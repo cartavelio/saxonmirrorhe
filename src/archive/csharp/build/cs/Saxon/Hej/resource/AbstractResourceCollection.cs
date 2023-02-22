@@ -36,19 +36,19 @@ namespace Saxon.Hej.resource {
             config.registerMediaType(contentType, factory);
         }
         protected internal Saxon.Hej.lib.ParseOptions optionsFromQueryParameters(Saxon.Hej.functions.URIQueryParameters @params, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(context.getConfiguration().getParseOptions());
+            Saxon.Hej.lib.ParseOptions options = context.getConfiguration().getParseOptions();
             if ((@params != null)) {
                 Saxon.Ejava.util.Optional<int> v = @params.getValidationMode();
                 if (v.isPresent()) {
-                    options.setSchemaValidationMode(v.get());
+                    options = options.withSchemaValidationMode(v.get());
                 }
                 Saxon.Ejava.util.Optional<bool> xInclude = @params.getXInclude();
                 if (xInclude.isPresent()) {
-                    options.setXIncludeAware(xInclude.get());
+                    options = options.withXIncludeAware(xInclude.get());
                 }
                 Saxon.Ejava.util.Optional<Saxon.Hej.om.SpaceStrippingRule> stripSpace = @params.getSpaceStrippingRule();
                 if (stripSpace.isPresent()) {
-                    options.setSpaceStrippingRule(stripSpace.get());
+                    options = options.withSpaceStrippingRule(stripSpace.get());
                 }
                 int onError = Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL;
                 if (@params.getOnError().isPresent()) {
@@ -56,18 +56,19 @@ namespace Saxon.Hej.resource {
                 }
                 Saxon.Hej.Controller controller = context.getController();
                 Saxon.Hej.lib.ErrorReporter oldErrorReporter = ((controller == null) ? context.getConfiguration().makeErrorReporter() : controller.getErrorReporter());
-                setupErrorHandlingForCollection(options, onError, oldErrorReporter);
+                options = setupErrorHandlingForCollection(options, onError, oldErrorReporter);
             }
             return options;
         }
-        public static void setupErrorHandlingForCollection(Saxon.Hej.lib.ParseOptions options, int onError, Saxon.Hej.lib.ErrorReporter oldErrorReporter) {
+        public static Saxon.Hej.lib.ParseOptions setupErrorHandlingForCollection(Saxon.Hej.lib.ParseOptions options, int onError, Saxon.Hej.lib.ErrorReporter oldErrorReporter) {
             if ((onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_IGNORE)) {
-                options.setErrorReporter(new Saxon.Hej.resource.AbstractResourceCollection.ErrorSuppressor());
+                options = options.withErrorReporter(new Saxon.Hej.resource.AbstractResourceCollection.ErrorSuppressor());
             } else {
                 if ((onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_WARNING)) {
-                    options.setErrorReporter(new Saxon.Hej.resource.AbstractResourceCollection.ErrorAsWarningReporter(oldErrorReporter));
+                    options = options.withErrorReporter(new Saxon.Hej.resource.AbstractResourceCollection.ErrorAsWarningReporter(oldErrorReporter));
                 }
             }
+            return options;
         }
         private class ErrorSuppressor : Saxon.Hej.lib.ErrorReporter {
             public void report(Saxon.Hej.s9api.XmlProcessingError error) {
@@ -84,7 +85,7 @@ namespace Saxon.Hej.resource {
                     originalErrorReporter.report(error);
                 } else {
                     originalErrorReporter.report(error.asWarning());
-                    Saxon.Hej.trans.XmlProcessingIncident supp = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("The document will be excluded from the collection").asWarning());
+                    Saxon.Hej.trans.XmlProcessingIncident supp = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("The document will be excluded from the collection", Saxon.Hej.trans.SaxonErrorCode.SXWN9050).asWarning());
                     supp.setLocation(error.getLocation());
                     originalErrorReporter.report(supp);
                 }
@@ -125,20 +126,22 @@ namespace Saxon.Hej.resource {
                     if (((binaryContent != null) && (encoding != null))) {
                         return Saxon.Hej.resource.BinaryResource.decode(binaryContent, encoding);
                     } else {
-                        using (System.IO.Stream stream = getInputStream()) {                            try {
-                                string enc = encoding;
-                                if ((enc == null)) {
-                                    enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, null);
-                                }
-                                return characterContent = Saxon.Hej.resource.CatalogCollection.makeStringFromStream(stream, enc);
-                            } catch (System.IO.IOException e) {
-                                if ((onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL)) {
-                                    throw new Saxon.Hej.trans.XPathException(e);
-                                } else {
-                                    return null;
-                                }
+                        try {
+                            System.IO.Stream stream = getInputStream();
+                            string enc = encoding;
+                            if ((enc == null)) {
+                                stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
+                                enc = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(stream, "UTF-8", null);
                             }
-                        }                    }
+                            return characterContent = Saxon.Hej.resource.CatalogCollection.makeStringFromStream(stream, enc);
+                        } catch (System.IO.IOException e) {
+                            if ((onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL)) {
+                                throw new Saxon.Hej.trans.XPathException(e);
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
                 }
             }
         

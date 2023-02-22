@@ -6,7 +6,6 @@ namespace Saxon.Eej.ee.schema.sdoc {
         internal bool isFieldSubset;
         internal Saxon.Hej.expr.Expression optimizedExpression;
         public Saxon.Hej.pattern.Pattern parseSelector(string expression, Saxon.Hej.expr.StaticContext env, bool isField) {
-            setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XPATH, 20);
             this.env = env;
             this.charChecker = env.getConfiguration().getValidCharacterChecker();
             this.isFieldSubset = isField;

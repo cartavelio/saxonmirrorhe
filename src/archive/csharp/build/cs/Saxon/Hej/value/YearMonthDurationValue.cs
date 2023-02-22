@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public sealed class YearMonthDurationValue : Saxon.Hej.value.DurationValue, Saxon.Hej.expr.sort.XPathComparable, Saxon.Hej.value.ContextFreeAtomicValue {
-        private YearMonthDurationValue()  {
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.YEAR_MONTH_DURATION;
+        public YearMonthDurationValue(int months, Saxon.Hej.type.AtomicType typeLabel) : base (0, months, 0, 0, 0, 0, 0, typeLabel) {
         }
         public static Saxon.Hej.type.ConversionResult makeYearMonthDurationValue(Saxon.Hej.str.UnicodeString s) {
             Saxon.Hej.type.ConversionResult d = Saxon.Hej.value.DurationValue.makeDuration(s, true, false);
@@ -15,9 +14,7 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.value.YearMonthDurationValue.fromMonths(((((dv.getYears()*12)+dv.getMonths()))*dv.signum()));
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.YearMonthDurationValue v = Saxon.Hej.value.YearMonthDurationValue.fromMonths(getLengthInMonths());
-            v.typeLabel = typeLabel;
-            return v;
+            return new Saxon.Hej.value.YearMonthDurationValue(getLengthInMonths(), typeLabel);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.YEAR_MONTH_DURATION;
@@ -25,7 +22,7 @@ namespace Saxon.Hej.value {
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
             int y = getYears();
             int m = getMonths();
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             if (_negative) {
                 sb.append('-');
             }
@@ -42,12 +39,7 @@ namespace Saxon.Hej.value {
             return (_months*((_negative ? -1 : +(1))));
         }
         public static Saxon.Hej.value.YearMonthDurationValue fromMonths(int months) {
-            Saxon.Hej.value.YearMonthDurationValue mdv = new Saxon.Hej.value.YearMonthDurationValue();
-            mdv._negative = (months<0);
-            mdv._months = ((months<0) ? -(months) : months);
-            mdv._seconds = 0;
-            mdv._nanoseconds = 0;
-            return mdv;
+            return new Saxon.Hej.value.YearMonthDurationValue(months, Saxon.Hej.type.BuiltInAtomicType.YEAR_MONTH_DURATION);
         }
         public override Saxon.Hej.value.YearMonthDurationValue multiply(long factor) {
             if (((System.Math.Abs(factor)<30_000) && (System.Math.Abs(_months)<30_000))) {

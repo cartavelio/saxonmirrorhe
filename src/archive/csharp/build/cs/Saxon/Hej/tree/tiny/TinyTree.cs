@@ -44,10 +44,10 @@ namespace Saxon.Hej.tree.tiny {
         internal Saxon.Hej.z.IntHashMap<string> knownBaseUris;
         private string uniformBaseUri = null;
         public TinyTree(Saxon.Hej.Configuration config, Saxon.Hej.tree.tiny.Statistics statistics) : base (config) {
-            int nodes = ((int)(statistics.getAverageNodes())+1);
-            int attributes = ((int)(statistics.getAverageAttributes())+1);
-            int namespaces = ((int)(statistics.getAverageNamespaces())+1);
-            int characters = ((int)(statistics.getAverageCharacters())+1);
+            int nodes = (statistics.getAverageNodes()+1);
+            int attributes = (statistics.getAverageAttributes()+1);
+            int namespaces = (statistics.getAverageNamespaces()+1);
+            int characters = System.Math.Min((statistics.getAverageCharacters()+10), 65536);
             nodeKind = new byte[nodes];
             depth = new short[nodes];
             next = new int[nodes];
@@ -60,7 +60,7 @@ namespace Saxon.Hej.tree.tiny {
             attValue = new string[attributes];
             numberOfNamespaces = 0;
             namespaceMaps = new Saxon.Hej.om.NamespaceMap[namespaces];
-            textBuffer = new Saxon.Hej.str.LargeTextBuffer();
+            textBuffer = new Saxon.Hej.str.LargeTextBuffer(characters);
             setConfiguration(config);
         }
         public override void setConfiguration(Saxon.Hej.Configuration config) {
@@ -185,7 +185,7 @@ namespace Saxon.Hej.tree.tiny {
                 namespaceMaps = Saxon.Ejava.util.Arrays.copyOf(namespaceMaps, numberOfNamespaces);
             }
             prefixPool.condense();
-            statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textBuffer.length());
+            statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textBuffer);
         }
         internal void setElementAnnotation(int nodeNr, Saxon.Hej.type.SchemaType type) {
             if (!(type.Equals(Saxon.Hej.type.Untyped.getInstance()))) {
@@ -211,6 +211,9 @@ namespace Saxon.Hej.tree.tiny {
         }
         public Saxon.Hej.om.AtomicSequence getTypedValueOfElement(Saxon.Hej.tree.tiny.TinyElementImpl element) {
             int nodeNr = element.nodeNr;
+            if ((typeArray == null)) {
+                return Saxon.Hej.value.StringValue.makeUntypedAtomic(Saxon.Hej.tree.tiny.TinyParentNodeImpl.getStringValue(this, nodeNr));
+            }
             if (((typedValueArray == null) || (typedValueArray[nodeNr] == null))) {
                 Saxon.Hej.type.SchemaType stype = getSchemaType(nodeNr);
                 int annotation = stype.getFingerprint();
@@ -356,65 +359,68 @@ namespace Saxon.Hej.tree.tiny {
                 alpha[parent] = numberOfAttributes;
             }
             if ((root is Saxon.Hej.tree.tiny.TinyDocumentImpl)) {
-                bool isID = false;
-                try {
-                    if (Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.IS_ID)) {
-                        isID = true;
-                    } else {
-                        if ((((nameCode&Saxon.Hej.om.NamePool.FP_MASK)) == Saxon.Hej.om.StandardNames.XML_ID)) {
-                            isID = true;
-                        } else {
-                            if (type.isIdType()) {
-                                isID = true;
-                            }
-                        }
-                    }
-                } catch (Saxon.Hej.type.MissingComponentException e) {
-                }
-                if (isID) {
-                    string id = Saxon.Hej.value.Whitespace.trim(attValue);
-                    this.attValue[numberOfAttributes] = id;
-                    if (Saxon.Hej.om.NameChecker.isValidNCName(id)) {
-                        Saxon.Hej.om.NodeInfo e = ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getNode(parent));
-                        registerID(e, id);
-                    } else {
-                        if ((attType != null)) {
-                            attType[numberOfAttributes] = Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC;
-                        }
-                    }
-                }
-                bool isIDREF = false;
-                try {
-                    if (Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.IS_IDREF)) {
-                        isIDREF = true;
-                    } else {
-                        if (((type == Saxon.Hej.type.BuiltInAtomicType.IDREF) || (type == Saxon.Hej.type.BuiltInListType.IDREFS))) {
-                            isIDREF = true;
-                        } else {
-                            if (type.isIdRefType()) {
-                                try {
-                                    Saxon.Hej.om.AtomicSequence @as = type.getTypedValue(Saxon.Hej.str.StringView.of(attValue).tidy(), null, getConfiguration().getConversionRules());
-                                    foreach (Saxon.Hej.value.AtomicValue v in @as) {
-                                        if (v.getItemType().isIdRefType()) {
-                                            isIDREF = true;
-                                            break ;
-                                        }
-                                    }
-                                } catch (Saxon.Hej.type.ValidationException ve) {
-                                }
-                            }
-                        }
-                    }
-                } catch (Saxon.Hej.type.MissingComponentException e) {
-                }
-                if (isIDREF) {
-                    if ((idRefAttributes == null)) {
-                        idRefAttributes = new Saxon.Hej.z.IntHashSet();
-                    }
-                    idRefAttributes.add(numberOfAttributes);
-                }
+                handleRootTinyDoc(parent, type, nameCode, attValue, properties);
             }
             numberOfAttributes++;
+        }
+        private void handleRootTinyDoc(int parent, Saxon.Hej.type.SimpleType type, int nameCode, string attValue, int properties) {
+            bool isID = false;
+            try {
+                if (Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.IS_ID)) {
+                    isID = true;
+                } else {
+                    if ((((nameCode&Saxon.Hej.om.NamePool.FP_MASK)) == Saxon.Hej.om.StandardNames.XML_ID)) {
+                        isID = true;
+                    } else {
+                        if (type.isIdType()) {
+                            isID = true;
+                        }
+                    }
+                }
+            } catch (Saxon.Hej.type.MissingComponentException e) {
+            }
+            if (isID) {
+                string id = Saxon.Hej.value.Whitespace.trim(attValue);
+                this.attValue[numberOfAttributes] = id;
+                if (Saxon.Hej.om.NameChecker.isValidNCName(id)) {
+                    Saxon.Hej.om.NodeInfo e = ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getNode(parent));
+                    registerID(e, id);
+                } else {
+                    if ((attType != null)) {
+                        attType[numberOfAttributes] = Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC;
+                    }
+                }
+            }
+            bool isIDREF = false;
+            try {
+                if (Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.IS_IDREF)) {
+                    isIDREF = true;
+                } else {
+                    if (((type == Saxon.Hej.type.BuiltInAtomicType.IDREF) || (type == Saxon.Hej.type.BuiltInListType.IDREFS))) {
+                        isIDREF = true;
+                    } else {
+                        if (type.isIdRefType()) {
+                            try {
+                                Saxon.Hej.om.AtomicSequence @as = type.getTypedValue(Saxon.Hej.str.StringView.of(attValue).tidy(), null, getConfiguration().getConversionRules());
+                                foreach (Saxon.Hej.value.AtomicValue v in @as) {
+                                    if (v.getItemType().isIdRefType()) {
+                                        isIDREF = true;
+                                        break ;
+                                    }
+                                }
+                            } catch (Saxon.Hej.type.ValidationException ve) {
+                            }
+                        }
+                    }
+                }
+            } catch (Saxon.Hej.type.MissingComponentException e) {
+            }
+            if (isIDREF) {
+                if ((idRefAttributes == null)) {
+                    idRefAttributes = new Saxon.Hej.z.IntHashSet();
+                }
+                idRefAttributes.add(numberOfAttributes);
+            }
         }
         private void initializeAttributeTypeCodes() {
             if ((attType == null)) {

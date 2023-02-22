@@ -13,18 +13,17 @@ namespace Saxon.Hej.value {
             }
         }
         private readonly byte[] binaryValue;
-        public Base64BinaryValue(Saxon.Hej.str.UnicodeString s)  {
+        public Base64BinaryValue(Saxon.Hej.str.UnicodeString s) : base (Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY) {
             binaryValue = decode(s);
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY;
         }
-        public Base64BinaryValue(byte[] value)  {
+        public Base64BinaryValue(byte[] value) : base (Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY) {
             binaryValue = value;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY;
+        }
+        public Base64BinaryValue(byte[] value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
+            binaryValue = value;
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.Base64BinaryValue v = new Saxon.Hej.value.Base64BinaryValue(binaryValue);
-            v.typeLabel = typeLabel;
-            return v;
+            return new Saxon.Hej.value.Base64BinaryValue(binaryValue, typeLabel);
         }
         public byte[] getBinaryValue() {
             return binaryValue;
@@ -64,7 +63,7 @@ namespace Saxon.Hej.value {
         private static readonly int[] encoding = new int[64];
         private static readonly int[] decoding = new int[128];
         public static Saxon.Hej.str.UnicodeString encode(byte[] value) {
-            Saxon.Hej.str.UnicodeBuilder buff = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder buff = new Saxon.Hej.str.UnicodeBuilder((value.Length*2));
             int whole = (value.Length-(value.Length%3));
             for (int i = 0; (i<whole); i += 3) {
                 int val = ((((((((int)(value[i]))&unchecked((int)0xff)))<<16))+((((((int)(value[(i+1)]))&unchecked((int)0xff)))<<8)))+(((((int)(value[(i+2)]))&unchecked((int)0xff)))));

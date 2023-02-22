@@ -44,7 +44,7 @@ namespace Saxon.Hej.functions {
                 throw new Saxon.Hej.trans.XPathException("There is no current merge group", "XTDE3480");
             }
             if ((source == null)) {
-                return gi.iterateCurrentGroup();
+                return gi.currentGroup().iterate();
             } else {
                 if (!(allowedNames.Contains(source))) {
                     throw new Saxon.Hej.trans.XPathException((("Supplied argument ("+source)+") is not the name of any xsl:merge-source in the containing xsl:merge instruction"), "XTDE3490");

@@ -23,7 +23,7 @@ namespace Saxon.Hej.expr.instruct {
         private void setChild(int n, Saxon.Hej.expr.Expression child) {
             operanda[n].setChildExpression(child);
         }
-        private int size() {
+        public int size() {
             return operanda.Length;
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
@@ -133,11 +133,11 @@ namespace Saxon.Hej.expr.instruct {
         public override bool implementsStaticTypeCheck() {
             return true;
         }
-        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(backwardsCompatible);
             if ((backwardsCompatible && !(Saxon.Hej.value.Cardinality.allowsMany(req.getCardinality())))) {
                 Saxon.Hej.expr.Expression first = Saxon.Hej.expr.FirstItemExpression.makeFirstItemExpression(this);
-                return tc.staticTypeCheck(first, req, role, visitor);
+                return tc.staticTypeCheck(first, req, roleSupplier, visitor);
             }
             Saxon.Hej.expr.Expression[] @checked = new Saxon.Hej.expr.Expression[operanda.Length];
             Saxon.Hej.value.SequenceType subReq = req;
@@ -145,7 +145,7 @@ namespace Saxon.Hej.expr.instruct {
                 subReq = Saxon.Hej.value.SequenceType.makeSequenceType(req.getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
             }
             for (int i = 0; (i<operanda.Length); i++) {
-                @checked[i] = tc.staticTypeCheck(operanda[i].getChildExpression(), subReq, role, visitor);
+                @checked[i] = tc.staticTypeCheck(operanda[i].getChildExpression(), subReq, roleSupplier, visitor);
             }
             Saxon.Hej.expr.instruct.Block b2 = new Saxon.Hej.expr.instruct.Block(@checked);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, b2);
@@ -154,12 +154,13 @@ namespace Saxon.Hej.expr.instruct {
             int suppliedCard = b2.getCardinality();
             if (!(Saxon.Hej.value.Cardinality.subsumes(req.getCardinality(), suppliedCard))) {
                 if ((((reqCard&suppliedCard)) == 0)) {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("The required cardinality of the "+role.getMessage())+" is ")+Saxon.Hej.value.Cardinality.describe(reqCard))+", but the supplied cardinality is ")+Saxon.Hej.value.Cardinality.describe(suppliedCard)), role.getErrorCode(), getLocation());
                     err.setIsTypeError(true);
                     err.setFailingExpression(this);
                     throw err;
                 } else {
-                    return Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(b2, reqCard, role);
+                    return Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(b2, reqCard, roleSupplier);
                 }
             }
             return b2;
@@ -377,8 +378,7 @@ namespace Saxon.Hej.expr.instruct {
                             if ((currentLiteralList == null)) {
                                 currentLiteralList = new System.Collections.Generic.List<Saxon.Hej.om.Item>(10);
                             }
-                            Saxon.Hej.om.Item item;
-                            while (((item = iterator.next()) != null)) {
+                            for (Saxon.Hej.om.Item item; ((item = iterator.next()) != null); ) {
                                 currentLiteralList.Add(item);
                             }
                         } else {
@@ -469,31 +469,12 @@ namespace Saxon.Hej.expr.instruct {
         public override string toShortString() {
             return (("("+child(0).toShortString())+", ...)");
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.instruct.TailCall tc = null;
-            foreach (Saxon.Hej.expr.Operand o in operands()) {
-                Saxon.Hej.expr.Expression child = o.getChildExpression();
-                try {
-                    if ((child is Saxon.Hej.expr.instruct.TailCallReturner)) {
-                        tc = ((Saxon.Hej.expr.instruct.TailCallReturner)(child)).processLeavingTail(output, context);
-                    } else {
-                        child.process(output, context);
-                        tc = null;
-                    }
-                } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(child.getLocation());
-                    e.maybeSetContext(context);
-                    throw;
-                }
-            }
-            return tc;
-        }
         public override int getImplementationMethod() {
             return (ITERATE_METHOD|PROCESS_METHOD);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             if ((size() == 0)) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             } else {
                 if ((size() == 1)) {
                     return child(0).iterate(context);
@@ -502,14 +483,119 @@ namespace Saxon.Hej.expr.instruct {
                 }
             }
         }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            foreach (Saxon.Hej.expr.Operand o in operands()) {
-                Saxon.Hej.expr.Expression child = o.getChildExpression();
-                child.evaluatePendingUpdates(context, pul);
-            }
-        }
         public override string getStreamerName() {
             return "Block";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.Block.BlockElaborator();
+        }
+        public delegate Saxon.Hej.ma.zeno.ZenoSequence ChainAction (Saxon.Hej.ma.zeno.ZenoSequence @in, Saxon.Hej.expr.XPathContext context);
+        public class BlockElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+                Saxon.Hej.expr.instruct.Block expr = (Saxon.Hej.expr.instruct.Block)(getExpression());
+                if (expr.isCandidateForSharedAppend()) {
+                    return new Saxon.Hej.expr.elab.SharedAppendEvaluator(expr);
+                } else {
+                    return base.lazily(repeatable);
+                }
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.Block expr = (Saxon.Hej.expr.instruct.Block)(getExpression());
+                Saxon.Hej.expr.Operand[] operanda = expr.getOperanda();
+                int size = operanda.Length;
+                Saxon.Hej.expr.elab.PullEvaluator[] actions = new Saxon.Hej.expr.elab.PullEvaluator[size];
+                for (int i = 0; (i<size); i++) {
+                    actions[i] = operanda[i].getChildExpression().makeElaborator().elaborateForPull();
+                }
+                return context => new Saxon.Hej.expr.instruct.Block.BlockElaborator.BlockIterator(actions, context);
+            }
+            private class BlockIterator : Saxon.Hej.expr.instruct.AbstractBlockIterator {
+                private readonly Saxon.Hej.expr.elab.PullEvaluator[] pullers;
+                public BlockIterator(Saxon.Hej.expr.elab.PullEvaluator[] pullers, Saxon.Hej.expr.XPathContext context)  {
+                    this.pullers = pullers;
+                    init(pullers.Length, context);
+                }
+                public override Saxon.Hej.om.SequenceIterator getNthChildIterator(int n) {
+                    return /*Delegate.iterate()*/pullers[n](context);
+                }
+            
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.Block expr = (Saxon.Hej.expr.instruct.Block)(getExpression());
+                Saxon.Hej.expr.Operand[] operanda = expr.getOperanda();
+                int size = operanda.Length;
+                Saxon.Hej.expr.elab.PushEvaluator[] actions = new Saxon.Hej.expr.elab.PushEvaluator[size];
+                for (int i = 0; (i<size); i++) {
+                    actions[i] = operanda[i].getChildExpression().makeElaborator().elaborateForPush();
+                }
+                switch (size) {
+                  case 2:
+                    {
+                        Saxon.Hej.expr.elab.PushEvaluator act0 = actions[0];
+                        Saxon.Hej.expr.elab.PushEvaluator act1 = actions[1];
+                        return (@out, context) => {
+                            Saxon.Hej.expr.instruct.TailCall tail = /*Delegate.processLeavingTail()*/act0(@out, context);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tail);
+                            return /*Delegate.processLeavingTail()*/act1(@out, context);
+                        } ;
+                    }
+                  case 3:
+                    {
+                        Saxon.Hej.expr.elab.PushEvaluator act0 = actions[0];
+                        Saxon.Hej.expr.elab.PushEvaluator act1 = actions[1];
+                        Saxon.Hej.expr.elab.PushEvaluator act2 = actions[2];
+                        return (@out, context) => {
+                            Saxon.Hej.expr.instruct.TailCall tail = /*Delegate.processLeavingTail()*/act0(@out, context);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tail);
+                            tail = /*Delegate.processLeavingTail()*/act1(@out, context);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tail);
+                            return /*Delegate.processLeavingTail()*/act2(@out, context);
+                        } ;
+                    }
+                  case 4:
+                    {
+                        Saxon.Hej.expr.elab.PushEvaluator act0 = actions[0];
+                        Saxon.Hej.expr.elab.PushEvaluator act1 = actions[1];
+                        Saxon.Hej.expr.elab.PushEvaluator act2 = actions[2];
+                        Saxon.Hej.expr.elab.PushEvaluator act3 = actions[3];
+                        return (@out, context) => {
+                            Saxon.Hej.expr.instruct.TailCall tail = /*Delegate.processLeavingTail()*/act0(@out, context);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tail);
+                            tail = /*Delegate.processLeavingTail()*/act1(@out, context);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tail);
+                            tail = /*Delegate.processLeavingTail()*/act2(@out, context);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tail);
+                            return /*Delegate.processLeavingTail()*/act3(@out, context);
+                        } ;
+                    }
+                  default:
+                    return (@out, context) => {
+                        Saxon.Hej.expr.instruct.TailCall tail = null;
+                        for (int i = 0; (i<size); i++) {
+                            while ((tail != null)) {
+                                tail = tail.processLeavingTail();
+                            }
+                            tail = /*Delegate.processLeavingTail()*/actions[i](@out, context);
+                        }
+                        return tail;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.instruct.Block expr = (Saxon.Hej.expr.instruct.Block)(getExpression());
+                Saxon.Hej.expr.Operand[] operanda = expr.getOperanda();
+                int size = operanda.Length;
+                Saxon.Hej.expr.elab.UpdateEvaluator[] actions = new Saxon.Hej.expr.elab.UpdateEvaluator[size];
+                for (int i = 0; (i<size); i++) {
+                    actions[i] = expr.child(i).makeElaborator().elaborateForUpdate();
+                }
+                return (context, pul) => {
+                    foreach (Saxon.Hej.expr.elab.UpdateEvaluator action in actions) {
+                        /*Delegate.registerUpdates()*/action(context, pul);
+                    }
+                } ;
+            }
+        
         }
     
     }

@@ -12,6 +12,7 @@ namespace Saxon.Hej.expr.instruct {
         private Saxon.Hej.expr.Component declaringComponent;
         private Saxon.Hej.trans.Visibility declaredVisibility = Saxon.Hej.trans.Visibility.UNDEFINED;
         private Saxon.Hej.expr.parser.RetainedStaticContext retainedStaticContext;
+        private Saxon.Hej.expr.elab.PushEvaluator bodyEvaluator;
         public Actor()  {
         }
         public abstract Saxon.Hej.trans.SymbolicName getSymbolicName();
@@ -69,7 +70,7 @@ namespace Saxon.Hej.expr.instruct {
                 return ;
             }
             Saxon.Hej.expr.Component target = pack.getComponent(name);
-            if ((((target == null) && name.getComponentName().hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT)) && name.getComponentName().getLocalPart().Equals("original"))) {
+            if ((((target == null) && name.getComponentName().hasURI(Saxon.Hej.om.NamespaceUri.XSLT)) && name.getComponentName().getLocalPart().Equals("original"))) {
                 target = pack.getOverriddenComponent(getSymbolicName());
             }
             if ((target == null)) {
@@ -149,6 +150,14 @@ namespace Saxon.Hej.expr.instruct {
         }
         public void setChildExpression(Saxon.Hej.expr.Expression expr) {
             setBody(expr);
+        }
+        protected internal Saxon.Hej.expr.instruct.TailCall process(Saxon.Hej.@event.Outputter @out, Saxon.Hej.expr.XPathContext context) {
+            lock (this) {
+                if ((bodyEvaluator == null)) {
+                    bodyEvaluator = body.makeElaborator().elaborateForPush();
+                }
+            }
+            return /*Delegate.processLeavingTail()*/bodyEvaluator(@out, context);
         }
     
     }

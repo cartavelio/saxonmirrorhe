@@ -22,9 +22,6 @@ namespace Saxon.Hej.tree.iter {
         public void close() {
             @base.close();
         }
-        public void discharge() {
-            @base.discharge();
-        }
         public bool supportsGetLength() {
             return Saxon.Hej.om.SequenceTool.supportsGetLength(@base);
         }

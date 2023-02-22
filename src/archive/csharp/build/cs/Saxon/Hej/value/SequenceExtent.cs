@@ -5,8 +5,7 @@ namespace Saxon.Hej.value {
     public abstract class SequenceExtent : Saxon.Hej.om.GroundedValue {
         public static Saxon.Hej.value.SequenceExtent.Of<Saxon.Hej.om.Item> from(Saxon.Hej.om.SequenceIterator iter) {
             System.Collections.Generic.IList<Saxon.Hej.om.Item> list = new System.Collections.Generic.List<Saxon.Hej.om.Item>((!(Saxon.Hej.om.SequenceTool.supportsGetLength(iter)) ? 20 : ((Saxon.Hej.expr.LastPositionFinder)(iter)).getLength()));
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 list.Add(item);
             }
             return new Saxon.Hej.value.SequenceExtent.Of<Saxon.Hej.om.Item>(list);
@@ -189,12 +188,12 @@ namespace Saxon.Hej.value {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */

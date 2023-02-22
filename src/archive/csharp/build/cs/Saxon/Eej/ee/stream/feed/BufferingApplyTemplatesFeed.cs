@@ -24,9 +24,8 @@ namespace Saxon.Eej.ee.stream.feed {
             Saxon.Hej.@event.SequenceWriter writer = new Saxon.Eej.ee.stream.StreamingSequenceWriter(getPipelineConfiguration(), getNextOutputter());
             Saxon.Hej.@event.Outputter output = new Saxon.Hej.@event.ComplexContentOutputter(writer);
             Saxon.Hej.trans.Mode mode = targetMode.getActor();
-            Saxon.Hej.om.Item item;
             Saxon.Hej.om.FocusIterator iter = c2.getCurrentIterator();
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 Saxon.Hej.trans.rules.Rule rule = mode.getRule(item, c2);
                 if ((rule == null)) {
                     mode.getBuiltInRuleSet().process(item, actualParams, tunnelParams, output, c2, Saxon.Hej.expr.parser.Loc.NONE);

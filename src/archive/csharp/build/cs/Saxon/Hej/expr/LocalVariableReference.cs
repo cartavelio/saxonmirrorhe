@@ -56,6 +56,61 @@ namespace Saxon.Hej.expr {
         public override string getExpressionName() {
             return "locVarRef";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.LocalVariableReference.LocalVariableReferenceElaborator();
+        }
+        public class LocalVariableReferenceElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override void setExpression(Saxon.Hej.expr.Expression expr) {
+                base.setExpression(expr);
+                if ((((Saxon.Hej.expr.LocalVariableReference)(expr)).getSlotNumber()<0)) {
+                    throw new Saxon.Ejava.lang.IllegalStateException("Can't elaborate a local variable reference before slot numbers have been allocated");
+                }
+            }
+            public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
+                Saxon.Hej.expr.LocalVariableReference varRef = (Saxon.Hej.expr.LocalVariableReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return new Saxon.Hej.expr.elab.LocalVariableEvaluator(slot);
+            }
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+                return eagerly();
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.LocalVariableReference varRef = (Saxon.Hej.expr.LocalVariableReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return context => context.evaluateLocalVariable(slot).iterate();
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.LocalVariableReference varRef = (Saxon.Hej.expr.LocalVariableReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return (@out, context) => {
+                    try {
+                        Saxon.Hej.om.SequenceIterator value = context.evaluateLocalVariable(slot).iterate();
+                        for (Saxon.Hej.om.Item it; ((it = value.next()) != null); ) {
+                            @out.append(it);
+                        }
+                        return null;
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        e.maybeSetLocation(getExpression().getLocation());
+                        e.maybeSetContext(context);
+                        throw;
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.LocalVariableReference varRef = (Saxon.Hej.expr.LocalVariableReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return context => {
+                    try {
+                        return context.evaluateLocalVariable(slot).head();
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        e.maybeSetLocation(getExpression().getLocation());
+                        e.maybeSetContext(context);
+                        throw;
+                    }
+                } ;
+            }
+        
+        }
     
     }
 }

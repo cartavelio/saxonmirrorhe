@@ -24,9 +24,9 @@ namespace Saxon.Hej.expr {
             setRhsExpression(getRhsExpression().unordered(false, false));
             Saxon.Hej.value.SequenceType atomicType = Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC;
             Saxon.Hej.expr.parser.TypeChecker tc = config.getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "eq", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "eq", 0);
             setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
-            Saxon.Hej.expr.parser.RoleDiagnostic role1 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "eq", 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role1 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "eq", 1);
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
             if ((getLhsExpression() != oldOp0)) {
                 adoptChildExpression(getLhsExpression());
@@ -57,7 +57,7 @@ namespace Saxon.Hej.expr {
                     knownToBeComparable = true;
                 } else {
                     if (!(Saxon.Hej.type.Type.isPossiblyComparable(pt0, pt1, false))) {
-                        env.issueWarning(((("Cannot compare "+t0.ToString())+" to ")+t1.ToString()), getLocation());
+                        env.issueWarning(((("Cannot compare "+t0)+" to ")+t1), Saxon.Hej.trans.SaxonErrorCode.SXWN9025, getLocation());
                     }
                 }
             }
@@ -72,6 +72,9 @@ namespace Saxon.Hej.expr {
         }
         public Saxon.Hej.expr.sort.AtomicComparer getAtomicComparer() {
             return comparer;
+        }
+        public Saxon.Hej.lib.StringCollator getStringCollator() {
+            return comparer.getCollator();
         }
         public int getSingletonOperator() {
             return @operator;
@@ -115,6 +118,26 @@ namespace Saxon.Hej.expr {
         }
         protected internal override void explainExtraAttributes(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.emitAttribute("cardinality", "singleton");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.EquivalenceComparison.EquivalenceComparisonElaborator();
+        }
+        private class EquivalenceComparisonElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.EquivalenceComparison expr = (Saxon.Hej.expr.EquivalenceComparison)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.value.AtomicValue v0 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/eval0(context));
+                    Saxon.Hej.value.AtomicValue v1 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/eval1(context));
+                    if (((v0 == null) || (v1 == null))) {
+                        return ((v0 == v1));
+                    }
+                    Saxon.Hej.expr.sort.AtomicComparer comp2 = expr.comparer.provideContext(context);
+                    return (((expr.knownToBeComparable || Saxon.Hej.type.Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), false))) && comp2.comparesEqual(v0, v1));
+                } ;
+            }
+        
         }
     
     }

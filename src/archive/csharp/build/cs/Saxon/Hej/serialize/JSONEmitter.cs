@@ -17,6 +17,7 @@ namespace Saxon.Hej.serialize {
         private bool afterKey = false;
         private int level;
         private readonly System.Collections.Generic.Stack<bool> oneLinerStack = new System.Collections.Generic.Stack<bool>();
+        private bool mustClose = true;
         private bool unfailing = false;
         public JSONEmitter(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.str.UnicodeWriter writer, Saxon.Ejava.util.Properties outputProperties)  {
             config = pipe.getConfiguration();
@@ -52,6 +53,9 @@ namespace Saxon.Hej.serialize {
                 characterSet = Saxon.Hej.serialize.charcode.UTF8CharacterSet.getInstance();
             }
         }
+        public void setMustClose(bool mustClose) {
+            this.mustClose = mustClose;
+        }
         public Saxon.Ejava.util.Properties getOutputProperties() {
             return outputProperties;
         }
@@ -63,11 +67,12 @@ namespace Saxon.Hej.serialize {
             this.characterMap = map;
         }
         public void writeKey(string key) {
+            bool oneLiner = oneLinerStack.Peek();
             conditionalComma(false);
             emit('"');
             emit(escape(key));
             emit("\":");
-            if (isIndenting) {
+            if ((isIndenting && !(oneLiner))) {
                 emit(" ");
             }
             afterKey = true;
@@ -152,12 +157,16 @@ namespace Saxon.Hej.serialize {
         }
         private void conditionalComma(bool opening) {
             bool wasFirst = first;
-            bool actuallyIndenting = ((isIndenting && (level != 0)) && !(oneLinerStack.Peek()));
+            bool oneLiner = (!((oneLinerStack.Count==0)) && oneLinerStack.Peek());
+            bool actuallyIndenting = ((isIndenting && (level != 0)) && !(oneLiner));
             if (first) {
                 first = false;
             } else {
                 if (!(afterKey)) {
                     emit(',');
+                    if ((oneLiner && isIndenting)) {
+                        emit(' ');
+                    }
                 }
             }
             if (((wasFirst && afterKey))) {
@@ -227,8 +236,13 @@ namespace Saxon.Hej.serialize {
             }
             if ((writer != null)) {
                 try {
-                    writer.close();
+                    if (mustClose) {
+                        writer.close();
+                    } else {
+                        writer.flush();
+                    }
                 } catch (System.IO.IOException e) {
+                    throw new Saxon.Hej.trans.XPathException(e);
                 }
             }
         }

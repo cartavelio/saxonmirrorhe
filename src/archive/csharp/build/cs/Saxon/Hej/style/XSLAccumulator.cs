@@ -34,7 +34,7 @@ namespace Saxon.Hej.style {
                         bool streamable = processStreamableAtt(value);
                         accumulator.setDeclaredStreamable(streamable);
                     } else {
-                        if ((attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON) && attName.getLocalPart().Equals("trace"))) {
+                        if ((attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && attName.getLocalPart().Equals("trace"))) {
                             if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                                 accumulator.setTracing(processBooleanAttribute("saxon:trace", value));
                             }
@@ -45,6 +45,7 @@ namespace Saxon.Hej.style {
             }
             if ((accumulator.getAccumulatorName() == null)) {
                 reportAbsence("name");
+                accumulator.setAccumulatorName(new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, ("acc"+GetHashCode())));
             }
         }
         protected internal override void prepareAttributes() {
@@ -67,7 +68,7 @@ namespace Saxon.Hej.style {
                                     compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "as");
                                 }
                             } else {
-                                if ((attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON) && attName.getLocalPart().Equals("trace"))) {
+                                if ((attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && attName.getLocalPart().Equals("trace"))) {
                                     if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                                         accumulator.setTracing(processBooleanAttribute("saxon:trace", value));
                                     }
@@ -97,7 +98,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.expr.Expression init = accumulator.getInitialValueExpression();
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(getStaticContext());
                 init = init.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
                 init = config.getTypeChecker(false).staticTypeCheck(init, accumulator.getType(), role, visitor);
                 init = init.optimize(visitor, config.getDefaultContextItemStaticInfo());
                 Saxon.Hej.expr.instruct.SlotManager stackFrameMap = config.makeSlotManager();
@@ -114,10 +115,10 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.expr.Expression newValueExp = rule.getNewValueExpression(compilation, decl);
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(getStaticContext());
                 newValueExp = newValueExp.typeCheck(visitor, config.makeContextItemStaticInfo(pattern.getItemType(), false));
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
                 newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
                 newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
-                slotManager.allocateSlotNumber(new Saxon.Hej.om.StructuredQName("", "", "value"));
+                slotManager.allocateSlotNumber(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "value"));
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(newValueExp, 1, slotManager);
                 bool isPreDescent = !(rule.isPostDescent());
                 Saxon.Hej.trans.SimpleMode mode = (isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules());
@@ -130,11 +131,11 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.type.ItemType itemType = pattern.getItemType();
                 if ((itemType is Saxon.Hej.pattern.NodeTest)) {
                     if (!(itemType.getUType().overlaps(Saxon.Hej.type.UType.DOCUMENT.union(Saxon.Hej.type.UType.CHILD_NODE_KINDS)))) {
-                        rule.compileWarning("An accumulator rule that matches attribute or namespace nodes has no effect", "SXWN9999");
+                        rule.issueWarning("An accumulator rule that matches attribute or namespace nodes has no effect", "SXWN9999");
                     }
                 } else {
                     if ((itemType is Saxon.Hej.type.AtomicType)) {
-                        rule.compileWarning("An accumulator rule that matches atomic values has no effect", "SXWN9999");
+                        rule.issueWarning("An accumulator rule that matches atomic values has no effect", "SXWN9999");
                     }
                 }
                 accumulator.addChildExpression(newValueExp);
@@ -146,9 +147,9 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.om.StructuredQName getObjectName() {
             Saxon.Hej.om.StructuredQName qn = base.getObjectName();
             if ((qn == null)) {
-                string nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue("", "name"));
+                string nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name"));
                 if ((nameAtt == null)) {
-                    return new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, ("badly-named-accumulator"+generateId()));
+                    return new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, ("badly-named-accumulator"+generateId()));
                 }
                 qn = makeQName(nameAtt, null, "name");
                 setObjectName(qn);
@@ -202,8 +203,6 @@ namespace Saxon.Hej.style {
         public Saxon.Hej.value.SequenceType getResultType() {
             return accumulator.getType();
         }
-        public void generateByteCode(Saxon.Hej.expr.parser.Optimizer opt) {
-        }
         private void checkInitialStreamability(Saxon.Hej.expr.Expression init) {
             if (accumulator.isDeclaredStreamable()) {
                 Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(init, Saxon.Eej.ee.trans.ContextItemStaticInfoEE.DEFAULT, null);
@@ -236,7 +235,7 @@ namespace Saxon.Hej.style {
             bool fallback = getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.STREAMING_FALLBACK);
             if (fallback) {
                 message += ". Falling back to non-streaming implementation";
-                rule.compileWarning(message, "XTSE3430");
+                rule.issueWarning(message, "XTSE3430");
                 rule.getCompilation().setFallbackToNonStreaming(true);
             } else {
                 rule.compileError(message, "XTSE3430");

@@ -16,7 +16,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"id", "schemaLocation"};
             allowAttributes(atts, allowed);
             processId();
-            string schemaLocation = atts.getValue("", "schemaLocation");
+            string schemaLocation = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "schemaLocation");
             if ((schemaLocation == null)) {
                 missingAttribute("schemaLocation");
                 return ;
@@ -48,9 +48,9 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
                 originalSchemaDocument = schemaDoc;
                 originalSchema = schemaDoc.getXSDSchema().getSchema();
-                string originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();
+                Saxon.Hej.om.NamespaceUri originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();
                 if (!(getSchema().getTargetNamespace().Equals(originalTargetNS))) {
-                    if (originalTargetNS.Length==0) {
+                    if (originalTargetNS.isEmpty()) {
                         originalSchemaDocument = schemaDoc = compiler.doChameleonTransformation(schemaDoc.getDocument().getRootNode(), this);
                         originalSchema = schemaDoc.getXSDSchema().getSchema();
                         try {
@@ -58,7 +58,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                             overridden.processAllAttributes();
                             overridden.validateSubtree(compiler);
                         } catch (Saxon.Hej.type.SchemaException err) {
-                            compiler.warning("The target of the xs:override is not a valid schema", this);
+                            compiler.warning("The target of the xs:override is not a valid schema", Saxon.Hej.trans.SaxonErrorCode.SXSD1017, this);
                         }
                     } else {
                         error("The targetNamespace of the overridden schema document differs from that of the overriding schema document");
@@ -74,7 +74,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 System.Exception cause = e.getException();
                 if ((cause is System.IO.IOException)) {
                     warning(("Failed to locate overridden schema document "+schemaLocation));
-                    originalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), "");
+                    originalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), Saxon.Hej.om.NamespaceUri.NULL);
                 } else {
                     throw;
                 }
@@ -112,7 +112,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                   case Saxon.Hej.om.StandardNames.XS_ATTRIBUTE:
                     {
-                        string attributeName = child.getAttributeValue("", "name");
+                        string attributeName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((attributeName != null) && !(redefinedAttributes.Add(attributeName)))) {
                             error("Attempting to override the same attribute declaration more than once");
                         }
@@ -120,7 +120,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                   case Saxon.Hej.om.StandardNames.XS_ELEMENT:
                     {
-                        string elementName = child.getAttributeValue("", "name");
+                        string elementName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((elementName != null) && !(redefinedElements.Add(elementName)))) {
                             error("Attempting to override the same element declaration more than once");
                         }
@@ -128,7 +128,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                   case Saxon.Hej.om.StandardNames.XS_ATTRIBUTE_GROUP:
                     {
-                        string attributeGroupName = child.getAttributeValue("", "name");
+                        string attributeGroupName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((attributeGroupName != null) && !(redefinedAttributeGroups.Add(attributeGroupName)))) {
                             error("Attempting to override the same attribute group more than once");
                         }
@@ -137,7 +137,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                   case Saxon.Hej.om.StandardNames.XS_COMPLEX_TYPE:
                   case Saxon.Hej.om.StandardNames.XS_SIMPLE_TYPE:
                     {
-                        string typeName = child.getAttributeValue("", "name");
+                        string typeName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((typeName != null) && !(redefinedTypes.Add(typeName)))) {
                             error("Attempting to override the same type more than once");
                         }
@@ -145,7 +145,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                   case Saxon.Hej.om.StandardNames.XS_GROUP:
                     {
-                        string modelGroupName = child.getAttributeValue("", "name");
+                        string modelGroupName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((modelGroupName != null) && !(redefinedModelGroups.Add(modelGroupName)))) {
                             error("Attempting to override the same named model group more than once");
                         }
@@ -153,7 +153,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                   case Saxon.Hej.om.StandardNames.XS_notation:
                     {
-                        string notationName = child.getAttributeValue("", "name");
+                        string notationName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((notationName != null) && !(redefinedNotations.Add(notationName)))) {
                             error("Attempting to override the same notation declaration more than once");
                         }

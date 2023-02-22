@@ -6,16 +6,16 @@ namespace Saxon.Hej.expr {
         private bool untyped = false;
         private bool singleValued = false;
         private Saxon.Hej.type.ItemType operandItemType = null;
-        private Saxon.Hej.expr.parser.RoleDiagnostic roleDiagnostic = null;
-        public Atomizer(Saxon.Hej.expr.Expression sequence, Saxon.Hej.expr.parser.RoleDiagnostic role) : base (sequence) {
-            this.roleDiagnostic = role;
+        private Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier = null;
+        public Atomizer(Saxon.Hej.expr.Expression sequence, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) : base (sequence) {
+            this.roleSupplier = role;
             sequence.setFlattened(true);
         }
-        public static Saxon.Hej.expr.Expression makeAtomizer(Saxon.Hej.expr.Expression sequence, Saxon.Hej.expr.parser.RoleDiagnostic role) {
+        public static Saxon.Hej.expr.Expression makeAtomizer(Saxon.Hej.expr.Expression sequence, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier) {
             if (((sequence is Saxon.Hej.expr.Literal) && (((Saxon.Hej.expr.Literal)(sequence)).getGroundedValue() is Saxon.Hej.om.AtomicSequence))) {
                 return sequence;
             } else {
-                return new Saxon.Hej.expr.Atomizer(sequence, role);
+                return new Saxon.Hej.expr.Atomizer(sequence, roleSupplier);
             }
         }
         protected internal override Saxon.Hej.expr.OperandRole getOperandRole() {
@@ -29,9 +29,6 @@ namespace Saxon.Hej.expr {
                 operandItemType = getBaseExpression().getItemType();
             }
             return operandItemType;
-        }
-        public void setRoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic role) {
-            this.roleDiagnostic = role;
         }
         public override Saxon.Hej.expr.Expression simplify() {
             untyped = !(getPackageData().isSchemaAware());
@@ -48,11 +45,11 @@ namespace Saxon.Hej.expr {
                     if ((i is Saxon.Hej.om.NodeInfo)) {
                         return this;
                     }
-                    if ((i is Saxon.Hej.om.Function)) {
-                        if (((Saxon.Hej.om.Function)(i)).isArray()) {
+                    if ((i is Saxon.Hej.om.FunctionItem)) {
+                        if (((Saxon.Hej.om.FunctionItem)(i)).isArray()) {
                             return this;
                         } else {
-                            if (((Saxon.Hej.om.Function)(i)).isMap()) {
+                            if (((Saxon.Hej.om.FunctionItem)(i)).isMap()) {
                                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(expandMessage((("Cannot atomize a map ("+i.toShortString())+")")), "FOTY0013");
                                 err.setIsTypeError(true);
                                 err.setLocation(getLocation());
@@ -109,22 +106,53 @@ namespace Saxon.Hej.expr {
                 if (!(singleValued)) {
                     Saxon.Hej.type.ItemType nodeType = getBaseExpression().getItemType();
                     if ((nodeType is Saxon.Hej.pattern.NodeTest)) {
-                        Saxon.Hej.type.SchemaType st = ((Saxon.Hej.pattern.NodeTest)(nodeType)).getContentType();
-                        if ((((st == Saxon.Hej.type.Untyped.getInstance()) || st.isAtomicType()) || ((st.isComplexType() && (st != Saxon.Hej.type.AnyType.getInstance()))))) {
-                            singleValued = true;
-                        }
                         if (!(nodeType.getUType().overlaps(Saxon.Hej.type.UType.ELEMENT.union(Saxon.Hej.type.UType.ATTRIBUTE)))) {
                             singleValued = true;
+                        } else {
+                            Saxon.Hej.type.SchemaType st = ((Saxon.Hej.pattern.NodeTest)(nodeType)).getContentType();
+                            if (isSingleValuedSchemaType(st)) {
+                                singleValued = true;
+                            }
                         }
                     }
                 }
             }
         }
+        private bool isSingleValuedSchemaType(Saxon.Hej.type.SchemaType st) {
+            if ((st == Saxon.Hej.type.Untyped.getInstance())) {
+                return true;
+            }
+            if (st.isSimpleType()) {
+                Saxon.Hej.type.SimpleType sim = (Saxon.Hej.type.SimpleType)(st);
+                if (sim.isAtomicType()) {
+                    return true;
+                } else {
+                    if (sim.isListType()) {
+                        return false;
+                    } else {
+                        if (sim.isUnionType()) {
+                            return ((Saxon.Hej.type.UnionType)(sim)).isPlainType();
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+            if (st.isComplexType()) {
+                if ((st == Saxon.Hej.type.AnyType.getInstance())) {
+                    return false;
+                }
+                if (((Saxon.Hej.type.ComplexType)(st)).isSimpleContent()) {
+                    return isSingleValuedSchemaType(((Saxon.Hej.type.ComplexType)(st)).getSimpleContentType());
+                }
+            }
+            return false;
+        }
         private string expandMessage(string message) {
-            if ((roleDiagnostic == null)) {
+            if ((roleSupplier == null)) {
                 return message;
             } else {
-                return ((message+". Found while atomizing the ")+roleDiagnostic.getMessage());
+                return ((message+". Found while atomizing the ")+roleSupplier().getMessage());
             }
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
@@ -141,7 +169,7 @@ namespace Saxon.Hej.expr {
                 }
                 if (((operand is Saxon.Hej.expr.LetExpression) || (operand is Saxon.Hej.expr.ForExpression))) {
                     Saxon.Hej.expr.Expression action = ((Saxon.Hej.expr.Assignation)(operand)).getAction();
-                    ((Saxon.Hej.expr.Assignation)(operand)).setAction(new Saxon.Hej.expr.Atomizer(action, roleDiagnostic));
+                    ((Saxon.Hej.expr.Assignation)(operand)).setAction(new Saxon.Hej.expr.Atomizer(action, roleSupplier));
                     return operand.optimize(visitor, contextInfo);
                 }
                 if ((operand is Saxon.Hej.expr.instruct.Choose)) {
@@ -152,7 +180,7 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.expr.Operand[] children = ((Saxon.Hej.expr.instruct.Block)(operand)).getOperanda();
                     Saxon.Hej.expr.Expression[] atomizedChildren = new Saxon.Hej.expr.Expression[children.Length];
                     for (int i = 0; (i<children.Length); i++) {
-                        atomizedChildren[i] = new Saxon.Hej.expr.Atomizer(children[i].getChildExpression(), roleDiagnostic);
+                        atomizedChildren[i] = new Saxon.Hej.expr.Atomizer(children[i].getChildExpression(), roleSupplier);
                     }
                     Saxon.Hej.expr.instruct.Block newBlock = new Saxon.Hej.expr.instruct.Block(atomizedChildren);
                     return newBlock.typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
@@ -161,11 +189,6 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.om.StructuredQName name = ((Saxon.Hej.expr.AxisExpression)(operand)).getNodeTest().getMatchingNodeName();
                     Saxon.Hej.om.FingerprintedQName qName = new Saxon.Hej.om.FingerprintedQName(name, visitor.getConfiguration().getNamePool());
                     Saxon.Hej.expr.AttributeGetter ag = new Saxon.Hej.expr.AttributeGetter(qName);
-                    int checks = 0;
-                    if (!(((((Saxon.Hej.expr.AxisExpression)(operand)).getContextItemType() is Saxon.Hej.pattern.NodeTest)))) {
-                        checks = Saxon.Hej.expr.AttributeGetter.CHECK_CONTEXT_ITEM_IS_NODE;
-                    }
-                    ag.setRequiredChecks(checks);
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ag);
                     return ag;
                 }
@@ -173,11 +196,6 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.om.StructuredQName name = ((Saxon.Hej.expr.SimpleStepExpression)(operand)).getAxisExpression().getNodeTest().getMatchingNodeName();
                     Saxon.Hej.om.FingerprintedQName qName = new Saxon.Hej.om.FingerprintedQName(name, visitor.getConfiguration().getNamePool());
                     Saxon.Hej.expr.AttributeGetter ag = new Saxon.Hej.expr.AttributeGetter(qName);
-                    int checks = 0;
-                    if (!(((((Saxon.Hej.expr.SimpleStepExpression)(operand)).getStart().getItemType() is Saxon.Hej.pattern.NodeTest)))) {
-                        checks = Saxon.Hej.expr.AttributeGetter.CHECK_CONTEXT_ITEM_IS_NODE;
-                    }
-                    ag.setRequiredChecks(checks);
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ag);
                     return new Saxon.Hej.expr.SlashExpression(((Saxon.Hej.expr.SimpleStepExpression)(operand)).getStart(), ag);
                 }
@@ -197,7 +215,7 @@ namespace Saxon.Hej.expr {
             operandItemType = null;
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
-            Saxon.Hej.expr.Atomizer copy = new Saxon.Hej.expr.Atomizer(getBaseExpression().copy(rebindings), roleDiagnostic);
+            Saxon.Hej.expr.Atomizer copy = new Saxon.Hej.expr.Atomizer(getBaseExpression().copy(rebindings), roleSupplier);
             copy.untyped = untyped;
             copy.singleValued = singleValued;
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, copy);
@@ -213,7 +231,7 @@ namespace Saxon.Hej.expr {
             } catch (Exception e) when (e is Saxon.Hej.expr.instruct.TerminationException || e is Saxon.Hej.functions.Error.UserDefinedXPathException) {
                 throw;
             } catch (Saxon.Hej.trans.XPathException e) {
-                if ((roleDiagnostic == null)) {
+                if ((roleSupplier == null)) {
                     throw;
                 } else {
                     string message = expandMessage(e.Message);
@@ -225,17 +243,15 @@ namespace Saxon.Hej.expr {
             }
         }
         public override Saxon.Hej.value.AtomicValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Item i = getBaseExpression().evaluateItem(context);
-            if ((i == null)) {
-                return null;
-            } else {
-                return ((/*1430*/Saxon.Hej.value.AtomicValue)i.atomize().head());
-            }
+            return (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         public override Saxon.Hej.type.ItemType getItemType() {
             operandItemType = getBaseExpression().getItemType();
             Saxon.Hej.type.TypeHierarchy th = getConfiguration().getTypeHierarchy();
             return getAtomizedItemType(getBaseExpression(), untyped, th);
+        }
+        public override Saxon.Hej.type.UType getStaticUType(Saxon.Hej.type.UType contextItemType) {
+            return Saxon.Hej.type.UType.ANY_ATOMIC.intersection(getItemType().getUType());
         }
         public static Saxon.Hej.type.ItemType getAtomizedItemType(Saxon.Hej.expr.Expression operand, bool alwaysUntyped, Saxon.Hej.type.TypeHierarchy th) {
             Saxon.Hej.type.ItemType @in = operand.getItemType();
@@ -319,10 +335,11 @@ namespace Saxon.Hej.expr {
             if (Saxon.Hej.om.SequenceTool.supportsGetLength(@base)) {
                 int count = Saxon.Hej.om.SequenceTool.getLength(@base);
                 if ((count == 0)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 } else {
                     if ((count == 1)) {
                         Saxon.Hej.om.Item first = @base.next();
+                        Saxon.Ejava.util.Objects.requireNonNull(first);
                         return ((/*1430*/Saxon.Hej.tree.iter.AtomicIterator)first.atomize().iterate());
                     }
                 }
@@ -359,9 +376,54 @@ namespace Saxon.Hej.expr {
             return getBaseExpression().toShortString();
         }
         protected internal override void emitExtraAttributes(Saxon.Hej.trace.ExpressionPresenter @out) {
-            if ((roleDiagnostic != null)) {
-                @out.emitAttribute("diag", roleDiagnostic.save());
+            if ((roleSupplier != null)) {
+                @out.emitAttribute("diag", roleSupplier().save());
             }
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.Atomizer.AtomizerElaborator();
+        }
+        public class AtomizerElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.Atomizer expr = (Saxon.Hej.expr.Atomizer)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                bool oneToOne = (expr.isUntyped() && (expr.getBaseExpression().getItemType() is Saxon.Hej.pattern.NodeTest));
+                return context => {
+                    try {
+                        Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/baseEval(context);
+                        return getAtomizingIterator(@base, oneToOne);
+                    } catch (Exception e) when (e is Saxon.Hej.expr.instruct.TerminationException || e is Saxon.Hej.functions.Error.UserDefinedXPathException) {
+                        throw;
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        if ((expr.roleSupplier == null)) {
+                            throw;
+                        } else {
+                            string message = expr.expandMessage(e.Message);
+                            Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                            e2.setXPathContext(context);
+                            e2.maybeSetLocation(expr.getLocation());
+                            throw e2;
+                        }
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.Atomizer expr = (Saxon.Hej.expr.Atomizer)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
+                if (nullable) {
+                    return context => {
+                        Saxon.Hej.om.Item it = /*Delegate.eval()*/baseEval(context);
+                        if ((it == null)) {
+                            return null;
+                        }
+                        return ((/*1430*/Saxon.Hej.value.AtomicValue)it.atomize().head());
+                    } ;
+                } else {
+                    return context => /*Delegate.eval()*/baseEval(context).atomize().head();
+                }
+            }
+        
         }
     
     }

@@ -5,16 +5,16 @@ namespace Saxon.Eej.functions.extfn {
     public class GroupStarting : Saxon.Hej.functions.SystemFunction {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.om.Sequence input = arguments[0];
-            Saxon.Hej.om.Function function = (Saxon.Hej.om.Function)(arguments[1].head());
+            Saxon.Hej.om.FunctionItem function = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
             return new Saxon.Hej.om.LazySequence(new Saxon.Eej.functions.extfn.GroupStarting.GroupStartingFunctionIterator(input.iterate(), function, context));
         }
         private class GroupStartingFunctionIterator : Saxon.Hej.om.SequenceIterator {
             private readonly Saxon.Hej.om.SequenceIterator baseIterator;
-            private readonly Saxon.Hej.om.Function function;
+            private readonly Saxon.Hej.om.FunctionItem function;
             private readonly Saxon.Hej.expr.XPathContext context;
             private Saxon.Hej.om.Item pending = null;
             private bool finished = false;
-            public GroupStartingFunctionIterator(Saxon.Hej.om.SequenceIterator @in, Saxon.Hej.om.Function f, Saxon.Hej.expr.XPathContext context)  {
+            public GroupStartingFunctionIterator(Saxon.Hej.om.SequenceIterator @in, Saxon.Hej.om.FunctionItem f, Saxon.Hej.expr.XPathContext context)  {
                 this.baseIterator = @in;
                 this.function = f;
                 this.context = context;
@@ -27,9 +27,8 @@ namespace Saxon.Eej.functions.extfn {
                 if ((pending != null)) {
                     group.Add(pending);
                 }
-                Saxon.Hej.om.Item item;
                 try {
-                    while (((item = baseIterator.next()) != null)) {
+                    for (Saxon.Hej.om.Item item; ((item = baseIterator.next()) != null); ) {
                         Saxon.Hej.om.Sequence test = function.call(context, Saxon.Hej.om.SequenceTool.fromItems(item));
                         bool match = Saxon.Hej.expr.parser.ExpressionTool.effectiveBooleanValue(test.head());
                         if (match) {
@@ -55,9 +54,6 @@ namespace Saxon.Eej.functions.extfn {
             }
             public void close() {
                 baseIterator.close();
-            }
-            public void discharge() {
-                baseIterator.discharge();
             }
         
         }

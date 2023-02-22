@@ -15,15 +15,53 @@ namespace Saxon.Hej.value {
             return (Saxon.Hej.value.DateTimeValue)dtv.copyAsSubType(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);
         }
     // End of injected C# code
-        private int year;
-        private byte month;
-        private byte day;
-        private byte hour;
-        private byte minute;
-        private byte second;
-        private int nanosecond;
-        private bool hasNoYearZero;
-        private DateTimeValue()  {
+        private readonly int year;
+        private readonly byte month;
+        private readonly byte day;
+        private readonly byte hour;
+        private readonly byte minute;
+        private readonly byte second;
+        private readonly int nanosecond;
+        private readonly bool hasNoYearZero;
+        public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second, int nanosecond, bool hasNoYearZero, int tzMinutes, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel, tzMinutes) {
+            this.year = year;
+            this.month = month;
+            this.day = day;
+            this.hour = hour;
+            this.minute = minute;
+            this.second = second;
+            this.nanosecond = nanosecond;
+            this.hasNoYearZero = hasNoYearZero;
+        }
+        private class MutableDateTimeValue {
+            public int year;
+            public byte month;
+            public byte day;
+            public byte hour;
+            public byte minute;
+            public byte second;
+            public int nanosecond;
+            public bool hasNoYearZero;
+            public int tzMinutes = NO_TIMEZONE;
+            public Saxon.Hej.type.AtomicType typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE_TIME;
+        
+        }
+        private Saxon.Hej.value.DateTimeValue.MutableDateTimeValue makeMutableCopy() {
+            Saxon.Hej.value.DateTimeValue.MutableDateTimeValue m = new Saxon.Hej.value.DateTimeValue.MutableDateTimeValue();
+            m.year = year;
+            m.month = month;
+            m.day = day;
+            m.hour = hour;
+            m.minute = minute;
+            m.second = second;
+            m.nanosecond = nanosecond;
+            m.hasNoYearZero = hasNoYearZero;
+            m.tzMinutes = getTimezoneInMinutes();
+            m.typeLabel = typeLabel;
+            return m;
+        }
+        private static Saxon.Hej.value.DateTimeValue fromMutableCopy(Saxon.Hej.value.DateTimeValue.MutableDateTimeValue m) {
+            return new Saxon.Hej.value.DateTimeValue(m.year, m.month, m.day, m.hour, m.minute, m.second, m.nanosecond, m.hasNoYearZero, m.tzMinutes, m.typeLabel);
         }
         public static Saxon.Hej.value.DateTimeValue getCurrentDateTime(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.Controller c;
@@ -54,18 +92,18 @@ namespace Saxon.Hej.value {
                 err.setErrorCode("FORG0008");
                 throw err;
             }
-            Saxon.Hej.value.DateTimeValue v = date.toDateTime();
+            Saxon.Hej.value.DateTimeValue.MutableDateTimeValue v = date.toDateTime().makeMutableCopy();
             v.hour = time.getHour();
             v.minute = time.getMinute();
             v.second = time.getSecond();
             v.nanosecond = time.getNanosecond();
-            v.setTimezoneInMinutes(System.Math.Max(tz1, tz2));
+            v.tzMinutes = System.Math.Max(tz1, tz2);
             v.typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE_TIME;
             v.hasNoYearZero = date.hasNoYearZero;
-            return v;
+            return fromMutableCopy(v);
         }
         public static Saxon.Hej.type.ConversionResult makeDateTimeValue(Saxon.Hej.str.UnicodeString s, Saxon.Hej.lib.ConversionRules rules) {
-            Saxon.Hej.value.DateTimeValue dt = new Saxon.Hej.value.DateTimeValue();
+            Saxon.Hej.value.DateTimeValue.MutableDateTimeValue dt = new Saxon.Hej.value.DateTimeValue.MutableDateTimeValue();
             dt.hasNoYearZero = !(rules.isAllowYearZero());
             Saxon.Ejava.util.StringTokenizer tok = new Saxon.Ejava.util.StringTokenizer(Saxon.Hej.value.Whitespace.trim(s).ToString(), "-:.+TZ", true);
             if (!(tok.hasMoreTokens())) {
@@ -231,7 +269,7 @@ namespace Saxon.Hej.value {
                     if (!(tok.hasMoreTokens())) {
                         return badDate("Decimal point must be followed by digits", s);
                     }
-                    part = (string)(tok.nextToken());
+                    part = tok.nextToken();
                     if (((part.Length>9) && System.Text.RegularExpressions.Regex.IsMatch(part, "^[0-9]+$"))) {
                         part = part.Substring(0, 9 - 0);
                     }
@@ -239,7 +277,7 @@ namespace Saxon.Hej.value {
                     if ((value<0)) {
                         return badDate("Non-numeric fractional seconds component", s);
                     }
-                    double fractionalSeconds = System.Double.Parse(('.'+part));
+                    double fractionalSeconds = Saxon.Impl.Helpers.Utils.ParseDouble(('.'+part));
                     int nanoSeconds = (int)((long)System.Math.Round((fractionalSeconds*1_000_000_000), System.MidpointRounding.AwayFromZero));
                     if ((nanoSeconds == 1_000_000_000)) {
                         nanoSeconds--;
@@ -256,7 +294,7 @@ namespace Saxon.Hej.value {
                         }
                         tz = 0;
                         state = 9;
-                        dt.setTimezoneInMinutes(0);
+                        dt.tzMinutes = 0;
                     } else {
                         if (("+".Equals(delim) || "-".Equals(delim))) {
                             if ((state>1)) {
@@ -266,7 +304,7 @@ namespace Saxon.Hej.value {
                             if (!(tok.hasMoreTokens())) {
                                 return badDate("Missing timezone", s);
                             }
-                            part = (string)(tok.nextToken());
+                            part = tok.nextToken();
                             if ((part.Length != 2)) {
                                 return badDate("Timezone hour must be two digits", s);
                             }
@@ -288,7 +326,7 @@ namespace Saxon.Hej.value {
                                     return badDate("Misplaced ':'", s);
                                 }
                                 state = 9;
-                                part = (string)(tok.nextToken());
+                                part = tok.nextToken();
                                 value = Saxon.Hej.value.DurationValue.simpleInteger(part);
                                 if ((value<0)) {
                                     return badDate("Non-numeric timezone minute component", s);
@@ -307,7 +345,7 @@ namespace Saxon.Hej.value {
                                 if (negativeTz) {
                                     tz = -(tz);
                                 }
-                                dt.setTimezoneInMinutes(tz);
+                                dt.tzMinutes = tz;
                             } else {
                                 return badDate("Timezone format is incorrect", s);
                             }
@@ -333,7 +371,7 @@ namespace Saxon.Hej.value {
                 dt.day = t.getDay();
             }
             dt.typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE_TIME;
-            return dt;
+            return fromMutableCopy(dt);
         }
         public static Saxon.Hej.value.DateTimeValue parse(Saxon.Hej.str.UnicodeString s) {
             Saxon.Hej.type.ConversionResult result = makeDateTimeValue(s, Saxon.Hej.lib.ConversionRules.DEFAULT);
@@ -353,29 +391,9 @@ namespace Saxon.Hej.value {
             err.setErrorCode(errorCode);
             return err;
         }
-        public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second, int nanosecond, int tz)  {
-            this.hasNoYearZero = false;
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            this.hour = hour;
-            this.minute = minute;
-            this.second = second;
-            this.nanosecond = nanosecond;
-            setTimezoneInMinutes(tz);
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE_TIME;
+        public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second, int nanosecond, int tz) : this (year, month, day, hour, minute, second, nanosecond, false, tz, Saxon.Hej.type.BuiltInAtomicType.DATE_TIME) {
         }
-        public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second, int microsecond, int tz, bool hasNoYearZero)  {
-            this.hasNoYearZero = hasNoYearZero;
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            this.hour = hour;
-            this.minute = minute;
-            this.second = second;
-            this.nanosecond = (microsecond*1000);
-            setTimezoneInMinutes(tz);
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE_TIME;
+        public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second, int microsecond, int tz, bool hasNoYearZero) : this (year, month, day, hour, minute, second, (microsecond*1000), hasNoYearZero, tz, Saxon.Hej.type.BuiltInAtomicType.DATE_TIME) {
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.DATE_TIME;
@@ -412,7 +430,7 @@ namespace Saxon.Hej.value {
         }
         public override void checkValidInJavascript() {
             if (((year<=0) || (year>9999))) {
-                throw new Saxon.Hej.trans.XPathException("Year out of range for Saxon-JS", "FODT0001");
+                throw new Saxon.Hej.trans.XPathException("Year out of range for SaxonJS", "FODT0001");
             }
         }
         public Saxon.Hej.value.DateTimeValue adjustToUTC(int implicitTimezone) {
@@ -422,9 +440,9 @@ namespace Saxon.Hej.value {
                 if (((implicitTimezone == Saxon.Hej.value.CalendarValue.MISSING_TIMEZONE) || (implicitTimezone == Saxon.Hej.value.CalendarValue.NO_TIMEZONE))) {
                     throw new Saxon.Hej.trans.NoDynamicContextException("DateTime operation needs access to implicit timezone");
                 }
-                Saxon.Hej.value.DateTimeValue dt = copyAsSubType(null);
-                dt.setTimezoneInMinutes(implicitTimezone);
-                return dt.adjustTimezone(0);
+                Saxon.Hej.value.DateTimeValue.MutableDateTimeValue m = makeMutableCopy();
+                m.tzMinutes = implicitTimezone;
+                return fromMutableCopy(m).adjustTimezone(0);
             }
         }
         public Singulink.Numerics.BigDecimal toJulianInstant() {
@@ -455,7 +473,7 @@ namespace Saxon.Hej.value {
             return ((((long)minute)*360 + ((long)second))*60) * 1000000000L + (long)nanosecond;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(32);
             int yr = year;
             if ((year<=0)) {
                 yr = (-(yr)+((hasNoYearZero ? 1 : 0)));
@@ -494,7 +512,7 @@ namespace Saxon.Hej.value {
             return new Saxon.Hej.value.DateValue(year, month, day, getTimezoneInMinutes(), hasNoYearZero);
         }
         public Saxon.Hej.value.TimeValue toTimeValue() {
-            return new Saxon.Hej.value.TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), "");
+            return new Saxon.Hej.value.TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.TIME);
         }
         public override Saxon.Hej.str.UnicodeString getCanonicalLexicalRepresentation() {
             if ((hasTimezone() && (getTimezoneInMinutes() != 0))) {
@@ -504,16 +522,15 @@ namespace Saxon.Hej.value {
             }
         }
         public override Saxon.Hej.value.DateTimeValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.DateTimeValue v = new Saxon.Hej.value.DateTimeValue(year, month, day, hour, minute, second, nanosecond, getTimezoneInMinutes());
-            v.hasNoYearZero = hasNoYearZero;
+            Saxon.Hej.value.DateTimeValue.MutableDateTimeValue v = makeMutableCopy();
             v.typeLabel = typeLabel;
-            return v;
+            return fromMutableCopy(v);
         }
         public override Saxon.Hej.value.DateTimeValue adjustTimezone(int timezone) {
-            if (!(hasTimezone())) {
-                Saxon.Hej.value.DateTimeValue @in = copyAsSubType(typeLabel);
-                @in.setTimezoneInMinutes(timezone);
-                return @in;
+            if ((!(hasTimezone()) || (timezone == NO_TIMEZONE))) {
+                Saxon.Hej.value.DateTimeValue.MutableDateTimeValue m = makeMutableCopy();
+                m.tzMinutes = timezone;
+                return fromMutableCopy(m);
             }
             int oldtz = getTimezoneInMinutes();
             if ((oldtz == timezone)) {
@@ -528,22 +545,18 @@ namespace Saxon.Hej.value {
                 mi = (((mi+(60*24)))%60);
             }
             if (((h>=0) && (h<24))) {
-                Saxon.Hej.value.DateTimeValue d2 = new Saxon.Hej.value.DateTimeValue(year, month, day, (byte)(h), (byte)(mi), second, nanosecond, timezone);
-                d2.hasNoYearZero = hasNoYearZero;
-                return d2;
+                return new Saxon.Hej.value.DateTimeValue(year, month, day, (byte)(h), (byte)(mi), second, nanosecond, hasNoYearZero, timezone, Saxon.Hej.type.BuiltInAtomicType.DATE_TIME);
             }
             Saxon.Hej.value.DateTimeValue dt = this;
             while ((h<0)) {
                 h += 24;
                 Saxon.Hej.value.DateValue t = Saxon.Hej.value.DateValue.yesterday(dt.getYear(), dt.getMonth(), dt.getDay());
-                dt = new Saxon.Hej.value.DateTimeValue(t.getYear(), t.getMonth(), t.getDay(), (byte)(h), (byte)(mi), second, nanosecond, timezone);
-                dt.hasNoYearZero = hasNoYearZero;
+                dt = new Saxon.Hej.value.DateTimeValue(t.getYear(), t.getMonth(), t.getDay(), (byte)(h), (byte)(mi), second, nanosecond, hasNoYearZero, timezone, Saxon.Hej.type.BuiltInAtomicType.DATE_TIME);
             }
             if ((h>23)) {
                 h -= 24;
                 Saxon.Hej.value.DateValue t = Saxon.Hej.value.DateValue.tomorrow(year, month, day);
-                dt = new Saxon.Hej.value.DateTimeValue(t.getYear(), t.getMonth(), t.getDay(), (byte)(h), (byte)(mi), second, nanosecond, timezone);
-                dt.hasNoYearZero = hasNoYearZero;
+                dt = new Saxon.Hej.value.DateTimeValue(t.getYear(), t.getMonth(), t.getDay(), (byte)(h), (byte)(mi), second, nanosecond, hasNoYearZero, timezone, Saxon.Hej.type.BuiltInAtomicType.DATE_TIME);
             }
             return dt;
         }
@@ -552,10 +565,10 @@ namespace Saxon.Hej.value {
                 Singulink.Numerics.BigDecimal seconds = duration.getTotalSeconds();
                 Singulink.Numerics.BigDecimal julian = toJulianInstant();
                 julian = (julian+seconds);
-                Saxon.Hej.value.DateTimeValue dt = fromJulianInstant(julian);
-                dt.setTimezoneInMinutes(getTimezoneInMinutes());
+                Saxon.Hej.value.DateTimeValue.MutableDateTimeValue dt = fromJulianInstant(julian).makeMutableCopy();
+                dt.tzMinutes = getTimezoneInMinutes();
                 dt.hasNoYearZero = this.hasNoYearZero;
-                return dt;
+                return fromMutableCopy(dt);
             } else {
                 if ((duration is Saxon.Hej.value.YearMonthDurationValue)) {
                     int months = ((Saxon.Hej.value.YearMonthDurationValue)(duration)).getLengthInMonths();
@@ -571,9 +584,7 @@ namespace Saxon.Hej.value {
                     while (!(Saxon.Hej.value.DateValue.isValidDate(y, m, d))) {
                         d -= 1;
                     }
-                    Saxon.Hej.value.DateTimeValue dtv = new Saxon.Hej.value.DateTimeValue(y, (byte)(m), (byte)(d), hour, minute, second, nanosecond, getTimezoneInMinutes());
-                    dtv.hasNoYearZero = hasNoYearZero;
-                    return dtv;
+                    return new Saxon.Hej.value.DateTimeValue(y, (byte)(m), (byte)(d), hour, minute, second, nanosecond, hasNoYearZero, getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.DATE_TIME);
                 } else {
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("DateTime arithmetic is not supported on xs:duration, only on its subtypes");
                     err.setErrorCode("XPTY0004");
@@ -635,9 +646,6 @@ namespace Saxon.Hej.value {
               default:
                 throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown component for dateTime: "+component));
             }
-        }
-        private Saxon.Hej.om.SequenceIterator oneInt(long value) {
-            return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(Saxon.Hej.value.Int64Value.makeIntegerValue(value));
         }
         public override int compareTo(Saxon.Hej.value.CalendarValue other, int implicitTimezone) {
             if (!(((other is Saxon.Hej.value.DateTimeValue)))) {

@@ -5,10 +5,10 @@ namespace Saxon.Hej.tree.util {
     public sealed class Navigator {
         private Navigator()  {
         }
-        public static string getAttributeValue(Saxon.Hej.om.NodeInfo element, string uri, string localName) {
+        public static string getAttributeValue(Saxon.Hej.om.NodeInfo element, Saxon.Hej.om.NamespaceUri uri, string localName) {
             return element.getAttributeValue(uri, localName);
         }
-        public static string getInheritedAttributeValue(Saxon.Hej.om.NodeInfo element, string uri, string localName) {
+        public static string getInheritedAttributeValue(Saxon.Hej.om.NodeInfo element, Saxon.Hej.om.NamespaceUri uri, string localName) {
             Saxon.Hej.om.NodeInfo node = element;
             while ((node != null)) {
                 string value = node.getAttributeValue(uri, localName);
@@ -22,7 +22,7 @@ namespace Saxon.Hej.tree.util {
         }
         public static Saxon.Hej.om.StructuredQName getNodeName(Saxon.Hej.om.NodeInfo node) {
             if ((node.getLocalPart() != null)) {
-                return new Saxon.Hej.om.StructuredQName(node.getPrefix(), node.getURI(), node.getLocalPart());
+                return new Saxon.Hej.om.StructuredQName(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart());
             } else {
                 return null;
             }
@@ -37,7 +37,7 @@ namespace Saxon.Hej.tree.util {
             } );
         }
         public static string getBaseURI(Saxon.Hej.om.NodeInfo node, System.Predicate<Saxon.Hej.om.NodeInfo> isTopElementWithinEntity) {
-            string xmlBase = ((node is Saxon.Hej.tree.tiny.TinyElementImpl) ? ((Saxon.Hej.tree.tiny.TinyElementImpl)(node)).getAttributeValue(Saxon.Hej.om.StandardNames.XML_BASE) : node.getAttributeValue(Saxon.Hej.lib.NamespaceConstant.XML, "base"));
+            string xmlBase = ((node is Saxon.Hej.tree.tiny.TinyElementImpl) ? ((Saxon.Hej.tree.tiny.TinyElementImpl)(node)).getAttributeValue(Saxon.Hej.om.StandardNames.XML_BASE) : node.getAttributeValue(Saxon.Hej.om.NamespaceUri.XML, "base"));
             if ((xmlBase != null)) {
                 System.Uri baseURI;
                 try {
@@ -146,7 +146,7 @@ namespace Saxon.Hej.tree.util {
             if ((n1.hasFingerprint() && n2.hasFingerprint())) {
                 return (n1.getFingerprint() == n2.getFingerprint());
             } else {
-                return (n1.getLocalPart().Equals(n2.getLocalPart()) && n1.getURI().Equals(n2.getURI()));
+                return (n1.getLocalPart().Equals(n2.getLocalPart()) && n1.getNamespaceUri().Equals(n2.getNamespaceUri()));
             }
         }
         public static int getNumberSimple(Saxon.Hej.om.NodeInfo node, Saxon.Hej.expr.XPathContext context) {
@@ -404,7 +404,7 @@ namespace Saxon.Hej.tree.util {
                     @out.startElement(Saxon.Hej.om.NameOfNode.makeName(node), annotation, locationId, (Saxon.Hej.@event.ReceiverOption.DISINHERIT_NAMESPACES|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK));
                     if ((((copyOptions&Saxon.Hej.om.CopyOptions.ALL_NAMESPACES)) != 0)) {
                         foreach (Saxon.Hej.om.NamespaceBinding ns in node.getAllNamespaces()) {
-                            @out.@namespace(ns.getPrefix(), ns.getURI(), Saxon.Hej.@event.ReceiverOption.NONE);
+                            @out.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
                         }
                     }
                     foreach (Saxon.Hej.om.AttributeInfo attr in node.attributes()) {
@@ -443,7 +443,7 @@ namespace Saxon.Hej.tree.util {
                 }
               case Saxon.Hej.type.Type.NAMESPACE:
                 {
-                    @out.@namespace(node.getLocalPart(), node.getStringValue(), Saxon.Hej.@event.ReceiverOption.NONE);
+                    @out.@namespace(node.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(node.getStringValue()), Saxon.Hej.@event.ReceiverOption.NONE);
                     return ;
                 }
               default:
@@ -663,7 +663,7 @@ namespace Saxon.Hej.tree.util {
             if ((predicate is Saxon.Hej.pattern.NodeTest)) {
                 return (Saxon.Hej.pattern.NodeTest)(predicate);
             } else {
-                return Saxon.Hej.pattern.NodeSelector.of(it => predicate.test(it) /* converted from instance method reference */);
+                return Saxon.Hej.pattern.NodeSelector.of(/* Unresolved method reference */predicate.test);
             }
         }
         public static Saxon.Hej.tree.iter.AxisIterator filteredSingleton(Saxon.Hej.om.NodeInfo node, Saxon.Hej.pattern.NodePredicate nodeTest) {
@@ -734,10 +734,6 @@ namespace Saxon.Hej.tree.util {
             public virtual void close() {
             }
 
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
-            }
-
         }
         public class EmptyTextFilter : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.iter.AxisIterator @base;
@@ -750,7 +746,7 @@ namespace Saxon.Hej.tree.util {
                     if ((next == null)) {
                         return null;
                     }
-                    if (!((((next.getNodeKind() == Saxon.Hej.type.Type.TEXT) && (next.getUnicodeStringValue().length() == 0))))) {
+                    if (!((((next.getNodeKind() == Saxon.Hej.type.Type.TEXT) && next.getUnicodeStringValue().isEmpty())))) {
                         return next;
                     }
                 }
@@ -758,10 +754,6 @@ namespace Saxon.Hej.tree.util {
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
             }
 
         }
@@ -786,10 +778,6 @@ namespace Saxon.Hej.tree.util {
         
             /* Expanding default method close from interface SequenceIterator */
             public void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public void discharge() {
             }
 
         }
@@ -864,10 +852,6 @@ namespace Saxon.Hej.tree.util {
             public void close() {
             }
 
-            /* Expanding default method discharge from interface SequenceIterator */
-            public void discharge() {
-            }
-
         }
         public sealed class FollowingEnumeration : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.iter.AxisIterator ancestorEnum;
@@ -936,10 +920,6 @@ namespace Saxon.Hej.tree.util {
             public void close() {
             }
 
-            /* Expanding default method discharge from interface SequenceIterator */
-            public void discharge() {
-            }
-
         }
         public sealed class PrecedingEnumeration : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.iter.AxisIterator ancestorEnum;
@@ -1004,10 +984,6 @@ namespace Saxon.Hej.tree.util {
         
             /* Expanding default method close from interface SequenceIterator */
             public void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public void discharge() {
             }
 
         }

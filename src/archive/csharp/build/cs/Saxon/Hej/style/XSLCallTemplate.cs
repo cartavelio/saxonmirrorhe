@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.style {
     public class XSLCallTemplate : Saxon.Hej.style.StyleElement {
-        private static readonly Saxon.Hej.om.StructuredQName ERROR_TEMPLATE_NAME = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "error-template");
+        private static readonly Saxon.Hej.om.StructuredQName ERROR_TEMPLATE_NAME = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "error-template");
         private Saxon.Hej.om.StructuredQName calledTemplateName;
         private Saxon.Hej.expr.instruct.NamedTemplate template = null;
         private bool useTailRecursion = false;
@@ -97,7 +97,7 @@ namespace Saxon.Hej.style {
             Saxon.Hej.style.PrincipalStylesheetModule pack = getPrincipalStylesheetModule();
             Saxon.Hej.expr.instruct.NamedTemplate template = pack.getNamedTemplate(templateName);
             if ((template == null)) {
-                if ((templateName.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT) && templateName.getLocalPart().Equals("original"))) {
+                if ((templateName.hasURI(Saxon.Hej.om.NamespaceUri.XSLT) && templateName.getLocalPart().Equals("original"))) {
                     return (Saxon.Hej.expr.instruct.NamedTemplate)(getXslOriginal(Saxon.Hej.om.StandardNames.XSL_TEMPLATE));
                 }
                 compileError(("Cannot find a template named "+calledTemplateName), "XTSE0650");

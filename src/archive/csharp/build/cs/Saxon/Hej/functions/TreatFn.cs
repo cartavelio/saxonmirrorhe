@@ -8,14 +8,11 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.om.SequenceIterator iterator = arguments[0].iterate();
             int card = getRequiredCardinality();
-            Saxon.Hej.expr.parser.RoleDiagnostic role = makeRoleDiagnostic();
-            iterator = new Saxon.Hej.expr.CardinalityCheckingIterator(iterator, card, role, null);
+            iterator = new Saxon.Hej.expr.CardinalityCheckingIterator(iterator, card, () => makeRoleDiagnostic(), null);
             return new Saxon.Hej.om.LazySequence(iterator);
         }
         public Saxon.Hej.expr.parser.RoleDiagnostic makeRoleDiagnostic() {
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0);
-            role.setErrorCode(getErrorCodeForTypeErrors());
-            return role;
+            return new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0, getErrorCodeForTypeErrors());
         }
         public override string getStreamerName() {
             return "TreatFn";

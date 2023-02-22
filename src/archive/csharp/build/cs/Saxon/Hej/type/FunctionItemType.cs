@@ -7,7 +7,7 @@ namespace Saxon.Hej.type {
         Saxon.Hej.value.SequenceType getResultType();
         Saxon.Hej.type.Affinity relationship(Saxon.Hej.type.FunctionItemType other, Saxon.Hej.type.TypeHierarchy th);
         Saxon.Hej.query.AnnotationList getAnnotationAssertions();
-        Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.parser.RoleDiagnostic role);
+        Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role);
         bool isMapType();
         bool isArrayType();
     

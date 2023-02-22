@@ -32,7 +32,7 @@ namespace Saxon.Hej.str {
                 return -1;
             }
             byte b = (byte)(((codePoint&unchecked((int)0xff))));
-            for (int i = (start+requireInt(from)); (i<end); i++) {
+            for (int i = (start+requireNonNegativeInt(from)); (i<end); i++) {
                 if ((bytes[i] == b)) {
                     return (i-start);
                 }
@@ -40,7 +40,11 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override int codePointAt(long index) {
-            return ((bytes[(start+requireInt(index))])&unchecked((int)0xff));
+            int index32 = requireInt(index);
+            if (((index32<0) || (index32>=length32()))) {
+                throw new System.IndexOutOfRangeException();
+            }
+            return ((bytes[(start+index32)])&unchecked((int)0xff));
         }
         public override Saxon.Hej.str.UnicodeString substring(long start, long end) {
             checkSubstringBounds(start, end);
@@ -66,7 +70,7 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override Saxon.Hej.z.IntIterator codePoints() {
-            return new Inner_IntIterator_29(this);
+            return new Inner_IntIterator_31(this);
         }
         internal override void copy8bit(byte[] target, int offset) {
             Saxon.Ejava.lang.System.arraycopy(bytes, start, target, offset, (end-start));
@@ -81,6 +85,11 @@ namespace Saxon.Hej.str {
                 target[j++] = (byte)(0);
                 target[j++] = (byte)(0);
                 target[j++] = bytes[i++];
+            }
+        }
+        internal override void copy32bit(int[] target, int offset) {
+            for (int i = start, j = offset; (i<end); ) {
+                target[j++] = (bytes[i++]&unchecked((int)0xff));
             }
         }
         public override int GetHashCode() {
@@ -98,9 +107,9 @@ namespace Saxon.Hej.str {
             return Saxon.Impl.Helpers.StringUtils.LATIN_1.GetString(bytes, start, end - start);
         }
     
-        private class Inner_IntIterator_29 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_31 : Saxon.Hej.z.IntIterator {
             private readonly Slice8 outerInstance;
-            public Inner_IntIterator_29(Slice8 outerInstance) {
+            public Inner_IntIterator_31(Slice8 outerInstance) {
                 this.outerInstance = outerInstance;
                 i = outerInstance.start;
             }

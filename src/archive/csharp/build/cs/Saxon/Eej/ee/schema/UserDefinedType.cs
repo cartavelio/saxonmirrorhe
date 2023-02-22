@@ -16,8 +16,8 @@ namespace Saxon.Eej.ee.schema {
         public string getName() {
             return getTypeName().getLocalPart();
         }
-        public string getTargetNamespace() {
-            return getTypeName().getURI();
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return getTypeName().getNamespaceUri();
         }
         public int getFingerprint() {
             return fingerprint;
@@ -32,7 +32,7 @@ namespace Saxon.Eej.ee.schema {
             return null;
         }
         public bool isAnonymousType() {
-            return ((fingerprint == -1) || getTargetNamespace().Equals(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS));
+            return ((fingerprint == -1) || getTargetNamespace().Equals(Saxon.Hej.om.NamespaceUri.ANONYMOUS));
         }
         public void setTypeName(Saxon.Hej.om.StructuredQName name, int fingerprint) {
             this.qName = name;
@@ -119,7 +119,7 @@ namespace Saxon.Eej.ee.schema {
         public virtual string getDescription() {
             int fp = getFingerprint();
             Saxon.Hej.om.NamePool pool = getNamePool();
-            if (((fp != -1) && !(getTypeName().hasURI(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS)))) {
+            if (((fp != -1) && !(getTypeName().hasURI(Saxon.Hej.om.NamespaceUri.ANONYMOUS)))) {
                 return getTypeName().getEQName();
             }
             if ((containingDeclarationName != null)) {

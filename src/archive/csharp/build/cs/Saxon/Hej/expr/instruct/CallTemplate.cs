@@ -85,9 +85,13 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.instruct.WithParam wp = actualParams[p];
                 Saxon.Hej.expr.instruct.NamedTemplate.LocalParamInfo lp = template.getLocalParamInfo(wp.getVariableQName());
                 if ((lp != null)) {
+                    int pos = p;
                     Saxon.Hej.value.SequenceType req = lp.requiredType;
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.PARAM, wp.getVariableQName().getDisplayName(), p);
-                    role.setErrorCode("XTTE0590");
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => {
+                        Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.PARAM, wp.getVariableQName().getDisplayName(), pos);
+                        role0.setErrorCode("XTTE0590");
+                        return role0;
+                    } ;
                     Saxon.Hej.expr.Expression select = tc.staticTypeCheck(wp.getSelectExpression(), req, role, visitor);
                     wp.setSelectExpression(this, select);
                     wp.setTypeChecked(true);
@@ -157,39 +161,11 @@ namespace Saxon.Hej.expr.instruct {
             c2.setCurrentMergeGroupIterator(null);
             try {
                 Saxon.Hej.expr.instruct.TailCall tc = t.expand(output, c2);
-                while ((tc != null)) {
-                    tc = tc.processLeavingTail();
-                }
+                dispatchTailCall(tc);
             } catch (System.StackOverflowException e) {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested template or function calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, getLocation());
                 err.setXPathContext(context);
                 throw err;
-            }
-        }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            if (useTailRecursion) {
-                Saxon.Hej.expr.Component targetComponent;
-                if ((bindingSlot>=0)) {
-                    targetComponent = context.getTargetComponent(bindingSlot);
-                } else {
-                    targetComponent = getFixedTarget();
-                }
-                if ((targetComponent == null)) {
-                    throw new Saxon.Hej.trans.XPathException("Internal Saxon error: No binding available for call-template instruction", Saxon.Hej.trans.SaxonErrorCode.SXPK0001, this.getLocation());
-                }
-                if (targetComponent.isHiddenAbstractComponent()) {
-                    throw new Saxon.Hej.trans.XPathException((("Cannot call an abstract template ("+calledTemplateName.getDisplayName())+") with no implementation"), "XTDE3052", this.getLocation());
-                }
-                Saxon.Hej.expr.instruct.ParameterSet @params = assembleParams(context, actualParams);
-                Saxon.Hej.expr.instruct.ParameterSet tunnels = assembleTunnelParams(context, tunnelParams);
-                if ((@params == null)) {
-                    @params = Saxon.Hej.expr.instruct.ParameterSet.EMPTY_PARAMETER_SET;
-                }
-                Saxon.Ejava.util.Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
-                return new Saxon.Hej.expr.instruct.CallTemplate.CallTemplatePackage(targetComponent, @params, tunnels, this, output, context);
-            } else {
-                process(output, context);
-                return null;
             }
         }
         public override Saxon.Hej.om.StructuredQName getObjectName() {
@@ -246,6 +222,7 @@ namespace Saxon.Hej.expr.instruct {
                 c2.setTunnelParameters(tunnelParams);
                 c2.openStackFrame(template.getStackFrameMap());
                 c2.setCurrentMergeGroupIterator(null);
+                c2.setCaller(evaluationContext.getMajorContext().getCaller());
                 return template.expand(output, c2);
             }
         
@@ -274,6 +251,72 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "CallTemplate";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.CallTemplate.CallTemplateElaborator();
+        }
+        public class CallTemplateElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.CallTemplate expr = (Saxon.Hej.expr.instruct.CallTemplate)(getExpression());
+                int bindingSlot = expr.getBindingSlot();
+                if (expr.useTailRecursion) {
+                    return (output, context) => {
+                        Saxon.Hej.expr.Component targetComponent;
+                        if ((bindingSlot>=0)) {
+                            targetComponent = context.getTargetComponent(bindingSlot);
+                        } else {
+                            targetComponent = expr.getFixedTarget();
+                        }
+                        if ((targetComponent == null)) {
+                            throw new Saxon.Hej.trans.XPathException("Internal Saxon error: No binding available for call-template instruction", Saxon.Hej.trans.SaxonErrorCode.SXPK0001, expr.getLocation());
+                        }
+                        if (targetComponent.isHiddenAbstractComponent()) {
+                            throw new Saxon.Hej.trans.XPathException((("Cannot call an abstract template ("+expr.calledTemplateName.getDisplayName())+") with no implementation"), "XTDE3052", expr.getLocation());
+                        }
+                        Saxon.Hej.expr.instruct.ParameterSet @params = assembleParams(context, expr.actualParams);
+                        Saxon.Hej.expr.instruct.ParameterSet tunnels = assembleTunnelParams(context, expr.tunnelParams);
+                        if ((@params == null)) {
+                            @params = Saxon.Hej.expr.instruct.ParameterSet.EMPTY_PARAMETER_SET;
+                        }
+                        Saxon.Ejava.util.Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
+                        return new Saxon.Hej.expr.instruct.CallTemplate.CallTemplatePackage(targetComponent, @params, tunnels, expr, output, context);
+                    } ;
+                } else {
+                    return (output, context) => {
+                        Saxon.Hej.expr.instruct.NamedTemplate t;
+                        Saxon.Hej.expr.Component target = expr.getFixedTarget();
+                        if ((bindingSlot>=0)) {
+                            target = context.getTargetComponent(bindingSlot);
+                            if (target.isHiddenAbstractComponent()) {
+                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot call an abstract template ("+expr.calledTemplateName.getDisplayName())+") with no implementation"), "XTDE3052");
+                                err.setLocation(expr.getLocation());
+                                throw err;
+                            }
+                        }
+                        t = (Saxon.Hej.expr.instruct.NamedTemplate)(target.getActor());
+                        Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                        c2.setCurrentComponent(target);
+                        c2.setOrigin(expr);
+                        c2.openStackFrame(t.getStackFrameMap());
+                        c2.setLocalParameters(assembleParams(context, expr.actualParams));
+                        c2.setTunnelParameters(assembleTunnelParams(context, expr.tunnelParams));
+                        if (expr.isWithinDeclaredStreamableConstruct) {
+                            c2.setCurrentGroupIterator(null);
+                        }
+                        c2.setCurrentMergeGroupIterator(null);
+                        try {
+                            Saxon.Hej.expr.instruct.TailCall tc = t.expand(output, c2);
+                            dispatchTailCall(tc);
+                        } catch (System.StackOverflowException e) {
+                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested template or function calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, expr.getLocation());
+                            err.setXPathContext(context);
+                            throw err;
+                        }
+                        return null;
+                    } ;
+                }
+            }
+        
         }
     
     }

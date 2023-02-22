@@ -18,8 +18,8 @@ namespace Saxon.Hej.type {
         public string getEQName() {
             return (("Q{"+Saxon.Hej.lib.NamespaceConstant.SCHEMA)+"}anyType");
         }
-        public string getTargetNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.SCHEMA;
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return Saxon.Hej.om.NamespaceUri.SCHEMA;
         }
         public Saxon.Hej.type.ComplexVariety getVariety() {
             return Saxon.Hej.type.ComplexVariety.MIXED;
@@ -99,7 +99,7 @@ namespace Saxon.Hej.type {
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
             return /*explicit enum*/ Saxon.Hej.type.AnyType.QNAME;
         }
-        public static readonly Saxon.Hej.om.StructuredQName QNAME = new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, "anyType");
+        public static readonly Saxon.Hej.om.StructuredQName QNAME = new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, "anyType");
         public string getDescription() {
             return "xs:anyType";
         }
@@ -155,7 +155,7 @@ namespace Saxon.Hej.type {
         public bool hasAssertions() {
             return false;
         }
-        public Saxon.Hej.om.Function getComponentAsFunction() {
+        public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return /*134*/Saxon.Eej.ee.schema.UserComplexType.getComponentAsFunction(this);
         }
     }

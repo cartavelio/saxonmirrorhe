@@ -2,10 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.xsltextn.style {
-    public class SaxonDoctype : Saxon.Hej.style.StyleElement {
-        public override bool isInstruction() {
-            return true;
-        }
+    public class SaxonDoctype : Saxon.Hej.style.ExtensionInstruction {
         protected internal override bool mayContainSequenceConstructor() {
             return true;
         }

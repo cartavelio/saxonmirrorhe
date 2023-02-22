@@ -4,6 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.expr.flwor {
     public class WhereClause : Saxon.Hej.expr.flwor.Clause {
         private readonly Saxon.Hej.expr.Operand predicateOp;
+        private Saxon.Hej.expr.elab.BooleanEvaluator predicateEvaluator;
         public WhereClause(Saxon.Hej.expr.flwor.FLWORExpression flwor, Saxon.Hej.expr.Expression predicate)  {
             this.predicateOp = new Saxon.Hej.expr.Operand(flwor, predicate, Saxon.Hej.expr.OperandRole.INSPECT);
         }
@@ -32,7 +33,10 @@ namespace Saxon.Hej.expr.flwor {
             base.typeCheck(visitor, contextInfo);
         }
         public override Saxon.Hej.expr.flwor.TuplePull getPullStream(Saxon.Hej.expr.flwor.TuplePull @base, Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Hej.expr.flwor.WhereClausePull(@base, getPredicate());
+            if ((predicateEvaluator == null)) {
+                predicateEvaluator = getPredicate().makeElaborator().elaborateForBoolean();
+            }
+            return new Saxon.Hej.expr.flwor.WhereClausePull(@base, predicateEvaluator);
         }
         public override void gatherVariableReferences(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.Binding binding, System.Collections.Generic.IList<Saxon.Hej.expr.VariableReference> references) {
             Saxon.Hej.expr.parser.ExpressionTool.gatherVariableReferences(getPredicate(), binding, references);
@@ -45,7 +49,10 @@ namespace Saxon.Hej.expr.flwor {
             }
         }
         public override Saxon.Hej.expr.flwor.TuplePush getPushStream(Saxon.Hej.expr.flwor.TuplePush destination, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Hej.expr.flwor.WhereClausePush(output, destination, getPredicate());
+            if ((predicateEvaluator == null)) {
+                predicateEvaluator = getPredicate().makeElaborator().elaborateForBoolean();
+            }
+            return new Saxon.Hej.expr.flwor.WhereClausePush(output, destination, predicateEvaluator);
         }
         public override void processOperands(Saxon.Hej.expr.flwor.OperandProcessor processor) {
             /*Delegate.processOperand()*/processor(predicateOp);

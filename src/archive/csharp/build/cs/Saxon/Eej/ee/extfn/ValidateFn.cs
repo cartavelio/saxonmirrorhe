@@ -76,7 +76,7 @@ namespace Saxon.Eej.ee.extfn {
                         qKey = (Saxon.Hej.value.QNameValue)(key);
                     } else {
                         if ((key is Saxon.Hej.value.StringValue)) {
-                            qKey = new Saxon.Hej.value.QNameValue("", "", key.getStringValue());
+                            qKey = new Saxon.Hej.value.QNameValue("", Saxon.Hej.om.NamespaceUri.NULL, key.getStringValue());
                         } else {
                             throw new Saxon.Hej.trans.XPathException("key value in third argument to saxon:validate must be a string or QName");
                         }
@@ -86,12 +86,7 @@ namespace Saxon.Eej.ee.extfn {
             } else {
                 @params = new Saxon.Hej.type.ValidationParams();
             }
-            Saxon.Hej.lib.ParseOptions parseOptions = new Saxon.Hej.lib.ParseOptions();
-            parseOptions.setValidationParams(@params);
-            parseOptions.setSchemaValidationMode(validation);
-            parseOptions.setTopLevelType(schemaType);
-            parseOptions.setExpandAttributeDefaults(expand);
-            parseOptions.setContinueAfterValidationErrors(true);
+            Saxon.Hej.lib.ParseOptions parseOptions = new Saxon.Hej.lib.ParseOptions().withValidationParams(@params).withSchemaValidationMode(validation).withTopLevelType(schemaType).withExpandAttributeDefaults(expand).withContinueAfterValidationErrors(true);
             System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo> currentErrorNode = new System.Collections.Generic.List<Saxon.Hej.om.NodeInfo>(1);
             Saxon.Hej.@event.PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             pipe.setParseOptions(parseOptions);
@@ -101,7 +96,7 @@ namespace Saxon.Eej.ee.extfn {
                 currentErrorNode.Add(element);
                 return null;
             } );
-            parseOptions.setInvalidityHandler(new Saxon.Eej.ee.extfn.ValidateFn.LocalInvalidityHandler(config, currentErrorNode, errorList));
+            parseOptions = parseOptions.withInvalidityHandler(new Saxon.Eej.ee.extfn.ValidateFn.LocalInvalidityHandler(config, currentErrorNode, errorList));
             int kind = input.getNodeKind();
             switch (kind) {
               case Saxon.Hej.type.Type.DOCUMENT:
@@ -117,7 +112,7 @@ namespace Saxon.Eej.ee.extfn {
               case Saxon.Hej.type.Type.ELEMENT:
                 {
                     Saxon.Hej.@event.SequenceReceiver @out = (buildTree ? new Saxon.Hej.@event.SequenceCollector(pipe) : new Saxon.Hej.@event.Sink(pipe));
-                    parseOptions.setTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(input).getStructuredQName());
+                    parseOptions = parseOptions.withTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(input).getStructuredQName());
                     Saxon.Hej.@event.Receiver val = config.getElementValidator(@out, parseOptions, Saxon.Hej.expr.parser.Loc.NONE);
                     val.setPipelineConfiguration(@out.getPipelineConfiguration());
                     val.setSystemId(input.getBaseURI());

@@ -8,7 +8,7 @@ namespace Saxon.Eej.ee.trans {
         private System.Object[] characteristics;
         public PreconditionMatcher(Saxon.Hej.trans.rules.RuleChain chain, Saxon.Hej.expr.XPathContext context) : base () {
             this.context = context;
-            if ((chain.optimizationData != null)) {
+            if (chain.hasOptimizationData()) {
                 Saxon.Eej.ee.trans.ModeEE.RuleChainOptimizationData data = (Saxon.Eej.ee.trans.ModeEE.RuleChainOptimizationData)(chain.optimizationData);
                 preconditionState = new int[data.preconditions.Count];
                 characteristics = new System.Object[data.characteristics.Count];
@@ -19,6 +19,9 @@ namespace Saxon.Eej.ee.trans {
         }
         public void setPreconditionState(int slot, bool value) {
             preconditionState[slot] = (value ? Saxon.Eej.ee.trans.Precondition.PRECONDITION_TRUE : Saxon.Eej.ee.trans.Precondition.PRECONDITION_FALSE);
+        }
+        public override bool checkPreconditions(Saxon.Hej.trans.rules.Rule rule) {
+            return ((Saxon.Eej.ee.trans.RuleEE)(rule)).checkPreconditions(this);
         }
         public System.Object obtainCharacteristic(Saxon.Eej.ee.trans.Characteristic chic) {
             System.Object val = characteristics[chic.getSlotNumber()];

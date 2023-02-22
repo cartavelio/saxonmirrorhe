@@ -62,11 +62,14 @@ namespace Saxon.Hej.functions {
         }
         private Saxon.Hej.om.SequenceIterator getSequenceIterator(Saxon.Hej.lib.ResourceCollection collection, Saxon.Hej.expr.XPathContext context) {
             System.Collections.Generic.IEnumerator<Saxon.Hej.lib.Resource> sources = collection.getResources(context);
-            return new Saxon.Hej.functions.CollectionFn.CollectionIterator(sources);
+            return new Saxon.Hej.functions.CollectionFn.CollectionIterator(sources, context);
         }
         private class CollectionIterator : Saxon.Hej.om.SequenceIterator {
+    // Injecting C# code
+        ~CollectionIterator(){sources?.Dispose();} // finalizer
+    // End of injected C# code
             private readonly System.Collections.Generic.IEnumerator<Saxon.Hej.lib.Resource> sources;
-            public CollectionIterator(System.Collections.Generic.IEnumerator<Saxon.Hej.lib.Resource> sources)  {
+            public CollectionIterator(System.Collections.Generic.IEnumerator<Saxon.Hej.lib.Resource> sources, Saxon.Hej.expr.XPathContext context)  {
                 this.sources = sources;
             }
             public Saxon.Hej.om.Item next() {
@@ -77,13 +80,9 @@ namespace Saxon.Hej.functions {
                 }
             }
             public void close() {
-                sources.Dispose();
+                sources?.Dispose();
             }
         
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
-            }
-
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             string href;
@@ -151,8 +150,7 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.om.DocumentPool docPool = controller.getDocumentPool();
                 cachedCollection = Saxon.Hej.om.SequenceTool.toGroundedValue(result);
                 Saxon.Hej.om.SequenceIterator iter = cachedCollection.iterate();
-                Saxon.Hej.om.Item item;
-                while (((item = iter.next()) != null)) {
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                     if (((item is Saxon.Hej.om.NodeInfo) && (((Saxon.Hej.om.NodeInfo)(item)).getNodeKind() == Saxon.Hej.type.Type.DOCUMENT))) {
                         string docUri = ((Saxon.Hej.om.NodeInfo)(item)).getSystemId();
                         Saxon.Hej.om.DocumentKey docKey;

@@ -12,14 +12,13 @@ namespace Saxon.Hej.str {
             bytes = new byte[len];
             for (int i = start; (i<len); i++) {
                 int c = chars[i];
-                if (Saxon.Hej.Configuration.isAssertionsEnabled()) {
-                    if ((c>255)) {
-                        throw new Saxon.Ejava.lang.IllegalArgumentException();
-                    }
+                if ((CHECKING && (c>255))) {
+                    throw new Saxon.Ejava.lang.IllegalArgumentException();
                 }
                 bytes[i] = (byte)(((chars[i]&unchecked((int)0xff))));
             }
         }
+        private readonly static bool CHECKING = Saxon.Hej.Configuration.isAssertionsEnabled();
         public Twine8(string str)  {
             bytes = fromString(str);
         }
@@ -50,6 +49,11 @@ namespace Saxon.Hej.str {
                 target[j++] = bytes[i++];
             }
         }
+        internal override void copy32bit(int[] target, int offset) {
+            for (int i = 0, j = offset; (i<bytes.Length); ) {
+                target[j++] = (bytes[i++]&unchecked((int)0xff));
+            }
+        }
         public override Saxon.Hej.str.UnicodeString substring(long start, long end) {
             long len = length();
             if ((((start<0) || (end<start)) || (end>len))) {
@@ -66,20 +70,16 @@ namespace Saxon.Hej.str {
             }
         }
         public override int codePointAt(long index) {
-            int index32 = Saxon.Hej.str.StringTool.requireInt(index);
+            int index32 = requireInt(index);
             if (((index32<0) || (index32>=length32()))) {
                 throw new System.IndexOutOfRangeException();
             }
             return ((int)(bytes[index32])&unchecked((int)0xff));
         }
         public override long indexOf(int codePoint, long from) {
-            int from32 = Saxon.Hej.str.StringTool.requireInt(from);
-            if ((from32<0)) {
-                from32 = 0;
-            } else {
-                if ((from32>=length32())) {
-                    return -1;
-                }
+            int from32 = requireNonNegativeInt(from);
+            if ((from32>=length32())) {
+                return -1;
             }
             int last = bytes.Length;
             if (((codePoint<0) || (codePoint>255))) {
@@ -93,11 +93,10 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override long indexOf(Saxon.Hej.str.UnicodeString other, long from) {
-            int from32 = requireInt(from);
-            if ((from32<0)) {
-                from32 = 0;
+            if ((from<0)) {
+                from = 0L;
             } else {
-                if ((from32>=length32())) {
+                if ((from>=length())) {
                     return -1;
                 }
             }
@@ -105,17 +104,17 @@ namespace Saxon.Hej.str {
                 return from;
             }
             int initial = other.codePointAt(0);
-            int len = Saxon.Hej.str.StringTool.requireInt(other.length());
+            int len = requireInt(other.length());
             int lastPossible = (length32()-len);
-            while ((from32<=lastPossible)) {
-                int i = Saxon.Hej.str.StringTool.requireInt(indexOf(initial, from32));
+            while ((from<=lastPossible)) {
+                long i = indexOf(initial, from);
                 if ((i<0)) {
                     return -1;
                 }
                 if (hasSubstring(other, i)) {
                     return i;
                 }
-                from32 = (i+1);
+                from = (i+1L);
             }
             return -1;
         }
@@ -126,7 +125,7 @@ namespace Saxon.Hej.str {
             return 8;
         }
         public override Saxon.Hej.z.IntIterator codePoints() {
-            return new Inner_IntIterator_64(bytes);
+            return new Inner_IntIterator_65(bytes);
         }
         public override int GetHashCode() {
             if ((cachedHash != 0)) {
@@ -186,8 +185,8 @@ namespace Saxon.Hej.str {
             return ("Twine8 bytes.length = "+bytes.Length);
         }
     
-        private class Inner_IntIterator_64 : Saxon.Hej.z.IntIterator {
-            public Inner_IntIterator_64(byte[] bytes) {
+        private class Inner_IntIterator_65 : Saxon.Hej.z.IntIterator {
+            public Inner_IntIterator_65(byte[] bytes) {
                 this.bytes = bytes;
                 i = 0;
             }

@@ -58,21 +58,17 @@ namespace Saxon.Hej.ma.arrays {
             return memberType;
         }
         public override string ToString() {
-            return makeString(st => st.ToString());
+            return makeString(x => x.ToString() /* method reference */);
         }
         private string makeString(System.Func<Saxon.Hej.value.SequenceType,string> show) {
             if (this.Equals(ANY_ARRAY_TYPE)) {
                 return "array(*)";
             } else {
-                Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(100);
-                sb.append("array(");
-                sb.append(show(memberType));
-                sb.append(")");
-                return sb.ToString();
+                return (("array("+show(memberType))+")");
             }
         }
         public override  /* REPLACING public */ string toExportString() {
-            return makeString(st => st.toExportString());
+            return makeString(x => x.toExportString() /* method reference */);
         }
         public override bool Equals(System.Object other) {
             if ((this == other)) {
@@ -116,7 +112,7 @@ namespace Saxon.Hej.ma.arrays {
                 }
             }
         }
-        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.parser.RoleDiagnostic role) {
+        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
             return new Saxon.Hej.type.SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
         }
         public override  /* REPLACING public */ Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {

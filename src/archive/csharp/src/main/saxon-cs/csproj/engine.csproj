@@ -2,12 +2,25 @@
 
     <PropertyGroup>
         <LangVersion>9.0</LangVersion>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>disable</Nullable>
         <OutputType>Exe</OutputType>
         <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>@@optimize@@</Optimize>
+        <OutputType>Exe</OutputType>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <PublishReadyToRun>true</PublishReadyToRun>
+        <RuntimeIdentifier>@@csrid@@</RuntimeIdentifier>
+
+        <UseHardenedRuntime>true</UseHardenedRuntime>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <IncludeSymbolsInSingleFile>false</IncludeSymbolsInSingleFile>
 
         <Authors>Saxonica Ltd.</Authors>
         <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
@@ -16,10 +29,27 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
         <Copyright>Copyright © 2021 Saxonica, Ltd.</Copyright>
         <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
         <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
-        <PackageSummary>An XSLT 3.0 processor for .NET 5</PackageSummary>
+        <PackageSummary>An XSLT 3.0 processor for .NET 6</PackageSummary>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>    
+
+  <PropertyGroup>
+    <CFBundleName>SaxonCS</CFBundleName>
+    <CFBundleDisplayName>SaxonCS</CFBundleDisplayName>
+    <CFBundleIdentifier>com.saxonica.saxoncs</CFBundleIdentifier>
+    <CFBundleVersion>12.0.0</CFBundleVersion>
+    <CFBundleShortVersionString>12.0.0</CFBundleShortVersionString>
+    <CFBundleExecutable>SaxonCS</CFBundleExecutable>
+    <CFBundleIconFile>SaxonicaDisk.icns</CFBundleIconFile>
+    <NSPrincipalClass>NSApplication</NSPrincipalClass>
+    <NSHighResolutionCapable>true</NSHighResolutionCapable>
+    <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
+  </ItemGroup>
     
     <ItemGroup>
         <Compile Include="../../src/main/saxon-cs/**" />
@@ -35,13 +65,20 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     </ItemGroup>    
 
     <ItemGroup>
-      <EmbeddedResource Include="../../src/main/resources/**/*" Exclude="../../src/main/resources/**/.DS_Store">
+      <EmbeddedResource Include="../../src/main/resources/**/*"
+                        Exclude="../../src/main/resources/**/.DS_Store">
         <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
+      </EmbeddedResource>
+      <!-- This is a bit of trail-and-error; we need to move the SEF file to
+           a location where Version.platform.locateResource() will find it. -->
+      <EmbeddedResource Include="resources/sef/function-library.sef.xml">
+         <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('../../src/main/resources/net/sf/saxon/data/sef/function-library.sef.xml'))</LogicalName>
       </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="HtmlAgilityPack" Version="1.11.33" />
+      <!--<PackageReference Include="HtmlAgilityPack" Version="1.11.33" />-->
+      <PackageReference Include="AngleSharp" Version="0.17.1" />
       <PackageReference Include="ICU4N" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.Collation" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.CurrencyData" Version="60.1.0-alpha.354" />
@@ -53,10 +90,11 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
       <PackageReference Include="XmlResolverData" Version="1.2.0" />
       <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.0" />
       <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.0.1" />
-      <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="5.0.0" />
+      <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="6.0.0" />
+      <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 
     

@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             allowAttributes(atts, allowed);
             processId();
             typeDefinition.setDerivationMethodName("union");
-            string memberTypes = atts.getValue("", "memberTypes");
+            string memberTypes = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "memberTypes");
             processMemberTypes(memberTypes);
         }
         public override void validate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {

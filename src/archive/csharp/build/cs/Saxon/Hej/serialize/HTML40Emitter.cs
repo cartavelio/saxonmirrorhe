@@ -23,7 +23,7 @@ namespace Saxon.Hej.serialize {
         public HTML40Emitter()  {
         }
         protected internal override bool isHTMLElement(Saxon.Hej.om.NodeName name) {
-            return name.getURI().Equals("");
+            return name.hasURI(Saxon.Hej.om.NamespaceUri.NULL);
         }
         protected internal override void openDocument() {
             string versionProperty = outputProperties.getProperty(Saxon.Hej.lib.SaxonOutputKeys.HTML_VERSION);

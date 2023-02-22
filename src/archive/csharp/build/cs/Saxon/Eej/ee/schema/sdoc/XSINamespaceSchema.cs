@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Eej.ee.schema.sdoc {
     public class XSINamespaceSchema {
         public static Saxon.Eej.ee.schema.PreparedSchema buildSchema(Saxon.Eej.config.EnterpriseConfiguration config) {
-            Saxon.Eej.ee.schema.SingleNamespaceSchema schema = new Saxon.Eej.ee.schema.SingleNamespaceSchema(config, Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE);
+            Saxon.Eej.ee.schema.SingleNamespaceSchema schema = new Saxon.Eej.ee.schema.SingleNamespaceSchema(config, Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE);
             Saxon.Eej.ee.schema.AttributeDecl xsiType = new Saxon.Eej.ee.schema.AttributeDecl(schema.getConfiguration(), true);
             xsiType.setAttributeName(Saxon.Hej.om.StandardNames.getStructuredQName(Saxon.Hej.om.StandardNames.XSI_TYPE));
             xsiType.setSimpleType(Saxon.Hej.type.BuiltInAtomicType.QNAME);

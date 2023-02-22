@@ -157,6 +157,7 @@ namespace Saxon.Eej.ee.stream {
                             err.setLocator(exp.getLocation());
                             throw err;
                         }
+                        exp.makeElaborator();
                         return /*Delegate.makeWatch()*/watchMaker(watchManager, parentFeed, context);
                     } else {
                         throw new Saxon.Ejava.lang.IllegalStateException(("unknown push method "+pushMethod));

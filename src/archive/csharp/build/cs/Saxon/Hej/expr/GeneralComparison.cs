@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr {
     #pragma warning disable 659
-    public abstract class GeneralComparison : Saxon.Hej.expr.BinaryExpression, Saxon.Hej.expr.ComparisonExpression, Saxon.Hej.expr.Callable {
+    public abstract class GeneralComparison : Saxon.Hej.expr.BinaryExpression, Saxon.Hej.expr.ComparisonExpression {
         public enum ComparisonCardinality {
             ONE_TO_ONE,
             MANY_TO_ONE,
@@ -41,6 +41,9 @@ namespace Saxon.Hej.expr {
         public Saxon.Hej.expr.sort.AtomicComparer getAtomicComparer() {
             return comparer;
         }
+        public Saxon.Hej.lib.StringCollator getStringCollator() {
+            return comparer.getCollator();
+        }
         public int getSingletonOperator() {
             return singletonOperator;
         }
@@ -52,7 +55,6 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             Saxon.Hej.Configuration config = visitor.getConfiguration();
-            Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
             Saxon.Hej.expr.Expression oldOp0 = getLhsExpression();
             Saxon.Hej.expr.Expression oldOp1 = getRhsExpression();
             getLhs().typeCheck(visitor, contextInfo);
@@ -64,9 +66,9 @@ namespace Saxon.Hej.expr {
             setRhsExpression(getRhsExpression().unordered(false, false));
             Saxon.Hej.value.SequenceType atomicType = Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE;
             Saxon.Hej.expr.parser.TypeChecker tc = config.getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
             setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
-            Saxon.Hej.expr.parser.RoleDiagnostic role1 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role1 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
             if ((getLhsExpression() != oldOp0)) {
                 adoptChildExpression(getLhsExpression());
@@ -108,7 +110,7 @@ namespace Saxon.Hej.expr {
                                     which = "the second";
                                 }
                             }
-                            visitor.getStaticContext().issueWarning((((message+". The comparison can succeed only if ")+which)+" operand is empty, and in that case will always be false"), getLocation());
+                            visitor.getStaticContext().issueWarning((((message+". The comparison can succeed only if ")+which)+" operand is empty, and in that case will always be false"), Saxon.Hej.trans.SaxonErrorCode.SXWN9025, getLocation());
                         }
                     } else {
                         Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
@@ -131,8 +133,8 @@ namespace Saxon.Hej.expr {
                         adoptChildExpression(e1);
                     } else {
                         if (Saxon.Hej.type.NumericType.isNumericType(t1)) {
-                            Saxon.Hej.expr.Expression vun = makeCompareUntypedToNumeric(getLhsExpression(), getRhsExpression(), singletonOperator);
-                            return vun.typeCheck(visitor, contextInfo);
+                            setAtomicComparer(new Saxon.Hej.expr.sort.UntypedNumericComparer());
+                            return this;
                         } else {
                             e0 = new Saxon.Hej.expr.CastExpression(getLhsExpression(), pt1, Saxon.Hej.value.Cardinality.allowsZero(c0));
                             adoptChildExpression(e0);
@@ -141,8 +143,8 @@ namespace Saxon.Hej.expr {
                 } else {
                     if (t1.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
                         if (Saxon.Hej.type.NumericType.isNumericType(t0)) {
-                            Saxon.Hej.expr.Expression vun = makeCompareUntypedToNumeric(getRhsExpression(), getLhsExpression(), Saxon.Hej.expr.parser.Token.inverse(singletonOperator));
-                            return vun.typeCheck(visitor, contextInfo);
+                            setAtomicComparer(new Saxon.Hej.expr.sort.UntypedNumericComparer());
+                            return this;
                         } else {
                             e1 = new Saxon.Hej.expr.CastExpression(getRhsExpression(), pt0, Saxon.Hej.value.Cardinality.allowsZero(c1));
                             adoptChildExpression(e1);
@@ -150,32 +152,22 @@ namespace Saxon.Hej.expr {
                     }
                 }
                 Saxon.Hej.expr.ValueComparison vc = new Saxon.Hej.expr.ValueComparison(e0, singletonOperator, e1);
-                vc.setAtomicComparer(comparer);
                 vc.setResultWhenEmpty(Saxon.Hej.value.BooleanValue.FALSE);
                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, vc);
                 Saxon.Hej.expr.parser.Optimizer.trace(config, "Replaced general comparison by value comparison", vc);
                 return vc.typeCheck(visitor, contextInfo);
             }
             Saxon.Hej.expr.StaticContext env = visitor.getStaticContext();
-            if ((comparer == null)) {
-                string defaultCollationName = env.getDefaultCollationName();
-                Saxon.Hej.lib.StringCollator collation = config.getCollation(defaultCollationName);
-                if ((collation == null)) {
-                    collation = Saxon.Hej.expr.sort.CodepointCollator.getInstance();
-                }
-                comparer = Saxon.Hej.expr.sort.GenericAtomicComparer.makeAtomicComparer(pt0, pt1, collation, config.getConversionContext());
+            string defaultCollationName = getRetainedStaticContext().getDefaultCollationName();
+            Saxon.Hej.lib.StringCollator collation = config.getCollation(defaultCollationName);
+            if ((collation == null)) {
+                collation = Saxon.Hej.expr.sort.CodepointCollator.getInstance();
             }
+            comparer = Saxon.Hej.expr.sort.GenericAtomicComparer.makeAtomicComparer(pt0, pt1, collation, config.getConversionContext());
             if ((((getLhsExpression() is Saxon.Hej.expr.Literal)) && ((getRhsExpression() is Saxon.Hej.expr.Literal)))) {
                 return Saxon.Hej.expr.Literal.makeLiteral(evaluateItem(env.makeEarlyEvaluationContext()), this);
             }
             return this;
-        }
-        private Saxon.Hej.expr.Expression makeCompareUntypedToNumeric(Saxon.Hej.expr.Expression lhs, Saxon.Hej.expr.Expression rhs, int @operator) {
-            Saxon.Hej.expr.ValueComparison vc = new Saxon.Hej.expr.ValueComparison(lhs, @operator, rhs);
-            vc.setAtomicComparer(new Saxon.Hej.expr.sort.UntypedNumericComparer());
-            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, vc);
-            Saxon.Hej.expr.parser.Optimizer.trace(getConfiguration(), "Replaced general comparison by untyped-numeric value comparison", vc);
-            return vc;
         }
         private static Saxon.Hej.expr.Expression makeMinOrMax(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, Saxon.Hej.expr.Expression exp, string function) {
             if (Saxon.Hej.value.Cardinality.allowsMany(exp.getCardinality())) {
@@ -209,7 +201,6 @@ namespace Saxon.Hej.expr {
             return base.computeHashCode();
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
-            Saxon.Hej.type.TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             Saxon.Hej.expr.StaticContext env = visitor.getStaticContext();
             getLhs().optimize(visitor, contextInfo);
             getRhs().optimize(visitor, contextInfo);
@@ -245,6 +236,42 @@ namespace Saxon.Hej.expr {
                     comparisonCardinality = Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE;
                 }
             }
+            if ((@operator == Saxon.Hej.expr.parser.Token.EQUALS)) {
+                if (((getLhsExpression() is Saxon.Hej.expr.RangeExpression) && ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).isDefaultedStep())) {
+                    Saxon.Hej.expr.Expression min = ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).getStartExpression();
+                    Saxon.Hej.expr.Expression max = ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).getEndExpression();
+                    Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getRhsExpression(), min, max);
+                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                    return ir;
+                }
+                if (((getRhsExpression() is Saxon.Hej.expr.RangeExpression) && ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).isDefaultedStep())) {
+                    Saxon.Hej.expr.Expression min = ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).getStartExpression();
+                    Saxon.Hej.expr.Expression max = ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).getEndExpression();
+                    Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getLhsExpression(), min, max);
+                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                    return ir;
+                }
+                if ((getLhsExpression() is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.om.GroundedValue value0 = ((Saxon.Hej.expr.Literal)(getLhsExpression())).getGroundedValue();
+                    if (((value0 is Saxon.Hej.value.IntegerRange) && (((Saxon.Hej.value.IntegerRange)(value0)).getStep() == 1))) {
+                        long min = ((Saxon.Hej.value.IntegerRange)(value0)).getStart();
+                        long max = ((Saxon.Hej.value.IntegerRange)(value0)).getEnd();
+                        Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getRhsExpression(), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(min), this), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(max), this));
+                        Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                        return ir;
+                    }
+                }
+                if ((getRhsExpression() is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.om.GroundedValue value1 = ((Saxon.Hej.expr.Literal)(getRhsExpression())).getGroundedValue();
+                    if (((value1 is Saxon.Hej.value.IntegerRange) && (((Saxon.Hej.value.IntegerRange)(value1)).getStep() == 1))) {
+                        long min = ((Saxon.Hej.value.IntegerRange)(value1)).getStart();
+                        long max = ((Saxon.Hej.value.IntegerRange)(value1)).getEnd();
+                        Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getLhsExpression(), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(min), this), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(max), this));
+                        Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
+                        return ir;
+                    }
+                }
+            }
             if (((((@operator != Saxon.Hej.expr.parser.Token.EQUALS) && (@operator != Saxon.Hej.expr.parser.Token.NE)) && (((comparisonCardinality == Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY) || ((comparisonCardinality == Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE) && ((manyOperandIsLiftable() || manyOperandIsRangeExpression())))))) && ((Saxon.Hej.type.NumericType.isNumericType(t0) || Saxon.Hej.type.NumericType.isNumericType(t1))))) {
                 Saxon.Hej.expr.ValueComparison vc;
                 switch (@operator) {
@@ -252,13 +279,11 @@ namespace Saxon.Hej.expr {
                   case Saxon.Hej.expr.parser.Token.LE:
                     vc = new Saxon.Hej.expr.ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "min"), singletonOperator, makeMinOrMax(visitor, contextInfo, getRhsExpression(), "max"));
                     vc.setResultWhenEmpty(Saxon.Hej.value.BooleanValue.FALSE);
-                    vc.setAtomicComparer(comparer);
                     break ;
                   case Saxon.Hej.expr.parser.Token.GT:
                   case Saxon.Hej.expr.parser.Token.GE:
                     vc = new Saxon.Hej.expr.ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "max"), singletonOperator, makeMinOrMax(visitor, contextInfo, getRhsExpression(), "min"));
                     vc.setResultWhenEmpty(Saxon.Hej.value.BooleanValue.FALSE);
-                    vc.setAtomicComparer(comparer);
                     break ;
                   default:
                     throw new Saxon.Ejava.lang.UnsupportedOperationException(("Unknown operator "+@operator));
@@ -295,179 +320,10 @@ namespace Saxon.Hej.expr {
             return false;
         }
         public override Saxon.Hej.value.BooleanValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            switch (comparisonCardinality) {
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE:
-                {
-                    Saxon.Hej.value.AtomicValue value0 = (Saxon.Hej.value.AtomicValue)(getLhsExpression().evaluateItem(context));
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                    return Saxon.Hej.value.BooleanValue.get(evaluateOneToOne(value0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE:
-                {
-                    Saxon.Hej.om.SequenceIterator iter0 = getLhsExpression().iterate(context);
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToOne(iter0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY:
-                {
-                    Saxon.Hej.om.SequenceIterator iter1 = getLhsExpression().iterate(context);
-                    Saxon.Hej.om.SequenceIterator iter2 = getRhsExpression().iterate(context);
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
-                }
-            }
-            return null;
-        }
-        public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            switch (comparisonCardinality) {
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE:
-                {
-                    Saxon.Hej.value.AtomicValue value0 = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(arguments[1].head());
-                    return Saxon.Hej.value.BooleanValue.get(evaluateOneToOne(value0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE:
-                {
-                    Saxon.Hej.om.SequenceIterator iter0 = arguments[0].iterate();
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(arguments[1].head());
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToOne(iter0, value1, context));
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY:
-                {
-                    Saxon.Hej.om.SequenceIterator iter1 = arguments[0].iterate();
-                    Saxon.Hej.om.SequenceIterator iter2 = arguments[1].iterate();
-                    return Saxon.Hej.value.BooleanValue.get(evaluateManyToMany(iter1, iter2, context));
-                }
-            }
-            return null;
+            return Saxon.Hej.value.BooleanValue.get(/*Delegate.eval()*/makeElaborator().elaborateForBoolean()(context));
         }
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
-            switch (comparisonCardinality) {
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE:
-                {
-                    Saxon.Hej.value.AtomicValue value0 = (Saxon.Hej.value.AtomicValue)(getLhsExpression().evaluateItem(context));
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                    return evaluateOneToOne(value0, value1, context);
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE:
-                {
-                    Saxon.Hej.om.SequenceIterator iter0 = getLhsExpression().iterate(context);
-                    Saxon.Hej.value.AtomicValue value1 = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                    return evaluateManyToOne(iter0, value1, context);
-                }
-              case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY:
-                {
-                    Saxon.Hej.om.SequenceIterator iter1 = getLhsExpression().iterate(context);
-                    Saxon.Hej.om.SequenceIterator iter2 = getRhsExpression().iterate(context);
-                    return evaluateManyToMany(iter1, iter2, context);
-                }
-            }
-            return false;
-        }
-        private bool evaluateOneToOne(Saxon.Hej.value.AtomicValue value0, Saxon.Hej.value.AtomicValue value1, Saxon.Hej.expr.XPathContext context) {
-            try {
-                return (!((((value0 == null) || (value1 == null)))) && compare(value0, singletonOperator, value1, comparer.provideContext(context), runtimeCheckNeeded, context, getRetainedStaticContext()));
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw;
-            }
-        }
-        private bool evaluateManyToOne(Saxon.Hej.om.SequenceIterator iter0, Saxon.Hej.value.AtomicValue value1, Saxon.Hej.expr.XPathContext context) {
-            try {
-                if ((value1 == null)) {
-                    return false;
-                }
-                if ((iter0 is Saxon.Hej.tree.iter.RangeIterator)) {
-                    if (value1.isUntypedAtomic()) {
-                        value1 = Saxon.Hej.type.StringConverter.StringToInteger.INSTANCE.convertString(value1.getUnicodeStringValue()).asAtomic();
-                    }
-                    Saxon.Hej.tree.iter.RangeIterator ri = (Saxon.Hej.tree.iter.RangeIterator)(iter0);
-                    switch (singletonOperator) {
-                      case Saxon.Hej.expr.parser.Token.FEQ:
-                        return ri.containsEq((Saxon.Hej.value.NumericValue)(value1));
-                      case Saxon.Hej.expr.parser.Token.FNE:
-                        return ((ri.getFirst().compareTo(ri.getLast()) != 0) || (ri.getFirst().compareTo(((Saxon.Hej.value.NumericValue)(value1))) != 0));
-                      case Saxon.Hej.expr.parser.Token.FLE:
-                        return (ri.getMin().compareTo(((Saxon.Hej.value.NumericValue)(value1)))<=0);
-                      case Saxon.Hej.expr.parser.Token.FLT:
-                        return (ri.getMin().compareTo(((Saxon.Hej.value.NumericValue)(value1)))<0);
-                      case Saxon.Hej.expr.parser.Token.FGE:
-                        return (ri.getMax().compareTo(((Saxon.Hej.value.NumericValue)(value1)))>=0);
-                      case Saxon.Hej.expr.parser.Token.FGT:
-                        return (ri.getMax().compareTo(((Saxon.Hej.value.NumericValue)(value1)))>0);
-                      default:
-                        throw new Saxon.Ejava.lang.AssertionError();
-                    }
-                }
-                Saxon.Hej.value.AtomicValue item0;
-                Saxon.Hej.expr.sort.AtomicComparer boundComparer = comparer.provideContext(context);
-                while (((item0 = (Saxon.Hej.value.AtomicValue)(iter0.next())) != null)) {
-                    if (compare(item0, singletonOperator, value1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
-                        iter0.close();
-                        return true;
-                    }
-                }
-                return false;
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw;
-            }
-        }
-        public bool evaluateManyToMany(Saxon.Hej.om.SequenceIterator iter0, Saxon.Hej.om.SequenceIterator iter1, Saxon.Hej.expr.XPathContext context) {
-            try {
-                bool exhausted0 = false;
-                bool exhausted1 = false;
-                System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> value0 = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>();
-                System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> value1 = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>();
-                Saxon.Hej.expr.sort.AtomicComparer boundComparer = comparer.provideContext(context);
-                while (true) {
-                    if (!(exhausted0)) {
-                        Saxon.Hej.value.AtomicValue item0 = (Saxon.Hej.value.AtomicValue)(iter0.next());
-                        if ((item0 == null)) {
-                            if (exhausted1) {
-                                return false;
-                            }
-                            exhausted0 = true;
-                        } else {
-                            foreach (Saxon.Hej.value.AtomicValue item1 in value1) {
-                                if (compare(item0, singletonOperator, item1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
-                                    iter0.close();
-                                    iter1.close();
-                                    return true;
-                                }
-                            }
-                            if (!(exhausted1)) {
-                                value0.Add(item0);
-                            }
-                        }
-                    }
-                    if (!(exhausted1)) {
-                        Saxon.Hej.value.AtomicValue item1 = (Saxon.Hej.value.AtomicValue)(iter1.next());
-                        if ((item1 == null)) {
-                            if (exhausted0) {
-                                return false;
-                            }
-                            exhausted1 = true;
-                        } else {
-                            foreach (Saxon.Hej.value.AtomicValue item0 in value0) {
-                                if (compare(item0, singletonOperator, item1, boundComparer, runtimeCheckNeeded, context, getRetainedStaticContext())) {
-                                    iter0.close();
-                                    iter1.close();
-                                    return true;
-                                }
-                            }
-                            if (!(exhausted0)) {
-                                value1.Add(item1);
-                            }
-                        }
-                    }
-                }
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw;
-            }
+            return /*Delegate.eval()*/makeElaborator().elaborateForBoolean()(context);
         }
         public static bool compare(Saxon.Hej.value.AtomicValue a0, int @operator, Saxon.Hej.value.AtomicValue a1, Saxon.Hej.expr.sort.AtomicComparer comparer, bool checkTypes, Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NamespaceResolver nsResolver) {
             bool u0 = a0.isUntypedAtomic();
@@ -557,6 +413,149 @@ namespace Saxon.Hej.expr {
             }
             @out.emitAttribute("card", cc);
             @out.emitAttribute("comp", comparer.save());
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.GeneralComparison.GeneralComparisonElaborator();
+        }
+        public class GeneralComparisonElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.GeneralComparison exp = (Saxon.Hej.expr.GeneralComparison)(getExpression());
+                Saxon.Hej.expr.GeneralComparison.ComparisonCardinality cardinality = exp.getComparisonCardinality();
+                bool needsRunTimeCheck = exp.needsRuntimeCheck();
+                Saxon.Hej.expr.sort.AtomicComparer comparer = exp.getAtomicComparer();
+                Saxon.Hej.expr.parser.RetainedStaticContext staticContext = exp.getRetainedStaticContext();
+                int singletonOperator = exp.getSingletonOperator();
+                switch (cardinality) {
+                  case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.ONE_TO_ONE:
+                    {
+                        Saxon.Hej.expr.elab.ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+                        Saxon.Hej.expr.elab.ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
+                        return context => {
+                            Saxon.Hej.value.AtomicValue av0 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/p0(context));
+                            if ((av0 == null)) {
+                                return false;
+                            }
+                            Saxon.Hej.value.AtomicValue av1 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/p1(context));
+                            if ((av1 == null)) {
+                                return false;
+                            }
+                            return compare(av0, singletonOperator, av1, comparer.provideContext(context), needsRunTimeCheck, context, staticContext);
+                        } ;
+                    }
+                  case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_ONE:
+                    {
+                        Saxon.Hej.expr.elab.PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                        Saxon.Hej.expr.elab.ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
+                        return context => evaluateManyToOne(/*Delegate.iterate()*/p0(context), (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/p1(context)), singletonOperator, comparer, needsRunTimeCheck, staticContext, exp.getLocation(), context);
+                    }
+                  case Saxon.Hej.expr.GeneralComparison.ComparisonCardinality.MANY_TO_MANY:
+                    {
+                        Saxon.Hej.expr.elab.PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                        Saxon.Hej.expr.elab.PullEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForPull();
+                        return context => evaluateManyToMany(/*Delegate.iterate()*/p0(context), /*Delegate.iterate()*/p1(context), singletonOperator, comparer, needsRunTimeCheck, staticContext, exp.getLocation(), context);
+                    }
+                  default:
+                    throw new Saxon.Ejava.lang.UnsupportedOperationException();
+                }
+            }
+            public bool evaluateManyToOne(Saxon.Hej.om.SequenceIterator iter0, Saxon.Hej.value.AtomicValue value1, int singletonOperator, Saxon.Hej.expr.sort.AtomicComparer comparer, bool runTimeCheckNeeded, Saxon.Hej.expr.parser.RetainedStaticContext staticContext, Saxon.Hej.s9api.Location loc, Saxon.Hej.expr.XPathContext context) {
+                try {
+                    if ((value1 == null)) {
+                        return false;
+                    }
+                    if ((iter0 is Saxon.Hej.tree.iter.RangeIterator)) {
+                        if (value1.isUntypedAtomic()) {
+                            value1 = Saxon.Hej.type.StringConverter.StringToInteger.INSTANCE.convertString(value1.getUnicodeStringValue()).asAtomic();
+                        }
+                        Saxon.Hej.tree.iter.RangeIterator ri = (Saxon.Hej.tree.iter.RangeIterator)(iter0);
+                        switch (singletonOperator) {
+                          case Saxon.Hej.expr.parser.Token.FEQ:
+                            return ri.containsEq((Saxon.Hej.value.NumericValue)(value1));
+                          case Saxon.Hej.expr.parser.Token.FNE:
+                            return ((ri.getFirst().compareTo(ri.getLast()) != 0) || (ri.getFirst().compareTo(((Saxon.Hej.value.NumericValue)(value1))) != 0));
+                          case Saxon.Hej.expr.parser.Token.FLE:
+                            return (ri.getMin().compareTo(((Saxon.Hej.value.NumericValue)(value1)))<=0);
+                          case Saxon.Hej.expr.parser.Token.FLT:
+                            return (ri.getMin().compareTo(((Saxon.Hej.value.NumericValue)(value1)))<0);
+                          case Saxon.Hej.expr.parser.Token.FGE:
+                            return (ri.getMax().compareTo(((Saxon.Hej.value.NumericValue)(value1)))>=0);
+                          case Saxon.Hej.expr.parser.Token.FGT:
+                            return (ri.getMax().compareTo(((Saxon.Hej.value.NumericValue)(value1)))>0);
+                          default:
+                            throw new Saxon.Ejava.lang.AssertionError();
+                        }
+                    }
+                    Saxon.Hej.value.AtomicValue item0;
+                    Saxon.Hej.expr.sort.AtomicComparer boundComparer = comparer.provideContext(context);
+                    while (((item0 = (Saxon.Hej.value.AtomicValue)(iter0.next())) != null)) {
+                        if (compare(item0, singletonOperator, value1, boundComparer, runTimeCheckNeeded, context, staticContext)) {
+                            iter0.close();
+                            return true;
+                        }
+                    }
+                    return false;
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    e.maybeSetLocation(loc);
+                    e.maybeSetContext(context);
+                    throw;
+                }
+            }
+            public virtual bool evaluateManyToMany(Saxon.Hej.om.SequenceIterator iter0, Saxon.Hej.om.SequenceIterator iter1, int singletonOperator, Saxon.Hej.expr.sort.AtomicComparer comparer, bool runTimeCheckNeeded, Saxon.Hej.expr.parser.RetainedStaticContext staticContext, Saxon.Hej.s9api.Location loc, Saxon.Hej.expr.XPathContext context) {
+                try {
+                    bool exhausted0 = false;
+                    bool exhausted1 = false;
+                    System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> value0 = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>();
+                    System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> value1 = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>();
+                    Saxon.Hej.expr.sort.AtomicComparer boundComparer = comparer.provideContext(context);
+                    while (true) {
+                        if (!(exhausted0)) {
+                            Saxon.Hej.value.AtomicValue item0 = (Saxon.Hej.value.AtomicValue)(iter0.next());
+                            if ((item0 == null)) {
+                                if (exhausted1) {
+                                    return false;
+                                }
+                                exhausted0 = true;
+                            } else {
+                                foreach (Saxon.Hej.value.AtomicValue item1 in value1) {
+                                    if (compare(item0, singletonOperator, item1, boundComparer, runTimeCheckNeeded, context, staticContext)) {
+                                        iter0.close();
+                                        iter1.close();
+                                        return true;
+                                    }
+                                }
+                                if (!(exhausted1)) {
+                                    value0.Add(item0);
+                                }
+                            }
+                        }
+                        if (!(exhausted1)) {
+                            Saxon.Hej.value.AtomicValue item1 = (Saxon.Hej.value.AtomicValue)(iter1.next());
+                            if ((item1 == null)) {
+                                if (exhausted0) {
+                                    return false;
+                                }
+                                exhausted1 = true;
+                            } else {
+                                foreach (Saxon.Hej.value.AtomicValue item0 in value0) {
+                                    if (compare(item0, singletonOperator, item1, boundComparer, runTimeCheckNeeded, context, staticContext)) {
+                                        iter0.close();
+                                        iter1.close();
+                                        return true;
+                                    }
+                                }
+                                if (!(exhausted0)) {
+                                    value1.Add(item1);
+                                }
+                            }
+                        }
+                    }
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    e.maybeSetLocation(loc);
+                    e.maybeSetContext(context);
+                    throw;
+                }
+            }
+        
         }
     
     }

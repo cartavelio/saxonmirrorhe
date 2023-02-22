@@ -8,6 +8,7 @@ using Org.XmlResolver.Utils;
 using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.resource;
 
 namespace Saxon.Callbacks {
     /// <summary>
@@ -37,13 +38,28 @@ namespace Saxon.Callbacks {
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource. Returns null if the request cannot be resolved.</returns>
         public Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
+            if (request.uriIsNamespace) {
+                return null;
+            }
             try {
                 string href = request.relativeUri ?? request.uri;
-                string baseUri = request.baseUri ?? request.uri;
+                string baseUri = request.baseUri;
                 if (string.IsNullOrEmpty(baseUri)) {
-                    baseUri = System.IO.Directory.GetCurrentDirectory();
+                    baseUri = Saxon.Ejava.io.File.CurrentDirectoryUri().AbsoluteUri;
                 }
                 Uri abs = new Uri(new Uri(baseUri), href);
+                if (abs.Scheme == "http" || abs.Scheme == "https") {
+                    using WebClient webClient = new WebClient();
+                    byte[] octets = webClient.DownloadData(abs);
+
+                    // Get response header.
+                    string contentType = webClient.ResponseHeaders["Content-Type"];
+                    TypedStreamSource tss = new();
+                    tss.setContentType(contentType);
+                    tss.setInputStream(new MemoryStream(octets));
+                    tss.setSystemId(abs.ToString());
+                    return tss;
+                }
                 Stream stream = UriUtils.GetStream(abs);
                 return new StreamSource(stream, abs.ToString());
             }

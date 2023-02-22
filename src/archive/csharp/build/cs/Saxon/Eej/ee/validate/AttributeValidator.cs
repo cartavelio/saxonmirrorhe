@@ -9,6 +9,9 @@ namespace Saxon.Eej.ee.validate {
         private Saxon.Eej.ee.schema.AttributeWildcard attributeWildcard = null;
         private int idAttributes = 0;
         internal Saxon.Hej.type.SimpleType latestAttributeType = null;
+        private Saxon.Hej.om.AttributeMap previousAttributeMap;
+        private Saxon.Hej.om.AttributeMap previousValidatedAttributes;
+        private System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> previousNamespaceBindings;
         public AttributeValidator(Saxon.Hej.@event.Receiver next) : base (next) {
         }
         public void setAttributeGroup(Saxon.Eej.ee.schema.AttributeGroupDecl attributeGroup) {
@@ -20,6 +23,10 @@ namespace Saxon.Eej.ee.validate {
             }
         }
         public override Saxon.Hej.om.AttributeMap validateAttributes(Saxon.Hej.om.AttributeMap @in, System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> additionalNamespaces) {
+            if ((@in == previousAttributeMap)) {
+                Saxon.Impl.Helpers.ListUtils.AddAll(additionalNamespaces, previousNamespaceBindings);
+                return previousValidatedAttributes;
+            }
             Saxon.Hej.@event.PipelineConfiguration pipe = getPipelineConfiguration();
             Saxon.Hej.om.AttributeMap result = Saxon.Hej.om.EmptyAttributeMap.getInstance();
             foreach (Saxon.Hej.om.AttributeInfo att in @in) {
@@ -49,8 +56,8 @@ namespace Saxon.Eej.ee.validate {
                     }
                 } else {
                     bool implicitlyAllowed = false;
-                    string uri = attName.getURI();
-                    if ((uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE) && (((((fingerprint == Saxon.Hej.om.StandardNames.XSI_TYPE) || (fingerprint == Saxon.Hej.om.StandardNames.XSI_NIL)) || (fingerprint == Saxon.Hej.om.StandardNames.XSI_SCHEMA_LOCATION)) || (fingerprint == Saxon.Hej.om.StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION))))) {
+                    Saxon.Hej.om.NamespaceUri uri = attName.getNamespaceUri();
+                    if ((uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE) && (((((fingerprint == Saxon.Hej.om.StandardNames.XSI_TYPE) || (fingerprint == Saxon.Hej.om.StandardNames.XSI_NIL)) || (fingerprint == Saxon.Hej.om.StandardNames.XSI_SCHEMA_LOCATION)) || (fingerprint == Saxon.Hej.om.StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION))))) {
                         implicitlyAllowed = true;
                     }
                     if (!(implicitlyAllowed)) {
@@ -136,9 +143,9 @@ namespace Saxon.Eej.ee.validate {
                                         checkNamespaceSensitiveDefaultValue(use, value);
                                     }
                                     Saxon.Hej.om.NamePool pool = getNamePool();
-                                    string uri = use.getTargetComponentName().getURI();
+                                    Saxon.Hej.om.NamespaceUri uri = use.getTargetComponentName().getNamespaceUri();
                                     string prefix = null;
-                                    if (uri.Length==0) {
+                                    if (uri.isEmpty()) {
                                         prefix = "";
                                     } else {
                                         Saxon.Hej.om.NamespaceResolver resolver = getNamespaceResolver();
@@ -159,7 +166,7 @@ namespace Saxon.Eej.ee.validate {
                                                 prefix = "ns";
                                             }
                                             while (true) {
-                                                string u = getNamespaceResolver().getURIForPrefix(prefix, false);
+                                                Saxon.Hej.om.NamespaceUri u = getNamespaceResolver().getURIForPrefix(prefix, false);
                                                 if (((u == null) || u.Equals(uri))) {
                                                     break ;
                                                 }
@@ -175,6 +182,9 @@ namespace Saxon.Eej.ee.validate {
                     }
                 }
             }
+            previousAttributeMap = @in;
+            previousValidatedAttributes = result;
+            previousNamespaceBindings = additionalNamespaces;
             return result;
         }
         private void checkNamespaceSensitiveDefaultValue(Saxon.Eej.ee.schema.AttributeUse use, Saxon.Hej.str.UnicodeString value) {
@@ -219,8 +229,8 @@ namespace Saxon.Eej.ee.validate {
                 for (System.Collections.Generic.IEnumerator<Saxon.Eej.ee.schema.AttributeUse> ii = declaredAttributes.valueIterator(); ii.MoveNext() /*UNSAFE CONVERSION*/; ) {
                     Saxon.Eej.ee.schema.AttributeUse au = ii.Current;
                     if (au.getTargetComponentName().getLocalPart().Equals(attName.getLocalPart())) {
-                        string ns = au.getTargetComponentName().getURI();
-                        if (ns.Length==0) {
+                        Saxon.Hej.om.NamespaceUri ns = au.getTargetComponentName().getNamespaceUri();
+                        if (ns.isEmpty()) {
                             possibleNamespaceMessage = " (it would be allowed in no namespace)";
                         } else {
                             possibleNamespaceMessage = ((" (it would be allowed in namespace "+ns)+")");
@@ -266,7 +276,6 @@ namespace Saxon.Eej.ee.validate {
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
             idAttributes = 0;
             checkNoChildrenWhenNil(location);
-            Saxon.Hej.@event.PipelineConfiguration pipe = getPipelineConfiguration();
             base.startElement(elemName, type, attributes, namespaces, location, properties);
             if ((locallyInvalid && (pendingMessages != null))) {
                 foreach (string pendingMessage in pendingMessages) {

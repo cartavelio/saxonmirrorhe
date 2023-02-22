@@ -71,7 +71,7 @@ namespace Saxon.Eej.ee.schema {
         public static bool isFacetName(string name, int xsdVersion) {
             return ((((((((((((((((("assertion".Equals(name) && (xsdVersion == Saxon.Hej.Configuration.XSD11))) || "enumeration".Equals(name)) || "length".Equals(name)) || "pattern".Equals(name)) || "maxExclusive".Equals(name)) || "minExclusive".Equals(name)) || "maxInclusive".Equals(name)) || "minInclusive".Equals(name)) || "maxLength".Equals(name)) || "minLength".Equals(name)) || "maxScale".Equals(name)) || "minScale".Equals(name)) || "whiteSpace".Equals(name)) || "totalDigits".Equals(name)) || "fractionDigits".Equals(name)) || (("explicitTimezone".Equals(name) && (xsdVersion == Saxon.Hej.Configuration.XSD11))));
         }
-        public abstract Saxon.Hej.om.Function getFacetAsFunctionItem();
+        public abstract Saxon.Hej.om.FunctionItem getFacetAsFunctionItem();
         public static Saxon.Eej.ee.schema.Facet makeFacet(string name, string value, Saxon.Eej.config.EnterpriseConfiguration config, Saxon.Hej.om.NamespaceResolver resolver) {
             switch (name) {
               case "pattern":

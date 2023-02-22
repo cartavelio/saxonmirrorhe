@@ -41,7 +41,7 @@ namespace Saxon.Hej.str {
             return baseString.IndexOf((char)(codePoint), from32);
         }
         public override long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
-            for (int i = requireInt(from); (i<baseString.Length); i++) {
+            for (int i = requireNonNegativeInt(from); (i<baseString.Length); i++) {
                 if (predicate(baseString[i])) {
                     return i;
                 }
@@ -49,11 +49,11 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override int codePointAt(long index) {
-            return baseString[Saxon.Hej.str.StringTool.requireInt(index)];
+            return baseString[requireInt(index)];
         }
         public override Saxon.Hej.str.UnicodeString substring(long start, long end) {
-            int start32 = Saxon.Hej.str.StringTool.requireInt(start);
-            int end32 = Saxon.Hej.str.StringTool.requireInt(end);
+            int start32 = requireInt(start);
+            int end32 = requireInt(end);
             return new Saxon.Hej.str.BMPString(baseString.Substring(start32, end32 - start32));
         }
         public override Saxon.Hej.str.UnicodeString concat(Saxon.Hej.str.UnicodeString other) {
@@ -94,6 +94,11 @@ namespace Saxon.Hej.str {
                 target[j++] = 0;
                 target[j++] = (byte)(((c>>8)));
                 target[j++] = (byte)(((c&unchecked((int)0xff))));
+            }
+        }
+        internal override void copy32bit(int[] target, int offset) {
+            for (int i = 0, j = offset; (i<baseString.Length); ) {
+                target[j++] = baseString[i++];
             }
         }
     

@@ -2,13 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.xsltextn.style {
-    public class SaxonDeepUpdate : Saxon.Hej.style.StyleElement {
+    public class SaxonDeepUpdate : Saxon.Hej.style.ExtensionInstruction {
         private Saxon.Hej.expr.Expression root;
         private Saxon.Hej.expr.Expression select;
         private Saxon.Hej.expr.Expression action;
-        public override bool isInstruction() {
-            return true;
-        }
         protected internal override bool mayContainSequenceConstructor() {
             return false;
         }

@@ -102,12 +102,6 @@ namespace Saxon.Hej.trans.rules {
             }
             return 1;
         }
-        public Saxon.Hej.trans.rules.Rule getTemplateRule(Saxon.Hej.om.Item item, Saxon.Hej.trans.Mode mode, int min, int max, Saxon.Hej.expr.XPathContext c) {
-            if ((mode == null)) {
-                mode = unnamedMode;
-            }
-            return mode.getRule(item, min, max, c);
-        }
         public void computeRankings() {
             unnamedMode.computeRankings(0);
             foreach (Saxon.Hej.trans.Mode mode in modes.Values) {

@@ -32,6 +32,18 @@ namespace Saxon.Hej.functions {
         public override string getStreamerName() {
             return "NotFn";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.NotFn.NotFnElaborator();
+        }
+        public class NotFnElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                Saxon.Hej.expr.elab.BooleanEvaluator argEval = arg.makeElaborator().elaborateForBoolean();
+                return context => !(/*Delegate.eval()*/argEval(context));
+            }
+        
+        }
     
         private class Inner_SystemFunctionCall_5 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly NotFn outerInstance;

@@ -20,10 +20,10 @@ namespace Saxon.Hej.expr {
                     return Saxon.Hej.expr.Literal.makeEmptySequence();
                 }
             }
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
             setLhsExpression(tc.staticTypeCheck(getLhsExpression(), Saxon.Hej.value.SequenceType.OPTIONAL_NODE, role0, visitor));
-            Saxon.Hej.expr.parser.RoleDiagnostic role1 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role1 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), Saxon.Hej.value.SequenceType.OPTIONAL_NODE, role1, visitor));
             if ((!(Saxon.Hej.value.Cardinality.allowsZero(getLhsExpression().getCardinality())) && !(Saxon.Hej.value.Cardinality.allowsZero(getRhsExpression().getCardinality())))) {
                 generateIdEmulation = false;
@@ -110,6 +110,83 @@ namespace Saxon.Hej.expr {
         }
         public override string getExpressionName() {
             return "nodeComparison";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.IdentityComparison.IdentityComparisonElaborator();
+        }
+        public class IdentityComparisonElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.IdentityComparison exp = (Saxon.Hej.expr.IdentityComparison)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
+                bool nullable0 = Saxon.Hej.value.Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
+                bool nullable1 = Saxon.Hej.value.Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
+                int @operator = exp.getOperator();
+                return context => {
+                    Saxon.Hej.om.NodeInfo v0 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p0(context));
+                    if ((nullable0 && (v0 == null))) {
+                        return false;
+                    }
+                    Saxon.Hej.om.NodeInfo v1 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p1(context));
+                    if ((nullable1 && (v1 == null))) {
+                        return false;
+                    }
+                    switch (@operator) {
+                      case Saxon.Hej.expr.parser.Token.IS:
+                        return v0.Equals(v1);
+                      case Saxon.Hej.expr.parser.Token.PRECEDES:
+                        return (Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance().compare(v0, v1)<0);
+                      case Saxon.Hej.expr.parser.Token.FOLLOWS:
+                        return (Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance().compare(v0, v1)>0);
+                      default:
+                        throw new Saxon.Ejava.lang.UnsupportedOperationException("Unknown node identity test");
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.IdentityComparison exp = (Saxon.Hej.expr.IdentityComparison)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
+                bool nullable0 = Saxon.Hej.value.Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
+                bool nullable1 = Saxon.Hej.value.Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
+                int @operator = exp.getOperator();
+                switch (@operator) {
+                  case Saxon.Hej.expr.parser.Token.IS:
+                    if ((nullable0 || nullable1)) {
+                        return context => {
+                            Saxon.Hej.om.NodeInfo v0 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p0(context));
+                            Saxon.Hej.om.NodeInfo v1 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p1(context));
+                            if (((v0 == null) || (v1 == null))) {
+                                return null;
+                            }
+                            return Saxon.Hej.value.BooleanValue.get(v0.Equals(v1));
+                        } ;
+                    } else {
+                        return context => Saxon.Hej.value.BooleanValue.get(/*Delegate.eval()*/p0(context).Equals(/*Delegate.eval()*/p1(context)));
+                    }
+                  case Saxon.Hej.expr.parser.Token.PRECEDES:
+                    return context => {
+                        Saxon.Hej.om.NodeInfo v0 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p0(context));
+                        Saxon.Hej.om.NodeInfo v1 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p1(context));
+                        if (((v0 == null) || (v1 == null))) {
+                            return null;
+                        }
+                        return Saxon.Hej.value.BooleanValue.get((Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance().compare(v0, v1)<0));
+                    } ;
+                  case Saxon.Hej.expr.parser.Token.FOLLOWS:
+                    return context => {
+                        Saxon.Hej.om.NodeInfo v0 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p0(context));
+                        Saxon.Hej.om.NodeInfo v1 = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/p1(context));
+                        if (((v0 == null) || (v1 == null))) {
+                            return null;
+                        }
+                        return Saxon.Hej.value.BooleanValue.get((Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance().compare(v0, v1)>0));
+                    } ;
+                  default:
+                    throw new Saxon.Ejava.lang.IllegalStateException();
+                }
+            }
+        
         }
     
     }

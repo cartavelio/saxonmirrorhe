@@ -275,7 +275,7 @@ namespace Saxon.Eej.ee.schema {
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.ModelGroup thisModelGroup = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

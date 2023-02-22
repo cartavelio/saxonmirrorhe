@@ -29,7 +29,7 @@ namespace Saxon.Ejavax.xml.transform.stream {
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            this._stream = new FileStream(file.getPath(), FileMode.Create);
+            //this._stream = new FileStream(file.getPath(), FileMode.Create);
             this.sysId = file.toUri().ToString();
         }
 

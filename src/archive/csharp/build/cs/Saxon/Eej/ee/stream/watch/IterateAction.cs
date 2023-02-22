@@ -35,15 +35,13 @@ namespace Saxon.Eej.ee.stream.watch {
             checkForBreakInstruction();
         }
         private void checkForBreakInstruction() {
-            Saxon.Hej.expr.XPathContext c = getContext();
-            while (!(((c is Saxon.Hej.expr.XPathContextMajor)))) {
-                c = c.getCaller();
-            }
-            Saxon.Hej.expr.XPathContextMajor cm = (Saxon.Hej.expr.XPathContextMajor)(c);
+            Saxon.Hej.expr.XPathContextMajor cm = getContext().getMajorContext();
             Saxon.Hej.expr.TailCallLoop.TailCallInfo tail = cm.getTailCallInfo();
             if ((tail is Saxon.Hej.expr.instruct.BreakInstr)) {
                 broken = true;
-                terminator.terminate();
+                if (getWatchManager().allowsEarlyExit()) {
+                    terminator.terminate();
+                }
             }
         }
         public override void close() {

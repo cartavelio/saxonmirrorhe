@@ -5,15 +5,11 @@ namespace Saxon.Eej.ee.optim {
     public class OptimizerEE : Saxon.Hej.expr.parser.Optimizer {
         public OptimizerEE(Saxon.Hej.Configuration config) : base (config) {
         }
-        private bool isStringLike(Saxon.Hej.type.ItemType type) {
-            int fp = type.getPrimitiveType();
-            return (((fp == Saxon.Hej.om.StandardNames.XS_STRING) || (fp == Saxon.Hej.om.StandardNames.XS_ANY_URI)) || (fp == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC));
-        }
         public override Saxon.Hej.expr.Expression optimizeValueComparison(Saxon.Hej.expr.ValueComparison vc, Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             Saxon.Hej.expr.Expression lhs = vc.getLhsExpression();
             Saxon.Hej.expr.Expression rhs = vc.getRhsExpression();
             int @operator = vc.getOperator();
-            Saxon.Hej.expr.sort.AtomicComparer comparer = vc.getAtomicComparer();
+            bool isCodepointCollation = vc.getRetainedStaticContext().getDefaultCollationName().Equals(Saxon.Hej.lib.NamespaceConstant.CODEPOINT_COLLATION_URI);
             Saxon.Hej.expr.Expression e1 = base.optimizeValueComparison(vc, visitor, contextInfo);
             if (((e1 != null) && (e1 != vc))) {
                 return e1;
@@ -85,7 +81,7 @@ namespace Saxon.Eej.ee.optim {
                 }
             }
             int p0 = lhs.getItemType().getPrimitiveType();
-            if ((((((((((p0 == Saxon.Hej.om.StandardNames.XS_STRING) || (p0 == Saxon.Hej.om.StandardNames.XS_ANY_URI)) || (p0 == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC))) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && (rhs is Saxon.Hej.expr.Literal)) && (((Saxon.Hej.expr.Literal)(rhs)).getGroundedValue() is Saxon.Hej.value.StringValue)) && ((Saxon.Hej.value.StringValue)(((Saxon.Hej.expr.Literal)(rhs)).getGroundedValue())).isEmpty()) && (comparer is Saxon.Hej.expr.sort.CodepointCollatingComparer))) {
+            if ((((((((((p0 == Saxon.Hej.om.StandardNames.XS_STRING) || (p0 == Saxon.Hej.om.StandardNames.XS_ANY_URI)) || (p0 == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC))) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && (rhs is Saxon.Hej.expr.Literal)) && (((Saxon.Hej.expr.Literal)(rhs)).getGroundedValue() is Saxon.Hej.value.StringValue)) && ((Saxon.Hej.value.StringValue)(((Saxon.Hej.expr.Literal)(rhs)).getGroundedValue())).isEmpty()) && isCodepointCollation)) {
                 switch (vc.getOperator()) {
                   case Saxon.Hej.expr.parser.Token.FNE:
                   case Saxon.Hej.expr.parser.Token.FGT:
@@ -99,7 +95,7 @@ namespace Saxon.Eej.ee.optim {
                 }
             }
             int p1 = rhs.getItemType().getPrimitiveType();
-            if ((((((((((p1 == Saxon.Hej.om.StandardNames.XS_STRING) || (p1 == Saxon.Hej.om.StandardNames.XS_ANY_URI)) || (p1 == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC))) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && (lhs is Saxon.Hej.expr.Literal)) && (((Saxon.Hej.expr.Literal)(lhs)).getGroundedValue() is Saxon.Hej.value.StringValue)) && ((Saxon.Hej.value.StringValue)(((Saxon.Hej.expr.Literal)(lhs)).getGroundedValue())).isEmpty()) && (comparer is Saxon.Hej.expr.sort.CodepointCollatingComparer))) {
+            if ((((((((((p1 == Saxon.Hej.om.StandardNames.XS_STRING) || (p1 == Saxon.Hej.om.StandardNames.XS_ANY_URI)) || (p1 == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC))) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && (lhs is Saxon.Hej.expr.Literal)) && (((Saxon.Hej.expr.Literal)(lhs)).getGroundedValue() is Saxon.Hej.value.StringValue)) && ((Saxon.Hej.value.StringValue)(((Saxon.Hej.expr.Literal)(lhs)).getGroundedValue())).isEmpty()) && isCodepointCollation)) {
                 switch (vc.getOperator()) {
                   case Saxon.Hej.expr.parser.Token.FNE:
                   case Saxon.Hej.expr.parser.Token.FLT:
@@ -112,10 +108,10 @@ namespace Saxon.Eej.ee.optim {
                     break ;
                 }
             }
-            if ((((((value1 is Saxon.Hej.value.StringValue) && (lhs.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && (comparer is Saxon.Hej.expr.sort.CodepointCollatingComparer)) && isStringLike(lhs.getItemType()))) {
+            if ((((((value1 is Saxon.Hej.value.StringValue) && (lhs.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && isCodepointCollation) && Saxon.Hej.type.BuiltInAtomicType.isStringLike(lhs.getItemType()))) {
                 return new Saxon.Hej.expr.CompareToStringConstant(lhs, vc.getOperator(), ((Saxon.Hej.value.StringValue)(value1)).getUnicodeStringValue());
             }
-            if ((((((value0 is Saxon.Hej.value.StringValue) && (rhs.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && (comparer is Saxon.Hej.expr.sort.CodepointCollatingComparer)) && isStringLike(rhs.getItemType()))) {
+            if ((((((value0 is Saxon.Hej.value.StringValue) && (rhs.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) && (vc.getResultWhenEmpty() != Saxon.Hej.value.BooleanValue.TRUE)) && isCodepointCollation) && Saxon.Hej.type.BuiltInAtomicType.isStringLike(rhs.getItemType()))) {
                 return new Saxon.Hej.expr.CompareToStringConstant(rhs, Saxon.Hej.expr.parser.Token.inverse(vc.getOperator()), ((Saxon.Hej.value.StringValue)(value0)).getUnicodeStringValue());
             }
             if ((((value1 is Saxon.Hej.value.Int64Value) && (lhs.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) && Saxon.Hej.type.NumericType.isNumericType(lhs.getItemType()))) {
@@ -256,7 +252,7 @@ namespace Saxon.Eej.ee.optim {
             return null;
         }
         public override Saxon.Hej.expr.Expression optimizeGeneralComparison(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.GeneralComparison gc, bool backwardsCompatible, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
-            if ((gc is Saxon.Eej.ee.optim.GeneralComparisonEE)) {
+            if ((gc is Saxon.Eej.ee.optim.GeneralEqualityEE)) {
                 return gc;
             }
             if (!("EE".Equals(visitor.getTargetEdition()))) {
@@ -268,7 +264,7 @@ namespace Saxon.Eej.ee.optim {
                 bool many0 = Saxon.Hej.value.Cardinality.expectsMany(p0);
                 bool many1 = Saxon.Hej.value.Cardinality.expectsMany(p1);
                 if ((many0 || many1)) {
-                    if (((gc.getAtomicComparer().getCollator() == null) || (gc.getAtomicComparer().getCollator() == Saxon.Hej.expr.sort.CodepointCollator.getInstance()))) {
+                    if (((gc.getStringCollator() == null) || (gc.getStringCollator() == Saxon.Hej.expr.sort.CodepointCollator.getInstance()))) {
                         if (((p1 is Saxon.Hej.expr.Literal) && (((Saxon.Hej.expr.Literal)(p1)).getGroundedValue().getLength()>8))) {
                             Saxon.Hej.expr.Expression mapTest = makeMapTest(visitor, p0, (Saxon.Hej.expr.Literal)(p1), contextItemType);
                             if ((mapTest != null)) {
@@ -283,7 +279,7 @@ namespace Saxon.Eej.ee.optim {
                             }
                         }
                     }
-                    Saxon.Eej.ee.optim.GeneralComparisonEE gcee = new Saxon.Eej.ee.optim.GeneralComparisonEE(p0, gc.getOperator(), p1);
+                    Saxon.Eej.ee.optim.GeneralEqualityEE gcee = new Saxon.Eej.ee.optim.GeneralEqualityEE(p0, gc.getOperator(), p1);
                     gcee.setRetainedStaticContext(gc.getRetainedStaticContext());
                     gcee.setAtomicComparer(gc.getAtomicComparer());
                     gcee.setComparisonCardinality(gc.getComparisonCardinality());
@@ -333,7 +329,7 @@ namespace Saxon.Eej.ee.optim {
                 Saxon.Hej.type.TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
                 Saxon.Hej.functions.SystemFunction containsFn;
                 if ((allStrings || (th.relationship(exp.getItemType(), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) == Saxon.Hej.type.Affinity.DISJOINT))) {
-                    containsFn = Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("contains", 2);
+                    containsFn = Saxon.Hej.ma.map.MapFunctionSet.getInstance(31).makeFunction("contains", 2);
                 } else {
                     containsFn = Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance().makeFunction("map-untyped-contains", 2);
                 }
@@ -380,10 +376,7 @@ namespace Saxon.Eej.ee.optim {
             Saxon.Hej.expr.Expression rest = pexp.getRemainingSteps();
             Saxon.Hej.expr.Expression snap = Saxon.Hej.functions.SystemFunction.makeCall("snapshot", select.getRetainedStaticContext(), rest);
             System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> accList = new System.Collections.Generic.HashSet<Saxon.Hej.expr.accum.Accumulator>();
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(config.getParseOptions());
-            options.setSchemaValidationMode(Saxon.Hej.lib.Validation.STRIP);
-            options.setTopLevelType(null);
-            options.setApplicableAccumulators(accList);
+            Saxon.Hej.lib.ParseOptions options = config.getParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.STRIP).withTopLevelType(null).withApplicableAccumulators(accList);
             Saxon.Eej.ee.stream.StreamInstr stream = new Saxon.Eej.ee.stream.StreamInstr(new Saxon.Hej.expr.ContextItemExpression(), snap, options);
             trace("Using streaming for saxon:stream", stream);
             Saxon.Hej.expr.instruct.ForEach each = new Saxon.Hej.expr.instruct.ForEach(documentExp.getArg(0), stream);
@@ -391,7 +384,7 @@ namespace Saxon.Eej.ee.optim {
         }
         private void streamingNotPossible(string reason, Saxon.Hej.expr.Expression select, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             trace(reason, select);
-            visitor.issueWarning(reason, select.getLocation());
+            visitor.issueWarning(reason, Saxon.Hej.trans.SaxonErrorCode.SXWN9024, select.getLocation());
         }
         public override void makeCopyOperationsExplicit(Saxon.Hej.expr.Expression parent, Saxon.Hej.expr.Operand childOp) {
             Saxon.Hej.expr.Expression child = childOp.getChildExpression();
@@ -446,7 +439,7 @@ namespace Saxon.Eej.ee.optim {
                     err.setLocator(sourceTemplate);
                     if (fallback) {
                         message.append("\n  * Falling back to non-streaming implementation");
-                        sourceTemplate.getStaticContext().issueWarning(message.ToString(), sourceTemplate);
+                        sourceTemplate.getStaticContext().issueWarning(message.ToString(), Saxon.Hej.trans.SaxonErrorCode.SXWN9024, sourceTemplate);
                         compiledTemplate.setDeclaredStreamable(false);
                     } else {
                         throw err;
@@ -557,6 +550,9 @@ namespace Saxon.Eej.ee.optim {
             return f;
         }
         public override Saxon.Hej.expr.FilterExpression reorderPredicates(Saxon.Hej.expr.FilterExpression f, Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo cisi) {
+            if (!(isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.REORDER_PREDICATES))) {
+                return f;
+            }
             Saxon.Hej.expr.Expression @base = f.getBase();
             if (!(((@base is Saxon.Hej.expr.FilterExpression)))) {
                 return f;
@@ -584,10 +580,11 @@ namespace Saxon.Eej.ee.optim {
     }
     return ((f0.getCost()<f1.getCost()) ? -1 : +(1));
 } );
+            Saxon.Hej.expr.Expression newPredicate = null;
             foreach (Saxon.Hej.expr.Expression e in filters) {
-                @base = new Saxon.Hej.expr.FilterExpression(@base, e);
+                newPredicate = ((newPredicate == null) ? e : new Saxon.Hej.expr.AndExpression(newPredicate, e));
             }
-            return (Saxon.Hej.expr.FilterExpression)(@base);
+            return new Saxon.Hej.expr.FilterExpression(@base, newPredicate);
         }
         private static void addTerms(Saxon.Hej.expr.Expression predicate, System.Collections.Generic.IList<Saxon.Hej.expr.Expression> filters) {
             if ((predicate is Saxon.Hej.expr.AndExpression)) {
@@ -749,7 +746,7 @@ namespace Saxon.Eej.ee.optim {
                     } catch (Saxon.Hej.trans.XPathException e) {
                         return null;
                     }
-                    keyName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, ("kk"+((100+keyManager.getNumberOfKeyDefinitions()))));
+                    keyName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, ("kk"+((100+keyManager.getNumberOfKeyDefinitions()))));
                     Saxon.Hej.trans.SymbolicName symbolicName = new Saxon.Hej.trans.SymbolicName(Saxon.Hej.om.StandardNames.XSL_KEY, keyName);
                     Saxon.Hej.trans.KeyDefinition key = new Saxon.Hej.trans.KeyDefinition(symbolicName, pathFinder, use, defaultCollationName, collator);
                     key.setPackageData(f.getPackageData());
@@ -773,7 +770,7 @@ namespace Saxon.Eej.ee.optim {
             if ((doc.getCardinality() != Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) {
                 Saxon.Hej.expr.ForExpression forExp = new Saxon.Hej.expr.ForExpression();
                 forExp.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(doc.getItemType(), doc.getCardinality()));
-                forExp.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("dd"+forExp.GetHashCode())));
+                forExp.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("dd"+forExp.GetHashCode())));
                 Saxon.Hej.expr.Expression docs = doc;
                 if (!(docs.hasSpecialProperty(Saxon.Hej.expr.StaticProperty.ORDERED_NODESET))) {
                     docs = new Saxon.Hej.expr.sort.DocumentSorter(docs);
@@ -937,22 +934,26 @@ namespace Saxon.Eej.ee.optim {
                 return functionCall;
             }
             Saxon.Hej.expr.instruct.UserFunction function = functionCall.getFunction();
-            Saxon.Ejava.util.Optional<bool> b = function.isInlineable();
+            Saxon.Ejava.util.Optional<bool> functionInlineable = function.isInlineable();
             bool isInlineable;
             if ((function.getDeclaredStreamability() != Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED)) {
                 isInlineable = false;
             } else {
-                if (!(b.isPresent())) {
+                if (functionInlineable.isEmpty()) {
                     if ((function.getBody() == null)) {
                         return functionCall;
                     }
                     System.Collections.Generic.IList<Saxon.Hej.expr.instruct.UserFunction> calledFunctions = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.UserFunction>(10);
                     Saxon.Hej.expr.parser.ExpressionTool.gatherCalledFunctions(function.getBody(), calledFunctions);
-                    isInlineable = (((((calledFunctions.Count==0 && !(Saxon.Hej.expr.parser.ExpressionTool.changesXsltContext(function.getBody()))) && (Saxon.Hej.expr.parser.ExpressionTool.expressionSize(function.getBody())<=config.getConfigurationProperty(Saxon.Hej.lib.Feature<int>.THRESHOLD_FOR_FUNCTION_INLINING))) && !(function.isMemoFunction())) && !(Saxon.Hej.expr.parser.ExpressionTool.dependsOnFocus(function.getBody()))) && (functionCall.getRetainedStaticContext().getPackageData() == function.getPackageData()));
+                    int maxInlineSize = config.getConfigurationProperty(Saxon.Hej.lib.Feature<int>.THRESHOLD_FOR_FUNCTION_INLINING);
+                    isInlineable = (((((calledFunctions.Count==0 && !(Saxon.Hej.expr.parser.ExpressionTool.changesXsltContext(function.getBody()))) && (Saxon.Hej.expr.parser.ExpressionTool.expressionSize(function.getBody())<=maxInlineSize)) && !(function.isMemoFunction())) && !(Saxon.Hej.expr.parser.ExpressionTool.dependsOnFocus(function.getBody()))) && (functionCall.getRetainedStaticContext().getPackageData() == function.getPackageData()));
                     function.setInlineable(isInlineable);
                 } else {
-                    isInlineable = b.get();
+                    isInlineable = functionInlineable.get();
                 }
+            }
+            if ((isInlineable && (function.getNumberOfParameters()>function.getMinimumArity()))) {
+                isInlineable = false;
             }
             if (isInlineable) {
                 functionCall.setBeingInlined(true);
@@ -1001,13 +1002,13 @@ namespace Saxon.Eej.ee.optim {
             if ((!("EE".Equals(visitor.getTargetEdition())) || !(isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.SWITCH)))) {
                 return choose;
             }
-            if ((choose.getNumberOfConditions()<4)) {
+            if ((choose.size()<4)) {
                 return choose;
             }
             Saxon.Eej.ee.optim.SwitchExpression.SwitchCaseInfo switchCaseInfo = new Saxon.Eej.ee.optim.SwitchExpression.SwitchCaseInfo();
             switchCaseInfo.commonlhs = null;
             switchCaseInfo.commontype = null;
-            switchCaseInfo.index = new System.Collections.Generic.Dictionary<Saxon.Hej.expr.sort.AtomicMatchKey, Saxon.Hej.expr.Expression>(choose.getNumberOfConditions());
+            switchCaseInfo.index = new System.Collections.Generic.Dictionary<Saxon.Hej.expr.sort.AtomicMatchKey, Saxon.Hej.expr.Expression>(choose.size());
             string defaultCollation = choose.getRetainedStaticContext().getDefaultCollationName();
             try {
                 switchCaseInfo.collation = getConfiguration().getCollation(defaultCollation);
@@ -1015,7 +1016,7 @@ namespace Saxon.Eej.ee.optim {
                 return choose;
             }
             switchCaseInfo.defaultAction = Saxon.Hej.expr.Literal.makeEmptySequence();
-            int size = choose.getNumberOfConditions();
+            int size = choose.size();
             for (int c = 0; (c<size); c++) {
                 Saxon.Hej.expr.Expression condition = choose.getCondition(c);
                 bool isOtherwise = ((c == (size-1)) && Saxon.Hej.expr.Literal.hasEffectiveBooleanValue(condition, true));
@@ -1054,8 +1055,11 @@ namespace Saxon.Eej.ee.optim {
             if (!(Saxon.Hej.expr.Literal.isAtomic(rhs))) {
                 return false;
             }
-            if ((((Saxon.Hej.expr.ComparisonExpression)(condition)).getAtomicComparer() is Saxon.Hej.expr.sort.UntypedNumericComparer)) {
-                lhs = new Saxon.Hej.expr.UntypedSequenceConverter(lhs.copy(new Saxon.Hej.expr.parser.RebindingMap()), Saxon.Hej.type.BuiltInAtomicType.DOUBLE);
+            if (((((Saxon.Hej.expr.ComparisonExpression)(condition)).getAtomicComparer() is Saxon.Hej.expr.sort.UntypedNumericComparer) || (((condition is Saxon.Hej.expr.ValueComparison) && ((Saxon.Hej.expr.ValueComparison)(condition)).convertsUntypedToOther())))) {
+                Saxon.Hej.expr.UntypedSequenceConverter usc = new Saxon.Hej.expr.UntypedSequenceConverter(lhs.copy(new Saxon.Hej.expr.parser.RebindingMap()), Saxon.Hej.type.BuiltInAtomicType.DOUBLE);
+                Saxon.Hej.type.Converter conv = usc.allocateConverter(getConfiguration(), true);
+                usc.setConverter(conv);
+                lhs = usc;
             }
             if ((switchCaseInfo.commonlhs == null)) {
                 switchCaseInfo.commonlhs = lhs;
@@ -1232,7 +1236,7 @@ namespace Saxon.Eej.ee.optim {
                     return null;
                 }
                 Saxon.Hej.expr.instruct.SlotManager slots = getConfiguration().makeSlotManager();
-                Saxon.Hej.om.StructuredQName valueName = new Saxon.Hej.om.StructuredQName("", "", "value");
+                Saxon.Hej.om.StructuredQName valueName = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "value");
                 slots.allocateSlotNumber(valueName);
                 Saxon.Hej.expr.SuppliedParameterReference @ref = new Saxon.Hej.expr.SuppliedParameterReference(0);
                 Saxon.Hej.expr.ArithmeticExpression increment = new Saxon.Hej.expr.ArithmeticExpression(@ref, Saxon.Hej.expr.parser.Token.PLUS, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.PLUS_ONE, ni));
@@ -1241,7 +1245,7 @@ namespace Saxon.Eej.ee.optim {
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(increment, 1, slots);
                 Saxon.Hej.expr.accum.AccumulatorRule ruleTarget = new Saxon.Hej.expr.accum.AccumulatorRule(increment, slots, false);
                 Saxon.Hej.trans.rules.Rule rule = new Saxon.Hej.trans.rules.Rule(count, ruleTarget, 0, 0, 0, 0, 0);
-                Saxon.Hej.om.StructuredQName genName = new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, ("n"+ni.GetHashCode()));
+                Saxon.Hej.om.StructuredQName genName = new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.om.NamespaceUri.ANONYMOUS, ("n"+ni.GetHashCode()));
                 Saxon.Hej.trans.SimpleMode rules = new Saxon.Hej.trans.SimpleMode(genName);
                 rules.addRule(count, rule);
                 if ((from != null)) {
@@ -1395,7 +1399,7 @@ namespace Saxon.Eej.ee.optim {
         private void unstreamableFunction(Saxon.Hej.style.XSLFunction fn, Saxon.Hej.expr.instruct.UserFunction compiledFunction, string message) {
             if (config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.STREAMING_FALLBACK)) {
                 message += ". Falling back to unstreamed implementation";
-                fn.compileWarning(message, "XTSE3430");
+                fn.issueWarning(message, "XTSE3430");
                 compiledFunction.setDeclaredStreamability(Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED);
                 fn.getCompilation().setFallbackToNonStreaming(true);
             } else {

@@ -62,7 +62,7 @@ namespace Saxon.Hej.style {
                             result.Add(Saxon.Hej.pattern.AnyNodeTest.getInstance());
                         }
                         string prefix = s.Substring(0, (s.Length-2) - 0);
-                        string uri = getURIForPrefix(prefix, false);
+                        Saxon.Hej.om.NamespaceUri uri = getURIForPrefix(prefix, false);
                         nt = new Saxon.Hej.pattern.NamespaceTest(getNamePool(), Saxon.Hej.type.Type.ELEMENT, uri);
                         result.Add(nt);
                     } else {
@@ -77,12 +77,12 @@ namespace Saxon.Hej.style {
                         } else {
                             string prefix;
                             string localName;
-                            string uri;
+                            Saxon.Hej.om.NamespaceUri uri;
                             try {
                                 string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(s);
                                 prefix = parts[0];
                                 if (parts[0].Equals("")) {
-                                    uri = "";
+                                    uri = Saxon.Hej.om.NamespaceUri.NULL;
                                 } else {
                                     uri = getURIForPrefix(prefix, false);
                                     if ((uri == null)) {

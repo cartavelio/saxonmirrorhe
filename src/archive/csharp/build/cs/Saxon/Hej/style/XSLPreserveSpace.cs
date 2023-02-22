@@ -29,7 +29,7 @@ namespace Saxon.Hej.style {
         public override void index(Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.style.PrincipalStylesheetModule top) {
             if ((getFingerprint() == Saxon.Hej.om.StandardNames.XSL_STRIP_SPACE)) {
                 if ((getFingerprint() == Saxon.Hej.om.StandardNames.XSL_STRIP_SPACE)) {
-                    string elements = getAttributeValue("", "elements");
+                    string elements = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "elements");
                     if (((elements != null) && !(elements.Trim().Length==0))) {
                         top.getStylesheetPackage().setStripsWhitespace(true);
                     }
@@ -62,7 +62,7 @@ namespace Saxon.Hej.style {
                                 if ((brace == (s.Length-1))) {
                                     compileError("Missing local part in EQName");
                                 } else {
-                                    string uri = s.Substring(2, brace - 2);
+                                    Saxon.Hej.om.NamespaceUri uri = Saxon.Hej.om.NamespaceUri.of(s.Substring(2, brace - 2));
                                     string local = s.Substring((brace+1));
                                     if (local.Equals("*")) {
                                         nt = new Saxon.Hej.pattern.NamespaceTest(getNamePool(), Saxon.Hej.type.Type.ELEMENT, uri);
@@ -78,7 +78,7 @@ namespace Saxon.Hej.style {
                                     compileError("No prefix before ':*'");
                                 }
                                 string prefix = s.Substring(0, (s.Length-2) - 0);
-                                string uri = getURIForPrefix(prefix, false);
+                                Saxon.Hej.om.NamespaceUri uri = getURIForPrefix(prefix, false);
                                 if ((uri == null)) {
                                     undeclaredNamespaceError(prefix, "XTSE0280", "elements");
                                 }
@@ -95,7 +95,7 @@ namespace Saxon.Hej.style {
                                 } else {
                                     string prefix;
                                     string localName;
-                                    string uri;
+                                    Saxon.Hej.om.NamespaceUri uri;
                                     try {
                                         string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(s);
                                         prefix = parts[0];

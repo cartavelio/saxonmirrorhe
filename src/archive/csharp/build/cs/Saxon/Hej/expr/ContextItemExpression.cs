@@ -31,7 +31,7 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             if ((contextInfo.getItemType() == Saxon.Hej.type.ErrorType.getInstance())) {
-                visitor.issueWarning("Evaluation will always fail: there is no context item", getLocation());
+                visitor.issueWarning("Evaluation will always fail: there is no context item", Saxon.Hej.trans.SaxonErrorCode.SXWN9027, getLocation());
                 Saxon.Hej.expr.ErrorExpression ee = new Saxon.Hej.expr.ErrorExpression("There is no context item", getErrorCodeForUndefinedContext(), absentContextIsTypeError);
                 ee.setOriginalExpression(this);
                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ee);
@@ -111,7 +111,7 @@ namespace Saxon.Hej.expr {
             }
             return item;
         }
-        private void reportAbsentContext(Saxon.Hej.expr.XPathContext context) {
+        public void reportAbsentContext(Saxon.Hej.expr.XPathContext context) {
             if (absentContextIsTypeError) {
                 typeError("The context item is absent", getErrorCodeForUndefinedContext(), context);
             } else {
@@ -135,6 +135,40 @@ namespace Saxon.Hej.expr {
         }
         public override string toShortString() {
             return ".";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.ContextItemExpression.ContextItemElaborator();
+        }
+        public class ContextItemElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.ContextItemExpression cie = (Saxon.Hej.expr.ContextItemExpression)(getExpression());
+                if (cie.isContextPossiblyUndefined()) {
+                    return context => {
+                        Saxon.Hej.om.Item current = context.getContextItem();
+                        if ((current == null)) {
+                            cie.reportAbsentContext(context);
+                        }
+                        return current;
+                    } ;
+                } else {
+                    return x => x.getContextItem() /* method reference */;
+                }
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.ContextItemExpression cie = (Saxon.Hej.expr.ContextItemExpression)(getExpression());
+                if (cie.isContextPossiblyUndefined()) {
+                    return context => {
+                        Saxon.Hej.om.Item current = context.getContextItem();
+                        if ((current == null)) {
+                            cie.reportAbsentContext(context);
+                        }
+                        return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(current);
+                    } ;
+                } else {
+                    return context => Saxon.Hej.tree.iter.SingletonIterator.makeIterator(context.getContextItem());
+                }
+            }
+        
         }
     
     }

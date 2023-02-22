@@ -11,9 +11,9 @@ namespace Saxon.Eej.functions.extfn {
             init();
         }
         public const double VERSION = 1.0;
-        public const string NAMESPACE = "http://expath.org/ns/binary";
+        public static readonly Saxon.Hej.om.NamespaceUri NAMESPACE = Saxon.Hej.om.NamespaceUri.EXPATH_BINARY;
         public const string PREFIX = "bin";
-        public const string ERROR_NAMESPACE = NAMESPACE;
+        public static readonly Saxon.Hej.om.NamespaceUri ERROR_NAMESPACE = NAMESPACE;
         public const string ERROR_PREFIX = PREFIX;
         private const string defaultEndianness = "BE";
         private const string ERROR_DIFFERENT_LENGTH_ARGUMENTS = "differing-length-arguments";
@@ -29,50 +29,50 @@ namespace Saxon.Eej.functions.extfn {
         private const long QUIET_DOUBLE_NAN = 0x7ff8_0000_0000_0000L;
         private const int QUIET_SINGLE_NAN = 0x7fc0_0000;
         private void init() {
-            register("and", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryAnd), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("bin", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryBin), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("decode-string", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("decode-string", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("decode-string", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("decode-string", 4, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("encode-string", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryEncodeString), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("encode-string", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryEncodeString), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("find", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryFind), Saxon.Hej.type.BuiltInAtomicType.INTEGER, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null);
-            register("from-octets", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryFromOctets), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, STAR, null);
-            register("hex", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryHex), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("insert-before", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryInsertBefore), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, null);
-            register("join", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryJoin), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, STAR, null);
-            register("length", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryLength), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, Saxon.Hej.value.EmptySequence.getInstance());
-            register("not", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryNot), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("octal", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryOctal), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("or", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryOr), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance());
-            register("pack-double", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackDouble), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null);
-            register("pack-double", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackDouble), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("pack-float", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackFloat), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, null);
-            register("pack-float", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackFloat), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("pack-integer", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackInteger), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("pack-integer", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackInteger), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("pad-left", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadLeft), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("pad-left", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadLeft), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("pad-right", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadRight), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("pad-right", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadRight), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("part", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPart), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("part", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPart), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("shift", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryShift), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("to-octets", 1, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryToOctets), Saxon.Hej.type.BuiltInAtomicType.INTEGER, STAR, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null);
-            register("unpack-double", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackDouble), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("unpack-double", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackDouble), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("unpack-float", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackFloat), Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("unpack-float", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackFloat), Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("unpack-integer", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackInteger), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("unpack-integer", 4, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackInteger), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("unpack-unsigned-integer", 3, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackUnsignedInteger), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("unpack-unsigned-integer", 4, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackUnsignedInteger), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("version", 0, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryVersion), Saxon.Hej.type.BuiltInAtomicType.DECIMAL, ONE, 0);
-            register("xor", 2, typeof(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryXor), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance());
+            register("and", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryAnd(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("bin", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryBin(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("decode-string", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString(), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("decode-string", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString(), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("decode-string", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString(), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("decode-string", 4, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryDecodeString(), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("encode-string", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryEncodeString(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("encode-string", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryEncodeString(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("find", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryFind(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null));
+            register("from-octets", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryFromOctets(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, STAR, null));
+            register("hex", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryHex(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("insert-before", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryInsertBefore(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, null));
+            register("join", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryJoin(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, STAR, null));
+            register("length", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryLength(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("not", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryNot(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("octal", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryOctal(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("or", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryOr(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
+            register("pack-double", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackDouble(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null));
+            register("pack-double", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackDouble(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("pack-float", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackFloat(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, null));
+            register("pack-float", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackFloat(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("pack-integer", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackInteger(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("pack-integer", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPackInteger(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("pad-left", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadLeft(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("pad-left", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadLeft(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("pad-right", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadRight(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("pad-right", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPadRight(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("part", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPart(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("part", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryPart(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("shift", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryShift(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("to-octets", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryToOctets(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, STAR, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null));
+            register("unpack-double", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackDouble(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("unpack-double", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackDouble(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("unpack-float", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackFloat(), Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("unpack-float", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackFloat(), Saxon.Hej.type.BuiltInAtomicType.FLOAT, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("unpack-integer", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackInteger(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("unpack-integer", 4, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackInteger(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("unpack-unsigned-integer", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackUnsignedInteger(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("unpack-unsigned-integer", 4, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryUnpackUnsignedInteger(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("version", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryVersion(), Saxon.Hej.type.BuiltInAtomicType.DECIMAL, ONE, 0));
+            register("xor", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.BinaryXor(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, OPT, Saxon.Hej.value.EmptySequence.getInstance()));
         }
-        public override string getNamespace() {
-            return NAMESPACE;
+        public override Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.EXPATH_BINARY;
         }
         public override string getConventionalPrefix() {
             return PREFIX;
@@ -137,7 +137,7 @@ namespace Saxon.Eej.functions.extfn {
                     string result = Saxon.Hej.resource.BinaryResource.decode(value.getBinaryValue(), offset, len, encoding);
                     return new Saxon.Hej.value.StringValue(result);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, (e.Message.StartsWith("Unsupported encoding") ? Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_UNKNOWN_ENCODING : Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION)));
                     throw;
                 }
             }
@@ -160,7 +160,7 @@ namespace Saxon.Eej.functions.extfn {
                 try {
                     data = Saxon.Hej.resource.BinaryResource.encode(s, encoding);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                    e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName("bin", ERROR_NAMESPACE, (e.Message.StartsWith("Unsupported encoding") ? Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_UNKNOWN_ENCODING : Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.ERROR_CONVERSION)));
                     throw;
                 }
                 return one(data);
@@ -195,9 +195,8 @@ namespace Saxon.Eej.functions.extfn {
                 Saxon.Hej.om.GroundedValue gv = arguments[0].materialize();
                 byte[] bytes = new byte[gv.getLength()];
                 Saxon.Hej.om.SequenceIterator iter = gv.iterate();
-                Saxon.Hej.om.Item item;
                 int i = 0;
-                while (((item = iter.next()) != null)) {
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                     long v = ((Saxon.Hej.value.IntegerValue)(item)).longValue();
                     if (((0<=v) && (v<=255))) {
                         bytes[i++] = (byte)(v);
@@ -363,12 +362,27 @@ namespace Saxon.Eej.functions.extfn {
         public class BinaryPackInteger : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.value.IntegerValue value = (Saxon.Hej.value.IntegerValue)(arguments[0].head());
-                int length = (int)(((Saxon.Hej.value.IntegerValue)(arguments[1].head())).longValue());
-                if ((length<0)) {
+                int requestedLength = (int)(((Saxon.Hej.value.IntegerValue)(arguments[1].head())).longValue());
+                if ((requestedLength<0)) {
                     error("Requested length of integer packing is negative", ERROR_NEGATIVE_SIZE);
                 }
                 System.Numerics.BigInteger big = value.asBigInteger();
-                return packBytes(big.ToByteArray(isUnsigned: false, isBigEndian: true), length, endianness(arguments, 2), (Saxon.Impl.Helpers.BigIntegerUtils.Signum(big) == -1));
+                byte[] @in = big.ToByteArray(isUnsigned: false, isBigEndian: true);
+                byte[] result = new byte[requestedLength];
+                if ((Saxon.Impl.Helpers.BigIntegerUtils.Signum(big) == -1)) {
+                    Saxon.Ejava.util.Arrays.fill(result, (byte)(255));
+                }
+                int suppliedLength = @in.Length;
+                if (endianness(arguments, 2)) {
+                    int bytesToCopy = System.Math.Min(suppliedLength, requestedLength);
+                    Saxon.Ejava.lang.System.arraycopy(@in, (suppliedLength-bytesToCopy), result, (requestedLength-bytesToCopy), bytesToCopy);
+                } else {
+                    int i = 0;
+                    while (((i<requestedLength) && (suppliedLength>0))) {
+                        result[i++] = @in[--suppliedLength];
+                    }
+                }
+                return one(result);
             }
         
         }
@@ -563,12 +577,12 @@ namespace Saxon.Eej.functions.extfn {
                 int offset = (int)(((Saxon.Hej.value.NumericValue)(arguments[1].head())).longValue());
                 int len = (int)(((Saxon.Hej.value.NumericValue)(arguments[2].head())).longValue());
                 checkIndex(value, offset, len);
-                byte[] @in = value.getBinaryValue();
-                bool negative = (((@in[offset]&unchecked((int)0x80))) != 0);
                 bool bigEnd = endianness(arguments, 3);
                 if ((len == 0)) {
                     return Saxon.Hej.value.Int64Value.ZERO;
                 }
+                byte[] @in = value.getBinaryValue();
+                bool negative = (((@in[(bigEnd ? offset : (offset+1))]&unchecked((int)0x80))) != 0);
                 if ((len>7)) {
                     System.Numerics.BigInteger big = bigIntegerFromBytes(offset, len, @in, bigEnd);
                     return new Saxon.Hej.value.BigIntegerValue(big);
@@ -760,36 +774,6 @@ namespace Saxon.Eej.functions.extfn {
                 while ((length-->0)) {
                     result[i++] = (byte)(((@in&unchecked((int)0xff))));
                     @in >>= 8;
-                }
-            }
-            return one(result);
-        }
-        private static Saxon.Hej.value.Base64BinaryValue packBytes(byte[] @in, int length, bool big) {
-            return packBytes(@in, length, big, false);
-        }
-        private static Saxon.Hej.value.Base64BinaryValue packBytes(byte[] @in, int length, bool big, bool negative) {
-            byte[] result = new byte[length];
-            int len = @in.Length;
-            int i;
-            if (big) {
-                i = len;
-                while (((length>0) && (i>0))) {
-                    result[--length] = @in[--i];
-                }
-                if (negative) {
-                    while ((length>0)) {
-                        result[--length] = (byte)((255));
-                    }
-                }
-            } else {
-                i = 0;
-                while (((length-->0) && (len>0))) {
-                    result[i++] = @in[--len];
-                }
-                if (negative) {
-                    while ((length>0)) {
-                        result[i++] = (byte)((255));
-                    }
                 }
             }
             return one(result);

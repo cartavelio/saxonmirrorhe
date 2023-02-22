@@ -17,7 +17,7 @@ namespace Saxon.Hej.expr {
             if ((requiredType != null)) {
                 Saxon.Hej.value.SequenceType decl = requiredType;
                 Saxon.Hej.value.SequenceType sequenceType = Saxon.Hej.value.SequenceType.makeSequenceType(decl.getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, variableName.getDisplayName(), 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, variableName.getDisplayName(), 0);
                 setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
                 Saxon.Hej.type.ItemType actualItemType = getSequence().getItemType();
                 refineTypeInformation(actualItemType, getRangeVariableCardinality(), null, getSequence().getSpecialProperties(), this);
@@ -184,22 +184,7 @@ namespace Saxon.Hej.expr {
             }
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            int slot = getLocalSlotNumber();
-            Saxon.Hej.om.SequenceTool.supply(getSequence().iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => {
-                context.setLocalVariable(slot, item);
-                getAction().process(output, context);
-            } )));
-        }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            try {
-                int slot = getLocalSlotNumber();
-                Saxon.Hej.om.SequenceTool.supply(getSequence().iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => {
-                    context.setLocalVariable(slot, item);
-                    getAction().evaluatePendingUpdates(context, pul);
-                } )));
-            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
-                throw e.getXPathException();
-            }
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override Saxon.Hej.type.ItemType getItemType() {
             return getAction().getItemType();
@@ -213,10 +198,13 @@ namespace Saxon.Hej.expr {
             return Saxon.Hej.value.Cardinality.multiply(c1, c2);
         }
         public override string ToString() {
-            return ((((("for $"+getVariableEQName())+" in ")+(((getSequence() == null) ? "(...)" : getSequence().ToString())))+" return ")+(((getAction() == null) ? "(...)" : Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getAction()))));
+            return (((((("for $"+getVariableEQName())+allowingEmptyString())+" in ")+(((getSequence() == null) ? "(...)" : getSequence().ToString())))+" return ")+(((getAction() == null) ? "(...)" : Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getAction()))));
         }
         public override string toShortString() {
-            return ((((("for $"+getVariableQName().getDisplayName())+" in ")+(((getSequence() == null) ? "(...)" : getSequence().toShortString())))+" return ")+(((getAction() == null) ? "(...)" : getAction().toShortString())));
+            return (((((("for $"+getVariableQName().getDisplayName())+allowingEmptyString())+" in ")+(((getSequence() == null) ? "(...)" : getSequence().toShortString())))+" return ")+(((getAction() == null) ? "(...)" : getAction().toShortString())));
+        }
+        protected internal virtual string allowingEmptyString() {
+            return "";
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("for", this);
@@ -256,6 +244,68 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "ForExpression";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.ForExpression.ForExprElaborator();
+        }
+        public class ForExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.ForExpression expr = (Saxon.Hej.expr.ForExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
+                int actionCardinality = expr.getAction().getCardinality();
+                int slot = expr.getLocalSlotNumber();
+                if (Saxon.Hej.value.Cardinality.allowsMany(actionCardinality)) {
+                    Saxon.Hej.expr.elab.PullEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPull();
+                    return context => {
+                        Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/selectEval(context);
+                        return new Saxon.Hej.expr.MappingIterator(@base, item => {
+                            context.setLocalVariable(slot, item);
+                            return /*Delegate.iterate()*/actionEval(context);
+                        } );
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.ItemEvaluator actionEval = expr.getAction().makeElaborator().elaborateForItem();
+                    return context => {
+                        Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/selectEval(context);
+                        return new Saxon.Hej.expr.ItemMappingIterator(@base, item => {
+                            context.setLocalVariable(slot, item);
+                            return /*Delegate.eval()*/actionEval(context);
+                        } );
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.ForExpression expr = (Saxon.Hej.expr.ForExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PushEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPush();
+                int slot = expr.getLocalSlotNumber();
+                return (@out, context) => {
+                    Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/selectEval(context);
+                    for (Saxon.Hej.om.Item item; ((item = @base.next()) != null); ) {
+                        context.setLocalVariable(slot, item);
+                        Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/actionEval(@out, context);
+                        dispatchTailCall(tc);
+                    }
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.ForExpression expr = (Saxon.Hej.expr.ForExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.UpdateEvaluator actionEval = expr.getAction().makeElaborator().elaborateForUpdate();
+                int slot = expr.getLocalSlotNumber();
+                return (context, pul) => {
+                    try {
+                        Saxon.Hej.om.SequenceTool.supply(/*Delegate.iterate()*/selectEval(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => {
+                            context.setLocalVariable(slot, item);
+                            /*Delegate.registerUpdates()*/actionEval(context, pul);
+                        } )));
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
+                } ;
+            }
+        
         }
     
     }

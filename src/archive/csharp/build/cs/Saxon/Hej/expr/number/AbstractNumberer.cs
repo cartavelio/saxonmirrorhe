@@ -23,10 +23,10 @@ namespace Saxon.Hej.expr.number {
         public string getCountry() {
             return country;
         }
-        public string format(long number, Saxon.Hej.str.UnicodeString picture, int groupSize, string groupSeparator, string letterValue, string ordinal) {
-            return format(number, picture, new Saxon.Hej.expr.number.RegularGroupFormatter(groupSize, groupSeparator, Saxon.Hej.str.EmptyUnicodeString.getInstance()), letterValue, ordinal);
+        public string format(long number, Saxon.Hej.str.UnicodeString picture, int groupSize, string groupSeparator, string letterValue, string cardinal, string ordinal) {
+            return format(number, picture, new Saxon.Hej.expr.number.RegularGroupFormatter(groupSize, groupSeparator, Saxon.Hej.str.EmptyUnicodeString.getInstance()), letterValue, cardinal, ordinal);
         }
-        public string format(long number, Saxon.Hej.str.UnicodeString picture, Saxon.Hej.expr.number.NumericGroupFormatter numGroupFormatter, string letterValue, string ordinal) {
+        public string format(long number, Saxon.Hej.str.UnicodeString picture, Saxon.Hej.expr.number.NumericGroupFormatter numGroupFormatter, string letterValue, string cardinal, string ordinal) {
             if ((number<0)) {
                 return (""+number);
             }
@@ -70,7 +70,7 @@ namespace Saxon.Hej.expr.number {
                 if (((ordinal != null) && !(ordinal.Length==0))) {
                     return toOrdinalWords(ordinal, number, wordCase);
                 } else {
-                    return toWords(number, wordCase);
+                    return toWords(cardinal, number, wordCase);
                 }
               case 'i':
                 if ((number == 0)) {
@@ -393,13 +393,13 @@ namespace Saxon.Hej.expr.number {
             }
         }
         private static readonly int[] kanjiDigits = {0x3007, 0x4e00, 0x4e8c, 0x4e09, 0x56db, 0x4e94, 0x516d, 0x4e03, 0x516b, 0x4e5d};
-        public abstract string toWords(long number);
-        public string toWords(long number, int wordCase) {
+        public abstract string toWords(string cardinal, long number);
+        public string toWords(string cardinal, long number, int wordCase) {
             string s;
             if ((number == 0)) {
-                s = "Zero";
+                s = zero();
             } else {
-                s = toWords(number);
+                s = toWords(cardinal, number);
             }
             switch (wordCase) {
               case UPPER_CASE:
@@ -409,6 +409,9 @@ namespace Saxon.Hej.expr.number {
               default:
                 return s;
             }
+        }
+        public string zero() {
+            return "Zero";
         }
         public abstract string toOrdinalWords(string ordinalParam, long number, int wordCase);
         public abstract string monthName(int month, int minWidth, int maxWidth);

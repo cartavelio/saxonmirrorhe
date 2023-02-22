@@ -24,6 +24,9 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.value.BooleanValue evaluateItem(Saxon.Hej.expr.XPathContext c) {
             return Saxon.Hej.value.BooleanValue.get((condition == c.isAtLast()));
         }
+        public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
+            return (condition == context.isAtLast());
+        }
         public override Saxon.Hej.type.ItemType getItemType() {
             return Saxon.Hej.type.BuiltInAtomicType.BOOLEAN;
         }
@@ -64,6 +67,20 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "IsLastExpr";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.IsLastExpression.IsLastElaborator();
+        }
+        public class IsLastElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.IsLastExpression expr = (Saxon.Hej.expr.IsLastExpression)(getExpression());
+                if (expr.getCondition()) {
+                    return x => x.isAtLast() /* method reference */;
+                } else {
+                    return context => !(context.isAtLast());
+                }
+            }
+        
         }
     
     }

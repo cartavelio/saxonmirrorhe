@@ -18,7 +18,7 @@ namespace Saxon.Hej.functions.hof {
             return functionName.getComponentName();
         }
         public override int getArity() {
-            return fd.getNumberOfArguments();
+            return functionName.getArity();
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
             return @ref.evaluateItem(context).call(context, args);

@@ -6,6 +6,7 @@ namespace Saxon.Hej.pattern {
     public class BasePatternWithPredicate : Saxon.Hej.pattern.Pattern, Saxon.Hej.pattern.PatternWithPredicate {
         internal Saxon.Hej.expr.Operand basePatternOp;
         internal Saxon.Hej.expr.Operand predicateOp;
+        internal Saxon.Hej.expr.elab.BooleanEvaluator predicateEvaluator;
         public BasePatternWithPredicate(Saxon.Hej.pattern.Pattern basePattern, Saxon.Hej.expr.Expression predicate)  {
             basePatternOp = new Saxon.Hej.expr.Operand(this, basePattern, Saxon.Hej.expr.OperandRole.ATOMIC_SEQUENCE);
             predicateOp = new Saxon.Hej.expr.Operand(this, predicate, Saxon.Hej.expr.OperandRole.FOCUS_CONTROLLED_ACTION);
@@ -46,12 +47,15 @@ namespace Saxon.Hej.pattern {
             return matchesPredicate(item, context);
         }
         private bool matchesPredicate(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context) {
+            if ((predicateEvaluator == null)) {
+                predicateEvaluator = getPredicate().makeElaborator().elaborateForBoolean();
+            }
             Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
             Saxon.Hej.tree.iter.ManualIterator si = new Saxon.Hej.tree.iter.ManualIterator(item);
             c2.setCurrentIterator(si);
             c2.setCurrentOutputUri(null);
             try {
-                return getPredicate().effectiveBooleanValue(c2);
+                return /*Delegate.eval()*/predicateEvaluator(c2);
             } catch (Exception e) when (e is Saxon.Hej.trans.XPathException.Circularity || e is Saxon.Hej.trans.XPathException.StackOverflow) {
                 throw;
             } catch (Saxon.Hej.trans.XPathException ex) {

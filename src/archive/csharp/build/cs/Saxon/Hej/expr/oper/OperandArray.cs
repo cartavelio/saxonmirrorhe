@@ -57,11 +57,11 @@ namespace Saxon.Hej.expr.oper {
             }
         }
         public System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
-            return Saxon.Ejava.util.Arrays.asList(operandArray);
+            return this;
         }
         public System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Expression> operandExpressions() {
             System.Collections.Generic.IList<Saxon.Hej.expr.Expression> list = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(operandArray.Length);
-            foreach (Saxon.Hej.expr.Operand o in operands()) {
+            foreach (Saxon.Hej.expr.Operand o in this) {
                 list.Add(o.getChildExpression());
             }
             return list;

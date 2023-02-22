@@ -21,7 +21,7 @@ namespace Saxon.Api {
         /// <param name="item">the item to be tested against this item type</param>
         /// <returns>true if the item is a function, otherwise false.</returns>
         public override bool Matches(XdmItem item) {
-            return (Item) item.value is Function;
+            return (Item) item.value is FunctionItem;
         }
 
         /// <summary>

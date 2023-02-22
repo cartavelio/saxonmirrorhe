@@ -11,20 +11,20 @@ namespace Saxon.Hej.functions.registry {
             init();
         }
         private void init() {
-            register("is-whole-number", 1, typeof(Saxon.Hej.functions.registry.VendorFunctionSetHE.IsWholeNumberFn), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.type.NumericType.getInstance(), OPT, EMPTY);
-            register("dynamic-error-info", 1, typeof(Saxon.Hej.functions.registry.VendorFunctionSetHE.DynamicErrorInfoFn), Saxon.Hej.type.AnyItemType.getInstance(), STAR, ((FOCUS|LATE)|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("apply", 2, typeof(Saxon.Hej.functions.ApplyFn), Saxon.Hej.type.AnyItemType.getInstance(), STAR, LATE).arg(0, Saxon.Hej.type.AnyFunctionType.getInstance(), ONE, null).arg(1, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
-            register("create-map", 1, typeof(Saxon.Hej.ma.map.MapCreate), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, null);
-            register("doc", 2, typeof(Saxon.Hej.functions.Doc_2), Saxon.Hej.pattern.NodeKindTest.DOCUMENT, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, EMPTY).setOptionDetails(Saxon.Hej.functions.Doc_2.makeOptionsParameter());
-            register("has-local-namespaces", 1, typeof(Saxon.Hej.functions.registry.VendorFunctionSetHE.HasLocalNamespaces), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null);
-            register("has-uniform-namespaces", 1, typeof(Saxon.Hej.functions.registry.VendorFunctionSetHE.HasUniformNamespaces), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null);
-            register("map-untyped-contains", 2, typeof(Saxon.Hej.ma.map.MapUntypedContains), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, ONE, null);
+            register("is-whole-number", 1, e => e.populate(() => new Saxon.Hej.functions.registry.VendorFunctionSetHE.IsWholeNumberFn(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.type.NumericType.getInstance(), OPT, EMPTY));
+            register("dynamic-error-info", 1, e => e.populate(() => new Saxon.Hej.functions.registry.VendorFunctionSetHE.DynamicErrorInfoFn(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, ((FOCUS|LATE)|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("create-map", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapCreate(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, null));
+            register("doc", 2, e => e.populate(() => new Saxon.Hej.functions.Doc_2(), Saxon.Hej.pattern.NodeKindTest.DOCUMENT, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, EMPTY).setOptionDetails(Saxon.Hej.functions.Doc_2.makeOptionsParameter()));
+            register("has-local-namespaces", 1, e => e.populate(() => new Saxon.Hej.functions.registry.VendorFunctionSetHE.HasLocalNamespaces(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null));
+            register("has-uniform-namespaces", 1, e => e.populate(() => new Saxon.Hej.functions.registry.VendorFunctionSetHE.HasUniformNamespaces(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null));
+            register("map-untyped-contains", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapUntypedContains(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, ONE, null));
             Saxon.Hej.ma.map.RecordTest mapRepresentation = new Saxon.Hej.ma.map.RecordTest(Saxon.Ejava.util.Arrays.asList("key", "value"), Saxon.Ejava.util.Arrays.asList(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ATOMIC, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}), new System.Collections.Generic.List<string>(), false);
-            register("map-as-sequence-of-maps", 1, typeof(Saxon.Hej.functions.registry.VendorFunctionSetHE.MapAsSequenceOfMaps), mapRepresentation, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, null);
-            register("yes-no-boolean", 1, typeof(Saxon.Hej.functions.registry.VendorFunctionSetHE.YesNoBoolean), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
+            register("map-as-sequence-of-maps", 1, e => e.populate(() => new Saxon.Hej.functions.registry.VendorFunctionSetHE.MapAsSequenceOfMaps(), mapRepresentation, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, null));
+            register("yes-no-boolean", 1, e => e.populate(() => new Saxon.Hej.functions.registry.VendorFunctionSetHE.YesNoBoolean(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("concatenate-sequences", 2, e => e.populate(() => new Saxon.Hej.functions.registry.VendorFunctionSetHE.ConcatenateSequences(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null));
         }
-        public override string getNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.SAXON;
+        public override Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.SAXON;
         }
         public override string getConventionalPrefix() {
             return "saxon";
@@ -76,7 +76,7 @@ namespace Saxon.Hej.functions.registry {
                   case "code":
                     Saxon.Hej.om.StructuredQName errorCodeQName = error.getErrorCodeQName();
                     if ((errorCodeQName == null)) {
-                        errorCodeQName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "XXXX9999");
+                        errorCodeQName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "XXXX9999");
                     }
                     return new Saxon.Hej.value.QNameValue(errorCodeQName, Saxon.Hej.type.BuiltInAtomicType.QNAME);
                   case "description":
@@ -169,6 +169,15 @@ namespace Saxon.Hej.functions.registry {
                   default:
                     throw new Saxon.Hej.trans.XPathException("Supplied value for boolean argument must be 0|false|no or 1|true|yes", "FORG0001");
                 }
+            }
+        
+        }
+        public class ConcatenateSequences : Saxon.Hej.functions.SystemFunction {
+            public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+                chain = chain.addAll(arguments[0].materialize().asIterable());
+                chain = chain.addAll(arguments[1].materialize().asIterable());
+                return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
             }
         
         }

@@ -44,11 +44,11 @@ namespace Saxon.Hej.style {
                                     }
                                     Saxon.Impl.Helpers.MapUtils.Put(serializationAttributes, f, val);
                                 } else {
-                                    string attributeURI = attName.getURI();
-                                    if ((("".Equals(attributeURI) || Saxon.Hej.lib.NamespaceConstant.XSLT.Equals(attributeURI)) || Saxon.Hej.lib.NamespaceConstant.SAXON.Equals(attributeURI))) {
+                                    Saxon.Hej.om.NamespaceUri attributeURI = attName.getNamespaceUri();
+                                    if (((Saxon.Hej.om.NamespaceUri.NULL.Equals(attributeURI) || Saxon.Hej.om.NamespaceUri.XSLT.Equals(attributeURI)) || Saxon.Hej.om.NamespaceUri.SAXON.Equals(attributeURI))) {
                                         checkUnknownAttribute(attName);
                                     } else {
-                                        string name = ((('{'+attributeURI)+'}')+attName.getLocalPart());
+                                        string name = ((("{"+attributeURI)+"}")+attName.getLocalPart());
                                         if ((userAttributes == null)) {
                                             userAttributes = new System.Collections.Generic.Dictionary<string, string>(5);
                                         }
@@ -73,7 +73,7 @@ namespace Saxon.Hej.style {
         }
         public override void compileDeclaration(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
         }
-        protected internal override void processVersionAttribute(string ns) {
+        protected internal override void processVersionAttribute(Saxon.Hej.om.NamespaceUri ns) {
             version = ((Saxon.Hej.style.StyleElement)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getEffectiveVersion();
         }
         protected internal void gatherOutputProperties(Saxon.Ejava.util.Properties details, System.Collections.Generic.Dictionary<string,int> precedences, int thisPrecedence) {
@@ -89,11 +89,11 @@ namespace Saxon.Hej.style {
                         if (prefix.Length==0) {
                             compileError("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name", "XTSE1570");
                         } else {
-                            string uri = getURIForPrefix(prefix, false);
+                            Saxon.Hej.om.NamespaceUri uri = getURIForPrefix(prefix, false);
                             if ((uri == null)) {
                                 undeclaredNamespaceError(prefix, "XTSE0280", "method");
                             }
-                            checkAndPut(sf, Saxon.Ejavax.xml.transform.OutputKeys.METHOD, ((('{'+uri)+'}')+parts[1]), details, precedences, thisPrecedence);
+                            checkAndPut(sf, Saxon.Ejavax.xml.transform.OutputKeys.METHOD, ((("{"+uri)+"}")+parts[1]), details, precedences, thisPrecedence);
                         }
                     } catch (Saxon.Hej.om.QNameException e) {
                         compileError(("Invalid method name. "+e.Message), "XTSE1570");

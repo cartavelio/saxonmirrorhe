@@ -13,14 +13,14 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.value.AtomicValue nameArg = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
             Saxon.Hej.value.QNameValue name;
             if ((nameArg is Saxon.Hej.value.QNameValue)) {
-                name = (Saxon.Hej.value.QNameValue)(arguments[0].head());
+                name = (Saxon.Hej.value.QNameValue)(nameArg);
             } else {
                 string s = nameArg.getStringValue();
                 Saxon.Hej.om.StructuredQName q = Saxon.Hej.om.StructuredQName.fromLexicalQName(s, false, true, getRetainedStaticContext());
                 name = new Saxon.Hej.value.QNameValue(q, Saxon.Hej.type.BuiltInAtomicType.QNAME);
             }
             cco.startElement(new Saxon.Hej.om.FingerprintedQName(name.getStructuredQName(), context.getNamePool()), Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, 0);
-            Saxon.Hej.om.SequenceTool.supply(arguments[1].iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => cco.append(it) /* converted from instance method reference */));
+            Saxon.Hej.om.SequenceTool.supply(arguments[1].iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */cco.append));
             cco.endElement();
             cco.close();
             return builder.getCurrentRoot();

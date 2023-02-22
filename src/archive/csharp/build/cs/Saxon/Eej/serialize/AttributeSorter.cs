@@ -26,7 +26,7 @@ namespace Saxon.Eej.serialize {
                     pos += MIDDLE_GROUND;
                 } else {
                     Saxon.Hej.om.StructuredQName sq = Saxon.Hej.om.StructuredQName.fromClarkName(expandedName);
-                    Saxon.Impl.Helpers.MapUtils.Put(knownAttributes, new Saxon.Hej.om.FingerprintedQName("", sq.getURI(), sq.getLocalPart()), pos++);
+                    Saxon.Impl.Helpers.MapUtils.Put(knownAttributes, new Saxon.Hej.om.FingerprintedQName("", sq.getNamespaceUri(), sq.getLocalPart()), pos++);
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace Saxon.Eej.serialize {
         if ((r1 != System.Int32.MinValue)) {
             return MIDDLE_GROUND.CompareTo(r1);
         } else {
-            int x = System.String.Compare(n0.getURI(), n1.getURI(), System.StringComparison.Ordinal);
+            int x = System.String.Compare(n0.getNamespaceUri().ToString(), n1.getNamespaceUri().ToString(), System.StringComparison.Ordinal);
             if ((x == 0)) {
                 x = System.String.Compare(n0.getLocalPart(), n1.getLocalPart(), System.StringComparison.Ordinal);
             }

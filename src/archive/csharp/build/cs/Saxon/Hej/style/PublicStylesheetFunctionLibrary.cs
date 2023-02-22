@@ -7,8 +7,8 @@ namespace Saxon.Hej.style {
         public PublicStylesheetFunctionLibrary(Saxon.Hej.functions.FunctionLibrary @base)  {
             this.@base = @base;
         }
-        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
-            Saxon.Hej.expr.Expression baseCall = @base.bind(functionName, staticArgs, env, reasons);
+        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+            Saxon.Hej.expr.Expression baseCall = @base.bind(functionName, staticArgs, null, env, reasons);
             if ((baseCall is Saxon.Hej.expr.UserFunctionCall)) {
                 Saxon.Hej.expr.Component target = ((Saxon.Hej.expr.UserFunctionCall)(baseCall)).getTarget();
                 Saxon.Hej.trans.Visibility v = target.getVisibility();
@@ -20,8 +20,8 @@ namespace Saxon.Hej.style {
             }
             return null;
         }
-        public Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
-            Saxon.Hej.om.Function baseFunction = @base.getFunctionItem(functionName, staticContext);
+        public Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+            Saxon.Hej.om.FunctionItem baseFunction = @base.getFunctionItem(functionName, staticContext);
             if ((baseFunction is Saxon.Hej.expr.instruct.UserFunction)) {
                 Saxon.Hej.trans.Visibility v = ((Saxon.Hej.expr.instruct.UserFunction)(baseFunction)).getDeclaredVisibility();
                 if (((v == Saxon.Hej.trans.Visibility.PUBLIC) || (v == Saxon.Hej.trans.Visibility.FINAL))) {

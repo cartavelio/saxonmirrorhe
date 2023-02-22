@@ -19,7 +19,7 @@ using Saxon.Hej.trans;
 
 namespace TestDriver {
     /**
-     * Test Driver for the QT3 test suite
+     * Test Driver for the QT3/QT4 test suite
      */
     public class QT3TestSuiteDriver : Driver {
         public static string RNS = "http://www.w3.org/2012/08/qt-fots-results";
@@ -98,7 +98,7 @@ namespace TestDriver {
                     this, xpc, env, globalEnvironments, defaultEnv);
             }
 
-            buildDependencyDictionary(driverProc, environment);
+            buildDependencyDictionary(driverProc, environment, catalog);
         }
 
         /**
@@ -975,22 +975,23 @@ namespace TestDriver {
          * @param env the environment for which dependency information is to be gathered
          * @
          */
-        private void buildDependencyDictionary(Processor processor, Environment env) {
+        private void buildDependencyDictionary(Processor processor, Environment env, XdmNode catalog) {
             XQueryCompiler xqCompiler = processor.NewXQueryCompiler();
             xqCompiler.XQueryLanguageVersion = "3.1";
             xqCompiler.BaseUri = new Uri("file://" + System.IO.Path.GetFullPath(testSuiteDir) + "/", UriKind.RelativeOrAbsolute);
-            XdmValue result = xqCompiler.Compile(
+            XQueryExecutable exec = xqCompiler.Compile(
                 "        declare namespace fots = \"http://www.w3.org/2010/09/qt-fots-catalog\";\n" +
-                "        let $testsets := doc('" + testSuiteDir +
-                "/catalog.xml')//fots:test-set/@file/doc(resolve-uri(., exactly-one(base-uri(.))))\n" +
+                "        let $testsets := //fots:test-set/@file/doc(resolve-uri(., exactly-one(base-uri(.))))\n" +
                 "        for $dependencyTS in $testsets//fots:dependency\n" +
                 "        let $name := $dependencyTS/@type\n" +
                 "        let $value := $dependencyTS/@value\n" +
                 "        group by $name, $value\n" +
                 "        order by $name, $value\n" +
-                "        return <dependency type='{$name}' value='{$value}' />").Load().Evaluate();
-
-
+                "        return <dependency type='{$name}' value='{$value}' />");
+            XQueryEvaluator selector = exec.Load();
+            selector.ContextItem = catalog;
+            XdmValue result = selector.Evaluate();
+            
             foreach (XdmItem item in result) {
                 XdmNode node = (XdmNode) item;
                 string type = node.GetAttributeValue(new QName("type"));
@@ -1017,24 +1018,3 @@ namespace TestDriver {
     }
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version
-// 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may
-// obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations
-// under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Michael Kay,
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All
-// Rights Reserved.
-//
-// Contributor(s): none.
-//

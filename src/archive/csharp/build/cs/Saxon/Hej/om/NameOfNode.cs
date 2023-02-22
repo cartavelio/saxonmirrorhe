@@ -9,7 +9,7 @@ namespace Saxon.Hej.om {
         }
         public static Saxon.Hej.om.NodeName makeName(Saxon.Hej.om.NodeInfo node) {
             if ((node is Saxon.Hej.om.MutableNodeInfo)) {
-                return new Saxon.Hej.om.FingerprintedQName(node.getPrefix(), node.getURI(), node.getLocalPart());
+                return new Saxon.Hej.om.FingerprintedQName(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart());
             } else {
                 if ((node is Saxon.Hej.tree.wrapper.AbstractVirtualNode)) {
                     return new Saxon.Hej.om.NameOfNode(((/*1430*/Saxon.Hej.om.NodeInfo)((Saxon.Hej.tree.wrapper.AbstractVirtualNode)(node)).getUnderlyingNode()));
@@ -21,8 +21,8 @@ namespace Saxon.Hej.om {
         public string getPrefix() {
             return node.getPrefix();
         }
-        public string getURI() {
-            return node.getURI();
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return node.getNamespaceUri();
         }
         public string getLocalPart() {
             return node.getLocalPart();
@@ -31,13 +31,16 @@ namespace Saxon.Hej.om {
             return node.getDisplayName();
         }
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
-            return new Saxon.Hej.om.StructuredQName(getPrefix(), getURI(), getLocalPart());
+            return new Saxon.Hej.om.StructuredQName(getPrefix(), getNamespaceUri(), getLocalPart());
         }
-        public bool hasURI(string ns) {
-            return node.getURI().Equals(ns);
+        public bool hasURI(Saxon.Hej.om.NamespaceUri ns) {
+            if ((node is Saxon.Hej.tree.tiny.TinyNodeImpl)) {
+                return ((Saxon.Hej.tree.tiny.TinyNodeImpl)(node)).hasURI(ns);
+            }
+            return node.getNamespaceUri().Equals(ns);
         }
         public Saxon.Hej.om.NamespaceBinding getNamespaceBinding() {
-            return Saxon.Hej.om.NamespaceBinding.makeNamespaceBinding(getPrefix(), getURI());
+            return new Saxon.Hej.om.NamespaceBinding(getPrefix(), getNamespaceUri());
         }
         public bool hasFingerprint() {
             return node.hasFingerprint();
@@ -53,11 +56,11 @@ namespace Saxon.Hej.om {
             if (node.hasFingerprint()) {
                 return node.getFingerprint();
             } else {
-                return namePool.allocateFingerprint(node.getURI(), node.getLocalPart());
+                return namePool.allocateFingerprint(node.getNamespaceUri(), node.getLocalPart());
             }
         }
         public override int GetHashCode() {
-            return Saxon.Hej.om.StructuredQName.computeHashCode(getURI(), getLocalPart());
+            return Saxon.Hej.om.StructuredQName.computeHashCode(getNamespaceUri(), getLocalPart());
         }
         public override bool Equals(System.Object obj) {
             if ((obj is Saxon.Hej.om.NodeName)) {
@@ -65,7 +68,7 @@ namespace Saxon.Hej.om {
                 if ((node.hasFingerprint() && n.hasFingerprint())) {
                     return (node.getFingerprint() == n.getFingerprint());
                 } else {
-                    return (n.getLocalPart().Equals(node.getLocalPart()) && n.hasURI(node.getURI()));
+                    return (n.getLocalPart().Equals(node.getLocalPart()) && n.hasURI(node.getNamespaceUri()));
                 }
             } else {
                 return false;
@@ -78,5 +81,10 @@ namespace Saxon.Hej.om {
             return (GetHashCode()^getPrefix().GetHashCode());
         }
     
+        /* Expanding default method getURI from interface NodeName */
+        public virtual string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
     }
 }

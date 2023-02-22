@@ -4,10 +4,10 @@ using System.Linq;
 namespace Saxon.Hej.expr {
     public sealed class SingletonAtomizer : Saxon.Hej.expr.UnaryExpression {
         private readonly bool allowEmpty;
-        private readonly Saxon.Hej.expr.parser.RoleDiagnostic roleDiagnostic;
-        public SingletonAtomizer(Saxon.Hej.expr.Expression sequence, Saxon.Hej.expr.parser.RoleDiagnostic role, bool allowEmpty) : base (sequence) {
+        private readonly Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier;
+        public SingletonAtomizer(Saxon.Hej.expr.Expression sequence, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role, bool allowEmpty) : base (sequence) {
             this.allowEmpty = allowEmpty;
-            this.roleDiagnostic = role;
+            this.roleSupplier = role;
         }
         protected internal override Saxon.Hej.expr.OperandRole getOperandRole() {
             return Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC;
@@ -29,7 +29,8 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.expr.parser.ExpressionTool.resetStaticProperties(this);
             if (Saxon.Hej.expr.Literal.isEmptySequence(operand)) {
                 if (!(allowEmpty)) {
-                    typeError(("An empty sequence is not allowed as the "+roleDiagnostic.getMessage()), roleDiagnostic.getErrorCode(), null);
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
+                    typeError(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode(), null);
                 }
                 return operand;
             }
@@ -72,7 +73,7 @@ namespace Saxon.Hej.expr {
             return (p|Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED);
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
-            Saxon.Hej.expr.Expression e2 = new Saxon.Hej.expr.SingletonAtomizer(getBaseExpression().copy(rebindings), roleDiagnostic, allowEmpty);
+            Saxon.Hej.expr.Expression e2 = new Saxon.Hej.expr.SingletonAtomizer(getBaseExpression().copy(rebindings), roleSupplier, allowEmpty);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, e2);
             return e2;
         }
@@ -83,7 +84,7 @@ namespace Saxon.Hej.expr {
             return "SingletonAtomizer";
         }
         public Saxon.Hej.expr.parser.RoleDiagnostic getRole() {
-            return roleDiagnostic;
+            return roleSupplier();
         }
         public override Saxon.Hej.expr.parser.PathMap.PathMapNodeSet addToPathMap(Saxon.Hej.expr.parser.PathMap pathMap, Saxon.Hej.expr.parser.PathMap.PathMapNodeSet pathMapNodeSet) {
             Saxon.Hej.expr.parser.PathMap.PathMapNodeSet result = getBaseExpression().addToPathMap(pathMap, pathMapNodeSet);
@@ -97,39 +98,7 @@ namespace Saxon.Hej.expr {
             return null;
         }
         public override Saxon.Hej.value.AtomicValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            int found = 0;
-            Saxon.Hej.value.AtomicValue result = null;
-            Saxon.Hej.om.SequenceIterator iter = getBaseExpression().iterate(context);
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
-                Saxon.Hej.om.AtomicSequence seq;
-                try {
-                    seq = item.atomize();
-                } catch (Exception e) when (e is Saxon.Hej.expr.instruct.TerminationException || e is Saxon.Hej.functions.Error.UserDefinedXPathException) {
-                    throw;
-                } catch (Saxon.Hej.trans.XPathException e) {
-                    if ((roleDiagnostic == null)) {
-                        throw;
-                    } else {
-                        string message = ((e.Message+". Failed while atomizing the ")+roleDiagnostic.getMessage());
-                        Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-                        e2.setXPathContext(context);
-                        e2.maybeSetLocation(getLocation());
-                        throw e2;
-                    }
-                }
-                found += seq.getLength();
-                if ((found>1)) {
-                    typeError((("A sequence of more than one item is not allowed as the "+roleDiagnostic.getMessage())+Saxon.Hej.expr.CardinalityChecker.depictSequenceStart(getBaseExpression().iterate(context), 3)), roleDiagnostic.getErrorCode(), context);
-                }
-                if ((found == 1)) {
-                    result = ((/*1430*/Saxon.Hej.value.AtomicValue)seq.head());
-                }
-            }
-            if (((found == 0) && !(allowEmpty))) {
-                typeError(("An empty sequence is not allowed as the "+roleDiagnostic.getMessage()), roleDiagnostic.getErrorCode(), null);
-            }
-            return result;
+            return (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         public override Saxon.Hej.type.ItemType getItemType() {
             bool isSchemaAware = true;
@@ -188,6 +157,53 @@ namespace Saxon.Hej.expr {
         }
         public override string toShortString() {
             return getBaseExpression().toShortString();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.SingletonAtomizer.SingletonAtomizerElaborator();
+        }
+        private class SingletonAtomizerElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SingletonAtomizer expr = (Saxon.Hej.expr.SingletonAtomizer)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    int found = 0;
+                    Saxon.Hej.value.AtomicValue result = null;
+                    Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/baseEval(context);
+                    for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                        Saxon.Hej.om.AtomicSequence seq;
+                        try {
+                            seq = item.atomize();
+                        } catch (Exception e) when (e is Saxon.Hej.expr.instruct.TerminationException || e is Saxon.Hej.functions.Error.UserDefinedXPathException) {
+                            throw;
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            if ((expr.roleSupplier == null)) {
+                                throw;
+                            } else {
+                                Saxon.Hej.expr.parser.RoleDiagnostic role = expr.roleSupplier();
+                                string message = ((e.Message+". Failed while atomizing the ")+role.getMessage());
+                                Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                                e2.setXPathContext(context);
+                                e2.maybeSetLocation(expr.getLocation());
+                                throw e2;
+                            }
+                        }
+                        found += seq.getLength();
+                        if ((found>1)) {
+                            Saxon.Hej.expr.parser.RoleDiagnostic role = expr.roleSupplier();
+                            expr.typeError((("A sequence of more than one item is not allowed as the "+role.getMessage())+Saxon.Hej.expr.CardinalityChecker.depictSequenceStart(/*Delegate.iterate()*/baseEval(context), 3)), role.getErrorCode(), context);
+                        }
+                        if ((found == 1)) {
+                            result = ((/*1430*/Saxon.Hej.value.AtomicValue)seq.head());
+                        }
+                    }
+                    if (((found == 0) && !(expr.allowEmpty))) {
+                        Saxon.Hej.expr.parser.RoleDiagnostic role = expr.roleSupplier();
+                        expr.typeError(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode(), null);
+                    }
+                    return result;
+                } ;
+            }
+        
         }
     
     }

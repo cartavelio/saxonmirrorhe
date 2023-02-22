@@ -61,7 +61,7 @@ namespace Saxon.Impl.Dom {
                 _currentNode = element;
                 foreach (Saxon.Hej.om.NamespaceBinding ns in namespaces) {
                     string nsprefix = ns.getPrefix();
-                    string nsuri = ns.getURI();
+                    string nsuri = ns.getNamespaceUri().ToString();
                     if (!(nsuri.Equals(Saxon.Hej.lib.NamespaceConstant.XML))) {
                         if ((nsprefix.Length == 0)) {
                             element.SetAttribute("xmlns", uri);

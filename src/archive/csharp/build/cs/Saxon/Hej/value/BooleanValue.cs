@@ -6,21 +6,17 @@ namespace Saxon.Hej.value {
         private readonly bool value;
         public static readonly Saxon.Hej.value.BooleanValue TRUE = new Saxon.Hej.value.BooleanValue(true);
         public static readonly Saxon.Hej.value.BooleanValue FALSE = new Saxon.Hej.value.BooleanValue(false);
-        private BooleanValue(bool value)  {
+        private BooleanValue(bool value) : base (Saxon.Hej.type.BuiltInAtomicType.BOOLEAN) {
             this.value = value;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.BOOLEAN;
         }
         public static Saxon.Hej.value.BooleanValue get(bool value) {
             return (value ? TRUE : FALSE);
         }
-        public BooleanValue(bool value, Saxon.Hej.type.AtomicType typeLabel)  {
+        public BooleanValue(bool value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
             this.value = value;
-            this.typeLabel = typeLabel;
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.BooleanValue v = new Saxon.Hej.value.BooleanValue(value);
-            v.typeLabel = typeLabel;
-            return v;
+            return new Saxon.Hej.value.BooleanValue(value, typeLabel);
         }
         public static Saxon.Hej.type.ConversionResult fromString(Saxon.Hej.str.UnicodeString s) {
             long start = Saxon.Hej.value.Whitespace.trimmedStart(s);

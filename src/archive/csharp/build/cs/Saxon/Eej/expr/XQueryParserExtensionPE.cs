@@ -11,7 +11,7 @@ namespace Saxon.Eej.expr {
         public override void parseTypeAliasDeclaration(Saxon.Hej.query.XQueryParser p) {
             p.nextToken();
             p.expect(Saxon.Hej.expr.parser.Token.NAME);
-            Saxon.Hej.om.StructuredQName typeName = p.makeStructuredQName(p.getTokenizer().currentTokenValue, "");
+            Saxon.Hej.om.StructuredQName typeName = p.makeStructuredQName(p.getTokenizer().currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
             p.nextToken();
             p.expect(Saxon.Hej.expr.parser.Token.EQUALS);
             p.nextToken();

@@ -163,29 +163,29 @@ namespace Saxon.Hej.@event {
                 attributes.verify();
                 string prefix = elemName.getPrefix();
                 if (prefix.Length==0) {
-                    string declaredDefaultUri = namespaces.getDefaultNamespace();
-                    if (!(declaredDefaultUri.Equals(elemName.getURI()))) {
-                        throw new Saxon.Ejava.lang.IllegalStateException((((((("URI of element Q{"+elemName.getURI())+"}")+elemName.getLocalPart())+" does not match declared default namespace {")+declaredDefaultUri)+"}"));
+                    Saxon.Hej.om.NamespaceUri declaredDefaultUri = namespaces.getDefaultNamespace();
+                    if (!(declaredDefaultUri.Equals(elemName.getNamespaceUri()))) {
+                        throw new Saxon.Ejava.lang.IllegalStateException((((((("URI of element Q{"+elemName.getNamespaceUri())+"}")+elemName.getLocalPart())+" does not match declared default namespace {")+declaredDefaultUri)+"}"));
                     }
                 } else {
-                    string declaredUri = namespaces.getURI(prefix);
+                    Saxon.Hej.om.NamespaceUri declaredUri = namespaces.getNamespaceUri(prefix);
                     if ((declaredUri == null)) {
                         throw new Saxon.Ejava.lang.IllegalStateException((("Prefix "+prefix)+" has not been declared"));
                     } else {
-                        if (!(declaredUri.Equals(elemName.getURI()))) {
+                        if (!(declaredUri.Equals(elemName.getNamespaceUri()))) {
                             throw new Saxon.Ejava.lang.IllegalStateException((("Prefix "+prefix)+" is bound to the wrong namespace"));
                         }
                     }
                 }
                 foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                     Saxon.Hej.om.NodeName name = att.getNodeName();
-                    if (!(name.getURI().Length==0)) {
+                    if (!(name.getNamespaceUri().isEmpty())) {
                         string attPrefix = name.getPrefix();
-                        string declaredUri = namespaces.getURI(attPrefix);
+                        Saxon.Hej.om.NamespaceUri declaredUri = namespaces.getNamespaceUri(attPrefix);
                         if ((declaredUri == null)) {
                             throw new Saxon.Ejava.lang.IllegalStateException(((("Prefix "+attPrefix)+" has not been declared for attribute ")+att.getNodeName().getDisplayName()));
                         } else {
-                            if (!(declaredUri.Equals(name.getURI()))) {
+                            if (!(declaredUri.Equals(name.getNamespaceUri()))) {
                                 throw new Saxon.Ejava.lang.IllegalStateException((((("Prefix "+prefix)+" is bound to the wrong namespace {")+declaredUri)+"}"));
                             }
                         }

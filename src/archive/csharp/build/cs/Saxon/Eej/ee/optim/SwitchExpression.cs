@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.optim {
-    public class SwitchExpression : Saxon.Hej.expr.Expression, Saxon.Hej.expr.instruct.TailCallReturner, Saxon.Hej.expr.instruct.ConditionalInstruction {
+    public class SwitchExpression : Saxon.Hej.expr.Expression, Saxon.Hej.expr.instruct.ConditionalInstruction {
         private readonly Saxon.Hej.expr.Operand subjectOp;
         private readonly System.Collections.Generic.IList<Saxon.Hej.expr.Operand> actions;
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.expr.sort.AtomicMatchKey,int> map;
@@ -137,68 +137,16 @@ namespace Saxon.Eej.ee.optim {
             return this;
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.AtomicValue subjectValue = (Saxon.Hej.value.AtomicValue)(getSubjectExpression().evaluateItem(context));
-            if ((subjectValue == null)) {
-                return getOtherwiseExpression().evaluateItem(context);
-            }
-            Saxon.Hej.expr.sort.AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-            int selection = getIndex(key);
-            if ((selection == -1)) {
-                return getOtherwiseExpression().evaluateItem(context);
-            } else {
-                return actions[selection].getChildExpression().evaluateItem(context);
-            }
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
         }
-        private int getIndex(Saxon.Hej.expr.sort.AtomicMatchKey key) {
+        public int getIndex(Saxon.Hej.expr.sort.AtomicMatchKey key) {
             return Saxon.Impl.Helpers.MapUtils.GetOrDefault(map, key, -1);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.AtomicValue subjectValue = (Saxon.Hej.value.AtomicValue)(getSubjectExpression().evaluateItem(context));
-            if ((subjectValue == null)) {
-                return getOtherwiseExpression().iterate(context);
-            }
-            Saxon.Hej.expr.sort.AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-            int selection = getIndex(key);
-            if ((selection == -1)) {
-                return getOtherwiseExpression().iterate(context);
-            } else {
-                return actions[selection].getChildExpression().iterate(context);
-            }
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.AtomicValue subjectValue = (Saxon.Hej.value.AtomicValue)(getSubjectExpression().evaluateItem(context));
-            if ((subjectValue == null)) {
-                getOtherwiseExpression().process(output, context);
-                return ;
-            }
-            Saxon.Hej.expr.sort.AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-            int selection = getIndex(key);
-            if ((selection == -1)) {
-                getOtherwiseExpression().process(output, context);
-            } else {
-                actions[selection].getChildExpression().process(output, context);
-            }
-        }
-        public Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.AtomicValue subjectValue = (Saxon.Hej.value.AtomicValue)(getSubjectExpression().evaluateItem(context));
-            if ((subjectValue == null)) {
-                return doTailCall(getOtherwiseExpression(), output, context);
-            }
-            Saxon.Hej.expr.sort.AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-            int selection = Saxon.Impl.Helpers.MapUtils.GetOrDefault(map, key, -1);
-            if ((selection == -1)) {
-                return doTailCall(getOtherwiseExpression(), output, context);
-            } else {
-                return doTailCall(actions[selection].getChildExpression(), output, context);
-            }
-        }
-        private Saxon.Hej.expr.instruct.TailCall doTailCall(Saxon.Hej.expr.Expression o, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            if ((o is Saxon.Hej.expr.instruct.TailCallReturner)) {
-                return ((Saxon.Hej.expr.instruct.TailCallReturner)(o)).processLeavingTail(output, context);
-            } else {
-                o.process(output, context);
-                return null;
-            }
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override int getImplementationMethod() {
             return ((PROCESS_METHOD|ITERATE_METHOD)|EVALUATE_METHOD);
@@ -239,6 +187,78 @@ namespace Saxon.Eej.ee.optim {
         }
         public override string getStreamerName() {
             return "SwitchExpression";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.ee.optim.SwitchExpression.SwitchExprElaborator();
+        }
+        public class SwitchExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Eej.ee.optim.SwitchExpression expr = (Saxon.Eej.ee.optim.SwitchExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator subjectEvaluator = expr.getSubjectExpression().makeElaborator().elaborateForItem();
+                System.Collections.Generic.IList<Saxon.Hej.expr.elab.PullEvaluator> actionEvaluators = new System.Collections.Generic.List<Saxon.Hej.expr.elab.PullEvaluator>(expr.getActions().Count);
+                foreach (Saxon.Hej.expr.Operand o in expr.getActions()) {
+                    actionEvaluators.Add(o.getChildExpression().makeElaborator().elaborateForPull());
+                }
+                Saxon.Hej.expr.elab.PullEvaluator otherwiseEvaluator = expr.getOtherwiseExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    Saxon.Hej.value.AtomicValue subjectValue = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/subjectEvaluator(context));
+                    if ((subjectValue == null)) {
+                        return /*Delegate.iterate()*/otherwiseEvaluator(context);
+                    }
+                    Saxon.Hej.expr.sort.AtomicMatchKey key = subjectValue.getXPathMatchKey(expr.getCollation(), context.getImplicitTimezone());
+                    int selection = expr.getIndex(key);
+                    if ((selection == -1)) {
+                        return /*Delegate.iterate()*/otherwiseEvaluator(context);
+                    } else {
+                        return /*Delegate.iterate()*/actionEvaluators[selection](context);
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Eej.ee.optim.SwitchExpression expr = (Saxon.Eej.ee.optim.SwitchExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator subjectEvaluator = expr.getSubjectExpression().makeElaborator().elaborateForItem();
+                System.Collections.Generic.IList<Saxon.Hej.expr.elab.ItemEvaluator> actionEvaluators = new System.Collections.Generic.List<Saxon.Hej.expr.elab.ItemEvaluator>(expr.getActions().Count);
+                foreach (Saxon.Hej.expr.Operand o in expr.getActions()) {
+                    actionEvaluators.Add(o.getChildExpression().makeElaborator().elaborateForItem());
+                }
+                Saxon.Hej.expr.elab.ItemEvaluator otherwiseEvaluator = expr.getOtherwiseExpression().makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.value.AtomicValue subjectValue = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/subjectEvaluator(context));
+                    if ((subjectValue == null)) {
+                        return /*Delegate.eval()*/otherwiseEvaluator(context);
+                    }
+                    Saxon.Hej.expr.sort.AtomicMatchKey key = subjectValue.getXPathMatchKey(expr.getCollation(), context.getImplicitTimezone());
+                    int selection = expr.getIndex(key);
+                    if ((selection == -1)) {
+                        return /*Delegate.eval()*/otherwiseEvaluator(context);
+                    } else {
+                        return /*Delegate.eval()*/actionEvaluators[selection](context);
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Eej.ee.optim.SwitchExpression expr = (Saxon.Eej.ee.optim.SwitchExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator subjectEvaluator = expr.getSubjectExpression().makeElaborator().elaborateForItem();
+                System.Collections.Generic.IList<Saxon.Hej.expr.elab.PushEvaluator> actionEvaluators = new System.Collections.Generic.List<Saxon.Hej.expr.elab.PushEvaluator>(expr.getActions().Count);
+                foreach (Saxon.Hej.expr.Operand o in expr.getActions()) {
+                    actionEvaluators.Add(o.getChildExpression().makeElaborator().elaborateForPush());
+                }
+                Saxon.Hej.expr.elab.PushEvaluator otherwiseEvaluator = expr.getOtherwiseExpression().makeElaborator().elaborateForPush();
+                return (@out, context) => {
+                    Saxon.Hej.value.AtomicValue subjectValue = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/subjectEvaluator(context));
+                    if ((subjectValue == null)) {
+                        return /*Delegate.processLeavingTail()*/otherwiseEvaluator(@out, context);
+                    }
+                    Saxon.Hej.expr.sort.AtomicMatchKey key = subjectValue.getXPathMatchKey(expr.getCollation(), context.getImplicitTimezone());
+                    int selection = expr.getIndex(key);
+                    if ((selection == -1)) {
+                        return /*Delegate.processLeavingTail()*/otherwiseEvaluator(@out, context);
+                    } else {
+                        return /*Delegate.processLeavingTail()*/actionEvaluators[selection](@out, context);
+                    }
+                } ;
+            }
+        
         }
     
     }

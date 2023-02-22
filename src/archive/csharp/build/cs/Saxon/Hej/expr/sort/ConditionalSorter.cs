@@ -29,7 +29,7 @@ namespace Saxon.Hej.expr.sort {
             return (Saxon.Hej.expr.sort.DocumentSorter)(sorterOp.getChildExpression());
         }
         public override Saxon.Hej.expr.Expression simplify() {
-            return rewrite(x => x.simplify() /* converted from static method reference */);
+            return rewrite(x => x.simplify() /* method reference */);
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             return rewrite(exp => exp.typeCheck(visitor, contextInfo));
@@ -92,15 +92,30 @@ namespace Saxon.Hej.expr.sort {
             return getDocumentSorter().getItemType();
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            bool b = getCondition().effectiveBooleanValue(context);
-            if (b) {
-                return getDocumentSorter().iterate(context);
-            } else {
-                return getDocumentSorter().getBaseExpression().iterate(context);
-            }
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override string getExpressionName() {
             return "conditionalSort";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.sort.ConditionalSorter.ConditionalSorterElaborator();
+        }
+        public class ConditionalSorterElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.sort.ConditionalSorter expr = (Saxon.Hej.expr.sort.ConditionalSorter)(getExpression());
+                Saxon.Hej.expr.elab.BooleanEvaluator condition = expr.getCondition().makeElaborator().elaborateForBoolean();
+                Saxon.Hej.expr.elab.PullEvaluator sorter = expr.getDocumentSorter().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PullEvaluator nonSorter = expr.getDocumentSorter().getBaseExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    bool b = /*Delegate.eval()*/condition(context);
+                    if (b) {
+                        return /*Delegate.iterate()*/sorter(context);
+                    } else {
+                        return /*Delegate.iterate()*/nonSorter(context);
+                    }
+                } ;
+            }
+        
         }
     
     }

@@ -72,7 +72,7 @@ namespace Saxon.Eej.ee.schema {
         public override bool testAtomicValue(Saxon.Hej.value.AtomicValue value) {
             return true;
         }
-        public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
+        public override Saxon.Hej.om.FunctionItem getFacetAsFunctionItem() {
             Saxon.Eej.ee.schema.WhitespaceFacet facet = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

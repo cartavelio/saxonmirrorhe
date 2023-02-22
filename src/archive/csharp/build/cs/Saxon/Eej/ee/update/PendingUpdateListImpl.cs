@@ -25,7 +25,7 @@ namespace Saxon.Eej.ee.update {
                     throw conflict("rename", "XUDY0015", action.getTargetNode());
                 }
                 Saxon.Hej.om.NodeName newName = ((Saxon.Eej.ee.update.RenameAction)(action)).getNewName();
-                Saxon.Hej.om.NamespaceBinding nsCode = new Saxon.Hej.om.NamespaceBinding(newName.getPrefix(), newName.getURI());
+                Saxon.Hej.om.NamespaceBinding nsCode = new Saxon.Hej.om.NamespaceBinding(newName.getPrefix(), newName.getNamespaceUri());
                 Saxon.Hej.om.NodeInfo targetNode = action.getTargetNode();
                 int nodeKind = targetNode.getNodeKind();
                 if ((nodeKind == Saxon.Hej.type.Type.ATTRIBUTE)) {
@@ -61,7 +61,7 @@ namespace Saxon.Eej.ee.update {
                         Saxon.Hej.om.AttributeMap newAtts = ((Saxon.Eej.ee.update.ReplaceAttributeAction)(action)).getNewAttributes();
                         foreach (Saxon.Hej.om.AttributeInfo att in newAtts) {
                             if (!(test.matches(att.getNodeName().getStructuredQName()))) {
-                                Saxon.Hej.om.NamespaceBinding nsBinding = new Saxon.Hej.om.NamespaceBinding(att.getNodeName().getPrefix(), att.getNodeName().getURI());
+                                Saxon.Hej.om.NamespaceBinding nsBinding = new Saxon.Hej.om.NamespaceBinding(att.getNodeName().getPrefix(), att.getNodeName().getNamespaceUri());
                                 checkForNamespaceConflict(element, Saxon.Hej.type.Type.ATTRIBUTE, nsBinding, action);
                             }
                         }
@@ -75,7 +75,7 @@ namespace Saxon.Eej.ee.update {
                         } else {
                             if ((action is Saxon.Eej.ee.update.InsertAttributeAction)) {
                                 Saxon.Hej.om.NodeName name = ((Saxon.Eej.ee.update.InsertAttributeAction)(action)).getAttributeName();
-                                Saxon.Hej.om.NamespaceBinding nsCode = new Saxon.Hej.om.NamespaceBinding(name.getPrefix(), name.getURI());
+                                Saxon.Hej.om.NamespaceBinding nsCode = new Saxon.Hej.om.NamespaceBinding(name.getPrefix(), name.getNamespaceUri());
                                 Saxon.Hej.om.NodeInfo targetNode = action.getTargetNode();
                                 addAttributeAction(targetNode, action);
                                 checkForNamespaceConflict(targetNode, Saxon.Hej.type.Type.ATTRIBUTE, nsCode, action);
@@ -126,10 +126,10 @@ namespace Saxon.Eej.ee.update {
         private void checkForNamespaceConflict(Saxon.Hej.om.NodeInfo targetNode, int nodeKind, Saxon.Hej.om.NamespaceBinding nsCode, Saxon.Eej.ee.update.PendingUpdateAction action) {
             if (((targetNode != null) && (((nodeKind == Saxon.Hej.type.Type.ELEMENT) || !(nsCode.getPrefix().Length==0))))) {
                 string prefix = nsCode.getPrefix();
-                string uri = nsCode.getURI();
+                Saxon.Hej.om.NamespaceUri uri = nsCode.getNamespaceUri();
                 Saxon.Hej.om.NamespaceMap map = targetNode.getAllNamespaces();
-                string existingURI = map.getURI(prefix);
-                if ((((existingURI != null) && !(existingURI.Length==0)) && !(existingURI.Equals(uri)))) {
+                Saxon.Hej.om.NamespaceUri existingURI = map.getNamespaceUri(prefix);
+                if ((((existingURI != null) && !(existingURI.isEmpty())) && !(existingURI.Equals(uri)))) {
                     Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException(("An update action creates a namespace binding that conflicts with an existing "+"namespace binding on the same target element"));
                     err1.setErrorCode("XUDY0023");
                     err1.setIsTypeError(false);
@@ -141,7 +141,7 @@ namespace Saxon.Eej.ee.update {
                     nsmap = Saxon.Hej.om.NamespaceMap.of(prefix, uri);
                     Saxon.Impl.Helpers.MapUtils.Put(newNamespaceBindings, targetNode, nsmap);
                 } else {
-                    string existingUri = nsmap.getURI(prefix);
+                    Saxon.Hej.om.NamespaceUri existingUri = nsmap.getNamespaceUri(prefix);
                     if ((existingUri == null)) {
                         nsmap = nsmap.put(prefix, uri);
                         Saxon.Impl.Helpers.MapUtils.Put(newNamespaceBindings, targetNode, nsmap);
@@ -289,11 +289,11 @@ namespace Saxon.Eej.ee.update {
                 if ((action is Saxon.Eej.ee.update.RenameAction)) {
                     Saxon.Hej.om.NodeName nc = ((Saxon.Eej.ee.update.RenameAction)(action)).getNewName();
                     Saxon.Hej.om.NodeName newName = null;
-                    if ((element.getAttributeValue(nc.getURI(), nc.getLocalPart()) != null)) {
+                    if ((element.getAttributeValue(nc.getNamespaceUri(), nc.getLocalPart()) != null)) {
                         for (int n = 1; ; n++) {
                             string candidate = (nc.getLocalPart()+n);
-                            if ((element.getAttributeValue(nc.getURI(), candidate) == null)) {
-                                newName = new Saxon.Hej.om.FingerprintedQName(nc.getPrefix(), nc.getURI(), candidate);
+                            if ((element.getAttributeValue(nc.getNamespaceUri(), candidate) == null)) {
+                                newName = new Saxon.Hej.om.FingerprintedQName(nc.getPrefix(), nc.getNamespaceUri(), candidate);
                                 break ;
                             }
                         }

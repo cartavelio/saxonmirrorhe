@@ -17,6 +17,29 @@ namespace Saxon.Hej.functions {
         public override string getCompilerName() {
             return "BaseURICompiler";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.BaseUri_1.BaseUriFnElaborator();
+        }
+        public class BaseUriFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(arg.getCardinality());
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/argEval(context));
+                    if ((nullable && (node == null))) {
+                        return null;
+                    }
+                    string s = node.getBaseURI();
+                    if ((s == null)) {
+                        return null;
+                    }
+                    return new Saxon.Hej.value.AnyURIValue(s);
+                } ;
+            }
+        
+        }
     
     }
 }

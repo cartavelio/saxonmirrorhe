@@ -9,12 +9,15 @@ namespace Saxon.Hej.functions {
             Saxon.Ejava.lang.System.arraycopy(arguments, 1, additionalArgs, 0, additionalArgs.Length);
             Saxon.Hej.functions.Fold fold = getFold(context, additionalArgs);
             Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
-                fold.processItem(item);
-                if (fold.isFinished()) {
-                    break ;
+            try {
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                    fold.processItem(item);
+                    if (fold.isFinished()) {
+                        break ;
+                    }
                 }
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
             return fold.result();
         }

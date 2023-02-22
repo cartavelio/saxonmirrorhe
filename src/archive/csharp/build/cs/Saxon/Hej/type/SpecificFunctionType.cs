@@ -178,7 +178,7 @@ namespace Saxon.Hej.type {
             return prio;
         }
         public override bool matches(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
-            if (!(((item is Saxon.Hej.om.Function)))) {
+            if (!(((item is Saxon.Hej.om.FunctionItem)))) {
                 return false;
             }
             if ((item is Saxon.Hej.ma.map.MapItem)) {
@@ -209,11 +209,11 @@ namespace Saxon.Hej.type {
                     return false;
                 }
             }
-            Saxon.Hej.type.Affinity affinity = th.relationship(((Saxon.Hej.om.Function)(item)).getFunctionItemType(), this);
+            Saxon.Hej.type.Affinity affinity = th.relationship(((Saxon.Hej.om.FunctionItem)(item)).getFunctionItemType(), this);
             return ((affinity == Saxon.Hej.type.Affinity.SAME_TYPE) || (affinity == Saxon.Hej.type.Affinity.SUBSUMED_BY));
         }
         public override  /* REPLACING public */ Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
-            if (!(((item is Saxon.Hej.om.Function)))) {
+            if (!(((item is Saxon.Hej.om.FunctionItem)))) {
                 return Saxon.Ejava.util.Optional<string>.empty();
             }
             if ((item is Saxon.Hej.ma.map.MapItem)) {
@@ -266,9 +266,9 @@ namespace Saxon.Hej.type {
                     return Saxon.Ejava.util.Optional<string>.of(s);
                 }
             }
-            Saxon.Hej.type.FunctionItemType other = ((Saxon.Hej.om.Function)(item)).getFunctionItemType();
-            if ((getArity() != ((Saxon.Hej.om.Function)(item)).getArity())) {
-                string s = ((("The required function arity is "+getArity())+"; the supplied function has arity ")+((Saxon.Hej.om.Function)(item)).getArity());
+            Saxon.Hej.type.FunctionItemType other = ((Saxon.Hej.om.FunctionItem)(item)).getFunctionItemType();
+            if ((getArity() != ((Saxon.Hej.om.FunctionItem)(item)).getArity())) {
+                string s = ((("The required function arity is "+getArity())+"; the supplied function has arity ")+((Saxon.Hej.om.FunctionItem)(item)).getArity());
                 return Saxon.Ejava.util.Optional<string>.of(s);
             }
             Saxon.Hej.type.Affinity affinity = th.sequenceTypeRelationship(resultType, other.getResultType());
@@ -285,7 +285,7 @@ namespace Saxon.Hej.type {
             }
             return Saxon.Ejava.util.Optional<string>.empty();
         }
-        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.parser.RoleDiagnostic role) {
+        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
             return new Saxon.Hej.functions.hof.FunctionSequenceCoercer(exp, this, role);
         }
     

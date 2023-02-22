@@ -96,7 +96,7 @@ namespace Saxon.Eej.ee.stream.watch {
                             gp.feed.open(getTerminator());
                         } else {
                             Saxon.Eej.ee.stream.feed.FilteringFeed.Filter filter = new Saxon.Eej.ee.stream.feed.FilteringFeed.FilterLambda((item, position) => (pattern.matchesBeneathAnchor((Saxon.Hej.om.NodeInfo)(item), anchorNode, bodyContext) ? /*explicit enum*/ Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.MATCHES : /*explicit enum*/ Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.SKIP));
-                            gp.feed = new Saxon.Eej.ee.stream.feed.FilteringFeed(actionFeed, getContext(), filter);
+                            gp.feed = new Saxon.Eej.ee.stream.feed.FilteringFeed(watchManager, actionFeed, getContext(), filter);
                             if ((pattern is Saxon.Hej.pattern.AncestorQualifiedPattern)) {
                                 getWatchManager().addWatch(watch, true);
                                 gp.feed = new Saxon.Eej.ee.stream.feed.NoCloseFeed(gp.feed, getContext());

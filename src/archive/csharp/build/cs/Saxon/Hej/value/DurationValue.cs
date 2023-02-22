@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public class DurationValue : Saxon.Hej.value.AtomicValue, Saxon.Hej.expr.sort.AtomicMatchKey {
-        protected internal bool _negative = false;
-        protected internal int _months = 0;
-        protected internal long _seconds = 0;
-        protected internal int _nanoseconds = 0;
-        protected internal DurationValue()  {
-        }
+        protected internal readonly bool _negative;
+        protected internal readonly int _months;
+        protected internal readonly long _seconds;
+        protected internal readonly int _nanoseconds;
         public DurationValue(bool positive, int years, int months, int days, int hours, int minutes, long seconds, int microseconds) : this (positive, years, months, days, hours, minutes, seconds, microseconds, Saxon.Hej.type.BuiltInAtomicType.DURATION) {
         }
-        public DurationValue(bool positive, int years, int months, int days, int hours, int minutes, long seconds, int microseconds, Saxon.Hej.type.AtomicType type)  {
-            this._negative = !(positive);
+        public DurationValue(bool positive, int years, int months, int days, int hours, int minutes, long seconds, int microseconds, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
             if ((((((((years<0) || (months<0)) || (days<0)) || (hours<0)) || (minutes<0)) || (seconds<0)) || (microseconds<0))) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException("Negative component value");
             }
@@ -27,10 +24,9 @@ namespace Saxon.Hej.value {
             long m = ((h*60L)+minutes);
             this._seconds = ((m*60L)+seconds);
             this._nanoseconds = (microseconds*1000);
-            normalizeZeroDuration();
-            typeLabel = type;
+            this._negative = isNegativeDuration(!(positive));
         }
-        public DurationValue(int years, int months, int days, int hours, int minutes, long seconds, int nanoseconds, Saxon.Hej.type.AtomicType type)  {
+        public DurationValue(int years, int months, int days, int hours, int minutes, long seconds, int nanoseconds, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
             bool somePositive = (((((((years>0) || (months>0)) || (days>0)) || (hours>0)) || (minutes>0)) || (seconds>0)) || (nanoseconds>0));
             bool someNegative = (((((((years<0) || (months<0)) || (days<0)) || (hours<0)) || (minutes<0)) || (seconds<0)) || (nanoseconds<0));
             if ((somePositive && someNegative)) {
@@ -56,9 +52,7 @@ namespace Saxon.Hej.value {
             long m = ((h*60L)+minutes);
             this._seconds = ((m*60L)+seconds);
             this._nanoseconds = nanoseconds;
-            _negative = someNegative;
-            normalizeZeroDuration();
-            typeLabel = type;
+            this._negative = someNegative;
         }
         protected internal static void formatFractionalSeconds(Saxon.Hej.str.UnicodeBuilder sb, int seconds, long nanosecs) {
             string mss = (nanosecs+"");
@@ -75,9 +69,11 @@ namespace Saxon.Hej.value {
             sb.append(mss.Substring((mss.Length-9), (lastSigDigit+1) - (mss.Length-9)));
             sb.append('S');
         }
-        protected internal void normalizeZeroDuration() {
+        protected internal bool isNegativeDuration(bool nonPositive) {
             if ((((_months == 0) && (_seconds == 0L)) && (_nanoseconds == 0))) {
-                _negative = false;
+                return false;
+            } else {
+                return nonPositive;
             }
         }
         public static Saxon.Hej.type.ConversionResult makeDuration(Saxon.Hej.str.UnicodeString s) {
@@ -323,7 +319,7 @@ namespace Saxon.Hej.value {
             if ((((_months == 0) && (_seconds == 0L)) && (_nanoseconds == 0))) {
                 return Saxon.Hej.str.BMPString.of("PT0S");
             }
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             if (_negative) {
                 sb.append('-');
             }

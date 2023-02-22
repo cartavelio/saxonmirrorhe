@@ -7,13 +7,7 @@ namespace Saxon.Hej.pattern {
         private bool recoverable = true;
         private string originalText;
         public static Saxon.Hej.pattern.Pattern make(string pattern, Saxon.Hej.expr.StaticContext env, Saxon.Hej.expr.PackageData packageData) {
-            int languageLevel = env.getXPathVersion();
-            if ((languageLevel == 30)) {
-                languageLevel = 305;
-            }
-            int lineNumber = ((env is Saxon.Hej.style.ExpressionContext) ? ((Saxon.Hej.style.ExpressionContext)(env)).getStyleElement().getLineNumber() : -1);
-            Saxon.Hej.pattern.PatternParser parser = (Saxon.Hej.pattern.PatternParser)(env.getConfiguration().newExpressionParser("PATTERN", false, languageLevel));
-            parser.setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XSLT_PATTERN, languageLevel);
+            Saxon.Hej.pattern.PatternParser parser = (Saxon.Hej.pattern.PatternParser)(env.getConfiguration().newExpressionParser("PATTERN", false));
             Saxon.Hej.pattern.Pattern pat = parser.parsePattern(pattern, env);
             pat.setRetainedStaticContext(env.makeRetainedStaticContext());
             pat = pat.simplify();
@@ -170,6 +164,16 @@ namespace Saxon.Hej.pattern {
         }
         public override string toShortString() {
             return ToString();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.pattern.Pattern.PatternElaborator();
+        }
+        private class PatternElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.pattern.Pattern pat = (Saxon.Hej.pattern.Pattern)(getExpression());
+                return context => pat.matches(context.getContextItem(), context);
+            }
+        
         }
     
     }

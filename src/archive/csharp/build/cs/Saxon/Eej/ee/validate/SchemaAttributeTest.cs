@@ -39,7 +39,7 @@ namespace Saxon.Eej.ee.validate {
             if (node.hasFingerprint()) {
                 return (((node.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && (node.getFingerprint() == declaration.getFingerprint())) && /*134*/Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()));
             } else {
-                return ((((node.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && node.getURI().Equals(declaration.getTargetNamespace())) && node.getLocalPart().Equals(declaration.getName())) && /*134*/Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()));
+                return ((((node.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && node.getNamespaceUri().Equals(declaration.getTargetNamespace())) && node.getLocalPart().Equals(declaration.getName())) && /*134*/Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()));
             }
         }
         public override double getDefaultPriority() {
@@ -72,7 +72,7 @@ namespace Saxon.Eej.ee.validate {
                 return explanation;
             }
             Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
-            Saxon.Hej.om.StructuredQName name = new Saxon.Hej.om.StructuredQName("", node.getURI(), node.getLocalPart());
+            Saxon.Hej.om.StructuredQName name = new Saxon.Hej.om.StructuredQName("", node.getNamespaceUri(), node.getLocalPart());
             if (!(declaration.getComponentName().Equals(name))) {
                 return Saxon.Ejava.util.Optional<string>.of("The supplied attribute has the wrong name");
             }

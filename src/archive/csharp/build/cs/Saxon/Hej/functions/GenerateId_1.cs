@@ -21,6 +21,38 @@ namespace Saxon.Hej.functions {
         public override string getCompilerName() {
             return "GenerateIdCompiler";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.GenerateId_1.GenerateIdElaborator();
+        }
+        public class GenerateIdElaborator : Saxon.Hej.expr.elab.StringElaborator {
+            public override Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthIfAbsent) {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(arg.getCardinality());
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/argEval(context));
+                    if ((nullable && (node == null))) {
+                        return Saxon.Hej.str.EmptyUnicodeString.getInstance();
+                    }
+                    return generateId(node).getUnicodeStringValue();
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthIfAbsent) {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(arg.getCardinality());
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/argEval(context));
+                    if ((nullable && (node == null))) {
+                        return "";
+                    }
+                    return generateId(node).getStringValue();
+                } ;
+            }
+        
+        }
     
     }
 }

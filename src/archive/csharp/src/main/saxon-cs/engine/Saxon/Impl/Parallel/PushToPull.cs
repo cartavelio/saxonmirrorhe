@@ -2,6 +2,7 @@ using Saxon.Eej.config;
 using Saxon.Eej.ee.parallel;
 using Saxon.Eej.ee.trans;
 using Saxon.Hej.expr;
+using Saxon.Hej.expr.elab;
 
 namespace Saxon.Impl.Parallel {
     using System;
@@ -26,11 +27,11 @@ namespace Saxon.Impl.Parallel {
     public class PushToPull {
         // The stopper item is placed on the channel to indicate that the input is complete
         private static readonly Item STOPPER = new StringValue("stopper");
-        private readonly Pusher pusher;
+        private readonly PushEvaluator pusher;
         private readonly XPathContext context;
         private readonly Channel<Outcome<Item>> channel = Channel.CreateBounded<Outcome<Item>>(50);
 
-        public PushToPull(Pusher pusher,
+        public PushToPull(PushEvaluator pusher,
             Saxon.Hej.expr.XPathContext context) {
             this.pusher = pusher;
             this.context = context;
@@ -70,9 +71,9 @@ namespace Saxon.Impl.Parallel {
         private class Provider  {
             private readonly XPathContext context;
             private readonly Channel<Outcome<Saxon.Hej.om.Item>> queue;
-            private readonly Pusher pusher;
+            private readonly PushEvaluator pusher;
 
-            public Provider(Pusher pusher,
+            public Provider(PushEvaluator pusher,
                 Channel<Outcome<Item>> queue, XPathContext context) {
                 this.pusher = pusher;
                 this.queue = queue;
@@ -84,7 +85,7 @@ namespace Saxon.Impl.Parallel {
                 pipe.setXPathContext(context);
                 PushToPull.QueueWriter q = new PushToPull.QueueWriter(queue, pipe);
                 try {
-                    pusher.push(new Saxon.Hej.@event.ComplexContentOutputter(q), context);
+                    pusher(new Saxon.Hej.@event.ComplexContentOutputter(q), context);
                     queue.Writer.WriteAsync(new Outcome<Item>(STOPPER));
                     //queue.Writer.Complete();
                 }

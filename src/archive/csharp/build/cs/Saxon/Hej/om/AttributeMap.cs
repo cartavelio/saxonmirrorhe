@@ -5,9 +5,9 @@ namespace Saxon.Hej.om {
     public interface AttributeMap : System.Collections.Generic.IEnumerable<Saxon.Hej.om.AttributeInfo> {
         int size();
         Saxon.Hej.om.AttributeInfo get(Saxon.Hej.om.NodeName name);
-        Saxon.Hej.om.AttributeInfo get(string uri, string local);
+        Saxon.Hej.om.AttributeInfo get(Saxon.Hej.om.NamespaceUri uri, string local);
         Saxon.Hej.om.AttributeInfo getByFingerprint(int fingerprint, Saxon.Hej.om.NamePool namePool);
-        string getValue(string uri, string local);
+        string getValue(Saxon.Hej.om.NamespaceUri uri, string local);
         string getValue(string local);
         Saxon.Hej.om.AttributeMap put(Saxon.Hej.om.AttributeInfo att);
         Saxon.Hej.om.AttributeMap remove(Saxon.Hej.om.NodeName name);

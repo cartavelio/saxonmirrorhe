@@ -15,6 +15,7 @@ namespace Saxon.Hej.om {
         Saxon.Hej.om.SpaceStrippingRule getSpaceStrippingRule();
         void setUserData(string key, System.Object value);
         System.Object getUserData(string key);
+        Saxon.Hej.om.Durability getDurability();
     
     }
 }

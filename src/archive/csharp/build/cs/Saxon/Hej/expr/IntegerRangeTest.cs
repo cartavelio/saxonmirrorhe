@@ -69,20 +69,31 @@ namespace Saxon.Hej.expr {
             return h;
         }
         public override Saxon.Hej.value.BooleanValue evaluateItem(Saxon.Hej.expr.XPathContext c) {
+            return Saxon.Hej.value.BooleanValue.get(effectiveBooleanValue(c));
+        }
+        public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext c) {
+            try {
+                return eval(context => getMin().evaluateItem(context), context => getMax().evaluateItem(context), context => getValue().iterate(context), c);
+            } catch (Saxon.Hej.trans.XPathException e) {
+                e.maybeSetLocation(getLocation());
+                throw;
+            }
+        }
+        public static bool eval(Saxon.Hej.expr.elab.ItemEvaluator minEval, Saxon.Hej.expr.elab.ItemEvaluator maxEval, Saxon.Hej.expr.elab.PullEvaluator valueEval, Saxon.Hej.expr.XPathContext c) {
             Saxon.Hej.value.IntegerValue minVal = null;
             Saxon.Hej.value.IntegerValue maxVal = null;
             Saxon.Hej.type.StringConverter toDouble = null;
-            Saxon.Hej.om.SequenceIterator iter = getValue().iterate(c);
+            Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/valueEval(c);
             Saxon.Hej.value.AtomicValue atom;
             while (((atom = (Saxon.Hej.value.AtomicValue)(iter.next())) != null)) {
                 if ((minVal == null)) {
-                    minVal = (Saxon.Hej.value.IntegerValue)(getMin().evaluateItem(c));
+                    minVal = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/minEval(c));
                     if ((minVal == null)) {
-                        return Saxon.Hej.value.BooleanValue.FALSE;
+                        return false;
                     }
-                    maxVal = (Saxon.Hej.value.IntegerValue)(getMax().evaluateItem(c));
+                    maxVal = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/maxEval(c));
                     if (((maxVal == null) || (maxVal.compareTo(minVal)<0))) {
-                        return Saxon.Hej.value.BooleanValue.FALSE;
+                        return false;
                     }
                 }
                 Saxon.Hej.value.NumericValue v;
@@ -92,9 +103,7 @@ namespace Saxon.Hej.expr {
                     }
                     Saxon.Hej.type.ConversionResult result = toDouble.convertString(atom.getUnicodeStringValue());
                     if ((result is Saxon.Hej.type.ValidationFailure)) {
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Failed to convert untypedAtomic value {"+atom.getUnicodeStringValue())+"}  to xs:integer"), "FORG0001");
-                        e.setLocation(getLocation());
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException((("Failed to convert untypedAtomic value {"+atom.getUnicodeStringValue())+"}  to xs:integer"), "FORG0001");
                     } else {
                         v = (Saxon.Hej.value.DoubleValue)(result.asAtomic());
                     }
@@ -104,15 +113,14 @@ namespace Saxon.Hej.expr {
                     } else {
                         Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Cannot compare value of type "+atom.getUType())+" to xs:integer"), "XPTY0004");
                         e.setIsTypeError(true);
-                        e.setLocation(getLocation());
                         throw e;
                     }
                 }
                 if (((v.isWholeNumber() && (v.compareTo(minVal)>=0)) && (v.compareTo(maxVal)<=0))) {
-                    return Saxon.Hej.value.BooleanValue.TRUE;
+                    return true;
                 }
             }
-            return Saxon.Hej.value.BooleanValue.FALSE;
+            return false;
         }
         public override string getExpressionName() {
             return "intRangeTest";
@@ -126,6 +134,19 @@ namespace Saxon.Hej.expr {
         }
         public override string ToString() {
             return (((((Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getValue())+" = (")+Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getMin()))+" to ")+Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getMax()))+")");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.IntegerRangeTest.IntegerRangeTestElaborator();
+        }
+        public class IntegerRangeTestElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.IntegerRangeTest expr = (Saxon.Hej.expr.IntegerRangeTest)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator iv1 = expr.getMin().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator iv2 = expr.getMax().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.PullEvaluator iv3 = expr.getValue().makeElaborator().elaborateForPull();
+                return (context) => Saxon.Hej.expr.IntegerRangeTest.eval(iv1, iv2, iv3, context);
+            }
+        
         }
     
     }

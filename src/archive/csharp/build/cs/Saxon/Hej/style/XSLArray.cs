@@ -4,6 +4,9 @@ using System.Linq;
 namespace Saxon.Hej.style {
     public class XSLArray : Saxon.Hej.style.XSLSequence {
         private bool composite;
+        public override bool isInXsltNamespace() {
+            return getNodeName().hasURI(Saxon.Hej.om.NamespaceUri.XSLT);
+        }
         protected internal override void prepareAttributes() {
             foreach (Saxon.Hej.om.AttributeInfo att in attributes()) {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
@@ -21,7 +24,7 @@ namespace Saxon.Hej.style {
             }
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
-            if (getURI().Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
+            if (isInXsltNamespace()) {
                 requireXslt40(null);
             } else {
                 if (!(getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION))) {
@@ -33,10 +36,10 @@ namespace Saxon.Hej.style {
             }
             Saxon.Hej.expr.Expression functionCall;
             if (composite) {
-                Saxon.Hej.functions.SystemFunction arrayOf = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance().makeFunction("of", 1);
+                Saxon.Hej.functions.SystemFunction arrayOf = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(40).makeFunction("of", 1);
                 functionCall = arrayOf.makeFunctionCall(getSelectExpression());
             } else {
-                Saxon.Hej.functions.SystemFunction arrayFromSeq = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance().makeFunction("_from-sequence", 1);
+                Saxon.Hej.functions.SystemFunction arrayFromSeq = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(40).makeFunction("_from-sequence", 1);
                 functionCall = arrayFromSeq.makeFunctionCall(getSelectExpression());
             }
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);

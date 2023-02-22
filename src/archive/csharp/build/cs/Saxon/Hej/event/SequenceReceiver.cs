@@ -81,8 +81,8 @@ namespace Saxon.Hej.@event {
                             endDocument();
                         } else {
                             if (((kind == Saxon.Hej.type.Type.ATTRIBUTE) || (kind == Saxon.Hej.type.Type.NAMESPACE))) {
-                                string description = ((kind == Saxon.Hej.type.Type.ATTRIBUTE) ? "an attribute" : "a namespace");
-                                throw new Saxon.Hej.trans.XPathException((("Sequence normalization: Cannot process "+description)+" node"), "SENR0001", locationId);
+                                string description = ((kind == Saxon.Hej.type.Type.ATTRIBUTE) ? "attribute" : "namespace");
+                                throw new Saxon.Hej.trans.XPathException((((("Sequence normalization: Cannot process free-standing "+description)+" node (")+node.getDisplayName())+")"), "SENR0001", locationId);
                             } else {
                                 int copyOptions = Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS;
                                 if (Saxon.Hej.@event.ReceiverOption.contains(copyNamespaces, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES)) {

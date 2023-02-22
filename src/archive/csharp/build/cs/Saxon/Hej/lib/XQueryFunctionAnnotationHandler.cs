@@ -43,8 +43,8 @@ namespace Saxon.Hej.lib {
                 }
             }
         }
-        public string getAssertionNamespace() {
-            return "http://www.w3.org/2012/xquery";
+        public Saxon.Hej.om.NamespaceUri getAssertionNamespace() {
+            return Saxon.Hej.om.NamespaceUri.of("http://www.w3.org/2012/xquery");
         }
         public bool satisfiesAssertion(Saxon.Hej.query.Annotation assertion, Saxon.Hej.query.AnnotationList annotationList) {
             return true;

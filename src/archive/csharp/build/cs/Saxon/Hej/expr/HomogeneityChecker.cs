@@ -58,6 +58,19 @@ namespace Saxon.Hej.expr {
         public override string getExpressionName() {
             return "homCheck";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.HomogeneityChecker.HomogeneityCheckerElaborator();
+        }
+        public class HomogeneityCheckerElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.HomogeneityChecker exp = (Saxon.Hej.expr.HomogeneityChecker)(getExpression());
+                Saxon.Hej.s9api.Location location = exp.getLocation();
+                Saxon.Hej.expr.Expression arg = exp.getBaseExpression();
+                Saxon.Hej.expr.elab.PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
+                return context => new Saxon.Hej.tree.iter.HomogeneityCheckerIterator(/*Delegate.iterate()*/argEval(context), location);
+            }
+        
+        }
     
     }
 }

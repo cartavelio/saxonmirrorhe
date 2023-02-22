@@ -14,7 +14,7 @@ namespace Saxon.Hej.functions {
             }
         }
         public static bool endsWith(Saxon.Hej.str.UnicodeString arg0, Saxon.Hej.str.UnicodeString arg1, Saxon.Hej.lib.SubstringMatcher collator) {
-            if ((((arg1 == null) || arg1.isEmpty()) || collator.comparesEqual(arg1, Saxon.Hej.str.EmptyUnicodeString.getInstance()))) {
+            if ((((arg1 == null) || arg1.isEmpty()) || collator.isEqualToEmpty(arg1))) {
                 return true;
             }
             if (((arg0 == null) || arg0.isEmpty())) {

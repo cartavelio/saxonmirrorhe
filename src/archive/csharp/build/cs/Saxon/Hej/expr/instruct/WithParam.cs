@@ -9,7 +9,7 @@ namespace Saxon.Hej.expr.instruct {
         private int slotNumber = -1;
         private Saxon.Hej.value.SequenceType requiredType;
         private Saxon.Hej.om.StructuredQName variableQName;
-        private Saxon.Hej.expr.parser.Evaluator evaluator = null;
+        private Saxon.Hej.expr.elab.SequenceEvaluator evaluator = null;
         public WithParam()  {
         }
         public void setSelectExpression(Saxon.Hej.expr.Expression parent, Saxon.Hej.expr.Expression select) {
@@ -63,18 +63,18 @@ namespace Saxon.Hej.expr.instruct {
             if ((@params != null)) {
                 foreach (Saxon.Hej.expr.instruct.WithParam param in @params) {
                     param.selectOp.optimize(visitor, contextItemType);
-                    param.computeEvaluator();
                 }
             }
         }
-        public Saxon.Hej.expr.parser.Evaluator getEvaluationMode() {
+        public Saxon.Hej.expr.elab.SequenceEvaluator getEvaluator() {
             if ((evaluator == null)) {
-                computeEvaluator();
+                makeEvaluator();
             }
             return evaluator;
         }
-        private void computeEvaluator() {
-            evaluator = Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluator(selectOp.getChildExpression(), true);
+        private void makeEvaluator() {
+            Saxon.Hej.expr.Expression select = selectOp.getChildExpression();
+            evaluator = new Saxon.Hej.expr.elab.LearningEvaluator(select, select.makeElaborator().lazily(true));
         }
         public static Saxon.Hej.expr.instruct.WithParam[] copy(Saxon.Hej.expr.Expression parent, Saxon.Hej.expr.instruct.WithParam[] @params, Saxon.Hej.expr.parser.RebindingMap rebindings) {
             if ((@params == null)) {
@@ -113,7 +113,6 @@ namespace Saxon.Hej.expr.instruct {
                     if (!(flags.Length==0)) {
                         @out.emitAttribute("flags", flags);
                     }
-                    Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions());
                     if ((param.getRequiredType() != Saxon.Hej.value.SequenceType.ANY_SEQUENCE)) {
                         @out.emitAttribute("as", param.getRequiredType().toAlphaCode());
                     }
@@ -127,11 +126,11 @@ namespace Saxon.Hej.expr.instruct {
         }
         public Saxon.Hej.om.Sequence getSelectValue(Saxon.Hej.expr.XPathContext context) {
             if ((evaluator == null)) {
-                computeEvaluator();
+                makeEvaluator();
             }
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_WITH_PARAM);
-            Saxon.Hej.om.Sequence result = evaluator.evaluate(selectOp.getChildExpression(), context);
+            Saxon.Hej.om.Sequence result = evaluator.evaluate(context);
             context.setTemporaryOutputState(savedOutputState);
             return result;
         }

@@ -113,11 +113,20 @@ namespace Saxon.Hej.expr {
             return this;
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
+            if ((visitor.isOptimizeForStreaming() && (getSelectExpression() is Saxon.Hej.expr.GlobalVariableReference))) {
+                visitor.setOptimizeForStreaming(false);
+                Saxon.Hej.expr.Expression eOpt = optimize(visitor, contextItemType);
+                visitor.setOptimizeForStreaming(true);
+                return eOpt;
+            }
             Saxon.Hej.Configuration config = visitor.getConfiguration();
             Saxon.Hej.expr.parser.Optimizer opt = visitor.obtainOptimizer();
             bool tracing = config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_OPTIMIZER_DECISIONS);
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
             getLhs().optimize(visitor, contextItemType);
+            if (Saxon.Hej.expr.Literal.isEmptySequence(getSelectExpression())) {
+                return getSelectExpression();
+            }
             getBase().setFiltered(true);
             Saxon.Hej.expr.parser.ContextItemStaticInfo baseItemType = config.makeContextItemStaticInfo(getSelectExpression().getItemType(), false);
             baseItemType.setContextSettingExpression(getBase());
@@ -320,7 +329,7 @@ namespace Saxon.Hej.expr {
                 if (Saxon.Hej.value.Cardinality.allowsZero(card)) {
                     Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
                     let.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(comparand.getItemType(), card));
-                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.lib.NamespaceConstant.SAXON, ("pp"+let.GetHashCode())));
+                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.om.NamespaceUri.SAXON, ("pp"+let.GetHashCode())));
                     let.setSequence(comparand);
                     comparand = new Saxon.Hej.expr.LocalVariableReference(let);
                     Saxon.Hej.expr.LocalVariableReference existsArg = new Saxon.Hej.expr.LocalVariableReference(let);
@@ -359,7 +368,7 @@ namespace Saxon.Hej.expr {
                     }
                     Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
                     let.setRequiredType(Saxon.Hej.value.SequenceType.SINGLE_INTEGER);
-                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("nn", Saxon.Hej.lib.NamespaceConstant.SAXON, ("nn"+let.GetHashCode())));
+                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("nn", Saxon.Hej.om.NamespaceUri.SAXON, ("nn"+let.GetHashCode())));
                     let.setSequence(min);
                     min = new Saxon.Hej.expr.LocalVariableReference(let);
                     Saxon.Hej.expr.LocalVariableReference min2 = new Saxon.Hej.expr.LocalVariableReference(let);
@@ -447,7 +456,7 @@ namespace Saxon.Hej.expr {
                     {
                         Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
                         let.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(comparand.getItemType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ONE));
-                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.lib.NamespaceConstant.SAXON, ("pp"+let.GetHashCode())));
+                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.om.NamespaceUri.SAXON, ("pp"+let.GetHashCode())));
                         let.setSequence(comparand);
                         Saxon.Hej.expr.LocalVariableReference isWholeArg = new Saxon.Hej.expr.LocalVariableReference(let);
                         Saxon.Hej.expr.LocalVariableReference arithArg = new Saxon.Hej.expr.LocalVariableReference(let);
@@ -470,7 +479,7 @@ namespace Saxon.Hej.expr {
                         Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(start, let);
                         let.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(comparand.getItemType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ONE));
-                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.lib.NamespaceConstant.SAXON, ("pp"+let.GetHashCode())));
+                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.om.NamespaceUri.SAXON, ("pp"+let.GetHashCode())));
                         let.setSequence(comparand);
                         Saxon.Hej.expr.LocalVariableReference isWholeArg = new Saxon.Hej.expr.LocalVariableReference(let);
                         Saxon.Hej.expr.LocalVariableReference castArg = new Saxon.Hej.expr.LocalVariableReference(let);
@@ -487,7 +496,7 @@ namespace Saxon.Hej.expr {
                     {
                         Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
                         let.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(comparand.getItemType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ONE));
-                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.lib.NamespaceConstant.SAXON, ("pp"+let.GetHashCode())));
+                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("pp", Saxon.Hej.om.NamespaceUri.SAXON, ("pp"+let.GetHashCode())));
                         let.setSequence(comparand);
                         Saxon.Hej.expr.LocalVariableReference isWholeArg = new Saxon.Hej.expr.LocalVariableReference(let);
                         Saxon.Hej.expr.LocalVariableReference arithArg = new Saxon.Hej.expr.LocalVariableReference(let);
@@ -615,7 +624,7 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.om.SequenceIterator it = getFilter().iterate(context);
                     Saxon.Hej.om.Item first = it.next();
                     if ((first == null)) {
-                        return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                     }
                     if ((first is Saxon.Hej.value.NumericValue)) {
                         if ((it.next() != null)) {
@@ -641,7 +650,7 @@ namespace Saxon.Hej.expr {
                                     }
                                 }
                             }
-                            return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                            return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                         }
                     } else {
                         bool ebv = false;
@@ -667,7 +676,7 @@ namespace Saxon.Hej.expr {
                         if (ebv) {
                             return getBase().iterate(context);
                         } else {
-                            return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                            return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                         }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
@@ -724,6 +733,93 @@ namespace Saxon.Hej.expr {
             filterIsIndependent = flags.Contains("i");
             filterIsPositional = flags.Contains("p");
             filterIsSingletonBoolean = flags.Contains("b");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.FilterExpression.FilterExprElaborator();
+        }
+        public class FilterExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.FilterExpression expr = (Saxon.Hej.expr.FilterExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBase().makeElaborator().elaborateForPull();
+                if (expr.isSimpleBooleanFilter()) {
+                    Saxon.Hej.expr.elab.BooleanEvaluator conditionEval = expr.getFilter().makeElaborator().elaborateForBoolean();
+                    return context => {
+                        Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/baseEval(context);
+                        Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
+                        c2.setCurrentIterator(Saxon.Hej.om.SequenceTool.focusTracker(@base));
+                        return new Saxon.Hej.expr.FilterExpression.FilterExprElaborator.SimpleFilteredIterator(c2, conditionEval);
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.PullEvaluator conditionEval = expr.getFilter().makeElaborator().elaborateForPull();
+                    return context => {
+                        Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/baseEval(context);
+                        Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
+                        c2.setCurrentIterator(Saxon.Hej.om.SequenceTool.focusTracker(@base));
+                        return new Saxon.Hej.expr.FilterExpression.FilterExprElaborator.PositionalFilteredIterator(c2, conditionEval);
+                    } ;
+                }
+            }
+            public class PositionalFilteredIterator : Saxon.Hej.om.SequenceIterator {
+                private readonly Saxon.Hej.expr.XPathContext outerContext;
+                private readonly Saxon.Hej.om.FocusIterator @base;
+                private readonly Saxon.Hej.expr.elab.PullEvaluator condition;
+                public PositionalFilteredIterator(Saxon.Hej.expr.XPathContext outerContext, Saxon.Hej.expr.elab.PullEvaluator condition)  {
+                    this.outerContext = outerContext;
+                    this.@base = outerContext.getCurrentIterator();
+                    this.condition = condition;
+                }
+                public Saxon.Hej.om.Item next() {
+                    try {
+                        while (true) {
+                            Saxon.Hej.om.Item next = @base.next();
+                            if ((next == null)) {
+                                return null;
+                            }
+                            if (Saxon.Hej.expr.FilterIterator.testPredicateValue(/*Delegate.iterate()*/condition(outerContext), @base.position(), null)) {
+                                return next;
+                            }
+                        }
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    }
+                }
+            
+                /* Expanding default method close from interface SequenceIterator */
+                public virtual void close() {
+                }
+
+            }
+            public class SimpleFilteredIterator : Saxon.Hej.om.SequenceIterator {
+                private readonly Saxon.Hej.expr.XPathContext outerContext;
+                private readonly Saxon.Hej.om.FocusIterator @base;
+                private readonly Saxon.Hej.expr.elab.BooleanEvaluator condition;
+                public SimpleFilteredIterator(Saxon.Hej.expr.XPathContext outerContext, Saxon.Hej.expr.elab.BooleanEvaluator condition)  {
+                    this.outerContext = outerContext;
+                    this.@base = outerContext.getCurrentIterator();
+                    this.condition = condition;
+                }
+                public Saxon.Hej.om.Item next() {
+                    try {
+                        while (true) {
+                            Saxon.Hej.om.Item next = @base.next();
+                            if ((next == null)) {
+                                return null;
+                            }
+                            if (/*Delegate.eval()*/condition(outerContext)) {
+                                return next;
+                            }
+                        }
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    }
+                }
+            
+                /* Expanding default method close from interface SequenceIterator */
+                public virtual void close() {
+                }
+
+            }
+        
         }
     
     }

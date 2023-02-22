@@ -20,6 +20,10 @@ namespace Saxon.Api.Support {
         public bool comparesEqual(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             return (comparer.Compare(s1.ToString(), s2.ToString(), options)==0);
         }
+
+        public bool isEqualToEmpty(Saxon.Hej.str.UnicodeString s1) {
+            return comparer.Compare(s1.ToString(), "") == 0;
+        }
         public bool contains(Saxon.Hej.str.UnicodeString s1, Saxon.Hej.str.UnicodeString s2) {
             return (comparer.IndexOf(s1.ToString(), s2.ToString(), options)>=0);
         }

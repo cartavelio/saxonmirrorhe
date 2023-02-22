@@ -6,7 +6,7 @@ namespace Saxon.Hej.@event {
         private Saxon.Hej.Configuration config;
         private Saxon.Hej.Controller controller;
         private Saxon.Hej.lib.ParseOptions parseOptions;
-        private Saxon.Api.HostLanguage hostLanguage = Saxon.Api.HostLanguage.XSLT;
+        private Saxon.Api.HostLanguage hostLanguage = Saxon.Api.HostLanguage.UNKNOWN;
         private System.Collections.Generic.IDictionary<string,System.Object> components;
         private Saxon.Hej.expr.XPathContext context;
         private System.Func<Saxon.Hej.om.NodeInfo,System.Object> copyInformee;
@@ -14,15 +14,20 @@ namespace Saxon.Hej.@event {
             this.config = config;
             parseOptions = new Saxon.Hej.lib.ParseOptions();
         }
+        public PipelineConfiguration(Saxon.Hej.Configuration config, Saxon.Hej.lib.ParseOptions parseOptions)  {
+            this.config = config;
+            this.parseOptions = parseOptions;
+        }
         public PipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration p)  {
             config = p.config;
             controller = p.controller;
-            parseOptions = new Saxon.Hej.lib.ParseOptions(p.parseOptions);
+            parseOptions = p.parseOptions;
             hostLanguage = p.hostLanguage;
             if ((p.components != null)) {
                 components = new System.Collections.Generic.Dictionary<string, System.Object>(p.components);
             }
             context = p.context;
+            copyInformee = null;
         }
         public Saxon.Hej.Configuration getConfiguration() {
             return config;
@@ -31,29 +36,32 @@ namespace Saxon.Hej.@event {
             this.config = config;
         }
         public Saxon.Hej.lib.ErrorReporter getErrorReporter() {
-            Saxon.Hej.lib.ErrorReporter reporter = parseOptions.getErrorReporter();
+            Saxon.Hej.lib.ErrorReporter reporter = getParseOptions().getErrorReporter();
             if ((reporter == null)) {
-                reporter = config.makeErrorReporter();
+                reporter = ((controller == null) ? config.makeErrorReporter() : controller.getErrorReporter());
             }
             return reporter;
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter errorReporter) {
-            parseOptions.setErrorReporter(errorReporter);
+            parseOptions = getParseOptions().withErrorReporter(errorReporter);
         }
         public void setParseOptions(Saxon.Hej.lib.ParseOptions options) {
             parseOptions = options;
         }
         public Saxon.Hej.lib.ParseOptions getParseOptions() {
+            if ((parseOptions == null)) {
+                parseOptions = config.getParseOptions();
+            }
             return parseOptions;
         }
         public void setUseXsiSchemaLocation(bool recognize) {
-            parseOptions.setUseXsiSchemaLocation(recognize);
+            parseOptions = getParseOptions().withUseXsiSchemaLocation(recognize);
         }
         public void setRecoverFromValidationErrors(bool recover) {
-            parseOptions.setContinueAfterValidationErrors(recover);
+            parseOptions = getParseOptions().withContinueAfterValidationErrors(recover);
         }
         public bool isRecoverFromValidationErrors() {
-            return parseOptions.isContinueAfterValidationErrors();
+            return getParseOptions().isContinueAfterValidationErrors();
         }
         public Saxon.Hej.Controller getController() {
             return controller;
@@ -62,16 +70,16 @@ namespace Saxon.Hej.@event {
             this.controller = controller;
         }
         public Saxon.Api.HostLanguage getHostLanguage() {
+            if ((hostLanguage == Saxon.Api.HostLanguage.UNKNOWN)) {
+                hostLanguage = ((controller == null) ? Saxon.Api.HostLanguage.UNKNOWN : controller.getExecutable().getHostLanguage());
+            }
             return hostLanguage;
         }
         public bool isXSLT() {
-            return (hostLanguage == Saxon.Api.HostLanguage.XSLT);
+            return (getHostLanguage() == Saxon.Api.HostLanguage.XSLT);
         }
         public void setHostLanguage(Saxon.Api.HostLanguage language) {
             hostLanguage = language;
-        }
-        public void setExpandAttributeDefaults(bool expand) {
-            parseOptions.setExpandAttributeDefaults(expand);
         }
         public void setComponent(string name, System.Object value) {
             if ((components == null)) {

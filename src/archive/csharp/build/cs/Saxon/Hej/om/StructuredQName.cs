@@ -4,28 +4,19 @@ using System.Linq;
 namespace Saxon.Hej.om {
     #pragma warning disable 659
     public class StructuredQName : Saxon.Hej.om.IdentityComparable {
-        private readonly char[] content;
-        private readonly int localNameStart;
-        private readonly int prefixStart;
+        private readonly string prefix;
+        private readonly Saxon.Hej.om.NamespaceUri uri;
+        private readonly string local;
         private int cachedHashCode = -1;
-        private StructuredQName(char[] content, int localNameStart, int prefixStart)  {
-            this.content = content;
-            this.localNameStart = localNameStart;
-            this.prefixStart = prefixStart;
+        public StructuredQName(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName)  {
+            this.prefix = ((prefix == null) ? "" : prefix);
+            this.uri = uri;
+            this.local = localName;
         }
         public StructuredQName(string prefix, string uri, string localName)  {
-            if ((uri == null)) {
-                uri = "";
-            }
-            int plen = prefix.Length;
-            int ulen = uri.Length;
-            int llen = localName.Length;
-            localNameStart = ulen;
-            prefixStart = (ulen+llen);
-            content = new char[((ulen+llen)+plen)];
-            Saxon.Impl.Helpers.StringUtils.stringToCharArray(uri, 0, ulen, content, 0);
-            Saxon.Impl.Helpers.StringUtils.stringToCharArray(localName, 0, llen, content, ulen);
-            Saxon.Impl.Helpers.StringUtils.stringToCharArray(prefix, 0, plen, content, (ulen+llen));
+            this.prefix = ((prefix == null) ? "" : prefix);
+            this.uri = Saxon.Hej.om.NamespaceUri.of(uri);
+            this.local = localName;
         }
         public static Saxon.Hej.om.StructuredQName fromClarkName(string expandedName) {
             string @namespace;
@@ -47,7 +38,7 @@ namespace Saxon.Hej.om {
                 @namespace = "";
                 localName = expandedName;
             }
-            return new Saxon.Hej.om.StructuredQName("", @namespace, localName);
+            return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(@namespace), localName);
         }
         public static Saxon.Hej.om.StructuredQName fromLexicalQName(string lexicalName, bool useDefault, bool allowEQName, Saxon.Hej.om.NamespaceResolver resolver) {
             lexicalName = Saxon.Hej.value.Whitespace.trim(lexicalName);
@@ -69,11 +60,11 @@ namespace Saxon.Hej.om {
                 if (!(Saxon.Hej.om.NameChecker.isValidNCName(Saxon.Hej.str.StringTool.codePoints(local)))) {
                     throw new Saxon.Hej.trans.XPathException("Invalid EQName: local part is not a valid NCName", "FOCA0002");
                 }
-                return new Saxon.Hej.om.StructuredQName("", uri, local);
+                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(uri), local);
             }
             try {
                 string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(lexicalName);
-                string uri = resolver.getURIForPrefix(parts[0], useDefault);
+                Saxon.Hej.om.NamespaceUri uri = resolver.getURIForPrefix(parts[0], useDefault);
                 if ((uri == null)) {
                     if (Saxon.Hej.om.NameChecker.isValidNCName(parts[0])) {
                         Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Namespace prefix '"+parts[0])+"' has not been declared"));
@@ -106,67 +97,49 @@ namespace Saxon.Hej.om {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("Invalid EQName: open brace in URI part");
                 }
                 string local = eqName.Substring((endBrace+1));
-                return new Saxon.Hej.om.StructuredQName("", uri, local);
+                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(uri), local);
             } else {
-                return new Saxon.Hej.om.StructuredQName("", "", eqName);
+                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, eqName);
             }
         }
         public string getPrefix() {
-            return new string(content, prefixStart, (content.Length-prefixStart));
+            return prefix;
+        }
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return this.uri;
         }
         public string getURI() {
-            if ((localNameStart == 0)) {
-                return "";
-            }
-            return new string(content, 0, localNameStart);
+            return this.uri.ToString();
         }
-        public bool hasURI(string uri) {
-            if ((localNameStart != uri.Length)) {
-                return false;
-            }
-            for (int i = (localNameStart-1); (i>=0); i--) {
-                if ((content[i] != uri[i])) {
-                    return false;
-                }
-            }
-            return true;
+        public bool hasURI(Saxon.Hej.om.NamespaceUri uri) {
+            return (this.uri == uri);
         }
         public string getLocalPart() {
-            return new string(content, localNameStart, (prefixStart-localNameStart));
+            return local;
         }
         public string getDisplayName() {
-            if ((prefixStart == content.Length)) {
-                return getLocalPart();
+            if (prefix.Length==0) {
+                return local;
             } else {
-                Saxon.Ejava.lang.StringBuilder buff = new Saxon.Ejava.lang.StringBuilder(((content.Length-localNameStart)+1));
-                buff.append(content, prefixStart, (content.Length-prefixStart));
-                buff.append(':');
-                buff.append(content, localNameStart, (prefixStart-localNameStart));
-                return buff.ToString();
+                return ((prefix+":")+local);
             }
         }
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
             return this;
         }
         public string getClarkName() {
-            Saxon.Ejava.lang.StringBuilder buff = new Saxon.Ejava.lang.StringBuilder(((content.Length-prefixStart)+2));
-            if ((localNameStart>0)) {
-                buff.append('{');
-                buff.append(content, 0, localNameStart);
-                buff.append('}');
+            if ((uri == Saxon.Hej.om.NamespaceUri.NULL)) {
+                return local;
+            } else {
+                return ((("{"+uri)+"}")+local);
             }
-            buff.append(content, localNameStart, (prefixStart-localNameStart));
-            return buff.ToString();
         }
         public string getEQName() {
-            Saxon.Ejava.lang.StringBuilder buff = new Saxon.Ejava.lang.StringBuilder(((content.Length-prefixStart)+2));
-            buff.append("Q{");
-            if ((localNameStart>0)) {
-                buff.append(content, 0, localNameStart);
+            if ((uri == Saxon.Hej.om.NamespaceUri.NULL)) {
+                return ("Q{}"+local);
+            } else {
+                return ((("Q{"+uri)+"}")+local);
             }
-            buff.append('}');
-            buff.append(content, localNameStart, (prefixStart-localNameStart));
-            return buff.ToString();
         }
         public override string ToString() {
             return getDisplayName();
@@ -176,51 +149,23 @@ namespace Saxon.Hej.om {
                 return true;
             }
             if ((other is Saxon.Hej.om.StructuredQName)) {
-                int c = ((Saxon.Hej.om.StructuredQName)(other)).cachedHashCode;
-                if (((c != -1) && (c != GetHashCode()))) {
-                    return false;
-                }
-                Saxon.Hej.om.StructuredQName sq2 = (Saxon.Hej.om.StructuredQName)(other);
-                if (((localNameStart != sq2.localNameStart) || (prefixStart != sq2.prefixStart))) {
-                    return false;
-                }
-                for (int i = (prefixStart-1); (i>=0); i--) {
-                    if ((content[i] != sq2.content[i])) {
-                        return false;
-                    }
-                }
-                return true;
+                return (local.Equals(((Saxon.Hej.om.StructuredQName)(other)).local) && (uri == ((Saxon.Hej.om.StructuredQName)(other)).uri));
             } else {
                 return false;
             }
         }
         public override int GetHashCode() {
             if ((cachedHashCode == -1)) {
-                int h = 0x5004a00b;
-                h ^= prefixStart;
-                h ^= localNameStart;
-                for (int i = localNameStart; (i<prefixStart); i++) {
-                    h ^= (content[i]<<((i&0x1f)));
-                }
-                return cachedHashCode = h;
+                return cachedHashCode = ((0x5004a00b^local.GetHashCode())^uri.GetHashCode());
             } else {
                 return cachedHashCode;
             }
         }
-        public static int computeHashCode(string uri, string local) {
-            int h = 0x5004a00b;
-            int localLen = local.Length;
-            int uriLen = uri.Length;
-            int totalLen = (localLen+uriLen);
-            h ^= totalLen;
-            h ^= uriLen;
-            for (int i = 0, j = uriLen; (i<localLen); i++, j++) {
-                h ^= (local[i]<<((j&0x1f)));
-            }
-            return h;
+        public static int computeHashCode(Saxon.Hej.om.NamespaceUri uri, string local) {
+            return ((0x5004a00b^local.GetHashCode())^uri.GetHashCode());
         }
         public Saxon.Hej.om.NamespaceBinding getNamespaceBinding() {
-            return Saxon.Hej.om.NamespaceBinding.makeNamespaceBinding(getPrefix(), getURI());
+            return new Saxon.Hej.om.NamespaceBinding(getPrefix(), getNamespaceUri());
         }
         public bool isIdentical(Saxon.Hej.om.IdentityComparable other) {
             return (Equals(other) && ((Saxon.Hej.om.StructuredQName)(other)).getPrefix().Equals(getPrefix()));

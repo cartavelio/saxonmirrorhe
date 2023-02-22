@@ -10,7 +10,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 return base.computeStreamability(contextInfo, reasons);
             } else {
                 if ((reasons != null)) {
-                    string desc = (exp.getVariableQName().getURI().Equals(Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE) ? exp.getSequence().toShortString() : ("bound to the variable $"+exp.getVariableName()));
+                    string desc = (exp.getVariableQName().hasURI(Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE) ? exp.getSequence().toShortString() : ("bound to the variable $"+exp.getVariableName()));
                     reasons.Add((((("The expression "+desc)+" is capable of delivering streamed nodes (line ")+getExpression().getLocation().getLineNumber())+")"));
                 }
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;

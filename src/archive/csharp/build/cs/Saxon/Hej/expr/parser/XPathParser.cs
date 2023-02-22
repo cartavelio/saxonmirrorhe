@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.parser {
     public class XPathParser {
+
+        static XPathParser() {
+            initializeOperatorPrecedenceTable();
+        }
         protected internal Saxon.Hej.expr.parser.Tokenizer t;
         protected internal Saxon.Hej.expr.StaticContext env;
         protected internal Saxon.Hej.tree.util.IndexedStack<Saxon.Hej.expr.LocalBinding> rangeVariables = new Saxon.Hej.tree.util.IndexedStack<Saxon.Hej.expr.LocalBinding>();
@@ -29,6 +33,7 @@ namespace Saxon.Hej.expr.parser {
         protected internal Saxon.Hej.expr.parser.XPathParser.ParsedLanguage language = Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XPATH;
         protected internal int languageVersion = 20;
         protected internal int catchDepth = 0;
+        private readonly static Saxon.Hej.z.IntToIntHashMap operatorPrecedenceTable = new Saxon.Hej.z.IntToIntHashMap(30);
         public class InlineFunctionDetails {
             public Saxon.Hej.tree.util.IndexedStack<Saxon.Hej.expr.LocalBinding> outerVariables;
             public System.Collections.Generic.IList<Saxon.Hej.expr.LocalBinding> outerVariablesUsed;
@@ -40,6 +45,49 @@ namespace Saxon.Hej.expr.parser {
         
         }
         public XPathParser()  {
+        }
+        private static void initializeOperatorPrecedenceTable() {
+            operatorPrecedenceTable.setDefaultValue(-1);
+            Saxon.Hej.z.IntToIntHashMap m = operatorPrecedenceTable;
+            m.put(Saxon.Hej.expr.parser.Token.QMARK_QMARK, 3);
+            m.put(Saxon.Hej.expr.parser.Token.BANG_BANG, 3);
+            m.put(Saxon.Hej.expr.parser.Token.OR, 4);
+            m.put(Saxon.Hej.expr.parser.Token.OR_ELSE, 4);
+            m.put(Saxon.Hej.expr.parser.Token.AND, 5);
+            m.put(Saxon.Hej.expr.parser.Token.AND_ALSO, 5);
+            m.put(Saxon.Hej.expr.parser.Token.FEQ, 6);
+            m.put(Saxon.Hej.expr.parser.Token.FNE, 6);
+            m.put(Saxon.Hej.expr.parser.Token.FLT, 6);
+            m.put(Saxon.Hej.expr.parser.Token.FGT, 6);
+            m.put(Saxon.Hej.expr.parser.Token.FLE, 6);
+            m.put(Saxon.Hej.expr.parser.Token.FGE, 6);
+            m.put(Saxon.Hej.expr.parser.Token.EQUALS, 6);
+            m.put(Saxon.Hej.expr.parser.Token.NE, 6);
+            m.put(Saxon.Hej.expr.parser.Token.LT, 6);
+            m.put(Saxon.Hej.expr.parser.Token.LE, 6);
+            m.put(Saxon.Hej.expr.parser.Token.GT, 6);
+            m.put(Saxon.Hej.expr.parser.Token.GE, 6);
+            m.put(Saxon.Hej.expr.parser.Token.IS, 6);
+            m.put(Saxon.Hej.expr.parser.Token.PRECEDES, 6);
+            m.put(Saxon.Hej.expr.parser.Token.FOLLOWS, 6);
+            m.put(Saxon.Hej.expr.parser.Token.CONCAT, 7);
+            m.put(Saxon.Hej.expr.parser.Token.BY, 8);
+            m.put(Saxon.Hej.expr.parser.Token.TO, 9);
+            m.put(Saxon.Hej.expr.parser.Token.PLUS, 10);
+            m.put(Saxon.Hej.expr.parser.Token.MINUS, 10);
+            m.put(Saxon.Hej.expr.parser.Token.MULT, 11);
+            m.put(Saxon.Hej.expr.parser.Token.DIV, 11);
+            m.put(Saxon.Hej.expr.parser.Token.IDIV, 11);
+            m.put(Saxon.Hej.expr.parser.Token.MOD, 11);
+            m.put(Saxon.Hej.expr.parser.Token.OTHERWISE, 12);
+            m.put(Saxon.Hej.expr.parser.Token.UNION, 13);
+            m.put(Saxon.Hej.expr.parser.Token.INTERSECT, 14);
+            m.put(Saxon.Hej.expr.parser.Token.EXCEPT, 14);
+            m.put(Saxon.Hej.expr.parser.Token.INSTANCE_OF, 15);
+            m.put(Saxon.Hej.expr.parser.Token.TREAT_AS, 16);
+            m.put(Saxon.Hej.expr.parser.Token.CASTABLE_AS, 17);
+            m.put(Saxon.Hej.expr.parser.Token.CAST_AS, 18);
+            m.put(Saxon.Hej.expr.parser.Token.FAT_ARROW, 19);
         }
         public void setCodeInjector(Saxon.Hej.expr.parser.CodeInjector injector) {
             this.codeInjector = injector;
@@ -78,14 +126,14 @@ namespace Saxon.Hej.expr.parser {
             grumble(message, ((language == Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XSLT_PATTERN) ? "XTSE0340" : "XPST0003"));
         }
         public void grumble(string message, string errorCode) {
-            grumble(message, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.ERR, errorCode), -1);
+            grumble(message, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.ERR, errorCode), -1);
         }
         public void grumble(string message, string errorCode, int offset) {
-            grumble(message, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.ERR, errorCode), offset);
+            grumble(message, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.ERR, errorCode), offset);
         }
         protected internal void grumble(string message, Saxon.Hej.om.StructuredQName errorCode, int offset) {
             if ((errorCode == null)) {
-                errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "XPST0003");
+                errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "XPST0003");
             }
             string nearbyText = null;
             int line = -1;
@@ -109,14 +157,14 @@ namespace Saxon.Hej.expr.parser {
             err.setErrorCodeQName(errorCode);
             throw err;
         }
-        protected internal void warning(string message) {
+        protected internal void warning(string message, string errorCode) {
             if (!(env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.SUPPRESS_XPATH_WARNINGS))) {
                 string s = t.recentText(-1);
                 string prefix = (((((message.StartsWith("...") ? "near" : "in"))+' ')+Saxon.Hej.trans.Err.wrap(s))+":\n    ");
-                env.issueWarning((prefix+message), makeLocation());
+                env.issueWarning((prefix+message), errorCode, makeLocation());
             }
         }
-        public void setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage language, int version) {
+        protected internal void setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage language, int version) {
             if ((version == 0)) {
                 version = 30;
             }
@@ -132,6 +180,7 @@ namespace Saxon.Hej.expr.parser {
                 break ;
               case Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XSLT_PATTERN:
               case Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.SEQUENCE_TYPE:
+              case Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.EXTENDED_ITEM_TYPE:
                 if (!((((((version == 20) || (version == 30)) || (version == 31)) || (version == 40))))) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException(("Unsupported language version "+version));
                 }
@@ -194,7 +243,7 @@ namespace Saxon.Hej.expr.parser {
             }
             setLanguage(language, languageVersion);
             Saxon.Hej.expr.Expression exp = null;
-            int offset = start;
+            int offset;
             if (((((accelerator != null) && (env.getUnprefixedElementMatchingPolicy() == Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace)) && (terminator != Saxon.Hej.expr.parser.Token.IMPLICIT_EOF)) && ((((expression.Length-start)<30) || (terminator == Saxon.Hej.expr.parser.Token.RCURLY))))) {
                 t = new Saxon.Hej.expr.parser.Tokenizer();
                 t.languageLevel = env.getXPathVersion();
@@ -240,6 +289,7 @@ namespace Saxon.Hej.expr.parser {
         }
         public Saxon.Hej.value.SequenceType parseSequenceType(string input, Saxon.Hej.expr.StaticContext env) {
             this.env = env;
+            setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.SEQUENCE_TYPE, env.getXPathVersion());
             if ((qNameParser == null)) {
                 qNameParser = new Saxon.Hej.om.QNameParser(env.getNamespaceResolver());
                 if ((languageVersion>=30)) {
@@ -248,7 +298,7 @@ namespace Saxon.Hej.expr.parser {
             }
             language = Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.SEQUENCE_TYPE;
             t = new Saxon.Hej.expr.parser.Tokenizer();
-            t.languageLevel = env.getXPathVersion();
+            t.languageLevel = languageVersion;
             allowXPath40Syntax = t.allowSaxonExtensions = (env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS) || (t.languageLevel == 40));
             try {
                 t.tokenize(input, 0, -1);
@@ -263,7 +313,7 @@ namespace Saxon.Hej.expr.parser {
         }
         public Saxon.Hej.type.ItemType parseExtendedItemType(string input, Saxon.Hej.expr.StaticContext env) {
             this.env = env;
-            language = Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.EXTENDED_ITEM_TYPE;
+            setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.EXTENDED_ITEM_TYPE, env.getXPathVersion());
             t = new Saxon.Hej.expr.parser.Tokenizer();
             t.languageLevel = env.getXPathVersion();
             allowSaxonExtensions = t.allowSaxonExtensions = true;
@@ -494,66 +544,7 @@ namespace Saxon.Hej.expr.parser {
             return operatorPrecedence(t.currentToken);
         }
         public static int operatorPrecedence(int @operator) {
-            switch (@operator) {
-              case Saxon.Hej.expr.parser.Token.QMARK_QMARK:
-              case Saxon.Hej.expr.parser.Token.BANG_BANG:
-                return 3;
-              case Saxon.Hej.expr.parser.Token.OR:
-              case Saxon.Hej.expr.parser.Token.OR_ELSE:
-                return 4;
-              case Saxon.Hej.expr.parser.Token.AND:
-              case Saxon.Hej.expr.parser.Token.AND_ALSO:
-                return 5;
-              case Saxon.Hej.expr.parser.Token.FEQ:
-              case Saxon.Hej.expr.parser.Token.FNE:
-              case Saxon.Hej.expr.parser.Token.FLE:
-              case Saxon.Hej.expr.parser.Token.FLT:
-              case Saxon.Hej.expr.parser.Token.FGE:
-              case Saxon.Hej.expr.parser.Token.FGT:
-              case Saxon.Hej.expr.parser.Token.EQUALS:
-              case Saxon.Hej.expr.parser.Token.NE:
-              case Saxon.Hej.expr.parser.Token.LE:
-              case Saxon.Hej.expr.parser.Token.LT:
-              case Saxon.Hej.expr.parser.Token.GE:
-              case Saxon.Hej.expr.parser.Token.GT:
-              case Saxon.Hej.expr.parser.Token.IS:
-              case Saxon.Hej.expr.parser.Token.PRECEDES:
-              case Saxon.Hej.expr.parser.Token.FOLLOWS:
-                return 6;
-              case Saxon.Hej.expr.parser.Token.CONCAT:
-                return 7;
-              case Saxon.Hej.expr.parser.Token.BY:
-                return 8;
-              case Saxon.Hej.expr.parser.Token.TO:
-                return 9;
-              case Saxon.Hej.expr.parser.Token.PLUS:
-              case Saxon.Hej.expr.parser.Token.MINUS:
-                return 10;
-              case Saxon.Hej.expr.parser.Token.MULT:
-              case Saxon.Hej.expr.parser.Token.DIV:
-              case Saxon.Hej.expr.parser.Token.IDIV:
-              case Saxon.Hej.expr.parser.Token.MOD:
-                return 11;
-              case Saxon.Hej.expr.parser.Token.OTHERWISE:
-                return 12;
-              case Saxon.Hej.expr.parser.Token.UNION:
-                return 13;
-              case Saxon.Hej.expr.parser.Token.INTERSECT:
-              case Saxon.Hej.expr.parser.Token.EXCEPT:
-                return 14;
-              case Saxon.Hej.expr.parser.Token.INSTANCE_OF:
-                return 15;
-              case Saxon.Hej.expr.parser.Token.TREAT_AS:
-                return 16;
-              case Saxon.Hej.expr.parser.Token.CASTABLE_AS:
-                return 17;
-              case Saxon.Hej.expr.parser.Token.CAST_AS:
-                return 18;
-              case Saxon.Hej.expr.parser.Token.FAT_ARROW:
-                return 19;
-              default:
-                return -1;
-            }
+            return operatorPrecedenceTable.get(@operator);
         }
         private Saxon.Hej.expr.Expression makeBinaryExpression(Saxon.Hej.expr.Expression lhs, int @operator, Saxon.Hej.expr.Expression rhs) {
             switch (@operator) {
@@ -634,7 +625,7 @@ namespace Saxon.Hej.expr.parser {
         private Saxon.Hej.expr.Expression makeOtherwiseExpression(Saxon.Hej.expr.Expression lhs, Saxon.Hej.expr.Expression rhs) {
             checkLanguageVersion40();
             Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
-            let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, ("n"+lhs.GetHashCode())));
+            let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.ANONYMOUS, ("n"+lhs.GetHashCode())));
             let.setSequence(lhs);
             let.setRequiredType(Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
             Saxon.Hej.expr.LocalVariableReference v1 = new Saxon.Hej.expr.LocalVariableReference(let.getVariableQName());
@@ -772,7 +763,7 @@ namespace Saxon.Hej.expr.parser {
                 }
                 clauses++;
                 setLocation(v, offset);
-                v.setVariableQName(makeStructuredQName(var, ""));
+                v.setVariableQName(makeStructuredQName(var, Saxon.Hej.om.NamespaceUri.NULL));
                 nextToken();
                 expect(((@operator == Saxon.Hej.expr.parser.Token.LET) ? Saxon.Hej.expr.parser.Token.ASSIGN : Saxon.Hej.expr.parser.Token.IN));
                 nextToken();
@@ -810,13 +801,13 @@ namespace Saxon.Hej.expr.parser {
                 v.setRequiredType(Saxon.Hej.value.SequenceType.SINGLE_ITEM);
                 v.setOperator(@operator);
                 setLocation(v, offset);
-                v.setVariableQName(makeStructuredQName(var, ""));
+                v.setVariableQName(makeStructuredQName(var, Saxon.Hej.om.NamespaceUri.NULL));
                 nextToken();
                 if (((t.currentToken == Saxon.Hej.expr.parser.Token.AS) && (language == Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XQUERY))) {
                     nextToken();
                     Saxon.Hej.value.SequenceType type = parseSequenceType();
                     if ((type.getCardinality() != Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) {
-                        warning("Occurrence indicator on singleton range variable has no effect");
+                        warning("Occurrence indicator on singleton range variable has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9039);
                         type = Saxon.Hej.value.SequenceType.makeSequenceType(type.getPrimaryType(), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
                     }
                     v.setRequiredType(type);
@@ -850,10 +841,12 @@ namespace Saxon.Hej.expr.parser {
             expect(Saxon.Hej.expr.parser.Token.THEN);
             nextToken();
             Saxon.Hej.expr.Expression thenExp = makeTracer(parseExprSingle(), null);
+            setLocation(thenExp, thenoffset);
             int elseoffset = t.currentTokenStartOffset;
             expect(Saxon.Hej.expr.parser.Token.ELSE);
             nextToken();
             Saxon.Hej.expr.Expression elseExp = makeTracer(parseExprSingle(), null);
+            setLocation(elseExp, elseoffset);
             Saxon.Hej.expr.Expression ifExp = Saxon.Hej.expr.instruct.Choose.makeConditional(condition, thenExp, elseExp);
             setLocation(ifExp, ifoffset);
             return makeTracer(ifExp, null);
@@ -862,7 +855,7 @@ namespace Saxon.Hej.expr.parser {
             if (scanOnly) {
                 return Saxon.Hej.type.BuiltInAtomicType.STRING;
             }
-            Saxon.Hej.om.StructuredQName sq = null;
+            Saxon.Hej.om.StructuredQName sq;
             try {
                 sq = qNameParser.parse(qname, env.getDefaultElementNamespace());
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -873,13 +866,13 @@ namespace Saxon.Hej.expr.parser {
         }
         public Saxon.Hej.type.ItemType getPlainType(Saxon.Hej.om.StructuredQName sq) {
             Saxon.Hej.Configuration config = env.getConfiguration();
-            string uri = sq.getURI();
-            if (uri.Length==0) {
+            Saxon.Hej.om.NamespaceUri uri = sq.getNamespaceUri();
+            if (uri.isEmpty()) {
                 uri = env.getDefaultElementNamespace();
             }
             string local = sq.getLocalPart();
             string qname = sq.getDisplayName();
-            bool builtInNamespace = uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA);
+            bool builtInNamespace = uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA);
             if (builtInNamespace) {
                 Saxon.Hej.type.ItemType t = Saxon.Hej.type.Type.getBuiltInItemType(uri, local);
                 if ((t == null)) {
@@ -898,7 +891,7 @@ namespace Saxon.Hej.expr.parser {
                     }
                 }
             } else {
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.DOT_NET_TYPE)) {
+                if (uri.Equals(Saxon.Hej.om.NamespaceUri.DOT_NET_TYPE)) {
                     return Saxon.Hej.Version.platform.getExternalObjectType(config, uri, local);
                 } else {
                     Saxon.Hej.type.SchemaType st = config.getSchemaType(sq);
@@ -965,9 +958,9 @@ namespace Saxon.Hej.expr.parser {
                 grumble(e.Message, e.getErrorCodeLocalPart());
                 System.Diagnostics.Debug.Assert(false);
             }
-            string uri = sq.getURI();
+            Saxon.Hej.om.NamespaceUri uri = sq.getNamespaceUri();
             string local = sq.getLocalPart();
-            bool builtInNamespace = uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA);
+            bool builtInNamespace = uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA);
             if (builtInNamespace) {
                 Saxon.Hej.type.SimpleType target = Saxon.Hej.type.Type.getBuiltInSimpleType(uri, local);
                 if ((target == null)) {
@@ -977,13 +970,14 @@ namespace Saxon.Hej.expr.parser {
                         grumble(("Unsuitable type for cast: "+target.getDescription()), "XPST0080");
                     }
                 }
+                System.Diagnostics.Debug.Assert((target is Saxon.Hej.type.CastingTarget));
                 Saxon.Hej.type.CastingTarget t = (Saxon.Hej.type.CastingTarget)(target);
                 if ((t is Saxon.Hej.type.BuiltInAtomicType)) {
                     checkAllowedType(env, (Saxon.Hej.type.BuiltInAtomicType)(t));
                 }
                 return t;
             } else {
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.DOT_NET_TYPE)) {
+                if (uri.Equals(Saxon.Hej.om.NamespaceUri.DOT_NET_TYPE)) {
                     return (Saxon.Hej.type.AtomicType)(Saxon.Hej.Version.platform.getExternalObjectType(env.getConfiguration(), uri, local));
                 } else {
                     Saxon.Hej.type.SchemaType st = env.getConfiguration().getSchemaType(new Saxon.Hej.om.StructuredQName("", uri, local));
@@ -1097,7 +1091,7 @@ namespace Saxon.Hej.expr.parser {
                           case "atomic":
                             nextToken();
                             expect(Saxon.Hej.expr.parser.Token.NAME);
-                            Saxon.Hej.om.StructuredQName typeName = getQNameParser().parse(t.currentTokenValue, Saxon.Hej.lib.NamespaceConstant.SCHEMA);
+                            Saxon.Hej.om.StructuredQName typeName = getQNameParser().parse(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.SCHEMA);
                             primaryType = getPlainType(typeName);
                             if (!(((primaryType is Saxon.Hej.type.AtomicType)))) {
                                 grumble((("Type "+t.currentTokenValue)+" exists, but is not atomic"));
@@ -1122,7 +1116,7 @@ namespace Saxon.Hej.expr.parser {
                             checkLanguageVersion40();
                             nextToken();
                             expect(Saxon.Hej.expr.parser.Token.NAME);
-                            Saxon.Hej.om.StructuredQName typeAlias = getQNameParser().parse(t.currentTokenValue, "");
+                            Saxon.Hej.om.StructuredQName typeAlias = getQNameParser().parse(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
                             Saxon.Hej.type.ItemType realType = getStaticContext().resolveTypeAlias(typeAlias);
                             if ((realType == null)) {
                                 grumble((("Named type ("+typeAlias.getDisplayName())+") has not been defined"));
@@ -1227,7 +1221,7 @@ namespace Saxon.Hej.expr.parser {
                     if ((t.currentToken == Saxon.Hej.expr.parser.Token.DOTDOT)) {
                         p.nextToken();
                         int occ = parseOccurrenceIndicator();
-                        arg = Saxon.Hej.value.SequenceType.makeSequenceType(recordTest, occ);
+                        arg = Saxon.Hej.value.SequenceType.makeSequenceType(new Saxon.Hej.ma.map.SelfReferenceRecordTest(recordTest), occ);
                         if ((!(Saxon.Hej.value.Cardinality.allowsZero(occ)) && !(optionalFieldNames.Contains(name)))) {
                             throw new Saxon.Hej.trans.XPathException("A self-referencing field in a record type must be emptiable or optional", "XPST0140");
                         }
@@ -1253,10 +1247,6 @@ namespace Saxon.Hej.expr.parser {
                 }
             }
             p.nextToken();
-            if (fieldNames.Count==0) {
-                p.grumble("RecordTest must contain at least one field");
-                return null;
-            }
             recordTest.setDetails(fieldNames, fieldTypes, optionalFieldNames, extensible);
             return recordTest;
         }
@@ -1324,7 +1314,49 @@ namespace Saxon.Hej.expr.parser {
             return new Saxon.Hej.type.EnumerationType(values);
         }
         protected internal Saxon.Hej.type.ItemType parseFunctionItemType(Saxon.Hej.query.AnnotationList annotations) {
-            return parserExtension.parseFunctionItemType(this, annotations);
+            nextToken();
+            System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> argTypes = new System.Collections.Generic.List<Saxon.Hej.value.SequenceType>(3);
+            Saxon.Hej.value.SequenceType resultType;
+            if (((t.currentToken == Saxon.Hej.expr.parser.Token.STAR) || (t.currentToken == Saxon.Hej.expr.parser.Token.MULT))) {
+                nextToken();
+                expect(Saxon.Hej.expr.parser.Token.RPAR);
+                nextToken();
+                if (annotations.isEmpty()) {
+                    return Saxon.Hej.type.AnyFunctionType.getInstance();
+                } else {
+                    return new Saxon.Hej.type.AnyFunctionTypeWithAssertions(annotations, getStaticContext().getConfiguration());
+                }
+            } else {
+                while ((t.currentToken != Saxon.Hej.expr.parser.Token.RPAR)) {
+                    Saxon.Hej.value.SequenceType arg = parseSequenceType();
+                    argTypes.Add(arg);
+                    if ((t.currentToken == Saxon.Hej.expr.parser.Token.RPAR)) {
+                        break ;
+                    } else {
+                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA)) {
+                            nextToken();
+                        } else {
+                            grumble((("Expected ',' or ')' after function argument type, found '"+Saxon.Hej.expr.parser.Token.tokens[t.currentToken])+'\''));
+                        }
+                    }
+                }
+                nextToken();
+                if ((t.currentToken == Saxon.Hej.expr.parser.Token.AS)) {
+                    nextToken();
+                    resultType = parseSequenceType();
+                    Saxon.Hej.value.SequenceType[] argArray = new Saxon.Hej.value.SequenceType[argTypes.Count];
+                    argArray = argTypes.ToArray();
+                    return new Saxon.Hej.type.SpecificFunctionType(argArray, resultType, annotations);
+                } else {
+                    if (!(argTypes.Count==0)) {
+                        grumble("Result type must be given if an argument type is given: expected 'as (type)'");
+                        return null;
+                    } else {
+                        grumble("function() is no longer allowed for a general function type: must be function(*)");
+                        return null;
+                    }
+                }
+            }
         }
         protected internal Saxon.Hej.type.ItemType parseMapItemType() {
             checkMapExtensions();
@@ -1508,11 +1540,11 @@ namespace Saxon.Hej.expr.parser {
                 return exp;
               default:
                 if (((t.currentToken == Saxon.Hej.expr.parser.Token.NAME) && ((t.currentTokenValue.Equals("true") || t.currentTokenValue.Equals("false"))))) {
-                    warning((((((((("The expression is looking for a child element named '"+t.currentTokenValue)+"' - perhaps ")+t.currentTokenValue)+"() was intended? To avoid this warning, use child::")+t.currentTokenValue)+" or ./")+t.currentTokenValue)+"."));
+                    warning((((((((("The expression is looking for a child element named '"+t.currentTokenValue)+"' - perhaps ")+t.currentTokenValue)+"() was intended? To avoid this warning, use child::")+t.currentTokenValue)+" or ./")+t.currentTokenValue)+"."), Saxon.Hej.trans.SaxonErrorCode.SXWN9040);
                 }
                 if (((((t.currentToken == Saxon.Hej.expr.parser.Token.NAME) && (t.getBinaryOp(t.currentTokenValue) != Saxon.Hej.expr.parser.Token.UNKNOWN)) && (language != Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XSLT_PATTERN)) && (((offset>0) || (t.peekAhead() != Saxon.Hej.expr.parser.Token.EOF))))) {
                     string s = t.currentTokenValue;
-                    warning((((((((("The keyword '"+s)+"' in this context means 'child::")+s)+"'. If this was intended, use 'child::")+s)+"' or './")+s)+"' to avoid this warning."));
+                    warning((((((((("The keyword '"+s)+"' in this context means 'child::")+s)+"'. If this was intended, use 'child::")+s)+"' or './")+s)+"' to avoid this warning."), Saxon.Hej.trans.SaxonErrorCode.SXWN9040);
                 }
                 return parseRelativePath();
             }
@@ -1607,15 +1639,15 @@ namespace Saxon.Hej.expr.parser {
             if (reverse) {
                 Saxon.Hej.expr.parser.RetainedStaticContext rsc = env.makeRetainedStaticContext();
                 step = Saxon.Hej.functions.SystemFunction.makeCall("reverse", rsc, step);
-                System.Diagnostics.Debug.Assert((step != null));
-                return step;
-            } else {
-                return step;
             }
+            return step;
         }
         protected internal Saxon.Hej.expr.Expression parsePredicate(Saxon.Hej.expr.Expression step) {
             nextToken();
             Saxon.Hej.expr.Expression predicate = parsePredicate();
+            if (Saxon.Hej.expr.Literal.isConstantZero(predicate)) {
+                warning("Positions are numbered from one; the predicate [0] selects nothing", Saxon.Hej.trans.SaxonErrorCode.SXWN9046);
+            }
             expect(Saxon.Hej.expr.parser.Token.RSQB);
             nextToken();
             step = new Saxon.Hej.expr.FilterExpression(step, predicate);
@@ -1648,8 +1680,8 @@ namespace Saxon.Hej.expr.parser {
         protected internal virtual Saxon.Hej.expr.Expression parsePredicate() {
             return parseExpression();
         }
-        protected internal bool isReservedInQuery(string uri) {
-            return Saxon.Hej.lib.NamespaceConstant.isReservedInQuery31(uri);
+        protected internal bool isReservedInQuery(Saxon.Hej.om.NamespaceUri uri) {
+            return Saxon.Hej.om.NamespaceUri.isReservedInQuery31(uri);
         }
         protected internal virtual Saxon.Hej.expr.Expression parseBasicStep(bool firstInPattern) {
             switch (t.currentToken) {
@@ -1662,7 +1694,7 @@ namespace Saxon.Hej.expr.parser {
               case Saxon.Hej.expr.parser.Token.STRING_LITERAL:
                 return parseStringLiteral(true);
               case Saxon.Hej.expr.parser.Token.STRING_LITERAL_BACKTICKED:
-                return parseStringLiteral(true);
+                return parseBackTickedStringLiteral();
               case Saxon.Hej.expr.parser.Token.STRING_CONSTRUCTOR_INITIAL:
                 return parseStringConstructor();
               case Saxon.Hej.expr.parser.Token.NUMBER:
@@ -1763,6 +1795,7 @@ namespace Saxon.Hej.expr.parser {
                   case Saxon.Hej.expr.parser.Token.SUFFIX:
                   case Saxon.Hej.expr.parser.Token.STAR:
                   case Saxon.Hej.expr.parser.Token.NODEKIND:
+                  case Saxon.Hej.expr.parser.Token.LPAR:
                     Saxon.Hej.expr.AxisExpression ae2 = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, parseNodeTest(Saxon.Hej.type.Type.ATTRIBUTE));
                     setLocation(ae2);
                     return ae2;
@@ -1788,6 +1821,7 @@ namespace Saxon.Hej.expr.parser {
                   case Saxon.Hej.expr.parser.Token.SUFFIX:
                   case Saxon.Hej.expr.parser.Token.STAR:
                   case Saxon.Hej.expr.parser.Token.NODEKIND:
+                  case Saxon.Hej.expr.parser.Token.LPAR:
                     Saxon.Hej.expr.Expression ax = new Saxon.Hej.expr.AxisExpression(axis, parseNodeTest(principalNodeType));
                     setLocation(ax);
                     return ax;
@@ -1802,12 +1836,6 @@ namespace Saxon.Hej.expr.parser {
                     return parseMapExpression();
                   case "array":
                     return parseArrayCurlyConstructor();
-                  case "fn":
-                  case ".":
-                    warning("The experimental syntax '.{expr}' has changed to '->{expr}");
-                    return parserExtension.parseDotFunction(this);
-                  case "_":
-                    return parserExtension.parseUnderscoreFunction(this);
                 }
                 goto case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;
               case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME:
@@ -1852,9 +1880,14 @@ namespace Saxon.Hej.expr.parser {
             return (traceable ? makeTracer(lit, null) : lit);
         }
         protected internal Saxon.Hej.expr.Expression parseStringLiteral(bool traceable) {
-            Saxon.Hej.expr.Literal literal = makeStringLiteral(t.currentTokenValue);
+            Saxon.Hej.expr.Literal literal = makeStringLiteral(t.currentTokenValue, true);
             nextToken();
             return (traceable ? makeTracer(literal, null) : literal);
+        }
+        protected internal Saxon.Hej.expr.Expression parseBackTickedStringLiteral() {
+            Saxon.Hej.expr.Literal literal = makeStringLiteral(t.currentTokenValue, false);
+            nextToken();
+            return makeTracer(literal, null);
         }
         protected internal virtual Saxon.Hej.expr.Expression parseStringConstructor() {
             grumble("String constructor expressions are allowed only in XQuery");
@@ -1863,16 +1896,13 @@ namespace Saxon.Hej.expr.parser {
         public Saxon.Hej.expr.Expression parseVariableReference() {
             int offset = t.currentTokenStartOffset;
             nextToken();
-            if ((t.currentToken == Saxon.Hej.expr.parser.Token.NUMBER)) {
-                return parserExtension.bindNumericParameterReference(this);
-            }
             expect(Saxon.Hej.expr.parser.Token.NAME);
             string var = t.currentTokenValue;
             nextToken();
             if (scanOnly) {
                 return new Saxon.Hej.expr.ContextItemExpression();
             }
-            Saxon.Hej.om.StructuredQName vtest = makeStructuredQName(var, "");
+            Saxon.Hej.om.StructuredQName vtest = makeStructuredQName(var, Saxon.Hej.om.NamespaceUri.NULL);
             System.Diagnostics.Debug.Assert((vtest != null));
             Saxon.Hej.expr.LocalBinding b = findRangeVariable(vtest);
             Saxon.Hej.expr.Expression @ref;
@@ -1882,10 +1912,10 @@ namespace Saxon.Hej.expr.parser {
                 if ((catchDepth>0)) {
                     foreach (Saxon.Hej.om.StructuredQName errorVariable in Saxon.Hej.om.StandardNames.errorVariables) {
                         if (errorVariable.getLocalPart().Equals(vtest.getLocalPart())) {
-                            Saxon.Hej.om.StructuredQName functionName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "dynamic-error-info");
+                            Saxon.Hej.om.StructuredQName functionName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "dynamic-error-info");
                             Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(functionName, 1);
                             Saxon.Hej.expr.Expression[] args = new Saxon.Hej.expr.Expression[]{new Saxon.Hej.expr.StringLiteral(vtest.getLocalPart())};
-                            return Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance().bind(sn, args, env, new System.Collections.Generic.List<string>());
+                            return Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance().bind(sn, args, null, env, new System.Collections.Generic.List<string>());
                         }
                     }
                 }
@@ -1899,7 +1929,7 @@ namespace Saxon.Hej.expr.parser {
             setLocation(@ref, offset);
             return @ref;
         }
-        protected internal virtual Saxon.Hej.expr.Literal makeStringLiteral(string currentTokenValue) {
+        protected internal virtual Saxon.Hej.expr.Literal makeStringLiteral(string currentTokenValue, bool unescape) {
             Saxon.Hej.expr.StringLiteral literal = new Saxon.Hej.expr.StringLiteral(currentTokenValue);
             setLocation(literal);
             return literal;
@@ -1950,16 +1980,11 @@ namespace Saxon.Hej.expr.parser {
             if ((placeMarkers == null)) {
                 return generateApplyCall(functionItem, args);
             } else {
-                return parserExtension.createDynamicCurriedFunction(this, functionItem, args, placeMarkers);
+                return createDynamicCurriedFunction(this, functionItem, args, placeMarkers);
             }
         }
         protected internal Saxon.Hej.expr.Expression generateApplyCall(Saxon.Hej.expr.Expression functionItem, System.Collections.Generic.List<Saxon.Hej.expr.Expression> args) {
-            Saxon.Hej.ma.arrays.SquareArrayConstructor block = new Saxon.Hej.ma.arrays.SquareArrayConstructor(args);
-            Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(getStaticContext());
-            Saxon.Hej.functions.SystemFunction fn = Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance().makeFunction("apply", 2);
-            fn.setRetainedStaticContext(rsc);
-            Saxon.Hej.expr.Expression call = fn.makeFunctionCall(functionItem, block);
-            ((Saxon.Hej.functions.ApplyFn)(fn)).setDynamicFunctionCall(functionItem.toShortString());
+            Saxon.Hej.expr.DynamicFunctionCall call = new Saxon.Hej.expr.DynamicFunctionCall(functionItem, args);
             setLocation(call, t.currentTokenStartOffset);
             return call;
         }
@@ -1987,7 +2012,7 @@ namespace Saxon.Hej.expr.parser {
                         grumble("Number following '?' must be an integer");
                     }
                     nextToken();
-                    result = lookup(this, lhs, Saxon.Hej.expr.Literal.makeLiteral(number));
+                    result = new Saxon.Hej.expr.LookupExpression(lhs, Saxon.Hej.expr.Literal.makeLiteral(number));
                 } else {
                     if (((token == Saxon.Hej.expr.parser.Token.MULT) || (token == Saxon.Hej.expr.parser.Token.STAR))) {
                         nextToken();
@@ -1995,7 +2020,7 @@ namespace Saxon.Hej.expr.parser {
                     } else {
                         if ((token == Saxon.Hej.expr.parser.Token.LPAR)) {
                             t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
-                            result = lookup(this, lhs, parseParenthesizedExpression());
+                            result = new Saxon.Hej.expr.LookupExpression(lhs, parseParenthesizedExpression());
                         } else {
                             if ((token == Saxon.Hej.expr.parser.Token.STRING_LITERAL)) {
                                 checkLanguageVersion40();
@@ -2004,7 +2029,7 @@ namespace Saxon.Hej.expr.parser {
                             } else {
                                 if ((token == Saxon.Hej.expr.parser.Token.DOLLAR)) {
                                     checkLanguageVersion40();
-                                    result = lookup(this, lhs, parseVariableReference());
+                                    result = new Saxon.Hej.expr.LookupExpression(lhs, parseVariableReference());
                                 } else {
                                     grumble((("Unexpected "+Saxon.Hej.expr.parser.Token.tokens[token])+" after '?'"));
                                     return null;
@@ -2017,9 +2042,6 @@ namespace Saxon.Hej.expr.parser {
             setLocation(result, offset);
             return result;
         }
-        private static Saxon.Hej.expr.Expression lookup(Saxon.Hej.expr.parser.XPathParser parser, Saxon.Hej.expr.Expression lhs, Saxon.Hej.expr.Expression rhs) {
-            return new Saxon.Hej.expr.LookupExpression(lhs, rhs);
-        }
         private Saxon.Hej.expr.Expression lookupName(Saxon.Hej.expr.Expression lhs, string rhs) {
             return new Saxon.Hej.expr.LookupExpression(lhs, new Saxon.Hej.expr.StringLiteral(rhs));
         }
@@ -2030,6 +2052,9 @@ namespace Saxon.Hej.expr.parser {
             int tok = t.currentToken;
             string tokv = t.currentTokenValue;
             switch (tok) {
+              case Saxon.Hej.expr.parser.Token.LPAR:
+                checkLanguageVersion40();
+                return parseUnionNodeTest(nodeType);
               case Saxon.Hej.expr.parser.Token.NAME:
                 nextToken();
                 return makeNameTest(nodeType, tokv, (nodeType == Saxon.Hej.type.Type.ELEMENT));
@@ -2051,6 +2076,17 @@ namespace Saxon.Hej.expr.parser {
                 grumble("Unrecognized node test");
                 throw new Saxon.Hej.trans.XPathException("");
             }
+        }
+        protected internal Saxon.Hej.pattern.NodeTest parseUnionNodeTest(short nodeType) {
+            nextToken();
+            Saxon.Hej.pattern.NodeTest test = parseNodeTest(nodeType);
+            while (((t.currentToken == Saxon.Hej.expr.parser.Token.UNION) && !(t.currentTokenValue.Equals("union")))) {
+                nextToken();
+                test = new Saxon.Hej.pattern.CombinedNodeTest(test, Saxon.Hej.expr.parser.Token.UNION, parseNodeTest(nodeType));
+            }
+            expect(Saxon.Hej.expr.parser.Token.RPAR);
+            nextToken();
+            return test;
         }
         private Saxon.Hej.pattern.NodeTest parseKindTest() {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
@@ -2105,7 +2141,7 @@ namespace Saxon.Hej.expr.parser {
                         nextToken();
                         expect(Saxon.Hej.expr.parser.Token.RPAR);
                         nextToken();
-                        return new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.NAMESPACE, "", nsName, pool);
+                        return new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.NAMESPACE, Saxon.Hej.om.NamespaceUri.NULL, nsName, pool);
                     } else {
                         grumble("No arguments are allowed in namespace-node()");
                         return null;
@@ -2139,14 +2175,14 @@ namespace Saxon.Hej.expr.parser {
                         if (!(Saxon.Hej.om.NameChecker.isValidNCName(Saxon.Hej.str.StringTool.codePoints(piName)))) {
                             grumble("Processing instruction name must be a valid NCName", "XPTY0004");
                         } else {
-                            fp = pool.allocateFingerprint("", piName);
+                            fp = pool.allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, piName);
                         }
                     } else {
                         if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
                             try {
                                 string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(t.currentTokenValue);
                                 if (parts[0].Length==0) {
-                                    fp = pool.allocateFingerprint("", parts[1]);
+                                    fp = pool.allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, parts[1]);
                                 } else {
                                     grumble("Processing instruction name must not contain a colon");
                                 }
@@ -2190,7 +2226,7 @@ namespace Saxon.Hej.expr.parser {
                         }
                     }
                 }
-                string suri = null;
+                Saxon.Hej.om.NamespaceUri suri = null;
                 if ((fp != -1)) {
                     suri = pool.getURI(fp);
                 }
@@ -2247,9 +2283,8 @@ namespace Saxon.Hej.expr.parser {
                                 Saxon.Hej.type.SchemaType schemaType;
                                 Saxon.Hej.om.StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
                                 System.Diagnostics.Debug.Assert((contentType != null));
-                                string uri = contentType.getURI();
-                                string lname = contentType.getLocalPart();
-                                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
+                                Saxon.Hej.om.NamespaceUri uri = contentType.getNamespaceUri();
+                                if (uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                                     schemaType = env.getConfiguration().getSchemaType(contentType);
                                 } else {
                                     if (!(env.isImportedSchema(uri))) {
@@ -2262,7 +2297,7 @@ namespace Saxon.Hej.expr.parser {
                                     return null;
                                 }
                                 if (((primaryType == Saxon.Hej.type.Type.ATTRIBUTE) && schemaType.isComplexType())) {
-                                    warning("An attribute cannot have a complex type");
+                                    warning("An attribute cannot have a complex type", Saxon.Hej.trans.SaxonErrorCode.SXWN9041);
                                 }
                                 Saxon.Hej.pattern.ContentTypeTest typeTest = new Saxon.Hej.pattern.ContentTypeTest(primaryType, schemaType, env.getConfiguration(), false);
                                 if (((fp == -1) && (((nodeTest == null) || (nodeTest is Saxon.Hej.pattern.NodeKindTest))))) {
@@ -2412,7 +2447,7 @@ namespace Saxon.Hej.expr.parser {
                     if ((((key is Saxon.Hej.expr.Literal) && (((Saxon.Hej.expr.Literal)(key)).getGroundedValue() is Saxon.Hej.value.AtomicValue)) && (value is Saxon.Hej.expr.Literal))) {
                         entry = Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.ma.map.SingleEntryMap((Saxon.Hej.value.AtomicValue)(((Saxon.Hej.expr.Literal)(key)).getGroundedValue()), ((Saxon.Hej.expr.Literal)(value)).getGroundedValue()));
                     } else {
-                        entry = Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, value);
+                        entry = Saxon.Hej.ma.map.MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, value);
                     }
                     entries.Add(entry);
                     if ((t.currentToken == Saxon.Hej.expr.parser.Token.RCURLY)) {
@@ -2438,8 +2473,8 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.expr.instruct.Block block = new Saxon.Hej.expr.instruct.Block(entries.ToArray());
                 Saxon.Impl.DataModel.ImmMap options = new Saxon.Impl.DataModel.ImmMap();
                 options.initialPut(new Saxon.Hej.value.StringValue("duplicates"), new Saxon.Hej.value.StringValue("reject"));
-                options.initialPut(new Saxon.Hej.value.QNameValue("", Saxon.Hej.lib.NamespaceConstant.SAXON, "duplicates-error-code"), new Saxon.Hej.value.StringValue("XQDY0137"));
-                result = Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("merge", 2).makeFunctionCall(block, Saxon.Hej.expr.Literal.makeLiteral(options));
+                options.initialPut(new Saxon.Hej.value.QNameValue("", Saxon.Hej.om.NamespaceUri.SAXON, "duplicates-error-code"), new Saxon.Hej.value.StringValue("XQDY0137"));
+                result = Saxon.Hej.ma.map.MapFunctionSet.getInstance(31).makeFunction("merge", 2).makeFunctionCall(block, Saxon.Hej.expr.Literal.makeLiteral(options));
                 break ;
             }
             setLocation(result, offset);
@@ -2490,7 +2525,7 @@ namespace Saxon.Hej.expr.parser {
             expect(Saxon.Hej.expr.parser.Token.RCURLY);
             t.lookAhead();
             nextToken();
-            Saxon.Hej.functions.SystemFunction sf = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance().makeFunction("_from-sequence", 1);
+            Saxon.Hej.functions.SystemFunction sf = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(40).makeFunction("_from-sequence", 1);
             Saxon.Hej.expr.Expression result = sf.makeFunctionCall(body);
             setLocation(result, offset);
             return result;
@@ -2504,28 +2539,26 @@ namespace Saxon.Hej.expr.parser {
             }
             Saxon.Hej.om.StructuredQName functionName = resolveFunctionName(fname);
             Saxon.Hej.z.IntSet placeMarkers = null;
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.expr.Expression> keywordArgs = null;
+            System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywordArgs = null;
             nextToken();
             if ((t.currentToken != Saxon.Hej.expr.parser.Token.RPAR)) {
                 while (true) {
                     int peek = t.peekAhead();
                     Saxon.Hej.expr.Expression arg;
-                    if (((t.currentToken == Saxon.Hej.expr.parser.Token.NAME) && (((peek == Saxon.Hej.expr.parser.Token.COLON) || (peek == Saxon.Hej.expr.parser.Token.ASSIGN))))) {
-                        if (!(Saxon.Hej.om.NameChecker.isValidNCName(t.currentTokenValue))) {
-                            grumble("Name used as argument keyword must be a valid NCName (a space may be missing after ':')");
-                        }
-                        string keyword = t.currentTokenValue;
+                    if (((t.currentToken == Saxon.Hej.expr.parser.Token.NAME) && (peek == Saxon.Hej.expr.parser.Token.ASSIGN))) {
+                        Saxon.Hej.om.StructuredQName paramName = qNameParser.parse(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
                         nextToken();
                         nextToken();
                         arg = parseExprSingle();
                         if ((keywordArgs == null)) {
-                            keywordArgs = new System.Collections.Generic.Dictionary<string, Saxon.Hej.expr.Expression>();
+                            keywordArgs = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, int>();
                         } else {
-                            if (keywordArgs.ContainsKey(keyword)) {
-                                grumble((("Duplicate keyword '"+keyword)+"'in function arguments"));
+                            if (keywordArgs.ContainsKey(paramName)) {
+                                grumble((("Duplicate keyword '"+paramName)+"'in function arguments"));
                             }
                         }
-                        Saxon.Impl.Helpers.MapUtils.Put(keywordArgs, keyword, arg);
+                        Saxon.Impl.Helpers.MapUtils.Put(keywordArgs, paramName, args.Count);
+                        args.Add(arg);
                     } else {
                         if ((keywordArgs != null)) {
                             grumble("Keyword arguments must not be followed by positional arguments in a function call");
@@ -2549,9 +2582,6 @@ namespace Saxon.Hej.expr.parser {
                     }
                 }
                 expect(Saxon.Hej.expr.parser.Token.RPAR);
-                if ((keywordArgs != null)) {
-                    args.Add(makeMapExpression(keywordArgs));
-                }
             }
             nextToken();
             if (scanOnly) {
@@ -2560,12 +2590,17 @@ namespace Saxon.Hej.expr.parser {
             Saxon.Hej.expr.Expression[] arguments = new Saxon.Hej.expr.Expression[args.Count];
             arguments = args.ToArray();
             if ((placeMarkers != null)) {
-                return parserExtension.makeCurriedFunction(this, offset, functionName, arguments, placeMarkers);
+                return makeCurriedFunction(this, offset, functionName, arguments, placeMarkers);
             }
             Saxon.Hej.expr.Expression fcall;
             Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(functionName, args.Count);
             System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-            fcall = env.getFunctionLibrary().bind(sn, arguments, env, reasons);
+            try {
+                fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                fcall = null;
+                reasons.Add(e.Message);
+            }
             if ((fcall == null)) {
                 return reportMissingFunction(offset, functionName, arguments, reasons);
             }
@@ -2596,21 +2631,51 @@ namespace Saxon.Hej.expr.parser {
             }
             setLocation(fcall, offset);
             foreach (Saxon.Hej.expr.Expression argument in arguments) {
-                if ((((fcall != argument) && (argument.getParentExpression() == null)) && !(functionName.hasURI(Saxon.Hej.lib.NamespaceConstant.GLOBAL_JS)))) {
+                if ((((fcall != argument) && (argument.getParentExpression() == null)) && !(functionName.hasURI(Saxon.Hej.om.NamespaceUri.GLOBAL_JS)))) {
                     fcall.adoptChildExpression(argument);
                 }
             }
             return makeTracer(fcall, functionName);
+        }
+        public Saxon.Hej.expr.Expression makeCurriedFunction(Saxon.Hej.expr.parser.XPathParser parser, int offset, Saxon.Hej.om.StructuredQName name, Saxon.Hej.expr.Expression[] args, Saxon.Hej.z.IntSet placeMarkers) {
+            Saxon.Hej.expr.StaticContext env = parser.getStaticContext();
+            Saxon.Hej.functions.FunctionLibrary lib = env.getFunctionLibrary();
+            Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(name, args.Length);
+            Saxon.Hej.om.FunctionItem target = lib.getFunctionItem(sn, env);
+            if ((target == null)) {
+                System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
+                return parser.reportMissingFunction(offset, name, args, reasons);
+            }
+            Saxon.Hej.expr.Expression targetExp = makeNamedFunctionReference(name, target);
+            parser.setLocation(targetExp, offset);
+            return curryFunction(targetExp, args, placeMarkers);
+        }
+        public static Saxon.Hej.expr.Expression curryFunction(Saxon.Hej.expr.Expression functionExp, Saxon.Hej.expr.Expression[] args, Saxon.Hej.z.IntSet placeMarkers) {
+            Saxon.Hej.z.IntIterator ii = placeMarkers.iterator();
+            while (ii.hasNext()) {
+                args[ii.next()] = null;
+            }
+            return new Saxon.Hej.functions.hof.PartialApply(functionExp, args);
+        }
+        public Saxon.Hej.expr.Expression createDynamicCurriedFunction(Saxon.Hej.expr.parser.XPathParser p, Saxon.Hej.expr.Expression functionItem, System.Collections.Generic.List<Saxon.Hej.expr.Expression> args, Saxon.Hej.z.IntSet placeMarkers) {
+            Saxon.Hej.expr.Expression[] arguments = new Saxon.Hej.expr.Expression[args.Count];
+            arguments = args.ToArray();
+            Saxon.Hej.expr.Expression result = curryFunction(functionItem, arguments, placeMarkers);
+            p.setLocation(result, p.getTokenizer().currentTokenStartOffset);
+            return result;
+        }
+        public void handleExternalFunctionDeclaration(Saxon.Hej.query.XQueryParser p, Saxon.Hej.query.XQueryFunction func) {
+            parserExtension.needExtension(p, "External function declarations");
         }
         private Saxon.Hej.expr.Expression makeMapExpression(System.Collections.Generic.IDictionary<string,Saxon.Hej.expr.Expression> keywordArgs) {
             Saxon.Hej.expr.Expression[] block = new Saxon.Hej.expr.Expression[keywordArgs.Count];
             int i = 0;
             foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.expr.Expression> entry in keywordArgs) {
                 Saxon.Hej.expr.StringLiteral key = new Saxon.Hej.expr.StringLiteral(entry.Key);
-                block[i++] = Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, entry.Value);
+                block[i++] = Saxon.Hej.ma.map.MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, entry.Value);
             }
             Saxon.Hej.expr.instruct.Block entries = new Saxon.Hej.expr.instruct.Block(block);
-            return Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("merge", 1).makeFunctionCall(entries);
+            return Saxon.Hej.ma.map.MapFunctionSet.getInstance(31).makeFunction("merge", 1).makeFunctionCall(entries);
         }
         public Saxon.Hej.expr.Expression reportMissingFunction(int offset, Saxon.Hej.om.StructuredQName functionName, Saxon.Hej.expr.Expression[] arguments, System.Collections.Generic.IList<string> reasons) {
             Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder();
@@ -2649,7 +2714,7 @@ namespace Saxon.Hej.expr.parser {
             }
         }
         public static string getMissingFunctionExplanation(Saxon.Hej.om.StructuredQName functionName, Saxon.Hej.Configuration config) {
-            string actualURI = functionName.getURI();
+            string actualURI = functionName.getNamespaceUri().ToString();
             string similarNamespace = Saxon.Hej.lib.NamespaceConstant.findSimilarNamespace(actualURI);
             if ((similarNamespace != null)) {
                 if (similarNamespace.Equals(actualURI)) {
@@ -2687,14 +2752,14 @@ namespace Saxon.Hej.expr.parser {
             return null;
         }
         private static string diagnoseCallToJavaMethod(Saxon.Hej.Configuration config) {
-            return "Reflexive calls to external Java methods are not available under Saxon-CS";
+            return "Reflexive calls to external Java methods are not available under SaxonCS";
         }
         private static string diagnoseCallToCliMethod(Saxon.Hej.Configuration config) {
-            return "Reflexive calls to external .NET methods are not available under Saxon-CS";
+            return "Reflexive calls to external .NET methods are not available under SaxonCS";
         }
         protected internal Saxon.Hej.om.StructuredQName resolveFunctionName(string fname) {
             if (scanOnly) {
-                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.SAXON, "dummy");
+                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.SAXON, "dummy");
             }
             Saxon.Hej.om.StructuredQName functionName = null;
             try {
@@ -2703,8 +2768,8 @@ namespace Saxon.Hej.expr.parser {
                 grumble(e.Message, e.getErrorCodeLocalPart());
                 System.Diagnostics.Debug.Assert(false);
             }
-            if (functionName.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
-                Saxon.Hej.type.ItemType t = Saxon.Hej.type.Type.getBuiltInItemType(functionName.getURI(), functionName.getLocalPart());
+            if (functionName.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
+                Saxon.Hej.type.ItemType t = Saxon.Hej.type.Type.getBuiltInItemType(functionName.getNamespaceUri(), functionName.getLocalPart());
                 if ((t is Saxon.Hej.type.BuiltInAtomicType)) {
                     checkAllowedType(env, (Saxon.Hej.type.BuiltInAtomicType)(t));
                 }
@@ -2715,7 +2780,65 @@ namespace Saxon.Hej.expr.parser {
             return parseExprSingle();
         }
         protected internal Saxon.Hej.expr.Expression parseNamedFunctionReference() {
-            return parserExtension.parseNamedFunctionReference(this);
+            string fname = t.currentTokenValue;
+            int offset = t.currentTokenStartOffset;
+            Saxon.Hej.expr.StaticContext env = getStaticContext();
+            nextToken();
+            expect(Saxon.Hej.expr.parser.Token.NUMBER);
+            Saxon.Hej.value.NumericValue number = Saxon.Hej.value.NumericValue.parseNumber(t.currentTokenValue);
+            if (!(((number is Saxon.Hej.value.IntegerValue)))) {
+                grumble("Number following '#' must be an integer");
+            }
+            if (((number.compareTo(0)<0) || (number.compareTo(System.Int32.MaxValue)>0))) {
+                grumble("Number following '#' is out of range", "FOAR0002");
+            }
+            int arity = (int)(number.longValue());
+            nextToken();
+            Saxon.Hej.om.StructuredQName functionName = null;
+            try {
+                functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
+                if (functionName.getPrefix().Equals("")) {
+                    if (Saxon.Hej.expr.parser.XPathParser.isReservedFunctionName31(functionName.getLocalPart())) {
+                        grumble((("The unprefixed function name '"+functionName.getLocalPart())+"' is reserved in XPath 3.1"));
+                    }
+                }
+            } catch (Saxon.Hej.trans.XPathException e) {
+                grumble(e.Message, e.getErrorCodeLocalPart());
+                System.Diagnostics.Debug.Assert((functionName != null));
+            }
+            Saxon.Hej.om.FunctionItem fcf = null;
+            try {
+                Saxon.Hej.functions.FunctionLibrary lib = env.getFunctionLibrary();
+                Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(functionName, arity);
+                fcf = lib.getFunctionItem(sn, env);
+                if ((fcf == null)) {
+                    grumble((((("Function "+functionName.getEQName())+"#")+arity)+" not found"), "XPST0017", offset);
+                }
+            } catch (Saxon.Hej.trans.XPathException e) {
+                grumble(e.Message, "XPST0017", offset);
+            }
+            if ((functionName.hasURI(Saxon.Hej.om.NamespaceUri.FN) && (fcf is Saxon.Hej.functions.SystemFunction))) {
+                Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry details = ((Saxon.Hej.functions.SystemFunction)(fcf)).getDetails();
+                if (((details != null) && (((details.properties&((Saxon.Hej.functions.registry.BuiltInFunctionSet.FOCUS|Saxon.Hej.functions.registry.BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)))) != 0))) {
+                    Saxon.Hej.functions.SystemFunction lookup = Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
+                    lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
+                    return lookup.makeFunctionCall(Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.value.QNameValue(functionName, Saxon.Hej.type.BuiltInAtomicType.QNAME)), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(arity)));
+                }
+            }
+            Saxon.Hej.expr.Expression @ref = makeNamedFunctionReference(functionName, fcf);
+            setLocation(@ref, offset);
+            return @ref;
+        }
+        private static Saxon.Hej.expr.Expression makeNamedFunctionReference(Saxon.Hej.om.StructuredQName functionName, Saxon.Hej.om.FunctionItem fcf) {
+            if (((fcf is Saxon.Hej.expr.instruct.UserFunction) && !(functionName.hasURI(Saxon.Hej.om.NamespaceUri.XSLT)))) {
+                return new Saxon.Hej.functions.hof.UserFunctionReference((Saxon.Hej.expr.instruct.UserFunction)(fcf));
+            } else {
+                if ((fcf is Saxon.Hej.functions.hof.UnresolvedXQueryFunctionItem)) {
+                    return ((Saxon.Hej.functions.hof.UnresolvedXQueryFunctionItem)(fcf)).getFunctionReference();
+                } else {
+                    return new Saxon.Hej.functions.hof.FunctionLiteral(fcf);
+                }
+            }
         }
         protected internal virtual Saxon.Hej.query.AnnotationList parseAnnotationsList() {
             grumble("Function annotations are not allowed in XPath");
@@ -2742,7 +2865,7 @@ namespace Saxon.Hej.expr.parser {
                 nextToken();
                 expect(Saxon.Hej.expr.parser.Token.NAME);
                 string argName = t.currentTokenValue;
-                Saxon.Hej.om.StructuredQName argQName = makeStructuredQName(argName, "");
+                Saxon.Hej.om.StructuredQName argQName = makeStructuredQName(argName, Saxon.Hej.om.NamespaceUri.NULL);
                 if (paramNames.Contains(argQName)) {
                     grumble(("Duplicate parameter name "+Saxon.Hej.trans.Err.wrap(t.currentTokenValue, Saxon.Hej.trans.Err.VARIABLE)), "XQST0039");
                 }
@@ -2804,7 +2927,7 @@ namespace Saxon.Hej.expr.parser {
         public static Saxon.Hej.expr.Expression makeInlineFunctionValue(Saxon.Hej.expr.parser.XPathParser p, Saxon.Hej.query.AnnotationList annotations, Saxon.Hej.expr.parser.XPathParser.InlineFunctionDetails details, System.Collections.Generic.IList<Saxon.Hej.expr.instruct.UserFunctionParameter> @params, Saxon.Hej.value.SequenceType resultType, Saxon.Hej.expr.Expression body) {
             int arity = @params.Count;
             Saxon.Hej.expr.instruct.UserFunction uf = new Saxon.Hej.expr.instruct.UserFunction();
-            uf.setFunctionName(new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, ("f_"+uf.GetHashCode())));
+            uf.setFunctionName(new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.om.NamespaceUri.ANONYMOUS, ("f_"+uf.GetHashCode())));
             uf.setPackageData(p.getStaticContext().getPackageData());
             uf.setBody(body);
             uf.setAnnotations(annotations);
@@ -2992,7 +3115,7 @@ namespace Saxon.Hej.expr.parser {
             nextToken();
             System.Collections.Generic.IList<Saxon.Hej.expr.instruct.UserFunctionParameter> @params = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.UserFunctionParameter>(1);
             Saxon.Hej.value.SequenceType resultType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
-            Saxon.Hej.om.StructuredQName argQName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "dot");
+            Saxon.Hej.om.StructuredQName argQName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "dot");
             Saxon.Hej.expr.instruct.UserFunctionParameter arg = new Saxon.Hej.expr.instruct.UserFunctionParameter();
             arg.setRequiredType(Saxon.Hej.value.SequenceType.SINGLE_ITEM);
             arg.setVariableQName(argQName);
@@ -3017,15 +3140,6 @@ namespace Saxon.Hej.expr.parser {
             setRangeVariables(details.outerVariables);
             inlineFunctionStack.pop();
             return result;
-        }
-        protected internal Saxon.Hej.expr.Expression makeCurriedFunction(int offset, Saxon.Hej.om.StructuredQName name, Saxon.Hej.expr.Expression[] args, Saxon.Hej.z.IntSet placeMarkers) {
-            grumble("Partial function application is not allowed in Saxon-HE");
-            return new Saxon.Hej.expr.ErrorExpression();
-        }
-        private readonly static string[] reservedFunctionNames30 = new string[]{"attribute", "comment", "document-node", "element", "empty-sequence", "function", "if", "item", "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"};
-        protected internal static bool isReservedFunctionName30(string name) {
-            int x = Saxon.Ejava.util.Arrays.binarySearch(reservedFunctionNames30, name);
-            return (x>=0);
         }
         private readonly static string[] reservedFunctionNames31 = new string[]{"array", "attribute", "comment", "document-node", "element", "empty-sequence", "function", "if", "item", "map", "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"};
         public static bool isReservedFunctionName31(string name) {
@@ -3061,35 +3175,35 @@ namespace Saxon.Hej.expr.parser {
                 return Saxon.Hej.om.StandardNames.XML_SPACE;
             }
             try {
-                string defaultNS = (useDefault ? env.getDefaultElementNamespace() : "");
+                Saxon.Hej.om.NamespaceUri defaultNS = (useDefault ? env.getDefaultElementNamespace() : Saxon.Hej.om.NamespaceUri.NULL);
                 Saxon.Hej.om.StructuredQName sq = qNameParser.parse(qname, defaultNS);
-                return env.getConfiguration().getNamePool().allocateFingerprint(sq.getURI(), sq.getLocalPart());
+                return env.getConfiguration().getNamePool().allocateFingerprint(sq.getNamespaceUri(), sq.getLocalPart());
             } catch (Saxon.Hej.trans.XPathException e) {
                 grumble(e.Message, e.getErrorCodeLocalPart());
                 return -1;
             }
         }
-        public Saxon.Hej.om.StructuredQName makeStructuredQNameSilently(string qname, string defaultUri) {
+        public Saxon.Hej.om.StructuredQName makeStructuredQNameSilently(string qname, Saxon.Hej.om.NamespaceUri defaultUri) {
             if (scanOnly) {
-                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.SAXON, "dummy");
+                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.SAXON, "dummy");
             }
             return qNameParser.parse(qname, defaultUri);
         }
-        public Saxon.Hej.om.StructuredQName makeStructuredQName(string qname, string defaultUri) {
+        public Saxon.Hej.om.StructuredQName makeStructuredQName(string qname, Saxon.Hej.om.NamespaceUri defaultUri) {
             try {
                 return makeStructuredQNameSilently(qname, defaultUri);
             } catch (Saxon.Hej.trans.XPathException err) {
                 grumble(err.Message, err.getErrorCodeLocalPart());
-                return new Saxon.Hej.om.StructuredQName("", "", "error");
+                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "error");
             }
         }
         public Saxon.Hej.om.NodeName makeNodeName(string qname, bool useDefault) {
-            Saxon.Hej.om.StructuredQName sq = makeStructuredQNameSilently(qname, (useDefault ? env.getDefaultElementNamespace() : ""));
+            Saxon.Hej.om.StructuredQName sq = makeStructuredQNameSilently(qname, (useDefault ? env.getDefaultElementNamespace() : Saxon.Hej.om.NamespaceUri.NULL));
             string prefix = sq.getPrefix();
-            string uri = sq.getURI();
+            Saxon.Hej.om.NamespaceUri uri = sq.getNamespaceUri();
             string local = sq.getLocalPart();
-            if (uri.Length==0) {
-                int fp = env.getConfiguration().getNamePool().allocateFingerprint("", local);
+            if (uri.isEmpty()) {
+                int fp = env.getConfiguration().getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, local);
                 return new Saxon.Hej.om.NoNamespaceName(local, fp);
             } else {
                 int fp = env.getConfiguration().getNamePool().allocateFingerprint(uri, local);
@@ -3098,7 +3212,7 @@ namespace Saxon.Hej.expr.parser {
         }
         public Saxon.Hej.pattern.NodeTest makeNameTest(short nodeType, string qname, bool useDefault) {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
-            string defaultNS = "";
+            Saxon.Hej.om.NamespaceUri defaultNS = Saxon.Hej.om.NamespaceUri.NULL;
             if ((((useDefault && (nodeType == Saxon.Hej.type.Type.ELEMENT)) && !(qname.StartsWith("Q{"))) && !(qname.Contains(":")))) {
                 Saxon.Api.UnprefixedElementMatchingPolicy policy = env.getUnprefixedElementMatchingPolicy();
                 switch (policy) {
@@ -3108,9 +3222,9 @@ namespace Saxon.Hej.expr.parser {
                   case Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespaceOrNone:
                     defaultNS = env.getDefaultElementNamespace();
                     Saxon.Hej.om.StructuredQName q = makeStructuredQName(qname, defaultNS);
-                    int fp1 = pool.allocateFingerprint(q.getURI(), q.getLocalPart());
+                    int fp1 = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
                     Saxon.Hej.pattern.NameTest test1 = new Saxon.Hej.pattern.NameTest(nodeType, fp1, pool);
-                    int fp2 = pool.allocateFingerprint("", q.getLocalPart());
+                    int fp2 = pool.allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, q.getLocalPart());
                     Saxon.Hej.pattern.NameTest test2 = new Saxon.Hej.pattern.NameTest(nodeType, fp2, pool);
                     return new Saxon.Hej.pattern.CombinedNodeTest(test1, Saxon.Hej.expr.parser.Token.UNION, test2);
                   case Saxon.Api.UnprefixedElementMatchingPolicy.AnyNamespace:
@@ -3121,28 +3235,28 @@ namespace Saxon.Hej.expr.parser {
                 }
             }
             Saxon.Hej.om.StructuredQName qName = makeStructuredQName(qname, defaultNS);
-            int fp = pool.allocateFingerprint(qName.getURI(), qName.getLocalPart());
+            int fp = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
             return new Saxon.Hej.pattern.NameTest(nodeType, fp, pool);
         }
         public Saxon.Hej.pattern.QNameTest makeQNameTest(short nodeType, string qname) {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
-            Saxon.Hej.om.StructuredQName q = makeStructuredQName(qname, "");
+            Saxon.Hej.om.StructuredQName q = makeStructuredQName(qname, Saxon.Hej.om.NamespaceUri.NULL);
             System.Diagnostics.Debug.Assert((q != null));
-            int fp = pool.allocateFingerprint(q.getURI(), q.getLocalPart());
+            int fp = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
             return new Saxon.Hej.pattern.NameTest(nodeType, fp, pool);
         }
         public Saxon.Hej.pattern.NamespaceTest makeNamespaceTest(short nodeType, string prefix) {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
             if (scanOnly) {
-                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, Saxon.Hej.lib.NamespaceConstant.SAXON);
+                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, Saxon.Hej.om.NamespaceUri.SAXON);
             }
             if (prefix.StartsWith("Q{")) {
                 string uri = prefix.Substring(2, (prefix.Length-2) - 2);
-                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, uri);
+                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, Saxon.Hej.om.NamespaceUri.of(uri));
             }
             try {
-                Saxon.Hej.om.StructuredQName sq = qNameParser.parse((prefix+":dummy"), "");
-                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, sq.getURI());
+                Saxon.Hej.om.StructuredQName sq = qNameParser.parse((prefix+":dummy"), Saxon.Hej.om.NamespaceUri.NULL);
+                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, sq.getNamespaceUri());
             } catch (Saxon.Hej.trans.XPathException err) {
                 grumble(err.Message, err.getErrorCodeLocalPart());
                 return null;
@@ -3214,12 +3328,7 @@ namespace Saxon.Hej.expr.parser {
             private readonly Saxon.Hej.s9api.Location containingLocation;
             private readonly int localLineNumber;
             private readonly int localColumnNumber;
-            private string nearbyText;
-            public NestedLocation(Saxon.Hej.s9api.Location containingLocation, int localLineNumber, int localColumnNumber)  {
-                this.containingLocation = containingLocation.saveLocation();
-                this.localLineNumber = localLineNumber;
-                this.localColumnNumber = localColumnNumber;
-            }
+            private readonly string nearbyText;
             public NestedLocation(Saxon.Hej.s9api.Location containingLocation, int localLineNumber, int localColumnNumber, string nearbyText)  {
                 this.containingLocation = containingLocation.saveLocation();
                 this.localLineNumber = localLineNumber;

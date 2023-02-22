@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.style {
     public class XSLStylesheet : Saxon.Hej.style.XSLModuleRoot {
+        public override void initialise(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType elementType, Saxon.Hej.om.AttributeMap atts, Saxon.Hej.om.NodeInfo parent, int sequenceNumber) {
+            base.initialise(elemName, elementType, atts, parent, sequenceNumber);
+            processDefaultCollationAttribute();
+        }
         protected internal override bool mayContainParam() {
             return true;
         }
@@ -59,11 +63,11 @@ namespace Saxon.Hej.style {
                 if ((((curr.getNodeKind() == Saxon.Hej.type.Type.TEXT) || (((curr is Saxon.Hej.style.StyleElement) && ((Saxon.Hej.style.StyleElement)(curr)).isDeclaration()))) || (curr is Saxon.Hej.style.DataElement))) {
                 } else {
                     if ((curr is Saxon.Hej.style.StyleElement)) {
-                        if ((!(Saxon.Hej.lib.NamespaceConstant.XSLT.Equals(curr.getURI())) && !("".Equals(curr.getURI())))) {
+                        if ((!(((Saxon.Hej.style.StyleElement)(curr)).isInXsltNamespace()) && !(((Saxon.Hej.style.StyleElement)(curr)).getNodeName().hasURI(Saxon.Hej.om.NamespaceUri.NULL)))) {
                         } else {
                             if (((curr is Saxon.Hej.style.AbsentExtensionElement) && ((Saxon.Hej.style.StyleElement)(curr)).forwardsCompatibleModeIsEnabled())) {
                             } else {
-                                if (Saxon.Hej.lib.NamespaceConstant.XSLT.Equals(curr.getURI())) {
+                                if (((Saxon.Hej.style.StyleElement)(curr)).isInXsltNamespace()) {
                                     ((Saxon.Hej.style.StyleElement)(curr)).compileError(((("Element "+curr.getDisplayName())+" must not appear directly within ")+getDisplayName()), "XTSE0010");
                                 } else {
                                     ((Saxon.Hej.style.StyleElement)(curr)).compileError((((("Element "+curr.getDisplayName())+" must not appear directly within ")+getDisplayName())+" because it is not in a namespace"), "XTSE0130");

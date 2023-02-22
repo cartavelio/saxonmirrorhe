@@ -17,7 +17,7 @@ namespace Saxon.Hej.functions {
                         coll = collUri.OriginalString;
                     }
                 } catch (System.UriFormatException e) {
-                    visitor.getStaticContext().issueWarning(("Cannot resolve relative collation URI "+coll), c.getLocation());
+                    visitor.getStaticContext().issueWarning(("Cannot resolve relative collation URI "+coll), Saxon.Hej.trans.SaxonErrorCode.SXWN9034, c.getLocation());
                 }
                 Saxon.Hej.functions.CollatingFunctionFixed fn = bindCollation(coll);
                 Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[(arguments.Length-1)];

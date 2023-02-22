@@ -100,7 +100,8 @@ namespace Saxon.Api {
             string[] parts =
                 Saxon.Hej.om.NameChecker.checkQNameParts(Saxon.Hej.value.Whitespace.trim(lexicalName));
 
-            return Implementation.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);
+            return Implementation.getUnderlyingStaticContext()
+                .getNamespaceResolver().getURIForPrefix(parts[0], useDefault).ToString();
         }
 
         /// <summary>

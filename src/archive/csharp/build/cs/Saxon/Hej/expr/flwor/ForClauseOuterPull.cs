@@ -12,7 +12,7 @@ namespace Saxon.Hej.expr.flwor {
                     if (!(@base.nextTuple(context))) {
                         return false;
                     }
-                    currentIteration = new Saxon.Hej.om.FocusTrackingIterator(forClause.getSequence().iterate(context));
+                    currentIteration = Saxon.Hej.om.SequenceTool.focusTracker(/*Delegate.iterate()*/forClause.getSequence().makeElaborator().elaborateForPull()(context));
                     next = currentIteration.next();
                     if ((next == null)) {
                         context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(), Saxon.Hej.value.EmptySequence.getInstance());

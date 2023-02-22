@@ -25,8 +25,12 @@ namespace Saxon.Eej.ee.trans {
         public override Saxon.Hej.trans.rules.Rule makeRule(Saxon.Hej.pattern.Pattern pattern, Saxon.Hej.trans.rules.RuleTarget action, int precedence, int minImportPrecedence, double priority, int sequence, int part) {
             return new Saxon.Eej.ee.trans.RuleEE(pattern, action, precedence, minImportPrecedence, priority, sequence, part);
         }
-        protected internal override Saxon.Eej.ee.trans.PreconditionMatcher makeRuleSearchState(Saxon.Hej.trans.rules.RuleChain chain, Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Eej.ee.trans.PreconditionMatcher(chain, context);
+        protected internal override Saxon.Hej.trans.rules.RuleSearchState makeRuleSearchState(Saxon.Hej.trans.rules.RuleChain chain, Saxon.Hej.expr.XPathContext context) {
+            if (chain.hasOptimizationData()) {
+                return new Saxon.Eej.ee.trans.PreconditionMatcher(chain, context);
+            } else {
+                return Saxon.Hej.trans.rules.RuleSearchState.getInstance();
+            }
         }
         public Saxon.Hej.trans.rules.RuleChain getNamedNodeChain(Saxon.Hej.om.NodeInfo node, Saxon.Hej.expr.XPathContext context) {
             if (node.hasFingerprint()) {
@@ -40,7 +44,7 @@ namespace Saxon.Eej.ee.trans {
                 switch (node.getNodeKind()) {
                   case Saxon.Hej.type.Type.ELEMENT:
                   case Saxon.Hej.type.Type.ATTRIBUTE:
-                    return getNamedRuleChain(context, node.getNodeKind(), node.getURI(), node.getLocalPart());
+                    return getNamedRuleChain(context, node.getNodeKind(), node.getNamespaceUri(), node.getLocalPart());
                 }
             }
             return null;
@@ -66,7 +70,7 @@ namespace Saxon.Eej.ee.trans {
             }
         }
         protected internal override bool ruleMatches(Saxon.Hej.trans.rules.Rule r, Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContextMajor context, Saxon.Hej.trans.rules.RuleSearchState ruleSearchState) {
-            return (r.isAlwaysMatches() || (((Saxon.Eej.ee.trans.RuleEE)(r)).checkPreconditions((Saxon.Eej.ee.trans.PreconditionMatcher)(ruleSearchState)) && r.matches(item, context)));
+            return (r.isAlwaysMatches() || (ruleSearchState.checkPreconditions(r) && r.matches(item, context)));
         }
         public override void computeStreamability() {
             processRules(r => {

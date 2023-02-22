@@ -19,7 +19,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>This method must be implemented in any class that implements this interface,
         /// that is, a class that provides a custom destination not based on those supplied
-        /// in the Saxon-CS product.</para>
+        /// in the SaxonCS product.</para>
         /// <para>Implementing this method requires familiarity with Saxon internals (which may
         /// change from one release to another.</para>
         /// <para>Information about the returned <see cref="Saxon.Hej.s9api.Destination"/> object

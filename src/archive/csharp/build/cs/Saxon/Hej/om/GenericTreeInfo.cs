@@ -9,6 +9,7 @@ namespace Saxon.Hej.om {
         private System.Collections.Generic.IDictionary<string,System.Object> userData;
         private long documentNumber = -1;
         private Saxon.Hej.om.SpaceStrippingRule spaceStrippingRule = Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance();
+        private Saxon.Hej.om.Durability durability;
         public GenericTreeInfo(Saxon.Hej.Configuration config)  {
             this.config = config;
         }
@@ -57,6 +58,15 @@ namespace Saxon.Hej.om {
         public virtual Saxon.Hej.om.NodeInfo selectID(string id, bool getParent) {
             return null;
         }
+        public void setDurability(Saxon.Hej.om.Durability durability) {
+            this.durability = durability;
+        }
+        public Saxon.Hej.om.Durability getDurability() {
+            return durability;
+        }
+        public bool isMutable() {
+            return (durability == Saxon.Hej.om.Durability.MUTABLE);
+        }
         public virtual System.Collections.Generic.IEnumerator<string> getUnparsedEntityNames() {
             return new System.Collections.Generic.List<string>().GetEnumerator();;
         }
@@ -88,11 +98,6 @@ namespace Saxon.Hej.om {
     
         /* Expanding default method isTyped from interface TreeInfo */
         public virtual bool isTyped() {
-            return false;
-        }
-
-        /* Expanding default method isMutable from interface TreeInfo */
-        public virtual bool isMutable() {
             return false;
         }
 

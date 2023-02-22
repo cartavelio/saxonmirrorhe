@@ -42,7 +42,7 @@ namespace Saxon.Hej.@event {
             public virtual Saxon.Hej.s9api.push.Element element(string name) {
                 try {
                     implicitClose();
-                    Saxon.Hej.om.NodeName fp = (defaultNamespace.Length==0 ? new Saxon.Hej.om.NoNamespaceName(name) : new Saxon.Hej.om.FingerprintedQName("", defaultNamespace, name));
+                    Saxon.Hej.om.NodeName fp = (defaultNamespace.Length==0 ? new Saxon.Hej.om.NoNamespaceName(name) : new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.of(defaultNamespace), name));
                     cco.startElement(fp, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Api.SaxonApiException(e);
@@ -188,7 +188,7 @@ namespace Saxon.Hej.@event {
             public Saxon.Hej.s9api.push.Element @namespace(string prefix, string uri) {
                 checkChildNotFound();
                 try {
-                    getOutputter().@namespace(prefix, uri, Saxon.Hej.@event.ReceiverOption.NONE);
+                    getOutputter().@namespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri), Saxon.Hej.@event.ReceiverOption.NONE);
                     return this;
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Api.SaxonApiException(e);

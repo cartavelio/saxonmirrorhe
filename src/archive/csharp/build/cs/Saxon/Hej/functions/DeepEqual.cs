@@ -45,12 +45,12 @@ namespace Saxon.Hej.functions {
                         }
                         break ;
                     }
-                    if (((item1 is Saxon.Hej.om.Function) || (item2 is Saxon.Hej.om.Function))) {
-                        if (!((((item1 is Saxon.Hej.om.Function) && (item2 is Saxon.Hej.om.Function))))) {
+                    if (((item1 is Saxon.Hej.om.FunctionItem) || (item2 is Saxon.Hej.om.FunctionItem))) {
+                        if (!((((item1 is Saxon.Hej.om.FunctionItem) && (item2 is Saxon.Hej.om.FunctionItem))))) {
                             reason = (("if one item is a function then both must be functions (position "+pos1)+")");
                             return false;
                         }
-                        bool fe = ((Saxon.Hej.om.Function)(item1)).deepEquals((Saxon.Hej.om.Function)(item2), context, comparer, flags);
+                        bool fe = ((Saxon.Hej.om.FunctionItem)(item1)).deepEquals((Saxon.Hej.om.FunctionItem)(item2), context, comparer, flags);
                         if (!(fe)) {
                             result = false;
                             reason = (("functions at position "+pos1)+" differ");
@@ -66,9 +66,10 @@ namespace Saxon.Hej.functions {
                     }
                     if ((item1 is Saxon.Hej.om.NodeInfo)) {
                         if ((item2 is Saxon.Hej.om.NodeInfo)) {
-                            if (!(deepEquals((Saxon.Hej.om.NodeInfo)(item1), (Saxon.Hej.om.NodeInfo)(item2), comparer, context, flags))) {
+                            string message = deepEquals((Saxon.Hej.om.NodeInfo)(item1), (Saxon.Hej.om.NodeInfo)(item2), comparer, context, flags);
+                            if ((message != null)) {
                                 result = false;
-                                reason = (("nodes at position "+pos1)+" differ");
+                                reason = ((("nodes at position "+pos1)+" differ: ")+message);
                                 break ;
                             }
                         } else {
@@ -106,30 +107,34 @@ namespace Saxon.Hej.functions {
             }
             return result;
         }
-        public static bool deepEquals(Saxon.Hej.om.NodeInfo n1, Saxon.Hej.om.NodeInfo n2, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context, int flags) {
+        public static string deepEquals(Saxon.Hej.om.NodeInfo n1, Saxon.Hej.om.NodeInfo n2, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context, int flags) {
             if (n1.Equals(n2)) {
-                return true;
+                return null;
             }
             Saxon.Hej.lib.ErrorReporter reporter = context.getErrorReporter();
             if ((n1.getNodeKind() != n2.getNodeKind())) {
-                explain(reporter, ((("node kinds differ: comparing "+showKind(n1))+" to ")+showKind(n2)), flags, n1, n2);
-                return false;
+                string reason = ((("node kinds differ: comparing "+showKind(n1))+" to ")+showKind(n2));
+                explain(reporter, reason, flags, n1, n2);
+                return reason;
             }
             switch (n1.getNodeKind()) {
               case Saxon.Hej.type.Type.ELEMENT:
                 if (!(Saxon.Hej.tree.util.Navigator.haveSameName(n1, n2))) {
-                    explain(reporter, ((("element names differ: "+Saxon.Hej.om.NameOfNode.makeName(n1).getStructuredQName().getEQName())+" != ")+Saxon.Hej.om.NameOfNode.makeName(n2).getStructuredQName().getEQName()), flags, n1, n2);
-                    return false;
+                    string reason = ((("element names differ: "+Saxon.Hej.om.NameOfNode.makeName(n1).getStructuredQName().getEQName())+" != ")+Saxon.Hej.om.NameOfNode.makeName(n2).getStructuredQName().getEQName());
+                    explain(reporter, reason, flags, n1, n2);
+                    return reason;
                 }
                 if ((((((flags&INCLUDE_PREFIXES)) != 0)) && !(n1.getPrefix().Equals(n2.getPrefix())))) {
-                    explain(reporter, ((("element prefixes differ: "+n1.getPrefix())+" != ")+n2.getPrefix()), flags, n1, n2);
-                    return false;
+                    string reason = ((("element prefixes differ: "+n1.getPrefix())+" != ")+n2.getPrefix());
+                    explain(reporter, reason, flags, n1, n2);
+                    return reason;
                 }
                 Saxon.Hej.tree.iter.AxisIterator a1 = n1.iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE);
                 Saxon.Hej.tree.iter.AxisIterator a2 = n2.iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE);
                 if (!(Saxon.Hej.om.SequenceTool.sameLength(a1, a2))) {
-                    explain(reporter, "elements have different number of attributes", flags, n1, n2);
-                    return false;
+                    string reason = "elements have different number of attributes";
+                    explain(reporter, reason, flags, n1, n2);
+                    return reason;
                 }
                 Saxon.Hej.om.NodeInfo att1;
                 a1 = n1.iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE);
@@ -137,40 +142,46 @@ namespace Saxon.Hej.functions {
                     Saxon.Hej.tree.iter.AxisIterator a2iter = n2.iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.SameNameTest(att1));
                     Saxon.Hej.om.NodeInfo att2 = ((/*1430*/Saxon.Hej.om.NodeInfo)a2iter.next());
                     if ((att2 == null)) {
-                        explain(reporter, (("one element has an attribute "+Saxon.Hej.om.NameOfNode.makeName(att1).getStructuredQName().getEQName())+", the other does not"), flags, n1, n2);
-                        return false;
+                        string reason = (("one element has an attribute "+Saxon.Hej.om.NameOfNode.makeName(att1).getStructuredQName().getEQName())+", the other does not");
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
-                    if (!(deepEquals(att1, att2, comparer, context, flags))) {
-                        deepEquals(att1, att2, comparer, context, flags);
-                        explain(reporter, ("elements have different values for the attribute "+Saxon.Hej.om.NameOfNode.makeName(att1).getStructuredQName().getEQName()), flags, n1, n2);
-                        return false;
+                    string attReason = deepEquals(att1, att2, comparer, context, flags);
+                    if ((attReason != null)) {
+                        string reason = ((("elements have different values for the attribute "+Saxon.Hej.om.NameOfNode.makeName(att1).getStructuredQName().getEQName())+" - ")+attReason);
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                 }
                 if ((((flags&INCLUDE_NAMESPACES)) != 0)) {
                     Saxon.Hej.om.NamespaceMap nm1 = n1.getAllNamespaces();
                     Saxon.Hej.om.NamespaceMap nm2 = n2.getAllNamespaces();
                     if (!(nm1.Equals(nm2))) {
-                        explain(reporter, ((("elements have different in-scope namespaces: "+nm1)+" versus ")+nm2), flags, n1, n2);
-                        return false;
+                        string reason = ((("elements have different in-scope namespaces: "+nm1)+" versus ")+nm2);
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                 }
                 if ((((flags&COMPARE_ANNOTATIONS)) != 0)) {
                     if (!(n1.getSchemaType().Equals(n2.getSchemaType()))) {
-                        explain(reporter, "elements have different type annotation", flags, n1, n2);
-                        return false;
+                        string reason = "elements have different type annotation";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                 }
                 if ((((flags&EXCLUDE_VARIETY)) == 0)) {
                     if ((n1.getSchemaType().isComplexType() != n2.getSchemaType().isComplexType())) {
-                        explain(reporter, "one element has complex type, the other simple", flags, n1, n2);
-                        return false;
+                        string reason = "one element has complex type, the other simple";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                     if (n1.getSchemaType().isComplexType()) {
                         Saxon.Hej.type.ComplexVariety variety1 = ((Saxon.Hej.type.ComplexType)(n1.getSchemaType())).getVariety();
                         Saxon.Hej.type.ComplexVariety variety2 = ((Saxon.Hej.type.ComplexType)(n2.getSchemaType())).getVariety();
                         if ((variety1 != variety2)) {
-                            explain(reporter, "both elements have complex type, but a different variety", flags, n1, n2);
-                            return false;
+                            string reason = "both elements have complex type, but a different variety";
+                            explain(reporter, reason, flags, n1, n2);
+                            return reason;
                         }
                     }
                 }
@@ -180,24 +191,28 @@ namespace Saxon.Hej.functions {
                     bool isSimple1 = (type1.isSimpleType() || ((Saxon.Hej.type.ComplexType)(type1)).isSimpleContent());
                     bool isSimple2 = (type2.isSimpleType() || ((Saxon.Hej.type.ComplexType)(type2)).isSimpleContent());
                     if ((isSimple1 != isSimple2)) {
-                        explain(reporter, "one element has a simple type, the other does not", flags, n1, n2);
-                        return false;
+                        string reason = "one element has a simple type, the other does not";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                     if (isSimple1) {
                         System.Diagnostics.Debug.Assert(isSimple2);
                         Saxon.Hej.tree.iter.AtomicIterator v1 = ((/*1430*/Saxon.Hej.tree.iter.AtomicIterator)n1.atomize().iterate());
                         Saxon.Hej.tree.iter.AtomicIterator v2 = ((/*1430*/Saxon.Hej.tree.iter.AtomicIterator)n2.atomize().iterate());
-                        return deepEqual(v1, v2, comparer, context, flags);
+                        bool typedValueComparison = deepEqual(v1, v2, comparer, context, flags);
+                        return (typedValueComparison ? null : "typed values of elements differ");
                     }
                 }
                 if ((((flags&COMPARE_ID_FLAGS)) != 0)) {
                     if ((n1.isId() != n2.isId())) {
-                        explain(reporter, "one element is an ID, the other is not", flags, n1, n2);
-                        return false;
+                        string reason = "one element is an ID, the other is not";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                     if ((n1.isIdref() != n2.isIdref())) {
-                        explain(reporter, "one element is an IDREF, the other is not", flags, n1, n2);
-                        return false;
+                        string reason = "one element is an IDREF, the other is not";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                 }
                 goto case Saxon.Hej.type.Type.DOCUMENT;
@@ -221,26 +236,31 @@ namespace Saxon.Hej.functions {
                                 message += " (the first extra child is whitespace text)";
                             }
                             explain(reporter, message, flags, n1, n2);
+                            return message;
                         }
-                        return r;
+                        return null;
                     }
-                    if (!(deepEquals(d1, d2, comparer, context, flags))) {
-                        return false;
+                    string recursiveResult = deepEquals(d1, d2, comparer, context, flags);
+                    if ((recursiveResult != null)) {
+                        return recursiveResult;
                     }
                 }
               case Saxon.Hej.type.Type.ATTRIBUTE:
                 if (!(Saxon.Hej.tree.util.Navigator.haveSameName(n1, n2))) {
-                    explain(reporter, ((("attribute names differ: "+Saxon.Hej.om.NameOfNode.makeName(n1).getStructuredQName().getEQName())+" != ")+Saxon.Hej.om.NameOfNode.makeName(n1).getStructuredQName().getEQName()), flags, n1, n2);
-                    return false;
+                    string reason = ((("attribute names differ: "+Saxon.Hej.om.NameOfNode.makeName(n1).getStructuredQName().getEQName())+" != ")+Saxon.Hej.om.NameOfNode.makeName(n1).getStructuredQName().getEQName());
+                    explain(reporter, reason, flags, n1, n2);
+                    return reason;
                 }
                 if ((((((flags&INCLUDE_PREFIXES)) != 0)) && !(n1.getPrefix().Equals(n2.getPrefix())))) {
-                    explain(reporter, ((("attribute prefixes differ: "+n1.getPrefix())+" != ")+n2.getPrefix()), flags, n1, n2);
-                    return false;
+                    string reason = ((("attribute prefixes differ: "+n1.getPrefix())+" != ")+n2.getPrefix());
+                    explain(reporter, reason, flags, n1, n2);
+                    return reason;
                 }
                 if ((((flags&COMPARE_ANNOTATIONS)) != 0)) {
                     if (!(n1.getSchemaType().Equals(n2.getSchemaType()))) {
-                        explain(reporter, "attributes have different type annotations", flags, n1, n2);
-                        return false;
+                        string reason = "attributes have different type annotations";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                 }
                 bool ar;
@@ -250,59 +270,68 @@ namespace Saxon.Hej.functions {
                     ar = comparer.comparesEqual(new Saxon.Hej.value.StringValue(n1.getUnicodeStringValue()), new Saxon.Hej.value.StringValue(n2.getUnicodeStringValue()));
                 }
                 if (!(ar)) {
-                    explain(reporter, "attribute values differ", flags, n1, n2);
-                    return false;
+                    string reason = "attribute values differ";
+                    explain(reporter, reason, flags, n1, n2);
+                    return reason;
                 }
                 if ((((flags&COMPARE_ID_FLAGS)) != 0)) {
                     if ((n1.isId() != n2.isId())) {
-                        explain(reporter, "one attribute is an ID, the other is not", flags, n1, n2);
-                        return false;
+                        string reason = "one attribute is an ID, the other is not";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                     if ((n1.isIdref() != n2.isIdref())) {
-                        explain(reporter, "one attribute is an IDREF, the other is not", flags, n1, n2);
-                        return false;
+                        string reason = "one attribute is an IDREF, the other is not";
+                        explain(reporter, reason, flags, n1, n2);
+                        return reason;
                     }
                 }
-                return true;
+                return null;
               case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
               case Saxon.Hej.type.Type.NAMESPACE:
                 if (!(n1.getLocalPart().Equals(n2.getLocalPart()))) {
-                    explain(reporter, (Saxon.Hej.type.Type.displayTypeName(n1)+" names differ"), flags, n1, n2);
-                    return false;
+                    string reason = (Saxon.Hej.type.Type.displayTypeName(n1)+" names differ");
+                    explain(reporter, reason, flags, n1, n2);
+                    return reason;
                 }
                 goto case Saxon.Hej.type.Type.TEXT;
               case Saxon.Hej.type.Type.TEXT:
               case Saxon.Hej.type.Type.COMMENT:
                 bool vr = comparer.comparesEqual((Saxon.Hej.value.AtomicValue)(n1.atomize()), (Saxon.Hej.value.AtomicValue)(n2.atomize()));
-                if ((!(vr) && ((((flags&WARNING_IF_FALSE)) != 0)))) {
-                    string v1 = n1.getStringValue();
-                    string v2 = n2.getStringValue();
-                    string message = "";
-                    if ((v1.Length != v2.Length)) {
-                        message = (((("lengths ("+v1.Length)+",")+v2.Length)+")");
-                    }
-                    if (((v1.Length<10) && (v2.Length<10))) {
-                        message = ((((" (\""+v1)+"\" vs \"")+v2)+"\")");
-                    } else {
-                        int min = System.Math.Min(v1.Length, v2.Length);
-                        if (v1.Substring(0, min - 0).Equals(v2.Substring(0, min - 0))) {
-                            message += ((((" different at char "+min)+"(\"")+Saxon.Hej.str.StringTool.diagnosticDisplay((((v1.Length>v2.Length) ? v1 : v2)).Substring(min)))+"\")");
+                if (!(vr)) {
+                    if ((((flags&WARNING_IF_FALSE)) != 0)) {
+                        string v1 = n1.getStringValue();
+                        string v2 = n2.getStringValue();
+                        string message = "";
+                        if ((v1.Length != v2.Length)) {
+                            message = (((("lengths ("+v1.Length)+",")+v2.Length)+")");
+                        }
+                        if (((v1.Length<10) && (v2.Length<10))) {
+                            message = ((((" (\""+v1)+"\" vs \"")+v2)+"\")");
                         } else {
-                            if ((v1[0] != v2[0])) {
-                                message += (((((" different at start "+"(\"")+v1.Substring(0, System.Math.Min(v1.Length, 10) - 0))+"\", \"")+v2.Substring(0, System.Math.Min(v2.Length, 10) - 0))+"\")");
+                            int min = System.Math.Min(v1.Length, v2.Length);
+                            if (v1.Substring(0, min - 0).Equals(v2.Substring(0, min - 0))) {
+                                message += ((((" different at char "+min)+"(\"")+Saxon.Hej.str.StringTool.diagnosticDisplay((((v1.Length>v2.Length) ? v1 : v2)).Substring(min)))+"\")");
                             } else {
-                                for (int i = 1; (i<min); i++) {
-                                    if (!(v1.Substring(0, i - 0).Equals(v2.Substring(0, i - 0)))) {
-                                        message += ((((((" different at char "+((i-1)))+"(\"")+v1.Substring((i-1), System.Math.Min(v1.Length, (i+10)) - (i-1)))+"\", \"")+v2.Substring((i-1), System.Math.Min(v2.Length, (i+10)) - (i-1)))+"\")");
-                                        break ;
+                                if ((v1[0] != v2[0])) {
+                                    message += (((((" different at start "+"(\"")+v1.Substring(0, System.Math.Min(v1.Length, 10) - 0))+"\", \"")+v2.Substring(0, System.Math.Min(v2.Length, 10) - 0))+"\")");
+                                } else {
+                                    for (int i = 1; (i<min); i++) {
+                                        if (!(v1.Substring(0, i - 0).Equals(v2.Substring(0, i - 0)))) {
+                                            message += ((((((" different at char "+((i-1)))+"(\"")+v1.Substring((i-1), System.Math.Min(v1.Length, (i+10)) - (i-1)))+"\", \"")+v2.Substring((i-1), System.Math.Min(v2.Length, (i+10)) - (i-1)))+"\")");
+                                            break ;
+                                        }
                                     }
                                 }
                             }
                         }
+                        explain(reporter, ((((((Saxon.Hej.type.Type.displayTypeName(n1)+" values differ (")+Saxon.Hej.tree.util.Navigator.getPath(n1))+", ")+Saxon.Hej.tree.util.Navigator.getPath(n2))+"): ")+message), flags, n1, n2);
+                        return message;
+                    } else {
+                        return "atomized values differ";
                     }
-                    explain(reporter, ((((((Saxon.Hej.type.Type.displayTypeName(n1)+" values differ (")+Saxon.Hej.tree.util.Navigator.getPath(n1))+", ")+Saxon.Hej.tree.util.Navigator.getPath(n2))+"): ")+message), flags, n1, n2);
                 }
-                return vr;
+                return null;
               default:
                 throw new Saxon.Ejava.lang.IllegalArgumentException("Unknown node type");
             }
@@ -339,7 +368,7 @@ namespace Saxon.Hej.functions {
             foreach (Saxon.Hej.om.NamespaceBinding binding in bindings) {
                 sb.append(binding.getPrefix());
                 sb.append("=");
-                sb.append(binding.getURI());
+                sb.append(binding.getNamespaceUri());
                 sb.append(" ");
             }
             sb.setLength((sb.length()-1));

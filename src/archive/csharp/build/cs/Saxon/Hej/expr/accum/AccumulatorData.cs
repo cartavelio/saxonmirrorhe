@@ -71,7 +71,7 @@ namespace Saxon.Hej.expr.accum {
             c2.setLocalVariable(0, value);
             c2.setCurrentComponent(accumulator.getDeclaringComponent());
             c2.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_ACCUMULATOR_RULE);
-            value = Saxon.Hej.expr.parser.Evaluator.EagerSequence.INSTANCE.evaluate(delta, c2);
+            value = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(delta, c2);
             if ((((node.getParent() == null) && !(isPostDescent)) && (values.Count == 1))) {
                 values.Clear();
             }

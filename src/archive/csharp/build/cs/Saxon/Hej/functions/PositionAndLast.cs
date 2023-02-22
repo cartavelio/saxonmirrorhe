@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions {
         public override int getNetCost() {
             return 0;
         }
-        public override Saxon.Hej.om.Function bindContext(Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.om.FunctionItem bindContext(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.value.Int64Value value;
             try {
                 value = evaluateItem(context);
@@ -57,6 +57,31 @@ namespace Saxon.Hej.functions {
             public override string getCompilerName() {
                 return "PositionCompiler";
             }
+            public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+                return new Saxon.Hej.functions.PositionAndLast.Position.PositionFnElaborator();
+            }
+            public class PositionFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+                public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                    Saxon.Hej.expr.SystemFunctionCall sfc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                    Saxon.Hej.functions.PositionAndLast.Position fn = (Saxon.Hej.functions.PositionAndLast.Position)(sfc.getTargetFunction());
+                    if (fn.isContextPossiblyUndefined()) {
+                        return context => {
+                            Saxon.Hej.om.FocusIterator focus = context.getCurrentIterator();
+                            if ((focus == null)) {
+                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The context item is absent, so position() is undefined");
+                                e.setXPathContext(context);
+                                e.setLocation(sfc.getLocation());
+                                e.setErrorCode("XPDY0002");
+                                throw e;
+                            }
+                            return Saxon.Hej.value.Int64Value.makeIntegerValue(focus.position());
+                        } ;
+                    } else {
+                        return context => Saxon.Hej.value.Int64Value.makeIntegerValue(context.getCurrentIterator().position());
+                    }
+                }
+            
+            }
         
         }
         public class Last : Saxon.Hej.functions.PositionAndLast {
@@ -72,6 +97,31 @@ namespace Saxon.Hej.functions {
             }
             public override string getStreamerName() {
                 return "Last";
+            }
+            public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+                return new Saxon.Hej.functions.PositionAndLast.Last.LastFnElaborator();
+            }
+            public class LastFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+                public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                    Saxon.Hej.expr.SystemFunctionCall sfc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                    Saxon.Hej.functions.PositionAndLast.Last fn = (Saxon.Hej.functions.PositionAndLast.Last)(sfc.getTargetFunction());
+                    if (fn.isContextPossiblyUndefined()) {
+                        return context => {
+                            Saxon.Hej.om.FocusIterator focus = context.getCurrentIterator();
+                            if ((focus == null)) {
+                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The context item is absent, so last() is undefined");
+                                e.setXPathContext(context);
+                                e.setLocation(sfc.getLocation());
+                                e.setErrorCode("XPDY0002");
+                                throw e;
+                            }
+                            return Saxon.Hej.value.Int64Value.makeIntegerValue(context.getLast());
+                        } ;
+                    } else {
+                        return context => Saxon.Hej.value.Int64Value.makeIntegerValue(context.getLast());
+                    }
+                }
+            
             }
         
         }

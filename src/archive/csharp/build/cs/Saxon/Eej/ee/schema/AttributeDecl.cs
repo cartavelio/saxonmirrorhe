@@ -34,8 +34,8 @@ namespace Saxon.Eej.ee.schema {
         public string getName() {
             return attributeName.getLocalPart();
         }
-        public string getTargetNamespace() {
-            return attributeName.getURI();
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return attributeName.getNamespaceUri();
         }
         public string getDisplayName() {
             return attributeName.getDisplayName();
@@ -46,7 +46,7 @@ namespace Saxon.Eej.ee.schema {
         }
         public void setAttributeName(Saxon.Hej.om.StructuredQName attributeName) {
             this.attributeName = attributeName;
-            this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(attributeName.getURI(), attributeName.getLocalPart());
+            this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(attributeName.getNamespaceUri(), attributeName.getLocalPart());
         }
         public Saxon.Hej.om.StructuredQName getComponentName() {
             return attributeName;
@@ -158,7 +158,7 @@ namespace Saxon.Eej.ee.schema {
             return result;
         }
         public bool isSameDeclaration(Saxon.Eej.ee.schema.AttributeDecl other) {
-            return (((this == other) || (((getFingerprint() == other.getFingerprint()) && hasSameLocation(other)))) || getTargetNamespace().Equals(Saxon.Hej.lib.NamespaceConstant.XML));
+            return (((this == other) || (((getFingerprint() == other.getFingerprint()) && hasSameLocation(other)))) || getTargetNamespace().Equals(Saxon.Hej.om.NamespaceUri.XML));
         }
         public bool isNillable() {
             return false;
@@ -172,8 +172,8 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("id", id);
             if ((getName() != null)) {
                 serializer.emitAttribute("name", getName());
-                if (((getTargetNamespace() != null) && !(getTargetNamespace().Length==0))) {
-                    serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                if (((getTargetNamespace() != null) && !(getTargetNamespace().isEmpty()))) {
+                    serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
                 }
             }
             Saxon.Hej.type.SimpleType type = ((/*1430*/Saxon.Hej.type.SimpleType)getType());
@@ -191,7 +191,7 @@ namespace Saxon.Eej.ee.schema {
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.AttributeDecl thisAttributeDecl = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
@@ -203,7 +203,7 @@ namespace Saxon.Eej.ee.schema {
                   case "name":
                     return new Saxon.Hej.value.StringValue(getName(), Saxon.Hej.type.BuiltInAtomicType.NCNAME);
                   case "target namespace":
-                    return new Saxon.Hej.value.AnyURIValue((getTargetNamespace()));
+                    return new Saxon.Hej.value.AnyURIValue((getTargetNamespace().toUnicodeString()));
                   case "type definition":
                     return ((/*1430*/Saxon.Hej.type.SimpleType)getType()).getComponentAsFunction();
                   case "scope":

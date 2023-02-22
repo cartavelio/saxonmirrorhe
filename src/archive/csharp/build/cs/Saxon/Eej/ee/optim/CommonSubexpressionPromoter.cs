@@ -35,10 +35,9 @@ namespace Saxon.Eej.ee.optim {
                 Saxon.Hej.value.SequenceType type = Saxon.Hej.value.SequenceType.makeSequenceType(itemType.toItemType(), cardinality);
                 Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
                 let.setSequence(topCandidate);
-                let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("cc"+topCandidate.GetHashCode())));
+                let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("cc"+topCandidate.GetHashCode())));
                 let.setRequiredType(type);
                 let.setNeedsLazyEvaluation(true);
-                let.setEvaluator((Saxon.Hej.value.Cardinality.allowsMany(topCandidate.getCardinality()) ? Saxon.Hej.expr.parser.Evaluator.MemoClosureEvaluator.INSTANCE : Saxon.Hej.expr.parser.Evaluator.SingletonClosure.INSTANCE));
                 foreach (Saxon.Hej.expr.Operand o in equivalents) {
                     o.setChildExpression(new Saxon.Hej.expr.LocalVariableReference(let));
                 }

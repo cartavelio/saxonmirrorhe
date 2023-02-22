@@ -64,16 +64,16 @@ namespace Saxon.Eej.ee.optim {
             if (!(((getBaseExpression() is Saxon.Hej.expr.VariableReference)))) {
                 if (Saxon.Hej.expr.parser.ExpressionTool.dependsOnFocus(getSearchExpression())) {
                     Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
-                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("vv"+computeHashCode())));
+                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("vv"+computeHashCode())));
                     let.setSequence(getSearchExpression());
                     let.setRequiredType(getSearchExpression().getStaticType());
-                    Saxon.Hej.expr.Expression filter = new Saxon.Eej.ee.optim.GeneralComparisonEE(getUseExpression(), Saxon.Hej.expr.parser.Token.EQUALS, new Saxon.Hej.expr.LocalVariableReference(let));
+                    Saxon.Hej.expr.Expression filter = new Saxon.Eej.ee.optim.GeneralEqualityEE(getUseExpression(), Saxon.Hej.expr.parser.Token.EQUALS, new Saxon.Hej.expr.LocalVariableReference(let));
                     filter = filter.typeCheck(visitor, contextItemType);
                     let.setAction(new Saxon.Hej.expr.FilterExpression(getBaseExpression(), filter));
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, let);
                     return let.optimize(visitor, contextItemType);
                 } else {
-                    Saxon.Hej.expr.Expression filter = new Saxon.Eej.ee.optim.GeneralComparisonEE(getUseExpression(), Saxon.Hej.expr.parser.Token.EQUALS, getSearchExpression());
+                    Saxon.Hej.expr.Expression filter = new Saxon.Eej.ee.optim.GeneralEqualityEE(getUseExpression(), Saxon.Hej.expr.parser.Token.EQUALS, getSearchExpression());
                     Saxon.Hej.type.ItemType type = getBaseExpression().getItemType();
                     Saxon.Hej.expr.parser.ContextItemStaticInfo cisi = visitor.getConfiguration().makeContextItemStaticInfo(type, false);
                     filter = filter.typeCheck(visitor, cisi);
@@ -114,36 +114,7 @@ namespace Saxon.Eej.ee.optim {
             return ((("IndexedFilterExpression".GetHashCode()+getBaseExpression().GetHashCode())^getUseExpression().GetHashCode())^getSearchExpression().GetHashCode());
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.Expression baseExp = getBaseExpression();
-            Saxon.Eej.ee.optim.SearchableValue indexedValue;
-            if ((baseExp is Saxon.Hej.expr.VariableReference)) {
-                Saxon.Hej.om.Sequence @base = ((Saxon.Hej.expr.VariableReference)(baseExp)).evaluateVariable(context);
-                if ((@base is Saxon.Hej.value.EmptySequence)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
-                } else {
-                    if ((@base is Saxon.Eej.ee.optim.SearchableValue)) {
-                        indexedValue = (Saxon.Eej.ee.optim.SearchableValue)(@base);
-                    } else {
-                        indexedValue = /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(@base.iterate());
-                        Saxon.Hej.expr.Binding binding = ((Saxon.Hej.expr.VariableReference)(baseExp)).getBinding();
-                        if ((binding is Saxon.Hej.expr.LocalBinding)) {
-                            context.setLocalVariable(((Saxon.Hej.expr.LocalBinding)(binding)).getLocalSlotNumber(), indexedValue);
-                        } else {
-                            if ((binding is Saxon.Hej.expr.instruct.GlobalVariable)) {
-                                context.getController().getBindery(((Saxon.Hej.expr.instruct.GlobalVariable)(binding)).getPackageData()).setGlobalVariable((Saxon.Hej.expr.instruct.GlobalVariable)(binding), indexedValue);
-                            }
-                        }
-                    }
-                }
-            } else {
-                indexedValue = /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(baseExp.iterate(context));
-            }
-            if ((indexedValue.getLength() == 0)) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
-            }
-            Saxon.Hej.expr.sort.AtomicComparer comparer = this.comparer.provideContext(context);
-            Saxon.Hej.om.SequenceIterator values = getSearchExpression().iterate(context);
-            return indexedValue.findItems(getUseExpression(), values, convertUntypedToOther, false, comparer, context);
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override int computeDependencies() {
             int b = (getBaseExpression().getDependencies()|getSearchExpression().getDependencies());
@@ -169,6 +140,49 @@ namespace Saxon.Eej.ee.optim {
         }
         public override string toShortString() {
             return (((((getBaseExpression().toShortString()+"[(:indexed:)")+getUseExpression().toShortString())+"=")+getSearchExpression().toShortString())+"]");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.ee.optim.IndexedFilterExpression.IndexedFilterExpressionElaborator();
+        }
+        private class IndexedFilterExpressionElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Eej.ee.optim.IndexedFilterExpression expr = (Saxon.Eej.ee.optim.IndexedFilterExpression)(getExpression());
+                Saxon.Hej.expr.Expression baseExp = expr.getBaseExpression();
+                Saxon.Hej.expr.elab.PullEvaluator basePullEvaluator = baseExp.makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PullEvaluator searchPullEvaluator = expr.getSearchExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    Saxon.Eej.ee.optim.SearchableValue indexedValue;
+                    if ((baseExp is Saxon.Hej.expr.VariableReference)) {
+                        Saxon.Hej.om.Sequence @base = ((Saxon.Hej.expr.VariableReference)(baseExp)).evaluateVariable(context);
+                        if ((@base is Saxon.Hej.value.EmptySequence)) {
+                            return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                        } else {
+                            if ((@base is Saxon.Eej.ee.optim.SearchableValue)) {
+                                indexedValue = (Saxon.Eej.ee.optim.SearchableValue)(@base);
+                            } else {
+                                indexedValue = /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(@base.iterate());
+                                Saxon.Hej.expr.Binding binding = ((Saxon.Hej.expr.VariableReference)(baseExp)).getBinding();
+                                if ((binding is Saxon.Hej.expr.LocalBinding)) {
+                                    context.setLocalVariable(((Saxon.Hej.expr.LocalBinding)(binding)).getLocalSlotNumber(), indexedValue);
+                                } else {
+                                    if ((binding is Saxon.Hej.expr.instruct.GlobalVariable)) {
+                                        context.getController().getBindery(((Saxon.Hej.expr.instruct.GlobalVariable)(binding)).getPackageData()).setGlobalVariable((Saxon.Hej.expr.instruct.GlobalVariable)(binding), indexedValue);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        indexedValue = /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(/*Delegate.iterate()*/basePullEvaluator(context));
+                    }
+                    if ((indexedValue.getLength() == 0)) {
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    }
+                    Saxon.Hej.expr.sort.AtomicComparer comparer = expr.comparer.provideContext(context);
+                    Saxon.Hej.om.SequenceIterator values = /*Delegate.iterate()*/searchPullEvaluator(context);
+                    return indexedValue.findItems(expr.getUseExpression(), values, expr.convertUntypedToOther, false, comparer, context);
+                } ;
+            }
+        
         }
     
     }

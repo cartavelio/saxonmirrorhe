@@ -62,10 +62,15 @@ namespace Saxon.Eej.ee.optim {
                 inversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(expression, false);
             }
             bool isUpdatingExpression = (mainModule.isUpdating() && expression.isUpdatingExpression());
-            if ((((config.getConfigurationProperty(Saxon.Hej.lib.Feature<bool>.GENERATE_BYTE_CODE) && config.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)) && !(streaming)) && !(isUpdatingExpression))) {
-                Saxon.Hej.expr.parser.Optimizer optimizer = config.obtainOptimizer();
-            }
             isUpdating = isUpdatingExpression;
+        }
+        internal Saxon.Hej.expr.elab.PushEvaluator pusher = null;
+        protected internal override void processQuery(Saxon.Hej.@event.Outputter dest, Saxon.Hej.expr.XPathContext context) {
+            if ((pusher == null)) {
+                pusher = expression.makeElaborator().elaborateForPush();
+            }
+            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/pusher(dest, context);
+            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
         }
         public override bool isUpdateQuery() {
             return isUpdating;
@@ -113,7 +118,7 @@ namespace Saxon.Eej.ee.optim {
             try {
                 Saxon.Hej.expr.PendingUpdateList pul = config.newPendingUpdateList();
                 context.openStackFrame(stackFrameMap);
-                expression.evaluatePendingUpdates(context, pul);
+                /*Delegate.registerUpdates()*/expression.makeElaborator().elaborateForUpdate()(context, pul);
                 pul.apply(context, mainModule.getRevalidationMode());
                 return pul.getAffectedTrees();
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -138,7 +143,7 @@ namespace Saxon.Eej.ee.optim {
             try {
                 Saxon.Hej.expr.PendingUpdateList pul = config.newPendingUpdateList();
                 context.openStackFrame(stackFrameMap);
-                expression.evaluatePendingUpdates(context, pul);
+                /*Delegate.registerUpdates()*/expression.makeElaborator().elaborateForUpdate()(context, pul);
                 pul.apply(context, mainModule.getRevalidationMode());
                 foreach (Saxon.Hej.om.MutableNodeInfo mutableNodeInfo in pul.getAffectedTrees()) {
                     /*Delegate.update()*/agent(mutableNodeInfo, controller);
@@ -162,9 +167,14 @@ namespace Saxon.Eej.ee.optim {
             Saxon.Hej.expr.XPathContextMajor context = controller.newXPathContext();
             Saxon.Hej.@event.PipelineConfiguration pipe = controller.makePipelineConfiguration();
             pipe.setHostLanguage(Saxon.Api.HostLanguage.XQUERY);
-            Saxon.Hej.lib.SerializerFactory sf = context.getConfiguration().getSerializerFactory();
-            Saxon.Ejava.util.Properties actualProperties = validateOutputProperties(controller, outputProperties);
-            Saxon.Hej.@event.Receiver receiver = sf.getReceiver(result, new Saxon.Hej.serialize.SerializationProperties(actualProperties), pipe);
+            Saxon.Hej.@event.Receiver receiver;
+            if ((result is Saxon.Hej.@event.Receiver)) {
+                receiver = (Saxon.Hej.@event.Receiver)(result);
+            } else {
+                Saxon.Hej.lib.SerializerFactory sf = context.getConfiguration().getSerializerFactory();
+                Saxon.Ejava.util.Properties actualProperties = validateOutputProperties(controller, outputProperties);
+                receiver = sf.getReceiver(result, new Saxon.Hej.serialize.SerializationProperties(actualProperties), pipe);
+            }
             receiver.open();
             Saxon.Eej.ee.stream.watch.WatchManager wm = new Saxon.Eej.ee.stream.watch.WatchManager(pipe);
             wm.setXPathContext(context);

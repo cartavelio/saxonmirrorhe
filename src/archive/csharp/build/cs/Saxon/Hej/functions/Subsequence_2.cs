@@ -21,14 +21,14 @@ namespace Saxon.Hej.functions {
                 }
             } else {
                 if (startVal.isNaN()) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 } else {
                     startVal = startVal.round(0);
                     if ((startVal.compareTo(Saxon.Hej.value.Int64Value.PLUS_ONE)<=0)) {
                         return seq;
                     } else {
                         if ((startVal.compareTo(Saxon.Hej.value.Int64Value.MAX_LONG)>0)) {
-                            return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                            return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                         } else {
                             lstart = startVal.longValue();
                         }
@@ -36,7 +36,7 @@ namespace Saxon.Hej.functions {
                 }
             }
             if ((lstart>System.Int32.MaxValue)) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             }
             return Saxon.Hej.expr.TailIterator.make(seq, (int)(lstart));
         }

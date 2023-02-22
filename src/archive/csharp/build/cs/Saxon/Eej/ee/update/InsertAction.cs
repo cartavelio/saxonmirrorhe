@@ -14,6 +14,9 @@ namespace Saxon.Eej.ee.update {
             this.inheritNamespaces = inherit;
         }
         public override void apply(Saxon.Hej.expr.XPathContext context, System.Collections.Generic.ISet<Saxon.Hej.om.MutableNodeInfo> affectedRootSet) {
+            if (!(targetNode.getTreeInfo().isMutable())) {
+                throw new Saxon.Hej.trans.XPathException("Attempting to update a non-updatable element", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
+            }
             bool affectsType = false;
             foreach (Saxon.Hej.om.NodeInfo node in content) {
                 int kind = node.getNodeKind();

@@ -16,7 +16,7 @@ namespace Saxon.Hej.tree.linked {
         private Saxon.Hej.tree.linked.LineNumberMap lineNumberMap;
         private Saxon.Hej.tree.linked.SystemIdMap systemIdMap = new Saxon.Hej.tree.linked.SystemIdMap();
         private bool imaginary;
-        private bool mutable;
+        private Saxon.Hej.om.Durability durability;
         private Saxon.Hej.om.SpaceStrippingRule spaceStrippingRule = Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance();
         public DocumentImpl()  {
             setRawParent(null);
@@ -32,16 +32,19 @@ namespace Saxon.Hej.tree.linked {
             return config;
         }
         public bool isMutable() {
-            return mutable;
+            return (durability == Saxon.Hej.om.Durability.MUTABLE);
+        }
+        public Saxon.Hej.om.Durability getDurability() {
+            return durability;
         }
         public void setMutable(bool mutable) {
-            this.mutable = mutable;
+            this.durability = (mutable ? Saxon.Hej.om.Durability.MUTABLE : Saxon.Hej.om.Durability.LASTING);
         }
         public override Saxon.Hej.om.NamePool getNamePool() {
             return config.getNamePool();
         }
         public override Saxon.Hej.@event.Builder newBuilder() {
-            Saxon.Hej.tree.linked.LinkedTreeBuilder builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(config.makePipelineConfiguration());
+            Saxon.Hej.tree.linked.LinkedTreeBuilder builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(config.makePipelineConfiguration(), Saxon.Hej.om.Durability.MUTABLE);
             builder.setAllocateSequenceNumbers(false);
             return builder;
         }

@@ -10,7 +10,7 @@ namespace Saxon.Eej.functions.extfn {
             if (!(Saxon.Hej.om.NameChecker.isValidNCName(Saxon.Hej.str.StringTool.codePoints(name)))) {
                 throw new Saxon.Hej.trans.XPathException(("Name of namespace node must be a valid NCName: "+name), "FORG0001");
             }
-            orphan.setNodeName(new Saxon.Hej.om.FingerprintedQName("", "", name));
+            orphan.setNodeName(new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.NULL, name));
             orphan.setStringValue(arguments[1].head().getUnicodeStringValue());
             return orphan;
         }

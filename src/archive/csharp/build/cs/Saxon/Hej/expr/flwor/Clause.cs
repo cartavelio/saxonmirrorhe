@@ -12,13 +12,14 @@ namespace Saxon.Hej.expr.flwor {
             ORDER_BY,
             WHERE,
             TRACE,
+            DIAG,
             FOR_MEMBER,
         }
         private Saxon.Hej.s9api.Location location;
         private Saxon.Hej.expr.PackageData packageData;
         private bool repeated;
         public Saxon.Hej.s9api.Location getLocation() {
-            return location;
+            return ((location == null) ? Saxon.Hej.expr.parser.Loc.NONE : location);
         }
         public void setLocation(Saxon.Hej.s9api.Location locationId) {
             this.location = locationId;

@@ -3,41 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public sealed class TimeValue : Saxon.Hej.value.CalendarValue, Saxon.Hej.expr.sort.XPathComparable {
-        private byte hour;
-        private byte minute;
-        private byte second;
-        private int nanosecond;
-        private TimeValue()  {
-        }
-        public TimeValue(byte hour, byte minute, byte second, int microsecond, int tz)  {
+        private readonly byte hour;
+        private readonly byte minute;
+        private readonly byte second;
+        private readonly int nanosecond;
+        public TimeValue(byte hour, byte minute, byte second, int microsecond, int tzMinutes) : base (Saxon.Hej.type.BuiltInAtomicType.TIME, tzMinutes) {
             this.hour = hour;
             this.minute = minute;
             this.second = second;
             this.nanosecond = (microsecond*1000);
-            setTimezoneInMinutes(tz);
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.TIME;
         }
-        public TimeValue(byte hour, byte minute, byte second, int nanosecond, int tz, string flag)  {
-            if (!(flag.Length==0)) {
-                throw new Saxon.Ejava.lang.IllegalArgumentException();
-            }
+        public TimeValue(byte hour, byte minute, byte second, int nanosecond, int tzMinutes, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel, tzMinutes) {
             this.hour = hour;
             this.minute = minute;
             this.second = second;
             this.nanosecond = nanosecond;
-            setTimezoneInMinutes(tz);
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.TIME;
         }
         public Saxon.Hej.value.TimeValue makeTimeValue(byte hour, byte minute, byte second, int nanosecond, int tz) {
-            return new Saxon.Hej.value.TimeValue(hour, minute, second, nanosecond, tz, "");
+            return new Saxon.Hej.value.TimeValue(hour, minute, second, nanosecond, tz, Saxon.Hej.type.BuiltInAtomicType.TIME);
         }
         public static Saxon.Hej.type.ConversionResult makeTimeValue(Saxon.Hej.str.UnicodeString s) {
-            Saxon.Hej.value.TimeValue tv = new Saxon.Hej.value.TimeValue();
             Saxon.Ejava.util.StringTokenizer tok = new Saxon.Ejava.util.StringTokenizer(Saxon.Hej.value.Whitespace.trim(s).ToString(), "-:.+Z", true);
             if (!(tok.hasMoreTokens())) {
                 return badTime("too short", s);
             }
-            string part = (string)(tok.nextToken());
+            string part = tok.nextToken();
             if ((part.Length != 2)) {
                 return badTime("hour must be two digits", s);
             }
@@ -45,8 +35,8 @@ namespace Saxon.Hej.value {
             if ((value<0)) {
                 return badTime("Non-numeric hour component", s);
             }
-            tv.hour = (byte)(value);
-            if ((tv.hour>24)) {
+            byte hour = (byte)(value);
+            if ((hour>24)) {
                 return badTime("hour is out of range", s);
             }
             if (!(tok.hasMoreTokens())) {
@@ -58,7 +48,7 @@ namespace Saxon.Hej.value {
             if (!(tok.hasMoreTokens())) {
                 return badTime("too short", s);
             }
-            part = (string)(tok.nextToken());
+            part = tok.nextToken();
             if ((part.Length != 2)) {
                 return badTime("minute must be two digits", s);
             }
@@ -66,11 +56,11 @@ namespace Saxon.Hej.value {
             if ((value<0)) {
                 return badTime("Non-numeric minute component", s);
             }
-            tv.minute = (byte)(value);
-            if ((tv.minute>59)) {
+            byte minute = (byte)(value);
+            if ((minute>59)) {
                 return badTime("minute is out of range", s);
             }
-            if (((tv.hour == 24) && (tv.minute != 0))) {
+            if (((hour == 24) && (minute != 0))) {
                 return badTime("If hour is 24, minute must be 00", s);
             }
             if (!(tok.hasMoreTokens())) {
@@ -82,7 +72,7 @@ namespace Saxon.Hej.value {
             if (!(tok.hasMoreTokens())) {
                 return badTime("too short", s);
             }
-            part = (string)(tok.nextToken());
+            part = tok.nextToken();
             if ((part.Length != 2)) {
                 return badTime("second must be two digits", s);
             }
@@ -90,21 +80,22 @@ namespace Saxon.Hej.value {
             if ((value<0)) {
                 return badTime("Non-numeric second component", s);
             }
-            tv.second = (byte)(value);
-            if ((tv.second>59)) {
+            byte second = (byte)(value);
+            if ((second>59)) {
                 return badTime("second is out of range", s);
             }
-            if (((tv.hour == 24) && (tv.second != 0))) {
+            if (((hour == 24) && (second != 0))) {
                 return badTime("If hour is 24, second must be 00", s);
             }
-            int tz = 0;
+            int tz = NO_TIMEZONE;
             bool negativeTz = false;
             int state = 0;
+            int nanosecond = 0;
             while (tok.hasMoreTokens()) {
                 if ((state == 9)) {
                     return badTime("characters after the end", s);
                 }
-                string delim = (string)(tok.nextToken());
+                string delim = tok.nextToken();
                 if (".".Equals(delim)) {
                     if ((state != 0)) {
                         return badTime("decimal separator occurs twice", s);
@@ -112,7 +103,7 @@ namespace Saxon.Hej.value {
                     if (!(tok.hasMoreTokens())) {
                         return badTime("decimal point must be followed by digits", s);
                     }
-                    part = (string)(tok.nextToken());
+                    part = tok.nextToken();
                     if (((part.Length>9) && System.Text.RegularExpressions.Regex.IsMatch(part, "^[0-9]+$"))) {
                         part = part.Substring(0, 9 - 0);
                     }
@@ -120,9 +111,9 @@ namespace Saxon.Hej.value {
                     if ((value<0)) {
                         return badTime("Non-numeric fractional seconds component", s);
                     }
-                    double fractionalSeconds = System.Double.Parse(('.'+part));
-                    tv.nanosecond = (int)((long)System.Math.Round((fractionalSeconds*1_000_000_000), System.MidpointRounding.AwayFromZero));
-                    if (((tv.hour == 24) && (tv.nanosecond != 0))) {
+                    double fractionalSeconds = Saxon.Impl.Helpers.Utils.ParseDouble(('.'+part));
+                    nanosecond = (int)((long)System.Math.Round((fractionalSeconds*1_000_000_000), System.MidpointRounding.AwayFromZero));
+                    if (((hour == 24) && (nanosecond != 0))) {
                         return badTime("If hour is 24, fractional seconds must be 0", s);
                     }
                     state = 1;
@@ -133,7 +124,6 @@ namespace Saxon.Hej.value {
                         }
                         tz = 0;
                         state = 9;
-                        tv.setTimezoneInMinutes(0);
                     } else {
                         if (("+".Equals(delim) || "-".Equals(delim))) {
                             if ((state>1)) {
@@ -143,7 +133,7 @@ namespace Saxon.Hej.value {
                             if (!(tok.hasMoreTokens())) {
                                 return badTime("missing timezone", s);
                             }
-                            part = (string)(tok.nextToken());
+                            part = tok.nextToken();
                             if ((part.Length != 2)) {
                                 return badTime("timezone hour must be two digits", s);
                             }
@@ -164,7 +154,7 @@ namespace Saxon.Hej.value {
                                     return badTime("colon cannot occur here", s);
                                 }
                                 state = 9;
-                                part = (string)(tok.nextToken());
+                                part = tok.nextToken();
                                 value = Saxon.Hej.value.DurationValue.simpleInteger(part);
                                 if ((value<0)) {
                                     return badTime("Non-numeric timezone minute component", s);
@@ -180,7 +170,6 @@ namespace Saxon.Hej.value {
                                 if (negativeTz) {
                                     tz = -(tz);
                                 }
-                                tv.setTimezoneInMinutes(tz);
                             } else {
                                 return badTime("timezone format is incorrect", s);
                             }
@@ -191,11 +180,10 @@ namespace Saxon.Hej.value {
             if (((state == 2) || (state == 3))) {
                 return badTime("timezone incomplete", s);
             }
-            if ((tv.hour == 24)) {
-                tv.hour = 0;
+            if ((hour == 24)) {
+                hour = 0;
             }
-            tv.typeLabel = Saxon.Hej.type.BuiltInAtomicType.TIME;
-            return tv;
+            return new Saxon.Hej.value.TimeValue(hour, minute, second, nanosecond, tz, Saxon.Hej.type.BuiltInAtomicType.TIME);
         }
         private static Saxon.Hej.type.ValidationFailure badTime(string msg, Saxon.Hej.str.UnicodeString value) {
             Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure((((("Invalid time "+Saxon.Hej.trans.Err.wrap(value, Saxon.Hej.trans.Err.VALUE))+" (")+msg)+")"));
@@ -221,7 +209,7 @@ namespace Saxon.Hej.value {
             return nanosecond;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             appendTwoDigits(sb, hour);
             sb.append(':');
             appendTwoDigits(sb, minute);
@@ -254,13 +242,11 @@ namespace Saxon.Hej.value {
             return new Saxon.Hej.value.DateTimeValue(1972, (byte)(12), (byte)(31), hour, minute, second, nanosecond, getTimezoneInMinutes());
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.TimeValue v = new Saxon.Hej.value.TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), "");
-            v.typeLabel = typeLabel;
-            return v;
+            return new Saxon.Hej.value.TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), typeLabel);
         }
         public override Saxon.Hej.value.TimeValue adjustTimezone(int timezone) {
             Saxon.Hej.value.DateTimeValue dt = toDateTime().adjustTimezone(timezone);
-            return new Saxon.Hej.value.TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNanosecond(), dt.getTimezoneInMinutes(), "");
+            return new Saxon.Hej.value.TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNanosecond(), dt.getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.TIME);
         }
         public override Saxon.Hej.value.AtomicValue getComponent(Saxon.Hej.functions.AccessorFn.Component component) {
             switch (component) {
@@ -372,7 +358,7 @@ namespace Saxon.Hej.value {
         public override Saxon.Hej.value.TimeValue add(Saxon.Hej.value.DurationValue duration) {
             if ((duration is Saxon.Hej.value.DayTimeDurationValue)) {
                 Saxon.Hej.value.DateTimeValue dt = toDateTime().add(duration);
-                return new Saxon.Hej.value.TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNanosecond(), getTimezoneInMinutes(), "");
+                return new Saxon.Hej.value.TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNanosecond(), getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.TIME);
             } else {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Time+Duration arithmetic is supported only for xs:dayTimeDuration");
                 err.setErrorCode("XPTY0004");

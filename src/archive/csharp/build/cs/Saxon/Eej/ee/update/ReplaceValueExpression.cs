@@ -31,12 +31,18 @@ namespace Saxon.Eej.ee.update {
             Saxon.Hej.expr.Expression result = getReplacementExp();
             setReplacementExp(new Saxon.Hej.expr.instruct.ValueOf(result, false, true));
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UPDATING_EXPR, "replace", 0);
-            role0.setErrorCode("XUDY0027");
-            setTargetExp(tc.staticTypeCheck(getTargetExp(), Saxon.Hej.value.SequenceType.NON_EMPTY_SEQUENCE, role0, visitor));
-            role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UPDATING_EXPR, "replace", 0);
-            role0.setErrorCode("XUTY0008");
-            setTargetExp(tc.staticTypeCheck(getTargetExp(), Saxon.Hej.value.SequenceType.OPTIONAL_NODE, role0, visitor));
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier0 = () => {
+                Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UPDATING_EXPR, "replace", 0);
+                role0.setErrorCode("XUDY0027");
+                return role0;
+            } ;
+            setTargetExp(tc.staticTypeCheck(getTargetExp(), Saxon.Hej.value.SequenceType.NON_EMPTY_SEQUENCE, roleSupplier0, visitor));
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier1 = () => {
+                Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UPDATING_EXPR, "replace", 0);
+                role0.setErrorCode("XUTY0008");
+                return role0;
+            } ;
+            setTargetExp(tc.staticTypeCheck(getTargetExp(), Saxon.Hej.value.SequenceType.OPTIONAL_NODE, roleSupplier1, visitor));
             return this;
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
@@ -52,58 +58,71 @@ namespace Saxon.Eej.ee.update {
             result.export(@out);
             @out.endElement();
         }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            Saxon.Hej.expr.Expression result = getReplacementExp();
-            Saxon.Hej.om.Item newText = result.evaluateItem(context);
-            string newString = ((newText == null) ? "" : newText.getStringValue());
-            Saxon.Hej.om.NodeInfo targetNode = (Saxon.Hej.om.NodeInfo)(getTargetExp().evaluateItem(context));
-            Saxon.Hej.trans.XPathException err = null;
-            switch (targetNode.getNodeKind()) {
-              case Saxon.Hej.type.Type.COMMENT:
-                if (newString.Contains("--")) {
-                    err = new Saxon.Hej.trans.XPathException("Replacement comment value cannot contain two adjacent hyphens", "XQDY0072");
-                } else {
-                    if (newString.EndsWith("-")) {
-                        err = new Saxon.Hej.trans.XPathException("Replacement comment value cannot end with a hyphen", "XQDY0072");
-                    }
-                }
-                break ;
-              case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
-                if (newString.Contains("?>")) {
-                    err = new Saxon.Hej.trans.XPathException("Replacement processing instruction value cannot contain '?>'", "XQDY0026");
-                }
-                break ;
-              case Saxon.Hej.type.Type.DOCUMENT:
-                err = new Saxon.Hej.trans.XPathException("Cannot replace the value of a document node", "XUTY0008");
-                break ;
-              case Saxon.Hej.type.Type.NAMESPACE:
-                err = new Saxon.Hej.trans.XPathException("Cannot replace the value of a namespace node", "XUTY0008");
-                break ;
-              default:
-                break ;
-            }
-            if ((err != null)) {
-                err.setLocation(getLocation());
-                err.setXPathContext(context);
-                throw err;
-            }
-            if (!(((targetNode is Saxon.Hej.om.MutableNodeInfo)))) {
-                Saxon.Hej.trans.XPathException er = new Saxon.Hej.trans.XPathException("Target node of replace expression is not updateable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
-                er.setLocation(getLocation());
-                throw er;
-            }
-            try {
-                Saxon.Eej.ee.update.ReplaceValueAction action = new Saxon.Eej.ee.update.ReplaceValueAction(Saxon.Hej.str.StringView.tidy(newString), (Saxon.Hej.om.MutableNodeInfo)(targetNode));
-                action.setOriginator(this);
-                ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw;
-            }
-        }
         public override string getExpressionName() {
             return "replaceValue";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.ee.update.ReplaceValueExpression.ReplaceValueExpressionElaborator();
+        }
+        private class ReplaceValueExpressionElaborator : Saxon.Hej.expr.elab.UpdateElaborator {
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Eej.ee.update.ReplaceValueExpression expr = (Saxon.Eej.ee.update.ReplaceValueExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator targetEval = expr.getTargetExp().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator replacementEval = expr.getReplacementExp().makeElaborator().elaborateForItem();
+                return (context, pul) => {
+                    Saxon.Hej.om.Item newText = /*Delegate.eval()*/replacementEval(context);
+                    string newString = ((newText == null) ? "" : newText.getStringValue());
+                    Saxon.Hej.om.NodeInfo targetNode = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/targetEval(context));
+                    if (!(targetNode.getTreeInfo().isMutable())) {
+                        throw new Saxon.Hej.trans.XPathException("Target of replace value expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
+                    }
+                    Saxon.Hej.trans.XPathException err = null;
+                    switch (targetNode.getNodeKind()) {
+                      case Saxon.Hej.type.Type.COMMENT:
+                        if (newString.Contains("--")) {
+                            err = new Saxon.Hej.trans.XPathException("Replacement comment value cannot contain two adjacent hyphens", "XQDY0072");
+                        } else {
+                            if (newString.EndsWith("-")) {
+                                err = new Saxon.Hej.trans.XPathException("Replacement comment value cannot end with a hyphen", "XQDY0072");
+                            }
+                        }
+                        break ;
+                      case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
+                        if (newString.Contains("?>")) {
+                            err = new Saxon.Hej.trans.XPathException("Replacement processing instruction value cannot contain '?>'", "XQDY0026");
+                        }
+                        break ;
+                      case Saxon.Hej.type.Type.DOCUMENT:
+                        err = new Saxon.Hej.trans.XPathException("Cannot replace the value of a document node", "XUTY0008");
+                        break ;
+                      case Saxon.Hej.type.Type.NAMESPACE:
+                        err = new Saxon.Hej.trans.XPathException("Cannot replace the value of a namespace node", "XUTY0008");
+                        break ;
+                      default:
+                        break ;
+                    }
+                    if ((err != null)) {
+                        err.setLocation(expr.getLocation());
+                        err.setXPathContext(context);
+                        throw err;
+                    }
+                    if (!(((targetNode is Saxon.Hej.om.MutableNodeInfo)))) {
+                        Saxon.Hej.trans.XPathException er = new Saxon.Hej.trans.XPathException("Target node of replace value expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
+                        er.setLocation(expr.getLocation());
+                        throw er;
+                    }
+                    try {
+                        Saxon.Eej.ee.update.ReplaceValueAction action = new Saxon.Eej.ee.update.ReplaceValueAction(Saxon.Hej.str.StringView.tidy(newString), (Saxon.Hej.om.MutableNodeInfo)(targetNode));
+                        action.setOriginator(expr);
+                        ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        e.maybeSetLocation(expr.getLocation());
+                        e.maybeSetContext(context);
+                        throw;
+                    }
+                } ;
+            }
+        
         }
     
     }

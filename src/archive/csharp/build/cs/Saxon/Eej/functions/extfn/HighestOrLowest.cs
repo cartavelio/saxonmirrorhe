@@ -5,9 +5,9 @@ namespace Saxon.Eej.functions.extfn {
     public class HighestOrLowest : Saxon.Hej.functions.SystemFunction {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.Configuration config = context.getConfiguration();
-            Saxon.Hej.om.Function function;
+            Saxon.Hej.om.FunctionItem function;
             if ((arguments.Length == 2)) {
-                function = (Saxon.Hej.om.Function)(arguments[1].head());
+                function = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
             } else {
                 function = config.makeSystemFunction("data", 1);
             }

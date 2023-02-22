@@ -20,7 +20,7 @@ namespace Saxon.Hej.pattern {
             if ((name.hasFingerprint() && origin.hasFingerprint())) {
                 return (name.getFingerprint() == origin.getFingerprint());
             } else {
-                return (name.hasURI(origin.getURI()) && name.getLocalPart().Equals(origin.getLocalPart()));
+                return (name.hasURI(origin.getNamespaceUri()) && name.getLocalPart().Equals(origin.getLocalPart()));
             }
         }
         public override Saxon.Hej.z.IntPredicateProxy getMatcher(Saxon.Hej.tree.tiny.NodeVectorTree tree) {
@@ -56,7 +56,7 @@ namespace Saxon.Hej.pattern {
                 return origin.getFingerprint();
             } else {
                 Saxon.Hej.om.NamePool pool = origin.getConfiguration().getNamePool();
-                return pool.allocateFingerprint(origin.getURI(), origin.getLocalPart());
+                return pool.allocateFingerprint(origin.getNamespaceUri(), origin.getLocalPart());
             }
         }
         public override int getPrimitiveType() {
@@ -65,8 +65,8 @@ namespace Saxon.Hej.pattern {
         public override Saxon.Ejava.util.Optional<Saxon.Hej.z.IntSet> getRequiredNodeNames() {
             return Saxon.Ejava.util.Optional<Saxon.Hej.z.IntSet>.of(new Saxon.Hej.z.IntSingletonSet(getFingerprint()));
         }
-        public string getNamespaceURI() {
-            return origin.getURI();
+        public Saxon.Hej.om.NamespaceUri getNamespaceURI() {
+            return origin.getNamespaceUri();
         }
         public string getLocalPart() {
             return origin.getLocalPart();
@@ -92,13 +92,13 @@ namespace Saxon.Hej.pattern {
             }
         }
         public override int GetHashCode() {
-            return (((origin.getNodeKind()<<20)^origin.getURI().GetHashCode())^origin.getLocalPart().GetHashCode());
+            return (((origin.getNodeKind()<<20)^origin.getNamespaceUri().GetHashCode())^origin.getLocalPart().GetHashCode());
         }
         public override bool Equals(System.Object other) {
             return ((other is Saxon.Hej.pattern.SameNameTest) && test(((Saxon.Hej.pattern.SameNameTest)(other)).origin));
         }
         public Saxon.Hej.pattern.NameTest getEquivalentNameTest() {
-            return new Saxon.Hej.pattern.NameTest(origin.getNodeKind(), origin.getURI(), origin.getLocalPart(), origin.getConfiguration().getNamePool());
+            return new Saxon.Hej.pattern.NameTest(origin.getNodeKind(), origin.getNamespaceUri(), origin.getLocalPart(), origin.getConfiguration().getNamePool());
         }
         public string exportQNameTest() {
             return "";

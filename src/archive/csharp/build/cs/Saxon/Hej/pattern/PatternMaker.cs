@@ -18,16 +18,24 @@ namespace Saxon.Hej.pattern {
                     if ((step is Saxon.Hej.expr.FirstItemExpression)) {
                         return getAxisForPathStep(((Saxon.Hej.expr.FirstItemExpression)(step)).getBaseExpression());
                     } else {
-                        if ((step is Saxon.Hej.expr.SubscriptExpression)) {
-                            return getAxisForPathStep(((Saxon.Hej.expr.SubscriptExpression)(step)).getBaseExpression());
+                        if ((step is Saxon.Hej.expr.LastItemExpression)) {
+                            return getAxisForPathStep(((Saxon.Hej.expr.LastItemExpression)(step)).getBaseExpression());
                         } else {
-                            if ((step is Saxon.Hej.expr.SlashExpression)) {
-                                return getAxisForPathStep(((Saxon.Hej.expr.SlashExpression)(step)).getFirstStep());
+                            if ((step is Saxon.Hej.expr.TailExpression)) {
+                                return getAxisForPathStep(((Saxon.Hej.expr.TailExpression)(step)).getBaseExpression());
                             } else {
-                                if ((step is Saxon.Hej.expr.ContextItemExpression)) {
-                                    return Saxon.Hej.om.AxisInfo.SELF;
+                                if ((step is Saxon.Hej.expr.SubscriptExpression)) {
+                                    return getAxisForPathStep(((Saxon.Hej.expr.SubscriptExpression)(step)).getBaseExpression());
                                 } else {
-                                    throw new Saxon.Hej.trans.XPathException("The path in a pattern must contain simple steps");
+                                    if ((step is Saxon.Hej.expr.SlashExpression)) {
+                                        return getAxisForPathStep(((Saxon.Hej.expr.SlashExpression)(step)).getFirstStep());
+                                    } else {
+                                        if ((step is Saxon.Hej.expr.ContextItemExpression)) {
+                                            return Saxon.Hej.om.AxisInfo.SELF;
+                                        } else {
+                                            throw new Saxon.Hej.trans.XPathException("The path in a pattern must contain simple steps");
+                                        }
+                                    }
                                 }
                             }
                         }

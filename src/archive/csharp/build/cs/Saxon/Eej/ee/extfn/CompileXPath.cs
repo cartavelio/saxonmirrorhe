@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.extfn {
     public class CompileXPath : Saxon.Hej.functions.SystemFunction {
-        private const string exportURI = "http://ns.saxonica.com/xslt/export";
+        private readonly static Saxon.Hej.om.NamespaceUri exportURI = Saxon.Hej.om.NamespaceUri.of("http://ns.saxonica.com/xslt/export");
         public override Saxon.Hej.ma.map.MapItem call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.Configuration configuration = controller.getConfiguration();
@@ -19,6 +19,7 @@ namespace Saxon.Eej.ee.extfn {
             } );
             Saxon.Hej.value.BooleanValue backwards = (Saxon.Hej.value.BooleanValue)(options.get(Saxon.Hej.value.StringValue.bmp("backwardCompatibility")));
             env.setBackwardsCompatibilityMode(((backwards != null) && backwards.getBooleanValue()));
+            env.setXPathLanguageLevel(configuration.getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT));
             bool inCatch;
             Saxon.Hej.value.BooleanValue inCatchVal = (Saxon.Hej.value.BooleanValue)(options.get(Saxon.Hej.value.StringValue.bmp("inCatch")));
             inCatch = ((inCatchVal != null) && inCatchVal.getBooleanValue());
@@ -46,7 +47,7 @@ namespace Saxon.Eej.ee.extfn {
                             throw new Saxon.Hej.trans.XPathException(("Unknown URI for defaulted prefix "+prefix));
                         }
                     }
-                    env.declareNamespace(prefix, uri);
+                    env.declareNamespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri));
                 }
             }
             Saxon.Hej.ma.map.MapItem globals = (Saxon.Hej.ma.map.MapItem)(options.get(Saxon.Hej.value.StringValue.bmp("globals")));
@@ -57,7 +58,7 @@ namespace Saxon.Eej.ee.extfn {
                 while (((key = ((/*1430*/Saxon.Hej.value.AtomicValue)keys.next())) != null)) {
                     knownGlobals.Add(key.getStringValue());
                     Saxon.Hej.om.NodeInfo n = (Saxon.Hej.om.NodeInfo)(globals.get(key));
-                    string t = n.getAttributeValue("", "sType");
+                    string t = n.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "sType");
                     Saxon.Hej.sxpath.XPathVariable v = env.declareVariable(Saxon.Hej.om.StructuredQName.fromClarkName(key.getStringValue()));
                     v.setRequiredType(makeType(t));
                 }
@@ -85,10 +86,10 @@ namespace Saxon.Eej.ee.extfn {
             Saxon.Hej.functions.ExecutableFunctionLibrary userFunctionLibrary = new Saxon.Eej.ee.extfn.CompileXPath.LocalFunctionLibrary(context.getConfiguration());
             Saxon.Hej.functions.FunctionLibraryList libraryList0 = ((Saxon.Hej.style.StylesheetPackage)(getRetainedStaticContext().getPackageData())).getFunctionLibrary();
             foreach (Saxon.Hej.functions.FunctionLibrary lib in libraryList0.getLibraryList()) {
-                if (((lib is Saxon.Hej.functions.registry.BuiltInFunctionSet) && ((Saxon.Hej.functions.registry.BuiltInFunctionSet)(lib)).getNamespace().Equals(Saxon.Hej.lib.NamespaceConstant.FN))) {
+                if (((lib is Saxon.Hej.functions.registry.BuiltInFunctionSet) && ((Saxon.Hej.functions.registry.BuiltInFunctionSet)(lib)).getNamespace().Equals(Saxon.Hej.om.NamespaceUri.FN))) {
                     libraryList.addFunctionLibrary(Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance());
                     libraryList.addFunctionLibrary(Saxon.Hej.functions.registry.XSLT30FunctionSet.getInstance());
-                    libraryList.addFunctionLibrary(new Saxon.Eej.ee.extfn.VendorFunctionSetEE((Saxon.Eej.config.EnterpriseConfiguration)(configuration)));
+                    libraryList.addFunctionLibrary(configuration.getVendorFunctionSet());
                 } else {
                     if (((lib is Saxon.Hej.style.StylesheetFunctionLibrary) || (lib is Saxon.Hej.functions.ExecutableFunctionLibrary))) {
                         libraryList.addFunctionLibrary(new Saxon.Hej.style.PublicStylesheetFunctionLibrary(lib));
@@ -98,7 +99,7 @@ namespace Saxon.Eej.ee.extfn {
                 }
             }
             Saxon.Hej.ma.map.MapItem globalFunctions = (Saxon.Hej.ma.map.MapItem)(options.get(Saxon.Hej.value.StringValue.bmp("globalFunctions")));
-            Saxon.Hej.expr.parser.XPathParser parser = configuration.newExpressionParser("XP", false, 31);
+            Saxon.Hej.expr.parser.XPathParser parser = configuration.newExpressionParser("XP", false);
             Saxon.Hej.expr.StaticContext parseContext = new Saxon.Hej.sxpath.IndependentContext(configuration);
             if ((globalFunctions != null)) {
                 Saxon.Hej.pattern.NameTest argTest = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, exportURI, "arg", configuration.getNamePool());
@@ -110,7 +111,7 @@ namespace Saxon.Eej.ee.extfn {
                     Saxon.Hej.om.NodeInfo decl = (Saxon.Hej.om.NodeInfo)(globalFunctions.get(key));
                     decl = decl.getParent();
                     Saxon.Hej.value.SequenceType reqType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
-                    string rType = decl.getAttributeValue("", "as");
+                    string rType = decl.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "as");
                     if ((rType != null)) {
                         reqType = parser.parseSequenceType(rType, parseContext);
                     }
@@ -134,9 +135,9 @@ namespace Saxon.Eej.ee.extfn {
                     Saxon.Hej.tree.iter.AxisIterator iter = decl.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, argTest);
                     while ((((arg = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null))) {
                         Saxon.Hej.expr.instruct.UserFunctionParameter p = new Saxon.Hej.expr.instruct.UserFunctionParameter();
-                        string name = arg.getAttributeValue("", "name");
+                        string name = arg.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         reqType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
-                        rType = decl.getAttributeValue("", "as");
+                        rType = decl.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "as");
                         if ((rType != null)) {
                             reqType = parser.parseSequenceType(rType, parseContext);
                         }
@@ -153,7 +154,7 @@ namespace Saxon.Eej.ee.extfn {
             env.setFunctionLibrary(libraryList);
             Saxon.Hej.expr.Expression expr;
             try {
-                if (((type != null) && "pattern".Equals(type.getUnicodeStringValue()))) {
+                if (((type != null) && "pattern".Equals(type.getStringValue()))) {
                     expr = Saxon.Hej.pattern.Pattern.make(exprText, env, null);
                 } else {
                     expr = make(exprText, env, 0, Saxon.Hej.expr.parser.Token.EOF, null, inCatch);
@@ -187,7 +188,7 @@ namespace Saxon.Eej.ee.extfn {
             public override bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
                 return lib.ContainsKey(functionName);
             }
-            public override Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+            public override Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
                 Saxon.Hej.expr.instruct.UserFunction fn = Saxon.Impl.Helpers.MapUtils.Get(lib, functionName);
                 Saxon.Hej.expr.instruct.UserFunctionParameter[] @params = new Saxon.Hej.expr.instruct.UserFunctionParameter[staticArgs.Length];
                 int i = 0;
@@ -208,7 +209,7 @@ namespace Saxon.Eej.ee.extfn {
             public override void addFunction(Saxon.Hej.expr.instruct.UserFunction fn) {
                 Saxon.Impl.Helpers.MapUtils.Put(lib, new Saxon.Hej.trans.SymbolicName.F(fn.getFunctionName(), fn.getArity()), fn);
             }
-            public override Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+            public override Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
                 return Saxon.Impl.Helpers.MapUtils.Get(lib, functionName);
             }
         
@@ -222,7 +223,7 @@ namespace Saxon.Eej.ee.extfn {
         }
         public static Saxon.Hej.expr.Expression make(string expression, Saxon.Hej.expr.StaticContext env, int start, int terminator, Saxon.Hej.expr.parser.CodeInjector codeInjector, bool inCatch) {
             int languageLevel = env.getXPathVersion();
-            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, languageLevel);
+            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
             if (inCatch) {
                 parser.setCatchDepth(1);
             }

@@ -79,6 +79,12 @@ namespace Saxon.Hej.trans {
                       case "fail":
                         @base = Saxon.Hej.trans.rules.FailRuleSet.getInstance();
                         break ;
+                      case "shallow-copy-all":
+                        @base = Saxon.Hej.trans.rules.ShallowCopyAllRuleSet.getInstance();
+                        break ;
+                      case "shallow-skip-all":
+                        @base = Saxon.Hej.trans.rules.ShallowSkipAllRuleSet.getInstance();
+                        break ;
                       default:
                         break ;
                     }
@@ -135,7 +141,7 @@ namespace Saxon.Hej.trans {
             to.mostRecentModuleHash = from.mostRecentModuleHash;
         }
         protected internal virtual Saxon.Hej.trans.rules.RuleSearchState makeRuleSearchState(Saxon.Hej.trans.rules.RuleChain chain, Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Hej.trans.rules.RuleSearchState();
+            return Saxon.Hej.trans.rules.RuleSearchState.getInstance();
         }
         public override bool isEmpty() {
             return !(hasRules);
@@ -166,8 +172,8 @@ namespace Saxon.Hej.trans {
         public string getPropertyValue(string name) {
             return Saxon.Impl.Helpers.MapUtils.Get(explicitPropertyValues, name);
         }
-        public override System.Collections.Generic.ISet<string> getExplicitNamespaces(Saxon.Hej.om.NamePool pool) {
-            System.Collections.Generic.ISet<string> namespaces = new System.Collections.Generic.HashSet<string>();
+        public override System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getExplicitNamespaces(Saxon.Hej.om.NamePool pool) {
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> namespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
             Saxon.Hej.z.IntIterator ii = namedElementRuleChains.keyIterator();
             while (ii.hasNext()) {
                 int fp = ii.next();
@@ -298,61 +304,10 @@ namespace Saxon.Hej.trans {
             if ((stackFrameSlotsNeeded>0)) {
                 context = makeNewContext(context);
             }
-            Saxon.Hej.trans.rules.RuleChain unnamedNodeChain;
             Saxon.Hej.trans.rules.Rule bestRule = null;
             if ((item is Saxon.Hej.om.NodeInfo)) {
                 Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
-                switch (node.getNodeKind()) {
-                  case Saxon.Hej.type.Type.DOCUMENT:
-                    unnamedNodeChain = documentRuleChain;
-                    break ;
-                  case Saxon.Hej.type.Type.ELEMENT:
-                    {
-                        unnamedNodeChain = unnamedElementRuleChain;
-                        Saxon.Hej.trans.rules.RuleChain namedNodeChain;
-                        if (node.hasFingerprint()) {
-                            namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
-                        } else {
-                            namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ELEMENT, node.getURI(), node.getLocalPart());
-                        }
-                        if ((namedNodeChain != null)) {
-                            bestRule = searchRuleChain(node, context, null, namedNodeChain);
-                        }
-                        break ;
-                    }
-                  case Saxon.Hej.type.Type.ATTRIBUTE:
-                    {
-                        unnamedNodeChain = unnamedAttributeRuleChain;
-                        Saxon.Hej.trans.rules.RuleChain namedNodeChain;
-                        if (node.hasFingerprint()) {
-                            namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
-                        } else {
-                            namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ATTRIBUTE, node.getURI(), node.getLocalPart());
-                        }
-                        if ((namedNodeChain != null)) {
-                            bestRule = searchRuleChain(node, context, null, namedNodeChain);
-                        }
-                        break ;
-                    }
-                  case Saxon.Hej.type.Type.TEXT:
-                    unnamedNodeChain = textRuleChain;
-                    break ;
-                  case Saxon.Hej.type.Type.COMMENT:
-                    unnamedNodeChain = commentRuleChain;
-                    break ;
-                  case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
-                    unnamedNodeChain = processingInstructionRuleChain;
-                    break ;
-                  case Saxon.Hej.type.Type.NAMESPACE:
-                    unnamedNodeChain = namespaceRuleChain;
-                    break ;
-                  default:
-                    throw new Saxon.Ejava.lang.AssertionError("Unknown node kind");
-                }
-                if ((unnamedNodeChain != null)) {
-                    bestRule = searchRuleChain(node, context, bestRule, unnamedNodeChain);
-                }
-                bestRule = searchRuleChain(node, context, bestRule, genericRuleChain);
+                bestRule = findBestRuleForNodeInfo(node, context);
             } else {
                 if ((item is Saxon.Hej.value.AtomicValue)) {
                     if ((atomicValueRuleChain != null)) {
@@ -360,7 +315,7 @@ namespace Saxon.Hej.trans {
                     }
                     bestRule = searchRuleChain(item, context, bestRule, genericRuleChain);
                 } else {
-                    if ((item is Saxon.Hej.om.Function)) {
+                    if ((item is Saxon.Hej.om.FunctionItem)) {
                         if ((functionItemRuleChain != null)) {
                             bestRule = searchRuleChain(item, context, bestRule, functionItemRuleChain);
                         }
@@ -370,7 +325,68 @@ namespace Saxon.Hej.trans {
             }
             return bestRule;
         }
-        protected internal Saxon.Hej.trans.rules.RuleChain getNamedRuleChain(Saxon.Hej.expr.XPathContext c, int kind, string uri, string local) {
+        private Saxon.Hej.trans.rules.Rule findBestRuleForNodeInfo(Saxon.Hej.om.NodeInfo node, Saxon.Hej.expr.XPathContext context) {
+            Saxon.Hej.trans.rules.RuleChain unnamedNodeChain;
+            Saxon.Hej.trans.rules.Rule bestRule = null;
+            int nodeKind;
+            if ((node is Saxon.Hej.tree.tiny.TinyElementImpl)) {
+                nodeKind = Saxon.Hej.type.Type.ELEMENT;
+            } else {
+                nodeKind = node.getNodeKind();
+            }
+            switch (nodeKind) {
+              case Saxon.Hej.type.Type.DOCUMENT:
+                unnamedNodeChain = documentRuleChain;
+                break ;
+              case Saxon.Hej.type.Type.ELEMENT:
+                {
+                    unnamedNodeChain = unnamedElementRuleChain;
+                    Saxon.Hej.trans.rules.RuleChain namedNodeChain;
+                    if (node.hasFingerprint()) {
+                        namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
+                    } else {
+                        namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
+                    }
+                    if ((namedNodeChain != null)) {
+                        bestRule = searchRuleChain(node, context, null, namedNodeChain);
+                    }
+                    break ;
+                }
+              case Saxon.Hej.type.Type.ATTRIBUTE:
+                {
+                    unnamedNodeChain = unnamedAttributeRuleChain;
+                    Saxon.Hej.trans.rules.RuleChain namedNodeChain;
+                    if (node.hasFingerprint()) {
+                        namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
+                    } else {
+                        namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
+                    }
+                    if ((namedNodeChain != null)) {
+                        bestRule = searchRuleChain(node, context, null, namedNodeChain);
+                    }
+                    break ;
+                }
+              case Saxon.Hej.type.Type.TEXT:
+                unnamedNodeChain = textRuleChain;
+                break ;
+              case Saxon.Hej.type.Type.COMMENT:
+                unnamedNodeChain = commentRuleChain;
+                break ;
+              case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
+                unnamedNodeChain = processingInstructionRuleChain;
+                break ;
+              case Saxon.Hej.type.Type.NAMESPACE:
+                unnamedNodeChain = namespaceRuleChain;
+                break ;
+              default:
+                throw new Saxon.Ejava.lang.AssertionError("Unknown node kind");
+            }
+            if ((unnamedNodeChain != null)) {
+                bestRule = searchRuleChain(node, context, bestRule, unnamedNodeChain);
+            }
+            return searchRuleChain(node, context, bestRule, genericRuleChain);
+        }
+        protected internal Saxon.Hej.trans.rules.RuleChain getNamedRuleChain(Saxon.Hej.expr.XPathContext c, int kind, Saxon.Hej.om.NamespaceUri uri, string local) {
             lock (this) {
                 if ((qNamedElementRuleChains == null)) {
                     qNamedElementRuleChains = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.trans.rules.RuleChain>(namedElementRuleChains.size());
@@ -392,9 +408,7 @@ namespace Saxon.Hej.trans {
             }
         }
         protected internal Saxon.Hej.trans.rules.Rule searchRuleChain(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context, Saxon.Hej.trans.rules.Rule bestRule, Saxon.Hej.trans.rules.RuleChain chain) {
-            while (!(((context is Saxon.Hej.expr.XPathContextMajor)))) {
-                context = context.getCaller();
-            }
+            context = context.getMajorContext();
             Saxon.Hej.trans.rules.RuleSearchState ruleSearchState = makeRuleSearchState(chain, context);
             Saxon.Hej.trans.rules.Rule head = ((chain == null) ? null : chain.head());
             while ((head != null)) {
@@ -462,7 +476,7 @@ namespace Saxon.Hej.trans {
                         if (node.hasFingerprint()) {
                             namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
                         } else {
-                            namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ELEMENT, node.getURI(), node.getLocalPart());
+                            namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
                         }
                         if ((namedNodeChain != null)) {
                             ruleSearchState = makeRuleSearchState(namedNodeChain, context);
@@ -477,7 +491,7 @@ namespace Saxon.Hej.trans {
                         if (node.hasFingerprint()) {
                             namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
                         } else {
-                            namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ATTRIBUTE, node.getURI(), node.getLocalPart());
+                            namedNodeChain = getNamedRuleChain(context, Saxon.Hej.type.Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
                         }
                         if ((namedNodeChain != null)) {
                             ruleSearchState = makeRuleSearchState(namedNodeChain, context);
@@ -514,7 +528,7 @@ namespace Saxon.Hej.trans {
                     bestRule = searchRuleChain(item, context, bestRule, genericRuleChain, ruleSearchState, filter);
                     return bestRule;
                 } else {
-                    if ((item is Saxon.Hej.om.Function)) {
+                    if ((item is Saxon.Hej.om.FunctionItem)) {
                         if ((functionItemRuleChain != null)) {
                             ruleSearchState = makeRuleSearchState(functionItemRuleChain, context);
                             bestRule = searchRuleChain(item, context, bestRule, functionItemRuleChain, ruleSearchState, filter);
@@ -751,7 +765,7 @@ namespace Saxon.Hej.trans {
         }
         public override void computeRankings(int start) {
             Saxon.Hej.trans.SimpleMode.RuleSorter sorter = new Saxon.Hej.trans.SimpleMode.RuleSorter(start);
-            processRules(it => sorter.addRule(it) /* converted from instance method reference */);
+            processRules(/* Unresolved method reference */sorter.addRule);
             sorter.allocateRanks();
             highestRank = (start+sorter.getNumberOfRules());
         }

@@ -61,6 +61,17 @@ namespace Saxon.Hej.functions {
         public override string getCompilerName() {
             return "NumberFnCompiler";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.Number_1.NumberFnElaborator();
+        }
+        public class NumberFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = fnc.getArg(0).makeElaborator().elaborateForItem();
+                return context => toNumber((Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/argEval(context)));
+            }
+        
+        }
     
     }
 }

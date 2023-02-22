@@ -69,11 +69,11 @@ namespace Saxon.Eej.ee.schema.fsa {
             } else {
                 int[] limits = compiler.getOccurrenceLimits();
                 if ((max>limits[1])) {
-                    compiler.warning((("maxOccurs value of "+max)+" treated as unbounded"), subjectType);
+                    compiler.warning((("maxOccurs value of "+max)+" treated as unbounded"), Saxon.Hej.trans.SaxonErrorCode.SXSD1012, subjectType);
                     max = Saxon.Eej.ee.schema.Particle.UNBOUNDED;
                 }
                 if ((min>limits[0])) {
-                    compiler.warning(((("minOccurs value of "+min)+" treated as ")+limits[0]), subjectType);
+                    compiler.warning(((("minOccurs value of "+min)+" treated as ")+limits[0]), Saxon.Hej.trans.SaxonErrorCode.SXSD1012, subjectType);
                     min = limits[0];
                 }
             }

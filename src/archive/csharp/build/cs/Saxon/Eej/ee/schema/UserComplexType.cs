@@ -1651,7 +1651,7 @@ namespace Saxon.Eej.ee.schema {
                 return ((("Element "+eName(sub))+" in the base type has an xs:keyref constraint that is not present ")+"in the restricted type");
             }
             if ((((baseUniqueSet.Count+baseKeySet.Count)+baseKeyRefSet.Count)>0)) {
-                compiler.warning((("Saxon is not able to verify that the identity constraints in element "+eName(sub))+" are compatible with those in the the base type"), sub);
+                compiler.warning((("Saxon is not able to verify that the identity constraints in element "+eName(sub))+" are compatible with those in the base type"), Saxon.Hej.trans.SaxonErrorCode.SXSD1009, sub);
             }
             if ((((@base.getBlock()&~(sub.getBlock()))) != 0)) {
                 return ((("The disallowed substitutions of element "+eName(sub))+"in the restricted content model (@block) must be ")+"a superset of those in the base content model");
@@ -1681,8 +1681,8 @@ namespace Saxon.Eej.ee.schema {
                     min += p.getMinOccurs();
                     max += p.getMaxOccurs();
                     if (!(((Saxon.Eej.ee.schema.ElementWildcard)(@base)).getWildcard().matches(p.getTargetComponentName(), true, config, this))) {
-                        string uri = p.getTargetComponentName().getURI();
-                        return ("The base type does not allow elements in "+(("".Equals(uri) ? "no namespace" : ("namespace "+uri))));
+                        Saxon.Hej.om.NamespaceUri uri = p.getTargetComponentName().getNamespaceUri();
+                        return ("The base type does not allow elements in "+((uri.isEmpty() ? "no namespace" : ("namespace "+uri))));
                     }
                 }
                 if ((min<@base.getMinOccurs())) {
@@ -1900,8 +1900,8 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("id", id);
             if (!(isAnonymousType())) {
                 serializer.emitAttribute("name", getName());
-                if (!(getTargetNamespace().Length==0)) {
-                    serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                if (!(getTargetNamespace().isEmpty())) {
+                    serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
                 }
             }
             serializer.emitAttribute("base", serializer.getTypeLink(getBaseType()));
@@ -1983,10 +1983,10 @@ namespace Saxon.Eej.ee.schema {
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return getComponentAsFunction(this);
         }
-        public static Saxon.Hej.om.Function getComponentAsFunction(Saxon.Hej.type.ComplexType type) {
+        public static Saxon.Hej.om.FunctionItem getComponentAsFunction(Saxon.Hej.type.ComplexType type) {
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
                 switch (key) {
@@ -2004,7 +2004,7 @@ namespace Saxon.Eej.ee.schema {
                     if (type.isAnonymousType()) {
                         return Saxon.Hej.value.EmptySequence.getInstance();
                     } else {
-                        return new Saxon.Hej.value.AnyURIValue((type.getTargetNamespace()));
+                        return new Saxon.Hej.value.AnyURIValue((type.getTargetNamespace().toUnicodeString()));
                     }
                   case "base type definition":
                     return type.getBaseType().getComponentAsFunction();

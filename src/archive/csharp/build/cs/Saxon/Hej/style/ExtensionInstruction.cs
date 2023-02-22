@@ -9,6 +9,9 @@ namespace Saxon.Hej.style {
         protected internal override bool mayContainFallback() {
             return true;
         }
+        public override bool isInXsltNamespace() {
+            return false;
+        }
     
     }
 }

@@ -29,6 +29,10 @@ namespace Saxon.Eej.ee.stream.watch {
         
         }
         private readonly System.Collections.Generic.IList<Saxon.Eej.ee.stream.watch.WatchManager.GroupingScope> capturingScopes = new System.Collections.Generic.List<Saxon.Eej.ee.stream.watch.WatchManager.GroupingScope>();
+        private long eventNumber = 0;
+        private void trace(string message) {
+            
+        }
         public WatchManager(Saxon.Hej.@event.PipelineConfiguration pipe) : base (pipe) {
             Saxon.Hej.Configuration config = pipe.getConfiguration();
             context = config.getConversionContext();
@@ -61,6 +65,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 startDocumentProperties = properties;
                 namespaceStack = new System.Collections.Generic.Stack<Saxon.Hej.om.NamespaceMap>();
             }
+            eventNumber++;
         }
         private void deferredStartDocument() {
             documentNode.setSystemId(getSystemId());
@@ -101,6 +106,7 @@ namespace Saxon.Eej.ee.stream.watch {
             }
         }
         public override void startElement(Saxon.Hej.om.NodeName elementName, Saxon.Hej.type.SchemaType typeCode, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
+            trace(("startElement "+elementName));
             try {
                 if (startDocumentPending) {
                     startDocumentPending = false;
@@ -147,14 +153,17 @@ namespace Saxon.Eej.ee.stream.watch {
                 }
                 lastLocationId = location.saveLocation();
             } catch (Saxon.Hej.trans.QuitParsingException quit) {
-                while (!((namespaceStack.Count==0))) {
-                    endElement();
+                if ((multiAccumulatorWatch == null)) {
+                    while (!((namespaceStack.Count==0))) {
+                        endElement();
+                    }
+                    endDocument();
+                    warning(quit);
+                    throw;
                 }
-                endDocument();
-                warning(quit);
-                throw;
             }
             processAttributes(attributes);
+            eventNumber++;
         }
         public void restartElement(Saxon.Eej.ee.stream.watch.Watch watch) {
             try {
@@ -238,6 +247,9 @@ namespace Saxon.Eej.ee.stream.watch {
         public Saxon.Eej.ee.stream.om.FleetingParentNode getCurrentNode() {
             return elementStack[(elementStackTop-1)];
         }
+        public long getCurrentEventNumber() {
+            return eventNumber;
+        }
         protected internal virtual void addPrearrangedWatches() {
         }
         public override void characters(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
@@ -272,13 +284,16 @@ namespace Saxon.Eej.ee.stream.watch {
                 warning(quit);
                 throw;
             }
+            eventNumber++;
         }
         private void warning(Saxon.Hej.trans.QuitParsingException exception) {
+            exception.maybeSetLocation(lastLocationId);
             Saxon.Hej.trans.XmlProcessingException err = new Saxon.Hej.trans.XmlProcessingException(exception);
             err.setWarning(true);
             getPipelineConfiguration().getErrorReporter().report(err);
         }
         public override void endElement() {
+            trace(("endElement "+elementStack[(elementStackTop-1)].getDisplayName()));
             foreach (Saxon.Hej.@event.Receiver @out in activeReceiverStack) {
                 @out.endElement();
             }
@@ -336,6 +351,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 warning(quit);
                 throw quit;
             }
+            eventNumber++;
         }
         public override void endDocument() {
             elementStackTop--;
@@ -360,6 +376,7 @@ namespace Saxon.Eej.ee.stream.watch {
                     }
                 }
             }
+            eventNumber++;
         }
         public override void comment(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
             ensureStackSpace();
@@ -383,6 +400,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 }
                 lastLocationId = locationId;
             }
+            eventNumber++;
         }
         public override void processingInstruction(string target, Saxon.Hej.str.UnicodeString data, Saxon.Hej.s9api.Location locationId, int properties) {
             ensureStackSpace();
@@ -408,6 +426,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 }
                 lastLocationId = locationId;
             }
+            eventNumber++;
         }
         public override void setUnparsedEntity(string name, string systemID, string publicID) {
             if ((documentNode != null)) {
@@ -441,9 +460,9 @@ namespace Saxon.Eej.ee.stream.watch {
         public void removeWatch(Saxon.Eej.ee.stream.watch.Watch watch) {
             Saxon.Impl.Helpers.ListUtils.Remove(watchList, watch);
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             if ((!(useDefault) && prefix.Length==0)) {
-                return Saxon.Hej.lib.NamespaceConstant.NULL;
+                return Saxon.Hej.om.NamespaceUri.NULL;
             }
             return namespaceStack.Peek().getURIForPrefix(prefix, useDefault);
         }
@@ -452,6 +471,9 @@ namespace Saxon.Eej.ee.stream.watch {
         }
         public override bool usesTypeAnnotations() {
             return true;
+        }
+        public bool allowsEarlyExit() {
+            return (multiAccumulatorWatch == null);
         }
         public Saxon.Eej.ee.stream.om.FleetingDocumentNode getDocumentNode() {
             return documentNode;

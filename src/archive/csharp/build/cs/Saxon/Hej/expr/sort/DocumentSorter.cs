@@ -44,7 +44,7 @@ namespace Saxon.Hej.expr.sort {
             if ((th.relationship(getBaseExpression().getItemType(), Saxon.Hej.pattern.AnyNodeTest.getInstance()) == Saxon.Hej.type.Affinity.DISJOINT)) {
                 return getBaseExpression();
             }
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "document-order sorter", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "document-order sorter", 0);
             Saxon.Hej.expr.Expression operand = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(getBaseExpression(), Saxon.Hej.value.SequenceType.NODE_SEQUENCE, role, visitor);
             setBaseExpression(operand);
             return this;
@@ -150,6 +150,22 @@ namespace Saxon.Hej.expr.sort {
         }
         public override string getStreamerName() {
             return "DocumentSorterAdjunct";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.sort.DocumentSorter.DocumentSorterElaborator();
+        }
+        public class DocumentSorterElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.sort.DocumentSorter expr = (Saxon.Hej.expr.sort.DocumentSorter)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                System.Collections.Generic.Comparer<Saxon.Hej.om.NodeInfo> comparer = expr.getComparer();
+                return context => new Saxon.Hej.expr.sort.DocumentOrderIterator(/*Delegate.iterate()*/baseEval(context), comparer);
+            }
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.sort.DocumentSorter expr = (Saxon.Hej.expr.sort.DocumentSorter)(getExpression());
+                return expr.getBaseExpression().makeElaborator().elaborateForBoolean();
+            }
+        
         }
     
     }

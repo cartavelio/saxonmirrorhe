@@ -53,7 +53,7 @@ namespace Saxon.Hej {
         private Saxon.Hej.lib.CollectionFinder collectionFinder;
         private Saxon.Hej.lib.EnvironmentVariableResolver environmentVariableResolver = new Saxon.Hej.lib.StandardEnvironmentVariableResolver();
         private string defaultCollection = null;
-        private readonly Saxon.Hej.lib.ParseOptions defaultParseOptions = new Saxon.Hej.lib.ParseOptions();
+        private Saxon.Hej.lib.ParseOptions defaultParseOptions = new Saxon.Hej.lib.ParseOptions();
         protected internal Saxon.Hej.query.StaticQueryContext defaultStaticQueryContext;
         private Saxon.Hej.lib.StaticQueryContextFactory staticQueryContextFactory = new Saxon.Hej.lib.StaticQueryContextFactory();
         protected internal Saxon.Hej.expr.parser.OptimizerOptions optimizerOptions = Saxon.Hej.expr.parser.OptimizerOptions.FULL_HE_OPTIMIZATION;
@@ -92,7 +92,7 @@ namespace Saxon.Hej {
         private readonly Saxon.Hej.expr.compat.TypeChecker10 typeChecker10 = new Saxon.Hej.expr.compat.TypeChecker10();
         private Saxon.Hej.lib.JJ_ResourceResolver commonResolver;
         private Saxon.Hej.lib.ProtocolRestrictor protocolRestrictor = new Saxon.Hej.lib.ProtocolRestrictor("all");
-        protected internal Saxon.Hej.functions.FunctionLibraryList builtInExtensionLibraryList;
+        protected internal Saxon.Hej.z.IntHashMap<Saxon.Hej.functions.FunctionLibraryList> builtInExtensionLibraryList = new Saxon.Hej.z.IntHashMap<Saxon.Hej.functions.FunctionLibraryList>(4);
         protected internal int xsdVersion = XSD11;
         private int xmlVersion = XML10;
         private int xpathVersionForXsd = 20;
@@ -100,8 +100,7 @@ namespace Saxon.Hej {
         private System.Collections.Generic.Comparer<string> mediaQueryEvaluator;
         private readonly System.Collections.Generic.IDictionary<string,string> fileExtensions = new System.Collections.Generic.Dictionary<string, string>();
         private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.lib.ResourceFactory> resourceFactoryMapping = new System.Collections.Generic.Dictionary<string, Saxon.Hej.lib.ResourceFactory>();
-        private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.lib.FunctionAnnotationHandler> functionAnnotationHandlers = new System.Collections.Generic.Dictionary<string, Saxon.Hej.lib.FunctionAnnotationHandler>();
-        protected internal int byteCodeThreshold = 100;
+        private readonly System.Collections.Generic.IDictionary<Saxon.Hej.om.NamespaceUri,Saxon.Hej.lib.FunctionAnnotationHandler> functionAnnotationHandlers = new System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri, Saxon.Hej.lib.FunctionAnnotationHandler>();
         private int regexBacktrackingLimit = 10000000;
         private readonly Saxon.Hej.tree.tiny.TreeStatistics treeStatistics = new Saxon.Hej.tree.tiny.TreeStatistics();
         public const int XML10 = 10;
@@ -120,6 +119,19 @@ namespace Saxon.Hej {
                 System.Console.Error.WriteLine(e);
                 throw new System.Exception("Cannot instantiate a Configuration", e);
             }
+        }
+        public static Saxon.Hej.Configuration newLicensedConfiguration() {
+            Saxon.Eej.config.EnterpriseConfiguration eeConfig = new Saxon.Eej.config.EnterpriseConfiguration();
+            if (eeConfig.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
+                return eeConfig;
+            } else {
+                if (eeConfig.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                    Saxon.Eej.config.ProfessionalConfiguration peConfig = new Saxon.Eej.config.ProfessionalConfiguration();
+                    peConfig.importLicenseDetails(eeConfig);
+                    return peConfig;
+                }
+            }
+            return new Saxon.Hej.Configuration();
         }
         public static Saxon.Hej.Configuration readConfiguration(Saxon.Ejavax.xml.transform.Source source) {
             Saxon.Hej.Configuration tempConfig = newConfiguration();
@@ -161,6 +173,15 @@ namespace Saxon.Hej {
             }
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.ALLOW_EXTERNAL_FUNCTIONS, Saxon.Hej.lib.FeatureKeys.ALLOW_EXTERNAL_FUNCTIONS, true);
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.DISABLE_XSL_EVALUATE, Saxon.Hej.lib.FeatureKeys.DISABLE_XSL_EVALUATE, false);
+            string initializationClass = Saxon.Ejava.lang.System.getProperty("SAXON_INITIALIZER");
+            if ((initializationClass != null)) {
+                try {
+                    Saxon.Hej.lib.Initializer initializer = (Saxon.Hej.lib.Initializer)(getInstance(initializationClass));
+                    initializer.initialize(this);
+                } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
+                    System.Console.Error.WriteLine(((("Warning: Failed to invoke Saxon Initializer "+initializationClass)+": ")+e.Message));
+                }
+            }
             registerFileExtension("xml", "application/xml");
             registerFileExtension("html", "application/html");
             registerFileExtension("atom", "application/atom");
@@ -224,6 +245,11 @@ namespace Saxon.Hej {
         public virtual bool isLicensedFeature(int feature) {
             return false;
         }
+        public void requireProfessionalLicense(string featureName) {
+            if (!(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION))) {
+                throw new Saxon.Hej.trans.LicenseException((("Use of "+featureName)+" requires a license key for Saxon-PE or Saxon-EE"), Saxon.Hej.trans.LicenseException.NOT_FOUND);
+            }
+        }
         public virtual string getLicenseFeature(string name) {
             return null;
         }
@@ -260,10 +286,6 @@ namespace Saxon.Hej {
         }
         public Saxon.Hej.lib.JJ_ResourceResolver makeResourceResolver(string className) {
             System.Object obj = dynamicLoader.getInstance(className, null);
-            if ((obj is Saxon.Ejavax.xml.transform.URIResolver)) {
-                getLogger().warning("From Saxon 11.1, the value of the -r option should be a ResourceResolver, not a URIResolver");
-                obj = new Saxon.Hej.lib.ResourceResolverWrappingURIResolver((Saxon.Ejavax.xml.transform.URIResolver)(obj));
-            }
             if ((obj is Saxon.Hej.lib.JJ_ResourceResolver)) {
                 return (Saxon.Hej.lib.JJ_ResourceResolver)(obj);
             }
@@ -309,6 +331,9 @@ namespace Saxon.Hej {
         public Saxon.Hej.lib.ParseOptions getParseOptions() {
             return defaultParseOptions;
         }
+        public void setParseOptions(Saxon.Hej.lib.ParseOptions options) {
+            defaultParseOptions = options;
+        }
         public void setMediaQueryEvaluator(System.Collections.Generic.Comparer<string> comparator) {
             this.mediaQueryEvaluator = comparator;
         }
@@ -348,25 +373,25 @@ namespace Saxon.Hej {
         }
         public Saxon.Hej.z.IntPredicateProxy getValidCharacterChecker() {
             if ((xmlVersion == XML10)) {
-                return Saxon.Hej.z.IntPredicateLambda.of(ch => Saxon.Hej.serialize.charcode.XMLCharacterData.isValid10(ch));
+                return Saxon.Hej.z.IntPredicateLambda.of(Saxon.Hej.serialize.charcode.XMLCharacterData.isValid10 /* static method reference */);
             } else {
-                return Saxon.Hej.z.IntPredicateLambda.of(ch => Saxon.Hej.serialize.charcode.XMLCharacterData.isValid11(ch));
+                return Saxon.Hej.z.IntPredicateLambda.of(Saxon.Hej.serialize.charcode.XMLCharacterData.isValid11 /* static method reference */);
             }
         }
         public int getTreeModel() {
             return defaultParseOptions.getModel().getSymbolicValue();
         }
         public void setTreeModel(int treeModel) {
-            defaultParseOptions.setModel(Saxon.Hej.om.TreeModel.getTreeModel(treeModel));
+            defaultParseOptions = defaultParseOptions.withModel(Saxon.Hej.om.TreeModel.getTreeModel(treeModel));
         }
         public bool isLineNumbering() {
             return defaultParseOptions.isLineNumbering();
         }
         public void setLineNumbering(bool lineNumbering) {
-            defaultParseOptions.setLineNumbering(lineNumbering);
+            defaultParseOptions = defaultParseOptions.withLineNumbering(lineNumbering);
         }
         public void setXIncludeAware(bool state) {
-            defaultParseOptions.setXIncludeAware(state);
+            defaultParseOptions = defaultParseOptions.withXIncludeAware(state);
         }
         public bool isXIncludeAware() {
             return defaultParseOptions.isXIncludeAware();
@@ -446,27 +471,38 @@ namespace Saxon.Hej {
             }
             throw new Saxon.Hej.trans.XPathException((("Class "+className)+" is not a TraceListener"));
         }
-        public Saxon.Hej.functions.registry.BuiltInFunctionSet getXSLT30FunctionSet() {
-            return Saxon.Hej.functions.registry.XSLT30FunctionSet.getInstance();
+        public virtual Saxon.Hej.functions.registry.BuiltInFunctionSet getXSLTFunctionSet(int version) {
+            if ((version == 30)) {
+                return Saxon.Hej.functions.registry.XSLT30FunctionSet.getInstance();
+            } else {
+                if ((version == 40)) {
+                    throw new Saxon.Ejava.lang.IllegalArgumentException("XSLT 4.0 requires Saxon-PE or higher");
+                } else {
+                    throw new Saxon.Ejava.lang.IllegalArgumentException((("Unsupported XSLT version "+version)+" (must be 30)"));
+                }
+            }
         }
-        public Saxon.Hej.functions.registry.BuiltInFunctionSet getUseWhenFunctionSet() {
-            return Saxon.Hej.functions.registry.UseWhen30FunctionSet.getInstance();
-        }
-        public Saxon.Hej.functions.registry.BuiltInFunctionSet getXPath30FunctionSet() {
-            return Saxon.Hej.functions.registry.XPath30FunctionSet.getInstance();
-        }
-        public Saxon.Hej.functions.registry.BuiltInFunctionSet getXPath31FunctionSet() {
-            return Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance();
-        }
-        public Saxon.Hej.functions.registry.BuiltInFunctionSet getXPath40FunctionSet() {
-            return Saxon.Hej.functions.registry.XPath40FunctionSet.getInstance();
+        public virtual Saxon.Hej.functions.registry.BuiltInFunctionSet getXPathFunctionSet(int version) {
+            switch (version) {
+              case 20:
+                return Saxon.Hej.functions.registry.XPath20FunctionSet.getInstance();
+              case 30:
+              case 305:
+                return Saxon.Hej.functions.registry.XPath30FunctionSet.getInstance();
+              case 31:
+                return Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance();
+              case 40:
+                throw new Saxon.Ejava.lang.IllegalArgumentException("Version 4.0 requires Saxon-PE or higher");
+              default:
+                return Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance();
+            }
         }
         public virtual Saxon.Hej.functions.registry.BuiltInFunctionSet getXQueryUpdateFunctionSet() {
             return null;
         }
-        public Saxon.Hej.functions.SystemFunction makeSystemFunction(string localName, int arity) {
+        public virtual Saxon.Hej.functions.SystemFunction makeSystemFunction(string localName, int arity) {
             try {
-                return getXSLT30FunctionSet().makeFunction(localName, arity);
+                return getXSLTFunctionSet(30).makeFunction(localName, arity);
             } catch (Saxon.Hej.trans.XPathException e) {
                 return null;
             }
@@ -477,32 +513,64 @@ namespace Saxon.Hej {
         public Saxon.Hej.functions.IntegratedFunctionLibrary getIntegratedFunctionLibrary() {
             return integratedFunctionLibrary;
         }
-        public virtual Saxon.Hej.functions.FunctionLibraryList getBuiltInExtensionLibraryList() {
-            if ((builtInExtensionLibraryList == null)) {
-                builtInExtensionLibraryList = new Saxon.Hej.functions.FunctionLibraryList();
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance());
-                builtInExtensionLibraryList.addFunctionLibrary(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.getInstance());
+        public Saxon.Hej.functions.FunctionLibraryList getBuiltInExtensionLibraryList(int version) { lock(this) {
+            Saxon.Hej.functions.FunctionLibraryList result = builtInExtensionLibraryList.get(version);
+            if ((result == null)) {
+                result = makeBuiltInExtensionLibraryList(version);
+                builtInExtensionLibraryList.put(version, result);
             }
-            return builtInExtensionLibraryList;
+            return result;
+        }}
+        protected internal virtual Saxon.Hej.functions.FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
+            Saxon.Hej.functions.FunctionLibraryList result = new Saxon.Hej.functions.FunctionLibraryList();
+            result.addFunctionLibrary(Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance());
+            result.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
+            result.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance(version));
+            result.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(version));
+            result.addFunctionLibrary(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.getInstance());
+            return result;
+        }
+        public virtual Saxon.Hej.functions.registry.BuiltInFunctionSet getVendorFunctionSet() {
+            return Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance();
         }
         public virtual Saxon.Hej.functions.SystemFunction bindSaxonExtensionFunction(string localName, int arity) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException((((("The extension function saxon:"+localName)+"#")+arity)+" requires Saxon-PE or higher"));
         }
         public virtual void addExtensionBinders(Saxon.Hej.functions.FunctionLibraryList list) {
         }
-        public virtual Saxon.Hej.om.Function getSystemFunction(Saxon.Hej.om.StructuredQName name, int arity) {
+        public virtual Saxon.Hej.om.FunctionItem getSystemFunction(Saxon.Hej.om.StructuredQName name, int arity) {
             try {
                 if ((staticContextForSystemFunctions == null)) {
                     staticContextForSystemFunctions = new Saxon.Hej.sxpath.IndependentContext(this);
                 }
-                Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-                lib.addFunctionLibrary(Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance());
-                lib.addFunctionLibrary(getBuiltInExtensionLibraryList());
-                lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(this));
-                lib.addFunctionLibrary(getIntegratedFunctionLibrary());
+                Saxon.Hej.functions.FunctionLibrary lib;
+                Saxon.Hej.om.NamespaceUri ns = name.getNamespaceUri();
+                int version = getDefaultStaticQueryContext().getLanguageVersion();
+                if (ns.Equals(Saxon.Hej.om.NamespaceUri.FN)) {
+                    lib = getXPathFunctionSet(version);
+                } else {
+                    if (ns.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
+                        lib = new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(this);
+                    } else {
+                        if (ns.Equals(Saxon.Hej.om.NamespaceUri.MATH)) {
+                            lib = Saxon.Hej.functions.MathFunctionSet.getInstance();
+                        } else {
+                            if (ns.Equals(Saxon.Hej.om.NamespaceUri.MAP_FUNCTIONS)) {
+                                lib = Saxon.Hej.ma.map.MapFunctionSet.getInstance(version);
+                            } else {
+                                if (ns.Equals(Saxon.Hej.om.NamespaceUri.ARRAY_FUNCTIONS)) {
+                                    lib = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(version);
+                                } else {
+                                    Saxon.Hej.functions.FunctionLibraryList fll = new Saxon.Hej.functions.FunctionLibraryList();
+                                    fll.addFunctionLibrary(getBuiltInExtensionLibraryList(31));
+                                    fll.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(this));
+                                    fll.addFunctionLibrary(getIntegratedFunctionLibrary());
+                                    lib = fll;
+                                }
+                            }
+                        }
+                    }
+                }
                 Saxon.Hej.trans.SymbolicName.F symbolicName = new Saxon.Hej.trans.SymbolicName.F(name, arity);
                 return lib.getFunctionItem(symbolicName, staticContextForSystemFunctions);
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -700,7 +768,7 @@ namespace Saxon.Hej {
         public void registerFunctionAnnotationHandler(Saxon.Hej.lib.FunctionAnnotationHandler handler) {
             Saxon.Impl.Helpers.MapUtils.Put(functionAnnotationHandlers, handler.getAssertionNamespace(), handler);
         }
-        public Saxon.Hej.lib.FunctionAnnotationHandler getFunctionAnnotationHandler(string @namespace) {
+        public Saxon.Hej.lib.FunctionAnnotationHandler getFunctionAnnotationHandler(Saxon.Hej.om.NamespaceUri @namespace) {
             return Saxon.Impl.Helpers.MapUtils.Get(functionAnnotationHandlers, @namespace);
         }
         public virtual bool isStreamabilityEnabled() {
@@ -739,7 +807,7 @@ namespace Saxon.Hej {
         public Saxon.Hej.serialize.SerializationProperties obtainDefaultSerializationProperties() {
             return new Saxon.Hej.serialize.SerializationProperties(defaultOutputProperties);
         }
-        public void processResultDocument(Saxon.Hej.expr.instruct.ResultDocument instruction, Saxon.Hej.expr.Expression content, Saxon.Hej.expr.XPathContext context) {
+        public void processResultDocument(Saxon.Hej.expr.instruct.ResultDocument instruction, Saxon.Hej.expr.elab.PushEvaluator content, Saxon.Hej.expr.XPathContext context) {
             instruction.processInstruction(content, context);
         }
         public virtual Saxon.Hej.om.SequenceIterator getMultithreadedItemMappingIterator(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.ItemMappingFunction action) {
@@ -764,7 +832,7 @@ namespace Saxon.Hej {
             return ((defaultParseOptions.getDTDValidationMode() == Saxon.Hej.lib.Validation.STRICT) || (defaultParseOptions.getDTDValidationMode() == Saxon.Hej.lib.Validation.LAX));
         }
         public void setValidation(bool validation) {
-            defaultParseOptions.setDTDValidationMode((validation ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.STRIP));
+            defaultParseOptions = defaultParseOptions.withDTDValidationMode((validation ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.STRIP));
         }
         public virtual Saxon.Hej.@event.FilterFactory makeDocumentProjector(Saxon.Hej.expr.parser.PathMap.PathMapRoot map) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException("Document projection requires Saxon-EE");
@@ -776,16 +844,16 @@ namespace Saxon.Hej {
             return defaultParseOptions.getSchemaValidationMode();
         }
         public void setSchemaValidationMode(int validationMode) {
-            defaultParseOptions.setSchemaValidationMode(validationMode);
+            defaultParseOptions = defaultParseOptions.withSchemaValidationMode(validationMode);
         }
         public void setValidationWarnings(bool warn) {
-            defaultParseOptions.setContinueAfterValidationErrors(warn);
+            defaultParseOptions = defaultParseOptions.withContinueAfterValidationErrors(warn);
         }
         public bool isValidationWarnings() {
             return defaultParseOptions.isContinueAfterValidationErrors();
         }
         public void setExpandAttributeDefaults(bool expand) {
-            defaultParseOptions.setExpandAttributeDefaults(expand);
+            defaultParseOptions = defaultParseOptions.withExpandAttributeDefaults(expand);
         }
         public bool isExpandAttributeDefaults() {
             return defaultParseOptions.isExpandAttributeDefaults();
@@ -830,14 +898,14 @@ namespace Saxon.Hej {
         public void loadSchema(string absoluteURI) {
             readSchema(makePipelineConfiguration(), "", absoluteURI, null);
         }
-        public virtual string readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, string expected) {
+        public virtual Saxon.Hej.om.NamespaceUri readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, Saxon.Hej.om.NamespaceUri expected) {
             needEnterpriseEdition();
             return null;
         }
-        public virtual void readMultipleSchemas(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, System.Collections.Generic.IList<string> schemaLocations, string expected) {
+        public virtual void readMultipleSchemas(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, System.Collections.Generic.IList<string> schemaLocations, Saxon.Hej.om.NamespaceUri expected) {
             needEnterpriseEdition();
         }
-        public virtual string readInlineSchema(Saxon.Hej.om.NodeInfo root, string expected, Saxon.Hej.lib.ErrorReporter errorReporter) {
+        public virtual Saxon.Hej.om.NamespaceUri readInlineSchema(Saxon.Hej.om.NodeInfo root, Saxon.Hej.om.NamespaceUri expected, Saxon.Hej.lib.ErrorReporter errorReporter) {
             needEnterpriseEdition();
             return null;
         }
@@ -850,17 +918,17 @@ namespace Saxon.Hej {
         public virtual void addSchemaSource(Saxon.Ejavax.xml.transform.Source schemaSource, Saxon.Hej.lib.ErrorReporter errorReporter) {
             needEnterpriseEdition();
         }
-        public virtual void addSchemaForBuiltInNamespace(string @namespace) {
+        public virtual void addSchemaForBuiltInNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
         }
-        public virtual bool isSchemaAvailable(string targetNamespace) {
+        public virtual bool isSchemaAvailable(Saxon.Hej.om.NamespaceUri targetNamespace) {
             return false;
         }
         public virtual void clearSchemaCache() {
         }
-        public virtual System.Collections.Generic.ISet<string> getImportedNamespaces() {
-            return new System.Collections.Generic.HashSet<string>();
+        public virtual System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getImportedNamespaces() {
+            return new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
         }
-        public virtual void sealNamespace(string @namespace) {
+        public virtual void sealNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
         }
         public virtual System.Collections.Generic.ICollection<Saxon.Hej.expr.instruct.GlobalParam> getDeclaredSchemaParameters() {
             return null;
@@ -887,7 +955,7 @@ namespace Saxon.Hej {
             return null;
         }
         public virtual Saxon.Hej.type.SchemaType getSchemaType(Saxon.Hej.om.StructuredQName name) {
-            if (name.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
+            if (name.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                 return Saxon.Hej.type.BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
             }
             return null;
@@ -895,7 +963,7 @@ namespace Saxon.Hej {
         public virtual Saxon.Hej.type.ItemType makeUserUnionType(System.Collections.Generic.IList<Saxon.Hej.type.AtomicType> memberTypes) {
             return null;
         }
-        public virtual bool isDeclaredNotation(string uri, string local) {
+        public virtual bool isDeclaredNotation(Saxon.Hej.om.NamespaceUri uri, string local) {
             return false;
         }
         public virtual void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType derived, Saxon.Hej.type.SchemaType @base, int block) {
@@ -914,35 +982,19 @@ namespace Saxon.Hej {
         public virtual Saxon.Hej.@event.Receiver getAnnotationStripper(Saxon.Hej.@event.Receiver destination) {
             return destination;
         }
-        public virtual Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating, int languageVersion) {
+        public virtual Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating) {
             if ("XQ".Equals(language)) {
                 if (updating) {
                     throw new Saxon.Hej.trans.XPathException("XQuery Update is supported only in Saxon-EE");
                 } else {
-                    if (((((languageVersion == 40) || (languageVersion == 31)) || (languageVersion == 30)) || (languageVersion == 10))) {
-                        Saxon.Hej.query.XQueryParser parser = new Saxon.Hej.query.XQueryParser(31);
-                        parser.setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XQUERY, System.Math.Max(languageVersion, 31));
-                        return parser;
-                    } else {
-                        throw new Saxon.Hej.trans.XPathException(("Unknown XQuery version "+languageVersion));
-                    }
+                    return new Saxon.Hej.query.XQueryParser();
                 }
             } else {
                 if ("XP".Equals(language)) {
-                    if ((((((languageVersion == 40) || (languageVersion == 31)) || (languageVersion == 30)) || (languageVersion == 305)) || (languageVersion == 20))) {
-                        Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser();
-                        parser.setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XPATH, languageVersion);
-                        return parser;
-                    } else {
-                        throw new Saxon.Hej.trans.XPathException(("Unknown XPath version "+languageVersion));
-                    }
+                    return new Saxon.Hej.expr.parser.XPathParser();
                 } else {
                     if ("PATTERN".Equals(language)) {
-                        if (((((languageVersion == 30) || (languageVersion == 20)) || (languageVersion == 305)) || (languageVersion == 31))) {
-                            return new Saxon.Hej.pattern.PatternParser();
-                        } else {
-                            throw new Saxon.Hej.trans.XPathException(("Unknown XPath version "+languageVersion));
-                        }
+                        return new Saxon.Hej.pattern.PatternParser();
                     } else {
                         throw new Saxon.Hej.trans.XPathException(("Unknown expression language "+language));
                     }
@@ -975,7 +1027,7 @@ namespace Saxon.Hej {
             return si;
         }
         public virtual System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> getFocusTrackerFactory(Saxon.Hej.expr.instruct.Executable exec, bool multithreaded) {
-            return iter => new Saxon.Hej.om.FocusTrackingIterator(iter);
+            return /* ctor#1 */ (a) => new Saxon.Hej.om.FocusTrackingIterator(a);
         }
         public virtual void checkStrictStreamability(Saxon.Hej.style.XSLTemplate template, Saxon.Hej.expr.Expression body) {
         }
@@ -984,6 +1036,9 @@ namespace Saxon.Hej {
         }
         public virtual Saxon.Hej.expr.parser.OptimizerOptions getOptimizerOptions() {
             return optimizerOptions.intersect(Saxon.Hej.expr.parser.OptimizerOptions.FULL_HE_OPTIMIZATION);
+        }
+        public virtual Saxon.Hej.expr.parser.OptimizerOptions getPermittedOptimizerOptions() {
+            return Saxon.Hej.expr.parser.OptimizerOptions.FULL_HE_OPTIMIZATION;
         }
         public virtual Saxon.Hej.expr.parser.Optimizer obtainOptimizer() {
             if ((optimizer == null)) {
@@ -1011,17 +1066,6 @@ namespace Saxon.Hej {
                 mainModule.getCodeInjector().process(xqe);
             }
             return xqe;
-        }
-        public virtual Saxon.Hej.om.Sequence makeClosure(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
-            if (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.EAGER_EVALUATION)) {
-                Saxon.Hej.om.SequenceIterator iter = expression.iterate(context);
-                return Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
-            }
-            Saxon.Hej.value.Closure closure = ((@ref>1) ? new Saxon.Hej.value.MemoClosure() : new Saxon.Hej.value.Closure());
-            closure.setExpression(expression);
-            closure.setSavedXPathContext(context.newContext());
-            closure.saveContext(expression, context);
-            return closure;
         }
         public virtual Saxon.Hej.om.GroundedValue makeSequenceExtent(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
             return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
@@ -1083,8 +1127,7 @@ namespace Saxon.Hej {
             throw new Saxon.Ejava.lang.UnsupportedOperationException("XQuery update is supported only in Saxon-EE");
         }
         public Saxon.Hej.@event.PipelineConfiguration makePipelineConfiguration() {
-            Saxon.Hej.@event.PipelineConfiguration pipe = new Saxon.Hej.@event.PipelineConfiguration(this);
-            pipe.setParseOptions(new Saxon.Hej.lib.ParseOptions(defaultParseOptions));
+            Saxon.Hej.@event.PipelineConfiguration pipe = new Saxon.Hej.@event.PipelineConfiguration(this, defaultParseOptions);
             pipe.setErrorReporter(makeErrorReporter());
             return pipe;
         }
@@ -1105,7 +1148,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_431(this, source, config);
+                return new Inner_ActiveSource_440(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1120,7 +1163,7 @@ namespace Saxon.Hej {
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
                 return buildDocumentTree(((Saxon.Hej.lib.AugmentedSource)(source)).getContainedSource(), ((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
             } else {
-                return buildDocumentTree(source, new Saxon.Hej.lib.ParseOptions(defaultParseOptions));
+                return buildDocumentTree(source, defaultParseOptions);
             }
         }
         public Saxon.Hej.om.TreeInfo buildDocumentTree(Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.lib.ParseOptions parseOptions) {
@@ -1129,16 +1172,16 @@ namespace Saxon.Hej {
             }
             bool finallyClose = false;
             try {
-                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(parseOptions);
+                Saxon.Hej.lib.ParseOptions options = parseOptions;
                 Saxon.Ejavax.xml.transform.Source src2 = resolveSource(source, this);
                 if ((src2 == null)) {
                     throw new Saxon.Hej.trans.XPathException(("Unknown source class "+source.GetType().Name));
                 }
                 source = src2;
                 if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                    options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
+                    options = options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
                 }
-                options.applyDefaults(this);
+                options = options.applyDefaults(this);
                 finallyClose = options.isPleaseCloseAfterUse();
                 Saxon.Hej.om.TreeModel treeModel = options.getModel();
                 bool lineNumbering = options.isLineNumbering();
@@ -1184,27 +1227,7 @@ namespace Saxon.Hej {
             if (Saxon.Hej.lib.FeatureIndex.exists(name)) {
                 setFeature(Saxon.Hej.lib.FeatureIndex.getData(name), value);
             } else {
-                if (name.StartsWith(Saxon.Hej.lib.FeatureKeys.XML_PARSER_FEATURE)) {
-                    string uri = name.Substring(Saxon.Hej.lib.FeatureKeys.XML_PARSER_FEATURE.Length);
-                    try {
-                        uri = Saxon.Ejava.net.URLDecoder.decode(uri, "utf-8");
-                    } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
-                        throw new Saxon.Ejava.lang.IllegalArgumentException(e);
-                    }
-                    defaultParseOptions.addParserFeature(uri, requireBoolean(name, value));
-                } else {
-                    if (name.StartsWith(Saxon.Hej.lib.FeatureKeys.XML_PARSER_PROPERTY)) {
-                        string uri = name.Substring(Saxon.Hej.lib.FeatureKeys.XML_PARSER_PROPERTY.Length);
-                        try {
-                            uri = Saxon.Ejava.net.URLDecoder.decode(uri, "utf-8");
-                        } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
-                            throw new Saxon.Ejava.lang.IllegalArgumentException(e);
-                        }
-                        defaultParseOptions.addParserProperties(uri, value);
-                    } else {
-                        throw new Saxon.Ejava.lang.IllegalArgumentException(("Unrecognized configuration feature: "+name));
-                    }
-                }
+                throw new Saxon.Ejava.lang.IllegalArgumentException(("Unrecognized configuration feature: "+name));
             }
         }
         public void setConfigurationProperty<T> (Saxon.Hej.lib.Feature<T> feature, T value) {
@@ -1282,9 +1305,9 @@ namespace Saxon.Hej {
                         {
                             bool b = requireBoolean(name, value);
                             if (b) {
-                                defaultParseOptions.setDTDValidationMode(Saxon.Hej.lib.Validation.LAX);
+                                defaultParseOptions = defaultParseOptions.withDTDValidationMode(Saxon.Hej.lib.Validation.LAX);
                             } else {
-                                defaultParseOptions.setDTDValidationMode((isValidation() ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
+                                defaultParseOptions = defaultParseOptions.withDTDValidationMode((isValidation() ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
                             }
                             internalSetBooleanProperty(code, name, b);
                             break ;
@@ -1328,19 +1351,18 @@ namespace Saxon.Hej {
                       case Saxon.Hej.lib.FeatureCode.OPTIMIZATION_LEVEL:
                         if ((value is int)) {
                             int v = (int)(value);
-                            optimizerOptions = ((v == 0) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION);
+                            optimizerOptions = ((v == 0) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION.intersect(getPermittedOptimizerOptions()));
                         } else {
                             string s = requireString(name, value);
                             if (System.Text.RegularExpressions.Regex.IsMatch(s, "[0-9]+")) {
-                                optimizerOptions = ("0".Equals(s) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION);
+                                optimizerOptions = ("0".Equals(s) ? new Saxon.Hej.expr.parser.OptimizerOptions(0) : Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION.intersect(getPermittedOptimizerOptions()));
                             } else {
-                                optimizerOptions = new Saxon.Hej.expr.parser.OptimizerOptions(s);
+                                optimizerOptions = new Saxon.Hej.expr.parser.OptimizerOptions(s).intersect(getPermittedOptimizerOptions());
                             }
                         }
                         if ((optimizer != null)) {
                             optimizer.setOptimizerOptions(optimizerOptions);
                         }
-                        internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.GENERATE_BYTE_CODE, Saxon.Hej.lib.FeatureKeys.GENERATE_BYTE_CODE, optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.BYTE_CODE));
                         defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
                         break ;
                       case Saxon.Hej.lib.FeatureCode.RECOVERY_POLICY:
@@ -1380,19 +1402,21 @@ namespace Saxon.Hej {
                       case Saxon.Hej.lib.FeatureCode.STRIP_WHITESPACE:
                         {
                             string s = requireString(name, value);
+                            Saxon.Hej.om.SpaceStrippingRule rule;
                             switch (s) {
                               case "all":
-                                defaultParseOptions.setSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance());
+                                rule = Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance();
                                 break ;
                               case "none":
-                                defaultParseOptions.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
+                                rule = Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance();
                                 break ;
                               case "ignorable":
-                                defaultParseOptions.setSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
+                                rule = Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance();
                                 break ;
                               default:
                                 throw new Saxon.Ejava.lang.IllegalArgumentException((("Unrecognized value STRIP_WHITESPACE = '"+value)+"': must be 'all', 'none', or 'ignorable'"));
                             }
+                            defaultParseOptions = defaultParseOptions.withSpaceStrippingRule(rule);
                             break ;
                         }
                       case Saxon.Hej.lib.FeatureCode.STYLE_PARSER_CLASS:
@@ -1446,15 +1470,11 @@ namespace Saxon.Hej {
                       case Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS:
                         setUnparsedTextURIResolver((Saxon.Hej.lib.UnparsedTextURIResolver)(instantiateClassName(name, value, typeof(Saxon.Hej.lib.UnparsedTextURIResolver))));
                         break ;
-                      case Saxon.Hej.lib.FeatureCode.URI_RESOLVER_CLASS:
-                        Saxon.Ejavax.xml.transform.URIResolver u = (Saxon.Ejavax.xml.transform.URIResolver)(instantiateClassName(name, value, typeof(Saxon.Ejavax.xml.transform.URIResolver)));
-                        setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(u));
-                        break ;
                       case Saxon.Hej.lib.FeatureCode.USE_XSI_SCHEMA_LOCATION:
-                        defaultParseOptions.setUseXsiSchemaLocation(requireBoolean(name, value));
+                        defaultParseOptions = defaultParseOptions.withUseXsiSchemaLocation(requireBoolean(name, value));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.VALIDATION_COMMENTS:
-                        defaultParseOptions.setAddCommentsAfterValidationErrors(requireBoolean(name, value));
+                        defaultParseOptions = defaultParseOptions.withAddCommentsAfterValidationErrors(requireBoolean(name, value));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.VALIDATION_WARNINGS:
                         setValidationWarnings(requireBoolean(name, value));
@@ -1489,10 +1509,10 @@ namespace Saxon.Hej {
                         getDefaultStaticQueryContext().setConstructionMode(Saxon.Hej.lib.Validation.getCode(value.ToString()));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XQUERY_DEFAULT_ELEMENT_NAMESPACE:
-                        getDefaultStaticQueryContext().setDefaultElementNamespace(value.ToString());
+                        getDefaultStaticQueryContext().setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri.of(value.ToString()));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XQUERY_DEFAULT_FUNCTION_NAMESPACE:
-                        getDefaultStaticQueryContext().setDefaultFunctionNamespace(value.ToString());
+                        getDefaultStaticQueryContext().setDefaultFunctionNamespace(Saxon.Hej.om.NamespaceUri.of(value.ToString()));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XQUERY_EMPTY_LEAST:
                         getDefaultStaticQueryContext().setEmptyLeast(requireBoolean(name, value));
@@ -1508,9 +1528,10 @@ namespace Saxon.Hej {
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE:
                         Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser();
-                        parser.setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
+                        Saxon.Hej.sxpath.IndependentContext env = new Saxon.Hej.sxpath.IndependentContext(this);
+                        env.setXPathLanguageLevel(31);
                         try {
-                            Saxon.Hej.value.SequenceType type = parser.parseSequenceType(value.ToString(), new Saxon.Hej.sxpath.IndependentContext(this));
+                            Saxon.Hej.value.SequenceType type = parser.parseSequenceType(value.ToString(), env);
                             if ((type.getCardinality() != Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) {
                                 throw new Saxon.Ejava.lang.IllegalArgumentException("Context item type must have no occurrence indicator");
                             }
@@ -1523,10 +1544,23 @@ namespace Saxon.Hej {
                         getDefaultStaticQueryContext().setSchemaAware(requireBoolean(name, value));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XQUERY_VERSION:
-                        if (!("3.1".Equals(value))) {
-                            makeErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("XQuery version ignored: only \"3.1\" is recognized").asWarning()));
+                        {
+                            int qvn;
+                            switch (value.ToString()) {
+                              case "3.1":
+                                qvn = 31;
+                                break ;
+                              case "4.0":
+                                qvn = 40;
+                                break ;
+                              default:
+                                makeErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("XQuery version ignored: only \"3.1\" and \"4.0\" are recognized", Saxon.Hej.trans.SaxonErrorCode.SXWN9049).asWarning()));
+                                qvn = 40;
+                                break ;
+                            }
+                            getDefaultStaticQueryContext().setLanguageVersion(qvn);
+                            break ;
                         }
-                        break ;
                       case Saxon.Hej.lib.FeatureCode.XML_VERSION:
                         string xv = requireString(name, value);
                         if (!(((xv.Equals("1.0") || xv.Equals("1.1"))))) {
@@ -1535,13 +1569,15 @@ namespace Saxon.Hej {
                         setXMLVersion((xv.Equals("1.0") ? XML10 : XML11));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XSD_VERSION:
-                        string vn = requireString(name, value);
-                        if (!(((vn.Equals("1.0") || vn.Equals("1.1"))))) {
-                            throw new Saxon.Ejava.lang.IllegalArgumentException("XSD_VERSION value must be \"1.0\" or \"1.1\" as a String");
+                        {
+                            string xsdVn = requireString(name, value);
+                            if (!(((xsdVn.Equals("1.0") || xsdVn.Equals("1.1"))))) {
+                                throw new Saxon.Ejava.lang.IllegalArgumentException("XSD_VERSION value must be \"1.0\" or \"1.1\" as a String");
+                            }
+                            xsdVersion = (xsdVn.Equals("1.0") ? XSD10 : XSD11);
+                            theConversionRules = null;
+                            break ;
                         }
-                        xsdVersion = (value.Equals("1.0") ? XSD10 : XSD11);
-                        theConversionRules = null;
-                        break ;
                       case Saxon.Hej.lib.FeatureCode.XSLT_ENABLE_ASSERTIONS:
                         getDefaultXsltCompilerInfo().setAssertionsEnabled(requireBoolean(name, value));
                         break ;
@@ -1560,14 +1596,24 @@ namespace Saxon.Hej {
                       case Saxon.Hej.lib.FeatureCode.XSLT_SCHEMA_AWARE:
                         getDefaultXsltCompilerInfo().setSchemaAware(requireBoolean(name, value));
                         break ;
-                      case Saxon.Hej.lib.FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
-                        getDefaultXsltCompilerInfo().setURIResolver((Saxon.Ejavax.xml.transform.URIResolver)(instantiateClassName(name, value, typeof(Saxon.Ejavax.xml.transform.URIResolver))));
-                        break ;
                       case Saxon.Hej.lib.FeatureCode.XSLT_VERSION:
-                        if (!("3.0".Equals(value))) {
-                            makeErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("XSLT version ignored: only \"3.0\" is recognized").asWarning()));
+                        {
+                            int xsltVersion;
+                            switch (value.ToString()) {
+                              case "3.0":
+                                xsltVersion = 30;
+                                break ;
+                              case "4.0":
+                                xsltVersion = 40;
+                                break ;
+                              default:
+                                makeErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("XSLT version ignored: only \"3.0\" and \"4.0\" are recognized", Saxon.Hej.trans.SaxonErrorCode.SXWN9020).asWarning()));
+                                xsltVersion = 30;
+                                break ;
+                            }
+                            getDefaultXsltCompilerInfo().setXsltVersion(xsltVersion);
+                            break ;
                         }
-                        break ;
                       case Saxon.Hej.lib.FeatureCode.RESOURCE_RESOLVER:
                         if (!(((value is Saxon.Hej.lib.JJ_ResourceResolver)))) {
                             throw new Saxon.Ejava.lang.IllegalArgumentException("RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.ResourceResolver");
@@ -1769,12 +1815,6 @@ namespace Saxon.Hej {
                 return getUnparsedTextURIResolver();
               case Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS:
                 return getUnparsedTextURIResolver().GetType().Name;
-              case Saxon.Hej.lib.FeatureCode.URI_RESOLVER_CLASS:
-                if ((getResourceResolver() is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                    return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(getResourceResolver())).GetType().Name;
-                } else {
-                    return null;
-                }
               case Saxon.Hej.lib.FeatureCode.USE_XSI_SCHEMA_LOCATION:
                 return defaultParseOptions.isUseXsiSchemaLocation();
               case Saxon.Hej.lib.FeatureCode.VALIDATION_COMMENTS:
@@ -1826,17 +1866,14 @@ namespace Saxon.Hej {
               case Saxon.Hej.lib.FeatureCode.XSLT_STATIC_URI_RESOLVER_CLASS:
                 return null;
               case Saxon.Hej.lib.FeatureCode.XSLT_VERSION:
-                return 30;
+                {
+                    int vn = getDefaultXsltCompilerInfo().getXsltVersion();
+                    return ((vn == 40) ? "4.0" : "3.0");
+                }
               case Saxon.Hej.lib.FeatureCode.RESOURCE_RESOLVER:
                 return getResourceResolver();
             }
             throw new Saxon.Ejava.lang.IllegalArgumentException("Unknown configuration property ");
-        }
-        public virtual bool isGenerateByteCode(Saxon.Api.HostLanguage hostLanguage) {
-            return false;
-        }
-        public virtual bool isDeferredByteCode(Saxon.Api.HostLanguage hostLanguage) {
-            return false;
         }
         public virtual bool isJITEnabled() {
             return false;
@@ -1851,9 +1888,6 @@ namespace Saxon.Hej {
         }
         public virtual Saxon.Hej.lib.InvalidityReportGenerator createValidityReporter() {
             throw new Saxon.Ejava.lang.UnsupportedOperationException("Schema validation requires Saxon-EE");
-        }
-        public int getCountDown() {
-            return byteCodeThreshold;
         }
         public class LicenseFeature {
             public const int SCHEMA_VALIDATION = 1;
@@ -1877,8 +1911,6 @@ namespace Saxon.Hej {
         public Saxon.Hej.expr.parser.ICompilerService makeCompilerService(Saxon.Api.HostLanguage hostLanguage) {
             return null;
         }
-        public void createByteCodeReport(string fileName) {
-        }
         public void setLabel(string label) {
             this.label = label;
         }
@@ -1886,9 +1918,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_431 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_440 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_431(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_440(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;
@@ -1896,7 +1928,8 @@ namespace Saxon.Hej {
             private Saxon.Ejavax.xml.transform.Source source;
             private Saxon.Hej.Configuration config;
             public void deliver(Saxon.Hej.@event.Receiver receiver, Saxon.Hej.lib.ParseOptions options) {
-                outerInstance.resolveSource(((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getContainedSource(), /*extraParam*/config).deliver(/*localparam*/receiver, ((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getParseOptions());
+                /*localparam*/options = /*localparam*/options.merge(((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getParseOptions());
+                outerInstance.resolveSource(((Saxon.Hej.lib.AugmentedSource)(/*extraParam*/source)).getContainedSource(), /*extraParam*/config).deliver(/*localparam*/receiver, /*localparam*/options);
             }
             public void setSystemId(string systemId) {
                 /*extraParam*/source.setSystemId(/*localparam*/systemId);

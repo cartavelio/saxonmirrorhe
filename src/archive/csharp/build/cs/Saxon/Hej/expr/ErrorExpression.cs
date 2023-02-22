@@ -38,22 +38,15 @@ namespace Saxon.Hej.expr {
             return (EVALUATE_METHOD|ITERATE_METHOD);
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            if ((exception != null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(exception.getMessage());
-                err.setLocation(exception.getLocation());
-                err.maybeSetLocation(getLocation());
-                if ((exception.getErrorCode() != null)) {
-                    err.setErrorCodeQName(exception.getErrorCode().GetStructuredQName());
-                }
-                err.maybeSetContext(context);
-                err.setIsTypeError(exception.isTypeError());
-                throw err;
-            } else {
-                Saxon.Hej.trans.XPathException err = Saxon.Hej.trans.XPathException.fromXmlProcessingError(exception);
-                err.setLocation(getLocation());
-                err.setXPathContext(context);
-                throw err;
+            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(exception.getMessage());
+            err.setLocation(exception.getLocation());
+            err.maybeSetLocation(getLocation());
+            if ((exception.getErrorCode() != null)) {
+                err.setErrorCodeQName(exception.getErrorCode().GetStructuredQName());
             }
+            err.maybeSetContext(context);
+            err.setIsTypeError(exception.isTypeError());
+            throw err;
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             evaluateItem(context);
@@ -94,6 +87,27 @@ namespace Saxon.Hej.expr {
             destination.emitAttribute("code", exception.getErrorCode().LocalName);
             destination.emitAttribute("isTypeErr", (exception.isTypeError() ? "0" : "1"));
             destination.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.ErrorExpression.ErrorExpressionElaborator();
+        }
+        private class ErrorExpressionElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.ErrorExpression expr = (Saxon.Hej.expr.ErrorExpression)(getExpression());
+                Saxon.Hej.s9api.XmlProcessingError exception = expr.getException();
+                return context => {
+                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(exception.getMessage());
+                    err.setLocation(exception.getLocation());
+                    err.maybeSetLocation(expr.getLocation());
+                    if ((exception.getErrorCode() != null)) {
+                        err.setErrorCodeQName(exception.getErrorCode().GetStructuredQName());
+                    }
+                    err.maybeSetContext(context);
+                    err.setIsTypeError(exception.isTypeError());
+                    throw err;
+                } ;
+            }
+        
         }
     
     }

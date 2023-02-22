@@ -63,9 +63,15 @@ namespace Saxon.Hej.type {
         }
         public class DownCastingConverter : Saxon.Hej.type.Converter {
             private readonly Saxon.Hej.type.AtomicType newType;
+            private string errorCode = null;
             public DownCastingConverter(Saxon.Hej.type.AtomicType annotation, Saxon.Hej.lib.ConversionRules rules)  {
                 this.newType = annotation;
                 setConversionRules(rules);
+            }
+            public DownCastingConverter(Saxon.Hej.type.AtomicType annotation, Saxon.Hej.lib.ConversionRules rules, string errorCode)  {
+                this.newType = annotation;
+                setConversionRules(rules);
+                this.errorCode = errorCode;
             }
             public Saxon.Hej.type.AtomicType getTargetType() {
                 return newType;
@@ -84,6 +90,9 @@ namespace Saxon.Hej.type {
                 if ((f == null)) {
                     return input.copyAsSubType(newType);
                 } else {
+                    if ((errorCode != null)) {
+                        f.setErrorCode(errorCode);
+                    }
                     return f;
                 }
             }
@@ -350,7 +359,7 @@ namespace Saxon.Hej.type {
             public readonly static Saxon.Hej.type.Converter.DateTimeToTime INSTANCE = new Saxon.Hej.type.Converter.DateTimeToTime();
             public override Saxon.Hej.value.TimeValue convert(Saxon.Hej.value.AtomicValue input) {
                 Saxon.Hej.value.DateTimeValue dt = (Saxon.Hej.value.DateTimeValue)(input);
-                return new Saxon.Hej.value.TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNanosecond(), dt.getTimezoneInMinutes(), "");
+                return new Saxon.Hej.value.TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNanosecond(), dt.getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.TIME);
             }
         
         }

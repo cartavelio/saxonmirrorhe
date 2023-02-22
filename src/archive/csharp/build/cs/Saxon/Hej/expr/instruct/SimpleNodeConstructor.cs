@@ -14,6 +14,9 @@ namespace Saxon.Hej.expr.instruct {
         public Saxon.Hej.expr.Expression getSelect() {
             return selectOp.getChildExpression();
         }
+        public Saxon.Hej.expr.Operand getSelectOp() {
+            return selectOp;
+        }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             return selectOp;
         }
@@ -74,19 +77,9 @@ namespace Saxon.Hej.expr.instruct {
         public override string getStreamerName() {
             return "SimpleNodeConstructor";
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.str.UnicodeString value = getSelect().evaluateAsString(context);
-            try {
-                processValue(value, output, context);
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
-            }
-            return null;
-        }
         public abstract void processValue(Saxon.Hej.str.UnicodeString value, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context);
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Item contentItem = getSelect().evaluateItem(context);
+            Saxon.Hej.om.Item contentItem = /*Delegate.eval()*/getSelect().makeElaborator().elaborateForItem()(context);
             Saxon.Hej.str.UnicodeString content;
             if ((contentItem == null)) {
                 content = Saxon.Hej.str.EmptyUnicodeString.getInstance();
@@ -100,7 +93,7 @@ namespace Saxon.Hej.expr.instruct {
             o.setNodeName(evaluateNodeName(context));
             return o;
         }
-        protected internal virtual Saxon.Hej.str.UnicodeString checkContent(Saxon.Hej.str.UnicodeString data, Saxon.Hej.expr.XPathContext context) {
+        public virtual Saxon.Hej.str.UnicodeString checkContent(Saxon.Hej.str.UnicodeString data, Saxon.Hej.expr.XPathContext context) {
             return data;
         }
         public virtual Saxon.Hej.om.NodeName evaluateNodeName(Saxon.Hej.expr.XPathContext context) {

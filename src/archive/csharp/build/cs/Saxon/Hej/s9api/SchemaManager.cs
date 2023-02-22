@@ -12,6 +12,9 @@ namespace Saxon.Hej.s9api {
         public abstract void setSchemaURIResolver(Saxon.Hej.lib.SchemaURIResolver resolver);
         public abstract Saxon.Hej.lib.SchemaURIResolver getSchemaURIResolver();
         public abstract void load(Saxon.Ejavax.xml.transform.Source source);
+        public void load(Saxon.Ejava.io.File file) {
+            load(new Saxon.Ejavax.xml.transform.stream.StreamSource(file));
+        }
         public abstract void importComponents(Saxon.Ejavax.xml.transform.Source source);
         public abstract void exportComponents(Saxon.Hej.s9api.Destination destination);
         public abstract Saxon.Hej.s9api.SchemaValidator newSchemaValidator();

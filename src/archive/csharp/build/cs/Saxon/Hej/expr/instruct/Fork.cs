@@ -55,18 +55,31 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, f2);
             return f2;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            foreach (Saxon.Hej.expr.Operand o in operands()) {
-                o.getChildExpression().process(output, context);
-            }
-            return null;
-        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("fork", this);
             foreach (Saxon.Hej.expr.Operand o in operands()) {
                 o.getChildExpression().export(@out);
             }
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.Fork.ForkElaborator();
+        }
+        private class ForkElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.Fork expr = (Saxon.Hej.expr.instruct.Fork)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator[] prongs = new Saxon.Hej.expr.elab.PushEvaluator[expr.getSize()];
+                for (int i = 0; (i<prongs.Length); i++) {
+                    prongs[i] = expr.getProng(i).makeElaborator().elaborateForPush();
+                }
+                return (output, context) => {
+                    foreach (Saxon.Hej.expr.elab.PushEvaluator prong in prongs) {
+                        dispatchTailCall(/*Delegate.processLeavingTail()*/prong(output, context));
+                    }
+                    return null;
+                } ;
+            }
+        
         }
     
     }

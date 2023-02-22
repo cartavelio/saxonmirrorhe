@@ -80,7 +80,7 @@ namespace Saxon.Hej.@event {
             return h;
         }
         private int hash(Saxon.Hej.om.NodeName n, int sequence) {
-            return (hash(n.getLocalPart(), sequence)^hash(n.getURI(), sequence));
+            return (hash(n.getLocalPart(), sequence)^hash(n.getNamespaceUri().ToString(), sequence));
         }
     
     }

@@ -57,7 +57,7 @@ namespace Saxon.Eej.ee.schema {
         public abstract void compile(Saxon.Eej.ee.schema.SchemaCompiler compiler);
         public abstract bool isPointless(Saxon.Eej.ee.schema.ModelGroup container);
         public abstract void serializeParticle(Saxon.Eej.ee.schema.SchemaModelSerializer serializer);
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.Particle thisParticle = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

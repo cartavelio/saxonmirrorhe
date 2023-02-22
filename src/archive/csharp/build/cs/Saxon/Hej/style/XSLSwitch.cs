@@ -27,7 +27,7 @@ namespace Saxon.Hej.style {
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.expr.LetExpression var = new Saxon.Hej.expr.LetExpression();
-            var.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("v"+GetHashCode())));
+            var.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("v"+GetHashCode())));
             var.setSequence(select);
             var.setRequiredType(Saxon.Hej.value.SequenceType.SINGLE_ATOMIC);
             switchVar = var;

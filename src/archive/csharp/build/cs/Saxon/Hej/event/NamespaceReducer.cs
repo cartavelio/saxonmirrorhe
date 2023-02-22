@@ -78,21 +78,21 @@ namespace Saxon.Hej.@event {
             namespacesSize -= countStack[depth];
             nextReceiver.endElement();
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             if ((prefix.Length==0 && !(useDefault))) {
-                return Saxon.Hej.lib.NamespaceConstant.NULL;
+                return Saxon.Hej.om.NamespaceUri.NULL;
             } else {
                 if ("xml".Equals(prefix)) {
-                    return Saxon.Hej.lib.NamespaceConstant.XML;
+                    return Saxon.Hej.om.NamespaceUri.XML;
                 } else {
                     for (int i = (namespacesSize-1); (i>=0); i--) {
                         if (namespaces[i].getPrefix().Equals(prefix)) {
-                            return namespaces[i].getURI();
+                            return namespaces[i].getNamespaceUri();
                         }
                     }
                 }
             }
-            return (prefix.Length==0 ? Saxon.Hej.lib.NamespaceConstant.NULL : null);
+            return (prefix.Length==0 ? Saxon.Hej.om.NamespaceUri.NULL : null);
         }
         public System.Collections.Generic.IEnumerator<string> iteratePrefixes() {
             System.Collections.Generic.IList<string> prefixes = new System.Collections.Generic.List<string>(namespacesSize);

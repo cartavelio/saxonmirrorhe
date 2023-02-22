@@ -6,6 +6,7 @@ namespace Saxon.Hej.expr.sort {
         private readonly Saxon.Hej.expr.Operand selectOp;
         private readonly Saxon.Hej.expr.Operand sortOp;
         private Saxon.Hej.expr.sort.AtomicComparer[] comparators = null;
+        private Saxon.Hej.expr.elab.ItemEvaluator[] sortKeyEvaluators;
         public SortExpression(Saxon.Hej.expr.Expression select, Saxon.Hej.expr.sort.SortKeyDefinitionList sortKeys)  {
             selectOp = new Saxon.Hej.expr.Operand(this, select, Saxon.Hej.expr.OperandRole.FOCUS_CONTROLLING_SELECT);
             sortOp = new Saxon.Hej.expr.Operand(this, sortKeys, Saxon.Hej.expr.OperandRole.ATOMIC_SEQUENCE);
@@ -27,8 +28,6 @@ namespace Saxon.Hej.expr.sort {
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             return operandList(selectOp, sortOp);
         }
-        private static readonly Saxon.Hej.expr.OperandRole SAME_FOCUS_SORT_KEY = new Saxon.Hej.expr.OperandRole(Saxon.Hej.expr.OperandRole.HIGHER_ORDER, Saxon.Hej.expr.OperandUsage.ABSORPTION, Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC);
-        private static readonly Saxon.Hej.expr.OperandRole NEW_FOCUS_SORT_KEY = new Saxon.Hej.expr.OperandRole((Saxon.Hej.expr.OperandRole.USES_NEW_FOCUS|Saxon.Hej.expr.OperandRole.HIGHER_ORDER), Saxon.Hej.expr.OperandUsage.ABSORPTION, Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC);
         public override Saxon.Hej.expr.parser.PathMap.PathMapNodeSet addToPathMap(Saxon.Hej.expr.parser.PathMap pathMap, Saxon.Hej.expr.parser.PathMap.PathMapNodeSet pathMapNodeSet) {
             Saxon.Hej.expr.parser.PathMap.PathMapNodeSet target = getSelect().addToPathMap(pathMap, pathMapNodeSet);
             foreach (Saxon.Hej.expr.sort.SortKeyDefinition sortKeyDefinition in getSortKeyDefinitionList()) {
@@ -37,28 +36,31 @@ namespace Saxon.Hej.expr.sort {
                 } else {
                     sortKeyDefinition.getSortKey().addToPathMap(pathMap, pathMapNodeSet);
                 }
-                Saxon.Hej.expr.Expression e = sortKeyDefinition.getOrder();
-                if ((e != null)) {
-                    e.addToPathMap(pathMap, pathMapNodeSet);
-                }
-                e = sortKeyDefinition.getCaseOrder();
-                if ((e != null)) {
-                    e.addToPathMap(pathMap, pathMapNodeSet);
-                }
-                e = sortKeyDefinition.getDataTypeExpression();
-                if ((e != null)) {
-                    e.addToPathMap(pathMap, pathMapNodeSet);
-                }
-                e = sortKeyDefinition.getLanguage();
-                if ((e != null)) {
-                    e.addToPathMap(pathMap, pathMapNodeSet);
-                }
-                e = sortKeyDefinition.getCollationNameExpression();
-                if ((e != null)) {
-                    e.addToPathMap(pathMap, pathMapNodeSet);
-                }
+                addSortKeyDetailsToPathMap(pathMap, pathMapNodeSet, sortKeyDefinition);
             }
             return target;
+        }
+        public static void addSortKeyDetailsToPathMap(Saxon.Hej.expr.parser.PathMap pathMap, Saxon.Hej.expr.parser.PathMap.PathMapNodeSet pathMapNodeSet, Saxon.Hej.expr.sort.SortKeyDefinition skd) {
+            Saxon.Hej.expr.Expression e = skd.getOrder();
+            if ((e != null)) {
+                e.addToPathMap(pathMap, pathMapNodeSet);
+            }
+            e = skd.getCaseOrder();
+            if ((e != null)) {
+                e.addToPathMap(pathMap, pathMapNodeSet);
+            }
+            e = skd.getDataTypeExpression();
+            if ((e != null)) {
+                e.addToPathMap(pathMap, pathMapNodeSet);
+            }
+            e = skd.getLanguage();
+            if ((e != null)) {
+                e.addToPathMap(pathMap, pathMapNodeSet);
+            }
+            e = skd.getCollationNameExpression();
+            if ((e != null)) {
+                e.addToPathMap(pathMap, pathMapNodeSet);
+            }
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             selectOp.typeCheck(visitor, contextInfo);
@@ -94,8 +96,7 @@ namespace Saxon.Hej.expr.sort {
                 if (sortKeyDef.isBackwardsCompatible()) {
                     sortKey = Saxon.Hej.expr.FirstItemExpression.makeFirstItemExpression(sortKey);
                 } else {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0);
-                    role.setErrorCode("XTTE1020");
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0, "XTTE1020");
                     sortKey = tc.staticTypeCheck(sortKey, Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC, role, visitor);
                 }
                 sortKeyDef.setSortKey(sortKey, sortKeyDef.isSetContextForSortKey());
@@ -108,7 +109,7 @@ namespace Saxon.Hej.expr.sort {
                     }
                 }
                 if ((sortKeyDef.isSetContextForSortKey() && !(Saxon.Hej.expr.parser.ExpressionTool.dependsOnFocus(sortKey)))) {
-                    visitor.getStaticContext().issueWarning("Sort key will have no effect because its value does not depend on the context item", sortKey.getLocation());
+                    visitor.getStaticContext().issueWarning("Sort key will have no effect because its value does not depend on the context item", Saxon.Hej.trans.SaxonErrorCode.SXWN9033, sortKey.getLocation());
                 }
             }
             return this;
@@ -180,6 +181,9 @@ namespace Saxon.Hej.expr.sort {
             if ((iter is Saxon.Hej.tree.iter.EmptyIterator)) {
                 return iter;
             }
+            return iterateSorted(iter, context);
+        }
+        public Saxon.Hej.om.SequenceIterator iterateSorted(Saxon.Hej.om.SequenceIterator iter, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.sort.AtomicComparer[] comps = comparators;
             if ((comparators == null)) {
                 int len = getSortKeyDefinitionList().size();
@@ -192,12 +196,22 @@ namespace Saxon.Hej.expr.sort {
                     comps[s] = comp;
                 }
             }
+            makeSortKeyEvaluators();
             iter = new Saxon.Hej.expr.sort.SortedIterator(context, iter, this, comps, getSortKeyDefinition(0).isSetContextForSortKey());
             ((Saxon.Hej.expr.sort.SortedIterator)(iter)).setHostLanguage(getPackageData().getHostLanguage());
             return iter;
         }
+        public void makeSortKeyEvaluators() { lock(this) {
+            if ((sortKeyEvaluators == null)) {
+                int len = getSortKeyDefinitionList().size();
+                sortKeyEvaluators = new Saxon.Hej.expr.elab.ItemEvaluator[len];
+                for (int s = 0; (s<len); s++) {
+                    sortKeyEvaluators[s] = getSortKeyDefinition(s).getSortKey().makeElaborator().elaborateForItem();
+                }
+            }
+        }}
         public Saxon.Hej.value.AtomicValue evaluateSortKey(int n, Saxon.Hej.expr.XPathContext c) {
-            return (Saxon.Hej.value.AtomicValue)(getSortKeyDefinition(n).getSortKey().evaluateItem(c));
+            return (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/sortKeyEvaluators[n](c));
         }
         public override string toShortString() {
             return (("sort("+getBaseExpression().toShortString())+")");
@@ -226,6 +240,17 @@ namespace Saxon.Hej.expr.sort {
         }
         public void setSortKeyDefinitionList(Saxon.Hej.expr.sort.SortKeyDefinitionList skd) {
             sortOp.setChildExpression(skd);
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.sort.SortExpression.SortExprElaborator();
+        }
+        public class SortExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.sort.SortExpression expr = (Saxon.Hej.expr.sort.SortExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => expr.iterateSorted(/*Delegate.iterate()*/baseEval(context), context);
+            }
+        
         }
     
     }

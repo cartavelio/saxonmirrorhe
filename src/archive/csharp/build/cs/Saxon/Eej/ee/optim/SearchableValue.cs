@@ -103,12 +103,12 @@ namespace Saxon.Eej.ee.optim {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */

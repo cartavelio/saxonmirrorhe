@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions {
         public void registerFunction(Saxon.Hej.lib.ExtensionFunctionDefinition function) {
             Saxon.Impl.Helpers.MapUtils.Put(functions, function.getFunctionQName(), function);
         }
-        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.lib.ExtensionFunctionDefinition defn = Saxon.Impl.Helpers.MapUtils.Get(functions, functionName.getComponentName());
             if ((defn == null)) {
                 return null;
@@ -21,13 +21,13 @@ namespace Saxon.Hej.functions {
             fc.setArguments(staticArgs);
             return fc;
         }
-        public Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+        public Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
             Saxon.Hej.lib.ExtensionFunctionDefinition defn = Saxon.Impl.Helpers.MapUtils.Get(functions, functionName.getComponentName());
             if ((defn == null)) {
                 return null;
             }
             try {
-                return defn.asFunction();
+                return defn.asFunction(functionName.getArity());
             } catch (System.Exception err) {
                 throw new Saxon.Hej.trans.XPathException(("Failed to create call to extension function "+functionName.getComponentName().getDisplayName()), err);
             }

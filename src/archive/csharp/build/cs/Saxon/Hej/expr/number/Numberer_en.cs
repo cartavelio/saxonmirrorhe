@@ -44,22 +44,22 @@ namespace Saxon.Hej.expr.number {
                 }
             }
         }
-        public override string toWords(long number) {
+        public override string toWords(string cardinal, long number) {
             if ((number>=1000000000)) {
                 long rem = (number%1000000000);
-                return ((toWords((number/1000000000))+" Billion")+(((rem == 0) ? "" : ((((rem<100) ? " and " : " "))+toWords(rem)))));
+                return ((toWords(cardinal, (number/1000000000))+" Billion")+(((rem == 0) ? "" : ((((rem<100) ? " and " : " "))+toWords(cardinal, rem)))));
             } else {
                 if ((number>=1000000)) {
                     long rem = (number%1000000);
-                    return ((toWords((number/1000000))+" Million")+(((rem == 0) ? "" : ((((rem<100) ? " and " : " "))+toWords(rem)))));
+                    return ((toWords(cardinal, (number/1000000))+" Million")+(((rem == 0) ? "" : ((((rem<100) ? " and " : " "))+toWords(cardinal, rem)))));
                 } else {
                     if ((number>=1000)) {
                         long rem = (number%1000);
-                        return ((toWords((number/1000))+" Thousand")+(((rem == 0) ? "" : ((((rem<100) ? " and " : " "))+toWords(rem)))));
+                        return ((toWords(cardinal, (number/1000))+" Thousand")+(((rem == 0) ? "" : ((((rem<100) ? " and " : " "))+toWords(cardinal, rem)))));
                     } else {
                         if ((number>=100)) {
                             long rem = (number%100);
-                            return ((toWords((number/100))+" Hundred")+(((rem == 0) ? "" : (" and "+toWords(rem)))));
+                            return ((toWords(cardinal, (number/100))+" Hundred")+(((rem == 0) ? "" : (" and "+toWords(cardinal, rem)))));
                         } else {
                             if ((number<20)) {
                                 return englishUnits[(int)(number)];
@@ -75,19 +75,19 @@ namespace Saxon.Hej.expr.number {
             string s;
             if ((number>=1000000000)) {
                 long rem = (number%1000000000);
-                s = ((toWords((number/1000000000))+" Billion")+(((rem == 0) ? "th" : ((((rem<100) ? " and " : " "))+toOrdinalWords(ordinalParam, rem, wordCase)))));
+                s = ((toWords(ordinalParam, (number/1000000000))+" Billion")+(((rem == 0) ? "th" : ((((rem<100) ? " and " : " "))+toOrdinalWords(ordinalParam, rem, wordCase)))));
             } else {
                 if ((number>=1000000)) {
                     long rem = (number%1000000);
-                    s = ((toWords((number/1000000))+" Million")+(((rem == 0) ? "th" : ((((rem<100) ? " and " : " "))+toOrdinalWords(ordinalParam, rem, wordCase)))));
+                    s = ((toWords(ordinalParam, (number/1000000))+" Million")+(((rem == 0) ? "th" : ((((rem<100) ? " and " : " "))+toOrdinalWords(ordinalParam, rem, wordCase)))));
                 } else {
                     if ((number>=1000)) {
                         long rem = (number%1000);
-                        s = ((toWords((number/1000))+" Thousand")+(((rem == 0) ? "th" : ((((rem<100) ? " and " : " "))+toOrdinalWords(ordinalParam, rem, wordCase)))));
+                        s = ((toWords(ordinalParam, (number/1000))+" Thousand")+(((rem == 0) ? "th" : ((((rem<100) ? " and " : " "))+toOrdinalWords(ordinalParam, rem, wordCase)))));
                     } else {
                         if ((number>=100)) {
                             long rem = (number%100);
-                            s = ((toWords((number/100))+" Hundred")+(((rem == 0) ? "th" : (" and "+toOrdinalWords(ordinalParam, rem, wordCase)))));
+                            s = ((toWords(ordinalParam, (number/100))+" Hundred")+(((rem == 0) ? "th" : (" and "+toOrdinalWords(ordinalParam, rem, wordCase)))));
                         } else {
                             if ((number<20)) {
                                 s = englishOrdinalUnits[(int)(number)];

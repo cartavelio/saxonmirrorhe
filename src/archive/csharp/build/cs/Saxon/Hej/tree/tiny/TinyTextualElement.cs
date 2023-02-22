@@ -17,7 +17,7 @@ namespace Saxon.Hej.tree.tiny {
                 return Saxon.Hej.om.NamespaceMap.emptyMap();
             }
         }
-        public override string getAttributeValue(string uri, string local) {
+        public override string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             return null;
         }
         public override string getAttributeValue(int fp) {
@@ -46,7 +46,11 @@ namespace Saxon.Hej.tree.tiny {
             if ((((copyOptions&Saxon.Hej.om.CopyOptions.ALL_NAMESPACES)) != 0)) {
                 namespaces = getAllNamespaces();
             } else {
-                namespaces = Saxon.Hej.om.NamespaceMap.emptyMap();
+                if (!(getNamespaceUri().isEmpty())) {
+                    namespaces = Saxon.Hej.om.NamespaceMap.of(getPrefix(), getNamespaceUri());
+                } else {
+                    namespaces = Saxon.Hej.om.NamespaceMap.emptyMap();
+                }
             }
             receiver.startElement(Saxon.Hej.om.NameOfNode.makeName(this), type, Saxon.Hej.om.EmptyAttributeMap.getInstance(), namespaces, location, Saxon.Hej.@event.ReceiverOption.NONE);
             receiver.characters(getUnicodeStringValue(), location, Saxon.Hej.@event.ReceiverOption.NONE);
@@ -152,8 +156,8 @@ namespace Saxon.Hej.tree.tiny {
             public string getPrefix() {
                 return "";
             }
-            public string getURI() {
-                return "";
+            public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+                return Saxon.Hej.om.NamespaceUri.NULL;
             }
             public string getDisplayName() {
                 return "";
@@ -164,7 +168,7 @@ namespace Saxon.Hej.tree.tiny {
             public bool hasChildNodes() {
                 return false;
             }
-            public string getAttributeValue(string uri, string local) {
+            public string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
                 return null;
             }
             public int getLineNumber() {
@@ -287,12 +291,12 @@ namespace Saxon.Hej.tree.tiny {
 
             /* Expanding default method concatenate from interface GroundedValue */
             public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-                Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-                chain.appendSequence(this);
-                foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                    chain.appendSequence(seq);
+                Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+                chain = chain.addAll(asIterable());
+                foreach (Saxon.Hej.om.GroundedValue val in others) {
+                    chain = chain.addAll(val.asIterable());
                 }
-                return chain;
+                return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
             }
 
             /* Expanding default method makeRepeatable from interface Sequence */
@@ -313,6 +317,16 @@ namespace Saxon.Hej.tree.tiny {
             /* Expanding default method getPublicId from interface NodeInfo */
             public virtual string getPublicId() {
                 return null;
+            }
+
+            /* Expanding default method getURI from interface NodeInfo */
+            public virtual string getURI() {
+                return getNamespaceUri().ToString();
+            }
+
+            /* Expanding default method getAttributeValue from interface NodeInfo */
+            public virtual string getAttributeValue(string uri, string local) {
+                return getAttributeValue((uri.Length==0 ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(uri)), local);
             }
 
             /* Expanding default method children from interface NodeInfo */
@@ -399,7 +413,7 @@ namespace Saxon.Hej.tree.tiny {
 
             /* Expanding default method iterate from interface Item */
             public virtual Saxon.Hej.om.SequenceIterator iterate() {
-                return new Saxon.Hej.tree.iter.SingletonIterator(this);
+                return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
             }
 
         }

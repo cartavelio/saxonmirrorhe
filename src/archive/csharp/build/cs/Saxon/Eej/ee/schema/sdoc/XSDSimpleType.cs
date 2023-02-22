@@ -20,7 +20,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 string[] allowed = {"id"};
                 allowAttributes(atts, allowed);
             }
-            string name = atts.getValue("", "name");
+            string name = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
             simpleTypeDef = new Saxon.Eej.ee.schema.sdoc.SimpleTypeDefinition((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()));
             simpleTypeDef.setLocator(this);
             simpleTypeDef.setSchemaDocumentURI(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()).getSystemId());
@@ -33,7 +33,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     error(err.Message);
                     typeName = Saxon.Hej.om.StandardNames.SQ_XS_INVALID_NAME;
                 }
-                int fp = getNamePool().allocateFingerprint(typeName.getURI(), typeName.getLocalPart());
+                int fp = getNamePool().allocateFingerprint(typeName.getNamespaceUri(), typeName.getLocalPart());
                 simpleTypeDef.setTypeName(typeName, fp);
                 if (!(isRedefinition)) {
                     if (((schema.getSchemaType(simpleTypeDef.getTypeName()) != null) && (fp>1023))) {
@@ -45,7 +45,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 simpleTypeDef.setTypeName(nn.getStructuredQName(), nn.getFingerprint());
                 schema.addType(simpleTypeDef);
             }
-            string finalVal = atts.getValue("", "final");
+            string finalVal = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "final");
             if ((finalVal == null)) {
                 simpleTypeDef.setFinalProhibitions(getXSDSchema().getFinalDefault());
             } else {
@@ -109,11 +109,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     return ;
                 }
                 if (!(((Saxon.Eej.ee.schema.sdoc.XSDRedefine)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getExternalSchemaDocumentURI().Equals(((Saxon.Eej.ee.schema.UserSimpleType)(oldSType)).getSchemaDocumentURI()))) {
-                    compiler.warning((("The redefined simple type was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), this);
+                    compiler.warning((("The redefined simple type was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), Saxon.Hej.trans.SaxonErrorCode.SXSD1016, this);
                 }
                 simpleTypeDef.setRedefinitionLevel((oldSType.getRedefinitionLevel()+1));
                 Saxon.Eej.ee.schema.UserSimpleType oldType = (Saxon.Eej.ee.schema.UserSimpleType)(oldSType);
-                string uri = getXSDSchema().getTargetNamespace();
+                Saxon.Hej.om.NamespaceUri uri = getXSDSchema().getTargetNamespace();
                 Saxon.Hej.om.NamePool pool = getNamePool();
                 string localName = simpleTypeDef.getName();
                 string prefix = simpleTypeDef.getTypeName().getPrefix();

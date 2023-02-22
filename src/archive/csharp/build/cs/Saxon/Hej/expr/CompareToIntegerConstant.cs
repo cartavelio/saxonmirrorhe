@@ -33,7 +33,7 @@ namespace Saxon.Hej.expr {
                 return (@operator == Saxon.Hej.expr.parser.Token.FNE);
             }
             int c = n.compareTo(comparand);
-            return interpretComparisonResult(c);
+            return interpretComparisonResult(@operator, c);
         }
         protected internal override int computeCardinality() {
             return Saxon.Hej.expr.StaticProperty.EXACTLY_ONE;
@@ -56,6 +56,59 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.expr.sort.AtomicComparer getAtomicComparer() {
             return Saxon.Hej.expr.sort.DoubleSortComparer.getInstance();
+        }
+        public override Saxon.Hej.lib.StringCollator getStringCollator() {
+            return Saxon.Hej.expr.sort.CodepointCollator.getInstance();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.CompareToIntegerConstant.CompareToIntegerConstantElaborator();
+        }
+        public class CompareToIntegerConstantElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.CompareToIntegerConstant expression = (Saxon.Hej.expr.CompareToIntegerConstant)(getExpression());
+                Saxon.Hej.expr.Expression arg = expression.getBaseExpression();
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+                int @operator = expression.getComparisonOperator();
+                long comparand = expression.getComparand();
+                Saxon.Hej.type.TypeHierarchy th = getConfiguration().getTypeHierarchy();
+                Saxon.Hej.type.ItemType operandType = arg.getItemType();
+                bool isDouble = th.isSubType(operandType, Saxon.Hej.type.BuiltInAtomicType.DOUBLE);
+                bool isFloat = th.isSubType(operandType, Saxon.Hej.type.BuiltInAtomicType.FLOAT);
+                bool isInteger = th.isSubType(operandType, Saxon.Hej.type.BuiltInAtomicType.INTEGER);
+                bool isDecimal = ((!(isInteger)) && th.isSubType(operandType, Saxon.Hej.type.BuiltInAtomicType.DECIMAL));
+                if (isInteger) {
+                    return context => {
+                        Saxon.Hej.value.IntegerValue val = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/argEval(context));
+                        return interpretComparisonResult(@operator, val.compareTo(comparand));
+                    } ;
+                }
+                if ((isDouble || isFloat)) {
+                    double constant = (double)(comparand);
+                    return context => {
+                        double val = ((Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/argEval(context))).getDoubleValue();
+                        if (System.Double.IsNaN(val)) {
+                            return (@operator == Saxon.Hej.expr.parser.Token.FNE);
+                        }
+                        return interpretComparisonResult(@operator, val.CompareTo(constant));
+                    } ;
+                }
+                if (isDecimal) {
+                    Singulink.Numerics.BigDecimal deci = Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(comparand);
+                    return context => {
+                        Singulink.Numerics.BigDecimal val = ((Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/argEval(context))).getDecimalValue();
+                        return interpretComparisonResult(@operator, val.CompareTo(deci));
+                    } ;
+                }
+                return context => {
+                    Saxon.Hej.value.NumericValue num = ((Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/argEval(context)));
+                    if (num.isNaN()) {
+                        return (@operator == Saxon.Hej.expr.parser.Token.FNE);
+                    }
+                    int c = num.compareTo(comparand);
+                    return interpretComparisonResult(@operator, c);
+                } ;
+            }
+        
         }
     
     }

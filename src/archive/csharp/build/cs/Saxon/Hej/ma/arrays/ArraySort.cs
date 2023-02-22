@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.arrays {
-    public class ArraySort : Saxon.Hej.functions.SystemFunction {
+    public class ArraySort : Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayGeneratingFunction {
         private class MemberToBeSorted {
             public Saxon.Hej.om.GroundedValue value;
             public Saxon.Hej.om.GroundedValue sortKey;
@@ -24,9 +24,9 @@ namespace Saxon.Hej.ma.arrays {
                     collation = context.getConfiguration().getCollation(collName.getStringValue(), getStaticBaseUriString());
                 }
             }
-            Saxon.Hej.om.Function key = null;
+            Saxon.Hej.om.FunctionItem key = null;
             if ((arguments.Length == 3)) {
-                key = (Saxon.Hej.om.Function)(arguments[2].head());
+                key = (Saxon.Hej.om.FunctionItem)(arguments[2].head());
             }
             foreach (Saxon.Hej.om.GroundedValue seq in array.members()) {
                 Saxon.Hej.ma.arrays.ArraySort.MemberToBeSorted member = new Saxon.Hej.ma.arrays.ArraySort.MemberToBeSorted();
@@ -58,7 +58,7 @@ namespace Saxon.Hej.ma.arrays {
             foreach (Saxon.Hej.ma.arrays.ArraySort.MemberToBeSorted member in inputList) {
                 outputList.Add(member.value);
             }
-            return new Saxon.Hej.ma.arrays.SimpleArrayItem(outputList);
+            return makeArray(outputList);
         }
         public static int compareSortKeys(Saxon.Hej.om.GroundedValue a, Saxon.Hej.om.GroundedValue b, Saxon.Hej.expr.sort.AtomicComparer comparer) {
             Saxon.Hej.om.SequenceIterator iteratora = a.iterate();

@@ -5,6 +5,7 @@ namespace Saxon.Hej.expr.instruct {
     public class AttributeSet : Saxon.Hej.expr.instruct.Actor {
         internal Saxon.Hej.om.StructuredQName attributeSetName;
         private bool declaredStreamable;
+        private Saxon.Hej.expr.elab.PushEvaluator bodyEvaluator;
         public AttributeSet()  {
         }
         public override Saxon.Hej.trans.SymbolicName getSymbolicName() {
@@ -28,12 +29,17 @@ namespace Saxon.Hej.expr.instruct {
             return (body.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_FOCUS);
         }
         public void expand(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
+            lock (this) {
+                if ((bodyEvaluator == null)) {
+                    bodyEvaluator = getBody().makeElaborator().elaborateForPush();
+                }
+            }
             System.Collections.Generic.Stack<Saxon.Hej.expr.instruct.AttributeSet> stack = ((Saxon.Hej.trans.XsltController)(context.getController())).getAttributeSetEvaluationStack();
             if (stack.Contains(this)) {
                 throw new Saxon.Hej.trans.XPathException((("Attribute set "+getObjectName().getEQName())+" invokes itself recursively"), "XTDE0640");
             }
             stack.Push(this);
-            getBody().process(output, context);
+            Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/bodyEvaluator(output, context));
             stack.Pop();
             if ((stack.Count==0)) {
                 ((Saxon.Hej.trans.XsltController)(context.getController())).releaseAttributeSetEvaluationStack();

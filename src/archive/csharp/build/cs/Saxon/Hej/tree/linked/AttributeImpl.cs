@@ -116,11 +116,11 @@ namespace Saxon.Hej.tree.linked {
             if (((owner != null) && !(isDeleted()))) {
                 Saxon.Hej.om.AttributeInfo att = getAttributeInfo();
                 owner.setAttributeInfo(getSiblingPosition(), new Saxon.Hej.om.AttributeInfo(newNameCode, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), att.getProperties()));
-                string newURI = newNameCode.getURI();
-                if (!(newURI.Length==0)) {
+                Saxon.Hej.om.NamespaceUri newURI = newNameCode.getNamespaceUri();
+                if (!(newURI.isEmpty())) {
                     string newPrefix = newNameCode.getPrefix();
                     Saxon.Hej.om.NamespaceBinding newBinding = new Saxon.Hej.om.NamespaceBinding(newPrefix, newURI);
-                    string oldURI = ((Saxon.Hej.tree.linked.ElementImpl)(getRawParent())).getURIForPrefix(newPrefix, false);
+                    Saxon.Hej.om.NamespaceUri oldURI = ((Saxon.Hej.tree.linked.ElementImpl)(getRawParent())).getURIForPrefix(newPrefix, false);
                     if ((oldURI == null)) {
                         owner.addNamespace(newBinding, inherit);
                     } else {

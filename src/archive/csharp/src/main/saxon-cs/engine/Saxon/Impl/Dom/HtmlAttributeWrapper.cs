@@ -1,4 +1,3 @@
-using HtmlAgilityPack;
 using Saxon.Hej.om;
 using Saxon.Hej.str;
 using Saxon.Hej.tree.iter;
@@ -14,17 +13,17 @@ namespace Saxon.Impl.Dom {
     /// "index" property indicating the position relative to the containing element.
     /// </summary>
     public class HtmlAttributeWrapper : AbstractNodeWrapper, SteppingNode, SiblingCountingNode {
-        private HtmlAttribute htmlAttribute;
-        private HtmlNodeWrapper parent;
+        private readonly AngleSharp.Dom.IAttr htmlAttribute;
+        private readonly HtmlNodeWrapper parent;
         private int index; // reflects the position of the attribute in document order, -1 if unknown
 
-        private HtmlAttributeWrapper(HtmlAttribute htmlAttribute, HtmlNodeWrapper parent, int index) {
+        private HtmlAttributeWrapper(AngleSharp.Dom.IAttr htmlAttribute, HtmlNodeWrapper parent, int index) {
             this.htmlAttribute = htmlAttribute;
             this.parent = parent;
             this.index = index;
         }
 
-        protected internal static HtmlAttributeWrapper makeWrapper(HtmlAttribute node, HtmlNodeWrapper elementWrapper) {
+        protected internal static HtmlAttributeWrapper makeWrapper(AngleSharp.Dom.IAttr node, HtmlNodeWrapper elementWrapper) {
             if ((node == null)) {
                 throw new Saxon.Ejava.lang.NullPointerException("HtmlAttributeWrapper#makeWrapper: Node must not be null");
             }
@@ -36,7 +35,7 @@ namespace Saxon.Impl.Dom {
             return new HtmlAttributeWrapper(node, elementWrapper, -1);
         }
 
-        protected internal static HtmlAttributeWrapper makeWrapper(HtmlAttribute node, HtmlNodeWrapper elementWrapper, int index) {
+        protected internal static HtmlAttributeWrapper makeWrapper(AngleSharp.Dom.IAttr node, HtmlNodeWrapper elementWrapper, int index) {
             return new HtmlAttributeWrapper(node, elementWrapper, index);
         }
 
@@ -78,6 +77,10 @@ namespace Saxon.Impl.Dom {
         public override string getLocalPart() {
             return htmlAttribute.Name;
         }
+        
+        public override Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return NamespaceUri.NULL;
+        }
 
         public override string getURI() {
             return "";
@@ -88,7 +91,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override string getDisplayName() {
-            return htmlAttribute.Name;
+            return getLocalPart();
         }
 
         public override NodeInfo getParent() {
@@ -154,12 +157,12 @@ namespace Saxon.Impl.Dom {
         public SteppingNode getFirstChild() {
             return null;
         }
-
+        
         public SteppingNode getPreviousSibling() {
             return null;
         }
 
-        public SteppingNode getSuccessorElement(SteppingNode anchor, string uri, string local) {
+        public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, string local) {
             return parent.getSuccessorElement(anchor, uri, local);
         }
 

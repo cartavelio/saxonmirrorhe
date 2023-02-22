@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions.hof {
             return new Saxon.Hej.value.IntegerValue[]{Saxon.Hej.value.Int64Value.ZERO, Saxon.Hej.value.Int64Value.makeIntegerValue(65535)};
         }
         public override Saxon.Hej.value.IntegerValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            Saxon.Hej.om.Function f = (Saxon.Hej.om.Function)(arguments[0].head());
+            Saxon.Hej.om.FunctionItem f = (Saxon.Hej.om.FunctionItem)(arguments[0].head());
             return Saxon.Hej.value.Int64Value.makeIntegerValue(f.getArity());
         }
     

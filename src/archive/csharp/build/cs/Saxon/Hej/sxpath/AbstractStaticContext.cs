@@ -9,19 +9,19 @@ namespace Saxon.Hej.sxpath {
         private Saxon.Hej.s9api.Location containingLocation = Saxon.Hej.expr.parser.Loc.NONE;
         private string defaultCollationName;
         private Saxon.Hej.functions.FunctionLibraryList libraryList = new Saxon.Hej.functions.FunctionLibraryList();
-        private string defaultFunctionNamespace = Saxon.Hej.lib.NamespaceConstant.FN;
-        private string defaultElementNamespace = Saxon.Hej.lib.NamespaceConstant.NULL;
+        private Saxon.Hej.om.NamespaceUri defaultFunctionNamespace = Saxon.Hej.om.NamespaceUri.FN;
+        private Saxon.Hej.om.NamespaceUri defaultElementNamespace = Saxon.Hej.om.NamespaceUri.NULL;
         private bool backwardsCompatible = false;
         private int xpathLanguageLevel = 31;
         protected internal bool usingDefaultFunctionLibrary;
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.type.ItemType> typeAliases = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.type.ItemType>();
         private Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementPolicy = Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
-        private Saxon.Ejava.util.function.BiConsumer<string,Saxon.Hej.s9api.Location> warningHandler;
+        private Saxon.Hej.sxpath.AbstractStaticContext.WarningHandler warningHandler;
         protected internal void setConfiguration(Saxon.Hej.Configuration config) {
             this.config = config;
             this.defaultCollationName = config.getDefaultCollationName();
-            warningHandler = (message, locator) => {
-                Saxon.Hej.trans.XmlProcessingIncident incident = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9000, locator).asWarning());
+            warningHandler = (message, code, locator) => {
+                Saxon.Hej.trans.XmlProcessingIncident incident = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(message, code, locator).asWarning());
                 config.makeErrorReporter().report(incident);
             } ;
         }
@@ -42,8 +42,8 @@ namespace Saxon.Hej.sxpath {
         }
         protected internal void setDefaultFunctionLibrary() {
             Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-            lib.addFunctionLibrary(config.getXPath31FunctionSet());
-            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance());
+            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
             lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(getConfiguration()));
             lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             config.addExtensionBinders(lib);
@@ -51,24 +51,9 @@ namespace Saxon.Hej.sxpath {
         }
         public void setDefaultFunctionLibrary(int version) {
             Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-            switch (version) {
-              case 20:
-              default:
-                lib.addFunctionLibrary(Saxon.Hej.functions.registry.XPath20FunctionSet.getInstance());
-                break ;
-              case 30:
-              case 305:
-                lib.addFunctionLibrary(config.getXPath30FunctionSet());
-                break ;
-              case 31:
-                lib.addFunctionLibrary(config.getXPath31FunctionSet());
-                break ;
-              case 40:
-                lib.addFunctionLibrary(config.getXPath40FunctionSet());
-                break ;
-            }
-            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
-            lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(getConfiguration()));
+            lib.addFunctionLibrary(config.getXPathFunctionSet(version));
+            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(version));
+            lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
             lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             config.addExtensionBinders(lib);
             setFunctionLibrary(lib);
@@ -105,31 +90,37 @@ namespace Saxon.Hej.sxpath {
             return defaultCollationName;
         }
         public void setWarningHandler(Saxon.Ejava.util.function.BiConsumer<string,Saxon.Hej.s9api.Location> handler) {
+            warningHandler = (message, code, loc) => handler(message, loc);
+        }
+        public void setWarningHandler(Saxon.Hej.sxpath.AbstractStaticContext.WarningHandler handler) {
             warningHandler = handler;
         }
-        public Saxon.Ejava.util.function.BiConsumer<string,Saxon.Hej.s9api.Location> getWarningHandler() {
+        public Saxon.Hej.sxpath.AbstractStaticContext.WarningHandler getWarningHandler() {
             return warningHandler;
         }
-        public virtual void issueWarning(string s, Saxon.Hej.s9api.Location locator) {
-            getWarningHandler()(s, locator);
+        public virtual void issueWarning(string s, string errorCode, Saxon.Hej.s9api.Location locator) {
+            /*Delegate.accept()*/getWarningHandler()(s, errorCode, locator);
         }
         public virtual string getSystemId() {
             return "";
         }
-        public string getDefaultElementNamespace() {
+        public Saxon.Hej.om.NamespaceUri getDefaultElementNamespace() {
             return defaultElementNamespace;
         }
-        public virtual void setDefaultElementNamespace(string uri) {
+        public virtual void setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri uri) {
             defaultElementNamespace = uri;
         }
-        public void setDefaultFunctionNamespace(string uri) {
+        public void setDefaultFunctionNamespace(Saxon.Hej.om.NamespaceUri uri) {
             defaultFunctionNamespace = uri;
         }
-        public virtual string getDefaultFunctionNamespace() {
+        public virtual Saxon.Hej.om.NamespaceUri getDefaultFunctionNamespace() {
             return defaultFunctionNamespace;
         }
         public void setXPathLanguageLevel(int level) {
             xpathLanguageLevel = level;
+            if ((packageData.getHostLanguageVersion() != level)) {
+                packageData.setHostLanguage(packageData.getHostLanguage(), level);
+            }
         }
         public int getXPathVersion() {
             return xpathLanguageLevel;
@@ -169,6 +160,7 @@ namespace Saxon.Hej.sxpath {
         public Saxon.Api.UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
             return unprefixedElementPolicy;
         }
+        public delegate void WarningHandler (string message, string errorCode, Saxon.Hej.s9api.Location location);
     
         /* Expanding default method getOptimizerOptions from interface StaticContext */
         public virtual Saxon.Hej.expr.parser.OptimizerOptions getOptimizerOptions() {
@@ -181,12 +173,12 @@ namespace Saxon.Hej.sxpath {
         }
 
         /* Creating stub method isImportedSchema to satisfy interface StaticContext */
-        public virtual bool isImportedSchema(string arg1) {
+        public virtual bool isImportedSchema(Saxon.Hej.om.NamespaceUri arg1) {
             throw new System.NotImplementedException();
         }
 
         /* Creating stub method getImportedSchemaNamespaces to satisfy interface StaticContext */
-        public virtual System.Collections.Generic.ISet<string> getImportedSchemaNamespaces() {
+        public virtual System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getImportedSchemaNamespaces() {
             throw new System.NotImplementedException();
         }
 

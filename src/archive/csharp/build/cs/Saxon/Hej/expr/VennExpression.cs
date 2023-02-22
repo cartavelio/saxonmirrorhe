@@ -138,11 +138,11 @@ namespace Saxon.Hej.expr {
             getLhs().typeCheck(visitor, contextInfo);
             getRhs().typeCheck(visitor, contextInfo);
             if (!(((getLhsExpression() is Saxon.Hej.pattern.Pattern)))) {
-                Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
                 setLhsExpression(tc.staticTypeCheck(getLhsExpression(), Saxon.Hej.value.SequenceType.NODE_SEQUENCE, role0, visitor));
             }
             if (!(((getRhsExpression() is Saxon.Hej.pattern.Pattern)))) {
-                Saxon.Hej.expr.parser.RoleDiagnostic role1 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role1 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
                 setRhsExpression(tc.staticTypeCheck(getRhsExpression(), Saxon.Hej.value.SequenceType.NODE_SEQUENCE, role1, visitor));
             }
             if ((@operator != Saxon.Hej.expr.parser.Token.UNION)) {
@@ -360,12 +360,19 @@ namespace Saxon.Hej.expr {
             if ((@operator == Saxon.Hej.expr.parser.Token.UNION)) {
                 return new Saxon.Hej.pattern.UnionPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
             } else {
-                if ((@operator == Saxon.Hej.expr.parser.Token.EXCEPT)) {
-                    return new Saxon.Hej.pattern.ExceptPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
-                } else {
-                    return new Saxon.Hej.pattern.IntersectPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
+                int commonAxis = Saxon.Hej.expr.parser.ExpressionTool.getAxisNavigation(this);
+                if (((((commonAxis == Saxon.Hej.om.AxisInfo.CHILD) || (commonAxis == Saxon.Hej.om.AxisInfo.ATTRIBUTE)) || independentOfContextItem(getLhsExpression())) || independentOfContextItem(getRhsExpression()))) {
+                    if ((@operator == Saxon.Hej.expr.parser.Token.EXCEPT)) {
+                        return new Saxon.Hej.pattern.ExceptPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
+                    } else {
+                        return new Saxon.Hej.pattern.IntersectPattern(getLhsExpression().toPattern(config), getRhsExpression().toPattern(config));
+                    }
                 }
+                return new Saxon.Hej.pattern.GeneralNodePattern(this, (Saxon.Hej.pattern.NodeTest)(getItemType()));
             }
+        }
+        private bool independentOfContextItem(Saxon.Hej.expr.Expression exp) {
+            return (((exp.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CONTEXT_ITEM)) == 0);
         }
         private bool isPredicatePattern(Saxon.Hej.expr.Expression exp) {
             if ((exp is Saxon.Hej.expr.ItemChecker)) {
@@ -391,13 +398,13 @@ namespace Saxon.Hej.expr {
                 {
                     Saxon.Hej.om.SequenceIterator i1 = getLhsExpression().iterate(c);
                     Saxon.Hej.om.SequenceIterator i2 = getRhsExpression().iterate(c);
-                    return new Saxon.Hej.expr.IntersectionEnumeration(i1, i2, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                    return new Saxon.Hej.expr.IntersectionIterator(i1, i2, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
                 }
               case Saxon.Hej.expr.parser.Token.EXCEPT:
                 {
                     Saxon.Hej.om.SequenceIterator i1 = getLhsExpression().iterate(c);
                     Saxon.Hej.om.SequenceIterator i2 = getRhsExpression().iterate(c);
-                    return new Saxon.Hej.expr.DifferenceEnumeration(i1, i2, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                    return new Saxon.Hej.expr.DifferenceIterator(i1, i2, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
                 }
             }
             throw new Saxon.Ejava.lang.UnsupportedOperationException("Unknown operator in Venn Expression");
@@ -425,6 +432,48 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "VennExpression";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.VennExpression.VennElaborator();
+        }
+        public class VennElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.VennExpression exp = (Saxon.Hej.expr.VennExpression)(getExpression());
+                if ((exp.getOperator() == Saxon.Hej.expr.parser.Token.UNION)) {
+                    System.Collections.Generic.IList<Saxon.Hej.expr.elab.PullEvaluator> leafEvaluators = new System.Collections.Generic.List<Saxon.Hej.expr.elab.PullEvaluator>();
+                    gatherUnionLeafEvaluators(exp, leafEvaluators);
+                    return context => {
+                        System.Collections.Generic.IList<Saxon.Hej.om.SequenceIterator> iterators = new System.Collections.Generic.List<Saxon.Hej.om.SequenceIterator>(leafEvaluators.Count);
+                        foreach (Saxon.Hej.expr.elab.PullEvaluator evaluator in leafEvaluators) {
+                            iterators.Add(/*Delegate.iterate()*/evaluator(context));
+                        }
+                        return new Saxon.Hej.expr.UnionIterator(iterators, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.PullEvaluator p1 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                    Saxon.Hej.expr.elab.PullEvaluator p2 = exp.getRhsExpression().makeElaborator().elaborateForPull();
+                    if ((exp.getOperator() == Saxon.Hej.expr.parser.Token.INTERSECT)) {
+                        return context => new Saxon.Hej.expr.IntersectionIterator(/*Delegate.iterate()*/p1(context), /*Delegate.iterate()*/p2(context), Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                    } else {
+                        return context => new Saxon.Hej.expr.DifferenceIterator(/*Delegate.iterate()*/p1(context), /*Delegate.iterate()*/p2(context), Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                    }
+                }
+            }
+            private static void gatherUnionLeafEvaluators(Saxon.Hej.expr.VennExpression exp, System.Collections.Generic.IList<Saxon.Hej.expr.elab.PullEvaluator> leafEvaluators) {
+                Saxon.Hej.expr.Expression e1 = exp.getLhsExpression();
+                if (((e1 is Saxon.Hej.expr.VennExpression) && (((Saxon.Hej.expr.VennExpression)(e1)).getOperator() == Saxon.Hej.expr.parser.Token.UNION))) {
+                    gatherUnionLeafEvaluators(((Saxon.Hej.expr.VennExpression)(e1)), leafEvaluators);
+                } else {
+                    leafEvaluators.Add(e1.makeElaborator().elaborateForPull());
+                }
+                Saxon.Hej.expr.Expression e2 = exp.getRhsExpression();
+                if (((e2 is Saxon.Hej.expr.VennExpression) && (((Saxon.Hej.expr.VennExpression)(e2)).getOperator() == Saxon.Hej.expr.parser.Token.UNION))) {
+                    gatherUnionLeafEvaluators(((Saxon.Hej.expr.VennExpression)(e2)), leafEvaluators);
+                } else {
+                    leafEvaluators.Add(e2.makeElaborator().elaborateForPull());
+                }
+            }
+        
         }
     
     }

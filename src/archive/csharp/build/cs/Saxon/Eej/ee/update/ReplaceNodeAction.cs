@@ -12,6 +12,9 @@ namespace Saxon.Eej.ee.update {
             this.inherit = inherit;
         }
         public override void apply(Saxon.Hej.expr.XPathContext context, System.Collections.Generic.ISet<Saxon.Hej.om.MutableNodeInfo> affectedRootSet) {
+            if (!(targetNode.getTreeInfo().isMutable())) {
+                throw new Saxon.Hej.trans.XPathException("Attempting to update a non-updatable element", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
+            }
             Saxon.Hej.om.NodeInfo root = targetNode.getRoot();
             Saxon.Hej.om.MutableNodeInfo parent = (Saxon.Hej.om.MutableNodeInfo)(targetNode.getParent());
             if ((!(parent.isDeleted()) && !(targetNode.isDeleted()))) {

@@ -70,6 +70,9 @@ namespace Saxon.Hej.str {
             target[(offset+1)] = (byte)(((codepoint>>8)));
             target[(offset+2)] = (byte)(((codepoint&unchecked((int)0xff))));
         }
+        internal override void copy32bit(int[] target, int offset) {
+            target[offset] = codepoint;
+        }
     
     }
 }

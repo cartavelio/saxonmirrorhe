@@ -4,7 +4,7 @@ using Saxon.Hej;
 using Saxon.Hej.lib;
 
 namespace Saxon.Impl.Overrides {
-    // Saxon-CS override for com.saxonica.config.ICULibrary
+    // SaxonCS override for com.saxonica.config.ICULibrary
     public class ICULibrary {
         
         public static bool isICUCollatorAvailable() {

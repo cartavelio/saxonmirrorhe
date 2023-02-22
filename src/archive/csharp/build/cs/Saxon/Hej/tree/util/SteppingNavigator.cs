@@ -58,9 +58,9 @@ namespace Saxon.Hej.tree.util {
         }
         private class FollowingElementStepper : Saxon.Hej.tree.util.SteppingNavigator.Stepper {
             internal Saxon.Hej.tree.util.SteppingNode anchor;
-            internal string uri;
+            internal Saxon.Hej.om.NamespaceUri uri;
             internal string local;
-            internal FollowingElementStepper(Saxon.Hej.tree.util.SteppingNode anchor, string uri, string local)  {
+            internal FollowingElementStepper(Saxon.Hej.tree.util.SteppingNode anchor, Saxon.Hej.om.NamespaceUri uri, string local)  {
                 this.anchor = anchor;
                 this.uri = uri;
                 this.local = local;
@@ -88,6 +88,7 @@ namespace Saxon.Hej.tree.util {
         public class DescendantAxisIterator : Saxon.Hej.tree.iter.AxisIterator {
             private readonly Saxon.Hej.tree.util.SteppingNode start;
             private Saxon.Hej.tree.util.SteppingNode current;
+            private bool done;
             private readonly Saxon.Hej.tree.util.SteppingNavigator.Stepper stepper;
             public DescendantAxisIterator(Saxon.Hej.tree.util.SteppingNode start, bool includeSelf, Saxon.Hej.pattern.NodeTest test)  {
                 this.start = start;
@@ -140,20 +141,22 @@ namespace Saxon.Hej.tree.util {
                 }
             }
             public Saxon.Hej.om.Item next() {
+                if (done) {
+                    return null;
+                }
                 if ((current == null)) {
                     current = start;
                     return start;
                 }
                 Saxon.Hej.tree.util.SteppingNode curr = stepper.step(current);
+                if ((curr == null)) {
+                    done = true;
+                }
                 return current = curr;
             }
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
             }
 
         }

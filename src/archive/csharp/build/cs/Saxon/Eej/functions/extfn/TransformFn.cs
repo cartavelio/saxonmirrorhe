@@ -40,7 +40,7 @@ namespace Saxon.Eej.functions.extfn {
                                     Saxon.Hej.value.AtomicValue key = pair.key;
                                     Saxon.Hej.om.GroundedValue val = ((Saxon.Hej.om.Sequence)(pair.value)).materialize();
                                     if ((key is Saxon.Hej.value.StringValue)) {
-                                        @params.put(new Saxon.Hej.om.StructuredQName("", "", key.getStringValue()), val);
+                                        @params.put(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, key.getStringValue()), val);
                                     } else {
                                         if ((key is Saxon.Hej.value.QNameValue)) {
                                             @params.put(((Saxon.Hej.value.QNameValue)(key)).getStructuredQName(), val);
@@ -60,7 +60,11 @@ namespace Saxon.Eej.functions.extfn {
                 transformer.setApplyFunctionConversionRulesToExternalVariables(true);
                 transformer.initializeController(@params);
                 transformer.applyTemplates(source, new Saxon.Hej.@event.TreeReceiver(builder));
-                return builder.getCurrentRoot();
+                Saxon.Hej.om.NodeInfo result = builder.getCurrentRoot();
+                if ((result == null)) {
+                    return Saxon.Hej.value.EmptySequence.getInstance();
+                }
+                return result;
             } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
                 throw Saxon.Hej.trans.XPathException.makeXPathException(e);
             }

@@ -12,7 +12,8 @@ namespace Saxon.Hej.style {
         private bool memoFunction = false;
         private string overrideExtensionFunctionAtt = null;
         private bool overrideExtensionFunction = true;
-        private int numberOfArguments = -1;
+        private int numberOfParameters = -1;
+        private int numberOfOptionalParameters = -1;
         private Saxon.Hej.expr.instruct.UserFunction compiledFunction;
         private Saxon.Hej.trans.Visibility visibility = Saxon.Hej.trans.Visibility.UNDEFINED;
         private Saxon.Hej.trans.FunctionStreamability streamability;
@@ -37,16 +38,16 @@ namespace Saxon.Hej.style {
             string streamabilityAtt = null;
             foreach (Saxon.Hej.om.AttributeInfo att in atts) {
                 Saxon.Hej.om.NodeName name = att.getNodeName();
-                string uri = name.getURI();
+                Saxon.Hej.om.NamespaceUri uri = name.getNamespaceUri();
                 string local = name.getLocalPart();
-                if ("".Equals(uri)) {
+                if (uri.isEmpty()) {
                     switch (local) {
                       case "name":
                         nameAtt = Saxon.Hej.value.Whitespace.trim(att.getValue());
                         System.Diagnostics.Debug.Assert((nameAtt != null));
                         Saxon.Hej.om.StructuredQName functionName = makeQName(nameAtt, null, "name");
-                        if (functionName.hasURI("")) {
-                            functionName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, functionName.getLocalPart());
+                        if (functionName.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
+                            functionName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, functionName.getLocalPart());
                             compileError("Function name must be in a namespace", "XTSE0740");
                         }
                         setObjectName(functionName);
@@ -71,7 +72,7 @@ namespace Saxon.Hej.style {
                             overrideExtensionFunctionAtt = overrideAtt;
                             overrideExtensionFunction = @override;
                         }
-                        compileWarning("The xsl:function/@override attribute is deprecated; use override-extension-function", Saxon.Hej.trans.SaxonErrorCode.SXWN9014);
+                        issueWarning("The xsl:function/@override attribute is deprecated; use override-extension-function", Saxon.Hej.trans.SaxonErrorCode.SXWN9014);
                         break ;
                       case "override-extension-function":
                         string overrideExtAtt = Saxon.Hej.value.Whitespace.trim(att.getValue());
@@ -83,9 +84,6 @@ namespace Saxon.Hej.style {
                         } else {
                             overrideExtensionFunctionAtt = overrideExtAtt;
                             overrideExtensionFunction = overrideExt;
-                        }
-                        if (local.Equals("override")) {
-                            compileWarning("The xsl:function/@override attribute is deprecated; use override-extension-function", Saxon.Hej.trans.SaxonErrorCode.SXWN9014);
                         }
                         break ;
                       case "cache":
@@ -99,10 +97,10 @@ namespace Saxon.Hej.style {
                         break ;
                     }
                 } else {
-                    if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
+                    if (uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON)) {
                         if (isExtensionAttributeAllowed(att.getNodeName().getDisplayName())) {
                             if (local.Equals("memo-function")) {
-                                compileWarning("saxon:memo-function is deprecated: use cache='yes'", Saxon.Hej.trans.SaxonErrorCode.SXWN9014);
+                                issueWarning("saxon:memo-function is deprecated: use cache='yes'", Saxon.Hej.trans.SaxonErrorCode.SXWN9014);
                                 if (getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                                     memoFunction = processBooleanAttribute("saxon:memo-function", att.getValue());
                                 }
@@ -199,9 +197,9 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.om.StructuredQName getObjectName() {
             Saxon.Hej.om.StructuredQName qn = base.getObjectName();
             if ((qn == null)) {
-                nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue("", "name"));
+                nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name"));
                 if ((nameAtt == null)) {
-                    return new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, ("badly-named-function"+generateId()));
+                    return new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, ("badly-named-function"+generateId()));
                 }
                 qn = makeQName(nameAtt, null, "name");
                 setObjectName(qn);
@@ -219,13 +217,13 @@ namespace Saxon.Hej.style {
         }
         public override Saxon.Hej.trans.Visibility getVisibility() {
             if ((visibility == Saxon.Hej.trans.Visibility.UNDEFINED)) {
-                string vAtt = getAttributeValue("", "visibility");
+                string vAtt = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "visibility");
                 return ((vAtt == null) ? Saxon.Hej.trans.Visibility.PRIVATE : interpretVisibilityValue(Saxon.Hej.value.Whitespace.trim(vAtt), ""));
             }
             return visibility;
         }
         public Saxon.Hej.trans.SymbolicName getSymbolicName() {
-            return new Saxon.Hej.trans.SymbolicName.F(getObjectName(), getNumberOfArguments());
+            return new Saxon.Hej.trans.SymbolicName.F(getObjectName(), getNumberOfParameters());
         }
         public void checkCompatibility(Saxon.Hej.expr.Component component) {
             if ((compiledFunction == null)) {
@@ -245,7 +243,7 @@ namespace Saxon.Hej.style {
             if (!(compiledFunction.getDeterminism().Equals(other.getDeterminism()))) {
                 compileError(((("The overriding xsl:function "+nameAtt)+" does not match the overridden function: ")+"the new-each-time attribute does not match"), "XTSE3070");
             }
-            for (int i = 0; (i<getNumberOfArguments()); i++) {
+            for (int i = 0; (i<getNumberOfParameters()); i++) {
                 if (!(compiledFunction.getArgumentType(i).isSameType(other.getArgumentType(i), th))) {
                     compileError(((((("The overriding xsl:function "+nameAtt)+" does not match the overridden function: ")+"the type of the ")+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" argument does not match"), "XTSE3070");
                 }
@@ -264,7 +262,7 @@ namespace Saxon.Hej.style {
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             stackFrameMap = getConfiguration().makeSlotManager();
             checkTopLevel("XTSE0010", true);
-            int arity = getNumberOfArguments();
+            int arity = getNumberOfParameters();
             if (((arity == 0) && (streamability != Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED))) {
                 compileError("A function with no arguments must have streamability=unclassified", "XTSE3155");
             }
@@ -317,34 +315,26 @@ namespace Saxon.Hej.style {
             }
             Saxon.Hej.expr.parser.OptimizerOptions options = getCompilation().getCompilerInfo().getOptimizerOptions();
             if ((options.isSet(Saxon.Hej.expr.parser.OptimizerOptions.TAIL_CALLS) && !(streamability.isStreaming()))) {
-                int tailCalls = Saxon.Hej.expr.parser.ExpressionTool.markTailFunctionCalls(exp2, getObjectName(), getNumberOfArguments());
+                int tailCalls = Saxon.Hej.expr.parser.ExpressionTool.markTailFunctionCalls(exp2, getObjectName(), getNumberOfParameters());
                 if ((tailCalls != 0)) {
                     compiledFunction.setTailRecursive((tailCalls>0), (tailCalls>1));
                     exp2 = compiledFunction.getBody();
                     compiledFunction.setBody(new Saxon.Hej.expr.TailCallLoop(compiledFunction, exp2));
                 }
             }
-            compiledFunction.computeEvaluationMode();
             if (streamability.isStreaming()) {
                 compiledFunction.prepareForStreaming();
-            } else {
-                if (visitor.getConfiguration().isDeferredByteCode(Saxon.Api.HostLanguage.XSLT)) {
-                    int evaluationModes = (Saxon.Hej.expr.Expression.ITERATE_METHOD|Saxon.Hej.expr.Expression.PROCESS_METHOD);
-                    compiledFunction.setBody(getConfiguration().obtainOptimizer().makeByteCodeCandidate(compiledFunction, compiledFunction.getBody(), nameAtt, evaluationModes));
-                }
             }
             if (explaining) {
                 exp2.explain(getConfiguration().getLogger());
             }
-        }
-        public void generateByteCode(Saxon.Hej.expr.parser.Optimizer opt) {
         }
         public Saxon.Hej.expr.instruct.SlotManager getSlotManager() {
             return stackFrameMap;
         }
         public Saxon.Hej.value.SequenceType getResultType() {
             if ((resultType == null)) {
-                string asAtt = getAttributeValue("", "as");
+                string asAtt = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "as");
                 if ((asAtt != null)) {
                     try {
                         resultType = makeSequenceType(asAtt);
@@ -354,23 +344,39 @@ namespace Saxon.Hej.style {
             }
             return ((resultType == null) ? Saxon.Hej.value.SequenceType.ANY_SEQUENCE : resultType);
         }
-        public int getNumberOfArguments() {
-            if ((numberOfArguments == -1)) {
-                numberOfArguments = 0;
+        public int getNumberOfParameters() {
+            if ((numberOfParameters == -1)) {
+                numberOfParameters = 0;
                 foreach (Saxon.Hej.om.NodeInfo child in children()) {
                     if ((child is Saxon.Hej.style.XSLLocalParam)) {
-                        numberOfArguments++;
+                        numberOfParameters++;
                     } else {
-                        return numberOfArguments;
+                        return numberOfParameters;
                     }
                 }
             }
-            return numberOfArguments;
+            return numberOfParameters;
+        }
+        public int getNumberOfOptionalParameters() {
+            if ((numberOfOptionalParameters == -1)) {
+                numberOfOptionalParameters = 0;
+                foreach (Saxon.Hej.om.NodeInfo child in children()) {
+                    if ((child is Saxon.Hej.style.XSLLocalParam)) {
+                        string requiredAtt = ((Saxon.Hej.style.XSLLocalParam)(child)).getAttributeValue("required");
+                        if (((requiredAtt != null) && isNo(Saxon.Hej.value.Whitespace.trim(requiredAtt)))) {
+                            numberOfOptionalParameters++;
+                        }
+                    } else {
+                        return numberOfOptionalParameters;
+                    }
+                }
+            }
+            return numberOfOptionalParameters;
         }
         public void setParameterDefinitions(Saxon.Hej.expr.instruct.UserFunction fn) {
-            Saxon.Hej.expr.instruct.UserFunctionParameter[] @params = new Saxon.Hej.expr.instruct.UserFunctionParameter[getNumberOfArguments()];
-            fn.setParameterDefinitions(@params);
+            Saxon.Hej.expr.instruct.UserFunctionParameter[] @params = new Saxon.Hej.expr.instruct.UserFunctionParameter[getNumberOfParameters()];
             int count = 0;
+            int optional = 0;
             foreach (Saxon.Hej.om.NodeInfo node in children()) {
                 if ((node is Saxon.Hej.style.XSLLocalParam)) {
                     Saxon.Hej.expr.instruct.UserFunctionParameter param = new Saxon.Hej.expr.instruct.UserFunctionParameter();
@@ -378,6 +384,10 @@ namespace Saxon.Hej.style {
                     param.setRequiredType(((Saxon.Hej.style.XSLLocalParam)(node)).getRequiredType());
                     param.setVariableQName(((Saxon.Hej.style.XSLLocalParam)(node)).getVariableQName());
                     param.setSlotNumber(((Saxon.Hej.style.XSLLocalParam)(node)).getSlotNumber());
+                    if (Saxon.Hej.style.XSLLocalParam.isNo(Saxon.Hej.value.Whitespace.trim(((Saxon.Hej.style.XSLLocalParam)(node)).getAttributeValue("required")))) {
+                        optional++;
+                        param.setRequired(false);
+                    }
                     if (((count == 0) && (streamability != Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED))) {
                         param.setFunctionStreamability(streamability);
                     }
@@ -386,6 +396,8 @@ namespace Saxon.Hej.style {
                     break ;
                 }
             }
+            fn.setParameterDefinitions(@params);
+            fn.setMinimumArity((count-optional));
         }
         private void bindParameterDefinitions(Saxon.Hej.expr.instruct.UserFunction fn) {
             Saxon.Hej.expr.instruct.UserFunctionParameter[] @params = fn.getParameterDefinitions();
@@ -399,7 +411,7 @@ namespace Saxon.Hej.style {
             }
         }
         public Saxon.Hej.value.SequenceType[] getArgumentTypes() {
-            Saxon.Hej.value.SequenceType[] types = new Saxon.Hej.value.SequenceType[getNumberOfArguments()];
+            Saxon.Hej.value.SequenceType[] types = new Saxon.Hej.value.SequenceType[getNumberOfParameters()];
             int count = 0;
             foreach (Saxon.Hej.om.NodeInfo node in children(x => (x is Saxon.Hej.style.XSLLocalParam))) {
                 types[count++] = ((Saxon.Hej.style.XSLLocalParam)(node)).getRequiredType();
@@ -412,6 +424,9 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.expr.instruct.UserFunction fn = getConfiguration().newUserFunction(memoFunction, streamability);
                 fn.setPackageData(getCompilation().getPackageData());
                 fn.setFunctionName(getObjectName());
+                int maxArity = getNumberOfParameters();
+                int minArity = (maxArity-getNumberOfOptionalParameters());
+                fn.setArityRange(minArity, maxArity);
                 setParameterDefinitions(fn);
                 fn.setResultType(getResultType());
                 fn.setLineNumber(getLineNumber());
@@ -423,7 +438,7 @@ namespace Saxon.Hej.style {
                 fn.setDeterminism(determinism);
                 System.Collections.Generic.IList<Saxon.Hej.query.Annotation> annotations = new System.Collections.Generic.List<Saxon.Hej.query.Annotation>();
                 if (memoFunction) {
-                    annotations.Add(new Saxon.Hej.query.Annotation(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "memo-function")));
+                    annotations.Add(new Saxon.Hej.query.Annotation(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "memo-function")));
                 }
                 fn.setAnnotations(new Saxon.Hej.query.AnnotationList(annotations));
                 fn.setOverrideExtensionFunction(overrideExtensionFunction);

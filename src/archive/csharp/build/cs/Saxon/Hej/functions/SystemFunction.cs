@@ -120,14 +120,14 @@ namespace Saxon.Hej.functions {
             if ((details == null)) {
                 return Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
             }
-            return details.argumentTypes[arg];
+            return details.paramTypes[arg];
         }
         public virtual Saxon.Hej.type.ItemType getResultItemType() {
             return details.itemType;
         }
         public override Saxon.Hej.type.FunctionItemType getFunctionItemType() {
             Saxon.Hej.value.SequenceType resultType = Saxon.Hej.value.SequenceType.makeSequenceType(getResultItemType(), details.cardinality);
-            return new Saxon.Hej.type.SpecificFunctionType(details.argumentTypes, resultType);
+            return new Saxon.Hej.type.SpecificFunctionType(details.paramTypes, resultType);
         }
         public virtual Saxon.Hej.type.ItemType getResultItemType(Saxon.Hej.expr.Expression[] args) {
             if ((((details.properties&Saxon.Hej.functions.registry.BuiltInFunctionSet.AS_ARG0)) != 0)) {
@@ -174,7 +174,7 @@ namespace Saxon.Hej.functions {
                 }
             }
         }
-        public static Saxon.Hej.om.Sequence dynamicCall(Saxon.Hej.om.Function f, Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
+        public static Saxon.Hej.om.Sequence dynamicCall(Saxon.Hej.om.FunctionItem f, Saxon.Hej.expr.XPathContext context, params Saxon.Hej.om.Sequence[]  args) {
             context = f.makeNewContext(context, null);
             context.setCurrentOutputUri(null);
             if ((context is Saxon.Hej.expr.XPathContextMajor)) {
@@ -185,7 +185,7 @@ namespace Saxon.Hej.functions {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("fnRef");
             Saxon.Hej.om.StructuredQName qName = getFunctionName();
-            string name = (qName.hasURI(Saxon.Hej.lib.NamespaceConstant.FN) ? qName.getLocalPart() : qName.getEQName());
+            string name = (qName.hasURI(Saxon.Hej.om.NamespaceUri.FN) ? qName.getLocalPart() : qName.getEQName());
             @out.emitAttribute("name", name);
             @out.emitAttribute("arity", (getArity()+""));
             if ((((getDetails().properties&Saxon.Hej.functions.registry.BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) != 0)) {
@@ -223,6 +223,9 @@ namespace Saxon.Hej.functions {
         protected internal Saxon.Hej.str.UnicodeString getUniStringArg(Saxon.Hej.om.Sequence supplied) {
             Saxon.Hej.value.StringValue item = (Saxon.Hej.value.StringValue)(supplied.head());
             return ((item == null) ? Saxon.Hej.str.EmptyUnicodeString.getInstance() : item.getUnicodeStringValue());
+        }
+        public virtual Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return null;
         }
     
     }

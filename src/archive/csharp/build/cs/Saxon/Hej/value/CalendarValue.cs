@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public abstract class CalendarValue : Saxon.Hej.value.AtomicValue, Saxon.Hej.expr.sort.AtomicMatchKey {
-        private int tzMinutes = NO_TIMEZONE;
+        private readonly int tzMinutes;
         public static readonly int NO_TIMEZONE = System.Int32.MinValue;
         public static readonly int MISSING_TIMEZONE = System.Int32.MaxValue;
         public static Saxon.Hej.type.ConversionResult makeCalendarValue(Saxon.Hej.str.UnicodeString s, Saxon.Hej.lib.ConversionRules rules) {
@@ -35,11 +35,14 @@ namespace Saxon.Hej.value {
             }
             return cr;
         }
+        public CalendarValue(Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
+            this.tzMinutes = NO_TIMEZONE;
+        }
+        public CalendarValue(Saxon.Hej.type.AtomicType typeLabel, int tzMinutes) : base (typeLabel) {
+            this.tzMinutes = tzMinutes;
+        }
         public bool hasTimezone() {
             return (tzMinutes != NO_TIMEZONE);
-        }
-        public void setTimezoneInMinutes(int minutes) {
-            tzMinutes = minutes;
         }
         public abstract Saxon.Hej.value.DateTimeValue toDateTime();
         public int getTimezoneInMinutes() {
@@ -63,9 +66,7 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.value.DayTimeDurationValue.fromSeconds(difference);
         }
         public Saxon.Hej.value.CalendarValue removeTimezone() {
-            Saxon.Hej.value.CalendarValue c = (Saxon.Hej.value.CalendarValue)(copyAsSubType(typeLabel));
-            c.tzMinutes = NO_TIMEZONE;
-            return c;
+            return adjustTimezone(NO_TIMEZONE);
         }
         public abstract Saxon.Hej.value.CalendarValue adjustTimezone(int tz);
         public Saxon.Hej.value.CalendarValue adjustTimezone(Saxon.Hej.value.DayTimeDurationValue tz) {

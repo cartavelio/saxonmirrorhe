@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.sxpath {
     public class IndependentContext : Saxon.Hej.sxpath.AbstractStaticContext, Saxon.Hej.sxpath.XPathStaticContext, Saxon.Hej.om.NamespaceResolver {
-        protected internal System.Collections.Generic.Dictionary<string,string> namespaces = new System.Collections.Generic.Dictionary<string, string>(10);
+        protected internal System.Collections.Generic.Dictionary<string,Saxon.Hej.om.NamespaceUri> namespaces = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.NamespaceUri>(10);
         protected internal System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.sxpath.XPathVariable> variables = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.sxpath.XPathVariable>(20);
         protected internal Saxon.Hej.om.NamespaceResolver externalResolver = null;
         protected internal Saxon.Hej.type.ItemType requiredContextItemType = Saxon.Hej.type.AnyItemType.getInstance();
-        protected internal System.Collections.Generic.ISet<string> importedSchemaNamespaces = new System.Collections.Generic.HashSet<string>();
+        protected internal System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> importedSchemaNamespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
         protected internal bool autoDeclare = false;
         protected internal Saxon.Hej.expr.instruct.Executable executable;
         protected internal Saxon.Hej.expr.parser.RetainedStaticContext retainedStaticContext;
@@ -34,7 +34,7 @@ namespace Saxon.Hej.sxpath {
             setDefaultElementNamespace(ic.getDefaultElementNamespace());
             setDefaultFunctionNamespace(ic.getDefaultFunctionNamespace());
             setBackwardsCompatibilityMode(ic.isInBackwardsCompatibleMode());
-            namespaces = new System.Collections.Generic.Dictionary<string, string>(ic.namespaces);
+            namespaces = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.NamespaceUri>(ic.namespaces);
             variables = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.sxpath.XPathVariable>(10);
             Saxon.Hej.functions.FunctionLibraryList libList = (Saxon.Hej.functions.FunctionLibraryList)(ic.getFunctionLibrary());
             if ((libList != null)) {
@@ -53,7 +53,7 @@ namespace Saxon.Hej.sxpath {
             }
             return retainedStaticContext;
         }
-        public void declareNamespace(string prefix, string uri) {
+        public void declareNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             if ((prefix == null)) {
                 throw new Saxon.Ejava.lang.NullPointerException("Null prefix supplied to declareNamespace()");
             }
@@ -66,25 +66,25 @@ namespace Saxon.Hej.sxpath {
                 Saxon.Impl.Helpers.MapUtils.Put(namespaces, prefix, uri);
             }
         }
-        public override void setDefaultElementNamespace(string uri) {
+        public override void setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri uri) {
             if ((uri == null)) {
-                uri = "";
+                uri = Saxon.Hej.om.NamespaceUri.NULL;
             }
             base.setDefaultElementNamespace(uri);
             Saxon.Impl.Helpers.MapUtils.Put(namespaces, "", uri);
         }
         public void clearNamespaces() {
             namespaces.Clear();
-            declareNamespace("xml", Saxon.Hej.lib.NamespaceConstant.XML);
-            declareNamespace("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT);
-            declareNamespace("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON);
-            declareNamespace("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA);
-            declareNamespace("", "");
+            declareNamespace("xml", Saxon.Hej.om.NamespaceUri.XML);
+            declareNamespace("xsl", Saxon.Hej.om.NamespaceUri.XSLT);
+            declareNamespace("saxon", Saxon.Hej.om.NamespaceUri.SAXON);
+            declareNamespace("xs", Saxon.Hej.om.NamespaceUri.SCHEMA);
+            declareNamespace("", Saxon.Hej.om.NamespaceUri.NULL);
         }
         public void clearAllNamespaces() {
             namespaces.Clear();
-            declareNamespace("xml", Saxon.Hej.lib.NamespaceConstant.XML);
-            declareNamespace("", "");
+            declareNamespace("xml", Saxon.Hej.om.NamespaceUri.XML);
+            declareNamespace("", Saxon.Hej.om.NamespaceUri.NULL);
         }
         public void setNamespaces(Saxon.Hej.om.NodeInfo node) {
             namespaces.Clear();
@@ -103,9 +103,9 @@ namespace Saxon.Hej.sxpath {
                 }
                 string prefix = ns.getLocalPart();
                 if ("".Equals(prefix)) {
-                    setDefaultElementNamespace(ns.getStringValue());
+                    setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri.of(ns.getStringValue()));
                 } else {
-                    declareNamespace(ns.getLocalPart(), ns.getStringValue());
+                    declareNamespace(ns.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(ns.getStringValue()));
                 }
             }
         }
@@ -121,8 +121,8 @@ namespace Saxon.Hej.sxpath {
         public Saxon.Hej.sxpath.XPathVariable declareVariable(Saxon.Hej.value.QNameValue qname) {
             return declareVariable(qname.getStructuredQName());
         }
-        public Saxon.Hej.sxpath.XPathVariable declareVariable(string namespaceURI, string localName) {
-            Saxon.Hej.om.StructuredQName qName = new Saxon.Hej.om.StructuredQName("", namespaceURI, localName);
+        public Saxon.Hej.sxpath.XPathVariable declareVariable(Saxon.Hej.om.NamespaceUri namespaceURI, string localName) {
+            Saxon.Hej.om.StructuredQName qName = new Saxon.Hej.om.StructuredQName("", ((namespaceURI == null) ? Saxon.Hej.om.NamespaceUri.NULL : namespaceURI), localName);
             return declareVariable(qName);
         }
         public Saxon.Hej.sxpath.XPathVariable declareVariable(Saxon.Hej.om.StructuredQName qName) {
@@ -158,12 +158,12 @@ namespace Saxon.Hej.sxpath {
                 return this;
             }
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             if ((externalResolver != null)) {
                 return externalResolver.getURIForPrefix(prefix, useDefault);
             }
             if (prefix.Length==0) {
-                return (useDefault ? getDefaultElementNamespace() : "");
+                return (useDefault ? getDefaultElementNamespace() : Saxon.Hej.om.NamespaceUri.NULL);
             } else {
                 return Saxon.Impl.Helpers.MapUtils.Get(namespaces, prefix);
             }
@@ -201,13 +201,13 @@ namespace Saxon.Hej.sxpath {
         public System.Collections.Generic.ICollection<Saxon.Hej.sxpath.XPathVariable> getDeclaredVariables() {
             return variables.Values;
         }
-        public override bool isImportedSchema(string @namespace) {
+        public override bool isImportedSchema(Saxon.Hej.om.NamespaceUri @namespace) {
             return importedSchemaNamespaces.Contains(@namespace);
         }
-        public override System.Collections.Generic.ISet<string> getImportedSchemaNamespaces() {
+        public override System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getImportedSchemaNamespaces() {
             return importedSchemaNamespaces;
         }
-        public void setImportedSchemaNamespaces(System.Collections.Generic.ISet<string> namespaces) {
+        public void setImportedSchemaNamespaces(System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> namespaces) {
             importedSchemaNamespaces = namespaces;
             if (!(namespaces.Count==0)) {
                 setSchemaAware(true);

@@ -53,8 +53,8 @@ namespace Saxon.Hej.om {
             qp2.unescaper = unescaper;
             return qp2;
         }
-        public Saxon.Hej.om.StructuredQName parse(string lexicalName, string defaultNS) {
-            lexicalName = Saxon.Hej.value.Whitespace.trim(lexicalName).ToString();
+        public Saxon.Hej.om.StructuredQName parse(string lexicalName, Saxon.Hej.om.NamespaceUri defaultNS) {
+            lexicalName = Saxon.Hej.value.Whitespace.trim(lexicalName);
             if ((((acceptEQName && (lexicalName.Length>=4)) && (lexicalName[0] == 'Q')) && (lexicalName[1] == '{'))) {
                 int endBrace = lexicalName.IndexOf('}');
                 if ((endBrace<0)) {
@@ -76,7 +76,7 @@ namespace Saxon.Hej.om {
                 }
                 string local = lexicalName.Substring((endBrace+1));
                 checkLocalName(local);
-                return new Saxon.Hej.om.StructuredQName("", uri, local);
+                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(uri), local);
             }
             try {
                 string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(lexicalName);
@@ -84,7 +84,7 @@ namespace Saxon.Hej.om {
                 if (parts[0].Length==0) {
                     return new Saxon.Hej.om.StructuredQName("", defaultNS, parts[1]);
                 }
-                string uri = resolver.getURIForPrefix(parts[0], false);
+                Saxon.Hej.om.NamespaceUri uri = resolver.getURIForPrefix(parts[0], false);
                 if ((uri == null)) {
                     throw new Saxon.Hej.trans.XPathException((("Namespace prefix '"+parts[0])+"' has not been declared"), errorOnUnresolvedPrefix);
                 }

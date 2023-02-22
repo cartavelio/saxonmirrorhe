@@ -56,12 +56,12 @@ namespace Saxon.Eej.ee.stream.feed {
             level++;
             buildingOutputter.startElement(elemName, typeCode, location, properties);
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             if ((buildingOutputter == null)) {
                 Saxon.Hej.tree.util.Orphan orphan = new Saxon.Hej.tree.util.Orphan(getConfiguration());
                 orphan.setNodeKind(Saxon.Hej.type.Type.NAMESPACE);
                 orphan.setNodeName(new Saxon.Hej.om.NoNamespaceName(prefix));
-                orphan.setStringValue(Saxon.Hej.str.StringView.tidy(namespaceUri));
+                orphan.setStringValue(namespaceUri.toUnicodeString());
                 append(orphan);
             } else {
                 buildingOutputter.@namespace(prefix, namespaceUri, properties);

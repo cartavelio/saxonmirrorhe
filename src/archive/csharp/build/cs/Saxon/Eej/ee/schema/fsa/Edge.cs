@@ -126,7 +126,7 @@ namespace Saxon.Eej.ee.schema.fsa {
                     return ("Element in base content model has a keyref constraint that is not present"+" in the corresponding element of the restricted content model");
                 }
                 if ((((baseUniqueCount>0) || (baseKeyCount>0)) || (baseKeyRefCount>0))) {
-                    compiler.warning(((("Saxon is not able to verify that the identity constraints defined on "+"element ")+@base.getDisplayName())+" are compatible between the base type and the derived type"), sub);
+                    compiler.warning(((("Saxon is not able to verify that the identity constraints defined on "+"element ")+@base.getDisplayName())+" are compatible between the base type and the derived type"), Saxon.Hej.trans.SaxonErrorCode.SXSD1009, sub);
                 }
                 if ((de.getTargetState().isFinalState() && !(((getTargetState().isFinalState() || getTargetState().isConditionallyFinalState()))))) {
                     return "Not final";
@@ -148,7 +148,7 @@ namespace Saxon.Eej.ee.schema.fsa {
                     if (mode.Equals("strict")) {
                         Saxon.Eej.ee.schema.ElementDecl een = schema.getElementDecl(((Saxon.Eej.ee.schema.ElementDecl)(de.term)).getComponentName());
                         if ((een == null)) {
-                            compiler.warning((("There is no global element declaration named "+Saxon.Hej.trans.Err.wrap(((Saxon.Eej.ee.schema.ElementDecl)(de.term)).getDisplayName()))+", so the strict wildcard in the base type can never be satisfied"), (Saxon.Eej.ee.schema.ElementDecl)(de.term));
+                            compiler.warning((("There is no global element declaration named "+Saxon.Hej.trans.Err.wrap(((Saxon.Eej.ee.schema.ElementDecl)(de.term)).getDisplayName()))+", so the strict wildcard in the base type can never be satisfied"), Saxon.Hej.trans.SaxonErrorCode.SXSD1003, (Saxon.Eej.ee.schema.ElementDecl)(de.term));
                             return null;
                         }
                         Saxon.Hej.type.SchemaType eent = een.getType();
@@ -162,7 +162,7 @@ namespace Saxon.Eej.ee.schema.fsa {
                             }
                             et = et.getBaseType();
                         }
-                        compiler.warning(((("The type of the local element declaration named "+Saxon.Hej.trans.Err.wrap(((Saxon.Eej.ee.schema.ElementDecl)(de.term)).getDisplayName()))+" is not derived by restriction from that of the global element")+" with the same name, so the strict wildcard in the base type can never be satisfied"), (Saxon.Eej.ee.schema.ElementDecl)(de.term));
+                        compiler.warning(((("The type of the local element declaration named "+Saxon.Hej.trans.Err.wrap(((Saxon.Eej.ee.schema.ElementDecl)(de.term)).getDisplayName()))+" is not derived by restriction from that of the global element")+" with the same name, so the strict wildcard in the base type can never be satisfied"), Saxon.Hej.trans.SaxonErrorCode.SXSD1011, (Saxon.Eej.ee.schema.ElementDecl)(de.term));
                         return null;
                     } else {
                         if (mode.Equals("lax")) {
@@ -181,7 +181,7 @@ namespace Saxon.Eej.ee.schema.fsa {
                                 }
                                 et = et.getBaseType();
                             }
-                            compiler.warning(((("The type of the local element declaration named "+Saxon.Hej.trans.Err.wrap(((Saxon.Eej.ee.schema.ElementDecl)(de.term)).getDisplayName()))+" is not derived by restriction from that of the global element")+" with the same name, so the lax wildcard in the base type can never be satisfied"), (Saxon.Eej.ee.schema.ElementDecl)(de.term));
+                            compiler.warning(((("The type of the local element declaration named "+Saxon.Hej.trans.Err.wrap(((Saxon.Eej.ee.schema.ElementDecl)(de.term)).getDisplayName()))+" is not derived by restriction from that of the global element")+" with the same name, so the lax wildcard in the base type can never be satisfied"), Saxon.Hej.trans.SaxonErrorCode.SXSD1011, (Saxon.Eej.ee.schema.ElementDecl)(de.term));
                             return null;
                         }
                     }

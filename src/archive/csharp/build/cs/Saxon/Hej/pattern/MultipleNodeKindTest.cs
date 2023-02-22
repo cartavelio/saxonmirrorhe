@@ -59,7 +59,7 @@ namespace Saxon.Hej.pattern {
         public override string ToString() {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
             System.Collections.Generic.LinkedList<Saxon.Hej.type.PrimitiveUType> types = new System.Collections.Generic.LinkedList<Saxon.Hej.type.PrimitiveUType>(uType.decompose());
-            format(types, fsb, x => x.ToString() /* converted from static method reference */);
+            format(types, fsb, x => x.ToString() /* method reference */);
             return fsb.ToString();
         }
         public override string toShortString() {
@@ -74,7 +74,7 @@ namespace Saxon.Hej.pattern {
         public override string toExportString() {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
             System.Collections.Generic.LinkedList<Saxon.Hej.type.PrimitiveUType> types = new System.Collections.Generic.LinkedList<Saxon.Hej.type.PrimitiveUType>(uType.decompose());
-            format(types, fsb, x => x.toExportString() /* converted from static method reference */);
+            format(types, fsb, x => x.toExportString() /* method reference */);
             return fsb.ToString();
         }
         private void format(System.Collections.Generic.LinkedList<Saxon.Hej.type.PrimitiveUType> list, Saxon.Ejava.lang.StringBuilder fsb, System.Func<Saxon.Hej.type.ItemType,string> show) {

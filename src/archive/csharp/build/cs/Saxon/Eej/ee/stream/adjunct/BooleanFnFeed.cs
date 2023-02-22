@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.stream.adjunct {
     public abstract class BooleanFnFeed : Saxon.Eej.ee.stream.feed.ItemFeed {
+        private Saxon.Eej.ee.stream.watch.WatchManager watchManager;
         private int count;
         private int level;
         private bool foundAtomic;
         private bool result;
         private bool done;
-        internal BooleanFnFeed(Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (exp, result, context) {
+        private bool closed;
+        internal BooleanFnFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (exp, result, context) {
+            this.watchManager = watchManager;
         }
         public override void open(Saxon.Eej.ee.stream.watch.Terminator terminator) {
             base.open(terminator);
@@ -20,10 +23,13 @@ namespace Saxon.Eej.ee.stream.adjunct {
         private void testNode() {
             if (((level == 0) && !(hasFailed()))) {
                 if ((++count == 1)) {
-                    getNextOutputter().append(Saxon.Hej.value.BooleanValue.get(isPositive()));
-                    getNextOutputter().close();
                     done = true;
-                    getTerminator().terminate();
+                    getNextOutputter().append(Saxon.Hej.value.BooleanValue.get(isPositive()));
+                    if (watchManager.allowsEarlyExit()) {
+                        closed = true;
+                        getNextOutputter().close();
+                        getTerminator().terminate();
+                    }
                 } else {
                     if (foundAtomic) {
                         try {
@@ -71,7 +77,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             testNode();
             level++;
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             testNode();
         }
         public override void endElement() {
@@ -89,12 +95,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public override void close() {
             if ((!(hasFailed()) && !(done))) {
                 getNextOutputter().append(Saxon.Hej.value.BooleanValue.get(result));
-                base.close();
+                if (!(closed)) {
+                    base.close();
+                }
                 done = true;
             }
         }
         public class Positive : Saxon.Eej.ee.stream.adjunct.BooleanFnFeed {
-            public Positive(Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (exp, result, context) {
+            public Positive(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (watchManager, exp, result, context) {
             }
             protected internal override bool isPositive() {
                 return true;
@@ -102,7 +110,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         
         }
         public class Negative : Saxon.Eej.ee.stream.adjunct.BooleanFnFeed {
-            internal Negative(Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (exp, result, context) {
+            public Negative(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (watchManager, exp, result, context) {
             }
             protected internal override bool isPositive() {
                 return false;

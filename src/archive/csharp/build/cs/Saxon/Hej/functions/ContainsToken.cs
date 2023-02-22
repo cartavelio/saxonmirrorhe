@@ -14,11 +14,9 @@ namespace Saxon.Hej.functions {
             if (search.isEmpty()) {
                 return false;
             }
-            Saxon.Hej.om.Item item;
-            while (((item = arg0.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = arg0.next()) != null); ) {
                 Saxon.Hej.om.SequenceIterator tokens = new Saxon.Hej.value.Whitespace.Tokenizer(item.getUnicodeStringValue());
-                Saxon.Hej.om.Item token;
-                while (((token = tokens.next()) != null)) {
+                for (Saxon.Hej.om.Item token; ((token = tokens.next()) != null); ) {
                     if (collator.comparesEqual(search, token.getUnicodeStringValue())) {
                         tokens.close();
                         arg0.close();

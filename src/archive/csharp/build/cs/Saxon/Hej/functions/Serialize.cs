@@ -109,8 +109,7 @@ namespace Saxon.Hej.functions {
                 if ((key is Saxon.Hej.value.StringValue)) {
                     string keyName = key.getStringValue();
                     if (isParamName(keyName)) {
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.OPTION, keyName, 0);
-                        role.setErrorCode("XPTY0004");
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.OPTION, keyName, 0, "XPTY0004");
                         Saxon.Hej.om.Sequence converted = th.applyFunctionConversionRules(map.get(key), Saxon.Impl.Helpers.MapUtils.Get(requiredTypes, keyName), role, Saxon.Hej.expr.parser.Loc.NONE);
                         result = result.addEntry(key, converted.materialize());
                     }
@@ -122,7 +121,7 @@ namespace Saxon.Hej.functions {
                             if (key.getComponent(Saxon.Hej.functions.AccessorFn.Component.NAMESPACE).getUnicodeStringValue().Equals(Saxon.Hej.str.StringView.of("http://saxon.sf.net/"))) {
                                 string keyName = ((Saxon.Hej.value.QNameValue)(key)).getLocalName();
                                 if (isParamNameSaxon(keyName)) {
-                                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.OPTION, keyName, 0);
+                                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.OPTION, keyName, 0);
                                     Saxon.Hej.om.Sequence converted = th.applyFunctionConversionRules(map.get(key), Saxon.Impl.Helpers.MapUtils.Get(requiredTypesSaxon, keyName), role, Saxon.Hej.expr.parser.Loc.NONE);
                                     result = result.addEntry(key, converted.materialize());
                                 }
@@ -229,7 +228,7 @@ namespace Saxon.Hej.functions {
                     throw new Saxon.Hej.trans.XPathException(("In the serialization parameters, the character map contains two entries for the character \\u"+Saxon.Impl.Helpers.Utils.intToHexString((65536+code)).Substring(1)), "SEPM0018");
                 }
             }
-            Saxon.Hej.om.StructuredQName name = new Saxon.Hej.om.StructuredQName("output", Saxon.Hej.lib.NamespaceConstant.OUTPUT, "serialization-parameters");
+            Saxon.Hej.om.StructuredQName name = new Saxon.Hej.om.StructuredQName("output", Saxon.Hej.om.NamespaceUri.OUTPUT, "serialization-parameters");
             return new Saxon.Hej.serialize.CharacterMap(name, intHashMap);
         }
         private Saxon.Hej.serialize.SerializationProperties serializationParamsFromMap(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map, Saxon.Hej.expr.XPathContext context) {
@@ -295,7 +294,7 @@ namespace Saxon.Hej.functions {
             }
             if (((seqVal = Saxon.Impl.Helpers.MapUtils.Get(map, "use-character-maps")) != null)) {
                 Saxon.Hej.serialize.CharacterMap characterMap = toCharacterMap(seqVal, context);
-                charMapIndex.putCharacterMap(new Saxon.Hej.om.StructuredQName("", "", "charMap"), characterMap);
+                charMapIndex.putCharacterMap(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "charMap"), characterMap);
                 props.setProperty(Saxon.Hej.lib.SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
             }
             if (((seqVal = Saxon.Impl.Helpers.MapUtils.Get(map, "version")) != null)) {
@@ -350,7 +349,7 @@ namespace Saxon.Hej.functions {
             if ((param != null)) {
                 if ((param is Saxon.Hej.om.NodeInfo)) {
                     Saxon.Hej.om.NodeInfo paramNode = (Saxon.Hej.om.NodeInfo)(param);
-                    if ((((paramNode.getNodeKind() != Saxon.Hej.type.Type.ELEMENT) || !(Saxon.Hej.lib.NamespaceConstant.OUTPUT.Equals(paramNode.getURI()))) || !("serialization-parameters".Equals(paramNode.getLocalPart())))) {
+                    if ((((paramNode.getNodeKind() != Saxon.Hej.type.Type.ELEMENT) || !(Saxon.Hej.om.NamespaceUri.OUTPUT.Equals(paramNode.getNamespaceUri()))) || !("serialization-parameters".Equals(paramNode.getLocalPart())))) {
                         throw new Saxon.Hej.trans.XPathException((("Second argument to fn:serialize() must be an element named {"+Saxon.Hej.lib.NamespaceConstant.OUTPUT)+"}serialization-parameters"), "XPTY0004");
                     }
                     Saxon.Hej.serialize.SerializationParamsHandler sph = new Saxon.Hej.serialize.SerializationParamsHandler();

@@ -97,7 +97,7 @@ namespace Saxon.Hej.type {
                                 if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
                                     return ((th == null) ? Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE : new Saxon.Hej.ma.arrays.ArrayItemType(((Saxon.Hej.ma.arrays.ArrayItem)(item)).getMemberType(th)));
                                 } else {
-                                    return ((Saxon.Hej.om.Function)(item)).getFunctionItemType();
+                                    return ((Saxon.Hej.om.FunctionItem)(item)).getFunctionItemType();
                                 }
                             }
                         }
@@ -132,7 +132,7 @@ namespace Saxon.Hej.type {
                 if ((item is Saxon.Hej.value.AtomicValue)) {
                     return ((Saxon.Hej.value.AtomicValue)(item)).getItemType().ToString();
                 } else {
-                    if ((item is Saxon.Hej.om.Function)) {
+                    if ((item is Saxon.Hej.om.FunctionItem)) {
                         return "function(*)";
                     } else {
                         return item.GetType().ToString();
@@ -140,7 +140,7 @@ namespace Saxon.Hej.type {
                 }
             }
         }
-        public static Saxon.Hej.type.ItemType getBuiltInItemType(string @namespace, string localName) {
+        public static Saxon.Hej.type.ItemType getBuiltInItemType(Saxon.Hej.om.NamespaceUri @namespace, string localName) {
             Saxon.Hej.type.SchemaType t = Saxon.Hej.type.BuiltInType.getSchemaType(Saxon.Hej.om.StandardNames.getFingerprint(@namespace, localName));
             if ((t is Saxon.Hej.type.ItemType)) {
                 return (Saxon.Hej.type.ItemType)(t);
@@ -148,7 +148,7 @@ namespace Saxon.Hej.type {
                 return null;
             }
         }
-        public static Saxon.Hej.type.SimpleType getBuiltInSimpleType(string @namespace, string localName) {
+        public static Saxon.Hej.type.SimpleType getBuiltInSimpleType(Saxon.Hej.om.NamespaceUri @namespace, string localName) {
             Saxon.Hej.type.SchemaType t = Saxon.Hej.type.BuiltInType.getSchemaType(Saxon.Hej.om.StandardNames.getFingerprint(@namespace, localName));
             if (((t is Saxon.Hej.type.SimpleType) && ((Saxon.Hej.type.SimpleType)(t)).isBuiltInType())) {
                 return (Saxon.Hej.type.SimpleType)(t);

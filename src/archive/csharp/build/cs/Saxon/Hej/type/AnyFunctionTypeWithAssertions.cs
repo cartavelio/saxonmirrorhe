@@ -13,12 +13,12 @@ namespace Saxon.Hej.type {
             return assertions;
         }
         public override bool matches(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
-            return ((item is Saxon.Hej.om.Function) && checkAnnotationAssertions(assertions, (Saxon.Hej.om.Function)(item), th.getConfiguration()));
+            return ((item is Saxon.Hej.om.FunctionItem) && checkAnnotationAssertions(assertions, (Saxon.Hej.om.FunctionItem)(item), th.getConfiguration()));
         }
-        private static bool checkAnnotationAssertions(Saxon.Hej.query.AnnotationList assertions, Saxon.Hej.om.Function item, Saxon.Hej.Configuration config) {
+        private static bool checkAnnotationAssertions(Saxon.Hej.query.AnnotationList assertions, Saxon.Hej.om.FunctionItem item, Saxon.Hej.Configuration config) {
             Saxon.Hej.query.AnnotationList annotations = item.getAnnotations();
             foreach (Saxon.Hej.query.Annotation ann in assertions) {
-                Saxon.Hej.lib.FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getURI());
+                Saxon.Hej.lib.FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
                 if ((handler != null)) {
                     bool ok = handler.satisfiesAssertion(ann, annotations);
                     if (!(ok)) {

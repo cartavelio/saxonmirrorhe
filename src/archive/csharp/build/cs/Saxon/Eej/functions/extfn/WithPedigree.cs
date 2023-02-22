@@ -8,7 +8,7 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.om.Item @out = makeRootWithPedigree(@in);
             return ((@out == null) ? @in : @out);
         }
-        public static Saxon.Hej.om.Function makeRootWithPedigree(Saxon.Hej.om.Item root) {
+        public static Saxon.Hej.om.FunctionItem makeRootWithPedigree(Saxon.Hej.om.Item root) {
             if ((root is Saxon.Hej.ma.map.MapItem)) {
                 return new Saxon.Eej.xsltextn.pedigree.PedigreeMapItem((Saxon.Hej.ma.map.MapItem)(root));
             } else {

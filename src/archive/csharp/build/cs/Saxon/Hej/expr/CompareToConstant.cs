@@ -47,7 +47,7 @@ namespace Saxon.Hej.expr {
         public bool convertsUntypedToOther() {
             return true;
         }
-        internal bool interpretComparisonResult(int c) {
+        public static bool interpretComparisonResult(int @operator, int c) {
             switch (@operator) {
               case Saxon.Hej.expr.parser.Token.FEQ:
                 return (c == 0);
@@ -68,6 +68,11 @@ namespace Saxon.Hej.expr {
     
         /* Creating stub method getAtomicComparer to satisfy interface ComparisonExpression */
         public virtual Saxon.Hej.expr.sort.AtomicComparer getAtomicComparer() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getStringCollator to satisfy interface ComparisonExpression */
+        public virtual Saxon.Hej.lib.StringCollator getStringCollator() {
             throw new System.NotImplementedException();
         }
 

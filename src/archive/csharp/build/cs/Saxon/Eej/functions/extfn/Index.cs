@@ -8,8 +8,8 @@ namespace Saxon.Eej.functions.extfn {
             if (((arg1 is Saxon.Hej.value.AnyExternalObject) && (((Saxon.Hej.value.AnyExternalObject)(arg1)).getWrappedObject() is Saxon.Eej.functions.extfn.Evaluate.PreparedExpression))) {
                 throw new Saxon.Hej.trans.XPathException("The function saxon:index() has changed to expect a function as its second argument");
             } else {
-                if ((arg1 is Saxon.Hej.om.Function)) {
-                    Saxon.Hej.om.Function function = (Saxon.Hej.om.Function)(arg1);
+                if ((arg1 is Saxon.Hej.om.FunctionItem)) {
+                    Saxon.Hej.om.FunctionItem function = (Saxon.Hej.om.FunctionItem)(arg1);
                     Saxon.Impl.DataModel.ImmMap imap = new Saxon.Impl.DataModel.ImmMap();
                     Saxon.Hej.om.Sequence[] functionArgs = Saxon.Hej.om.SequenceTool.makeSequenceArray(1);
                     Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
@@ -25,12 +25,12 @@ namespace Saxon.Eej.functions.extfn {
                                 imap.initialPut(key, next);
                             } else {
                                 if ((existingVal is Saxon.Hej.ma.zeno.ZenoSequence)) {
-                                    ((Saxon.Hej.ma.zeno.ZenoSequence)(existingVal)).append(next);
+                                    imap.initialPut(key, ((Saxon.Hej.ma.zeno.ZenoSequence)(existingVal)).append(next));
                                 } else {
-                                    Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-                                    chain.appendSequence(existingVal);
-                                    chain.append(next);
-                                    imap.initialPut(key, chain);
+                                    Saxon.Hej.ma.zeno.ZenoSequence zenoSeq = new Saxon.Hej.ma.zeno.ZenoSequence();
+                                    zenoSeq = zenoSeq.appendSequence(existingVal);
+                                    zenoSeq = zenoSeq.append(next);
+                                    imap.initialPut(key, zenoSeq);
                                 }
                             }
                         }

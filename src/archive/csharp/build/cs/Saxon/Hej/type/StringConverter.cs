@@ -332,8 +332,7 @@ namespace Saxon.Hej.type {
                     if ((iv is Saxon.Hej.value.BigIntegerValue)) {
                         bool ok = Saxon.Hej.value.IntegerValue.checkBigRange(((Saxon.Hej.value.BigIntegerValue)(iv)).asBigInteger(), targetType);
                         if (ok) {
-                            ((Saxon.Hej.value.BigIntegerValue)(iv)).setTypeLabel(targetType);
-                            return iv;
+                            return ((Saxon.Hej.value.BigIntegerValue)(iv)).copyAsSubType(targetType);
                         } else {
                             return new Saxon.Hej.type.ValidationFailure(("Integer value is out of range for type "+targetType));
                         }
@@ -383,7 +382,7 @@ namespace Saxon.Hej.type {
                     if (!(((Saxon.Hej.value.DateTimeValue)(val)).hasTimezone())) {
                         return new Saxon.Hej.type.ValidationFailure((("Supplied DateTimeStamp value "+input)+" has no time zone"));
                     } else {
-                        ((Saxon.Hej.value.DateTimeValue)(val)).setTypeLabel(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);
+                        val = ((Saxon.Hej.value.DateTimeValue)(val)).copyAsSubType(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);
                     }
                 }
                 return val;
@@ -489,7 +488,7 @@ namespace Saxon.Hej.type {
                 }
                 try {
                     string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(Saxon.Hej.value.Whitespace.trim(input.ToString()));
-                    string uri = nsResolver.getURIForPrefix(parts[0], true);
+                    Saxon.Hej.om.NamespaceUri uri = nsResolver.getURIForPrefix(parts[0], true);
                     if ((uri == null)) {
                         Saxon.Hej.type.ValidationFailure failure = new Saxon.Hej.type.ValidationFailure((("Namespace prefix "+Saxon.Hej.trans.Err.wrap(parts[0]))+" has not been declared"));
                         failure.setErrorCode("FONS0004");
@@ -522,7 +521,7 @@ namespace Saxon.Hej.type {
                 }
                 try {
                     string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(Saxon.Hej.value.Whitespace.trim(input.ToString()));
-                    string uri = getNamespaceResolver().getURIForPrefix(parts[0], true);
+                    Saxon.Hej.om.NamespaceUri uri = getNamespaceResolver().getURIForPrefix(parts[0], true);
                     if ((uri == null)) {
                         return new Saxon.Hej.type.ValidationFailure((("Namespace prefix "+Saxon.Hej.trans.Err.wrap(parts[0]))+" has not been declared"));
                     }

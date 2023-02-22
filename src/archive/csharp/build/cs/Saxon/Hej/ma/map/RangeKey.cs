@@ -79,7 +79,7 @@ namespace Saxon.Hej.ma.map {
         public override string getDescription() {
             return "range key";
         }
-        public override bool deepEquals(Saxon.Hej.om.Function other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
+        public override bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
             if ((other is Saxon.Hej.ma.map.RangeKey)) {
                 Saxon.Hej.ma.map.RangeKey rk = (Saxon.Hej.ma.map.RangeKey)(other);
                 return ((min.Equals(rk.min) && max.Equals(rk.max)) && index.Equals(rk.index));
@@ -144,10 +144,6 @@ namespace Saxon.Hej.ma.map {
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
             }
 
         }

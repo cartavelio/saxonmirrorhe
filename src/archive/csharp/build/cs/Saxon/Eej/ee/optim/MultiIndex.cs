@@ -174,11 +174,11 @@ namespace Saxon.Eej.ee.optim {
                 }
             }
             if ((selectedItems == null)) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             }
             int size = selectedItems.size();
             if ((size == 0)) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             } else {
                 if ((size == 1)) {
                     Saxon.Hej.z.IntIterator it = selectedItems.iterator();
@@ -225,10 +225,6 @@ namespace Saxon.Eej.ee.optim {
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
             }
 
         }

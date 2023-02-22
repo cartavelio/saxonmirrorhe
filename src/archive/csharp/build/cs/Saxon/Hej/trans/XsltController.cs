@@ -8,7 +8,6 @@ namespace Saxon.Hej.trans {
         private Saxon.Hej.lib.ResultDocumentResolver resultDocumentResolver;
         private System.Collections.Generic.HashSet<Saxon.Hej.om.DocumentKey> allOutputDestinations;
         private Saxon.Hej.expr.Component.M initialMode = null;
-        private readonly Saxon.Hej.om.Function initialFunction = null;
         private System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence> initialTemplateParams;
         private System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence> initialTemplateTunnelParams;
         private readonly System.Collections.Generic.IDictionary<System.Int64,System.Collections.Generic.Stack<Saxon.Hej.expr.instruct.AttributeSet>> attributeSetEvaluationStacks = new System.Collections.Generic.Dictionary<System.Int64, System.Collections.Generic.Stack<Saxon.Hej.expr.instruct.AttributeSet>>();
@@ -108,20 +107,20 @@ namespace Saxon.Hej.trans {
             }
             return !(allOutputDestinations.Contains(uri));
         }}
-        public void addUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) {
+        public void addUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) { lock(this) {
             if ((allOutputDestinations == null)) {
                 allOutputDestinations = new System.Collections.Generic.HashSet<Saxon.Hej.om.DocumentKey>(20);
             }
             allOutputDestinations.Add(uri);
-        }
-        public void removeUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) {
+        }}
+        public void removeUnavailableOutputDestination(Saxon.Hej.om.DocumentKey uri) { lock(this) {
             if ((allOutputDestinations != null)) {
                 allOutputDestinations.Remove(uri);
             }
-        }
-        public bool isUnusedOutputDestination(Saxon.Hej.om.DocumentKey uri) {
+        }}
+        public bool isUnusedOutputDestination(Saxon.Hej.om.DocumentKey uri) { lock(this) {
             return ((allOutputDestinations == null) || !(allOutputDestinations.Contains(uri)));
-        }
+        }}
         public void setInitialTemplateParameters(System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence> @params, bool tunnel) {
             if (tunnel) {
                 this.initialTemplateTunnelParams = @params;
@@ -267,7 +266,7 @@ namespace Saxon.Hej.trans {
                     if (((((isStylesheetContainingStripSpace() && isStripSourceTree()) && !(((node is Saxon.Hej.tree.wrapper.SpaceStrippedNode)))) && (node != globalContextItem)) && (node.getTreeInfo().getSpaceStrippingRule() != spaceStrippingRule))) {
                         Saxon.Hej.tree.wrapper.SpaceStrippedDocument strippedDoc = new Saxon.Hej.tree.wrapper.SpaceStrippedDocument(node.getTreeInfo(), spaceStrippingRule);
                         if (!(Saxon.Hej.tree.wrapper.SpaceStrippedNode.isPreservedNode(node, strippedDoc, node.getParent()))) {
-                            return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                            return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                         }
                         node = strippedDoc.wrap(node);
                     }
@@ -282,7 +281,7 @@ namespace Saxon.Hej.trans {
         }
         private void warningIfStreamable(Saxon.Hej.trans.Mode mode) {
             if (mode.isDeclaredStreamable()) {
-                warning(((((initialMode == null) ? "" : getInitialMode().getModeTitle(true)))+" is streamable, but the input is not supplied as a stream"), Saxon.Hej.trans.SaxonErrorCode.SXWN9000, Saxon.Hej.expr.parser.Loc.NONE);
+                warning(((((initialMode == null) ? "" : getInitialMode().getModeTitle(true)))+" is streamable, but the input is not supplied as a stream"), Saxon.Hej.trans.SaxonErrorCode.SXWN9045, Saxon.Hej.expr.parser.Loc.NONE);
             }
         }
         public void callTemplate(Saxon.Hej.om.StructuredQName initialTemplateName, Saxon.Hej.@event.Receiver @out) {
@@ -374,7 +373,7 @@ namespace Saxon.Hej.trans {
                     despatcher = makeStripper(despatcher);
                 }
                 Saxon.Hej.@event.PipelineConfiguration pipe = despatcher.getPipelineConfiguration();
-                pipe.getParseOptions().setSchemaValidationMode(this.validationMode);
+                pipe.setParseOptions(pipe.getParseOptions().withSchemaValidationMode(this.validationMode));
                 bool verbose = getConfiguration().isTiming();
                 if (verbose) {
                     getConfiguration().getLogger().info(("Streaming "+source.getSystemId()));

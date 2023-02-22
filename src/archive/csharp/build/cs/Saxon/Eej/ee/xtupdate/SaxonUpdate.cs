@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.xtupdate {
-    public class SaxonUpdate : Saxon.Hej.style.StyleElement {
+    public class SaxonUpdate : Saxon.Hej.style.ExtensionInstruction {
         private Saxon.Hej.expr.Expression select;
-        public override bool isInstruction() {
-            return true;
-        }
         protected internal override bool mayContainSequenceConstructor() {
             return true;
         }

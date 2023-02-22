@@ -6,6 +6,7 @@ namespace Saxon.Hej.expr.flwor {
         protected internal Saxon.Hej.expr.flwor.LocalVariableBinding rangeVariable;
         protected internal Saxon.Hej.expr.flwor.LocalVariableBinding positionVariable;
         protected internal Saxon.Hej.expr.Operand sequenceOp;
+        protected internal Saxon.Hej.expr.elab.PullEvaluator sequenceOperandEvaluator;
         protected internal bool allowsEmpty;
         public ForClause()  {
         }
@@ -32,6 +33,15 @@ namespace Saxon.Hej.expr.flwor {
         }
         public Saxon.Hej.expr.Expression getSequence() {
             return sequenceOp.getChildExpression();
+        }
+        public Saxon.Hej.expr.Operand getSequenceOp() {
+            return this.sequenceOp;
+        }
+        protected internal virtual Saxon.Hej.om.SequenceIterator getIterator(Saxon.Hej.expr.XPathContext context) {
+            if ((sequenceOperandEvaluator == null)) {
+                sequenceOperandEvaluator = getSequence().makeElaborator().elaborateForPull();
+            }
+            return /*Delegate.iterate()*/sequenceOperandEvaluator(context);
         }
         public void setRangeVariable(Saxon.Hej.expr.flwor.LocalVariableBinding binding) {
             rangeVariable = binding;
@@ -61,12 +71,12 @@ namespace Saxon.Hej.expr.flwor {
         public override void typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             Saxon.Hej.value.SequenceType decl = rangeVariable.getRequiredType();
             if ((allowsEmpty && !(Saxon.Hej.value.Cardinality.allowsZero(decl.getCardinality())))) {
-                Saxon.Hej.expr.parser.RoleDiagnostic emptyRole = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> emptyRole = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
                 Saxon.Hej.expr.Expression checker = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(getSequence(), Saxon.Hej.expr.StaticProperty.ALLOWS_ONE_OR_MORE, emptyRole);
                 setSequence(checker);
             }
             Saxon.Hej.value.SequenceType sequenceType = Saxon.Hej.value.SequenceType.makeSequenceType(decl.getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
             setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
         }
         public override Saxon.Hej.expr.flwor.TuplePull getPullStream(Saxon.Hej.expr.flwor.TuplePull @base, Saxon.Hej.expr.XPathContext context) {
@@ -155,7 +165,6 @@ namespace Saxon.Hej.expr.flwor {
                         if ((rel != Saxon.Hej.type.Affinity.DISJOINT)) {
                             Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(visitor.getStaticContext());
                             predicate = Saxon.Hej.functions.SystemFunction.makeCall("boolean", rsc, predicate);
-                            System.Diagnostics.Debug.Assert((predicate != null));
                         }
                         selection = new Saxon.Hej.expr.FilterExpression(selection, predicate);
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(predicate, selection);
@@ -176,11 +185,7 @@ namespace Saxon.Hej.expr.flwor {
                         if ((path is Saxon.Hej.expr.SlashExpression)) {
                             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(condition, path);
                             Saxon.Hej.expr.Expression k = visitor.obtainOptimizer().convertPathExpressionToKey((Saxon.Hej.expr.SlashExpression)(path), visitor);
-                            if ((k == null)) {
-                                setSequence(path);
-                            } else {
-                                setSequence(k);
-                            }
+                            setSequence(((k == null) ? path : k));
                             sequenceOp.typeCheck(visitor, contextItemType);
                             sequenceOp.optimize(visitor, contextItemType);
                         }
@@ -221,22 +226,12 @@ namespace Saxon.Hej.expr.flwor {
             @out.endElement();
         }
         public override string toShortString() {
-            Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
-            fsb.append(getClauseKey().ToString().ToLower());
-            fsb.append(" $");
-            fsb.append(rangeVariable.getVariableQName().getDisplayName());
-            fsb.append(' ');
-            Saxon.Hej.expr.flwor.LocalVariableBinding posVar = getPositionVariable();
-            if ((posVar != null)) {
-                fsb.append("at $");
-                fsb.append(posVar.getVariableQName().getDisplayName());
-                fsb.append(' ');
-            }
-            fsb.append("in ");
-            fsb.append(getSequence().toShortString());
-            return fsb.ToString();
+            return stringify(true);
         }
         public override string ToString() {
+            return stringify(false);
+        }
+        private string stringify(bool abbreviate) {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
             fsb.append(getClauseKey().ToString().ToLower());
             fsb.append(" $");
@@ -249,7 +244,7 @@ namespace Saxon.Hej.expr.flwor {
                 fsb.append(' ');
             }
             fsb.append("in ");
-            fsb.append(getSequence().ToString());
+            fsb.append((abbreviate ? getSequence().toShortString() : getSequence().ToString()));
             return fsb.ToString();
         }
     

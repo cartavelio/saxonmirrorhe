@@ -31,8 +31,8 @@ namespace Saxon.Eej.ee.schema {
         public string getName() {
             return notationName.getLocalPart();
         }
-        public string getTargetNamespace() {
-            return notationName.getURI();
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return notationName.getNamespaceUri();
         }
         public override bool validate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             return true;
@@ -51,8 +51,8 @@ namespace Saxon.Eej.ee.schema {
             serializer.startElement("notation");
             serializer.emitAttribute("id", id);
             serializer.emitAttribute("name", getName());
-            if (((getTargetNamespace() != null) && !(getTargetNamespace().Length==0))) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+            if (((getTargetNamespace() != null) && !(getTargetNamespace().isEmpty()))) {
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
             }
             if ((notationPublicId != null)) {
                 serializer.emitAttribute("publicId", notationPublicId);
@@ -62,7 +62,7 @@ namespace Saxon.Eej.ee.schema {
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.Notation thisNotation = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
@@ -74,7 +74,7 @@ namespace Saxon.Eej.ee.schema {
                   case "name":
                     return new Saxon.Hej.value.StringValue(getName(), Saxon.Hej.type.BuiltInAtomicType.NCNAME);
                   case "target namespace":
-                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace());
+                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace().toUnicodeString());
                   case "system identifier":
                     if ((getNotationSystemId() == null)) {
                         return Saxon.Hej.value.EmptySequence.getInstance();

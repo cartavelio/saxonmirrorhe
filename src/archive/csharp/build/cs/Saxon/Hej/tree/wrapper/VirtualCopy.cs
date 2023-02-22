@@ -6,12 +6,12 @@ namespace Saxon.Hej.tree.wrapper {
         protected internal Saxon.Ejava.util.function.Supplier<string> systemIdSupplier;
         protected internal Saxon.Hej.om.NodeInfo original;
         protected internal Saxon.Hej.tree.wrapper.VirtualCopy parent;
-        protected internal Saxon.Hej.om.NodeInfo root;
         protected internal Saxon.Hej.tree.wrapper.VirtualTreeInfo tree;
+        protected internal Saxon.Hej.om.NodeInfo root;
         private bool dropNamespaces = false;
         protected internal VirtualCopy(Saxon.Hej.om.NodeInfo @base, Saxon.Hej.om.NodeInfo root)  {
             original = @base;
-            systemIdSupplier = () => @base.getBaseURI();
+            systemIdSupplier = @base.getBaseURI /* instance method reference */;
             this.root = root;
         }
         public static Saxon.Hej.tree.wrapper.VirtualCopy makeVirtualCopy(Saxon.Hej.om.NodeInfo original) {
@@ -47,15 +47,15 @@ namespace Saxon.Hej.tree.wrapper {
             if ((getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {
                 if (dropNamespaces) {
                     Saxon.Hej.om.NamespaceMap nsMap = Saxon.Hej.om.NamespaceMap.emptyMap();
-                    string ns = getURI();
-                    if (!(ns.Length==0)) {
+                    Saxon.Hej.om.NamespaceUri ns = getNamespaceUri();
+                    if (!(ns.isEmpty())) {
                         nsMap = nsMap.put(getPrefix(), ns);
                     }
                     Saxon.Hej.tree.iter.AxisIterator iter = original.iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE);
                     Saxon.Hej.om.NodeInfo att;
                     while (((att = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null)) {
-                        if (!(att.getURI().Equals(""))) {
-                            nsMap = nsMap.put(att.getPrefix(), att.getURI());
+                        if (!(att.getNamespaceUri().isEmpty())) {
+                            nsMap = nsMap.put(att.getPrefix(), att.getNamespaceUri());
                         }
                     }
                     return nsMap;
@@ -114,8 +114,8 @@ namespace Saxon.Hej.tree.wrapper {
         public string getLocalPart() {
             return original.getLocalPart();
         }
-        public string getURI() {
-            return original.getURI();
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return original.getNamespaceUri();
         }
         public string getPrefix() {
             return original.getPrefix();
@@ -174,7 +174,7 @@ namespace Saxon.Hej.tree.wrapper {
             }
             return makeCopier(original.iterateAxis(axisNumber, nodeTest), newParent, !(Saxon.Hej.om.AxisInfo.isSubtreeAxis[axisNumber]));
         }
-        public string getAttributeValue(string uri, string local) {
+        public string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             return original.getAttributeValue(uri, local);
         }
         public virtual Saxon.Hej.om.NodeInfo getRoot() {
@@ -205,18 +205,18 @@ namespace Saxon.Hej.tree.wrapper {
             if ((getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {
                 if (dropNamespaces) {
                     System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> allNamespaces = new System.Collections.Generic.List<Saxon.Hej.om.NamespaceBinding>(5);
-                    string ns = getURI();
-                    if (ns.Length==0) {
-                        if (((getParent() != null) && !(getParent().getURI().Length==0))) {
-                            allNamespaces.Add(new Saxon.Hej.om.NamespaceBinding("", ""));
+                    Saxon.Hej.om.NamespaceUri ns = getNamespaceUri();
+                    if (ns.isEmpty()) {
+                        if (((getParent() != null) && !(getParent().getNamespaceUri().isEmpty()))) {
+                            allNamespaces.Add(new Saxon.Hej.om.NamespaceBinding("", Saxon.Hej.om.NamespaceUri.NULL));
                         }
                     } else {
-                        allNamespaces.Add(new Saxon.Hej.om.NamespaceBinding(getPrefix(), getURI()));
+                        allNamespaces.Add(new Saxon.Hej.om.NamespaceBinding(getPrefix(), getNamespaceUri()));
                     }
                     foreach (Saxon.Hej.om.AttributeInfo att in original.attributes()) {
                         Saxon.Hej.om.NodeName name = att.getNodeName();
-                        if ((name.getURI() != null)) {
-                            Saxon.Hej.om.NamespaceBinding b = new Saxon.Hej.om.NamespaceBinding(name.getPrefix(), name.getURI());
+                        if ((name.getNamespaceUri() != null)) {
+                            Saxon.Hej.om.NamespaceBinding b = new Saxon.Hej.om.NamespaceBinding(name.getPrefix(), name.getNamespaceUri());
                             if (!(allNamespaces.Contains(b))) {
                                 allNamespaces.Add(b);
                             }
@@ -289,9 +289,6 @@ namespace Saxon.Hej.tree.wrapper {
             public void close() {
                 @base.close();
             }
-            public void discharge() {
-                @base.discharge();
-            }
         
         }
     
@@ -327,12 +324,12 @@ namespace Saxon.Hej.tree.wrapper {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */
@@ -345,9 +342,19 @@ namespace Saxon.Hej.tree.wrapper {
             return Equals(other);
         }
 
+        /* Expanding default method getURI from interface NodeInfo */
+        public virtual string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
         /* Expanding default method iterateAxis from interface NodeInfo */
         public virtual Saxon.Hej.tree.iter.AxisIterator iterateAxis(int axisNumber) {
             return iterateAxis(axisNumber, Saxon.Hej.pattern.AnyNodeTest.getInstance());
+        }
+
+        /* Expanding default method getAttributeValue from interface NodeInfo */
+        public virtual string getAttributeValue(string uri, string local) {
+            return getAttributeValue((uri.Length==0 ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(uri)), local);
         }
 
         /* Expanding default method children from interface NodeInfo */
@@ -419,7 +426,7 @@ namespace Saxon.Hej.tree.wrapper {
 
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
     }

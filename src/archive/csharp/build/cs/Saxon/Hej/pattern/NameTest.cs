@@ -7,9 +7,9 @@ namespace Saxon.Hej.pattern {
         private readonly int fingerprint;
         private readonly Saxon.Hej.type.UType uType;
         private readonly Saxon.Hej.om.NamePool namePool;
-        private string uri = null;
+        private Saxon.Hej.om.NamespaceUri uri = null;
         private string localName = null;
-        public NameTest(int nodeKind, string uri, string localName, Saxon.Hej.om.NamePool namePool)  {
+        public NameTest(int nodeKind, Saxon.Hej.om.NamespaceUri uri, string localName, Saxon.Hej.om.NamePool namePool)  {
             this.uri = uri;
             this.localName = localName;
             this.nodeKind = nodeKind;
@@ -24,7 +24,7 @@ namespace Saxon.Hej.pattern {
             this.uType = Saxon.Hej.type.UType.fromTypeCode(nodeKind);
         }
         public NameTest(int nodeKind, Saxon.Hej.om.NodeName name, Saxon.Hej.om.NamePool pool)  {
-            this.uri = name.getURI();
+            this.uri = name.getNamespaceUri();
             this.localName = name.getLocalPart();
             this.nodeKind = nodeKind;
             this.fingerprint = name.obtainFingerprint(pool);
@@ -64,13 +64,13 @@ namespace Saxon.Hej.pattern {
                 return (node.getFingerprint() == fingerprint);
             } else {
                 computeUriAndLocal();
-                return (localName.Equals(node.getLocalPart()) && uri.Equals(node.getURI()));
+                return (localName.Equals(node.getLocalPart()) && uri.Equals(node.getNamespaceUri()));
             }
         }
         private void computeUriAndLocal() {
             if (((uri == null) || (localName == null))) {
                 Saxon.Hej.om.StructuredQName name = namePool.getUnprefixedQName(fingerprint);
-                uri = name.getURI();
+                uri = name.getNamespaceUri();
                 localName = name.getLocalPart();
             }
         }
@@ -94,7 +94,7 @@ namespace Saxon.Hej.pattern {
         public override Saxon.Ejava.util.Optional<Saxon.Hej.z.IntSet> getRequiredNodeNames() {
             return Saxon.Ejava.util.Optional<Saxon.Hej.z.IntSet>.of(new Saxon.Hej.z.IntSingletonSet(fingerprint));
         }
-        public string getNamespaceURI() {
+        public Saxon.Hej.om.NamespaceUri getNamespaceURI() {
             computeUriAndLocal();
             return uri;
         }
@@ -129,7 +129,7 @@ namespace Saxon.Hej.pattern {
         }
         public string generateJavaScriptNameTest(int targetVersion) {
             computeUriAndLocal();
-            return (((("q.uri==='"+Saxon.Hej.trace.ExpressionPresenter.jsEscape(uri))+"'&&q.local==='")+localName)+"'");
+            return (((("q.uri==='"+Saxon.Hej.trace.ExpressionPresenter.jsEscape(uri.ToString()))+"'&&q.local==='")+localName)+"'");
         }
         public override Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             Saxon.Ejava.util.Optional<string> explanation = base.explainMismatch(item, th);
@@ -141,9 +141,9 @@ namespace Saxon.Hej.pattern {
         public override string toShortString() {
             switch (nodeKind) {
               case Saxon.Hej.type.Type.ELEMENT:
-                return (getNamespaceURI().Length==0 ? namePool.getLocalName(getFingerprint()) : ToString());
+                return (getNamespaceURI().isEmpty() ? namePool.getLocalName(getFingerprint()) : ToString());
               case Saxon.Hej.type.Type.ATTRIBUTE:
-                return ("@"+((getNamespaceURI().Length==0 ? namePool.getLocalName(getFingerprint()) : ToString())));
+                return ("@"+((getNamespaceURI().isEmpty() ? namePool.getLocalName(getFingerprint()) : ToString())));
               default:
                 return ToString();
             }

@@ -57,7 +57,7 @@ namespace Saxon.Hej.lib {
                         } else {
                             try {
                                 string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(displayname);
-                                string muri = nsResolver.getURIForPrefix(parts[0], useDefaultNS);
+                                Saxon.Hej.om.NamespaceUri muri = nsResolver.getURIForPrefix(parts[0], useDefaultNS);
                                 if ((muri == null)) {
                                     throw new Saxon.Hej.trans.XPathException((("Namespace prefix '"+parts[0])+"' has not been declared"), errorCode);
                                 }

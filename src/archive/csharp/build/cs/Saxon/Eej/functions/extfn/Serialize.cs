@@ -31,7 +31,7 @@ namespace Saxon.Eej.functions.extfn {
                     outputProps.setProperty("method", lexicalName);
                 }
             } else {
-                if (((((secondArg is Saxon.Hej.om.NodeInfo) && (((Saxon.Hej.om.NodeInfo)(secondArg)).getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) && ((Saxon.Hej.om.NodeInfo)(secondArg)).getURI().Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) && ((Saxon.Hej.om.NodeInfo)(secondArg)).getLocalPart().Equals("output"))) {
+                if (((((secondArg is Saxon.Hej.om.NodeInfo) && (((Saxon.Hej.om.NodeInfo)(secondArg)).getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) && ((Saxon.Hej.om.NodeInfo)(secondArg)).getNamespaceUri().Equals(Saxon.Hej.om.NamespaceUri.XSLT)) && ((Saxon.Hej.om.NodeInfo)(secondArg)).getLocalPart().Equals("output"))) {
                     props = new Saxon.Ejava.util.Properties();
                     Saxon.Hej.expr.instruct.ResultDocument.processXslOutputElement((Saxon.Hej.om.NodeInfo)(secondArg), props, context);
                     outputProps = new Saxon.Hej.serialize.SerializationProperties(props);

@@ -13,9 +13,9 @@ namespace Saxon.Hej.functions {
         public Saxon.Hej.functions.FunctionLibrary get(int n) {
             return libraryList[n];
         }
-        public Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+        public Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
             foreach (Saxon.Hej.functions.FunctionLibrary lib in libraryList) {
-                Saxon.Hej.om.Function fi = lib.getFunctionItem(functionName, staticContext);
+                Saxon.Hej.om.FunctionItem fi = lib.getFunctionItem(functionName, staticContext);
                 if ((fi != null)) {
                     return fi;
                 }
@@ -30,7 +30,7 @@ namespace Saxon.Hej.functions {
             }
             return false;
         }
-        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
             bool debug = env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_EXTERNAL_FUNCTIONS);
             Saxon.Hej.lib.Logger err = env.getConfiguration().getLogger();
             if (debug) {
@@ -40,7 +40,7 @@ namespace Saxon.Hej.functions {
                 if (debug) {
                     err.info(("Trying "+lib.GetType().Name));
                 }
-                Saxon.Hej.expr.Expression func = lib.bind(functionName, staticArgs, env, reasons);
+                Saxon.Hej.expr.Expression func = lib.bind(functionName, staticArgs, keywords, env, reasons);
                 if ((func != null)) {
                     return func;
                 }
@@ -60,6 +60,17 @@ namespace Saxon.Hej.functions {
                 }
             }
             return null;
+        }
+        public bool bindUnboundFunctionCall(Saxon.Hej.expr.UserFunctionCall call, System.Collections.Generic.IList<string> reasons) {
+            foreach (Saxon.Hej.functions.FunctionLibrary lib in libraryList) {
+                if ((lib is Saxon.Hej.query.XQueryFunctionBinder)) {
+                    bool found = ((Saxon.Hej.query.XQueryFunctionBinder)(lib)).bindUnboundFunctionCall(call, reasons);
+                    if (found) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
         public System.Collections.Generic.IList<Saxon.Hej.functions.FunctionLibrary> getLibraryList() {
             return libraryList;

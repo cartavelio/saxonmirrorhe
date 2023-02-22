@@ -12,7 +12,7 @@ namespace Saxon.Hej.functions.hof {
                 boundContext.setCurrentIterator(null);
             } else {
                 Saxon.Hej.tree.iter.ManualIterator iter = new Saxon.Hej.tree.iter.ManualIterator(context.getContextItem(), context.getCurrentIterator().position());
-                iter.setLengthFinder(() => context.getLast());
+                iter.setLengthFinder(context.getLast /* instance method reference */);
                 boundContext.setCurrentIterator(iter);
             }
         }

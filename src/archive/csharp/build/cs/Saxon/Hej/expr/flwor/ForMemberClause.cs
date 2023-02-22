@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.flwor {
     public class ForMemberClause : Saxon.Hej.expr.flwor.ForClause {
+        protected internal Saxon.Hej.expr.elab.ItemEvaluator arrayOperandEvaluator;
         public ForMemberClause()  {
         }
         public override Saxon.Hej.expr.flwor.Clause.ClauseName getClauseKey() {
@@ -23,12 +24,12 @@ namespace Saxon.Hej.expr.flwor {
         public override void typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             Saxon.Hej.value.SequenceType decl = rangeVariable.getRequiredType();
             if ((allowsEmpty && !(Saxon.Hej.value.Cardinality.allowsZero(decl.getCardinality())))) {
-                Saxon.Hej.expr.parser.RoleDiagnostic emptyRole = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> emptyRole = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
                 Saxon.Hej.expr.Expression checker = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(getSequence(), Saxon.Hej.expr.StaticProperty.ALLOWS_ONE_OR_MORE, emptyRole);
                 setSequence(checker);
             }
             Saxon.Hej.value.SequenceType sequenceType = Saxon.Hej.value.SequenceType.makeSequenceType(new Saxon.Hej.ma.arrays.ArrayItemType(decl), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FOR_MEMBER, rangeVariable.getVariableQName().getDisplayName(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FOR_MEMBER, rangeVariable.getVariableQName().getDisplayName(), 0);
             setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
         }
         public override Saxon.Hej.expr.flwor.TuplePull getPullStream(Saxon.Hej.expr.flwor.TuplePull @base, Saxon.Hej.expr.XPathContext context) {
@@ -52,6 +53,15 @@ namespace Saxon.Hej.expr.flwor {
         public override void addToPathMap(Saxon.Hej.expr.parser.PathMap pathMap, Saxon.Hej.expr.parser.PathMap.PathMapNodeSet pathMapNodeSet) {
             Saxon.Hej.expr.parser.PathMap.PathMapNodeSet varPath = getSequence().addToPathMap(pathMap, pathMapNodeSet);
             pathMap.registerPathForVariable(rangeVariable, varPath);
+        }
+        public Saxon.Hej.ma.arrays.ArrayItem evaluateArrayExpression(Saxon.Hej.expr.XPathContext context) {
+            if ((arrayOperandEvaluator == null)) {
+                arrayOperandEvaluator = getSequence().makeElaborator().elaborateForItem();
+            }
+            return (Saxon.Hej.ma.arrays.ArrayItem)(/*Delegate.eval()*/arrayOperandEvaluator(context));
+        }
+        protected internal override Saxon.Hej.om.SequenceIterator getIterator(Saxon.Hej.expr.XPathContext context) {
+            return evaluateArrayExpression(context).parcels();
         }
     
     }

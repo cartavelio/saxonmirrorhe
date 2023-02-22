@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>disable</Nullable>
     <OutputType>Exe</OutputType>
     <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <Reference Include="Saxon">
-      <HintPath>../cs/bin/Release/net5.0/SaxonCS.dll</HintPath>
+      <HintPath>../cs/bin/Release/net6.0/osx-x64/SaxonCS.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -101,7 +101,7 @@ namespace Saxon.Eej.ee.validate {
             if (!(started)) {
                 try {
                     started = true;
-                    doc.setDefaultNamespace(REPORT_NS);
+                    doc.setDefaultNamespace(REPORT_NS.ToString());
                     report = doc.element("validation-report");
                     if ((this.systemId != null)) {
                         report.attribute("system-id", this.systemId);

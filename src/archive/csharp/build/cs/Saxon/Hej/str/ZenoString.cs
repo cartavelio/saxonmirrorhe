@@ -11,6 +11,7 @@ namespace Saxon.Hej.str {
             segments.Add(content);
             offsets.Add(0L);
         }
+        public static readonly Saxon.Hej.str.ZenoString EMPTY = new Saxon.Hej.str.ZenoString();
         public static Saxon.Hej.str.ZenoString of(Saxon.Hej.str.UnicodeString content) {
             if ((content is Saxon.Hej.str.ZenoString)) {
                 return (Saxon.Hej.str.ZenoString)(content);
@@ -128,6 +129,25 @@ namespace Saxon.Hej.str {
                 return z.concat(segments[last].prefix((end-offsets[last])));
             }
         }
+        public override bool hasSubstring(Saxon.Hej.str.UnicodeString other, long offset) {
+            if (((offset<0) || (offset>length()))) {
+                throw new System.IndexOutOfRangeException();
+            }
+            long len = other.length();
+            if (((len+offset)>length())) {
+                return false;
+            }
+            long end = (offset+len);
+            int first = segmentForOffset(offset);
+            int last = segmentForOffset((end-1));
+            if ((first == last)) {
+                Saxon.Hej.str.UnicodeString segment = segments[first];
+                long segmentOffset = offsets[first];
+                return segment.hasSubstring(other, (offset-segmentOffset));
+            } else {
+                return substring(offset, end).Equals(other);
+            }
+        }
         public override Saxon.Hej.str.ZenoString concat(Saxon.Hej.str.UnicodeString other) {
             if (isEmpty()) {
                 return ((other is Saxon.Hej.str.ZenoString) ? (Saxon.Hej.str.ZenoString)(other) : new Saxon.Hej.str.ZenoString(other));
@@ -171,6 +191,12 @@ namespace Saxon.Hej.str {
             foreach (Saxon.Hej.str.UnicodeString us in segments) {
                 us.copy24bit(target, offset);
                 offset += ((us.length32()*3));
+            }
+        }
+        internal override void copy32bit(int[] target, int offset) {
+            foreach (Saxon.Hej.str.UnicodeString us in segments) {
+                us.copy32bit(target, offset);
+                offset += us.length32();
             }
         }
         private Saxon.Hej.str.ZenoString consolidate() {
@@ -225,7 +251,6 @@ namespace Saxon.Hej.str {
                     Saxon.Impl.Helpers.ListUtils.Remove(offsets, (i+1));
                 }
             }
-            verifySegmentLengths();
             return this;
         }
         private Saxon.Hej.str.ZenoString consolidate1() {

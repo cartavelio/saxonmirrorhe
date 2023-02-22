@@ -46,7 +46,7 @@ namespace Saxon.Eej.ee.schema {
             }
         }
         public abstract override bool testLength(int actualLength);
-        public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
+        public override Saxon.Hej.om.FunctionItem getFacetAsFunctionItem() {
             Saxon.Hej.expr.Callable callable = new Inner_Callable_1(this);
             return new Saxon.Hej.functions.CallableFunction(1, callable, Saxon.Hej.type.SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
         }

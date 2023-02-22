@@ -24,6 +24,8 @@ namespace Saxon.Hej.str {
         }
         internal override void copy24bit(byte[] target, int offset) {
         }
+        internal override void copy32bit(int[] target, int offset) {
+        }
         public override Saxon.Hej.str.UnicodeString substring(long start, long end) {
             checkSubstringBounds(start, end);
             return this;
@@ -35,7 +37,7 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override long indexOf(Saxon.Hej.str.UnicodeString other, long from) {
-            return -1;
+            return ((other.isEmpty() && (from == 0)) ? 0 : -1);
         }
         public override bool isEmpty() {
             return true;

@@ -23,6 +23,9 @@ namespace Saxon.Hej.serialize {
         public void setUnicodeWriter(Saxon.Hej.str.UnicodeWriter unicodeWriter) {
             this.writer = unicodeWriter;
         }
+        public void setMustClose(bool mustClose) {
+            this.mustClose = mustClose;
+        }
         public override void setUnparsedEntity(string name, string uri, string publicId) {
         }
         public override void close() {

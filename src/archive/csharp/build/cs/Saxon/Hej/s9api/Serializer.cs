@@ -211,14 +211,14 @@ namespace Saxon.Hej.s9api {
         }
         public void setOutputProperty(Saxon.Api.QName property, string value) {
             Saxon.Hej.lib.SerializerFactory sf = processor.getUnderlyingConfiguration().getSerializerFactory();
-            string uri = property.Uri;
-            if ((uri.Length==0 || uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
+            Saxon.Hej.om.NamespaceUri uri = property.NamespaceUri;
+            if ((uri.isEmpty() || uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON))) {
                 try {
                     value = sf.checkOutputProperty(property.ClarkName, value);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException(e.Message);
                 }
-                if ((uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON) && property.LocalName.Equals("next-in-chain"))) {
+                if ((uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON) && property.LocalName.Equals("next-in-chain"))) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("saxon:next-in-chain is not a valid serialization property");
                 }
             }

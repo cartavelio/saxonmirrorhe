@@ -8,21 +8,17 @@ namespace Saxon.Hej.value {
         public static readonly Saxon.Hej.value.FloatValue ONE = new Saxon.Hej.value.FloatValue((float)(1.0));
         public static readonly Saxon.Hej.value.FloatValue NaN = new Saxon.Hej.value.FloatValue(System.Single.NaN);
         private readonly float value;
-        public FloatValue(float value)  {
+        public FloatValue(float value) : base (Saxon.Hej.type.BuiltInAtomicType.FLOAT) {
             this.value = value;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.FLOAT;
         }
         public static Saxon.Hej.value.FloatValue makeFloatValue(float value) {
             return new Saxon.Hej.value.FloatValue(value);
         }
-        public FloatValue(float value, Saxon.Hej.type.AtomicType type)  {
+        public FloatValue(float value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
             this.value = value;
-            typeLabel = type;
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.FloatValue v = new Saxon.Hej.value.FloatValue(value);
-            v.typeLabel = typeLabel;
-            return v;
+            return new Saxon.Hej.value.FloatValue(value, typeLabel);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.FLOAT;
@@ -63,7 +59,7 @@ namespace Saxon.Hej.value {
             return floatToString(value);
         }
         public override Saxon.Hej.str.UnicodeString getCanonicalLexicalRepresentation() {
-            Saxon.Hej.str.UnicodeBuilder fsb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder fsb = new Saxon.Hej.str.UnicodeBuilder(32);
             return Saxon.Hej.value.FloatingPointConverter.appendFloat(fsb, value, true);
         }
         public static Saxon.Hej.str.UnicodeString floatToString(float value) {

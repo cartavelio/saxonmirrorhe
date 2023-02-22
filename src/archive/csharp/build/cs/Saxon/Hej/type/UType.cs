@@ -191,12 +191,7 @@ namespace Saxon.Hej.type {
             return sb.ToString();
         }
         public string toStringWithIndefiniteArticle() {
-            string s = ToString();
-            if (("aeiouxy".IndexOf(s[0])>=0)) {
-                return (("an "+s)+" node");
-            } else {
-                return (("a "+s)+" node");
-            }
+            return (((Saxon.Hej.trans.Err.indefiniteArticleFor(ToString(), false)+" ")+this)+" node");
         }
         public bool overlaps(Saxon.Hej.type.UType other) {
             return (((bits&other.bits)) != 0);
@@ -239,7 +234,7 @@ namespace Saxon.Hej.type {
                 if ((item is Saxon.Hej.value.AtomicValue)) {
                     return ((Saxon.Hej.value.AtomicValue)(item)).getUType();
                 } else {
-                    if ((item is Saxon.Hej.om.Function)) {
+                    if ((item is Saxon.Hej.om.FunctionItem)) {
                         return Saxon.Hej.type.UType.FUNCTION;
                     } else {
                         if ((item.getGenre() == Saxon.Hej.om.Genre.EXTERNAL)) {
@@ -253,9 +248,8 @@ namespace Saxon.Hej.type {
         }
         public static Saxon.Hej.type.UType getUType(Saxon.Hej.om.GroundedValue sequence) {
             Saxon.Hej.om.SequenceIterator iter = sequence.iterate();
-            Saxon.Hej.om.Item item;
             Saxon.Hej.type.UType u = Saxon.Hej.type.UType.VOID;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 u = u.union(getUType(item));
             }
             return u;

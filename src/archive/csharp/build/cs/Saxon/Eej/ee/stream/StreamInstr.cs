@@ -6,6 +6,9 @@ namespace Saxon.Eej.ee.stream {
         private Saxon.Eej.ee.stream.Inversion action;
         public StreamInstr(Saxon.Hej.expr.Expression hrefExp, Saxon.Hej.expr.Expression body, Saxon.Hej.lib.ParseOptions options) : base (hrefExp, body, options) {
         }
+        public override void setSpaceStrippingRule(Saxon.Hej.om.SpaceStrippingRule rule) {
+            parseOptions = parseOptions.withSpaceStrippingRule(rule);
+        }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             Saxon.Hej.expr.parser.ContextItemStaticInfo newType = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.pattern.NodeKindTest.DOCUMENT, false);
             newType.setContextPostureStriding();
@@ -138,6 +141,8 @@ namespace Saxon.Eej.ee.stream {
                 try {
                     Saxon.Hej.functions.DocumentFn.sendDoc(href, getStaticBaseURIString(), getPackageData(), context, getLocation(), stream, parseOptions);
                 } catch (Saxon.Hej.trans.QuitParsingException q) {
+                    q.maybeSetLocation(getLocation());
+                    q.maybeSetContext(context);
                     if (verbose) {
                         controller.getConfiguration().getLogger().info((("Streaming "+href)+" : early exit "));
                     }
@@ -146,10 +151,45 @@ namespace Saxon.Eej.ee.stream {
             }
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Impl.Parallel.PushToPull(this, context).getIterator();
+            return new Saxon.Impl.Parallel.PushToPull(makeElaborator().elaborateForPush(), context).getIterator();
+        }
+        public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
+            try {
+                base.process(output, context);
+            } catch (Saxon.Hej.trans.QuitParsingException e) {
+            }
         }
         public override string getExportTag() {
             return "stream";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.ee.stream.StreamInstr.StreamInstrElaborator();
+        }
+        public class StreamInstrElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Eej.ee.stream.StreamInstr expr = (Saxon.Eej.ee.stream.StreamInstr)(getExpression());
+                return (output, context) => {
+                    try {
+                        expr.push(output, context);
+                    } catch (Saxon.Hej.trans.QuitParsingException q) {
+                        if (q.isNotifiedByConsumer()) {
+                            throw;
+                        }
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        e.maybeSetLocation(expr.getLocation());
+                        if ((e.getErrorCodeQName() == null)) {
+                            e.setErrorCode("FODC0002");
+                        }
+                        throw;
+                    }
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.elab.PushEvaluator pusher = elaborateForPush();
+                return context => new Saxon.Impl.Parallel.PushToPull(pusher, context).getIterator();
+            }
+        
         }
     
     }

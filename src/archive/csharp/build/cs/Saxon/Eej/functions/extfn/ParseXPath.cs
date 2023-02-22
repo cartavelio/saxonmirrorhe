@@ -7,7 +7,7 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.Configuration configuration = controller.getConfiguration();
             Saxon.Hej.value.AtomicValue content = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
-            throw new Saxon.Hej.trans.XPathException("saxon:parse-XPath() is only supported in Saxon-JS", Saxon.Hej.trans.SaxonErrorCode.SXJS0001);
+            throw new Saxon.Hej.trans.XPathException("saxon:parse-XPath() is only supported in SaxonJS", Saxon.Hej.trans.SaxonErrorCode.SXJS0001);
         }
     
     }

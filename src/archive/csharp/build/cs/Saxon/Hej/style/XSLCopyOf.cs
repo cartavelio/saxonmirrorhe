@@ -37,7 +37,7 @@ namespace Saxon.Hej.style {
                                 if (f.Equals("type")) {
                                     typeAtt = Saxon.Hej.value.Whitespace.trim(value);
                                 } else {
-                                    if ((attName.getLocalPart().Equals("read-once") && attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
+                                    if ((attName.getLocalPart().Equals("read-once") && attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON))) {
                                         compileError("The saxon:read-once attribute is no longer available - use xsl:stream");
                                     } else {
                                         checkUnknownAttribute(attName);
@@ -56,7 +56,7 @@ namespace Saxon.Hej.style {
             } else {
                 copyAccumulators = processBooleanAttribute("copy-accumulators", copyAccumulatorsAtt);
                 if ((copyAccumulators && isConstructingComplexContent())) {
-                    compileWarning((("Copying accumulators is pointless when the copied element "+"is immediately attached to a new parent, since that action ")+"will lose the accumulator values"), Saxon.Hej.trans.SaxonErrorCode.SXWN9017);
+                    issueWarning((("Copying accumulators is pointless when the copied element "+"is immediately attached to a new parent, since that action ")+"will lose the accumulator values"), Saxon.Hej.trans.SaxonErrorCode.SXWN9017);
                     copyAccumulators = false;
                 }
             }

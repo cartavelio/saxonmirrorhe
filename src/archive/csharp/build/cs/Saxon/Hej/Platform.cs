@@ -21,7 +21,7 @@ namespace Saxon.Hej {
         bool hasICUNumberer();
         Saxon.Hej.lib.StringCollator makeUcaCollator(string uri, Saxon.Hej.Configuration config);
         Saxon.Hej.regex.RegularExpression compileRegularExpression(Saxon.Hej.Configuration config, Saxon.Hej.str.UnicodeString regex, string flags, string hostLanguage, System.Collections.Generic.IList<string> warnings);
-        Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, string uri, string localName);
+        Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, Saxon.Hej.om.NamespaceUri uri, string localName);
         string getInstallationDirectory(string edition, Saxon.Hej.Configuration config);
         void registerAllBuiltInObjectModels(Saxon.Hej.Configuration config);
         void setDefaultSAXParserFactory(Saxon.Hej.Configuration config);

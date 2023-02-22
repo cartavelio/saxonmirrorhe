@@ -15,7 +15,7 @@ namespace Saxon.Hej.functions {
                 qname = errorCode;
             }
             if ((qname == null)) {
-                qname = new Saxon.Hej.value.QNameValue("err", Saxon.Hej.lib.NamespaceConstant.ERR, ((getArity() == 1) ? "FOTY0004" : "FOER0000"), Saxon.Hej.type.BuiltInAtomicType.QNAME, false);
+                qname = new Saxon.Hej.value.QNameValue("err", Saxon.Hej.om.NamespaceUri.ERR, ((getArity() == 1) ? "FOTY0004" : "FOER0000"), Saxon.Hej.type.BuiltInAtomicType.QNAME, false);
             }
             string description;
             if ((getArity()>1)) {
@@ -31,18 +31,18 @@ namespace Saxon.Hej.functions {
                 if ((errorObject.getLength() == 1)) {
                     Saxon.Hej.om.Item root = errorObject.head();
                     if ((((root is Saxon.Hej.om.NodeInfo)) && (((Saxon.Hej.om.NodeInfo)(root)).getNodeKind() == Saxon.Hej.type.Type.DOCUMENT))) {
-                        Saxon.Hej.tree.iter.AxisIterator iter = ((Saxon.Hej.om.NodeInfo)(root)).iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, "", "error", context.getConfiguration().getNamePool()));
+                        Saxon.Hej.tree.iter.AxisIterator iter = ((Saxon.Hej.om.NodeInfo)(root)).iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, Saxon.Hej.om.NamespaceUri.NULL, "error", context.getConfiguration().getNamePool()));
                         Saxon.Hej.om.NodeInfo errorElement = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next());
                         if ((errorElement != null)) {
-                            string module = errorElement.getAttributeValue("", "module");
-                            string lineVal = errorElement.getAttributeValue("", "line");
+                            string module = errorElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "module");
+                            string lineVal = errorElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "line");
                             int line;
                             try {
                                 line = ((lineVal == null) ? -1 : Saxon.Impl.Helpers.Utils.ParseInt(lineVal));
                             } catch (Saxon.Ejava.lang.NumberFormatException ex) {
                                 line = -1;
                             }
-                            string columnVal = errorElement.getAttributeValue("", "column");
+                            string columnVal = errorElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "column");
                             int col;
                             try {
                                 col = ((columnVal == null) ? -1 : Saxon.Impl.Helpers.Utils.ParseInt(columnVal));
@@ -66,7 +66,7 @@ namespace Saxon.Hej.functions {
               case 1:
                 Saxon.Hej.value.QNameValue arg0 = (Saxon.Hej.value.QNameValue)(arguments[0].head());
                 if ((arg0 == null)) {
-                    arg0 = new Saxon.Hej.value.QNameValue("err", Saxon.Hej.lib.NamespaceConstant.ERR, "FOER0000");
+                    arg0 = new Saxon.Hej.value.QNameValue("err", Saxon.Hej.om.NamespaceUri.ERR, "FOER0000");
                 }
                 return error(context, arg0, null, null);
               case 2:

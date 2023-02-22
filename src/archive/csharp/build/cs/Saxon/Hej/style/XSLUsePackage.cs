@@ -10,7 +10,7 @@ namespace Saxon.Hej.style {
         internal void findUsedPackage(Saxon.Hej.trans.CompilerInfo info) {
             if ((usedPackage == null)) {
                 if ((nameAtt == null)) {
-                    nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue("", "name"));
+                    nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name"));
                 }
                 if ((nameAtt == null)) {
                     reportAbsence("name");
@@ -49,7 +49,7 @@ namespace Saxon.Hej.style {
                     nameAtt = Saxon.Hej.value.Whitespace.trim(att.getValue());
                 } else {
                     if (f.Equals("package-version")) {
-                        ranges = System.Text.RegularExpressions.Regex.Replace(Saxon.Hej.value.Whitespace.trim(att.getValue()), "\\\\", "");
+                        ranges = Saxon.Hej.value.Whitespace.trim(att.getValue()).Replace("\\", "");
                     } else {
                         checkUnknownAttribute(attName);
                     }
@@ -130,7 +130,7 @@ namespace Saxon.Hej.style {
                     if ((name != null)) {
                         overrides.Add(name);
                     } else {
-                        if (((overridingDeclaration is Saxon.Hej.style.XSLTemplate) && (overridingDeclaration.getAttributeValue("", "match") != null))) {
+                        if (((overridingDeclaration is Saxon.Hej.style.XSLTemplate) && (overridingDeclaration.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "match") != null))) {
                             Saxon.Hej.om.StructuredQName[] modeNames = ((Saxon.Hej.style.XSLTemplate)(overridingDeclaration)).getModeNames();
                             foreach (Saxon.Hej.om.StructuredQName m in modeNames) {
                                 overrides.Add(new Saxon.Hej.trans.SymbolicName(Saxon.Hej.om.StandardNames.XSL_MODE, m));
@@ -171,7 +171,7 @@ namespace Saxon.Hej.style {
                     Saxon.Hej.tree.iter.AxisIterator overridings = @override.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.ELEMENT);
                     Saxon.Hej.om.NodeInfo overridingDeclaration;
                     while (((overridingDeclaration = ((/*1430*/Saxon.Hej.om.NodeInfo)overridings.next())) != null)) {
-                        if (((overridingDeclaration is Saxon.Hej.style.XSLTemplate) && (overridingDeclaration.getAttributeValue("", "match") != null))) {
+                        if (((overridingDeclaration is Saxon.Hej.style.XSLTemplate) && (overridingDeclaration.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "match") != null))) {
                             Saxon.Hej.om.StructuredQName[] modeNames = ((Saxon.Hej.style.XSLTemplate)(overridingDeclaration)).getModeNames();
                             foreach (Saxon.Hej.om.StructuredQName modeName in modeNames) {
                                 if (modeName.Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {

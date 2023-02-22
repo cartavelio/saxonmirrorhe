@@ -28,31 +28,23 @@ namespace Saxon.Hej.expr.sort {
                 }
                 gtbs.originalPosition = count++;
                 gtbs.currentGroupingKey = groupIter.getCurrentGroupingKey();
-                gtbs.currentGroup = new Saxon.Hej.om.MemoSequence(groupIter.iterateCurrentGroup());
+                gtbs.currentGroup = groupIter.currentGroup();
             }
         }
         public Saxon.Hej.om.AtomicSequence getCurrentGroupingKey() {
             return ((Saxon.Hej.expr.sort.GroupToBeSorted)(values[(position-1)])).currentGroupingKey;
         }
-        public Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-            return ((Saxon.Hej.expr.sort.GroupToBeSorted)(values[(position-1)])).currentGroup.iterate();
+        public Saxon.Hej.om.GroundedValue currentGroup() {
+            return ((Saxon.Hej.expr.sort.GroupToBeSorted)(values[(position-1)])).currentGroup;
         }
         public Saxon.Eej.ee.stream.ManualGroupIterator getSnapShot(Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Hej.expr.sort.SortedGroupIterator.ManualSortedGroupIterator(values, position);
-        }
-        private class ManualSortedGroupIterator : Saxon.Eej.ee.stream.ManualGroupIterator {
-            private readonly Saxon.Hej.expr.sort.ObjectToBeSorted[] values;
-            public ManualSortedGroupIterator(Saxon.Hej.expr.sort.ObjectToBeSorted[] values, int position) : base (values[(position-1)].value, position) {
-                this.values = values;
-                setLengthFinder(() => values.Length);
-            }
-            public override Saxon.Hej.om.AtomicSequence getCurrentGroupingKey() {
-                return ((Saxon.Hej.expr.sort.GroupToBeSorted)(values[(position()-1)])).currentGroupingKey;
-            }
-            public override Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-                return ((Saxon.Hej.expr.sort.GroupToBeSorted)(values[(position()-1)])).currentGroup.iterate();
-            }
-        
+            Saxon.Hej.expr.sort.GroupToBeSorted[] groupArray = (Saxon.Hej.expr.sort.GroupToBeSorted[])(values);
+            Saxon.Hej.expr.sort.GroupToBeSorted thisGroup = groupArray[(position-1)];
+            Saxon.Eej.ee.stream.ManualGroupIterator iter = new Saxon.Eej.ee.stream.ManualGroupIterator(thisGroup.value, position);
+            iter.setCurrentGroup(thisGroup.currentGroup);
+            iter.setCurrentGroupingKey(thisGroup.currentGroupingKey);
+            iter.setLengthFinder(() => values.Length);
+            return iter;
         }
     
     }

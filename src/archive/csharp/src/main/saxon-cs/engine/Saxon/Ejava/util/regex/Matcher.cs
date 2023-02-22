@@ -1,17 +1,16 @@
-using System;
-using ICU4N.Text;
 using SysRegex = System.Text.RegularExpressions;
-using Saxon.Ejava.lang;
+
 
 namespace Saxon.Ejava.util.regex {
     
-    /*
-     * Emulates the API of the Java regex engine by delegating all calls to the .NET regex engine
-     */
+    /// <summary>
+    /// Emulates the API of the Java regex engine by delegating all calls to the .NET regex engine
+    /// </summary>
     public class Matcher {
 
         private SysRegex.Regex regex;
         private SysRegex.Match latestMatch;
+        private int position = 0;
         private string input;
 
         public Matcher(SysRegex.Regex regex, string input) {
@@ -24,15 +23,25 @@ namespace Saxon.Ejava.util.regex {
         }
 
         public bool find() {
-            latestMatch = regex.Match(input);
-            return latestMatch.Success;
-        }
-        
-        public bool find(int start) {
+            // From the Javadoc: This method starts at the beginning of this matcher's region, or, if a previous
+            // invocation of the method was successful and the matcher has not since been reset,
+            // at the first character not matched by the previous match.
+            // However, see https://stackoverflow.com/questions/73579877, and bug 5655.
+            // It seems that after a successful zero-length match, the method actually advances one character.
+            // This implementation assumes that there are no calls after an unsuccessful match.
+            
+            int start = latestMatch?.Index ?? 0;
+            if (latestMatch?.Length == 0) {
+                start++;
+            }
             latestMatch = regex.Match(input, start);
-            return latestMatch.Success;
+            if (latestMatch.Success) {
+                position = latestMatch.Index + latestMatch.Length;
+                return true;
+            }
+            return false;
         }
-        
+
         public string replaceAll(string str) {
             return regex.Replace(input, str) ;
         }
@@ -50,15 +59,15 @@ namespace Saxon.Ejava.util.regex {
         }
         
         public int start(int i) {
-            throw new NotImplementedException();
+            return latestMatch.Groups[i].Index;
         }
 
         public int end() {
-            throw new NotImplementedException();
+            return latestMatch.Index + latestMatch.Length;
         }
         
         public int end(int i) {
-            throw new NotImplementedException();
+            return latestMatch.Groups[i].Index + latestMatch.Groups[i].Length;
         }
     }
 }

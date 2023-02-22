@@ -307,7 +307,7 @@ namespace Saxon.Hej.serialize {
                 }
                 bool isFirst = true;
                 foreach (Saxon.Hej.om.NamespaceBinding ns in namespaces) {
-                    @namespace(ns.getPrefix(), ns.getURI(), isFirst);
+                    @namespace(ns.getPrefix(), ns.getNamespaceUri(), isFirst);
                     isFirst = false;
                 }
                 foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
@@ -323,7 +323,7 @@ namespace Saxon.Hej.serialize {
         protected internal virtual bool writeDocTypeWithNullSystemId() {
             return (internalSubset != null);
         }
-        public void @namespace(string nsprefix, string nsuri, bool isFirst) {
+        public void @namespace(string nsprefix, Saxon.Hej.om.NamespaceUri nsuri, bool isFirst) {
             try {
                 if (nsprefix.Length==0) {
                     if (isFirst) {
@@ -331,7 +331,7 @@ namespace Saxon.Hej.serialize {
                     } else {
                         writeAttributeIndentString();
                     }
-                    writeAttribute(elementCode, "xmlns", nsuri, Saxon.Hej.@event.ReceiverOption.NONE);
+                    writeAttribute(elementCode, "xmlns", nsuri.ToString(), Saxon.Hej.@event.ReceiverOption.NONE);
                 } else {
                     if (nsprefix.Equals("xml")) {
                     } else {
@@ -341,13 +341,13 @@ namespace Saxon.Hej.serialize {
                             err.setErrorCode("SERE0008");
                             throw err;
                         }
-                        if ((undeclareNamespaces || !(nsuri.Length==0))) {
+                        if ((undeclareNamespaces || !(nsuri.isEmpty()))) {
                             if (isFirst) {
                                 writer.writeCodePoint(' ');
                             } else {
                                 writeAttributeIndentString();
                             }
-                            writeAttribute(elementCode, ("xmlns:"+nsprefix), nsuri, Saxon.Hej.@event.ReceiverOption.NONE);
+                            writeAttribute(elementCode, ("xmlns:"+nsprefix), nsuri.ToString(), Saxon.Hej.@event.ReceiverOption.NONE);
                         }
                     }
                 }
@@ -442,12 +442,9 @@ namespace Saxon.Hej.serialize {
             }
         }
         protected internal int testCharacters(Saxon.Hej.str.UnicodeString chars) {
-            Saxon.Hej.z.IntIterator iter = chars.codePoints();
-            while (iter.hasNext()) {
-                int ch = iter.next();
-                if (((ch>127) && !(characterSet.inCharset(ch)))) {
-                    return ch;
-                }
+            long foundInvalid = chars.indexWhere(ch => ((ch>127) && !(characterSet.inCharset(ch))), 0);
+            if ((foundInvalid>=0)) {
+                return chars.codePointAt(foundInvalid);
             }
             return 0;
         }
@@ -499,7 +496,7 @@ namespace Saxon.Hej.serialize {
                         writer.write(chars);
                     } else {
                         if (!(Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.DISABLE_ESCAPING))) {
-                            writeEscape(chars.tidy(), false);
+                            writeEscape(chars, false);
                         } else {
                             if ((testCharacters(chars) == 0)) {
                                 if (!(Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.USE_NULL_MARKERS))) {

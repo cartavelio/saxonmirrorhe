@@ -131,9 +131,9 @@ namespace Saxon.Hej.serialize {
             while (st2.hasMoreTokens()) {
                 string expandedName = st2.nextToken();
                 Saxon.Hej.om.StructuredQName sq = Saxon.Hej.om.StructuredQName.fromClarkName(expandedName);
-                string uri = sq.getURI();
-                if (((!(isHTML) || ((isHTML4 && !(uri.Equals(""))))) || (((isHTML5 && !(uri.Equals(""))) && !(uri.Equals(Saxon.Hej.lib.NamespaceConstant.XHTML)))))) {
-                    nameList.Add(new Saxon.Hej.om.FingerprintedQName("", sq.getURI(), sq.getLocalPart()));
+                Saxon.Hej.om.NamespaceUri uri = sq.getNamespaceUri();
+                if (((!(isHTML) || ((isHTML4 && !(uri.Equals(Saxon.Hej.om.NamespaceUri.NULL))))) || (((isHTML5 && !(uri.Equals(Saxon.Hej.om.NamespaceUri.NULL))) && !(uri.Equals(Saxon.Hej.om.NamespaceUri.XHTML)))))) {
+                    nameList.Add(new Saxon.Hej.om.FingerprintedQName("", uri, sq.getLocalPart()));
                 }
             }
         }

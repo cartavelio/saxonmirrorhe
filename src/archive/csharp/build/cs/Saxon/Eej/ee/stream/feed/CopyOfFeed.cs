@@ -73,16 +73,14 @@ namespace Saxon.Eej.ee.stream.feed {
                         }
                         if (((validation != Saxon.Hej.lib.Validation.PRESERVE) || (type != null))) {
                             Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
-                            Saxon.Hej.lib.ParseOptions validationOptions = new Saxon.Hej.lib.ParseOptions();
-                            validationOptions.setSchemaValidationMode(validation);
-                            validationOptions.setTopLevelType(type);
+                            Saxon.Hej.lib.ParseOptions validationOptions = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(validation).withTopLevelType(type);
                             Saxon.Hej.Configuration config = getPipelineConfiguration().getConfiguration();
                             Saxon.Hej.@event.SequenceCollector writer = new Saxon.Hej.@event.SequenceCollector(getPipelineConfiguration());
                             Saxon.Hej.@event.Receiver copier;
                             if ((kind == Saxon.Hej.type.Type.DOCUMENT)) {
                                 copier = config.getDocumentValidator(writer, node.getBaseURI(), validationOptions, loc);
                             } else {
-                                validationOptions.setTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(node).getStructuredQName());
+                                validationOptions = validationOptions.withTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(node).getStructuredQName());
                                 copier = config.getElementValidator(writer, validationOptions, loc);
                             }
                             node.copy(copier, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES, loc);
@@ -109,7 +107,7 @@ namespace Saxon.Eej.ee.stream.feed {
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType typeCode, Saxon.Hej.s9api.Location location, int properties) {
             getNextOutputter().startElement(elemName, typeCode, location, properties);
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             getNextOutputter().@namespace(prefix, namespaceUri, properties);
         }
         public override void attribute(Saxon.Hej.om.NodeName attName, Saxon.Hej.type.SimpleType typeCode, string value, Saxon.Hej.s9api.Location location, int properties) {
@@ -144,7 +142,7 @@ namespace Saxon.Eej.ee.stream.feed {
                 Saxon.Hej.@event.PipelineConfiguration pipe = feed.getPipelineConfiguration();
                 if ((feed.valuesReadyToBeOutput.Count==0 && (((feed.getResultFeed() is Saxon.Eej.ee.stream.feed.DecomposingFeed) || (feed.getResultFeed() is Saxon.Eej.ee.stream.feed.ComplexNodeEventFeed))))) {
                     Saxon.Hej.@event.Outputter r = feed.getNextOutputter();
-                    destination = new Inner_ProxyOutputter_15(this, r);
+                    destination = new Inner_ProxyOutputter_16(this, r);
                 } else {
                     builder = new Saxon.Hej.tree.tiny.TinyBuilder(pipe);
                     builder.setStatistics(pipe.getConfiguration().getTreeStatistics().TEMPORARY_TREE_STATISTICS);
@@ -157,18 +155,16 @@ namespace Saxon.Eej.ee.stream.feed {
             public override Saxon.Hej.@event.Receiver getGatherer() {
                 Saxon.Hej.@event.Receiver copier = destination;
                 if (!(feed.copyNamespaces)) {
-                    copier = new Inner_ProxyReceiver_16(this, copier);
+                    copier = new Inner_ProxyReceiver_17(this, copier);
                 }
                 if (((feed.validation != Saxon.Hej.lib.Validation.PRESERVE) || (feed.type != null))) {
-                    Saxon.Hej.lib.ParseOptions validationOptions = new Saxon.Hej.lib.ParseOptions();
-                    validationOptions.setSchemaValidationMode(feed.validation);
-                    validationOptions.setTopLevelType(feed.type);
+                    Saxon.Hej.lib.ParseOptions validationOptions = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(feed.validation).withTopLevelType(feed.type);
                     Saxon.Hej.Configuration config = feed.getPipelineConfiguration().getConfiguration();
                     Saxon.Hej.s9api.Location loc = ((feed.getExpression() == null) ? Saxon.Hej.expr.parser.Loc.NONE : feed.getExpression().getLocation());
                     if ((rootOfCopy.getNodeKind() == Saxon.Hej.type.Type.DOCUMENT)) {
                         copier = new Saxon.Hej.@event.ComplexContentOutputter(config.getDocumentValidator(copier, rootOfCopy.getBaseURI(), validationOptions, loc));
                     } else {
-                        validationOptions.setTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(rootOfCopy).getStructuredQName());
+                        validationOptions = validationOptions.withTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(rootOfCopy).getStructuredQName());
                         try {
                             copier = new Saxon.Hej.@event.ComplexContentOutputter(config.getElementValidator(copier, validationOptions, loc));
                         } catch (Saxon.Hej.trans.XPathException e) {
@@ -200,9 +196,9 @@ namespace Saxon.Eej.ee.stream.feed {
             public override void rollback() {
             }
         
-            private class Inner_ProxyOutputter_15 : Saxon.Hej.@event.ProxyOutputter {
+            private class Inner_ProxyOutputter_16 : Saxon.Hej.@event.ProxyOutputter {
                 private readonly PendingCopyAction outerInstance;
-                public Inner_ProxyOutputter_15(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+                public Inner_ProxyOutputter_16(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
                     this.outerInstance = outerInstance;
                 }
                 public override void open() {
@@ -211,20 +207,20 @@ namespace Saxon.Eej.ee.stream.feed {
                 }
             }
 
-            private class Inner_ProxyReceiver_16 : Saxon.Hej.@event.ProxyReceiver {
+            private class Inner_ProxyReceiver_17 : Saxon.Hej.@event.ProxyReceiver {
                 private readonly PendingCopyAction outerInstance;
-                public Inner_ProxyReceiver_16(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
+                public Inner_ProxyReceiver_17(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
                     this.outerInstance = outerInstance;
                 }
                 public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
                     Saxon.Hej.om.NamespaceMap map = Saxon.Hej.om.NamespaceMap.emptyMap();
-                    if (!(/*localparam*/elemName.getURI().Length==0)) {
-                        /*localvar*/map = /*localvar*/map.put(/*localparam*/elemName.getPrefix(), /*localparam*/elemName.getURI());
+                    if (!(/*localparam*/elemName.getNamespaceUri().isEmpty())) {
+                        /*localvar*/map = /*localvar*/map.put(/*localparam*/elemName.getPrefix(), /*localparam*/elemName.getNamespaceUri());
                     }
                     foreach (Saxon.Hej.om.AttributeInfo att in /*localparam*/attributes) {
                         Saxon.Hej.om.NodeName name = /*localvar*/att.getNodeName();
-                        if (!(/*localvar*/name.getURI().Length==0)) {
-                            /*localvar*/map = /*localvar*/map.put(/*localvar*/name.getPrefix(), /*localvar*/name.getURI());
+                        if (!(/*localvar*/name.getNamespaceUri().isEmpty())) {
+                            /*localvar*/map = /*localvar*/map.put(/*localvar*/name.getPrefix(), /*localvar*/name.getNamespaceUri());
                         }
                     }
                     base.startElement(/*localparam*/elemName, /*localparam*/type, /*localparam*/attributes, /*localvar*/map, /*localparam*/location, /*localparam*/properties);
@@ -324,9 +320,9 @@ namespace Saxon.Eej.ee.stream.feed {
         
         }
     
-        private class Inner_ProxyOutputter_15 : Saxon.Hej.@event.ProxyOutputter {
+        private class Inner_ProxyOutputter_16 : Saxon.Hej.@event.ProxyOutputter {
             private readonly PendingCopyAction outerInstance;
-            public Inner_ProxyOutputter_15(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+            public Inner_ProxyOutputter_16(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override void open() {
@@ -335,20 +331,20 @@ namespace Saxon.Eej.ee.stream.feed {
             }
         }
 
-        private class Inner_ProxyReceiver_16 : Saxon.Hej.@event.ProxyReceiver {
+        private class Inner_ProxyReceiver_17 : Saxon.Hej.@event.ProxyReceiver {
             private readonly PendingCopyAction outerInstance;
-            public Inner_ProxyReceiver_16(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
+            public Inner_ProxyReceiver_17(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
                 Saxon.Hej.om.NamespaceMap map = Saxon.Hej.om.NamespaceMap.emptyMap();
-                if (!(/*localparam*/elemName.getURI().Length==0)) {
-                    /*localvar*/map = /*localvar*/map.put(/*localparam*/elemName.getPrefix(), /*localparam*/elemName.getURI());
+                if (!(/*localparam*/elemName.getNamespaceUri().isEmpty())) {
+                    /*localvar*/map = /*localvar*/map.put(/*localparam*/elemName.getPrefix(), /*localparam*/elemName.getNamespaceUri());
                 }
                 foreach (Saxon.Hej.om.AttributeInfo att in /*localparam*/attributes) {
                     Saxon.Hej.om.NodeName name = /*localvar*/att.getNodeName();
-                    if (!(/*localvar*/name.getURI().Length==0)) {
-                        /*localvar*/map = /*localvar*/map.put(/*localvar*/name.getPrefix(), /*localvar*/name.getURI());
+                    if (!(/*localvar*/name.getNamespaceUri().isEmpty())) {
+                        /*localvar*/map = /*localvar*/map.put(/*localvar*/name.getPrefix(), /*localvar*/name.getNamespaceUri());
                     }
                 }
                 base.startElement(/*localparam*/elemName, /*localparam*/type, /*localparam*/attributes, /*localvar*/map, /*localparam*/location, /*localparam*/properties);

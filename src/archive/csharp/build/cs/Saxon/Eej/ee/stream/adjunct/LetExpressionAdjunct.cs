@@ -13,7 +13,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 letAction.pushMethod = Saxon.Hej.expr.Expression.ITEM_FEED_METHOD;
                 letAction.streamingChildSequence = 0;
                 route.prepend(letAction);
-                return (watchManager, @out, context) => route.getWatch(watchManager, @out, context);
+                return route.getWatch /* instance method reference */;
             } else {
                 Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), getExpression());
                 return sa.getWatchMaker(forGrouping);
@@ -51,7 +51,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             public override void endDocument() {
                 cco.endDocument();
             }
-            public override void @namespace(string prefix, string namespaceUri, int properties) {
+            public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
                 cco.@namespace(prefix, namespaceUri, properties);
             }
             public override void attribute(Saxon.Hej.om.NodeName attName, Saxon.Hej.type.SimpleType typeCode, string value, Saxon.Hej.s9api.Location location, int properties) {
@@ -74,10 +74,11 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
             public override void close() {
                 Saxon.Hej.expr.LetExpression letExpr = (Saxon.Hej.expr.LetExpression)(getExpression());
-                Saxon.Hej.om.Sequence value = collector.getSequence();
+                Saxon.Hej.om.GroundedValue value = collector.getSequence();
                 Saxon.Hej.expr.XPathContext context = getContext();
                 context.setLocalVariable(letExpr.getLocalSlotNumber(), value);
-                letExpr.getAction().process(getResultFeed(), context);
+                Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/letExpr.getAction().makeElaborator().elaborateForPush()(getResultFeed(), context);
+                Saxon.Hej.expr.Expression.dispatchTailCall(tc);
                 base.close();
             }
         

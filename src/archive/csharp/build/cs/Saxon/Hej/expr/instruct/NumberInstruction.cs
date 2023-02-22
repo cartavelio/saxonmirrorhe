@@ -85,14 +85,17 @@ namespace Saxon.Hej.expr.instruct {
             return this;
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> vec = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>(1);
             Saxon.Hej.om.NodeInfo source = (Saxon.Hej.om.NodeInfo)(selectOp.getChildExpression().evaluateItem(context));
+            return getPlaceMarker(source, context);
+        }
+        private Saxon.Hej.om.SequenceIterator getPlaceMarker(Saxon.Hej.om.NodeInfo source, Saxon.Hej.expr.XPathContext context) {
+            System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> numbers = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>(1);
             switch (level) {
               case SIMPLE:
                 {
                     long value = Saxon.Hej.tree.util.Navigator.getNumberSimple(source, context);
                     if ((value != 0)) {
-                        vec.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(value));
+                        numbers.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(value));
                     }
                     break ;
                 }
@@ -100,7 +103,7 @@ namespace Saxon.Hej.expr.instruct {
                 {
                     long value = Saxon.Hej.tree.util.Navigator.getNumberSingle(source, getCount(), getFrom(), context);
                     if ((value != 0)) {
-                        vec.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(value));
+                        numbers.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(value));
                     }
                     break ;
                 }
@@ -108,19 +111,19 @@ namespace Saxon.Hej.expr.instruct {
                 {
                     long value = Saxon.Hej.tree.util.Navigator.getNumberAny(this, source, getCount(), getFrom(), context, hasVariablesInPatterns);
                     if ((value != 0)) {
-                        vec.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(value));
+                        numbers.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(value));
                     }
                     break ;
                 }
               case MULTI:
                 {
                     foreach (long n in Saxon.Hej.tree.util.Navigator.getNumberMulti(source, getCount(), getFrom(), context)) {
-                        vec.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(n));
+                        numbers.Add(Saxon.Hej.value.Int64Value.makeIntegerValue(n));
                     }
                     break ;
                 }
             }
-            return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.value.AtomicValue>(vec);
+            return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.value.AtomicValue>(numbers);
         }
         public override string getExpressionName() {
             return "xsl:number";
@@ -139,6 +142,20 @@ namespace Saxon.Hej.expr.instruct {
                 getFrom().export(@out);
             }
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.NumberInstruction.NumberInstructionElaborator();
+        }
+        private class NumberInstructionElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.NumberInstruction expr = (Saxon.Hej.expr.instruct.NumberInstruction)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator sourceEval = expr.selectOp.getChildExpression().makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.om.NodeInfo source = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/sourceEval(context));
+                    return expr.getPlaceMarker(source, context);
+                } ;
+            }
+        
         }
     
     }

@@ -22,7 +22,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
         }
         public Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Eej.ee.stream.feed.FilteringFeed(@out, context, new Saxon.Eej.ee.stream.feed.FilteringFeed.FilterLambda((item, position) => (((!(Saxon.Hej.expr.AdjacentTextNodeMerger.isTextNode(item)) || !(item.getUnicodeStringValue().isEmpty()))) ? Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.MATCHES : Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.SKIP)));
+            return new Saxon.Eej.ee.stream.feed.FilteringFeed(watchManager, @out, context, new Saxon.Eej.ee.stream.feed.FilteringFeed.FilterLambda((item, position) => (((!(Saxon.Hej.expr.AdjacentTextNodeMerger.isTextNode(item)) || !(item.getUnicodeStringValue().isEmpty()))) ? Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.MATCHES : Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.SKIP)));
         }
     
     }

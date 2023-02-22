@@ -47,7 +47,7 @@ namespace Saxon.Hej.lib {
         public readonly static Saxon.Hej.lib.Feature<bool> LINE_NUMBERING = new Saxon.Hej.lib.Feature<bool>(38, "http://saxon.sf.net/feature/linenumbering");
         public readonly static Saxon.Hej.lib.Feature<bool> MARK_DEFAULTED_ATTRIBUTES = new Saxon.Hej.lib.Feature<bool>(39, "http://saxon.sf.net/feature/markDefaultedAttributes");
         public readonly static Saxon.Hej.lib.Feature<int> MAX_COMPILED_CLASSES = new Saxon.Hej.lib.Feature<int>(40, "http://saxon.sf.net/feature/maxCompiledClasses");
-        public readonly static Saxon.Hej.lib.Feature<string> MESSAGE_EMITTER_CLASS = new Saxon.Hej.lib.Feature<string>(41, "http://saxon.sf.net/feature/messageEmitterClass");
+        public readonly static Saxon.Hej.lib.Feature<System.Object> MESSAGE_EMITTER_CLASS = new Saxon.Hej.lib.Feature<System.Object>(41, "http://saxon.sf.net/feature/messageEmitterClass");
         public readonly static Saxon.Hej.lib.Feature<Saxon.Hej.lib.ModuleURIResolver> MODULE_URI_RESOLVER = new Saxon.Hej.lib.Feature<Saxon.Hej.lib.ModuleURIResolver>(42, "http://saxon.sf.net/feature/moduleURIResolver");
         public readonly static Saxon.Hej.lib.Feature<string> MODULE_URI_RESOLVER_CLASS = new Saxon.Hej.lib.Feature<string>(43, "http://saxon.sf.net/feature/moduleURIResolverClass");
         public readonly static Saxon.Hej.lib.Feature<bool> MONITOR_HOT_SPOT_BYTE_CODE = new Saxon.Hej.lib.Feature<bool>(44, "http://saxon.sf.net/feature/monitorHotSpotByteCode");

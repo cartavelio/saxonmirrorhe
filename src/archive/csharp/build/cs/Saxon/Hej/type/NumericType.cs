@@ -17,7 +17,7 @@ namespace Saxon.Hej.type {
         private NumericType() : base (Saxon.Ejava.util.Arrays.asList<Saxon.Hej.type.AtomicType>(Saxon.Hej.type.BuiltInAtomicType.DOUBLE, Saxon.Hej.type.BuiltInAtomicType.FLOAT, Saxon.Hej.type.BuiltInAtomicType.DECIMAL)) {}
         /* End of C# Replacement Method */
         public override Saxon.Hej.om.StructuredQName getTypeName() {
-            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, "numeric");
+            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, "numeric");
         }
         public override Saxon.Hej.om.Genre getGenre() {
             return Saxon.Hej.om.Genre.ATOMIC;
@@ -111,8 +111,8 @@ namespace Saxon.Hej.type {
         public string getName() {
             return "numeric";
         }
-        public string getTargetNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.SCHEMA;
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return Saxon.Hej.om.NamespaceUri.SCHEMA;
         }
         public int getFingerprint() {
             return Saxon.Hej.om.StandardNames.XS_NUMERIC;
@@ -124,7 +124,7 @@ namespace Saxon.Hej.type {
             return (("Q("+Saxon.Hej.lib.NamespaceConstant.SCHEMA)+"}numeric");
         }
         public override  /* REPLACING public */ Saxon.Hej.om.StructuredQName getStructuredQName() {
-            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, "numeric");
+            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, "numeric");
         }
         public bool isComplexType() {
             return false;
@@ -189,7 +189,7 @@ namespace Saxon.Hej.type {
                 throw new Saxon.Hej.type.SchemaException(s);
             }
         }
-        public Saxon.Hej.om.Function getComponentAsFunction() {
+        public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     

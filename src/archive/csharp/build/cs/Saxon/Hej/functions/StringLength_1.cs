@@ -25,6 +25,21 @@ namespace Saxon.Hej.functions {
         public override string getCompilerName() {
             return "StringLengthCompiler";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.StringLength_1.StringLengthFnElaborator();
+        }
+        public class StringLengthFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(true);
+                return context => {
+                    Saxon.Hej.str.UnicodeString str = /*Delegate.eval()*/argEval(context);
+                    return Saxon.Hej.value.Int64Value.makeIntegerValue(str.length());
+                } ;
+            }
+        
+        }
     
     }
 }

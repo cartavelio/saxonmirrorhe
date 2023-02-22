@@ -17,7 +17,7 @@ namespace Saxon.Hej.style {
             return true;
         }
         protected internal override void prepareAttributes() {
-            parseOptions = new Saxon.Hej.lib.ParseOptions(getConfiguration().getParseOptions());
+            parseOptions = getConfiguration().getParseOptions();
             string hrefAtt = null;
             string validationAtt = null;
             string typeAtt = null;
@@ -43,37 +43,37 @@ namespace Saxon.Hej.style {
                                 if (f.Equals("streamable")) {
                                     streaming = processStreamableAtt(value);
                                 } else {
-                                    if (attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
+                                    if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                                         isExtensionAttributeAllowed(attName.getDisplayName());
                                         string local = attName.getLocalPart();
                                         switch (local) {
                                           case "dtd-validation":
-                                            parseOptions.setDTDValidationMode((processBooleanAttribute(f, value) ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
+                                            parseOptions = parseOptions.withDTDValidationMode((processBooleanAttribute(f, value) ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
                                             break ;
                                           case "expand-attribute-defaults":
-                                            parseOptions.setExpandAttributeDefaults(processBooleanAttribute(f, value));
+                                            parseOptions = parseOptions.withExpandAttributeDefaults(processBooleanAttribute(f, value));
                                             break ;
                                           case "line-numbering":
-                                            parseOptions.setLineNumbering(processBooleanAttribute(f, value));
+                                            parseOptions = parseOptions.withLineNumbering(processBooleanAttribute(f, value));
                                             break ;
                                           case "xinclude":
-                                            parseOptions.setXIncludeAware(processBooleanAttribute(f, value));
+                                            parseOptions = parseOptions.withXIncludeAware(processBooleanAttribute(f, value));
                                             break ;
                                           case "validation-params":
                                             break ;
                                           case "strip-space":
                                             switch (Saxon.Hej.value.Whitespace.normalizeWhitespace(Saxon.Hej.str.StringView.of(value)).ToString()) {
                                               case "#all":
-                                                parseOptions.setSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance());
+                                                parseOptions = parseOptions.withSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance());
                                                 break ;
                                               case "#none":
-                                                parseOptions.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
+                                                parseOptions = parseOptions.withSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
                                                 break ;
                                               case "#ignorable":
-                                                parseOptions.setSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
+                                                parseOptions = parseOptions.withSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
                                                 break ;
                                               case "#default":
-                                                parseOptions.setSpaceStrippingRule(null);
+                                                parseOptions = parseOptions.withSpaceStrippingRule(null);
                                                 break ;
                                               default:
                                                 invalidAttribute("saxon:strip-space", "#all|#none|#ignorable|#default");
@@ -98,14 +98,14 @@ namespace Saxon.Hej.style {
             }
             if ((validationAtt != null)) {
                 int validation = validateValidationAttribute(validationAtt);
-                parseOptions.setSchemaValidationMode(validation);
+                parseOptions = parseOptions.withSchemaValidationMode(validation);
             }
             if ((typeAtt != null)) {
                 if (!(isSchemaAware())) {
                     compileError("The @type attribute is available only with a schema-aware XSLT processor", "XTSE1660");
                 }
-                parseOptions.setSchemaValidationMode(Saxon.Hej.lib.Validation.BY_TYPE);
-                parseOptions.setTopLevelType(getSchemaType(typeAtt));
+                parseOptions = parseOptions.withSchemaValidationMode(Saxon.Hej.lib.Validation.BY_TYPE);
+                parseOptions = parseOptions.withTopLevelType(getSchemaType(typeAtt));
             }
             if (((typeAtt != null) && (validationAtt != null))) {
                 compileError("The @validation and @type attributes are mutually exclusive", "XTSE1505");
@@ -119,15 +119,15 @@ namespace Saxon.Hej.style {
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             href = typeCheck("select", href);
             if (!(hasChildNodes())) {
-                compileWarning("An empty xsl:source-document instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
+                issueWarning("An empty xsl:source-document instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
             }
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.Configuration config = getConfiguration();
             if ((parseOptions.getSpaceStrippingRule() == null)) {
-                parseOptions.setSpaceStrippingRule(getPackageData().getSpaceStrippingRule());
+                parseOptions = parseOptions.withSpaceStrippingRule(getPackageData().getSpaceStrippingRule());
             }
-            parseOptions.setApplicableAccumulators(accumulators);
+            parseOptions = parseOptions.withApplicableAccumulators(accumulators);
             Saxon.Hej.expr.Expression action = compileSequenceConstructor(exec, decl, false);
             if ((action == null)) {
                 return Saxon.Hej.expr.Literal.makeEmptySequence();

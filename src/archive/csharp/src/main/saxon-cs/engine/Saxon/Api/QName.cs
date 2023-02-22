@@ -1,5 +1,6 @@
 using System;
 using System.Xml;
+using System.Xml.Linq;
 using Saxon.Hej.om;
 using Saxon.Hej.value;
 
@@ -157,7 +158,23 @@ namespace Saxon.Api {
         public QName(XmlQualifiedName qualifiedName) {
             string uri = qualifiedName.Namespace;
             string local = qualifiedName.Name;
-            string prefix = String.Empty;
+            string prefix = string.Empty;
+            sqName = new StructuredQName(prefix, uri, local);
+        }
+        
+        /// <summary>
+        /// Construct a <c>QName</c> from an <c>XName</c> (as defined in the
+        /// <c>System.Xml.Linq</c> package).
+        /// </summary>
+        /// <remarks>
+        /// Note that an <c>XName</c> does not contain any prefix, so the result
+        /// will always have a prefix of ""
+        /// </remarks>
+        /// <param name="name">The <c>XName</c></param>
+        public QName(XName name) {
+            string uri = name.Namespace == XNamespace.None ? "" : name.Namespace.NamespaceName;
+            string local = name.LocalName;
+            string prefix = string.Empty;
             sqName = new StructuredQName(prefix, uri, local);
         }
 
@@ -284,6 +301,8 @@ namespace Saxon.Api {
 
         public string Uri => sqName.getURI();
 
+        internal NamespaceUri NamespaceUri => sqName.getNamespaceUri();
+
         /// <summary>Get the local part of the <c>QName</c></summary>
 
         public string LocalName => sqName.getLocalPart();
@@ -351,11 +370,23 @@ namespace Saxon.Api {
         public XmlQualifiedName ToXmlQualifiedName() {
             return new XmlQualifiedName(LocalName, Uri);
         }
+        
+        /// <summary>
+        /// Convert the value to an <c>XName</c> (as defined in the
+        /// <c>System.Xml.Linq</c> package)
+        /// </summary>
+        /// <remarks>
+        /// Note that this loses the prefix.
+        /// </remarks>
+        public System.Xml.Linq.XName ToXName() {
+            XNamespace ns = Uri == "" ? XNamespace.None : XNamespace.Get(Uri);
+            return ns + LocalName;
+        }
 
         // internal method: Convert to a Saxon.Hej.value.QNameValue
 
         internal QNameValue ToQNameValue() {
-            return new QNameValue(sqName.getPrefix(), sqName.getURI(), sqName.getLocalPart(), null);
+            return new QNameValue(sqName.getPrefix(), sqName.getNamespaceUri(), sqName.getLocalPart(), null);
         }
 
         /// <summary>

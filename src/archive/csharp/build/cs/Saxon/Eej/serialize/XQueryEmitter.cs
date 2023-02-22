@@ -6,7 +6,7 @@ namespace Saxon.Eej.serialize {
         protected internal override void writeEscape(Saxon.Hej.str.UnicodeString chars, bool inAttribute) {
             bool inBraces = false;
             chars = chars.tidy();
-            Saxon.Hej.str.UnicodeBuilder buff = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder buff = new Saxon.Hej.str.UnicodeBuilder((chars.length32()+20));
             for (int i = 0; (i<chars.length()); i++) {
                 int c = chars.codePointAt(i);
                 if (((!(inBraces) && (c == '{')) && (chars.codePointAt((i+1)) != '{'))) {

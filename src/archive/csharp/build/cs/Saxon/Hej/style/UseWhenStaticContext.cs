@@ -14,8 +14,8 @@ namespace Saxon.Hej.style {
             this.namespaceContext = namespaceContext;
             setXPathLanguageLevel(31);
             Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-            lib.addFunctionLibrary(config.getUseWhenFunctionSet());
-            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(Saxon.Hej.functions.registry.UseWhen30FunctionSet.getInstance());
+            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
             lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(getConfiguration()));
             lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             config.addExtensionBinders(lib);
@@ -27,8 +27,8 @@ namespace Saxon.Hej.style {
         public Saxon.Hej.style.Compilation getCompilation() {
             return compilation;
         }
-        public override void issueWarning(string s, Saxon.Hej.s9api.Location locator) {
-            compilation.getCompilerInfo().getErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(s, Saxon.Hej.trans.SaxonErrorCode.SXWN9000, locator).asWarning()));
+        public override void issueWarning(string s, string errorCode, Saxon.Hej.s9api.Location locator) {
+            compilation.getCompilerInfo().getErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(s, errorCode, locator).asWarning()));
         }
         public override string getSystemId() {
             return getStaticBaseURI();
@@ -50,17 +50,17 @@ namespace Saxon.Hej.style {
         public override string getDefaultCollationName() {
             return Saxon.Hej.lib.NamespaceConstant.CODEPOINT_COLLATION_URI;
         }
-        public override string getDefaultFunctionNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.FN;
+        public override Saxon.Hej.om.NamespaceUri getDefaultFunctionNamespace() {
+            return Saxon.Hej.om.NamespaceUri.FN;
         }
         public override bool isInBackwardsCompatibleMode() {
             return false;
         }
-        public override bool isImportedSchema(string @namespace) {
+        public override bool isImportedSchema(Saxon.Hej.om.NamespaceUri @namespace) {
             return false;
         }
-        public override System.Collections.Generic.ISet<string> getImportedSchemaNamespaces() {
-            return new System.Collections.Generic.HashSet<string>();
+        public override System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getImportedSchemaNamespaces() {
+            return new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
         }
         public override Saxon.Hej.om.NamespaceResolver getNamespaceResolver() {
             return namespaceContext;

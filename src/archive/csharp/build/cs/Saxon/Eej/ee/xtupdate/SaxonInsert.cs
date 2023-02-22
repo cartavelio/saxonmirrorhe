@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.xtupdate {
-    public class SaxonInsert : Saxon.Hej.style.StyleElement {
+    public class SaxonInsert : Saxon.Hej.style.ExtensionInstruction {
         private Saxon.Hej.expr.Expression select;
         private string positionAtt;
-        public override bool isInstruction() {
-            return true;
-        }
         protected internal override bool mayContainSequenceConstructor() {
             return true;
         }

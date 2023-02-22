@@ -110,21 +110,21 @@ namespace Saxon.Hej.s9api {
             return env.getUnprefixedElementMatchingPolicy();
         }
         public void setWarningHandler(Saxon.Hej.lib.ErrorReporter reporter) {
-            env.setWarningHandler((message, location) => {
-                reporter.report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9000, location).asWarning()));
+            env.setWarningHandler((message, code, location) => {
+                reporter.report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(message, code, location).asWarning()));
             } );
         }
         public void declareNamespace(string prefix, string uri) {
             if ((cache != null)) {
                 cache.clear();
             }
-            env.declareNamespace(prefix, uri);
+            env.declareNamespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri));
         }
         public void importSchemaNamespace(string uri) {
             if ((cache != null)) {
                 cache.clear();
             }
-            env.getImportedSchemaNamespaces().Add(uri);
+            env.getImportedSchemaNamespaces().Add(Saxon.Hej.om.NamespaceUri.of(uri));
             env.setSchemaAware(true);
         }
         public void setAllowUndeclaredVariables(bool allow) {
@@ -140,13 +140,13 @@ namespace Saxon.Hej.s9api {
             if ((cache != null)) {
                 cache.clear();
             }
-            env.declareVariable(qname.Uri, qname.LocalName);
+            env.declareVariable(qname.NamespaceUri, qname.LocalName);
         }
         public void declareVariable(Saxon.Api.QName qname, Saxon.Api.XdmItemType itemType, Saxon.Hej.s9api.OccurrenceIndicator occurrences) {
             if ((cache != null)) {
                 cache.clear();
             }
-            Saxon.Hej.sxpath.XPathVariable var = env.declareVariable(qname.Uri, qname.LocalName);
+            Saxon.Hej.sxpath.XPathVariable var = env.declareVariable(qname.NamespaceUri, qname.LocalName);
             var.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(((Saxon.Hej.type.ItemType)itemType.Unwrap()), occurrences.getCardinality()));
         }
         public void addXsltFunctionLibrary(Saxon.Hej.s9api.XsltPackage libraryPackage) {
@@ -275,6 +275,9 @@ namespace Saxon.Hej.s9api {
             }
         }
         public void setDecimalFormatProperty(Saxon.Api.QName format, string property, string value) {
+            Saxon.Ejava.util.Objects.requireNonNull(format);
+            Saxon.Ejava.util.Objects.requireNonNull(property);
+            Saxon.Ejava.util.Objects.requireNonNull(value);
             Saxon.Hej.trans.DecimalFormatManager dfm = env.getDecimalFormatManager();
             if ((dfm == null)) {
                 dfm = new Saxon.Hej.trans.DecimalFormatManager(Saxon.Api.HostLanguage.XPATH, env.getXPathVersion());

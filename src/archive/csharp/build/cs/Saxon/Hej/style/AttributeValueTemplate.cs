@@ -6,7 +6,6 @@ namespace Saxon.Hej.style {
         private AttributeValueTemplate()  {
         }
         public static Saxon.Hej.expr.Expression make(string avt, Saxon.Hej.expr.StaticContext env) {
-            int languageLevel = env.getXPathVersion();
             System.Collections.Generic.IList<Saxon.Hej.expr.Expression> components = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(5);
             int i0, i1, i8, i9;
             int len = avt.Length;
@@ -39,15 +38,14 @@ namespace Saxon.Hej.style {
                                     addStringComponent(components, avt, last, i0);
                                 }
                                 Saxon.Hej.expr.Expression exp;
-                                Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, languageLevel);
-                                parser.setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XPATH, 31);
+                                Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
                                 parser.setAllowAbsentExpression(true);
                                 exp = parser.parse(avt, (i0+1), Saxon.Hej.expr.parser.Token.RCURLY, env);
                                 exp.setRetainedStaticContext(env.makeRetainedStaticContext());
                                 exp = exp.simplify();
                                 last = (parser.getTokenizer().currentTokenStartOffset+1);
                                 if ((((env is Saxon.Hej.style.ExpressionContext) && (((Saxon.Hej.style.ExpressionContext)(env)).getStyleElement() is Saxon.Hej.style.XSLAnalyzeString)) && isIntegerOrIntegerPair(exp))) {
-                                    env.issueWarning((((("Found {"+showIntegers(exp))+"} in regex attribute: perhaps {{")+showIntegers(exp))+"}} was intended? (The attribute is an AVT, so curly braces should be doubled)"), exp.getLocation());
+                                    env.issueWarning((((("Found {"+showIntegers(exp))+"} in regex attribute: perhaps {{")+showIntegers(exp))+"}} was intended? (The attribute is an AVT, so curly braces should be doubled)"), Saxon.Hej.trans.SaxonErrorCode.SXWN9036, exp.getLocation());
                                 }
                                 if (env.isInBackwardsCompatibleMode()) {
                                     components.Add(makeFirstItem(exp, env));

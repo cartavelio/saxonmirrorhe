@@ -5,25 +5,25 @@ namespace Saxon.Hej.functions {
     public class AvailableSystemProperties : Saxon.Hej.functions.SystemFunction {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> myList = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>();
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "version"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "vendor"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "vendor-url"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "product-name"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "product-version"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "is-schema-aware"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "supports-serialization"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "supports-backwards-compatibility"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "supports-namespace-axis"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "supports-streaming"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "supports-dynamic-evaluation"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "supports-higher-order-functions"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "xpath-version"));
-            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "xsd-version"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "version"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "vendor"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "vendor-url"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "product-name"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "product-version"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "is-schema-aware"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "supports-serialization"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "supports-backwards-compatibility"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "supports-namespace-axis"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "supports-streaming"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "supports-dynamic-evaluation"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "supports-higher-order-functions"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "xpath-version"));
+            myList.Add(new Saxon.Hej.value.QNameValue("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "xsd-version"));
             myList.Add(new Saxon.Hej.value.QNameValue("bin", Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.NAMESPACE, "version"));
             myList.Add(new Saxon.Hej.value.QNameValue("file", Saxon.Eej.functions.extfn.EXPathFileFunctionSet.NAMESPACE, "version"));
             if (context.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_EXTERNAL_FUNCTIONS)) {
                 foreach (string s in Saxon.Ejava.lang.System.getProperties().stringPropertyNames()) {
-                    myList.Add(new Saxon.Hej.value.QNameValue("", "", s));
+                    myList.Add(new Saxon.Hej.value.QNameValue("", Saxon.Hej.om.NamespaceUri.NULL, s));
                 }
             }
             return new Saxon.Hej.om.AtomicArray(myList);

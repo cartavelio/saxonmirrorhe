@@ -67,6 +67,38 @@ namespace Saxon.Hej.expr {
             }
             return result;
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.AndExpression.AndElaborator();
+        }
+        public class AndElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.AndExpression expr = (Saxon.Hej.expr.AndExpression)(getExpression());
+                Saxon.Hej.expr.elab.BooleanEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForBoolean();
+                Saxon.Hej.expr.elab.BooleanEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForBoolean();
+                return context => {
+                    Saxon.Hej.trans.XPathException saved = null;
+                    try {
+                        bool b0 = /*Delegate.eval()*/eval0(context);
+                        if (!(b0)) {
+                            return false;
+                        }
+                    } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                        saved = err.getXPathException();
+                    } catch (Saxon.Hej.trans.XPathException err) {
+                        saved = err;
+                    }
+                    bool b1 = /*Delegate.eval()*/eval1(context);
+                    if (!(b1)) {
+                        return false;
+                    }
+                    if ((saved != null)) {
+                        throw saved;
+                    }
+                    return true;
+                } ;
+            }
+        
+        }
     
     }
 }

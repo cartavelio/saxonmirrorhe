@@ -106,17 +106,21 @@ namespace Saxon.Hej.type {
         private BuiltInAtomicType(int fingerprint)  {
             this.fingerprint = fingerprint;
         }
+        public static bool isStringLike(Saxon.Hej.type.ItemType type) {
+            int fp = type.getPrimitiveType();
+            return (((fp == Saxon.Hej.om.StandardNames.XS_STRING) || (fp == Saxon.Hej.om.StandardNames.XS_ANY_URI)) || (fp == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC));
+        }
         public string getName() {
             return Saxon.Hej.om.StandardNames.getLocalName(fingerprint);
         }
         public Saxon.Hej.type.UType getUType() {
             return uType;
         }
-        public string getTargetNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.SCHEMA;
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return Saxon.Hej.om.NamespaceUri.SCHEMA;
         }
         public string getEQName() {
-            return ((("Q{"+Saxon.Hej.lib.NamespaceConstant.SCHEMA)+"}")+getName());
+            return ((("Q{"+Saxon.Hej.om.NamespaceUri.SCHEMA)+"}")+getName());
         }
         public bool isAbstract() {
             switch (fingerprint) {
@@ -204,7 +208,7 @@ namespace Saxon.Hej.type {
             return fingerprint;
         }
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
-            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, Saxon.Hej.om.StandardNames.getLocalName(fingerprint));
+            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, Saxon.Hej.om.StandardNames.getLocalName(fingerprint));
         }
         public string getDisplayName() {
             return Saxon.Hej.om.StandardNames.getDisplayName(fingerprint);
@@ -350,6 +354,7 @@ namespace Saxon.Hej.type {
                     if ((fingerprint == Saxon.Hej.om.StandardNames.XS_NOTATION)) {
                         Saxon.Hej.value.NotationValue nv = (Saxon.Hej.value.NotationValue)(result);
                         if (!(rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName()))) {
+                            System.Console.Error.WriteLine(rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName()));
                             return new Saxon.Hej.type.ValidationFailure((((("Notation {"+nv.getNamespaceURI())+"}")+nv.getLocalName())+" is not declared in the schema"));
                         }
                     }
@@ -459,7 +464,7 @@ namespace Saxon.Hej.type {
                     if (((Saxon.Hej.value.DecimalValue)(primValue)).isWholeNumber()) {
                         return null;
                     } else {
-                        return new Saxon.Hej.type.ValidationFailure((("xs:decimal value "+primValue.toShortString())+" cannot be down-cast to xs:integer"));
+                        return new Saxon.Hej.type.ValidationFailure((("xs:decimal value "+primValue.toShortString())+" cannot be used where xs:integer is required"));
                     }
                 } else {
                     return null;
@@ -538,7 +543,10 @@ namespace Saxon.Hej.type {
             Saxon.Hej.type.ItemType p = ((/*1430*/Saxon.Hej.type.BuiltInAtomicType)getPrimitiveItemType());
             return (((((p == Saxon.Hej.type.NumericType.getInstance()) || (p == DECIMAL)) || (p == DOUBLE)) || (p == FLOAT)) || (p == INTEGER));
         }
-        public Saxon.Hej.om.Function getComponentAsFunction() {
+        public bool isDurationType() {
+            return (((this == DURATION) || (this == DAY_TIME_DURATION)) || (this == YEAR_MONTH_DURATION));
+        }
+        public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     

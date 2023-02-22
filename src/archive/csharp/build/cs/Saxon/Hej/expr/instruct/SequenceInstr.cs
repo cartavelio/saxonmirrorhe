@@ -29,7 +29,7 @@ namespace Saxon.Hej.expr.instruct {
             return "sequence";
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            getBaseExpression().process(output, context);
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             return getBaseExpression().iterate(context);
@@ -39,6 +39,22 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "SequenceInstr";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.SequenceInstr.SequenceInstrElaborator();
+        }
+        public class SequenceInstrElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.UnaryExpression expr = (Saxon.Hej.expr.UnaryExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator basePull = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => /*Delegate.iterate()*/basePull(context);
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.UnaryExpression expr = (Saxon.Hej.expr.UnaryExpression)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator basePush = expr.getBaseExpression().makeElaborator().elaborateForPush();
+                return (output, context) => /*Delegate.processLeavingTail()*/basePush(output, context);
+            }
+        
         }
     
     }

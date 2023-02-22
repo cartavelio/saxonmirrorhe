@@ -31,7 +31,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// Applications using the class <c>Saxon.Hej.value.AtomicValue</c> should be aware that it is subject to occasional
         /// changes from one release to the next. For documentation on this class, see the Saxon-EE Javadoc documentation
-        /// for the very similar class <c>net.sf.saxon.value.AtomicValue</c>.
+        /// for the very similar class <see cref="Saxon.Hej.value.AtomicValue"/>.
         /// </remarks>
         /// <param name="atomicValue">The object to be wrapped</param>
 		public XdmAtomicValue(Saxon.Hej.value.AtomicValue atomicValue) : base(atomicValue) {
@@ -92,32 +92,38 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Construct an atomic value of type <c>xs:dateTime</c> from a .NET DateTime object
-        /// Here we probe the object for timezone offset information to create the resulting value. 
+        /// Construct an atomic value of type <c>xs:dateTime</c> from a .NET DateTime object.
+        /// The timezone offset in the result is taken from the system clock: more specifically,
+        /// it is the value of <c>TimeZoneInfo.Local.GetUtcOffset(DateTime.Now)</c> 
         /// </summary>
         /// <param name="dt">The DateTime object value</param>
         public XdmAtomicValue(DateTime dt) : base(_init(dt)) {
         }
+
+        private static int ticksToNanoseconds(long ticks) {
+            return Convert.ToInt32(ticks % TimeSpan.TicksPerSecond * 100);
+        }
         
         private static DateTimeValue _init(DateTime dt) {
+            
             switch (dt) {
                 case {Kind: DateTimeKind.Local}: {
-                    int offsetMinutes = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).Minutes;
+                    int offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).TotalMinutes;
                     return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
                         Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                        Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
+                        Convert.ToByte(dt.Second), ticksToNanoseconds(dt.Ticks),
                         offsetMinutes);
                 }
                 case {Kind: DateTimeKind.Utc}: {
                     return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
                         Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                        Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
+                        Convert.ToByte(dt.Second), ticksToNanoseconds(dt.Ticks),
                         0);
                 }
                 case {Kind: DateTimeKind.Unspecified}: {
                     return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
                         Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
-                        Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
+                        Convert.ToByte(dt.Second), ticksToNanoseconds(dt.Ticks),
                         Saxon.Hej.value.CalendarValue.NO_TIMEZONE);
                 }
                 default:
@@ -136,7 +142,7 @@ namespace Saxon.Api {
             DateTime dt = offset.DateTime;
             return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day),
                 Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second),
-                Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), offset.Offset.Minutes);
+                ticksToNanoseconds(dt.Ticks), (int)offset.Offset.TotalMinutes);
 
         }
 
@@ -166,7 +172,7 @@ namespace Saxon.Api {
         /// Construct an atomic value of type <c>xs:QName</c>
         /// </summary>
         /// <param name="q">The QName value</param>                
-        public XdmAtomicValue(QName q) : base(new QNameValue( q.Prefix, q.Uri, q.LocalName)) {
+        public XdmAtomicValue(QName q) : base(new QNameValue( q.Prefix, q.NamespaceUri, q.LocalName)) {
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace Saxon.Hej.functions {
                   case Saxon.Hej.type.Type.DOCUMENT:
                     return new Saxon.Hej.value.StringValue(fsb.ToString());
                   case Saxon.Hej.type.Type.ELEMENT:
-                    fsb2.append("/Q{").append(n.getURI()).append("}");
+                    fsb2.append("/Q{").append(n.getNamespaceUri()).append("}");
                     fsb2.append(n.getLocalPart());
                     fsb2.append("[").append(Saxon.Hej.tree.util.Navigator.getNumberSimple(n, context)).append("]");
                     fsb2.append(fsb);
@@ -35,7 +35,7 @@ namespace Saxon.Hej.functions {
                     break ;
                   case Saxon.Hej.type.Type.ATTRIBUTE:
                     fsb2.append("/@");
-                    string attURI = n.getURI();
+                    string attURI = n.getNamespaceUri().ToString();
                     if (!("".Equals(attURI))) {
                         fsb2.append("Q{").append(attURI).append("}");
                     }

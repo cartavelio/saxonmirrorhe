@@ -6,7 +6,7 @@ namespace Saxon.Hej.ma.json {
         public bool escape;
         protected internal Saxon.Hej.z.IntPredicateProxy charChecker;
         private Saxon.Hej.expr.XPathContext context;
-        private Saxon.Hej.om.Function fallbackFunction = null;
+        private Saxon.Hej.om.FunctionItem fallbackFunction = null;
         private const string REPLACEMENT = "\ufffd";
         public void setContext(Saxon.Hej.expr.XPathContext context) {
             this.context = context;
@@ -114,8 +114,8 @@ namespace Saxon.Hej.ma.json {
             Saxon.Hej.om.Sequence val = Saxon.Impl.Helpers.MapUtils.Get(options, "fallback");
             if ((val != null)) {
                 Saxon.Hej.om.Item fn = val.head();
-                if ((fn is Saxon.Hej.om.Function)) {
-                    fallbackFunction = (Saxon.Hej.om.Function)(fn);
+                if ((fn is Saxon.Hej.om.FunctionItem)) {
+                    fallbackFunction = (Saxon.Hej.om.FunctionItem)(fn);
                     if ((fallbackFunction.getArity() != 1)) {
                         throw new Saxon.Hej.trans.XPathException("Fallback function must have arity=1", "FOJS0005");
                     }

@@ -14,7 +14,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
                 string value = att.getValue();
                 string f = attName.getDisplayName();
-                if (attName.getURI().Length==0) {
+                if (attName.getNamespaceUri().isEmpty()) {
                     switch (f) {
                       case "match":
                         matchAtt = value;
@@ -41,7 +41,7 @@ namespace Saxon.Hej.style {
                         break ;
                     }
                 } else {
-                    if (attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
+                    if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                         if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                             if (attName.getLocalPart().Equals("capture")) {
                                 capture = processBooleanAttribute("saxon:capture", value);
@@ -58,7 +58,7 @@ namespace Saxon.Hej.style {
             }
             match = makePattern(matchAtt, "match");
             if ((capture && !(postDescent))) {
-                compileWarning("saxon:capture has no effect on a pre-descent accumulator rule", Saxon.Hej.trans.SaxonErrorCode.SXWN9000);
+                issueWarning("saxon:capture has no effect on a pre-descent accumulator rule", Saxon.Hej.trans.SaxonErrorCode.SXWN9044);
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
@@ -96,9 +96,9 @@ namespace Saxon.Hej.style {
             this.select = select;
         }
         protected internal override Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName name) {
-            if ((name.getLocalPart().Equals("value") && name.hasURI(""))) {
+            if ((name.getLocalPart().Equals("value") && name.hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
                 Saxon.Hej.style.SourceBinding sb = new Saxon.Hej.style.SourceBinding(this);
-                sb.setVariableQName(new Saxon.Hej.om.StructuredQName("", "", "value"));
+                sb.setVariableQName(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "value"));
                 System.Diagnostics.Debug.Assert((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) != null));
                 sb.setDeclaredType(((Saxon.Hej.style.XSLAccumulator)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getResultType());
                 sb.setProperty(Saxon.Hej.style.SourceBinding.BindingProperty.IMPLICITLY_DECLARED, true);

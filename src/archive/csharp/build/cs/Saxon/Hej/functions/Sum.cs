@@ -37,14 +37,14 @@ namespace Saxon.Hej.functions {
         public static Saxon.Hej.value.AtomicValue total(Saxon.Hej.om.SequenceIterator @in, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locator) {
             try {
                 Saxon.Hej.functions.Sum.SumFold fold = new Saxon.Hej.functions.Sum.SumFold(context, null);
-                Saxon.Hej.om.SequenceTool.supply(@in, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => fold.processItem(it) /* converted from instance method reference */));
+                Saxon.Hej.om.SequenceTool.supply(@in, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */fold.processItem));
                 return (Saxon.Hej.value.AtomicValue)(fold.result().head());
             } catch (Saxon.Hej.trans.XPathException e) {
                 e.maybeSetLocation(locator);
                 throw;
             }
         }
-        private class SumFold : Saxon.Hej.functions.Fold {
+        public class SumFold : Saxon.Hej.functions.Fold {
             private readonly Saxon.Hej.expr.XPathContext context;
             private readonly Saxon.Hej.value.AtomicValue zeroValue;
             private Saxon.Hej.value.AtomicValue data;
@@ -125,6 +125,25 @@ namespace Saxon.Hej.functions {
         }
         public override string getCompilerName() {
             return "SumCompiler";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.Sum.SumFnElaborator();
+        }
+        public class SumFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator puller = fnc.getArg(0).makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.ItemEvaluator zero = ((fnc.getArity() == 2) ? fnc.getArg(1).makeElaborator().elaborateForItem() : context => Saxon.Hej.value.Int64Value.ZERO);
+                return context => {
+                    Saxon.Hej.functions.Sum.SumFold fold = new Saxon.Hej.functions.Sum.SumFold(context, (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/zero(context)));
+                    Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/puller(context);
+                    for (Saxon.Hej.om.Item it; ((it = iter.next()) != null); ) {
+                        fold.processItem(it);
+                    }
+                    return fold.result().head();
+                } ;
+            }
+        
         }
     
     }

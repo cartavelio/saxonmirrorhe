@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.zeno {
     public class ZenoSequence : Saxon.Hej.om.GroundedValue {
-        private Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain;
+        private readonly Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain;
         public ZenoSequence()  {
             chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
         }
@@ -11,7 +11,7 @@ namespace Saxon.Hej.ma.zeno {
             Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>().addAll(items);
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
-        private ZenoSequence(Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain)  {
+        public ZenoSequence(Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain)  {
             this.chain = chain;
         }
         public Saxon.Hej.om.SequenceIterator iterate() {
@@ -28,13 +28,21 @@ namespace Saxon.Hej.ma.zeno {
             return (chain.isEmpty() ? null : chain.get(0));
         }
         public Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
-            if ((length == 1)) {
-                return itemAt(start);
-            }
             if ((start<0)) {
                 start = 0;
             }
-            return new Saxon.Hej.ma.zeno.ZenoSequence(chain.subList(start, (start+length)));
+            int size = chain.size();
+            if (((start>=size) || (length<=0))) {
+                return Saxon.Hej.value.EmptySequence.getInstance();
+            }
+            if ((((long)(start)+(long)(length))>(long)(size))) {
+                length = (size-start);
+            }
+            if ((length == 1)) {
+                return itemAt(start);
+            } else {
+                return new Saxon.Hej.ma.zeno.ZenoSequence(chain.subList(start, (start+length)));
+            }
         }
         public int getLength() {
             return chain.size();
@@ -73,25 +81,25 @@ namespace Saxon.Hej.ma.zeno {
                 return builder.ToString();
             }
         }
-        public void append(Saxon.Hej.om.Item item) {
-            chain = chain.add(item);
+        public Saxon.Hej.ma.zeno.ZenoSequence append(Saxon.Hej.om.Item item) {
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain.add(item));
         }
-        public void appendSequence(Saxon.Hej.om.GroundedValue items) {
-            if ((items is Saxon.Hej.ma.zeno.ZenoSequence)) {
-                int len = this.getLength();
-                switch (len) {
-                  case 0:
-                    chain = ((Saxon.Hej.ma.zeno.ZenoSequence)(items)).chain;
-                    return ;
-                  case 1:
-                    chain = ((Saxon.Hej.ma.zeno.ZenoSequence)(items)).chain.prepend(head());
-                    return ;
-                  default:
-                    chain = chain.addAll(((Saxon.Hej.ma.zeno.ZenoSequence)(items)).chain);
-                    return ;
+        public Saxon.Hej.ma.zeno.ZenoSequence appendSequence(Saxon.Hej.om.GroundedValue items) {
+            if ((chain.isEmpty() && (items is Saxon.Hej.ma.zeno.ZenoSequence))) {
+                return (Saxon.Hej.ma.zeno.ZenoSequence)(items);
+            }
+            switch (items.getLength()) {
+              case 0:
+                return this;
+              case 1:
+                Saxon.Hej.om.Item item = items.head();
+                return new Saxon.Hej.ma.zeno.ZenoSequence(chain.add(item));
+              default:
+                if ((items is Saxon.Hej.ma.zeno.ZenoSequence)) {
+                    return new Saxon.Hej.ma.zeno.ZenoSequence(chain.concat(((Saxon.Hej.ma.zeno.ZenoSequence)(items)).chain));
+                } else {
+                    return new Saxon.Hej.ma.zeno.ZenoSequence(chain.addAll(items.asIterable()));
                 }
-            } else {
-                chain = chain.addAll(items.asIterable());
             }
         }
         public static Saxon.Hej.ma.zeno.ZenoSequence join(System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> segments) {
@@ -108,8 +116,8 @@ namespace Saxon.Hej.ma.zeno {
             return new Saxon.Hej.ma.zeno.ZenoSequence(list);
         }
         public class ZenoSequenceIterator : Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.expr.LastPositionFinder {
-            private Saxon.Hej.ma.zeno.ZenoSequence sequence;
-            private System.Collections.Generic.IEnumerator<Saxon.Hej.om.Item> chainIterator;
+            private readonly Saxon.Hej.ma.zeno.ZenoSequence sequence;
+            private readonly System.Collections.Generic.IEnumerator<Saxon.Hej.om.Item> chainIterator;
             private int position = 0;
             public ZenoSequenceIterator(Saxon.Hej.ma.zeno.ZenoSequence sequence)  {
                 this.sequence = sequence;
@@ -143,10 +151,6 @@ namespace Saxon.Hej.ma.zeno {
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
             }
 
         }
@@ -183,12 +187,12 @@ namespace Saxon.Hej.ma.zeno {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */

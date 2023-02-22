@@ -10,27 +10,27 @@ namespace Saxon.Hej.functions {
         private MathFunctionSet()  {
             init();
         }
-        private void reg1(string name, System.Type implementation) {
-            register(name, 1, implementation, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, CARD0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, EMPTY);
+        private void reg1(string name, System.Func<System.Double,System.Double> method) {
+            register(name, 1, e => e.populate(() => new Saxon.Hej.functions.MathFunctionSet.TrigFn1(method), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, CARD0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, EMPTY));
         }
         private void init() {
-            register("pi", 0, typeof(Saxon.Hej.functions.MathFunctionSet.PiFn), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0);
-            reg1("sin", typeof(Saxon.Hej.functions.MathFunctionSet.SinFn));
-            reg1("cos", typeof(Saxon.Hej.functions.MathFunctionSet.CosFn));
-            reg1("tan", typeof(Saxon.Hej.functions.MathFunctionSet.TanFn));
-            reg1("asin", typeof(Saxon.Hej.functions.MathFunctionSet.AsinFn));
-            reg1("acos", typeof(Saxon.Hej.functions.MathFunctionSet.AcosFn));
-            reg1("atan", typeof(Saxon.Hej.functions.MathFunctionSet.AtanFn));
-            reg1("sqrt", typeof(Saxon.Hej.functions.MathFunctionSet.SqrtFn));
-            reg1("log", typeof(Saxon.Hej.functions.MathFunctionSet.LogFn));
-            reg1("log10", typeof(Saxon.Hej.functions.MathFunctionSet.Log10Fn));
-            reg1("exp", typeof(Saxon.Hej.functions.MathFunctionSet.ExpFn));
-            reg1("exp10", typeof(Saxon.Hej.functions.MathFunctionSet.Exp10Fn));
-            register("pow", 2, typeof(Saxon.Hej.functions.MathFunctionSet.PowFn), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, CARD0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, EMPTY).arg(1, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null);
-            register("atan2", 2, typeof(Saxon.Hej.functions.MathFunctionSet.Atan2Fn), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null);
+            register("pi", 0, e => e.populate(() => new Saxon.Hej.functions.MathFunctionSet.PiFn(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0));
+            reg1("sin", Saxon.Ejava.lang.Math.sin /* known method reference */);
+            reg1("cos", Saxon.Ejava.lang.Math.cos /* known method reference */);
+            reg1("tan", Saxon.Ejava.lang.Math.tan /* known method reference */);
+            reg1("asin", Saxon.Ejava.lang.Math.asin /* known method reference */);
+            reg1("acos", Saxon.Ejava.lang.Math.acos /* known method reference */);
+            reg1("atan", Saxon.Ejava.lang.Math.atan /* known method reference */);
+            reg1("sqrt", Saxon.Ejava.lang.Math.sqrt /* known method reference */);
+            reg1("log", Saxon.Ejava.lang.Math.log /* known method reference */);
+            reg1("log10", Saxon.Ejava.lang.Math.log10 /* known method reference */);
+            reg1("exp", Saxon.Ejava.lang.Math.exp /* known method reference */);
+            reg1("exp10", input => System.Math.Pow(10, input));
+            register("pow", 2, e => e.populate(() => new Saxon.Hej.functions.MathFunctionSet.PowFn(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, CARD0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, OPT, EMPTY).arg(1, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null));
+            register("atan2", 2, e => e.populate(() => new Saxon.Hej.functions.MathFunctionSet.Atan2Fn(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.DOUBLE, ONE, null));
         }
-        public override string getNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.MATH;
+        public override Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.MATH;
         }
         public override string getConventionalPrefix() {
             return "math";
@@ -44,81 +44,18 @@ namespace Saxon.Hej.functions {
             }
         
         }
-        public abstract class TrigFn1 : Saxon.Hej.functions.SystemFunction {
-            protected internal abstract double compute(double input);
+        public class TrigFn1 : Saxon.Hej.functions.SystemFunction {
+            private readonly System.Func<System.Double,System.Double> method;
+            public TrigFn1(System.Func<System.Double,System.Double> method)  {
+                this.method = method;
+            }
             public override Saxon.Hej.om.GroundedValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
                 Saxon.Hej.value.DoubleValue @in = (Saxon.Hej.value.DoubleValue)(args[0].head());
                 if ((@in == null)) {
                     return Saxon.Hej.value.EmptySequence.getInstance();
                 } else {
-                    return new Saxon.Hej.value.DoubleValue(compute(@in.getDoubleValue()));
+                    return new Saxon.Hej.value.DoubleValue(method(@in.getDoubleValue()));
                 }
-            }
-        
-        }
-        public class SinFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Sin(input);
-            }
-        
-        }
-        public class CosFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Cos(input);
-            }
-        
-        }
-        public class TanFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Tan(input);
-            }
-        
-        }
-        public class AsinFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Asin(input);
-            }
-        
-        }
-        public class AcosFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Acos(input);
-            }
-        
-        }
-        public class AtanFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Atan(input);
-            }
-        
-        }
-        public class SqrtFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Sqrt(input);
-            }
-        
-        }
-        public class LogFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Log(input);
-            }
-        
-        }
-        public class Log10Fn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Log10(input);
-            }
-        
-        }
-        public class ExpFn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Exp(input);
-            }
-        
-        }
-        public class Exp10Fn : Saxon.Hej.functions.MathFunctionSet.TrigFn1 {
-            protected internal override double compute(double input) {
-                return System.Math.Pow(10, input);
             }
         
         }

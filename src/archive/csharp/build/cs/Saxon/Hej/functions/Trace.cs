@@ -36,9 +36,9 @@ namespace Saxon.Hej.functions {
                         if (((val is Saxon.Hej.ma.arrays.ArrayItem) || (val is Saxon.Hej.ma.map.MapItem))) {
                             @out.info(((label+": ")+val.toShortString()));
                         } else {
-                            if ((val is Saxon.Hej.om.Function)) {
-                                Saxon.Hej.om.StructuredQName name = ((Saxon.Hej.om.Function)(val)).getFunctionName();
-                                @out.info(((((label+": function ")+(((name == null) ? "(anon)" : name.getDisplayName())))+"#")+((Saxon.Hej.om.Function)(val)).getArity()));
+                            if ((val is Saxon.Hej.om.FunctionItem)) {
+                                Saxon.Hej.om.StructuredQName name = ((Saxon.Hej.om.FunctionItem)(val)).getFunctionName();
+                                @out.info(((((label+": function ")+(((name == null) ? "(anon)" : name.getDisplayName())))+"#")+((Saxon.Hej.om.FunctionItem)(val)).getArity()));
                             } else {
                                 if ((val.getGenre() == Saxon.Hej.om.Genre.EXTERNAL)) {
                                     System.Object obj = ((Saxon.Hej.value.ObjectValue<object>)(val)).getObject();
@@ -59,7 +59,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.Controller controller = context.getController();
             string label = ((arguments.Length == 1) ? "*" : arguments[1].head().getStringValue());
             if (controller.isTracing()) {
-                Saxon.Hej.om.Sequence value = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[0].iterate());
+                Saxon.Hej.om.Sequence value = arguments[0].materialize();
                 notifyListener(label, value, context);
                 return value;
             } else {
@@ -100,9 +100,6 @@ namespace Saxon.Hej.functions {
             }
             public void close() {
                 @base.close();
-            }
-            public void discharge() {
-                @base.discharge();
             }
         
         }

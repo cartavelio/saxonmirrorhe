@@ -10,27 +10,30 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.AttributeMap atts = attributes();
             string[] allowed = {"id", "test", "type", "xpathDefaultNamespace"};
             allowAttributes(atts, allowed);
-            string defaultNamespace = atts.getValue("", "xpathDefaultNamespace");
+            string defaultNamespace = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xpathDefaultNamespace");
             if ((defaultNamespace == null)) {
                 defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
             }
+            Saxon.Hej.om.NamespaceUri defaultNamespaceUri;
             if (defaultNamespace.Equals("##defaultNamespace")) {
-                defaultNamespace = getURIForPrefix("", true);
+                defaultNamespaceUri = getURIForPrefix("", true);
             } else {
                 if (defaultNamespace.Equals("##targetNamespace")) {
-                    defaultNamespace = getXSDSchema().getTargetNamespace();
+                    defaultNamespaceUri = getXSDSchema().getTargetNamespace();
                 } else {
                     if (defaultNamespace.Equals("##local")) {
-                        defaultNamespace = "";
+                        defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.NULL;
+                    } else {
+                        defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.of(defaultNamespace);
                     }
                 }
             }
-            string xpath = atts.getValue("", "test");
+            string xpath = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "test");
             Saxon.Hej.sxpath.XPathExpression condition = null;
             System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.sxpath.XPathVariable> parameters = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.sxpath.XPathVariable>();
             if ((xpath != null)) {
                 Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext env = new Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext(this);
-                env.setDefaultElementNamespace(defaultNamespace);
+                env.setDefaultElementNamespace(defaultNamespaceUri);
                 env.setBaseURI(getBaseURI());
                 env.setXPathLanguageLevel((getXSDSchema().getAllowedExtensions().Contains("any-xpath-version") ? 31 : 20));
                 foreach (Saxon.Hej.expr.instruct.GlobalParam param in getXSDSchema().getGlobalParams()) {
@@ -58,7 +61,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             alternative.setDefaultElementNamespace(defaultNamespace);
             alternative.setBaseURI(getBaseURI());
             alternative.setParameters(parameters);
-            string attValue = atts.getValue("", "type");
+            string attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "type");
             if ((attValue != null)) {
                 int fp;
                 try {

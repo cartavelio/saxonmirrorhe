@@ -42,7 +42,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         private static Saxon.Hej.expr.instruct.UseAttributeSet makeUseAttributeSet(Saxon.Hej.om.StructuredQName name, Saxon.Hej.style.StyleElement instruction) {
             Saxon.Hej.expr.instruct.AttributeSet target;
-            if ((name.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT) && name.getLocalPart().Equals("original"))) {
+            if ((name.hasURI(Saxon.Hej.om.NamespaceUri.XSLT) && name.getLocalPart().Equals("original"))) {
                 target = (Saxon.Hej.expr.instruct.AttributeSet)(instruction.getXslOriginal(Saxon.Hej.om.StandardNames.XSL_ATTRIBUTE_SET));
             } else {
                 Saxon.Hej.expr.Component invokee = instruction.getContainingPackage().getComponent(new Saxon.Hej.trans.SymbolicName(Saxon.Hej.om.StandardNames.XSL_ATTRIBUTE_SET, name));
@@ -107,33 +107,6 @@ namespace Saxon.Hej.expr.instruct {
         public Saxon.Hej.om.StructuredQName getTargetAttributeSetName() {
             return targetName;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.Component target;
-            if ((bindingSlot<0)) {
-                target = getFixedTarget();
-            } else {
-                target = context.getTargetComponent(bindingSlot);
-                if (target.isHiddenAbstractComponent()) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot expand an abstract attribute set ("+targetName.getDisplayName())+") with no implementation"), "XTDE3052");
-                    err.setLocation(getLocation());
-                    throw err;
-                }
-            }
-            if ((target == null)) {
-                throw new Saxon.Ejava.lang.AssertionError(("Failed to locate attribute set "+getTargetAttributeSetName().getEQName()));
-            }
-            Saxon.Hej.expr.instruct.AttributeSet @as = (Saxon.Hej.expr.instruct.AttributeSet)(target.getActor());
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setCurrentComponent(target);
-            c2.setOrigin(this);
-            Saxon.Hej.expr.instruct.SlotManager sm = @as.getStackFrameMap();
-            if ((sm == null)) {
-                sm = Saxon.Hej.expr.instruct.SlotManager.EMPTY;
-            }
-            c2.openStackFrame(sm);
-            @as.expand(output, c2);
-            return null;
-        }
         public override string getExpressionName() {
             return "useAS";
         }
@@ -157,6 +130,42 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "UseAttributeSet";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.UseAttributeSet.UseAttributeSetElaborator();
+        }
+        public class UseAttributeSetElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.UseAttributeSet expr = (Saxon.Hej.expr.instruct.UseAttributeSet)(getExpression());
+                return (output, context) => {
+                    Saxon.Hej.expr.Component target;
+                    if ((expr.bindingSlot<0)) {
+                        target = expr.getFixedTarget();
+                    } else {
+                        target = context.getTargetComponent(expr.bindingSlot);
+                        if (target.isHiddenAbstractComponent()) {
+                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot expand an abstract attribute set ("+expr.targetName.getDisplayName())+") with no implementation"), "XTDE3052");
+                            err.setLocation(expr.getLocation());
+                            throw err;
+                        }
+                    }
+                    if ((target == null)) {
+                        throw new Saxon.Ejava.lang.AssertionError(("Failed to locate attribute set "+expr.getTargetAttributeSetName().getEQName()));
+                    }
+                    Saxon.Hej.expr.instruct.AttributeSet @as = (Saxon.Hej.expr.instruct.AttributeSet)(target.getActor());
+                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                    c2.setCurrentComponent(target);
+                    c2.setOrigin(expr);
+                    Saxon.Hej.expr.instruct.SlotManager sm = @as.getStackFrameMap();
+                    if ((sm == null)) {
+                        sm = Saxon.Hej.expr.instruct.SlotManager.EMPTY;
+                    }
+                    c2.openStackFrame(sm);
+                    @as.expand(output, c2);
+                    return null;
+                } ;
+            }
+        
         }
     
     }

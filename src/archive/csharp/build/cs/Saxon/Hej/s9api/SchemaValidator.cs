@@ -24,6 +24,7 @@ namespace Saxon.Hej.s9api {
         public abstract bool isExpandAttributeDefaults();
         public abstract void setParameter(Saxon.Api.QName name, Saxon.Api.XdmValue value);
         public abstract Saxon.Api.XdmValue getParameter(Saxon.Api.QName name);
+        public abstract Saxon.Hej.type.ValidationParams getValidationParameters();
         public abstract void validate(Saxon.Ejavax.xml.transform.Source source);
         public abstract void validateMultiple(System.Collections.Generic.IEnumerable<Saxon.Ejavax.xml.transform.Source> sources);
         public abstract override Saxon.Hej.@event.Receiver getReceiver(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.serialize.SerializationProperties @params);

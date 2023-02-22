@@ -205,86 +205,15 @@ namespace Saxon.Hej.expr.instruct {
             }
             return exp;
         }
-        public override Saxon.Hej.om.NodeName getElementName(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo copiedNode) {
-            return Saxon.Hej.om.NameOfNode.makeName(copiedNode);
-        }
-        public override string getNewBaseURI(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo copiedNode) {
-            return copiedNode.getBaseURI();
-        }
-        public override void outputNamespaceNodes(Saxon.Hej.@event.Outputter receiver, Saxon.Hej.om.NodeName nodeName, Saxon.Hej.om.NodeInfo copiedNode) {
+        public override void outputNamespaceNodes(Saxon.Hej.@event.Outputter receiver, Saxon.Hej.om.NodeName nodeName, Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails details) {
             if (copyNamespaces) {
-                receiver.namespaces(copiedNode.getAllNamespaces(), Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK);
+                receiver.namespaces(((Saxon.Hej.expr.instruct.Copy.CopyElementDetails)(details)).getCopiedNode().getAllNamespaces(), Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK);
             } else {
                 Saxon.Hej.om.NamespaceBinding ns = nodeName.getNamespaceBinding();
                 if (!(ns.isDefaultUndeclaration())) {
-                    receiver.@namespace(ns.getPrefix(), ns.getURI(), Saxon.Hej.@event.ReceiverOption.NONE);
+                    receiver.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
                 }
             }
-        }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter @out, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.Controller controller = context.getController();
-            Saxon.Hej.om.Item item = context.getContextItem();
-            if ((item == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no context item for xsl:copy", "XTTE0945");
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                err.setXPathContext(context);
-                throw err;
-            }
-            if (!(((item is Saxon.Hej.om.NodeInfo)))) {
-                @out.append(item, getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
-                return null;
-            }
-            Saxon.Hej.om.NodeInfo source = (Saxon.Hej.om.NodeInfo)(item);
-            switch (source.getNodeKind()) {
-              case Saxon.Hej.type.Type.ELEMENT:
-                return base.processLeavingTail(@out, context, (Saxon.Hej.om.NodeInfo)(item));
-              case Saxon.Hej.type.Type.ATTRIBUTE:
-                if ((getSchemaType() is Saxon.Hej.type.ComplexType)) {
-                    dynamicError("Cannot copy an attribute when the type requested for validation is a complex type", "XTTE1535", context);
-                }
-                try {
-                    Saxon.Hej.expr.instruct.CopyOf.copyAttribute(source, (Saxon.Hej.type.SimpleType)(getSchemaType()), getValidationAction(), this, @out, context, false);
-                } catch (Saxon.Hej.@event.NoOpenStartTagException err) {
-                    err.setXPathContext(context);
-                    throw dynamicError(getLocation(), err, context);
-                }
-                break ;
-              case Saxon.Hej.type.Type.TEXT:
-                Saxon.Hej.str.UnicodeString tval = source.getUnicodeStringValue();
-                @out.characters(tval, getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
-                break ;
-              case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
-                Saxon.Hej.str.UnicodeString pval = source.getUnicodeStringValue();
-                @out.processingInstruction(source.getDisplayName(), pval, getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
-                break ;
-              case Saxon.Hej.type.Type.COMMENT:
-                Saxon.Hej.str.UnicodeString cval = source.getUnicodeStringValue();
-                @out.comment(cval, getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
-                break ;
-              case Saxon.Hej.type.Type.NAMESPACE:
-                @out.@namespace(((Saxon.Hej.om.NodeInfo)(item)).getLocalPart(), item.getStringValue(), Saxon.Hej.@event.ReceiverOption.NONE);
-                break ;
-              case Saxon.Hej.type.Type.DOCUMENT:
-                if (!(preservingTypes)) {
-                    Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(getValidationOptions());
-                    options.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
-                    controller.getConfiguration().prepareValidationReporting(context, options);
-                    Saxon.Hej.@event.Receiver val = controller.getConfiguration().getDocumentValidator(@out, source.getBaseURI(), options, getLocation());
-                    @out = new Saxon.Hej.@event.ComplexContentOutputter(val);
-                }
-                if ((@out.getSystemId() == null)) {
-                    @out.setSystemId(source.getBaseURI());
-                }
-                @out.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
-                copyUnparsedEntities(source, @out);
-                getContentExpression().process(@out, context);
-                @out.endDocument();
-                break ;
-              default:
-                throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown node kind "+source.getNodeKind()));
-            }
-            return null;
         }
         public static void copyUnparsedEntities(Saxon.Hej.om.NodeInfo source, Saxon.Hej.@event.Outputter @out) {
             System.Collections.Generic.IEnumerator<string> unparsedEntities = source.getTreeInfo().getUnparsedEntityNames();
@@ -295,14 +224,7 @@ namespace Saxon.Hej.expr.instruct {
             }
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.Controller controller = context.getController();
-            Saxon.Hej.@event.SequenceCollector seq = controller.allocateSequenceOutputter(1);
-            seq.getPipelineConfiguration().setHostLanguage(getPackageData().getHostLanguage());
-            process(new Saxon.Hej.@event.ComplexContentOutputter(seq), context);
-            seq.close();
-            Saxon.Hej.om.Item item = seq.getFirstItem();
-            seq.reset();
-            return item;
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
         }
         public override string getStreamerName() {
             return "Copy";
@@ -325,12 +247,145 @@ namespace Saxon.Hej.expr.instruct {
             }
             @out.emitAttribute("flags", flags);
             string sType = Saxon.Hej.value.SequenceType.makeSequenceType(selectItemType, getCardinality()).toAlphaCode();
-            if ((sType != null)) {
-                @out.emitAttribute("sit", sType);
-            }
+            @out.emitAttribute("sit", sType);
             @out.setChildRole("content");
             getContentExpression().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.Copy.CopyElaborator();
+        }
+        public class CopyElementDetails : Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails {
+            private readonly Saxon.Hej.expr.elab.PushEvaluator contentEvaluator;
+            private readonly Saxon.Hej.om.NodeInfo copiedNode;
+            public CopyElementDetails(Saxon.Hej.expr.elab.PushEvaluator contentEvaluator, Saxon.Hej.om.NodeInfo copiedNode)  {
+                this.contentEvaluator = contentEvaluator;
+                this.copiedNode = copiedNode;
+            }
+            public Saxon.Hej.om.NodeInfo getCopiedNode() {
+                return copiedNode;
+            }
+            public override Saxon.Hej.om.NodeName getNodeName(Saxon.Hej.expr.XPathContext context) {
+                return Saxon.Hej.om.NameOfNode.makeName(copiedNode);
+            }
+            public override string getSystemId(Saxon.Hej.expr.XPathContext context) {
+                return copiedNode.getBaseURI();
+            }
+            public override void processContent(Saxon.Hej.@event.Outputter @out, Saxon.Hej.expr.XPathContext context) {
+                Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/contentEvaluator(@out, context));
+            }
+        
+        }
+        public class CopyElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.Copy expr = (Saxon.Hej.expr.instruct.Copy)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
+                Saxon.Hej.type.SchemaType typeCode = ((expr.getValidationAction() == Saxon.Hej.lib.Validation.PRESERVE) ? Saxon.Hej.type.AnyType.getInstance() : Saxon.Hej.type.Untyped.getInstance());
+                int properties = Saxon.Hej.@event.ReceiverOption.NONE;
+                if (!(expr.bequeathNamespacesToChildren)) {
+                    properties |= Saxon.Hej.@event.ReceiverOption.DISINHERIT_NAMESPACES;
+                }
+                if (!(expr.inheritNamespacesFromParent)) {
+                    properties |= Saxon.Hej.@event.ReceiverOption.REFUSE_NAMESPACES;
+                }
+                properties |= Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES;
+                int finalProperties = properties;
+                return (output, context) => {
+                    Saxon.Hej.Controller controller = context.getController();
+                    Saxon.Hej.om.Item item = context.getContextItem();
+                    if ((item == null)) {
+                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no context item for xsl:copy", "XTTE0945");
+                        err.setIsTypeError(true);
+                        err.setLocation(expr.getLocation());
+                        err.setXPathContext(context);
+                        throw err;
+                    }
+                    if (!(((item is Saxon.Hej.om.NodeInfo)))) {
+                        output.append(item, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
+                        return null;
+                    }
+                    Saxon.Hej.om.NodeInfo source = (Saxon.Hej.om.NodeInfo)(item);
+                    switch (source.getNodeKind()) {
+                      case Saxon.Hej.type.Type.ELEMENT:
+                        try {
+                            Saxon.Hej.om.NodeName elemName = Saxon.Hej.om.NameOfNode.makeName(source);
+                            Saxon.Hej.@event.Receiver elemOut = output;
+                            if (!(expr.preservingTypes)) {
+                                Saxon.Hej.lib.ParseOptions options = expr.getValidationOptions().withTopLevelElement(elemName.getStructuredQName());
+                                context.getConfiguration().prepareValidationReporting(context, options);
+                                Saxon.Hej.@event.Receiver validator = context.getConfiguration().getElementValidator(elemOut, options, expr.getLocation());
+                                if ((validator != elemOut)) {
+                                    output = new Saxon.Hej.@event.ComplexContentOutputter(validator);
+                                }
+                            }
+                            if ((output.getSystemId() == null)) {
+                                output.setSystemId(source.getBaseURI());
+                            }
+                            output.startElement(elemName, typeCode, expr.getLocation(), finalProperties);
+                            if (expr.copyNamespaces) {
+                                output.namespaces(source.getAllNamespaces(), Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK);
+                            } else {
+                                Saxon.Hej.om.NamespaceBinding ns = elemName.getNamespaceBinding();
+                                if (!(ns.isDefaultUndeclaration())) {
+                                    output.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
+                                }
+                            }
+                            Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/contentPush(output, context));
+                            output.endElement();
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            e.maybeSetLocation(expr.getLocation());
+                            e.maybeSetContext(context);
+                            throw;
+                        }
+                        return null;
+                      case Saxon.Hej.type.Type.ATTRIBUTE:
+                        if ((expr.getSchemaType() is Saxon.Hej.type.ComplexType)) {
+                            expr.dynamicError("Cannot copy an attribute when the type requested for validation is a complex type", "XTTE1535", context);
+                        }
+                        try {
+                            Saxon.Hej.expr.instruct.CopyOf.copyAttribute(source, (Saxon.Hej.type.SimpleType)(expr.getSchemaType()), expr.getValidationAction(), expr, output, context, false);
+                        } catch (Saxon.Hej.@event.NoOpenStartTagException err) {
+                            err.setXPathContext(context);
+                            throw dynamicError(expr.getLocation(), err, context);
+                        }
+                        break ;
+                      case Saxon.Hej.type.Type.TEXT:
+                        Saxon.Hej.str.UnicodeString tval = source.getUnicodeStringValue();
+                        output.characters(tval, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
+                        break ;
+                      case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
+                        Saxon.Hej.str.UnicodeString pval = source.getUnicodeStringValue();
+                        output.processingInstruction(source.getDisplayName(), pval, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
+                        break ;
+                      case Saxon.Hej.type.Type.COMMENT:
+                        Saxon.Hej.str.UnicodeString cval = source.getUnicodeStringValue();
+                        output.comment(cval, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
+                        break ;
+                      case Saxon.Hej.type.Type.NAMESPACE:
+                        output.@namespace(((Saxon.Hej.om.NodeInfo)(item)).getLocalPart(), Saxon.Hej.om.NamespaceUri.of(item.getStringValue()), Saxon.Hej.@event.ReceiverOption.NONE);
+                        break ;
+                      case Saxon.Hej.type.Type.DOCUMENT:
+                        if (!(expr.preservingTypes)) {
+                            Saxon.Hej.lib.ParseOptions options = expr.getValidationOptions().withSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
+                            controller.getConfiguration().prepareValidationReporting(context, options);
+                            Saxon.Hej.@event.Receiver val = controller.getConfiguration().getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
+                            output = new Saxon.Hej.@event.ComplexContentOutputter(val);
+                        }
+                        if ((output.getSystemId() == null)) {
+                            output.setSystemId(source.getBaseURI());
+                        }
+                        output.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
+                        copyUnparsedEntities(source, output);
+                        Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/contentPush(output, context));
+                        output.endDocument();
+                        break ;
+                      default:
+                        throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown node kind "+source.getNodeKind()));
+                    }
+                    return null;
+                } ;
+            }
+        
         }
     
     }

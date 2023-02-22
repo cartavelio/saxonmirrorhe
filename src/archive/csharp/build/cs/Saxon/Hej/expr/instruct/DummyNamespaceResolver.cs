@@ -9,14 +9,14 @@ namespace Saxon.Hej.expr.instruct {
         }
         private DummyNamespaceResolver()  {
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             if (prefix.Length==0) {
-                return Saxon.Hej.lib.NamespaceConstant.NULL;
+                return Saxon.Hej.om.NamespaceUri.NULL;
             } else {
                 if ("xml".Equals(prefix)) {
-                    return Saxon.Hej.lib.NamespaceConstant.XML;
+                    return Saxon.Hej.om.NamespaceUri.XML;
                 } else {
-                    return Saxon.Hej.lib.NamespaceConstant.NULL;
+                    return Saxon.Hej.om.NamespaceUri.NULL;
                 }
             }
         }

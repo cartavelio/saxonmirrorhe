@@ -10,8 +10,7 @@ namespace Saxon.Eej.ee.stream.feed {
         }
         public override Saxon.Hej.@event.Receiver startSelectedParentNode(Saxon.Eej.ee.stream.om.FleetingParentNode node, Saxon.Hej.s9api.Location locationId) {
             Saxon.Hej.om.SequenceIterator iter = expression.iterate(getContext());
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 if ((item is Saxon.Eej.ee.stream.om.FleetingParentNode)) {
                     selected = true;
                     return getResultFeed().startSelectedParentNode((Saxon.Eej.ee.stream.om.FleetingParentNode)(item), locationId);

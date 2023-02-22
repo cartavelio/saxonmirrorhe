@@ -30,7 +30,7 @@ namespace Saxon.Hej.@event {
             level++;
             getNextOutputter().startElement(elemName, type, attributes, namespaces, location, properties);
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             start();
             getNextOutputter().@namespace(prefix, namespaceUri, properties);
         }
@@ -92,6 +92,12 @@ namespace Saxon.Hej.@event {
                 start();
             }
             base.append(item, locationId, copyNamespaces);
+        }
+        public override void append(Saxon.Hej.om.Item item) {
+            if (isSignificant(item)) {
+                start();
+            }
+            base.append(item);
         }
         public override void endDocument() {
             if ((--level != 0)) {

@@ -8,7 +8,7 @@ namespace Saxon.Hej.expr.instruct {
         private readonly System.Collections.Generic.IList<Saxon.Hej.expr.PackageData> packages = new System.Collections.Generic.List<Saxon.Hej.expr.PackageData>();
         private Saxon.Ejava.util.Properties defaultOutputProperties;
         private Saxon.Hej.serialize.CharacterMapIndex characterMapIndex;
-        private System.Collections.Generic.Dictionary<string,System.Collections.Generic.IList<Saxon.Hej.query.QueryModule>> queryLibraryModules;
+        private System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri,System.Collections.Generic.IList<Saxon.Hej.query.QueryModule>> queryLibraryModules;
         private System.Collections.Generic.HashSet<string> queryLocationHintsProcessed;
         private Saxon.Hej.functions.FunctionLibraryList functionLibrary;
         private Saxon.Api.HostLanguage hostLanguage = Saxon.Api.HostLanguage.XSLT;
@@ -87,9 +87,9 @@ namespace Saxon.Hej.expr.instruct {
         }
         public void addQueryLibraryModule(Saxon.Hej.query.QueryModule module) {
             if ((queryLibraryModules == null)) {
-                queryLibraryModules = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Saxon.Hej.query.QueryModule>>(5);
+                queryLibraryModules = new System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri, System.Collections.Generic.IList<Saxon.Hej.query.QueryModule>>(5);
             }
-            string uri = module.getModuleNamespace();
+            Saxon.Hej.om.NamespaceUri uri = module.getModuleNamespace();
             System.Collections.Generic.IList<Saxon.Hej.query.QueryModule> existing = Saxon.Impl.Helpers.MapUtils.Get(queryLibraryModules, uri);
             if ((existing == null)) {
                 existing = new System.Collections.Generic.List<Saxon.Hej.query.QueryModule>(5);
@@ -101,7 +101,7 @@ namespace Saxon.Hej.expr.instruct {
                 }
             }
         }
-        public System.Collections.Generic.IList<Saxon.Hej.query.QueryModule> getQueryLibraryModules(string @namespace) {
+        public System.Collections.Generic.IList<Saxon.Hej.query.QueryModule> getQueryLibraryModules(Saxon.Hej.om.NamespaceUri @namespace) {
             if ((queryLibraryModules == null)) {
                 return null;
             }

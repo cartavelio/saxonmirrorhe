@@ -21,7 +21,7 @@ namespace Saxon.Hej.functions {
             return op;
         }
         public static Saxon.Hej.lib.ParseOptions setParseOptions(Saxon.Hej.expr.parser.RetainedStaticContext rsc, System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.lib.ParseOptions result = new Saxon.Hej.lib.ParseOptions(context.getConfiguration().getParseOptions());
+            Saxon.Hej.lib.ParseOptions result = context.getConfiguration().getParseOptions();
             Saxon.Hej.om.Sequence value = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "validation");
             if ((value != null)) {
                 string valStr = value.head().getStringValue();
@@ -32,39 +32,38 @@ namespace Saxon.Hej.functions {
                 if ((v == Saxon.Hej.lib.Validation.INVALID)) {
                     throw new Saxon.Hej.trans.XPathException(("Invalid validation value "+valStr), "SXZZ0002");
                 }
-                result.setSchemaValidationMode(v);
+                result = result.withSchemaValidationMode(v);
             }
             value = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "type");
             if ((value != null)) {
                 Saxon.Hej.value.QNameValue qval = (Saxon.Hej.value.QNameValue)(value.head());
-                result.setTopLevelType(context.getConfiguration().getSchemaType(qval.getStructuredQName()));
-                result.setSchemaValidationMode(Saxon.Hej.lib.Validation.BY_TYPE);
+                result = result.withTopLevelType(context.getConfiguration().getSchemaType(qval.getStructuredQName())).withSchemaValidationMode(Saxon.Hej.lib.Validation.BY_TYPE);
             }
             value = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "strip-space");
             if ((value != null)) {
                 string s = value.head().getStringValue();
                 switch (s) {
                   case "all":
-                    result.setSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance());
+                    result = result.withSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance());
                     break ;
                   case "none":
-                    result.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
+                    result = result.withSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
                     break ;
                   case "ignorable":
-                    result.setSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
+                    result = result.withSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
                     break ;
                   case "package-defined":
                   case "default":
                     Saxon.Hej.expr.PackageData data = rsc.getPackageData();
                     if ((data is Saxon.Hej.style.StylesheetPackage)) {
-                        result.setSpaceStrippingRule(((Saxon.Hej.style.StylesheetPackage)(data)).getSpaceStrippingRule());
+                        result = result.withSpaceStrippingRule(((Saxon.Hej.style.StylesheetPackage)(data)).getSpaceStrippingRule());
                     }
                     break ;
                 }
             }
             value = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "dtd-validation");
             if ((value != null)) {
-                result.setDTDValidationMode((((Saxon.Hej.value.BooleanValue)(value.head())).getBooleanValue() ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
+                result = result.withDTDValidationMode((((Saxon.Hej.value.BooleanValue)(value.head())).getBooleanValue() ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
             }
             value = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "accumulators");
             if ((value != null)) {
@@ -77,11 +76,11 @@ namespace Saxon.Hej.functions {
                     Saxon.Hej.expr.accum.Accumulator acc = reg.getAccumulator(name.getStructuredQName());
                     accumulators.Add(acc);
                 }
-                result.setApplicableAccumulators(accumulators);
+                result = result.withApplicableAccumulators(accumulators);
             }
             value = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "use-xsi-schema-location");
             if ((value != null)) {
-                result.setUseXsiSchemaLocation(((Saxon.Hej.value.BooleanValue)(value.head())).getBooleanValue());
+                result = result.withUseXsiSchemaLocation(((Saxon.Hej.value.BooleanValue)(value.head())).getBooleanValue());
             }
             return result;
         }
@@ -120,6 +119,7 @@ namespace Saxon.Hej.functions {
                 newdoc = startNode.getTreeInfo();
             } else {
                 Saxon.Hej.@event.Builder b = controller.makeBuilder();
+                b.setDurability(Saxon.Hej.om.Durability.LASTING);
                 if ((b is Saxon.Hej.tree.tiny.TinyBuilder)) {
                     ((Saxon.Hej.tree.tiny.TinyBuilder)(b)).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
                 }

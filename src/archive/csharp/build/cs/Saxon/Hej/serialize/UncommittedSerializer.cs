@@ -56,11 +56,11 @@ namespace Saxon.Hej.serialize {
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
             if (!(committed)) {
                 string name = elemName.getLocalPart();
-                string uri = elemName.getURI();
-                if ((Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(name, "html") && uri.Length==0)) {
+                Saxon.Hej.om.NamespaceUri uri = elemName.getNamespaceUri();
+                if ((Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(name, "html") && uri.isEmpty())) {
                     switchToMethod("html");
                 } else {
-                    if ((name.Equals("html") && uri.Equals(Saxon.Hej.lib.NamespaceConstant.XHTML))) {
+                    if ((name.Equals("html") && uri.Equals(Saxon.Hej.om.NamespaceUri.XHTML))) {
                         string version = this.properties.getProperties().getProperty(Saxon.Hej.lib.SaxonOutputKeys.STYLESHEET_VERSION);
                         if ("10".Equals(version)) {
                             switchToMethod("xml");

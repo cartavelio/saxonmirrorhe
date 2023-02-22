@@ -20,7 +20,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             processId();
             checkMutuallyExclusiveAttributes("ref", "name");
             checkMutuallyExclusiveAttributes("ref", "refer");
-            string refAtt = atts.getValue("", "ref");
+            string refAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
             Saxon.Hej.om.StructuredQName nameCode;
             if ((refAtt != null)) {
                 if ((getXSDSchema().getSchemaCompiler().getLanguageVersion() == Saxon.Hej.Configuration.XSD10)) {
@@ -29,14 +29,14 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 nameCode = getComponentName(refAtt, USE_DEFAULT_NS);
                 isRef = true;
             } else {
-                string name = atts.getValue("", "name");
+                string name = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                 if ((name == null)) {
                     missingAttribute("name");
                     name = (("saxon-error-"+getLocalPart())+"-name");
                 }
                 nameCode = getComponentName(name, REQUIRE_TARGET_NS);
                 if ((getFingerprint() == Saxon.Hej.om.StandardNames.XS_KEYREF)) {
-                    string referAtt = atts.getValue("", "refer");
+                    string referAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "refer");
                     if ((referAtt == null)) {
                         missingAttribute("refer");
                         return ;
@@ -161,7 +161,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     {
                         Saxon.Eej.ee.schema.IdentityField field = ((Saxon.Eej.ee.schema.sdoc.XSDFieldOrSelector)(child)).getIdentityField();
                         identityConstraint.addField(field);
-                        if ((child.getAttributeValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "order") != null)) {
+                        if ((child.getAttributeValue(Saxon.Hej.om.NamespaceUri.SAXON, "order") != null)) {
                             if ((getFingerprint() != Saxon.Hej.om.StandardNames.XS_UNIQUE)) {
                                 error("saxon:order is allowed only on a field of xs:unique");
                             }

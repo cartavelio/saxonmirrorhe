@@ -100,7 +100,7 @@ namespace Saxon.Eej.ee.schema {
                                     if ((userMessage != null)) {
                                         message += (". "+userMessage);
                                     }
-                                    compiler.warning(message, this);
+                                    compiler.warning(message, Saxon.Hej.trans.SaxonErrorCode.SXSD1010, this);
                                 }
                             }
                         }
@@ -381,8 +381,8 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("id", id);
             if (!(isAnonymousType())) {
                 serializer.emitAttribute("name", getName());
-                if (!(getTargetNamespace().Length==0)) {
-                    serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                if (!(getTargetNamespace().isEmpty())) {
+                    serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
                 }
             }
             serializer.emitAttribute("base", serializer.getTypeLink(getBaseType()));
@@ -413,10 +413,10 @@ namespace Saxon.Eej.ee.schema {
             serializer.endElement();
         }
         protected internal abstract void serializeVariety(Saxon.Eej.ee.schema.SchemaModelSerializer serializer);
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return getComponentAsFunction(this);
         }
-        public static Saxon.Hej.om.Function getComponentAsFunction(Saxon.Hej.type.SimpleType type) {
+        public static Saxon.Hej.om.FunctionItem getComponentAsFunction(Saxon.Hej.type.SimpleType type) {
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
                 switch (key) {
@@ -434,7 +434,7 @@ namespace Saxon.Eej.ee.schema {
                     if (type.isAnonymousType()) {
                         return Saxon.Hej.value.EmptySequence.getInstance();
                     } else {
-                        return new Saxon.Hej.value.AnyURIValue((type.getTargetNamespace()));
+                        return new Saxon.Hej.value.AnyURIValue((type.getTargetNamespace().toUnicodeString()));
                     }
                   case "final":
                     {

@@ -17,7 +17,6 @@ namespace Saxon.Hej.expr.instruct {
             if ((threads != null)) {
                 threadsOp = new Saxon.Hej.expr.Operand(this, threads, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
             }
-            this.containsTailCall = (containsTailCall && (action is Saxon.Hej.expr.instruct.TailCallReturner));
         }
         public void setSeparatorExpression(Saxon.Hej.expr.Expression separator) {
             separatorOp = new Saxon.Hej.expr.Operand(this, separator, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
@@ -171,72 +170,6 @@ namespace Saxon.Hej.expr.instruct {
         public override void checkPermittedContents(Saxon.Hej.type.SchemaType parentType, bool whole) {
             getAction().checkPermittedContents(parentType, false);
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.Controller controller = context.getController();
-            System.Diagnostics.Debug.Assert((controller != null));
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            Saxon.Hej.om.FocusIterator iter = c2.trackFocus(getSelect().iterate(context));
-            c2.setCurrentTemplateRule(null);
-            Saxon.Hej.expr.Expression action = getAction();
-            if (containsTailCall) {
-                if (controller.isTracing()) {
-                    Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                    System.Diagnostics.Debug.Assert((listener != null));
-                    Saxon.Hej.om.Item item = iter.next();
-                    if ((item == null)) {
-                        return null;
-                    }
-                    listener.startCurrentItem(item);
-                    Saxon.Hej.expr.instruct.TailCall tc = ((Saxon.Hej.expr.instruct.TailCallReturner)(action)).processLeavingTail(output, c2);
-                    listener.endCurrentItem(item);
-                    return tc;
-                } else {
-                    Saxon.Hej.om.Item item = iter.next();
-                    if ((item == null)) {
-                        return null;
-                    }
-                    return ((Saxon.Hej.expr.instruct.TailCallReturner)(action)).processLeavingTail(output, c2);
-                }
-            } else {
-                Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
-                pipe.setXPathContext(c2);
-                Saxon.Hej.om.NodeInfo separator = null;
-                if ((separatorOp != null)) {
-                    separator = makeSeparator(context);
-                }
-                if ((controller.isTracing() || (separator != null))) {
-                    Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                    Saxon.Hej.om.Item item;
-                    bool first = true;
-                    while (((item = iter.next()) != null)) {
-                        if (controller.isTracing()) {
-                            System.Diagnostics.Debug.Assert((listener != null));
-                            listener.startCurrentItem(item);
-                        }
-                        if ((separator != null)) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                output.append(separator);
-                            }
-                        }
-                        action.process(output, c2);
-                        if (controller.isTracing()) {
-                            listener.endCurrentItem(item);
-                        }
-                    }
-                } else {
-                    try {
-                        Saxon.Hej.om.SequenceTool.supply(iter, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => action.process(output, c2))));
-                    } catch (Saxon.Hej.trans.UncheckedXPathException err) {
-                        throw err.getXPathException();
-                    }
-                }
-                pipe.setXPathContext(context);
-            }
-            return null;
-        }
         protected internal Saxon.Hej.om.NodeInfo makeSeparator(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.NodeInfo separator;
             Saxon.Hej.str.UnicodeString sepValue = separatorOp.getChildExpression().evaluateAsString(context);
@@ -263,15 +196,6 @@ namespace Saxon.Hej.expr.instruct {
                 return new Saxon.Hej.expr.ContextMappingIterator(mapper, c2);
             }
         }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
-            c2.trackFocus(getSelect().iterate(context));
-            Saxon.Hej.om.SequenceIterator iter = c2.getCurrentIterator();
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
-                getAction().evaluatePendingUpdates(c2, pul);
-            }
-        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("forEach", this);
             getSelect().export(@out);
@@ -296,6 +220,95 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "ForEach";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ForEach.ForEachElaborator();
+        }
+        public class ForEachElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            private Saxon.Hej.om.NodeInfo makeSeparator(Saxon.Hej.expr.elab.UnicodeStringEvaluator evaluator, Saxon.Hej.expr.XPathContext context) {
+                Saxon.Hej.str.UnicodeString sepValue = /*Delegate.eval()*/evaluator(context);
+                Saxon.Hej.tree.util.Orphan orphan = new Saxon.Hej.tree.util.Orphan(context.getConfiguration());
+                orphan.setNodeKind(Saxon.Hej.type.Type.TEXT);
+                orphan.setStringValue(sepValue);
+                return orphan;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.ForEach forEach = (Saxon.Hej.expr.instruct.ForEach)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
+                if ((forEach.getSeparatorExpression() == null)) {
+                    Saxon.Hej.expr.ContextMappingFunction mapper = cxt => /*Delegate.iterate()*/action(cxt);
+                    return context => {
+                        Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                        c2.trackFocus(/*Delegate.iterate()*/select(context));
+                        return new Saxon.Hej.expr.ContextMappingIterator(mapper, c2);
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.UnicodeStringEvaluator sepEval = forEach.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
+                    return context => {
+                        Saxon.Hej.om.NodeInfo separator = makeSeparator(sepEval, context);
+                        Saxon.Hej.expr.ContextMappingFunction mapper = cxt => {
+                            if ((cxt.getCurrentIterator().position() == 1)) {
+                                return /*Delegate.iterate()*/action(cxt);
+                            } else {
+                                return new Saxon.Hej.tree.iter.PrependSequenceIterator(separator, /*Delegate.iterate()*/action(cxt));
+                            }
+                        } ;
+                        Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                        c2.trackFocus(/*Delegate.iterate()*/select(context));
+                        return new Saxon.Hej.expr.ContextMappingIterator(mapper, c2);
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ForEach forEach = (Saxon.Hej.expr.instruct.ForEach)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PushEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPush();
+                if ((forEach.getSeparatorExpression() == null)) {
+                    return (@out, context) => {
+                        Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                        Saxon.Hej.om.FocusIterator iter = c2.trackFocus(/*Delegate.iterate()*/select(context));
+                        Saxon.Hej.expr.instruct.TailCall tc = null;
+                        while ((iter.next() != null)) {
+                            dispatchTailCall(tc);
+                            tc = /*Delegate.processLeavingTail()*/action(@out, c2);
+                        }
+                        return tc;
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.UnicodeStringEvaluator sepEval = forEach.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
+                    return (@out, context) => {
+                        Saxon.Hej.om.NodeInfo separator = makeSeparator(sepEval, context);
+                        Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                        Saxon.Hej.om.FocusIterator iter = c2.trackFocus(/*Delegate.iterate()*/select(context));
+                        Saxon.Hej.expr.instruct.TailCall tc = null;
+                        if ((iter.next() != null)) {
+                            dispatchTailCall(tc);
+                            tc = /*Delegate.processLeavingTail()*/action(@out, c2);
+                        }
+                        while ((iter.next() != null)) {
+                            @out.append(separator);
+                            dispatchTailCall(tc);
+                            tc = /*Delegate.processLeavingTail()*/action(@out, c2);
+                        }
+                        return tc;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.instruct.ForEach forEach = (Saxon.Hej.expr.instruct.ForEach)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.UpdateEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForUpdate();
+                return (context, pul) => {
+                    Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                    c2.trackFocus(/*Delegate.iterate()*/select(context));
+                    Saxon.Hej.om.SequenceIterator iter = c2.getCurrentIterator();
+                    while ((iter.next() != null)) {
+                        /*Delegate.registerUpdates()*/action(c2, pul);
+                    }
+                } ;
+            }
+        
         }
     
     }

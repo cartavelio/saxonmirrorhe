@@ -34,7 +34,7 @@ namespace Saxon.Hej.trans {
             return exception.Message;
         }
         public Saxon.Hej.s9api.Location getLocation() {
-            return exception.getLocator();
+            return ((exception.getLocator() == null) ? Saxon.Hej.expr.parser.Loc.NONE : exception.getLocator());
         }
         public bool isWarning() {
             return _isWarning;

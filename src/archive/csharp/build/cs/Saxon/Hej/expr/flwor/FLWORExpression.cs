@@ -5,6 +5,7 @@ namespace Saxon.Hej.expr.flwor {
     public class FLWORExpression : Saxon.Hej.expr.Expression {
         public System.Collections.Generic.IList<Saxon.Hej.expr.flwor.Clause> clauses;
         public Saxon.Hej.expr.Operand returnClauseOp;
+        public Saxon.Hej.expr.elab.PushEvaluator returnPushEvaluator;
         public FLWORExpression()  {
         }
         public void init(System.Collections.Generic.IList<Saxon.Hej.expr.flwor.Clause> clauses, Saxon.Hej.expr.Expression returnClause) {
@@ -26,6 +27,14 @@ namespace Saxon.Hej.expr.flwor {
         }
         public Saxon.Hej.expr.Expression getReturnClause() {
             return returnClauseOp.getChildExpression();
+        }
+        public Saxon.Hej.expr.elab.PushEvaluator getReturnPushEvaluator() {
+            lock (this) {
+                if ((returnPushEvaluator == null)) {
+                    returnPushEvaluator = makeElaborator().elaborateForPush();
+                }
+            }
+            return returnPushEvaluator;
         }
         public override bool hasVariableBinding(Saxon.Hej.expr.Binding binding) {
             foreach (Saxon.Hej.expr.flwor.Clause c in clauses) {
@@ -84,9 +93,9 @@ namespace Saxon.Hej.expr.flwor {
             }
             return true;
         }
-        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(backwardsCompatible);
-            returnClauseOp.setChildExpression(tc.staticTypeCheck(getReturnClause(), req, role, visitor));
+            returnClauseOp.setChildExpression(tc.staticTypeCheck(getReturnClause(), req, roleSupplier, visitor));
             return this;
         }
         public override Saxon.Hej.type.ItemType getItemType() {
@@ -428,29 +437,11 @@ namespace Saxon.Hej.expr.flwor {
             return action;
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.flwor.TuplePull stream = new Saxon.Hej.expr.flwor.SingularityPull();
-            foreach (Saxon.Hej.expr.flwor.Clause c in clauses) {
-                stream = c.getPullStream(stream, context);
-            }
-            return new Saxon.Hej.expr.flwor.ReturnClauseIterator(stream, this, context);
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.flwor.TuplePush destination = new Saxon.Hej.expr.flwor.ReturnClausePush(output, getReturnClause());
-            for (int i = (clauses.Count-1); (i>=0); i--) {
-                Saxon.Hej.expr.flwor.Clause c = clauses[i];
-                destination = c.getPushStream(destination, output, context);
-            }
-            destination.processTuple(context);
-            destination.close();
-        }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            Saxon.Hej.expr.flwor.TuplePull stream = new Saxon.Hej.expr.flwor.SingularityPull();
-            foreach (Saxon.Hej.expr.flwor.Clause c in clauses) {
-                stream = c.getPullStream(stream, context);
-            }
-            while (stream.nextTuple(context)) {
-                getReturnClause().evaluatePendingUpdates(context, pul);
-            }
+            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context);
+            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
         }
         public override string getExpressionName() {
             return "FLWOR";
@@ -510,6 +501,50 @@ namespace Saxon.Hej.expr.flwor {
                 }
             }
             return false;
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.flwor.FLWORExpression.FLWORElaborator();
+        }
+        private class FLWORElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.flwor.FLWORExpression expr = (Saxon.Hej.expr.flwor.FLWORExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator returnPull = expr.getReturnClause().makeElaborator().elaborateForPull();
+                return context => {
+                    Saxon.Hej.expr.flwor.TuplePull stream = new Saxon.Hej.expr.flwor.SingularityPull();
+                    foreach (Saxon.Hej.expr.flwor.Clause c in expr.clauses) {
+                        stream = c.getPullStream(stream, context);
+                    }
+                    return new Saxon.Hej.expr.flwor.ReturnClauseIterator(stream, returnPull, context);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.flwor.FLWORExpression expr = (Saxon.Hej.expr.flwor.FLWORExpression)(getExpression());
+                expr.returnPushEvaluator = expr.getReturnClause().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    Saxon.Hej.expr.flwor.TuplePush destination = new Saxon.Hej.expr.flwor.ReturnClausePush(output, expr.returnPushEvaluator);
+                    for (int i = (expr.clauses.Count-1); (i>=0); i--) {
+                        Saxon.Hej.expr.flwor.Clause c = expr.clauses[i];
+                        destination = c.getPushStream(destination, output, context);
+                    }
+                    destination.processTuple(context);
+                    destination.close();
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.flwor.FLWORExpression expr = (Saxon.Hej.expr.flwor.FLWORExpression)(getExpression());
+                Saxon.Hej.expr.elab.UpdateEvaluator returnAction = expr.getReturnClause().makeElaborator().elaborateForUpdate();
+                return (context, pul) => {
+                    Saxon.Hej.expr.flwor.TuplePull stream = new Saxon.Hej.expr.flwor.SingularityPull();
+                    foreach (Saxon.Hej.expr.flwor.Clause c in expr.clauses) {
+                        stream = c.getPullStream(stream, context);
+                    }
+                    while (stream.nextTuple(context)) {
+                        /*Delegate.registerUpdates()*/returnAction(context, pul);
+                    }
+                } ;
+            }
+        
         }
     
     }

@@ -50,6 +50,17 @@ namespace Saxon.Hej.expr.instruct {
         public override void processValue(Saxon.Hej.str.UnicodeString value, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.NodeName attName = evaluateNodeName(context);
             int opt = getOptions();
+            Saxon.Hej.type.SimpleType ann = validate(attName, value, context);
+            if (attName.Equals(Saxon.Hej.om.StandardNames.XML_ID_NAME)) {
+                value = Saxon.Hej.value.Whitespace.collapseWhitespace(value);
+            }
+            try {
+                output.attribute(attName, ann, value.ToString(), getLocation(), opt);
+            } catch (Saxon.Hej.trans.XPathException err) {
+                throw dynamicError(getLocation(), err, context);
+            }
+        }
+        protected internal Saxon.Hej.type.SimpleType validate(Saxon.Hej.om.NodeName attName, Saxon.Hej.str.UnicodeString value, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.type.SimpleType ann;
             Saxon.Hej.type.SimpleType schemaType = ((/*1430*/Saxon.Hej.type.SimpleType)getSchemaType());
             int validationAction = getValidationAction();
@@ -79,14 +90,7 @@ namespace Saxon.Hej.expr.instruct {
                     ann = Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC;
                 }
             }
-            if (attName.Equals(Saxon.Hej.om.StandardNames.XML_ID_NAME)) {
-                value = Saxon.Hej.value.Whitespace.collapseWhitespace(value);
-            }
-            try {
-                output.attribute(attName, ann, value.ToString(), getLocation(), opt);
-            } catch (Saxon.Hej.trans.XPathException err) {
-                throw dynamicError(getLocation(), err, context);
-            }
+            return ann;
         }
         protected internal void validateOrphanAttribute(Saxon.Hej.tree.util.Orphan orphan, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.lib.ConversionRules rules = context.getConfiguration().getConversionRules();

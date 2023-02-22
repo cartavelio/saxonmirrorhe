@@ -6,7 +6,7 @@ namespace Saxon.Hej.expr.instruct {
         private readonly Saxon.Hej.expr.Operand nameOp;
         private Saxon.Hej.expr.Operand namespaceOp;
         private readonly bool allowNameAsQName;
-        public ComputedAttribute(Saxon.Hej.expr.Expression attributeName, Saxon.Hej.expr.Expression @namespace, Saxon.Hej.om.NamespaceResolver nsContext, int validationAction, Saxon.Hej.type.SimpleType schemaType, bool allowNameAsQName)  {
+        public ComputedAttribute(Saxon.Hej.expr.Expression attributeName, Saxon.Hej.expr.Expression @namespace, int validationAction, Saxon.Hej.type.SimpleType schemaType, bool allowNameAsQName)  {
             nameOp = new Saxon.Hej.expr.Operand(this, attributeName, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
             if ((@namespace != null)) {
                 namespaceOp = new Saxon.Hej.expr.Operand(this, @namespace, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
@@ -60,7 +60,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override void localTypeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             nameOp.typeCheck(visitor, contextItemType);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "attribute/name", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "attribute/name", 0);
             Saxon.Hej.Configuration config = visitor.getConfiguration();
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
             if (allowNameAsQName) {
@@ -89,7 +89,7 @@ namespace Saxon.Hej.expr.instruct {
                     if ((val is Saxon.Hej.value.StringValue)) {
                         string[] parts = Saxon.Hej.om.NameChecker.checkQNameParts(val.getStringValue());
                         if ((getNamespaceExp() == null)) {
-                            string uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
+                            Saxon.Hej.om.NamespaceUri uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
                             if ((uri == null)) {
                                 Saxon.Hej.trans.XPathException se = new Saxon.Hej.trans.XPathException((("Prefix "+parts[0])+" has not been declared"));
                                 if (isXSLT()) {
@@ -102,7 +102,7 @@ namespace Saxon.Hej.expr.instruct {
                                     throw se;
                                 }
                             }
-                            setNamespace(new Saxon.Hej.expr.StringLiteral(uri));
+                            setNamespace(new Saxon.Hej.expr.StringLiteral(uri.ToString()));
                         }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
@@ -130,7 +130,7 @@ namespace Saxon.Hej.expr.instruct {
             return this;
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
-            Saxon.Hej.expr.instruct.ComputedAttribute exp = new Saxon.Hej.expr.instruct.ComputedAttribute(((getNameExp() == null) ? null : getNameExp().copy(rebindings)), ((getNamespaceExp() == null) ? null : getNamespaceExp().copy(rebindings)), getRetainedStaticContext(), getValidationAction(), ((/*1430*/Saxon.Hej.type.SimpleType)getSchemaType()), allowNameAsQName);
+            Saxon.Hej.expr.instruct.ComputedAttribute exp = new Saxon.Hej.expr.instruct.ComputedAttribute(((getNameExp() == null) ? null : getNameExp().copy(rebindings)), ((getNamespaceExp() == null) ? null : getNamespaceExp().copy(rebindings)), getValidationAction(), ((/*1430*/Saxon.Hej.type.SimpleType)getSchemaType()), allowNameAsQName);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, exp);
             exp.setSelect(getSelect().copy(rebindings));
             exp.setInstruction(isInstruction());
@@ -151,11 +151,14 @@ namespace Saxon.Hej.expr.instruct {
             }
         }
         public override Saxon.Hej.om.NodeName evaluateNodeName(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.NamePool pool = context.getNamePool();
             Saxon.Hej.om.Item nameValue = getNameExp().evaluateItem(context);
+            return validateNodeName(nameValue, context);
+        }
+        private Saxon.Hej.om.NodeName validateNodeName(Saxon.Hej.om.Item nameValue, Saxon.Hej.expr.XPathContext context) {
+            Saxon.Hej.om.NamePool pool = context.getNamePool();
             string prefix;
             string localName;
-            string uri = null;
+            Saxon.Hej.om.NamespaceUri uri = null;
             if ((nameValue is Saxon.Hej.value.StringValue)) {
                 string rawName = nameValue.getStringValue();
                 rawName = Saxon.Hej.value.Whitespace.trim(rawName);
@@ -164,7 +167,7 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.om.StructuredQName qn = Saxon.Hej.om.StructuredQName.fromEQName(rawName);
                         prefix = "";
                         localName = qn.getLocalPart();
-                        uri = qn.getURI();
+                        uri = qn.getNamespaceUri();
                     } catch (Saxon.Ejava.lang.IllegalArgumentException e) {
                         throw new Saxon.Hej.trans.XPathException(("Invalid EQName in computed attribute constructor: "+e.Message), "XQDY0074");
                     }
@@ -181,7 +184,7 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException(("Invalid attribute name: "+rawName), errorCode, this.getLocation());
                         throw dynamicError(getLocation(), err1, context);
                     }
-                    if (rawName.ToString().Equals("xmlns")) {
+                    if (rawName.Equals("xmlns")) {
                         if ((getNamespaceExp() == null)) {
                             string errorCode = (isXSLT() ? "XTDE0855" : "XQDY0044");
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Invalid attribute name: "+rawName), errorCode, this.getLocation());
@@ -202,11 +205,11 @@ namespace Saxon.Hej.expr.instruct {
                 if (((nameValue is Saxon.Hej.value.QNameValue) && allowNameAsQName)) {
                     localName = ((Saxon.Hej.value.QNameValue)(nameValue)).getLocalName();
                     uri = ((Saxon.Hej.value.QNameValue)(nameValue)).getNamespaceURI();
-                    if ((localName.Equals("xmlns") && uri.Length==0)) {
+                    if ((localName.Equals("xmlns") && uri.isEmpty())) {
                         Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Invalid attribute name: xmlns", "XQDY0044", this.getLocation());
                         throw dynamicError(getLocation(), err, context);
                     }
-                    if (uri.Length==0) {
+                    if (uri.isEmpty()) {
                         prefix = "";
                     } else {
                         prefix = ((Saxon.Hej.value.QNameValue)(nameValue)).getPrefix();
@@ -216,7 +219,7 @@ namespace Saxon.Hej.expr.instruct {
                                 prefix = "ns0";
                             }
                         }
-                        if ((uri.Equals(Saxon.Hej.lib.NamespaceConstant.XML) != "xml".Equals(prefix))) {
+                        if ((uri.Equals(Saxon.Hej.om.NamespaceUri.XML) != "xml".Equals(prefix))) {
                             string message;
                             if ("xml".Equals(prefix)) {
                                 message = ("When the prefix is 'xml', the namespace URI must be "+Saxon.Hej.lib.NamespaceConstant.XML);
@@ -240,7 +243,7 @@ namespace Saxon.Hej.expr.instruct {
             }
             if (((getNamespaceExp() == null) && (uri == null))) {
                 if (prefix.Length==0) {
-                    uri = "";
+                    uri = Saxon.Hej.om.NamespaceUri.NULL;
                 } else {
                     uri = getRetainedStaticContext().getURIForPrefix(prefix, false);
                     if ((uri == null)) {
@@ -252,16 +255,16 @@ namespace Saxon.Hej.expr.instruct {
             } else {
                 if ((uri == null)) {
                     if ((getNamespaceExp() is Saxon.Hej.expr.StringLiteral)) {
-                        uri = ((Saxon.Hej.expr.StringLiteral)(getNamespaceExp())).stringify();
+                        uri = Saxon.Hej.om.NamespaceUri.of(((Saxon.Hej.expr.StringLiteral)(getNamespaceExp())).stringify());
                     } else {
-                        uri = getNamespaceExp().evaluateAsString(context).ToString();
-                        if (!(Saxon.Hej.lib.StandardURIChecker.getInstance().isValidURI(uri))) {
+                        uri = Saxon.Hej.om.NamespaceUri.of(getNamespaceExp().evaluateAsString(context).ToString());
+                        if (!(Saxon.Hej.lib.StandardURIChecker.getInstance().isValidURI(uri.ToString()))) {
                             Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException("The value of the namespace attribute must be a valid URI", "XTDE0865", this.getLocation());
                             throw dynamicError(getLocation(), de, context);
                         }
                     }
                 }
-                if (uri.Length==0) {
+                if (uri.isEmpty()) {
                     prefix = "";
                 } else {
                     if (prefix.Length==0) {
@@ -272,7 +275,7 @@ namespace Saxon.Hej.expr.instruct {
                     }
                 }
             }
-            if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XMLNS)) {
+            if (uri.Equals(Saxon.Hej.om.NamespaceUri.XMLNS)) {
                 string errorCode = (isXSLT() ? "XTDE0865" : "XQDY0044");
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot create attribute in namespace "+uri), errorCode, this.getLocation());
                 throw dynamicError(getLocation(), err, context);
@@ -309,6 +312,66 @@ namespace Saxon.Hej.expr.instruct {
             @out.setChildRole("select");
             getSelect().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ComputedAttribute.ComputedAttributeElaborator();
+        }
+        private class ComputedAttributeElaborator : Saxon.Hej.expr.elab.SimpleNodePushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ComputedAttribute expr = (Saxon.Hej.expr.instruct.ComputedAttribute)(getExpression());
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                int options = expr.getOptions();
+                Saxon.Hej.expr.elab.ItemEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForItem();
+                if ((((((/*1430*/Saxon.Hej.type.SimpleType)expr.getSchemaType()) != null) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.STRICT)) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.LAX))) {
+                    Saxon.Hej.expr.elab.UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                    return (output, context) => {
+                        Saxon.Hej.om.Item nameItem = /*Delegate.eval()*/nameEval(context);
+                        Saxon.Hej.om.NodeName name = expr.validateNodeName(nameItem, context);
+                        Saxon.Hej.str.UnicodeString content = /*Delegate.eval()*/contentEval(context);
+                        Saxon.Hej.type.SimpleType ann = expr.validate(name, content, context);
+                        if (name.Equals(Saxon.Hej.om.StandardNames.XML_ID_NAME)) {
+                            content = Saxon.Hej.value.Whitespace.collapseWhitespace(content);
+                        }
+                        try {
+                            output.attribute(name, ann, content.ToString(), loc, options);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            throw dynamicError(loc, err, context);
+                        }
+                        return null;
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.StringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForString(true);
+                    return (output, context) => {
+                        Saxon.Hej.om.Item nameItem = /*Delegate.eval()*/nameEval(context);
+                        Saxon.Hej.om.NodeName name = expr.validateNodeName(nameItem, context);
+                        string content = /*Delegate.eval()*/contentEval(context);
+                        if (name.Equals(Saxon.Hej.om.StandardNames.XML_ID_NAME)) {
+                            content = Saxon.Hej.value.Whitespace.collapseWhitespace(content);
+                        }
+                        try {
+                            output.attribute(name, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, content, loc, options);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            throw Saxon.Hej.expr.instruct.Instruction.dynamicError(loc, err, context);
+                        }
+                        return null;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.instruct.ComputedAttribute expr = (Saxon.Hej.expr.instruct.ComputedAttribute)(getExpression());
+                if ((((((/*1430*/Saxon.Hej.type.SimpleType)expr.getSchemaType()) != null) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.STRICT)) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.LAX))) {
+                    Saxon.Hej.expr.elab.ItemEvaluator superEval = base.elaborateForItem();
+                    return context => {
+                        Saxon.Hej.tree.util.Orphan o = (Saxon.Hej.tree.util.Orphan)(/*Delegate.eval()*/superEval(context));
+                        System.Diagnostics.Debug.Assert((o != null));
+                        expr.validateOrphanAttribute(o, context);
+                        return o;
+                    } ;
+                } else {
+                    return base.elaborateForItem();
+                }
+            }
+        
         }
     
     }

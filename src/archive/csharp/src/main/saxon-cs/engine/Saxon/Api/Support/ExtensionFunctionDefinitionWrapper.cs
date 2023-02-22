@@ -14,6 +14,14 @@ namespace Saxon.Api.Support {
         public override StructuredQName getFunctionQName() {
             return apiFunction.FunctionName.GetStructuredQName();
         }
+        
+        public override int getMinimumNumberOfArguments() {
+            return apiFunction.MinimumNumberOfArguments;
+        }
+        
+        public override int getMaximumNumberOfArguments() {
+            return apiFunction.MaximumNumberOfArguments;
+        }
 
         public override SequenceType[] getArgumentTypes() {
             SequenceType[] result = new SequenceType[apiFunction.ArgumentTypes.Length];
@@ -49,6 +57,10 @@ namespace Saxon.Api.Support {
 
         public override void supplyStaticContext(Saxon.Hej.expr.StaticContext context, int locationId, Expression[] arguments) {
             apiCall.SupplyStaticContext(new Saxon.Api.StaticContext(context));
+        }
+        
+        public override void copyLocalData(Saxon.Hej.lib.ExtensionFunctionCall destination) {
+            apiCall.CopyLocalData(((ExtensionFunctionCallWrapper) destination).apiCall);
         }
 
         public override Sequence call(XPathContext context, Sequence[] arguments) {

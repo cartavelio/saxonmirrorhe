@@ -85,7 +85,7 @@ namespace Saxon.Eej.ee.validate {
                         Saxon.Hej.@event.Receiver initialReceiver = getNextReceiver();
                         System.Collections.Generic.IList<Saxon.Hej.type.ValidationFailure> failures = new System.Collections.Generic.List<Saxon.Hej.type.ValidationFailure>(1);
                         if ((xsiType != null)) {
-                            if ((((initialReceiver is Saxon.Eej.ee.validate.EmptyContentValidator) || (initialReceiver is Saxon.Eej.ee.validate.AnyTypeValidator)) || (initialReceiver is Saxon.Eej.ee.validate.LaxValidator))) {
+                            if (((initialReceiver is Saxon.Eej.ee.validate.EmptyContentValidator) || (initialReceiver is Saxon.Eej.ee.validate.LaxValidator))) {
                                 initial = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidatorForType(null, xsiType, pipe, outputReceiver, failures);
                             } else {
                                 if ((initialReceiver is Saxon.Eej.ee.validate.SimpleContentValidator)) {
@@ -122,7 +122,7 @@ namespace Saxon.Eej.ee.validate {
                                 } else {
                                     Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(getConfiguration().getElementDeclaration(fp));
                                     initial = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location, getValidationContext(), null, initialValidationMode, pipe, outputReceiver, failures);
-                                    if ((((decl != null) && !(decl.isNillable())) && (attributes.get(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE, "nil") != null))) {
+                                    if ((((decl != null) && !(decl.isNillable())) && (attributes.get(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE, "nil") != null))) {
                                         string message = "The element is not nillable, so xsi:nil must not be present";
                                         Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure(message);
                                         ve.setConstraintReference(1, "cvc-elt", "3.1");
@@ -151,10 +151,10 @@ namespace Saxon.Eej.ee.validate {
                     System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> additionalNamespaces = new System.Collections.Generic.List<Saxon.Hej.om.NamespaceBinding>();
                     Saxon.Hej.om.AttributeMap validatedAttributes = initial.validateAttributes(attributes, additionalNamespaces);
                     foreach (Saxon.Hej.om.NamespaceBinding ns in additionalNamespaces) {
-                        namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+                        namespaces = namespaces.put(ns.getPrefix(), ns.getNamespaceUri());
                     }
                     if (((initial is Saxon.Eej.ee.validate.SimpleContentValidator) && initialSchemaType.isIdType())) {
-                        pipe.getErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("During validation, using an ID element at the outermost level has no effect").asWarning()));
+                        pipe.getErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident("During validation, using an ID element at the outermost level has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9048).asWarning()));
                     }
                     Saxon.Eej.ee.validate.ConstraintChecker constraintChecker = getConstraintChecker();
                     if ((constraintChecker != null)) {
@@ -191,7 +191,7 @@ namespace Saxon.Eej.ee.validate {
                         System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> additionalNamespaces = new System.Collections.Generic.List<Saxon.Hej.om.NamespaceBinding>();
                         Saxon.Hej.om.AttributeMap validatedAtts = v1.validateAttributes(attributes, additionalNamespaces);
                         foreach (Saxon.Hej.om.NamespaceBinding ns in additionalNamespaces) {
-                            namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+                            namespaces = namespaces.put(ns.getPrefix(), ns.getNamespaceUri());
                         }
                         prepareForAssertions(elemName, type, validatedAtts, namespaces, location, properties, pipe);
                     }
@@ -216,7 +216,7 @@ namespace Saxon.Eej.ee.validate {
             foreach (Saxon.Eej.ee.schema.Assertion a in assertions) {
                 if ((a.getSweep() == Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                     if ((stub == null)) {
-                        Saxon.Hej.tree.linked.LinkedTreeBuilder stubBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
+                        Saxon.Hej.tree.linked.LinkedTreeBuilder stubBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe, Saxon.Hej.om.Durability.TEMPORARY);
                         stubBuilder.open();
                         stubBuilder.startElement(elemName, Saxon.Hej.type.Untyped.INSTANCE, validatedAttributes, namespaces, location, properties);
                         stubBuilder.endElement();
@@ -251,7 +251,7 @@ namespace Saxon.Eej.ee.validate {
                         Saxon.Eej.ee.stream.Inversion inversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(a.getCondition().getInternalExpression(), false);
                         Saxon.Eej.ee.stream.feed.ItemFeed assertionResultHandler = new Saxon.Eej.ee.validate.ValidationStack.AssertionResultHandler(this, a, elemName, context);
                         assertionResultHandler.setPipelineConfiguration(pipe);
-                        Saxon.Eej.ee.stream.feed.ItemFeed booleanCapture = new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(null, assertionResultHandler, context);
+                        Saxon.Eej.ee.stream.feed.ItemFeed booleanCapture = new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(watchManager, null, assertionResultHandler, context);
                         Saxon.Eej.ee.stream.watch.Trigger assertionWatch = inversion.getWatch(watchManager, booleanCapture, context);
                         watchManager.addWatch(assertionWatch, true);
                         watchManager.restartElement(assertionWatch);

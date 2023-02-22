@@ -33,7 +33,11 @@ namespace Saxon.Eej.ee.stream.feed {
                 Saxon.Hej.om.Sequence value = processGroundedItem(item);
                 if (!(hasFailed())) {
                     if ((valuesUnderConstructionStack.Count==0)) {
-                        processItems(value.iterate(), getNextOutputter());
+                        if ((value is Saxon.Hej.om.Item)) {
+                            getNextOutputter().append((Saxon.Hej.om.Item)(value));
+                        } else {
+                            processItems(value.iterate(), getNextOutputter());
+                        }
                     } else {
                         valuesReadyToBeOutput.Add(value);
                     }

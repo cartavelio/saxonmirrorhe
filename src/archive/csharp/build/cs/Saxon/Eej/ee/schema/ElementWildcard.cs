@@ -99,7 +99,7 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("ref", id);
             serializer.endElement();
         }
-        public Saxon.Hej.om.Function getTermComponentAsFunction() {
+        public Saxon.Hej.om.FunctionItem getTermComponentAsFunction() {
             return wildcard.getComponentAsFunction();
         }
     

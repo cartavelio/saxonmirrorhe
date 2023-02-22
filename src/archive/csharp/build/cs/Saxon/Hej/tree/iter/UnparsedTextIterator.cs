@@ -14,6 +14,7 @@ namespace Saxon.Hej.tree.iter {
             this.checker = context.getConfiguration().getValidCharacterChecker();
             this.encoding = encoding;
             this.location = location;
+            arrangeCleanup(reader, context);
         }
         public UnparsedTextIterator(Saxon.Impl.Helpers.LineNumberReader reader, System.Uri absoluteURI, Saxon.Hej.expr.XPathContext context, string encoding)  {
             this.reader = reader;
@@ -22,6 +23,7 @@ namespace Saxon.Hej.tree.iter {
             this.checker = context.getConfiguration().getValidCharacterChecker();
             this.encoding = encoding;
             this.location = null;
+            arrangeCleanup(reader, context);
         }
     
     }

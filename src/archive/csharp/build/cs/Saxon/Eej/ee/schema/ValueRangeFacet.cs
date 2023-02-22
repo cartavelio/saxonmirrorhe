@@ -121,7 +121,7 @@ namespace Saxon.Eej.ee.schema {
             return ((c != Saxon.Hej.om.SequenceTool.INDETERMINATE_ORDERING) && testComparisonOK(c));
         }
         protected internal abstract bool testComparisonOK(int comparisonResult);
-        public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
+        public override Saxon.Hej.om.FunctionItem getFacetAsFunctionItem() {
             Saxon.Eej.ee.schema.ValueRangeFacet thisFacet = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

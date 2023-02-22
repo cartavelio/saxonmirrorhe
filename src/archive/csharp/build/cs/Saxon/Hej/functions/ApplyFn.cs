@@ -36,10 +36,10 @@ namespace Saxon.Hej.functions {
             if (((arguments.Length == 2) && (arguments[1] is Saxon.Hej.ma.arrays.SquareArrayConstructor))) {
                 Saxon.Hej.expr.Expression target = arguments[0];
                 if ((target.getItemType() is Saxon.Hej.ma.map.MapType)) {
-                    return makeGetCall(visitor, Saxon.Hej.ma.map.MapFunctionSet.getInstance(), contextInfo, arguments);
+                    return makeGetCall(visitor, Saxon.Hej.ma.map.MapFunctionSet.getInstance(31), contextInfo, arguments);
                 } else {
                     if ((target.getItemType() is Saxon.Hej.ma.arrays.ArrayItemType)) {
-                        return makeGetCall(visitor, Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(), contextInfo, arguments);
+                        return makeGetCall(visitor, Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(31), contextInfo, arguments);
                     }
                 }
             }
@@ -51,17 +51,17 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.expr.Expression getter = fnSet.makeFunction("get", 2).makeFunctionCall(target, key);
             getter.setRetainedStaticContext(target.getRetainedStaticContext());
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
-            if ((fnSet == Saxon.Hej.ma.map.MapFunctionSet.getInstance())) {
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "key value supplied when calling a map as a function", 0);
+            if ((fnSet == Saxon.Hej.ma.map.MapFunctionSet.getInstance(31))) {
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "key value supplied when calling a map as a function", 0);
                 ((Saxon.Hej.expr.SystemFunctionCall)(getter)).setArg(1, tc.staticTypeCheck(key, Saxon.Hej.value.SequenceType.SINGLE_ATOMIC, role, visitor));
             } else {
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "subscript supplied when calling an array as a function", 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "subscript supplied when calling an array as a function", 0);
                 ((Saxon.Hej.expr.SystemFunctionCall)(getter)).setArg(1, tc.staticTypeCheck(key, Saxon.Hej.value.SequenceType.SINGLE_INTEGER, role, visitor));
             }
             return getter.typeCheck(visitor, contextInfo);
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            Saxon.Hej.om.Function function = (Saxon.Hej.om.Function)(arguments[0].head());
+            Saxon.Hej.om.FunctionItem function = (Saxon.Hej.om.FunctionItem)(arguments[0].head());
             Saxon.Hej.type.TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             Saxon.Hej.type.FunctionItemType fit = function.getFunctionItemType();
             Saxon.Hej.ma.arrays.ArrayItem args = (Saxon.Hej.ma.arrays.ArrayItem)(arguments[1].head());
@@ -80,11 +80,12 @@ namespace Saxon.Hej.functions {
             } else {
                 for (int i = 0; (i<argArray.Length); i++) {
                     Saxon.Hej.value.SequenceType expected = fit.getArgumentTypes()[i];
-                    Saxon.Hej.expr.parser.RoleDiagnostic role;
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role;
                     if (isDynamicFunctionCall()) {
-                        role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, dynamicFunctionCall.ToString(), 0);
+                        role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, dynamicFunctionCall.ToString(), 0);
                     } else {
-                        role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "fn:apply", (i+1));
+                        int pos = i;
+                        role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "fn:apply", (pos+1));
                     }
                     Saxon.Hej.om.Sequence converted = th.applyFunctionConversionRules(args.get(i), expected, role, Saxon.Hej.expr.parser.Loc.NONE);
                     argArray[i] = converted.materialize();
@@ -92,8 +93,7 @@ namespace Saxon.Hej.functions {
             }
             if (function.isSequenceVariadic()) {
                 System.Collections.Generic.IList<Saxon.Hej.om.Item> members = new System.Collections.Generic.List<Saxon.Hej.om.Item>();
-                Saxon.Hej.ma.arrays.ArrayItem suppliedArgs = (Saxon.Hej.ma.arrays.ArrayItem)(arguments[1].head());
-                foreach (Saxon.Hej.om.GroundedValue mem in suppliedArgs.members()) {
+                foreach (Saxon.Hej.om.GroundedValue mem in args.members()) {
                     foreach (Saxon.Hej.om.Item it in mem.asIterable()) {
                         members.Add(it);
                     }
@@ -107,7 +107,7 @@ namespace Saxon.Hej.functions {
             if (function.isTrustedResultType()) {
                 return rawResult;
             } else {
-                Saxon.Hej.expr.parser.RoleDiagnostic resultRole = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> resultRole = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
                 return th.applyFunctionConversionRules(rawResult, fit.getResultType(), resultRole, Saxon.Hej.expr.parser.Loc.NONE);
             }
         }

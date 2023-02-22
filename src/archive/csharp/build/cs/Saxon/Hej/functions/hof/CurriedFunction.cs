@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions.hof {
     public class CurriedFunction : Saxon.Hej.functions.AbstractFunction {
-        private readonly Saxon.Hej.om.Function targetFunction;
+        private readonly Saxon.Hej.om.FunctionItem targetFunction;
         private readonly Saxon.Hej.om.Sequence[] boundValues;
         private Saxon.Hej.type.FunctionItemType functionType;
-        public CurriedFunction(Saxon.Hej.om.Function targetFunction, Saxon.Hej.om.Sequence[] boundValues)  {
+        public CurriedFunction(Saxon.Hej.om.FunctionItem targetFunction, Saxon.Hej.om.Sequence[] boundValues)  {
             this.targetFunction = targetFunction;
             this.boundValues = boundValues;
         }

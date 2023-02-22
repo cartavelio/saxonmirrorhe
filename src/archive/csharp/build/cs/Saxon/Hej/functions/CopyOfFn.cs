@@ -14,7 +14,9 @@ namespace Saxon.Hej.functions {
                     return item;
                 } else {
                     Saxon.Hej.tree.wrapper.VirtualCopy vc = Saxon.Hej.tree.wrapper.VirtualCopy.makeVirtualCopy((Saxon.Hej.om.NodeInfo)(item));
-                    ((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()).setCopyAccumulators(true);
+                    if (getRetainedStaticContext().getPackageData().isXSLT()) {
+                        ((/*1430*/Saxon.Hej.tree.wrapper.VirtualTreeInfo)vc.getTreeInfo()).setCopyAccumulators(true);
+                    }
                     return vc;
                 }
             } );

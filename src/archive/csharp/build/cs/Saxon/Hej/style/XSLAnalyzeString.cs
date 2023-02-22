@@ -60,7 +60,7 @@ namespace Saxon.Hej.style {
                     System.Collections.Generic.IList<string> warnings = new System.Collections.Generic.List<string>();
                     pattern = getConfiguration().compileRegularExpression(regex, flagstr, ((getEffectiveVersion()>=30) ? "XP30" : "XP20"), warnings);
                     foreach (string w in warnings) {
-                        issueWarning(w, this);
+                        issueWarning(w, Saxon.Hej.trans.SaxonErrorCode.SXWN9022);
                     }
                 } catch (Saxon.Hej.trans.XPathException err) {
                     if ("FORX0001".Equals(err.getErrorCodeLocalPart())) {

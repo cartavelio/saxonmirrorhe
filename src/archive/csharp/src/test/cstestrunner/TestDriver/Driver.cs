@@ -161,10 +161,13 @@ namespace TestDriver {
 
                 
 
-                string catalog = testSuiteDir + "/catalog.xml";
+                string catalogFile = "catalog.xml";
                 string specStr = null;
 
                 for (int i = 1; i < args.Length; i++) {
+                    if (args[i].StartsWith("-catalog")) {
+                        catalogFile = args[i].Substring(9);
+                    }
                     if (args[i].StartsWith("-o")) {
                         resultsDir = args[i].Substring(3);
                         if (resultsDir.EndsWith("/")) {
@@ -226,6 +229,8 @@ namespace TestDriver {
                         }
                     }
                 }
+
+                string catalog = testSuiteDir + "/" + catalogFile;
 
                 if (resultsDir == null) {
                     feedback.Message("No results directory specified (use -o:dirname)", true);

@@ -46,8 +46,7 @@ namespace Saxon.Hej.sxpath {
                 }
             }
             Saxon.Hej.om.SequenceIterator iter = value.iterate();
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 if (((item is Saxon.Hej.om.NodeInfo) && !(((Saxon.Hej.om.NodeInfo)(item)).getConfiguration().isCompatible(contextObject.getConfiguration())))) {
                     throw new Saxon.Hej.trans.XPathException("Supplied node must be built using the same or a compatible Configuration", Saxon.Hej.trans.SaxonErrorCode.SXXP0004);
                 }

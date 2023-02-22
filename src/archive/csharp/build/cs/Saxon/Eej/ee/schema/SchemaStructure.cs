@@ -56,7 +56,7 @@ namespace Saxon.Eej.ee.schema {
         public virtual bool validate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             return true;
         }
-        public virtual Saxon.Hej.om.Function getComponentAsFunction() {
+        public virtual Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return null;
         }
         public virtual Saxon.Hej.type.SchemaValidationStatus getValidationStatus() {
@@ -93,7 +93,7 @@ namespace Saxon.Eej.ee.schema {
         }
         public virtual void elaborate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
         }
-        protected internal static Saxon.Hej.om.Function makeXPathExpressionPropertyRecord(string conditionText, Saxon.Hej.om.NamespaceResolver nsResolver, string baseURI) {
+        protected internal static Saxon.Hej.om.FunctionItem makeXPathExpressionPropertyRecord(string conditionText, Saxon.Hej.om.NamespaceResolver nsResolver, string baseURI) {
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
                 switch (key) {
@@ -108,7 +108,7 @@ namespace Saxon.Eej.ee.schema {
                               case "prefix":
                                 return new Saxon.Hej.value.StringValue(prefix);
                               case "namespace":
-                                return new Saxon.Hej.value.AnyURIValue((nsResolver.getURIForPrefix(prefix, false)));
+                                return new Saxon.Hej.value.AnyURIValue((nsResolver.getURIForPrefix(prefix, false)).toUnicodeString());
                               default:
                                 return Saxon.Hej.value.EmptySequence.getInstance();
                             }
@@ -117,7 +117,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                     return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(bindings);
                   case "default namespace":
-                    return new Saxon.Hej.value.AnyURIValue((nsResolver.getURIForPrefix("", true)));
+                    return new Saxon.Hej.value.AnyURIValue((nsResolver.getURIForPrefix("", true)).toUnicodeString());
                   case "base URI":
                     return new Saxon.Hej.value.AnyURIValue((baseURI));
                   case "expression":

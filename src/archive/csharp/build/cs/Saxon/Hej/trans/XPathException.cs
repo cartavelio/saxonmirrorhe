@@ -154,12 +154,12 @@ namespace Saxon.Hej.trans {
         }
         public void setErrorCode(string code) {
             if ((code != null)) {
-                errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, code);
+                errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, code);
             }
         }
         public void maybeSetErrorCode(string code) {
             if (((errorCode == null) && (code != null))) {
-                errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, code);
+                errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, code);
             }
         }
         public void setErrorCodeQName(Saxon.Hej.om.StructuredQName code) {
@@ -171,8 +171,8 @@ namespace Saxon.Hej.trans {
         public string getErrorCodeLocalPart() {
             return ((errorCode == null) ? null : errorCode.getLocalPart());
         }
-        public string getErrorCodeNamespace() {
-            return ((errorCode == null) ? null : errorCode.getURI());
+        public Saxon.Hej.om.NamespaceUri getErrorCodeNamespace() {
+            return ((errorCode == null) ? null : errorCode.getNamespaceUri());
         }
         public void setErrorObject(Saxon.Hej.om.Sequence value) {
             errorObject = value;
@@ -207,7 +207,7 @@ namespace Saxon.Hej.trans {
                 return true;
             }
             Saxon.Hej.om.StructuredQName err = errorCode;
-            if (((err != null) && err.hasURI(Saxon.Hej.lib.NamespaceConstant.ERR))) {
+            if (((err != null) && err.hasURI(Saxon.Hej.om.NamespaceUri.ERR))) {
                 string local = err.getLocalPart();
                 return ((((((local.Equals("XTDE1260") || local.Equals("XTDE1280")) || local.Equals("XTDE1390")) || local.Equals("XTDE1400")) || local.Equals("XTDE1428")) || local.Equals("XTDE1440")) || local.Equals("XTDE1460"));
             }

@@ -12,16 +12,8 @@ namespace Saxon.Hej.expr.instruct {
             this.noNodeIfEmpty = noNodeIfEmpty;
             adoptChildExpression(select);
             if ((select is Saxon.Hej.expr.StringLiteral)) {
-                bool special = false;
                 Saxon.Hej.str.UnicodeString val = ((Saxon.Hej.expr.StringLiteral)(select)).getString();
-                Saxon.Hej.z.IntIterator iter = val.codePoints();
-                while (iter.hasNext()) {
-                    int c = iter.next();
-                    if ((((((c<33) || (c>126)) || (c == '<')) || (c == '>')) || (c == '&'))) {
-                        special = true;
-                        break ;
-                    }
-                }
+                bool special = (val.indexWhere(c => (((((c<33) || (c>126)) || (c == '<')) || (c == '>')) || (c == '&')), 0)>=0);
                 if (!(special)) {
                     options |= Saxon.Hej.@event.ReceiverOption.NO_SPECIAL_CHARS;
                 }
@@ -129,53 +121,36 @@ namespace Saxon.Hej.expr.instruct {
                 return new Saxon.Hej.expr.CastExpression(sf, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, false);
             }
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            if (noNodeIfEmpty) {
-                Saxon.Hej.om.Item value = getSelect().evaluateItem(context);
-                if ((value != null)) {
-                    processValue(value.getUnicodeStringValue(), output, context);
-                }
-                return null;
-            } else {
-                if ((((getSelect().getItemType() == Saxon.Hej.type.BuiltInAtomicType.STRING) && !(isDisableOutputEscaping())) && !(Saxon.Hej.value.Cardinality.allowsZero(getCardinality())))) {
-                    Saxon.Hej.s9api.Location instructionLoc = getLocation();
-                    Saxon.Hej.@event.Outputter toText = new Inner_ProxyOutputter_14(this, output, instructionLoc);
-                    getSelect().process(toText, context);
-                    return null;
-                } else {
-                    return base.processLeavingTail(output, context);
-                }
-            }
-        }
         public override void processValue(Saxon.Hej.str.UnicodeString value, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
             output.characters(value, getLocation(), options);
         }
         public override Saxon.Hej.om.NodeInfo evaluateItem(Saxon.Hej.expr.XPathContext context) {
             try {
-                Saxon.Hej.str.UnicodeString val;
-                Saxon.Hej.om.Item item = getSelect().evaluateItem(context);
-                if ((item == null)) {
-                    if (noNodeIfEmpty) {
-                        return null;
-                    } else {
-                        val = Saxon.Hej.str.EmptyUnicodeString.getInstance();
-                    }
-                } else {
-                    val = item.getUnicodeStringValue();
-                }
-                Saxon.Hej.Controller controller = context.getController();
-                System.Diagnostics.Debug.Assert((controller != null));
-                Saxon.Hej.tree.util.Orphan o = new Saxon.Hej.tree.util.Orphan(controller.getConfiguration());
-                o.setNodeKind(Saxon.Hej.type.Type.TEXT);
-                o.setStringValue(val);
-                if (isDisableOutputEscaping()) {
-                    o.setDisableOutputEscaping(true);
-                }
-                return o;
+                Saxon.Hej.om.Item content = /*Delegate.eval()*/getSelect().makeElaborator().elaborateForItem()(context);
+                return makeTextNode(content, noNodeIfEmpty, isDisableOutputEscaping(), context);
             } catch (Saxon.Hej.trans.XPathException err) {
                 err.maybeSetLocation(getLocation());
                 throw;
             }
+        }
+        private static Saxon.Hej.om.NodeInfo makeTextNode(Saxon.Hej.om.Item content, bool noNodeIfEmpty, bool doe, Saxon.Hej.expr.XPathContext context) {
+            Saxon.Hej.str.UnicodeString val;
+            if ((content == null)) {
+                if (noNodeIfEmpty) {
+                    return null;
+                } else {
+                    val = Saxon.Hej.str.EmptyUnicodeString.getInstance();
+                }
+            } else {
+                val = content.getUnicodeStringValue();
+            }
+            Saxon.Hej.tree.util.Orphan o = new Saxon.Hej.tree.util.Orphan(context.getConfiguration());
+            o.setNodeKind(Saxon.Hej.type.Type.TEXT);
+            o.setStringValue(val);
+            if (doe) {
+                o.setDisableOutputEscaping(true);
+            }
+            return o;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("valueOf", this);
@@ -198,26 +173,70 @@ namespace Saxon.Hej.expr.instruct {
             getSelect().export(@out);
             @out.endElement();
         }
-    
-        private class Inner_ProxyOutputter_14 : Saxon.Hej.@event.ProxyOutputter {
-            private readonly ValueOf outerInstance;
-            public Inner_ProxyOutputter_14(ValueOf outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1, Saxon.Hej.s9api.Location instructionLoc) : base(arg1) {
-                this.outerInstance = outerInstance;
-                this.instructionLoc = instructionLoc;
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ValueOf.ValueOfElaborator();
+        }
+        private class ValueOfElaborator : Saxon.Hej.expr.elab.SimpleNodePushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ValueOf expr = (Saxon.Hej.expr.instruct.ValueOf)(getExpression());
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                bool noNodeIfEmpty = expr.noNodeIfEmpty;
+                int options = expr.getOptions();
+                if (noNodeIfEmpty) {
+                    Saxon.Hej.expr.elab.ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
+                    return (output, context) => {
+                        Saxon.Hej.om.Item value = /*Delegate.eval()*/contentEval(context);
+                        if ((value != null)) {
+                            output.characters(value.getUnicodeStringValue(), loc, options);
+                        }
+                        return null;
+                    } ;
+                } else {
+                    if ((((expr.getSelect().getItemType() == Saxon.Hej.type.BuiltInAtomicType.STRING) && !(expr.isDisableOutputEscaping())) && !(Saxon.Hej.value.Cardinality.allowsZero(expr.getCardinality())))) {
+                        Saxon.Hej.expr.elab.PushEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForPush();
+                        return (output, context) => {
+                            Saxon.Hej.@event.Outputter streamer = new Saxon.Hej.expr.instruct.ValueOf.TextNodeOutputStreamer(output, loc, options);
+                            return /*Delegate.processLeavingTail()*/contentEval(streamer, context);
+                        } ;
+                    } else {
+                        Saxon.Hej.expr.elab.UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                        return (output, context) => {
+                            Saxon.Hej.str.UnicodeString value = /*Delegate.eval()*/contentEval(context);
+                            output.characters(value, loc, options);
+                            return null;
+                        } ;
+                    }
+                }
             }
-            private Saxon.Hej.s9api.Location instructionLoc;
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.instruct.ValueOf expr = (Saxon.Hej.expr.instruct.ValueOf)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
+                bool noNodeIfEmpty = expr.noNodeIfEmpty;
+                bool doe = expr.isDisableOutputEscaping();
+                return context => Saxon.Hej.expr.instruct.ValueOf.makeTextNode(/*Delegate.eval()*/contentEval(context), noNodeIfEmpty, doe, context);
+            }
+        
+        }
+        private class TextNodeOutputStreamer : Saxon.Hej.@event.ProxyOutputter {
+            private readonly Saxon.Hej.s9api.Location instructionLoc;
+            private readonly int options;
+            public TextNodeOutputStreamer(Saxon.Hej.@event.Outputter output, Saxon.Hej.s9api.Location instructionLoc, int options) : base (output) {
+                this.instructionLoc = instructionLoc;
+                this.options = options;
+            }
             public override void append(Saxon.Hej.om.Item item) {
-                /*superMethod*/getNextOutputter().characters(/*localparam*/item.getUnicodeStringValue(), /*extraParam*/instructionLoc, outerInstance.options);
+                getNextOutputter().characters(item.getUnicodeStringValue(), instructionLoc, options);
             }
             public override void append(Saxon.Hej.om.Item item, Saxon.Hej.s9api.Location loc, int properties) {
-                Saxon.Hej.s9api.Location location = ((/*localparam*/loc.getLineNumber() == -1) ? /*extraParam*/instructionLoc : /*localparam*/loc);
-                /*superMethod*/getNextOutputter().characters(/*localparam*/item.getUnicodeStringValue(), /*localvar*/location, (/*localparam*/properties|outerInstance.options));
+                Saxon.Hej.s9api.Location location = ((loc.getLineNumber() == -1) ? instructionLoc : loc);
+                getNextOutputter().characters(item.getUnicodeStringValue(), location, (properties|options));
             }
-            public override  /* REPLACING public */ Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode, Saxon.Hej.s9api.Location loc) {
-                Saxon.Hej.s9api.Location location = ((/*localparam*/loc.getLineNumber() == -1) ? /*extraParam*/instructionLoc : /*localparam*/loc);
-                return /*superMethod*/getNextOutputter().getStringReceiver(true, /*localvar*/location);
+            public override  /* REPLACING public override */ Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode, Saxon.Hej.s9api.Location loc) {
+                Saxon.Hej.s9api.Location location = ((loc.getLineNumber() == -1) ? instructionLoc : loc);
+                return getNextOutputter().getStringReceiver(true, location);
             }
+        
         }
-
+    
     }
 }

@@ -5,10 +5,10 @@ namespace Saxon.Hej.expr {
     #pragma warning disable 659
     public sealed class ItemChecker : Saxon.Hej.expr.UnaryExpression {
         private readonly Saxon.Hej.type.ItemType requiredItemType;
-        private readonly Saxon.Hej.expr.parser.RoleDiagnostic role;
-        public ItemChecker(Saxon.Hej.expr.Expression sequence, Saxon.Hej.type.ItemType itemType, Saxon.Hej.expr.parser.RoleDiagnostic role) : base (sequence) {
+        private readonly Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier;
+        public ItemChecker(Saxon.Hej.expr.Expression sequence, Saxon.Hej.type.ItemType itemType, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier) : base (sequence) {
             requiredItemType = itemType;
-            this.role = role;
+            this.roleSupplier = roleSupplier;
         }
         public Saxon.Hej.type.ItemType getRequiredType() {
             return requiredItemType;
@@ -17,7 +17,7 @@ namespace Saxon.Hej.expr {
             return Saxon.Hej.expr.OperandRole.SAME_FOCUS_ACTION;
         }
         public Saxon.Hej.expr.parser.RoleDiagnostic getRoleLocator() {
-            return role;
+            return roleSupplier();
         }
         public override Saxon.Hej.expr.Expression simplify() {
             Saxon.Hej.expr.Expression operand = getBaseExpression().simplify();
@@ -34,7 +34,7 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.expr.instruct.Block block = (Saxon.Hej.expr.instruct.Block)(operand);
                 System.Collections.Generic.IList<Saxon.Hej.expr.Expression> checkedOperands = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>();
                 foreach (Saxon.Hej.expr.Operand o in block.operands()) {
-                    Saxon.Hej.expr.ItemChecker checkedOp = new Saxon.Hej.expr.ItemChecker(o.getChildExpression(), requiredItemType, role);
+                    Saxon.Hej.expr.ItemChecker checkedOp = new Saxon.Hej.expr.ItemChecker(o.getChildExpression(), requiredItemType, roleSupplier);
                     checkedOperands.Add(checkedOp);
                 }
                 Saxon.Hej.expr.instruct.Block newBlock = new Saxon.Hej.expr.instruct.Block(checkedOperands.ToArray());
@@ -57,10 +57,12 @@ namespace Saxon.Hej.expr {
                     } else {
                         if (Saxon.Hej.value.Cardinality.allowsZero(card)) {
                             if (!(((operand is Saxon.Hej.expr.Literal)))) {
+                                Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                                 string message = role.composeErrorMessage(requiredItemType, operand, th);
-                                visitor.getStaticContext().issueWarning(("The only value that can pass type-checking is an empty sequence. "+message), getLocation());
+                                visitor.getStaticContext().issueWarning(("The only value that can pass type-checking is an empty sequence. "+message), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
                             }
                         } else {
+                            Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                             string message = role.composeErrorMessage(requiredItemType, operand, th);
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
                             err.setErrorCode(role.getErrorCode());
@@ -96,14 +98,17 @@ namespace Saxon.Hej.expr {
             return getBaseExpression().getIntegerBounds();
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
+        }
+        public Saxon.Hej.om.SequenceIterator checkSequence(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.Expression baseExpr = getBaseExpression();
-            Saxon.Hej.om.SequenceIterator @base = baseExpr.iterate(context);
             Saxon.Hej.type.TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             Saxon.Ejava.util.function.Consumer<Saxon.Hej.om.Item> checker = item => {
                 if (requiredItemType.matches(item, th)) {
                 } else {
                     if ((requiredItemType.getUType().subsumes(Saxon.Hej.type.UType.STRING) && Saxon.Hej.type.BuiltInAtomicType.ANY_URI.matches(item, th))) {
                     } else {
+                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                         string message = role.composeErrorMessage(requiredItemType, item, th);
                         string errorCode = role.getErrorCode();
                         Saxon.Hej.trans.XPathException te = new Saxon.Hej.trans.XPathException(message, errorCode);
@@ -117,8 +122,10 @@ namespace Saxon.Hej.expr {
             return new Saxon.Hej.expr.ItemCheckingIterator(@base, checker);
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
+        }
+        public Saxon.Hej.om.Item checkItem(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.type.TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-            Saxon.Hej.om.Item item = getBaseExpression().evaluateItem(context);
             if ((item == null)) {
                 return null;
             }
@@ -128,6 +135,7 @@ namespace Saxon.Hej.expr {
                 if ((requiredItemType.getUType().subsumes(Saxon.Hej.type.UType.STRING) && ((Saxon.Hej.type.BuiltInAtomicType.ANY_URI.matches(item, th) || Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC.matches(item, th))))) {
                     return item;
                 } else {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     string message = role.composeErrorMessage(requiredItemType, item, th);
                     string errorCode = role.getErrorCode();
                     if ("XPDY0050".Equals(errorCode)) {
@@ -140,23 +148,10 @@ namespace Saxon.Hej.expr {
             }
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.Expression next = getBaseExpression();
-            int card = Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
-            if ((next is Saxon.Hej.expr.CardinalityChecker)) {
-                card = ((Saxon.Hej.expr.CardinalityChecker)(next)).getRequiredCardinality();
-                next = ((Saxon.Hej.expr.CardinalityChecker)(next)).getBaseExpression();
-            }
-            if (((((next.getImplementationMethod()&PROCESS_METHOD)) != 0) && !(((requiredItemType is Saxon.Hej.pattern.DocumentNodeTest))))) {
-                Saxon.Hej.@event.TypeCheckingFilter filter = new Saxon.Hej.@event.TypeCheckingFilter(output);
-                filter.setRequiredType(requiredItemType, card, role, getLocation());
-                next.process(filter, context);
-                filter.finalCheck();
-            } else {
-                base.process(output, context);
-            }
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
-            Saxon.Hej.expr.ItemChecker exp = new Saxon.Hej.expr.ItemChecker(getBaseExpression().copy(rebindings), requiredItemType, role);
+            Saxon.Hej.expr.ItemChecker exp = new Saxon.Hej.expr.ItemChecker(getBaseExpression().copy(rebindings), requiredItemType, roleSupplier);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, exp);
             return exp;
         }
@@ -191,7 +186,7 @@ namespace Saxon.Hej.expr {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("treat", this);
             @out.emitAttribute("as", Saxon.Hej.type.AlphaCode.fromItemType(requiredItemType));
-            @out.emitAttribute("diag", role.save());
+            @out.emitAttribute("diag", roleSupplier().save());
             getBaseExpression().export(@out);
             @out.endElement();
         }
@@ -204,6 +199,55 @@ namespace Saxon.Hej.expr {
         }
         public override string toShortString() {
             return getBaseExpression().toShortString();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.ItemChecker.ItemCheckerElaborator();
+        }
+        public class ItemCheckerElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.ItemChecker exp = (Saxon.Hej.expr.ItemChecker)(getExpression());
+                Saxon.Hej.expr.Expression arg = exp.getBaseExpression();
+                Saxon.Hej.expr.elab.PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
+                return context => exp.checkSequence(/*Delegate.iterate()*/argEval(context), context);
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.ItemChecker expr = (Saxon.Hej.expr.ItemChecker)(getExpression());
+                Saxon.Hej.expr.Expression arg = expr.getBaseExpression();
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+                return context => expr.checkItem(/*Delegate.eval()*/argEval(context), context);
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.ItemChecker expr = (Saxon.Hej.expr.ItemChecker)(getExpression());
+                Saxon.Hej.expr.Expression arg = expr.getBaseExpression();
+                int card = Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
+                if ((arg is Saxon.Hej.expr.CardinalityChecker)) {
+                    card = ((Saxon.Hej.expr.CardinalityChecker)(arg)).getRequiredCardinality();
+                    arg = ((Saxon.Hej.expr.CardinalityChecker)(arg)).getBaseExpression();
+                }
+                if (((((arg.getImplementationMethod()&PROCESS_METHOD)) != 0) && !(((expr.requiredItemType is Saxon.Hej.pattern.DocumentNodeTest))))) {
+                    Saxon.Hej.expr.Expression finalArg = arg;
+                    int finalCard = card;
+                    return (output, context) => {
+                        Saxon.Hej.expr.elab.PushEvaluator argPush = finalArg.makeElaborator().elaborateForPush();
+                        Saxon.Hej.@event.TypeCheckingFilter filter = new Saxon.Hej.@event.TypeCheckingFilter(output);
+                        filter.setRequiredType(expr.requiredItemType, finalCard, expr.roleSupplier(), expr.getLocation());
+                        Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/argPush(filter, context);
+                        Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                        filter.finalCheck();
+                        return null;
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
+                    return (output, context) => {
+                        Saxon.Hej.om.SequenceIterator iter = expr.checkSequence(/*Delegate.iterate()*/argEval(context), context);
+                        for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                            output.append(item);
+                        }
+                        return null;
+                    } ;
+                }
+            }
+        
         }
     
     }

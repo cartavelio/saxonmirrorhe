@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions.registry {
     public class SefFunction : Saxon.Hej.functions.SystemFunction {
-        private const string FN_ALIAS = "http://ns.saxonica.com/xpath-functions";
+        private readonly static Saxon.Hej.om.NamespaceUri FN_ALIAS = Saxon.Hej.om.NamespaceUri.of("http://ns.saxonica.com/xpath-functions");
         protected internal Saxon.Hej.trans.SymbolicName.F functionAlias;
         public override void setDetails(Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry entry) {
             base.setDetails(entry);
-            functionAlias = new Saxon.Hej.trans.SymbolicName.F(new Saxon.Hej.om.StructuredQName("", FN_ALIAS, getDetails().name.getLocalPart()), getDetails().arity);
+            functionAlias = new Saxon.Hej.trans.SymbolicName.F(new Saxon.Hej.om.StructuredQName("", FN_ALIAS, getDetails().name.getLocalPart()), getDetails().maxArity);
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
             Saxon.Hej.expr.Expression e = new Saxon.Hej.expr.SystemFunctionCall(this, arguments);

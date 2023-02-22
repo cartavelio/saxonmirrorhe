@@ -14,6 +14,18 @@ namespace Saxon.Hej.functions {
         public override string getCompilerName() {
             return "DateTimeConstructorCompiler";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.DateTimeConstructor.DateTimeFnElaborator();
+        }
+        public class DateTimeFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall sfc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator arg0eval = sfc.getArg(0).makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator arg1eval = sfc.getArg(1).makeElaborator().elaborateForItem();
+                return context => Saxon.Hej.value.DateTimeValue.makeDateTimeValue((Saxon.Hej.value.DateValue)(/*Delegate.eval()*/arg0eval(context)), (Saxon.Hej.value.TimeValue)(/*Delegate.eval()*/arg1eval(context)));
+            }
+        
+        }
     
     }
 }

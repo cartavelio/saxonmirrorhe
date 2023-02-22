@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"id", "name", "public", "system"};
             allowAttributes(atts, allowed);
             processId();
-            string name = atts.getValue("", "name");
+            string name = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
             if ((name == null)) {
                 missingAttribute("name");
                 name = ("unnamed-notation-"+GetHashCode());
@@ -25,11 +25,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 nc = Saxon.Hej.om.StandardNames.SQ_XS_INVALID_NAME;
             }
             notation.setNotationName(nc);
-            string publicAtt = atts.getValue("", "public");
+            string publicAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "public");
             if ((publicAtt != null)) {
                 notation.setNotationPublicId(publicAtt);
             }
-            string systemAtt = atts.getValue("", "system");
+            string systemAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "system");
             if ((systemAtt != null)) {
                 notation.setNotationSystemId(systemAtt);
             }

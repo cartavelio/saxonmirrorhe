@@ -8,14 +8,16 @@ namespace Saxon.Hej.str {
         protected internal Twine24(byte[] bytes)  {
             this.bytes = bytes;
         }
-        public Twine24(int[] codePoints)  {
-            bytes = new byte[(codePoints.Length*3)];
-            for (int i = 0, j = 0; (i<codePoints.Length); i++, j += 3) {
+        public Twine24(int[] codePoints, int used)  {
+            bytes = new byte[(used*3)];
+            for (int i = 0, j = 0; (i<used); i++, j += 3) {
                 int c = codePoints[i];
                 bytes[j] = (byte)(((((c>>16))&unchecked((int)0xff))));
                 bytes[(j+1)] = (byte)(((((c>>8))&unchecked((int)0xff))));
                 bytes[(j+2)] = (byte)(((c&unchecked((int)0xff))));
             }
+        }
+        public Twine24(int[] codePoints) : this (codePoints, codePoints.Length) {
         }
         public byte[] getByteArray() {
             return bytes;
@@ -27,8 +29,8 @@ namespace Saxon.Hej.str {
             return (bytes.Length/3);
         }
         public override Saxon.Hej.str.UnicodeString substring(long start, long end) {
-            int start32 = Saxon.Hej.str.StringTool.requireInt(start);
-            int end32 = Saxon.Hej.str.StringTool.requireInt(end);
+            int start32 = requireInt(start);
+            int end32 = requireInt(end);
             int len = length32();
             checkSubstringBounds(start, end);
             if ((end == start)) {
@@ -42,7 +44,7 @@ namespace Saxon.Hej.str {
             }
         }
         public override int codePointAt(long index) {
-            int index32 = Saxon.Hej.str.StringTool.requireInt(index);
+            int index32 = requireInt(index);
             if (((index32<0) || (index32>=length32()))) {
                 throw new System.IndexOutOfRangeException();
             }
@@ -50,7 +52,7 @@ namespace Saxon.Hej.str {
             return ((((((bytes[offset]<<16)|(((bytes[(offset+1)]&unchecked((int)0xff)))<<8)))|((bytes[(offset+2)]&unchecked((int)0xff)))))&unchecked((int)0xffffff));
         }
         public override long indexOf(int code, long from) {
-            int from32 = System.Math.Max(requireInt(from), 0);
+            int from32 = requireNonNegativeInt(from);
             if ((from32>=length32())) {
                 return -1;
             }
@@ -69,7 +71,7 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override long indexOf(Saxon.Hej.str.UnicodeString other, long from) {
-            int from32 = Saxon.Hej.str.StringTool.requireInt(from);
+            int from32 = requireInt(from);
             if ((from32<0)) {
                 from32 = 0;
             } else {
@@ -81,10 +83,10 @@ namespace Saxon.Hej.str {
                 return from;
             }
             int initial = other.codePointAt(0);
-            int len = Saxon.Hej.str.StringTool.requireInt(other.length());
+            int len = requireInt(other.length());
             int lastPossible = (length32()-len);
             while ((from32<=lastPossible)) {
-                int i = Saxon.Hej.str.StringTool.requireInt(indexOf(initial, from32));
+                int i = requireInt(indexOf(initial, from32));
                 if ((i<0)) {
                     return -1;
                 }

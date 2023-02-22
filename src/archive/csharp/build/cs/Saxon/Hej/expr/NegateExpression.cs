@@ -17,7 +17,7 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             getOperand().typeCheck(visitor, contextInfo);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UNARY_EXPR, "-", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UNARY_EXPR, "-", 0);
             Saxon.Hej.expr.Expression operand = visitor.getConfiguration().getTypeChecker(backwardsCompatible).staticTypeCheck(getBaseExpression(), Saxon.Hej.value.SequenceType.OPTIONAL_NUMERIC, role, visitor);
             setBaseExpression(operand);
             if ((operand is Saxon.Hej.expr.Literal)) {
@@ -38,11 +38,7 @@ namespace Saxon.Hej.expr {
             return EVALUATE_METHOD;
         }
         public override Saxon.Hej.value.NumericValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.NumericValue v1 = (Saxon.Hej.value.NumericValue)(getBaseExpression().evaluateItem(context));
-            if ((v1 == null)) {
-                return (backwardsCompatible ? Saxon.Hej.value.DoubleValue.NaN : null);
-            }
-            return v1.negate();
+            return (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.NegateExpression exp = new Saxon.Hej.expr.NegateExpression(getBaseExpression().copy(rebindings));
@@ -62,6 +58,33 @@ namespace Saxon.Hej.expr {
             }
             getBaseExpression().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.NegateExpression.NegateElaborator();
+        }
+        public class NegateElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.NegateExpression exp = (Saxon.Hej.expr.NegateExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = exp.getBaseExpression().makeElaborator().elaborateForItem();
+                bool maybeEmpty = Saxon.Hej.value.Cardinality.allowsZero(exp.getBaseExpression().getCardinality());
+                bool backwardsCompatible = exp.isBackwardsCompatible();
+                if (maybeEmpty) {
+                    if (backwardsCompatible) {
+                        return context => {
+                            Saxon.Hej.value.NumericValue v1 = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/argEval(context));
+                            return ((v1 == null) ? Saxon.Hej.value.DoubleValue.NaN : v1.negate());
+                        } ;
+                    } else {
+                        return context => {
+                            Saxon.Hej.value.NumericValue v1 = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/argEval(context));
+                            return ((v1 == null) ? null : v1.negate());
+                        } ;
+                    }
+                } else {
+                    return context => ((Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/argEval(context))).negate();
+                }
+            }
+        
         }
     
     }

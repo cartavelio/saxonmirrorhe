@@ -23,7 +23,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 string[] allowed = {"defaultAttributesApply", "id", "mixed"};
                 allowAttributes(atts, allowed);
             }
-            string debug = atts.getValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "debug");
+            string debug = atts.getValue(Saxon.Hej.om.NamespaceUri.SAXON, "debug");
             if ((debug != null)) {
                 debug = Saxon.Hej.value.Whitespace.trim(debug);
                 if (("true".Equals(debug) || "1".Equals(debug))) {
@@ -31,7 +31,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
             }
             processId();
-            string attValue = Saxon.Hej.value.Whitespace.trim(atts.getValue("", "name"));
+            string attValue = Saxon.Hej.value.Whitespace.trim(atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name"));
             if ((attValue != null)) {
                 Saxon.Hej.om.StructuredQName typeName;
                 try {
@@ -41,7 +41,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     attValue = ("invalid-complex-type-definition-"+GetHashCode());
                     error(err.Message);
                 }
-                int fp = getNamePool().allocateFingerprint(typeName.getURI(), typeName.getLocalPart());
+                int fp = getNamePool().allocateFingerprint(typeName.getNamespaceUri(), typeName.getLocalPart());
                 complexType.setTypeName(typeName, fp);
                 if (!(isRedefinition)) {
                     if (((schema.getSchemaType(complexType.getTypeName()) != null) && (fp>1023))) {
@@ -53,30 +53,30 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 complexType.setTypeName(nc.getStructuredQName(), nc.getFingerprint());
                 schema.addAnonymousType(complexType);
             }
-            string mixedAtt = Saxon.Hej.value.Whitespace.trim(atts.getValue("", "mixed"));
+            string mixedAtt = Saxon.Hej.value.Whitespace.trim(atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "mixed"));
             if ((mixedAtt != null)) {
                 mixed = Saxon.Ejava.util.Optional<bool>.of(parseBooleanAttribute("mixed", mixedAtt));
             }
-            attValue = atts.getValue("", "abstract");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "abstract");
             if ((attValue != null)) {
                 bool isAbstract = parseBooleanAttribute("abstract", attValue);
                 complexType.setAbstract(isAbstract);
             }
-            string blockVal = atts.getValue("", "block");
+            string blockVal = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "block");
             if ((blockVal == null)) {
                 complexType.setFinalProhibitions(getXSDSchema().getBlockDefault());
             } else {
                 int f = parseFinalOrBlock("block", blockVal, (Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION));
                 complexType.setBlock(f);
             }
-            string finalVal = atts.getValue("", "final");
+            string finalVal = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "final");
             if ((finalVal == null)) {
                 complexType.setFinalProhibitions(getXSDSchema().getFinalDefault());
             } else {
                 int f = parseFinalOrBlock("final", finalVal, (Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION));
                 complexType.setFinalProhibitions(f);
             }
-            string applyAtt = Saxon.Hej.value.Whitespace.trim(atts.getValue("", "defaultAttributesApply"));
+            string applyAtt = Saxon.Hej.value.Whitespace.trim(atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "defaultAttributesApply"));
             if ((applyAtt != null)) {
                 if ((applyAtt.Equals("true") || applyAtt.Equals("1"))) {
                     defaultAttributesApply = true;
@@ -177,10 +177,10 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                 }
                 if (!(((Saxon.Eej.ee.schema.sdoc.XSDRedefine)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getExternalSchemaDocumentURI().Equals(oldType.getSchemaDocumentURI()))) {
-                    compiler.warning((("The redefined complex type was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), this);
+                    compiler.warning((("The redefined complex type was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), Saxon.Hej.trans.SaxonErrorCode.SXSD1016, this);
                 }
                 complexType.setRedefinitionLevel((oldType.getRedefinitionLevel()+1));
-                string uri = getXSDSchema().getTargetNamespace();
+                Saxon.Hej.om.NamespaceUri uri = getXSDSchema().getTargetNamespace();
                 Saxon.Hej.om.NamePool pool = getNamePool();
                 string localName = pool.getLocalName(complexType.getFingerprint());
                 string newLocalName = ((localName+'_')+complexType.GetHashCode());

@@ -7,7 +7,7 @@ namespace Saxon.Hej.serialize {
         public override System.Text.Encoding Encoding { get { return System.Text.Encoding.UTF8; } }
     // End of injected C# code
         private const int MIN_BUF_LEN = 32;
-        private const int DEFAULT_BUF_LEN = 4000;
+        private const int DEFAULT_BUF_LEN = 4096;
         const int SURR1_FIRST = 0xD800;
         const int SURR1_LAST = 0xDBFF;
         const int SURR2_FIRST = 0xDC00;
@@ -23,7 +23,7 @@ namespace Saxon.Hej.serialize {
             if ((bufferLength<MIN_BUF_LEN)) {
                 bufferLength = MIN_BUF_LEN;
             }
-            _out = @out;
+            _out = new System.IO.BufferedStream(@out);
             _outBuffer = new byte[bufferLength];
             _outBufferLast = (bufferLength-4);
             _outPtr = 0;
@@ -259,37 +259,7 @@ namespace Saxon.Hej.serialize {
                         ((Saxon.Hej.str.ZenoString)(chars)).writeSegments(this);
                     } else {
                         if ((chars.getWidth()<=8)) {
-                            if ((chars is Saxon.Hej.str.Twine8)) {
-                                int width = chars.getWidth();
-                                if ((width == 7)) {
-                                    writeAscii(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
-                                } else {
-                                    if ((width == 8)) {
-                                        writeLatin1(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
-                                    }
-                                }
-                            } else {
-                                if ((chars is Saxon.Hej.str.Slice8)) {
-                                    Saxon.Hej.str.Slice8 s8 = (Saxon.Hej.str.Slice8)(chars);
-                                    int width = chars.getWidth();
-                                    if ((width == 7)) {
-                                        writeAscii(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
-                                    } else {
-                                        if ((width == 8)) {
-                                            writeLatin1(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
-                                        }
-                                    }
-                                } else {
-                                    if ((chars is Saxon.Hej.str.WhitespaceString)) {
-                                        ((Saxon.Hej.str.WhitespaceString)(chars)).write(this);
-                                    } else {
-                                        Saxon.Hej.z.IntIterator iter = chars.codePoints();
-                                        while (iter.hasNext()) {
-                                            write(iter.next());
-                                        }
-                                    }
-                                }
-                            }
+                            writeWidth8OrLower(chars);
                         } else {
                             if ((chars.getWidth() == 16)) {
                                 if ((chars is Saxon.Hej.str.Twine16)) {
@@ -306,6 +276,39 @@ namespace Saxon.Hej.serialize {
                                     write(iter.next());
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+        private void writeWidth8OrLower(Saxon.Hej.str.UnicodeString chars) {
+            if ((chars is Saxon.Hej.str.Twine8)) {
+                int width = chars.getWidth();
+                if ((width == 7)) {
+                    writeAscii(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
+                } else {
+                    if ((width == 8)) {
+                        writeLatin1(((Saxon.Hej.str.Twine8)(chars)).getByteArray(), 0, chars.length32());
+                    }
+                }
+            } else {
+                if ((chars is Saxon.Hej.str.Slice8)) {
+                    Saxon.Hej.str.Slice8 s8 = (Saxon.Hej.str.Slice8)(chars);
+                    int width = chars.getWidth();
+                    if ((width == 7)) {
+                        writeAscii(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
+                    } else {
+                        if ((width == 8)) {
+                            writeLatin1(s8.getByteArray(), s8.getStart(), (s8.getEnd()-s8.getStart()));
+                        }
+                    }
+                } else {
+                    if ((chars is Saxon.Hej.str.WhitespaceString)) {
+                        ((Saxon.Hej.str.WhitespaceString)(chars)).write(this);
+                    } else {
+                        Saxon.Hej.z.IntIterator iter = chars.codePoints();
+                        while (iter.hasNext()) {
+                            write(iter.next());
                         }
                     }
                 }
@@ -360,36 +363,46 @@ namespace Saxon.Hej.serialize {
                         continue ;
                     }
                 }
-                if ((c<unchecked((int)0x800))) {
-                    outBuf[outPtr++] = (byte)(((unchecked((int)0xc0)|((c>>6)))));
-                    outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((c&0x3f)))));
+                int[] result = writeMultiByte(c, outBuf, outPtr, str, off, len);
+                if ((result == null)) {
+                    break ;
                 } else {
-                    if (((c<SURR1_FIRST) || (c>SURR2_LAST))) {
-                        outBuf[outPtr++] = (byte)(((unchecked((int)0xe0)|((c>>12)))));
-                        outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((((c>>6))&0x3f)))));
-                        outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((c&0x3f)))));
-                        continue ;
-                    }
-                    if ((c>SURR1_LAST)) {
-                        _outPtr = outPtr;
-                        throwIllegal(c);
-                    }
-                    _surrogate = c;
-                    if ((off>=len)) {
-                        break ;
-                    }
-                    c = _convertSurrogate(str[off++]);
-                    if ((c>0x10FFFF)) {
-                        _outPtr = outPtr;
-                        throwIllegal(c);
-                    }
-                    outBuf[outPtr++] = (byte)(((unchecked((int)0xf0)|((c>>18)))));
-                    outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((((c>>12))&0x3f)))));
-                    outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((((c>>6))&0x3f)))));
-                    outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((c&0x3f)))));
+                    outPtr = result[0];
+                    off = result[1];
                 }
             }
             _outPtr = outPtr;
+        }
+        private int[] writeMultiByte(int c, byte[] outBuf, int outPtr, string str, int off, int len) {
+            if ((c<unchecked((int)0x800))) {
+                outBuf[outPtr++] = (byte)(((unchecked((int)0xc0)|((c>>6)))));
+                outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((c&0x3f)))));
+            } else {
+                if (((c<SURR1_FIRST) || (c>SURR2_LAST))) {
+                    outBuf[outPtr++] = (byte)(((unchecked((int)0xe0)|((c>>12)))));
+                    outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((((c>>6))&0x3f)))));
+                    outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((c&0x3f)))));
+                    return new int[]{outPtr, off};
+                }
+                if ((c>SURR1_LAST)) {
+                    _outPtr = outPtr;
+                    throwIllegal(c);
+                }
+                _surrogate = c;
+                if ((off>=len)) {
+                    return null;
+                }
+                c = _convertSurrogate(str[off++]);
+                if ((c>0x10FFFF)) {
+                    _outPtr = outPtr;
+                    throwIllegal(c);
+                }
+                outBuf[outPtr++] = (byte)(((unchecked((int)0xf0)|((c>>18)))));
+                outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((((c>>12))&0x3f)))));
+                outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((((c>>6))&0x3f)))));
+                outBuf[outPtr++] = (byte)(((unchecked((int)0x80)|((c&0x3f)))));
+            }
+            return new int[]{outPtr, off};
         }
         private void _flushBuffer() {
             if (((_outPtr>0) && (_outBuffer != null))) {

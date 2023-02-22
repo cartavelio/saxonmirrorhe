@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.xsltextn.style {
-    public class SaxonTabulateMaps : Saxon.Hej.style.StyleElement {
+    public class SaxonTabulateMaps : Saxon.Hej.style.ExtensionInstruction {
         private Saxon.Hej.expr.Expression root;
         private Saxon.Hej.expr.Expression select;
-        public override bool isInstruction() {
-            return true;
-        }
         protected internal override bool mayContainSequenceConstructor() {
             return false;
         }

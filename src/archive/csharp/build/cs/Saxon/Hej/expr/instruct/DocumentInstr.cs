@@ -5,6 +5,7 @@ namespace Saxon.Hej.expr.instruct {
     public class DocumentInstr : Saxon.Hej.expr.instruct.ParentNodeConstructor {
         private readonly bool textOnly;
         private readonly Saxon.Hej.str.UnicodeString constantText;
+        private Saxon.Hej.tree.tiny.Statistics treeStatistics = new Saxon.Hej.tree.tiny.Statistics();
         public DocumentInstr(bool textOnly, Saxon.Hej.str.UnicodeString constantText)  {
             this.textOnly = textOnly;
             this.constantText = constantText;
@@ -112,73 +113,15 @@ namespace Saxon.Hej.expr.instruct {
         public override Saxon.Hej.type.ItemType getItemType() {
             return Saxon.Hej.pattern.NodeKindTest.DOCUMENT;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            if ((preservingTypes && !(textOnly))) {
-                output.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
-                getContentExpression().process(output, context);
-                output.endDocument();
-                return null;
-            } else {
-                Saxon.Hej.om.Item item = evaluateItem(context);
-                if ((item != null)) {
-                    output.append(item, getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
-                }
-                return null;
-            }
-        }
         public override Saxon.Hej.om.NodeInfo evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.Controller controller = context.getController();
-            Saxon.Hej.Configuration config = controller.getConfiguration();
-            Saxon.Hej.om.NodeInfo root;
-            if (textOnly) {
-                Saxon.Hej.str.UnicodeString textValue;
-                if ((constantText != null)) {
-                    textValue = constantText;
-                } else {
-                    Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
-                    Saxon.Hej.om.SequenceIterator iter = getContentExpression().iterate(context);
-                    Saxon.Hej.om.Item item;
-                    while (((item = iter.next()) != null)) {
-                        sb.accept(item.getUnicodeStringValue());
-                    }
-                    textValue = sb.toUnicodeString();
-                }
-                root = Saxon.Hej.value.TextFragmentValue.makeTextFragment(config, textValue, getStaticBaseURIString());
-            } else {
-                try {
-                    Saxon.Hej.@event.PipelineConfiguration pipe = controller.makePipelineConfiguration();
-                    pipe.setXPathContext(context);
-                    Saxon.Hej.@event.Builder builder;
-                    builder = controller.makeBuilder();
-                    builder.setUseEventLocation(false);
-                    if ((builder is Saxon.Hej.tree.tiny.TinyBuilder)) {
-                        ((Saxon.Hej.tree.tiny.TinyBuilder)(builder)).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
-                    }
-                    builder.setBaseURI(getStaticBaseURIString());
-                    builder.setTiming(false);
-                    pipe.setHostLanguage(getPackageData().getHostLanguage());
-                    builder.setPipelineConfiguration(pipe);
-                    Saxon.Hej.@event.ComplexContentOutputter @out = Saxon.Hej.@event.ComplexContentOutputter.makeComplexContentReceiver(builder, getValidationOptions());
-                    @out.open();
-                    @out.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
-                    getContentExpression().process(@out, context);
-                    @out.endDocument();
-                    @out.close();
-                    root = builder.getCurrentRoot();
-                } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    e.maybeSetContext(context);
-                    throw;
-                }
-            }
-            return root;
+            return (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         public override int getInstructionNameCode() {
             return Saxon.Hej.om.StandardNames.XSL_DOCUMENT;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("doc", this);
-            if (!(@out.isRelocatable())) {
+            if (!(@out.getOptions().relocatable)) {
                 @out.emitAttribute("base", getStaticBaseURIString());
             }
             string flags = "";
@@ -206,6 +149,77 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "DocumentInstr";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.DocumentInstr.DocumentInstrElaborator();
+        }
+        public class DocumentInstrElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.DocumentInstr expr = (Saxon.Hej.expr.instruct.DocumentInstr)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator evalAsItem = elaborateForItem();
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                return (output, context) => {
+                    Saxon.Hej.om.Item item = /*Delegate.eval()*/evalAsItem(context);
+                    if ((item != null)) {
+                        output.append(item, loc, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
+                    }
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.instruct.DocumentInstr expr = (Saxon.Hej.expr.instruct.DocumentInstr)(getExpression());
+                string staticBaseUri = expr.getStaticBaseURIString();
+                if (expr.textOnly) {
+                    if ((expr.constantText != null)) {
+                        Saxon.Hej.str.UnicodeString text = expr.constantText;
+                        return context => Saxon.Hej.value.TextFragmentValue.makeTextFragment(context.getConfiguration(), text, staticBaseUri);
+                    } else {
+                        Saxon.Hej.expr.elab.PullEvaluator contentEval = expr.getContentExpression().makeElaborator().elaborateForPull();
+                        return context => {
+                            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+                            Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/contentEval(context);
+                            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                                sb.accept(item.getUnicodeStringValue());
+                            }
+                            return Saxon.Hej.value.TextFragmentValue.makeTextFragment(context.getConfiguration(), sb.toUnicodeString(), staticBaseUri);
+                        } ;
+                    }
+                } else {
+                    Saxon.Hej.expr.elab.PushEvaluator contentEval = expr.getContentExpression().makeElaborator().elaborateForPush();
+                    Saxon.Api.HostLanguage hostLanguage = expr.getPackageData().getHostLanguage();
+                    return context => {
+                        try {
+                            Saxon.Hej.Controller controller = context.getController();
+                            Saxon.Hej.@event.PipelineConfiguration pipe = controller.makePipelineConfiguration();
+                            pipe.setXPathContext(context);
+                            Saxon.Hej.@event.Builder builder;
+                            builder = controller.makeBuilder();
+                            builder.setUseEventLocation(false);
+                            builder.setDurability(Saxon.Hej.om.Durability.TEMPORARY);
+                            if ((builder is Saxon.Hej.tree.tiny.TinyBuilder)) {
+                                ((Saxon.Hej.tree.tiny.TinyBuilder)(builder)).setStatistics(expr.treeStatistics);
+                            }
+                            builder.setBaseURI(staticBaseUri);
+                            builder.setTiming(false);
+                            pipe.setHostLanguage(hostLanguage);
+                            builder.setPipelineConfiguration(pipe);
+                            Saxon.Hej.@event.ComplexContentOutputter @out = Saxon.Hej.@event.ComplexContentOutputter.makeComplexContentReceiver(builder, expr.getValidationOptions());
+                            @out.open();
+                            @out.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
+                            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/contentEval(@out, context);
+                            dispatchTailCall(tc);
+                            @out.endDocument();
+                            @out.close();
+                            return builder.getCurrentRoot();
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            e.maybeSetLocation(expr.getLocation());
+                            e.maybeSetContext(context);
+                            throw;
+                        }
+                    } ;
+                }
+            }
+        
         }
     
     }

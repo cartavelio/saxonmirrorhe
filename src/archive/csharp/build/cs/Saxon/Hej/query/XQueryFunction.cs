@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.query {
-    public class XQueryFunction : Saxon.Hej.query.Declaration, Saxon.Hej.s9api.Location {
+    public class XQueryFunction : Saxon.Hej.query.Declaration, Saxon.Hej.s9api.Location, Saxon.Hej.functions.registry.FunctionDefinition {
         private Saxon.Hej.om.StructuredQName functionName;
-        private readonly System.Collections.Generic.IList<Saxon.Hej.expr.instruct.UserFunctionParameter> arguments;
+        private readonly System.Collections.Generic.IList<Saxon.Hej.expr.instruct.UserFunctionParameter> parameters;
         private Saxon.Hej.value.SequenceType resultType;
         private Saxon.Hej.expr.Expression body = null;
         private System.Collections.Generic.IList<Saxon.Hej.expr.UserFunctionResolvable> references = new System.Collections.Generic.List<Saxon.Hej.expr.UserFunctionResolvable>(10);
@@ -15,8 +15,9 @@ namespace Saxon.Hej.query {
         private Saxon.Hej.query.QueryModule staticContext;
         private bool updating = false;
         private Saxon.Hej.query.AnnotationList annotations = Saxon.Hej.query.AnnotationList.EMPTY;
+        private int mandatoryParams = 0;
         public XQueryFunction()  {
-            arguments = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.UserFunctionParameter>(8);
+            parameters = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.UserFunctionParameter>(8);
         }
         public Saxon.Hej.expr.PackageData getPackageData() {
             return staticContext.getPackageData();
@@ -24,8 +25,11 @@ namespace Saxon.Hej.query {
         public void setFunctionName(Saxon.Hej.om.StructuredQName name) {
             functionName = name;
         }
-        public void addArgument(Saxon.Hej.expr.instruct.UserFunctionParameter argument) {
-            arguments.Add(argument);
+        public void addParameter(Saxon.Hej.expr.instruct.UserFunctionParameter param) {
+            parameters.Add(param);
+            if ((param.getDefaultValueExpression() == null)) {
+                mandatoryParams++;
+            }
         }
         public void setResultType(Saxon.Hej.value.SequenceType resultType) {
             this.resultType = resultType;
@@ -46,7 +50,7 @@ namespace Saxon.Hej.query {
             return functionName.getDisplayName();
         }
         public Saxon.Hej.trans.SymbolicName getIdentificationKey() {
-            return new Saxon.Hej.trans.SymbolicName.F(functionName, arguments.Count);
+            return new Saxon.Hej.trans.SymbolicName.F(functionName, parameters.Count);
         }
         public static Saxon.Hej.trans.SymbolicName getIdentificationKey(Saxon.Hej.om.StructuredQName qName, int arity) {
             return new Saxon.Hej.trans.SymbolicName.F(qName, arity);
@@ -61,18 +65,37 @@ namespace Saxon.Hej.query {
             return staticContext;
         }
         public Saxon.Hej.value.SequenceType[] getArgumentTypes() {
-            Saxon.Hej.value.SequenceType[] types = new Saxon.Hej.value.SequenceType[arguments.Count];
-            for (int i = 0; (i<arguments.Count); i++) {
-                types[i] = arguments[i].getRequiredType();
+            Saxon.Hej.value.SequenceType[] types = new Saxon.Hej.value.SequenceType[parameters.Count];
+            for (int i = 0; (i<parameters.Count); i++) {
+                types[i] = parameters[i].getRequiredType();
             }
             return types;
         }
         public Saxon.Hej.expr.instruct.UserFunctionParameter[] getParameterDefinitions() {
-            Saxon.Hej.expr.instruct.UserFunctionParameter[] @params = new Saxon.Hej.expr.instruct.UserFunctionParameter[arguments.Count];
-            return arguments.ToArray();
+            Saxon.Hej.expr.instruct.UserFunctionParameter[] @params = new Saxon.Hej.expr.instruct.UserFunctionParameter[parameters.Count];
+            return parameters.ToArray();
         }
-        public int getNumberOfArguments() {
-            return arguments.Count;
+        public int getPositionOfParameter(Saxon.Hej.om.StructuredQName name) {
+            int pos = 0;
+            foreach (Saxon.Hej.expr.instruct.UserFunctionParameter p in parameters) {
+                if (p.getVariableQName().Equals(name)) {
+                    return pos;
+                }
+                pos++;
+            }
+            return -1;
+        }
+        public Saxon.Hej.om.StructuredQName getParameterName(int i) {
+            return parameters[i].getVariableQName();
+        }
+        public Saxon.Hej.expr.Expression getDefaultValueExpression(int i) {
+            return parameters[i].getDefaultValueExpression();
+        }
+        public int getNumberOfParameters() {
+            return parameters.Count;
+        }
+        public int getMinimumArity() {
+            return mandatoryParams;
         }
         public void registerReference(Saxon.Hej.expr.UserFunctionResolvable ufc) {
             references.Add(ufc);
@@ -123,7 +146,7 @@ namespace Saxon.Hej.query {
                         body.setRetainedStaticContext(rsc);
                         Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(staticContext);
                         body = body.simplify().typeCheck(visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT);
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, functionName.getDisplayName(), 0);
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, functionName.getDisplayName(), 0);
                         body = config.getTypeChecker(false).staticTypeCheck(body, resultType, role, visitor);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         e.maybeSetLocation(this);
@@ -178,7 +201,7 @@ namespace Saxon.Hej.query {
             Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(staticContext);
             Saxon.Hej.Configuration config = staticContext.getConfiguration();
             Saxon.Hej.expr.parser.Optimizer opt = visitor.obtainOptimizer();
-            int arity = arguments.Count;
+            int arity = parameters.Count;
             if (opt.isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.MISCELLANEOUS)) {
                 body = body.optimize(visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT);
             }
@@ -187,7 +210,7 @@ namespace Saxon.Hej.query {
                 body = Saxon.Hej.expr.parser.LoopLifter.process(body, visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT);
             }
             if (opt.isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.EXTRACT_GLOBALS)) {
-                Saxon.Hej.trans.GlobalVariableManager manager = new Inner_GlobalVariableManager_23(this);
+                Saxon.Hej.trans.GlobalVariableManager manager = new Inner_GlobalVariableManager_25(this);
                 Saxon.Hej.expr.Expression b2 = opt.promoteExpressionsToGlobal(body, manager, visitor);
                 if ((b2 != null)) {
                     body = body.optimize(visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT);
@@ -202,7 +225,6 @@ namespace Saxon.Hej.query {
                 }
             }
             compiledFunction.setBody(body);
-            compiledFunction.computeEvaluationMode();
             Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(body, arity, compiledFunction.getStackFrameMap());
         }
         public void fixupReferences() {
@@ -222,7 +244,7 @@ namespace Saxon.Hej.query {
         public void explain(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("declareFunction");
             @out.emitAttribute("name", functionName.getDisplayName());
-            @out.emitAttribute("arity", (""+getNumberOfArguments()));
+            @out.emitAttribute("arity", (""+getNumberOfParameters()));
             if ((compiledFunction == null)) {
                 @out.emitAttribute("unreferenced", "true");
             } else {
@@ -276,9 +298,9 @@ namespace Saxon.Hej.query {
             return Saxon.Api.HostLanguage.XQUERY;
         }
     
-        private class Inner_GlobalVariableManager_23 : Saxon.Hej.trans.GlobalVariableManager {
+        private class Inner_GlobalVariableManager_25 : Saxon.Hej.trans.GlobalVariableManager {
             private readonly XQueryFunction outerInstance;
-            public Inner_GlobalVariableManager_23(XQueryFunction outerInstance) {
+            public Inner_GlobalVariableManager_25(XQueryFunction outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public void addGlobalVariable(Saxon.Hej.expr.instruct.GlobalVariable variable) {

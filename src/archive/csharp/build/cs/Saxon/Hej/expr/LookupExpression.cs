@@ -68,7 +68,7 @@ namespace Saxon.Hej.expr {
             if ((!(isArrayLookup) && !(isMapLookup))) {
                 if ((((th.relationship(containerType, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE) == Saxon.Hej.type.Affinity.DISJOINT) && (th.relationship(containerType, Saxon.Hej.ma.arrays.ArrayItemType.getInstance()) == Saxon.Hej.type.Affinity.DISJOINT)) && (th.relationship(containerType, Saxon.Hej.type.AnyExternalObjectType.THE_INSTANCE) == Saxon.Hej.type.Affinity.DISJOINT))) {
                     if (Saxon.Hej.value.Cardinality.allowsZero(getLhsExpression().getCardinality())) {
-                        visitor.issueWarning(("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "+containerType), getLocation());
+                        visitor.issueWarning(("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "+containerType), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
                     } else {
                         Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("The left-hand operand of '?' must be a map or an array; the supplied expression is of type "+containerType), "XPTY0004");
                         err.setLocation(getLocation());
@@ -79,7 +79,7 @@ namespace Saxon.Hej.expr {
                 }
             }
             getRhs().typeCheck(visitor, contextInfo);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "?", 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "?", 1);
             Saxon.Hej.expr.parser.TypeChecker tc = config.getTypeChecker(false);
             Saxon.Hej.value.SequenceType req = Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC.zeroOrMore();
             if (isArrayLookup) {
@@ -161,103 +161,7 @@ namespace Saxon.Hej.expr {
             return (("LookupExpression".GetHashCode()^getLhsExpression().GetHashCode())^getRhsExpression().GetHashCode());
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.Configuration config = context.getConfiguration();
-            if (isArrayLookup) {
-                if ((isSingleContainer && isSingleEntry)) {
-                    Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(getLhsExpression().evaluateItem(context));
-                    Saxon.Hej.value.IntegerValue subscript = (Saxon.Hej.value.IntegerValue)(getRhsExpression().evaluateItem(context));
-                    int index = Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript(subscript, array.arrayLength());
-                    return array.get((index-1)).iterate();
-                } else {
-                    if (isSingleEntry) {
-                        Saxon.Hej.om.SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                        Saxon.Hej.value.IntegerValue subscriptValue = (Saxon.Hej.value.IntegerValue)(getRhsExpression().evaluateItem(context));
-                        int subscript = (subscriptValue.asSubscript()-1);
-                        return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => {
-                            Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(baseItem);
-                            if (((subscript>=0) && (subscript<array.arrayLength()))) {
-                                return array.get(subscript).iterate();
-                            } else {
-                                Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript(subscriptValue, array.arrayLength());
-                                return null;
-                            }
-                        } );
-                    } else {
-                        Saxon.Hej.om.SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                        Saxon.Hej.om.GroundedValue rhs = Saxon.Hej.om.SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
-                        return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => Saxon.Hej.expr.MappingIterator.map(rhs.iterate(), index => {
-                            Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(baseItem);
-                            int subscript = (Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript((Saxon.Hej.value.IntegerValue)(index), array.arrayLength())-1);
-                            return array.get(subscript).iterate();
-                        } ));
-                    }
-                }
-            } else {
-                if (isMapLookup) {
-                    if ((isSingleContainer && isSingleEntry)) {
-                        Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(getLhsExpression().evaluateItem(context));
-                        Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                        return optionalGroundedValueIterator(map.get(key));
-                    } else {
-                        if (isSingleEntry) {
-                            Saxon.Hej.om.SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                            Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-                            return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => optionalGroundedValueIterator(((Saxon.Hej.ma.map.MapItem)(baseItem)).get(key)));
-                        } else {
-                            Saxon.Hej.om.SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                            Saxon.Hej.om.GroundedValue rhs = Saxon.Hej.om.SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
-                            return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => Saxon.Hej.expr.MappingIterator.map(rhs.iterate(), index => optionalGroundedValueIterator(((Saxon.Hej.ma.map.MapItem)(baseItem)).get((Saxon.Hej.value.AtomicValue)(index)))));
-                        }
-                    }
-                } else {
-                    Saxon.Hej.om.SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                    Saxon.Hej.om.GroundedValue rhs = Saxon.Hej.om.SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
-                    Saxon.Hej.expr.MappingFunction mappingFunction = Saxon.Hej.expr.SequenceMapper.of(baseItem => {
-                        switch (baseItem.getGenre()) {
-                          case Saxon.Hej.om.Genre.ARRAY:
-                            {
-                                Saxon.Hej.expr.MappingFunction arrayAccess = Saxon.Hej.expr.SequenceMapper.of(index => {
-                                    if ((index is Saxon.Hej.value.IntegerValue)) {
-                                        Saxon.Hej.om.GroundedValue member = ((Saxon.Hej.ma.arrays.ArrayItem)(baseItem)).get(((int)(((Saxon.Hej.value.IntegerValue)(index)).longValue())-1));
-                                        return member.iterate();
-                                    } else {
-                                        Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((("An item on the LHS of the '?' operator is an array, but a value on the RHS of the operator ("+baseItem.toShortString())+") is not an integer"), "XPTY0004");
-                                        exception.setIsTypeError(true);
-                                        exception.setLocation(getLocation());
-                                        exception.setFailingExpression(this);
-                                        throw exception;
-                                    }
-                                } );
-                                Saxon.Hej.om.SequenceIterator rhsIter = rhs.iterate();
-                                return new Saxon.Hej.expr.MappingIterator(rhsIter, arrayAccess);
-                            }
-                          case Saxon.Hej.om.Genre.MAP:
-                            {
-                                Saxon.Hej.om.SequenceIterator rhsIter = rhs.iterate();
-                                return Saxon.Hej.expr.MappingIterator.map(rhsIter, key => optionalGroundedValueIterator(((Saxon.Hej.ma.map.MapItem)(baseItem)).get((Saxon.Hej.value.AtomicValue)(key))));
-                            }
-                          case Saxon.Hej.om.Genre.EXTERNAL:
-                            {
-                                if (!(((rhs is Saxon.Hej.value.StringValue)))) {
-                                    Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((("An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator ("+baseItem.toShortString())+") is not a singleton string"), "XPTY0004");
-                                    exception.setIsTypeError(true);
-                                    exception.setLocation(getLocation());
-                                    exception.setFailingExpression(this);
-                                    throw exception;
-                                }
-                                string key = ((Saxon.Hej.value.StringValue)(rhs)).getStringValue();
-                                return config.externalObjectAsMap((Saxon.Hej.value.ObjectValue<object>)(baseItem), key).get((Saxon.Hej.value.StringValue)(rhs)).iterate();
-                            }
-                          default:
-                            {
-                                mustBeArrayOrMap(this, baseItem);
-                                return null;
-                            }
-                        }
-                    } );
-                    return new Saxon.Hej.expr.MappingIterator(baseIterator, mappingFunction);
-                }
-            }
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         private static Saxon.Hej.om.SequenceIterator optionalGroundedValueIterator(Saxon.Hej.om.GroundedValue value) {
             if ((value == null)) {
@@ -296,6 +200,139 @@ namespace Saxon.Hej.expr {
                 rhs = Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getRhsExpression());
             }
             return ((Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getLhsExpression())+"?")+rhs);
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.LookupExpression.LookupElaborator();
+        }
+        public class LookupElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.LookupExpression expr = (Saxon.Hej.expr.LookupExpression)(getExpression());
+                if (expr.isArrayLookup) {
+                    if ((expr.isSingleContainer && expr.isSingleEntry)) {
+                        Saxon.Hej.expr.elab.ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                        Saxon.Hej.expr.elab.ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                        return context => {
+                            Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(/*Delegate.eval()*/lhs(context));
+                            Saxon.Hej.value.IntegerValue subscript = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/rhs(context));
+                            int index = Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript(subscript, array.arrayLength());
+                            return array.get((index-1)).iterate();
+                        } ;
+                    } else {
+                        if (expr.isSingleEntry) {
+                            Saxon.Hej.expr.elab.PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            Saxon.Hej.expr.elab.ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                            return context => {
+                                Saxon.Hej.value.IntegerValue subscriptValue = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/rhs(context));
+                                int subscript = (subscriptValue.asSubscript()-1);
+                                return Saxon.Hej.expr.MappingIterator.map(/*Delegate.iterate()*/lhs(context), baseItem => {
+                                    Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(baseItem);
+                                    if (((subscript>=0) && (subscript<array.arrayLength()))) {
+                                        return array.get(subscript).iterate();
+                                    } else {
+                                        Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript(subscriptValue, array.arrayLength());
+                                        return null;
+                                    }
+                                } );
+                            } ;
+                        } else {
+                            Saxon.Hej.expr.elab.PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            Saxon.Hej.expr.elab.PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                            return context => {
+                                Saxon.Hej.om.SequenceIterator baseIterator = /*Delegate.iterate()*/lhs(context);
+                                Saxon.Hej.om.GroundedValue rhsValue = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                                return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => Saxon.Hej.expr.MappingIterator.map(rhsValue.iterate(), index => {
+                                    Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(baseItem);
+                                    int subscript = (Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript((Saxon.Hej.value.IntegerValue)(index), array.arrayLength())-1);
+                                    return array.get(subscript).iterate();
+                                } ));
+                            } ;
+                        }
+                    }
+                } else {
+                    if (expr.isMapLookup) {
+                        if ((expr.isSingleContainer && expr.isSingleEntry)) {
+                            Saxon.Hej.expr.elab.ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                            Saxon.Hej.expr.elab.ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                            return context => {
+                                Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(/*Delegate.eval()*/lhs(context));
+                                Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/rhs(context));
+                                return optionalGroundedValueIterator(map.get(key));
+                            } ;
+                        } else {
+                            if (expr.isSingleEntry) {
+                                Saxon.Hej.expr.elab.PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                                Saxon.Hej.expr.elab.ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                                return context => {
+                                    Saxon.Hej.om.SequenceIterator baseIterator = /*Delegate.iterate()*/lhs(context);
+                                    Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/rhs(context));
+                                    return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => optionalGroundedValueIterator(((Saxon.Hej.ma.map.MapItem)(baseItem)).get(key)));
+                                } ;
+                            } else {
+                                Saxon.Hej.expr.elab.PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                                Saxon.Hej.expr.elab.PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                                return context => {
+                                    Saxon.Hej.om.SequenceIterator baseIterator = /*Delegate.iterate()*/lhs(context);
+                                    Saxon.Hej.om.GroundedValue rhsVal = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                                    return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => Saxon.Hej.expr.MappingIterator.map(rhsVal.iterate(), index => optionalGroundedValueIterator(((Saxon.Hej.ma.map.MapItem)(baseItem)).get((Saxon.Hej.value.AtomicValue)(index)))));
+                                } ;
+                            }
+                        }
+                    } else {
+                        Saxon.Hej.expr.elab.PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                        Saxon.Hej.expr.elab.PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                        return context => {
+                            Saxon.Hej.om.SequenceIterator baseIterator = /*Delegate.iterate()*/lhs(context);
+                            Saxon.Hej.om.GroundedValue rhsVal = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                            Saxon.Hej.expr.MappingFunction mappingFunction = Saxon.Hej.expr.SequenceMapper.of(baseItem => {
+                                switch (baseItem.getGenre()) {
+                                  case Saxon.Hej.om.Genre.ARRAY:
+                                    {
+                                        Saxon.Hej.expr.MappingFunction arrayAccess = Saxon.Hej.expr.SequenceMapper.of(index => {
+                                            if ((index is Saxon.Hej.value.IntegerValue)) {
+                                                int subscript = (Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript((Saxon.Hej.value.IntegerValue)(index), ((Saxon.Hej.ma.arrays.ArrayItem)(baseItem)).arrayLength())-1);
+                                                Saxon.Hej.om.GroundedValue member = ((Saxon.Hej.ma.arrays.ArrayItem)(baseItem)).get(subscript);
+                                                return member.iterate();
+                                            } else {
+                                                Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((((("An item on the LHS of the '?' operator ("+expr.getLhsExpression().toShortString())+") is an array, but a value on the RHS of the operator (")+baseItem.toShortString())+") is not an integer"), "XPTY0004");
+                                                exception.setIsTypeError(true);
+                                                exception.setLocation(expr.getLocation());
+                                                exception.setFailingExpression(expr);
+                                                throw exception;
+                                            }
+                                        } );
+                                        Saxon.Hej.om.SequenceIterator rhsIter = rhsVal.iterate();
+                                        return new Saxon.Hej.expr.MappingIterator(rhsIter, arrayAccess);
+                                    }
+                                  case Saxon.Hej.om.Genre.MAP:
+                                    {
+                                        Saxon.Hej.om.SequenceIterator rhsIter = rhsVal.iterate();
+                                        return Saxon.Hej.expr.MappingIterator.map(rhsIter, key => optionalGroundedValueIterator(((Saxon.Hej.ma.map.MapItem)(baseItem)).get((Saxon.Hej.value.AtomicValue)(key))));
+                                    }
+                                  case Saxon.Hej.om.Genre.EXTERNAL:
+                                    {
+                                        if (!(((rhsVal is Saxon.Hej.value.StringValue)))) {
+                                            Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((("An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator ("+baseItem.toShortString())+") is not a singleton string"), "XPTY0004");
+                                            exception.setIsTypeError(true);
+                                            exception.setLocation(expr.getLocation());
+                                            exception.setFailingExpression(expr);
+                                            throw exception;
+                                        }
+                                        string key = ((Saxon.Hej.value.StringValue)(rhsVal)).getStringValue();
+                                        return context.getConfiguration().externalObjectAsMap((Saxon.Hej.value.ObjectValue<object>)(baseItem), key).get((Saxon.Hej.value.StringValue)(rhsVal)).iterate();
+                                    }
+                                  default:
+                                    {
+                                        mustBeArrayOrMap(expr, baseItem);
+                                        return null;
+                                    }
+                                }
+                            } );
+                            return new Saxon.Hej.expr.MappingIterator(baseIterator, mappingFunction);
+                        } ;
+                    }
+                }
+            }
+        
         }
     
     }

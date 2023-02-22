@@ -50,7 +50,7 @@ namespace Saxon.Hej.expr.instruct {
                             schemaType = (Saxon.Hej.type.SimpleType)(decl.getType());
                             errorCode = "XTTE1515";
                         } else {
-                            visitor.getStaticContext().issueWarning(("Lax validation has no effect: there is no global attribute declaration for "+nodeName.getDisplayName()), getLocation());
+                            visitor.getStaticContext().issueWarning(("Lax validation has no effect: there is no global attribute declaration for "+nodeName.getDisplayName()), Saxon.Hej.trans.SaxonErrorCode.SXWN9031, getLocation());
                         }
                     }
                 }
@@ -136,8 +136,8 @@ namespace Saxon.Hej.expr.instruct {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("att", this);
             @out.emitAttribute("name", nodeName.getDisplayName());
-            if (!(nodeName.getStructuredQName().hasURI(""))) {
-                @out.emitAttribute("nsuri", nodeName.getStructuredQName().getURI());
+            if (!(nodeName.getStructuredQName().hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
+                @out.emitAttribute("nsuri", nodeName.getStructuredQName().getNamespaceUri().ToString());
             }
             if (((getValidationAction() != Saxon.Hej.lib.Validation.SKIP) && (getValidationAction() != Saxon.Hej.lib.Validation.BY_TYPE))) {
                 @out.emitAttribute("validation", Saxon.Hej.lib.Validation.describe(getValidationAction()));
@@ -157,6 +157,60 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string toShortString() {
             return (("attr{"+nodeName.getDisplayName())+"=...}");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.FixedAttribute.FixedAttributeElaborator();
+        }
+        private class FixedAttributeElaborator : Saxon.Hej.expr.elab.SimpleNodePushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.FixedAttribute expr = (Saxon.Hej.expr.instruct.FixedAttribute)(getExpression());
+                Saxon.Hej.om.NodeName name = expr.nodeName;
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                int options = expr.getOptions();
+                bool collapse = name.Equals(Saxon.Hej.om.StandardNames.XML_ID_NAME);
+                if ((((collapse || (((/*1430*/Saxon.Hej.type.SimpleType)expr.getSchemaType()) != null)) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.STRICT)) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.LAX))) {
+                    Saxon.Hej.expr.elab.UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                    return (output, context) => {
+                        Saxon.Hej.str.UnicodeString content = /*Delegate.eval()*/contentEval(context);
+                        Saxon.Hej.type.SimpleType ann = expr.validate(name, content, context);
+                        if (collapse) {
+                            content = Saxon.Hej.value.Whitespace.collapseWhitespace(content);
+                        }
+                        try {
+                            output.attribute(name, ann, content.ToString(), loc, options);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            throw dynamicError(loc, err, context);
+                        }
+                        return null;
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.StringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForString(true);
+                    return (output, context) => {
+                        string content = /*Delegate.eval()*/contentEval(context);
+                        try {
+                            output.attribute(name, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, content, loc, options);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            throw Saxon.Hej.expr.instruct.Instruction.dynamicError(loc, err, context);
+                        }
+                        return null;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.instruct.FixedAttribute expr = (Saxon.Hej.expr.instruct.FixedAttribute)(getExpression());
+                if ((((((/*1430*/Saxon.Hej.type.SimpleType)expr.getSchemaType()) != null) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.STRICT)) || (expr.getValidationAction() == Saxon.Hej.lib.Validation.LAX))) {
+                    Saxon.Hej.expr.elab.ItemEvaluator superEval = base.elaborateForItem();
+                    return context => {
+                        Saxon.Hej.tree.util.Orphan o = (Saxon.Hej.tree.util.Orphan)(/*Delegate.eval()*/superEval(context));
+                        System.Diagnostics.Debug.Assert((o != null));
+                        expr.validateOrphanAttribute(o, context);
+                        return o;
+                    } ;
+                } else {
+                    return base.elaborateForItem();
+                }
+            }
+        
         }
     
     }

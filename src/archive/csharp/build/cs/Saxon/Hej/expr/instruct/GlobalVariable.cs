@@ -151,7 +151,7 @@ namespace Saxon.Hej.expr.instruct {
                 if (value.isUpdatingExpression()) {
                     throw new Saxon.Hej.trans.XPathException("Initializing expression for global variable must not be an updating expression", "XUST0001");
                 }
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
                 Saxon.Hej.expr.parser.ContextItemStaticInfo cit = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), true);
                 Saxon.Hej.expr.Expression value2 = Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(value.simplify().typeCheck(visitor, cit), getRequiredType(), role, visitor.getStaticContext());
                 value2 = value2.optimize(visitor, cit);
@@ -195,7 +195,7 @@ namespace Saxon.Hej.expr.instruct {
                     } else {
                         if ((referees.get((i+1)) is Saxon.Hej.query.XQueryFunction)) {
                             Saxon.Hej.query.XQueryFunction next = (Saxon.Hej.query.XQueryFunction)(referees.get((i+1)));
-                            messageBuilder.append(" calls ").append(next.getFunctionName().getDisplayName()).append("#").append(next.getNumberOfArguments()).append("()");
+                            messageBuilder.append(" calls ").append(next.getFunctionName().getDisplayName()).append("#").append(next.getNumberOfParameters()).append("()");
                         }
                     }
                 }
@@ -292,18 +292,18 @@ namespace Saxon.Hej.expr.instruct {
                         if (_indexed) {
                             result = c2.getConfiguration().makeSequenceExtent(select, Saxon.Hej.expr.FilterExpression.FILTERED, c2);
                         } else {
-                            result = Saxon.Hej.om.SequenceTool.toGroundedValue(select.iterate(c2));
+                            result = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(select, c2);
                         }
                         c2.setTemporaryOutputState(savedOutputState);
                         return result;
                     } catch (Saxon.Hej.trans.UncheckedXPathException unxe) {
                         Saxon.Hej.trans.XPathException xe = unxe.getXPathException();
-                        if (!(getVariableQName().hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE))) {
+                        if (!(getVariableQName().hasURI(Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE))) {
                             xe.setIsGlobalError(true);
                         }
                         throw xe;
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        if (!(getVariableQName().hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE))) {
+                        if (!(getVariableQName().hasURI(Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE))) {
                             e.setIsGlobalError(true);
                         }
                         throw;
@@ -370,9 +370,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         protected internal static void setDependencies(Saxon.Hej.expr.instruct.GlobalVariable var, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.Controller controller = context.getController();
-            if (!(((context is Saxon.Hej.expr.XPathContextMajor)))) {
-                context = getMajorCaller(context);
-            }
+            context = context.getMajorContext();
             while ((context != null)) {
                 do {
                     Saxon.Hej.expr.ContextOriginator origin = ((Saxon.Hej.expr.XPathContextMajor)(context)).getOrigin();
@@ -380,16 +378,12 @@ namespace Saxon.Hej.expr.instruct {
                         controller.registerGlobalVariableDependency((Saxon.Hej.expr.instruct.GlobalVariable)(origin), var);
                         return ;
                     }
-                    context = getMajorCaller(context);
+                    context = context.getCaller();
+                    if ((context != null)) {
+                        context = context.getMajorContext();
+                    }
                 } while ((context != null));
             }
-        }
-        private static Saxon.Hej.expr.XPathContextMajor getMajorCaller(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.XPathContext caller = context.getCaller();
-            while (!((((caller == null) || (caller is Saxon.Hej.expr.XPathContextMajor))))) {
-                caller = caller.getCaller();
-            }
-            return (Saxon.Hej.expr.XPathContextMajor)(caller);
         }
         public Saxon.Hej.value.IntegerValue[] getIntegerBoundsForVariable() {
             return ((getBody() == null) ? null : getBody().getIntegerBounds());
@@ -404,7 +398,7 @@ namespace Saxon.Hej.expr.instruct {
             return variableQName;
         }
         public string getDescription() {
-            if (variableQName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
+            if (variableQName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE)) {
                 return (("optimizer-generated global variable select=\""+getBody().toShortString())+'"');
             } else {
                 return ("global variable "+getVariableQName().getDisplayName());

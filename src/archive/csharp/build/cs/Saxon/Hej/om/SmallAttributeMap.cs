@@ -19,7 +19,7 @@ namespace Saxon.Hej.om {
             }
             return null;
         }
-        public Saxon.Hej.om.AttributeInfo get(string uri, string local) {
+        public Saxon.Hej.om.AttributeInfo get(Saxon.Hej.om.NamespaceUri uri, string local) {
             foreach (Saxon.Hej.om.AttributeInfo info in attributes) {
                 Saxon.Hej.om.NodeName name = info.getNodeName();
                 if ((name.getLocalPart().Equals(local) && name.hasURI(uri))) {
@@ -52,14 +52,14 @@ namespace Saxon.Hej.om {
         }
     
         /* Expanding default method getValue from interface AttributeMap */
-        public virtual string getValue(string uri, string local) {
+        public virtual string getValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             Saxon.Hej.om.AttributeInfo att = get(uri, local);
             return ((att == null) ? null : att.getValue());
         }
 
         /* Expanding default method getValue from interface AttributeMap */
         public virtual string getValue(string local) {
-            Saxon.Hej.om.AttributeInfo att = get("", local);
+            Saxon.Hej.om.AttributeInfo att = get(Saxon.Hej.om.NamespaceUri.NULL, local);
             return ((att == null) ? null : att.getValue());
         }
 

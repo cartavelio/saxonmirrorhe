@@ -5,15 +5,15 @@ namespace Saxon.Hej.expr.flwor {
     public class LetClause : Saxon.Hej.expr.flwor.Clause {
         private Saxon.Hej.expr.flwor.LocalVariableBinding rangeVariable;
         private Saxon.Hej.expr.Operand sequenceOp;
-        private Saxon.Hej.expr.parser.Evaluator evaluator;
+        private Saxon.Hej.expr.elab.SequenceEvaluator variableEvaluator;
         public override Saxon.Hej.expr.flwor.Clause.ClauseName getClauseKey() {
             return /*explicit enum*/ Saxon.Hej.expr.flwor.Clause.ClauseName.LET;
         }
-        public Saxon.Hej.expr.parser.Evaluator getEvaluator() {
-            if ((evaluator == null)) {
-                evaluator = Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluator(getSequence(), true);
+        public Saxon.Hej.expr.elab.SequenceEvaluator getEvaluator() {
+            if ((variableEvaluator == null)) {
+                variableEvaluator = new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily(true));
             }
-            return evaluator;
+            return variableEvaluator;
         }
         public override Saxon.Hej.expr.flwor.LetClause copy(Saxon.Hej.expr.flwor.FLWORExpression flwor, Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.flwor.LetClause let2 = new Saxon.Hej.expr.flwor.LetClause();
@@ -38,6 +38,13 @@ namespace Saxon.Hej.expr.flwor {
         public Saxon.Hej.expr.flwor.LocalVariableBinding getRangeVariable() {
             return rangeVariable;
         }
+        public void evaluateRangeVariable(Saxon.Hej.expr.XPathContext context) {
+            if ((variableEvaluator == null)) {
+                getEvaluator();
+            }
+            Saxon.Hej.om.Sequence val = variableEvaluator.evaluate(context);
+            context.setLocalVariable(getRangeVariable().getLocalSlotNumber(), val);
+        }
         public override Saxon.Hej.expr.flwor.LocalVariableBinding[] getRangeVariables() {
             return new Saxon.Hej.expr.flwor.LocalVariableBinding[]{rangeVariable};
         }
@@ -51,9 +58,8 @@ namespace Saxon.Hej.expr.flwor {
             /*Delegate.processOperand()*/processor(sequenceOp);
         }
         public override void typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
             setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), rangeVariable.getRequiredType(), role, visitor.getStaticContext()));
-            evaluator = Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluator(getSequence(), true);
         }
         public override void gatherVariableReferences(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.Binding binding, System.Collections.Generic.IList<Saxon.Hej.expr.VariableReference> references) {
             Saxon.Hej.expr.parser.ExpressionTool.gatherVariableReferences(getSequence(), binding, references);

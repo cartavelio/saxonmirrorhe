@@ -26,6 +26,9 @@ namespace Saxon.Hej.str {
         internal override void copy24bit(byte[] target, int offset) {
             uncompress().copy24bit(target, offset);
         }
+        internal override void copy32bit(int[] target, int offset) {
+            uncompress().copy32bit(target, offset);
+        }
         public abstract void writeEscape(bool[] specialChars, Saxon.Hej.str.UnicodeWriter writer);
     
     }

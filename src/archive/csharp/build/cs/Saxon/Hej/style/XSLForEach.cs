@@ -34,43 +34,29 @@ namespace Saxon.Hej.style {
                 if (f.Equals("select")) {
                     select = makeExpression(value, att);
                 } else {
-                    if (f.Equals("array")) {
-                        requireXslt40("array");
-                        select = arrayToSequence(makeExpression(value, att));
+                    if (f.Equals("separator")) {
+                        requireXslt40("separator");
+                        separator = makeAttributeValueTemplate(value, att);
                     } else {
-                        if (f.Equals("map")) {
-                            requireXslt40("map");
-                            select = mapToSequence(makeExpression(value, att));
-                        } else {
-                            if (f.Equals("separator")) {
-                                requireXslt40("separator");
-                                separator = makeAttributeValueTemplate(value, att);
+                        if ((attName.getLocalPart().Equals("threads") && attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON))) {
+                            threads = makeAttributeValueTemplate(Saxon.Hej.value.Whitespace.trim(value), att);
+                            if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
+                                issueWarning("saxon:threads - no multithreading takes place when compiling with trace enabled", Saxon.Hej.trans.SaxonErrorCode.SXWN9012);
+                                threads = new Saxon.Hej.expr.StringLiteral("0");
                             } else {
-                                if ((attName.getLocalPart().Equals("threads") && attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
-                                    threads = makeAttributeValueTemplate(Saxon.Hej.value.Whitespace.trim(value), att);
-                                    if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
-                                        compileWarning("saxon:threads - no multithreading takes place when compiling with trace enabled", Saxon.Hej.trans.SaxonErrorCode.SXWN9012);
-                                        threads = new Saxon.Hej.expr.StringLiteral("0");
-                                    } else {
-                                        if (!("EE".Equals(getConfiguration().getEditionCode()))) {
-                                            compileWarning("saxon:threads - ignored when not running Saxon-EE", Saxon.Hej.trans.SaxonErrorCode.SXWN9013);
-                                            threads = new Saxon.Hej.expr.StringLiteral("0");
-                                        }
-                                    }
-                                } else {
-                                    checkUnknownAttribute(attName);
+                                if (!("EE".Equals(getConfiguration().getEditionCode()))) {
+                                    issueWarning("saxon:threads - ignored when not running Saxon-EE", Saxon.Hej.trans.SaxonErrorCode.SXWN9013);
+                                    threads = new Saxon.Hej.expr.StringLiteral("0");
                                 }
                             }
+                        } else {
+                            checkUnknownAttribute(attName);
                         }
                     }
                 }
             }
             if ((select == null)) {
-                if ((getEffectiveVersion()>=40)) {
-                    compileError("One of the attributes select|array|map must be present");
-                } else {
-                    reportAbsence("select");
-                }
+                reportAbsence("select");
                 select = Saxon.Hej.expr.Literal.makeEmptySequence();
             }
         }
@@ -84,7 +70,7 @@ namespace Saxon.Hej.style {
                 threads = typeCheck("threads", threads);
             }
             if (!(hasChildNodes())) {
-                compileWarning("An empty xsl:for-each instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
+                issueWarning("An empty xsl:for-each instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
             }
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {

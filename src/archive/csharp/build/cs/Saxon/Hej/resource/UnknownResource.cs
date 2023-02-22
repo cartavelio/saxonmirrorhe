@@ -5,7 +5,7 @@ namespace Saxon.Hej.resource {
     public class UnknownResource : Saxon.Hej.lib.Resource {
         private readonly Saxon.Hej.expr.XPathContext context;
         private readonly Saxon.Hej.resource.AbstractResourceCollection.InputDetails details;
-        public static readonly Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.UnknownResource(context, details);
+        public static readonly Saxon.Hej.lib.ResourceFactory FACTORY = /* ctor#2 */ (a, b) => new Saxon.Hej.resource.UnknownResource(a, b);
         public UnknownResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
             this.context = context;
             this.details = details;

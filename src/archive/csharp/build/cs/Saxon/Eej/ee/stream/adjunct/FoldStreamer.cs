@@ -8,11 +8,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
         }
         public Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.SystemFunctionCall call = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
-            return new Saxon.Eej.ee.stream.adjunct.FoldStreamer.FoldFeed(call, @out, context);
+            return new Saxon.Eej.ee.stream.adjunct.FoldStreamer.FoldFeed(watchManager, call, @out, context);
         }
         private class FoldFeed : Saxon.Eej.ee.stream.feed.AtomicItemFeed {
             private readonly Saxon.Hej.functions.Fold fold;
-            public FoldFeed(Saxon.Hej.expr.SystemFunctionCall expression, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expression, result, context) {
+            private Saxon.Eej.ee.stream.watch.WatchManager watchManager;
+            private bool closed = false;
+            public FoldFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.SystemFunctionCall expression, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expression, result, context) {
+                this.watchManager = watchManager;
                 Saxon.Hej.om.Sequence[] additionalArgs = Saxon.Hej.om.SequenceTool.makeSequenceArray((expression.getArity()-1));
                 for (int i = 1; (i<expression.getArity()); i++) {
                     additionalArgs[(i-1)] = Saxon.Hej.om.SequenceTool.toLazySequence(expression.getArg(i).iterate(context));
@@ -27,7 +30,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     } catch (Saxon.Hej.trans.XPathException err) {
                         dynamicError(err);
                     }
-                    if (fold.isFinished()) {
+                    if ((fold.isFinished() && watchManager.allowsEarlyExit())) {
+                        closed = true;
                         close();
                         getTerminator().terminate();
                     }
@@ -38,7 +42,9 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     Saxon.Hej.om.Sequence value = fold.result();
                     Saxon.Hej.@event.Outputter @out = getNextOutputter();
                     processItems(value.iterate(), @out);
-                    @out.close();
+                    if (!(closed)) {
+                        @out.close();
+                    }
                 }
             }
         

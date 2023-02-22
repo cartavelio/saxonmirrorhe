@@ -65,7 +65,7 @@ namespace Saxon.Hej.style {
                     withParams = makeExpression(withParamsAtt, att);
                     break ;
                   default:
-                    if ((attName.getLocalPart().Equals("options") && attName.getURI().Equals(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
+                    if ((attName.getLocalPart().Equals("options") && attName.getNamespaceUri().Equals(Saxon.Hej.om.NamespaceUri.SAXON))) {
                         if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                             options = makeExpression(att.getValue(), att);
                         }
@@ -134,20 +134,17 @@ namespace Saxon.Hej.style {
             try {
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = makeExpressionVisitor();
                 Saxon.Hej.expr.parser.TypeChecker tc = getConfiguration().getTypeChecker(false);
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/xpath", 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/xpath", 0);
                 xpath = tc.staticTypeCheck(xpath, Saxon.Hej.value.SequenceType.SINGLE_STRING, role, visitor);
-                role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/context-item", 0);
-                role.setErrorCode("XTTE3210");
+                role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/context-item", 0, "XTTE3210");
                 contextItem = tc.staticTypeCheck(contextItem, Saxon.Hej.value.SequenceType.OPTIONAL_ITEM, role, visitor);
-                role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/namespace-context", 0);
-                role.setErrorCode("XTTE3170");
+                role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/namespace-context", 0, "XTTE3170");
                 if ((namespaceContext != null)) {
                     namespaceContext = tc.staticTypeCheck(namespaceContext, Saxon.Hej.value.SequenceType.SINGLE_NODE, role, visitor);
                 }
-                role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/with-params", 0);
-                role.setErrorCode("XTTE3170");
+                role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/with-params", 0, "XTTE3170");
                 withParams = tc.staticTypeCheck(withParams, Saxon.Hej.value.SequenceType.makeSequenceType(Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE), role, visitor);
-                role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/saxon:options", 0);
+                role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:evaluate/saxon:options", 0);
                 options = tc.staticTypeCheck(options, Saxon.Hej.value.SequenceType.makeSequenceType(Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE), role, visitor);
             } catch (Saxon.Hej.trans.XPathException err) {
                 compileError(err);

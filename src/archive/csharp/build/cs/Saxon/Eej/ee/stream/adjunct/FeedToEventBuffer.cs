@@ -26,14 +26,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 buffer.Add(new Saxon.Hej.@event.OutputterEvent.Attribute(att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties()));
             }
             foreach (Saxon.Hej.om.NamespaceBinding binding in namespaces) {
-                buffer.Add(new Saxon.Hej.@event.OutputterEvent.Namespace(binding.getPrefix(), binding.getURI(), properties));
+                buffer.Add(new Saxon.Hej.@event.OutputterEvent.Namespace(binding.getPrefix(), binding.getNamespaceUri(), properties));
             }
             buffer.Add(new Saxon.Hej.@event.OutputterEvent.StartContent());
         }
         public override void attribute(Saxon.Hej.om.NodeName name, Saxon.Hej.type.SimpleType type, string value, Saxon.Hej.s9api.Location location, int properties) {
             buffer.Add(new Saxon.Hej.@event.OutputterEvent.Attribute(name, type, value.ToString(), location, properties));
         }
-        public override void @namespace(string prefix, string uri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri uri, int properties) {
             buffer.Add(new Saxon.Hej.@event.OutputterEvent.Namespace(prefix, uri, properties));
         }
         public override void startContent() {

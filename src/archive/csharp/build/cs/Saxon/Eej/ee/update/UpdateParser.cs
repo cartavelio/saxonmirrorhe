@@ -67,7 +67,7 @@ namespace Saxon.Eej.ee.update {
                 p.expect(Saxon.Hej.expr.parser.Token.NAME);
                 string var = t.currentTokenValue;
                 Saxon.Hej.expr.LetExpression v = new Saxon.Hej.expr.LetExpression();
-                Saxon.Hej.om.StructuredQName varQName = p.makeStructuredQName(var, "");
+                Saxon.Hej.om.StructuredQName varQName = p.makeStructuredQName(var, Saxon.Hej.om.NamespaceUri.NULL);
                 v.setRequiredType(Saxon.Hej.value.SequenceType.SINGLE_NODE);
                 v.setVariableQName(varQName);
                 clause.binding = v;
@@ -75,8 +75,7 @@ namespace Saxon.Eej.ee.update {
                 p.expect(Saxon.Hej.expr.parser.Token.ASSIGN);
                 p.nextToken();
                 Saxon.Hej.expr.Expression rhs = p.parseExprSingle();
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UPDATING_EXPR, "copyModify", 0);
-                role.setErrorCode("XUTY0013");
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.UPDATING_EXPR, "copyModify", 0, "XUTY0013");
                 rhs = new Saxon.Hej.expr.ItemChecker(rhs, Saxon.Hej.pattern.AnyNodeTest.getInstance(), role);
                 rhs = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(rhs, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE, role);
                 bool preserve = ((Saxon.Hej.query.QueryModule)(p.getStaticContext())).isPreserveNamespaces();

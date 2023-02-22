@@ -10,6 +10,7 @@ namespace Saxon.Hej.regex {
         Saxon.Hej.str.UnicodeString replace(Saxon.Hej.str.UnicodeString input, Saxon.Hej.str.UnicodeString replacement);
         Saxon.Hej.str.UnicodeString replaceWith(Saxon.Hej.str.UnicodeString input, System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString> replacement);
         string getFlags();
+        bool isPlatformNative();
     
     }
 }

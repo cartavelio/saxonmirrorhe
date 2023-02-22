@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.arrays {
     #pragma warning disable 659
-    public class SquareArrayConstructor : Saxon.Hej.expr.Expression {
+    public class SquareArrayConstructor : Saxon.Hej.expr.Expression, Saxon.Hej.expr.elab.Pingable {
         private Saxon.Hej.expr.oper.OperandArray operanda;
+        private double numberOfCalls = 0;
+        private double numberOfConversions = 0;
         public SquareArrayConstructor(System.Collections.Generic.IList<Saxon.Hej.expr.Expression> children)  {
             Saxon.Hej.expr.Expression[] kids = children.ToArray();
             foreach (Saxon.Hej.expr.Expression e in children) {
@@ -22,7 +24,7 @@ namespace Saxon.Hej.ma.arrays {
             return operanda.getOperand(i);
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
-            return operanda.operands();
+            return operanda;
         }
         public override string getExpressionName() {
             return "SquareArrayConstructor";
@@ -138,13 +140,46 @@ namespace Saxon.Hej.ma.arrays {
         public override int getImplementationMethod() {
             return EVALUATE_METHOD;
         }
+        public void ping() {
+            numberOfConversions++;
+        }
+        protected internal Saxon.Hej.ma.arrays.ArrayItem makeArray(System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> members) {
+            if ((numberOfConversions>(numberOfCalls*0.5))) {
+                return new Saxon.Impl.DataModel.ImmArray(members);
+            } else {
+                numberOfCalls++;
+                Saxon.Hej.ma.arrays.SimpleArrayItem result = new Saxon.Hej.ma.arrays.SimpleArrayItem(members);
+                result.requestNotification(this);
+                return result;
+            }
+        }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
             System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> value = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>(getOperanda().getNumberOfOperands());
             foreach (Saxon.Hej.expr.Operand o in operands()) {
                 Saxon.Hej.om.GroundedValue s = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(o.getChildExpression(), context);
                 value.Add(s);
             }
-            return new Saxon.Hej.ma.arrays.SimpleArrayItem(value);
+            return makeArray(value);
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.ma.arrays.SquareArrayConstructor.SquareArrayConstructorElaborator();
+        }
+        private class SquareArrayConstructorElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.ma.arrays.SquareArrayConstructor expr = (Saxon.Hej.ma.arrays.SquareArrayConstructor)(getExpression());
+                System.Collections.Generic.IList<Saxon.Hej.expr.elab.SequenceEvaluator> eagerEvaluators = new System.Collections.Generic.List<Saxon.Hej.expr.elab.SequenceEvaluator>(expr.getOperanda().getNumberOfOperands());
+                foreach (Saxon.Hej.expr.Operand o in expr.operands()) {
+                    eagerEvaluators.Add(o.getChildExpression().makeElaborator().eagerly());
+                }
+                return context => {
+                    System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>(eagerEvaluators.Count);
+                    foreach (Saxon.Hej.expr.elab.SequenceEvaluator e in eagerEvaluators) {
+                        members.Add((Saxon.Hej.om.GroundedValue)(e.evaluate(context)));
+                    }
+                    return expr.makeArray(members);
+                } ;
+            }
+        
         }
     
     }

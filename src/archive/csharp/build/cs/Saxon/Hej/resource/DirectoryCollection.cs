@@ -25,8 +25,7 @@ namespace Saxon.Hej.resource {
             return directoryContents(dirFile, @params);
         }
         public override System.Collections.Generic.IEnumerator<Saxon.Hej.lib.Resource> getResources(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.lib.ParseOptions options = optionsFromQueryParameters(@params, context);
-            options.setSpaceStrippingRule(whitespaceRules);
+            Saxon.Hej.lib.ParseOptions options = optionsFromQueryParameters(@params, context).withSpaceStrippingRule(whitespaceRules);
             Saxon.Ejava.util.Optional<bool> metadataParam = @params.getMetaData();
             bool metadata = (metadataParam.isPresent() && metadataParam.get());
             System.Collections.Generic.IEnumerator<string> resourceURIs = getResourceURIs(context);

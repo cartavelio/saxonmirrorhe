@@ -72,7 +72,7 @@ namespace Saxon.Hej.style {
                                         if ((f.Equals("visibility") && permittedAttributes.HasFlag(Saxon.Hej.style.SourceBinding.BindingProperty.VISIBILITY))) {
                                             visibilityAtt = Saxon.Hej.value.Whitespace.trim(att.getValue());
                                         } else {
-                                            if (Saxon.Hej.lib.NamespaceConstant.SAXON.Equals(attName.getURI())) {
+                                            if (Saxon.Hej.om.NamespaceUri.SAXON.Equals(attName.getNamespaceUri())) {
                                                 if (sourceElement.isExtensionAttributeAllowed(attName.getDisplayName())) {
                                                     if ((attName.getLocalPart().Equals("assignable") && permittedAttributes.HasFlag(Saxon.Hej.style.SourceBinding.BindingProperty.ASSIGNABLE))) {
                                                         assignableAtt = Saxon.Hej.value.Whitespace.trim(att.getValue());
@@ -170,7 +170,7 @@ namespace Saxon.Hej.style {
                                 bool tunnel = sourceElement.processBooleanAttribute("tunnel", tunnelAtt);
                                 setProperty(Saxon.Hej.style.SourceBinding.BindingProperty.TUNNEL, tunnel);
                             } else {
-                                if (Saxon.Hej.lib.NamespaceConstant.SAXON.Equals(attName.getURI())) {
+                                if (Saxon.Hej.om.NamespaceUri.SAXON.Equals(attName.getNamespaceUri())) {
                                     if (attName.getLocalPart().Equals("as")) {
                                         extraAsAtt = att.getValue();
                                     }
@@ -235,7 +235,7 @@ namespace Saxon.Hej.style {
             }
         }
         private Saxon.Hej.om.StructuredQName errorName() {
-            return new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "error-variable-name");
+            return new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "error-variable-name");
         }
         public void validate() {
             if (((select != null) && sourceElement.hasChildNodes())) {
@@ -303,8 +303,9 @@ namespace Saxon.Hej.style {
                                     errorCode = "XTTE0590";
                                 }
                             }
-                            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(category, name.getDisplayName(), 0);
-                            role.setErrorCode(errorCode);
+                            int selectedCategory = category;
+                            string selectedErrorCode = errorCode;
+                            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(selectedCategory, name.getDisplayName(), 0, selectedErrorCode);
                             select = sourceElement.getConfiguration().getTypeChecker(false).staticTypeCheck(select, required, role, sourceElement.makeExpressionVisitor());
                         } else {
                         }
@@ -318,7 +319,7 @@ namespace Saxon.Hej.style {
         }
         public Saxon.Hej.om.StructuredQName getVariableQName() {
             if ((name == null)) {
-                processVariableName(sourceElement.getAttributeValue("", "name"));
+                processVariableName(sourceElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name"));
             }
             return name;
         }
@@ -360,8 +361,7 @@ namespace Saxon.Hej.style {
                         select = Saxon.Hej.expr.Literal.makeEmptySequence();
                     }
                     try {
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, name.getDisplayName(), 0);
-                        role.setErrorCode("XTTE0570");
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, name.getDisplayName(), 0, "XTTE0570");
                         select = select.simplify();
                         select = sourceElement.getConfiguration().getTypeChecker(false).staticTypeCheck(select, declaredType, role, sourceElement.makeExpressionVisitor());
                     } catch (Saxon.Hej.trans.XPathException err) {
@@ -375,7 +375,7 @@ namespace Saxon.Hej.style {
         }
         public Saxon.Hej.value.SequenceType getDeclaredType() {
             if ((declaredType == null)) {
-                string asAtt = sourceElement.getAttributeValue("", "as");
+                string asAtt = sourceElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "as");
                 if ((asAtt == null)) {
                     return null;
                 } else {

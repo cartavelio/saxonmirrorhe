@@ -24,7 +24,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             if ((pattern != null)) {
                 return (watchManager, @out, context) => {
                     if (forGrouping) {
-                        @out = new Saxon.Eej.ee.stream.feed.FilteringFeed(@out, context, new Saxon.Eej.ee.stream.feed.FilteringFeed.FilterLambda((item, position) => ((position == 1) ? Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.MATCHES : Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.DONE)));
+                        @out = new Saxon.Eej.ee.stream.feed.FilteringFeed(watchManager, @out, context, new Saxon.Eej.ee.stream.feed.FilteringFeed.FilterLambda((item, position) => ((position == 1) ? Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.MATCHES : Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.DONE)));
                     }
                     return new Saxon.Eej.ee.stream.watch.Trigger(pattern, @out, context);
                 } ;

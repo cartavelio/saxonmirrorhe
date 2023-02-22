@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Saxon.Hej.ma.arrays;
+using Saxon.Hej.om;
 using Saxon.Hej.z;
 using Saxon.Impl.Helpers;
 using GroundedValue = Saxon.Hej.om.GroundedValue;
@@ -19,9 +21,22 @@ namespace Saxon.Impl.DataModel {
         public ImmArray(Saxon.Hej.ma.arrays.SimpleArrayItem other) {
             this.backing = ImmutableList<GroundedValue>.Empty.AddRange(other.members());
         }
+        
+        public ImmArray(IList<GroundedValue> members) {
+            this.backing = ImmutableList<GroundedValue>.Empty.AddRange(members);
+        }
 
         private ImmArray(ImmutableList<GroundedValue> backingList) {
             this.backing = backingList;
+        }
+
+        public static ImmArray from(SequenceIterator iter) {
+            ImmutableList<GroundedValue> list = ImmutableList<GroundedValue>.Empty;
+            for (Item item; (item = iter.next()) != null;) {
+                list = list.Add(item);
+            }
+
+            return new ImmArray(list);
         }
 
         public override Saxon.Hej.om.GroundedValue get(int index) {
@@ -32,6 +47,9 @@ namespace Saxon.Impl.DataModel {
         }
         public override Saxon.Hej.ma.arrays.ArrayItem insert(int position, Saxon.Hej.om.GroundedValue member) {
             return new ImmArray(backing.Insert(position, member));
+        }
+        public override Saxon.Hej.ma.arrays.ArrayItem append(Saxon.Hej.om.GroundedValue member) {
+            return new ImmArray(backing.Add(member));
         }
         public override int arrayLength() {
             return backing.Count;

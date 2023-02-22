@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.xtupdate {
-    public class SaxonRename : Saxon.Hej.style.StyleElement {
+    public class SaxonRename : Saxon.Hej.style.ExtensionInstruction {
         private Saxon.Hej.expr.Expression select;
         private Saxon.Hej.expr.Expression newName;
-        public override bool isInstruction() {
-            return true;
-        }
         protected internal override bool mayContainSequenceConstructor() {
             return false;
         }

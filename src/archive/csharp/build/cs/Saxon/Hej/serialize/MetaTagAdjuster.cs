@@ -46,9 +46,9 @@ namespace Saxon.Hej.serialize {
                     return false;
                 }
                 if ((htmlVersion == 5)) {
-                    return (name.hasURI("") || name.hasURI(Saxon.Hej.lib.NamespaceConstant.XHTML));
+                    return (name.hasURI(Saxon.Hej.om.NamespaceUri.NULL) || name.hasURI(Saxon.Hej.om.NamespaceUri.XHTML));
                 } else {
-                    return name.hasURI(Saxon.Hej.lib.NamespaceConstant.XHTML);
+                    return name.hasURI(Saxon.Hej.om.NamespaceUri.XHTML);
                 }
             } else {
                 return Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(name.getLocalPart(), local);
@@ -78,7 +78,7 @@ namespace Saxon.Hej.serialize {
             nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
             if ((seekingHead && matchesName(elemName, "head"))) {
                 string headPrefix = elemName.getPrefix();
-                string headURI = elemName.getURI();
+                Saxon.Hej.om.NamespaceUri headURI = elemName.getNamespaceUri();
                 Saxon.Hej.om.FingerprintedQName metaCode = new Saxon.Hej.om.FingerprintedQName(headPrefix, headURI, "meta");
                 Saxon.Hej.om.AttributeMap atts = Saxon.Hej.om.EmptyAttributeMap.getInstance();
                 atts = atts.put(new Saxon.Hej.om.AttributeInfo(new Saxon.Hej.om.NoNamespaceName("http-equiv"), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, "Content-Type", Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE));

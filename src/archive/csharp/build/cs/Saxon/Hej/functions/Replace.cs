@@ -8,8 +8,18 @@ namespace Saxon.Hej.functions {
             return false;
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
-            bool maybeQ = ((arguments.Length == 4) && ((!(((arguments[3] is Saxon.Hej.expr.StringLiteral))) || ((Saxon.Hej.expr.StringLiteral)(arguments[3])).stringify().Contains("q"))));
-            if (((arguments[2] is Saxon.Hej.expr.StringLiteral) && !(maybeQ))) {
+            bool doEarlyReplacementCheck = true;
+            if ((arguments.Length == 4)) {
+                if ((arguments[3] is Saxon.Hej.expr.StringLiteral)) {
+                    string flags = ((Saxon.Hej.expr.StringLiteral)(arguments[3])).stringify();
+                    if ((flags.Contains("q") || flags.Contains(";"))) {
+                        doEarlyReplacementCheck = false;
+                    }
+                } else {
+                    doEarlyReplacementCheck = false;
+                }
+            }
+            if (((arguments[2] is Saxon.Hej.expr.StringLiteral) && doEarlyReplacementCheck)) {
                 Saxon.Hej.str.UnicodeString rep = ((Saxon.Hej.expr.StringLiteral)(arguments[2])).getString();
                 if ((checkReplacement(rep) == null)) {
                     replacementChecked = true;
@@ -22,7 +32,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.str.UnicodeString input = ((arg0 == null) ? Saxon.Hej.str.EmptyUnicodeString.getInstance() : arg0.getUnicodeStringValue());
             Saxon.Hej.str.UnicodeString replacement = arguments[2].head().getUnicodeStringValue();
             Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments);
-            if (!(re.getFlags().Contains("q"))) {
+            if ((!(re.getFlags().Contains("q")) && !(re.isPlatformNative()))) {
                 if (!(replacementChecked)) {
                     string msg = checkReplacement(replacement);
                     if ((msg != null)) {

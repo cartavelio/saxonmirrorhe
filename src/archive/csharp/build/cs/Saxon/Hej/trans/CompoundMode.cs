@@ -44,8 +44,8 @@ namespace Saxon.Hej.trans {
             overrides.processRules(action);
             @base.processRules(action);
         }
-        public override System.Collections.Generic.ISet<string> getExplicitNamespaces(Saxon.Hej.om.NamePool pool) {
-            System.Collections.Generic.HashSet<string> r = new System.Collections.Generic.HashSet<string>();
+        public override System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getExplicitNamespaces(Saxon.Hej.om.NamePool pool) {
+            System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri> r = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
             Saxon.Impl.Helpers.SetUtils.AddAll(r, @base.getExplicitNamespaces(pool));
             Saxon.Impl.Helpers.SetUtils.AddAll(r, overrides.getExplicitNamespaces(pool));
             return r;

@@ -3,324 +3,329 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.lib {
     public class ParseOptions {
-        private int schemaValidation = Saxon.Hej.lib.Validation.DEFAULT;
-        private int dtdValidation = Saxon.Hej.lib.Validation.DEFAULT;
-        private Saxon.Hej.om.StructuredQName topLevelElement;
-        private Saxon.Hej.type.SchemaType topLevelType;
-        private Saxon.Ejava.util.Optional<bool> wrapDocument = Saxon.Ejava.util.Optional<bool>.empty();
-        private Saxon.Hej.om.TreeModel treeModel = null;
-        private Saxon.Hej.om.SpaceStrippingRule spaceStrippingRule = null;
-        private Saxon.Ejava.util.Optional<bool> lineNumbering = Saxon.Ejava.util.Optional<bool>.empty();
-        private bool pleaseClose = false;
-        private Saxon.Hej.lib.ErrorReporter errorReporter = null;
-        private System.Collections.Generic.IList<Saxon.Hej.@event.FilterFactory> filters = null;
-        private bool continueAfterValidationErrors = false;
-        private bool addCommentsAfterValidationErrors = false;
-        private bool expandAttributeDefaults = true;
-        private bool useXsiSchemaLocation = true;
-        private bool checkEntityReferences = false;
-        private bool stable = true;
-        private int validationErrorLimit = System.Int32.MaxValue;
-        private Saxon.Hej.type.ValidationParams validationParams = null;
-        private Saxon.Hej.lib.ValidationStatisticsRecipient validationStatisticsRecipient = null;
-        private System.Collections.Generic.IDictionary<string,bool> parserFeatures = null;
-        private System.Collections.Generic.IDictionary<string,System.Object> parserProperties = null;
-        private Saxon.Hej.lib.InvalidityHandler invalidityHandler = null;
-        private System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> applicableAccumulators = null;
+        private enum Key {
+            ADD_COMMENTS_AFTER_VALIDATION_ERRORS,
+            APPLICABLE_ACCUMULATORS,
+            CHECK_ENTITY_REFERENCES,
+            CONTINUE_AFTER_VALIDATION_ERRORS,
+            DTD_VALIDATION,
+            ERROR_HANDLER,
+            ERROR_REPORTER,
+            EXPAND_ATTRIBUTE_DEFAULTS,
+            FILTERS,
+            INVALIDITY_HANDLER,
+            LINE_NUMBERING,
+            MODEL,
+            PLEASE_CLOSE,
+            SCHEMA_VALIDATION,
+            SPACE_STRIPPING_RULE,
+            STABLE,
+            TOP_LEVEL_ELEMENT,
+            TOP_LEVEL_TYPE,
+            TREE_MODEL,
+            USE_XSI_SCHEMA_LOCATION,
+            VALIDATION_ERROR_LIMIT,
+            VALIDATION_PARAMS,
+            VALIDATION_STATISTICS_RECIPIENT,
+            WRAP_DOCUMENT,
+        }
+        private readonly System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.lib.ParseOptions.Key,System.Object> properties;
+        private System.Collections.Generic.IList<Saxon.Hej.lib.ParseOptions.Key> cacheKeys;
+        private System.Collections.Generic.IList<System.Object> cacheValues;
+        private System.Collections.Generic.IList<Saxon.Hej.lib.ParseOptions> cacheResults;
         public ParseOptions()  {
+            properties = init();
         }
-        public ParseOptions(Saxon.Hej.lib.ParseOptions p)  {
-            schemaValidation = p.schemaValidation;
-            validationParams = p.validationParams;
-            setDTDValidationMode(p.dtdValidation);
-            topLevelElement = p.topLevelElement;
-            topLevelType = p.topLevelType;
-            wrapDocument = p.wrapDocument;
-            treeModel = p.treeModel;
-            spaceStrippingRule = p.spaceStrippingRule;
-            lineNumbering = p.lineNumbering;
-            pleaseClose = p.pleaseClose;
-            errorReporter = p.errorReporter;
-            invalidityHandler = p.invalidityHandler;
-            stable = p.stable;
-            if ((p.filters != null)) {
-                filters = new System.Collections.Generic.List<Saxon.Hej.@event.FilterFactory>(p.filters);
-            }
-            setExpandAttributeDefaults(p.expandAttributeDefaults);
-            useXsiSchemaLocation = p.useXsiSchemaLocation;
-            validationErrorLimit = p.validationErrorLimit;
-            continueAfterValidationErrors = p.continueAfterValidationErrors;
-            addCommentsAfterValidationErrors = p.addCommentsAfterValidationErrors;
-            if ((p.parserFeatures != null)) {
-                parserFeatures = new System.Collections.Generic.Dictionary<string, bool>(p.parserFeatures);
-            }
-            if ((p.parserProperties != null)) {
-                parserProperties = new System.Collections.Generic.Dictionary<string, System.Object>(p.parserProperties);
-            }
-            applicableAccumulators = p.applicableAccumulators;
-            checkEntityReferences = p.checkEntityReferences;
-            validationStatisticsRecipient = p.validationStatisticsRecipient;
+        private ParseOptions(System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.lib.ParseOptions.Key,System.Object> properties)  {
+            this.properties = properties;
         }
-        public void merge(Saxon.Hej.lib.ParseOptions options) {
-            if ((options.dtdValidation != Saxon.Hej.lib.Validation.DEFAULT)) {
-                setDTDValidationMode(options.dtdValidation);
+        private System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.lib.ParseOptions.Key,System.Object> init() {
+            return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.lib.ParseOptions.Key,System.Object>.Empty;
+        }
+        private Saxon.Hej.lib.ParseOptions searchCache(Saxon.Hej.lib.ParseOptions.Key key, System.Object value) { lock(this) {
+            if ((cacheKeys == null)) {
+                return null;
             }
-            if ((options.schemaValidation != Saxon.Hej.lib.Validation.DEFAULT)) {
-                schemaValidation = options.schemaValidation;
-            }
-            if ((options.invalidityHandler != null)) {
-                invalidityHandler = options.invalidityHandler;
-            }
-            if ((options.topLevelElement != null)) {
-                topLevelElement = options.topLevelElement;
-            }
-            if ((options.topLevelType != null)) {
-                topLevelType = options.topLevelType;
-            }
-            if (options.wrapDocument.isPresent()) {
-                wrapDocument = options.wrapDocument;
-            }
-            if ((options.treeModel != null)) {
-                treeModel = options.treeModel;
-            }
-            if ((options.spaceStrippingRule != null)) {
-                spaceStrippingRule = options.spaceStrippingRule;
-            }
-            if (options.lineNumbering.isPresent()) {
-                lineNumbering = options.lineNumbering;
-            }
-            if (options.pleaseClose) {
-                pleaseClose = true;
-            }
-            if ((options.filters != null)) {
-                if ((filters == null)) {
-                    filters = new System.Collections.Generic.List<Saxon.Hej.@event.FilterFactory>();
+            for (int i = 0; (i<cacheKeys.Count); i++) {
+                if (((cacheKeys[i] == key) && (cacheValues[i] == value))) {
+                    return cacheResults[i];
                 }
-                Saxon.Impl.Helpers.ListUtils.AddAll(filters, options.filters);
             }
-            if ((options.parserFeatures != null)) {
-                if ((parserFeatures == null)) {
-                    parserFeatures = new System.Collections.Generic.Dictionary<string, bool>();
+            return null;
+        }}
+        private void addToCache(Saxon.Hej.lib.ParseOptions.Key key, System.Object value, Saxon.Hej.lib.ParseOptions result) { lock(this) {
+            if ((cacheKeys == null)) {
+                cacheKeys = new System.Collections.Generic.List<Saxon.Hej.lib.ParseOptions.Key>(10);
+                cacheValues = new System.Collections.Generic.List<System.Object>(10);
+                cacheResults = new System.Collections.Generic.List<Saxon.Hej.lib.ParseOptions>(10);
+            } else {
+                if ((cacheKeys.Count>=10)) {
+                    cacheKeys.Clear();
+                    cacheValues.Clear();
+                    cacheResults.Clear();
                 }
-                Saxon.Impl.Helpers.MapUtils.PutAll(parserFeatures, options.parserFeatures);
             }
-            if ((options.parserProperties != null)) {
-                if ((parserProperties == null)) {
-                    parserProperties = new System.Collections.Generic.Dictionary<string, System.Object>();
+            cacheKeys.Add(key);
+            cacheValues.Add(value);
+            cacheResults.Add(result);
+        }}
+        private Saxon.Hej.lib.ParseOptions withProperty(Saxon.Hej.lib.ParseOptions.Key key, System.Object value) {
+            if ((value == Saxon.Impl.Helpers.MapUtils.Get(properties, key))) {
+                return this;
+            }
+            Saxon.Hej.lib.ParseOptions result = searchCache(key, value);
+            if ((result != null)) {
+                return result;
+            }
+            if ((value == null)) {
+                result = new Saxon.Hej.lib.ParseOptions(properties.Remove(key));
+            } else {
+                result = new Saxon.Hej.lib.ParseOptions(properties.SetItem(key, value));
+            }
+            addToCache(key, value, result);
+            return result;
+        }
+        private System.Object getProperty(Saxon.Hej.lib.ParseOptions.Key key) {
+            return Saxon.Impl.Helpers.MapUtils.Get(properties, key);
+        }
+        private bool hasProperty(Saxon.Hej.lib.ParseOptions.Key key) {
+            return (Saxon.Impl.Helpers.MapUtils.Get(properties, key) != null);
+        }
+        private int getIntegerProperty(Saxon.Hej.lib.ParseOptions.Key key, int defaultValue) {
+            System.Object value = Saxon.Impl.Helpers.MapUtils.Get(properties, key);
+            if ((value == null)) {
+                return defaultValue;
+            } else {
+                return (int)(value);
+            }
+        }
+        private bool getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key key, bool defaultValue) {
+            System.Object value = Saxon.Impl.Helpers.MapUtils.Get(properties, key);
+            if ((value == null)) {
+                return defaultValue;
+            } else {
+                return (bool)(value);
+            }
+        }
+        public Saxon.Hej.lib.ParseOptions merge(Saxon.Hej.lib.ParseOptions other) {
+            Saxon.Hej.lib.ParseOptions result = this;
+            if ((other.getDTDValidationMode() != Saxon.Hej.lib.Validation.DEFAULT)) {
+                result = result.withDTDValidationMode(other.getDTDValidationMode());
+            }
+            if ((other.getSchemaValidationMode() != Saxon.Hej.lib.Validation.DEFAULT)) {
+                result = result.withSchemaValidationMode(other.getSchemaValidationMode());
+            }
+            result = result.withPropertyIfNotNull(Saxon.Hej.lib.ParseOptions.Key.INVALIDITY_HANDLER, other.getInvalidityHandler());
+            result = result.withPropertyIfNotNull(Saxon.Hej.lib.ParseOptions.Key.TOP_LEVEL_ELEMENT, other.getTopLevelElement());
+            result = result.withPropertyIfNotNull(Saxon.Hej.lib.ParseOptions.Key.TOP_LEVEL_TYPE, other.getTopLevelType());
+            result = result.withPropertyIfNotNull(Saxon.Hej.lib.ParseOptions.Key.SPACE_STRIPPING_RULE, other.getSpaceStrippingRule());
+            result = result.withPropertyIfNotNull(Saxon.Hej.lib.ParseOptions.Key.TREE_MODEL, other.getTreeModel());
+            if (other.hasProperty(Saxon.Hej.lib.ParseOptions.Key.LINE_NUMBERING)) {
+                result = result.withLineNumbering(other.isLineNumbering());
+            }
+            if (other.isPleaseCloseAfterUse()) {
+                result = result.withPleaseCloseAfterUse(true);
+            }
+            if ((other.getFilters() != null)) {
+                foreach (Saxon.Hej.@event.FilterFactory ff in other.getFilters()) {
+                    result = result.withFilter(ff);
                 }
-                Saxon.Impl.Helpers.MapUtils.PutAll(parserProperties, options.parserProperties);
             }
-            if (!(options.expandAttributeDefaults)) {
-                setExpandAttributeDefaults(false);
+            if (!(other.isExpandAttributeDefaults())) {
+                result = result.withExpandAttributeDefaults(false);
             }
-            if (!(options.useXsiSchemaLocation)) {
-                useXsiSchemaLocation = false;
+            if (!(other.isUseXsiSchemaLocation())) {
+                result = result.withUseXsiSchemaLocation(false);
             }
-            if (options.addCommentsAfterValidationErrors) {
-                addCommentsAfterValidationErrors = true;
+            if (other.isAddCommentsAfterValidationErrors()) {
+                result = result.withUseXsiSchemaLocation(true);
             }
-            validationErrorLimit = System.Math.Min(validationErrorLimit, options.validationErrorLimit);
+            result = result.withValidationErrorLimit(System.Math.Min(this.getValidationErrorLimit(), other.getValidationErrorLimit()));
+            return result;
         }
-        public void applyDefaults(Saxon.Hej.Configuration config) {
-            if ((dtdValidation == Saxon.Hej.lib.Validation.DEFAULT)) {
-                setDTDValidationMode((config.isValidation() ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
+        private Saxon.Hej.lib.ParseOptions withPropertyIfNotNull(Saxon.Hej.lib.ParseOptions.Key key, System.Object value) {
+            if ((value != null)) {
+                return withProperty(key, value);
             }
-            if ((schemaValidation == Saxon.Hej.lib.Validation.DEFAULT)) {
-                schemaValidation = config.getSchemaValidationMode();
-            }
-            if ((treeModel == null)) {
-                treeModel = Saxon.Hej.om.TreeModel.getTreeModel(config.getTreeModel());
-            }
-            if ((spaceStrippingRule == null)) {
-                spaceStrippingRule = config.getParseOptions().getSpaceStrippingRule();
-            }
-            if (!(lineNumbering.isPresent())) {
-                lineNumbering = Saxon.Ejava.util.Optional<bool>.of(config.isLineNumbering());
-            }
+            return this;
         }
-        public void addFilter(Saxon.Hej.@event.FilterFactory filterFactory) {
-            if ((filters == null)) {
-                filters = new System.Collections.Generic.List<Saxon.Hej.@event.FilterFactory>(5);
+        public Saxon.Hej.lib.ParseOptions applyDefaults(Saxon.Hej.Configuration config) {
+            Saxon.Hej.lib.ParseOptions result = this;
+            if ((getDTDValidationMode() == Saxon.Hej.lib.Validation.DEFAULT)) {
+                result = result.withDTDValidationMode((config.isValidation() ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.SKIP));
             }
-            filters.Add(filterFactory);
+            if ((getSchemaValidationMode() == Saxon.Hej.lib.Validation.DEFAULT)) {
+                result = result.withSchemaValidationMode(config.getSchemaValidationMode());
+            }
+            if ((getModel() == null)) {
+                result = result.withModel(Saxon.Hej.om.TreeModel.getTreeModel(config.getTreeModel()));
+            }
+            if ((getSpaceStrippingRule() == null)) {
+                result = result.withSpaceStrippingRule(config.getParseOptions().getSpaceStrippingRule());
+            }
+            if ((getProperty(Saxon.Hej.lib.ParseOptions.Key.LINE_NUMBERING) == null)) {
+                result = result.withProperty(Saxon.Hej.lib.ParseOptions.Key.LINE_NUMBERING, config.isLineNumbering());
+            }
+            return result;
+        }
+        public Saxon.Hej.lib.ParseOptions withFilter(Saxon.Hej.@event.FilterFactory filterFactory) {
+            System.Collections.Generic.IList<Saxon.Hej.@event.FilterFactory> list = getFilters();
+            if ((list == null)) {
+                list = new System.Collections.Generic.List<Saxon.Hej.@event.FilterFactory>(2);
+            } else {
+                list = new System.Collections.Generic.List<Saxon.Hej.@event.FilterFactory>(list);
+            }
+            list.Add(filterFactory);
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.FILTERS, list);
         }
         public System.Collections.Generic.IList<Saxon.Hej.@event.FilterFactory> getFilters() {
-            return filters;
+            return (System.Collections.Generic.IList<Saxon.Hej.@event.FilterFactory>)(getProperty(Saxon.Hej.lib.ParseOptions.Key.FILTERS));
         }
         public Saxon.Hej.om.SpaceStrippingRule getSpaceStrippingRule() {
-            return spaceStrippingRule;
+            return (Saxon.Hej.om.SpaceStrippingRule)(getProperty(Saxon.Hej.lib.ParseOptions.Key.SPACE_STRIPPING_RULE));
         }
-        public void setSpaceStrippingRule(Saxon.Hej.om.SpaceStrippingRule rule) {
-            spaceStrippingRule = rule;
+        public Saxon.Hej.lib.ParseOptions withSpaceStrippingRule(Saxon.Hej.om.SpaceStrippingRule rule) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.SPACE_STRIPPING_RULE, rule);
         }
-        public void setTreeModel(int model) {
-            treeModel = Saxon.Hej.om.TreeModel.getTreeModel(model);
-        }
-        public void addParserFeature(string uri, bool value) {
-            if ((parserFeatures == null)) {
-                parserFeatures = new System.Collections.Generic.Dictionary<string, bool>();
-            }
-            Saxon.Impl.Helpers.MapUtils.Put(parserFeatures, uri, value);
-        }
-        public void addParserProperties(string uri, System.Object value) {
-            if ((parserProperties == null)) {
-                parserProperties = new System.Collections.Generic.Dictionary<string, System.Object>();
-            }
-            Saxon.Impl.Helpers.MapUtils.Put(parserProperties, uri, value);
-        }
-        public bool getParserFeature(string uri) {
-            return Saxon.Impl.Helpers.MapUtils.Get(parserFeatures, uri);
-        }
-        public System.Object getParserProperty(string name) {
-            return Saxon.Impl.Helpers.MapUtils.Get(parserProperties, name);
-        }
-        public System.Collections.Generic.IDictionary<string,bool> getParserFeatures() {
-            return parserFeatures;
-        }
-        public System.Collections.Generic.IDictionary<string,System.Object> getParserProperties() {
-            return parserProperties;
+        public Saxon.Hej.lib.ParseOptions withTreeModel(int model) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.TREE_MODEL, model);
         }
         public int getTreeModel() {
-            if ((treeModel == null)) {
+            Saxon.Hej.om.TreeModel model = getModel();
+            if ((model == null)) {
                 return Saxon.Hej.@event.Builder.UNSPECIFIED_TREE_MODEL;
             }
-            return treeModel.getSymbolicValue();
+            return model.getSymbolicValue();
         }
-        public void setModel(Saxon.Hej.om.TreeModel model) {
-            treeModel = model;
+        public Saxon.Hej.lib.ParseOptions withModel(Saxon.Hej.om.TreeModel model) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.MODEL, model);
         }
         public Saxon.Hej.om.TreeModel getModel() {
+            Saxon.Hej.om.TreeModel treeModel = (Saxon.Hej.om.TreeModel)(getProperty(Saxon.Hej.lib.ParseOptions.Key.MODEL));
             return ((treeModel == null) ? Saxon.Hej.om.TreeModel.TINY_TREE : treeModel);
         }
-        public void setSchemaValidationMode(int option) {
-            schemaValidation = option;
+        public Saxon.Hej.lib.ParseOptions withSchemaValidationMode(int option) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.SCHEMA_VALIDATION, option);
         }
         public int getSchemaValidationMode() {
-            return schemaValidation;
+            return getIntegerProperty(Saxon.Hej.lib.ParseOptions.Key.SCHEMA_VALIDATION, Saxon.Hej.lib.Validation.DEFAULT);
         }
-        public void setExpandAttributeDefaults(bool expand) {
-            this.expandAttributeDefaults = expand;
+        public Saxon.Hej.lib.ParseOptions withExpandAttributeDefaults(bool expand) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.EXPAND_ATTRIBUTE_DEFAULTS, expand);
         }
         public bool isExpandAttributeDefaults() {
-            return expandAttributeDefaults;
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.EXPAND_ATTRIBUTE_DEFAULTS, true);
         }
-        public void setTopLevelElement(Saxon.Hej.om.StructuredQName elementName) {
-            topLevelElement = elementName;
+        public Saxon.Hej.lib.ParseOptions withTopLevelElement(Saxon.Hej.om.StructuredQName elementName) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.TOP_LEVEL_ELEMENT, elementName);
         }
         public Saxon.Hej.om.StructuredQName getTopLevelElement() {
-            return topLevelElement;
+            return (Saxon.Hej.om.StructuredQName)(getProperty(Saxon.Hej.lib.ParseOptions.Key.TOP_LEVEL_ELEMENT));
         }
-        public void setTopLevelType(Saxon.Hej.type.SchemaType type) {
-            topLevelType = type;
+        public Saxon.Hej.lib.ParseOptions withTopLevelType(Saxon.Hej.type.SchemaType type) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.TOP_LEVEL_TYPE, type);
         }
         public Saxon.Hej.type.SchemaType getTopLevelType() {
-            return topLevelType;
+            return (Saxon.Hej.type.SchemaType)(getProperty(Saxon.Hej.lib.ParseOptions.Key.TOP_LEVEL_TYPE));
         }
-        public void setUseXsiSchemaLocation(bool use) {
-            useXsiSchemaLocation = use;
+        public Saxon.Hej.lib.ParseOptions withUseXsiSchemaLocation(bool use) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.USE_XSI_SCHEMA_LOCATION, use);
         }
         public bool isUseXsiSchemaLocation() {
-            return useXsiSchemaLocation;
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.USE_XSI_SCHEMA_LOCATION, true);
         }
         public int getValidationErrorLimit() {
-            return validationErrorLimit;
+            return getIntegerProperty(Saxon.Hej.lib.ParseOptions.Key.VALIDATION_ERROR_LIMIT, System.Int32.MaxValue);
         }
-        public void setValidationErrorLimit(int validationErrorLimit) {
-            this.validationErrorLimit = validationErrorLimit;
+        public Saxon.Hej.lib.ParseOptions withValidationErrorLimit(int validationErrorLimit) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.VALIDATION_ERROR_LIMIT, validationErrorLimit);
         }
-        public void setDTDValidationMode(int option) {
-            dtdValidation = option;
-            addParserFeature("http://xml.org/sax/features/validation", ((option == Saxon.Hej.lib.Validation.STRICT) || (option == Saxon.Hej.lib.Validation.LAX)));
+        public Saxon.Hej.lib.ParseOptions withDTDValidationMode(int option) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.DTD_VALIDATION, option);
         }
         public int getDTDValidationMode() {
-            return dtdValidation;
+            return getIntegerProperty(Saxon.Hej.lib.ParseOptions.Key.DTD_VALIDATION, Saxon.Hej.lib.Validation.SKIP);
         }
-        public void setValidationStatisticsRecipient(Saxon.Hej.lib.ValidationStatisticsRecipient recipient) {
-            validationStatisticsRecipient = recipient;
+        public Saxon.Hej.lib.ParseOptions withValidationStatisticsRecipient(Saxon.Hej.lib.ValidationStatisticsRecipient recipient) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.VALIDATION_STATISTICS_RECIPIENT, recipient);
         }
         public Saxon.Hej.lib.ValidationStatisticsRecipient getValidationStatisticsRecipient() {
-            return validationStatisticsRecipient;
+            return (Saxon.Hej.lib.ValidationStatisticsRecipient)(getProperty(Saxon.Hej.lib.ParseOptions.Key.VALIDATION_STATISTICS_RECIPIENT));
         }
-        public void setLineNumbering(bool lineNumbering) {
-            this.lineNumbering = Saxon.Ejava.util.Optional<bool>.of(lineNumbering);
+        public Saxon.Hej.lib.ParseOptions withLineNumbering(bool lineNumbering) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.LINE_NUMBERING, lineNumbering);
         }
         public bool isLineNumbering() {
-            return (lineNumbering.isPresent() && lineNumbering.get());
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.LINE_NUMBERING, false);
         }
         public bool isLineNumberingSet() {
-            return lineNumbering.isPresent();
+            return hasProperty(Saxon.Hej.lib.ParseOptions.Key.LINE_NUMBERING);
         }
-        public void setWrapDocument(Saxon.Ejava.util.Optional<bool> wrap) {
-            wrapDocument = wrap;
-        }
-        public Saxon.Ejava.util.Optional<bool> getWrapDocument() {
-            return wrapDocument;
-        }
-        public void setXIncludeAware(bool state) {
-            addParserFeature("http://apache.org/xml/features/xinclude", state);
+        public Saxon.Hej.lib.ParseOptions withXIncludeAware(bool state) {
+            if (state) throw new System.NotSupportedException("XInclude is not supported in SaxonCS"); else return this;
         }
         public bool isXIncludeAwareSet() {
-            return ((parserFeatures != null) && parserFeatures.ContainsKey("http://apache.org/xml/features/xinclude"));
+            return false;
         }
         public bool isXIncludeAware() {
-            return ((parserFeatures != null) && Saxon.Impl.Helpers.MapUtils.GetOrDefault(parserFeatures, "http://apache.org/xml/features/xinclude", false));
+            return false;
         }
-        public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
+        public Saxon.Hej.lib.ParseOptions withErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
             if ((reporter == null)) {
                 reporter = new Saxon.Hej.lib.StandardErrorReporter();
             }
-            errorReporter = reporter;
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.ERROR_REPORTER, reporter);
         }
         public Saxon.Hej.lib.ErrorReporter getErrorReporter() {
-            return errorReporter;
+            return (Saxon.Hej.lib.ErrorReporter)(getProperty(Saxon.Hej.lib.ParseOptions.Key.ERROR_REPORTER));
         }
-        public void setContinueAfterValidationErrors(bool keepGoing) {
-            continueAfterValidationErrors = keepGoing;
+        public Saxon.Hej.lib.ParseOptions withContinueAfterValidationErrors(bool keepGoing) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.CONTINUE_AFTER_VALIDATION_ERRORS, keepGoing);
         }
         public bool isContinueAfterValidationErrors() {
-            return continueAfterValidationErrors;
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.CONTINUE_AFTER_VALIDATION_ERRORS, false);
         }
-        public void setAddCommentsAfterValidationErrors(bool keepGoing) {
-            addCommentsAfterValidationErrors = keepGoing;
+        public Saxon.Hej.lib.ParseOptions withAddCommentsAfterValidationErrors(bool addComments) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.ADD_COMMENTS_AFTER_VALIDATION_ERRORS, addComments);
         }
         public bool isAddCommentsAfterValidationErrors() {
-            return addCommentsAfterValidationErrors;
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.ADD_COMMENTS_AFTER_VALIDATION_ERRORS, false);
         }
-        public void setValidationParams(Saxon.Hej.type.ValidationParams @params) {
-            validationParams = @params;
+        public Saxon.Hej.lib.ParseOptions withValidationParams(Saxon.Hej.type.ValidationParams @params) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.VALIDATION_PARAMS, @params);
         }
         public Saxon.Hej.type.ValidationParams getValidationParams() {
-            return validationParams;
+            return (Saxon.Hej.type.ValidationParams)(getProperty(Saxon.Hej.lib.ParseOptions.Key.VALIDATION_PARAMS));
         }
-        public void setCheckEntityReferences(bool check) {
-            this.checkEntityReferences = check;
+        public Saxon.Hej.lib.ParseOptions withCheckEntityReferences(bool check) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.CHECK_ENTITY_REFERENCES, check);
         }
         public bool isCheckEntityReferences() {
-            return this.checkEntityReferences;
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.CHECK_ENTITY_REFERENCES, false);
         }
         public bool isStable() {
-            return stable;
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.STABLE, true);
         }
-        public void setStable(bool stable) {
-            this.stable = stable;
+        public Saxon.Hej.lib.ParseOptions withStable(bool stable) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.STABLE, stable);
         }
         public Saxon.Hej.lib.InvalidityHandler getInvalidityHandler() {
-            return invalidityHandler;
+            return (Saxon.Hej.lib.InvalidityHandler)(getProperty(Saxon.Hej.lib.ParseOptions.Key.INVALIDITY_HANDLER));
         }
-        public void setInvalidityHandler(Saxon.Hej.lib.InvalidityHandler invalidityHandler) {
-            this.invalidityHandler = invalidityHandler;
+        public Saxon.Hej.lib.ParseOptions withInvalidityHandler(Saxon.Hej.lib.InvalidityHandler invalidityHandler) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.INVALIDITY_HANDLER, invalidityHandler);
         }
-        public void setApplicableAccumulators(System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> accumulators) {
-            this.applicableAccumulators = accumulators;
+        public Saxon.Hej.lib.ParseOptions withApplicableAccumulators(System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> accumulators) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.APPLICABLE_ACCUMULATORS, accumulators);
         }
         public System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> getApplicableAccumulators() {
-            return applicableAccumulators;
+            return (System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator>)(getProperty(Saxon.Hej.lib.ParseOptions.Key.APPLICABLE_ACCUMULATORS));
         }
-        public void setPleaseCloseAfterUse(bool close) {
-            pleaseClose = close;
+        public Saxon.Hej.lib.ParseOptions withPleaseCloseAfterUse(bool close) {
+            return withProperty(Saxon.Hej.lib.ParseOptions.Key.PLEASE_CLOSE, close);
         }
         public bool isPleaseCloseAfterUse() {
-            return pleaseClose;
+            return getBooleanProperty(Saxon.Hej.lib.ParseOptions.Key.PLEASE_CLOSE, false);
         }
         public static void close(Saxon.Ejavax.xml.transform.Source source) {
             try {
@@ -339,6 +344,16 @@ namespace Saxon.Hej.lib {
                 }
             } catch (System.IO.IOException err) {
             }
+        }
+        public override string ToString() {
+            Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder();
+            foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.lib.ParseOptions.Key,System.Object> entry in properties) {
+                sb.append(entry.Key);
+                sb.append('=');
+                sb.append(entry.Value);
+                sb.append(' ');
+            }
+            return sb.ToString();
         }
     
     }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Saxon.Ejava.util.function;
 using Sys = System;
@@ -36,6 +37,8 @@ namespace Saxon.Api {
         private QName initialTemplateName;
         private Saxon.Hej.s9api.XsltTransformer s9Transformer;
         private readonly StandardMessageHandler _standardMessageHandler;
+        private ResourceResolver textResolver;
+        private ResourceResolver xmlDocumentResolver;
 
         // internal constructor
 
@@ -46,7 +49,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// The global context item for the stylesheet, as a node.
+        /// The initial context item for the stylesheet, as a node.
         /// </summary>
         /// <remarks><para>Although XSLT 3.0 allows the global context item to be any item,
         /// this interface only allows it to be a node.
@@ -56,6 +59,14 @@ namespace Saxon.Api {
         /// to strip whitespace, or <c>input-type-annotations="strip"</c> to remove type
         /// annotations, since this will result in the transformation operating on a virtual document
         /// implemented as a view or wrapper of the supplied document.</para>
+        /// <para>The name of this property is potentially misleading. If the supplied node is not
+        /// a document node (for example, if it is the outermost element in the document), then
+        /// the global context item for the transformation (that is, the value of "." when referenced
+        /// withing a global variable in the stylesheet) will actually be the root node of the
+        /// containing document tree. The supplied element node, however, is used as the
+        /// "initial match selection": that is, the transformation will start by finding a template
+        /// rule that matches the element, and evaluating that template with the element as its
+        /// context item.</para> 
         /// </remarks>
 
         public XdmNode InitialContextNode {
@@ -85,6 +96,33 @@ namespace Saxon.Api {
         /// The base URI of the principal input document. This is used for example by the <c>document()</c>
         /// function if the document contains links to other documents in the form of relative URIs.</param>
         public void SetInputStream(Stream input, Uri baseUri) {
+            StreamSource streamSource = new StreamSource(input,
+                Uri.EscapeUriString(baseUri.ToString()));
+            s9Transformer.setSource(streamSource);
+        }
+
+        /// <summary>
+        /// Supply the principal input document for the transformation in the form of a <c>TextReader</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>If this method is used, the <c>InitialContextNode</c> is ignored.</para>
+        /// <para>The supplied reader will be consumed by the <c>Run()</c> method.
+        /// Closing the input reader after use is the client's responsibility.</para>
+        /// <para>A base URI must be supplied in all cases. It is used to resolve relative
+        /// URI references appearing within the input document.</para>
+        /// <para>Schema validation is applied to the input document according to the value of
+        /// the <c>SchemaValidationMode</c> property.</para>
+        /// <para>Whitespace stripping is applied according to the value of the
+        /// <c>xsl:strip-space</c> and <c>xsl:preserve-space</c> declarations in the stylesheet.</para>
+        /// </remarks>
+        /// <param name="input">
+        /// The reader containing the source XML of the principal input document to the transformation. The document
+        /// node at the root of this document will be the global context item for the transformation.
+        /// </param>
+        /// <param name="baseUri">
+        /// The base URI of the principal input document. This is used for example by the <c>document()</c>
+        /// function if the document contains links to other documents in the form of relative URIs.</param>
+        public void SetInputTextReader(TextReader input, Uri baseUri) {
             StreamSource streamSource = new StreamSource(input,
                 Uri.EscapeUriString(baseUri.ToString()));
             s9Transformer.setSource(streamSource);
@@ -182,8 +220,6 @@ namespace Saxon.Api {
         }
 
 
-        
-
         /// <summary>
         /// The <c>IResultDocumentHandler</c> to be used at run-time to process the output
         /// produced by any <c>xsl:result-document</c> instruction with an <c>href</c>
@@ -241,7 +277,7 @@ namespace Saxon.Api {
         /// <para>The <c>TextWriter</c> should be closed by the caller after use.</para>
         /// </remarks>
 
-		public TextWriter TraceFunctionDestination {
+        public TextWriter TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
                 s9Transformer.setTraceFunctionDestination(new StandardLogger(value));
@@ -262,7 +298,6 @@ namespace Saxon.Api {
         /// If the parameter declaration defines a required type for the variable, then
         /// this value will be converted in the same way as arguments to function calls
         /// (for example, numeric promotion is applied).</param>
-         
         public void SetParameter(QName name, XdmValue value) {
             s9Transformer.setParameter(name, value);
         }
@@ -274,7 +309,7 @@ namespace Saxon.Api {
         /// <value>
         ///     The underlying implementation object, which will be an instance of the class
         ///     <c>Saxon.Hej.s9api.XsltTransformer</c>. Information about this class is available in the
-        ///     Saxon-EE Javadoc documentation for the very similar Java class <c>net.sf.saxon.s9api.XsltTransformer</c>.
+        ///     Saxon-EE Javadoc documentation for the very similar Java class <see cref="Saxon.Hej.s9api.XsltTransformer"/>.
         /// </value>
         public Saxon.Hej.s9api.Destination UnderlyingDestination {
             get { return s9Transformer; }
@@ -297,6 +332,71 @@ namespace Saxon.Api {
             }
         }
 
+        /// <summary>
+        /// The <c>TextResolver</c> to be used at run-time to resolve and dereference URIs
+        /// supplied to the <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>,
+        /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
+        /// </summary>
+        /// <remarks>
+        /// <para>If no <c>TextResolver</c> is supplied, or if the supplied <c>TextResolver</c> returns null
+        /// when called, the <c>CommonResourceResolver</c> for the Saxon <c>Configuration</c> is invoked,
+        /// with a <c>ResourceRequest</c> having <c>Nature == ResourceRequest.TEXT_NATURE</c>. If this
+        /// returns null, then the "direct" URI resolution provided by <c>Org.XmlResolver.UriUtils</c> is
+        /// invoked: this is capable of handling regular <c>file:</c>, <c>http:</c>, and <c>https:</c>
+        /// URIs, as well as the <c>data:</c> and <c>pack:</c> schemes.
+        /// </para>
+        /// <para>If the call on <c>unparsed-text()</c> supplies an encoding parameter, this is made
+        /// available in the call to the <c>TextResolver</c>. 
+        /// </para>
+        /// </remarks>
+
+        public ResourceResolver TextResolver {
+            get => textResolver;
+            set {
+                textResolver = value;
+                s9Transformer.setUnparsedTextResolver(WrapTextResolver(value));
+            }
+        }
+
+        protected internal static UnparsedTextURIResolver WrapTextResolver(Saxon.Api.ResourceResolver value) {
+            return new Xslt30Transformer.WrappedTextResolver(value);
+        }
+        
+        /// <summary>
+        /// The <code>ResourceResolver</code> to be used at run-time to resolve and dereference URIs
+        /// supplied to functions retrieving XML, such as the <c>fn:doc()</c>, <c>fn:document()</c>, and
+        /// <c>fn:doc-available()</c> functions, as well as <c>fn:transform()</c>
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The URI supplied as the first argument to the resolver is the absolute URI requested,
+        /// that is, the result of resolving the requested relative URI against the relevant base URI.
+        /// </para>
+        /// <para>The requested relative URI and the corresponding base URI are supplied as separate
+        /// properties within the <c>ResourceProperties</c> argument, in case they are needed.
+        /// </para>
+        /// <para>The returned <c>IResource</c> must be one of the following:
+        /// <list>
+        /// <item>An <c>IResource</c> such as a <c>NodeResource</c> or an <c>XmlReaderResource</c>
+        /// whose <c>getItem()</c> method delivers an <c>XdmNode</c>;</item>
+        /// <item>A <c>TextResource</c> delivering lexical XML in its <c>Content</c> property; this
+        /// will then be parsed to deliver the corresponding XML document.</item>
+        /// </list>
+        /// </para>
+        /// <para>If no <c>XmlDocumentResolver</c> is supplied, or if it returns null, then
+        /// the <c>CommonResourceResolver</c> associated with the Saxon Configuration is invoked.
+        /// </para>
+        /// </remarks>
+
+        public ResourceResolver XmlDocumentResolver {
+            get => xmlDocumentResolver;
+            set {
+                xmlDocumentResolver = value;
+                s9Transformer.setResourceResolver(new JResourceResolverWrappingCS(
+                    value, s9Transformer.getUnderlyingController().getConfiguration()));
+            }
+        }
+
 
         /// <summary>
         /// Close the <c>Destination</c>, releasing any resources that need to be released.
@@ -309,7 +409,7 @@ namespace Saxon.Api {
         public void Close() {
             s9Transformer.close();
         }
-        
+
         /// <summary>
         /// Define an action to be performed when writing to the Destination is complete.
         /// </summary>
@@ -355,10 +455,26 @@ namespace Saxon.Api {
         }
 
         /// <summary>
+        /// Run the transformation, sending the result to the destination set in the
+        /// <c>Destination</c> property (which must have been given a value).
+        /// </summary>
+        /// <exception cref="Saxon.Api.SaxonApiException">Throws a <c>SaxonApiException</c> if the transformation
+        /// fails, or if no destination has been set.</exception>
+        public void Run() {
+            if (xmlDestination == null) {
+                throw new SaxonApiException("Destination has not been set");
+            }
+
+            s9Transformer.setDestination(xmlDestination.UnderlyingDestination);
+            s9Transformer.transform();
+        }
+
+
+        /// <summary>
         /// Escape hatch to the underlying implementation
         /// </summary>
 
-		public Saxon.Hej.trans.XsltController Implementation => s9Transformer.getUnderlyingController();
+        public Saxon.Hej.trans.XsltController Implementation => s9Transformer.getUnderlyingController();
     }
 }
 

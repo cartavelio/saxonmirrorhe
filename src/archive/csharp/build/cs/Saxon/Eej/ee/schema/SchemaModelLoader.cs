@@ -15,13 +15,14 @@ namespace Saxon.Eej.ee.schema {
         private readonly System.Collections.Generic.IList<Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge> pendingEdges = new System.Collections.Generic.List<Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge>();
         private string dmk = null;
         public SchemaModelLoader(Saxon.Hej.Configuration config) : base (new Saxon.Hej.@event.Sink(config.makePipelineConfiguration())) {
-            getPipelineConfiguration().getParseOptions().setSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
+            Saxon.Hej.lib.ParseOptions options = config.getParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
+            getPipelineConfiguration().setParseOptions(options);
             this.config = (Saxon.Eej.config.EnterpriseConfiguration)(config);
             schema = new Saxon.Eej.ee.schema.PreparedSchema((Saxon.Eej.config.EnterpriseConfiguration)(config));
         }
         public Saxon.Eej.ee.schema.PreparedSchema load(Saxon.Ejavax.xml.transform.Source source) {
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.getParseOptions().setSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
+            pipe.setParseOptions(config.getParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP));
             pipe.setHostLanguage(Saxon.Api.HostLanguage.XML_SCHEMA);
             Saxon.Hej.@event.NamespaceReducer reducer = new Saxon.Hej.@event.NamespaceReducer(this);
             namespaceResolver = reducer;
@@ -123,11 +124,11 @@ namespace Saxon.Eej.ee.schema {
         }
         private class SchemaHandler : Saxon.Eej.ee.schema.SchemaModelLoader.SCMNodeHandler {
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string xsdVersion = attributes.getValue("", "xsdVersion");
+                string xsdVersion = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xsdVersion");
                 if (((xsdVersion != null) && (System.String.Compare(xsdVersion, loader.config.getConfigurationProperty(Saxon.Hej.lib.Feature<string>.XSD_VERSION), System.StringComparison.Ordinal)>0))) {
                     throw new Saxon.Hej.type.SchemaException(("Imported schema component model requires XSD version "+xsdVersion));
                 }
-                loader.dmk = attributes.getValue("", "dmk");
+                loader.dmk = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "dmk");
                 if ((loader.dmk != null)) {
                     loader.schema.setLocalLicenseId(loader.config.registerLocalLicense(loader.dmk));
                 }
@@ -182,22 +183,22 @@ namespace Saxon.Eej.ee.schema {
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 Saxon.Eej.config.EnterpriseConfiguration config = loader.config;
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
-                bool isGlobal = toBoolean(attributes.getValue("", "global"));
-                bool isNillable = toBoolean(attributes.getValue("", "nillable"));
-                bool isAbstract = toBoolean(attributes.getValue("", "abstract"));
-                string type = attributes.getValue("", "type");
-                string finalAtt = attributes.getValue("", "final");
-                string defaultValue = attributes.getValue("", "default");
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                string @namespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+                bool isGlobal = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "global"));
+                bool isNillable = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "nillable"));
+                bool isAbstract = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "abstract"));
+                string type = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "type");
+                string finalAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "final");
+                string defaultValue = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "default");
                 int finalSet = parseFinalOrBlock("final", finalAtt, ((Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION)|Saxon.Hej.type.Derivation.DERIVE_BY_SUBSTITUTION));
-                string blockAtt = attributes.getValue("", "block");
+                string blockAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "block");
                 int blockSet = parseFinalOrBlock("block", blockAtt, ((Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION)|Saxon.Hej.type.Derivation.DERIVE_BY_SUBSTITUTION));
                 elementDecl = new Saxon.Eej.ee.schema.ElementDecl(config, isGlobal, null);
                 elementDecl.setGeneratedId(id);
                 Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, elementDecl);
-                elementDecl.setElementName(new Saxon.Hej.om.StructuredQName("", @namespace, name));
+                elementDecl.setElementName(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(@namespace), name));
                 elementDecl.setAbstract(isAbstract);
                 elementDecl.setNillable(isNillable);
                 elementDecl.setBlock(blockSet);
@@ -208,7 +209,7 @@ namespace Saxon.Eej.ee.schema {
                 }
                 if ((type != null)) {
                     if (type.StartsWith("#")) {
-                        int fp = config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, type.Substring(1));
+                        int fp = config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, type.Substring(1));
                         elementDecl.setTypeReference(new Saxon.Eej.ee.schema.TypeReference(fp, config, null));
                     } else {
                         loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(elementDecl, type, FIXUP_ELEMENT_TYPE));
@@ -231,7 +232,7 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string head = attributes.getValue("", "ref");
+                string head = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
                 if ((head != null)) {
                     loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(elementDecl, head, FIXUP_ELEMENT_SUBSTITUTION_GROUP));
                 }
@@ -250,14 +251,14 @@ namespace Saxon.Eej.ee.schema {
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 Saxon.Eej.config.EnterpriseConfiguration config = loader.config;
-                string xpathText = attributes.getValue("", "test");
-                string xmlBase = attributes.getValue(Saxon.Hej.lib.NamespaceConstant.XML, "base");
-                string defaultNamespace = attributes.getValue("", "defaultNamespace");
-                string type = attributes.getValue("", "type");
+                string xpathText = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "test");
+                string xmlBase = attributes.getValue(Saxon.Hej.om.NamespaceUri.XML, "base");
+                string defaultNamespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "defaultNamespace");
+                string type = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "type");
                 Saxon.Hej.sxpath.XPathEvaluator evaluator = new Saxon.Hej.sxpath.XPathEvaluator(config);
                 Saxon.Hej.sxpath.IndependentContext env = (Saxon.Hej.sxpath.IndependentContext)(evaluator.getStaticContext());
                 env.setNamespaceResolver(loader.namespaceResolver);
-                env.setDefaultElementNamespace(defaultNamespace);
+                env.setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri.of(defaultNamespace));
                 env.setBaseURI(xmlBase);
                 Saxon.Hej.sxpath.XPathExpression condition;
                 try {
@@ -271,7 +272,7 @@ namespace Saxon.Eej.ee.schema {
                 alt.setNamespaceContext(Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
                 alt.setParameters(new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.sxpath.XPathVariable>());
                 if (type.StartsWith("#")) {
-                    int fp = config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, type.Substring(1));
+                    int fp = config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, type.Substring(1));
                     alt.setTypeReference(new Saxon.Eej.ee.schema.TypeReference(fp, loader.config, null));
                 } else {
                     loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(alt, type, FIXUP_ALTERNATIVE_TYPE));
@@ -291,7 +292,7 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string @ref = attributes.getValue("", "ref");
+                string @ref = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
                 Saxon.Eej.ee.schema.IdentityConstraintReference constraintRef = new Saxon.Eej.ee.schema.IdentityConstraintReference();
                 container.addIdentityConstraint(constraintRef);
                 loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(constraintRef, @ref, FIXUP_IDENTITY_CONSTRAINT_REF));
@@ -315,11 +316,11 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
-                string key = attributes.getValue("", "key");
-                Saxon.Hej.om.StructuredQName nameCode = new Saxon.Hej.om.StructuredQName("", @namespace, name);
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                string @namespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+                string key = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "key");
+                Saxon.Hej.om.StructuredQName nameCode = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(@namespace), name);
                 Saxon.Eej.ee.schema.IdentityConstraint ic;
                 switch (localName) {
                   case "unique":
@@ -355,12 +356,14 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string xpath = attributes.getValue("", "xpath");
+                string xpath = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xpath");
                 bool isField = localName.Equals("field");
-                string defaultNamespace = attributes.getValue("", "defaultNamespace");
+                string defaultNamespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "defaultNamespace");
+                Saxon.Hej.om.NamespaceUri defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.of(defaultNamespace);
                 Saxon.Hej.sxpath.IndependentContext env = new Saxon.Hej.sxpath.IndependentContext(loader.config);
                 env.setNamespaceResolver(Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
-                env.setDefaultElementNamespace(defaultNamespace);
+                env.setDefaultElementNamespace(defaultNamespaceUri);
+                env.setXPathLanguageLevel(20);
                 Saxon.Hej.pattern.Pattern selector;
                 try {
                     selector = new Saxon.Eej.ee.schema.sdoc.SelectionParser().parseSelector(xpath, env, isField);
@@ -371,13 +374,13 @@ namespace Saxon.Eej.ee.schema {
                     Saxon.Eej.ee.schema.IdentityField idf = new Saxon.Eej.ee.schema.IdentityField(xpath);
                     idf.setSelection(selector);
                     idf.setNamespaceContext(Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
-                    idf.setXPathDefaultNamespace(defaultNamespace);
+                    idf.setXPathDefaultNamespace(defaultNamespaceUri);
                     identityConstraint.addField(idf);
                 } else {
                     Saxon.Eej.ee.schema.IdentitySelector ids = new Saxon.Eej.ee.schema.IdentitySelector(xpath);
                     ids.setSelection(selector);
                     ids.setNamespaceContext(Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
-                    ids.setXPathDefaultNamespace(defaultNamespace);
+                    ids.setXPathDefaultNamespace(defaultNamespaceUri);
                     identityConstraint.setSelector(ids);
                 }
             }
@@ -395,17 +398,17 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                Saxon.Hej.om.NamespaceUri @namespace = Saxon.Hej.om.NamespaceUri.of(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace"));
                 Saxon.Hej.om.StructuredQName attributeName = null;
                 if ((name != null)) {
                     attributeName = new Saxon.Hej.om.StructuredQName("", @namespace, name);
                 }
-                bool isGlobal = toBoolean(attributes.getValue("", "global"));
-                bool isInheritable = toBoolean(attributes.getValue("", "inheritable"));
-                string type = attributes.getValue("", "type");
-                string defaultValue = attributes.getValue("", "default");
+                bool isGlobal = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "global"));
+                bool isInheritable = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "inheritable"));
+                string type = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "type");
+                string defaultValue = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "default");
                 attributeDecl = new Saxon.Eej.ee.schema.AttributeDecl(loader.config, isGlobal);
                 Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, attributeDecl);
                 attributeDecl.setAttributeName(attributeName, loader.config.getNamePool().allocateFingerprint(@namespace, name));
@@ -416,7 +419,7 @@ namespace Saxon.Eej.ee.schema {
                 }
                 if ((type != null)) {
                     if (type.StartsWith("#")) {
-                        int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, type.Substring(1));
+                        int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, type.Substring(1));
                         attributeDecl.setTypeReference(new Saxon.Eej.ee.schema.TypeReference(fp, loader.config, null));
                     } else {
                         loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(attributeDecl, type, FIXUP_ATTRIBUTE_TYPE));
@@ -458,29 +461,30 @@ namespace Saxon.Eej.ee.schema {
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 Saxon.Eej.config.EnterpriseConfiguration config = loader.config;
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                string @namespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+                Saxon.Hej.om.NamespaceUri namespaceUri = Saxon.Hej.om.NamespaceUri.of(@namespace);
                 int fp;
                 if ((name == null)) {
-                    fp = loader.config.getNamePool().allocateFingerprint(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, id);
+                    fp = loader.config.getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.ANONYMOUS, id);
                     name = id;
-                    @namespace = Saxon.Hej.lib.NamespaceConstant.ANONYMOUS;
+                    namespaceUri = Saxon.Hej.om.NamespaceUri.ANONYMOUS;
                 } else {
-                    fp = loader.config.getNamePool().allocateFingerprint(@namespace, name);
+                    fp = loader.config.getNamePool().allocateFingerprint(namespaceUri, name);
                 }
-                string @base = attributes.getValue("", "base");
-                string variety = attributes.getValue("", "variety");
-                bool isAbstract = toBoolean(attributes.getValue("", "abstract"));
-                string derivation = attributes.getValue("", "derivationMethod");
-                string simpleType = attributes.getValue("", "simpleType");
+                string @base = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "base");
+                string variety = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "variety");
+                bool isAbstract = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "abstract"));
+                string derivation = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "derivationMethod");
+                string simpleType = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "simpleType");
                 complexType = new Saxon.Eej.ee.schema.UserComplexType(config, null);
                 complexType.setEmptyCombinedAttributeGroup();
                 Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, complexType);
-                complexType.setTypeName(new Saxon.Hej.om.StructuredQName("", @namespace, name), fp);
+                complexType.setTypeName(new Saxon.Hej.om.StructuredQName("", namespaceUri, name), fp);
                 if ((@base != null)) {
                     if (@base.StartsWith("#")) {
-                        int basefp = config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, @base.Substring(1));
+                        int basefp = config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, @base.Substring(1));
                         complexType.setBaseTypeReference(new Saxon.Eej.ee.schema.TypeReference(basefp, config, null));
                     } else {
                         loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(complexType, @base, FIXUP_COMPLEX_TYPE_BASE_TYPE));
@@ -506,7 +510,7 @@ namespace Saxon.Eej.ee.schema {
                 complexType.setDerivationMethodName(derivation);
                 if ((simpleType != null)) {
                     if (simpleType.StartsWith("#")) {
-                        int typefp = config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, simpleType.Substring(1));
+                        int typefp = config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, simpleType.Substring(1));
                         complexType.setSimpleContentTypeReference(new Saxon.Eej.ee.schema.TypeReference(typefp, config, null));
                     } else {
                         loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(complexType, simpleType, FIXUP_COMPLEX_TYPE_SIMPLE_TYPE));
@@ -517,10 +521,10 @@ namespace Saxon.Eej.ee.schema {
                 } else {
                     loader.schema.addType(complexType);
                 }
-                string blockAtt = attributes.getValue("", "block");
+                string blockAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "block");
                 int blockSet = parseFinalOrBlock("block", blockAtt, (Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION));
                 complexType.setBlock(blockSet);
-                string finalAtt = attributes.getValue("", "final");
+                string finalAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "final");
                 int finalSet = parseFinalOrBlock("final", finalAtt, (Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION));
                 complexType.setFinalProhibitions(finalSet);
             }
@@ -543,21 +547,22 @@ namespace Saxon.Eej.ee.schema {
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 Saxon.Eej.config.EnterpriseConfiguration config = loader.config;
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                string @namespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+                Saxon.Hej.om.NamespaceUri namespaceUri = Saxon.Hej.om.NamespaceUri.of(@namespace);
                 int fingerprint;
                 if ((name == null)) {
-                    fingerprint = config.getNamePool().allocateFingerprint(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, id);
+                    fingerprint = config.getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.ANONYMOUS, id);
                     name = id;
-                    @namespace = Saxon.Hej.lib.NamespaceConstant.ANONYMOUS;
+                    namespaceUri = Saxon.Hej.om.NamespaceUri.ANONYMOUS;
                 } else {
-                    fingerprint = loader.config.getNamePool().allocateFingerprint(@namespace, name);
+                    fingerprint = loader.config.getNamePool().allocateFingerprint(namespaceUri, name);
                 }
-                string @base = attributes.getValue("", "base");
-                string variety = attributes.getValue("", "variety");
-                string itemType = attributes.getValue("", "itemType");
-                string memberTypes = attributes.getValue("", "memberTypes");
+                string @base = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "base");
+                string variety = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "variety");
+                string itemType = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "itemType");
+                string memberTypes = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "memberTypes");
                 if ("atomic".Equals(variety)) {
                     simpleType = new Saxon.Eej.ee.schema.UserAtomicType(config);
                 } else {
@@ -572,10 +577,10 @@ namespace Saxon.Eej.ee.schema {
                     }
                 }
                 Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, simpleType);
-                simpleType.setTypeName(new Saxon.Hej.om.StructuredQName("", @namespace, name), fingerprint);
+                simpleType.setTypeName(new Saxon.Hej.om.StructuredQName("", namespaceUri, name), fingerprint);
                 if ((@base != null)) {
                     if (@base.StartsWith("#")) {
-                        int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, @base.Substring(1));
+                        int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, @base.Substring(1));
                         simpleType.setBaseTypeReference(new Saxon.Eej.ee.schema.TypeReference(fp, loader.config, null));
                     } else {
                         loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(simpleType, @base, FIXUP_SIMPLE_TYPE_BASE_TYPE));
@@ -583,7 +588,7 @@ namespace Saxon.Eej.ee.schema {
                 }
                 if ((itemType != null)) {
                     if (itemType.StartsWith("#")) {
-                        int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, itemType.Substring(1));
+                        int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, itemType.Substring(1));
                         ((Saxon.Eej.ee.schema.UserListType)(simpleType)).setItemTypeReference(new Saxon.Eej.ee.schema.TypeReference(fp, loader.config, null));
                     } else {
                         loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(simpleType, itemType, FIXUP_SIMPLE_TYPE_ITEM_TYPE));
@@ -594,7 +599,7 @@ namespace Saxon.Eej.ee.schema {
                     while (st.hasMoreTokens()) {
                         string memberType = st.nextToken();
                         if (memberType.StartsWith("#")) {
-                            int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.lib.NamespaceConstant.SCHEMA, memberType.Substring(1));
+                            int fp = loader.config.getNamePool().getFingerprint(Saxon.Hej.om.NamespaceUri.SCHEMA, memberType.Substring(1));
                             ((Saxon.Eej.ee.schema.UserUnionType)(simpleType)).addMemberTypeReference(new Saxon.Eej.ee.schema.TypeReference(fp, loader.config, null));
                         } else {
                             loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(simpleType, memberType, FIXUP_SIMPLE_TYPE_MEMBER_TYPE));
@@ -630,12 +635,12 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                string @namespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
                 Saxon.Hej.om.StructuredQName nameCode = null;
                 if ((name != null)) {
-                    nameCode = new Saxon.Hej.om.StructuredQName("", @namespace, name);
+                    nameCode = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(@namespace), name);
                 }
                 Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, group);
                 group.setAttributeGroupName(nameCode);
@@ -651,19 +656,19 @@ namespace Saxon.Eej.ee.schema {
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 Saxon.Eej.ee.schema.Notation notation = new Saxon.Eej.ee.schema.Notation(loader.config, null);
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                string @namespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
                 Saxon.Hej.om.StructuredQName nameCode;
                 if ((name == null)) {
-                    nameCode = new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, id);
+                    nameCode = new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.om.NamespaceUri.ANONYMOUS, id);
                 } else {
-                    nameCode = new Saxon.Hej.om.StructuredQName("", @namespace, name);
+                    nameCode = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.of(@namespace), name);
                 }
                 notation.setNotationName(nameCode);
-                string systemId = attributes.getValue("", "systemId");
+                string systemId = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "systemId");
                 notation.setNotationSystemId(systemId);
-                string publicId = attributes.getValue("", "publicId");
+                string publicId = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "publicId");
                 notation.setNotationPublicId(publicId);
                 Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, notation);
                 loader.schema.addNotation(notation);
@@ -674,10 +679,11 @@ namespace Saxon.Eej.ee.schema {
         }
         private class ModelGroupDefinitionHandler : Saxon.Eej.ee.schema.SchemaModelLoader.ModelGroupHandler {
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string id = attributes.getValue("", "id");
-                string name = attributes.getValue("", "name");
-                string @namespace = attributes.getValue("", "targetNamespace");
-                Saxon.Hej.om.StructuredQName modelGroupName = new Saxon.Hej.om.StructuredQName("", @namespace, name);
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
+                string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                string @namespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+                Saxon.Hej.om.NamespaceUri namespaceUri = Saxon.Hej.om.NamespaceUri.of(@namespace);
+                Saxon.Hej.om.StructuredQName modelGroupName = new Saxon.Hej.om.StructuredQName("", namespaceUri, name);
                 Saxon.Eej.ee.schema.ModelGroupDefinition mgd = new Saxon.Eej.ee.schema.ModelGroupDefinition(loader.config, null);
                 mgd.setModelGroupName(modelGroupName);
                 Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, mgd);
@@ -702,10 +708,10 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                bool required = toBoolean(attributes.getValue("", "required"));
-                bool isInheritable = toBoolean(attributes.getValue("", "inheritable"));
-                string @ref = attributes.getValue("", "ref");
-                string defaultValue = attributes.getValue("", "default");
+                bool required = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "required"));
+                bool isInheritable = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "inheritable"));
+                string @ref = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
+                string defaultValue = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "default");
                 attributeUse = new Saxon.Eej.ee.schema.AttributeUse(loader.config);
                 attributeUse.setInheritable((isInheritable ? 1 : 0));
                 if ((container is Saxon.Eej.ee.schema.UserComplexType)) {
@@ -737,20 +743,20 @@ namespace Saxon.Eej.ee.schema {
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 if (!(localName.Equals("assert"))) {
-                    string value = attributes.getValue("", "value");
-                    bool namespaceSensitive = toBoolean(attributes.getValue("", "namespaceSensitive"));
+                    string value = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "value");
+                    bool namespaceSensitive = toBoolean(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "namespaceSensitive"));
                     Saxon.Hej.om.NamespaceResolver resolver = null;
                     if (namespaceSensitive) {
                         resolver = Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver);
                     }
                     Saxon.Eej.ee.schema.Facet facet = /*134*/Saxon.Eej.ee.schema.Facet.makeFacet(localName, value, loader.config, resolver);
-                    string @fixed = attributes.getValue("", "fixed");
+                    string @fixed = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "fixed");
                     if ((@fixed != null)) {
                         facet.setFixed(toBoolean(@fixed));
                     }
                     if ((facet is Saxon.Eej.ee.schema.PatternFacet)) {
                         ((Saxon.Eej.ee.schema.PatternFacet)(facet)).setDoNotMerge(true);
-                        string flags = attributes.getValue("", "flags");
+                        string flags = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "flags");
                         if ((flags != null)) {
                             ((Saxon.Eej.ee.schema.PatternFacet)(facet)).setFlags(flags);
                         }
@@ -778,7 +784,7 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string @fixed = attributes.getValue("", "fixed");
+                string @fixed = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "fixed");
                 if ((@fixed != null)) {
                     facet.setFixed(toBoolean(@fixed));
                 }
@@ -820,13 +826,13 @@ namespace Saxon.Eej.ee.schema {
                   default:
                     throw new Saxon.Hej.type.SchemaException(("Unknown kind of particle "+localName));
                 }
-                string minOccursAtt = attributes.getValue("", "minOccurs");
+                string minOccursAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "minOccurs");
                 int minOccurs = 1;
                 if ((minOccursAtt != null)) {
                     minOccurs = Saxon.Impl.Helpers.Utils.ParseInt(minOccursAtt.Trim());
                 }
                 particle.setMinOccurs(minOccurs);
-                string maxOccursAtt = attributes.getValue("", "maxOccurs");
+                string maxOccursAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "maxOccurs");
                 int maxOccurs = -1;
                 if ((maxOccursAtt != null)) {
                     maxOccursAtt = maxOccursAtt.Trim();
@@ -838,17 +844,17 @@ namespace Saxon.Eej.ee.schema {
                 }
                 particle.setMaxOccurs(maxOccurs);
                 if ((particle is Saxon.Eej.ee.schema.ElementParticle)) {
-                    string @ref = attributes.getValue("", "ref");
+                    string @ref = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
                     loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(particle, @ref, FIXUP_ELEMENT_PARTICLE_REF));
                 } else {
                     if ((particle is Saxon.Eej.ee.schema.ModelGroupParticle)) {
-                        string @ref = attributes.getValue("", "ref");
+                        string @ref = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
                         if ((@ref != null)) {
                             loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(particle, @ref, FIXUP_MODEL_GROUP_PARTICLE_REF));
                         }
                     } else {
                         if ((particle is Saxon.Eej.ee.schema.ElementWildcard)) {
-                            string @ref = attributes.getValue("", "ref");
+                            string @ref = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
                             loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(particle, @ref, FIXUP_ELEMENT_WILDCARD_REF));
                         } else {
                             throw new Saxon.Ejava.lang.IllegalStateException(("Unknown particle "+particle.GetType().Name));
@@ -922,10 +928,11 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string xpathText = attributes.getValue("", "test");
-                string xmlBase = attributes.getValue(Saxon.Hej.lib.NamespaceConstant.XML, "base");
-                string defaultNamespace = attributes.getValue("", "defaultNamespace");
-                string sweep = attributes.getValue("", "sweep");
+                string xpathText = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "test");
+                string xmlBase = attributes.getValue(Saxon.Hej.om.NamespaceUri.XML, "base");
+                string defaultNamespace = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "defaultNamespace");
+                Saxon.Hej.om.NamespaceUri defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.of(defaultNamespace);
+                string sweep = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "sweep");
                 Saxon.Hej.sxpath.XPathEvaluator evaluator;
                 if ((container is Saxon.Eej.ee.schema.UserComplexType)) {
                     evaluator = new Saxon.Eej.ee.schema.sdoc.XSDAssert.CustomizedXPath(loader.config);
@@ -935,13 +942,13 @@ namespace Saxon.Eej.ee.schema {
                 Saxon.Hej.sxpath.IndependentContext env = (Saxon.Hej.sxpath.IndependentContext)(evaluator.getStaticContext());
                 env.setNamespaceResolver(Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
                 env.setBaseURI(xmlBase);
-                env.setDefaultElementNamespace(defaultNamespace);
+                env.setDefaultElementNamespace(defaultNamespaceUri);
                 env.getPackageData().setLocalLicenseId(loader.schema.getLocalLicenseId());
                 env.setSchemaAware(true);
                 bool isSimple = (((container is Saxon.Eej.ee.schema.UserSimpleType)) || (((container is Saxon.Eej.ee.schema.UserComplexType) && ((Saxon.Eej.ee.schema.UserComplexType)(container)).isSimpleContent())));
                 Saxon.Hej.sxpath.XPathVariable valueVariable = null;
                 if (((isSimple || (container is Saxon.Eej.ee.schema.PreprocessFacet)) || xpathText.Contains("$value"))) {
-                    valueVariable = env.declareVariable("", "value");
+                    valueVariable = env.declareVariable(Saxon.Hej.om.NamespaceUri.NULL, "value");
                 }
                 Saxon.Hej.sxpath.XPathExpression condition;
                 try {
@@ -987,8 +994,8 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string mode = attributes.getValue("", "mode");
-                string wildcardRef = attributes.getValue("", "wildcard");
+                string mode = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "mode");
+                string wildcardRef = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "wildcard");
                 if (mode.Equals("suffix")) {
                     loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(container, wildcardRef, FIXUP_COMPLEX_TYPE_OPEN_CONTENT_SUFFIX));
                 } else {
@@ -1018,7 +1025,7 @@ namespace Saxon.Eej.ee.schema {
                         throw new Saxon.Ejava.lang.IllegalArgumentException(container.GetType().Name);
                     }
                 }
-                string @ref = attributes.getValue("", "ref");
+                string @ref = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
                 loader.fixups.Add(new Saxon.Eej.ee.schema.SchemaModelLoader.Fixup(awc, @ref, FIXUP_ATTRIBUTE_WILDCARD_REF));
             }
             public override void processElementEnd() {
@@ -1042,7 +1049,7 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                lexicalForm = attributes.getValue("", "lexicalForm");
+                lexicalForm = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "lexicalForm");
             }
             public override void processElementEnd() {
                 Saxon.Hej.om.AtomicSequence v;
@@ -1072,15 +1079,16 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string type = attributes.getValue("", "type");
-                Saxon.Hej.type.BuiltInAtomicType t = (Saxon.Hej.type.BuiltInAtomicType)(loader.config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.SCHEMA, type.Substring(1))));
-                string value = attributes.getValue("", "value");
-                string @namespace = attributes.getValue("", "namespace");
+                string type = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "type");
+                Saxon.Hej.type.BuiltInAtomicType t = (Saxon.Hej.type.BuiltInAtomicType)(loader.config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.SCHEMA, type.Substring(1))));
+                string value = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "value");
+                string namespaceAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "namespace");
                 Saxon.Hej.value.AtomicValue typedValue;
                 try {
-                    if ((@namespace == null)) {
+                    if ((namespaceAtt == null)) {
                         typedValue = ((/*1430*/Saxon.Hej.value.AtomicValue)t.getTypedValue(Saxon.Hej.str.StringView.tidy(value), null, loader.config.getConversionRules()).head());
                     } else {
+                        Saxon.Hej.om.NamespaceUri @namespace = Saxon.Hej.om.NamespaceUri.of(namespaceAtt);
                         string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(value);
                         if (t.Equals(Saxon.Hej.type.BuiltInAtomicType.QNAME)) {
                             typedValue = new Saxon.Hej.value.QNameValue(parts[0], @namespace, parts[1]);
@@ -1110,41 +1118,41 @@ namespace Saxon.Eej.ee.schema {
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
                 Saxon.Eej.ee.schema.Wildcard wildcard = new Saxon.Eej.ee.schema.Wildcard();
                 wildcard.setConfiguration((Saxon.Eej.config.EnterpriseConfiguration)(loader.getConfiguration()));
-                string id = attributes.getValue("", "id");
+                string id = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
                 if ((id != null)) {
                     Saxon.Impl.Helpers.MapUtils.Put(loader.components, id, wildcard);
                 }
-                string processContents = attributes.getValue("", "processContents");
+                string processContents = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "processContents");
                 wildcard.setProcessContents(processContents);
-                string constraint = attributes.getValue("", "constraint");
+                string constraint = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "constraint");
                 switch (constraint) {
                   case "any":
                     break ;
                   case "not":
                     {
-                        string namespaces = attributes.getValue("", "namespaces");
+                        string namespaces = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "namespaces");
                         Saxon.Ejava.util.StringTokenizer st = new Saxon.Ejava.util.StringTokenizer(namespaces, " \t\n\r");
                         while (st.hasMoreTokens()) {
                             string ns = st.nextToken();
-                            wildcard.addDisallowedNamespace((ns.Equals("##local") ? "" : ns));
+                            wildcard.addDisallowedNamespace((ns.Equals("##local") ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(ns)));
                         }
                         break ;
                     }
                   case "enumeration":
                     {
                         wildcard.setNoNamespacesAllowed();
-                        string namespaces = attributes.getValue("", "namespaces");
+                        string namespaces = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "namespaces");
                         Saxon.Ejava.util.StringTokenizer st = new Saxon.Ejava.util.StringTokenizer(namespaces, " \t\n\r");
                         while (st.hasMoreTokens()) {
                             string ns = st.nextToken();
-                            wildcard.addAllowedNamespace((ns.Equals("##local") ? "" : ns));
+                            wildcard.addAllowedNamespace((ns.Equals("##local") ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(ns)));
                         }
                         break ;
                     }
                   default:
                     throw new Saxon.Hej.type.SchemaException(("Unknown wildcard constraint "+constraint));
                 }
-                string disallowedQNames = attributes.getValue("", "notQName");
+                string disallowedQNames = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "notQName");
                 if ((disallowedQNames != null)) {
                     Saxon.Hej.om.NamePool pool = loader.getNamePool();
                     Saxon.Ejava.util.StringTokenizer st = new Saxon.Ejava.util.StringTokenizer(disallowedQNames, " \r\t\n");
@@ -1203,21 +1211,21 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string stateNumber = attributes.getValue("", "nr");
+                string stateNumber = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "nr");
                 Saxon.Eej.ee.schema.fsa.FiniteStateMachine fsm = fsmHandler.getFiniteStateMachine();
                 if (stateNumber.Equals("0")) {
                     state = (Saxon.Eej.ee.schema.fsa.DeterminizedState)(fsm.getInitialState());
                 } else {
                     state = new Saxon.Eej.ee.schema.fsa.DeterminizedState(fsm);
                 }
-                string isFinal = attributes.getValue("", "final");
+                string isFinal = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "final");
                 state.setFinalState(toBoolean(isFinal));
-                string min = attributes.getValue("", "minOccurs");
-                string max = attributes.getValue("", "maxOccurs");
+                string min = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "minOccurs");
+                string max = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "maxOccurs");
                 if (((min != null) && (max != null))) {
                     state.setLimits(Saxon.Impl.Helpers.Utils.ParseInt(min), (max.Equals("unbounded") ? -1 : Saxon.Impl.Helpers.Utils.ParseInt(max)));
                 }
-                string afterMax = attributes.getValue("", "afterMax");
+                string afterMax = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "afterMax");
                 if ((afterMax != null)) {
                     Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge leavingEdge = new Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge();
                     leavingEdge.machine = fsm;
@@ -1242,8 +1250,8 @@ namespace Saxon.Eej.ee.schema {
                 return null;
             }
             public override void processElementStart(string localName, Saxon.Hej.om.AttributeMap attributes) {
-                string term = attributes.getValue("", "term");
-                int targetState = Saxon.Impl.Helpers.Utils.ParseInt(attributes.getValue("", "to"));
+                string term = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "term");
+                int targetState = Saxon.Impl.Helpers.Utils.ParseInt(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "to"));
                 Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge pe = new Saxon.Eej.ee.schema.SchemaModelLoader.PendingEdge();
                 pe.machine = fsm.getFiniteStateMachine();
                 pe.fromState = state.getStateNumber();

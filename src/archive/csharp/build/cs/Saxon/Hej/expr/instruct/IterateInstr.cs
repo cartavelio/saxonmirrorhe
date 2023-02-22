@@ -132,45 +132,6 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, exp);
             return exp;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            Saxon.Hej.om.FocusIterator iter = c2.trackFocus(getSelectExpression().iterate(context));
-            c2.setCurrentTemplateRule(null);
-            Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
-            pipe.setXPathContext(c2);
-            bool tracing = context.getController().isTracing();
-            Saxon.Hej.lib.TraceListener listener = (tracing ? context.getController().getTraceListener() : null);
-            getInitiallyExp().process(output, context);
-            while (true) {
-                Saxon.Hej.om.Item item = iter.next();
-                if ((item != null)) {
-                    if (tracing) {
-                        listener.startCurrentItem(item);
-                    }
-                    getActionExpression().process(output, c2);
-                    if (tracing) {
-                        listener.endCurrentItem(item);
-                    }
-                    Saxon.Hej.expr.TailCallLoop.TailCallInfo comp = c2.getTailCallInfo();
-                    if ((comp == null)) {
-                    } else {
-                        if ((comp is Saxon.Hej.expr.instruct.BreakInstr)) {
-                            iter.close();
-                            return null;
-                        } else {
-                        }
-                    }
-                } else {
-                    Saxon.Hej.expr.XPathContextMinor c3 = context.newMinorContext();
-                    c3.setCurrentIterator(null);
-                    getOnCompletion().process(output, c3);
-                    break ;
-                }
-            }
-            pipe.setXPathContext(context);
-            return null;
-        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("iterate", this);
             @out.setChildRole("select");
@@ -184,6 +145,61 @@ namespace Saxon.Hej.expr.instruct {
             @out.setChildRole("action");
             getActionExpression().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.IterateInstr.IterateElaborator();
+        }
+        public class IterateElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.IterateInstr expr = (Saxon.Hej.expr.instruct.IterateInstr)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PushEvaluator initial = expr.getInitiallyExp().makeElaborator().elaborateForPush();
+                Saxon.Hej.expr.elab.PushEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPush();
+                Saxon.Hej.expr.elab.PushEvaluator completion = expr.getOnCompletion().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                    c2.setOrigin(expr);
+                    Saxon.Hej.om.FocusIterator iter = c2.trackFocus(/*Delegate.iterate()*/select(context));
+                    c2.setCurrentTemplateRule(null);
+                    Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
+                    pipe.setXPathContext(c2);
+                    bool tracing = context.getController().isTracing();
+                    Saxon.Hej.lib.TraceListener listener = (tracing ? context.getController().getTraceListener() : null);
+                    Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/initial(output, context);
+                    Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                    while (true) {
+                        Saxon.Hej.om.Item item = iter.next();
+                        if ((item != null)) {
+                            if (tracing) {
+                                listener.startCurrentItem(item);
+                            }
+                            tc = /*Delegate.processLeavingTail()*/action(output, c2);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                            if (tracing) {
+                                listener.endCurrentItem(item);
+                            }
+                            Saxon.Hej.expr.TailCallLoop.TailCallInfo comp = c2.getTailCallInfo();
+                            if ((comp == null)) {
+                            } else {
+                                if ((comp is Saxon.Hej.expr.instruct.BreakInstr)) {
+                                    iter.close();
+                                    return null;
+                                } else {
+                                }
+                            }
+                        } else {
+                            Saxon.Hej.expr.XPathContextMinor c3 = context.newMinorContext();
+                            c3.setCurrentIterator(null);
+                            tc = /*Delegate.processLeavingTail()*/completion(output, c3);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                            break ;
+                        }
+                    }
+                    pipe.setXPathContext(context);
+                    return null;
+                } ;
+            }
+        
         }
     
     }

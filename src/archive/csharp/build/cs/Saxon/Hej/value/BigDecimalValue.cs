@@ -13,9 +13,11 @@ namespace Saxon.Hej.value {
         public static readonly Saxon.Hej.value.BigDecimalValue TWO = new Saxon.Hej.value.BigDecimalValue(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(2));
         public static readonly Saxon.Hej.value.BigDecimalValue THREE = new Saxon.Hej.value.BigDecimalValue(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(3));
         public static readonly Singulink.Numerics.BigDecimal MAX_INT = Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(System.Int32.MaxValue);
-        public BigDecimalValue(Singulink.Numerics.BigDecimal value)  {
+        public BigDecimalValue(Singulink.Numerics.BigDecimal value) : base (Saxon.Hej.type.BuiltInAtomicType.DECIMAL) {
             this.value = value;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DECIMAL;
+        }
+        public BigDecimalValue(Singulink.Numerics.BigDecimal value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
+            this.value = value;
         }
         private static readonly Saxon.Ejava.util.regex.Pattern decimalPattern = Saxon.Ejava.util.regex.Pattern.compile("(\\-|\\+)?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))");
         public static Saxon.Hej.type.ConversionResult makeDecimalValue(string @in, bool validate) {
@@ -115,7 +117,7 @@ namespace Saxon.Hej.value {
             string trimmed = Saxon.Hej.value.Whitespace.trim(@in).ToString();
             return decimalPattern.matcher(trimmed).matches();
         }
-        public BigDecimalValue(double @in)  {
+        public BigDecimalValue(double @in) : base (Saxon.Hej.type.BuiltInAtomicType.DECIMAL) {
             try {
                 Singulink.Numerics.BigDecimal d = Singulink.Numerics.BigDecimal.FromDouble(@in, Singulink.Numerics.FloatConversion.Exact);
                 value = d;
@@ -124,19 +126,15 @@ namespace Saxon.Hej.value {
                 e.setErrorCode("FOCA0002");
                 throw e.makeException();
             }
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DECIMAL;
         }
-        public BigDecimalValue(long @in)  {
+        public BigDecimalValue(long @in) : base (Saxon.Hej.type.BuiltInAtomicType.DECIMAL) {
             value = Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(@in);
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DECIMAL;
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
             if ((typeLabel.getPrimitiveItemType() == Saxon.Hej.type.BuiltInAtomicType.INTEGER)) {
                 return Saxon.Hej.value.IntegerValue.makeIntegerValue(((System.Numerics.BigInteger)value)).copyAsSubType(typeLabel);
             } else {
-                Saxon.Hej.value.BigDecimalValue v = new Saxon.Hej.value.BigDecimalValue(value);
-                v.typeLabel = typeLabel;
-                return v;
+                return new Saxon.Hej.value.BigDecimalValue(value, typeLabel);
             }
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {

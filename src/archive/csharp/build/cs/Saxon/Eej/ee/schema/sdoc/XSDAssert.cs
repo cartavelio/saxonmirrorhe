@@ -13,45 +13,49 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.AttributeMap atts = attributes();
             string[] allowed = {"id", "test", "xpathDefaultNamespace"};
             allowAttributes(atts, allowed);
-            string defaultNamespace = atts.getValue("", "xpathDefaultNamespace");
+            string defaultNamespace = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xpathDefaultNamespace");
             if ((defaultNamespace == null)) {
                 defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
             }
+            Saxon.Hej.om.NamespaceUri defaultNamespaceUri;
             switch (defaultNamespace) {
               case "##defaultNamespace":
-                defaultNamespace = getURIForPrefix("", true);
+                defaultNamespaceUri = getURIForPrefix("", true);
                 break ;
               case "##targetNamespace":
-                defaultNamespace = getXSDSchema().getTargetNamespace();
+                defaultNamespaceUri = getXSDSchema().getTargetNamespace();
                 break ;
               case "##local":
-                defaultNamespace = "";
+                defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.NULL;
+                break ;
+              default:
+                defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.of(defaultNamespace);
                 break ;
             }
             bool streamable = false;
-            string streamableAtt = atts.getValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "streamable");
+            string streamableAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.SAXON, "streamable");
             if ((streamableAtt != null)) {
                 streamable = parseBooleanAttribute("streamable", streamableAtt);
             }
-            string xpath = atts.getValue("", "test");
+            string xpath = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "test");
             if ((xpath == null)) {
                 missingAttribute("test");
                 xpath = ".";
             }
             Saxon.Hej.Configuration config = getConfiguration();
             Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext env = new Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext(this);
-            env.setDefaultElementNamespace(defaultNamespace);
+            env.setDefaultElementNamespace(defaultNamespaceUri);
             env.setNamespaceResolver(makeNamespaceContext());
             env.setBaseURI(getBaseURI());
             env.setRequiredContextItemType(Saxon.Hej.pattern.NodeKindTest.ELEMENT);
             env.setContextItemParentless(true);
-            env.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(this, new Saxon.Hej.om.StructuredQName("", "", "test")));
+            env.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(this, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "test")));
             int xpathVersion = config.getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSD);
             if (getXSDSchema().getAllowedExtensions().Contains("any-xpath-version")) {
                 xpathVersion = 31;
             }
             env.setXPathLanguageLevel(xpathVersion);
-            Saxon.Hej.sxpath.XPathVariable valueVariable = env.declareVariable("", "value");
+            Saxon.Hej.sxpath.XPathVariable valueVariable = env.declareVariable(Saxon.Hej.om.NamespaceUri.NULL, "value");
             System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.sxpath.XPathVariable> parameters = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.sxpath.XPathVariable>();
             foreach (Saxon.Hej.expr.instruct.GlobalParam param in getXSDSchema().getGlobalParams()) {
                 Saxon.Hej.sxpath.XPathVariable var = env.declareVariable(param.getVariableQName());
@@ -77,7 +81,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             assertion = new Saxon.Eej.ee.schema.Assertion(getSchema().getConfiguration(), condition, valueVariable, parameters, xpath);
             assertion.setReturnsFailingNodes(returnFailingNodes);
             assertion.setStaticContext(env);
-            string message = atts.getValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "message");
+            string message = atts.getValue(Saxon.Hej.om.NamespaceUri.SAXON, "message");
             assertion.setMessage(message);
             if (streamable) {
                 if (xpath.Contains("$value")) {

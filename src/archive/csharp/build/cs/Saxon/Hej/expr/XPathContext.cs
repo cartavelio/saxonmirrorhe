@@ -13,6 +13,7 @@ namespace Saxon.Hej.expr {
         Saxon.Hej.om.NamePool getNamePool();
         void setCaller(Saxon.Hej.expr.XPathContext caller);
         Saxon.Hej.expr.XPathContext getCaller();
+        Saxon.Hej.expr.XPathContextMajor getMajorContext();
         Saxon.Hej.om.FocusIterator trackFocus(Saxon.Hej.om.SequenceIterator iter);
         void setCurrentIterator(Saxon.Hej.om.FocusIterator iter);
         Saxon.Hej.om.FocusIterator getCurrentIterator();

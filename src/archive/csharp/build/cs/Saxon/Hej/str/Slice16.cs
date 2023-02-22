@@ -33,7 +33,7 @@ namespace Saxon.Hej.str {
             }
             char b = (char)(((codePoint&unchecked((int)0xffff))));
             int limit = end;
-            for (int i = (start+System.Math.Max(requireInt(from), 0)); (i<limit); i++) {
+            for (int i = (start+requireNonNegativeInt(from)); (i<limit); i++) {
                 if ((chars[i] == b)) {
                     return (i-start);
                 }
@@ -41,7 +41,11 @@ namespace Saxon.Hej.str {
             return -1;
         }
         public override int codePointAt(long index) {
-            return (chars[(start+requireInt(index))]);
+            int index32 = requireInt(index);
+            if (((index32<0) || (index32>=length32()))) {
+                throw new System.IndexOutOfRangeException();
+            }
+            return (chars[(start+index32)]);
         }
         public override Saxon.Hej.str.UnicodeString substring(long start, long end) {
             checkSubstringBounds(start, end);
@@ -73,8 +77,13 @@ namespace Saxon.Hej.str {
                 target[j++] = (byte)(((c&unchecked((int)0xff))));
             }
         }
+        internal override void copy32bit(int[] target, int offset) {
+            for (int i = start, j = offset; (i<end); ) {
+                target[j++] = chars[i++];
+            }
+        }
         public override Saxon.Hej.z.IntIterator codePoints() {
-            return new Inner_IntIterator_38(this);
+            return new Inner_IntIterator_43(this);
         }
         public override int GetHashCode() {
             if ((cachedHash != 0)) {
@@ -91,9 +100,9 @@ namespace Saxon.Hej.str {
             return new string(chars, start, (end-start));
         }
     
-        private class Inner_IntIterator_38 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_43 : Saxon.Hej.z.IntIterator {
             private readonly Slice16 outerInstance;
-            public Inner_IntIterator_38(Slice16 outerInstance) {
+            public Inner_IntIterator_43(Slice16 outerInstance) {
                 this.outerInstance = outerInstance;
                 i = outerInstance.start;
             }

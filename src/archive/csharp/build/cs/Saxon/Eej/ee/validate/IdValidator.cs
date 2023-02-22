@@ -8,7 +8,7 @@ namespace Saxon.Eej.ee.validate {
         private readonly System.Collections.Generic.HashSet<string> idValues = new System.Collections.Generic.HashSet<string>(100);
         private readonly System.Collections.Generic.HashSet<string> unresolvedRefs = new System.Collections.Generic.HashSet<string>(100);
         private Saxon.Eej.ee.validate.IdValidator.IdValueChecker currentElementChecker = null;
-        private readonly Saxon.Hej.str.UnicodeBuilder buffer = new Saxon.Hej.str.UnicodeBuilder();
+        private readonly Saxon.Hej.str.UnicodeBuilder buffer = new Saxon.Hej.str.UnicodeBuilder(32);
         private Saxon.Hej.s9api.Location textLocationId = Saxon.Hej.expr.parser.Loc.NONE;
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.type.SchemaType,Saxon.Eej.ee.validate.IdValidator.IdValueChecker> checkerMap = new System.Collections.Generic.Dictionary<Saxon.Hej.type.SchemaType, Saxon.Eej.ee.validate.IdValidator.IdValueChecker>(10);
         public IdValidator(Saxon.Hej.@event.Receiver next) : base (next) {
@@ -132,7 +132,7 @@ namespace Saxon.Eej.ee.validate {
                 } else {
                     Saxon.Hej.expr.number.Numberer_en num = new Saxon.Hej.expr.number.Numberer_en();
                     num.setTensUnitsSeparatorCardinal("-");
-                    howMany = (" are "+num.toWords(count, Saxon.Hej.expr.number.AbstractNumberer.LOWER_CASE));
+                    howMany = (" are "+num.toWords("", count, Saxon.Hej.expr.number.AbstractNumberer.LOWER_CASE));
                     value = "values";
                 }
                 Saxon.Ejava.lang.StringBuilder err = new Saxon.Ejava.lang.StringBuilder((((("There"+howMany)+" IDREF ")+value)+" with no corresponding ID"));

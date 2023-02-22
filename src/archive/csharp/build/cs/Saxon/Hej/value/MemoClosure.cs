@@ -4,10 +4,17 @@ using System.Linq;
 namespace Saxon.Hej.value {
     public class MemoClosure : Saxon.Hej.value.Closure, Saxon.Hej.expr.ContextOriginator {
         private Saxon.Hej.om.Sequence sequence;
-        public MemoClosure()  {
+        public MemoClosure(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.elab.PullEvaluator inputEvaluator, Saxon.Hej.expr.XPathContext context)  {
+            Saxon.Hej.trace.Instrumentation.count("MemoClosure(X)");
+            setInputEvaluator(inputEvaluator);
+            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+            c2.setOrigin(this);
+            setSavedXPathContext(c2);
+            saveContext(expr, context);
         }
         public MemoClosure(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context)  {
-            setExpression(expr);
+            Saxon.Hej.trace.Instrumentation.count("MemoClosure(X)");
+            setInputEvaluator(expr.makeElaborator().elaborateForPull());
             Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
             c2.setOrigin(this);
             setSavedXPathContext(c2);
@@ -23,12 +30,17 @@ namespace Saxon.Hej.value {
         }}
         private void makeSequence() {
             if ((sequence == null)) {
-                inputIterator = expression.iterate(savedXPathContext);
-                inputIterator.discharge();
+                inputIterator = /*Delegate.iterate()*/inputEvaluator(savedXPathContext);
                 if (((inputIterator is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(inputIterator)).isActuallyGrounded())) {
                     sequence = ((Saxon.Hej.tree.iter.GroundedIterator)(inputIterator)).materialize();
+                    if ((learningEvaluator != null)) {
+                        learningEvaluator.reportCompletion(serialNumber);
+                    }
                 } else {
                     sequence = Saxon.Hej.om.SequenceTool.toMemoSequence(inputIterator);
+                    if (((sequence is Saxon.Hej.om.MemoSequence) && (learningEvaluator != null))) {
+                        ((Saxon.Hej.om.MemoSequence)(sequence)).setLearningEvaluator(learningEvaluator, serialNumber);
+                    }
                 }
             }
         }

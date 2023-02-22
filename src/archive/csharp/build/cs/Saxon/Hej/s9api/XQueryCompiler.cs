@@ -106,7 +106,7 @@ namespace Saxon.Hej.s9api {
             return ((languageVersion == 40) ? "4.0" : "3.1");
         }
         public void declareNamespace(string prefix, string uri) {
-            staticQueryContext.declareNamespace(prefix, uri);
+            staticQueryContext.declareNamespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri));
         }
         public void declareDefaultCollation(string uri) {
             staticQueryContext.declareDefaultCollation(uri);

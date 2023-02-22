@@ -32,23 +32,24 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.expr.PackageData pd = getRetainedStaticContext().getPackageData();
             if ((Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "strip-space") == null)) {
                 if ((pd is Saxon.Hej.style.StylesheetPackage)) {
-                    parseOptions.setSpaceStrippingRule(((Saxon.Hej.style.StylesheetPackage)(pd)).getSpaceStrippingRule());
+                    parseOptions = parseOptions.withSpaceStrippingRule(((Saxon.Hej.style.StylesheetPackage)(pd)).getSpaceStrippingRule());
                     if (((Saxon.Hej.style.StylesheetPackage)(pd)).isStripsTypeAnnotations()) {
                         s = config.getAnnotationStripper(s);
                     }
                 } else {
-                    parseOptions.setSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
+                    parseOptions = parseOptions.withSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
                 }
             }
-            parseOptions.setErrorReporter(context.getController().getErrorReporter());
-            setXMLReader(config, parseOptions);
+            parseOptions = parseOptions.withErrorReporter(context.getController().getErrorReporter());
+            parseOptions = setXMLReader(config, parseOptions);
             s.setPipelineConfiguration(b.getPipelineConfiguration());
             Saxon.Hej.@event.Sender.send(source, s, parseOptions);
             Saxon.Hej.om.NodeInfo node = b.getCurrentRoot();
             b.reset();
             return node;
         }
-        protected internal void setXMLReader(Saxon.Hej.Configuration config, Saxon.Hej.lib.ParseOptions source) {
+        protected internal Saxon.Hej.lib.ParseOptions setXMLReader(Saxon.Hej.Configuration config, Saxon.Hej.lib.ParseOptions source) {
+            return source;
         }
     
     }

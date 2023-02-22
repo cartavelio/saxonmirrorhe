@@ -35,10 +35,10 @@ namespace Saxon.Hej.expr {
             return c;
         }
         public virtual Saxon.Hej.expr.instruct.ParameterSet getLocalParameters() {
-            return getCaller().getLocalParameters();
+            return getMajorContext().getLocalParameters();
         }
         public virtual Saxon.Hej.expr.instruct.ParameterSet getTunnelParameters() {
-            return getCaller().getTunnelParameters();
+            return getMajorContext().getTunnelParameters();
         }
         public Saxon.Hej.Controller getController() {
             return controller;
@@ -52,9 +52,16 @@ namespace Saxon.Hej.expr {
         public Saxon.Hej.expr.XPathContext getCaller() {
             return caller;
         }
+        public Saxon.Hej.expr.XPathContextMajor getMajorContext() {
+            Saxon.Hej.expr.XPathContext c = this;
+            while (((c != null) && !(((c is Saxon.Hej.expr.XPathContextMajor))))) {
+                c = c.getCaller();
+            }
+            return (Saxon.Hej.expr.XPathContextMajor)(c);
+        }
         public void setCurrentIterator(Saxon.Hej.om.FocusIterator iter) {
             currentIterator = iter;
-            last = new Saxon.Hej.expr.XPathContextMinor.LastValue(-1);
+            last = null;
         }
         public Saxon.Hej.om.FocusIterator trackFocus(Saxon.Hej.om.SequenceIterator iter) {
             System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> factory = controller.getFocusTrackerFactory(false);
@@ -75,7 +82,11 @@ namespace Saxon.Hej.expr {
             if ((currentIterator == null)) {
                 return null;
             }
-            return currentIterator.current();
+            if ((currentIterator is Saxon.Hej.om.FocusTrackingIterator)) {
+                return ((Saxon.Hej.om.FocusTrackingIterator)(currentIterator)).current();
+            } else {
+                return currentIterator.current();
+            }
         }
         public int getLast() {
             if ((currentIterator == null)) {
@@ -84,7 +95,7 @@ namespace Saxon.Hej.expr {
                 e.setErrorCode("XPDY0002");
                 throw new Saxon.Hej.trans.UncheckedXPathException(e);
             }
-            if ((last.value>=0)) {
+            if ((last != null)) {
                 return last.value;
             }
             try {
@@ -128,8 +139,8 @@ namespace Saxon.Hej.expr {
                 stackFrame = new Saxon.Hej.expr.StackFrame(null, Saxon.Hej.om.SequenceTool.makeSequenceArray(0));
             }
         }
-        public Saxon.Hej.om.Sequence evaluateLocalVariable(int slotnumber) {
-            return stackFrame.slots[slotnumber];
+        public Saxon.Hej.om.Sequence evaluateLocalVariable(int slot) {
+            return stackFrame.slots[slot];
         }
         public void setLocalVariable(int slotNumber, Saxon.Hej.om.Sequence value) {
             value = value.makeRepeatable();
@@ -144,7 +155,7 @@ namespace Saxon.Hej.expr {
             }
         }
         public virtual void waitForChildThreads() { lock(this) {
-            getCaller().waitForChildThreads();
+            getMajorContext().waitForChildThreads();
         }}
         public void setTemporaryOutputState(int temporary) {
             temporaryOutputState = temporary;
@@ -159,22 +170,22 @@ namespace Saxon.Hej.expr {
             return currentDestination;
         }
         public virtual int useLocalParameter(Saxon.Hej.om.StructuredQName parameterId, int slotNumber, bool isTunnel) {
-            return getCaller().useLocalParameter(parameterId, slotNumber, isTunnel);
+            return getMajorContext().useLocalParameter(parameterId, slotNumber, isTunnel);
         }
         public virtual Saxon.Hej.expr.Component.M getCurrentMode() {
-            return getCaller().getCurrentMode();
+            return getMajorContext().getCurrentMode();
         }
         public virtual Saxon.Hej.trans.rules.Rule getCurrentTemplateRule() {
             return null;
         }
         public virtual Saxon.Hej.expr.sort.GroupIterator getCurrentGroupIterator() {
-            return getCaller().getCurrentGroupIterator();
+            return getMajorContext().getCurrentGroupIterator();
         }
         public virtual Saxon.Hej.expr.sort.GroupIterator getCurrentMergeGroupIterator() {
-            return getCaller().getCurrentMergeGroupIterator();
+            return getMajorContext().getCurrentMergeGroupIterator();
         }
         public virtual Saxon.Hej.regex.RegexIterator getCurrentRegexIterator() {
-            return getCaller().getCurrentRegexIterator();
+            return getMajorContext().getCurrentRegexIterator();
         }
         public Saxon.Hej.value.DateTimeValue getCurrentDateTime() {
             return controller.getCurrentDateTime();
@@ -186,7 +197,7 @@ namespace Saxon.Hej.expr {
             return new Saxon.Hej.trace.ContextStackIterator(this);
         }
         public virtual Saxon.Hej.expr.Component getTargetComponent(int bindingSlot) {
-            return getCaller().getTargetComponent(bindingSlot);
+            return getMajorContext().getTargetComponent(bindingSlot);
         }
         protected internal class LastValue {
             public readonly int value;

@@ -12,9 +12,9 @@ namespace Saxon.Hej.functions.hof {
             }
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            return evalFoldRight((Saxon.Hej.om.Function)(arguments[2].head()), arguments[1].materialize(), arguments[0].iterate(), context);
+            return evalFoldRight((Saxon.Hej.om.FunctionItem)(arguments[2].head()), arguments[1].materialize(), arguments[0].iterate(), context);
         }
-        private Saxon.Hej.om.Sequence evalFoldRight(Saxon.Hej.om.Function function, Saxon.Hej.om.Sequence zero, Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.XPathContext context) {
+        private Saxon.Hej.om.Sequence evalFoldRight(Saxon.Hej.om.FunctionItem function, Saxon.Hej.om.Sequence zero, Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.SequenceIterator reverseBase = Saxon.Hej.functions.Reverse.getReverseIterator(@base);
             Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[2];
             Saxon.Hej.om.Item item;

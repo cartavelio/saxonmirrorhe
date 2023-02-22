@@ -238,6 +238,18 @@ namespace Saxon.Hej.expr.compat {
         protected internal override string tag() {
             return "gc10";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.compat.GeneralComparison10.GeneralComparison10Elaborator();
+        }
+        private class GeneralComparison10Elaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.compat.GeneralComparison10 expr = (Saxon.Hej.expr.compat.GeneralComparison10)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PullEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                return context => expr.effectiveBooleanValue(/*Delegate.iterate()*/eval0(context), /*Delegate.iterate()*/eval1(context), context);
+            }
+        
+        }
     
     }
 }

@@ -9,22 +9,21 @@ namespace Saxon.Hej.query {
         private bool resolving = false;
         public UnboundFunctionLibrary()  {
         }
-        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] arguments, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] arguments, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
             if (resolving) {
                 return null;
             }
             if ((!(reasons.Count==0) && reasons[0].StartsWith("Cannot call the private XQuery function"))) {
                 return null;
             }
-            Saxon.Hej.expr.UserFunctionCall ufc = new Saxon.Hej.expr.UserFunctionCall();
-            ufc.setFunctionName(functionName.getComponentName());
-            ufc.setArguments(arguments);
+            Saxon.Hej.query.UnboundFunctionLibrary.UnboundFunctionCallDetails details = new Saxon.Hej.query.UnboundFunctionLibrary.UnboundFunctionCallDetails(functionName, arguments, keywords, env);
+            Saxon.Hej.expr.UserFunctionCall ufc = new Saxon.Hej.expr.UserFunctionCall(details);
             unboundFunctionReferences.Add(ufc);
             correspondingStaticContext.Add(env);
             correspondingReasons.Add(reasons);
             return ufc;
         }
-        public Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+        public Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
             if (resolving) {
                 return null;
             }
@@ -49,20 +48,17 @@ namespace Saxon.Hej.query {
                         continue ;
                     }
                     correspondingStaticContext[i] = null;
-                    Saxon.Hej.om.StructuredQName q = ufc.getFunctionName();
-                    int arity = ufc.getArity();
-                    Saxon.Hej.query.XQueryFunction fd = lib.getDeclaration(q, arity);
-                    if ((fd != null)) {
-                        fd.registerReference(ufc);
-                        ufc.setStaticType(fd.getResultType());
+                    Saxon.Hej.query.UnboundFunctionLibrary.UnboundFunctionCallDetails details = ufc.getUnboundCallDetails();
+                    bool success = lib.bindUnboundFunctionCall(ufc, new System.Collections.Generic.List<string>());
+                    if (success) {
                     } else {
-                        Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder((((("Cannot find a "+arity)+"-argument function named ")+q.getEQName())+"()"));
+                        Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder((((("Cannot find a "+details.arguments.Length)+"-argument function named ")+details.functionName.getComponentName().getEQName())+"()"));
                         System.Collections.Generic.IList<string> reasons = correspondingReasons[i];
                         foreach (string reason in reasons) {
                             sb.append(". ").append(reason);
                         }
                         if (reasons.Count==0) {
-                            string supplementary = Saxon.Hej.expr.parser.XPathParser.getMissingFunctionExplanation(q, config);
+                            string supplementary = Saxon.Hej.expr.parser.XPathParser.getMissingFunctionExplanation(details.functionName.getComponentName(), config);
                             if ((supplementary != null)) {
                                 sb.append(". ").append(supplementary);
                             }
@@ -99,6 +95,19 @@ namespace Saxon.Hej.query {
             qfl.correspondingStaticContext = new System.Collections.Generic.List<Saxon.Hej.expr.StaticContext>(correspondingStaticContext);
             qfl.resolving = resolving;
             return qfl;
+        }
+        public class UnboundFunctionCallDetails {
+            public Saxon.Hej.trans.SymbolicName.F functionName;
+            public Saxon.Hej.expr.Expression[] arguments;
+            public System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords;
+            public Saxon.Hej.expr.StaticContext env;
+            public UnboundFunctionCallDetails(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] arguments, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env)  {
+                this.functionName = functionName;
+                this.arguments = arguments;
+                this.keywords = keywords;
+                this.env = env;
+            }
+        
         }
     
         /* Expanding default method setConfiguration from interface FunctionLibrary */

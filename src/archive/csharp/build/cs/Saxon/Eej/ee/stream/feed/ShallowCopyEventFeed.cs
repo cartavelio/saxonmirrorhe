@@ -21,7 +21,7 @@ namespace Saxon.Eej.ee.stream.feed {
                 Saxon.Hej.type.SchemaType schemaType = (schemaAware ? Saxon.Hej.type.AnyType.getInstance() : Saxon.Hej.type.Untyped.getInstance());
                 receiver.startElement(Saxon.Hej.om.NameOfNode.makeName(node), schemaType, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
                 foreach (Saxon.Hej.om.NamespaceBinding ns in node.getAllNamespaces()) {
-                    receiver.@namespace(ns.getPrefix(), ns.getURI(), Saxon.Hej.@event.ReceiverOption.NONE);
+                    receiver.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
                 }
                 Saxon.Hej.tree.iter.AxisIterator attributes = node.iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE);
                 if ((attributes != Saxon.Hej.tree.iter.EmptyIterator.ofNodes())) {

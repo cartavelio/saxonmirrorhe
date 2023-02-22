@@ -283,8 +283,16 @@ public abstract class FeatureKeys
     /// </summary>
     /// <remarks>
     ///            <para>If set at stylesheet compile time, the feature is statically disabled. If set at 
-    ///                run-time it is dynamically disabled. (These terms are defined in the XSLT 3.0 spec.) 
-    ///                The feature is always disabled (statically) in Saxon-HE.</para>
+    ///                run-time it is dynamically disabled. (These terms are defined in the XSLT 3.0 spec.)
+    ///                By default, the feature is enabled.</para>
+    ///            <para><i>The XSLT 3.0 specification requires conformant processors to provide a way of
+    ///                disabling <code>xsl:evaluate</code>. This shouldn't be taken as meaning that 
+    ///                <code>xsl:evaluate</code> poses particular security risks. The main reason for disabling it
+    ///                is if you want to carry out static analysis or inspection of stylesheet code to see what 
+    ///                features it uses. But if you're doing such inspection, it's not difficult to check that
+    ///                <code>xsl:evaluate</code> is only being used to execute trusted code. Note also that
+    ///                <code>fn:transform()</code> can similarly be used to execute dynamically-constructed code,
+    ///                and there is no switch to disable that function.</i></para>
     ///        
     /// </remarks>
 
@@ -655,7 +663,7 @@ public abstract class FeatureKeys
     /// <remarks>
     ///            <para>There is a set of single-letter flags identifying particular optimizations:</para>
     ///            <list>
-    ///                <item>c: generate bytecode</item>
+    ///                <item>c: no longer used</item>
     ///                <item>e: cache regular expressions</item>
     ///                <item>f: inline functions</item>
     ///                <item>g: extract global variables</item>
@@ -762,7 +770,7 @@ public abstract class FeatureKeys
 
     /// <summary><para>At one time this property controlled how recoverable errors were handled
     ///            (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-    ///                specification, so the property is no longer used.</para>
+    ///            specification, so the property is now deprecated.</para>
     /// </summary>
 
     public const string RECOVERY_POLICY = 
@@ -773,7 +781,7 @@ public abstract class FeatureKeys
 
     /// <summary><para>At one time this property controlled how recoverable errors were handled
     ///                (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-    ///                specification, so the property is no longer used.</para>
+    ///                specification, so the property is now deprecated.</para>
     /// </summary>
 
     public const string RECOVERY_POLICY_NAME = 
@@ -1656,6 +1664,17 @@ public abstract class FeatureKeys
     ///            <para>This option can be set for a particular XSLT transformation. When the option is set
     ///                at the <code>Configuration</code> level (or on a <code>TransformerFactory</code>),
     ///                it acts as a default.</para>
+    ///            <para>Specifically, if the transformation is performed using the <code>transform()</code>
+    ///                method of class <code>net.sf.saxon.s9api.XsltTransformer</code>, then the transformation
+    ///                will proceed by calling the relevant named template, rather than by applying templates
+    ///                to the supplied source node. It will also affect other APIs built on top of the 
+    ///                <code>XsltTransformer</code>, notably the JAXP transformation interface, which in turn
+    ///                is used by many higher-level interfaces such as Ant. Indeed, the main purpose of this
+    ///                configuration option is to allow named-template stylesheet invocation using the JAXP 
+    ///                interface, which was designed without this feature in mind.</para>
+    ///            <para>This configuration option is ignored when using an <code>net.sf.saxon.s9api.Xslt30Transformer</code>,
+    ///                or other interfaces built on top of an <code>Xslt30Transformer</code>, for example the
+    ///                <code>net.sf.saxon.Transform</code> command line interface.</para>
     ///        
     /// </remarks>
 
@@ -1816,8 +1835,11 @@ public abstract class FeatureKeys
     /// </summary>
     /// <remarks>
     ///            <para>If this option is set, then <code>Location</code> objects held in the run-time expression tree may contain a link
-    ///                to an element node in the source stylesheet, enabling a user-written <code>ErrorListener</code> to produce
+    ///                to an element node in the source stylesheet, enabling a user-written <code>ErrorReporter</code> to produce
     ///                improved diagnostics. This may be an appropriate setting to use, for example, in an IDE.</para>
+    ///            <para>This setting can also be useful to get improved location information for compile-time errors in cases where reliable
+    ///               line numbers are not available for the source stylesheet. This might happen, for example, if the
+    ///               source stylesheet is preprocessed before compilation, or if it is retrieved from an XML database.</para>
     ///            <para>Links to source nodes are not retained in an exported SEF file, regardless of this setting.</para>
     ///        
     /// </remarks>

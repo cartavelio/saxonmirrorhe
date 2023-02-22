@@ -13,6 +13,7 @@ using Saxon.Hej.ma.map;
 using Saxon.Hej.om;
 using Saxon.Hej.value;
 using Saxon.Hej.expr;
+using Saxon.Hej.functions;
 using Saxon.Hej.serialize;
 using Saxon.Hej.trans;
 using Exception = System.Exception;
@@ -23,24 +24,24 @@ namespace Saxon.Api {
     /// items, each item being an atomic value, a node, or a function item.
     /// </summary>
     /// <remarks>
-    /// <para>An <c>XdmValue</c> is immutable.</para>
+    /// <para>An <c>XdmValue</c> is designed to be immutable.</para>
     /// <para>An <c>XdmValue</c> is indexed, so you can get the n'th item in the value (starting from zero) by
     /// writing <c>value[n]</c>. Alternatively, use the method <c>value.ItemAt(n)</c>.</para>
     /// <para>A sequence consisting of a single item <i>may</i> be represented
     /// as an instance of <see cref="XdmItem"/>, which is a subtype of <c>XdmValue</c>. However,
     /// there is no guarantee that all single-item sequences will be instances of
-    /// <c>XdmItem</c>: if you want to ensure this, use the <see cref="Simplify()"/> property.</para>
+    /// <c>XdmItem</c>: if you want to ensure this, use the <see cref="Simplify()"/> method.</para>
     /// <para>There are various ways of creating an <c>XdmValue</c>. To create an atomic
     /// value, use one of the constructors on <see cref="XdmAtomicValue"/> (which is a subtype of <c>XdmValue</c>).
     /// To construct an <see cref="XdmNode"/> (another subtype) by parsing an XML document, or by wrapping a DOM document,
     /// use a <see cref="DocumentBuilder"/>. To create a sequence of values, use the <see cref="Append(XdmValue)"/>
-    /// method on this class to form a list from individual items or sublists.</para>
+    /// method on this class to form a list from individual items or sub-lists.</para>
     /// <para>An <c>XdmValue</c> is also returned as the result of evaluating a query
     /// using the XQuery and XPath interfaces.</para>
     /// <para>The subtype <see cref="XdmEmptySequence"/> represents an empty sequence: an
     /// <c>XdmValue</c> of length zero. Again, there is no guarantee that every empty sequence
     /// will be represented as an instance of <c>XdmEmptySequence</c>, unless you use
-    /// the <c>Simplify()</c> method.</para>
+    /// the <see cref="Simplify()"/> method.</para>
     /// </remarks>
     [Serializable]
     public class XdmValue : IEnumerable<XdmItem> {
@@ -58,7 +59,7 @@ namespace Saxon.Api {
         public XdmValue(IEnumerator<XdmItem> items) {
             List<Item> list = new List<Item>();
             while (items.MoveNext()) {
-                list.Add((Item) items.Current.Unwrap());
+                list.Add((Item)items.Current.Unwrap());
             }
 
             value = SequenceExtent.makeSequenceExtent(list);
@@ -74,7 +75,7 @@ namespace Saxon.Api {
         public XdmValue(IEnumerable<XdmItem> items) {
             List<Item> list = new List<Item>();
             foreach (XdmItem c in items) {
-                list.Add((Item) c.Unwrap());
+                list.Add((Item)c.Unwrap());
             }
 
             value = SequenceExtent.makeSequenceExtent(list);
@@ -89,6 +90,39 @@ namespace Saxon.Api {
         /// is analogous to the <c>SelectMany</c> operation in C#, or to the "!" operator
         /// in XPath.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The following examples assume a <c>using static</c> declaration of the standard Steps:
+        /// <code>using static Saxon.Api.Steps;</code>
+        /// </para>
+        /// <list>
+        ///     <item><c>Select(Child())</c> returns a stream containing all children</item>
+        ///     <item><c>Select(Child("*"))</c> returns a stream containing all element children</item>
+        ///     <item><c>Select(Child("author"))</c> returns a stream containing all element children with
+        ///     local name "author" (regardless of namespace)</item>
+        ///     <item><c>Select(Child("http://my.ns/", "author"))</c> returns a stream containing all element children with
+        ///     local name "author" and namespace "http://my.ns/"</item>
+        ///     <item><c>Select(Descendant("author"))</c> returns a stream containing all element descendants with
+        ///     local name "author" (regardless of namespace)</item>
+        ///     <item><c>Select(Descendant("author").Then(Attribute("name"))</c> returns a stream containing the "name"
+        ///     attributes of "author" descendants</item>
+        ///     <item><c>Select(Path("//", "author", "@name"))</c> returns a stream containing the "name"
+        ///     attributes of "author" descendants</item>
+        ///     <item><c>Select(Child("author").Where(AttributeEq("firstName", "Jane"))</c> returns a stream
+        ///     containing all the "author" children having a "firstName" attribute whose value is "Jane"</item>
+        ///     <item><c>Select(Child("author").First())</c> returns the first "author" child
+        ///     (if there is one)</item>
+        ///     <item><c>Select(Child("author").Where(attributeEq("firstName", "Jane").Last())</c> returns 
+        ///     the last "author" child having a "firstName" attribute whose value is "Jane" (if there is one)</item>
+        /// </list>
+        ///
+        /// <para>In each of the above examples except the last two, the selected nodes are returned as an <c>Enumerable&lt;XdmNode></c>,
+        /// so they can be processed using a <c>foreach</c> statement.</para>
+        ///
+        /// <para>The <code>Select</code> method thus has comparable power to simple XPath expressions; but unlike
+        /// XPath expressions, there is no run-time overhead in parsing the XPath expression and developing an
+        /// execution plan.</para>
+        /// </remarks>
         /// <typeparam name="TInput">Input items to the <c>Step</c> function, which can be subclass of <c>XdmItem</c></typeparam>
         /// <typeparam name="TResult">Result items to the <c>Step</c> function, which can be subclass of <c>XdmItem</c></typeparam>
         /// <param name="step">The <c>Step</c> to be applied to the items in this value.</param>
@@ -99,13 +133,13 @@ namespace Saxon.Api {
             where TResult : XdmItem {
             foreach (XdmItem item in this) {
                 if (item is TInput) {
-                    foreach (TResult tresult in step.Invoke((TInput) item)) {
+                    foreach (TResult tresult in step.Invoke((TInput)item)) {
                         yield return tresult;
                     }
                 }
             }
         }
-
+        
 
         /// <summary>
         /// Concatenate two <c>IEnumerable</c> objects of <c>XdmItem</c> objects or items of its subclass.
@@ -146,27 +180,41 @@ namespace Saxon.Api {
         /// </summary>
         /// <typeparam name="T">The types of object to enumerate. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
         /// <param name="predicate">The predicate to be applied</param>
-        /// <returns>An enumerable of items that satisfy the suppplied <c>Predicate</c>.</returns>
+        /// <returns>An enumerable of items that satisfy the supplied <c>Predicate</c>.</returns>
         public IEnumerable<T> Where<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
                 throw new ArgumentNullException(nameof(predicate));
             }
-
+            
             return this.Select(new Step<T, T>(x => {
                 if (!(x is T)) {
                     throw new Exception("Type error for item in XdmValue");
                 }
 
-                return Enumerable.Repeat((T) x, predicate.Invoke((T) x) ? 1 : 0);
+                return Enumerable.Repeat((T)x, predicate.Invoke((T)x) ? 1 : 0);
             }));
         }
 
+        /// <summary>
+        /// Ask whether this value is an instance of a supplied SequenceType
+        /// </summary>
+        /// <param name="type">the type to be tested</param>
+        /// <returns>true if the this value conforms to the supplied SequenceType</returns>
+
+        public bool Matches(XdmSequenceType type) {
+            return type.Matches(this);
+        }
+        
         /// <summary>
         /// Ask whether any item in this <c>XdmValue</c> matches the provided predicate.
         /// Might not evaluate the predicate on all items if not necessary for 
         /// determining the result. 
         /// </summary>
+        /// <remarks>
+        /// <para>To test whether any items match a particular XDM item type, write
+        /// for example <c>.AnyMatch(XdmAtomicType.Integer.Matches)</c></para>
+        /// </remarks>
         /// <typeparam name="T">The types of object in the enumerable. The object must be an <c>XdmItem</c> or
         /// a derived type.</typeparam>
         /// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
@@ -178,7 +226,7 @@ namespace Saxon.Api {
             }
 
             foreach (XdmItem item in this) {
-                if (item is T && predicate.Invoke((T) item)) {
+                if (item is T && predicate.Invoke((T)item)) {
                     return true;
                 }
             }
@@ -190,6 +238,10 @@ namespace Saxon.Api {
         /// Ask whether all items of this <c>XdmValue</c> match the provided predicate.
         /// Might not evaluate the predicate on all items if not necessary for determining the result.
         /// </summary>
+        /// <remarks>
+        /// <para>To test whether all items match a particular XDM item type, write
+        /// for example <c>.AllMatch(XdmAtomicType.Integer.Matches)</c></para>
+        /// </remarks>
         /// <typeparam name="T">The types of object in the enumerable. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
         /// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
         /// <returns><c>true</c> if either all items of the <c>XdmValue</c> match the provided predicate or the <c>XdmValue</c> is empty, otherwise <c>false</c></returns>
@@ -225,11 +277,11 @@ namespace Saxon.Api {
         public XdmValue Append(XdmValue otherValue) {
             List<Item> list = new List<Item>();
             foreach (XdmItem item in this) {
-                list.Add((Item) item.Unwrap());
+                list.Add((Item)item.Unwrap());
             }
 
             foreach (XdmItem item in otherValue) {
-                list.Add((Item) item.Unwrap());
+                list.Add((Item)item.Unwrap());
             }
 
             GroundedValue gv = SequenceExtent.makeSequenceExtent(list);
@@ -249,6 +301,7 @@ namespace Saxon.Api {
                     list.Add(val);
                 }
             }
+
             return FromGroundedValue(SequenceExtent.makeSequenceExtent(list));
         }
 
@@ -279,6 +332,7 @@ namespace Saxon.Api {
             if (gv.getLength() == 0) {
                 return XdmEmptySequence.Instance;
             }
+
             if (gv.getLength() == 1) {
                 Item first = gv.head();
                 return first switch {
@@ -286,12 +340,12 @@ namespace Saxon.Api {
                     NodeInfo node => new XdmNode(node),
                     MapItem map => new XdmMap(map),
                     ArrayItem array => new XdmArray(array),
-                    Function fn => new XdmFunctionItem(fn),
+                    FunctionItem fn => new XdmFunctionItem(fn),
                     _ => new XdmValue(first)
                 };
             }
+
             return FromGroundedValue(gv);
-            
         }
 
         static internal XdmValue FromGroundedValue(GroundedValue value) {
@@ -306,8 +360,9 @@ namespace Saxon.Api {
                         Genre.ATOMIC => new XdmAtomicValue((AtomicValue)first),
                         Genre.MAP => new XdmMap((MapItem)first),
                         Genre.ARRAY => new XdmArray((ArrayItem)first),
-                        Genre.FUNCTION => new XdmFunctionItem((Function)first),
-                        Genre.EXTERNAL => new XdmExternalObject(((Saxon.Hej.value.AnyExternalObject)first).getWrappedObject()),
+                        Genre.FUNCTION => new XdmFunctionItem((FunctionItem)first),
+                        Genre.EXTERNAL => new XdmExternalObject(((Saxon.Hej.value.AnyExternalObject)first)
+                            .getWrappedObject()),
                         _ => throw new IllegalArgumentException()
                     };
                 default:
@@ -346,7 +401,7 @@ namespace Saxon.Api {
                     return XdmMap.MakeMap(dictionary);
                 default: {
                     if (o.GetType().IsArray) {
-                        return XdmArray.MakeArray((object[]) o);
+                        return XdmArray.MakeArray((object[])o);
                     }
 
                     if (o is IEnumerable enumerable) {
@@ -389,7 +444,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>An object representing the XDM value in the
         /// underlying Saxon implementation.</returns>
-		public Saxon.Hej.om.GroundedValue Unwrap() {
+        public Saxon.Hej.om.GroundedValue Unwrap() {
             return value;
         }
 
@@ -405,6 +460,7 @@ namespace Saxon.Api {
             foreach (Item it in value.asIterable()) {
                 list.Add(XdmItem.WrapItem(it));
             }
+
             return list;
         }
 
@@ -448,13 +504,13 @@ namespace Saxon.Api {
             }
 
             try {
-                return (XdmItem) Wrap(value.itemAt(i));
+                return (XdmItem)Wrap(value.itemAt(i));
             }
             catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }
-        
+
         /// <summary>
         /// Get a selected item in the sequence by position, counting from zero.
         /// </summary>
@@ -463,9 +519,36 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="index">The item that is required, counting the first item in the sequence as item zero.</param>
         /// <returns>The item in the sequence at position <c>index</c>, counting from zero.</returns>
-        
+
         // Indexer declaration
         public XdmItem this[int index] => ItemAt(index);
+        
+        /// <summary>
+        /// Get a subsequence of the value.
+        /// </summary>
+        /// <remarks>
+        /// Gets an XdmValue containing a contiguous subsequence of this value, starting at the given
+        /// index and containing <c>count</c> items. Throws <c>IndexOutOfRangeException</c> if the <c>index</c>
+        /// or <c>count</c> are out of range. 
+        /// </remarks>
+        /// <param name="index">The index of the first item to be included.</param>
+        /// <param name="count">The number of items to be included.</param>
+        /// <returns>The i'th item in the sequence making up the value, counting from zero.</returns>
+        
+        public XdmValue GetRange(int index, int count) {
+            if (index < 0 || index >= this.Count) {
+                throw new IndexOutOfRangeException("Invalid start index " + index);
+            }
+            if (count < 0 || index + count > this.Count) {
+                throw new IndexOutOfRangeException("Invalid count " + count);
+            }
+            try {
+                return new XdmValue(value.subsequence(index, count));
+            }
+            catch (Saxon.Hej.trans.XPathException e) {
+                throw new Saxon.Api.SaxonApiException(e);
+            }
+        }
 
         /// <summary>
         /// Create a string representation of the value. The is the result of serializing
@@ -483,9 +566,11 @@ namespace Saxon.Api {
                         break;
                     }
                 }
+
                 if (config == null) {
                     config = Configuration.newConfiguration();
                 }
+
                 StringWriter writer = new StringWriter();
                 StreamResult result = new StreamResult(writer);
                 SerializationProperties properties = new SerializationProperties();
@@ -495,7 +580,8 @@ namespace Saxon.Api {
                 Receiver r = config.getSerializerFactory().getReceiver(result, properties);
                 SequenceCopier.copySequence(value.iterate(), r);
                 return writer.ToString();
-            } catch (XPathException) {
+            }
+            catch (XPathException) {
                 return base.ToString();
             }
         }
@@ -509,7 +595,8 @@ namespace Saxon.Api {
         public XdmValue DocumentOrder() {
             try {
                 SequenceIterator iter = value.iterate();
-                Saxon.Hej.expr.sort.DocumentOrderIterator sorted = new(iter, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
+                Saxon.Hej.expr.sort.DocumentOrderIterator sorted = new(iter,
+                    Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
                 return Wrap(SequenceTool.toGroundedValue(sorted));
             }
             catch (Saxon.Hej.trans.XPathException e) {
@@ -552,7 +639,6 @@ namespace Saxon.Api {
         /// </list>
         /// </remarks>
         /// <returns>The XDM value reduced to the simplest possible form.</returns>
-
         public XdmValue Simplify() {
             return value.getLength() switch {
                 0 => this is XdmEmptySequence ? this : XdmEmptySequence.Instance,

@@ -24,9 +24,5 @@ namespace Saxon.Hej.tree.iter {
             second.close();
         }
     
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
-        }
-
     }
 }

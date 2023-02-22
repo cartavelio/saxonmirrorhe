@@ -30,7 +30,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.expr.Expression oldOp0 = getLhsExpression();
             Saxon.Hej.expr.Expression oldOp1 = getRhsExpression();
             Saxon.Hej.value.SequenceType atomicType = Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC;
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
             setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
             Saxon.Hej.type.ItemType itemType0 = getLhsExpression().getItemType();
             if ((itemType0 is Saxon.Hej.type.ErrorType)) {
@@ -46,7 +46,7 @@ namespace Saxon.Hej.expr {
                     type0 = (Saxon.Hej.type.AtomicType)(getLhsExpression().getItemType().getPrimitiveItemType());
                 }
             }
-            Saxon.Hej.expr.parser.RoleDiagnostic role1 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role1 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
             Saxon.Hej.type.ItemType itemType1 = getRhsExpression().getItemType();
             if ((itemType1 is Saxon.Hej.type.ErrorType)) {
@@ -96,7 +96,7 @@ namespace Saxon.Hej.expr {
                 de.setErrorCode("XPTY0004");
                 throw de;
             }
-            if (System.Text.RegularExpressions.Regex.IsMatch(calculator.code(), "d.d")) {
+            if ((calculator is Saxon.Hej.expr.Calculator.DoubleOpDouble)) {
                 if (((getLhsExpression() is Saxon.Hej.expr.Literal) && !(type0.Equals(Saxon.Hej.type.BuiltInAtomicType.DOUBLE)))) {
                     Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getLhsExpression())).getGroundedValue();
                     if ((value is Saxon.Hej.value.NumericValue)) {
@@ -238,22 +238,7 @@ namespace Saxon.Hej.expr {
             itemType = null;
         }
         public override Saxon.Hej.value.AtomicValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.AtomicValue v0 = (Saxon.Hej.value.AtomicValue)(getLhsExpression().evaluateItem(context));
-            if ((v0 == null)) {
-                return null;
-            }
-            Saxon.Hej.value.AtomicValue v1 = (Saxon.Hej.value.AtomicValue)(getRhsExpression().evaluateItem(context));
-            if ((v1 == null)) {
-                return null;
-            }
-            try {
-                return calculator.compute(v0, v1, context);
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetFailingExpression(this);
-                e.maybeSetContext(context);
-                throw;
-            }
+            return (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         protected internal override string tag() {
             return "arith";
@@ -262,6 +247,56 @@ namespace Saxon.Hej.expr {
             if ((calculator != null)) {
                 @out.emitAttribute("calc", calculator.code());
             }
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.ArithmeticExpression.ArithmeticElaborator();
+        }
+        public class ArithmeticElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.ArithmeticExpression exp = (Saxon.Hej.expr.ArithmeticExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator arg0Eval = exp.getLhsExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator arg1Eval = exp.getRhsExpression().makeElaborator().elaborateForItem();
+                bool nullable0 = Saxon.Hej.value.Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
+                bool nullable1 = Saxon.Hej.value.Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
+                Saxon.Hej.expr.Calculator calc = exp.getCalculator();
+                if ((nullable0 || nullable1)) {
+                    return context => {
+                        Saxon.Hej.value.AtomicValue v0 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/arg0Eval(context));
+                        if ((v0 == null)) {
+                            return null;
+                        }
+                        Saxon.Hej.value.AtomicValue v1 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/arg1Eval(context));
+                        if ((v1 == null)) {
+                            return null;
+                        }
+                        try {
+                            return calc.compute(v0, v1, context);
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            e.maybeSetContext(context);
+                            e.maybeSetLocation(exp.getLocation());
+                            throw;
+                        }
+                    } ;
+                } else {
+                    if (((calc is Saxon.Hej.expr.Calculator.DoublePlusDouble) && (exp.getRhsExpression() is Saxon.Hej.expr.Literal))) {
+                        double addend = ((Saxon.Hej.value.NumericValue)(((Saxon.Hej.expr.Literal)(exp.getRhsExpression())).getGroundedValue())).getDoubleValue();
+                        return context => new Saxon.Hej.value.DoubleValue((((Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/arg0Eval(context))).getDoubleValue()+addend));
+                    } else {
+                        return context => {
+                            Saxon.Hej.value.AtomicValue v0 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/arg0Eval(context));
+                            Saxon.Hej.value.AtomicValue v1 = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/arg1Eval(context));
+                            try {
+                                return calc.compute(v0, v1, context);
+                            } catch (Saxon.Hej.trans.XPathException e) {
+                                e.maybeSetContext(context);
+                                e.maybeSetLocation(exp.getLocation());
+                                throw;
+                            }
+                        } ;
+                    }
+                }
+            }
+        
         }
     
     }

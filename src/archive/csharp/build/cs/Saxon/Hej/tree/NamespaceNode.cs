@@ -59,10 +59,10 @@ namespace Saxon.Hej.tree {
             }
         }
         public Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
-            return Saxon.Hej.str.StringView.tidy(nsBinding.getURI());
+            return nsBinding.getNamespaceUri().toUnicodeString();
         }
         public string getStringValue() {
-            return nsBinding.getURI();
+            return nsBinding.getNamespaceUri().ToString();
         }
         public bool hasFingerprint() {
             return true;
@@ -72,7 +72,7 @@ namespace Saxon.Hej.tree {
                 if (nsBinding.getPrefix().Length==0) {
                     return -1;
                 } else {
-                    fingerprint = element.getConfiguration().getNamePool().allocateFingerprint("", nsBinding.getPrefix());
+                    fingerprint = element.getConfiguration().getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, nsBinding.getPrefix());
                 }
             }
             return fingerprint;
@@ -80,8 +80,8 @@ namespace Saxon.Hej.tree {
         public string getLocalPart() {
             return nsBinding.getPrefix();
         }
-        public string getURI() {
-            return "";
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return Saxon.Hej.om.NamespaceUri.NULL;
         }
         public string getDisplayName() {
             return getLocalPart();
@@ -134,7 +134,7 @@ namespace Saxon.Hej.tree {
                 throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown axis number "+axisNumber));
             }
         }
-        public string getAttributeValue(string uri, string local) {
+        public string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             return null;
         }
         public Saxon.Hej.om.NodeInfo getRoot() {
@@ -219,12 +219,12 @@ namespace Saxon.Hej.tree {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */
@@ -237,9 +237,19 @@ namespace Saxon.Hej.tree {
             return Equals(other);
         }
 
+        /* Expanding default method getURI from interface NodeInfo */
+        public virtual string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
         /* Expanding default method iterateAxis from interface NodeInfo */
         public virtual Saxon.Hej.tree.iter.AxisIterator iterateAxis(int axisNumber) {
             return iterateAxis(axisNumber, Saxon.Hej.pattern.AnyNodeTest.getInstance());
+        }
+
+        /* Expanding default method getAttributeValue from interface NodeInfo */
+        public virtual string getAttributeValue(string uri, string local) {
+            return getAttributeValue((uri.Length==0 ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(uri)), local);
         }
 
         /* Expanding default method children from interface NodeInfo */
@@ -311,7 +321,7 @@ namespace Saxon.Hej.tree {
 
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
     }

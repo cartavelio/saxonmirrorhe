@@ -73,7 +73,7 @@ namespace Saxon.Hej.expr.sort {
             return normalize(s);
         }
         private Saxon.Hej.str.UnicodeString normalize(Saxon.Hej.str.UnicodeString cs) {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(cs.length32());
             Saxon.Hej.z.IntIterator iter = cs.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();
@@ -86,5 +86,10 @@ namespace Saxon.Hej.expr.sort {
             return sb.toUnicodeString();
         }
     
+        /* Expanding default method isEqualToEmpty from interface StringCollator */
+        public virtual bool isEqualToEmpty(Saxon.Hej.str.UnicodeString s1) {
+            return comparesEqual(s1, Saxon.Hej.str.EmptyUnicodeString.getInstance());
+        }
+
     }
 }

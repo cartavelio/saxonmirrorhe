@@ -4,8 +4,8 @@ using System.Linq;
 namespace Saxon.Hej.expr {
     #pragma warning disable 659
     public class SlashExpression : Saxon.Hej.expr.BinaryExpression, Saxon.Hej.expr.ContextSwitchingExpression {
-        internal bool contextFree;
-        internal bool indexingDisabled;
+        private bool contextFree;
+        private bool indexingDisabled;
         public SlashExpression(Saxon.Hej.expr.Expression start, Saxon.Hej.expr.Expression step) : base (start, Saxon.Hej.expr.parser.Token.SLASH, step) {
         }
         protected internal override Saxon.Hej.expr.OperandRole getOperandRole(int arg) {
@@ -51,9 +51,8 @@ namespace Saxon.Hej.expr {
             }
             Saxon.Hej.Configuration config = visitor.getConfiguration();
             Saxon.Hej.expr.parser.TypeChecker tc = config.getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "/", 0);
-            role0.setErrorCode("XPTY0019");
-            setStart(tc.staticTypeCheck(getStart(), Saxon.Hej.value.SequenceType.NODE_SEQUENCE, role0, visitor));
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "/", 0, "XPTY0019");
+            setStart(tc.staticTypeCheck(getStart(), Saxon.Hej.value.SequenceType.NODE_SEQUENCE, roleSupplier, visitor));
             Saxon.Hej.type.ItemType startType = getStart().getItemType();
             if ((startType == Saxon.Hej.type.ErrorType.getInstance())) {
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
@@ -64,7 +63,7 @@ namespace Saxon.Hej.expr {
             if ((getRhsExpression() is Saxon.Hej.ma.arrays.SquareArrayConstructor)) {
                 Saxon.Hej.ma.arrays.SquareArrayConstructor sq = (Saxon.Hej.ma.arrays.SquareArrayConstructor)(getRhsExpression());
                 if ((sq.getOperanda().getNumberOfOperands() == 1)) {
-                    visitor.getStaticContext().issueWarning(("An array constructor appears immediately after '/' or '//'. Perhaps "+"'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning."), getLocation());
+                    visitor.getStaticContext().issueWarning(("An array constructor appears immediately after '/' or '//'. Perhaps "+"'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning."), Saxon.Hej.trans.SaxonErrorCode.SXWN9028, getLocation());
                 }
             }
             Saxon.Hej.expr.Expression e2 = simplifyDescendantPath(visitor.getStaticContext());
@@ -392,6 +391,16 @@ namespace Saxon.Hej.expr {
                 if ((checker.getBaseExpression() is Saxon.Hej.expr.ContextItemExpression)) {
                     return tail.toPattern(config);
                 }
+            } else {
+                if ((tail is Saxon.Hej.expr.VennExpression)) {
+                    Saxon.Hej.expr.VennExpression ve = (Saxon.Hej.expr.VennExpression)(tail);
+                    if ((ve.@operator == Saxon.Hej.expr.parser.Token.UNION)) {
+                        Saxon.Hej.expr.Expression lhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ve.getLhsExpression());
+                        Saxon.Hej.expr.Expression rhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ve.getRhsExpression());
+                        Saxon.Hej.expr.VennExpression topExpansion = new Saxon.Hej.expr.VennExpression(lhExpansion, ve.@operator, rhExpansion);
+                        return topExpansion.toPattern(config);
+                    }
+                }
             }
             Saxon.Hej.pattern.Pattern tailPattern = tail.toPattern(config);
             if ((tailPattern is Saxon.Hej.pattern.NodeTestPattern)) {
@@ -416,15 +425,8 @@ namespace Saxon.Hej.expr {
                 }
             }
             if ((headPattern == null)) {
-                if ((tail is Saxon.Hej.expr.VennExpression)) {
-                    Saxon.Hej.expr.Expression lhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ((Saxon.Hej.expr.VennExpression)(tail)).getLhsExpression());
-                    Saxon.Hej.expr.Expression rhExpansion = new Saxon.Hej.expr.SlashExpression(head.copy(new Saxon.Hej.expr.parser.RebindingMap()), ((Saxon.Hej.expr.VennExpression)(tail)).getRhsExpression());
-                    Saxon.Hej.expr.VennExpression topExpansion = new Saxon.Hej.expr.VennExpression(lhExpansion, ((Saxon.Hej.expr.VennExpression)(tail)).@operator, rhExpansion);
-                    return topExpansion.toPattern(config);
-                } else {
-                    axis = Saxon.Hej.pattern.PatternMaker.getAxisForPathStep(tail);
-                    headPattern = head.toPattern(config);
-                }
+                axis = Saxon.Hej.pattern.PatternMaker.getAxisForPathStep(tail);
+                headPattern = head.toPattern(config);
             }
             return new Saxon.Hej.pattern.AncestorQualifiedPattern(tailPattern, headPattern, axis);
         }
@@ -481,7 +483,7 @@ namespace Saxon.Hej.expr {
         }
         public Saxon.Hej.expr.Expression getRemainingSteps() {
             if ((getStart() is Saxon.Hej.expr.SlashExpression)) {
-                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> list = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(8);
+                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> list = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(4);
                 gatherSteps(list);
                 Saxon.Hej.expr.Expression rem = rebuildSteps(Saxon.Impl.Helpers.ListUtils.SubList(list, 1, list.Count));
                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, rem);
@@ -518,7 +520,7 @@ namespace Saxon.Hej.expr {
         }
         public Saxon.Hej.expr.Expression getLeadingSteps() {
             if ((getStep() is Saxon.Hej.expr.SlashExpression)) {
-                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> list = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(8);
+                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> list = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(4);
                 gatherSteps(list);
                 Saxon.Hej.expr.Expression rem = rebuildSteps(Saxon.Impl.Helpers.ListUtils.SubList(list, 0, (list.Count-1)));
                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, rem);
@@ -532,6 +534,57 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "ForEach";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.SlashExpression.SlashExprElaborator();
+        }
+        public class SlashExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.SlashExpression expr = (Saxon.Hej.expr.SlashExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PullEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPull();
+                if ((expr.contextFree && (expr.getStep() is Saxon.Hej.expr.AxisExpression))) {
+                    Saxon.Hej.expr.AxisExpression step = (Saxon.Hej.expr.AxisExpression)(expr.getStep());
+                    return context => Saxon.Hej.expr.MappingIterator.map(/*Delegate.iterate()*/select(context), item => step.iterate((Saxon.Hej.om.NodeInfo)(item)));
+                } else {
+                    Saxon.Hej.expr.ContextMappingFunction mapper = cxt => /*Delegate.iterate()*/action(cxt);
+                    return context => {
+                        Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                        c2.trackFocus(/*Delegate.iterate()*/select(context));
+                        return new Saxon.Hej.expr.ContextMappingIterator(mapper, c2);
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.SlashExpression expr = (Saxon.Hej.expr.SlashExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PushEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPush();
+                if ((expr.contextFree && (expr.getStep() is Saxon.Hej.expr.AxisExpression))) {
+                    Saxon.Hej.expr.AxisExpression step = (Saxon.Hej.expr.AxisExpression)(expr.getStep());
+                    return (@out, context) => {
+                        Saxon.Hej.om.SequenceIterator outer = /*Delegate.iterate()*/select(context);
+                        for (Saxon.Hej.om.Item a; ((a = outer.next()) != null); ) {
+                            Saxon.Hej.tree.iter.AxisIterator inner = step.iterate((Saxon.Hej.om.NodeInfo)(a));
+                            for (Saxon.Hej.om.NodeInfo b; ((b = ((/*1430*/Saxon.Hej.om.NodeInfo)inner.next())) != null); ) {
+                                @out.append(b, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
+                            }
+                        }
+                        return null;
+                    } ;
+                } else {
+                    return (@out, context) => {
+                        Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                        Saxon.Hej.om.FocusIterator iter = c2.trackFocus(/*Delegate.iterate()*/select(context));
+                        Saxon.Hej.expr.instruct.TailCall tc = null;
+                        while ((iter.next() != null)) {
+                            dispatchTailCall(tc);
+                            tc = /*Delegate.processLeavingTail()*/action(@out, c2);
+                        }
+                        return tc;
+                    } ;
+                }
+            }
+        
         }
     
     }

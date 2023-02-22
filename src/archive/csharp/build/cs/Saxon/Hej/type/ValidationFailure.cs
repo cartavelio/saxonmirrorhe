@@ -184,7 +184,7 @@ namespace Saxon.Hej.type {
             if ((errorCode == null)) {
                 this.errorCode = null;
             } else {
-                this.errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, errorCode);
+                this.errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, errorCode);
             }
         }
         public void setErrorCodeQName(Saxon.Hej.om.StructuredQName errorCode) {
@@ -194,7 +194,7 @@ namespace Saxon.Hej.type {
             if ((errorCode == null)) {
                 return null;
             } else {
-                if (errorCode.hasURI(Saxon.Hej.lib.NamespaceConstant.ERR)) {
+                if (errorCode.hasURI(Saxon.Hej.om.NamespaceUri.ERR)) {
                     return errorCode.getLocalPart();
                 } else {
                     return errorCode.getEQName();

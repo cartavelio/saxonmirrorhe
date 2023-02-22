@@ -11,62 +11,62 @@ namespace Saxon.Eej.functions.extfn {
             init();
         }
         private void init() {
-            register("append", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppend), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null);
-            register("append", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppend), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(2, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null);
-            register("append-binary", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendBinary), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null);
-            register("append-text", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendText), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("append-text", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendText), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("append-text-lines", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendTextLines), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null);
-            register("append-text-lines", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendTextLines), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("base-dir", 0, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileBaseDir), Saxon.Hej.type.AnyItemType.getInstance(), OPT, 0);
-            register("children", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileChildren), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("copy", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCopy), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("create-dir", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateDir), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("create-temp-dir", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempDir), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("create-temp-dir", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempDir), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("create-temp-file", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempFile), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("create-temp-file", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempFile), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("current-dir", 0, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCurrentDir), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0);
-            register("delete", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileDelete), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("delete", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileDelete), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, null);
-            register("dir-separator", 0, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileDirSeparator), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0);
-            register("exists", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileExists), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("is-dir", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileIsDir), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("is-file", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileIsFile), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("last-modified", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileLastModified), Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("line-separator", 0, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileLineSeparator), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0);
-            register("list", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileList), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("list", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileList), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, null);
-            register("list", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileList), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("move", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileMove), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("name", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileName), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("parent", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileParent), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("path-separator", 0, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FilePathSeparator), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0);
-            register("path-to-native", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FilePathToNative), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("path-to-uri", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FilePathToUri), Saxon.Hej.type.BuiltInAtomicType.ANY_URI, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("read-binary", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadBinary), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("read-binary", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadBinary), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("read-binary", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadBinary), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("read-text", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadText), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("read-text", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadText), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("read-text-lines", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadTextLines), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("read-text-lines", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadTextLines), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("resolve-path", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileResolvePath), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("size", 1, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileSize), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("temp-dir", 0, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileTempDir), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE);
-            register("write", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWrite), Saxon.Hej.type.AnyItemType.getInstance(), STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null);
-            register("write", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWrite), Saxon.Hej.type.AnyItemType.getInstance(), STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(2, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null);
-            register("write-binary", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteBinary), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null);
-            register("write-binary", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteBinary), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null);
-            register("write-text", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteText), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("write-text", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteText), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("write-text-lines", 2, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteTextLines), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null);
-            register("write-text-lines", 3, typeof(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteTextLines), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
+            register("append", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppend(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null));
+            register("append", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppend(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(2, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null));
+            register("append-binary", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendBinary(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null));
+            register("append-text", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendText(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("append-text", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendText(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("append-text-lines", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendTextLines(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null));
+            register("append-text-lines", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileAppendTextLines(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("base-dir", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileBaseDir(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, 0));
+            register("children", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileChildren(), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("copy", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCopy(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("create-dir", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateDir(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("create-temp-dir", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempDir(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("create-temp-dir", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempDir(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("create-temp-file", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempFile(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("create-temp-file", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCreateTempFile(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("current-dir", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileCurrentDir(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0));
+            register("delete", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileDelete(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("delete", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileDelete(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, null));
+            register("dir-separator", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileDirSeparator(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0));
+            register("exists", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileExists(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("is-dir", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileIsDir(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("is-file", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileIsFile(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("last-modified", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileLastModified(), Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("line-separator", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileLineSeparator(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0));
+            register("list", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileList(), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("list", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileList(), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, null));
+            register("list", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileList(), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("move", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileMove(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("name", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileName(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("parent", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileParent(), Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("path-separator", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FilePathSeparator(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0));
+            register("path-to-native", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FilePathToNative(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("path-to-uri", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FilePathToUri(), Saxon.Hej.type.BuiltInAtomicType.ANY_URI, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("read-binary", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadBinary(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("read-binary", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadBinary(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("read-binary", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadBinary(), Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("read-text", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadText(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("read-text", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadText(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("read-text-lines", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadTextLines(), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("read-text-lines", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileReadTextLines(), Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("resolve-path", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileResolvePath(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("size", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileSize(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("temp-dir", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileTempDir(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, LATE));
+            register("write", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWrite(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null));
+            register("write", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWrite(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, LATE).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(2, Saxon.Hej.pattern.NodeKindTest.ELEMENT, ONE, null));
+            register("write-binary", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteBinary(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null));
+            register("write-binary", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteBinary(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
+            register("write-text", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteText(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("write-text", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteText(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("write-text-lines", 2, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteTextLines(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null));
+            register("write-text-lines", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.FileWriteTextLines(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (LATE|SIDE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, STAR, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
         }
         public static readonly Saxon.Hej.value.BigDecimalValue VERSION = new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Parse("1.0", System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture));
-        public const string NAMESPACE = "http://expath.org/ns/file";
+        public static readonly Saxon.Hej.om.NamespaceUri NAMESPACE = Saxon.Hej.om.NamespaceUri.EXPATH_FILE;
         public const string PREFIX = "file";
-        public const string ERROR_NAMESPACE = NAMESPACE;
+        public static readonly Saxon.Hej.om.NamespaceUri ERROR_NAMESPACE = NAMESPACE;
         public const string ERROR_PREFIX = PREFIX;
         private const string ERROR_PATH_NOT_EXIST = "not-found";
         private const string ERROR_PATH_EXISTS = "exists";
@@ -76,8 +76,8 @@ namespace Saxon.Eej.functions.extfn {
         public const string ERROR_INDEX_OUT_OF_BOUNDS = "out-of-range";
         public const string ERROR_IO = "io-error";
         public static readonly string NEWLINE = Saxon.Ejava.lang.System.getProperty("line.separator");
-        public override string getNamespace() {
-            return NAMESPACE;
+        public override Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.EXPATH_FILE;
         }
         public override string getConventionalPrefix() {
             return PREFIX;
@@ -133,16 +133,16 @@ namespace Saxon.Eej.functions.extfn {
                 try {
                     Saxon.Ejava.io.File file = toFile(path);
                     if (file.isDirectory()) {
-                        error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
+                        throw error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
                     }
                     System.IO.FileStream stream = makeFileAppendOutputStream(file);
                     Saxon.Hej.value.Base64BinaryValue contents = (Saxon.Hej.value.Base64BinaryValue)(arguments[1].head());
                     stream.Write(contents.getBinaryValue());
                     stream.Close();
                 } catch (Saxon.Ejava.io.FileNotFoundException e) {
-                    error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                    throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
                 } catch (System.IO.IOException e) {
-                    error(("Failed to write to file "+path), e, ERROR_IO);
+                    throw error(("Failed to write to file "+path), e, ERROR_IO);
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
@@ -164,17 +164,17 @@ namespace Saxon.Eej.functions.extfn {
                 try {
                     file = toFile(path);
                     if (file.isDirectory()) {
-                        error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
+                        throw error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
                     }
-                    writer = newOutputStreamWriter(makeFileAppendOutputStream(file), encoding);
+                    writer = Saxon.Ejava.util.Objects.requireNonNull(newOutputStreamWriter(makeFileAppendOutputStream(file), encoding));
                     writer.Write(contents);
                     writer.Close();
                 } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
-                    error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
+                    throw error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
                 } catch (Saxon.Ejava.io.FileNotFoundException e) {
-                    error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                    throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
                 } catch (System.IO.IOException e) {
-                    error(("Failed to write to file "+file.getAbsolutePath()), e, ERROR_IO);
+                    throw error(("Failed to write to file "+file.getAbsolutePath()), e, ERROR_IO);
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
@@ -194,21 +194,20 @@ namespace Saxon.Eej.functions.extfn {
                 try {
                     file = toFile(path);
                     if (file.isDirectory()) {
-                        error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
+                        throw error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
                     }
                     System.IO.TextWriter writer = newOutputStreamWriter(makeFileAppendOutputStream(file), encoding);
                     Saxon.Hej.om.SequenceIterator iter = arguments[1].iterate();
-                    Saxon.Hej.om.Item item;
-                    while (((item = iter.next()) != null)) {
+                    for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                         writer.Write(item.getStringValue());
                         writer.Write(NEWLINE);
                     }
                 } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
-                    error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
+                    throw error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
                 } catch (Saxon.Ejava.io.FileNotFoundException e) {
-                    error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                    throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
                 } catch (System.IO.IOException e) {
-                    error(("Failed to write to file "+path), e, ERROR_IO);
+                    throw error(("Failed to write to file "+path), e, ERROR_IO);
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
@@ -220,9 +219,9 @@ namespace Saxon.Eej.functions.extfn {
                 string dir = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File fd = toExistingDirectory(dir);
                 if (!(fd.isDirectory())) {
-                    error((("File "+dir)+" is not a directory"), ERROR_PATH_NOT_DIRECTORY);
+                    throw error((("File "+dir)+" is not a directory"), ERROR_PATH_NOT_DIRECTORY);
                 }
-                foreach (Saxon.Ejava.io.File file in fd.listFiles()) {
+                foreach (Saxon.Ejava.io.File file in Saxon.Ejava.util.Objects.requireNonNull(fd.listFiles())) {
                     result.Add(new Saxon.Hej.value.StringValue((file.getAbsolutePath()+((file.isDirectory() ? Saxon.Ejava.io.File.separator : "")))));
                 }
                 return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(result);
@@ -240,23 +239,17 @@ namespace Saxon.Eej.functions.extfn {
                             to.mkdir();
                             copyDirectory(from, to);
                         } else {
-                            error("Source is a directory but target is a file", ERROR_PATH_EXISTS);
+                            throw error("Source is a directory but target is a file", ERROR_PATH_EXISTS);
                         }
                     } else {
                         to.mkdir();
                         copyDirectory(from, to);
                     }
                 } else {
-                    if (to.exists()) {
-                        if (to.isDirectory()) {
-                            to = new Saxon.Ejava.io.File(to, from.getName());
-                            copyFile(from, to);
-                        } else {
-                            copyFile(from, to);
-                        }
-                    } else {
-                        copyFile(from, to);
+                    if ((to.exists() && to.isDirectory())) {
+                        to = new Saxon.Ejava.io.File(to, from.getName());
                     }
+                    copyFile(from, to);
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
@@ -268,12 +261,12 @@ namespace Saxon.Eej.functions.extfn {
                 Saxon.Ejava.io.File file = toFile(path);
                 if (file.exists()) {
                     if (!(file.isDirectory())) {
-                        error((("Path "+path)+" already exists and is not a directory"), ERROR_PATH_EXISTS);
+                        throw error((("Path "+path)+" already exists and is not a directory"), ERROR_PATH_EXISTS);
                     }
                 } else {
                     bool result = file.mkdirs();
                     if (!(result)) {
-                        error(("Failed to create directory "+path), ERROR_PATH_EXISTS);
+                        throw error(("Failed to create directory "+path), ERROR_PATH_EXISTS);
                     }
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
@@ -299,9 +292,8 @@ namespace Saxon.Eej.functions.extfn {
                     deleteTempFile(context, temp);
                     return new Saxon.Hej.value.StringValue(temp.getCanonicalPath());
                 } catch (System.IO.IOException e) {
-                    handleIOError(e);
+                    throw handleIOError(e);
                 }
-                return Saxon.Hej.value.EmptySequence.getInstance();
             }
         
         }
@@ -320,9 +312,8 @@ namespace Saxon.Eej.functions.extfn {
                     deleteTempFile(context, temp);
                     return new Saxon.Hej.value.StringValue(temp.getCanonicalPath());
                 } catch (System.IO.IOException e) {
-                    handleIOError(e);
+                    throw handleIOError(e);
                 }
-                return Saxon.Hej.value.EmptySequence.getInstance();
             }
         
         }
@@ -343,17 +334,17 @@ namespace Saxon.Eej.functions.extfn {
                 }
                 if (!(recurse)) {
                     if ((file.isDirectory() && (file.list().Length != 0))) {
-                        error(("Cannot delete non-empty directory "+file.getAbsolutePath()), ERROR_PATH_IS_DIRECTORY);
+                        throw error(("Cannot delete non-empty directory "+file.getAbsolutePath()), ERROR_PATH_IS_DIRECTORY);
                     }
                     bool result = file.delete();
                     if (!(result)) {
-                        error(("Failed to delete file "+file.getAbsolutePath()), ERROR_IO);
+                        throw error(("Failed to delete file "+file.getAbsolutePath()), ERROR_IO);
                     }
                 } else {
                     try {
                         deleteRecursive(file);
                     } catch (System.IO.IOException e) {
-                        error(("Failed to delete "+path), e, ERROR_IO);
+                        throw error(("Failed to delete "+path), e, ERROR_IO);
                     }
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
@@ -406,7 +397,7 @@ namespace Saxon.Eej.functions.extfn {
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = toExistingDirectory(path);
                 if (!(file.isDirectory())) {
-                    error((("File "+path)+" is not a directory"), ERROR_PATH_NOT_DIRECTORY);
+                    throw error((("File "+path)+" is not a directory"), ERROR_PATH_NOT_DIRECTORY);
                 }
                 bool recursive = false;
                 if ((arguments.Length>1)) {
@@ -417,14 +408,14 @@ namespace Saxon.Eej.functions.extfn {
                 if ((arguments.Length>2)) {
                     filter = Saxon.Hej.functions.URIQueryParameters.makeGlobFilter(arguments[2].head().getStringValue());
                 } else {
-                    filter = new Inner_FilenameFilter_19(this);
+                    filter = null;
                 }
                 gatherDirectoryContents(file, "", recursive, filter, result);
                 return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(result);
             }
             private static void gatherDirectoryContents(Saxon.Ejava.io.File dir, string prefix, bool recurse, Saxon.Ejava.io.FilenameFilter filter, System.Collections.Generic.IList<Saxon.Hej.value.StringValue> result) {
                 Saxon.Hej.functions.URIQueryParameters.RegexFilter filter2 = ((filter is Saxon.Hej.functions.URIQueryParameters.RegexFilter) ? (Saxon.Hej.functions.URIQueryParameters.RegexFilter)(filter) : null);
-                foreach (Saxon.Ejava.io.File file in dir.listFiles(filter)) {
+                foreach (Saxon.Ejava.io.File file in Saxon.Ejava.util.Objects.requireNonNull(dir.listFiles(filter))) {
                     if ((((filter2 == null) || !(file.isDirectory())) || filter2.matches(file.getName()))) {
                         string name = (prefix.Length==0 ? file.getName() : ((prefix+Saxon.Ejava.io.File.separator)+file.getName()));
                         if (file.isDirectory()) {
@@ -434,25 +425,15 @@ namespace Saxon.Eej.functions.extfn {
                     }
                 }
                 if (recurse) {
-                    foreach (Saxon.Ejava.io.File file in dir.listFiles()) {
+                    foreach (Saxon.Ejava.io.File file in Saxon.Ejava.util.Objects.requireNonNull(dir.listFiles())) {
                         if (file.isDirectory()) {
                             string name = (prefix.Length==0 ? file.getName() : ((prefix+Saxon.Ejava.io.File.separator)+file.getName()));
-                            gatherDirectoryContents(file, name, recurse, filter, result);
+                            gatherDirectoryContents(file, name, true, filter, result);
                         }
                     }
                 }
             }
         
-            private class Inner_FilenameFilter_19 : Saxon.Ejava.io.FilenameFilter {
-                private readonly FileList outerInstance;
-                public Inner_FilenameFilter_19(FileList outerInstance) {
-                    this.outerInstance = outerInstance;
-                }
-                public bool accept(Saxon.Ejava.io.File dir, string name) {
-                    return true;
-                }
-            }
-
         }
         public class FileMove : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
@@ -461,14 +442,23 @@ namespace Saxon.Eej.functions.extfn {
                 if (from.isDirectory()) {
                     if (to.exists()) {
                         if (to.isDirectory()) {
-                            from.renameTo(new Saxon.Ejava.io.File(to, from.getName()));
+                            bool success = from.renameTo(new Saxon.Ejava.io.File(to, from.getName()));
+                            if (!(success)) {
+                                throw error((("Renaming of "+from.getName())+" failed"), ERROR_IO);
+                            }
                         } else {
-                            error("Target of directory move exists and is not a directory", ERROR_PATH_EXISTS);
+                            throw error("Target of directory move exists and is not a directory", ERROR_PATH_EXISTS);
                         }
                     } else {
-                        to.mkdirs();
-                        foreach (Saxon.Ejava.io.File f in from.listFiles()) {
-                            f.renameTo(new Saxon.Ejava.io.File(to, f.getName()));
+                        bool created = to.mkdirs();
+                        if (!(created)) {
+                            throw error((("Creation of "+to)+" failed"), ERROR_IO);
+                        }
+                        foreach (Saxon.Ejava.io.File f in Saxon.Ejava.util.Objects.requireNonNull(from.listFiles())) {
+                            bool success = f.renameTo(new Saxon.Ejava.io.File(to, f.getName()));
+                            if (!(success)) {
+                                throw error((("Renaming of "+f)+" failed"), ERROR_IO);
+                            }
                         }
                     }
                 } else {
@@ -476,11 +466,14 @@ namespace Saxon.Eej.functions.extfn {
                         to = new Saxon.Ejava.io.File(to, from.getName());
                     }
                     if (to.exists()) {
-                        to.delete();
+                        bool success = to.delete();
+                        if (!(success)) {
+                            throw error((("Deletion of existing file "+to)+" failed"), ERROR_IO);
+                        }
                     }
                     bool result = from.renameTo(to);
                     if (!(result)) {
-                        throw new Saxon.Hej.trans.XPathException((((("Moving "+from)+" to ")+to)+" failed "));
+                        throw error((((("Moving "+from)+" to ")+to)+" failed "), ERROR_IO);
                     }
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
@@ -509,9 +502,8 @@ namespace Saxon.Eej.functions.extfn {
                     Saxon.Ejava.io.File parent = new Saxon.Ejava.io.File(file.getParent());
                     return new Saxon.Hej.value.StringValue((parent.getCanonicalPath()+Saxon.Ejava.io.File.separator));
                 } catch (System.IO.IOException e) {
-                    handleIOError(e);
+                    throw handleIOError(e);
                 }
-                return Saxon.Hej.value.EmptySequence.getInstance();
             }
         
         }
@@ -530,7 +522,7 @@ namespace Saxon.Eej.functions.extfn {
                         System.Uri uri = new System.Uri(path, System.UriKind.RelativeOrAbsolute);
                         file = new Saxon.Ejava.io.File(uri);
                         if (!((file.exists()))) {
-                            error((("No file exists at "+path)), ERROR_PATH_NOT_EXIST);
+                            throw error((("No file exists at "+path)), ERROR_PATH_NOT_EXIST);
                         }
                     } catch (System.UriFormatException err) {
                     }
@@ -541,9 +533,8 @@ namespace Saxon.Eej.functions.extfn {
                 try {
                     return new Saxon.Hej.value.StringValue(file.getCanonicalPath());
                 } catch (System.IO.IOException e) {
-                    handleIOError(e);
+                    throw handleIOError(e);
                 }
-                return null;
             }
         
         }
@@ -581,33 +572,32 @@ namespace Saxon.Eej.functions.extfn {
                 try {
                     long fileLength = file.length();
                     if ((offset<0L)) {
-                        error(("Negative offset in binary read:"+offset), ERROR_INDEX_OUT_OF_BOUNDS);
+                        throw error(("Negative offset in binary read:"+offset), ERROR_INDEX_OUT_OF_BOUNDS);
                     }
                     if ((length<0L)) {
-                        error(("Negative length in binary read:"+length), ERROR_INDEX_OUT_OF_BOUNDS);
+                        throw error(("Negative length in binary read:"+length), ERROR_INDEX_OUT_OF_BOUNDS);
                     }
                     if (((offset+length)>fileLength)) {
-                        error(("Length exceeds file length in binary read:"+((offset+length))), ERROR_INDEX_OUT_OF_BOUNDS);
+                        throw error(("Length exceeds file length in binary read:"+((offset+length))), ERROR_INDEX_OUT_OF_BOUNDS);
                     }
                     byte[] content = new byte[(int)(length)];
                     System.IO.FileStream @in = System.IO.File.OpenRead(file.getPath());
                     if ((offset>0)) {
                         long skipped = @in.Seek(offset, System.IO.SeekOrigin.Current);
                         if ((skipped != offset)) {
-                            error(((("Error skipping content at start of binary: "+skipped)+" bytes skipped, but requested ")+offset), ERROR_IO);
+                            throw error(((("Error skipping content at start of binary: "+skipped)+" bytes skipped, but requested ")+offset), ERROR_IO);
                         }
                     }
                     int bytes = @in.Read(content, 0, (int)(length));
                     if ((bytes != content.Length)) {
                         @in.Close();
-                        error("Number of bytes read does not match file length", ERROR_IO);
+                        throw error("Number of bytes read does not match file length", ERROR_IO);
                     }
                     @in.Close();
                     return new Saxon.Hej.value.Base64BinaryValue(content);
                 } catch (System.IO.IOException e) {
-                    error(("Failed to read file "+path), e, ERROR_IO);
+                    throw error(("Failed to read file "+path), e, ERROR_IO);
                 }
-                return null;
             }
         
         }
@@ -619,7 +609,7 @@ namespace Saxon.Eej.functions.extfn {
                 if ((arguments.Length>1)) {
                     encoding = arguments[1].head().getStringValue();
                 }
-                System.IO.TextReader reader = getInputStreamReader(file, encoding);
+                System.IO.TextReader reader = Saxon.Ejava.util.Objects.requireNonNull(getInputStreamReader(file, encoding));
                 try {
                     string result = Saxon.Hej.functions.UnparsedTextFunction.readFile(context.getConfiguration().getValidCharacterChecker(), reader).ToString();
                     reader.Close();
@@ -628,18 +618,17 @@ namespace Saxon.Eej.functions.extfn {
                     try {
                         reader.Close();
                     } catch (System.IO.IOException e1) {
-                        error(("Failed to close file "+file.getAbsolutePath()), e, ERROR_IO);
+                        throw error(("Failed to close file "+file.getAbsolutePath()), e, ERROR_IO);
                     }
-                    error(e.Message, ERROR_IO);
+                    throw error(e.Message, ERROR_IO);
                 } catch (System.IO.IOException e) {
                     try {
                         reader.Close();
                     } catch (System.IO.IOException e1) {
-                        error(("Failed to close file "+file.getAbsolutePath()), e, ERROR_IO);
+                        throw error(("Failed to close file "+file.getAbsolutePath()), e, ERROR_IO);
                     }
-                    error(("Failed to read file "+path), e, ERROR_IO);
+                    throw error(("Failed to read file "+path), e, ERROR_IO);
                 }
-                return null;
             }
         
         }
@@ -651,7 +640,7 @@ namespace Saxon.Eej.functions.extfn {
                 if ((arguments.Length>1)) {
                     encoding = arguments[1].head().getStringValue();
                 }
-                return new Saxon.Hej.om.LazySequence(new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.TextFileLinesIterator(file, encoding));
+                return new Saxon.Hej.om.LazySequence(new Saxon.Eej.functions.extfn.EXPathFileFunctionSet.TextFileLinesIterator(file, encoding, context));
             }
         
         }
@@ -703,27 +692,27 @@ namespace Saxon.Eej.functions.extfn {
                         stream.Write(content);
                         stream.Close();
                     } catch (System.IO.IOException e) {
-                        error(("Failed to write to file "+path), e, ERROR_IO);
+                        throw error(("Failed to write to file "+path), e, ERROR_IO);
                     }
                 } else {
                     try {
                         long offset = ((Saxon.Hej.value.NumericValue)(arguments[2].head())).longValue();
                         if ((offset<0L)) {
-                            error(("Negative offset in binary write:"+offset), ERROR_INDEX_OUT_OF_BOUNDS);
+                            throw error(("Negative offset in binary write:"+offset), ERROR_INDEX_OUT_OF_BOUNDS);
                         }
                         int lb = content.Length;
                         byte[] data;
                         if ((file.exists() && (offset>0))) {
                             long fileLength = file.length();
                             if ((offset>fileLength)) {
-                                error(("Offset exceeds file length in binary write:"+offset), ERROR_INDEX_OUT_OF_BOUNDS);
+                                throw error(("Offset exceeds file length in binary write:"+offset), ERROR_INDEX_OUT_OF_BOUNDS);
                             }
                             data = new byte[System.Math.Max((int)(fileLength), ((int)(offset)+lb))];
                             System.IO.FileStream @in = System.IO.File.OpenRead(file.getPath());
                             int bytes = @in.Read(data);
                             if ((bytes != fileLength)) {
                                 @in.Close();
-                                error("Number of bytes read does not match file length", ERROR_IO);
+                                throw error("Number of bytes read does not match file length", ERROR_IO);
                             }
                             @in.Close();
                         } else {
@@ -734,7 +723,7 @@ namespace Saxon.Eej.functions.extfn {
                         stream.Write(data);
                         stream.Close();
                     } catch (System.IO.IOException e) {
-                        error(("Failed to write to file "+path), e, ERROR_IO);
+                        throw error(("Failed to write to file "+path), e, ERROR_IO);
                     }
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
@@ -756,11 +745,11 @@ namespace Saxon.Eej.functions.extfn {
                     writer.Write(content);
                     writer.Close();
                 } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
-                    error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
+                    throw error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
                 } catch (Saxon.Ejava.io.FileNotFoundException e) {
-                    error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                    throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
                 } catch (System.IO.IOException e) {
-                    error(("Failed to write to file "+file.getAbsolutePath()), e, ERROR_IO);
+                    throw error(("Failed to write to file "+file.getAbsolutePath()), e, ERROR_IO);
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
@@ -785,11 +774,11 @@ namespace Saxon.Eej.functions.extfn {
                     }
                     writer.Close();
                 } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
-                    error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
+                    throw error(("Unsupported encoding "+encoding), ERROR_UNKNOWN_ENCODING);
                 } catch (Saxon.Ejava.io.FileNotFoundException e) {
-                    error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
+                    throw error("Failed to create file", e, ERROR_PATH_NOT_DIRECTORY);
                 } catch (System.IO.IOException e) {
-                    error(("Failed to write to file "+file.getAbsolutePath()), e, ERROR_IO);
+                    throw error(("Failed to write to file "+file.getAbsolutePath()), e, ERROR_IO);
                 }
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
@@ -804,7 +793,7 @@ namespace Saxon.Eej.functions.extfn {
                 }
                 bool maybeURI = path.StartsWith("file:");
                 if (maybeURI) {
-                    System.Uri uri = new System.Uri(System.Text.RegularExpressions.Regex.Replace(path, "\\\\", "/"), System.UriKind.RelativeOrAbsolute);
+                    System.Uri uri = new System.Uri(path.Replace("\\", "/"), System.UriKind.RelativeOrAbsolute);
                     return new Saxon.Ejava.io.File(uri.LocalPath);
                 } else {
                     string dir = Saxon.Ejava.lang.System.getProperty("expath.base.directory");
@@ -823,46 +812,46 @@ namespace Saxon.Eej.functions.extfn {
         private static Saxon.Ejava.io.File toExistingFile(string path) {
             Saxon.Ejava.io.File file = toFile(path);
             if (!(file.exists())) {
-                error(("No file exists at "+path), ERROR_PATH_NOT_EXIST);
+                throw error(("No file exists at "+path), ERROR_PATH_NOT_EXIST);
             }
             return file;
         }
         private static Saxon.Ejava.io.File checkReadSource(string path) {
             Saxon.Ejava.io.File file = toExistingFile(path);
             if (file.isDirectory()) {
-                error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
+                throw error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
             }
             if (!(file.exists())) {
-                error(("File not found: "+path), ERROR_PATH_NOT_EXIST);
+                throw error(("File not found: "+path), ERROR_PATH_NOT_EXIST);
             }
             return file;
         }
         private static Saxon.Ejava.io.File checkWriteDestination(string path) {
             Saxon.Ejava.io.File file = toFile(path);
             if (file.isDirectory()) {
-                error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
+                throw error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
             }
             if (!(file.getParentFile().exists())) {
-                error(("Parent directory does not exist: "+path), ERROR_PATH_NOT_DIRECTORY);
+                throw error(("Parent directory does not exist: "+path), ERROR_PATH_NOT_DIRECTORY);
             }
             return file;
         }
         private static Saxon.Ejava.io.File toExistingDirectory(string path) {
             Saxon.Ejava.io.File file = toFile(path);
             if (!(file.exists())) {
-                error(("No directory exists at "+path), ERROR_PATH_NOT_DIRECTORY);
+                throw error(("No directory exists at "+path), ERROR_PATH_NOT_DIRECTORY);
             }
             return file;
         }
-        public static void error(string message, string code) {
+        public static Saxon.Hej.trans.XPathException error(string message, string code) {
             Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message);
             e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, code));
-            throw e;
+            return e;
         }
-        public static void error(string message, System.Exception cause, string code) {
+        public static Saxon.Hej.trans.XPathException error(string message, System.Exception cause, string code) {
             Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message, cause);
             e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, code));
-            throw e;
+            return e;
         }
         private static void serialize(Saxon.Hej.expr.XPathContext context, string path, bool append, Saxon.Hej.om.Sequence contents, Saxon.Hej.serialize.SerializationProperties properties) {
             Saxon.Hej.lib.SerializerFactory factory = context.getConfiguration().getSerializerFactory();
@@ -870,9 +859,9 @@ namespace Saxon.Eej.functions.extfn {
             pipe.setXPathContext(context);
             Saxon.Ejava.io.File file = toFile(path);
             if (file.isDirectory()) {
-                error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
+                throw error((("Path "+path)+" is a directory"), ERROR_PATH_IS_DIRECTORY);
             }
-            System.IO.Stream stream = null;
+            System.IO.Stream stream;
             try {
                 if (append) {
                     stream = makeFileAppendOutputStream(file);
@@ -880,7 +869,7 @@ namespace Saxon.Eej.functions.extfn {
                     stream = new System.IO.FileStream(file.getPath(), System.IO.FileMode.Create);
                 }
             } catch (Saxon.Ejava.io.FileNotFoundException e) {
-                error(("Failed to write to file "+path), e, ERROR_UNKNOWN_ENCODING);
+                throw error(("Failed to write to file "+path), e, ERROR_UNKNOWN_ENCODING);
             }
             Saxon.Ejavax.xml.transform.Result result = new Saxon.Ejavax.xml.transform.stream.StreamResult(stream);
             Saxon.Hej.@event.Receiver sr = factory.getReceiver(result, properties, pipe);
@@ -894,31 +883,35 @@ namespace Saxon.Eej.functions.extfn {
             sr.endDocument();
             sr.close();
             try {
-                if ((stream != null)) {
-                    stream.Close();
-                }
+                stream.Close();
             } catch (System.IO.IOException e) {
             }
         }
         private static void copyDirectory(Saxon.Ejava.io.File from, Saxon.Ejava.io.File to) {
-            foreach (Saxon.Ejava.io.File child in from.listFiles()) {
+            foreach (Saxon.Ejava.io.File child in Saxon.Ejava.util.Objects.requireNonNull(from.listFiles())) {
                 Saxon.Ejava.io.File target = new Saxon.Ejava.io.File(to, child.getName());
                 if (child.isDirectory()) {
                     if (target.exists()) {
-                        if (target.isDirectory()) {
-                            copyDirectory(child, target);
-                        } else {
-                            target.delete();
-                            target.mkdir();
-                            copyDirectory(child, target);
+                        if (!(target.isDirectory())) {
+                            bool deleteOK = target.delete();
+                            if (!(deleteOK)) {
+                                throw error(("Failed to delete existing file "+target), ERROR_IO);
+                            }
+                            bool mkOK = target.mkdir();
+                            if (!(mkOK)) {
+                                throw error(("Failed to create new directory "+target), ERROR_IO);
+                            }
                         }
                     } else {
-                        target.mkdir();
-                        copyDirectory(child, target);
+                        bool mkOK = target.mkdir();
+                        if (!(mkOK)) {
+                            throw error(("Failed to create new directory "+target), ERROR_IO);
+                        }
                     }
+                    copyDirectory(child, target);
                 } else {
                     if ((target.exists() && target.isDirectory())) {
-                        error((((("Cannot copy "+child.getAbsolutePath())+" because directory ")+target.getAbsolutePath())+" is in the way"), ERROR_PATH_IS_DIRECTORY);
+                        throw error((((("Cannot copy "+child.getAbsolutePath())+" because directory ")+target.getAbsolutePath())+" is in the way"), ERROR_PATH_IS_DIRECTORY);
                     } else {
                         copyFile(child, target);
                     }
@@ -936,16 +929,13 @@ namespace Saxon.Eej.functions.extfn {
         }
         private static void deleteRecursive(Saxon.Ejava.io.File file) {
             if (file.isDirectory()) {
-                foreach (Saxon.Ejava.io.File child in file.listFiles()) {
+                foreach (Saxon.Ejava.io.File child in Saxon.Ejava.util.Objects.requireNonNull(file.listFiles())) {
                     deleteRecursive(child);
                 }
             }
-            bool ok = file.delete();
-            if (!(ok)) {
-                throw new System.IO.IOException(("Failed to delete "+file.getAbsolutePath()));
-            }
+            file.delete();
         }
-        private static void handleIOError(System.IO.IOException err) {
+        private static Saxon.Hej.trans.XPathException handleIOError(System.IO.IOException err) {
             Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(err);
             string localName = ((err is Saxon.Ejava.io.UnsupportedEncodingException) ? ERROR_UNKNOWN_ENCODING : ERROR_IO);
             xe.setErrorCodeQName(new Saxon.Hej.om.StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, localName));
@@ -954,27 +944,13 @@ namespace Saxon.Eej.functions.extfn {
         private class TextFileLinesIterator : Saxon.Hej.tree.iter.TextLinesIterator {
             internal Saxon.Ejava.io.File file;
             internal string encoding;
-            public TextFileLinesIterator(Saxon.Ejava.io.File file, string encoding)  {
+            public TextFileLinesIterator(Saxon.Ejava.io.File file, string encoding, Saxon.Hej.expr.XPathContext context)  {
                 this.encoding = encoding;
                 this.file = file;
-                reader = new Saxon.Impl.Helpers.LineNumberReader(getInputStreamReader(file, encoding));
+                reader = new Saxon.Impl.Helpers.LineNumberReader(Saxon.Ejava.util.Objects.requireNonNull(getInputStreamReader(file, encoding)));
                 uri = file.toURI();
-                checker = Saxon.Hej.z.IntPredicateLambda.of(ch => Saxon.Hej.serialize.charcode.XMLCharacterData.isValid11(ch));
-            }
-            public override Saxon.Hej.value.StringValue next() {
-                Saxon.Hej.value.StringValue result = null;
-                result = ((/*1430*/Saxon.Hej.value.StringValue)base.next());
-                return result;
-            }
-            protected internal override Saxon.Hej.trans.XPathException handleIOError(System.Uri uri, System.IO.IOException err) {
-                string message = "Failed to read input file";
-                if (((uri != null) && !(err.Message.Equals(uri.ToString())))) {
-                    message += (' '+uri.ToString());
-                }
-                message += ((" ("+err.GetType().Name)+')');
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message, err);
-                e.setErrorCodeQName(new Saxon.Hej.om.StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, ERROR_IO));
-                return e;
+                checker = Saxon.Hej.z.IntPredicateLambda.of(Saxon.Hej.serialize.charcode.XMLCharacterData.isValid11 /* instance method reference */);
+                arrangeCleanup(reader, context);
             }
         
         }
@@ -983,8 +959,7 @@ namespace Saxon.Eej.functions.extfn {
                  return file.getInputStreamReader(encoding);
              }
              catch (Saxon.Ejava.io.IOException) {
-                 error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
-                 return null;
+                 throw error("Unsupported encoding " + encoding, ERROR_UNKNOWN_ENCODING);
              }
         }
         public static string _parent(string path) {
@@ -1000,15 +975,5 @@ namespace Saxon.Eej.functions.extfn {
             return null;
         }
     
-        private class Inner_FilenameFilter_19 : Saxon.Ejava.io.FilenameFilter {
-            private readonly FileList outerInstance;
-            public Inner_FilenameFilter_19(FileList outerInstance) {
-                this.outerInstance = outerInstance;
-            }
-            public bool accept(Saxon.Ejava.io.File dir, string name) {
-                return true;
-            }
-        }
-
     }
 }

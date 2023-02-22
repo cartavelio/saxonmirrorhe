@@ -30,7 +30,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 reasons.Add((("Call to "+fn.getParentExpression().toShortString())+" is not streamable, because the predicate function is not statically known"));
                 return false;
             } else {
-                if (uf.getFunctionName().getURI().Equals(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS)) {
+                if (uf.getFunctionName().hasURI(Saxon.Hej.om.NamespaceUri.ANONYMOUS)) {
                     Saxon.Hej.expr.instruct.UserFunctionParameter first = uf.getParameterDefinitions()[0];
                     first.setFunctionStreamability(Saxon.Hej.trans.FunctionStreamability.INSPECTION);
                     first.setRequiredType(new Saxon.Hej.value.SequenceType(first.getRequiredType().getPrimaryType(), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE));
@@ -50,7 +50,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return true;
         }
         public override Saxon.Eej.ee.stream.feed.FilteringFeed.Filter makeFilter(Saxon.Hej.expr.XPathContext context, Saxon.Eej.ee.stream.feed.ItemFeed @out) {
-            Saxon.Hej.om.Function function = (Saxon.Hej.om.Function)(((Saxon.Hej.expr.SystemFunctionCall)(getExpression())).getArg(1).evaluateItem(context));
+            Saxon.Hej.om.FunctionItem function = (Saxon.Hej.om.FunctionItem)(((Saxon.Hej.expr.SystemFunctionCall)(getExpression())).getArg(1).evaluateItem(context));
             Saxon.Hej.om.Sequence[] args = Saxon.Hej.om.SequenceTool.makeSequenceArray(1);
             return new Saxon.Eej.ee.stream.feed.FilteringFeed.FilterLambda((item, position) => {
                 args[0] = item;

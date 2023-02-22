@@ -13,7 +13,7 @@ namespace Saxon.Hej.serialize {
         static System.Collections.Generic.ISet<string> emptyTags5 = new System.Collections.Generic.HashSet<string>(31);
         private static readonly string[] emptyTagNames5 = {"area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"};
         private bool isRecognizedHtmlElement(Saxon.Hej.om.NodeName name) {
-            return (name.hasURI(Saxon.Hej.lib.NamespaceConstant.XHTML) || (name.hasURI("") && html5Elements.Contains(name.getLocalPart().ToLower())));
+            return (name.hasURI(Saxon.Hej.om.NamespaceUri.XHTML) || (name.hasURI(Saxon.Hej.om.NamespaceUri.NULL) && html5Elements.Contains(name.getLocalPart().ToLower())));
         }
         protected internal override void writeDocType(Saxon.Hej.om.NodeName name, string displayName, string systemId, string publicId) {
             if ((((systemId == null) && isRecognizedHtmlElement(name)) && name.getLocalPart().ToLower().Equals("html"))) {

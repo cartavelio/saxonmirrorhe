@@ -12,7 +12,7 @@ namespace Saxon.Eej.functions.registry {
         }
         private void init() {
             importFunctionSet(Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance());
-            register("put", 2, typeof(Saxon.Hej.functions.Put), Saxon.Hej.type.AnyItemType.getInstance(), OPT, LATE).arg(0, Saxon.Hej.type.Type.NODE_TYPE, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
+            register("put", 2, e => e.populate(() => new Saxon.Hej.functions.Put(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, LATE).arg(0, Saxon.Hej.type.Type.NODE_TYPE, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
         }
     
     }

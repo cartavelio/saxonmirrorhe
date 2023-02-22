@@ -18,7 +18,7 @@ namespace Saxon.Hej.expr {
                 throw err;
             } else {
                 if (((!(doneWarnings) && contextInfo.isParentless()) && (th.relationship(contextInfo.getItemType(), Saxon.Hej.pattern.NodeKindTest.DOCUMENT) == Saxon.Hej.type.Affinity.DISJOINT))) {
-                    visitor.issueWarning((noContextMessage()+": the context item is parentless and is not a document node"), getLocation());
+                    visitor.issueWarning((noContextMessage()+": the context item is parentless and is not a document node"), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
                     doneWarnings = true;
                 }
             }
@@ -124,6 +124,16 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "RootExpression";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.RootExpression.RootExprElaborator();
+        }
+        public class RootExprElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.RootExpression expr = (Saxon.Hej.expr.RootExpression)(getExpression());
+                return /* Unresolved method reference */expr.getNode;
+            }
+        
         }
     
     }

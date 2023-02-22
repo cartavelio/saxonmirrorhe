@@ -32,9 +32,6 @@ namespace Saxon.Hej.tree.iter {
         public void close() {
             @base.close();
         }
-        public void discharge() {
-            @base.discharge();
-        }
     
     }
 }

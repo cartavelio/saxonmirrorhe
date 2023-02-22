@@ -60,7 +60,7 @@ namespace Saxon.Hej.style {
             }
             if ((nameAtt == null)) {
                 reportAbsence("name");
-                setObjectName(new Saxon.Hej.om.StructuredQName("", "", "attribute-set-error-name"));
+                setObjectName(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "attribute-set-error-name"));
                 return ;
             }
             if ((visibilityAtt == null)) {
@@ -169,8 +169,6 @@ namespace Saxon.Hej.style {
             setActionCompleted(ACTION_COMPILE);
         }
         public void optimize(Saxon.Hej.style.ComponentDeclaration declaration) {
-        }
-        public void generateByteCode(Saxon.Hej.expr.parser.Optimizer opt) {
         }
     
     }

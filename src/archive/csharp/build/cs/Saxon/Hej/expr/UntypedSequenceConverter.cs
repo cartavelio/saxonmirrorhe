@@ -69,7 +69,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.expr.UntypedSequenceConverter atomicConverter = new Saxon.Hej.expr.UntypedSequenceConverter(getBaseExpression().copy(rebindings), getRequiredItemType());
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, atomicConverter);
             atomicConverter.setConverter(converter);
-            atomicConverter.setRoleDiagnostic(getRoleDiagnostic());
+            atomicConverter.setRoleDiagnostic(getRoleSupplier());
             return atomicConverter;
         }
         public override Saxon.Hej.type.ItemType getItemType() {
@@ -101,11 +101,47 @@ namespace Saxon.Hej.expr {
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
             destination.startElement("cvUntyped", this);
             destination.emitAttribute("to", Saxon.Hej.type.AlphaCode.fromItemType(getRequiredItemType()));
-            if ((getRoleDiagnostic() != null)) {
-                destination.emitAttribute("diag", getRoleDiagnostic().save());
+            if ((getRoleSupplier() != null)) {
+                destination.emitAttribute("diag", getRoleSupplier()().save());
             }
             getBaseExpression().export(destination);
             destination.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.UntypedSequenceConverter.UntypedSequenceConverterElaborator();
+        }
+        public class UntypedSequenceConverterElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.UntypedSequenceConverter expr = (Saxon.Hej.expr.UntypedSequenceConverter)(getExpression());
+                Saxon.Hej.expr.UntypedSequenceConverter.UntypedConverter converter = (Saxon.Hej.expr.UntypedSequenceConverter.UntypedConverter)(expr.getConverter());
+                System.Diagnostics.Debug.Assert((converter != null));
+                Saxon.Hej.expr.AtomicSequenceConverter.AtomicSequenceMappingFunction mapper = new Saxon.Hej.expr.AtomicSequenceConverter.AtomicSequenceMappingFunction();
+                mapper.setConverter(converter);
+                if ((expr.getRoleSupplier() != null)) {
+                    string errorCode = expr.getRoleSupplier()().getErrorCode();
+                    mapper.setErrorCode(("XPTY0004".Equals(errorCode) ? "FORG0001" : "XPTY0004"));
+                }
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/baseEval(context);
+                    return new Saxon.Hej.expr.ItemMappingIterator(@base, mapper, true);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.AtomicSequenceConverter expr = (Saxon.Hej.expr.AtomicSequenceConverter)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.type.Converter converter = expr.getConverter();
+                System.Diagnostics.Debug.Assert((converter != null));
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
+                return context => {
+                    Saxon.Hej.value.AtomicValue baseValue = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/baseEval(context));
+                    if ((nullable && (baseValue == null))) {
+                        return null;
+                    }
+                    return converter.convert(baseValue).asAtomic();
+                } ;
+            }
+        
         }
     
         private class Inner_Converter_7 : Saxon.Hej.type.Converter {

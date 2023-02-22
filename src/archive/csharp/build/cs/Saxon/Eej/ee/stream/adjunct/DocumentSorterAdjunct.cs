@@ -117,7 +117,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 Saxon.Hej.om.SequenceIterator grounded = new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(groundedItems);
                 Saxon.Hej.om.SequenceIterator sorted = new Saxon.Hej.expr.sort.DocumentOrderIterator(grounded, Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
                 Saxon.Hej.@event.Outputter @out = getNextOutputter();
-                Saxon.Hej.om.SequenceTool.supply(sorted, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => @out.append(it) /* converted from instance method reference */));
+                Saxon.Hej.om.SequenceTool.supply(sorted, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */@out.append));
                 base.close();
             }
         

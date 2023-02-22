@@ -22,7 +22,11 @@ namespace Saxon.Hej.expr.sort {
             this.lastPositionFinder = lpf;
         }
         public Saxon.Eej.ee.stream.ManualGroupIterator getSnapShot(Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Hej.expr.sort.MergeGroupingIterator.ManualMergeGroupingIterator(currentMembers, getCurrentGroupingKey(), position, currenti);
+            Saxon.Eej.ee.stream.ManualGroupIterator iter = new Saxon.Eej.ee.stream.ManualGroupIterator(currenti.getObject().baseItem, position);
+            iter.setCurrentGroup(Saxon.Hej.value.SequenceExtent.makeSequenceExtent(currentMembers));
+            iter.setCurrentGroupingKey(getCurrentGroupingKey());
+            iter.setLengthFinder(() => currentMembers.Count);
+            return iter;
         }
         private void advance() {
             currentMembers = new System.Collections.Generic.List<Saxon.Hej.om.Item>(20);
@@ -92,9 +96,6 @@ namespace Saxon.Hej.expr.sort {
         public void close() {
             baseItr.close();
         }
-        public void discharge() {
-            baseItr.discharge();
-        }
         public bool supportsGetLength() {
             return true;
         }
@@ -104,37 +105,16 @@ namespace Saxon.Hej.expr.sort {
         public Saxon.Hej.om.AtomicSequence getCurrentGroupingKey() {
             return new Saxon.Hej.om.AtomicArray(compositeMergeKey);
         }
-        public Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-            return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(currentMembers);
+        public Saxon.Hej.om.GroundedValue currentGroup() {
+            return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(currentMembers);
         }
         public Saxon.Hej.om.SequenceIterator iterateCurrentGroup(string source) {
             System.Collections.Generic.IList<Saxon.Hej.om.Item> sourceMembers = Saxon.Impl.Helpers.MapUtils.Get(currentSourceMembers, source);
             if ((sourceMembers == null)) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             } else {
                 return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(sourceMembers);
             }
-        }
-        public class ManualMergeGroupingIterator : Saxon.Eej.ee.stream.ManualGroupIterator {
-            internal System.Collections.Generic.IList<Saxon.Hej.om.Item> currentGroup;
-            internal Saxon.Hej.om.AtomicSequence currentGroupingKey;
-            internal Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys> currenti;
-            public ManualMergeGroupingIterator(System.Collections.Generic.IList<Saxon.Hej.om.Item> currentGroup, Saxon.Hej.om.AtomicSequence currentGroupingKey, int position, Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys> currenti) : base (currenti.getObject().baseItem, position) {
-                this.currentGroup = currentGroup;
-                this.currentGroupingKey = currentGroupingKey;
-                this.currenti = currenti;
-                setLengthFinder(() => currentGroup.Count);
-            }
-            public override Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-                return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(currentGroup);
-            }
-            public override Saxon.Hej.om.AtomicSequence getCurrentGroupingKey() {
-                return currentGroupingKey;
-            }
-            public override int getLength() {
-                return currentGroup.Count;
-            }
-        
         }
     
     }

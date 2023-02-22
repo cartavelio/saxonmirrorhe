@@ -9,9 +9,9 @@ namespace Saxon.Hej.expr.instruct {
         public const int GROUP_ENDING = 3;
         public const int GROUP_BREAKING_WHEN = 4;
         private readonly byte algorithm;
-        private int keyItemType;
-        private Saxon.Hej.lib.StringCollator collator = null;
+        private Saxon.Hej.lib.StringCollator collator;
         private Saxon.Hej.expr.sort.AtomicComparer[] sortComparators = null;
+        private Saxon.Hej.expr.elab.ItemEvaluator[] sortKeyEvaluators = null;
         private bool composite = false;
         private bool inFork = false;
         private readonly Saxon.Hej.expr.Operand selectOp;
@@ -54,9 +54,6 @@ namespace Saxon.Hej.expr.instruct {
         public Saxon.Hej.expr.Expression getGroupingKey() {
             return keyOp.getChildExpression();
         }
-        public int getKeyItemType() {
-            return keyItemType;
-        }
         public Saxon.Hej.expr.sort.SortKeyDefinitionList getSortKeyDefinitions() {
             return ((sortKeysOp == null) ? null : (Saxon.Hej.expr.sort.SortKeyDefinitionList)(sortKeysOp.getChildExpression()));
         }
@@ -97,9 +94,7 @@ namespace Saxon.Hej.expr.instruct {
             if ((selectedItemType == Saxon.Hej.type.ErrorType.getInstance())) {
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
             }
-            foreach (Saxon.Hej.expr.Operand o in operands()) {
-                fixupGroupReferences(this, this, selectedItemType, false);
-            }
+            fixupGroupReferences(this, this, selectedItemType, false);
             Saxon.Hej.expr.parser.ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectedItemType, false);
             cit.setContextSettingExpression(getSelectExpression());
             actionOp.typeCheck(visitor, cit);
@@ -118,8 +113,7 @@ namespace Saxon.Hej.expr.instruct {
                     if (sk.isBackwardsCompatible()) {
                         sortKey = Saxon.Hej.expr.FirstItemExpression.makeFirstItemExpression(sortKey);
                     } else {
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0);
-                        role.setErrorCode("XTTE1020");
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0, "XTTE1020");
                         sortKey = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(sortKey, Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE, role);
                     }
                     sk.setSortKey(sortKey, true);
@@ -138,7 +132,6 @@ namespace Saxon.Hej.expr.instruct {
                     }
                 }
             }
-            keyItemType = getGroupingKey().getItemType().getPrimitiveType();
             return this;
         }
         private static void fixupGroupReferences(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.instruct.ForEachGroup feg, Saxon.Hej.type.ItemType selectedItemType, bool isInLoop) {
@@ -286,60 +279,13 @@ namespace Saxon.Hej.expr.instruct {
             if ((getSortKeyDefinitions() != null)) {
                 foreach (Saxon.Hej.expr.sort.SortKeyDefinition skd in getSortKeyDefinitions()) {
                     skd.getSortKey().addToPathMap(pathMap, target);
-                    Saxon.Hej.expr.Expression e = skd.getOrder();
-                    if ((e != null)) {
-                        e.addToPathMap(pathMap, pathMapNodeSet);
-                    }
-                    e = skd.getCaseOrder();
-                    if ((e != null)) {
-                        e.addToPathMap(pathMap, pathMapNodeSet);
-                    }
-                    e = skd.getDataTypeExpression();
-                    if ((e != null)) {
-                        e.addToPathMap(pathMap, pathMapNodeSet);
-                    }
-                    e = skd.getLanguage();
-                    if ((e != null)) {
-                        e.addToPathMap(pathMap, pathMapNodeSet);
-                    }
-                    e = skd.getCollationNameExpression();
-                    if ((e != null)) {
-                        e.addToPathMap(pathMap, pathMapNodeSet);
-                    }
+                    Saxon.Hej.expr.sort.SortExpression.addSortKeyDetailsToPathMap(pathMap, pathMapNodeSet, skd);
                 }
             }
             return getActionExpression().addToPathMap(pathMap, target);
         }
         public override void checkPermittedContents(Saxon.Hej.type.SchemaType parentType, bool whole) {
             getActionExpression().checkPermittedContents(parentType, false);
-        }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.Controller controller = context.getController();
-            System.Diagnostics.Debug.Assert((controller != null));
-            Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
-            Saxon.Hej.expr.sort.GroupIterator groupIterator = getGroupIterator(context);
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            Saxon.Hej.om.FocusIterator focusIterator = c2.trackFocus(groupIterator);
-            c2.setCurrentGroupIterator(groupIterator);
-            c2.setCurrentTemplateRule(null);
-            pipe.setXPathContext(c2);
-            if (controller.isTracing()) {
-                Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                System.Diagnostics.Debug.Assert((listener != null));
-                Saxon.Hej.om.Item item;
-                while (((item = focusIterator.next()) != null)) {
-                    listener.startCurrentItem(item);
-                    getActionExpression().process(output, c2);
-                    listener.endCurrentItem(item);
-                }
-            } else {
-                while ((focusIterator.next() != null)) {
-                    getActionExpression().process(output, c2);
-                }
-            }
-            pipe.setXPathContext(context);
-            return null;
         }
         public Saxon.Hej.expr.Expression getCollationNameExpression() {
             return ((collationOp == null) ? null : collationOp.getChildExpression());
@@ -359,10 +305,7 @@ namespace Saxon.Hej.expr.instruct {
                 return Saxon.Hej.expr.sort.CodepointCollator.getInstance();
             }
         }
-        private Saxon.Hej.expr.sort.GroupIterator getGroupIterator(Saxon.Hej.expr.XPathContext context) {
-            return getGroupIterator(getSelectExpression(), context);
-        }
-        public Saxon.Hej.expr.sort.GroupIterator getGroupIterator(Saxon.Hej.expr.Expression select, Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.expr.sort.GroupIterator getGroupIterator(Saxon.Hej.expr.elab.PullEvaluator selectPull, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.sort.GroupIterator groupIterator;
             switch (algorithm) {
               case GROUP_BY:
@@ -372,7 +315,7 @@ namespace Saxon.Hej.expr.instruct {
                         coll = getCollator(context);
                     }
                     Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
-                    Saxon.Hej.om.FocusIterator population = c2.trackFocus(select.iterate(context));
+                    Saxon.Hej.om.FocusIterator population = c2.trackFocus(/*Delegate.iterate()*/selectPull(context));
                     groupIterator = new Saxon.Hej.expr.sort.GroupByIterator(population, getGroupingKey(), c2, coll, composite);
                     break ;
                 }
@@ -382,18 +325,18 @@ namespace Saxon.Hej.expr.instruct {
                     if ((coll == null)) {
                         coll = getCollator(context);
                     }
-                    groupIterator = new Saxon.Hej.expr.sort.GroupAdjacentIterator(select, getGroupingKey(), context, coll, composite);
+                    groupIterator = new Saxon.Hej.expr.sort.GroupAdjacentIterator(selectPull, getGroupingKey(), context, coll, composite);
                     break ;
                 }
               case GROUP_STARTING:
-                groupIterator = new Saxon.Hej.expr.sort.GroupStartingIterator(select, (Saxon.Hej.pattern.Pattern)(getGroupingKey()), context);
+                groupIterator = new Saxon.Hej.expr.sort.GroupStartingIterator(selectPull, (Saxon.Hej.pattern.Pattern)(getGroupingKey()), context);
                 break ;
               case GROUP_ENDING:
-                groupIterator = new Saxon.Hej.expr.sort.GroupEndingIterator(select, (Saxon.Hej.pattern.Pattern)(getGroupingKey()), context);
+                groupIterator = new Saxon.Hej.expr.sort.GroupEndingIterator(selectPull, (Saxon.Hej.pattern.Pattern)(getGroupingKey()), context);
                 break ;
               case GROUP_BREAKING_WHEN:
-                Saxon.Hej.om.Function breakWhen = (Saxon.Hej.om.Function)(getGroupingKey().evaluateItem(context));
-                groupIterator = new Saxon.Hej.expr.sort.GroupBreakingIterator(select, breakWhen, context);
+                Saxon.Hej.om.FunctionItem breakWhen = (Saxon.Hej.om.FunctionItem)(getGroupingKey().evaluateItem(context));
+                groupIterator = new Saxon.Hej.expr.sort.GroupBreakingIterator(selectPull, breakWhen, context);
                 break ;
               default:
                 throw new Saxon.Ejava.lang.AssertionError("Unknown grouping algorithm");
@@ -407,21 +350,24 @@ namespace Saxon.Hej.expr.instruct {
                         comps[s] = getSortKeyDefinitions().getSortKeyDefinition(s).makeComparator(xpc);
                     }
                 }
+                makeSortKeyEvaluators();
                 groupIterator = new Saxon.Hej.expr.sort.SortedGroupIterator(xpc, groupIterator, this, comps);
             }
             return groupIterator;
         }
+        private void makeSortKeyEvaluators() {
+            if (((sortKeyEvaluators == null) && (getSortKeyDefinitions() != null))) {
+                sortKeyEvaluators = new Saxon.Hej.expr.elab.ItemEvaluator[getSortKeyDefinitions().size()];
+                for (int s = 0; (s<getSortKeyDefinitions().size()); s++) {
+                    sortKeyEvaluators[s] = getSortKeyDefinitions().getSortKeyDefinition(s).getSortKey().makeElaborator().elaborateForItem();
+                }
+            }
+        }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.sort.GroupIterator master = getGroupIterator(context);
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            c2.trackFocus(master);
-            c2.setCurrentGroupIterator(master);
-            c2.setCurrentTemplateRule(null);
-            return new Saxon.Hej.expr.ContextMappingIterator(cc => getActionExpression().iterate(cc), c2);
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public Saxon.Hej.value.AtomicValue evaluateSortKey(int n, Saxon.Hej.expr.XPathContext c) {
-            return (Saxon.Hej.value.AtomicValue)(getSortKeyDefinitions().getSortKeyDefinition(n).getSortKey().evaluateItem(c));
+            return (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/sortKeyEvaluators[n](c));
         }
         public Saxon.Hej.expr.sort.SortKeyDefinitionList getSortKeyDefinitionList() {
             if ((sortKeysOp == null)) {
@@ -444,13 +390,8 @@ namespace Saxon.Hej.expr.instruct {
             }
             @out.setChildRole("select");
             getSelectExpression().export(@out);
-            if (((algorithm == GROUP_BY) || (algorithm == GROUP_ADJACENT))) {
-                @out.setChildRole("key");
-                getGroupingKey().export(@out);
-            } else {
-                @out.setChildRole("match");
-                getGroupingKey().export(@out);
-            }
+            @out.setChildRole(((((algorithm == GROUP_BY) || (algorithm == GROUP_ADJACENT)) || (algorithm == GROUP_BREAKING_WHEN)) ? "key" : "match"));
+            getGroupingKey().export(@out);
             if ((getSortKeyDefinitions() != null)) {
                 @out.setChildRole("sort");
                 getSortKeyDefinitionList().export(@out);
@@ -473,6 +414,8 @@ namespace Saxon.Hej.expr.instruct {
                 return "starting";
               case GROUP_ENDING:
                 return "ending";
+              case GROUP_BREAKING_WHEN:
+                return "breaking";
               default:
                 return "** unknown algorithm **";
             }
@@ -493,12 +436,121 @@ namespace Saxon.Hej.expr.instruct {
                 collationOp.setChildExpression(collationNameExpression);
             }
         }
-        public void setSortKeyDefinitions(Saxon.Hej.expr.sort.SortKeyDefinitionList sortKeyDefinitions) {
-            if ((sortKeysOp == null)) {
-                sortKeysOp = new Saxon.Hej.expr.Operand(this, sortKeyDefinitions, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
-            } else {
-                sortKeysOp.setChildExpression(sortKeyDefinitions);
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ForEachGroup.ForEachGroupElaborator();
+        }
+        public class ForEachGroupElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            private Saxon.Hej.expr.elab.PullEvaluator getGroupIteratorProvider() {
+                Saxon.Hej.expr.instruct.ForEachGroup expr = (Saxon.Hej.expr.instruct.ForEachGroup)(getExpression());
+                Saxon.Hej.expr.Expression select = expr.getSelectExpression();
+                Saxon.Hej.expr.elab.PullEvaluator selectPull = select.makeElaborator().elaborateForPull();
+                int algorithm = expr.getAlgorithm();
+                switch (algorithm) {
+                  case GROUP_BY:
+                    {
+                        return context => {
+                            Saxon.Hej.lib.StringCollator coll = expr.collator;
+                            if ((coll == null)) {
+                                coll = expr.getCollator(context);
+                            }
+                            Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
+                            Saxon.Hej.om.FocusIterator population = c2.trackFocus(/*Delegate.iterate()*/selectPull(context));
+                            return new Saxon.Hej.expr.sort.GroupByIterator(population, expr.getGroupingKey(), c2, coll, expr.composite);
+                        } ;
+                    }
+                  case GROUP_ADJACENT:
+                    {
+                        return context => {
+                            Saxon.Hej.lib.StringCollator coll = expr.collator;
+                            if ((coll == null)) {
+                                coll = expr.getCollator(context);
+                            }
+                            return new Saxon.Hej.expr.sort.GroupAdjacentIterator(selectPull, expr.getGroupingKey(), context, coll, expr.composite);
+                        } ;
+                    }
+                  case GROUP_STARTING:
+                    return context => new Saxon.Hej.expr.sort.GroupStartingIterator(selectPull, (Saxon.Hej.pattern.Pattern)(expr.getGroupingKey()), context);
+                  case GROUP_ENDING:
+                    return context => new Saxon.Hej.expr.sort.GroupEndingIterator(selectPull, (Saxon.Hej.pattern.Pattern)(expr.getGroupingKey()), context);
+                  case GROUP_BREAKING_WHEN:
+                    return context => {
+                        Saxon.Hej.om.FunctionItem breakWhen = (Saxon.Hej.om.FunctionItem)(expr.getGroupingKey().evaluateItem(context));
+                        return new Saxon.Hej.expr.sort.GroupBreakingIterator(selectPull, breakWhen, context);
+                    } ;
+                  default:
+                    throw new Saxon.Ejava.lang.AssertionError("Unknown grouping algorithm");
+                }
             }
+            private Saxon.Hej.expr.elab.PullEvaluator getSortedGroupIteratorProvider() {
+                Saxon.Hej.expr.instruct.ForEachGroup expr = (Saxon.Hej.expr.instruct.ForEachGroup)(getExpression());
+                if ((expr.getSortKeyDefinitions() != null)) {
+                    Saxon.Hej.expr.sort.AtomicComparer[] comps = ((expr.sortComparators == null) ? new Saxon.Hej.expr.sort.AtomicComparer[expr.getSortKeyDefinitions().size()] : expr.sortComparators);
+                    Saxon.Hej.expr.elab.PullEvaluator grouper = getGroupIteratorProvider();
+                    return context => {
+                        Saxon.Hej.expr.XPathContext xpc = context.newMinorContext();
+                        if ((comps[0] == null)) {
+                            for (int s = 0; (s<expr.getSortKeyDefinitions().size()); s++) {
+                                comps[s] = expr.getSortKeyDefinitions().getSortKeyDefinition(s).makeComparator(xpc);
+                            }
+                        }
+                        return new Saxon.Hej.expr.sort.SortedGroupIterator(xpc, (Saxon.Hej.expr.sort.GroupIterator)(/*Delegate.iterate()*/grouper(xpc)), expr, comps);
+                    } ;
+                } else {
+                    return getGroupIteratorProvider();
+                }
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ForEachGroup expr = (Saxon.Hej.expr.instruct.ForEachGroup)(getExpression());
+                expr.makeSortKeyEvaluators();
+                Saxon.Hej.expr.elab.PullEvaluator grouper = getSortedGroupIteratorProvider();
+                Saxon.Hej.expr.elab.PushEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    Saxon.Hej.Controller controller = context.getController();
+                    System.Diagnostics.Debug.Assert((controller != null));
+                    Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
+                    Saxon.Hej.expr.sort.GroupIterator groupIterator = (Saxon.Hej.expr.sort.GroupIterator)(/*Delegate.iterate()*/grouper(context));
+                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                    c2.setOrigin(expr);
+                    Saxon.Hej.om.FocusIterator focusIterator = c2.trackFocus(groupIterator);
+                    c2.setCurrentGroupIterator(groupIterator);
+                    c2.setCurrentTemplateRule(null);
+                    pipe.setXPathContext(c2);
+                    if (controller.isTracing()) {
+                        Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
+                        System.Diagnostics.Debug.Assert((listener != null));
+                        Saxon.Hej.om.Item item;
+                        while (((item = focusIterator.next()) != null)) {
+                            listener.startCurrentItem(item);
+                            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/action(output, c2);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                            listener.endCurrentItem(item);
+                        }
+                    } else {
+                        while ((focusIterator.next() != null)) {
+                            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/action(output, c2);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                        }
+                    }
+                    pipe.setXPathContext(context);
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.ForEachGroup expr = (Saxon.Hej.expr.instruct.ForEachGroup)(getExpression());
+                expr.makeSortKeyEvaluators();
+                Saxon.Hej.expr.elab.PullEvaluator grouper = getSortedGroupIteratorProvider();
+                Saxon.Hej.expr.elab.PullEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    Saxon.Hej.expr.sort.GroupIterator master = (Saxon.Hej.expr.sort.GroupIterator)(/*Delegate.iterate()*/grouper(context));
+                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                    c2.setOrigin(expr);
+                    c2.trackFocus(master);
+                    c2.setCurrentGroupIterator(master);
+                    c2.setCurrentTemplateRule(null);
+                    return new Saxon.Hej.expr.ContextMappingIterator(cxt => /*Delegate.iterate()*/action(cxt), c2);
+                } ;
+            }
+        
         }
     
     }

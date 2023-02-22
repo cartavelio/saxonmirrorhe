@@ -22,6 +22,9 @@ namespace Saxon.Eej.xsltextn.pedigree {
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.om.GroundedValue> members() {
             return @base.members();
         }
+        public override Saxon.Hej.ma.arrays.ArrayItem append(Saxon.Hej.om.GroundedValue newMember) {
+            return @base.append(newMember);
+        }
         public override Saxon.Hej.ma.arrays.ArrayItem concat(Saxon.Hej.ma.arrays.ArrayItem other) {
             return @base.concat(other);
         }

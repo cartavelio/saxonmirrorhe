@@ -49,12 +49,11 @@ namespace Saxon.Hej.tree.iter {
         public bool supportsGetLength() {
             return true;
         }
-        public virtual int getLength() {
+        public int getLength() {
             if ((lengthFinder == null)) {
                 throw new Saxon.Hej.trans.UncheckedXPathException("Saxon streaming restriction: last() cannot be used when consuming a sequence of streamed nodes, even if the items being processed are grounded");
             } else {
-                int length = lengthFinder();
-                return length;
+                return lengthFinder();
             }
         }
         public bool isActuallyGrounded() {
@@ -72,10 +71,6 @@ namespace Saxon.Hej.tree.iter {
     
         /* Expanding default method close from interface SequenceIterator */
         public virtual void close() {
-        }
-
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
         }
 
     }

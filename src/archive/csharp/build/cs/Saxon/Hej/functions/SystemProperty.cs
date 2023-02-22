@@ -4,15 +4,16 @@ using System.Linq;
 namespace Saxon.Hej.functions {
     public class SystemProperty : Saxon.Hej.functions.SystemFunction, Saxon.Hej.expr.Callable {
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
-            if ((arguments[0] is Saxon.Hej.expr.StringLiteral)) {
+            if (((arguments[0] is Saxon.Hej.expr.StringLiteral) && visitor.getTargetEdition().Equals(visitor.getConfiguration().getEditionCode()))) {
                 try {
                     string name = ((Saxon.Hej.expr.StringLiteral)(arguments[0])).stringify();
                     Saxon.Hej.om.StructuredQName qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(name, false, true, getRetainedStaticContext());
-                    string uri = qName.getURI();
-                    string local = qName.getLocalPart();
-                    if ((uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT) && ((((((((local.Equals("version") || local.Equals("vendor")) || local.Equals("vendor-url")) || local.Equals("product-name")) || local.Equals("product-version")) || local.Equals("supports-backwards-compatibility")) || local.Equals("xpath-version")) || local.Equals("xsd-version"))))) {
-                        string result = getProperty(uri, local, getRetainedStaticContext());
-                        return new Saxon.Hej.expr.StringLiteral(result);
+                    if (qName.hasURI(Saxon.Hej.om.NamespaceUri.XSLT)) {
+                        string local = qName.getLocalPart();
+                        if ((((((((local.Equals("version") || local.Equals("vendor")) || local.Equals("vendor-url")) || local.Equals("product-name")) || local.Equals("product-version")) || local.Equals("supports-backwards-compatibility")) || local.Equals("xpath-version")) || local.Equals("xsd-version"))) {
+                            string result = getProperty(Saxon.Hej.lib.NamespaceConstant.XSLT, local, getRetainedStaticContext());
+                            return new Saxon.Hej.expr.StringLiteral(result);
+                        }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
                 }
@@ -23,18 +24,7 @@ namespace Saxon.Hej.functions {
             string name = arguments[0].head().getStringValue();
             try {
                 Saxon.Hej.om.StructuredQName qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(name, false, true, getRetainedStaticContext());
-                return new Saxon.Hej.value.StringValue(getProperty(qName.getURI(), qName.getLocalPart(), getRetainedStaticContext()));
-            } catch (Saxon.Hej.trans.XPathException err) {
-                throw new Saxon.Hej.trans.XPathException(("Invalid system property name. "+err.Message), "XTDE1390", context);
-            }
-        }
-        private bool allowsEarlyEvaluation(Saxon.Hej.om.Sequence[] arguments, Saxon.Hej.expr.XPathContext context) {
-            string name = arguments[0].head().getStringValue();
-            try {
-                Saxon.Hej.om.StructuredQName qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(name, false, true, getRetainedStaticContext());
-                string uri = qName.getURI();
-                string local = qName.getLocalPart();
-                return (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT) && ((((((((local.Equals("version") || local.Equals("vendor")) || local.Equals("vendor-url")) || local.Equals("product-name")) || local.Equals("product-version")) || local.Equals("supports-backwards-compatibility")) || local.Equals("xpath-version")) || local.Equals("xsd-version"))));
+                return new Saxon.Hej.value.StringValue(getProperty(qName.getNamespaceUri().ToString(), qName.getLocalPart(), getRetainedStaticContext()));
             } catch (Saxon.Hej.trans.XPathException err) {
                 throw new Saxon.Hej.trans.XPathException(("Invalid system property name. "+err.Message), "XTDE1390", context);
             }
@@ -61,7 +51,7 @@ namespace Saxon.Hej.functions {
                     bool schemaAware = rsc.getPackageData().isSchemaAware();
                     return yesOrNo(schemaAware);
                   case "supports-serialization":
-                    return yesOrNo(!("JS".Equals(edition)));
+                    return "yes";
                   case "supports-backwards-compatibility":
                     return "yes";
                   case "supports-namespace-axis":

@@ -38,43 +38,6 @@ namespace Saxon.Hej.expr.instruct {
             }
             return this;
         }
-        private void removeRedundantNamespaces(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.om.NamespaceMap parentNamespaces) {
-            if (namespaceBindings.isEmpty()) {
-                return ;
-            }
-            Saxon.Hej.type.TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-            Saxon.Hej.type.ItemType contentType = getContentExpression().getItemType();
-            bool ok = (th.relationship(contentType, Saxon.Hej.pattern.NodeKindTest.ATTRIBUTE) == Saxon.Hej.type.Affinity.DISJOINT);
-            if (!(ok)) {
-                if ((getContentExpression() is Saxon.Hej.expr.instruct.Block)) {
-                    ok = true;
-                    foreach (Saxon.Hej.expr.Operand o in getContentExpression().operands()) {
-                        Saxon.Hej.expr.Expression exp = o.getChildExpression();
-                        if ((exp is Saxon.Hej.expr.instruct.FixedAttribute)) {
-                            if (!(((Saxon.Hej.expr.instruct.FixedAttribute)(exp)).getAttributeName().hasURI(""))) {
-                                ok = false;
-                                break ;
-                            }
-                        } else {
-                            Saxon.Hej.type.ItemType childType = exp.getItemType();
-                            if ((th.relationship(childType, Saxon.Hej.pattern.NodeKindTest.ATTRIBUTE) != Saxon.Hej.type.Affinity.DISJOINT)) {
-                                ok = false;
-                                break ;
-                            }
-                        }
-                    }
-                }
-            }
-            if (ok) {
-                Saxon.Hej.om.NamespaceMap reduced = namespaceBindings;
-                foreach (Saxon.Hej.om.NamespaceBinding childNamespace in namespaceBindings) {
-                    if (childNamespace.getURI().Equals(parentNamespaces.getURI(childNamespace.getPrefix()))) {
-                        reduced = reduced.remove(childNamespace.getPrefix());
-                    }
-                }
-                namespaceBindings = reduced;
-            }
-        }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.instruct.FixedElement fe = new Saxon.Hej.expr.instruct.FixedElement(elementName, namespaceBindings, bequeathNamespacesToChildren, inheritNamespacesFromParent, getSchemaType(), getValidationAction());
             fe.setContentExpression(getContentExpression().copy(rebindings));
@@ -111,7 +74,7 @@ namespace Saxon.Hej.expr.instruct {
                     }
                     itemType = new Saxon.Hej.pattern.CombinedNodeTest(new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, fp, env.getConfiguration().getNamePool()), Saxon.Hej.expr.parser.Token.INTERSECT, new Saxon.Hej.pattern.ContentTypeTest(Saxon.Hej.type.Type.ELEMENT, schemaType, config, false));
                     if (((xsiType != null) || !(decl.hasTypeAlternatives()))) {
-                        instr.getValidationOptions().setTopLevelType(schemaType);
+                        instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                         try {
                             schemaType.analyzeContentExpression(content, Saxon.Hej.type.Type.ELEMENT);
                         } catch (Saxon.Hej.trans.XPathException e) {
@@ -135,11 +98,11 @@ namespace Saxon.Hej.expr.instruct {
                     if ((validation == Saxon.Hej.lib.Validation.LAX)) {
                         Saxon.Hej.type.SchemaDeclaration decl = config.getElementDeclaration(fp);
                         if ((decl == null)) {
-                            env.issueWarning(("There is no global element declaration for "+elementName.getDisplayName()), instr.getLocation());
+                            env.issueWarning(("There is no global element declaration for "+elementName.getDisplayName()), Saxon.Hej.trans.SaxonErrorCode.SXWN9031, instr.getLocation());
                             itemType = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, fp, config.getNamePool());
                         } else {
                             schemaType = decl.getType();
-                            instr.getValidationOptions().setTopLevelType(schemaType);
+                            instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                             itemType = new Saxon.Hej.pattern.CombinedNodeTest(new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, fp, config.getNamePool()), Saxon.Hej.expr.parser.Token.INTERSECT, new Saxon.Hej.pattern.ContentTypeTest(Saxon.Hej.type.Type.ELEMENT, instr.getSchemaType(), config, false));
                             try {
                                 schemaType.analyzeContentExpression(content, Saxon.Hej.type.Type.ELEMENT);
@@ -175,17 +138,11 @@ namespace Saxon.Hej.expr.instruct {
             }
             return itemType;
         }
-        public override Saxon.Hej.om.NodeName getElementName(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo copiedNode) {
-            return elementName;
-        }
         public Saxon.Hej.om.NodeName getFixedElementName() {
             return elementName;
         }
         public override void gatherProperties(Saxon.Ejava.util.function.BiConsumer<string,System.Object> consumer) {
             consumer("name", getFixedElementName());
-        }
-        public override string getNewBaseURI(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo copiedNode) {
-            return getStaticBaseURIString();
         }
         private Saxon.Hej.type.SchemaType getXSIType(Saxon.Hej.expr.StaticContext env) {
             if ((getContentExpression() is Saxon.Hej.expr.instruct.FixedAttribute)) {
@@ -214,7 +171,7 @@ namespace Saxon.Hej.expr.instruct {
                 if ((attValue is Saxon.Hej.expr.StringLiteral)) {
                     try {
                         string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(((Saxon.Hej.expr.StringLiteral)(attValue)).stringify());
-                        string uri = namespaceBindings.getURI(parts[0]);
+                        Saxon.Hej.om.NamespaceUri uri = namespaceBindings.getNamespaceUri(parts[0]);
                         if ((uri == null)) {
                             return null;
                         } else {
@@ -271,9 +228,12 @@ namespace Saxon.Hej.expr.instruct {
                 throw;
             }
         }
-        public override void outputNamespaceNodes(Saxon.Hej.@event.Outputter @out, Saxon.Hej.om.NodeName nodeName, Saxon.Hej.om.NodeInfo copiedNode) {
+        public override Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails makeElementCreationDetails() {
+            return new Inner_ElementCreationDetails_125(this);
+        }
+        public override void outputNamespaceNodes(Saxon.Hej.@event.Outputter @out, Saxon.Hej.om.NodeName nodeName, Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails details) {
             foreach (Saxon.Hej.om.NamespaceBinding ns in namespaceBindings) {
-                @out.@namespace(ns.getPrefix(), ns.getURI(), Saxon.Hej.@event.ReceiverOption.NONE);
+                @out.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
             }
         }
         public Saxon.Hej.om.NamespaceMap getActiveNamespaces() {
@@ -282,9 +242,9 @@ namespace Saxon.Hej.expr.instruct {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("elem", this);
             @out.emitAttribute("name", elementName.getDisplayName());
-            @out.emitAttribute("nsuri", elementName.getURI());
+            @out.emitAttribute("nsuri", elementName.getNamespaceUri().ToString());
             string flags = getInheritanceFlags();
-            if ((!(elementName.getURI().Length==0) && elementName.getPrefix().Length==0)) {
+            if ((!(elementName.getNamespaceUri().isEmpty()) && elementName.getPrefix().Length==0)) {
                 flags += "d";
             }
             if (isLocal()) {
@@ -299,9 +259,9 @@ namespace Saxon.Hej.expr.instruct {
                     string prefix = ns.getPrefix();
                     if (!(prefix.Equals("xml"))) {
                         fsb.append((prefix.Length==0 ? "#" : prefix));
-                        if (!(ns.getURI().Equals(getRetainedStaticContext().getURIForPrefix(prefix, true)))) {
+                        if (!(ns.getNamespaceUri().Equals(getRetainedStaticContext().getURIForPrefix(prefix, true)))) {
                             fsb.append('=');
-                            fsb.append(ns.getURI());
+                            fsb.append(ns.getNamespaceUri());
                         }
                         fsb.append(' ');
                     }
@@ -322,6 +282,71 @@ namespace Saxon.Hej.expr.instruct {
         public override string getExpressionName() {
             return "element";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.FixedElement.FixedElementElaborator();
+        }
+        public class FixedElementElaborator : Saxon.Hej.expr.elab.ComplexNodePushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.FixedElement expr = (Saxon.Hej.expr.instruct.FixedElement)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator contentPusher = expr.getContentExpression().makeElaborator().elaborateForPush();
+                Saxon.Hej.type.SchemaType typeCode = ((expr.getValidationAction() == Saxon.Hej.lib.Validation.PRESERVE) ? Saxon.Hej.type.AnyType.getInstance() : Saxon.Hej.type.Untyped.getInstance());
+                int properties = Saxon.Hej.@event.ReceiverOption.NONE;
+                if (!(expr.bequeathNamespacesToChildren)) {
+                    properties |= Saxon.Hej.@event.ReceiverOption.DISINHERIT_NAMESPACES;
+                }
+                if (!(expr.inheritNamespacesFromParent)) {
+                    properties |= Saxon.Hej.@event.ReceiverOption.REFUSE_NAMESPACES;
+                }
+                properties |= Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES;
+                int finalProperties = properties;
+                return (@out, context) => {
+                    try {
+                        Saxon.Hej.om.NodeName elemName = expr.getFixedElementName();
+                        Saxon.Hej.@event.Receiver elemOut = @out;
+                        if (!(expr.preservingTypes)) {
+                            Saxon.Hej.lib.ParseOptions options = expr.getValidationOptions().withTopLevelElement(elemName.getStructuredQName());
+                            context.getConfiguration().prepareValidationReporting(context, options);
+                            Saxon.Hej.@event.Receiver validator = context.getConfiguration().getElementValidator(elemOut, options, expr.getLocation());
+                            if ((validator != elemOut)) {
+                                @out = new Saxon.Hej.@event.ComplexContentOutputter(validator);
+                            }
+                        }
+                        if ((@out.getSystemId() == null)) {
+                            @out.setSystemId(expr.getStaticBaseURIString());
+                        }
+                        @out.startElement(elemName, typeCode, expr.getLocation(), finalProperties);
+                        foreach (Saxon.Hej.om.NamespaceBinding ns in expr.namespaceBindings) {
+                            @out.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
+                        }
+                        Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/contentPusher(@out, context);
+                        Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                        @out.endElement();
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        e.maybeSetLocation(expr.getLocation());
+                        e.maybeSetContext(context);
+                        throw;
+                    }
+                    return null;
+                } ;
+            }
+        
+        }
     
+        private class Inner_ElementCreationDetails_125 : Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails {
+            private readonly FixedElement outerInstance;
+            public Inner_ElementCreationDetails_125(FixedElement outerInstance) {
+                this.outerInstance = outerInstance;
+            }
+            public override Saxon.Hej.om.NodeName getNodeName(Saxon.Hej.expr.XPathContext context) {
+                return outerInstance.getFixedElementName();
+            }
+            public override string getSystemId(Saxon.Hej.expr.XPathContext context) {
+                return /*guess*/outerInstance.getStaticBaseURIString();
+            }
+            public override void processContent(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
+                /*guess*/outerInstance.getContentExpression().process(/*localparam*/output, /*localparam*/context);
+            }
+        }
+
     }
 }

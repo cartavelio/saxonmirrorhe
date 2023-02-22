@@ -24,7 +24,7 @@ namespace Saxon.Eej.ee.trans {
         public override void process(Saxon.Eej.ee.trans.RuleEE rule, Saxon.Hej.pattern.Pattern pattern, System.Collections.Generic.IDictionary<Saxon.Eej.ee.trans.Precondition,System.Collections.Generic.IList<Saxon.Eej.ee.trans.RuleEE>> preconditions, System.Collections.Generic.IDictionary<Saxon.Eej.ee.trans.Characteristic,Saxon.Eej.ee.trans.Characteristic> characteristics) {
             Saxon.Hej.expr.Expression exp = ((Saxon.Hej.pattern.PatternWithPredicate)(pattern)).getPredicate();
             Saxon.Hej.expr.Expression lhs = ((Saxon.Hej.expr.ComparisonExpression)(exp)).getLhsExpression();
-            Saxon.Hej.lib.StringCollator collator = ((Saxon.Hej.expr.ComparisonExpression)(exp)).getAtomicComparer().getCollator();
+            Saxon.Hej.lib.StringCollator collator = ((Saxon.Hej.expr.ComparisonExpression)(exp)).getStringCollator();
             Saxon.Eej.ee.trans.GeneralComparisonOperand chic = new Saxon.Eej.ee.trans.GeneralComparisonOperand(collator, lhs);
             chic = (Saxon.Eej.ee.trans.GeneralComparisonOperand)(allocateCharacteristic(characteristics, chic));
             Saxon.Hej.expr.sort.AtomicMatchKey key = collator.getCollationKey(((Saxon.Hej.expr.StringLiteral)(((Saxon.Hej.expr.ComparisonExpression)(exp)).getRhsExpression())).getString());

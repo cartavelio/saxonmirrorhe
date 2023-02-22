@@ -75,20 +75,17 @@ namespace Saxon.Eej.ee.update {
             @out.endElement();
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            doUpdates(context);
-            return getReturnExp().iterate(context);
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            doUpdates(context);
-            return getReturnExp().evaluateItem(context);
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            doUpdates(context);
-            getReturnExp().process(output, context);
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         private void doUpdates(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.PendingUpdateList pul = context.getConfiguration().newPendingUpdateList();
-            getUpdateExp().evaluatePendingUpdates(context, pul);
+            /*Delegate.registerUpdates()*/getUpdateExp().makeElaborator().elaborateForUpdate()(context, pul);
             pul.apply(context, validationMode);
             System.Collections.Generic.ISet<Saxon.Hej.om.NodeInfo> copiedNodes = new System.Collections.Generic.HashSet<Saxon.Hej.om.NodeInfo>();
             Saxon.Hej.om.SequenceTool.supply(getCopyBindings().iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((node => copiedNodes.Add((Saxon.Hej.om.NodeInfo)(node)))));
@@ -99,6 +96,36 @@ namespace Saxon.Eej.ee.update {
                 err.setXPathContext(context);
                 throw err;
             }
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.ee.update.CopyModifyExpression.CopyModifyExpressionElaborator();
+        }
+        private class CopyModifyExpressionElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Eej.ee.update.CopyModifyExpression expr = (Saxon.Eej.ee.update.CopyModifyExpression)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator returnEval = expr.getReturnExp().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    expr.doUpdates(context);
+                    return /*Delegate.processLeavingTail()*/returnEval(output, context);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Eej.ee.update.CopyModifyExpression expr = (Saxon.Eej.ee.update.CopyModifyExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator returnEval = expr.getReturnExp().makeElaborator().elaborateForItem();
+                return context => {
+                    expr.doUpdates(context);
+                    return /*Delegate.eval()*/returnEval(context);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Eej.ee.update.CopyModifyExpression expr = (Saxon.Eej.ee.update.CopyModifyExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator returnEval = expr.getReturnExp().makeElaborator().elaborateForPull();
+                return context => {
+                    expr.doUpdates(context);
+                    return /*Delegate.iterate()*/returnEval(context);
+                } ;
+            }
+        
         }
     
     }

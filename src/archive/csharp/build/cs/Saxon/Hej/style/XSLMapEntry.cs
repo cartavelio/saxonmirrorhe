@@ -54,7 +54,7 @@ namespace Saxon.Hej.style {
                 select = compileSequenceConstructor(exec, decl, false);
                 select = select.simplify();
             }
-            Saxon.Hej.expr.Expression exp = Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, select);
+            Saxon.Hej.expr.Expression exp = Saxon.Hej.ma.map.MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, select);
             if (getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.STRICT_STREAMABILITY)) {
                 exp = new Saxon.Hej.expr.instruct.SequenceInstr(exp);
             }

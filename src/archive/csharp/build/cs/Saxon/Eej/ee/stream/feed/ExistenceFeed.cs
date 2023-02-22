@@ -28,7 +28,7 @@ namespace Saxon.Eej.ee.stream.feed {
             }
             level++;
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             if ((level == 0)) {
                 action();
             }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions {
     public class IsIdRef : Saxon.Hej.lib.ExtensionFunctionDefinition {
-        private static readonly Saxon.Hej.om.StructuredQName qName = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.SAXON, "is-idref");
+        private static readonly Saxon.Hej.om.StructuredQName qName = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.SAXON, "is-idref");
         public override Saxon.Hej.om.StructuredQName getFunctionQName() {
             return qName;
         }

@@ -12,7 +12,7 @@ namespace Saxon.Hej.functions {
             return new Saxon.Hej.om.LazySequence(iter);
         }
         public static Saxon.Hej.om.SequenceIterator snapshotSequence(Saxon.Hej.om.SequenceIterator nodes) {
-            return Saxon.Hej.expr.ItemMappingIterator.map(nodes, it => snapshotSingle(it));
+            return Saxon.Hej.expr.ItemMappingIterator.map(nodes, Saxon.Hej.functions.SnapshotFn.snapshotSingle /* static method reference */);
         }
         public static Saxon.Hej.om.Item snapshotSingle(Saxon.Hej.om.Item origin) {
             if ((origin is Saxon.Hej.om.NodeInfo)) {
@@ -30,8 +30,7 @@ namespace Saxon.Hej.functions {
         public static System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo> makeAncestorList(Saxon.Hej.om.NodeInfo origin) {
             System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo> ancestors = new System.Collections.Generic.List<Saxon.Hej.om.NodeInfo>(20);
             Saxon.Hej.tree.iter.AxisIterator iter = origin.iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR);
-            Saxon.Hej.om.NodeInfo item;
-            while (((item = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null)) {
+            for (Saxon.Hej.om.NodeInfo item; ((item = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null); ) {
                 ancestors.Add(item);
             }
             return ancestors;

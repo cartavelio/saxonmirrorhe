@@ -15,11 +15,11 @@ namespace Saxon.Hej.functions {
                 prefix = p.getStringValue();
             }
             Saxon.Hej.om.NamespaceResolver resolver = element.getAllNamespaces();
-            string uri = resolver.getURIForPrefix(prefix, true);
-            if (((uri == null) || uri.Length==0)) {
+            Saxon.Hej.om.NamespaceUri uri = resolver.getURIForPrefix(prefix, true);
+            if (((uri == null) || uri.isEmpty())) {
                 return null;
             }
-            return new Saxon.Hej.value.AnyURIValue(uri);
+            return new Saxon.Hej.value.AnyURIValue(uri.toUnicodeString());
         }
     
     }

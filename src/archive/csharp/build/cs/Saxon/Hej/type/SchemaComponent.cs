@@ -5,7 +5,7 @@ namespace Saxon.Hej.type {
     public interface SchemaComponent {
         Saxon.Hej.type.SchemaValidationStatus getValidationStatus();
         int getRedefinitionLevel();
-        Saxon.Hej.om.Function getComponentAsFunction();
+        Saxon.Hej.om.FunctionItem getComponentAsFunction();
     
     }
 }

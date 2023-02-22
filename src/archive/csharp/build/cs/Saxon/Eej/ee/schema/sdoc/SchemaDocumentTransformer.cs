@@ -21,14 +21,13 @@ namespace Saxon.Eej.ee.schema.sdoc {
             try {
                 Saxon.Hej.trans.XsltController transformer = pss.newController();
                 transformer.initializeController(@params);
-                Saxon.Hej.tree.linked.LinkedTreeBuilder builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
+                Saxon.Hej.tree.linked.LinkedTreeBuilder builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe, Saxon.Hej.om.Durability.LASTING);
                 builder.setNodeFactory(new Saxon.Eej.ee.schema.sdoc.SchemaNodeFactory(compiler, pipe, referrer));
                 transformer.setBaseOutputURI(input.getSystemId());
                 transformer.setGlobalContextItem(input);
                 transformer.applyTemplates(input, new Saxon.Hej.@event.TreeReceiver(builder));
                 return builder.getCurrentRoot().getTreeInfo();
             } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
-                System.Console.Error.WriteLine(e.getMessageAndLocation());
                 throw new Saxon.Hej.type.SchemaException(e);
             }
         }

@@ -8,7 +8,7 @@ namespace Saxon.Eej.ee.schema {
         public const int NAMESPACE_KNOWN = 3;
         public const int NAMESPACE_SEALED = 4;
         private Saxon.Eej.config.EnterpriseConfiguration config;
-        private readonly System.Collections.Generic.ISet<string> targetNamespaces = new System.Collections.Generic.HashSet<string>();
+        private readonly System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> targetNamespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
         private System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Eej.ee.schema.AttributeDecl> attributesByName = null;
         private Saxon.Hej.z.IntHashMap<Saxon.Eej.ee.schema.AttributeDecl> attributesByFingerprint = null;
         private System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Eej.ee.schema.AttributeGroupDecl> attributeGroups = null;
@@ -76,13 +76,13 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
         }
-        private bool isBuiltInNamespace(string @namespace) {
-            return ((@namespace.Equals(Saxon.Hej.lib.NamespaceConstant.XML) || @namespace.Equals(Saxon.Hej.lib.NamespaceConstant.FN)) || @namespace.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE));
+        private bool isBuiltInNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
+            return ((@namespace.Equals(Saxon.Hej.om.NamespaceUri.XML) || @namespace.Equals(Saxon.Hej.om.NamespaceUri.FN)) || @namespace.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE));
         }
         public Saxon.Eej.ee.schema.AttributeDecl getAttributeDecl(Saxon.Hej.om.StructuredQName name) {
             Saxon.Eej.ee.schema.AttributeDecl decl = Saxon.Impl.Helpers.MapUtils.Get(attributesByName, name);
-            if (((decl == null) && isBuiltInNamespace(name.getURI()))) {
-                config.addSchemaForBuiltInNamespace(name.getURI());
+            if (((decl == null) && isBuiltInNamespace(name.getNamespaceUri()))) {
+                config.addSchemaForBuiltInNamespace(name.getNamespaceUri());
                 decl = Saxon.Impl.Helpers.MapUtils.Get(attributesByName, name);
             }
             return decl;
@@ -134,7 +134,7 @@ namespace Saxon.Eej.ee.schema {
             }
         }
         public Saxon.Hej.type.SchemaType getSchemaType(Saxon.Hej.om.StructuredQName name) {
-            if (name.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
+            if (name.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                 Saxon.Hej.type.SchemaType type = Saxon.Hej.type.BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
                 if ((type != null)) {
                     return type;
@@ -207,8 +207,8 @@ namespace Saxon.Eej.ee.schema {
         }
         public Saxon.Eej.ee.schema.ElementDecl getElementDecl(Saxon.Hej.om.StructuredQName name) {
             Saxon.Eej.ee.schema.ElementDecl decl = Saxon.Impl.Helpers.MapUtils.Get(elementsByName, name);
-            if (((decl == null) && isBuiltInNamespace(name.getURI()))) {
-                config.addSchemaForBuiltInNamespace(name.getURI());
+            if (((decl == null) && isBuiltInNamespace(name.getNamespaceUri()))) {
+                config.addSchemaForBuiltInNamespace(name.getNamespaceUri());
                 decl = Saxon.Impl.Helpers.MapUtils.Get(elementsByName, name);
             }
             return decl;
@@ -264,7 +264,7 @@ namespace Saxon.Eej.ee.schema {
             }
             return identityConstraints.Values;
         }
-        public System.Collections.Generic.ISet<string> getTargetNamespaces() {
+        public System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getTargetNamespaces() {
             return targetNamespaces;
         }
         public Saxon.Hej.om.NamePool getNamePool() {
@@ -483,7 +483,7 @@ namespace Saxon.Eej.ee.schema {
             } else {
                 string componentType = /*134*/Saxon.Eej.ee.schema.SymbolSpace.getSymbolSpaceName(@ref.getSymbolSpace());
                 string reason = "has not been declared";
-                if (@ref.getTargetComponentName().hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
+                if (@ref.getTargetComponentName().hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                     reason = "is not defined in the XML Schema namespace";
                 }
                 string message = ((((("The "+componentType)+' ')+Saxon.Hej.trans.Err.wrap(@ref.getTargetComponentName().getDisplayName()))+" is referenced, but ")+reason);
@@ -491,7 +491,7 @@ namespace Saxon.Eej.ee.schema {
                     if ((fatal || !(compiler.isAllowDanglingReferences()))) {
                         compiler.error(message, @ref);
                     } else {
-                        compiler.warning(message, @ref);
+                        compiler.warning(message, Saxon.Hej.trans.SaxonErrorCode.SXSD1007, @ref);
                     }
                 }
                 return null;
@@ -592,7 +592,7 @@ namespace Saxon.Eej.ee.schema {
             }
             return result;
         }
-        public bool isDeclaredNotation(string uri, string local) {
+        public bool isDeclaredNotation(Saxon.Hej.om.NamespaceUri uri, string local) {
             return ((notations != null) && (Saxon.Impl.Helpers.MapUtils.Get(notations, new Saxon.Hej.om.StructuredQName("", uri, local)) != null));
         }
     

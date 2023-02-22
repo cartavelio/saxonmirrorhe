@@ -23,10 +23,10 @@ namespace Saxon.Hej.expr {
                 throw err1;
             }
             if (((getLhsExpression() is Saxon.Hej.expr.Literal) && !(((((Saxon.Hej.expr.Literal)(getLhsExpression())).getGroundedValue() is Saxon.Hej.value.BooleanValue))))) {
-                setLhsExpression(Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.get(getLhsExpression().effectiveBooleanValue(visitor.makeDynamicContext())), this));
+                setLhsExpression(Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.get(((Saxon.Hej.expr.Literal)(getLhsExpression())).getGroundedValue().effectiveBooleanValue()), this));
             }
             if (((getRhsExpression() is Saxon.Hej.expr.Literal) && !(((((Saxon.Hej.expr.Literal)(getRhsExpression())).getGroundedValue() is Saxon.Hej.value.BooleanValue))))) {
-                setRhsExpression(Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.get(getRhsExpression().effectiveBooleanValue(visitor.makeDynamicContext())), this));
+                setRhsExpression(Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.get(((Saxon.Hej.expr.Literal)(getRhsExpression())).getGroundedValue().effectiveBooleanValue()), this));
             }
             return preEvaluate();
         }

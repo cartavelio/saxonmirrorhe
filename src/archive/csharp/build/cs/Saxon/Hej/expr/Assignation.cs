@@ -126,7 +126,7 @@ namespace Saxon.Hej.expr {
             if ((variableName == null)) {
                 return ("Q{http://ns.saxonica.com/anonymous-var}var"+computeHashCode());
             } else {
-                if (variableName.hasURI("")) {
+                if (variableName.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
                     return variableName.getLocalPart();
                 } else {
                     return variableName.getEQName();

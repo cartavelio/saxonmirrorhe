@@ -16,16 +16,12 @@ namespace Saxon.Eej.functions.extfn {
                 env.setNamespaceResolver(rsc);
                 env.setDefaultElementNamespace(rsc.getDefaultElementNamespace());
             }
-            Saxon.Hej.functions.FunctionLibraryList libraryList0 = context.getController().getExecutable().getFunctionLibrary();
-            Saxon.Hej.functions.FunctionLibraryList libraryList1 = new Saxon.Hej.functions.FunctionLibraryList();
-            foreach (Saxon.Hej.functions.FunctionLibrary lib in libraryList0.getLibraryList()) {
-                if (((lib is Saxon.Hej.functions.registry.BuiltInFunctionSet) && ((Saxon.Hej.functions.registry.BuiltInFunctionSet)(lib)).getNamespace().Equals(Saxon.Hej.lib.NamespaceConstant.FN))) {
-                    libraryList1.addFunctionLibrary(Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance());
-                } else {
-                    libraryList1.addFunctionLibrary(lib);
-                }
+            Saxon.Hej.expr.PackageData pack = getRetainedStaticContext().getPackageData();
+            if ((pack is Saxon.Hej.style.StylesheetPackage)) {
+                env.setFunctionLibrary(((Saxon.Hej.style.StylesheetPackage)(pack)).getFunctionLibrary());
+            } else {
+                env.setFunctionLibrary(context.getController().getExecutable().getFunctionLibrary());
             }
-            env.setFunctionLibrary(libraryList1);
             env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
             return env;
         }
@@ -35,13 +31,12 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.expr.instruct.Executable exec = context.getController().getExecutable();
             env.setExecutable(exec);
             env.setXPathLanguageLevel(30);
-            env.setFunctionLibrary(exec.getFunctionLibrary());
             env.setAllowUndeclaredVariables(true);
             Saxon.Eej.functions.extfn.Evaluate.PreparedExpression pexpr = new Saxon.Eej.functions.extfn.Evaluate.PreparedExpression();
             pexpr.expStaticContext = env;
             pexpr.variables = new Saxon.Hej.sxpath.XPathVariable[10];
             for (int i = 1; (i<10); i++) {
-                pexpr.variables[(i-1)] = env.declareVariable("", ("p"+i));
+                pexpr.variables[(i-1)] = env.declareVariable(Saxon.Hej.om.NamespaceUri.NULL, ("p"+i));
             }
             Saxon.Hej.expr.Expression expr;
             try {

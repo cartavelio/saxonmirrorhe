@@ -34,7 +34,7 @@ namespace Saxon.Hej.expr.instruct {
         public override void localTypeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             Saxon.Hej.expr.StaticContext env = visitor.getStaticContext();
             nameOp.typeCheck(visitor, contextItemType);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "processing-instruction/name", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "processing-instruction/name", 0);
             setNameExp(visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(getNameExp(), Saxon.Hej.value.SequenceType.SINGLE_ATOMIC, role, visitor));
             Saxon.Hej.expr.Expression nameExp = getNameExp();
             adoptChildExpression(nameExp);
@@ -58,7 +58,7 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.str.UnicodeString data = checkContent(value, context);
             output.processingInstruction(expandedName, data, getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
         }
-        protected internal override Saxon.Hej.str.UnicodeString checkContent(Saxon.Hej.str.UnicodeString data, Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.str.UnicodeString checkContent(Saxon.Hej.str.UnicodeString data, Saxon.Hej.expr.XPathContext context) {
             if (isXSLT()) {
                 return checkContentXSLT(data);
             } else {
@@ -100,7 +100,7 @@ namespace Saxon.Hej.expr.instruct {
                 throw dynamicError(getLocation(), e, context);
             }
         }
-        private string checkName(Saxon.Hej.value.AtomicValue name, Saxon.Hej.expr.XPathContext context) {
+        public string checkName(Saxon.Hej.value.AtomicValue name, Saxon.Hej.expr.XPathContext context) {
             if (((name is Saxon.Hej.value.StringValue) && !(((name is Saxon.Hej.value.AnyURIValue))))) {
                 string expandedName = Saxon.Hej.value.Whitespace.trim(name.getStringValue());
                 if (!(Saxon.Hej.om.NameChecker.isValidNCName(expandedName))) {
@@ -126,18 +126,45 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("procInst", this);
-            string flags = "";
             if (isLocal()) {
-                flags += "l";
-            }
-            if (!(flags.Length==0)) {
-                @out.emitAttribute("flags", flags);
+                @out.emitAttribute("flags", "l");
             }
             @out.setChildRole("name");
             getNameExp().export(@out);
             @out.setChildRole("select");
             getSelect().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ProcessingInstruction.ProcessingInstructionElaborator();
+        }
+        private class ProcessingInstructionElaborator : Saxon.Hej.expr.elab.SimpleNodePushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ProcessingInstruction expr = (Saxon.Hej.expr.instruct.ProcessingInstruction)(getExpression());
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                Saxon.Hej.expr.elab.ItemEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForItem();
+                if (expr.isXSLT()) {
+                    return (@out, context) => {
+                        Saxon.Hej.value.StringValue name = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/nameEval(context));
+                        string checkedName = expr.checkName(name, context);
+                        Saxon.Hej.str.UnicodeString content = /*Delegate.eval()*/contentEval(context);
+                        content = Saxon.Hej.expr.instruct.ProcessingInstruction.checkContentXSLT(content);
+                        @out.processingInstruction(checkedName, content, loc, Saxon.Hej.@event.ReceiverOption.NONE);
+                        return null;
+                    } ;
+                } else {
+                    return (@out, context) => {
+                        Saxon.Hej.value.AtomicValue name = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/nameEval(context));
+                        string checkedName = expr.checkName(name, context);
+                        Saxon.Hej.str.UnicodeString content = /*Delegate.eval()*/contentEval(context);
+                        Saxon.Hej.expr.instruct.ProcessingInstruction.checkContentXQuery(content);
+                        @out.processingInstruction(checkedName, content, loc, Saxon.Hej.@event.ReceiverOption.NONE);
+                        return null;
+                    } ;
+                }
+            }
+        
         }
     
     }

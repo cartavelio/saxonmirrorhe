@@ -14,7 +14,7 @@ namespace Saxon.Hej.expr.flwor {
             return operanda;
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
-            return operanda.operands();
+            return operanda;
         }
         public void setVariables(System.Collections.Generic.IList<Saxon.Hej.expr.LocalVariableReference> refs) {
             Saxon.Hej.expr.Expression[] e = new Saxon.Hej.expr.Expression[refs.Count];
@@ -41,7 +41,7 @@ namespace Saxon.Hej.expr.flwor {
             return false;
         }
         public override Saxon.Hej.type.ItemType getItemType() {
-            return new Saxon.Hej.type.JavaExternalObjectType(typeof(Saxon.Hej.expr.flwor.Tuple));
+            return Saxon.Hej.type.JavaExternalObjectType.of(typeof(Saxon.Hej.expr.flwor.Tuple));
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             for (int i = 0; (i<getSize()); i++) {

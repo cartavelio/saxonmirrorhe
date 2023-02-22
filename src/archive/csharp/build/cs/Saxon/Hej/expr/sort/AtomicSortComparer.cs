@@ -101,7 +101,7 @@ namespace Saxon.Hej.expr.sort {
         }
         private class MatchKeyForNaN : Saxon.Hej.expr.sort.AtomicMatchKey {
             public Saxon.Hej.value.AtomicValue asAtomic() {
-                return new Saxon.Hej.value.QNameValue("saxon", "http://saxon.sf.net/collation-key", "NaN");
+                return new Saxon.Hej.value.QNameValue("saxon", Saxon.Hej.om.NamespaceUri.of("http://saxon.sf.net/collation-key"), "NaN");
             }
             public int compareTo(Saxon.Hej.expr.sort.AtomicMatchKey o) {
                 return Saxon.Hej.om.SequenceTool.INDETERMINATE_ORDERING;

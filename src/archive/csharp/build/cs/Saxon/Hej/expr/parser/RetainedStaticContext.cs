@@ -9,8 +9,8 @@ namespace Saxon.Hej.expr.parser {
         private string staticBaseUriString;
         private string defaultCollationName;
         private Saxon.Hej.om.NamespaceResolver namespaces;
-        private string defaultFunctionNamespace = Saxon.Hej.lib.NamespaceConstant.FN;
-        private string defaultElementNamespace;
+        private Saxon.Hej.om.NamespaceUri defaultFunctionNamespace = Saxon.Hej.om.NamespaceUri.FN;
+        private Saxon.Hej.om.NamespaceUri defaultElementNamespace;
         private Saxon.Hej.trans.DecimalFormatManager decimalFormatManager;
         private bool backwardsCompatibility;
         public RetainedStaticContext(Saxon.Hej.Configuration config)  {
@@ -90,16 +90,16 @@ namespace Saxon.Hej.expr.parser {
         public void setDefaultCollationName(string defaultCollationName) {
             this.defaultCollationName = defaultCollationName;
         }
-        public string getDefaultFunctionNamespace() {
+        public Saxon.Hej.om.NamespaceUri getDefaultFunctionNamespace() {
             return defaultFunctionNamespace;
         }
-        public void setDefaultFunctionNamespace(string defaultFunctionNamespace) {
+        public void setDefaultFunctionNamespace(Saxon.Hej.om.NamespaceUri defaultFunctionNamespace) {
             this.defaultFunctionNamespace = defaultFunctionNamespace;
         }
-        public string getDefaultElementNamespace() {
-            return ((defaultElementNamespace == null) ? "" : defaultElementNamespace);
+        public Saxon.Hej.om.NamespaceUri getDefaultElementNamespace() {
+            return ((defaultElementNamespace == null) ? Saxon.Hej.om.NamespaceUri.NULL : defaultElementNamespace);
         }
-        public void setDefaultElementNamespace(string ns) {
+        public void setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri ns) {
             defaultElementNamespace = ns;
         }
         public Saxon.Hej.trans.DecimalFormatManager getDecimalFormatManager() {
@@ -114,14 +114,14 @@ namespace Saxon.Hej.expr.parser {
         public void setBackwardsCompatibility(bool backwardsCompatibility) {
             this.backwardsCompatibility = backwardsCompatibility;
         }
-        public void declareNamespace(string prefix, string uri) {
+        public void declareNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             if ((namespaces is Saxon.Hej.om.NamespaceMap)) {
                 namespaces = ((Saxon.Hej.om.NamespaceMap)(namespaces)).put(prefix, uri);
             } else {
                 throw new Saxon.Ejava.lang.UnsupportedOperationException();
             }
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             return namespaces.getURIForPrefix(prefix, useDefault);
         }
         public System.Collections.Generic.IEnumerator<string> iteratePrefixes() {

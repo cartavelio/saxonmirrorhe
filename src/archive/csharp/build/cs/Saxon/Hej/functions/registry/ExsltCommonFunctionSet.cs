@@ -11,11 +11,11 @@ namespace Saxon.Hej.functions.registry {
             init();
         }
         private void init() {
-            register("node-set", 1, typeof(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.NodeSetFn), Saxon.Hej.type.AnyItemType.getInstance(), OPT, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), OPT, EMPTY);
-            register("object-type", 1, typeof(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.ObjectTypeFn), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null);
+            register("node-set", 1, e => e.populate(() => new Saxon.Hej.functions.registry.ExsltCommonFunctionSet.NodeSetFn(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), OPT, EMPTY));
+            register("object-type", 1, e => e.populate(() => new Saxon.Hej.functions.registry.ExsltCommonFunctionSet.ObjectTypeFn(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null));
         }
-        public override string getNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.EXSLT_COMMON;
+        public override Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.EXSLT_COMMON;
         }
         public override string getConventionalPrefix() {
             return "exsltCommon";

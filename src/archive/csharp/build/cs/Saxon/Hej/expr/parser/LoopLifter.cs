@@ -34,7 +34,48 @@ namespace Saxon.Hej.expr.parser {
             internal Saxon.Hej.expr.Expression expression;
             internal int loopLevel;
             internal bool multiThreaded;
-            internal System.Collections.Generic.IDictionary<Saxon.Hej.expr.Expression,string> dependees = new Saxon.Ejava.util.IdentityHashMap<Saxon.Hej.expr.Expression, string>();
+            internal Saxon.Hej.expr.parser.LoopLifter.ExpressionSet dependees;
+        
+        }
+        private class ExpressionSet {
+            private Saxon.Hej.expr.Expression firstExpression;
+            private System.Collections.Generic.IDictionary<Saxon.Hej.expr.Expression,string> furtherExpressions;
+            public void add(Saxon.Hej.expr.Expression exp) {
+                if ((firstExpression == null)) {
+                    firstExpression = exp;
+                } else {
+                    if ((firstExpression != exp)) {
+                        if ((furtherExpressions == null)) {
+                            furtherExpressions = new Saxon.Ejava.util.IdentityHashMap<Saxon.Hej.expr.Expression, string>(8);
+                            Saxon.Impl.Helpers.MapUtils.Put(furtherExpressions, exp, MARKER);
+                        } else {
+                            Saxon.Impl.Helpers.MapUtils.Put(furtherExpressions, exp, MARKER);
+                        }
+                    }
+                }
+            }
+            public void addAll(Saxon.Hej.expr.parser.LoopLifter.ExpressionSet other) {
+                if ((other.firstExpression != null)) {
+                    add(other.firstExpression);
+                    if ((other.furtherExpressions != null)) {
+                        foreach (Saxon.Hej.expr.Expression exp in Saxon.Impl.Helpers.MapUtils.KeySet(other.furtherExpressions)) {
+                            add(exp);
+                        }
+                    }
+                }
+            }
+            public bool contains(Saxon.Hej.expr.Expression exp) {
+                if ((firstExpression == null)) {
+                    return false;
+                }
+                if ((firstExpression == exp)) {
+                    return true;
+                }
+                if ((furtherExpressions != null)) {
+                    return furtherExpressions.ContainsKey(exp);
+                }
+                return false;
+            }
         
         }
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.expr.Expression,Saxon.Hej.expr.parser.LoopLifter.ExpInfo> expInfoMap = new Saxon.Ejava.util.IdentityHashMap<Saxon.Hej.expr.Expression, Saxon.Hej.expr.parser.LoopLifter.ExpInfo>();
@@ -99,7 +140,11 @@ namespace Saxon.Hej.expr.parser {
                 parent = exp;
                 while (((parent != null) && (parent != variableSetter))) {
                     try {
-                        Saxon.Impl.Helpers.MapUtils.Put(Saxon.Impl.Helpers.MapUtils.Get(expInfoMap, parent).dependees, variableSetter, MARKER);
+                        Saxon.Hej.expr.parser.LoopLifter.ExpInfo parentInfo = Saxon.Impl.Helpers.MapUtils.Get(expInfoMap, parent);
+                        if ((parentInfo.dependees == null)) {
+                            parentInfo.dependees = new Saxon.Hej.expr.parser.LoopLifter.ExpressionSet();
+                        }
+                        parentInfo.dependees.add(variableSetter);
                     } catch (Saxon.Ejava.lang.NullPointerException e) {
                         Saxon.Hej.expr.parser.ExpressionTool.validateTree(parent);
                         System.Console.Error.WriteLine(e);
@@ -113,14 +158,14 @@ namespace Saxon.Hej.expr.parser {
             Saxon.Hej.expr.parser.LoopLifter.ExpInfo info = Saxon.Impl.Helpers.MapUtils.Get(expInfoMap, exp);
             if (!(info.multiThreaded)) {
                 if (((info.loopLevel>0) && (exp.getNetCost()>0))) {
-                    if (((info.dependees.Count==0 && exp.isLiftable(streaming)) && !(mayReturnStreamedNodes(exp)))) {
+                    if ((((info.dependees == null) && exp.isLiftable(streaming)) && !(mayReturnStreamedNodes(exp)))) {
                         root = lift(exp, root);
                     } else {
                         Saxon.Hej.expr.Expression child = exp;
                         Saxon.Hej.expr.parser.LoopLifter.ExpInfo expInfo = Saxon.Impl.Helpers.MapUtils.Get(expInfoMap, exp);
                         Saxon.Hej.expr.Expression parent = exp.getParentExpression();
                         while ((parent != null)) {
-                            if (expInfo.dependees.ContainsKey(parent)) {
+                            if (((expInfo.dependees != null) && expInfo.dependees.contains(parent))) {
                                 Saxon.Hej.expr.parser.LoopLifter.ExpInfo childInfo = Saxon.Impl.Helpers.MapUtils.Get(expInfoMap, child);
                                 if ((expInfo.loopLevel != childInfo.loopLevel)) {
                                     Saxon.Hej.expr.Operand o = Saxon.Hej.expr.parser.ExpressionTool.findOperand(parent, child);
@@ -153,19 +198,20 @@ namespace Saxon.Hej.expr.parser {
             Saxon.Hej.expr.Operand oldOperand = Saxon.Hej.expr.parser.ExpressionTool.findOperand(oldParent, child);
             System.Diagnostics.Debug.Assert((oldOperand != null));
             Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
-            let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("v"+sequence++)));
+            let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("v"+sequence++)));
             Saxon.Hej.value.SequenceType type = Saxon.Hej.value.SequenceType.makeSequenceType(child.getItemType(), child.getCardinality());
             let.setRequiredType(type);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(child, let);
             let.setSequence(child);
             let.setNeedsLazyEvaluation(true);
-            let.setEvaluator((Saxon.Hej.value.Cardinality.allowsMany(child.getCardinality()) ? Saxon.Hej.expr.parser.Evaluator.MemoClosureEvaluator.INSTANCE : Saxon.Hej.expr.parser.Evaluator.SingletonClosure.INSTANCE));
             let.setAction(newAction);
             let.adoptChildExpression(newAction);
             Saxon.Hej.expr.parser.LoopLifter.ExpInfo letInfo = new Saxon.Hej.expr.parser.LoopLifter.ExpInfo();
             letInfo.expression = let;
             letInfo.dependees = childInfo.dependees;
-            Saxon.Impl.Helpers.MapUtils.PutAll(letInfo.dependees, actionInfo.dependees);
+            if (((childInfo.dependees != null)&(actionInfo.dependees != null))) {
+                letInfo.dependees.addAll(actionInfo.dependees);
+            }
             letInfo.loopLevel = actionInfo.loopLevel;
             Saxon.Impl.Helpers.MapUtils.Put(expInfoMap, let, letInfo);
             try {

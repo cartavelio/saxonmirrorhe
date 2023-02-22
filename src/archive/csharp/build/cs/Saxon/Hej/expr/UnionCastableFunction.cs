@@ -13,8 +13,7 @@ namespace Saxon.Hej.expr {
         }
         private bool effectiveBooleanValue(Saxon.Hej.om.SequenceIterator iter, Saxon.Hej.expr.XPathContext context) {
             int count = 0;
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 if ((item is Saxon.Hej.om.NodeInfo)) {
                     Saxon.Hej.om.AtomicSequence atomizedValue = item.atomize();
                     int length = Saxon.Hej.om.SequenceTool.getLength(atomizedValue);

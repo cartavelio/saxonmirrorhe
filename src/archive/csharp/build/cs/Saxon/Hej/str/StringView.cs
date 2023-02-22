@@ -22,26 +22,7 @@ namespace Saxon.Hej.str {
             if ((baseUnicodeString != null)) {
                 return baseUnicodeString;
             } else {
-                int uLength = Saxon.Hej.str.StringTool.getStringLength(baseString);
-                if ((uLength == baseString.Length)) {
-                    return baseUnicodeString = new Saxon.Hej.str.BMPString(baseString);
-                } else {
-                    byte[] triples = new byte[(uLength*3)];
-                    for (int i = 0, j = 0; (i<baseString.Length); i++) {
-                        char c = baseString[i];
-                        if (Saxon.Hej.serialize.charcode.UTF16CharacterSet.isSurrogate(c)) {
-                            int cp = Saxon.Hej.serialize.charcode.UTF16CharacterSet.combinePair(c, baseString[++i]);
-                            triples[j++] = (byte)(((((cp>>16))&unchecked((int)0xff))));
-                            triples[j++] = (byte)(((((cp>>8))&unchecked((int)0xff))));
-                            triples[j++] = (byte)(((cp&unchecked((int)0xff))));
-                        } else {
-                            triples[j++] = 0;
-                            triples[j++] = (byte)(((((c>>8))&unchecked((int)0xff))));
-                            triples[j++] = (byte)(((c&unchecked((int)0xff))));
-                        }
-                    }
-                    return baseUnicodeString = new Saxon.Hej.str.Twine24(triples);
-                }
+                return baseUnicodeString = Saxon.Hej.str.StringTool.fromCharSequence(baseString);
             }
         }}
         public override bool isEmpty() {

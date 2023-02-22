@@ -58,98 +58,94 @@ namespace Saxon.Hej.trans {
                 if ("-".Equals(arg)) {
                     positionalOptions.Add(arg);
                 } else {
-                    if (arg.Equals("--?")) {
-                        System.Console.Error.WriteLine(("Configuration features:"+featureKeys()));
-                    } else {
-                        if ((arg[0] == '-')) {
-                            string option;
-                            string value = "";
-                            if (((arg.Length>5) && (arg[1] == '-'))) {
-                                int colon = arg.IndexOf(':');
-                                if (((colon>0) && (colon<(arg.Length-1)))) {
-                                    option = arg.Substring(2, colon - 2);
-                                    value = arg.Substring((colon+1));
-                                    configOptions.setProperty(option, value);
-                                } else {
-                                    if (((colon>0) && (colon == (arg.Length-1)))) {
-                                        option = arg.Substring(2, colon - 2);
-                                        configOptions.setProperty(option, "");
-                                    } else {
-                                        option = arg.Substring(2);
-                                        configOptions.setProperty(option, "true");
-                                    }
-                                }
+                    if ((arg[0] == '-')) {
+                        string option;
+                        string value = "";
+                        if (((arg.Length>2) && (arg[1] == '-'))) {
+                            int colon = arg.IndexOf(':');
+                            if (((colon>0) && (colon<(arg.Length-1)))) {
+                                option = arg.Substring(2, colon - 2);
+                                value = arg.Substring((colon+1));
+                                configOptions.setProperty(option, value);
                             } else {
-                                int colon = arg.IndexOf(':');
-                                if (((colon>0) && (colon<(arg.Length-1)))) {
-                                    option = arg.Substring(1, colon - 1);
-                                    value = arg.Substring((colon+1));
+                                if (((colon>0) && (colon == (arg.Length-1)))) {
+                                    option = arg.Substring(2, colon - 2);
+                                    configOptions.setProperty(option, "");
                                 } else {
-                                    option = arg.Substring(1);
+                                    option = arg.Substring(2);
+                                    configOptions.setProperty(option, "true");
                                 }
-                                if ((Saxon.Impl.Helpers.MapUtils.GetOrDefault(recognizedOptions, option, -1) == -1)) {
-                                    throw new Saxon.Hej.trans.XPathException(((("Command line option -"+option)+" is not recognized. Options available: ")+displayPermittedOptions()));
-                                }
-                                if ((namedOptions.getProperty(option) != null)) {
-                                    throw new Saxon.Hej.trans.XPathException((("Command line option -"+option)+" appears more than once"));
+                            }
+                        } else {
+                            int colon = arg.IndexOf(':');
+                            if (((colon>0) && (colon<(arg.Length-1)))) {
+                                option = arg.Substring(1, colon - 1);
+                                value = arg.Substring((colon+1));
+                            } else {
+                                option = arg.Substring(1);
+                            }
+                            if ((Saxon.Impl.Helpers.MapUtils.GetOrDefault(recognizedOptions, option, -1) == -1)) {
+                                throw new Saxon.Hej.trans.XPathException(((("Command line option -"+option)+" is not recognized. Options available: ")+displayPermittedOptions()));
+                            }
+                            if ((namedOptions.getProperty(option) != null)) {
+                                throw new Saxon.Hej.trans.XPathException((("Command line option -"+option)+" appears more than once"));
+                            } else {
+                                if ("?".Equals(value)) {
+                                    displayOptionHelp(option);
+                                    throw new Saxon.Hej.trans.XPathException("No processing requested");
                                 } else {
-                                    if ("?".Equals(value)) {
-                                        displayOptionHelp(option);
-                                        throw new Saxon.Hej.trans.XPathException("No processing requested");
+                                    if ("".Equals(value)) {
+                                        int prop = Saxon.Impl.Helpers.MapUtils.Get(recognizedOptions, option);
+                                        if ((((prop&VALUE_REQUIRED)) != 0)) {
+                                            string msg = (("Command line option -"+option)+" requires a value");
+                                            if ((Saxon.Impl.Helpers.MapUtils.Get(permittedValues, option) != null)) {
+                                                msg += (": permitted values are "+displayPermittedValues(Saxon.Impl.Helpers.MapUtils.Get(permittedValues, option)));
+                                            }
+                                            throw new Saxon.Hej.trans.XPathException(msg);
+                                        }
+                                        string defaultValue = Saxon.Impl.Helpers.MapUtils.Get(defaultValues, option);
+                                        if ((defaultValue != null)) {
+                                            value = defaultValue;
+                                        }
                                     } else {
-                                        if ("".Equals(value)) {
-                                            int prop = Saxon.Impl.Helpers.MapUtils.Get(recognizedOptions, option);
-                                            if ((((prop&VALUE_REQUIRED)) != 0)) {
-                                                string msg = (("Command line option -"+option)+" requires a value");
-                                                if ((Saxon.Impl.Helpers.MapUtils.Get(permittedValues, option) != null)) {
-                                                    msg += (": permitted values are "+displayPermittedValues(Saxon.Impl.Helpers.MapUtils.Get(permittedValues, option)));
-                                                }
-                                                throw new Saxon.Hej.trans.XPathException(msg);
-                                            }
-                                            string defaultValue = Saxon.Impl.Helpers.MapUtils.Get(defaultValues, option);
-                                            if ((defaultValue != null)) {
-                                                value = defaultValue;
-                                            }
-                                        } else {
-                                            int prop = Saxon.Impl.Helpers.MapUtils.Get(recognizedOptions, option);
-                                            if ((((prop&VALUE_PROHIBITED)) != 0)) {
-                                                string msg = (("Command line option -"+option)+" does not expect a value");
-                                                throw new Saxon.Hej.trans.XPathException(msg);
-                                            }
+                                        int prop = Saxon.Impl.Helpers.MapUtils.Get(recognizedOptions, option);
+                                        if ((((prop&VALUE_PROHIBITED)) != 0)) {
+                                            string msg = (("Command line option -"+option)+" does not expect a value");
+                                            throw new Saxon.Hej.trans.XPathException(msg);
                                         }
-                                        System.Collections.Generic.ISet<string> permitted = Saxon.Impl.Helpers.MapUtils.Get(permittedValues, option);
-                                        if (((permitted != null) && !(permitted.Contains(value)))) {
-                                            throw new Saxon.Hej.trans.XPathException(((("Bad option value "+arg)+": permitted values are ")+displayPermittedValues(permitted)));
-                                        }
-                                        namedOptions.setProperty(option, value);
+                                    }
+                                    System.Collections.Generic.ISet<string> permitted = Saxon.Impl.Helpers.MapUtils.Get(permittedValues, option);
+                                    if (((permitted != null) && !(permitted.Contains(value)))) {
+                                        throw new Saxon.Hej.trans.XPathException(((("Bad option value "+arg)+": permitted values are ")+displayPermittedValues(permitted)));
+                                    }
+                                    namedOptions.setProperty(option, value);
+                                }
+                            }
+                        }
+                    } else {
+                        int eq = arg.IndexOf('=');
+                        if ((eq>=1)) {
+                            string keyword = arg.Substring(0, eq - 0);
+                            string value = "";
+                            if ((eq<(arg.Length-1))) {
+                                value = arg.Substring((eq+1));
+                            }
+                            char ch = arg[0];
+                            if (((ch == '!') && (eq>=2))) {
+                                serializationParams.setProperty(keyword.Substring(1), value);
+                            } else {
+                                if (((ch == '?') && (eq>=2))) {
+                                    paramExpressions.setProperty(keyword.Substring(1), value);
+                                } else {
+                                    if (((ch == '+') && (eq>=2))) {
+                                        paramFiles.setProperty(keyword.Substring(1), value);
+                                    } else {
+                                        paramValues.setProperty(keyword, value);
                                     }
                                 }
                             }
                         } else {
-                            int eq = arg.IndexOf('=');
-                            if ((eq>=1)) {
-                                string keyword = arg.Substring(0, eq - 0);
-                                string value = "";
-                                if ((eq<(arg.Length-1))) {
-                                    value = arg.Substring((eq+1));
-                                }
-                                char ch = arg[0];
-                                if (((ch == '!') && (eq>=2))) {
-                                    serializationParams.setProperty(keyword.Substring(1), value);
-                                } else {
-                                    if (((ch == '?') && (eq>=2))) {
-                                        paramExpressions.setProperty(keyword.Substring(1), value);
-                                    } else {
-                                        if (((ch == '+') && (eq>=2))) {
-                                            paramFiles.setProperty(keyword.Substring(1), value);
-                                        } else {
-                                            paramValues.setProperty(keyword, value);
-                                        }
-                                    }
-                                }
-                            } else {
-                                positionalOptions.Add(arg);
-                            }
+                            positionalOptions.Add(arg);
                         }
                     }
                 }
@@ -163,6 +159,10 @@ namespace Saxon.Hej.trans {
         }
         public void applyToConfiguration(Saxon.Hej.s9api.Processor processor) {
             Saxon.Hej.Configuration config = processor.getUnderlyingConfiguration();
+            if ((configOptions.getProperty("?") != null)) {
+                System.Console.Error.WriteLine(featureKeys(processor.getSaxonEdition()));
+                return ;
+            }
             foreach (string name in configOptions.stringPropertyNames()) {
                 string value = configOptions.getProperty(name);
                 string fullName = ("http://saxon.sf.net/feature/"+name);
@@ -199,7 +199,7 @@ namespace Saxon.Hej.trans {
                 if ((((getOptionValue("u") != null)) || isImplicitURI(optionValue))) {
                     Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                     request.nature = "urn:oasis:names:tc:entity:xmlns:xml:catalog";
-                    request.purpose = "catalog";
+                    request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                     foreach (string s in System.Text.RegularExpressions.Regex.Split(optionValue, ";")) {
                         Saxon.Ejavax.xml.transform.Source sourceInput;
                         try {
@@ -223,21 +223,23 @@ namespace Saxon.Hej.trans {
             }
             optionValue = getOptionValue("dtd");
             if ((optionValue != null)) {
+                int mode = Saxon.Hej.lib.Validation.DEFAULT;
                 switch (optionValue) {
                   case "on":
                     config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.DTD_VALIDATION, true);
-                    config.getParseOptions().setDTDValidationMode(Saxon.Hej.lib.Validation.STRICT);
+                    mode = Saxon.Hej.lib.Validation.STRICT;
                     break ;
                   case "off":
                     config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.DTD_VALIDATION, false);
-                    config.getParseOptions().setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
+                    mode = Saxon.Hej.lib.Validation.SKIP;
                     break ;
                   case "recover":
                     config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.DTD_VALIDATION, true);
                     config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.DTD_VALIDATION_RECOVERABLE, true);
-                    config.getParseOptions().setDTDValidationMode(Saxon.Hej.lib.Validation.LAX);
+                    mode = Saxon.Hej.lib.Validation.LAX;
                     break ;
                 }
+                config.setParseOptions(config.getParseOptions().withDTDValidationMode(mode));
             }
             optionValue = getOptionValue("ea");
             if ((optionValue != null)) {
@@ -247,7 +249,7 @@ namespace Saxon.Hej.trans {
             optionValue = getOptionValue("expand");
             if ((optionValue != null)) {
                 bool on = Saxon.Hej.Configuration.requireBoolean("expand", optionValue);
-                config.getParseOptions().setExpandAttributeDefaults(on);
+                config.setParseOptions(config.getParseOptions().withExpandAttributeDefaults(on));
             }
             optionValue = getOptionValue("ext");
             if ((optionValue != null)) {
@@ -261,7 +263,7 @@ namespace Saxon.Hej.trans {
             }
             optionValue = getOptionValue("m");
             if ((optionValue != null)) {
-                config.setConfigurationProperty(Saxon.Hej.lib.Feature<string>.MESSAGE_EMITTER_CLASS, optionValue);
+                config.setConfigurationProperty(Saxon.Hej.lib.Feature<System.Object>.MESSAGE_EMITTER_CLASS, optionValue);
             }
             optionValue = getOptionValue("opt");
             if ((optionValue != null)) {
@@ -342,9 +344,11 @@ namespace Saxon.Hej.trans {
             }
             optionValue = getOptionValue("init");
             if ((optionValue != null)) {
-                Saxon.Hej.lib.Initializer initializer = (Saxon.Hej.lib.Initializer)(config.getInstance(optionValue));
-                initializer.initialize(config);
+                invokeInitializer(processor, optionValue);
             }
+        }
+        private void invokeInitializer(Saxon.Hej.s9api.Processor processor, string initializationClass) {
+            Saxon.Api.Support.InitializationHandler.doInitialization(new Saxon.Api.Processor(processor), initializationClass);
         }
         private void setCatalogFiles(Saxon.Hej.Configuration config, System.Collections.Generic.IList<string> catalogs) {
             Saxon.Hej.lib.JJ_ResourceResolver rr = config.getResourceResolver();
@@ -424,10 +428,14 @@ namespace Saxon.Hej.trans {
             applyFileParameters(processor, paramSetter);
             foreach (string name in paramExpressions.stringPropertyNames()) {
                 string value = paramExpressions.getProperty(name);
-                Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
-                Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
-                Saxon.Api.XdmValue val = xpe.load().evaluate();
-                /*Delegate.setParam()*/paramSetter(Saxon.Api.QName.FromClarkName(name), val);
+                try {
+                    Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
+                    Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
+                    Saxon.Api.XdmValue val = xpe.load().evaluate();
+                    /*Delegate.setParam()*/paramSetter(Saxon.Api.QName.FromClarkName(name), val);
+                } catch (Saxon.Api.SaxonApiException e) {
+                    throw new Saxon.Api.SaxonApiException((("Failure evaluating XPath expression {"+value)+"} on command line"), e.InnerException);
+                }
             }
         }
         private void applyFileParameters(Saxon.Hej.s9api.Processor processor, Saxon.Hej.trans.CommandLineOptions.ParamSetter paramSetter) {
@@ -468,16 +476,20 @@ namespace Saxon.Hej.trans {
             }
             foreach (string name in paramExpressions.stringPropertyNames()) {
                 string value = paramExpressions.getProperty(name);
-                Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
-                Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
-                Saxon.Api.XdmValue val = xpe.load().evaluate();
-                compiler.setParameter(Saxon.Api.QName.FromClarkName(name), val);
+                try {
+                    Saxon.Hej.s9api.XPathCompiler xpc = processor.newXPathCompiler();
+                    Saxon.Hej.s9api.XPathExecutable xpe = xpc.compile(value);
+                    Saxon.Api.XdmValue val = xpe.load().evaluate();
+                    compiler.setParameter(Saxon.Api.QName.FromClarkName(name), val);
+                } catch (Saxon.Api.SaxonApiException e) {
+                    throw new Saxon.Api.SaxonApiException((("Failure evaluating XPath expression {"+value)+"} on command line"), e.InnerException);
+                }
             }
         }
         public void applyFileParams(Saxon.Hej.s9api.Processor processor, Saxon.Hej.s9api.Xslt30Transformer transformer) {
             if (!(paramFiles.isEmpty())) {
                 System.Collections.Generic.IDictionary<Saxon.Api.QName,Saxon.Api.XdmValue> @params = new System.Collections.Generic.Dictionary<Saxon.Api.QName, Saxon.Api.XdmValue>();
-                applyFileParameters(processor, (k, v) => Saxon.Impl.Helpers.MapUtils.Put(@params, k, v));
+                applyFileParameters(processor, (name, value) => Saxon.Impl.Helpers.MapUtils.Put(@params, name, value));
                 transformer.setStylesheetParameters(@params);
             }
         }
@@ -489,7 +501,7 @@ namespace Saxon.Hej.trans {
                     Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                     request.uri = sourceFileName;
                     request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                    request.purpose = "source document";
+                    request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                     sourceInput = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Api.SaxonApiException(e);
@@ -540,11 +552,13 @@ namespace Saxon.Hej.trans {
                 config.addSchemaSource(new Saxon.Ejavax.xml.transform.stream.StreamSource(schemaFile));
             }
         }
-        public static string featureKeys() {
+        public static string featureKeys(string edition) {
             int index = "http://saxon.sf.net/feature/".Length;
             Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder();
             foreach (string name in Saxon.Hej.lib.FeatureIndex.getNames()) {
-                sb.append("\n  ").append(name.Substring(index));
+                if (Saxon.Hej.lib.FeatureIndex.getData(name).editions.Contains(edition)) {
+                    sb.append("\n  ").append(name.Substring(index));
+                }
             }
             return sb.ToString();
         }

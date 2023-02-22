@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.sort {
     public class GroupStartingIterator : Saxon.Hej.expr.sort.GroupMatchingIterator, Saxon.Hej.tree.iter.LookaheadIterator, Saxon.Hej.expr.sort.GroupIterator {
-        public GroupStartingIterator(Saxon.Hej.expr.Expression select, Saxon.Hej.pattern.Pattern startPattern, Saxon.Hej.expr.XPathContext context)  {
+        public GroupStartingIterator(Saxon.Hej.expr.elab.PullEvaluator select, Saxon.Hej.pattern.Pattern startPattern, Saxon.Hej.expr.XPathContext context)  {
             this.select = select;
             this.pattern = startPattern;
             baseContext = context;
             runningContext = context.newMinorContext();
-            this.population = runningContext.trackFocus(select.iterate(context));
+            this.population = runningContext.trackFocus(/*Delegate.iterate()*/select(context));
             nextItem = population.next();
         }
         public override bool supportsGetLength() {

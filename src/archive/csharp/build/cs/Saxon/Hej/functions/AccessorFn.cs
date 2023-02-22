@@ -188,6 +188,26 @@ namespace Saxon.Hej.functions {
             }
         
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.AccessorFn.AccessorFnElaborator();
+        }
+        public class AccessorFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.functions.AccessorFn fn = (Saxon.Hej.functions.AccessorFn)(fnc.getTargetFunction());
+                Saxon.Hej.functions.AccessorFn.Component component = fn.getComponentId();
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = fnc.getArg(0).makeElaborator().elaborateForItem();
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(fnc.getArg((0)).getCardinality());
+                return context => {
+                    Saxon.Hej.value.AtomicValue @base = ((Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/argEval(context)));
+                    if ((nullable && (@base == null))) {
+                        return null;
+                    }
+                    return @base.getComponent(component);
+                } ;
+            }
+        
+        }
     
     }
 }

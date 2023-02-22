@@ -193,8 +193,6 @@ namespace Saxon.Hej.style {
         public void setRedundant(bool redundant) {
             this.redundant = redundant;
         }
-        public void generateByteCode(Saxon.Hej.expr.parser.Optimizer opt) {
-        }
     
     }
 }

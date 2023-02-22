@@ -19,24 +19,24 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             checkMutuallyExclusiveAttributes("namespace", "notNamespace");
             string attValue;
-            attValue = atts.getValue("", "namespace");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "namespace");
             if ((attValue != null)) {
                 processAllowedNamespaces(attValue, wildcard.getWildcard());
             }
-            attValue = atts.getValue("", "notNamespace");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "notNamespace");
             if ((attValue != null)) {
                 processDisallowedNamespaces(attValue, wildcard.getWildcard());
             }
-            attValue = atts.getValue("", "notQName");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "notQName");
             if ((attValue != null)) {
                 processDisallowedQNames(attValue, wildcard.getWildcard());
             }
-            attValue = atts.getValue("", "maxOccurs");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "maxOccurs");
             if ((attValue != null)) {
                 int max = processMaxOccurs(attValue);
                 wildcard.setMaxOccurs(max);
             }
-            attValue = atts.getValue("", "minOccurs");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "minOccurs");
             if ((attValue != null)) {
                 int minOccurs = processMinOccurs(attValue);
                 wildcard.setMinOccurs(minOccurs);
@@ -45,7 +45,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             if (((maxOccurs != -1) && (wildcard.getMinOccurs()>maxOccurs))) {
                 error("maxOccurs must not be less than minOccurs");
             }
-            attValue = atts.getValue("", "processContents");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "processContents");
             if ((attValue != null)) {
                 if (isProcessName(attValue)) {
                     wildcard.getWildcard().setProcessContents(attValue);
@@ -57,10 +57,10 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         public override void validate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             base.validate(compiler);
-            if (((getAttributeValue("", "notNamespace") != null) && (compiler.getLanguageVersion() != Saxon.Hej.Configuration.XSD11))) {
+            if (((getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "notNamespace") != null) && (compiler.getLanguageVersion() != Saxon.Hej.Configuration.XSD11))) {
                 error("The notNamespace attribute requires XSD 1.1 to be enabled");
             }
-            if (((getAttributeValue("", "notQName") != null) && (compiler.getLanguageVersion() != Saxon.Hej.Configuration.XSD11))) {
+            if (((getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "notQName") != null) && (compiler.getLanguageVersion() != Saxon.Hej.Configuration.XSD11))) {
                 error("The notQName attribute requires XSD 1.1 to be enabled");
             }
         }

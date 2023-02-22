@@ -71,9 +71,6 @@ namespace Saxon.Hej.style {
                 }
             }
         }
-        public void addXSLOverrideFunctionLibrary(Saxon.Hej.functions.FunctionLibraryList list) {
-            list.addFunctionLibrary(Saxon.Hej.style.XSLOriginalLibrary.getInstance());
-        }
     
     }
 }

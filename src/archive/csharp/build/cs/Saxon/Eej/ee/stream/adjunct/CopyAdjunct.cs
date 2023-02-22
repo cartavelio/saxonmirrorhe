@@ -23,8 +23,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                             if (!(expression.isPreservingTypes())) {
                                 Saxon.Hej.Controller controller = context.getController();
                                 Saxon.Hej.Configuration config = controller.getConfiguration();
-                                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(expression.getValidationOptions());
-                                options.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
+                                Saxon.Hej.lib.ParseOptions options = expression.getValidationOptions().withSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
                                 Saxon.Hej.@event.Receiver val = config.getDocumentValidator(next, node.getBaseURI(), options, expression.getLocation());
                                 next = new Saxon.Hej.@event.ComplexContentOutputter(val);
                             }
@@ -39,8 +38,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                             if (!(expression.isPreservingTypes())) {
                                 Saxon.Hej.Controller controller = context.getController();
                                 System.Diagnostics.Debug.Assert((controller != null));
-                                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(expression.getValidationOptions());
-                                options.setTopLevelElement(elemName.getStructuredQName());
+                                Saxon.Hej.lib.ParseOptions options = expression.getValidationOptions().withTopLevelElement(elemName.getStructuredQName());
                                 try {
                                     Saxon.Hej.@event.Receiver val = context.getConfiguration().getElementValidator(next, options, expression.getLocation());
                                     next = new Saxon.Hej.@event.ComplexContentOutputter(val);
@@ -49,23 +47,21 @@ namespace Saxon.Eej.ee.stream.adjunct {
                                 }
                             }
                             if ((next.getSystemId() == null)) {
-                                next.setSystemId(expression.getNewBaseURI(context, node));
+                                next.setSystemId(node.getBaseURI());
                             }
                             next.startElement(elemName, typeCode, expression.getLocation(), properties);
-                            expression.outputNamespaceNodes(next, elemName, node);
+                            if (expression.isCopyNamespaces()) {
+                                next.namespaces(node.getAllNamespaces(), Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK);
+                            } else {
+                                Saxon.Hej.om.NamespaceBinding ns = elemName.getNamespaceBinding();
+                                if (!(ns.isDefaultUndeclaration())) {
+                                    next.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
+                                }
+                            }
                             break ;
                         }
                       default:
-                        try {
-                            Saxon.Hej.expr.instruct.TailCall tc = expression.processLeavingTail(next, context, node);
-                            while ((tc != null)) {
-                                tc = tc.processLeavingTail();
-                            }
-                        } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetLocation(expression.getLocation());
-                            throw;
-                        }
-                        break ;
+                        throw new Saxon.Ejava.lang.UnsupportedOperationException();
                     }
                 }
             }

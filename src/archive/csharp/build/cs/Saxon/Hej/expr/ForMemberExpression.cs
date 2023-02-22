@@ -10,7 +10,7 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             getSequenceOp().typeCheck(visitor, contextInfo);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "'in' clause of for-member", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "'in' clause of for-member", 0);
             Saxon.Hej.expr.Expression operand = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(getSequence(), Saxon.Hej.ma.arrays.ArrayItemType.SINGLE_ARRAY, role, visitor);
             setSequence(operand);
             if (Saxon.Hej.expr.Literal.isEmptySequence(getAction())) {
@@ -45,31 +45,10 @@ namespace Saxon.Hej.expr {
             getAction().checkPermittedContents(parentType, false);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            int slot = getLocalSlotNumber();
-            Saxon.Hej.ma.arrays.ArrayItem theArray = ((Saxon.Hej.ma.arrays.ArrayItem)(getSequence().evaluateItem(context)));
-            int length = theArray.arrayLength();
-            Saxon.Hej.expr.AscendingRangeIterator @base = new Saxon.Hej.expr.AscendingRangeIterator(0, 1, (length-1));
-            return Saxon.Hej.expr.MappingIterator.map(@base, index => {
-                Saxon.Hej.om.Sequence member = theArray.get((int)(((Saxon.Hej.value.IntegerValue)(index)).longValue()));
-                context.setLocalVariable(slot, member);
-                return getAction().iterate(context);
-            } );
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            int slot = getLocalSlotNumber();
-            Saxon.Hej.ma.arrays.ArrayItem theArray = ((Saxon.Hej.ma.arrays.ArrayItem)(getSequence().evaluateItem(context)));
-            foreach (Saxon.Hej.om.GroundedValue member in theArray.members()) {
-                context.setLocalVariable(slot, member);
-                getAction().process(output, context);
-            }
-        }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            int slot = getLocalSlotNumber();
-            Saxon.Hej.ma.arrays.ArrayItem theArray = ((Saxon.Hej.ma.arrays.ArrayItem)(getSequence().evaluateItem(context)));
-            foreach (Saxon.Hej.om.GroundedValue member in theArray.members()) {
-                context.setLocalVariable(slot, member);
-                getAction().evaluatePendingUpdates(context, pul);
-            }
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override Saxon.Hej.type.ItemType getItemType() {
             return getAction().getItemType();
@@ -98,6 +77,56 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "ForMemberExpression";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.ForMemberExpression.ForMemberExprElaborator();
+        }
+        public class ForMemberExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.ForMemberExpression expr = (Saxon.Hej.expr.ForMemberExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator arrayEval = expr.getSequence().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.PullEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPull();
+                int slot = expr.getLocalSlotNumber();
+                return context => {
+                    Saxon.Hej.ma.arrays.ArrayItem theArray = ((Saxon.Hej.ma.arrays.ArrayItem)(/*Delegate.eval()*/arrayEval(context)));
+                    int length = theArray.arrayLength();
+                    Saxon.Hej.expr.AscendingRangeIterator @base = new Saxon.Hej.expr.AscendingRangeIterator(0, 1, (length-1));
+                    return Saxon.Hej.expr.MappingIterator.map(@base, index => {
+                        Saxon.Hej.om.Sequence member = theArray.get((int)(((Saxon.Hej.value.IntegerValue)(index)).longValue()));
+                        context.setLocalVariable(slot, member);
+                        return /*Delegate.iterate()*/actionEval(context);
+                    } );
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.ForExpression expr = (Saxon.Hej.expr.ForExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.PushEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPush();
+                int slot = expr.getLocalSlotNumber();
+                return (output, context) => {
+                    Saxon.Hej.ma.arrays.ArrayItem theArray = (Saxon.Hej.ma.arrays.ArrayItem)(/*Delegate.eval()*/selectEval(context));
+                    foreach (Saxon.Hej.om.GroundedValue member in theArray.members()) {
+                        context.setLocalVariable(slot, member);
+                        Saxon.Hej.expr.instruct.TailCall tail = /*Delegate.processLeavingTail()*/actionEval(output, context);
+                        Saxon.Hej.expr.Expression.dispatchTailCall(tail);
+                    }
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.ForExpression expr = (Saxon.Hej.expr.ForExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.UpdateEvaluator actionEval = expr.getAction().makeElaborator().elaborateForUpdate();
+                int slot = expr.getLocalSlotNumber();
+                return (context, pul) => {
+                    Saxon.Hej.ma.arrays.ArrayItem theArray = ((Saxon.Hej.ma.arrays.ArrayItem)(/*Delegate.eval()*/selectEval(context)));
+                    foreach (Saxon.Hej.om.GroundedValue member in theArray.members()) {
+                        context.setLocalVariable(slot, member);
+                        /*Delegate.registerUpdates()*/actionEval(context, pul);
+                    }
+                } ;
+            }
+        
         }
     
     }

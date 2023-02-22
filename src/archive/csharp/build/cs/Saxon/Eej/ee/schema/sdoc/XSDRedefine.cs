@@ -13,7 +13,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"id", "schemaLocation"};
             allowAttributes(atts, allowed);
             processId();
-            string schemaLocation = atts.getValue("", "schemaLocation");
+            string schemaLocation = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "schemaLocation");
             if ((schemaLocation == null)) {
                 missingAttribute("schemaLocation");
                 throw new Saxon.Hej.type.SchemaException("Processing abandoned");
@@ -29,7 +29,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             if ((source == null)) {
                 warning(("Failed to locate redefined schema document "+schemaLocation));
-                externalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), "");
+                externalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), Saxon.Hej.om.NamespaceUri.NULL);
             }
             if ((source != null)) {
                 if (compiler.isBeingRead(source.getSystemId())) {
@@ -54,7 +54,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             System.Exception cause = e.getException();
             if (/*134*/Saxon.Eej.ee.schema.sdoc.XSDInclude.isFileNotFoundException(cause)) {
                 warning(("Failed to locate redefined schema document "+schemaLocation));
-                externalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), "");
+                externalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), Saxon.Hej.om.NamespaceUri.NULL);
             } else {
                 throw e;
             }
@@ -84,7 +84,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                   case Saxon.Hej.om.StandardNames.XS_ATTRIBUTE_GROUP:
                     {
-                        string attributeGroupName = child.getAttributeValue("", "name");
+                        string attributeGroupName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((attributeGroupName != null) && !(redefinedAttributeGroups.Add(attributeGroupName)))) {
                             error("Attempting to redefine the same attribute group more than once");
                         }
@@ -93,7 +93,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                   case Saxon.Hej.om.StandardNames.XS_COMPLEX_TYPE:
                   case Saxon.Hej.om.StandardNames.XS_SIMPLE_TYPE:
                     {
-                        string typeName = child.getAttributeValue("", "name");
+                        string typeName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((typeName != null) && !(redefinedTypes.Add(typeName)))) {
                             error("Attempting to redefine the same type more than once");
                         }
@@ -101,7 +101,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                   case Saxon.Hej.om.StandardNames.XS_GROUP:
                     {
-                        string modelGroupName = child.getAttributeValue("", "name");
+                        string modelGroupName = child.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                         if (((modelGroupName != null) && !(redefinedModelGroups.Add(modelGroupName)))) {
                             error("Attempting to redefine the same named model group more than once");
                         }

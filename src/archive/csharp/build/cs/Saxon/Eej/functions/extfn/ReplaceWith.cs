@@ -15,7 +15,7 @@ namespace Saxon.Eej.functions.extfn {
                 extra[3] = Saxon.Hej.value.StringValue.EMPTY_STRING;
                 arguments = extra;
             }
-            Saxon.Hej.om.Function arg2 = (Saxon.Hej.om.Function)(arguments[2].head());
+            Saxon.Hej.om.FunctionItem arg2 = (Saxon.Hej.om.FunctionItem)(arguments[2].head());
             System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString> fn = @in => {
                 try {
                     Saxon.Hej.om.Sequence result = arg2.call(context, new Saxon.Hej.om.Sequence[]{new Saxon.Hej.value.StringValue(@in)});

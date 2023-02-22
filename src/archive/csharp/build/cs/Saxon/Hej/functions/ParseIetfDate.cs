@@ -232,7 +232,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.value.TimeValue time = timeValue[0];
             if ((time.getHour() == 24)) {
                 date = Saxon.Hej.value.DateValue.tomorrow(date.getYear(), date.getMonth(), date.getDay());
-                time = new Saxon.Hej.value.TimeValue((byte)(0), (byte)(0), (byte)(0), 0, time.getTimezoneInMinutes(), "");
+                time = new Saxon.Hej.value.TimeValue((byte)(0), (byte)(0), (byte)(0), 0, time.getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.TIME);
             }
             return Saxon.Hej.value.DateTimeValue.makeDateTimeValue(date, time);
         }
@@ -424,7 +424,7 @@ namespace Saxon.Hej.functions {
             if (!(isValidTime(hour, minute, second, microsecond, tz))) {
                 badDate("Time/timezone is not valid", input);
             }
-            Saxon.Hej.value.TimeValue timeValue = new Saxon.Hej.value.TimeValue(hour, minute, second, (microsecond*1000), tz, "");
+            Saxon.Hej.value.TimeValue timeValue = new Saxon.Hej.value.TimeValue(hour, minute, second, (microsecond*1000), tz, Saxon.Hej.type.BuiltInAtomicType.TIME);
             result.Add(timeValue);
             return n;
         }

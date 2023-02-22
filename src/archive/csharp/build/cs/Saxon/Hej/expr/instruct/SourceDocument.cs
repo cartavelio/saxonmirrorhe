@@ -13,6 +13,9 @@ namespace Saxon.Hej.expr.instruct {
             this.parseOptions = options;
             this.accumulators = options.getApplicableAccumulators();
         }
+        public virtual void setSpaceStrippingRule(Saxon.Hej.om.SpaceStrippingRule rule) {
+            parseOptions = parseOptions.withSpaceStrippingRule(rule);
+        }
         public override string getExpressionName() {
             return "xsl:source-document";
         }
@@ -42,7 +45,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             hrefOp.typeCheck(visitor, contextInfo);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:stream/href", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:stream/href", 0);
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
             hrefOp.setChildExpression(tc.staticTypeCheck(hrefOp.getChildExpression(), Saxon.Hej.value.SequenceType.SINGLE_STRING, role, visitor));
             Saxon.Hej.expr.parser.ContextItemStaticInfo newType = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.pattern.NodeKindTest.DOCUMENT, false);
@@ -74,10 +77,7 @@ namespace Saxon.Hej.expr.instruct {
             return base.computeSpecialProperties();
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
-            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions());
-            if (("JS".Equals(options.target) && (options.targetVersion == 1))) {
-                throw new Saxon.Hej.trans.XPathException("xsl:source-document is not supported in Saxon-JS 1.*", Saxon.Hej.trans.SaxonErrorCode.SXJS0001);
-            }
+            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = @out.getOptions();
             @out.startElement(getExportTag(), this);
             int validation = parseOptions.getSchemaValidationMode();
             if (((validation != Saxon.Hej.lib.Validation.SKIP) && (validation != Saxon.Hej.lib.Validation.BY_TYPE))) {
@@ -131,19 +131,6 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, exp);
             return exp;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            try {
-                push(output, context);
-            } catch (Saxon.Hej.trans.QuitParsingException q) {
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                if ((e.getErrorCodeQName() == null)) {
-                    e.setErrorCode("FODC0002");
-                }
-                throw;
-            }
-            return null;
-        }
         public virtual void push(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
             string href = hrefOp.getChildExpression().evaluateAsString(context).ToString();
             Saxon.Hej.om.NodeInfo doc = Saxon.Hej.functions.DocumentFn.makeDoc(href, getStaticBaseURIString(), getPackageData(), parseOptions, context, getLocation(), false);
@@ -156,6 +143,32 @@ namespace Saxon.Hej.expr.instruct {
                 c2.setCurrentIterator(new Saxon.Hej.tree.iter.ManualIterator(doc));
                 bodyOp.getChildExpression().process(output, c2);
             }
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.SourceDocument.SourceDocumentElaborator();
+        }
+        private class SourceDocumentElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.SourceDocument expr = (Saxon.Hej.expr.instruct.SourceDocument)(getExpression());
+                Saxon.Hej.expr.elab.StringEvaluator hrefEval = expr.getHref().makeElaborator().elaborateForString(false);
+                Saxon.Hej.expr.elab.PushEvaluator bodyPush = expr.getBody().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    string href = /*Delegate.eval()*/hrefEval(context);
+                    Saxon.Hej.om.NodeInfo doc = Saxon.Hej.functions.DocumentFn.makeDoc(href, expr.getStaticBaseURIString(), expr.getPackageData(), expr.parseOptions, context, expr.getLocation(), false);
+                    if ((doc != null)) {
+                        Saxon.Hej.Controller controller = context.getController();
+                        if (((expr.accumulators != null) && (controller is Saxon.Hej.trans.XsltController))) {
+                            ((Saxon.Hej.trans.XsltController)(controller)).getAccumulatorManager().setApplicableAccumulators(doc.getTreeInfo(), expr.accumulators);
+                        }
+                        Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
+                        c2.setCurrentIterator(new Saxon.Hej.tree.iter.ManualIterator(doc));
+                        return /*Delegate.processLeavingTail()*/bodyPush(output, c2);
+                    } else {
+                        return null;
+                    }
+                } ;
+            }
+        
         }
     
     }

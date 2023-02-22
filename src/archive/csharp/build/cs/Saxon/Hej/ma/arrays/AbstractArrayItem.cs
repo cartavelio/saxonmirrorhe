@@ -41,7 +41,7 @@ namespace Saxon.Hej.ma.arrays {
             Saxon.Hej.value.IntegerValue subscript = (Saxon.Hej.value.IntegerValue)(args[0].head());
             return get((Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript(subscript, arrayLength())-1));
         }
-        public override bool deepEquals(Saxon.Hej.om.Function other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
+        public override bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
             if ((other is Saxon.Hej.ma.arrays.ArrayItem)) {
                 Saxon.Hej.ma.arrays.ArrayItem that = (Saxon.Hej.ma.arrays.ArrayItem)(other);
                 if ((this.arrayLength() != that.arrayLength())) {
@@ -61,7 +61,7 @@ namespace Saxon.Hej.ma.arrays {
             throw new Saxon.Hej.trans.XPathException("Effective boolean value is not defined for arrays", "FORG0006");
         }
         public override Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
-            throw new Saxon.Ejava.lang.UnsupportedOperationException("An array does not have a string value");
+            throw new Saxon.Hej.trans.UncheckedXPathException(new Saxon.Hej.trans.XPathException("An array has no string value", "FOTY0014"));
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("array");

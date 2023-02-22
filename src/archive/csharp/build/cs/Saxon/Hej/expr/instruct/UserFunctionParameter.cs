@@ -8,7 +8,9 @@ namespace Saxon.Hej.expr.instruct {
         private int slotNumber;
         private readonly int referenceCount = 999;
         private bool isIndexed = false;
+        private bool isRequiredParam = true;
         private Saxon.Hej.trans.FunctionStreamability functionStreamability = Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED;
+        private Saxon.Hej.expr.Expression defaultValue;
         public UserFunctionParameter()  {
         }
         public bool isGlobal() {
@@ -16,6 +18,12 @@ namespace Saxon.Hej.expr.instruct {
         }
         public bool isAssignable() {
             return false;
+        }
+        public void setRequired(bool required) {
+            isRequiredParam = required;
+        }
+        public bool isRequired() {
+            return isRequiredParam;
         }
         public void setSlotNumber(int slot) {
             slotNumber = slot;
@@ -39,6 +47,12 @@ namespace Saxon.Hej.expr.instruct {
             return variableQName;
         }
         public void addReference(Saxon.Hej.expr.VariableReference @ref, bool isLoopingReference) {
+        }
+        public void setDefaultValueExpression(Saxon.Hej.expr.Expression select) {
+            this.defaultValue = select;
+        }
+        public Saxon.Hej.expr.Expression getDefaultValueExpression() {
+            return defaultValue;
         }
         public int getReferenceCount() {
             return referenceCount;

@@ -49,7 +49,7 @@ namespace Saxon.Hej.expr {
             return ITERATE_METHOD;
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.NodeInfo origin = null;
+            Saxon.Hej.om.NodeInfo origin;
             try {
                 origin = (Saxon.Hej.om.NodeInfo)(getStart().evaluateItem(context));
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -66,6 +66,33 @@ namespace Saxon.Hej.expr {
         }
         public override string getExpressionName() {
             return "simpleStep";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.SimpleStepExpression.SimpleStepExprElaborator();
+        }
+        public class SimpleStepExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.SimpleStepExpression expr = (Saxon.Hej.expr.SimpleStepExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.AxisExpression step = (Saxon.Hej.expr.AxisExpression)(expr.getStep());
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(expr.getSelectExpression().getCardinality());
+                if (nullable) {
+                    return context => {
+                        Saxon.Hej.om.NodeInfo origin = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/select(context));
+                        if ((origin == null)) {
+                            return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                        }
+                        return step.iterate(origin);
+                    } ;
+                } else {
+                    return context => {
+                        Saxon.Hej.om.NodeInfo start = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/select(context));
+                        System.Diagnostics.Debug.Assert((start != null));
+                        return step.iterate(start);
+                    } ;
+                }
+            }
+        
         }
     
     }

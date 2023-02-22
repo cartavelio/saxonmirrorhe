@@ -36,20 +36,6 @@ namespace Saxon.Hej.expr {
                 }
             }
         }
-        public static Saxon.Hej.tree.iter.AtomicIterator makeLongRangeIterator(long start, long step, long end) {
-            int direction = step.CompareTo(0);
-            if ((((direction == 0) || ((direction>0) && (start>end))) || ((direction<0) && (start<end)))) {
-                return Saxon.Hej.tree.iter.EmptyIterator.ofAtomic();
-            }
-            if (((((end-start))/step)>System.Int32.MaxValue)) {
-                throw new Saxon.Hej.trans.XPathException("Saxon limit on sequence length exceeded (2^31)", "XPDY0130");
-            }
-            if ((step>0)) {
-                return new Saxon.Hej.expr.AscendingRangeIterator(start, step, end);
-            } else {
-                return new Saxon.Hej.expr.DescendingRangeIterator(start, -(step), end);
-            }
-        }
         public AscendingRangeIterator(long start, long step, long end)  {
             this.start = start;
             this.step = step;

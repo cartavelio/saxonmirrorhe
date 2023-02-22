@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.instruct {
-    public abstract class Instruction : Saxon.Hej.expr.Expression, Saxon.Hej.expr.instruct.TailCallReturner {
+    public abstract class Instruction : Saxon.Hej.expr.Expression {
         public Instruction()  {
         }
         public override int getImplementationMethod() {
@@ -29,13 +29,10 @@ namespace Saxon.Hej.expr.instruct {
             return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
         public abstract override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands();
-        public abstract Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context);
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
             try {
-                Saxon.Hej.expr.instruct.TailCall tc = processLeavingTail(output, context);
-                while ((tc != null)) {
-                    tc = tc.processLeavingTail();
-                }
+                Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context);
+                dispatchTailCall(tc);
             } catch (Saxon.Hej.trans.XPathException err) {
                 err.maybeSetFailingExpression(this);
                 err.maybeSetContext(context);
@@ -108,33 +105,17 @@ namespace Saxon.Hej.expr.instruct {
             return false;
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            int m = getImplementationMethod();
-            if ((((m&EVALUATE_METHOD)) != 0)) {
-                throw new Saxon.Ejava.lang.AssertionError(("evaluateItem() is not implemented in the subclass "+this.GetType()));
-            } else {
-                if ((((m&ITERATE_METHOD)) != 0)) {
-                    return iterate(context).next();
-                } else {
-                    return Saxon.Hej.expr.parser.ExpressionTool.getItemFromProcessMethod(this, context);
-                }
-            }
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            int m = getImplementationMethod();
-            if ((((m&EVALUATE_METHOD)) != 0)) {
-                Saxon.Hej.om.Item item = evaluateItem(context);
-                if ((item == null)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
-                } else {
-                    return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(item);
-                }
-            } else {
-                if ((((m&ITERATE_METHOD)) != 0)) {
-                    throw new Saxon.Ejava.lang.AssertionError(("iterate() is not implemented in the subclass "+this.GetType()));
-                } else {
+            Saxon.Hej.expr.elab.Elaborator elaborator = makeElaborator();
+            if ((elaborator is Saxon.Hej.expr.elab.FallbackElaborator)) {
+                if ((((getImplementationMethod()&PROCESS_METHOD)) != 0)) {
                     return Saxon.Hej.expr.parser.ExpressionTool.getIteratorFromProcessMethod(this, context);
                 }
+                throw new Saxon.Ejava.lang.IllegalStateException(("No iterate() method available for expression "+toShortString()));
             }
+            return /*Delegate.iterate()*/elaborator.elaborateForPull()(context);
         }
         public override Saxon.Hej.str.UnicodeString evaluateAsString(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.Item item = evaluateItem(context);

@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.type {
     public class JavaExternalObjectType : Saxon.Hej.type.ExternalObjectType {
+    // Injecting C# code
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Type, Saxon.Hej.type.JavaExternalObjectType> cache = new (16, 20);
+    // End of injected C# code
         protected internal System.Type javaClass;
-        public JavaExternalObjectType(System.Type javaClass)  {
+        private JavaExternalObjectType(System.Type javaClass)  {
             this.javaClass = javaClass;
         }
+        public static Saxon.Hej.type.JavaExternalObjectType of(System.Type javaClass) {
+            return Saxon.Impl.Helpers.MapUtils.ComputeIfAbsent(cache, javaClass, jc => new Saxon.Hej.type.JavaExternalObjectType(jc));
+        }
         public override string getName() {
-            return javaClass.Name;
+            return classNameToQName(javaClass.Name).getLocalPart();
         }
         public override string getTargetNamespace() {
             return Saxon.Hej.lib.NamespaceConstant.JAVA_TYPE;
@@ -84,7 +90,7 @@ namespace Saxon.Hej.type {
             return fsb.ToString();
         }
         public static Saxon.Hej.om.StructuredQName classNameToQName(string className) {
-            return new Saxon.Hej.om.StructuredQName("jt", Saxon.Hej.lib.NamespaceConstant.JAVA_TYPE, classNameToLocalName(className));
+            return new Saxon.Hej.om.StructuredQName("jt", Saxon.Hej.om.NamespaceUri.JAVA_TYPE, classNameToLocalName(className));
         }
     
     }

@@ -5,9 +5,9 @@ namespace Saxon.Hej.expr.compat {
     public class TypeChecker10 : Saxon.Hej.expr.parser.TypeChecker {
         public TypeChecker10()  {
         }
-        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.expr.Expression supplied, Saxon.Hej.value.SequenceType req, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.expr.Expression supplied, Saxon.Hej.value.SequenceType req, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             if (supplied.implementsStaticTypeCheck()) {
-                return supplied.staticTypeCheck(req, true, role, visitor);
+                return supplied.staticTypeCheck(req, true, roleSupplier, visitor);
             }
             Saxon.Hej.Configuration config = visitor.getConfiguration();
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
@@ -39,7 +39,7 @@ namespace Saxon.Hej.expr.compat {
                     throw;
                 }
             }
-            return base.staticTypeCheck(supplied, req, role, visitor);
+            return base.staticTypeCheck(supplied, req, roleSupplier, visitor);
         }
         public override Saxon.Hej.expr.Expression makeArithmeticExpression(Saxon.Hej.expr.Expression lhs, int @operator, Saxon.Hej.expr.Expression rhs) {
             return new Saxon.Hej.expr.compat.ArithmeticExpression10(lhs, @operator, rhs);

@@ -6,9 +6,11 @@ namespace Saxon.Hej.str {
         private const int BITS = 16;
         private const int SEGLEN = (1<<BITS);
         private const int MASK = (SEGLEN-1);
-        private System.Collections.Generic.IList<Saxon.Hej.str.LargeTextBuffer.Segment> completeSegments;
+        private readonly static Saxon.Hej.str.LargeTextBuffer.Segment EMPTY_SEGMENT = new Saxon.Hej.str.LargeTextBuffer.Segment8(new byte[]{});
+        private readonly System.Collections.Generic.IList<Saxon.Hej.str.LargeTextBuffer.Segment> completeSegments;
         private Saxon.Hej.str.LargeTextBuffer.Segment lastSegment;
         private int lastSegmentLength;
+        private int initialSize;
         private interface Segment {
             int getWidth();
             Saxon.Hej.str.LargeTextBuffer.Segment stretch(int oldLength, int newLength, int newWidth);
@@ -25,9 +27,10 @@ namespace Saxon.Hej.str {
                 return 8;
             }
             public Saxon.Hej.str.LargeTextBuffer.Segment stretch(int oldLength, int newLength, int newWidth) {
+                System.Diagnostics.Debug.Assert((newLength<=SEGLEN));
                 if ((newWidth<=8)) {
                     if ((newLength>bytes.Length)) {
-                        bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max(newLength, (oldLength*2)));
+                        bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max(newLength, System.Math.Min((oldLength*2), SEGLEN)));
                     }
                     return this;
                 } else {
@@ -59,9 +62,10 @@ namespace Saxon.Hej.str {
                 return 16;
             }
             public Saxon.Hej.str.LargeTextBuffer.Segment stretch(int oldLength, int newLength, int newWidth) {
+                System.Diagnostics.Debug.Assert((newLength<=SEGLEN));
                 if ((newWidth<=16)) {
                     if ((newLength>chars.Length)) {
-                        chars = Saxon.Ejava.util.Arrays.copyOf(chars, System.Math.Max(newLength, (oldLength*2)));
+                        chars = Saxon.Ejava.util.Arrays.copyOf(chars, System.Math.Max(newLength, System.Math.Min((oldLength*2), SEGLEN)));
                     }
                     return this;
                 } else {
@@ -87,8 +91,9 @@ namespace Saxon.Hej.str {
                 return 24;
             }
             public Saxon.Hej.str.LargeTextBuffer.Segment stretch(int oldLength, int newLength, int newWidth) {
+                System.Diagnostics.Debug.Assert((newLength<=SEGLEN));
                 if (((newLength*3)>bytes.Length)) {
-                    bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max((newLength*3), (oldLength*6)));
+                    bytes = Saxon.Ejava.util.Arrays.copyOf(bytes, System.Math.Max((newLength*3), System.Math.Min((oldLength*6), (SEGLEN*3))));
                 }
                 return this;
             }
@@ -100,10 +105,11 @@ namespace Saxon.Hej.str {
             }
         
         }
-        public LargeTextBuffer()  {
+        public LargeTextBuffer(int initialSize)  {
             completeSegments = new System.Collections.Generic.List<Saxon.Hej.str.LargeTextBuffer.Segment>(4);
-            lastSegment = new Saxon.Hej.str.LargeTextBuffer.Segment8(new byte[0]);
+            lastSegment = EMPTY_SEGMENT;
             lastSegmentLength = 0;
+            this.initialSize = System.Math.Max(initialSize, 65536);
         }
         private void addSegment(Saxon.Hej.str.LargeTextBuffer.Segment segment) {
             completeSegments.Add(segment);
@@ -116,6 +122,22 @@ namespace Saxon.Hej.str {
             }
         }
         public void appendUnicodeString(Saxon.Hej.str.UnicodeString chars) {
+            if (chars.isEmpty()) {
+                return ;
+            }
+            if ((lastSegment == EMPTY_SEGMENT)) {
+                int newWidth = chars.getWidth();
+                int newLength = (System.Math.Max(initialSize, chars.length32())&65535);
+                if ((newWidth<=8)) {
+                    lastSegment = new Saxon.Hej.str.LargeTextBuffer.Segment8(new byte[newLength]);
+                } else {
+                    if ((newWidth == 16)) {
+                        lastSegment = new Saxon.Hej.str.LargeTextBuffer.Segment16(new char[newLength]);
+                    } else {
+                        lastSegment = new Saxon.Hej.str.LargeTextBuffer.Segment24(new byte[(newLength*3)]);
+                    }
+                }
+            }
             int spaceAvailableInLastSegment = (SEGLEN-lastSegmentLength);
             long charsSupplied = chars.length();
             if ((charsSupplied<spaceAvailableInLastSegment)) {
@@ -195,7 +217,11 @@ namespace Saxon.Hej.str {
             lastSegment = null;
         }
         public int length() {
-            return ((completeSegments.Count*SEGLEN)+(((lastSegment == null) ? 0 : lastSegmentLength)));
+            if ((lastSegment == null)) {
+                return ((((completeSegments.Count-1))*SEGLEN)+lastSegmentLength);
+            } else {
+                return ((completeSegments.Count*SEGLEN)+lastSegmentLength);
+            }
         }
         public void setLength(int newLength) {
             if ((newLength<length())) {

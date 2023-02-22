@@ -13,6 +13,7 @@ namespace Saxon.Hej.trans {
         private bool convertUntypedToOther = false;
         private bool rangeKey = false;
         private bool composite = false;
+        private Saxon.Hej.expr.elab.PullEvaluator useExpressionEvaluator;
         public KeyDefinition(Saxon.Hej.trans.SymbolicName symbolicName, Saxon.Hej.pattern.Pattern match, Saxon.Hej.expr.Expression use, string collationName, Saxon.Hej.lib.StringCollator collation)  {
             this.symbolicName = symbolicName;
             this.match = match;
@@ -83,6 +84,12 @@ namespace Saxon.Hej.trans {
         public Saxon.Hej.expr.Expression getUse() {
             return getBody();
         }
+        public Saxon.Hej.expr.elab.PullEvaluator obtainUseEvaluator() { lock(this) {
+            if ((useExpressionEvaluator == null)) {
+                useExpressionEvaluator = getBody().makeElaborator().elaborateForPull();
+            }
+            return useExpressionEvaluator;
+        }}
         public string getCollationName() {
             return collationName;
         }

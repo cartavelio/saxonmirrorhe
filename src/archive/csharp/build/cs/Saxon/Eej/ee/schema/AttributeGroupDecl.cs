@@ -21,8 +21,8 @@ namespace Saxon.Eej.ee.schema {
         public string getName() {
             return attributeGroupName.getLocalPart();
         }
-        public string getTargetNamespace() {
-            return attributeGroupName.getURI();
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return attributeGroupName.getNamespaceUri();
         }
         public void addAttributeUse(Saxon.Eej.ee.schema.AttributeUse use) {
             if ((use == null)) {
@@ -348,8 +348,8 @@ namespace Saxon.Eej.ee.schema {
             serializer.startElement("attributeGroup");
             serializer.emitAttribute("id", id);
             serializer.emitAttribute("name", getName());
-            if (((getTargetNamespace() != null) && !(getTargetNamespace().Length==0))) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+            if (((getTargetNamespace() != null) && !(getTargetNamespace().isEmpty()))) {
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
             }
             serializeContents(serializer);
             serializer.endElement();
@@ -365,7 +365,7 @@ namespace Saxon.Eej.ee.schema {
         public override void elaborate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             buildCounterMap();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.AttributeGroupDecl thisDecl = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
@@ -377,7 +377,7 @@ namespace Saxon.Eej.ee.schema {
                   case "name":
                     return new Saxon.Hej.value.StringValue(getName(), Saxon.Hej.type.BuiltInAtomicType.NCNAME);
                   case "target namespace":
-                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace());
+                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace().toUnicodeString());
                   case "attribute uses":
                     System.Collections.Generic.IList<Saxon.Hej.om.Item> uses = new System.Collections.Generic.List<Saxon.Hej.om.Item>();
                     foreach (Saxon.Eej.ee.schema.AttributeUse use in getAttributeUses()) {
