@@ -133,7 +133,12 @@ namespace Saxon.Impl.Parallel {
                 try {
                     Task<Outcome<Item>> readTask = queue.Reader.ReadAsync().AsTask();
                     //var task = Task.Run(async () => { await WriteToLogAsync(text); });
-                    readTask.Wait();
+                    try {
+                        readTask.Wait();
+                    }
+                    catch (System.Exception e) when (e is ChannelClosedException || e is System.AggregateException) {
+                        return null;
+                    }
                     //if (value.IsCompleted) {
                     Outcome<Item> next = readTask.Result;
                     if (next.isSuccess()) {

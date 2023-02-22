@@ -5,6 +5,8 @@ using System.Text;
 using System.Xml;
 using System.Xml.XPath;
 using net.sf.saxon;
+using net.sf.saxon.query;
+using net.sf.saxon.resource;
 
 namespace Saxon.Callbacks {
     public class StandardUnparsedTextResolver : net.sf.saxon.lib.UnparsedTextURIResolver {
@@ -30,9 +32,8 @@ namespace Saxon.Callbacks {
 
             try {
                 Stream stream = (Stream)resolver.GetEntity(absoluteURI, "plain/text", typeof(Stream));
-                // TODO: peek at the content to guess the encoding
                 if (encoding == null) {
-                    encoding = "utf-8";
+                    encoding = inferEncoding(stream);
                 }
                 return new StreamReader(stream, Encoding.GetEncoding(encoding));
             }
@@ -40,6 +41,10 @@ namespace Saxon.Callbacks {
                 throw new net.sf.saxon.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
 
             }
+        }
+
+        protected string inferEncoding(Stream stream) {
+            return EncodingDetector.inferStreamEncoding(stream, null);
         }
         
     }

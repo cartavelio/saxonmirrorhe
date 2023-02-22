@@ -214,7 +214,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public bool canReturnCollationKeys(net.sf.saxon.lib.StringCollator collation) {
-            throw new NotImplementedException();
+            return true;
             //return collation is DotNetComparator || collation is net.sf.saxon.expr.sort.CodepointCollator;
         }
 
@@ -430,6 +430,10 @@ namespace Saxon.Impl.Helpers {
 
         public override Uri ResolveUri(Uri? baseUri, string? relativeUri) {
             Console.Error.WriteLine("Resolve " + baseUri + " .. " + relativeUri);
+            if (relativeUri.StartsWith("-//")) {
+                // Looks like a Public ID: this isn't documented, but the parser calls us with a public ID!
+                return null;
+            }
             if (baseUri == null) {
                 baseUri = this.baseUri;
             }

@@ -25,7 +25,13 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        /**public**/ Destination GetUnderlyingDestination();
+        Destination GetUnderlyingDestination();
+
+        /// <summary>
+        /// Define an action to be performed when writing to the Destination is complete.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        void OnClose(System.Action action);
 
     }
 }
