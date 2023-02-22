@@ -256,6 +256,7 @@ public class ToXml {
             });
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
             combinedTypeSolver.add(new JarTypeSolver("build/libs/saxon-ee-11.0.jar"));
+            combinedTypeSolver.add(new JarTypeSolver("/Users/mike/GitHub/saxon-dev/lib/icu4j-59.1.jar")); // TODO: find this relative to the build directories
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);
