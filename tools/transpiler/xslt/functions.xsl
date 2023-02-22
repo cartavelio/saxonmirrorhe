@@ -59,7 +59,6 @@
    
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
       'boolean': 'bool',
-      'com.saxonica.config.Verifier': 'Saxon.Impl.Overrides.Verifier',
       'com.saxonica.ee.parallel.MultithreadedContextMappingIterator': 'Saxon.Impl.Parallel.MultithreadedContextMappingIterator',
       'com.saxonica.ee.parallel.MultithreadedItemMappingIterator': 'Saxon.Impl.Parallel.MultithreadedItemMappingIterator',
       (:'com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator': 'Saxon.Impl.Parallel.MultithreadedFocusTrackingIterator',:)

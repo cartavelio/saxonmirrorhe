@@ -790,20 +790,19 @@
       <xsl:sequence select="f:applyFormat(., map{
          'add#1':         '%scope%.AddLast(%args%)',
          'add#2':         '%scope%.Insert(%args%)',
-         'addAll#1':      'Saxon.Impl.Helpers.ListUtils.AddAll(%scope%, %args%)',
+         'addAll#1':      'Saxon.Impl.Helpers.LinkedListUtils.AddAll(%scope%, %args%)',
          'addFirst#1':    '%scope%.AddFirst(%args%)',
          'get#1':         '%scope%[%args%]',
          'getFirst#0':    '%scope%.First.Value',
          'isEmpty#0':     '%scope%.Count==0',
          'iterator#0':    '%scope%.GetEnumerator()',
          'offer#1':       '%scope%.AddLast(%args%)',
-         'remove#1':      'Saxon.Impl.Helpers.ListUtils.Remove(%scope%, %args%)',
+         'pollFirst#0':   'Saxon.Impl.Helpers.LinkedListUtils.PollFirst(%scope%)',
+         'remove#1':      '%scope%.Remove(%args%)',
          'removeFirst#0': '%scope%.RemoveFirst()',
          'set#2':         '%scope%[%arg1%] = %arg2%',
          'size#0':        '%scope%.Count',
-         'subList#2':     'Saxon.Impl.Helpers.ListUtils.SubList(%scope%, %args%)',
          'toArray#1':     '%scope%.ToArray()', (: Linq extension method :)
-         'trimToSize#0':  'Saxon.Impl.Helpers.ListUtils.TrimToSize(%scope%)',
          '*':             '%scope%.%Name%(%args%)' 
          })"/>
    </xsl:template>
