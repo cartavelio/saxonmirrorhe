@@ -79,6 +79,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             case "XT30":
                 spec = Spec.XT30;
                 break;
+            case "XT40":
+                spec = Spec.XT40;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown spec " + specStr);
         }
