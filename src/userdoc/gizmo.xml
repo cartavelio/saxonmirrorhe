@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="gizmo" title="The Gizmo Utility">
-  <h1>The Gizmo Utility</h1>
+<article id="gizmo" title="The Gizmo utility">
+  <h1>The Gizmo utility</h1>
   
   <p>Saxon (from 10.0) provides the Gizmo command line utility, which can be used interactively or in batch mode, 
     to perform simple operations such as examining the content of a document, renaming or deletion of 
@@ -18,7 +18,7 @@
       from the command line, the classpath must contain both the standard Saxon JAR file (for example
       <code>saxon-pe-10.0.jar</code>), and also the JLine2 JAR file, which is named <code>jline-2.14.6.jar</code>.</p></aside>
   
-  <h2 class="subtitle">Command Line Syntax</h2>
+  <h2 class="subtitle">Command line syntax</h2>
   
   <kbd>java net.sf.saxon.Gizmo [-s:source.xml] [-q:script.txt]</kbd>
   

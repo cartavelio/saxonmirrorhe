@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="conformance" title="Standards Conformance">
-   <h1>Standards Conformance</h1>
+<article id="conformance" title="Standards conformance">
+   <h1>Standards conformance</h1>
 
 
    <p>This section of the documentation describes the extent to which Saxon conforms to external
@@ -132,7 +132,7 @@
       <p>For information on using packages, see <a class="bodylink" href="/using-xsl/compiling">Compiling a Stylesheet</a>.</p>
 
 
-      <h2 class="subtitle">Non-Conformances</h2>
+      <h2 class="subtitle">Non-conformances</h2>
       
       <p>The following non-conformances are known:</p>
       
@@ -163,7 +163,7 @@
   
       
 
-      <h2 class="subtitle">Checklist of Implementation-Defined Items</h2>
+      <h2 class="subtitle">Checklist of implementation-defined items</h2>
 
       <p>The following list describes the way in which Saxon implements the features that the
          specification leaves implementation-defined. The numbering of items in the list corresponds
@@ -1088,7 +1088,7 @@
      a function called <code>attribute()</code> to be declared, but didn't allow it to be called.</aside>
 
 
-      <h2 class="subtitle">Checklist of Implementation-Defined Items</h2>
+      <h2 class="subtitle">Checklist of implementation-defined items</h2>
 
 
       <p>Appendix D of the XQuery 3.1 specification lists a number of features whose behavior is

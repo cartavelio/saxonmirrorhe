@@ -106,7 +106,7 @@
       without worrying too much about what namespace they are in.</li>
    </ul>
    
-   <h2 class="subtitle">XPath Versions</h2>
+   <h2 class="subtitle">XPath versions</h2>
    
    <p>W3C has published four versions of XPath: 1.0, 2.0, 3.0, and 3.1. In addition, there is a W3C Community Group,
    led by Saxonica, working on ideas for a version 4.0, some of which are implemented experimentally in Saxon 11.</p>
@@ -130,7 +130,7 @@
       <li>The experimental features of early 4.0 drafts are not available unless you explicitly enable them.</li>
    </ul>
    
-   <h2 class="subtitle">XPath Variables</h2>
+   <h2 class="subtitle">XPath variables</h2>
    
    <p>Very often you will want to execute the same XPath expression repeatedly, but with some parameter taking
    different values: for example <code>//person[@id='A1234']</code> where the required ID changes each time.</p>
@@ -226,8 +226,8 @@
          is designed primarily for internal use within Saxon, whereas <code>XdmNode</code> is designed for application use.</p>
    </section>
    
-   <section id="s9api-xpath" title="Evaluating XPath Expressions using s9api" class="javaonly">
-      <h1>Evaluating XPath Expressions using s9api</h1>
+   <section id="s9api-xpath" title="Evaluating XPath expressions using s9api" class="javaonly">
+      <h1>Evaluating XPath expressions using s9api</h1>
       
 
 
@@ -436,8 +436,8 @@ XPath xpath = xpathFactory.newXPath();
          
       </section>
       
-      <section id="setting-xpath-variables" title="Setting XPath Variables" class="javaonly">
-         <h1>Setting XPath Variables</h1>
+      <section id="setting-xpath-variables" title="Setting XPath variables" class="javaonly">
+         <h1>Setting XPath variables</h1>
          
          <p>An XPath expression supplied to the JAXP XPath API can contain undeclared variables, for 
          example a valid expression might be <code>//emp[@ssn=$SSN]</code>. The value of the variable
@@ -567,8 +567,8 @@ XPath xpath = xpathFactory.newXPath();
       </section>
    </section>
    
-   <section id="dotnet-xpath" title="Evaluating XPath Expressions from C#" class="csonly">
-         <h1>Evaluating XPath Expressions from C#</h1>
+   <section id="dotnet-xpath" title="Evaluating XPath expressions from C#" class="csonly">
+         <h1>Evaluating XPath expressions from C#</h1>
          
          
          

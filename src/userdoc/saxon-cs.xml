@@ -310,7 +310,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       parser provided it is capable of delivering a Saxon <code>XdmNode</code> or a DOM <code>XmlNode</code>.</p>
       
       
-      <h2>HTML Parsing</h2>
+      <h2>HTML parsing</h2>
       
       <p>The <a class="bodylink code" href="/functions/saxon/parse-html">saxon:parse-html()</a> extension function is available. It parses the supplied
       HTML content using HTML Agility Pack, returning a Saxon wrapper around the resulting

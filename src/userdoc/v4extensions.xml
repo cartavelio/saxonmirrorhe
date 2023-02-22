@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<article id="v4extensions" title="Experimental 4.0 Extensions">
-   <h1>Experimental 4.0 Extensions</h1>
+<article id="v4extensions" title="Experimental 4.0 extensions">
+   <h1>Experimental 4.0 extensions</h1>
 
    <p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which
    could eventually become part of a version 4.0 set of specifications.</p>
@@ -713,7 +713,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             </nav>
             
             <section id="ternary" title="Ternary conditionals">
-               <h1>Ternary Conditionals</h1>
+               <h1>Ternary conditionals</h1>
                
                <p>The syntax <code><i>condition</i> ?? <i>thenExpr</i> !! <i>elseExpr</i></code> is introduced
                as an alternative for <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code>.
@@ -783,8 +783,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                </section>
             
 
-      <section id="for-member-expression" title="For-Member expressions">
-         <h1>For-Member expressions</h1>
+      <section id="for-member-expression" title="For-member expressions">
+         <h1>For-member expressions</h1>
 
          <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
 
