@@ -201,8 +201,9 @@ dependencies {
     [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
     [group: 'org.graalvm.sdk', name: 'graal-sdk', version: graalVersion],
     [group: 'org.graalvm.nativeimage', name: 'svm', version: graalVersion],
-    files(saxonLicenseDir),
+    [group: 'nu.validator', name: 'htmlparser', version: '1.4.16'],
     files("lib/Tidy.jar"),
+    files(saxonLicenseDir),
     //fileTree(dir: 'extra/lib/', include: ['*.jar'])
   )
   testImplementation (
@@ -210,6 +211,7 @@ dependencies {
     [group: 'org.junit.platform', name: 'junit-platform-console-standalone', version: '1.7.1'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     [group: sqlDriverGroup, name: sqlDriverName, version: sqlDriverVersion],
+    [group: 'nu.validator', name: 'htmlparser', version: '1.4.16'],
     files("src/main/resources"),
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
