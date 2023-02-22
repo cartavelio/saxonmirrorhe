@@ -11,12 +11,12 @@ import net.sf.saxon.value.AtomicValue;
 
 public class DotNetMapUtils {
 
-    public static MapItem addEntry(MapItem map, AtomicValue key, GroundedValue value) {
-        return map.addEntry(key, value);
+    public static GroundedValue addEntry(GroundedValue map, AtomicValue key, GroundedValue value) {
+        return ((MapItem)map).addEntry(key, value);
     }
 
-    public static MapItem remove(MapItem map, AtomicValue key) {
-        return map.remove(key);
+    public static GroundedValue remove(GroundedValue map, AtomicValue key) {
+        return ((MapItem)map).remove(key);
     }
 }
 
