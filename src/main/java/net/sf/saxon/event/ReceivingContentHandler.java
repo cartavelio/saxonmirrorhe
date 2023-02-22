@@ -98,7 +98,7 @@ public class ReceivingContentHandler
      * namecodes.
      */
 
-    private final HashMap<NamespaceUri, HashMap<String, NodeName>> nameCache = new HashMap<>(10);
+    private final HashMap<String, HashMap<String, NodeName>> nameCache = new HashMap<>(10);
     private HashMap<String, NodeName> noNamespaceNameCache = new HashMap<>(10);
 
     // Action to be taken with defaulted attributes. 0=process normally, -1=suppress, +1=mark as defaulted
@@ -372,7 +372,7 @@ public class ReceivingContentHandler
             flush(true);
 
             int options = ReceiverOption.NAMESPACE_OK | ReceiverOption.ALL_NAMESPACES;
-            NodeName elementName = getNodeName(NamespaceUri.of(uri), localname, rawname);
+            NodeName elementName = getNodeName(uri, localname, rawname);
             AttributeMap attributes = makeAttributeMap(atts, localLocator);
             receiver.startElement(elementName, Untyped.getInstance(),
                                   attributes, currentNamespaceMap,
@@ -405,7 +405,7 @@ public class ReceivingContentHandler
                 continue;
             }
 
-            NamespaceUri uri = NamespaceUri.of(atts.getURI(a));
+            String uri = atts.getURI(a);
             if (isAttributes2 && !((Attributes2) atts).isSpecified(a)) {
                 // Attribute originates from DTD or schema defaulting.
                 if (defaultedAttributesAction == -1) {
@@ -418,29 +418,30 @@ public class ReceivingContentHandler
                 // Bug 4996 - if the attribute originates from Xerces schema processing,
                 // and if the attribute is namespaced, then the prefix and namespace declaration
                 // may be missing. Although Xerces is getting this wrong, we attempt to repair the damage.
-                if (uri != NamespaceUri.NULL && qname.indexOf(':') < 0) {
+                if (!uri.isEmpty() && qname.indexOf(':') < 0) {
                     // defaulted attribute has a URI but no prefix
-                    String trialPrefix = getConfiguration().getNamePool().suggestPrefixForURI(uri);
+                    NamespaceUri nsUri = NamespaceUri.of(uri);
+                    String trialPrefix = getConfiguration().getNamePool().suggestPrefixForURI(nsUri);
                     if (trialPrefix == null) {
                         NamespaceUri[] existingUris = currentNamespaceMap.getURIsAsArray();
                         for (int u = 0; u < existingUris.length; u++) {
-                            if (existingUris[u].equals(uri)) {
+                            if (existingUris[u].equals(nsUri)) {
                                 trialPrefix = currentNamespaceMap.getPrefixArray()[u];
                             }
                         }
                     }
                     if (trialPrefix == null) {
-                        trialPrefix = "p" + Err.abbreviateURI(uri.toString()).replace("/", "").replace("...", ".");
+                        trialPrefix = "p" + Err.abbreviateURI(uri).replace("/", "").replace("...", ".");
                         if (!NameChecker.isValidNCName(trialPrefix)) {
                             trialPrefix = "p" + "_" + qname;
                         }
                     }
-                    while (currentNamespaceMap.getURI(trialPrefix) != null && !currentNamespaceMap.getURI(trialPrefix).equals(uri)) {
+                    while (currentNamespaceMap.getURI(trialPrefix) != null && !currentNamespaceMap.getURI(trialPrefix).equals(nsUri)) {
                         trialPrefix = trialPrefix + "z";
                     }
-                    currentNamespaceMap = currentNamespaceMap.put(trialPrefix, uri);
+                    currentNamespaceMap = currentNamespaceMap.put(trialPrefix, nsUri);
                     qname = trialPrefix + ":" + qname;
-                    getConfiguration().getNamePool().suggestPrefix(trialPrefix, uri);
+                    getConfiguration().getNamePool().suggestPrefix(trialPrefix, nsUri);
                 }
             }
 
@@ -504,7 +505,7 @@ public class ReceivingContentHandler
      * @throws SAXException if the information supplied by the SAX parser is insufficient
      */
 
-    private NodeName getNodeName(NamespaceUri uri, String localname, String rawname) throws SAXException {
+    private NodeName getNodeName(String uri, String localname, String rawname) throws SAXException {
         // System.err.println("URI=" + uri + " local=" + " raw=" + rawname);
         // The XML parser isn't required to report the rawname (qname), though all known parsers do.
         // If none is provided, we give up
@@ -544,7 +545,7 @@ public class ReceivingContentHandler
                 return qn;
             } else {
                 String prefix = NameChecker.getPrefix(rawname);
-                FingerprintedQName qn = new FingerprintedQName(prefix, uri, localname);
+                FingerprintedQName qn = new FingerprintedQName(prefix, NamespaceUri.of(uri), localname);
                 map2.put(rawname, qn);
                 return qn;
             }
