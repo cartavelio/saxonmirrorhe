@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="sql-extension" title="Saxon SQL Extension">
+<article id="sql-extension" title="Saxon SQL Extension" for="J">
    <h1>Saxon SQL Extension</h1>
 
-   <aside>Requires Saxon-PE or Saxon-EE. Not available on the .NET platform.</aside>
+   <aside>Requires Saxon-PE or Saxon-EE. Not available in Saxon-CS.</aside>
    
    <p>The <code>saxon-sql-10.#.jar</code> file, distributed alongside the main JAR file, includes a set of XSLT extension
       instructions, and from Saxon 9.9 also a set of extension functions, providing access to SQL databases. The JAR

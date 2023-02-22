@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section id="other-numberings" title="Numberings for selected languages">
+<section id="other-numberings" title="Numberings for selected languages" for="J">
   <h1>Numberings for selected languages</h1>
   <p>
     <code>Numberer</code> implementations are available for several selected European languages, and

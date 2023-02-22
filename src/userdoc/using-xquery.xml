@@ -4,10 +4,9 @@
 
 
    <p>This section describes how to use Saxon as an XQuery processor, either from the command line,
-      or from the Java API.</p>
+      or from the Java or C# API.</p>
 
-   <p>For details of the .NET API, see <a class="bodylink" href="/dotnet/dotnetapi">Saxon API for
-         .NET</a>.</p>
+ 
 
    <p>Saxon 9.8 and later releases implement the <a href="https://www.w3.org/TR/xquery-31/" class="bodylink">XQuery 3.1 Recommendation</a> 
       dated 18 April 2017. Because XQuery 3.1 is backwards compatible with XQuery 1.0 and XQuery 3.0, Saxon will
@@ -38,7 +37,7 @@
       execute. (In this scenario, Saxon-EE is recommended, because it has a more powerful optimizer
       for complex joins.)</p>
 
-   <aside>The memory available in the Java heap is controlled using the <code>-Xmx</code> option on
+   <aside for="J">The memory available in the Java heap is controlled using the <code>-Xmx</code> option on
       the command line, for example <code>java -Xmx1024m net.sf.saxon.Query ...</code> allocates
       1Gb.</aside>
 
@@ -50,12 +49,13 @@
       <h1>Running XQuery from the Command Line</h1>
 
 
-      <p>A command is available to run a query contained in a file. The form of command on the Java
+      <p>A command is available to run a query contained in a file.</p> 
+      <p for="J">The form of command on the Java
          platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
 
-      <p>On the .NET platform, the command is simply:</p>
-      <kbd>Query   [options]  [ <i>params...</i>] </kbd>
+      <p for="CS">On Saxon-CS, the command takes the form:</p>
+      <kbd>dotnet Saxon query   [options]  [ <i>params...</i>] </kbd>
 
       <p>The options will generally include either <code>-q:queryFile</code> which takes the query from a file,
       or <code>-qs:query</code> in which the query appears directly in the command line (usually in quotes).</p>
@@ -139,7 +139,7 @@
                   to the standard error stream. The output is a tree in XML format.</p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-ext:(on|off)</p>
             </td>
@@ -152,7 +152,7 @@
                   methods and thereby gain privileged access to resources on your machine. </p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-init:initializer</p>
             </td>
@@ -189,7 +189,7 @@
                   document.</p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-mr:classname</p>
             </td>
@@ -326,7 +326,7 @@
                   elements within the file <code>a.xml</code> in the current directory.</p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-quit:(on|off)</p>
             </td>
@@ -338,7 +338,7 @@
                   invoked from another Java application such as Ant. </p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-r:classname</p>
             </td>
@@ -460,7 +460,7 @@
                   to the time before A was compiled in its own right.</p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-TJ</p>
             </td>
@@ -589,7 +589,7 @@
                   way, notably free-standing attribute nodes.</p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-x:classname</p>
             </td>
@@ -601,7 +601,7 @@
                   instantiable using a zero-argument public constructor.</p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-xi:(on|off)</p>
             </td>
@@ -611,7 +611,7 @@
                   using the Xerces parser, which is the default in JDK 1.5 and later.</p>
             </td>
          </tr>
-         <tr>
+         <tr for="J">
             <td>
                <p>-xmlversion:(1.0|1.1)</p>
             </td>
@@ -747,11 +747,11 @@
          supported by Saxon, see <a class="bodylink" href="/extensions/output-extras">Additional
             serialization parameters</a>.</p>
    </section>
-   <section id="api-query" title="Running Queries from a Java Application">
+   <section id="api-query" title="Running Queries from a Java Application" for="J">
       <h1>Running Queries from a Java Application</h1>
 
 
-      <p>Saxon offers three different APIs allowing queries to be run from Java:</p>
+      <p>Saxon offers two different APIs allowing queries to be run from Java:</p>
       <ul>
          <li>
             <p>The XQJ interface is an implementation of the XQuery API for Java (XQJ) interface
@@ -765,15 +765,9 @@
                Saxon processor, see <a href="s9api-query" class="bodylink">Using s9api for
                   XQuery</a>.</p>
          </li>
-         <li>
-            <p>There is also a legacy interface retained from previous Saxon releases, which may be
-               appropriate if you need access to lower-level Saxon internals. This is described only
-               in the JavaDoc: start at <a class="javalink"
-                  href="net.sf.saxon.query.StaticQueryContext">StaticQueryContext</a>.</p>
-         </li>
       </ul>
 
-      <section id="s9api-query" title="Using s9api for XQuery">
+      <section id="s9api-query" title="Using s9api for XQuery" for="J">
          <h1>Using s9api for XQuery</h1>
 
          <p>You can perform a query using the s9api interface as follows:</p>
@@ -853,7 +847,7 @@
             supplied, it will be ignored.</p>
       </section>
 
-      <section id="xqj" title="Invoking XQuery using the XQJ API">
+      <section id="xqj" title="Invoking XQuery using the XQJ API" for="J">
          <h1>Invoking XQuery using the XQJ API</h1>
 
 
@@ -908,6 +902,96 @@
             suitable Java object or value.</p>
       </section>
    </section>
+   
+   <section id="saxon-api-query" title="Using XQuery from C#" for="CS">
+      <h1>Using XQuery from C#</h1>
+      
+      <aside>The same classes and methods can be used from .NET languages other than C#, but
+      all the examples here are written in C# terms.</aside>
+      
+      <p>Note that the current version of Saxon-CS offers "enterprise edition" capability only.</p>
+      
+      <p>You can perform a query using the Saxon.Api interface as follows:</p>
+      <ol>
+         <li>
+            <p>Create a <a class="cslink" href="Saxon.Api.Processor">Processor</a> and
+               set any global configuration options on the <code>Processor</code>.</p>
+         </li>
+         <li>
+            <p>Optionally, build the source document by calling <code>NewDocumentBuilder()</code>
+               to create a document builder, setting appropriate options, and then calling one of the
+               <code>Build()</code> methods. This returns an <a class="cslink"
+                  href="Saxon.Api.XdmNode">XdmNode</a> which can be supplied as input to
+               the query either as the context item, or as the value of an external variable.</p>
+         </li>
+         <li>
+            <p>Call <code>NewXQueryCompiler()</code> to create an <a class="cslink"
+               href="Saxon.Api.XQueryCompiler">XQueryCompiler</a>. Then set any
+               options that are local to a specific compilation (for example, the destination of
+               error messages, the base URI, or the character encoding of the query text).</p>
+         </li>
+         <li>
+            <p>Call one of the <code>Compile()</code> methods to compile a query. The result is
+               an <code>XQueryExecutable</code>, which can be used as often as you like in the
+               same thread or in different threads.</p>
+         </li>
+         <li>
+            <p>To run a query, first call the <code>Load()</code> method on the
+               <code>XQueryExecutable</code>. This creates an <a class="cslink"
+                  href="Saxon.Api.XQueryEvaluator">XQueryEvaluator</a>. The
+               <code>XQueryEvaluator</code> can be serially reused, but it must not be shared
+               across multiple threads. Set any options required for the specific query execution
+               (for example, the initial context node, the values of external variables, and the
+               destination for the query result), and then call any of the methods
+               <code>Evaluate()</code>, <code>EvaluateSingle()</code>, <code>Run()</code>,
+               <code>RunStreamed()</code>, or <code>GetEnumerator()</code> methods to execute the
+               query.</p>
+            
+
+         </li>
+         <li>
+            <p>Because the <code>XQueryEvaluator</code> is an <code>IEnumerable</code>, it is
+               possible to iterate over the results directly using the C# "foreach"
+               construct:</p>
+            <p><code>foreach(XdmItem item in compiler.Compile("1 to 10").Load()) {...}</code></p>
+         </li>
+         <li><p>The result of the <code>XQueryEvaluator.Evaluate()</code> method is an
+            <code>XdmValue</code>. Saxon provides powerful facilities (modeled on LINQ) to process
+            an <code>XdmValue</code> using steps and predictaes. For example, if the query returns
+            a single node <code>section</code>, (<code>XdmNode</code> is a subclass of <code>XdmValue</code>), then
+            you could test whether it has any descendant <code>para</code> elements with <code>@class="normal"</code>
+            by writing <code>if (section.Select(Descendant("para").Where(Eq(Attribute("class"), "normal")).Exists()) {...}</code>.</p>
+            
+            <aside>This example assumes the presence of appropriate <code>using static</code> directives for the
+               types <a class="cslink" href="Saxon.Api.Steps">Saxon.Api.Steps</a> and <a class="cslink"
+                     href="Saxon.Api.Predicates">Saxon.Api.Predicates</a></aside>
+         </li>
+      </ol>
+      
+      <p>The output of the query may be retrieved as an iterator over a sequence of items, or it
+         may be specified as an <a class="cslink" href="Saxon.Api.IDestination"
+            >IDestination</a> object, which allows a wide range of possibilities. The most
+         common <code>IDestination</code>  is a <a class="cslink" href="Saxon.Api.Serializer"
+            >Serializer</a>, which can format the result as XML, HTML, or JSON. Alternatively, you can build a tree
+         either in Saxon's native format (represented by the class <code>Saxon.Api.XdmNode</code>) or
+         as a DOM.</p>
+      
+      <p>Examples of C# queries are included in the <code>saxon-resources</code> file, see
+         module <strong>APIExamples.cs</strong>.</p>
+      <h2 class="subtitle">Separate compilation of library modules</h2>
+      
+      <p>Under Saxon-EE, it is possible to compile library modules separately from the main
+         module. This reduces the compilation time and memory usage when the same library module
+         is imported by many main modules for different queries. A method
+         <code>CompileLibrary()</code> (with a number of overloaded variants supplying the
+         input in different ways) is provided in the <code>XQueryCompiler</code> class; any
+         library module compiled using this method will be available to all subsequent
+         compilations using the same <code>XQueryCompiler</code>. To import the module, simply
+         use <code>import module</code> specifying the module URI in the normal way. It is not
+         necessary to supply a module location hint (<code>at "URI"</code>), and if any is
+         supplied, it will be ignored.</p>
+   </section>
+   
    <section id="update" title="Using XQuery Update">
       <h1>Using XQuery Update</h1>
 
@@ -955,7 +1039,7 @@
          present possible to update the Tiny Tree, nor external object models such as DOM, JDOM2, or
          XOM.</p>
    </section>
-   <section id="callingfunctions" title="Calling XQuery Functions from Java">
+   <section id="callingfunctions" title="Calling XQuery Functions from Java" for="J">
       <h1>Calling XQuery Functions from Java</h1>
 
 
@@ -1003,11 +1087,56 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
       the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
          
          
-         <aside>Earlier Saxon releases provided a lower-level interface for function calling, using the method
-      <code>StaticQueryContext.getUserDefinedFunction()</code> to obtain a <code>UserFunction</code> object, and
-      then using the <code>call()</code> method on the <code>UserFunction</code> object to invoke it. That approach
-      was very efficient but not very robust (for example, it did no type-checking on the supplied arguments)
-      and it was therefore dropped.</aside>
+ 
+   </section>
+   <section id="callingfunctions" title="Calling XQuery Functions from C#" for="CS">
+      <h1>Calling XQuery Functions from C#</h1>
+      
+      
+      <p>Although the usual way to invoke XQuery from a C# application is to compile and execute a
+         query as described above, it is also possible to invoke individual XQuery functions
+         directly from C# if required. This is achieved as follows:</p>
+      
+      <ol>
+         <li><p>First use the Saxon.Api interface to create
+            an <code>XQueryEvaluator</code> in the usual way</p></li>
+         <li><p>Optionally, set the global context item for the query using the <code>ContextItem</code> property.</p></li>
+         <li><p>Optionally, set the values of external variables in the query using the <code>SetExternalVariable()</code> method.</p></li>
+         <li><p>Then call the method <code>CallFunction()</code> to execute a specific function.</p></li>
+      </ol>
+      
+      <p>The final step can be repeated to call different functions or to call the same function with different
+         parameters. Having called a function, the context item and external variable values should not be changed.</p>
+      
+      <p>A function in a query is identified uniquely by a QName and arity. The QName is supplied explicitly in the call on
+         <code>CallFunction()</code>; the arity is inferred from the length of the argument array.</p>
+      
+      <p>The arguments to the function are supplied as an array of <code>XdmValue</code> objects, and the result is returned
+         as an <code>XdmValue</code>. The <code>XdmValue</code> class has subclasses such as <code>XdmNode</code>, <code>XdmAtomicValue</code>,
+         and <code>XdmMap</code> allowing specific types of value to be constructed; it is also possible, of course, to use the
+         result of one function call as an argument to another function call.</p>
+      
+      <p>Saxon applies the standard function conversion rules to convert supplied arguments to the
+         required type: for example, if the function expects a string, then you can supply an attribute node, and it will be atomized.</p>
+      
+      <p>Here is an example:</p>
+      <samp><![CDATA[Processor processor = new Processor();
+XQueryCompiler qc = processor.NewXQueryCompiler();
+XQueryExecutable exp1 = qc.Compile(
+        "declare function local:t1($v1 as xs:integer, $v2 as xs:double*) { " +
+        "   $v1 div sum($v2)" +
+        "};" +
+        "10");
+XQueryEvaluator ev = exp1.Load();
+XdmValue v1 = new XdmAtomicValue(14);
+XdmValue v2 = new XdmAtomicValue(5).append(new XdmAtomicValue(2));
+XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local-functions", "t1"), v1, v2);]]></samp>
+      
+      <p>The value of <code>result</code> will be the atomic value 2, of type <code>xs:double</code>. The function conversion rules take care of
+         the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
+      
+      
+      
    </section>
    <section id="resultformat" title="Result Format">
       <h1>Result Format</h1>
@@ -1017,9 +1146,9 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
          general, an XML document. This raises the question as to how the results should be
          output.</p>
 
-      <p>The Saxon command line processor for XQuery by default produces the output in raw format.
-         This converts the result sequence to a document following the rules of the XQuery
-            <code>document{}</code> constructor, and then serializes this document.</p>
+      <p>The Saxon command line processor for XQuery by default produces the output by
+         converting the result sequence to a document following the rules of the XQuery
+            <code>document{}</code> constructor, and then serializing this document.</p>
 
       <p>The alternative is wrapped format, requested using the <code>-wrap</code> argument. This
          wraps the result sequence as an XML document, and then serializes the resulting document.
@@ -1027,10 +1156,10 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
             <code>result:element</code> or <code>result:atomic-value</code>) according to its type.
          The sequence as a whole is wrapped in a <code>result:sequence</code> element.</p>
    </section>
-   <section id="querycompilation" title="Compiling Queries">
+   <section id="querycompilation" title="Compiling Queries" for="J">
       <h1>Compiling Queries</h1>
 
-      <aside>Bycode generation requires Saxon-EE.</aside>
+      <aside>Bytecode generation requires Saxon-EE on the Java platform.</aside>
 
       <p>Since Saxon 9.4, Saxon-EE automatically (and selectively) compiles queries to Java
          bytecode. When running on .NET, the bytecode is then automatically converted to IL code for
@@ -1086,12 +1215,12 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
       <h1>Extensibility</h1>
 
 
-      <p>The Saxon XQuery implementation allows you to call Java methods as external functions. The
+      <p for="J">The Saxon XQuery implementation allows you to call Java methods as external functions. The
          function does not need to be declared. Use a namespace declaration such as <code>declare
             namespace math="java:java.lang.Math"</code>, and invoke the method as
             <code>math:sqrt(2)</code>.</p>
 
-      <p>More details of this mechanism are found in <a class="bodylink"
+      <p for="J">More details of this mechanism are found in <a class="bodylink"
             href="/extensibility/functions">Writing Extension Functions</a>.</p>
 
       <p>Saxon recognizes the XQuery pragma syntax, but it currently defines only one pragma of its
