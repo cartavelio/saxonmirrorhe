@@ -263,7 +263,7 @@ public abstract class PJConverter {
                                 @Override
                                 public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
                                     try {
-                                        return constructor.newInstance(value.head().getUnicodeStringValue());
+                                        return constructor.newInstance(value.head().getStringValue());
                                     } catch (InstantiationException | IllegalAccessException e) {
                                         throw new XPathException(e);
                                     } catch (InvocationTargetException e) {
