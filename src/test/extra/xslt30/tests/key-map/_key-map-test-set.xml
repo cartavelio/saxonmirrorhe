@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test-set xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns="http://www.w3.org/2012/10/xslt-test-catalog"
+          name="key-map">
+   <description>Tests key-map</description>
+
+   <test-case name="key-map-001">
+      <description>Test saxon:key-map() extension function</description>
+      <created by="Michael Kay" on="2014-04-13"/>
+      <modified by="Debbie Lockett" on="2015-11-06" change="Update map syntax in stylesheet"/>
+      <dependencies>
+         <feature value="Saxon-EE"/>
+         <spec value="XSLT30+"/>
+      </dependencies>
+      <test>
+         <stylesheet file="key-map-001.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <assert-xml file="key-map-001.out"/>
+      </result>
+   </test-case>
+   
+   <test-case name="key-map-001b">
+      <description>Test saxon:key-map() extension function</description>
+      <created by="Debbie Lockett" on="2020-03-10"/>
+      <dependencies>
+         <feature value="Saxon-EE" satisfied="false"/>
+         <spec value="XSLT30+"/>
+      </dependencies>
+      <test>
+         <stylesheet file="key-map-001.xsl"/>
+         <initial-template name="main"/>
+      </test>
+      <result>
+         <error code="XPST0017"/>
+      </result>
+   </test-case>
+</test-set>
