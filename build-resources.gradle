@@ -31,7 +31,6 @@ task resources_notices(
 ) {
     into "${buildDir}/saxon-resources/notices"
     from ("${projectDir}/src/docs/notices") {
-        include "ASM.txt"
         include "ICU-J.txt"
         include "JAMESCLARK.txt"
         include "JLINE2.txt"
