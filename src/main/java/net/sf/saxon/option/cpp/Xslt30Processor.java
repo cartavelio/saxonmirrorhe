@@ -19,11 +19,21 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
 
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.nativeimage.ObjectHandles;
+import org.graalvm.nativeimage.ObjectHandle;
+
 
 /**
  * * This class is to use with SaxonC on C++
  */
 public class Xslt30Processor extends SaxonCAPI {
+
+
+
 
 
     /**
@@ -92,6 +102,13 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param proc - s9api processor
      * @return XsltProcessor
      */
+    @CEntryPoint(name = "createXslt30Processor")
+    public static long createXslt30Processor(IsolateThread thread) {
+            ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.Xslt30Processor(false));
+            return handle.rawValue();
+    }
+
+
     public static Xslt30Processor newInstance(Processor proc) {
         return new Xslt30Processor(proc);
     }
@@ -223,6 +240,20 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param filename - File name of the stylsheet
      * @return XsltExecutable
      */
+
+    @CEntryPoint(name = "compileFromFile1")
+    public static long compileFromFile1(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer stylesheetFile) {
+
+        net.sf.saxon.option.cpp.Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        XsltExecutable executable = null;
+        try {
+            executable = xslt30Processor.compileFromFile(CTypeConversion.toJavaString(cwd), CTypeConversion.toJavaString(stylesheetFile), false, null, null);
+        }catch(SaxonApiException ex) {
+            return 0;
+        }
+        ObjectHandle handle = objectHandles.create((Object)executable);
+        return handle.rawValue();
+    }
     public XsltExecutable compileFromFile(String cwd, String filename, boolean jit, String[] sparams, Object[] values) throws SaxonApiException {
 
         XsltCompiler compiler = processor.newXsltCompiler();
@@ -251,6 +282,27 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param jit - Falg for Just in Time compilation
      * @return XsltExecutable
      */
+
+
+
+
+
+    @CEntryPoint(name = "compileFromString1")
+    public static long compileFromString1(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer stylesheetFile) throws SaxonApiException {
+
+
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        XsltExecutable executable = null;
+        try {
+            executable = xslt30Processor.compileFromString(CTypeConversion.toJavaString(cwd), CTypeConversion.toJavaString(stylesheetFile), false, null, null);
+        }catch(SaxonApiException ex) {
+            return 0;
+        }
+
+        ObjectHandle handle = objectHandles.create((Object)executable);
+        return handle.rawValue();
+    }
+
     public XsltExecutable compileFromString(String cwd, String str, boolean jit, String[] sparams, Object[] values) throws SaxonApiException {
         XsltCompiler compiler = processor.newXsltCompiler();
         setStaticParametersFromArray(compiler, sparams, values);
@@ -1183,6 +1235,55 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as a string representation in a byte array
      */
+
+
+
+
+ /*   @CEntryPoint(name = "transformToString1")
+    public static  CCharPointer transformToString1(IsolateThread thread, long xsltExecutableRef, CCharPointer cwd, CCharPointer sourceFile, CCharPointer stylesheetFile) {
+        Processor proc = new Processor(false);
+        Xslt30Processor xslt30Processor = Xslt30Processor.newInstance(proc);
+        String result = "Failed";
+        try {
+            byte[] resultBytes = transformToString(CTypeConversion.toJavaString(cwd), xslt30Processor, null, CTypeConversion.toJavaString(sourceFile), CTypeConversion.toJavaString(stylesheetFile), null, null);
+            if (resultBytes != null) {
+                result = new String(resultBytes);
+
+            }  else {
+                result =  "Failed: Results bytes is null";
+            }
+        } catch(SaxonApiException ex) {
+            result =  "Failed: exception thrown: "+ex.getMessage();
+        }
+
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(result);
+        return holder.get();
+
+    }         */
+
+    @CEntryPoint(name = "transformToString1")
+    public static  CCharPointer transformToString1(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xsltExecutableRef, CCharPointer cwd, CCharPointer sourceFile, CCharPointer stylesheetFile) {
+
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        XsltExecutable executable = objectHandles.get(xsltExecutableRef);
+        String result = "Failed";
+        try {
+            byte[] resultBytes = transformToString(CTypeConversion.toJavaString(cwd), xslt30Processor, executable, CTypeConversion.toJavaString(sourceFile), CTypeConversion.toJavaString(stylesheetFile), null, null);
+            if (resultBytes != null) {
+                result = new String(resultBytes);
+
+            }  else {
+                result =  "Failed: Results bytes is null";
+            }
+        } catch(SaxonApiException ex) {
+            result =  "Failed: exception thrown: "+ex.getMessage();
+        }
+
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(result);
+        return holder.get();
+
+    }
+
     public static byte[] transformToString(String cwd, Xslt30Processor xslt30Processor, XsltExecutable executable, String sourceFile, String stylesheet, String[] params, Object[] values) throws SaxonApiException {
 
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
