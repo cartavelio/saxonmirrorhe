@@ -13,6 +13,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -369,59 +370,70 @@ public class Parts extends SystemFunction implements Callable {
         try {
             URI uri = new URI(arg);
             dict.initialPut("isValid", BooleanValue.TRUE);
-            boolean test = uri.isAbsolute();
-            dict.initialPut("isAbsolute", BooleanValue.get(test));
-            test = uri.isOpaque();
-            dict.initialPut("isOpaque", BooleanValue.get(test));
-            String val = uri.getAuthority();
+            boolean absolute = uri.isAbsolute();
+            dict.initialPut("isAbsolute", BooleanValue.get(absolute));
+            dict.initialPut("isOpaque", BooleanValue.get(uri.isOpaque()));
+            URI surrogateURI = absolute ? uri : getSurrogateURI(uri);
+            String val = absolute ? uri.getAuthority() : null;
             if (val != null) {
                 dict.initialPut("authority", new StringValue(val));
             }
-            val = uri.getRawAuthority();
+            val = absolute ? uri.getRawAuthority() : null;
             if (val != null) {
                 dict.initialPut("rawAuthority", new StringValue(val));
             }
-            val = uri.getUserInfo();
+            val = absolute ? uri.getUserInfo() : null;
             if (val != null) {
                 dict.initialPut("userInfo", new StringValue(val));
             }
-            val = uri.getRawUserInfo();
+            val = absolute ? uri.getRawUserInfo() : null;
             if (val != null) {
                 dict.initialPut("rawUserInfo", new StringValue(val));
             }
-            val = uri.getScheme();
+            val = absolute ? uri.getScheme() : null;
             if (val != null) {
                 dict.initialPut("scheme", new StringValue(val));
             }
-            val = uri.getHost();
+            val = absolute ? uri.getHost() : null;
             if (val != null) {
                 dict.initialPut("host", new StringValue(val));
             }
-            val = uri.getSchemeSpecificPart();
+            val = surrogateURI.getSchemeSpecificPart();
             if (val != null) {
                 dict.initialPut("schemeSpecificPart", new StringValue(val));
             }
-            val = uri.getRawSchemeSpecificPart();
+            val = surrogateURI.getRawSchemeSpecificPart();
             if (val != null) {
                 dict.initialPut("rawSchemeSpecificPart", new StringValue(val));
             }
-            int port = uri.getPort();
-            if (port >= 0) {
-                dict.initialPut("port", new Int64Value(port));
+            if (absolute) {
+                int port = uri.getPort();
+                if (port >= 0) {
+                    dict.initialPut("port", new Int64Value(port));
+                }
             }
-            val = uri.getPath();
+            val = surrogateURI.getPath();
             if (val != null) {
+                if (val.equals("/") && !arg.endsWith("/")) {
+                    // Relevant for .NET, where the absolute path of a URI such as "http://www.example.com" is wrongly
+                    // given as "/" rather than "". This doesn't catch all cases, for example if there is a query part.
+                    val = "";
+                }
+                if (!absolute && val.startsWith("/") && !arg.startsWith("/")) {
+                    // For a relative URI such as "books.xml", return "books.xml" rather than "/books.xml"
+                    val = val.substring(1);
+                }
                 dict.initialPut("path", new StringValue(val));
             }
-            val = uri.getRawPath();
+            val = surrogateURI.getRawPath();
             if (val != null) {
                 dict.initialPut("rawPath", new StringValue(val));
             }
-            val = uri.getRawQuery();
+            val = surrogateURI.getRawQuery();
             if (val != null) {
                 dict.initialPut("rawQuery", new StringValue(val));
             }
-            val = uri.getQuery();
+            val = surrogateURI.getQuery();
             if (val != null) {
                 dict.initialPut("query", new StringValue(val));
                 DictionaryMap params = new DictionaryMap();
@@ -439,11 +451,11 @@ public class Parts extends SystemFunction implements Callable {
                 }
                 dict.initialPut("queryParams", params);
             }
-            val = uri.getRawFragment();
+            val = surrogateURI.getRawFragment();
             if (val != null) {
                 dict.initialPut("rawFragment", new StringValue(val));
             }
-            val = uri.getFragment();
+            val = surrogateURI.getFragment();
             if (val != null) {
                 dict.initialPut("fragment", new StringValue(val));
             }
@@ -457,6 +469,16 @@ public class Parts extends SystemFunction implements Callable {
             dict.initialPut("error", new StringValue(e.getMessage()));
             return dict;
         }
+    }
+
+    /**
+     * For a relative URI, get a corresponding URI whose components are accessible. No action on Java;
+     * on C#, resolve the relative URI against an arbitrary base URI
+     */
+
+    @CSharpReplaceBody(code="return new System.Uri(new System.Uri(\"http://dummy.uri/\"), relative);")
+    private static URI getSurrogateURI(URI relative) {
+        return relative;
     }
 }
 
