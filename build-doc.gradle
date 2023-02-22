@@ -856,10 +856,10 @@ variants.each { ds ->
     description: "Creates the PDF version of the ${ds} product description"
   ) {
     inputs.file "${buildDir}/proddesc/PD/fo/${ds}.fo"
-    outputs.file "${buildDir}/proddesc/PD/pdf/${ds}.pdf"
+    outputs.file "${buildDir}/proddesc/PD/pdf/Saxon${ds}.pdf"
     classpath = configurations.documentation
     main = "org.apache.fop.cli.Main"
-    args "-q", "${buildDir}/proddesc/PD/fo/${ds}.fo", "-pdf", "${buildDir}/proddesc/PD/pdf/${ds}.pdf"
+    args "-q", "${buildDir}/proddesc/PD/fo/${ds}.fo", "-pdf", "${buildDir}/proddesc/PD/pdf/Saxon${ds}.pdf"
   }
   gen_prod_desc_pdf.dependsOn t
 }
