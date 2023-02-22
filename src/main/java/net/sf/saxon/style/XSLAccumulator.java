@@ -94,6 +94,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
      * references to this accumulator
      */
 
+    @SuppressWarnings("StatementWithEmptyBody")
     private void prepareSimpleAttributes() {
 
         for (AttributeInfo att : attributes()) {
@@ -124,10 +125,9 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
 
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     protected void prepareAttributes() {
-
-        //prepareSimpleAttributes();
 
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
@@ -343,23 +343,22 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
         // no action currently
     }
 
-    private void checkInitialStreamability(Expression init) throws XPathException {
-        // Check streamability constraints
+    private void checkInitialStreamability(Expression init) {
         //#ifdefined STREAM
         if (accumulator.isDeclaredStreamable()) {
+            // Check streamability constraints
             PostureAndSweep ps = Streamability.getStreamability(init, ContextItemStaticInfoEE.DEFAULT, null);
             if (ps.getSweep() != Sweep.MOTIONLESS) {
                 notStreamable(this,"The initial value expression for a streaming accumulator must be motionless");
             }
         }
-
         //#endif
     }
 
-    private void checkRuleStreamability(XSLAccumulatorRule rule, Pattern pattern, Expression newValueExp) throws XPathException {
-        // Check streamability constraints
+    private void checkRuleStreamability(XSLAccumulatorRule rule, Pattern pattern, Expression newValueExp) {
         //#ifdefined STREAM
         if (accumulator.isDeclaredStreamable()) {
+            // Check streamability constraints
             if (!pattern.isMotionless()) {
                 String message = "The patterns for the accumulator rules in a streaming accumulator must be motionless";
                 notStreamable(rule, message);
