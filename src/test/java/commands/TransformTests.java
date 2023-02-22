@@ -45,9 +45,14 @@ public class TransformTests {
     private static class VerifyingTransform extends Transform {
 
         private final RetentiveLogger logger;
+        private String expectedError = null;
 
         public VerifyingTransform() {
             this.logger = new RetentiveLogger();
+        }
+
+        public void setExpectedError(String s) {
+            expectedError = s;
         }
 
         public String transform(String[] args) {
@@ -61,8 +66,13 @@ public class TransformTests {
                 System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
                 return baos.toString("utf-8");
             } catch (Exception e) {
-                fail();
-                return "failure";
+                if (expectedError != null) {
+                    assertTrue(e.getMessage().contains(expectedError));
+                    return "failed as expected";
+                } else {
+                    fail();
+                    return "failure";
+                }
             }
         }
 
@@ -628,6 +638,49 @@ public class TransformTests {
             assertTrue(strResult.contains("tax-expanded=\"true\""));
             assertTrue(strResult.contains("id-retained=\"true\""));
             assertTrue(strResult.contains("price-typed=\"true\""));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testCustomSourceParser() {
+        String[] args = {
+                "-ext:off",
+                "-quit:off",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books-preserve-types.xsl",
+                "-x:com.saxonica.ee.jaxp.ValidatingReader",
+                "-t"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(baos));   // redirect System.out
+            String strResult = vt.transform(args);
+            assertTrue(vt.outputMatches(s -> s.startsWith("Using parser com.saxonica.ee.jaxp.ValidatingReader")));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testCustomStyleParser() {
+        String[] args = {
+                "-ext:off",
+                "-quit:off",
+                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsl:" + configTest.getDataDir() + "books-preserve-types.xsl",
+                "-y:com.saxonica.ee.jaxp.ValidatingReader",
+                "-t"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            vt.setExpectedError("no element declaration available");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(baos));   // redirect System.out
+            String strResult = vt.transform(args);
+            //assertTrue(vt.outputMatches(s -> s.startsWith("Using parser com.saxonica.ee.jaxp.ValidatingReader")));
         } catch (Exception e) {
             fail(e.getMessage());
         }
