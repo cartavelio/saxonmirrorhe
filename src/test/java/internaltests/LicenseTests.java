@@ -53,6 +53,7 @@ public class LicenseTests {
 
         proc = new Processor(true);
         compiler = proc.newXsltCompiler();
+        compiler.setJustInTimeCompilation(false);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));
@@ -105,6 +106,7 @@ public class LicenseTests {
         }
         compiler = proc.newXsltCompiler();
         compiler.setSchemaAware(true);
+        compiler.setJustInTimeCompilation(false);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));
