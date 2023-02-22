@@ -570,6 +570,10 @@ public class Copy extends ElementCreator {
                                 //elemOut = validator;
                             }
 
+                            if (output.getSystemId() == null) {
+                                output.setSystemId(source.getBaseURI());
+                            }
+
                             output.startElement(elemName, typeCode, expr.getLocation(), finalProperties);
 
                             // output the required namespace nodes via a callback
