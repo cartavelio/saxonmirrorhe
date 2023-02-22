@@ -123,8 +123,10 @@ public class Transform {
                                     "Allow calls to Java extension functions and xsl:result-document");
         options.addRecognizedOption("im", CommandLineOptions.TYPE_QNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Name of initial mode");
+        //#if CSHARP==false
         options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
                                     "User-supplied net.sf.saxon.lib.Initializer class to initialize the Saxon Configuration");
+        //#endif
         options.addRecognizedOption("it", CommandLineOptions.TYPE_QNAME,
                                     "Name of initial template");
         options.addRecognizedOption("jit", CommandLineOptions.TYPE_BOOLEAN,
@@ -137,8 +139,10 @@ public class Transform {
                                     "List of file names of library packages used by the stylesheet");
         options.addRecognizedOption("license", CommandLineOptions.TYPE_BOOLEAN,
                                     "Check for local license file");
+        //#if CSHARP==false
         options.addRecognizedOption("m", CommandLineOptions.TYPE_CLASSNAME,
                                     "Use named class to handle xsl:message output");
+        //#endif
         options.addRecognizedOption("nogo", CommandLineOptions.TYPE_BOOLEAN,
                                     "Compile only, no evaluation");
         options.addRecognizedOption("now", CommandLineOptions.TYPE_DATETIME | CommandLineOptions.VALUE_REQUIRED,
@@ -149,8 +153,10 @@ public class Transform {
                                     "Use specified file for primary output");
         options.addRecognizedOption("opt", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
                                     "Enable/disable optimization options [-]cfgjklmnrsvwx");
+        //#if CSHARP==false
         options.addRecognizedOption("or", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named OutputURIResolver class");
+        //#endif
         options.addRecognizedOption("outval", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Action when validation of output file fails");
         options.setPermittedValues("outval", new String[]{"recover", "fatal"}, null);
@@ -159,9 +165,9 @@ public class Transform {
         //#if CSHARP==false
         options.addRecognizedOption("quit", CommandLineOptions.TYPE_BOOLEAN | CommandLineOptions.VALUE_REQUIRED,
                                     "Quit JVM if transformation fails");
-        //#endif
         options.addRecognizedOption("r", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named URIResolver class");
+        //#endif
         options.addRecognizedOption("relocate", CommandLineOptions.TYPE_BOOLEAN,
                                     "Produce relocatable packages");
         options.addRecognizedOption("repeat", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
@@ -187,8 +193,8 @@ public class Transform {
                                     "Trace hotspot bytecode generation to specified XML file");
         options.addRecognizedOption("TJ", CommandLineOptions.TYPE_BOOLEAN,
                                     "Debug binding and execution of extension functions");
-        //#endif
         options.setPermittedValues("TJ", new String[]{"on", "off"}, "on");
+        //#endif
         options.addRecognizedOption("Tlevel", CommandLineOptions.TYPE_STRING,
                                     "Level of detail for trace listener output");
         options.setPermittedValues("Tlevel", new String[]{"none", "low", "normal", "high"}, "normal");
