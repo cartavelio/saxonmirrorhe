@@ -7,13 +7,13 @@ using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
 
 // file:////C:/work/repositories/hg/qt3-testsuite/ C:/work/repositories/hg/qt3-testsuite/results/saxon/ -lang:XQ30
-//using net.sf.saxon.Version;
-using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
-using JConfiguration = net.sf.saxon.Configuration;
-using JVersion = net.sf.saxon.Version;
+//using Saxon.Hej.Version;
+using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
+using JConfiguration = Saxon.Hej.Configuration;
+using JVersion = Saxon.Hej.Version;
 using System.Linq;
-using java.util;
-using TestRunner;
+using System.Net;
+
 
 namespace TestDriver {
     /**
@@ -68,14 +68,11 @@ namespace TestDriver {
 
             resultsDoc = new FotsResultsDocument(this.getResultsDir(), requestedSpec);
         }
-
-
-        //C:/work/repositories/hg/qt3-testsuite/ C:/work/repositories/hg/qt3-testsuite/results/saxon/ -lang:XQ31
-        //file:////C:/work/repositories/hg/qt3tests/ C:/work/repositories/hg/qt3tests/results/saxon/ -lang:XQ30
+        
         public static void MainQT(string[] args) {
             if (args.Length == 0 || args[0].Equals("-?")) {
-                System.Console.WriteLine("testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                                         " [-t:testNamePattern] [-unfolded] [-bytecode:on|off|debug] [-tree] [-lang:XP20|XP30|XQ10|XQ30|XQ31]");
+                System.Console.WriteLine("testsuiteDir  [-o:resultsdir] [-s:testSetName]" +
+                                         " [-t:testNamePattern] [-unfolded] [-tree] [-lang:XP20|XP30|XQ10|XQ30|XQ31]");
                 return;
             }
 
@@ -324,7 +321,7 @@ namespace TestDriver {
             if (inverse) {
                 // force use of a non-schema-aware processor by creating a ProfessionalConfiguration
                 Processor savedProcessor = env.processor;
-                com.saxonica.config.ProfessionalConfiguration pConfig = new com.saxonica.config.ProfessionalConfiguration();
+                Saxon.Eej.config.ProfessionalConfiguration pConfig = new Saxon.Eej.config.ProfessionalConfiguration();
                 pConfig.setNamePool(env.processor.Implementation.getNamePool());
                 env.processor = new Processor(pConfig);
                 env.processor.SetProperty(Feature<bool>.STABLE_UNPARSED_TEXT, true);
@@ -365,7 +362,7 @@ namespace TestDriver {
                     }
                 });
             }
-
+            
             return true;
         }
 
@@ -422,10 +419,32 @@ namespace TestDriver {
             env.xpathCompiler.BackwardsCompatible = false;
             env.processor.XmlVersion = (decimal) 1.0;
 
+            env.xqueryCompiler.XQueryResolver = (moduleUri, baseUri, locationHints) => {
+                XdmValue files =
+                    xpc.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
+                if (files.Count == 0) {
+                    throw new Exception("Failed to find module entry for " + moduleUri);
+                }
+
+                XQueryModuleSource[] sources = new XQueryModuleSource[files.Count];
+                int u = 0;
+                foreach (XdmItem file in files) {
+                    string filename = file.GetStringValue();
+                    Uri abs = new Uri(testCase.BaseUri, filename);
+                    sources[u++] = new XQueryModuleSource() {
+                        BaseUri = abs,
+                        Content = new WebClient().DownloadString(abs)
+                    };
+                }
+
+                return sources;
+            };
+
+
 
             //test
-            /*bool icuColCheck = net.sf.saxon.Version.platform.hasICUCollator ();
-			bool icuNumCheck = net.sf.saxon.Version.platform.hasICUNumberer();
+            /*bool icuColCheck = Saxon.Hej.Version.platform.hasICUCollator ();
+			bool icuNumCheck = Saxon.Hej.Version.platform.hasICUNumberer();
 			Console.WriteLine ("ICUCol: " + (icuColCheck ? "true" : "false"));
 			Console.WriteLine ("ICUNum: " + (icuNumCheck ? "true" : "false"));*/
             //end of test
@@ -619,7 +638,6 @@ namespace TestDriver {
                             }
                         }
 
-                        testXqc.QueryResolver = new ModuleResolver(xpc, testCase);
                         try {
                             XQueryExecutable q = testXqc.Compile(exp);
                             if (optimization != null) {
@@ -656,11 +674,9 @@ namespace TestDriver {
                                 selector.ContextItem = env.contextItem;
                             }
 
-                            selector.InputXmlResolver = env;
-                            //selector.InputXmlResolver =  .SetURIResolver(new TestURIResolver(env)); //TODO
+                            selector.XmlResolver = env;
                             if (env.unparsedTextResolver != null) {
-                                selector.Implementation.getUnderlyingQueryContext()
-                                    .setUnparsedTextURIResolver(env.unparsedTextResolver); // TODO
+                                selector.TextResolver = env.unparsedTextResolver; 
                             }
 
                             if (needSerializedResult) {
@@ -832,42 +848,8 @@ namespace TestDriver {
             resultsDoc.writeTestcaseElement(name, result, comment);
         }
 
-        public class ModuleResolver : IQueryResolver {
-            private readonly XPathCompiler catalogXPathCompiler;
-            private readonly XdmNode testCase;
-
-            public ModuleResolver(XPathCompiler xpc, XdmNode testCase) {
-                this.catalogXPathCompiler = xpc;
-                this.testCase = testCase;
-            }
-
-            public Object GetEntity(Uri absoluteUri) {
-                return new FileStream(absoluteUri.AbsolutePath, FileMode.Open, FileAccess.Read);
-            }
-
-            internal Uri resolve(Uri basei, String child) {
-                return (new XmlUrlResolver()).ResolveUri(testCase.BaseUri, child);
-            }
-
-
-            public Uri[] GetModules(String moduleUri, Uri baseUri, String[] locationHints) {
-                XdmValue files =
-                    catalogXPathCompiler.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
-                if (files.Count == 0) {
-                    throw new Exception("Failed to find module entry for " + moduleUri);
-                }
-
-                Uri[] uris = new Uri[files.Count];
-                int u = 0;
-                foreach (XdmItem file in files) {
-                    uris[u++] = resolve(baseUri, file.Unwrap().getStringValue());
-                }
-
-                return uris;
-            }
-        }
-
-        public class EnvironmentVariableResolver : net.sf.saxon.lib.EnvironmentVariableResolver {
+ 
+        public class EnvironmentVariableResolver : Saxon.Hej.lib.EnvironmentVariableResolver {
             public EnvironmentVariableResolver() {
             }
 

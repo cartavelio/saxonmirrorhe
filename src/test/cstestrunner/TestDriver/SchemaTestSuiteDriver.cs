@@ -76,21 +76,21 @@ namespace TestDriver {
         }
 
         public static void MainXSD(string[] args) {
-            long startTime = java.lang.System.nanoTime();
+            long startTime = Saxon.Ejava.lang.System.nanoTime();
             new SchemaTestSuiteDriver().go(args);
-            long endTime = java.lang.System.nanoTime();
-            Console.Error.WriteLine("Execution time: "+net.sf.saxon.trans.CommandLineOptions.showExecutionTimeNano((endTime-startTime)));
+            long endTime = Saxon.Ejava.lang.System.nanoTime();
+            Console.Error.WriteLine("Execution time: "+Saxon.Hej.trans.Timer.showExecutionTimeNano((endTime-startTime)));
 
         }
         /**
-             * Run the tests
-             * @param args command line arguments
-             * @throws SAXException
-             * @throws ParserConfigurationException
-             * @throws XPathException
-             * @throws IOException
-             * @throws URISyntaxException
-             */
+         * Run the tests
+         * @param args command line arguments
+         * @throws SAXException
+         * @throws ParserConfigurationException
+         * @throws XPathException
+         * @throws IOException
+         * @throws URISyntaxException
+         */
         public void go(String[] args) {
             if (args.Length == 0 || args[0] == "-?") {
                 Console.WriteLine(

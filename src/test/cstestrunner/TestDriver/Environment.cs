@@ -6,36 +6,35 @@ using System.Xml;
 using System.IO;
 using System.Globalization;
 using System.Net;
-using JConfiguration = net.sf.saxon.Configuration;
-using JPreparedStylesheet = net.sf.saxon.PreparedStylesheet;
-using JClause = net.sf.saxon.expr.flwor.Clause;
-using JCodeInjector = net.sf.saxon.expr.parser.CodeInjector;
-using JSimpleCollection = net.sf.saxon.expr.sort.SimpleCollation;
-using JDecimalFormatManager = net.sf.saxon.trans.DecimalFormatManager;
-using JDecimalSymbols = net.sf.saxon.trans.DecimalSymbols;
-using JXpathException = net.sf.saxon.trans.XPathException;
-using JUnparsedTextURIResolver = net.sf.saxon.lib.UnparsedTextURIResolver;
-using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
-using JStringCollator = net.sf.saxon.lib.StringCollator;
-using JAnyURIValue = net.sf.saxon.value.AnyURIValue;
-using JItem = net.sf.saxon.om.Item;
-using JNamespaceConstant = net.sf.saxon.lib.NamespaceConstant;
-using JExpression = net.sf.saxon.expr.Expression;
-using JStructuredQName = net.sf.saxon.om.StructuredQName;
-using java.net;
-using net.sf.saxon;
-using net.sf.saxon.expr;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
-using net.sf.saxon.resource;
-using net.sf.saxon.style;
+using JConfiguration = Saxon.Hej.Configuration;
+using JPreparedStylesheet = Saxon.Hej.PreparedStylesheet;
+using JClause = Saxon.Hej.expr.flwor.Clause;
+using JCodeInjector = Saxon.Hej.expr.parser.CodeInjector;
+using JSimpleCollection = Saxon.Hej.expr.sort.SimpleCollation;
+using JDecimalFormatManager = Saxon.Hej.trans.DecimalFormatManager;
+using JDecimalSymbols = Saxon.Hej.trans.DecimalSymbols;
+using JXpathException = Saxon.Hej.trans.XPathException;
+using JUnparsedTextURIResolver = Saxon.Hej.lib.UnparsedTextURIResolver;
+using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
+using JStringCollator = Saxon.Hej.lib.StringCollator;
+using JAnyURIValue = Saxon.Hej.value.AnyURIValue;
+using JItem = Saxon.Hej.om.Item;
+using JNamespaceConstant = Saxon.Hej.lib.NamespaceConstant;
+using JExpression = Saxon.Hej.expr.Expression;
+using JStructuredQName = Saxon.Hej.om.StructuredQName;
+using Saxon.Hej;
+using Saxon.Hej.expr;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
+using Saxon.Hej.resource;
+using Saxon.Hej.style;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
 using TestRunner;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using Environment = System.Environment;
 using Processor = Saxon.Api.Processor;
-using Resource = net.sf.saxon.lib.Resource;
+using Resource = Saxon.Hej.lib.Resource;
 using XPathCompiler = Saxon.Api.XPathCompiler;
 using XPathSelector = Saxon.Api.XPathSelector;
 using XQueryCompiler = Saxon.Api.XQueryCompiler;
@@ -68,7 +67,7 @@ namespace TestDriver {
         public bool usable = true;
         public StringBuilder paramDeclarations = new StringBuilder(256);
         public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
-        public JUnparsedTextURIResolver unparsedTextResolver;
+        public TextResolver unparsedTextResolver;
         public SysCollGen.IList<ResetAction> resetActions = new SysCollGen.List<ResetAction>();
         public bool outputTree = true;
         public bool outputSerialize = false;
@@ -89,6 +88,7 @@ namespace TestDriver {
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
             string version = SpecAttr.VersionOf(spec);
             string xpVersion = version == "3.0" ? "3.1" : version;
+            string xtVersion = version == "3.1" ? "3.0" : version;
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
             environment.xpathCompiler.BaseUri = baseURI;
             environment.xpathCompiler.XPathLanguageVersion = xpVersion;
@@ -97,7 +97,7 @@ namespace TestDriver {
             environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
             environment.xsltCompiler = environment.processor.NewXsltCompiler();
             environment.xsltCompiler.BaseUri = baseURI;
-            environment.xsltCompiler.XsltLanguageVersion = version;
+            environment.xsltCompiler.XsltLanguageVersion = xtVersion;
 
             if (unfolded) {
                 // environment.xqueryCompiler.Implementation.setCodeInjector(new LazyLiteralInjector()); //TODO
@@ -275,8 +275,8 @@ namespace TestDriver {
         private static void SetBaseUri(Driver driver, XPathCompiler xpc, XdmItem env, Environment environment) {
             foreach (XdmItem basei in xpc.Evaluate("static-base-uri", env)) {
                 string uri = ((XdmNode) basei).GetAttributeValue(new QName("uri"));
-                if (uri == null || "#UNDEFINED".Equals(uri)) {
-                    driver.println("**** Error: The BaseURI null and #UNDEFINED is not supported");
+                if (uri is null or "#UNDEFINED") {
+                    driver.println("**** Error: Test cannot be run: static-base-uri is null or '#UNDEFINED'");
                 }
                 else {
                     try {
@@ -514,7 +514,7 @@ namespace TestDriver {
         private static void CreateUnparsedTextResolver(Driver driver, XPathCompiler xpc, XdmItem env,
                 Environment environment) {
             SysCollGen.Dictionary<Uri, Func<TextReader>> resources = new SysCollGen.Dictionary<Uri, Func<TextReader>>();
-            SysCollGen.Dictionary<Uri, String> encodings = new SysCollGen.Dictionary<Uri, String>();
+            SysCollGen.Dictionary<Uri, Encoding> encodings = new SysCollGen.Dictionary<Uri, Encoding>();
             XmlUrlResolver res = new XmlUrlResolver();
             
             // For each resource in the environment, create a dictionary entry that maps
@@ -522,13 +522,13 @@ namespace TestDriver {
             // for that resource
             
             foreach (XdmItem resource in xpc.Evaluate("resource", env)) {
-                String nominalUriStr = ((XdmNode) resource).GetAttributeValue(new QName("uri"));
+                string nominalUriStr = ((XdmNode) resource).GetAttributeValue(new QName("uri"));
                 Uri nominalUri = new Uri(nominalUriStr, UriKind.RelativeOrAbsolute);
                 if (!nominalUri.IsAbsoluteUri) {
                     nominalUri = new Uri(((XdmNode) env).BaseUri, nominalUri);
                 }
-                String href = ((XdmNode) resource).GetAttributeValue(new QName("file"));
-                String encoding = ((XdmNode) resource).GetAttributeValue(new QName("encoding"));
+                string href = ((XdmNode) resource).GetAttributeValue(new QName("file"));
+                string encoding = ((XdmNode) resource).GetAttributeValue(new QName("encoding"));
                 if (encoding == null) {
                     encoding = "utf-8"; // TODO: should infer from content etc?
                 }
@@ -536,7 +536,7 @@ namespace TestDriver {
                 Encoding enc1 = Encoding.GetEncoding(encoding, 
                     EncoderFallback.ExceptionFallback, 
                     new DecoderExceptionFallback());
-                String mediaType = ((XdmNode) resource).GetAttributeValue(new QName("media-type"));
+                string mediaType = ((XdmNode) resource).GetAttributeValue(new QName("media-type"));
                 if (href != null) {
                     if (href.StartsWith("http")) {
                         resources.Add(nominalUri, () => {
@@ -550,11 +550,6 @@ namespace TestDriver {
                     }
                     else {
                         Uri resourceUri = new Uri(((XdmNode) env).BaseUri, href);
-                        // //Uri alias = new Uri(uri, UriKind.RelativeOrAbsolute);
-                        // if (!resourceUri.IsAbsoluteUri) {
-                        //     alias = new Uri(((XdmNode) env).BaseUri, alias);
-                        // }
-
                         
                         resources.Add(nominalUri, () => {
                             try {
@@ -574,7 +569,6 @@ namespace TestDriver {
                                 if (str.Length > 0 && str[0] == 0xfffe) {
                                     str = str.Substring(1);
                                 }
-                                //string str = wc.DownloadString(href);
                                 return new StringReader(str);
                             }
                             catch (System.Text.DecoderFallbackException e) {
@@ -586,7 +580,7 @@ namespace TestDriver {
                     
 
                     try {
-                        encodings.Add(nominalUri, encoding);
+                        //encodings.Add(nominalUri, encoding);
                         
 
                         // environment.catalogResources.Add();
@@ -604,51 +598,46 @@ namespace TestDriver {
 
             if (resources.Count != 0) {
                 environment.unparsedTextResolver =
-                    new TestUnparsedTextURIResolver(encodings, resources);
+                    new TestUnparsedTextURIResolver(encodings, resources, environment.processor.Implementation).resolve;
             }
         }
 
-        public class TestUnparsedTextURIResolver : UnparsedTextURIResolver {
-            SysCollGen.Dictionary<Uri, String> encodings;
+        public class TestUnparsedTextURIResolver {
+            SysCollGen.Dictionary<Uri, Encoding> encodings;
             SysCollGen.Dictionary<Uri, Func<TextReader>> resources;
+            private Configuration config;
 
-            public TestUnparsedTextURIResolver(SysCollGen.Dictionary<Uri, String> encodings,
-                SysCollGen.Dictionary<Uri, Func<TextReader>> resources) {
+            public TestUnparsedTextURIResolver(SysCollGen.Dictionary<Uri, Encoding> encodings,
+                SysCollGen.Dictionary<Uri, Func<TextReader>> resources,
+                Configuration config) {
                 this.encodings = encodings;
                 this.resources = resources;
+                this.config = config;
             }
 
 
-            public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
+            public TextReader resolve(Uri absoluteURI, Encoding encoding) {
                 if (resources.ContainsKey(absoluteURI)) {
                     if (encoding == null) {
                         encodings.TryGetValue(new Uri(absoluteURI.ToString()), out encoding);
                     }
-                    else {
-                        try {
-                            Encoding.GetEncoding(encoding);
-                        }
-                        catch (ArgumentException) {
-                            throw new net.sf.saxon.trans.XPathException("Unknown encoding " + encoding, "FOUT1190");
-                        }
-                    }
 
                     if (encoding == null) {
-                        encoding = "utf-8";
+                        encoding = Encoding.UTF8;
                     }
 
                     try {
                         return resources[absoluteURI].Invoke();
                     }
                     catch (Exception ioe) {
-                        net.sf.saxon.trans.XPathException xpe =
-                            new net.sf.saxon.trans.XPathException("Unknown URI " + absoluteURI, ioe);
+                        Saxon.Hej.trans.XPathException xpe =
+                            new Saxon.Hej.trans.XPathException("Unknown URI " + absoluteURI, ioe);
                         xpe.setErrorCode("FOUT1170");
                         throw xpe;
                     }
                 }
                 else {
-                    return new StandardUnparsedTextResolver().resolve(absoluteURI, encoding, config);
+                    return new StandardUnparsedTextResolver().resolve(absoluteURI, encoding.EncodingName, config);
                 }
 
             }
@@ -744,8 +733,8 @@ namespace TestDriver {
                 //     String href = ((XdmNode) source).GetAttributeValue(new QName("file"));
                 //     String encoding = ((XdmNode) source).GetAttributeValue(new QName("encoding"));
                 //     String media = ((XdmNode) source).GetAttributeValue(new QName("media-type"));
-                //     net.sf.saxon.resource.AbstractResourceCollection.InputDetails details =
-                //         new net.sf.saxon.resource.AbstractResourceCollection.InputDetails();
+                //     Saxon.Hej.resource.AbstractResourceCollection.InputDetails details =
+                //         new Saxon.Hej.resource.AbstractResourceCollection.InputDetails();
                 //     details.encoding = encoding;
                 //     details.contentType = media;
                 //     FileStream file = null;
@@ -846,13 +835,13 @@ namespace TestDriver {
                     String hrefStri = (hrefStr.StartsWith("file:///") ? hrefStr.Substring(7) : hrefStr);
                     Stream stream = new FileStream(hrefStri, FileMode.Open);
                     
-                    javax.xml.transform.Source sourcei = new javax.xml.transform.stream.StreamSource(stream);
+                    Saxon.Ejavax.xml.transform.Source sourcei = new Saxon.Ejavax.xml.transform.stream.StreamSource(stream);
 
 
                     if (!val.Equals("skip")) {
-                        sourcei = net.sf.saxon.lib.AugmentedSource.makeAugmentedSource(sourcei);
-                        ((net.sf.saxon.lib.AugmentedSource) sourcei).setSchemaValidationMode(
-                            net.sf.saxon.lib.Validation.getCode(val));
+                        sourcei = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(sourcei);
+                        ((Saxon.Hej.lib.AugmentedSource) sourcei).setSchemaValidationMode(
+                            Saxon.Hej.lib.Validation.getCode(val));
                     }
 
                     sourcei.setSystemId(hrefStr);
@@ -1093,7 +1082,7 @@ namespace TestDriver {
         //
         //     internal Resource MakeResource(JConfiguration config, AbstractResourceCollection.InputDetails details,
         //         string absolutePath) {
-        //         net.sf.saxon.lib.ResourceFactory factory = null;
+        //         Saxon.Hej.lib.ResourceFactory factory = null;
         //         String contentType = details.contentType;
         //         if (contentType != null) {
         //             factory = config.getResourceFactoryForMediaType(contentType);
@@ -1108,7 +1097,7 @@ namespace TestDriver {
         // }
 
 
-        // public class CollectionFinder : net.sf.saxon.lib.CollectionFinder {
+        // public class CollectionFinder : Saxon.Hej.lib.CollectionFinder {
         //     SysCollGen.Dictionary<Uri, ResourceCollection> collections;
         //
         //     public CollectionFinder(SysCollGen.Dictionary<Uri, ResourceCollection> collections) {
@@ -1125,15 +1114,15 @@ namespace TestDriver {
         // }
 
 
-        // public class CollectionResolver /*:net.sf.saxon.lib.CollectionURIResolver */ {
+        // public class CollectionResolver /*:Saxon.Hej.lib.CollectionURIResolver */ {
         //     System.Collections.Hashtable collections;
         //
         //     public CollectionResolver(System.Collections.Hashtable collections) {
         //         this.collections = collections;
         //     }
         //
-        //     public net.sf.saxon.om.SequenceIterator resolve(string href, string baseStr,
-        //         net.sf.saxon.expr.XPathContext context) {
+        //     public Saxon.Hej.om.SequenceIterator resolve(string href, string baseStr,
+        //         Saxon.Hej.expr.XPathContext context) {
         //         try {
         //             List<Uri> docs;
         //             if (href == null) {
@@ -1151,20 +1140,20 @@ namespace TestDriver {
         //             }
         //
         //             if (docs == null) {
-        //                 return net.sf.saxon.tree.iter.EmptyIterator.getInstance();
+        //                 return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
         //             }
         //             else {
         //                 SysCollGen.List<string> list = new SysCollGen.List<string>();
         //                 foreach (Uri uri in docs) {
-        //                     list.Add(new net.sf.saxon.value.AnyURIValue(uri.ToString()));
+        //                     list.Add(new Saxon.Hej.value.AnyURIValue(uri.ToString()));
         //                 }
         //
-        //                 return new net.sf.saxon.tree.iter.ListIterator(list);
+        //                 return new Saxon.Hej.tree.iter.ListIterator(list);
         //             }
         //         }
         //         catch (java.net.URISyntaxException e) {
         //             System.Console.WriteLine("** Invalid Uri: " + e.Message);
-        //             return net.sf.saxon.tree.iter.EmptyIterator.getInstance();
+        //             return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
         //         }
         //     }
         // }
