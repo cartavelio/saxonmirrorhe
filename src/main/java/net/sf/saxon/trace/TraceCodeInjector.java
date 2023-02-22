@@ -24,7 +24,10 @@ public class TraceCodeInjector implements CodeInjector {
 
     @Override
     public Expression inject(Expression exp) {
-        if (!(exp instanceof TraceExpression) && isApplicable(exp)) {
+        if (exp instanceof FLWORExpression) {
+            ((FLWORExpression) exp).injectCode(this);
+            return exp;
+        } else if (!(exp instanceof TraceExpression) && isApplicable(exp)) {
             return new TraceExpression(exp);
         } else {
             return exp;

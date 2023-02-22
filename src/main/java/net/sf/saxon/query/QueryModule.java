@@ -23,7 +23,7 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.TraceCodeInjector;
+import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.util.IndexedStack;
@@ -245,7 +245,7 @@ public class QueryModule implements StaticContext {
         if (importer.getCodeInjector() != null) {
             qp.setCodeInjector(importer.getCodeInjector());
         } else if (config.isCompileWithTracing()) {
-            qp.setCodeInjector(new TraceCodeInjector());
+            qp.setCodeInjector(new XQueryTraceCodeInjector());
         }
         QNameParser qnp = new QNameParser(module.getLiveNamespaceResolver())
             .withAcceptEQName(importer.getXPathVersion() >= 30)
