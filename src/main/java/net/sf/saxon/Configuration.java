@@ -2098,33 +2098,6 @@ public class Configuration implements SourceResolver, NotationSet {
         return false;
     }
 
-    //#if CSHARP==false
-    /**
-     * Get the name of the class that will be instantiated to create a MessageEmitter,
-     * to process the output of xsl:message instructions in XSLT.
-     *
-     * @return the full class name of the message emitter class.
-     * @since 8.4
-     */
-
-    public String getMessageEmitterClass() {
-        return defaultXsltCompilerInfo.getMessageReceiverClassName();
-    }
-
-    /**
-     * Set the name of the class that will be instantiated to
-     * to process the output of xsl:message instructions in XSLT.
-     *
-     * @param messageReceiverClassName the full class name of the message receiver. This
-     *                                 must implement net.sf.saxon.event.Receiver.
-     * @since 8.4. From 11.1 this method has no effect.
-     */
-
-    public void setMessageEmitterClass(String messageReceiverClassName) {
-        defaultXsltCompilerInfo.setMessageReceiverClassName(messageReceiverClassName);
-    }
-    //#endif
-
     /**
      * Get the name of the class that will be instantiated to create an XML parser
      * for parsing source documents (for example, documents loaded using the document()
@@ -4425,14 +4398,6 @@ public class Configuration implements SourceResolver, NotationSet {
                     setLineNumbering(b);
                     break;
                 }
-                //#if CSHARP==false
-                case FeatureCode.MESSAGE_EMITTER_CLASS:
-                    if (!(value instanceof String)) {
-                        throw new IllegalArgumentException("MESSAGE_EMITTER_CLASS class must be a String");
-                    }
-                    setMessageEmitterClass((String) value);
-                    break;
-                //#endif
                 case FeatureCode.MODULE_URI_RESOLVER:
                     if (!(value instanceof ModuleURIResolver)) {
                         throw new IllegalArgumentException(
@@ -5114,11 +5079,6 @@ public class Configuration implements SourceResolver, NotationSet {
 
             case FeatureCode.LINE_NUMBERING:
                 return isLineNumbering();
-
-            //#if CSHARP==false
-            case FeatureCode.MESSAGE_EMITTER_CLASS:
-                return getMessageEmitterClass();
-            //#endif
 
             case FeatureCode.MODULE_URI_RESOLVER:
                 return getModuleURIResolver();

@@ -52,8 +52,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
     private boolean beingInlined = false;
 
-
-    // Only used in cases that don't yet use elaboration, e.g. streaming and XQuery Update
     private SequenceEvaluator[] argumentEvaluators = null;
 
     public static final int NOT_TAIL_CALL = 0;
@@ -193,21 +191,61 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         StaticProperty.DEPENDS_ON_POSITION | StaticProperty.DEPENDS_ON_LAST |
             StaticProperty.DEPENDS_ON_XSLT_CONTEXT | StaticProperty.DEPENDS_ON_USER_FUNCTIONS;
 
+//    public void allocateArgumentEvaluators() {
+//        // Retained for paths such as streaming, bytecode generation, XQuery updated, that have
+//        // not yet converted to use elaboration mechanisms.
+//        argumentEvaluators = new SequenceEvaluator[getArity()];
+//        int i=0;
+//        for (Operand o : operands()) {
+//            Expression arg = o.getChildExpression();
+//            SequenceType required = function.getArgumentType(i);
+//            int cardinality = required.getCardinality();
+//
+//            if (i == 0 && function.getDeclaredStreamability().isConsuming()) {
+//                argumentEvaluators[i] = new StreamingArgumentEvaluator(arg);
+//            } else if (function.getParameterDefinitions()[i].isIndexedVariable()) {
+//                PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
+//                argumentEvaluators[i] = new IndexedVariableEvaluator(argPull);
+//            } else {
+//                argumentEvaluators[i] = arg.makeElaborator().lazily(true);
+//            }
+//            i++;
+//        }
+//    }
     public void allocateArgumentEvaluators() {
-        // Retained for paths such as streaming, bytecode generation, XQuery updated, that have
-        // not yet converted to use elaboration mechanisms.
         argumentEvaluators = new SequenceEvaluator[getArity()];
-        int i=0;
+        UserFunction target = getFunction();
+        int i = 0;
         for (Operand o : operands()) {
             Expression arg = o.getChildExpression();
-            SequenceType required = function.getArgumentType(i);
-            int cardinality = required.getCardinality();
-
-            if (i == 0 && function.getDeclaredStreamability().isConsuming()) {
+            if (i == 0 && target.getDeclaredStreamability().isConsuming()) {
                 argumentEvaluators[i] = new StreamingArgumentEvaluator(arg);
-            } else if (function.getParameterDefinitions()[i].isIndexedVariable()) {
+            } else if (target.getParameterDefinitions()[i].isIndexedVariable()) {
                 PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
                 argumentEvaluators[i] = new IndexedVariableEvaluator(argPull);
+            } else if ((arg.getDependencies() & UNHANDLED_DEPENDENCIES) != 0) {
+                // If the argument contains a call to a user-defined function, then it might be a recursive call.
+                // It's better to evaluate it now, rather than waiting until we are on a new stack frame, as
+                // that can blow the stack if done repeatedly. (See test func42)
+                // If the argument contains calls to position(), last(), regex-group(), current-group(),
+                // current-merge-group(), etc, then in general we can't save the values in a Closure
+                // so we need to evaluate the argument eagerly. (Tests position-0103, merge-096).
+                argumentEvaluators[i] = arg.makeElaborator().eagerly();
+            } else if (!Cardinality.allowsMany(arg.getCardinality()) && arg.getCost() < 20) {
+                // the argument is cheap to evaluate and doesn't use much memory...
+                argumentEvaluators[i] = arg.makeElaborator().eagerly();
+            } else if (arg.getCardinality() == StaticProperty.ALLOWS_ZERO_OR_ONE) {
+                ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+                argumentEvaluators[i] = new OptionalItemEvaluator(argEval);
+            } else if (arg instanceof Block && ((Block) arg).isCandidateForSharedAppend()) {
+                // If the expression is a Block, that is, it is appending a value to a sequence,
+                // then we have the opportunity to use a shared list underpinning the old value and
+                // the new. This takes precedence over lazy evaluation (it would be possible to do this
+                // lazily, but more difficult). We currently do this for any Block that has a variable
+                // reference as one of its subexpressions. The most common case is that the first argument is a reference
+                // to an argument of recursive function, where the recursive function returns the result of
+                // appending to the sequence.
+                argumentEvaluators[i] = new SharedAppendEvaluator((Block) arg);
             } else {
                 argumentEvaluators[i] = arg.makeElaborator().lazily(true);
             }
@@ -630,53 +668,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             return new UserFunctionCallElaborator();
         }
     }
-    public static abstract class UserFunctionCallAbstractElaborator extends FunctionCallElaborator {
 
-        @Override
-        protected void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
-            argumentEvaluators = new SequenceEvaluator[expr.getArity()];
-            UserFunction target = ((UserFunctionCall)expr).getFunction();
-            int i = 0;
-            for (Operand o : expr.operands()) {
-                Expression arg = o.getChildExpression();
-                if (i == 0 && target.getDeclaredStreamability().isConsuming()) {
-                    argumentEvaluators[i] = new StreamingArgumentEvaluator(arg);
-                } else if (target.getParameterDefinitions()[i].isIndexedVariable()) {
-                    PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
-                    argumentEvaluators[i] = new IndexedVariableEvaluator(argPull);
-                } else if ((arg.getDependencies() & UNHANDLED_DEPENDENCIES) != 0) {
-                    // If the argument contains a call to a user-defined function, then it might be a recursive call.
-                    // It's better to evaluate it now, rather than waiting until we are on a new stack frame, as
-                    // that can blow the stack if done repeatedly. (See test func42)
-                    // If the argument contains calls to position(), last(), regex-group(), current-group(),
-                    // current-merge-group(), etc, then in general we can't save the values in a Closure
-                    // so we need to evaluate the argument eagerly. (Tests position-0103, merge-096).
-                    argumentEvaluators[i] = arg.makeElaborator().eagerly();
-                } else if (!Cardinality.allowsMany(arg.getCardinality()) && arg.getCost() < 20) {
-                    // the argument is cheap to evaluate and doesn't use much memory...
-                    argumentEvaluators[i] = arg.makeElaborator().eagerly();
-                } else if (arg.getCardinality() == StaticProperty.ALLOWS_ZERO_OR_ONE) {
-                    ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
-                    argumentEvaluators[i] = new OptionalItemEvaluator(argEval);
-                } else if (arg instanceof Block && ((Block) arg).isCandidateForSharedAppend()) {
-                    // If the expression is a Block, that is, it is appending a value to a sequence,
-                    // then we have the opportunity to use a shared list underpinning the old value and
-                    // the new. This takes precedence over lazy evaluation (it would be possible to do this
-                    // lazily, but more difficult). We currently do this for any Block that has a variable
-                    // reference as one of its subexpressions. The most common case is that the first argument is a reference
-                    // to an argument of recursive function, where the recursive function returns the result of
-                    // appending to the sequence.
-                    argumentEvaluators[i] = new SharedAppendEvaluator((Block)arg);
-                } else {
-                    argumentEvaluators[i] = arg.makeElaborator().lazily(allowRepeatedUse);
-                }
-                i++;
-            }
-        }
-
-    }
-
-    private static class TailCallElaborator extends UserFunctionCallAbstractElaborator {
+    private static class TailCallElaborator extends PullElaborator {
 
         public PullEvaluator elaborateForPull() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
@@ -692,7 +685,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                                                          expr.getFunctionName().getDisplayName() +
                                                          ") with no implementation", "XTDE3052");
                     }
-                    Sequence[] actualArgs = evaluateArguments(context);
+                    Sequence[] actualArgs = expr.evaluateArguments(context, false);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
                     return EmptyIterator.getInstance();
                 };
@@ -700,7 +693,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 TailCallLoop.TailCallFunction info = new TailCallLoop.TailCallFunction();
                 info.function = expr.getFunction();
                 return context -> {
-                    Sequence[] actualArgs = evaluateArguments(context);
+                    Sequence[] actualArgs = expr.evaluateArguments(context, false);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
                     return EmptyIterator.getInstance();
                 };
@@ -708,7 +701,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
     }
 
-    private static class UserFunctionCallElaborator extends UserFunctionCallAbstractElaborator {
+    private static class UserFunctionCallElaborator extends PullElaborator {
 
         private void testNotAbstract(UserFunctionCall expr, Component target) throws XPathException {
             if (target.isHiddenAbstractComponent()) {
@@ -739,7 +732,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     Component target = expr.getTargetComponent(context);
                     testNotAbstract(expr, target);
                     try {
-                        Sequence[] actualArgs = evaluateArguments(context);
+                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
                         UserFunction targetFunction = (UserFunction) target.getActor();
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         c2.setCurrentComponent(target);
@@ -753,7 +746,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 UserFunction targetFunction = expr.getFunction();
                 return context -> {
                     try {
-                        Sequence[] actualArgs = evaluateArguments(context);
+                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         return targetFunction.call(c2, actualArgs).iterate();
                     } catch (StackOverflowError err) {
@@ -780,7 +773,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     Component target = expr.getTargetComponent(context);
                     testNotAbstract(expr, target);
                     try {
-                        Sequence[] actualArgs = evaluateArguments(context);
+                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
                         UserFunction targetFunction = (UserFunction) target.getActor();
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         c2.setCurrentComponent(target);
@@ -794,7 +787,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 UserFunction targetFunction = expr.getFunction();
                 return context -> {
                     try {
-                        Sequence[] actualArgs = evaluateArguments(context);
+                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         return targetFunction.call(c2, actualArgs).head();
                     } catch (StackOverflowError err) {
@@ -826,7 +819,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     Component target = expr.getTargetComponent(context);
                     testNotAbstract(expr, target);
                     try {
-                        Sequence[] actualArgs = evaluateArguments(context);
+                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
                         UserFunction targetFunction = (UserFunction) target.getActor();
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         c2.setCurrentComponent(target);
@@ -841,7 +834,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 UserFunction targetFunction = expr.getFunction();
                 return (output, context) -> {
                     try {
-                        Sequence[] actualArgs = evaluateArguments(context);
+                        Sequence[] actualArgs = expr.evaluateArguments(context, false);
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
                         targetFunction.process(c2, actualArgs, output);
                     } catch (StackOverflowError err) {
@@ -888,7 +881,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
             UserFunction targetFunction = expr.getFunction(); // This is XQuery: target function is known
             return (context, pul) -> {
-                Sequence[] actualArgs = evaluateArguments(context);
+                Sequence[] actualArgs = expr.evaluateArguments(context, false);
                 XPathContextMajor c2 = context.newCleanContext();
                 c2.setOrigin(expr);
                 targetFunction.callUpdating(actualArgs, c2, pul);

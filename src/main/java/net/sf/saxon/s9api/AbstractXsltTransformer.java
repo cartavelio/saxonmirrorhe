@@ -302,8 +302,10 @@ public abstract class AbstractXsltTransformer {
     /**
      * Set the MessageListener to be notified of {@code xsl:message} and {@code xsl:assert} output.
      * @param listener the MessageListener to be notified
+     * @deprecated since 12.0 - use {@link #setMessageHandler(Consumer)}
      */
 
+    @Deprecated
     public synchronized void setMessageListener(MessageListener2 listener) {
         messageListener2 = listener;
         setMessageHandler(message -> listener.message(
@@ -327,8 +329,10 @@ public abstract class AbstractXsltTransformer {
      * return null
      *
      * @return the user-supplied MessageListener2, or null if none has been supplied
+     * @deprecated since 12.0
      */
 
+    @Deprecated
     public MessageListener2 getMessageListener2() {
         return messageListener2;
     }

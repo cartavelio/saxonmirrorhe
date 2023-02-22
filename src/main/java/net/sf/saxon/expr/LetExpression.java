@@ -932,7 +932,7 @@ public class LetExpression extends Assignation
                  */
                 @Override
                 public int getEvaluationMethodCode() {
-                    return 0;
+                    return Evaluators.EAGER_SEQUENCE;
                 }
             };
         }

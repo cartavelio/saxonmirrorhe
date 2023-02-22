@@ -62,7 +62,6 @@ public class PreparedStylesheet extends Executable {
 
     private final StructuredQName defaultInitialTemplate;
     private final StructuredQName defaultInitialMode;
-    private final String messageReceiverClassName;
     private final GlobalParameterSet compileTimeParams;
 
     //#if CSHARP==false
@@ -90,7 +89,6 @@ public class PreparedStylesheet extends Executable {
         compileTimeParams = compilation.getParameters();
 
         //#if CSHARP==false
-        messageReceiverClassName = compilerInfo.getMessageReceiverClassName();
         outputURIResolver = compilerInfo.getOutputURIResolver();
         //#endif
     }
@@ -107,8 +105,6 @@ public class PreparedStylesheet extends Executable {
         Configuration config = getConfiguration();
         XsltController c = new XsltController(config, this);
         //#if CSHARP==false
-        //noinspection deprecation
-        c.setMessageReceiverClassName(messageReceiverClassName);
         c.setOutputURIResolver(outputURIResolver);
         //#endif
         if (defaultInitialMode != null) {

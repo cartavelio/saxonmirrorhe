@@ -17,6 +17,7 @@ import javax.xml.transform.SourceLocator;
  * <p>The <code>MessageListener2</code> interface differs from <code>MessageListener</code>
  * in allowing the error code supplied to <code>xsl:message</code> to be made available.</p>
  */
+@Deprecated
 public interface MessageListener2 {
 
     /**
