@@ -190,7 +190,7 @@ public class SQLUpdate extends ExtensionInstruction {
                     Object value;
                     switch (parameterClassName) {
                         case "java.lang.String":
-                            value = v.getUnicodeStringValue();
+                            value = v.getStringValue();
                             break;
                         case "java.sql.Date":
                             value = java.sql.Date.valueOf(v.getStringValue());
