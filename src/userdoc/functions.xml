@@ -7248,7 +7248,11 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             an empty sequence.</p>
 
           <p>Example:</p>
-          <samp><![CDATA[format-dateTime(file-last-modified(resolve-uri('lookup.xml', static-base-uri()))]]></samp>
+          <samp><![CDATA[format-dateTime(saxon:last-modified(resolve-uri('lookup.xml', static-base-uri()))]]></samp>
+          
+          <p>This function differs from the EXPath function <code>file:last-modified</code> in that it takes
+          a URI rather than a filename as input, and may work for resources other than files: for example,
+          HTTP resources, provided the <code>last-modified</code> header is present in the HTTP response.</p>
         </div>
       </details>
     </function>

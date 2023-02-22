@@ -32,8 +32,57 @@
         <p>The <code>DocumentBuilder</code> class has two new methods <code>parse(Source, Destination)</code>
         and <code>parse(File, Destination)</code> allowing parsed documents to be sent directly to a destination
         such as a <code>Serializer</code> without building a tree in memory.</p>
+
+        <p>The preferred way of capturing <code>xsl:message</code> output is the new method
+        <code>Xslt30Transformer.setMessageHandler(Consumer &lt;Message&gt; messageHandler)</code>
+        which encapsulates all the information about a message in the new <code>Message</code> object.</p>
+        
+        <p>The interfaces comprising the recently-introduced <code>Push</code> API have been
+        reorganised, largely in the interests of making them work in C# as well as Java (C# does
+        not allow inner interfaces within an interface). The main
+        factory method <code>Processor.newPush()</code> is unchanged, but the detailed interfaces
+        have been moved to a new package, as follows:</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Old name</th>
+                    <th>New name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>net.sf.saxon.s9api.Push</td>
+                    <td>net.sf.saxon.s9api.push.Push</td>
+                </tr>
+                <tr>
+                    <td>net.sf.saxon.s9api.Push.Document</td>
+                    <td>net.sf.saxon.s9api.push.Document</td>
+                </tr>
+                <tr>
+                    <td>net.sf.saxon.s9api.Push.Element</td>
+                    <td>net.sf.saxon.s9api.push.Element</td>
+                </tr>
+                <tr>
+                    <td>net.sf.saxon.s9api.Push.Container</td>
+                    <td>net.sf.saxon.s9api.push.Container</td>
+                </tr>
+            </tbody>
+        </table>
         
  
+    </category>
+
+    <category name="jaxp">
+
+        <p>A new interface <code>ActiveSource</code> is introduced as a sub-interface of the JAXP <code>Source</code>
+        interface. Unlike <code>Source</code>, this is a true interface in that Saxon will accept any class
+        that implements the interface. An <code>ActiveSource</code> must implement the method
+        <code>deliver(Receiver receiver, ParseOptions options)</code>, which Saxon calls to obtain the
+        contents of the source: the method must deliver a sequence of events to the supplied
+        <code>Receiver</code>. The <code>ParseOptions</code> can be ignored if not required; they
+        are relevant primarily in cases where the <code>ActiveSource</code> performs XML parsing.</p>
+
     </category>
     
     <category name="spi">
@@ -72,15 +121,41 @@
         <p></p>
         
         <h2>Sequence and SequenceIterator</h2>
+
+        <p>The <code>SequenceIterator.next()</code> method no longer throws checked (<code>XPathException</code>) exceptions.
+        Instead, if a dynamic error occurs, an <code>UncheckedXPathException</code> is thrown. This change makes
+        the <code>SequenceIterator</code> class play better with modern Java facilities such as streams and
+        functional interfaces.</p>
+
+        <p>The <code>SequenceIterator.getProperties()</code> method is dropped. Instead, to determine whether
+        a <code>SequenceIterator</code> supports look-ahead, first test whether it is an instance of
+        <code>LookaheadIterator</code>, then cast it to <code>LookaheadIterator</code> and call the
+        <code>supportsHasNext()</code> method; and similarly for
+            <code>GroundedIterator</code> and <code>LastPositionFinder</code>.</p>
         
 
         <h2>NodeInfo</h2>
+
+        <p>The method <code>NodeInfo.iterateAxis(int axisNumber, Predicate&lt;? super NodeInfo> nodeTest)</code>
+        is replaced by <code>NodeInfo.iterateAxis(int axisNumber, NodePredicate predicate)</code>.</p>
+
+        <p>The reason for this is to facilitate conversion of the source code from Java to C#. In Java,
+        a functional interface can be satisfied both by a lambda expression and by a concrete implementation
+        class; in C#, classes and delegates are not interchangeable in the same way. The introduction
+        of <code>NodePredicate</code> solves this by providing a concrete implementation that allows
+            a lambda expression to be supplied as an argument. Similar changes have been made in
+        some other, less visible. areas.</p>
   
         
         <h2>Receiver</h2>
         
  
         <h2>Miscellaneous</h2>
+
+        <p>A number of internal changes have been made to facilitate conversion of the source code from
+        Java to C#. These should only affect applications that use very low-level interfaces within Saxon.</p>
+
+        <p>For example, </p>
         
  
         <h2>Dropped interfaces</h2>
@@ -142,9 +217,15 @@
     
     <category name="extensions">
         
+        <h2>Changes to Extension Functions</h2>
         
+        <p>Many of the extension functions in the <code>saxon</code> namespace have been re-implemented
+        as "integrated extension functions" where they were previously "reflexive extension functions".
+        The only noticeable effect should be that they now enforce the specification more strictly. In
+        particular, the function name must be spelled as specified; it is no longer possible to use
+        alternative spellings such as <code>saxon:printStack</code> for <code>saxon:print-stack</code>.</p>
         
-        <h2>Extension Functions</h2>
+        <h2>New Extension Functions</h2>
         
         <p>The new function <code>saxon:unindexed()</code> returns the value of its argument unchanged,
         and a static call will normally be optimized away. The purpose of the function is to suppress
@@ -158,7 +239,14 @@
         
         <p>Added <code>saxon:slice()</code> based on proposed XPath 4.0 function fn:slice(). For example
         <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code></p>
-      
+
+        <h2>Dropped Extension Functions</h2>
+
+        <p>The <code>saxon:path</code> function is dropped: use the standard <code>fn:path</code> function
+            instead.</p>
+
+        <p>The undocumented and untested functions <code>saxon:pause-tracing</code> and <code>saxon:resume-tracing</code>
+        have been dropped. (The underlying methods in the <code>Controller</code> class remain available if required).</p>
  
         <h2>Extensions to Standard Functions</h2>
         
@@ -198,7 +286,12 @@
         
  
  
-       
+        <h2>SQL extensions</h2>
+
+        <p>It is no longer necessary, when establishing a SQL connection, to supply the name of the
+        JDBC Driver class.</p>
+
+        <p>TODO: other changes - NDW??</p>
         
 
         
