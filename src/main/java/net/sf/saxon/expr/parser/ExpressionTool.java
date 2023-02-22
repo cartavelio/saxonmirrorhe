@@ -313,7 +313,6 @@ public class ExpressionTool {
      */
 
     public static boolean changesXsltContext(Expression exp) {
-        exp = exp.getInterpretedExpression();
         if (exp instanceof ResultDocument || exp instanceof CallTemplate || exp instanceof ApplyTemplates ||
                 exp instanceof NextMatch || exp instanceof ApplyImports || exp.isCallOn(RegexGroup.class)
                 || exp.isCallOn(CurrentGroup.class)) {
@@ -991,9 +990,6 @@ public class ExpressionTool {
         if (!visitor.isOptimizeForStreaming()) {
             body = opt.eliminateCommonSubexpressions(body);
         }
-        //#if BYTECODE==true
-        opt.injectByteCodeCandidates(body);
-        //#endif
         opt.prepareForStreaming(body);
 
         //computeEvaluationModesForUserFunctionCalls(body);
@@ -1262,7 +1258,6 @@ public class ExpressionTool {
      */
 
     public static int expressionSize(Expression exp) {
-        exp = exp.getInterpretedExpression();
         int total = 1;
         for (Operand o : exp.operands()) {
             total += expressionSize(o.getChildExpression());

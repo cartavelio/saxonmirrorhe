@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.GlobalParam;
-import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
@@ -132,8 +131,6 @@ public class XSLGlobalParam extends XSLGlobalVariable {
         }
     }
 
-    public void insertBytecodeCandidate(Optimizer opt) {
 
-    }
 }
 

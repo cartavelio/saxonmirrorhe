@@ -88,14 +88,13 @@ public class Environment implements ResourceResolver {
      * Construct a local default environment for a test set
      */
 
-    public static Environment createLocalEnvironment(URI baseURI, int generateByteCode, boolean unfolded, Spec spec, TestDriver testDriver) {
+    public static Environment createLocalEnvironment(URI baseURI, boolean unfolded, Spec spec, TestDriver testDriver) {
         final Environment environment = new Environment();
         environment.processor = new Processor(!testDriver.driverProc.getSaxonEdition().equals("HE"));
 
         //testDriver.getLicensor().activate(environment.processor);
         //AutoActivate.activate(environment.processor);
         environment.processor.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, testDriver.optimizerFlags);
-        configureByteCode(testDriver, environment, generateByteCode);
 
         environment.xpathCompiler = environment.processor.newXPathCompiler();
         environment.xpathCompiler.setBaseURI(baseURI);
@@ -171,8 +170,6 @@ public class Environment implements ResourceResolver {
         // TODO temporary
         environment.processor.setConfigurationProperty(Feature.EXPATH_FILE_DELETE_TEMPORARY_FILES, true);
         environment.processor.setConfigurationProperty(Feature.LINE_NUMBERING, true);
-
-        configureByteCode(driver, environment, driver.generateByteCode);
 
         String xpVersion = driver.spec.version;
         if (driver.spec.shortSpecName.equals("XT") && driver.spec.version.equals("3.0")) {
@@ -350,10 +347,6 @@ public class Environment implements ResourceResolver {
                 environment.processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
                 environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
                 //environment.processor.setConfigurationProperty(Feature.ALLOW_MULTITHREADING, "false"); // TODO should have a separate option for this
-            }
-            if (generate >= 0 && driver.isDebugByteCode()) {
-                environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
-                environment.processor.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, driver.getResultsDir() + "/debugByteCode");
             }
         }
     }

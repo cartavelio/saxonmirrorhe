@@ -14,7 +14,6 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
@@ -24,7 +23,6 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.trans.Timer;
@@ -1407,28 +1405,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
             if (Compilation.TIMING) {
                 timer.report("allocate binding slots to accumulators");
-            }
-
-            // Generate byte code where appropriate
-
-            if (compilation.getCompilerInfo().isGenerateByteCode() &&
-                    !config.isDeferredByteCode(HostLanguage.XSLT)) {
-                if (Compilation.TIMING) {
-                    config.getLogger().info("Generating byte code...");
-                }
-
-                Optimizer opt = config.obtainOptimizer();
-                for (ComponentDeclaration decl : topLevel) {
-                    StyleElement inst = decl.getSourceElement();
-                    if (inst instanceof StylesheetComponent) {
-                        ((StylesheetComponent) inst).generateByteCode(opt);
-                    }
-                }
-            }
-
-            if (Compilation.TIMING) {
-                timer.report("inject byte code candidates");
-                timer.reportCumulative("total compile time");
             }
 
         } catch (RuntimeException err) {

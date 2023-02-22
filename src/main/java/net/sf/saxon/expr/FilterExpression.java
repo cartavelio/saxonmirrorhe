@@ -153,7 +153,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     }
 
     /**
-     * Ask if the filter is positional (used from bytecode)
+     * Ask if the filter is positional
      * @return true filter is positional
      */
     public boolean isFilterIsPositional() {

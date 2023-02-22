@@ -12,7 +12,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UseAttributeSet;
-import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.SymbolicName;
@@ -346,26 +345,6 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
         // Already done earlier
     }
 
-
-    /**
-     * Generate byte code if appropriate
-     *
-     * @param opt the optimizer
-     */
-    @Override
-    public void generateByteCode(Optimizer opt) {}
-
-//    private void checkStreamability() throws XPathException {
-////#ifdefined STREAM
-//         if (streamable) {
-//             ContextItemStaticInfo info = new ContextItemStaticInfo(AnyItemType.getInstance(), false, true);
-//             procedure.getBody().getStreamability(false, info, null);
-//             if (procedure.getBody().getSweep() != Sweep.MOTIONLESS) {
-//                 compileError("The attribute set is declared streamable but it is not motionless", "XTSE3430");
-//             }
-//         }
-////#endif
-//     }
 
 
 

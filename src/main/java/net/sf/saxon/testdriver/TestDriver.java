@@ -50,8 +50,6 @@ public abstract class TestDriver {
     protected boolean unfolded = false;
     protected boolean saveResults = false;
     protected boolean runPostureAndSweepTests = true;
-    protected int generateByteCode = 1;
-    protected boolean debugByteCode = false;
     protected String optimizerFlags = "-";
     protected boolean jitFlag = false;
     protected int streaming = 1;
@@ -166,22 +164,7 @@ public abstract class TestDriver {
                 tracing = true;
             }
             if (args[i].startsWith("-bytecode:")) {
-                switch (argValue) {
-                    case "on":
-                        generateByteCode = 0;
-                        break;
-                    case "debug":
-                        debugByteCode = true;
-                        generateByteCode = 0;
-                        break;
-                    case "off":
-                        generateByteCode = -1;
-
-                        break;
-                    default:
-                        generateByteCode = Integer.parseInt(argValue);
-                        break;
-                }
+                System.err.println("***WARNING*** -bytecode option is ignored") ;
             }
             if (args[i].startsWith("-streaming:")) {
                 switch (argValue) {
@@ -278,10 +261,6 @@ public abstract class TestDriver {
         System.exit(0);
     }
 
-    public boolean isDebugByteCode(){
-        return debugByteCode;
-    }
-
     /**
      * Return the appropriate tree model to use
      *
@@ -312,10 +291,6 @@ public abstract class TestDriver {
 
     public abstract void processSpec(String specStr);
 
-    public boolean isByteCode() {
-        return generateByteCode == 0;
-    }
-
     public String getProductEdition() {
         return "Saxon-" + driverProc.getSaxonEdition();
     }
@@ -328,26 +303,7 @@ public abstract class TestDriver {
 
 
     protected void processCatalog(File catalogFile) throws SaxonApiException {
-        if (driverProc.getSaxonEdition().equals("EE")) {
-            if (generateByteCode == 0 && !debugByteCode) {
-                driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-                driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 0);
-                driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
-            } else if (generateByteCode >0) {
-                driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-                driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, generateByteCode);
-                driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
-            } else if (generateByteCode == 0 && debugByteCode) {
-                driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-                driverProc.setConfigurationProperty(Feature.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, 0);
-                driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
-                driverProc.setConfigurationProperty(Feature.DISPLAY_BYTE_CODE, true);
-                driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, getResultsDir() + "/byteCode/");
-            } else {
-                driverProc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-                driverProc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, false);
-            }
-        }
+
         DocumentBuilder catbuilder = driverProc.newDocumentBuilder();
         catbuilder.setTreeModel(treeModel);
         catbuilder.setLineNumbering(true);
@@ -545,7 +501,7 @@ public abstract class TestDriver {
     protected void createLocalEnvironments(XdmNode testSetDocNode) {
         localEnvironments.clear();
         Environment defaultEnvironment =
-                Environment.createLocalEnvironment(testSetDocNode.getBaseURI(), generateByteCode, unfolded, spec, this);
+                Environment.createLocalEnvironment(testSetDocNode.getBaseURI(), unfolded, spec, this);
         localEnvironments.put("default", defaultEnvironment);
     }
 

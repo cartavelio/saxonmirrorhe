@@ -186,31 +186,6 @@ public class CoercedFunction extends AbstractFunction {
         }
     }
 
-    /**
-     * Factory method to create a CoercedFunction with a given type, for a given targetFunction.
-     * It is assumed that we have already established that coercion is needed.
-     * Called from Bytecode compiler.
-     * @param suppliedFunction the function to be coerced
-     * @param requiredType the target type for the coercion
-     * @param role diagnostic information about the role of the expression being coerced
-     * @return the function after coercion
-     * @throws XPathException if the function cannot be coerced to the required type (for example,
-     * because it has the wrong arity)
-     */
-
-    public static CoercedFunction coerce(FunctionItem suppliedFunction, SpecificFunctionType requiredType,
-                                         RoleDiagnostic role)
-            throws XPathException {
-        // DO NOT DELETE THIS METHOD: IT IS CALLED FROM BYTECODE
-        int arity = requiredType.getArity();
-        if (suppliedFunction.getArity() != arity) {
-            String msg = role.composeErrorMessage(
-                    requiredType, suppliedFunction, null);
-            msg += ". " + wrongArityMessage(suppliedFunction, arity);
-            throw new XPathException(msg, "XPTY0004");
-        }
-        return new CoercedFunction(suppliedFunction, requiredType);
-    }
 
     private static String wrongArityMessage(FunctionItem supplied, int expected) {
         return "The supplied function (" + supplied.getDescription() + ") has " + FunctionCall.pluralArguments(supplied.getArity()) +

@@ -78,25 +78,6 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
         }
     }
 
-    /**
-     * Construct an CardinalityCheckingIterator that will return the same items as the base sequence,
-     * checking how many there are.
-     *
-     * <p>This constructor is called from bytecode. There seem to be problems generating bytecode
-     * for the constructor that accepts a {@code Supplier<RoleDiagnostic>}</p>
-     *
-     * @param base                the base iterator
-     * @param requiredCardinality the required Cardinality
-     * @param roleDiagnostic        information for use if a failure occurs
-     * @param locator             the location in the source stylesheet or query
-     * @throws XPathException if a failure is detected
-     */
-
-    public CardinalityCheckingIterator(SequenceIterator base, int requiredCardinality,
-                                       RoleDiagnostic roleDiagnostic, Location locator) throws XPathException {
-        this(base, requiredCardinality, () -> roleDiagnostic, locator);
-    }
-
     @Override
     public Item next() {
         if (position < 2) {

@@ -35,11 +35,9 @@ import net.sf.saxon.value.StringValue;
 
 public final class AttributeGetter extends Expression {
 
-    //public static final int CHECK_CONTEXT_ITEM_PRESENT = 1;
-    public static final int CHECK_CONTEXT_ITEM_IS_NODE = 2;
 
     private final FingerprintedQName attributeName;
-    private int requiredChecks = CHECK_CONTEXT_ITEM_IS_NODE;
+
 
     public AttributeGetter(FingerprintedQName attributeName) {
         this.attributeName = attributeName;
@@ -49,23 +47,6 @@ public final class AttributeGetter extends Expression {
         return attributeName;
     }
 
-    /**
-     * Say what run-time checks are needed. (This information is only used when generating bytecode)
-     * @param checks the run-time checks that need to be performed
-     */
-
-    public void setRequiredChecks(int checks) {
-        requiredChecks = checks;
-    }
-
-    /**
-     * Ask what run-time checks are needed. (This information is only used when generating bytecode)
-     * @return the run-time checks that need to be performed
-     */
-
-    public int getRequiredChecks() {
-        return requiredChecks;
-    }
 
     @Override
     public ItemType getItemType() {
@@ -89,9 +70,7 @@ public final class AttributeGetter extends Expression {
 
     @Override
     public AttributeGetter copy(RebindingMap rebindings) {
-        AttributeGetter ag2 = new AttributeGetter(attributeName);
-        ag2.setRequiredChecks(requiredChecks);
-        return ag2;
+        return new AttributeGetter(attributeName);
     }
 
     @Override
@@ -191,7 +170,6 @@ public final class AttributeGetter extends Expression {
     public void export(ExpressionPresenter out) {
         out.startElement("attVal", this);
         out.emitAttribute("name", attributeName.getStructuredQName());
-        out.emitAttribute("chk", "" + requiredChecks);
         out.endElement();
     }
 

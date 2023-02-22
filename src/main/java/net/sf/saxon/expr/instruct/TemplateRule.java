@@ -306,7 +306,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
 
     public List<LocalParam> getLocalParams() {
         List<LocalParam> result = new ArrayList<>();
-        gatherLocalParams(getInterpretedBody(), result);
+        gatherLocalParams(getBody(), result);
         return result;
     }
 
@@ -478,11 +478,6 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
             presenter.emitAttribute("streamable", "1");
         }
     }
-
-    public Expression getInterpretedBody() {
-        return body.getInterpretedExpression();
-    }
-
 
     /**
      * Create a copy of a template rule. This is needed when copying a rule from the "omniMode" (mode=#all)

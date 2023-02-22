@@ -188,8 +188,6 @@ public class Query {
                                     "Display version and timing information");
         options.addRecognizedOption("T", CommandLineOptions.TYPE_CLASSNAME,
                                     "Use named TraceListener class, or standard TraceListener");
-        options.addRecognizedOption("TB", CommandLineOptions.TYPE_FILENAME,
-                                    "Trace hotspot bytecode generation to specified XML file");
         options.addRecognizedOption("TJ", CommandLineOptions.TYPE_BOOLEAN,
                                     "Debug binding and execution of extension functions");
         options.setPermittedValues("TJ", new String[]{"on", "off"}, "on");
@@ -488,10 +486,6 @@ public class Query {
                 config.getLogger().info("Average execution time: " +
                                            Timer.showExecutionTimeNano(totalTime / (r - 3)));
             }
-            if (options.getOptionValue("TB") != null) {
-                // report on hotspot bytecode generation
-                config.createByteCodeReport(options.getOptionValue("TB"));
-            }
 
         } catch (TerminationException err) {
             quit(err.getMessage(), 1);
@@ -642,12 +636,6 @@ public class Query {
             if (options.getOptionValue("T") == null) {
                 makeXQueryTraceListener(options);
             }
-        }
-
-        value = options.getOptionValue("TB");
-        if (value != null) {
-            // Trace hotspot byte code generation and produce a report.
-            config.setBooleanProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE, true);
         }
 
         //#if CSHARP==false
