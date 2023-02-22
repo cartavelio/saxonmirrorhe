@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -473,6 +474,41 @@ public class XdmValue implements Iterable<XdmItem> {
 
     public <T extends XdmItem> XdmStream<T> select(Step<T> step) {
         return stream().flatMapToXdm(step);
+    }
+
+    /**
+     * Filter the value on a supplied predicate
+     * @param predicate the predicate to be applied. Note that an {@link ItemType} is a
+     *                  predicate, so this method can be used to select those items
+     *                  that match a supplied item type. For example, <code>where(ItemType.INTEGER)</code>
+     *                  will select the items in the sequence that are instances of <code>xs:integer</code>.
+     * @return a new <code>XdmValue</code> comprising those items in this <code>XdmValue</code>
+     * that match the given predicate.
+     * @since 12.0
+     */
+
+    public XdmValue where(Predicate<? super XdmItem> predicate) {
+        return stream().filter(predicate).asXdmValue();
+    }
+
+    /**
+     * Test whether the value matches a supplied SequenceType
+     * @param type the SequenceType that we are testing against
+     * @return true if this value matches the sequence type, false otherwise.
+     * @since 12.0
+     */
+
+    public boolean matches(SequenceType type) {
+        if (!type.getOccurrenceIndicator().allows(size())) {
+            return false;
+        }
+        ItemType it = type.getItemType();
+        for (XdmItem item : this) {
+            if (!it.matches(item)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

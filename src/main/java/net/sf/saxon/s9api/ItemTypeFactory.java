@@ -8,7 +8,9 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -16,6 +18,8 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.sxpath.IndependentContext;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
@@ -40,6 +44,36 @@ public class ItemTypeFactory {
 
     public ItemTypeFactory(Processor processor) {
         this.config = processor.getUnderlyingConfiguration();
+    }
+
+    /**
+     * Parse an item type in XPath syntax.
+     * <p>Saxon extensions such as union types and tuple types are enabled.</p>
+     * @param typeDesignation the lexical representation of the item type in XPath syntax, for example
+     *                        <code>map(xs:string, node()*)</code>. The namespace prefix <code>xs</code>
+     *                        is recognized; any other namespaced names should be written using <code>Q{uri}local</code>
+     *                        notation.
+     * @return the ItemType
+     * @throws SaxonApiException if the syntax is invalid
+     * @since 12.0
+     */
+
+    public ItemType parseItemType(String typeDesignation) throws SaxonApiException {
+        try {
+            XPathParser parser = new XPathParser();
+            parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 40);
+            IndependentContext env = new IndependentContext();
+            env.setXPathLanguageLevel(40);
+            env.declareNamespace("xs", NamespaceConstant.SCHEMA);
+            net.sf.saxon.value.SequenceType st = parser.parseSequenceType(typeDesignation, env);
+            if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
+                parser.grumble("No occurrence indicator is allowed");
+            }
+            net.sf.saxon.type.ItemType it = st.getPrimaryType();
+            return new ConstructedItemType(it, config);
+        } catch (XPathException err) {
+            throw new SaxonApiException(err);
+        }
     }
 
     /**
@@ -508,7 +542,26 @@ public class ItemTypeFactory {
             throw new IllegalArgumentException("Map key must be atomic");
         }
         return new ConstructedItemType(
-                new MapType((AtomicType)keyType.getUnderlyingItemType(), valueType.getUnderlyingSequenceType()), config);
+                new MapType((AtomicType)keyType.getUnderlyingItemType(), valueType.getUnderlyingSequenceType()),
+                config);
+    }
+
+    /**
+     * Obtain a function type, that is a type for XDM functions with given argument types and a given result type.
+     * @param returnType   the type of the function's result
+     * @param argumentTypes the types of the argument values
+     * @return the required function type
+     */
+
+    public ItemType getFunctionType(SequenceType returnType, SequenceType... argumentTypes) {
+        net.sf.saxon.value.SequenceType basicReturnType = returnType.getUnderlyingSequenceType();
+        net.sf.saxon.value.SequenceType[] basicArgTypes = new net.sf.saxon.value.SequenceType[argumentTypes.length];
+        for (int i=0; i<argumentTypes.length; i++) {
+            basicArgTypes[i] = argumentTypes[i].getUnderlyingSequenceType();
+        }
+        return new ConstructedItemType(
+                new SpecificFunctionType(basicArgTypes, basicReturnType),
+                config);
     }
 
     /**
@@ -524,6 +577,8 @@ public class ItemTypeFactory {
 
     /**
      * Factory method to construct a map item from a Java map
+     * <p>Note: this is merely a wrapper around {@link XdmMap#makeMap}, which is probably more convenient
+     * to use.</p>
      * @param map the input map. The contents of this map are shallow-copied, so subsequent changes to the
      * Java map do not affect the XDM map. The keys in the map must be convertible to atomic values,
      * and the values in the map must be convertible to XDM values.
@@ -531,6 +586,7 @@ public class ItemTypeFactory {
      * because XDM maps are functions (from the key to the value).
      * @throws SaxonApiException if there are values that cannot be converted.
      * @since 9.6
+     * @deprecated since 12.0 - use {@link XdmMap#makeMap} instead
      */
 
     public XdmMap newMap(Map<?, ?> map) throws SaxonApiException {
@@ -544,15 +600,19 @@ public class ItemTypeFactory {
     /**
      * Get an ItemType representing the type of a supplied XdmItem.
      *
-     * <p>If the supplied item is
-     * an atomic value, the returned ItemType will reflect the most specific atomic type of the
-     * item.</p>
+     * <p>Note that the results are to some extent arbitrary, since an item may conform
+     * to many different item types, and none of them is necessarily more specific
+     * than all the others.</p>
+     *
+     * <p>If the supplied item is an atomic value, the returned ItemType will
+     * reflect the most specific atomic type of the item.</p>
      *
      * <p>If the supplied item is a node, the returned item type will reflect the node kind,
      * and if the node has a name, then its name. It will not reflect the type annotation.</p>
      *
-     * <p>For a map, the result is {@link net.sf.saxon.s9api.ItemType#ANY_MAP}. For an array, the result is
-     * {@link net.sf.saxon.s9api.ItemType#ANY_ARRAY}. For any other function, it is {@link net.sf.saxon.s9api.ItemType#ANY_FUNCTION}.</p>
+     * <p>For a map, the result is simply {@link net.sf.saxon.s9api.ItemType#ANY_MAP}. For an array, the result is
+     * simply {@link net.sf.saxon.s9api.ItemType#ANY_ARRAY}. For any other function, it is an instance of
+     * {@link XdmFunctionItem} that reflects the signature of the function.</p>
      *
      * <p>If the item is an external object, a suitable item type object is constructed.</p>
      *
@@ -586,7 +646,13 @@ public class ItemTypeFactory {
                 return new ConstructedItemType(ExternalObjectType.THE_INSTANCE, config);
             //#endif
             } else {
-                return ItemType.ANY_FUNCTION;
+                Function functionItem = (Function)it;
+                FunctionItemType fit = functionItem.getFunctionItemType();
+                net.sf.saxon.value.SequenceType basicReturnType = fit.getResultType();
+                net.sf.saxon.value.SequenceType[] basicArgTypes = fit.getArgumentTypes();
+                return new ConstructedItemType(
+                        new SpecificFunctionType(basicArgTypes, basicReturnType),
+                        config);
             }
         }
     }
