@@ -8,10 +8,12 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.ibm.icu.text.RuleBasedCollator"
+  "name":"com.ibm.icu.text.RuleBasedCollator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.ibm.icu.text.RuleBasedNumberFormat"
+  "name":"com.ibm.icu.text.RuleBasedNumberFormat",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"com.saxonica.config.EnterpriseConfiguration",
