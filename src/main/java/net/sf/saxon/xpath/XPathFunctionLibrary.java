@@ -24,6 +24,7 @@ import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionResolver;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The XPathFunctionLibrary is a FunctionLibrary that supports binding of XPath function
@@ -70,6 +71,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
      * @param staticArgs   The expressions supplied statically in the function call. The intention is
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality() may
      *                     be used as part of the binding algorithm.
+     * @param keywords
      * @param env          The static context
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
@@ -80,7 +82,7 @@ public class XPathFunctionLibrary implements FunctionLibrary {
 
     /*@Nullable*/
     @Override
-    public Expression bind(/*@NotNull*/ SymbolicName.F functionName, /*@NotNull*/  Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(/*@NotNull*/ SymbolicName.F functionName, /*@NotNull*/  Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         if (resolver == null) {
             return null;
         }

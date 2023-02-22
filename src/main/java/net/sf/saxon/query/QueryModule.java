@@ -1054,7 +1054,7 @@ public class QueryModule implements StaticContext {
 
     public void declareFunction(/*@NotNull*/ XQueryFunction function) throws XPathException {
         Configuration config = getConfiguration();
-        if (function.getNumberOfArguments() == 1) {
+        if (function.getMinimumArity() <= 1 && function.getNumberOfArguments() >= 1) {
             StructuredQName name = function.getFunctionName();
             SchemaType t = config.getSchemaType(name);
             if (t != null && t.isAtomicType()) {

@@ -1,20 +1,254 @@
-package net.sf.saxon.functions.registry;public class ParamKeywords {
+package net.sf.saxon.functions.registry;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class ParamKeywords {
+
+    public final static Map<String, String> fnParamNames = new HashMap<>();
+    public final static Map<String, String> mathParamNames = new HashMap<>();
+    public final static Map<String, String> mapParamNames = new HashMap<>();
+    public final static Map<String, String> arrayParamNames = new HashMap<>();
+
+    // ==== DO NOT EDIT ====
+    // Following code is generated from the function catalog using generate-keyword-declarations.xsl.
+    // ==== DO NOT EDIT ====
+
+    static {
+
+        arrayParamNames.put("append", "array|add");
+        arrayParamNames.put("filter", "array|predicate");
+        arrayParamNames.put("flatten", "input");
+        arrayParamNames.put("fold-left", "array|zero|action");
+        arrayParamNames.put("fold-right", "array|zero|action");
+        arrayParamNames.put("for-each", "array|action");
+        arrayParamNames.put("for-each-pair", "array1|array2|action");
+        arrayParamNames.put("from-sequence", "input|action");
+        arrayParamNames.put("get", "array|position");
+        arrayParamNames.put("head", "array");
+        arrayParamNames.put("insert-before", "array|position|member");
+        arrayParamNames.put("join", "arrays");
+        arrayParamNames.put("members", "input");
+        arrayParamNames.put("of", "input");
+        arrayParamNames.put("partition", "input|break-when");
+        arrayParamNames.put("put", "array|position|member");
+        arrayParamNames.put("remove", "array|positions");
+        arrayParamNames.put("replace", "array|position|action");
+        arrayParamNames.put("reverse", "array");
+        arrayParamNames.put("size", "array");
+        arrayParamNames.put("slice", "input|start|end|step");
+        arrayParamNames.put("sort", "array|collation|key");
+        arrayParamNames.put("subarray", "array|start|length");
+        arrayParamNames.put("tail", "array");
+        fnParamNames.put("QName", "uri|qname");
+        fnParamNames.put("abs", "value");
+        fnParamNames.put("adjust-date-to-timezone", "value|timezone");
+        fnParamNames.put("adjust-dateTime-to-timezone", "value|timezone");
+        fnParamNames.put("adjust-time-to-timezone", "value|timezone");
+        fnParamNames.put("all", "input|predicate");
+        fnParamNames.put("all-different", "values|collation");
+        fnParamNames.put("all-equal", "values|collation");
+        fnParamNames.put("analyze-string", "value|pattern|flags");
+        fnParamNames.put("apply", "function|arguments");
+        fnParamNames.put("available-environment-variables", "");
+        fnParamNames.put("avg", "values");
+        fnParamNames.put("base-uri", "node");
+        fnParamNames.put("boolean", "input");
+        fnParamNames.put("ceiling", "value");
+        fnParamNames.put("characters", "value");
+        fnParamNames.put("codepoint-equal", "value1|value2");
+        fnParamNames.put("codepoints-to-string", "values");
+        fnParamNames.put("collation-key", "value|collation");
+        fnParamNames.put("collection", "uri");
+        fnParamNames.put("compare", "value1|value2|collation");
+        fnParamNames.put("concat", "value1|value2|...");
+        fnParamNames.put("contains", "value|substring|collation");
+        fnParamNames.put("contains-token", "value|token|collation");
+        fnParamNames.put("count", "input");
+        fnParamNames.put("current-date", "");
+        fnParamNames.put("current-dateTime", "");
+        fnParamNames.put("current-time", "");
+        fnParamNames.put("data", "input");
+        fnParamNames.put("dateTime", "date|time");
+        fnParamNames.put("day-from-date", "value");
+        fnParamNames.put("day-from-dateTime", "value");
+        fnParamNames.put("days-from-duration", "value");
+        fnParamNames.put("deep-equal", "input1|input2|collation");
+        fnParamNames.put("default-collation", "");
+        fnParamNames.put("default-language", "");
+        fnParamNames.put("differences", "input1|input2|options|collation");
+        fnParamNames.put("distinct-values", "values|collation");
+        fnParamNames.put("doc", "href");
+        fnParamNames.put("doc-available", "href");
+        fnParamNames.put("document-uri", "node");
+        fnParamNames.put("element-with-id", "values|node");
+        fnParamNames.put("empty", "input");
+        fnParamNames.put("encode-for-uri", "value");
+        fnParamNames.put("ends-with", "value|substring|collation");
+        fnParamNames.put("environment-variable", "name");
+        fnParamNames.put("error", "code|description|error-object");
+        fnParamNames.put("escape-html-uri", "value");
+        fnParamNames.put("exactly-one", "input");
+        fnParamNames.put("exists", "input");
+        fnParamNames.put("false", "");
+        fnParamNames.put("filter", "input|predicate");
+        fnParamNames.put("floor", "value");
+        fnParamNames.put("fold-left", "input|zero|action");
+        fnParamNames.put("fold-right", "input|zero|action");
+        fnParamNames.put("foot", "input");
+        fnParamNames.put("for-each", "input|action");
+        fnParamNames.put("for-each-pair", "input1|input2|action");
+        fnParamNames.put("format-date", "value|picture|language|calendar|place");
+        fnParamNames.put("format-dateTime", "value|picture|language|calendar|place");
+        fnParamNames.put("format-integer", "value|picture|lang");
+        fnParamNames.put("format-number", "value|picture|decimal-format-name");
+        fnParamNames.put("format-time", "value|picture|language|calendar|place");
+        fnParamNames.put("function-arity", "function");
+        fnParamNames.put("function-lookup", "name|arity");
+        fnParamNames.put("function-name", "function");
+        fnParamNames.put("generate-id", "node");
+        fnParamNames.put("has-children", "node");
+        fnParamNames.put("head", "input");
+        fnParamNames.put("highest", "input|collation|key");
+        fnParamNames.put("hours-from-dateTime", "value");
+        fnParamNames.put("hours-from-duration", "value");
+        fnParamNames.put("hours-from-time", "value");
+        fnParamNames.put("id", "values|node");
+        fnParamNames.put("identity", "input");
+        fnParamNames.put("idref", "values|node");
+        fnParamNames.put("implicit-timezone", "");
+        fnParamNames.put("in-scope-namespaces", "element");
+        fnParamNames.put("in-scope-prefixes", "element");
+        fnParamNames.put("index-of", "input|search|collation");
+        fnParamNames.put("index-where", "input|predicate");
+        fnParamNames.put("innermost", "nodes");
+        fnParamNames.put("insert-before", "input|position|insert");
+        fnParamNames.put("intersperse", "input|separator");
+        fnParamNames.put("iri-to-uri", "value");
+        fnParamNames.put("is-NaN", "value");
+        fnParamNames.put("items-after", "input|predicate");
+        fnParamNames.put("items-before", "input|predicate");
+        fnParamNames.put("items-ending-where", "input|predicate");
+        fnParamNames.put("items-starting-where", "input|predicate");
+        fnParamNames.put("json", "input|options");
+        fnParamNames.put("json-doc", "href|options");
+        fnParamNames.put("json-to-xml", "json|options");
+        fnParamNames.put("lang", "language|node");
+        fnParamNames.put("last", "");
+        fnParamNames.put("load-xquery-module", "module-uri|options");
+        fnParamNames.put("local-name", "node");
+        fnParamNames.put("local-name-from-QName", "value");
+        fnParamNames.put("lower-case", "value");
+        fnParamNames.put("lowest", "input|collation|key");
+        fnParamNames.put("matches", "value|pattern|flags");
+        fnParamNames.put("max", "values|collation");
+        fnParamNames.put("min", "values|collation");
+        fnParamNames.put("minutes-from-dateTime", "value");
+        fnParamNames.put("minutes-from-duration", "value");
+        fnParamNames.put("minutes-from-time", "value");
+        fnParamNames.put("month-from-date", "value");
+        fnParamNames.put("month-from-dateTime", "value");
+        fnParamNames.put("months-from-duration", "value");
+        fnParamNames.put("name", "node");
+        fnParamNames.put("namespace-uri", "node");
+        fnParamNames.put("namespace-uri-for-prefix", "prefix|element");
+        fnParamNames.put("namespace-uri-from-QName", "value");
+        fnParamNames.put("nilled", "node");
+        fnParamNames.put("node-name", "node");
+        fnParamNames.put("normalize-space", "value");
+        fnParamNames.put("normalize-unicode", "value|form");
+        fnParamNames.put("not", "input");
+        fnParamNames.put("number", "value");
+        fnParamNames.put("one-or-more", "input");
+        fnParamNames.put("op", "operator");
+        fnParamNames.put("outermost", "nodes");
+        fnParamNames.put("parcel", "input");
+        fnParamNames.put("parse-ietf-date", "value");
+        fnParamNames.put("parse-json", "json|options");
+        fnParamNames.put("parse-xml", "value");
+        fnParamNames.put("parse-xml-fragment", "value");
+        fnParamNames.put("parts", "");
+        fnParamNames.put("path", "node");
+        fnParamNames.put("position", "");
+        fnParamNames.put("prefix-from-QName", "value");
+        fnParamNames.put("random-number-generator", "seed");
+        fnParamNames.put("remove", "input|position");
+        fnParamNames.put("replace", "value|pattern|replacement|flags|action");
+        fnParamNames.put("replicate", "input|count");
+        fnParamNames.put("resolve-QName", "qname|element");
+        fnParamNames.put("resolve-uri", "relative|base");
+        fnParamNames.put("reverse", "input");
+        fnParamNames.put("root", "node");
+        fnParamNames.put("round", "value|precision");
+        fnParamNames.put("round-half-to-even", "value|precision");
+        fnParamNames.put("seconds-from-dateTime", "value");
+        fnParamNames.put("seconds-from-duration", "value");
+        fnParamNames.put("seconds-from-time", "value");
+        fnParamNames.put("serialize", "input|options");
+        fnParamNames.put("slice", "input|start|end|step");
+        fnParamNames.put("some", "input|predicate");
+        fnParamNames.put("sort", "input|collation|key");
+        fnParamNames.put("stack-trace", "");
+        fnParamNames.put("starts-with", "value|substring|collation");
+        fnParamNames.put("static-base-uri", "");
+        fnParamNames.put("string", "item");
+        fnParamNames.put("string-join", "values|separator");
+        fnParamNames.put("string-length", "value");
+        fnParamNames.put("string-to-codepoints", "value");
+        fnParamNames.put("subsequence", "input|start|length");
+        fnParamNames.put("substring", "value|start|length");
+        fnParamNames.put("substring-after", "value|substring|collation");
+        fnParamNames.put("substring-before", "value|substring|collation");
+        fnParamNames.put("sum", "values|zero");
+        fnParamNames.put("tail", "input");
+        fnParamNames.put("timezone-from-date", "value");
+        fnParamNames.put("timezone-from-dateTime", "value");
+        fnParamNames.put("timezone-from-time", "value");
+        fnParamNames.put("tokenize", "value|pattern|flags");
+        fnParamNames.put("trace", "value|label");
+        fnParamNames.put("transform", "options");
+        fnParamNames.put("translate", "value|replace|with");
+        fnParamNames.put("true", "");
+        fnParamNames.put("truncate", "input");
+        fnParamNames.put("unordered", "input");
+        fnParamNames.put("unparsed-text", "href|encoding");
+        fnParamNames.put("unparsed-text-available", "href|encoding");
+        fnParamNames.put("unparsed-text-lines", "href|encoding");
+        fnParamNames.put("upper-case", "value");
+        fnParamNames.put("uri-collection", "uri");
+        fnParamNames.put("xml-to-json", "node|options");
+        fnParamNames.put("year-from-date", "value");
+        fnParamNames.put("year-from-dateTime", "value");
+        fnParamNames.put("years-from-duration", "value");
+        fnParamNames.put("zero-or-one", "input");
+        mapParamNames.put("contains", "map|key");
+        mapParamNames.put("entry", "key|value");
+        mapParamNames.put("filter", "map|predicate");
+        mapParamNames.put("find", "input|key");
+        mapParamNames.put("for-each", "map|action");
+        mapParamNames.put("get", "map|key");
+        mapParamNames.put("group-by", "input|key");
+        mapParamNames.put("keys", "map");
+        mapParamNames.put("merge", "maps|options");
+        mapParamNames.put("put", "map|key|value");
+        mapParamNames.put("remove", "map|keys");
+        mapParamNames.put("replace", "map|key|action");
+        mapParamNames.put("size", "map");
+        mapParamNames.put("substitute", "map|action");
+        mathParamNames.put("acos", "value");
+        mathParamNames.put("asin", "value");
+        mathParamNames.put("atan", "value");
+        mathParamNames.put("atan2", "y|x");
+        mathParamNames.put("cos", "radians");
+        mathParamNames.put("exp", "value");
+        mathParamNames.put("exp10", "value");
+        mathParamNames.put("log", "value");
+        mathParamNames.put("log10", "value");
+        mathParamNames.put("pi", "");
+        mathParamNames.put("pow", "x|y");
+        mathParamNames.put("sin", "radians");
+        mathParamNames.put("sqrt", "value");
+        mathParamNames.put("tan", "radians");
+    }
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//

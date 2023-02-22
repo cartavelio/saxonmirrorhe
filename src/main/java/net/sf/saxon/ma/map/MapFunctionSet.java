@@ -136,6 +136,15 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
+        SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
+                SequenceType.SINGLE_BOOLEAN
+        );
+
+        register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                .arg(1, FILTER_TYPE, ONE | INS, null));
+
 
     }
 
@@ -160,6 +169,27 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             MapItem map = (MapItem) arguments[0].head();
             AtomicValue key = (AtomicValue) arguments[1].head();
             return BooleanValue.get(map.get(key) != null);
+        }
+
+    }
+
+    /**
+     * Implementation of the proposed XPath 4.0 function map:filter(Map, function(*)) =&gt; Map
+     */
+    public static class MapFilter extends SystemFunction {
+
+        @Override
+        public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem map = (MapItem) arguments[0].head();
+            Function fn = (Function) arguments[1].head();
+            HashTrieMap result = new HashTrieMap();
+            for (KeyValuePair pair : map.keyValuePairs()) {
+                BooleanValue match = (BooleanValue)dynamicCall(fn, context, new Sequence[]{pair.key, pair.value}).head();
+                if (match.getBooleanValue()) {
+                    result = result.addEntry(pair.key, pair.value);
+                }
+            }
+            return result;
         }
 
     }

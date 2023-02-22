@@ -11,10 +11,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A FunctionLibrary handles the binding of function calls in XPath (or XQuery) expressions.
@@ -49,8 +51,7 @@ public interface FunctionLibrary {
      * time.
      *
      * @param functionName the QName of the function being called
-     * @param staticArgs   May be null; if present, the length of the array must match the
-     *                     value of arity. Contains the expressions supplied statically in arguments to the function call.
+     * @param staticArgs   Contains the expressions supplied statically in arguments to the function call.
      *                     The intention is
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality()) may
      *                     be used as part of the binding algorithm. In some cases it may be possible for the function
@@ -60,16 +61,21 @@ public interface FunctionLibrary {
      *                     example, the result of f(4) is expected to be the same as f(2+2). The actual expression is supplied
      *                     here to enable the binding mechanism to select the most efficient possible implementation (including
      *                     compile-time pre-evaluation where appropriate).</p>
+     * @param keywords     May be null if no keywords are used in the function call. Otherwise, a map identifying the
+     *                     keywords appearing in the function call, and the 0-based position at which they appeared.
      * @param env          The static context of the function call
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
      *                     functions could be used.
      * @return An expression equivalent to a call on the specified function, if one is found;
      *         null if no function was found matching the required name and arity.
+     * @throws XPathException if a matching function was identified, but the call is incorrect,
+     * for example because it uses incorrect argument keywords
      */
 
     /*@Nullable*/
-    Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons);
+    Expression bind(SymbolicName.F functionName, Expression[] staticArgs,
+                    Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) throws XPathException;
 
     /**
      * This method creates a copy of a FunctionLibrary: if the original FunctionLibrary allows

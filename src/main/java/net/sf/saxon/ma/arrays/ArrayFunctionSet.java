@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Function signatures (and pointers to implementations) of the functions defined in XPath 2.0
+ * Function signatures (and pointers to implementations) of the functions defined in XPath 3.1
  */
 
 public class ArrayFunctionSet extends BuiltInFunctionSet {

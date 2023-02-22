@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;

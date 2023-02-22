@@ -7,10 +7,10 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.FunctionStreamability;
@@ -30,6 +30,7 @@ public class UserFunctionParameter implements LocalBinding {
     // is referenced repeatedly until proved otherwise
     private boolean isIndexed = false;
     private FunctionStreamability functionStreamability = FunctionStreamability.UNCLASSIFIED;
+    private Expression defaultValue;   // In 4.0, function parameters can have a default value
 
     /**
      * Create a UserFunctionParameter
@@ -141,6 +142,25 @@ public class UserFunctionParameter implements LocalBinding {
     public void addReference(VariableReference ref, boolean isLoopingReference) {
 
     }
+
+    /**
+     * Set an expression used to compute the default value of the parameter
+     * @param select the default value expression
+     */
+
+    public void setDefaultValueExpression(Expression select) {
+        this.defaultValue = select;
+    }
+
+    /**
+     * Get the expression used to compute the default value of the parameter
+     * @return the default value expression, if there is one, otherwise null
+     */
+
+    public Expression getDefaultValueExpression() {
+        return defaultValue;
+    }
+
 
 //    /**
 //     * Set the (nominal) number of references within the function body to this parameter, where a reference

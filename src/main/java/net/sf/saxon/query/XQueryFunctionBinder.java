@@ -7,8 +7,11 @@
 
 package net.sf.saxon.query;
 
+import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.StructuredQName;
+
+import java.util.List;
 
 /**
  * XQueryFunctionBinder is an extension of the FunctionLibrary interface used for function libraries
@@ -28,5 +31,7 @@ public interface XQueryFunctionBinder extends FunctionLibrary {
 
     /*@Nullable*/
     XQueryFunction getDeclaration(StructuredQName functionName, int staticArgs);
+
+    boolean bindUnboundFunctionCall(UserFunctionCall call, List<String> reasons);
 
 }

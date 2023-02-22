@@ -48,10 +48,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("all", 1, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("all", 1, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
 
-        register("all", 2, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("all", 2, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
                 .arg(1, predicate, ONE, null));
 
@@ -102,6 +102,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("in-scope-namespaces", 1, e -> e.populate( InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null));
 
+        register("intersperse", 2, e -> e.populate(Intersperse::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null));
+
         register("is-NaN", 1, e -> e.populate( IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
@@ -133,6 +137,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
 
+
+        SpecificFunctionType operatorType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE);
+
+        register("op", 1, e -> e.populate(OpFn::new, operatorType, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, STAR, null));
+
+
         register("parcel", 1, e -> e.populate( ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
@@ -162,10 +175,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null));   // TODO: define a record type
 
-        register("some", 1, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("some", 1, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
 
-        register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(1, predicate, ONE, null));
 

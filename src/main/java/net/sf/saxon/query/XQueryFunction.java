@@ -9,14 +9,18 @@ package net.sf.saxon.query;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.expr.instruct.SlotManager;
+import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.registry.DeclaredFunction;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.trans.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.jiter.PairIterator;
 import net.sf.saxon.value.SequenceType;
 
@@ -29,9 +33,9 @@ import java.util.function.Supplier;
  * A user-defined function in an XQuery module
  */
 
-public class XQueryFunction implements Declaration, Location {
+public class XQueryFunction extends DeclaredFunction implements Declaration, Location {
     private StructuredQName functionName;
-    private final List<UserFunctionParameter> arguments;
+    private final List<UserFunctionParameter> parameters;
     private SequenceType resultType;
     private Expression body = null;
     private List<UserFunctionResolvable> references = new ArrayList<>(10);
@@ -42,13 +46,14 @@ public class XQueryFunction implements Declaration, Location {
     private QueryModule staticContext;
     private boolean updating = false;
     private AnnotationList annotations = AnnotationList.EMPTY;
+    private int mandatoryParams = 0;
 
     /**
      * Create an XQuery function
      */
 
     public XQueryFunction() {
-        arguments = new ArrayList<>(8);
+        parameters = new ArrayList<>(8);
     }
 
     /**
@@ -71,13 +76,16 @@ public class XQueryFunction implements Declaration, Location {
     }
 
     /**
-     * Add an argument to the list of arguments
+     * Add an argument to the list of parameters
      *
-     * @param argument the formal declaration of the argument to be added
+     * @param param the formal declaration of the parameter to be added
      */
 
-    public void addArgument(UserFunctionParameter argument) {
-        arguments.add(argument);
+    public void addParameter(UserFunctionParameter param) {
+        parameters.add(param);
+        if (param.getDefaultValueExpression() == null) {
+            mandatoryParams++;
+        }
     }
 
     /**
@@ -153,7 +161,7 @@ public class XQueryFunction implements Declaration, Location {
 
     /*@NotNull*/
     public SymbolicName getIdentificationKey() {
-        return new SymbolicName.F(functionName, arguments.size());
+        return new SymbolicName.F(functionName, parameters.size());
     }
 
     /**
@@ -206,9 +214,9 @@ public class XQueryFunction implements Declaration, Location {
 
     /*@NotNull*/
     public SequenceType[] getArgumentTypes() {
-        SequenceType[] types = new SequenceType[arguments.size()];
-        for (int i = 0; i < arguments.size(); i++) {
-            types[i] = arguments.get(i).getRequiredType();
+        SequenceType[] types = new SequenceType[parameters.size()];
+        for (int i = 0; i < parameters.size(); i++) {
+            types[i] = parameters.get(i).getRequiredType();
         }
         return types;
     }
@@ -220,18 +228,63 @@ public class XQueryFunction implements Declaration, Location {
      */
 
     public UserFunctionParameter[] getParameterDefinitions() {
-        UserFunctionParameter[] params = new UserFunctionParameter[arguments.size()];
-        return arguments.toArray(params);
+        UserFunctionParameter[] params = new UserFunctionParameter[parameters.size()];
+        return parameters.toArray(params);
     }
 
     /**
-     * Get the arity of the function
+     * Get the position in the parameter list of a given parameter name
+     * @param name the name of the required parameter
+     * @return the position of the parameter in the parameter list, or -1 if absent
+     */
+
+    public int getPositionOfParameter(StructuredQName name) {
+        int pos = 0;
+        for (UserFunctionParameter p : parameters) {
+            if (p.getVariableQName().equals(name)) {
+                return pos;
+            }
+            pos++;
+        }
+        return -1;
+    }
+
+    /**
+     * Get the name of the Nth parameter, if any
      *
-     * @return the arity (the number of arguments)
+     * @return the name (keyword) of the Nth parameter
+     */
+
+    public StructuredQName getParameterName(int param) {
+        return parameters.get(param).getVariableQName();
+    }
+
+
+    /**
+     * Get the default value expression of the Nth parameter, if any
+     * @return the expression for computing the value of the Nth parameter, or null if there is none
+     */
+
+    public Expression getDefaultValueExpression(int param) {
+        return parameters.get(param).getDefaultValueExpression();
+    }
+
+    /**
+     * Get the maximum arity of the function
+     * @return the arity (the maximum number of arguments including optional arguments)
      */
 
     public int getNumberOfArguments() {
-        return arguments.size();
+        return parameters.size();
+    }
+
+    /**
+     * Get the minimum arity of the function
+     * @return the number of mandatory parameters
+     */
+
+    public int getMinimumArity() {
+        return mandatoryParams;
     }
 
     /**
@@ -448,7 +501,7 @@ public class XQueryFunction implements Declaration, Location {
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
         Configuration config = staticContext.getConfiguration();
         Optimizer opt = visitor.obtainOptimizer();
-        int arity = arguments.size();
+        int arity = parameters.size();
         if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
             body = body.optimize(visitor, ContextItemStaticInfo.ABSENT);
         }
