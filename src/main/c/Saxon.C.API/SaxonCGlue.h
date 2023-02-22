@@ -17,7 +17,6 @@
 #if defined __linux__ || defined __APPLE__
 #include <stdlib.h>
 #include <string.h>
-#include <dlfcn.h>
 #include <stdio.h>
 
 
