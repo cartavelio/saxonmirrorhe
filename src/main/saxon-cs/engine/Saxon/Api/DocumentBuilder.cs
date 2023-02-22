@@ -131,19 +131,19 @@ namespace Saxon.Api {
         ///  method is never called). Rather, some of the properties of the <code>SchemaValidator</code> are used to control
         ///  how schema validation is performed by the <code>DocumentBuilder</code>. The particular properties
         ///  that take effect include:</para>
-        ///  <ul>
-        ///  <li>The validation mode (strict or lax)</li>
-        ///  <li>The required top-level element declaration (see {@link SchemaValidator#setDocumentElementName(QName)}</li>
-        ///  <li>The required type of the top-level element (see {@link SchemaValidator#setDocumentElementTypeName(QName)}</li>
-        ///  <li>The option {@link SchemaValidator#isUseXsiSchemaLocation()}</li>
-        ///  <li>The option {@link SchemaValidator#isExpandAttributeDefaults()}</li>
-        ///  <li>Validation parameters set using {@link SchemaValidator#setParameter}</li>
-        ///  <li>The {@link net.sf.saxon.lib.InvalidityHandler}</li>
-        ///  </ul>
+        ///  <list>
+        ///  <item>The validation mode (strict or lax)</item>
+        ///  <item>The required top-level element declaration (see {@link SchemaValidator#setDocumentElementName(QName)}</item>
+        ///  <item>The required type of the top-level element (see {@link SchemaValidator#setDocumentElementTypeName(QName)}</item>
+        ///  <item>The option {@link SchemaValidator#isUseXsiSchemaLocation()}</item>
+        ///  <item>The option {@link SchemaValidator#isExpandAttributeDefaults()}</item>
+        ///  <item>Validation parameters set using {@link SchemaValidator#setParameter}</item>
+        ///  <item>The {@link net.sf.saxon.lib.InvalidityHandler}</item>
+        ///  </list>
         ///  <p>Properties that currently do NOT have any effect include:</p>
-        ///  <ul>
-        ///  <li>The option {@link SchemaValidator#isCollectStatistics()}</li>
-        ///  </ul>
+        ///  <list>
+        ///  <item>The option {@link SchemaValidator#isCollectStatistics()}</item>
+        ///  </list>
         /// </remarks>
         public SchemaValidator SchemaValidator {
             get => schemaValidator;
@@ -575,7 +575,7 @@ namespace Saxon.Api {
         }
         
         /// <summary>
-        /// Wrap a Linq document node, supplied as an <c>XDocument</c>, as a Saxon <c>XdmNode</c>.
+        /// Wrap a Linq document node, supplied as an <c>System.Linq.XDocument</c>, as a Saxon <c>XdmNode</c>.
         /// </summary>
         /// <remarks>
         /// <para>

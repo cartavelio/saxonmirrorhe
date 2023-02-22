@@ -378,7 +378,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// Note that this loses the prefix.
         /// </remarks>
-        public XName ToXName() {
+        public System.Xml.Linq.XName ToXName() {
             XNamespace ns = Uri == "" ? XNamespace.None : XNamespace.Get(Uri);
             return ns + LocalName;
         }

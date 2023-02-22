@@ -270,7 +270,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>The underlying <c>XNode</c> if there is one, or null otherwise</returns>
-        public XNode GetUnderlyingXNode() {
+        public System.Xml.Linq.XNode GetUnderlyingXNode() {
             NodeInfo localNode = (NodeInfo)value;
             if (localNode is VirtualNode virtualNode) {
                 object realNode = virtualNode.getRealNode();
