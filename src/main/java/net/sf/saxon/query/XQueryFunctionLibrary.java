@@ -16,10 +16,7 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.DeclaredFunction;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -93,8 +90,9 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
 
         // Test if the arity range of this function overlaps the arity range of another function
         StructuredQName functionName = function.getFunctionName();
+        @SuppressWarnings("Convert2Diamond")
         List<XQueryFunction> existingFunctions = functionsByName.computeIfAbsent(
-                functionName, k -> new ArrayList<>(2));
+                functionName, k -> new ArrayList<XQueryFunction>(2));
         for (XQueryFunction existing : existingFunctions) {
             if (existing == function) {
                 return;
@@ -158,14 +156,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 return fn;
             } else {
                 // return a reference to a reduced-arity version in which some of the arguments are defaulted
-                Callable callable = (context, arguments) -> {
-                    Sequence[] extendedArguments = Arrays.copyOf(arguments, fn.getArity());
-                    for (int i = functionName.getArity(); i < fn.getArity(); i++) {
-                        // Evaluate the default value expression for the omitted argument
-                        extendedArguments[i] = fd.getParameterDefinitions()[i].getDefaultValueExpression().makeElaborator().eagerly().evaluate(context);
-                    }
-                    return fn.call(context, extendedArguments);
-                };
+                Callable callable = new ReducedArityCallable(fd, fn);
+
                 SequenceType[] argTypes = new SequenceType[functionName.getArity()];
                 for (int i=0; i< functionName.getArity(); i++) {
                     argTypes[i] = fd.getArgumentTypes()[i];
@@ -492,6 +484,28 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         XQueryFunctionLibrary qfl = new XQueryFunctionLibrary(config);
         qfl.functions = new HashMap<SymbolicName, XQueryFunction>(functions);
         return qfl;
+    }
+
+    private static class ReducedArityCallable implements Callable {
+
+        private final XQueryFunction declaredFunction;
+        private final UserFunction userFunction;
+
+        public ReducedArityCallable(XQueryFunction fd, UserFunction fn) {
+            this.declaredFunction = fd;
+            this.userFunction = fn;
+        }
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            Sequence[] extendedArguments = Arrays.copyOf(arguments, userFunction.getArity());
+            for (int i = arguments.length; i < userFunction.getArity(); i++) {
+                // Evaluate the default value expression for the omitted argument
+                extendedArguments[i] = declaredFunction.getParameterDefinitions()[i].getDefaultValueExpression().makeElaborator().eagerly().evaluate(context);
+            }
+            return userFunction.call(context, extendedArguments);
+        }
+
     }
 
 
