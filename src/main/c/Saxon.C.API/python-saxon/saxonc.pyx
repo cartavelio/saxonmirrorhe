@@ -1525,7 +1525,6 @@ cdef class PyXsltExecutable:
             value (PyXdmValue): the value of the stylesheet parameter, or NULL to clear a previously set value
         """
         cdef const char * c_str = NULL
-        '''make_c_str(name)'''
         py_string_string = name.encode('utf-8') if name is not None else None
         c_str = py_string_string if name is not None else ""
         cdef PyXdmAtomicValue avalue_
@@ -1533,19 +1532,23 @@ cdef class PyXsltExecutable:
         cdef PyXdmNode nvalue_
         cdef PyXdmValue value_
         if c_str is not NULL:
-            if isinstance(value, PyXdmValue):
-                value_ = value
-                self.thisxptr.setParameter(c_str, value_.thisvptr)
-            elif  isinstance(value, PyXdmItem):
-                ivalue_ = value
-                self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *>  ivalue_.derivedptr)
+            if  isinstance(value, PyXdmAtomicValue):
+                avalue_ = value
+                avalue_.derivedaptr.incrementRefCount()
+                self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *> avalue_.derivedaptr)
             elif  isinstance(value, PyXdmNode):
                 nvalue_ = value
+                nvalue_.derivedaptr.incrementRefCount()
                 self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *>  nvalue_.derivednptr)
-            elif  isinstance(value, PyXdmAtomicValue):
-                avalue_ = value
-                self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *> avalue_.derivedaptr)
-                 
+            elif  isinstance(value, PyXdmItem):
+                ivalue_ = value
+                ivalue_.derivedaptr.incrementRefCount()
+                self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *>  ivalue_.derivedptr)
+            elif isinstance(value, PyXdmValue):
+                value_ = value
+                value_.thisvptr.incrementRefCount()
+                self.thisxptr.setParameter(c_str, value_.thisvptr)
+
      def get_parameter(self, name):
         """
         get_parameter(self, name)
