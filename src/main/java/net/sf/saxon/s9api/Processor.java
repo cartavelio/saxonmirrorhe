@@ -387,6 +387,9 @@ public class Processor implements Configuration.ApiProvider {
         if (name.equals(FeatureKeys.CONFIGURATION)) {
             config = (Configuration) value;
         } else {
+            if (name.equals("http://saxonica.com/oem-data")) {
+                config.setConfigurationProperty();
+            }
             config.setConfigurationProperty(name, value);
         }
     }

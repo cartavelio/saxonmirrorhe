@@ -60,6 +60,7 @@ public class AnalyzeStringFn extends RegexFunction {
         vocab.groupName = new FingerprintedQName("", NamespaceConstant.FN, "group");
         vocab.groupNrName = new NoNamespaceName("nr");
 
+        //#if EE==true
         if (schemaAware) {
             vocab.resultType = config.getSchemaType(new StructuredQName("", NamespaceConstant.FN, "analyze-string-result-type"));
             vocab.nonMatchType = BuiltInAtomicType.STRING;
@@ -70,6 +71,7 @@ public class AnalyzeStringFn extends RegexFunction {
                 throw new XPathException("Schema for analyze-string has not been successfully loaded");
             }
         }
+        //#endif
     }
 
     /**
@@ -92,6 +94,7 @@ public class AnalyzeStringFn extends RegexFunction {
         RegularExpression re = getRegularExpression(arguments);
         RegexIterator iter = re.analyze(input);
 
+        //#if EE==true
         if (vocab.resultName == null) {
             boolean schemaAware = context.getController().getExecutable().isSchemaAware();
             Configuration config = context.getConfiguration();
@@ -103,6 +106,7 @@ public class AnalyzeStringFn extends RegexFunction {
             }
             init(context.getConfiguration(), schemaAware);
         }
+        //#endif
 
         final Builder builder = context.getController().makeBuilder();
         final ComplexContentOutputter out = new ComplexContentOutputter(builder);

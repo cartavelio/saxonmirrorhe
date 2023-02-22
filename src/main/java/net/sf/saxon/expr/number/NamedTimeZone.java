@@ -433,7 +433,7 @@ public class NamedTimeZone {
             olsenName = region;
         }
         TimeZone zone = TimeZone.getTimeZone(olsenName);
-        return Optional.of(inDaylightTime(zone, date.secondsSinceEpoch().longValue()));
+        return Optional.of(inDaylightTime(zone, date.secondsSinceEpoch().longValue()*1000));
     }
 
     @CSharpReplaceBody(code="return zone.inDaylightTime(millisecsSinceEpoch);")
