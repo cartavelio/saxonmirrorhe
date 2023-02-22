@@ -23,6 +23,15 @@
             </head>
             <body class="main">
                 <h1>Saxon <xsl:value-of select="$version"/> product comparison (Feature Matrix)</h1>
+                <p>This chart describes the features present in each edition of Saxon 11.</p>
+                <p><b>At the time of publication, not all editions of Saxon 11 are available. The information
+                for editions that are not yet available is provisional and subject to change.</b></p>
+                <xsl:if test="number($version) ge 11">
+                    <p>
+                        <i>For features in version 10 products, see the <a class="bodylink"
+                            href="feature-matrix-10.xml">Saxon 10 Feature Matrix</a>.</i>
+                    </p>
+                </xsl:if>
                 <xsl:if test="number($version) ge 10">
                     <p>
                         <i>For features in version 9.9 products, see the <a class="bodylink"
@@ -62,6 +71,7 @@
                                 <td>EE&#8209;T</td>
                                 <td>EE&#8209;Q</td>
                                 <td>EE&#8209;V</td>
+                                <td>CS</td>
                                 <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
                                     <td>JS</td>
                                 </xsl:if>
@@ -86,6 +96,7 @@
                                             <td>EE&#8209;T</td>
                                             <td>EE&#8209;Q</td>
                                             <td>EE&#8209;V</td>
+                                            <td>CS</td>
                                             <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
                                                 <td>JS</td>
                                             </xsl:if>
@@ -185,6 +196,11 @@
                                                     <xsl:sequence select="f:dot($editions,'EE-V')"/>
                                                 </p>
                                             </td>
+                                            <td>
+                                                <p>
+                                                    <xsl:sequence select="f:dot($editions,'CS')"/>
+                                                </p>
+                                            </td>
                                             <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
                                                 <td>
                                                     <p>
@@ -218,7 +234,7 @@
     <xsl:template name="aside">
         <div id="aside">
             <xsl:choose>
-                <xsl:when test="$version = ('9.6', '9.7', '9.8', '9.9', '10')">
+                <xsl:when test="$version = ('9.6', '9.7', '9.8', '9.9', '10', '11')">
                     <h2>View the full product descriptions</h2>
                     <ul>
                         <li><a class="title" target="_blank"
@@ -240,6 +256,8 @@
                             <b>EE-V: </b>Saxon Enterprise Edition, Validation package
                             (restricted license allowing
                             Schema processing only)</a></li>
+                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/CS.pdf">
+                            <b>CS: </b>Saxon Enterprise Edition for .NET 5</a></li>
                         <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
                             <li><a class="title" href="../saxon-js/archive.xml"><b>JS: </b>Saxon-JS, JavaScript run-time</a></li>
                         </xsl:if>
@@ -269,6 +287,8 @@
                             <b>EE-V: </b>Saxon Enterprise Edition, Validation package
                             (restricted license allowing
                             Schema processing only)</li>
+                        <li>
+                            <b>CS: </b>Saxon Enterprise Edition for .NET 5</li>
                         <xsl:if test="number($version) ge 9.8 and number($version) lt 10">
                             <li>
                                 <b>JS: </b>Saxon-JS, JavaScript run-time</li>
