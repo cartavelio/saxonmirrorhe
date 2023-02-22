@@ -12,6 +12,7 @@ from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
 from nodekind import *
+from cython.operator import dereference, postincrement
 from os.path import isfile
 
 from libc.stdlib cimport free, malloc, realloc
@@ -1407,6 +1408,45 @@ cdef class PyXsltExecutable:
         self.thisxptr.setResultAsRawValue(c_raw)
         #else:
         #raise Warning("setJustInTimeCompilation: argument must be a boolean type. JIT not set")
+
+     def set_save_result_document(self, bool value):
+        """
+        set_save_result_document(self, value)
+        When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
+        via a user defined dictionary object where we have the pair document URI and XdmNode object.
+        Args:
+            value (bool): True true enables map object which is used to save the result documents from the transformation
+        """
+        cdef bool c_value
+        c_value = value
+        self.thisxptr.setSaveResultDocument(c_value)
+
+     def get_result_documents(self):
+         """
+         get_result_documents(self)
+
+         :return dictionary [str, PyXdmNode]:
+         """
+         cdef map[string , saxoncClasses.XdmNode * ] c_dataMap
+         cdef dict p_dataMap = {}
+         cdef PyXdmNode nval = None
+
+         c_dataMap = self.thisxptr.getResultDocuments()
+
+         cdef map[string , saxoncClasses.XdmNode * ].iterator it = c_dataMap.begin()
+         cdef int size = c_dataMap.size()
+
+         cdef str key_str
+         while(it != c_dataMap.end()):
+             c_xdmNode =  dereference(it).second
+             nval = PyXdmNode()
+             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_xdmNode
+             key_str = make_py_str(dereference(it).first.c_str())
+             p_dataMap[key_str] =  nval
+             postincrement(it)
+             
+         return p_dataMap
+
      def set_parameter(self, name, value):
         """
         set_parameter(self, PyXdmValue value)

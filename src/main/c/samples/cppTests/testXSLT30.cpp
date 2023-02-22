@@ -1436,9 +1436,12 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *
     } else {
 
         const char *svalue = value->itemAt(0)->getStringValue();
+        if(svalue != nullptr) {
         cout << "testResolveUri = " << svalue << endl;
-        sresult->success++;
         delete svalue;
+        }
+        sresult->success++;
+
         delete value;
     }
 
@@ -1633,7 +1636,7 @@ void testCallSystemFunction(SaxonProcessor *proc, sResultCount *sresult) {
     XdmValue ** xdmValue = new XdmValue*[1];
     xdmValue[0] = new XdmValue();
     xdmValue[0]->addXdmItem(proc->makeStringValue("[1,2,3]"));
-    XdmValue *result = fi->call(xdmValue, 1);
+    XdmValue *result = fi->call(proc, xdmValue, 1);
 
     std::cerr << "Result = " << result->toString() << endl;
     if(result->size() == 3) {

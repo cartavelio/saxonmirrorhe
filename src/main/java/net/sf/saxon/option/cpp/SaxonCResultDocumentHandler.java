@@ -27,6 +27,10 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
         dest.setDestinationBaseURI(uri);
         String href = uri.toASCIIString();
         results.put(href, dest);
+        if(SaxonCAPI.debug) {
+            System.err.println("SaxonC Debug - ResultDocumentHandler: href="+ href + "added");
+            System.err.println("SaxonC Debug - ResultDocumentHandler: size="+ results.size());
+        }
         return dest;
     }
 
@@ -35,9 +39,18 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
         XdmNode [] resultDocArr = new XdmNode[results.size()];
         Collection<XdmDestination> resultDocCollection = results.values();
         int i=0;
+        if(resultDocCollection.size() == 0) {
+            if(SaxonCAPI.debug) {
+                System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument is empty");
+            }
+            return null;
+        }
         for(XdmDestination dest : resultDocCollection) {
             resultDocArr[i] = dest.getXdmNode();
             i++;
+        }
+        if(SaxonCAPI.debug) {
+            System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument.length"+ resultDocArr.length);
         }
         return resultDocArr;
     }
@@ -46,9 +59,15 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
         String [] resultDocUris = new String[results.size()];
         Collection<XdmDestination> resultDocCollection = results.values();
         int i=0;
+        if(resultDocCollection.size() == 0) {
+            return null;
+        }
         for(XdmDestination dest : resultDocCollection) {
             resultDocUris[i] = dest.getBaseURI().toASCIIString();
             i++;
+        }
+        if(SaxonCAPI.debug) {
+            System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument-uris.length"+ resultDocUris.length);
         }
         return resultDocUris;
     }
