@@ -681,11 +681,10 @@ namespace Saxon.Api {
                 throw new ArgumentException("Source must be a document node");
             }
             
-            IEnumerator kids = source
-                .Children(Predicates.IsProcessingInstruction().And(Predicates.HasName("", "xml-stylesheet")))
-                .GetEnumerator();
-            while (kids.MoveNext()) {
-                XdmNode n = (XdmNode) kids.Current;
+            foreach (XdmNode n in source
+                .Children(
+                    Predicates.AllOf(Predicates.IsProcessingInstruction(), 
+                    Predicates.HasName("", "xml-stylesheet")))) {
                 // TODO: check the media type
                 String href = ProcInstParser.getPseudoAttribute(n.StringValue, "href");
                 if (href == null) {

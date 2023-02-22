@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using java.lang;
 using BigInt = System.Numerics.BigInteger;
 
 namespace Saxon.Impl.Helpers {
@@ -7,12 +8,16 @@ namespace Saxon.Impl.Helpers {
 
         public static readonly BigInt ZERO = ValueOf(0);
         public static BigInt ValueOf(long val) {
-            return (BigInt) val;
+            return val;
         }
 
         public static BigInt ValueOf(string s) {
-            // TODO: should be able to use Parse or TryParse, but I'm not finding these methods...
-            throw new NotImplementedException();
+            try {
+                return BigInteger.Parse(s);
+            }
+            catch (FormatException e) {
+                throw new NumberFormatException("Invalid integer " + s);
+            }
         }
 
         public static BigInt[] DivideAndRemainder(BigInt numerator, BigInt denominator) {

@@ -141,7 +141,7 @@ namespace Saxon.Api {
         /// <typeparam name="T">The types of object to enumerate. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
         /// <param name="predicate">The predicate to be applied</param>
         /// <returns>An enumerable of items that satisfy the suppplied <c>Predicate</c>.</returns>
-        public IEnumerable<T> Where<T>(IPredicate<T> predicate)
+        public IEnumerable<T> Where<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
                 throw new ArgumentNullException("Predicate is null");
@@ -165,14 +165,14 @@ namespace Saxon.Api {
         /// a derived type.</typeparam>
         /// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
         /// <returns>True if any items of the <c>XdmValue</c> match the provided predicate, otherwise false.</returns>
-        public bool AnyMatch<T>(IPredicate<T> predicate)
+        public bool AnyMatch<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
                 throw new ArgumentNullException("Predicate is null");
             }
 
             foreach (XdmItem item in this) {
-                if (item is T && predicate.Func((T) item)) {
+                if (item is T && predicate.Invoke((T) item)) {
                     return true;
                 }
             }
@@ -187,7 +187,7 @@ namespace Saxon.Api {
         /// <typeparam name="T">The types of object in the enumerable. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
         /// <param name="predicate">The predicate to apply to items of this <c>XdmValue</c></param>
         /// <returns><c>true</c> if either all items of the <c>XdmValue</c> match the provided predicate or the <c>XdmValue</c> is empty, otherwise <c>false</c></returns>
-        public bool AllMatch<T>(IPredicate<T> predicate)
+        public bool AllMatch<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
                 throw new ArgumentNullException("Predicate is null");
@@ -198,7 +198,7 @@ namespace Saxon.Api {
                     return false;
                 }
 
-                if (!predicate.Func((T) item)) {
+                if (!predicate.Invoke((T) item)) {
                     return false;
                 }
             }

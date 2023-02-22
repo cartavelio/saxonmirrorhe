@@ -57,7 +57,7 @@ namespace Saxon.Impl.Helpers {
             if (scale == 0 && value < System.Int64.MaxValue) {
                 if (value > 0.0) {
                     return System.Math.Round(value, System.MidpointRounding.AwayFromZero);
-                } else if (value > -0.5) {
+                } else if (value >= -0.5) {
                     return -0.0;
                 } else if (value > -100_000_000) {
                     // add a sufficiently large displacement, then round away from zero, then subtract the displacement
