@@ -37,12 +37,14 @@ import java.net.URI;
  * stylesheet several times. Running the stylesheet does not change the context
  * that has been established. Some of the public methods are synchronized: this is not because
  * multi-threaded execution is supported, rather it is to reduce the damage if multi-threaded
- * execution is attempted.
- * <p>
- * An {@code XsltTransformer} is always constructed by running the {@code Load}
- * method of an {@link XsltExecutable}.
- * <p>
- * An {@code XsltTransformer} is itself a {@link Destination}. This means it is possible to use
+ * execution is attempted.</p>
+ *
+ * <p>The date/time value returned by <code>fn:current-dateTime()</code> remains constant for the
+ * duration of an <code>Xslt30Transformer</code>.</p>
+ * <p>An {@code XsltTransformer} is always constructed by running the {@code Load}
+ * method of an {@link XsltExecutable}.</p>
+ *
+ * <p>An {@code XsltTransformer} is itself a {@link Destination}. This means it is possible to use
  * one {@code XsltTransformer} as the destination to receive the results of another transformation,
  * this providing a simple way for transformations to be chained into a pipeline. Note however that a
  * when the input to a transformation is supplied in this way, it will always be built as a tree in
@@ -50,7 +52,7 @@ import java.net.URI;
  * performs <i>Sequence Normalization</i> on its input; that is, it converts the input to a single
  * document node. (The main reason for this is that when chaining XSLT transformations, the raw
  * output of the first stylesheet is often an element node, but the second stylesheet traditionally
- * expects a document node.)
+ * expects a document node.)</p>
  *
  * @since 9.0
  */
