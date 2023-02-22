@@ -382,6 +382,59 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>For more general information about these localization features, see the <a class="bodylink"
          href="/localization">Localization</a> section.</p>
    </section>
+   <section id="callbacks" title="Callbacks" class="csonly">
+      <h1>Callbacks</h1>
+      
+      <p>SaxonCS offers a number of places where user-supplied code can be invoked to customize the required
+      behaviour. Examples include:</p>
+      
+      <ul>
+         <li><p>The <code>ErrorReporter</code>, used to report errors and warnings</p></li>
+         <li><p>The <code>ResourceResolver</code>, used to resolve URI references to external resources</p></li>
+         <li><p>The <code>IInvalidityHandler</code>, used to report on validation errors found during schema processing</p></li>
+         <li><p>The <code>ExtensionFunction</code> interface used to implement C# functions that can be invoked from XPath expressions</p></li>
+      </ul>
+      
+      <p>Generally the application registers these callback types are registered with the Saxon <code>Processor</code>. This
+      means that no dynamic loading of user-written code is required.</p>
+      
+      <p>The one exception is where a query, transformation, or schema validation is run using the command-line interface.
+      In this scenario, a user-written initialization hook can be nominated by name, in the <code>-init</code> option. The value of the
+      option is a (relative) filename, which must refer to a DLL containing a class that implements the interface
+      <code>Saxon.Api.IProcessorInitializer</code>.</p>
+      
+      <p>Here is an example of an initialization class. It switches the configuration option <code>Feature.TIMING</code> on,
+      and declares an extension function:</p>
+      
+      <samp><![CDATA[
+        public class UuidInit : IProcessorInitializer {
+
+        public void Initialize(Processor processor) {
+            Console.WriteLine("UuidInit invoked for " + processor.ProductTitle);
+            processor.SetProperty(Feature.TIMING, true);
+            processor.RegisterExtensionFunction(
+                new QName("http://example.com/ns", "uuid"),
+                processor.ParseItemType("function() as xs:string"),
+                args => new XdmAtomicValue(Guid.NewGuid().ToString()));
+        }
+    }]]></samp>
+      
+      <p>To invoke this initializer, specify <code>-init:uuid.dll</code> on the command line, where <code>uuid.dll</code>
+      is the location of the compiled project.</p>
+      
+      <aside><p>To build this project successfully, it must have a dependency on the SaxonCS DLL (because it refers to Saxon classes
+      such as <code>Saxon.Api.Processor</code>). It is important that this dependency is marked in the <code>.csproj</code> file
+         with <code><![CDATA[<Private>false</Private>]]></code> to ensure that the project is not built with a private copy
+      of the Saxon DLL. Without this option, the class <code>UuidInit</code> will not be recognized as implementing the
+         <code>IProcessorInitializer</code> class in the calling instance of SaxonCS.</p></aside>
+      
+      <p>Within this Saxon configuration, the extension function <code>Q{http://example.com/ns}uuid()</code> can then
+      be called to generate a UUID.</p>
+      
+      <p>The initializer should be used only to set properties of the Saxon <code>Processor</code>; it should not be used
+      to do significant work such as running queries or transformations.</p>
+      
+   </section>
    <section id="restrictions" title="Restrictions" class="csonly">
       <h1>Restrictions</h1>
       
