@@ -206,6 +206,10 @@
         </ul>
         
        <p>The proposed 4.0 functions fn:uniform(), fn:unique(), and fn:replicate() are implemented.</p>
+        
+        <p>The attributes <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
+            <code>xsl:for-each-group</code>, and <code>xsl:iterate</code> are dropped. In their place, use
+        <code>select="array:members($array)"</code> or <code>select="map:key-value-pairs($map)"</code></p>
  
 
     
