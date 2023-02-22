@@ -14,16 +14,16 @@
 
       <category name="main">
          <ul>
-            <li>The SaxonC 12 release is built from the SaxonJ (Java) 12 as its baseline.</li>
+            <li>The SaxonC 12 release is built from SaxonJ (Java) 12 as its baseline.</li>
             <li>SaxonC is now cross-compiled with GraalVM Native Image (version 22.3.0) as a direct replacement to Excelsior Jet JVM.
             This replacement of JVM is significant in that we now only require a single shared native library which contains only the code required at run time,
                that is the application classes, standard-library classes, the language runtime, and statically-linked native code from the JDK.</li>
-            <li>SaxonC now uses Native Image C API instead of JNI Invocation API for calling a method embedded in a native shared library. There are benchmarks
-               available which show the Native Image C API to considerably faster than using JNI.
+            <li>SaxonC now uses the Native Image C API instead of JNI Invocation API for calling a method embedded in a native shared library. There are benchmarks
+               available which show that using the Native Image C API is considerably faster than using JNI.
             </li>
-            <li>For SaxonC-EE is built using GraalVM Enterprise edition, whereas SaxonC-PE and SaxonC-HE is built from the GraalVM Community edition.</li>
-            <li>The SaxonC Python extension is now as a Python wheel package. This is available using Pypi for a number of platforms and flavors including MacOS, Linux and Windows.
-               Python supported 3.8+ supported</li>
+            <li>SaxonC-EE is built using GraalVM Enterprise edition, while SaxonC-PE and SaxonC-HE are built using GraalVM Community edition.</li>
+            <li>The SaxonC Python extension is now available as a Python wheel package. This is available using Pypi for a number of platforms and flavors including MacOS, Linux and Windows.
+               Python 3.8+ is supported.</li>
             <li>SaxonC now supports PHP 8 and has removed support for PHP 7 since it has reached End of Life and is no longer supported.</li>
          </ul>
       </category>

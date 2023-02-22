@@ -152,8 +152,15 @@
 
       <p>SaxonC 12 is built from the SaxonJ 12 Java product by cross compiling using GraalVM Native Image.
          This generates platform specific machine code, which is
-         interfaced with C/C++ using the Native Image C API. The following SaxonC API
-         classes are available in C++ to process XSLT, XQuery, XPath and Schema validation:</p>
+         interfaced with C/C++ using the Native Image C API.</p>
+      
+      <p>The <a class="bodylink"
+         href="https://www.saxonica.com/saxon-c/doc12/html/index.html"
+         >SaxonC C++ API documentation</a> contains full details of the API. 
+         See below for direct links to the main classes.</p>
+      
+      <p>The following SaxonC API classes are available in C++ to process XSLT, XQuery, XPath and Schema validation:</p>
+      
       <ul>
          <li>
             <a class="bodylink code"
@@ -2829,6 +2836,11 @@
       <p>The SaxonC Python extension API has been developed using <a href="https://cython.org/"
             target="_blank">Cython</a>. SaxonC only supports Python3. Cython is required to build
          the extension library.</p>
+      
+      <p>The <a class="bodylink"
+         href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html"
+         >SaxonC Python API documentation</a> contains full details of the extension API. 
+         See below for direct links to the main classes.</p>
 
       <p>The following classes are available in the Python API:</p>
       <ul>
