@@ -32,11 +32,11 @@ namespace Saxon.Impl.Helpers {
         }
 
         public void initialize(Saxon.Hej.Configuration config) {
-            config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver(config)));
+            //config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver(config)));
             config.setCollectionFinder((cxt, uri) => 
                 new Saxon.Hej.resource.StandardCollectionFinder().findCollection(cxt, uri));
-            config.setUnparsedTextURIResolver(new StandardUnparsedTextResolver().resolve);
-            config.setLocalizerFactory(new Saxon.Impl.Overrides.DotNetLocalizerFactory());
+            config.setUnparsedTextURIResolver(new StandardUnparsedTextResolver(config).resolve);
+            config.setLocalizerFactory(new Saxon.Impl.Overrides.DotNetLocalizerFactory(config));
         }
         
 
@@ -344,7 +344,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public Saxon.Hej.lib.ModuleURIResolver makeStandardModuleURIResolver(Saxon.Hej.Configuration config) {
-            return new StandardModuleURIResolver(new StandardXmlResolver(config));
+            return new StandardModuleURIResolver(config);
         }
 
         public IDynamicLoader getDefaultDynamicLoader() {
@@ -404,6 +404,7 @@ namespace Saxon.Impl.Helpers {
                     MaxCharactersFromEntities = 100000,
                     XmlResolver = config.getCommonResourceResolver()
                 };
+
                 // if (source.getSystemId() != null) {
                 //     settings.XmlResolver =
                 //         new TracingXmlResolver(new Uri(source.getSystemId(), UriKind.RelativeOrAbsolute));
@@ -411,7 +412,7 @@ namespace Saxon.Impl.Helpers {
 
                 XmlReader xmlReader = null;
                 if (inputStream != null) {
-                    xmlReader = XmlReader.Create(inputStream, settings);
+                    xmlReader = XmlReader.Create(inputStream, settings,source.getSystemId());
 
                     //if (hasDTD) {
                         
@@ -442,7 +443,7 @@ namespace Saxon.Impl.Helpers {
                     //     settings, parserContext);
                 }
                 else if (streamSource.getReader() != null) {
-                    xmlReader = XmlReader.Create(streamSource.getReader(), settings);
+                    xmlReader = XmlReader.Create(streamSource.getReader(), settings, source.getSystemId());
                 }
                 else {
                     string sysId = source.getSystemId();

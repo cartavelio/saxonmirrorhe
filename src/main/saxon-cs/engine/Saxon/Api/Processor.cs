@@ -179,18 +179,12 @@ namespace Saxon.Api {
         /// </remarks>
 
         public XmlResolver XmlResolver {
-            get {
-                Saxon.Ejavax.xml.transform.URIResolver resolver = JProcessor.getUnderlyingConfiguration().getURIResolver();
-                if (resolver is StandardURIResolver uriResolver) {
-                    return uriResolver.getXmlResolver();
-                }
-
-                return new StandardXmlResolver(Implementation);
+            get => Implementation.getCommonResourceResolver();
+            set {
+                Implementation.getCommonResourceResolver().chain(new XmlResolverWrapper(value));
             }
-            set => JProcessor.getUnderlyingConfiguration().setURIResolver(
-                                new StandardURIResolver(JProcessor.getUnderlyingConfiguration(), value));
         }
-        
+
         /// <summary>
         /// An <c>TextResolver</c>, which will be used for resolving URIs passed to calls on
         /// <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>, <c>unparsed-text-available()</c>,
@@ -557,7 +551,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="feature">The property feature</param>
         /// <param name="value">The property value</param>
-        public void SetProperty<T>(Feature<T> feature, T value) {
+        public void SetProperty(Feature feature, object value) {
             Implementation.setFeature(FeatureIndex.getData(feature.Code), value);
         }
 
@@ -583,16 +577,13 @@ namespace Saxon.Api {
         /// Get a property of the configuration.
         /// </summary>
         /// <remarks>
-        /// <para>This method provides a type-safe way of getting the value of a configuration
-        /// property of any type: for example, <c>GetProperty(Feature&lt;bool>.XQUERY_ALLOW_UPDATE)</c>
-        /// returns a boolean property as a boolean. </para>
+        /// <para>In earlier versions of SaxonCS this method attempted to achieve type-safety by returning
+        /// a generic type. This has been abandoned - see bug 5183</para>
         /// </remarks>
-        /// <typeparam name="T">See the class <c>Feature</c> for constants 
-        /// representing the properties that can be requested.</typeparam>
         /// <param name="feature">the required property. </param>
         /// <returns>the value of the property</returns>
-        public T GetProperty<T>(Feature<T> feature) {
-            return (T)Implementation.getFeature(FeatureIndex.getData(feature.Code));
+        public object GetProperty(Feature feature) {
+            return Implementation.getFeature(FeatureIndex.getData(feature.Code));
         }
 
         /// <summary>
