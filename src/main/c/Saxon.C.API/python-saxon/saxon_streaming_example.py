@@ -23,7 +23,7 @@ t1 = time.time()
 
 total = t1-t0
 
-print('Time ='.(total/10) . 'ms')
+print('Time ='+str(total/10) + 'ms')
 
 
 
