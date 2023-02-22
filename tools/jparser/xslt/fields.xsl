@@ -7,7 +7,7 @@
    default-mode="fields"
    version="3.0">
    
-   <xsl:mode name="fields" on-no-match="fail"/>
+   <xsl:mode name="fields" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/" on-no-match="fail"/>
    
    <!-- This module is concerned with field access expressions, especially rules for 
       properties that are specific to particular classes. All the rules in this 
@@ -16,6 +16,11 @@
       not re-stated as part of each pattern.
    -->
    
+   <!--<xsl:template match="*" priority="1000">
+      <xsl:message>Field access to {name/@identifier}</xsl:message>
+      <xsl:text>/*Field access to {name/@identifier}*/</xsl:text>
+      <xsl:next-match/>
+   </xsl:template>-->
    
    <!-- .length accessor on arrays -->
    <xsl:template match="*[name/@identifier='length'][ends-with(@RESOLVED_TYPE, '[]')]" priority="50">
@@ -95,6 +100,15 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- Identify a static field accessor such as Double.POSITIVE_INFINITY -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Double']" priority="19">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'POSITIVE_INFINITY'">System.Double.PositiveInfinity</xsl:when>
+         <xsl:when test="name/@identifier = 'NEGATIVE_INFINITY'">System.Double.NegativeInfinity</xsl:when>
+         <xsl:otherwise>System.Double.{name/@identifier}</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
    <!-- Identify a static field accessor such as Character.LETTER_NUMBER -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.lang.Character']" priority="19">
       <xsl:choose>
@@ -138,6 +152,38 @@
          <xsl:when test="name/@identifier='HALF_UP'">System.MidpointRounding.AwayFromZero</xsl:when>
          <xsl:when test="name/@identifier='UNNECESSARY'">System.MidpointRounding.ToZero</xsl:when>
          <xsl:when test="name/@identifier='UP'">System.MidpointRounding.AwayFromZero</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <xsl:variable name="atomicTypes" as="xs:string*" select="tokenize('
+      boolean integer double float decimal string date dateTime time duration dayTimeDuration 
+      gYear gMonth gDay gYearMonth gMonthDay anyURI hexBinary base64Binary untypedAtomic QName NOTATION')"/>
+   
+   <xsl:function name="f:toUpperWithUnderscore">
+      <xsl:param name="in" as="xs:string"/>
+      <xsl:sequence select="$in => replace('(\p{Ll})(\p{Lu})', '$1_$2') => upper-case()"/>
+   </xsl:function>
+   
+   <xsl:variable name="upperAtomicTypes" as="xs:string*" select="$atomicTypes ! f:toUpperWithUnderscore(.)"/>
+   
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'net.sf.saxon.s9api.ItemType']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier=$upperAtomicTypes">
+            <xsl:text>Saxon.Api.XdmAtomicType.{f:toUpperWithUnderscore(name/@identifier)}</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Identify static field accessors such as java.io.File.pathSeparator -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.io.File']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='pathSeparator'">System.IO.Path.PathSeparator.ToString()</xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
          </xsl:otherwise>

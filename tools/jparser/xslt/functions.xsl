@@ -56,13 +56,33 @@
    
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
       'boolean': 'bool',
+      'java.io.BufferedInputStream': 'System.IO.BufferedStream',
+      'java.io.BufferedOutputStream': 'System.IO.BufferedStream',
+      'java.io.BufferedReader': 'Saxon.Impl.Helpers.BufferedReader',
+      'java.io.ByteArrayInputStream': 'System.IO.MemoryStream',
+      'java.io.ByteArrayOutputStream': 'System.IO.MemoryStream',
+      'java.io.FileInputStream': 'System.IO.FileStream',
+      'java.io.FileOutputStream': 'System.IO.FileStream',
+      'java.io.InputStream': 'System.IO.Stream',
+      'java.io.InputStreamReader': 'System.IO.StreamReader',
+      'java.io.IOException': 'System.IO.IOException',
+      'java.io.LineNumberReader': 'Saxon.Impl.Helpers.LineNumberReader',
+      'java.io.OutputStream': 'System.IO.Stream',
+      'java.io.OutputStreamWriter': 'System.IO.StreamWriter',
+      'java.io.Reader': 'System.IO.TextReader',
+      'java.io.StringReader': 'System.IO.StringReader',
+      'java.io.StringWriter': 'System.IO.StringWriter',
+      'java.io.Writer': 'System.IO.TextWriter',
       'java.lang.ArithmeticException': 'System.ArithmeticException',
       'java.lang.ArrayIndexOutOfBoundsException': 'System.IndexOutOfRangeException',
       'java.lang.Boolean': 'System.Boolean',
+      'java.lang.Byte': 'System.Byte',
+      'java.lang.Character': 'System.Char',
       'java.lang.CharSequence': 'string',
       'java.lang.Class': 'System.Type',
       'java.lang.Double': 'System.Double',
       'java.lang.Exception': 'System.Exception',
+      'java.lang.Float': 'System.Single',
       'java.lang.IndexOutOfBoundsException': 'System.IndexOutOfRangeException',
       'java.lang.Integer': 'System.Int32',
       'java.lang.Long': 'System.Int64',
@@ -72,26 +92,47 @@
       'java.lang.StackOverflowError': 'System.StackOverflowException',
       'java.lang.String': 'string',
       'java.lang.StringIndexOutOfBoundsException': 'System.IndexOutOfRangeException',
-      'java.lang.System': 'System.Console',
       'java.lang.InterruptedException': 'System.Threading.ThreadInterruptedException',
+      'java.lang.Iterable': 'System.Collections.Generic.IEnumerable',
       'java.lang.ThreadLocal': 'System.Threading.ThreadLocal',
       'java.lang.Throwable': 'System.Exception',
       'java.math.BigDecimal': 'Singulink.Numerics.BigDecimal',
       'java.math.BigInteger': 'System.Numerics.BigInteger',
       'java.net.URI': 'System.Uri',
       'java.time.format.DateTimeParseException': 'System.FormatException',
+      'java.util.ArrayList': 'System.Collections.Generic.List',
+      'java.util.Collection': 'System.Collections.Generic.ICollection',
+      'java.util.Comparator': 'System.Collections.Generic.Comparer',
       'java.util.function.Function': 'System.Func',
       'java.util.function.Predicate': 'System.Predicate',
-      'java.util.Map.Entry': 'java.util.Map_Entry',
+      'java.util.HashMap': 'System.Collections.Generic.Dictionary',
+      'java.util.HashSet': 'System.Collections.Generic.HashSet',
+      'java.util.Iterator': 'System.Collections.Generic.IEnumerator',
+      'java.util.LinkedHashMap': 'Saxon.Impl.Helpers.OrderedDictionary',
+      'java.util.LinkedList': 'System.Collections.Generic.LinkedList',
+      'java.util.List': 'System.Collections.Generic.IList',
+      'java.util.Map': 'System.Collections.Generic.IDictionary',
+      'java.util.Map.Entry': 'System.Collections.Generic.KeyValuePair',
       'java.util.Optional': 'System.Nullable',
+      'java.util.Set': 'System.Collections.Generic.ISet',
+      'java.util.TreeSet': 'System.Collections.Generic.SortedSet',
       'net.sf.saxon.expr.sort.LFUCache.EntryWithCounter': 'net.sf.saxon.expr.sort.LFUCache&lt;K,V>.EntryWithCounter',
       'net.sf.saxon.ma.arrays.ImmutableArrayItem': 'Saxon.Impl.DataModel.ImmArray',
-      'net.sf.saxon.s9api.Push.Document': 'net.sf.saxon.s9api.Push_Document',
-      'net.sf.saxon.s9api.Push.Element': 'net.sf.saxon.s9api.Push_Element',
-      'net.sf.saxon.s9api.Push.Container': 'net.sf.saxon.s9api.Push_Container'
+      'net.sf.saxon.s9api.ItemType': 'Saxon.Api.XdmItemType',
+      'net.sf.saxon.s9api.QName': 'Saxon.Api.QName',
+      'net.sf.saxon.s9api.WhitespaceStrippingPolicy': 'Saxon.Api.WhitespacePolicy',
+      'net.sf.saxon.s9api.XdmArray': 'Saxon.Api.XdmArray',
+      'net.sf.saxon.s9api.XdmAtomicValue': 'Saxon.Api.XdmAtomicValue',
+      'net.sf.saxon.s9api.XdmEmptySequence': 'Saxon.Api.XdmEmptySequence',
+      'net.sf.saxon.s9api.XdmFunctionItem': 'Saxon.Api.XdmFunctionItem',     
+      'net.sf.saxon.s9api.XdmItem': 'Saxon.Api.XdmItem',
+      'net.sf.saxon.s9api.XdmMap': 'Saxon.Api.XdmMap',
+      'net.sf.saxon.s9api.XdmNode': 'Saxon.Api.XdmNode',
+      'net.sf.saxon.s9api.XdmValue': 'Saxon.Api.XdmValue'
       }"/>
    
    <xsl:variable name="jdkExceptionTypes" as="xs:string*" select="
+      'java.io.IOException',
       'java.lang.ArrayIndexOutOfBoundsException',
       'java.lang.AssertionError',
       'java.lang.Exception',
@@ -105,17 +146,6 @@
       "/>
    
    <xsl:variable name="dropTypeParameters" as="xs:string*" select="tokenize('System.Type')"/>
-
-   <xsl:variable name="specialProperties" as="map(*)">
-      <!--<xsl:variable name="json" as="xs:string" expand-text="no">
-         { "java.util.Map.Entry": {"getKey": "Key", "getValue": "Value"},
-           "java.util.Map": {"keys": "Keys", "values": "Values"},
-           "java.util.HashMap": {"keys": "Keys", "values": "Values"}
-         }    
-      </xsl:variable>
-      <xsl:sequence select="parse-json($json)"/>-->
-      <xsl:sequence select="map{}"/>
-   </xsl:variable>
  
    <xsl:function name="f:qualifiedName" as="xs:string">
       <xsl:param name="in" as="element(*)"/>
@@ -151,6 +181,42 @@
       </xsl:for-each>
    </xsl:function>
    
+   <xsl:function name="f:expressionType" as="xs:string">
+      <xsl:param name="expr" as="element(*)"/>
+      <xsl:choose>
+         <xsl:when test="$expr/@nodeType='ObjectCreationExpr'">
+            <xsl:sequence select="$expr/type/@RESOLVED_TYPE"/>
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='NameExpr'">
+            <xsl:sequence select="$expr/@RESOLVED_TYPE"/>
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='FieldAccessExpr'">
+            <xsl:sequence select="$expr/@RETURN"/>
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='MethodCallExpr'">
+            <xsl:sequence select="$expr/@RETURN"/>
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='StringLiteralExpr'">
+            <xsl:sequence select="'java.lang.String'"/>
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='IntegerLiteralExpr'">
+            <xsl:sequence select="'java.lang.Integer'"/>
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='ConditionalExpr'">
+            <xsl:sequence select="f:expressionType($expr/thenExpr)"/>
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='BinaryExpr'">
+            <xsl:sequence select="f:expressionType($expr/left)"/> <!-- guesswork here -->
+         </xsl:when>
+         <xsl:when test="$expr/@nodeType='ArrayCreationExpr'">
+            <xsl:sequence select="f:expressionType($expr/elementType) || '[]'"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>java.lang.Object /* unknown type for {$expr/@nodeType} */</xsl:text>
+         </xsl:otherwise>        
+      </xsl:choose>
+   </xsl:function>
+   
    <xsl:function name="f:fullClassName" as="xs:string">
       <xsl:param name="classElement" as="element()*"/>
       <xsl:assert test="$classElement/@nodeType = 'ClassOrInterfaceDeclaration'"/>
@@ -167,6 +233,28 @@
    <xsl:function name="f:isIteratorType" as="xs:boolean">
       <xsl:param name="type" as="xs:string"/>
       <xsl:sequence select="f:degenerify($type) = ('java.util.Iterator', 'net.sf.saxon.s9api.XdmSequenceIterator')"/>
+   </xsl:function>
+   
+   <!-- Given a class in the digest, determine whether this class implements java.util.Iterator
+        directly or indirectly; and if it does; return the class over which it iterates -->
+   <xsl:function name="f:typeThatThisIteratesOver" as="xs:string?">
+      <xsl:param name="type" as="element()"/>
+      <xsl:assert test="$type[self::class|self::interface]">Wrong element type in f:iteratesOver: {name($type)}</xsl:assert>
+      <xsl:variable name="superTypes" as="element(*)*" select="$type/implements | $type/extends"/>
+      <xsl:variable name="iteratorSuperType" select="$superTypes[@name = 'java.util.Iterator']"/>
+      <xsl:choose>
+         <xsl:when test="$iteratorSuperType">
+            <xsl:sequence select="$iteratorSuperType/@params => replace('(^&lt;|&gt;$)', '')"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:for-each select="$superTypes">
+               <xsl:variable name="declaration" select="key('digestClassKey', .)"/>
+               <xsl:if test="$declaration">
+                  <xsl:sequence select="f:typeThatThisIteratesOver($declaration)"/>
+               </xsl:if>
+            </xsl:for-each>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:function>
    
    <xsl:function name="f:renameMethod" as="xs:string">
@@ -225,15 +313,6 @@
    <xsl:function name="f:capitalize" as="xs:string">
       <xsl:param name="in" as="xs:string"/>
       <xsl:sequence select="upper-case(substring($in, 1, 1)) || substring($in, 2)"/>
-   </xsl:function>
-   
-   
-   
-   <!-- special-case getKey() and getValue() in KeyValuePair -->
-   <xsl:function name="f:methodAsProperty" as="xs:string?">
-      <xsl:param name="expr" as="element(*)"/>
-      <xsl:variable name="simpleName" select="f:degenerify($expr/@RESOLVED_TYPE)"/>
-      <xsl:sequence select="$specialProperties($simpleName)?($expr/name/@identifier)"/>
    </xsl:function>
    
  
