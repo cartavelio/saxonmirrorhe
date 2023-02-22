@@ -110,6 +110,8 @@ public class ExtensionTest {
     @Test
     public void testArrayParam() {
 
+        // Changed 2021-10-21 to use spelling type-annotation rather than typeAnnotation
+
         byte[] bytes = new byte[]{'x', 'y', 'z'};
 
         try {
@@ -118,7 +120,7 @@ public class ExtensionTest {
             comp.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
             XQueryExecutable exec = comp.compile(
                     "declare variable $in as Q{http://saxon.sf.net/java-type}_-B external; " +
-                    "Q{java:java.lang.String}new($in) || '=>' || Q{http://saxon.sf.net/}typeAnnotation($in)");
+                    "Q{java:java.lang.String}new($in) || '=>' || Q{http://saxon.sf.net/}type-annotation($in)");
             XQueryEvaluator eval = exec.load();
             eval.setExternalVariable(new QName("in"), new XdmExternalObject(bytes));
             XdmItem result = eval.evaluateSingle();
@@ -250,11 +252,11 @@ public class ExtensionTest {
             builder.setLineNumbering(true);
             XdmNode doc = builder.build(new StreamSource(new StringReader("<a>\n<b/>\n<b/>\n<b/>\n<b/>\n<c/>\n</a>")));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            XQueryExecutable exec = comp.compile("declare namespace saxon='http://saxon.sf.net/'; saxon:line-number(//c)");
+            XQueryExecutable exec = comp.compile("declare namespace jint='java:java.lang.Integer'; jint:bitCount(5)");
             XQueryEvaluator eval = exec.load();
             eval.setContextItem(doc);
             XdmAtomicValue result = (XdmAtomicValue)eval.evaluateSingle();
-            assertTrue(result.getLongValue() == 6);
+            assertTrue(result.getLongValue() == 2);
             assertTrue(messages.size() == 2);
         } catch (SaxonApiException e) {
             fail();
@@ -282,14 +284,14 @@ public class ExtensionTest {
             XdmNode doc = builder.build(new StreamSource(new StringReader("<a>\n<b/>\n<b/>\n<b/>\n<b/>\n<c/>\n</a>")));
             XsltCompiler comp = proc.newXsltCompiler();
             XsltExecutable exec = comp.compile(new StreamSource(new StringReader(
-                    "<a xmlns:t='http://www.w3.org/1999/XSL/Transform' xmlns:saxon='http://saxon.sf.net/' t:version='2.0'>" +
-                            "<t:value-of select='saxon:line-number(//c)'/></a>")));
+                    "<a xmlns:t='http://www.w3.org/1999/XSL/Transform' xmlns:jint='java:java.lang.Integer' t:version='2.0'>" +
+                            "<t:value-of select='jint:bitCount(15)'/></a>")));
             XsltTransformer eval = exec.load();
             eval.setInitialContextNode(doc);
             StringWriter sw = new StringWriter();
             eval.setDestination(proc.newSerializer(sw));
             eval.transform();
-            assertTrue(sw.toString().endsWith(">6</a>"), "result");
+            assertTrue(sw.toString().endsWith(">4</a>"), "result");
             assertEquals(2, messages.size(), "messages");
         } catch (SaxonApiException e) {
             fail();
