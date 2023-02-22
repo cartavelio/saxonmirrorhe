@@ -26,6 +26,7 @@ namespace Saxon.Callbacks {
             XmlResolverConfiguration resolverConfig = new(null, new List<string>());
             // Enable searching of the XmlResolverData library, which holds copies of well-known W3C resources such as DTDs
             resolverConfig.SetFeature(ResolverFeature.ASSEMBLY_CATALOGS, "XmlResolverData.dll");
+            //catalogBasedResolver.GetConfiguration().SetFeature(ResolverFeature.THROW_URI_EXCEPTIONS, true);
             catalogBasedResolver = new(resolverConfig);
         }
         
