@@ -535,8 +535,7 @@ const char * XdmMap::toString(){
                        	keysArr = new XdmAtomicValue*[sizex];
                        	for (int p=0; p < sizex; ++p){
                        			jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
-                       			tempValue = new XdmAtomicValue();
-                       			tempValue->addUnderlyingValue(resulti);
+                       			tempValue = new XdmAtomicValue(resulti);
                        			keysArr[p] =tempValue;
                        	}
             }
