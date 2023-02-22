@@ -1038,26 +1038,20 @@ any version number.</p>
       <p>Before you can run the software, you will need to ensure that a license file is installed, as described
          in <a class="bodylink" href="/about/license/licensekey">Setting up a license key</a>.</p>
          
-      <p>The software can be installed using .NET using Nuget or directly as
-      an executable.</p>
+      <p>The software can be installed using Nuget or directly as an executable.</p>
 
       <h3>Installing with Nuget</h3>
 
-      <p>When installed with Nuget, all of the dependencies will be
-      automatically loaded as well. It consists of a single DLL file,
-      named SaxonCS.</p>
+      <p>When SaxonCS is installed with Nuget, all of the dependencies will be
+      automatically loaded as well. It consists of a single DLL file, named SaxonCS.</p>
 
       <p>To invoke SaxonCS from a C# application, simply add a Nuget dependency to your project
       as you would for any other third-party library.</p>
       
       <p>To run XSLT transformations, XQuery queries, or XSD validation from the command line,
-      two approaches are possible:</p>
+         you can use the dotnet command, for example:</p>
       
-      <ul>
-         <li><p>Firstly, having installed the DLL using Nuget, you can use the dotnet command, for example:</p>
-            <kbd>dotnet SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
-         </li>
-      </ul>
+      <kbd>dotnet SaxonCS transform -t -s:source.xml -xsl:stylesheet.xsl</kbd>
 
      <h3>Installing an application</h3>
 
@@ -1075,13 +1069,13 @@ any version number.</p>
 
      <h4>Installing on MacOS</h4>
 
-     <p>The MacOS application is distributed as a signed, notarized “DMG” file.
-     Download the DMG file, open it up, drag the “SaxonCS” application across
+     <p>The MacOS application is distributed as a signed, notarized "DMG" file.
+     Download the DMG file, open it up, and drag the "SaxonCS" application across
      the screen into the Applications folder.</p>
 
-     <p>The SaxonCS application doesn’t have a GUI interface, so simply clicking on
-     the application icon doesn’t do anything. From a terminal window, you can
-     run <code>/Applications/SaxonCS.app/Contents/Mac/SaxonCS</code>.
+     <p>The SaxonCS application doesn't have a GUI interface, so simply clicking on
+     the application icon doesn't do anything. From a terminal window, you can
+     run <code>/Applications/SaxonCS.app/Contents/MacOS/SaxonCS</code>.
      For convenience, create an alias or link the application into another
      directory such as <code>/usr/local/bin</code>.</p>
 
