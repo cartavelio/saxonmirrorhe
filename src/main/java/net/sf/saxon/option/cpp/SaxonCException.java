@@ -82,10 +82,12 @@ public class SaxonCException  {
             return WordFactory.nullPointer();
         }
         CCharPointer a = null;
+        int lineNumber = exception.getLineNumber();
         if(exception.getErrorCode() == null) {
-            a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
+            a = SaxonCAPI.stringToNative2(alloc, exception.getMessage()+". Line number: "+lineNumber);
         } else {
-            a = SaxonCAPI.stringToNative2(alloc,exception.getErrorCode().getLocalName() + ": " + exception.getMessage());
+            a = SaxonCAPI.stringToNative2(alloc,exception.getErrorCode().getLocalName() + ": " + exception.getMessage() +
+                    ". Line number: "+lineNumber);
         }
 
         return a;
