@@ -27,7 +27,7 @@ import java.net.URI;
 /**
  * An iterator that iterates over a file line by line, returning each line as a {@link StringValue}
  */
-@CSharpInjectMembers(code={"~TextLinesIterator() { reader.Close(); /* finalizer */ }"})
+@CSharpInjectMembers(code={"~TextLinesIterator() { reader?.Close(); /* finalizer */ }"})
 public abstract class TextLinesIterator implements SequenceIterator {
 
     protected LineNumberReader reader;

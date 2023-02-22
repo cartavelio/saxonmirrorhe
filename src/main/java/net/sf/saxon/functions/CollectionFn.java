@@ -143,7 +143,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         return new CollectionIterator(sources, context);
     }
 
-    @CSharpInjectMembers(code={"~CollectionIterator(){sources.Dispose();} // finalizer"})
+    @CSharpInjectMembers(code={"~CollectionIterator(){sources?.Dispose();} // finalizer"})
     private static class CollectionIterator implements SequenceIterator {
 
         private final Iterator<? extends Resource> sources;
@@ -183,7 +183,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         }
 
         @Override
-        @CSharpReplaceBody(code="sources.Dispose();")
+        @CSharpReplaceBody(code="sources?.Dispose();")
         public void close() {
             if (cleanable != null) {
                 cleanable.clean();
