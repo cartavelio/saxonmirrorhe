@@ -531,7 +531,8 @@ task dotnetRelease(
   doLast {
     exec {
       workingDir = "${buildDir}/cs"
-      commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal'
+      commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal',
+        "-p:Configuration=${csconfiguration}", "-p:Platform=Any CPU"
     }
   }
 
@@ -540,7 +541,8 @@ task dotnetRelease(
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
-        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        "-p:Configuration=${csconfiguration}", "-p:Platform=Any CPU"	
     }
   }
 
@@ -622,7 +624,8 @@ task dotnetPublish(
         '--configuration', 'Release', '-r', csrid,
         '--self-contained', 'true',
         "-p:PublishSingleFile=${singleFile}",
-        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        "-p:Configuration=${csconfiguration}", "-p:Platform=Any CPU"	
     }
   }
   doLast {
