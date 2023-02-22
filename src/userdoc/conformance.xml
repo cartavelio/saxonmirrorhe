@@ -850,6 +850,15 @@
 
       <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
       
+      <p>At the time of release Saxon-CS 11.0 passes all 21564 applicable tests in the W3C XPath/XQuery test suite (QT3),
+         when run as an XPath 3.1 processor.
+      </p>
+      
+      <aside>A further 11571 tests have been classified as "not applicable". Most of these require support for XQuery; a
+         few require capabilities that are not available in Saxon's XPath API, for example the ability to define
+         named decimal formats in the dynamic context.</aside>
+      
+      
       <p>At the time of releasing Saxon-CS 11.0, the corresponding Java product passes all 22,263 applicable XPath 3.1 tests in 
          the W3C XPath/XQuery test suite (QT3). The pass rate on C# is slightly lower (22,000 tests), mainly because the tests are written
          to require requests on the <code>fn:unparsed-text()</code> function to be redirected to local files, and the Saxon-CS XPath API
