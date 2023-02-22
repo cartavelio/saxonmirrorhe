@@ -4459,12 +4459,12 @@
                     key. Default value ".".</attribute>
                 <attribute name="lang" use="optional">Determines the algorithm used for alphabetic
                     collating, as an ISO language code such as <code>en</code> (English) or
-                        <code>de</code> (German). The default is based on the Java system locale.
+                        <code>de</code> (German). 
                     The value is used to select a collating sequence associated with the Java Locale
-                    for that language.</attribute>
+                    for that language. If the attribute is omitted, and in the absence of a specific collation,
+                    Saxon uses Unicode codepoint collation.</attribute>
                 <attribute name="order" use="optional">Determines the sort order; the default is
-                        <code>ascending</code>. There is no control over language, collating
-                    sequence, or data type.</attribute>
+                        <code>ascending</code>.</attribute>
                 <attribute name="collation" use="optional">The name of a collating sequence. If
                     present it must be a collation URI recognized by
                     Saxon: see <a class="bodylink"
@@ -4481,8 +4481,11 @@
                     sorted before their lowercase equivalents, or vice-versa.</attribute>
                 <attribute name="data-type" use="optional">Determines whether collating is based on
                     alphabetic sequence or numeric sequence. The permitted values are either
-                        <code>text</code> or <code>number</code>, or a built-in type in XML Schema,
-                    such as <code>xs:date</code> or <code>xs:decimal</code>.</attribute>
+                        <code>text</code> or <code>number</code>. The W3C specification permits other
+                values and states that their effect is implementation-defined; Saxon rejects all values
+                other than <code>text</code> and <code>number</code>. The default is to sort according
+                to the data type of the sort key, for example <code>select="xs:date(@date-of-birth)"</code>
+                does a chronological sort.</attribute>
             </attributes>
             <details>
                 <p>When using the Unicode Collation Algorithm, only the <code>order</code> and
@@ -4541,7 +4544,10 @@
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status>The Saxon implementation uses an internal sort routine using the QuickSort algorithm.</status>
+            <status>The SaxonJ implementation uses <code>java.util.Arrays.sort()</code>: see the
+            Javadoc documentation for that method for information about the performance characteristics
+            of the sort algorithm. The SaxonCS implementation uses <code>System.Array.sort()</code>:
+            see the .NET documentation for details of the sort algorithm used.</status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="for-each" type="xsl-elements"/>
             <see-also name="for-each-group" type="xsl-elements"/>
