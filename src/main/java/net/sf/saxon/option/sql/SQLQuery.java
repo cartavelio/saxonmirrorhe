@@ -252,7 +252,7 @@ public class SQLQuery extends ExtensionInstruction {
                 // -- Prepare the SQL statement
                 ps = connection.prepareStatement(statement.toString());
                 controller.setUserData(this.getLocation(), "sql:statement", ps);
-
+                // TODO: it seems we're saving the prepared statement for reuse but never reusing it.
                 // -- Execute Statement
                 rs = ps.executeQuery();
 
