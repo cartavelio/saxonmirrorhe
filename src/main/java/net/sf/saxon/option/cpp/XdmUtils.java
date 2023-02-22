@@ -232,6 +232,96 @@ public class XdmUtils {
 
     }
 
+
+    @CEntryPoint(name = "j_xdmArray_arrayLength", exceptionHandler = SaxonCExceptionIntHandler.class)
+    public static int j_xdmArray_arrayLength(IsolateThread thread, ObjectHandle arrayRef) throws SaxonApiException {
+        if(arrayRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+        XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
+
+        return xdmArray.arrayLength();
+
+    }
+
+
+
+    @CEntryPoint(name = "j_xdmArray_get", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmArray_get(IsolateThread thread, ObjectHandle arrayRef, int n) throws SaxonApiException {
+        if(arrayRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+        XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
+        XdmValue result = xdmArray.get(n);
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+
+
+    @CEntryPoint(name = "j_xdmArray_put", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmArray_put(IsolateThread thread, ObjectHandle arrayRef, int n, ObjectHandle valueRef) throws SaxonApiException {
+        if(arrayRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Array object is null");
+        }
+        if(valueRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Value object is null");
+        }
+        XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
+        XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
+        XdmArray result = xdmArray.put(n, value);
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+
+    @CEntryPoint(name = "j_xdmArray_addMember", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmArray_addMember(IsolateThread thread, ObjectHandle arrayRef, ObjectHandle valueRef) throws SaxonApiException {
+        if(arrayRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Array object is null");
+        }
+        if(valueRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Value object is null");
+        }
+        XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
+        XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
+        XdmArray result = xdmArray.addMember(value);
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+
+    @CEntryPoint(name = "j_xdmArray_concat", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_xdmArray_concat(IsolateThread thread, ObjectHandle arrayRef, ObjectHandle valueRef) throws SaxonApiException {
+        if(arrayRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Array object is null");
+        }
+        if(valueRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Value object is null");
+        }
+        XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
+        XdmArray value = SaxonCAPI.objectHandles.get(valueRef);
+        XdmArray result = xdmArray.concat(value);
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        return handle.rawValue();
+
+    }
+
+
+
+    @CEntryPoint(name = "j_xdmArray_toString", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer j_xdmArray_toString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle arrayRef) throws SaxonApiException {
+        if(arrayRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Array object is null");
+        }
+        XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
+        String result = xdmArray.toString();
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, result);
+        return a;
+
+    }
+
+
     /**
      * Attempt to Downcast XdmItem to XdmAtomicValue. If this is not possible then return null
      */
@@ -252,11 +342,22 @@ public class XdmUtils {
         return null;
     }
 
-    public static XdmValue [] convertXdmArrayToArrayObject(XdmArray value) {
-        XdmValue arr [] = new XdmValue[value.arrayLength()];
-        value.asList().toArray(arr);
-        return arr;
+    @CEntryPoint(name = "j_convertXdmArrayToArrayObject", exceptionHandler =  SaxonCExceptionCLongPointerHandler.class)
+    public static CLongPointer convertXdmArrayToArrayObject(IsolateThread thread, ObjectHandle arrayRef, SaxonCAPI.AllocatorFn alloc) throws SaxonApiException {
+        if(arrayRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Array object is null");
+        }
+         XdmArray value = SaxonCAPI.objectHandles.get(arrayRef);
+        if(value.arrayLength() == 0) {
+            return WordFactory.nullPointer();
+        }
+        long[] attrRefs = value.stream().mapToLong(i -> {
+                        ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
+                        return objectHandle.rawValue();
+                    }).toArray();
 
+        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, attrRefs);
+        return addr;
     }
 
     @CEntryPoint(name = "j_makeXdmArray")

@@ -137,7 +137,6 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 
         }  else if (typeRef == 4) {
             value = new XdmValue();
-            value = new XdmValue();
             xdmItem =  new XdmMap(results);
             value->addXdmItem(xdmItem);
 
