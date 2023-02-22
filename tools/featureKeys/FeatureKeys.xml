@@ -453,8 +453,8 @@
                 is if you want to carry out static analysis or inspection of stylesheet code to see what 
                 features it uses. But if you're doing such inspection, it's not difficult to check that
                 <code>xsl:evaluate</code> is only being used to execute trusted code. Note also that
-                <code>fn:transform</code> can similarly be used to execute dynamically-constructed code,
-                and there is no switch to disable that function</i></p>
+                <code>fn:transform()</code> can similarly be used to execute dynamically-constructed code,
+                and there is no switch to disable that function.</i></p>
         </desc>
     </feature>
     <feature>
@@ -1219,7 +1219,7 @@
         <desc>
             <p>At one time this property controlled how recoverable errors were handled
                 (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-                specification, so the property is no longer used.</p>
+                specification, so the property is now deprecated.</p>
         </desc>
     </feature>
     <feature>
@@ -1231,14 +1231,14 @@
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
         <configfile>xslt/@recoveryPolicy</configfile>
         <configfiledesc>
-            <p>Indicates how XSLT recoverable errors are handled (for example, ambiguous template
-                rules).</p>
+            <p>Previously used to indicate how XSLT recoverable errors were handled, but since the
+                XSLT 3.0 specification has eliminated these, the property is now deprecated.</p>
         </configfiledesc>
         <typedesc>recoverWithWarnings|recoverSilently| doNotRecover</typedesc>
         <desc>
             <p>At one time this property controlled how recoverable errors were handled
                 (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-                specification, so the property is no longer used.</p>
+                specification, so the property is now deprecated.</p>
         </desc>
     </feature>
     <feature>
