@@ -19,6 +19,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.Locksmith;
 import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -31,6 +32,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 /**
@@ -371,6 +373,8 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      *                        the template
      */
 
+    private AtomicReference<PushEvaluator> atomicBodyEvaluator = new AtomicReference<>(null);
+
     public TailCall applyLeavingTail(Outputter output, XPathContext context) throws XPathException {
         //initialize();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
@@ -390,11 +394,11 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         }
 
         try {
-            synchronized(this) {
-                if (bodyEvaluator == null) {
-                    bodyEvaluator = body.makeElaborator().elaborateForPush();
-                }
+            if (bodyEvaluator == null)
+            {
+                bodyEvaluator = atomicBodyEvaluator.updateAndGet(bodyEvaluator -> bodyEvaluator == null ? body.makeElaborator().elaborateForPush() : bodyEvaluator);
             }
+            
             return bodyEvaluator.processLeavingTail(output, context);
         } catch (UncheckedXPathException e) {
             XPathException xe = e.getXPathException();
