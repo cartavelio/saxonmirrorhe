@@ -56,6 +56,15 @@ public class ResourceResolverWrappingURIResolver implements ResourceResolver {
         }
         try {
             Source resolved = uriResolver.resolve(href, request.baseUri);
+
+            // If the resolver claims to have resolved the request with exactly the
+            // same URI as the requested URI, then it didn't do anything. Return
+            // null so the caller can try something else (including just loading
+            // the document from the original request URI, if it wants).
+            if (request.uri != null && request.uri.equals(resolved.getSystemId())) {
+                return null;
+            }
+
             //#if CSHARP==false
             if (ResourceRequest.TEXT_NATURE.equals(request.nature)
                     && resolved instanceof SAXSource
@@ -63,14 +72,6 @@ public class ResourceResolverWrappingURIResolver implements ResourceResolver {
                 // bug 5582. When unparsed text is requested, the resource resolver
                 // shouldn't return a SAXSource, but a legacy URIResolver may do so
                 InputSource is = ((SAXSource) resolved).getInputSource();
-
-                // If the resolver claims to have resolved the request with exactly the
-                // same URI as the requested URI, then it didn't do anything. Return
-                // null so the caller can try something else (including just loading
-                // the document from the original request URI, if it wants).
-                if (request.uri != null && request.uri.equals(resolved.getSystemId())) {
-                    return null;
-                }
 
                 StreamSource ss = new StreamSource();
                 ss.setInputStream(is.getByteStream());
