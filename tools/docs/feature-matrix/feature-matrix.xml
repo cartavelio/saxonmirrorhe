@@ -786,9 +786,12 @@
   
   <feature class="Interfaces">
     <shortName>S9API API</shortName>
-    <description>
-      <p>SaxonJ's native interface for processing XSLT, XQuery, XPath, and XML Schema, on Java.</p>
+    <description J="EE">
+      <p>SaxonJ's native interface for processing XSLT, XQuery, XPath, and (with Saxon-EE) XML Schema, on Java.</p>
     </description>
+    <alt-description J="HE">
+      <p>SaxonJ's native interface for processing XSLT, XQuery, and XPath, on Java.</p>
+    </alt-description>
     <products>
       <product J="HE"/>
     </products>
@@ -796,9 +799,12 @@
   
   <feature class="Interfaces">
     <shortName>.NET API</shortName>
-    <description>
-      <p>SaxonCS's interface for processing XSLT, XQuery, XPath, and XML Schema, on .NET.</p>
+    <description CS="EE">
+      <p>SaxonCS's interface for processing XSLT, XQuery, XPath, and (with Saxon-EE) XML Schema, on .NET.</p>
     </description>
+    <alt-description CS="HE">
+      <p>SaxonCS's interface for processing XSLT, XQuery, and XPath, on .NET.</p>
+    </alt-description>
     <details link="saxon-cs/dotnetapi" name="Saxon API for .NET"/>
     <products>
       <product CS="HE"/>
@@ -807,9 +813,12 @@
   
   <feature class="Interfaces">
     <shortName>C++ API</shortName>
-    <description>
-      <p>SaxonC's interface for processing XSLT, XQuery, XPath, and XML Schema, on C++.</p>
+    <description C="EE">
+      <p>SaxonC's interface for processing XSLT, XQuery, XPath, and (with Saxon-EE) XML Schema, on C++.</p>
     </description>
+    <alt-description C="HE">
+      <p>SaxonC's interface for processing XSLT, XQuery, and XPath, on C++.</p>
+    </alt-description>
     <products>
       <product C="HE"/>
     </products>
@@ -817,10 +826,13 @@
 
   <feature class="Interfaces">
     <shortName>JAXP API</shortName>
-    <description>
+    <description J="EE">
       <p>Implementations of the standard JAXP interfaces for XSLT transformation, XPath evaluation,
-        and XML Schema validation.</p>
+        and (with Saxon-EE) XML Schema validation.</p>
     </description>
+    <alt-description J="HE">
+      <p>Implementations of the standard JAXP interfaces for XSLT transformation and XPath evaluation.</p>
+    </alt-description>
     <details link="conformance/jaxp" name="JAXP API conformance"/>
     <products>
       <product J="HE"/>
