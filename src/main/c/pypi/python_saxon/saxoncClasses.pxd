@@ -390,6 +390,8 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
         void setcwd(const char* cwd)
 
+        void registerSchemaFromNode(XdmNode * node)
+
         void registerSchemaFromFile(const char * xsd)
 
         void registerSchemaFromString(const char * schemaStr)

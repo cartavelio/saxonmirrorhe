@@ -115,6 +115,26 @@ void SchemaValidator::setLax(bool l){
 	return nullptr;
 }
 
+   void SchemaValidator::registerSchemaFromNode(XdmNode * node){
+  	setProperty("resources", proc->getResourcesDirectory());
+
+	if (node == nullptr) {
+		 exception = new SaxonApiException("Error:: XdmNode XSD is NULL");
+	     return;
+	}
+
+      int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
+
+      int64_t  status = j_registerSchemaNode(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)node->getUnderlyingValue(), (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+      if(status == -2) {
+          exception = new SaxonApiException();
+      }
+      if(processorDataRef > 0) {
+          j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+          processorDataRef = -1;
+      }
+   }
+
   void SchemaValidator::registerSchemaFromFile(const char * sourceFile){
       SaxonProcessor::attachCurrentThread();
   	setProperty("resources", proc->getResourcesDirectory());

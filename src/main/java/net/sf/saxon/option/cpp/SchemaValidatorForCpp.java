@@ -259,6 +259,49 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
     }
 
+    /**
+     * Register the Schema which is given as a Xdm Node Object.
+     *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param processorRef - processor reference
+     * @param cxsd      - File name of the schema relative to the cwd
+     * @param csystemId - The system ID of the document
+     * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
+     * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
+     */
+    @CEntryPoint(name = "j_registerSchemaNode")
+    public static long registerSchemaFromXdmNode(IsolateThread thread, ObjectHandle processorRef, ObjectHandle xsdRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+        Processor processor = null;
+        if (processorRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor object is null");
+        }
+
+        if(xsdRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XdmNode object is null");
+        }
+
+        processor = SaxonCAPI.objectHandles.get(processorRef);
+        ProcessorDataAccumulator processorDataAccumulator;
+        String[] params = null;
+        Object[] values = null;
+        if (processorDataAccumulatorRef != WordFactory.nullPointer()) {
+            processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
+        SchemaValidatorForCpp.setProperties(processor, params, values);
+        XdmNode xsd = objectHandles.get(xsdRef);
+
+        if (xsd == null) {
+            SaxonApiException ex = new SaxonApiException("Schema document not found");
+            throw ex;
+        }
+
+        processor.getSchemaManager().load(xsd.asSource());
+        return SaxonCAPI.STATUS_OK;
+
+    }
+
 
     /**
      * Export a precompiled Schema Component Model containing all the components (except built-in components)

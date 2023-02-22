@@ -3298,7 +3298,7 @@ cdef class PySchemaValidator:
         Args:
             **kwds: Possible keyword arguments: must be one of the following (xsd_text|xsd_file)
         """
-        py_error_message = "Error: register_schema should only contain one of the following keyword arguments: (xsd_text|xsd_file)"
+        py_error_message = "Error: register_schema should only contain one of the following keyword arguments: (xsd_text|xsd_file|xsd_node)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -3315,6 +3315,10 @@ cdef class PySchemaValidator:
             py_value_string = py_value.encode('UTF-8') if py_value is not None else None
             c_source = py_value_string if py_value is not None else ""
             self.thissvptr.registerSchemaFromFile(c_source)
+        elif "xsd_node" in kwds:
+            xsd_node = kwds["xsd_node"]
+            if isinstance(xsd_node, PyXdmNode):
+                self.thissvptr.registerSchemaFromFile(xsd_node.derivednptr)
         else:
           raise Exception(py_error_message)
      def export_schema(self, file_name):
