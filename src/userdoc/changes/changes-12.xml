@@ -226,11 +226,14 @@
                 to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
         </ul>
         
-       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:intersperse(), and fn:replicate() are implemented.</p>
+       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:expanded-QName(), fn:intersperse(), fn:replicate(),
+           and fn:while() are implemented.</p>
         
-        <p>The proposed 4.0 function map:filter() is implemented</p>
+        <p>The new single-argument version of fn:QName is implemented.</p>
         
-        <p>The attributes <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
+        <p>The proposed 4.0 functions map:build() and map:filter() are implemented</p>
+        
+        <p>The  <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
             <code>xsl:for-each-group</code>, and <code>xsl:iterate</code> are dropped. In their place, use
         <code>select="array:members($array)"</code> or <code>select="map:key-value-pairs($map)"</code></p>
         
