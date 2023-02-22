@@ -321,6 +321,9 @@ public class NamedTimeZone {
                 break;
 
         }
+        if (referenceTimezone == null && place.startsWith("Europe/")) {
+            referenceTimezone = ZoneId.of(place);
+        }
         if (referenceTimezone == null) {
             return formatTimeZoneOffset(date);
         }
