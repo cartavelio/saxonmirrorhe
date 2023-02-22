@@ -19,9 +19,11 @@ import net.sf.saxon.trans.KeyDefinitionSet;
 import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -234,7 +236,6 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
     protected static Sequence search(
             final KeyManager keyManager, XPathContext context, Sequence sought, NodeInfo origin, KeyDefinitionSet selectedKeySet) throws XPathException {
 
-
         NodeInfo doc = origin.getRoot();
         if (selectedKeySet.isComposite()) {
             SequenceIterator soughtKey = sought.iterate();
@@ -249,6 +250,17 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         } else {
             // Changed by bug 2929 and bug 4656
             SequenceIterator allResults = null;
+            if (sought instanceof AtomicValue) {
+                SequenceIterator results = keyManager.selectByKey(selectedKeySet, doc.getTreeInfo(), (AtomicValue)sought, context);
+                if (results instanceof EmptyIterator) {
+                    return EmptySequence.getInstance();
+                } else if (results instanceof SingletonIterator) {
+                    return results.next();
+                } else {
+                    return new LazySequence(results);
+                }
+
+            }
             SequenceIterator keys = sought.iterate();
             AtomicValue keyValue;
             List<SequenceIterator> allKeyIterators = new ArrayList<>();
@@ -257,7 +269,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
                 allKeyIterators.add(someResults);
             }
             if (allKeyIterators.isEmpty()) {
-                allResults = EmptyIterator.ofNodes();
+                return EmptySequence.getInstance();
             } else if (allKeyIterators.size() == 1) {
                 allResults = allKeyIterators.get(0);
             } else {

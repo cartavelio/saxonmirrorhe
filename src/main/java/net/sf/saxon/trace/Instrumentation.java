@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class Instrumentation {
 
-    public static final boolean ACTIVE = true;
+    public static final boolean ACTIVE = false;
 
     public static HashMap<String, Long> counters = new HashMap<>();
 

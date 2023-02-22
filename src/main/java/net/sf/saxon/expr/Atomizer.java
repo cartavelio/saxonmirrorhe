@@ -296,6 +296,20 @@ public final class Atomizer extends UnaryExpression {
                 ExpressionTool.copyLocationInfo(this, ag);
                 return ag;
             }
+            if (untyped && operand instanceof SimpleStepExpression &&
+                    ((SimpleStepExpression) operand).getAxisExpression().getAxis() == AxisInfo.ATTRIBUTE &&
+                    ((SimpleStepExpression) operand).getAxisExpression().getNodeTest() instanceof NameTest) {
+                StructuredQName name = ((SimpleStepExpression) operand).getAxisExpression().getNodeTest().getMatchingNodeName();
+                FingerprintedQName qName = new FingerprintedQName(name, visitor.getConfiguration().getNamePool());
+                AttributeGetter ag = new AttributeGetter(qName);
+                int checks = 0;
+                if (!(((SimpleStepExpression) operand).getStart().getItemType() instanceof NodeTest)) {
+                    checks = AttributeGetter.CHECK_CONTEXT_ITEM_IS_NODE;
+                }
+                ag.setRequiredChecks(checks);
+                ExpressionTool.copyLocationInfo(this, ag);
+                return new SlashExpression(((SimpleStepExpression) operand).getStart(), ag);
+            }
         }
         return exp;
     }
