@@ -56,9 +56,9 @@ public:
 	*/
     SaxonProcessor * getSaxonProcessor(){return proc;}
 
-    //!set the current working directory (cwd). This method also applies to the
-    //! static base URI for XSLT stylesheets when supplied as lexical string.
+    //!set the current working directory (cwd).
     /**
+     * This method also applies to the static base URI for XSLT stylesheets when supplied as lexical string.
       * The cwd is used to set the base URI is part of the static context, and is used to resolve
       * any relative URIs appearing within XSLT.
       * @param cwd - Current working directory

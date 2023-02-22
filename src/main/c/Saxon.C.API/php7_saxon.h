@@ -194,13 +194,13 @@ PHP_RINIT_FUNCTION(saxon);
 
     PHP_METHOD(SaxonProcessor,  createAtomicValue);
 
-    PHP_METHOD(SaxonProcessor,  createXdmMapValue);  //TODO implement
-    PHP_METHOD(SaxonProcessor,  createXdmArrayValue); //TODO implement
+    PHP_METHOD(SaxonProcessor,  createXdmMapValue);
+    PHP_METHOD(SaxonProcessor,  createXdmArrayValue);
     PHP_METHOD(SaxonProcessor,  createQNameValue);
 
     PHP_METHOD(SaxonProcessor,  parseXmlFromString);
     PHP_METHOD(SaxonProcessor,  parseXmlFromFile);
-    PHP_METHOD(SaxonProcessor,  parseXmlFromUri);     //new
+    PHP_METHOD(SaxonProcessor,  parseXmlFromUri);
     PHP_METHOD(SaxonProcessor,  setcwd);
 
     PHP_METHOD(SaxonProcessor,  setCatalog);
@@ -209,7 +209,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SaxonProcessor,  exceptionOccurred);
     PHP_METHOD(SaxonProcessor, setConfigurationProperty);
     PHP_METHOD(SaxonProcessor, clearConfigurationProperties);
-    PHP_METHOD(SaxonProcessor, newXsltProcessor);
     PHP_METHOD(SaxonProcessor, newXslt30Processor);
     PHP_METHOD(SaxonProcessor, newXQueryProcessor);
     PHP_METHOD(SaxonProcessor, newXPathProcessor);
@@ -260,12 +259,6 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XsltExecutable,  transformToString);
     PHP_METHOD(XsltExecutable,  transformToValue);
     PHP_METHOD(XsltExecutable,  transformToFile);
-    PHP_METHOD(XsltExecutable, compileFromFile);
-    PHP_METHOD(XsltExecutable, compileFromValue);
-    PHP_METHOD(XsltExecutable, compileFromString);
-    PHP_METHOD(XsltExecutable, compileFromStringAndSave);
-    PHP_METHOD(XsltExecutable, compileFromFileAndSave);
-    PHP_METHOD(XsltExecutable, compileFromAssociatedFile);
     PHP_METHOD(XsltExecutable,  setOutputFile);
     PHP_METHOD(XsltExecutable,  setResultAsRawValue);
     PHP_METHOD(XsltExecutable,  setParameter);
@@ -321,8 +314,8 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XPathProcessor,  evaluate);
     PHP_METHOD(XPathProcessor,  evaluateSingle);
     PHP_METHOD(XPathProcessor, declareNamespace);
-    PHP_METHOD(XPathProcessor, setBackwardsCompatible);
-    PHP_METHOD(XPathProcessor, setCaching);
+    PHP_METHOD(XPathProcessor, setBackwardsCompatible); //new
+    PHP_METHOD(XPathProcessor, setCaching); //new
     PHP_METHOD(XPathProcessor, importSchemaNamespace);      //new
     PHP_METHOD(XPathProcessor,  setParameter);
     PHP_METHOD(XPathProcessor,  setProperty);
