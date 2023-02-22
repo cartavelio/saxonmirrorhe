@@ -204,7 +204,7 @@ void executeQueryToFile(sxnc_environment environi, sxnc_processor ** proc, char 
 	if(queryFileID == NULL) {
 		queryFileID = (jmethodID)(*(environi.env))->GetMethodID (environi.env, cppClass,"executeQueryToFile", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)V");
  		if (!queryFileID) {
-        		printf("Error: MyClassInDll. executeQueryToString not found\n");
+        		printf("Error: MyClassInDll. executeQueryToFile not found\n");
 			fflush (stdout);
 			return;
     		} 
@@ -257,7 +257,7 @@ const char * executeQueryToString(sxnc_environment environi, sxnc_processor ** p
 	}
 
 	if(queryStrID == NULL) {
-		queryStrID = (jmethodID)(*(environi.env))->GetMethodID (environi.env, cppClass,"executeQueryToString", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+		queryStrID = (jmethodID)(*(environi.env))->GetMethodID (environi.env, cppClass,"executeQueryToString", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)[B");
 		if (!queryStrID) {
 		        printf("Error: MyClassInDll. executeQueryToString not found\n");
 			fflush (stdout);
@@ -294,12 +294,26 @@ const char * executeQueryToString(sxnc_environment environi, sxnc_processor ** p
 	   }
 	  
 	}
-      jstring result = (jstring)((*(environi.env))->CallObjectMethod(environi.env, cpp, queryStrID, (cwd== NULL ? (*(environi.env))->NewStringUTF(environi.env, "") : (*(environi.env))->NewStringUTF(environi.env, cwd)), stringArray, objectArray ));
+    jobject obj = (jstring)((*(environi.env))->CallObjectMethod(environi.env, cpp, queryStrID, (cwd== NULL ? (*(environi.env))->NewStringUTF(environi.env, "") : (*(environi.env))->NewStringUTF(environi.env, cwd)), stringArray, objectArray ));
 
       (*(environi.env))->DeleteLocalRef(environi.env, objectArray);
       (*(environi.env))->DeleteLocalRef(environi.env, stringArray);
-      if(result) {
+      if(obj) {
+          jbyteArray result = (jbyteArray) obj;
+          jboolean isCopy = false;
+          jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
+          jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
 
+          char* str = new char[num_bytes + 1];
+          memcpy ( str, b , num_bytes );
+          str[num_bytes] = '\0';
+
+          SaxonProcessor::sxn_environ->env->ReleaseByteArrayElements( result, b, 0);
+          SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+          return str;
+
+
+          ////
        const char * str = (*(environi.env))->GetStringUTFChars(environi.env, result, NULL);
        //return "result should be ok";       
 	//checkForException( environi, cpp);     
