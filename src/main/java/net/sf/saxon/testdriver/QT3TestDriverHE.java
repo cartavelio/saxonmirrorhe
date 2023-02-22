@@ -567,6 +567,7 @@ public class QT3TestDriverHE extends TestDriver {
 
                             copySchemaNamespaces(env, testXpc);  // ensure environment has schema namespaces
 
+                            testXpc.setBaseURI(testCase.getBaseURI());
 
                             ModuleResolver mr = new ModuleResolver(xpc); //
 
@@ -1041,8 +1042,8 @@ public class QT3TestDriverHE extends TestDriver {
                         "        let $type := $dependencyTS/@type\n" +
                         "        let $name := $dependencyTS/@name\n" +
                         "        let $value := $dependencyTS/@value\n" +
-                        "        group by $type, $value\n" +
-                        "        order by $type, $value\n" +
+                        "        group by $type, $name, $value\n" +
+                        "        order by $type, $name, $value\n" +
                         "        return <dependency type='{$type}' name='{$name}' value='{$value}' />").load();
         eval.setContextItem(catalog);
         XdmValue result = eval.evaluate();
