@@ -49,7 +49,7 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
       <PackageReference Include="ICU4N.RegionData" Version="60.1.0-alpha.354" />
       <PackageReference Include="ICU4N.Transliterator" Version="60.1.0-alpha.354" />
       <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
-      <PackageReference Include="XmlResolver" Version="0.6.0" />
+      <PackageReference Include="XmlResolver" Version="0.6.1" />
       <PackageReference Include="XmlResolverData" Version="0.2.0" />
       <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.0" />
       <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.0.1" />
