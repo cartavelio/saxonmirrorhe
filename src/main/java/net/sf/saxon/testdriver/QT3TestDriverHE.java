@@ -592,7 +592,7 @@ public class QT3TestDriverHE extends TestDriver {
                                 outcome.setPrincipalResult(result);
                             } catch (SaxonApiException err) {
                                 println(err.getMessage());
-                                outcome.setException(err.getErrorCode());
+                                outcome.setException(err.getErrorCode() == null ? new QName("XXXX99999") : err.getErrorCode());
                             } catch (Exception err) {
                                 println(err.getMessage());
                                 err.printStackTrace();
