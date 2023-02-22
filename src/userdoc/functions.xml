@@ -2530,7 +2530,8 @@
           </li>
         </ul>
         <p>For Saxon 10 and earlier releases, if the platform-native regex engine is used
-          (Java or .NET) then the syntax for the replacement expression in the third argument of <code>fn:replace</code> still 
+          (Java or .NET) then the syntax for the replacement expression in the third argument of
+          <a class="bodylink code" href="../replace">fn:replace()</a> still 
           follows the XPath rules, not the platform native rules. This means, for example, that the syntax <code>${name}</code> cannot be used
           in a reference to a named captured group. This will change in Saxon 11 so the replacement string follows
           the platform native rules. (On .NET this means that a literal '$' sign is escaped as '\$' in Saxon 10, but
@@ -10059,7 +10060,7 @@ return saxon:transform($splitter, $results)]]></samp>
         </proto>
       </signatures>
       <status-ok/>
-      <saxon-edition>PE/EE 9.5</saxon-edition>
+      <saxon-edition>EE 9.5</saxon-edition>
       <details>
         <div>
           <p>The information is returned in the same form as information from the <a
