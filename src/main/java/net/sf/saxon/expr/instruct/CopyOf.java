@@ -923,7 +923,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     return item;
                 }
                 VirtualCopy vc = VirtualUntypedCopy.makeVirtualUntypedTree((NodeInfo) item, (NodeInfo) item);
-                vc.getTreeInfo().setCopyAccumulators(copyAccumulators);
+                if (copyAccumulators) {
+                    vc.getTreeInfo().setCopyAccumulators(true);
+                    AccumulatorManager am = ((XsltController) controller).getAccumulatorManager();
+                    am.setApplicableAccumulators(vc.getTreeInfo(), am.getApplicableAccumulators(((NodeInfo) item).getTreeInfo()));
+                }
                 vc.setDropNamespaces(!copyNamespaces);
                 if (((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
                     vc.setSystemId(computeNewBaseUri((NodeInfo) item, getStaticBaseURIString()));
