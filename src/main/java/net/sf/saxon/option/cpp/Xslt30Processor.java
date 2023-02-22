@@ -334,7 +334,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "j_compileFromString")
+    @CEntryPoint(name = "j_compileFromString", exceptionHandler = SaxonCExceptionHandler.class)
     public static long compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
@@ -376,7 +376,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values
      * @return XsltExecutable
      */
-    @CEntryPoint(name = "j_compileFromXdmNode")
+    @CEntryPoint(name = "j_compileFromXdmNode", exceptionHandler = SaxonCExceptionHandler.class)
     public static long compileFromXdmNode(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd,  ObjectHandle xdmNodeRef, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
@@ -478,7 +478,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "j_applyTemplatesReturningValue")
+    @CEntryPoint(name = "j_applyTemplatesReturningValue", exceptionHandler = SaxonCExceptionHandler.class)
     public static long applyTemplatesReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xsltExecutableRef, ObjectHandle sourceObjRef , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(xsltExecutableRef);
         
@@ -671,7 +671,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "j_applyTemplatesReturningString")
+    @CEntryPoint(name = "j_applyTemplatesReturningString", exceptionHandler = SaxonCExceptionHandler.class)
     public static CCharPointer applyTemplatesReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
