@@ -1,8 +1,21 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2023 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.StructuredQName;
 
+/**
+ * A {@code FunctionDefinition} represents the declaration of a user-defined function in XQuery or XSLT; in 4.0
+ * a function definition has an arity range. The minimum arity is the number of mandatory parameters,
+ * the maximum arity is the number of optional plus mandatory parameters; optional parameters have a default
+ * value which is supplied as an expression.
+ */
 public interface FunctionDefinition {
 
     /**

@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2023 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.Controller;
@@ -12,6 +19,11 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.Cardinality;
 
+/**
+ * Abstract superclass for elaborators whose primary evaluation method is in push mode. This class provides
+ * olternative modes of evaluation (such as pull and item evaluation), all implemented in terms of the
+ * push evaluator which must be supplied in a subclass.
+ */
 public abstract class PushElaborator extends Elaborator {
 
     @Override
