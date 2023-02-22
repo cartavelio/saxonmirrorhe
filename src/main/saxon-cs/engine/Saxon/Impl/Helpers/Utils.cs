@@ -12,11 +12,11 @@ namespace Saxon.Impl.Helpers {
         }
 
         public static string intToHexString(int i) {
-            return i.ToString("X");
+            return i.ToString("x");
         }
         
         public static string longToHexString(long i) {
-            return i.ToString("X");
+            return i.ToString("x");
         }
         
         // parse an integer literal whose radix is not known statically

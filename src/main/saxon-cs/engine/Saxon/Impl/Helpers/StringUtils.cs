@@ -70,7 +70,15 @@ namespace Saxon.Impl.Helpers {
             }
         }
 
+        public static Encoding EncodingForName(string enc) {
+            if (enc == "UTF8") {
+                enc = "utf-8";
+            }
 
+            return System.Text.Encoding.GetEncoding(enc);
+        }
 
     }
+    
+    
 }

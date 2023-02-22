@@ -1,5 +1,7 @@
 
 
+using Saxon.Hej.expr.parser;
+
 namespace Saxon.Api {
     /// <summary>
     /// The <c>XmlProcessorError</c> class contains information about an error detected during
@@ -30,7 +32,7 @@ namespace Saxon.Api {
         /// The location of the error (typically identifying a module of a schema, query,
         /// or stylesheet, and a line and column number within that module).
         /// </summary>
-        public Location Location => new (incident.getLocation());
+        public Location Location => new (incident.getLocation() == null ? Loc.NONE : incident.getLocation());
 
         /// <summary>
         /// This property indicates whether the error is to be treated as a warning condition.

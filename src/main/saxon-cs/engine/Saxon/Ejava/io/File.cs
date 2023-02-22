@@ -14,6 +14,9 @@ namespace Saxon.Ejava.io {
         private readonly string fileName;
         private readonly string fullPath;
         public File(string name) {
+            if (name.EndsWith(separator)) {
+                name = name.Substring(0, name.Length - separator.Length);
+            }
             this.fileName = name;
             this.fullPath = SysIO.Path.GetFullPath(name);
         }
@@ -61,7 +64,12 @@ namespace Saxon.Ejava.io {
         }
 
         public string getName() {
-            return new SysIO.FileInfo(fileName).Name;
+            if (isDirectory()) {
+                return new SysIO.DirectoryInfo(fileName).Name;
+            }
+            else {
+                return new SysIO.FileInfo(fileName).Name;
+            }
         }
 
         public string getPath() {
@@ -166,7 +174,7 @@ namespace Saxon.Ejava.io {
         }
         
         public void mkdir() {
-            throw new NotImplementedException();
+            mkdirs();
         }
 
         public bool mkdirs() {
@@ -184,7 +192,7 @@ namespace Saxon.Ejava.io {
             }
 
             if (dir == null) {
-                dir = new File(JLSystem.getProperty("Saxon.Ejava.io.tmpdir"));
+                dir = new File(JLSystem.getProperty("java.io.tmpdir"));
             }
 
             String mid = "_" + new Random().Next();
@@ -194,7 +202,7 @@ namespace Saxon.Ejava.io {
         }
 
         public bool renameTo(File file) {
-            if (file.isDirectory()) {
+            if (isDirectory() || file.isDirectory()) {
                 SysIO.Directory.Move(fullPath, file.fullPath);
             }
             else {
