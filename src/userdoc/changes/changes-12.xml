@@ -312,6 +312,13 @@
             rather than allocating a new one each time.</p></li>
         </ul>
         
+        <p>Bytecode generation is dropped from SaxonJ. Over time, as the JVM JIT compiler has improved, the benefits obtained
+        from bytecode generation have been steadily diminishing, to the point where it is no longer worth maintaining the code.
+        Internal changes in 12.0 to improve the interpreted code have further reduced any advantage obtained from bytecode generation,
+        to the point where the majority of workloads gain no benefit at all. In addition, bytecode generation is not applicable
+        for the newer platforms (SaxonCS is now generated from C# source code, while SaxonC uses the ahead-of-time code generation
+        capabilities of GraalVM).</p>
+        
         <p>Internally, a number of code paths have been changed to avoid use of <code>Class.newInstance()</code>, which is
         deprecated since Java 9, and which causes operational difficulties under GraalVM. For example, system functions
         were previously registered with a <code>Class&lt;? extends SystemFunction></code> object such as <code>Replace.class</code>,
