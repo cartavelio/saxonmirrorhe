@@ -53,6 +53,8 @@ public class ToXml {
     
     private static File repoDir = null;
     private static String repoDirName = null;
+    private static String eeJarVersion = null;
+    private static String icu4jVersion = "59.1";
     private File singleInputFile = null;
     private File historicInputDir = null; // directory holding the Java prior to preprocessing
     private File inputDir = null;
@@ -115,6 +117,10 @@ public class ToXml {
                 if (!csDir.isDirectory()) {
                     throw new IllegalArgumentException(xmlDir + " is not a directory");
                 }
+            } else if (arg.startsWith("-ee:")) {
+                eeJarVersion = arg.substring(4);
+            } else if (arg.startsWith("-icu4j:")) {
+                icu4jVersion = arg.substring(7);
             } else if (arg.equals("-debug")) {
                 DEBUG = true;
                 compiler.setCompileWithTracing(true);
@@ -125,6 +131,11 @@ public class ToXml {
                 throw new IllegalArgumentException("Unknown option " + arg);
             }
         }
+
+        if (eeJarVersion == null) {
+            throw new IllegalArgumentException("You must specify the EE jar version: -ee:11.2 for example");
+        }
+
 
         if (inputDir == null && singleInputFile == null && xmlDir == null) {
             throw new IllegalArgumentException("No input supplied (-f, -xml, -j)");
@@ -293,8 +304,8 @@ public class ToXml {
             });
 
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
-            combinedTypeSolver.add(new JarTypeSolver(repoDirName + "build/libs/saxon-ee-11.1.jar"));
-            combinedTypeSolver.add(new JarTypeSolver(repoDirName + "lib/icu4j-59.1/icu4j-59.1.jar")); 
+            combinedTypeSolver.add(new JarTypeSolver(String.format("%s/build/libs/saxon-ee-%s.jar", repoDirName, eeJarVersion)));
+            combinedTypeSolver.add(new JarTypeSolver(String.format("%s/lib/icu4j-%s/icu4j-%s.jar", repoDirName, icu4jVersion, icu4jVersion)));
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);
