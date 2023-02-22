@@ -45,8 +45,8 @@ namespace Saxon.Api {
         internal XsltCompiler(Processor processor) {
             this.processor = processor;
             jXsltCompiler = processor.JProcessor.newXsltCompiler();
-            jXsltCompiler.getUnderlyingCompilerInfo().setCommonResourceResolver(processor.Implementation.getCommonResourceResolver());
-            resourceResolver = processor.Implementation.getCommonResourceResolver().chain(new DirectResourceResolver()).Resolve;
+            jXsltCompiler.getUnderlyingCompilerInfo().setResourceResolver(processor.Implementation.getResourceResolver());
+            resourceResolver = null;
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Saxon.Api {
             get => resourceResolver;
             set {
                 resourceResolver = value;
-                jXsltCompiler.setURIResolver(new UriResolverWrappingDocumentResolver(value, processor.Implementation));
+                jXsltCompiler.setResourceResolver(new JResourceResolverWrappingCS(value, processor.Implementation));
             }
         }
 
@@ -605,25 +605,33 @@ namespace Saxon.Api {
                 Uri = uri,
                 Nature = ResourceRequest.XSLT_NATURE
             };
-            IResource resource = resourceResolver.Invoke(request);
-            if (resource is TextResource text) {
-                if (text.hasStream()) {
-                    executable = Compile(text.InputStream, uri.ToString(), true);
+            if (resourceResolver == null) {
+                executable = new XsltExecutable(jXsltCompiler.compile(new StreamSource(uri.ToString())));
+            }
+            else {
+                IResource resource = resourceResolver.Invoke(request);
+                if (resource is TextResource text) {
+                    if (text.hasStream()) {
+                        executable = Compile(text.InputStream, uri.ToString(), true);
+                    }
+                    else {
+                        executable = Compile(text.TextReader);
+                    }
+                }
+                else if (resource is XmlReaderResource xrr) {
+                    executable = Compile(xrr.XmlReader);
                 }
                 else {
-                    executable = Compile(text.TextReader);
-                }
-            } else if (resource is XmlReaderResource xrr) {
-                executable = Compile(xrr.XmlReader);
-            } else {
-                XdmItem item = resource.GetXdmItem();
-                if (item is XdmNode node) {
-                    executable = Compile(node);
-                }
-                else {
-                    throw new ArgumentException("Invalid type of result from URI resolver");
+                    XdmItem item = resource.GetXdmItem();
+                    if (item is XdmNode node) {
+                        executable = Compile(node);
+                    }
+                    else {
+                        throw new ArgumentException("Invalid type of result from URI resolver");
+                    }
                 }
             }
+
             executable.InternalProcessor = processor;
             return executable;
         }

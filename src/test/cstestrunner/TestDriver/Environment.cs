@@ -61,7 +61,7 @@ namespace TestDriver {
         public bool usable = true;
         public StringBuilder paramDeclarations = new StringBuilder(256);
         public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
-        public ResourceResolver unparsedTextResolver;
+        public Saxon.Api.ResourceResolver unparsedTextResolver;
         public SysCollGen.IList<ResetAction> resetActions = new SysCollGen.List<ResetAction>();
         public bool outputTree = true;
         public bool outputSerialize = false;
@@ -376,7 +376,7 @@ namespace TestDriver {
                         else {
                             Uri uri = res.ResolveUri(null, ns);
                             Console.Error.WriteLine("Load schema document " + uri);
-                            Stream file = KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
+                            Stream file = null; //KnownResourceFinder.fetchSystemId(uri.ToString(), config).stream;
                             if (file == null) {
                                 file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
                             }
@@ -607,7 +607,7 @@ namespace TestDriver {
 
             if (resources.Count != 0) {
                 environment.unparsedTextResolver =
-                    new TestUnparsedTextURIResolver(encodings, resources, environment.processor.Implementation).resolve;
+                    new TestUnparsedTextURIResolver(encodings, resources, environment.processor.Implementation).Resolve;
             }
         }
 
@@ -625,7 +625,7 @@ namespace TestDriver {
             }
 
 
-            public TextResource resolve(ResourceRequest request) {
+            public TextResource Resolve(Saxon.Api.ResourceRequest request) {
                 Uri absoluteURI = request.Uri;
                 Encoding encoding = request.Encoding;
                 if (resources.ContainsKey(absoluteURI)) {
@@ -651,8 +651,10 @@ namespace TestDriver {
                     if (encoding == null) {
                         encoding = Encoding.UTF8;
                     }
-                    TextReader reader = new StandardUnparsedTextResolver(config).resolve(absoluteURI, encoding.WebName, config);
-                    return new TextResource(reader, absoluteURI);
+
+                    return null;
+                    // TextReader reader = new StandardUnparsedTextResolver(config).resolve(absoluteURI, encoding.WebName, config);
+                    // return new TextResource(reader, absoluteURI);
                 }
 
             }
@@ -825,7 +827,7 @@ namespace TestDriver {
             }
         }
         
-        public ResourceResolver GetXmlDocumentResolver() {
+        public Saxon.Api.ResourceResolver GetXmlDocumentResolver() {
             return (request) => GetDocument(request.Uri);
         }
 

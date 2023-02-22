@@ -2,8 +2,8 @@ using System;
 
 namespace Saxon.Api {
     /// <summary>
-    /// This interface defines a Resource. The Resource objects typically belong to a collection.
-    /// It is used to support the fn:collection() and fn:uri-collection() functions.
+    /// This interface defines a Resource, which might be an external XML file, text file, JSON file, etc.
+    /// Resources might belong to a collection, or might be accessed individually by URI.
     /// </summary>
     /// <remarks>
     /// <para>It is recommended (but is not universally the case) that fetching (and where necessary parsing)
@@ -21,7 +21,7 @@ namespace Saxon.Api {
         /// A URI that identifies this resource
         /// </summary>
 
-		  /**public**/ Uri ResourceUri { get; }
+		Uri ResourceUri { get; }
 
         ///  <summary>
         ///  Get an XDM Item holding the contents of this resource.
@@ -32,12 +32,12 @@ namespace Saxon.Api {
         ///  for binary resource. May also return null if the resource cannot be materialized
         ///  and this is not to be treated as an error.</returns>
 
-        /**public**/ XdmItem GetXdmItem();
+        XdmItem GetXdmItem();
 
         /// <summary> 
         /// The media type (MIME type) of the resource if known (otherwise null)
         /// </summary>
-        /**public**/ string ContentType { get; }
+        string ContentType { get; }
     }
 }
 

@@ -689,14 +689,16 @@ namespace TestDriver {
                                 foreach (QName varName in env.params1.Keys) {
                                     selector.SetExternalVariable(varName, env.params1[varName]);
                                 }
-                                
+
                                 if (previousResult != null) {
                                     if (previousResult is XdmItem) {
-                                        selector.ContextItem = (XdmItem) previousResult;
-                                    } else {
+                                        selector.ContextItem = (XdmItem)previousResult;
+                                    }
+                                    else {
                                         selector.ContextItem = null;
                                     }
-                                } else  if (env.contextItem != null) {
+                                }
+                                else if (env.contextItem != null) {
                                     selector.ContextItem = env.contextItem;
                                 }
 
@@ -740,7 +742,8 @@ namespace TestDriver {
                                         previousResult = resultDoc;
                                         outcome.SetPrincipalResult(resultDoc);
                                     }
-                                } else {
+                                }
+                                else {
 
                                     if (needSerializedResult) {
                                         StringWriter sw = new StringWriter();
@@ -769,9 +772,18 @@ namespace TestDriver {
                                 println(err.Message);
                                 outcome.SetException(err);
                             }
+                            catch (SaxonApiException err) {
+                                println("in TestSet " + testSetName);
+                                println(err.Message);
+                                outcome.SetException(err);
+                            }
                             catch (Exception err) {
                                 println("in TestSet " + testSetName);
                                 println(err.ToString());
+                                writeTestcaseElement(testCaseName, "fail", "Unexpected exception " + err.GetType() 
+                                    + " " + err.Message,
+                                    requestedSpec);
+                                recordFailure(testSetName, testCaseName);
                                 outcome.SetException(err);
                                 //	outcome.SetErrorsReported(testXqc.ErrorList); //TODO
                             }
