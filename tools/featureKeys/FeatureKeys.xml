@@ -2956,10 +2956,14 @@
         <configfiledesc>
             <p>A regular expression used to decide whether a collection URI is to
                 be treated as representing a ZIP file. The default pattern is
-                "^jar:|\.jar$|\.zip$" which matches a URI that starts with "jar:"
-                or that ends with ".jar" or ".zip".</p>
+                "^jar:|\.jar$|\.zip$\.docx$\.xlsx$" which matches a URI that starts with "jar:"
+                or that ends with ".jar", ".zip", ".docx, or ".xlsx".</p>
         </configfiledesc>
         <desc>
+            <p>The value of this property is a regular expression used to decide whether a collection URI is to
+                be treated as representing a ZIP file. The default pattern is
+                "^jar:|\.jar$|\.zip$\.docx$\.xlsx$" which matches a URI that starts with "jar:"
+                or that ends with ".jar", ".zip", ".docx, or ".xlsx".</p>
             <p>This is used by the standard Collection Finder and may not be relevant
                 if a custom Collection Finder is in use.
             </p>
