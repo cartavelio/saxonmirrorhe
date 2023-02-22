@@ -5,6 +5,7 @@ import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -189,14 +190,15 @@ public class SerializerTests {
         }
     }
 
-    @Test
+    @Disabled
     public void testIllegalUri() {
-        // Run this test in the temp directory so that the output file isn't
-        // a problem. It's unclear to ndw how platform-specific this test
-        // might be.
-        String cwd = System.getProperty("user.dir");
-        String temp = configTest.getDataDir() + "temp";
-        System.setProperty("user.dir", temp);
+        // 20 January 2023, norm disabled this test. It doesn't *test* anything useful.
+        // It creates a file named ".\\config\\testIllegalUriOutput.xml", but that doesn't
+        // prove anything except whether Java will create that file. The file
+        // creation is outside the transformation. Also, it claims to be testing
+        // illegal URIs but is expected to pass?
+        //
+        // Finally, the business with user.dir that was in here was totally not working.
 
         try {
             String stylesheet =
@@ -214,15 +216,12 @@ public class SerializerTests {
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Transformer trans = templates.newTransformer();
             StreamSource input = new StreamSource(new StringReader(stylesheet));
-            String s = ".\\config\\testIllegalUriOutput.xml";
+            String s = "build/temp/.\\config\\testIllegalUriOutput.xml";
             StreamResult result = new StreamResult(new File(s));
             trans.transform(input, result);
-
-            System.setProperty("user.dir", cwd);
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
     }
 
     @Test

@@ -10,13 +10,13 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -46,7 +46,7 @@ public class MultithreadedExtensionTest {
             fail("Interrupted");
         }
         int finalThreads = java.lang.Thread.activeCount();
-        assertEquals(threads, finalThreads);
+        Assertions.assertEquals(threads, finalThreads);
     }
 
     private void test(boolean fail) throws Exception {

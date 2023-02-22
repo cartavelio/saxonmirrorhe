@@ -15,8 +15,8 @@ import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.DocumentImpl;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -65,12 +65,12 @@ public class GizmoCommandTests {
                     System.err.println(QueryResult.serialize(gizmo.getCurrentDoc()));
                 }
             }
-            Assert.assertTrue(ok);
+            Assertions.assertTrue(ok);
         } catch (NoClassDefFoundError ex) {
             ex.printStackTrace();
             throw ex;
         } catch (XPathException | SaxonApiException e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -102,9 +102,9 @@ public class GizmoCommandTests {
                     System.err.println(QueryResult.serialize(gizmo.getCurrentDoc()));
                 }
             }
-            Assert.assertTrue(ok);
+            Assertions.assertTrue(ok);
         } catch (XPathException | SaxonApiException e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
             e.printStackTrace();
         }
     }

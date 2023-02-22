@@ -6,7 +6,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xmlresolver.ResolverFeature;
@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResolverConfigurationTest {
     private final ConfigTest configTest = new ConfigTest();

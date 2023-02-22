@@ -3,21 +3,21 @@ package resolvers;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.s9api.Processor;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class StandardModuleURIResolverTest {
     static String cwd;
     static URI baseURI;
 
-    @Before
-    public void before() {
+    @BeforeAll
+    public static void before() {
         cwd = System.getProperty("user.dir").replace("\\", "/"); // Windows
         if (!cwd.endsWith("/")) {
             cwd += "/";
@@ -53,7 +53,7 @@ public class StandardModuleURIResolverTest {
             String namespace = "http://irrelevant/";
             String[] loc = new String[] { "src/test/testdata/resolvers/module.xqy" };
             StreamSource[] source = resolver.resolve(namespace, baseURI.toString(), loc);
-            Assert.assertNotNull(source);
+            Assertions.assertNotNull(source);
         } catch (Exception ex) {
             fail();
         }
@@ -69,7 +69,7 @@ public class StandardModuleURIResolverTest {
             StandardModuleURIResolver resolver = new StandardModuleURIResolver(config);
 
             StreamSource[] source = resolver.resolve("http://example.com/testfunc", baseURI.toString(), new String[] {});
-            Assert.assertNotNull(source);
+            Assertions.assertNotNull(source);
         } catch (Exception ex) {
             fail();
         }
@@ -88,7 +88,7 @@ public class StandardModuleURIResolverTest {
             String[] loc = new String[] { "src/test/testdata/resolvers/module.xqy" };
 
             StreamSource[] source = resolver.resolve(namespace, baseURI.toString(), loc);
-            Assert.assertNotNull(source);
+            Assertions.assertNotNull(source);
         } catch (Exception ex) {
             fail();
         }

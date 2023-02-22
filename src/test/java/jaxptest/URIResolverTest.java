@@ -287,6 +287,9 @@ public class URIResolverTest {
     }
 
     private static class Resolver2 extends StandardURIResolver {
+        private final ConfigTest configTest = new ConfigTest();
+
+        private final String d = configTest.getDataDir() + "trax/";
 
         public Configuration config;
         public Set<String> history = new HashSet<String>();
@@ -311,9 +314,9 @@ public class URIResolverTest {
                 SAXBuilder builder = new SAXBuilder();
                 File file;
                 if (href.endsWith("inc1/inc1.xsl")) {
-                    file = new File("/Users/mike/GitHub/saxon2020/src/test/testdata/trax/xsl/inc1/inc1.xsl");
+                    file = new File(configTest.getDataDir() + "/trax/xsl/inc1/inc1.xsl");
                 } else if (href.endsWith("inc2/inc2.xsl")) {
-                    file = new File("/Users/mike/GitHub/saxon2020/src/test/testdata/trax/xsl/inc1/inc2/inc2.xsl");
+                    file = new File(configTest.getDataDir() + "/trax/xsl/inc1/inc2/inc2.xsl");
                 } else {
                     throw new XPathException("Unknown file " + href);
                 }
