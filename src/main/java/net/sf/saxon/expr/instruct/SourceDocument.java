@@ -211,7 +211,7 @@ public class SourceDocument extends Instruction {
     public void export(ExpressionPresenter out) throws XPathException {
         ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
         if ("JS".equals(options.target) && options.targetVersion == 1) {
-            throw new XPathException("xsl:source-document is not supported in Saxon-JS 1.*", SaxonErrorCode.SXJS0001);
+            throw new XPathException("xsl:source-document is not supported in SaxonJS 1.*", SaxonErrorCode.SXJS0001);
         }
         out.startElement(getExportTag(), this);
         int validation = parseOptions.getSchemaValidationMode();

@@ -426,8 +426,8 @@ public abstract class AtomicValue
     }
 
     /**
-     * Check that the value can be handled in Saxon-JS
-     * @throws XPathException if it can't be handled in Saxon-JS
+     * Check that the value can be handled in SaxonJS
+     * @throws XPathException if it can't be handled in SaxonJS
      */
 
     public void checkValidInJavascript() throws XPathException {

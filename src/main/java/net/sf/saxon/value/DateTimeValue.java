@@ -859,15 +859,15 @@ public final class DateTimeValue extends CalendarValue
     }
 
     /**
-     * Check that the value can be handled in Saxon-JS
+     * Check that the value can be handled in SaxonJS
      *
-     * @throws XPathException if it can't be handled in Saxon-JS
+     * @throws XPathException if it can't be handled in SaxonJS
      */
 
     @Override
     public void checkValidInJavascript() throws XPathException {
         if (year <= 0 || year > 9999) {
-            throw new XPathException("Year out of range for Saxon-JS", "FODT0001");
+            throw new XPathException("Year out of range for SaxonJS", "FODT0001");
         }
     }
 
