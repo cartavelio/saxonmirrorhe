@@ -106,7 +106,8 @@ public class ResolveURI extends SystemFunction {
             // Special-case JAR file URLs, even though non-conformant
             throw new XPathException("Base URI " + Err.wrap(base) + " is a non-hierarchic URI", "FORG0002", context);
         }
-        if (absoluteURI.getRawFragment() != null) {
+        String fragment = absoluteURI.getRawFragment();
+        if (fragment != null && !fragment.isEmpty()) {
             throw new XPathException("Base URI " + Err.wrap(base) + " contains a fragment identifier", "FORG0002", context);
         }
         if (!base.startsWith("jar:") && absoluteURI.getPath() != null && absoluteURI.getPath().isEmpty()) {

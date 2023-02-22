@@ -9,7 +9,6 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;

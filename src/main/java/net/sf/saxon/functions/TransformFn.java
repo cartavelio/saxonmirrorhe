@@ -29,17 +29,14 @@ import net.sf.saxon.trans.StylesheetCache;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.AtomicIterator;
-
 import net.sf.saxon.tree.wrapper.RebasedDocument;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.*;
-import org.xml.sax.InputSource;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
@@ -471,7 +468,7 @@ public class TransformFn extends SystemFunction implements Callable {
                 }
                 if (executable == null) {
                     StringReader sr = new StringReader(stylesheetText);
-                    SAXSource style = new SAXSource(new InputSource(sr));
+                    StreamSource style = new StreamSource(sr);
                     if (stylesheetBaseUri != null) {
                         style.setSystemId(stylesheetBaseUri.toASCIIString());
                     }
@@ -818,7 +815,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         // Build map of secondary results
 
-        HashTrieMap resultMap = new HashTrieMap();
+        MapItem resultMap = new HashTrieMap();
         resultMap = deliverer.populateResultMap(resultMap);
 
         // Add primary result
@@ -939,7 +936,7 @@ public class TransformFn extends SystemFunction implements Callable {
          * @throws XPathException if a failure occurs
          */
 
-        public abstract HashTrieMap populateResultMap(HashTrieMap resultMap) throws XPathException;
+        public abstract MapItem populateResultMap(MapItem resultMap) throws XPathException;
 
         /**
          * Get the s9api Destination object to be used for the transformation
@@ -1091,7 +1088,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         @Override
-        public HashTrieMap populateResultMap(HashTrieMap resultMap) {
+        public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, TreeInfo> entry : results.entrySet()) {
                 String uri = entry.getKey();
                 resultMap = resultMap.addEntry(new StringItem(uri),
@@ -1152,7 +1149,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         @Override
-        public HashTrieMap populateResultMap(HashTrieMap resultMap) {
+        public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, String> entry : results.entrySet()) {
                 String uri = entry.getKey();
                 resultMap = resultMap.addEntry(new StringItem(uri),
@@ -1192,7 +1189,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         @Override
-        public HashTrieMap populateResultMap(HashTrieMap resultMap) {
+        public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, XdmValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
                 resultMap = resultMap.addEntry(new StringItem(uri),

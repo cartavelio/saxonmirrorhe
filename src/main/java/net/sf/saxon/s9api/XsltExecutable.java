@@ -176,7 +176,7 @@ public class XsltExecutable {
     public WhitespaceStrippingPolicy getWhitespaceStrippingPolicy() {
         StylesheetPackage top = preparedStylesheet.getTopLevelPackage();
         if (top.isStripsWhitespace()) {
-            return new WhitespaceStrippingPolicy(preparedStylesheet.getTopLevelPackage());
+            return new WhitespaceStrippingPolicy(top);
         } else {
             return WhitespaceStrippingPolicy.UNSPECIFIED;
         }

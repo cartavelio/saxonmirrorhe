@@ -79,6 +79,7 @@ public class XsltPackage {
         return stylesheetPackage.getPackageVersion();
     }
 
+    //#if CSHARP==false
     /**
      * Get the whitespace stripping policy defined by this stylesheet package, that is, the policy
      * defined by the xsl:strip-space and xsl:preserve-space elements in the source XSLT code of the package.
@@ -90,7 +91,7 @@ public class XsltPackage {
     public WhitespaceStrippingPolicy getWhitespaceStrippingPolicy() {
         return new WhitespaceStrippingPolicy(stylesheetPackage);
     }
-
+    //#endif
 
     /**
      * Link this package with the packages it uses, to form an executable stylesheet. This process fixes

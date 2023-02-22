@@ -9,6 +9,7 @@ package net.sf.saxon.om;
 
 
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class LargeAttributeMap implements AttributeMap {
 
     public LargeAttributeMap(List<AttributeInfo> atts) {
         assert !atts.isEmpty();
-        this.attributes = ImmutableHashTrieMap.empty();
+        this.attributes = emptyMap();
         this._size = atts.size();
         AttributeInfoLink current = null;
         for (AttributeInfo att : atts) {
@@ -66,6 +67,11 @@ public class LargeAttributeMap implements AttributeMap {
         this._size = size;
         this.first = first;
         this.last = last;
+    }
+
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary.Create<net.sf.saxon.om.NodeName,net.sf.saxon.om.LargeAttributeMap.AttributeInfoLink>();")
+    private ImmutableHashTrieMap<NodeName, AttributeInfoLink> emptyMap() {
+        return ImmutableHashTrieMap.empty();
     }
 
     /**
@@ -137,7 +143,7 @@ public class LargeAttributeMap implements AttributeMap {
                 priorLink2.payload = priorLink.payload;
                 priorLink2.prior = priorLink.prior;
                 priorLink2.next = existing.next;
-                att2.put(existing.prior, priorLink2);
+                att2 = att2.put(existing.prior, priorLink2);
             } else {
                 first2 = existing.next;
             }
@@ -147,7 +153,7 @@ public class LargeAttributeMap implements AttributeMap {
                 nextLink2.payload = nextLink.payload;
                 nextLink2.next = nextLink.next;
                 nextLink2.prior = existing.prior;
-                att2.put(existing.next, nextLink2);
+                att2 = att2.put(existing.next, nextLink2);
             } else {
                 last2 = existing.prior;
             }
@@ -178,7 +184,9 @@ public class LargeAttributeMap implements AttributeMap {
     @Override
     public synchronized List<AttributeInfo> asList() {
         List<AttributeInfo> result = new ArrayList<>(_size);
-        iterator().forEachRemaining(result::add);
+        for (AttributeInfo att : this) {
+            result.add(att);
+        }
         return result;
     }
 

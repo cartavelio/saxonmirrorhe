@@ -1,7 +1,10 @@
 package net.sf.saxon.trans;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.CheckSumFilter;
+import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.event.ProxyReceiver;
+import net.sf.saxon.event.Stripper;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -41,6 +44,7 @@ import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.jiter.TopDownStackIterable;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
@@ -69,6 +73,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private final XPathParser parser;
     public final Stack<List<ComponentInvocation>> fixups = new Stack<>();
     public final List<Action> completionActions = new ArrayList<>();
+    public StylesheetPackage topLevelPackage;
     public final Map<String, StylesheetPackage> allPackages = new HashMap<>();
     public Stack<LocalBinding> localBindings;
     private final ExecutableFunctionLibrary overriding;
@@ -123,7 +128,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     public StylesheetPackage getTopLevelPackage() {
-        return packStack.get(0);
+        return topLevelPackage;
     }
 
     public StylesheetPackage getPackage(String key) {
@@ -178,6 +183,9 @@ public class PackageLoaderHE implements IPackageLoader {
         pack.setRuleManager(new RuleManager(pack));
         pack.setCharacterMapIndex(new CharacterMapIndex());
         pack.setJustInTimeCompilation(false);
+        if (packStack.isEmpty()) {
+            topLevelPackage = pack;
+        }
         packStack.push(pack);
         NodeInfo packageElement = doc.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
         if (!packageElement.getURI().equals(NamespaceConstant.SAXON_XSLT_EXPORT)) {
@@ -608,6 +616,10 @@ public class PackageLoaderHE implements IPackageLoader {
         userFunctions.put(function.getSymbolicName(), function);
         underriding.addFunction(function);
         return function;
+    }
+
+    private UserFunction getUserFunction(SymbolicName.F name) {
+        return userFunctions.get(name);
     }
 
     private UserFunction currentFunction;
@@ -1555,7 +1567,6 @@ public class PackageLoaderHE implements IPackageLoader {
             return inst;
         });
 
-
         eMap.put("applyT", (loader, element) -> {
             StylesheetPackage pack = loader.packStack.peek();
             Expression select = loader.getFirstChildExpression(element);
@@ -1853,7 +1864,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 coercedFn = new CoercedFunction((SpecificFunctionType) type);
                 final CoercedFunction coercedFn2 = coercedFn;
                 final SymbolicName name = ((UserFunctionReference) target).getSymbolicName();
-                loader.completionActions.add(() -> coercedFn2.setTargetFunction(loader.userFunctions.get(name)));
+                loader.addCompletionAction(() -> coercedFn2.setTargetFunction(loader.getUserFunction((SymbolicName.F)name)));
             } else if (target instanceof Literal) {
                 targetFn = (Function) ((Literal) target).getGroundedValue();
                 coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type);
@@ -2725,7 +2736,7 @@ public class PackageLoaderHE implements IPackageLoader {
             MergeInstr.MergeSource[] mergeSources = list.toArray(new MergeInstr.MergeSource[0]);
             inst.init(mergeSources, mergeAction);
             //noinspection Convert2MethodRef
-            loader.completionActions.add(() -> inst.fixupGroupReferences());
+            loader.addCompletionAction(() -> inst.fixupGroupReferences());
             return inst;
         });
 
@@ -3288,14 +3299,8 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("varRef", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             Stack<LocalBinding> locals = loader.localBindings;
-            LocalBinding binding = null;
-            for (int i = locals.size() - 1; i >= 0; i--) {
-                LocalBinding b = locals.get(i);
-                if (b.getVariableQName().equals(name)) {
-                    binding = b;
-                    break;
-                }
-            }
+            LocalBinding binding = findLocalBinding(loader.localBindings, name);
+
             if (binding == null) {
                 throw new XPathException("No binding found for local variable " + name);
             }
@@ -3342,6 +3347,38 @@ public class PackageLoaderHE implements IPackageLoader {
             }
         }
     }
+
+    /**
+     * Find a local binding of a variable, by name, searching downwards from the top of the stack
+     * @param locals the stack to be searched
+     * @param name the required variable name
+     * @return the first (nearest-to-top) binding found with this name
+     * @implNote Complicated by the difference between Java and C# stacks. In Java, we iterate
+     * over the stack by index. In C#, a stack is enumerable in the top-to-bottom direction,
+     * and is not addressable by index.
+     */
+
+    private static LocalBinding findLocalBinding(Stack<LocalBinding> locals, StructuredQName name) {
+        for (LocalBinding b : new TopDownStackIterable<>(locals)) {
+            if (b.getVariableQName().equals(name)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+//    //#if CSHARP==true
+//    private static LocalBinding findLocalBindingTopDown(Stack<LocalBinding> locals, StructuredQName name) {
+//        // This code is right for C#, wrong for Java, because the order of iteration over a stack
+//        // is bottom-up on Java, top-down on C#
+//        for (LocalBinding b : locals) {
+//            if (b.getVariableQName().equals(name)) {
+//                return b;
+//            }
+//        }
+//        return null;
+//    }
+//    //#endif
 
     protected static List<Expression> getChildExpressionList(PackageLoaderHE loader, NodeInfo element) throws XPathException {
         List<Expression> children = new ArrayList<>();

@@ -60,8 +60,8 @@ public class AvailableSystemProperties extends SystemFunction {
 //#endif
 
         if (context.getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
-            for (Object s : System.getProperties().keySet()) {
-                 myList.add(new QNameValue("", "", s.toString()));
+            for (String s : System.getProperties().stringPropertyNames()) {
+                 myList.add(new QNameValue("", "", s));
             }
         }
 

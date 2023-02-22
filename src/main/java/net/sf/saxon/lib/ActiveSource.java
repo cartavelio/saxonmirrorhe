@@ -1,7 +1,6 @@
-package net.sf.saxon.resource;
+package net.sf.saxon.lib;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;

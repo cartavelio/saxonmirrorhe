@@ -94,12 +94,16 @@ public class StandardResultDocumentResolver implements ResultDocumentResolver {
             throw new XPathException("Invalid syntax for " + which + " URI", err);
         } catch (IllegalArgumentException err2) {
             throw new XPathException("Invalid " + which + " URI syntax", err2);
+        //#if CSHARP==false
         } catch (MalformedURLException err3) {
             throw new XPathException("Resolved URL is malformed", err3);
         } catch (UnknownServiceException err5) {
             throw new XPathException("Specified protocol does not allow output", err5);
         } catch (IOException err4) {
             throw new XPathException("Cannot open connection to specified URL", err4);
+        //#endif
+        } catch (Exception err6) {
+            throw new XPathException("Exception thrown by ResultDocumentResolver", err6);
         }
     }
 
@@ -113,6 +117,8 @@ public class StandardResultDocumentResolver implements ResultDocumentResolver {
             // This is optimistic: I have yet to discover a URL scheme that it can handle "out of the box".
             // But it can apparently be achieved using custom-written protocol handlers.
 
+            String details = "";
+            //#if CSHARP==false
             URLConnection connection = absoluteURI.toURL().openConnection();
             connection.setDoInput(false);
             connection.setDoOutput(true);
@@ -120,7 +126,16 @@ public class StandardResultDocumentResolver implements ResultDocumentResolver {
             OutputStream stream = connection.getOutputStream();
             StreamResult result = new StreamResult(stream);
             result.setSystemId(absoluteURI.toASCIIString());
-            return result;
+            try {
+                return result;
+            } catch (Exception e) {
+                details = e.getMessage();
+                //#endif
+                throw new XPathException("Failed to establish connection to non-file output destination" +
+                        (details.isEmpty() ? "" : (": " + details)));
+                //#if CSHARP==false
+            }
+            //#endif
         }
     }
 

@@ -12,11 +12,8 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.SimpleCollation;
-import net.sf.saxon.lib.AugmentedSource;
-import net.sf.saxon.lib.ModuleURIResolver;
-import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ExternalObjectType;
@@ -73,6 +70,13 @@ public interface Platform {
      */
 
     String getPlatformSuffix();
+
+    /**
+     * Get the default DynamicLoader for the platform
+     * @return the default DynamicLoader
+     */
+
+    IDynamicLoader getDefaultDynamicLoader();
 
     /**
      * Read a resource file issued with the Saxon product
@@ -304,7 +308,7 @@ public interface Platform {
      * @since 9.6.0.3
      */
 
-    ClassLoader makeGeneratedClassLoader(Configuration config, Class thisClass);
+    ClassLoader makeGeneratedClassLoader(Configuration config, Class<?> thisClass);
 //#endif
 
 }

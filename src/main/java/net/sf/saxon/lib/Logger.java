@@ -7,6 +7,8 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.transpile.CSharpInjectMembers;
+
 import javax.xml.transform.stream.StreamResult;
 import java.io.Writer;
 
@@ -111,6 +113,7 @@ public abstract class Logger {
         return new LoggingWriter(this);
     }
 
+    @CSharpInjectMembers(code="public override System.Text.Encoding Encoding => System.Text.Encoding.UTF8;")
     private static class LoggingWriter extends Writer {
         private final StringBuilder builder = new StringBuilder();
         private final Logger logger;

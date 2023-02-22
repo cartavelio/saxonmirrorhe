@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.Arrays;
 import java.util.Stack;
@@ -46,8 +47,7 @@ public class StackFrame {
         Sequence[] v2 = Arrays.copyOf(slots, slots.length);
         StackFrame s = new StackFrame(map, v2);
         if (dynamicStack != null) {
-            s.dynamicStack = newStack();
-            s.dynamicStack.addAll(dynamicStack);
+            s.dynamicStack = shallowCopy(dynamicStack);
         }
         return s;
     }
@@ -65,6 +65,14 @@ public class StackFrame {
     private Stack<Sequence> newStack() {
         // Separate method for the benefit of C#
         return new Stack<>();
+    }
+
+    // Shallow-copy of a stack is tricky in C# because iteration reverses the order
+    @CSharpReplaceBody(code="return new Stack<net.sf.saxon.om.Sequence>(new Stack<net.sf.saxon.om.Sequence>(old));")
+    private Stack<Sequence> shallowCopy(Stack<Sequence> old) {
+        Stack<Sequence> s2 = newStack();
+        s2.addAll(old);
+        return s2;
     }
 
     public Sequence popDynamicValue() {

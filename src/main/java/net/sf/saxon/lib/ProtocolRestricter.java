@@ -19,10 +19,23 @@ import java.util.function.Predicate;
  * which constrain the set of URIs that can be used by supplying a list of permitted protocols.
  */
 
-public class ProtocolRestricter implements Predicate<URI> {
+public class ProtocolRestricter {
 
-    private final String rule;
-    private final List<Predicate<URI>> permitted = new ArrayList<>();
+    //private final String rule;
+    //private final List<Predicate<URI>> permitted = new ArrayList<>();
+
+    /**
+     * Create a predicate from a list of allowed protocols.
+     *
+     * <p>The value is a comma-separated list of permitted protocols. A protocol is the
+     *  scheme portion of a URI, or in the case of the JAR protocol, "jar"
+     *  plus the scheme portion separated by colon. The value "all" gives access
+     *  to all protocols (which is the default). The value "" (empty string) disallows
+     *  all external resource access. (The format is thus the same as for
+     *  <code>XMLConstants.ACCESS_EXTERNAL_SCHEMA</code> and similar attributes.)
+     *  @param value the list of allowed protocols
+     *  @return a predicate which matches a URI if the protocol is allowed
+     */
 
     public static Predicate<URI> make(String value) {
         Objects.requireNonNull(value);
@@ -31,43 +44,41 @@ public class ProtocolRestricter implements Predicate<URI> {
             // Allow all URIs
             return uri -> true;
         } else {
-            return new ProtocolRestricter(value);
-
-        }
-    }
-
-    private ProtocolRestricter(String value) {
-        this.rule = value;
-        String[] tokens = value.split(",\\s*");
-        for (String token : tokens) {
-            if (token.startsWith("jar:") && token.length() > 4) {
-                String subScheme = token.substring(4).toLowerCase();
-                permitted.add(uri -> uri.getScheme().equals("jar") && uri.getSchemeSpecificPart().toLowerCase().startsWith(subScheme));
-            } else {
-                permitted.add(uri -> uri.getScheme().equals(token));
+            final List<Predicate<URI>> permitted = new ArrayList<>();
+            String[] tokens = value.split(",\\s*");
+            for (String token : tokens) {
+                if (token.startsWith("jar:") && token.length() > 4) {
+                    String subScheme = token.substring(4).toLowerCase();
+                    permitted.add(uri -> scheme(uri).equals("jar") &&
+                            schemeSpecificPart(uri).toLowerCase().startsWith(subScheme));
+                } else {
+                    permitted.add(uri -> scheme(uri).equals(token));
+                }
             }
+            return uri -> {
+                for (Predicate<URI> pred : permitted) {
+                    if (pred.test(uri)) {
+                        return true;
+                    }
+                }
+                return false;
+            };
         }
     }
 
-    /**
-     * Evaluates this predicate on the given argument.
-     *
-     * @param uri the input argument
-     * @return {@code true} if the input argument matches the predicate,
-     * otherwise {@code false}
-     */
-    @Override
-    public boolean test(URI uri) {
-        for (Predicate<URI> pred : permitted) {
-            if (pred.test(uri)) {
-                return true;
-            }
-        }
-        return false;
+    // The following methods are extracted to enable the C# transpiler to recognise what it needs to do...
+
+    private static String scheme(URI uri) {
+        return uri.getScheme();
     }
 
-    public String toString() {
-        return rule;
+    private static String schemeSpecificPart(URI uri) {
+        return uri.getSchemeSpecificPart();
+    }
+
+    public static void main(String[] args) throws Exception {
+        URI uri = new URI(args[0]);
+        System.err.println(uri.getScheme() + " + " + uri.getSchemeSpecificPart());
     }
 }
 

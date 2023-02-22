@@ -29,6 +29,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.packages.UsePack;
 import net.sf.saxon.tree.AttributeLocation;
+import net.sf.saxon.tree.jiter.TopDownStackIterable;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.type.*;
@@ -632,8 +633,7 @@ public class UseWhenFilter extends ProxyReceiver {
 
     private void setNamespaceBindings(UseWhenStaticContext staticContext) {
         staticContext.setDefaultElementNamespace(NamespaceConstant.NULL);
-        for (int i = defaultNamespaceStack.size() - 1; i >= 0; i--) {
-            String uri = defaultNamespaceStack.get(i);
+        for (String uri : new TopDownStackIterable<>(defaultNamespaceStack)) {
             if (uri != null) {
                 staticContext.setDefaultElementNamespace(uri);
                 break;

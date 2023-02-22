@@ -23,6 +23,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -189,7 +190,7 @@ public abstract class AbstractXsltTransformer {
 
     @CSharpInnerClass(
             outer=false,
-            extra={"java.util.function.Function<java.net.URI, net.sf.saxon.s9api.Destination> handler"})
+            extra={"System.Func<System.Uri,net.sf.saxon.s9api.Destination> handler"})
     
     public void setResultDocumentHandler(java.util.function.Function<URI, Destination> handler) {
         controller.setResultDocumentResolver(new ResultDocumentResolver() {
@@ -553,6 +554,7 @@ public abstract class AbstractXsltTransformer {
             boolean closed = false;
 
             @Override
+            @CSharpModifiers(code="public")
             public void close() throws XPathException {
                 if (!closed) {
                     try {

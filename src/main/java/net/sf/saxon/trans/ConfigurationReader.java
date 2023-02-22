@@ -10,30 +10,28 @@ package net.sf.saxon.trans;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
-import net.sf.saxon.event.ContentHandlerProxy;
-import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.lib.ActiveSource;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
-
-import org.xml.sax.*;
+import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -42,22 +40,74 @@ import java.util.*;
  * Class used to read a config.xml file and transfer all settings from the file to the Configuration
  */
 
-public class ConfigurationReader implements ContentHandler, NamespaceResolver {
+public class ConfigurationReader implements Receiver {
 
     private int level = 0;
     private String section = null;
     private String subsection = null;
     private final StringBuilder buffer = new StringBuilder(100);
-    protected Configuration config;
+    protected Configuration targetConfig;
     private ClassLoader classLoader = null;
     private final List<XmlProcessingError> errors = new ArrayList<>();
-    private Locator locator;
     private final Stack<List<String[]>> namespaceStack = new Stack<>();
     private PackageLibrary packageLibrary;
     private PackageDetails currentPackage;
     private Configuration baseConfiguration;
+    private PipelineConfiguration pipe;
+    private Stack<String> localNameStack = new Stack<>();
+    private String systemId = null;
 
     public ConfigurationReader() {
+    }
+
+    @Override
+    public void setPipelineConfiguration(PipelineConfiguration pipe) {
+        this.pipe = pipe;
+    }
+
+    @Override
+    public PipelineConfiguration getPipelineConfiguration() {
+        return pipe;
+    }
+
+    @Override
+    public void setSystemId(String systemId) {
+        this.systemId = systemId;
+    }
+
+    @Override
+    public void open() throws XPathException {
+
+    }
+
+    @Override
+    public void startDocument(int properties) throws XPathException {
+
+    }
+
+    @Override
+    public void setUnparsedEntity(String name, String systemID, String publicID) throws XPathException {
+
+    }
+
+    @Override
+    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
+
+    }
+
+    @Override
+    public void comment(CodePoints content, Location location, int properties) throws XPathException {
+
+    }
+
+    @Override
+    public void close() throws XPathException {
+
+    }
+
+    @Override
+    public String getSystemId() {
+        return systemId;
     }
 
     /**
@@ -82,26 +132,6 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         this.baseConfiguration = base;
     }
 
-    private static class ContentHandlerProxyWithStartAndEnd extends ContentHandlerProxy {
-        @Override
-        public void startDocument(int properties) throws XPathException {
-            try {
-                getUnderlyingContentHandler().startDocument();
-            } catch (SAXException e) {
-                throw XPathException.makeXPathException(e);
-            }
-        }
-
-        @Override
-        public void endDocument() throws XPathException {
-            try {
-                getUnderlyingContentHandler().endDocument();
-            } catch (SAXException e) {
-                throw XPathException.makeXPathException(e);
-            }
-        }
-    }
-
     /**
      * Create a Configuration based on the contents of this configuration file
      *
@@ -111,56 +141,28 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
      */
 
     public Configuration makeConfiguration(Source source) throws XPathException {
-
-        if (source instanceof NodeInfo) {
-            ContentHandlerProxy proxy = new ContentHandlerProxyWithStartAndEnd();
-            proxy.setUnderlyingContentHandler(this);
-            proxy.setPipelineConfiguration(((NodeInfo) source).getConfiguration().makePipelineConfiguration());
-            proxy.open();
-            setDocumentLocator(new Loc(source.getSystemId(), -1, -1));   //Must be after the open() call
-            proxy.startDocument(ReceiverOption.NONE);
-            ((NodeInfo) source).copy(proxy, CopyOptions.ALL_NAMESPACES, Loc.NONE);
-            proxy.endDocument();
-            proxy.close();
-        } else {
-            InputSource is;
-            XMLReader parser = null;
-            if (source instanceof SAXSource) {
-                parser = ((SAXSource) source).getXMLReader();
-                is = ((SAXSource) source).getInputSource();
-            } else if (source instanceof StreamSource) {
-                is = new InputSource(source.getSystemId());
-                is.setCharacterStream(((StreamSource) source).getReader());
-                is.setByteStream(((StreamSource) source).getInputStream());
+        Configuration localConfig = baseConfiguration;
+        if (localConfig == null) {
+            if (pipe == null) {
+                localConfig = new Configuration();
+                setPipelineConfiguration(localConfig.makePipelineConfiguration());
             } else {
-                throw new XPathException("Source for configuration file must be a StreamSource or SAXSource or NodeInfo");
-            }
-            if (parser == null) {
-                // Don't use the parser from the pool, it might be validating
-                parser = Version.platform.loadParser();
-                try {
-                    parser.setFeature("http://xml.org/sax/features/namespaces", true);
-                    parser.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
-                } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
-                    throw new TransformerFactoryConfigurationError(e);
-                }
-            }
-            try {
-                parser.setContentHandler(this);
-                parser.parse(is);
-            } catch (IOException e) {
-                throw new XPathException("Failed to read config file", e);
-            } catch (SAXException e) {
-                throw new XPathException("Failed to parse config file", e);
+                localConfig = pipe.getConfiguration();
             }
         }
+        setSystemId(source.getSystemId());
+        ActiveSource activeSource = Version.platform.resolveSource(source, localConfig);
+        activeSource.deliver(this, new ParseOptions());
+        // TODO: set an error handler
+        // TODO: set location information
+
 
         if (!errors.isEmpty()) {
             ErrorReporter reporter;
-            if (config == null) {
+            if (targetConfig == null) {
                 reporter = new StandardErrorReporter();
             } else {
-                reporter = config.makeErrorReporter();
+                reporter = targetConfig.makeErrorReporter();
             }
             for (XmlProcessingError err : errors) {
                 reporter.report(err.asWarning());
@@ -168,41 +170,25 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             throw XPathException.fromXmlProcessingError(errors.get(0));
         }
         if (baseConfiguration != null) {
-            config.importLicenseDetails(baseConfiguration);
+            targetConfig.importLicenseDetails(baseConfiguration);
         }
-        return config;
-    }
-
-    @Override
-    public void setDocumentLocator(Locator locator) {
-        this.locator = locator;
-    }
-
-    @Override
-    public void startDocument() {
-        namespaceStack.push(new ArrayList<>());
+        return targetConfig;
     }
 
     @Override
     public void endDocument() {
         namespaceStack.pop();
-        if (config != null) {
-            config.getDefaultXsltCompilerInfo().setPackageLibrary(packageLibrary);
+        if (targetConfig != null) {
+            targetConfig.getDefaultXsltCompilerInfo().setPackageLibrary(packageLibrary);
         }
     }
 
     @Override
-    public void startPrefixMapping(String prefix, String uri) {
-        namespaceStack.peek().add(new String[]{prefix, uri});
-    }
-
-    @Override
-    public void endPrefixMapping(String prefix) {
-
-    }
-
-    @Override
-    public void startElement(String uri, String localName, String qName, Attributes atts) {
+    public void startElement(NodeName elemName, SchemaType type, AttributeMap atts,
+                             NamespaceMap namespaces, Location location, int properties) throws XPathException {
+        String uri = elemName.getURI();
+        String localName = elemName.getLocalPart();
+        localNameStack.push(localName);
         buffer.setLength(0);
         if (NamespaceConstant.SAXON_CONFIGURATION.equals(uri)) {
             if (level == 0) {
@@ -215,32 +201,34 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
                 }
                 switch (edition) {
                     case "HE":
-                        config = new Configuration();
+                        targetConfig = new Configuration();
                         break;
+                        //#if CSHARP==false
                     case "PE":
-                        config = Configuration.makeLicensedConfiguration(classLoader, "com.saxonica.config.ProfessionalConfiguration");
+                        targetConfig = Configuration.makeLicensedConfiguration(classLoader, "com.saxonica.config.ProfessionalConfiguration");
                         break;
                     case "EE":
-                        config = Configuration.makeLicensedConfiguration(classLoader, "com.saxonica.config.EnterpriseConfiguration");
+                        targetConfig = Configuration.makeLicensedConfiguration(classLoader, "com.saxonica.config.EnterpriseConfiguration");
                         break;
+                        //#endif
                     default:
                         error("configuration", "edition", edition, "HE|PE|EE");
-                        config = new Configuration();
+                        targetConfig = new Configuration();
                         break;
                 }
 
                 if (baseConfiguration != null) {
-                    config.setNamePool(baseConfiguration.getNamePool());
-                    config.setDocumentNumberAllocator(baseConfiguration.getDocumentNumberAllocator());
+                    targetConfig.setNamePool(baseConfiguration.getNamePool());
+                    targetConfig.setDocumentNumberAllocator(baseConfiguration.getDocumentNumberAllocator());
                 }
 
-                packageLibrary = new PackageLibrary(config.getDefaultXsltCompilerInfo());
+                packageLibrary = new PackageLibrary(targetConfig.getDefaultXsltCompilerInfo());
                 String licenseLoc = atts.getValue("licenseFileLocation");
-                if (licenseLoc != null && !edition.equals("HE") && !config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                    String base = locator.getSystemId();
+                if (licenseLoc != null && !edition.equals("HE") && !targetConfig.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                    String base = getSystemId();
                     try {
                         URI absoluteLoc = ResolveURI.makeAbsolute(licenseLoc, base);
-                        config.setConfigurationProperty(FeatureKeys.LICENSE_FILE_LOCATION, absoluteLoc.toString());
+                        targetConfig.setConfigurationProperty(FeatureKeys.LICENSE_FILE_LOCATION, absoluteLoc.toString());
                     } catch (Exception err) {
                         XmlProcessingIncident incident = new XmlProcessingIncident("Failed to process license at " + licenseLoc);
                         incident.setCause(err);
@@ -253,16 +241,16 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
                 }
                 String label = atts.getValue("label");
                 if (label != null) {
-                    config.setLabel(label);
+                    targetConfig.setLabel(label);
                 }
-                config.getDynamicLoader().setClassLoader(classLoader);
+                targetConfig.getDynamicLoader().setClassLoader(classLoader);
             }
             if (level == 1) {
                 section = localName;
                 if ("global".equals(localName)) {
                     readGlobalElement(atts);
                 } else if ("serialization".equals(localName)) {
-                    readSerializationElement(atts);
+                    readSerializationElement(atts, namespaces);
                 } else if ("xquery".equals(localName)) {
                     readXQueryElement(atts);
                 } else if ("xslt".equals(localName)) {
@@ -319,7 +307,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             } else if (level == 3) {
                 if ("package".equals(subsection)) {
                     if ("withParam".equals(localName)) {
-                        readWithParam(atts);
+                        readWithParam(atts, namespaces);
                     } else {
                         error(localName, null, null, null);
                     }
@@ -333,16 +321,16 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         namespaceStack.push(new ArrayList<>());
     }
 
-    private void readGlobalElement(Attributes atts) {
+    private void readGlobalElement(AttributeMap atts) {
         Properties props = new Properties();
-        for (int i = 0; i < atts.getLength(); i++) {
-            String name = atts.getLocalName(i);
-            String value = atts.getValue(i);
-            if (!value.isEmpty() && atts.getURI(i).isEmpty()) {
-                props.put(name, value);
+        for (AttributeInfo a : atts) {
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (!value.isEmpty() && a.getNodeName().getURI().isEmpty()) {
+                props.setProperty(name, value);
             }
         }
-        props.put("#element", "global");
+        props.setProperty("#element", "global");
         applyProperty(props, "allowedProtocols", FeatureCode.ALLOWED_PROTOCOLS);
         applyProperty(props, "allowExternalFunctions", FeatureCode.ALLOW_EXTERNAL_FUNCTIONS);
         applyProperty(props, "allowMultiThreading", FeatureCode.ALLOW_MULTITHREADING);
@@ -411,53 +399,54 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         String value = props.getProperty(attributeName);
         if (value != null) {
             try {
-                config.setConfigurationProperty(FeatureIndex.getData(featureCode).uri, value);
+                targetConfig.setConfigurationProperty(FeatureIndex.getData(featureCode).uri, value);
             } catch (IllegalArgumentException e) {
                 String message = e.getMessage();
                 if (message.startsWith(attributeName)) {
                     message = message.replace(attributeName, "Value");
                 }
                 if (message.startsWith("Unknown configuration property")) {
-                    message = "Property not available in Saxon-" + config.getEditionCode();
+                    message = "Property not available in Saxon-" + targetConfig.getEditionCode();
                 }
                 error(props.getProperty("#element"), attributeName, value, message);
             }
         }
     }
 
-    private void readSerializationElement(Attributes atts) {
+    private void readSerializationElement(AttributeMap atts, NamespaceMap nsMap) {
         Properties props = new Properties();
-        for (int i = 0; i < atts.getLength(); i++) {
-            String uri = atts.getURI(i);
-            String name = atts.getLocalName(i);
-            String value = atts.getValue(i);
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
             if (value.isEmpty()) {
                 continue;
             }
             try {
                 ResultDocument.setSerializationProperty(props,
-                                                        uri, name, value, this, false, config);
+                                                        uri, name, value, nsMap, false, targetConfig);
             } catch (XPathException e) {
                 errors.add(new XmlProcessingException(e));
             }
         }
-        config.setDefaultSerializationProperties(props);
+        targetConfig.setDefaultSerializationProperties(props);
     }
 
-    private void readCollation(Attributes atts) {
+    private void readCollation(AttributeMap atts) {
         Properties props = new Properties();
         String collationUri = null;
-        for (int i = 0; i < atts.getLength(); i++) {
-            if (atts.getURI(i).isEmpty()) {
-                String name = atts.getLocalName(i);
-                String value = atts.getValue(i);
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (uri.isEmpty()) {
                 if (value.isEmpty()) {
                     continue;
                 }
                 if ("uri".equals(name)) {
                     collationUri = value;
                 } else {
-                    props.put(name, value);
+                    props.setProperty(name, value);
                 }
             }
         }
@@ -466,36 +455,38 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         }
         StringCollator collator = null;
         try {
-            collator = Version.platform.makeCollation(config, props, collationUri);
+            collator = Version.platform.makeCollation(targetConfig, props, collationUri);
         } catch (XPathException e) {
             errors.add(new XmlProcessingIncident(e.getMessage()));
         }
-        config.registerCollation(collationUri, collator);
+        targetConfig.registerCollation(collationUri, collator);
 
     }
 
-    private void readLocalizationsElement(Attributes atts) {
-        for (int i = 0; i < atts.getLength(); i++) {
-            if (atts.getURI(i).isEmpty()) {
-                String name = atts.getLocalName(i);
-                String value = atts.getValue(i);
+    private void readLocalizationsElement(AttributeMap atts) {
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (uri.isEmpty()) {
                 if ("defaultLanguage".equals(name) && !value.isEmpty()) {
-                    config.setConfigurationProperty(FeatureKeys.DEFAULT_LANGUAGE, value);
+                    targetConfig.setConfigurationProperty(FeatureKeys.DEFAULT_LANGUAGE, value);
                 }
                 if ("defaultCountry".equals(name) && !value.isEmpty()) {
-                    config.setConfigurationProperty(FeatureKeys.DEFAULT_COUNTRY, value);
+                    targetConfig.setConfigurationProperty(FeatureKeys.DEFAULT_COUNTRY, value);
                 }
             }
         }
     }
 
-    private void readLocalization(Attributes atts) {
+    private void readLocalization(AttributeMap atts) {
         String lang = null;
         Properties properties = new Properties();
-        for (int i = 0; i < atts.getLength(); i++) {
-            if (atts.getURI(i).isEmpty()) {
-                String name = atts.getLocalName(i);
-                String value = atts.getValue(i);
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (uri.isEmpty()) {
                 if ("lang".equals(name) && !value.isEmpty()) {
                     lang = value;
                 } else if (!value.isEmpty()) {
@@ -504,23 +495,23 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             }
         }
         if (lang != null) {
-            LocalizerFactory factory = config.getLocalizerFactory();
+            LocalizerFactory factory = targetConfig.getLocalizerFactory();
             if (factory != null) {
                 factory.setLanguageProperties(lang, properties);
             }
         }
     }
 
-    private void readFileExtension(Attributes atts) {
-        String extension = atts.getValue("", "extension");
-        String mediaType = atts.getValue("", "mediaType");
+    private void readFileExtension(AttributeMap atts) {
+        String extension = atts.getValue("extension");
+        String mediaType = atts.getValue("mediaType");
         if (extension == null) {
             error("fileExtension", "extension", null, null);
         }
         if (mediaType == null) {
             error("fileExtension", "mediaType", null, null);
         }
-        config.registerFileExtension(extension, mediaType);
+        targetConfig.registerFileExtension(extension, mediaType);
     }
 
     /**
@@ -529,13 +520,13 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
      * @param atts the attributes of the extensionElement element in the configuration file
      */
 
-    protected void readExtensionElement(Attributes atts) {
+    protected void readExtensionElement(AttributeMap atts) {
         XmlProcessingIncident err = new XmlProcessingIncident("Extension elements are not available in Saxon-HE");
-        err.setLocation(Loc.makeFromSax(locator));
+        //err.setLocation(Loc.makeFromSax(locator));     // TODO: reinstate location info for diagostics
         errors.add(err);
     }
 
-    protected void readXsltPackage(Attributes atts) {
+    protected void readXsltPackage(AttributeMap atts) {
         String name = atts.getValue("name");
         if (name == null) {
             String attName = "exportLocation";
@@ -549,7 +540,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
                 error("package", attName, null, null);
             }
             try {
-                uri = ResolveURI.makeAbsolute(location, locator.getSystemId());
+                uri = ResolveURI.makeAbsolute(location, getSystemId());
             } catch (URISyntaxException e) {
                 error("package", attName, location, "Requires a valid URI.");
             }
@@ -578,7 +569,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             if (sourceLoc != null) {
                 try {
                     source = new StreamSource(
-                            ResolveURI.makeAbsolute(sourceLoc, locator.getSystemId()).toString());
+                            ResolveURI.makeAbsolute(sourceLoc, getSystemId()).toString());
                 } catch (URISyntaxException e) {
                     error("package", "sourceLocation", sourceLoc, "Requires a valid URI.");
                 }
@@ -588,7 +579,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             if (exportLoc != null) {
                 try {
                     source = new StreamSource(
-                            ResolveURI.makeAbsolute(exportLoc, locator.getSystemId()).toString());
+                            ResolveURI.makeAbsolute(exportLoc, getSystemId()).toString());
                 } catch (URISyntaxException e) {
                     error("package", "exportLocation", exportLoc, "Requires a valid URI.");
                 }
@@ -609,7 +600,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         }
     }
 
-    protected void readWithParam(Attributes atts) {
+    protected void readWithParam(AttributeMap atts, NamespaceMap nsMap) {
         if (currentPackage.exportLocation != null) {
             error("withParam", null, null, "Not allowed when @exportLocation exists");
         }
@@ -617,7 +608,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         if (name == null) {
             error("withParam", "name", null, null);
         }
-        QNameParser qp = new QNameParser(this).withAcceptEQName(true);
+        QNameParser qp = new QNameParser(nsMap).withAcceptEQName(true);
         StructuredQName qName = null;
         try {
             qName = qp.parse(name, "");
@@ -628,8 +619,8 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         if (select == null) {
             error("withParam", "select", null, null);
         }
-        IndependentContext env = new IndependentContext(config);
-        env.setNamespaceResolver(this);
+        IndependentContext env = new IndependentContext(targetConfig);
+        env.setNamespaceResolver(nsMap);
         XPathParser parser = new XPathParser();
         GroundedValue value = null;
         try {
@@ -645,16 +636,17 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
     }
 
 
-    private void readXQueryElement(Attributes atts) {
+    private void readXQueryElement(AttributeMap atts) {
         Properties props = new Properties();
-        for (int i = 0; i < atts.getLength(); i++) {
-            String name = atts.getLocalName(i);
-            String value = atts.getValue(i);
-            if (!value.isEmpty() && atts.getURI(i).isEmpty()) {
-                props.put(name, value);
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (!value.isEmpty() && uri.isEmpty()) {
+                props.setProperty(name, value);
             }
         }
-        props.put("#element", "xquery");
+        props.setProperty("#element", "xquery");
         applyProperty(props, "allowUpdate", FeatureCode.XQUERY_ALLOW_UPDATE);
         applyProperty(props, "constructionMode", FeatureCode.XQUERY_CONSTRUCTION_MODE);
         applyProperty(props, "defaultElementNamespace", FeatureCode.XQUERY_DEFAULT_ELEMENT_NAMESPACE);
@@ -670,16 +662,17 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         applyProperty(props, "version", FeatureCode.XQUERY_VERSION);
     }
 
-    private void readXsltElement(Attributes atts) {
+    private void readXsltElement(AttributeMap atts) {
         Properties props = new Properties();
-        for (int i = 0; i < atts.getLength(); i++) {
-            String name = atts.getLocalName(i);
-            String value = atts.getValue(i);
-            if (!value.isEmpty() && atts.getURI(i).isEmpty()) {
-                props.put(name, value);
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (!value.isEmpty() && uri.isEmpty()) {
+                props.setProperty(name, value);
             }
         }
-        props.put("#element", "xslt");
+        props.setProperty("#element", "xslt");
         applyProperty(props, "disableXslEvaluate", FeatureCode.DISABLE_XSL_EVALUATE);
         applyProperty(props, "enableAssertions", FeatureCode.XSLT_ENABLE_ASSERTIONS);
         applyProperty(props, "initialMode", FeatureCode.XSLT_INITIAL_MODE);
@@ -697,16 +690,17 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         //applyProperty(props, "versionWarning", FeatureKeys.VERSION_WARNING);
     }
 
-    private void readXsdElement(Attributes atts) {
+    private void readXsdElement(AttributeMap atts) {
         Properties props = new Properties();
-        for (int i = 0; i < atts.getLength(); i++) {
-            String name = atts.getLocalName(i);
-            String value = atts.getValue(i);
-            if (!value.isEmpty() && atts.getURI(i).isEmpty()) {
-                props.put(name, value);
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String name = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (!value.isEmpty() && uri.isEmpty()) {
+                props.setProperty(name, value);
             }
         }
-        props.put("#element", "xsd");
+        props.setProperty("#element", "xsd");
         applyProperty(props, "assertionsCanSeeComments", FeatureCode.ASSERTIONS_CAN_SEE_COMMENTS);
         applyProperty(props, "implicitSchemaImports", FeatureCode.IMPLICIT_SCHEMA_IMPORTS);
         applyProperty(props, "multipleSchemaImports", FeatureCode.MULTIPLE_SCHEMA_IMPORTS);
@@ -728,12 +722,12 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
             err = new XmlProcessingIncident("Invalid configuration property " +
                                              element + "/@" + attribute + ". Supplied value '" + actual + "'. " + required);
         }
-        err.setLocation(Loc.makeFromSax(locator));
+        //err.setLocation(Loc.makeFromSax(locator));
         errors.add(err);
     }
 
     protected void error(XPathException err) {
-        err.setLocator(Loc.makeFromSax(locator));
+        //err.setLocator(Loc.makeFromSax(locator));
         errors.add(new XmlProcessingException(err));
     }
 
@@ -743,40 +737,43 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
                                                         ". Supplied value '" + actual +
                                                         "', required value is the name of a class that implements '" + required.getName() + "'");
         err.setCause(cause);
-        err.setLocation(Loc.makeFromSax(locator));
+        //err.setLocation(Loc.makeFromSax(locator));
         errors.add(err);
     }
 
     @Override
-    public void endElement(String uri, String localName, String qName) {
+    public void endElement() throws XPathException {
+        String localName = localNameStack.pop();
         if (level == 3 && "resources".equals(section)) {
             String content = buffer.toString();
             if (!content.isEmpty()) {
                 if ("externalObjectModel".equals(localName)) {
+                    //#if CSHARP==false
                     try {
-                        ExternalObjectModel model = (ExternalObjectModel) config.getInstance(content);
-                        config.registerExternalObjectModel(model);
+                        ExternalObjectModel model = (ExternalObjectModel) targetConfig.getInstance(content);
+                        targetConfig.registerExternalObjectModel(model);
                     } catch (XPathException | ClassCastException e) {
                         errorClass("externalObjectModel", null, content, ExternalObjectModel.class, e);
                     }
+                    //#endif
                 } else if ("extensionFunction".equals(localName)) {
                     try {
-                        ExtensionFunctionDefinition model = (ExtensionFunctionDefinition) config.getInstance(content);
-                        config.registerExtensionFunction(model);
+                        ExtensionFunctionDefinition model = (ExtensionFunctionDefinition) targetConfig.getInstance(content);
+                        targetConfig.registerExtensionFunction(model);
                     } catch (XPathException | ClassCastException | IllegalArgumentException e) {
                         errorClass("extensionFunction", null, content, ExtensionFunctionDefinition.class, e);
                     }
                 } else if ("schemaDocument".equals(localName)) {
                     try {
                         Source source = getInputSource(content);
-                        config.addSchemaSource(source);
+                        targetConfig.addSchemaSource(source);
                     } catch (XPathException e) {
                         errors.add(new XmlProcessingException(e));
                     }
                 } else if ("schemaComponentModel".equals(localName)) {
                     try {
                         Source source = getInputSource(content);
-                        config.importComponents(source);
+                        targetConfig.importComponents(source);
                     } catch (XPathException e) {
                         errors.add(new XmlProcessingException(e));
                     }
@@ -794,7 +791,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
 
     private Source getInputSource(String href) throws XPathException {
         try {
-            String base = locator.getSystemId();
+            String base = getSystemId();
             URI abs = ResolveURI.makeAbsolute(href, base);
             return new StreamSource(abs.toString());
         } catch (URISyntaxException e) {
@@ -803,69 +800,9 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
     }
 
     @Override
-    public void characters(char[] ch, int start, int length) {
-        buffer.append(ch, start, length);
+    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+        buffer.append(chars.toString());
     }
 
-    @Override
-    public void ignorableWhitespace(char[] ch, int start, int length) {
-
-    }
-
-    @Override
-    public void processingInstruction(String target, String data) {
-
-    }
-
-    @Override
-    public void skippedEntity(String name) {
-
-    }
-
-    /////////////////////////////////////////////////////
-    // Implement NamespaceResolver
-    /////////////////////////////////////////////////////
-
-    /**
-     * Get the namespace URI corresponding to a given prefix. Return null
-     * if the prefix is not in scope.
-     *
-     * @param prefix     the namespace prefix. May be the zero-length string, indicating
-     *                   that there is no prefix. This indicates either the default namespace or the
-     *                   null namespace, depending on the value of useDefault.
-     * @param useDefault true if the default namespace is to be used when the
-     *                   prefix is "". If false, the method returns "" when the prefix is "".
-     * @return the uri for the namespace, or null if the prefix is not in scope.
-     * The "null namespace" is represented by the pseudo-URI "".
-     */
-
-    @Override
-    public String getURIForPrefix(String prefix, boolean useDefault) {
-        for (int i = namespaceStack.size() - 1; i >= 0; i--) {
-            List<String[]> list = namespaceStack.get(i);
-            for (String[] pair : list) {
-                if (pair[0].equals(prefix)) {
-                    return pair[1];
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get an iterator over all the prefixes declared in this namespace context. This will include
-     * the default namespace (prefix="") and the XML namespace where appropriate
-     */
-    
-    @Override
-    public Iterator<String> iteratePrefixes() {
-        Set<String> prefixes = new HashSet<>();
-        for (List<String[]> list : namespaceStack) {
-            for (String[] pair : list) {
-                prefixes.add(pair[0]);
-            }
-        }
-        return prefixes.iterator();
-    }
 }
 

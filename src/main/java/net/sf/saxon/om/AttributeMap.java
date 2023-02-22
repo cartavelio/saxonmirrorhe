@@ -84,6 +84,20 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
     }
 
     /**
+     * Get the value of a no-namespace attribute with a given local name, if it exists
+     *
+     * @param local the local part of the name of the required attribute; the attribute
+     *              must be in no namespace
+     * @return the value of the required attribute if it exists, or null otherwise
+     */
+
+    default String getValue(String local) {
+        AttributeInfo att = get("", local);
+        return att == null ? null : att.getValue();
+    }
+
+
+    /**
      * Replace or add an attribute, to create a new AttributeMap
      * @param att the attribute to be added or replaced
      * @return the new AttributeMap

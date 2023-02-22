@@ -8,6 +8,8 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.Objects;
@@ -17,9 +19,14 @@ import java.util.Objects;
  * <p>This class is not user-visible.</p>
  */
 
+@CSharpInjectMembers(
+        code={"public override bool Matches(Saxon.Api.XdmItem item) {return matches(item);}",
+              "public override bool Subsumes(Saxon.Api.XdmItemType other) {return subsumes(other);}"
+        }
+)
+
 class ConstructedItemType extends ItemType {
 
-    private final net.sf.saxon.type.ItemType underlyingType;
     private final Processor processor;
 
     /**
@@ -30,10 +37,10 @@ class ConstructedItemType extends ItemType {
      */
 
     protected ConstructedItemType(/*@Nullable*/ net.sf.saxon.type.ItemType underlyingType, Processor processor) {
-            Objects.requireNonNull(processor);
-            Objects.requireNonNull(underlyingType);
+        super(underlyingType);
+        Objects.requireNonNull(processor);
+        Objects.requireNonNull(underlyingType);
         this.processor = processor;
-        this.underlyingType = underlyingType;
     }
 
     /**
@@ -45,6 +52,7 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
+    @CSharpModifiers(code = "public")
     public ConversionRules getConversionRules() {
         return processor.getUnderlyingConfiguration().getConversionRules();
     }
@@ -60,6 +68,7 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
+    @CSharpModifiers(code="public")
     public boolean matches(XdmItem item) {
         TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
         return underlyingType.matches(item.getUnderlyingValue(), th);
@@ -77,6 +86,7 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
+    @CSharpModifiers(code = "public")
     public boolean subsumes(ItemType other) {
         TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
         return th.isSubType(other.getUnderlyingItemType(), underlyingType);
@@ -90,6 +100,7 @@ class ConstructedItemType extends ItemType {
      */
 
     @Override
+    @CSharpModifiers(code = "public")
     public net.sf.saxon.type.ItemType getUnderlyingItemType() {
         return underlyingType;
     }
@@ -104,5 +115,7 @@ class ConstructedItemType extends ItemType {
     protected Processor getProcessor() {
         return processor;
     }
+
+
 }
 

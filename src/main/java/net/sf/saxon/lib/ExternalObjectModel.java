@@ -12,7 +12,6 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Result;

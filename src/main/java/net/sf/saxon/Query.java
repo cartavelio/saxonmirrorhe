@@ -339,7 +339,6 @@ public class Query {
                     config.getLogger().info("Analysis time: " + ((endTime - startTime) / 1e6) + " milliseconds");
                     startTime = endTime;
                 }
-
             } catch (SaxonApiException e) {
                 if (e.getCause() instanceof XPathException) {
                     XPathException err = (XPathException) e.getCause();
