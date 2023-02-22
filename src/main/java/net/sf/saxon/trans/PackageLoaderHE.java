@@ -3149,9 +3149,6 @@ public class PackageLoaderHE implements IPackageLoader {
                     .withTopLevelType(schemaType);
             String flags = element.getAttributeValue(NamespaceUri.NULL,"flags");
             if (flags != null) {
-//                if (flags.contains("s")) {
-//                    loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
-//                }
                 if (flags.contains("S")) {
                     options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                 }
@@ -3171,6 +3168,9 @@ public class PackageLoaderHE implements IPackageLoader {
 
             final SourceDocument inst = new SourceDocument(href, body, options);
 
+            if (flags != null && flags.contains("s")) {
+                loader.addCompletionAction(() -> inst.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
+            }
             String accumulatorNames = element.getAttributeValue(NamespaceUri.NULL,"accum");
             processAccumulatorList(loader, inst, accumulatorNames);
             return inst;

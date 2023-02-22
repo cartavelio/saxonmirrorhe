@@ -55,6 +55,15 @@ public class SourceDocument extends Instruction {
         this.accumulators = options.getApplicableAccumulators();
     }
 
+    /**
+     * Set the whitespace stripping rule to be used. (This method is used when
+     * reloading the instruction from a SEF file)
+     * @param rule the whitespace stripping rule
+     */
+    public void setSpaceStrippingRule(SpaceStrippingRule rule) {
+        parseOptions = parseOptions.withSpaceStrippingRule(rule);
+    }
+
 
     /**
      * Get a name identifying the kind of expression, in terms meaningful to a user.
