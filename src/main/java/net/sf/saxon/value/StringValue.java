@@ -21,7 +21,7 @@ import net.sf.saxon.z.IntIterator;
 
 /**
  * An atomic value of type xs:string. This class is also used for types derived from xs:string.
- * Subclasses of StringValue are used for xs:untypedAtomic and xs:anyURI values.
+ * The StringValue class is also used for xs:untypedAtomic; a subclass is used for xs:anyURI values.
  *
  * <p>Internally the value is held as a wrapper around a {@link UnicodeString}, which allows
  * a variety of implementations</p>
