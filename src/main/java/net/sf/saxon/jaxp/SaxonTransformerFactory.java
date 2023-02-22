@@ -152,7 +152,7 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
                 compiler.setErrorReporter(new ErrorReporterToListener(errorListener));
             }
             XsltExecutable executable = compiler.compile(source);
-            return new TemplatesImpl(executable);
+            return new TemplatesImpl(this, executable);
         } catch (SaxonApiException e) {
             throw new TransformerConfigurationException(e);
         }
@@ -181,7 +181,7 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.getUnderlyingCompilerInfo().copyFrom(info);
-            return new TemplatesImpl(compiler.compile(source));
+            return new TemplatesImpl(this, compiler.compile(source));
         } catch (SaxonApiException e) {
             throw new TransformerConfigurationException(e);
         }
@@ -459,7 +459,7 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
 
     @Override
     public TemplatesHandler newTemplatesHandler() {
-        return new TemplatesHandlerImpl(processor);
+        return new TemplatesHandlerImpl(this, processor);
     }
 
     /**

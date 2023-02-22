@@ -3,6 +3,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
+import java.net.URISyntaxException;
 
 /**
  * A bundle of information made available when requesting resource resolution.
@@ -110,7 +111,19 @@ public class ResourceRequest {
     public Source resolve(ResourceResolver... resolvers) throws XPathException {
         for (ResourceResolver resolver : resolvers) {
             if (resolver != null) {
-                Source s = resolver.resolve(this);
+                Source s = null;
+                try {
+                    s = resolver.resolve(this);
+                } catch (XPathException e) {
+                    if (e.getCause() instanceof IllegalArgumentException) {
+                        IllegalArgumentException iae = (IllegalArgumentException)e.getCause();
+                        if (iae.getCause() instanceof URISyntaxException) {
+                            throw new XPathException("Invalid URI " + uri, iae.getCause());
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
                 if (s != null) {
                     return s;
                 }
