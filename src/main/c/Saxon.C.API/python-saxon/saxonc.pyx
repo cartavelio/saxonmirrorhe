@@ -789,9 +789,12 @@ cdef class PyDocumentBuilder:
         """bool: true if line numbering is enabled"""
         return self.thisdbptr.isLineNumbering()
 
-    @line_numbering.setter
-    def line_numbering(self, value):
-        """bool: option true if line numbers are to be maintained, false otherwise."""
+    def set_line_numbering(self, value):
+        """Set whether line and column numbering and is to be enabled for documents constructed using this
+        PyDocumentBuilder. By default, line and column numbering is disabled.
+        Args:
+            value (bool): true if line numbers are to be maintained, false otherwise
+        """
         cdef bool c_line
         c_line = value
         self.thisdbptr.setLineNumbering(c_line)
@@ -802,9 +805,12 @@ cdef class PyDocumentBuilder:
         """bool: Ask whether DTD validation is to be applied to documents loaded using this PyDocumentBuilder"""
         return self.thisdbptr.isDTDValidation()
 
-    @dtd_validation.setter
-    def dtd_validation(self, value):
-        """bool: Set whether DTD validation should be applied to documents loaded using this PyDocumentBuilder"""
+    def set_dtd_validation(self, value):
+        """Set whether DTD validation should be applied to documents loaded using this PyDocumentBuilder.
+        By default, no DTD validation takes place.
+        Args:
+            value (bool): true if DTD validation should be applied to loaded documents
+        """
         cdef bool c_dtd
         c_dtd = value
         self.thisdbptr.setDTDValidation(c_dtd)
