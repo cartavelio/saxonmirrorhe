@@ -58,9 +58,11 @@ public class XdmUtils {
     @CEntryPoint(name = "getStringValueForXdmItem")
     public static CCharPointer getStringValue_XdmItem(IsolateThread thread, ObjectHandle value) {
         XdmItem item = SaxonCAPI.objectHandles.get(value);
+        /*
+        TODO how do we return null?
         if(item == null) {
             return null;
-        }
+        }   */
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.getStringValue());
         return holder.get();
     }
@@ -68,9 +70,11 @@ public class XdmUtils {
     @CEntryPoint(name = "xdmItemToString")
     public static CCharPointer toString_XdmItem(IsolateThread thread, ObjectHandle value) {
         XdmItem item = SaxonCAPI.objectHandles.get(value);
+        /*
+        TODO how do we return null?
         if(item == null) {
             return null;
-        }
+        }   */
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
         return holder.get();
     }
