@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
-
-// A C# emulation of Saxon.Ejava.util.Comparator
+/*
+ * A C# emulation of java.util.Comparator
+ */
  
 namespace Saxon.Ejava.util {
     public interface Comparator<in T> {

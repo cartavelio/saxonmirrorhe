@@ -4,15 +4,17 @@ using Saxon.Hej.trans;
 
 namespace Saxon.Api {
     /// <summary>
-    /// The class <c>StaticContext</c> provides information about the static context of an expression
+    /// The class <c>StaticContext</c> provides information about the static context of an expression.
     /// </summary>
+    /// <remarks>
+    /// <para>The class is used to supply information about the static context of an extension function call,
+    /// allowing the result of an extension function to depend on aspects of the static context
+    /// such as the default collation.</para>
+    /// </remarks>
 
     public class StaticContext {
-
-        private Saxon.Hej.expr.StaticContext env;
-
         internal StaticContext(Saxon.Hej.expr.StaticContext jsc) {
-            env = jsc;
+            Implementation = jsc;
         }
 
 
@@ -20,11 +22,7 @@ namespace Saxon.Api {
         /// The URI of the module where an expression appears, suitable for use in diagnostics
         /// </summary>
 
-        public Uri ModuleUri {
-            get {
-                return new Uri(env.getSystemId());
-            }
-        }
+        public Uri ModuleUri => new Uri(Implementation.getSystemId());
 
 
         /// <summary>
@@ -33,11 +31,7 @@ namespace Saxon.Api {
         /// <c>xml:base</c> attribute
         /// </summary>
 
-        public Uri BaseUri {
-            get {
-                return new Uri(env.getStaticBaseURI());
-            }
-        }
+        public Uri BaseUri => new(Implementation.getStaticBaseURI());
 
         /// <summary>
         /// Resolve an in-scope namespace prefix to obtain the corresponding namespace URI. If the prefix
@@ -46,12 +40,12 @@ namespace Saxon.Api {
         /// <param name="Prefix">The namespace prefix</param>
         /// <returns>The corresponding namespace URI if there is one, or null otherwise</returns>
 
-        public String GetNamespaceForPrefix(string Prefix) {
+        public string GetNamespaceForPrefix(string Prefix) {
             if (Prefix == "") {
-                return env.getDefaultElementNamespace();
+                return Implementation.getDefaultElementNamespace();
             }
             try {
-                return env.getNamespaceResolver().getURIForPrefix(Prefix, false);
+                return Implementation.getNamespaceResolver().getURIForPrefix(Prefix, false);
             } catch (XPathException) {
                 return null;
             }
@@ -70,23 +64,7 @@ namespace Saxon.Api {
         /// or between a <c>Processor</c> and other applications.</para>
         /// </remarks>
 
-        public Processor Processor
-        {
-            get
-            {
-                Configuration config = env.getConfiguration();
-                Object p = config.getProcessor();
-                if (p is Processor)
-                {
-                    return (Processor)p;
-                }
-                else
-                {
-                    return null;
-                }
-
-            }
-        }
+        public Processor Processor => (object)Implementation.getConfiguration().getProcessor() is Processor processor ? processor : null;
 
         /// <summary>
         /// The underlying object in the Saxon implementation, an instance of class
@@ -103,9 +81,6 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
 
-        public Saxon.Hej.expr.StaticContext Implementation
-        {
-            get { return env; }
-        }
+        public Saxon.Hej.expr.StaticContext Implementation { get; }
     }
 }
