@@ -186,6 +186,7 @@ public class FailingTests {
     }
 
     @Test  // bug 5148
+    @Disabled("Takes too long, runs out of memory")
     public void testParallelCompilation() {
 
         for (int runs=0; runs<20; runs++) {
