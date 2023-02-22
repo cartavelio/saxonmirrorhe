@@ -344,7 +344,7 @@ public class StandardErrorReporter
             int line = nestedLoc.getLocalLineNumber();
             int column = nestedLoc.getColumnNumber();
             String lineInfo = line <= 0 ? "" : "on line " + line + ' ';
-            String columnInfo = column < 0 ? "" : "at " + (line <= 0 ? "char " : "column ") + column + ' ';
+            String columnInfo = column <= 0 ? "" : "at " + (line <= 0 ? "char " : "column ") + column + ' ';
             String nearBy = nestedLoc.getNearbyText();
 
             Expression failingExpression = null;
