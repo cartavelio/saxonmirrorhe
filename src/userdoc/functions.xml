@@ -1769,7 +1769,8 @@
       <description>
         <p>Formats an integer according to a given picture string, using the conventions of a given
           natural language if specified.</p>
-        <p>For localization details, see <a href="/localization/localizing-numbers-and-dates" class="bodylink code">Localizing numbers and dates</a>.</p>
+        <p>For localization details, see <a href="/localization/number-formatting" 
+          class="bodylink code">Formatting numbers</a>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">

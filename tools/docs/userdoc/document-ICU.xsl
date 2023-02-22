@@ -316,18 +316,25 @@
         <p>In all cases it appears to be that the numbering scheme names and their behaviour is
           taken from the base language, with no regional variation - i.e. <code>es-PT</code> and
             <code>es-419</code> would produce the same results.</p>
-        <p>The simplest way to invoke a specific ICU numbering scheme is to name it explictly.
-        In <code>format-integer</code> this can be done within the parentheses in the forma
-          picture, for example <code>format-integer(@value,'1;o(%spellout-ordinal-verbose)',$lang)</code>.
-        When this approach is used, it does not matter whether "o" (for ordinal) or "c" (for
+        <h3>Explicitly named numbering schemes</h3>
+        <p>The simplest way to invoke a specific ICU numbering scheme (or spellout ruleset) is to name it explictly.
+          In <a class="bodylink code" href="/functions/fn/format-integer">format-integer()</a> this can be
+          done within the parentheses in the format 
+          picture, for example:</p> 
+        <samp>format-integer(@value,'1;o(%spellout-ordinal-verbose)',$lang)</samp>
+        <p>When this approach is used, it does not matter whether "o" (for ordinal) or "c" (for
         cardinal) is specified; the chosen spellout rules take precedence.</p>
-        <p>Similarly, with <code>xsl:number</code>, you can specify <code>ordinal="%spellout-ordinal-verbose"</code>.
+        <p>Similarly, with <a class="bodylink code" href="/xsl-elements/number">xsl:number</a>, you can
+          specify <code>ordinal="%spellout-ordinal-verbose"</code>.
         Again, it does not matter whether the numbering scheme is cardinal, ordinal, or something else: 
         as noted in the XSLT 3.0 specification, the attribute name <code>ordinal</code> is a misnomer.</p>
         <p>If a spellout name is chosen that does not exist for the chosen language, Saxon attempts to fall back
-        to a default scheme, it does not report an error.</p>
+          to a default scheme, it does not report an error.</p>
+        <p>See <a class="bodylink" href="ICU-numbering">Supported ICU numbering schemes</a> for a full list
+          of the names of numbering schemes available in different languages.</p>
         <aside><p>The XSLT 3.0 specification suggests the use of ICU spellout names as described here,
-        but does not mandate it.</p></aside>
+          but does not mandate it.</p></aside>
+        <h3>Alternative ways to specify numbering schemes</h3>
         <p>To avoid such a direct dependency on ICU spellout names, and for compatibility with
         earlier Saxon and XSLT versions, alternative mechanisms are available, as described below.</p>
         <p>To invoke one of these schemes, an IETF BCP47 standard <em>private tag</em> can be appended
@@ -335,8 +342,8 @@
           of exceptions (to avoid clashes) these codes are encoded as the sequence of first letters
           of each word, the result being all lower case: for example <code>%spellout-ordinal-verbose</code> 
           with American English may be invoked using language code <code>en-US-x-sov</code>.
-          Further examples of use are shown in the previous
-          table. These private tag codes are recognised for 'word' numbering purposes on both
+          Further examples of use are shown in the 
+          table above. These private tag codes are recognised for 'word' numbering purposes on both
           <a class="bodylink code" href="/functions/fn/format-integer">format-integer()</a> and 
           <a class="bodylink code" href="/xsl-elements/number">xsl:number</a> language arguments.</p>
         <p>A full list of the scheme codes and their support in a given language is given in <a

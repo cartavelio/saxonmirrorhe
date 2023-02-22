@@ -67,7 +67,7 @@
             java="net.sf.saxon.s9api.SchemaManager#load">load()</code> method now has an overload that takes a <code>java.io.File</code> as its
             argument.</p>
         
-        <p>The output of <code java="net.sf.saxon.s9api.XdmNode#toString">XdmNode.toString()</code> has changed so it is now consistent with the
+        <p>The output of the <code java="net.sf.saxon.s9api.XdmNode">XdmNode</code> method <code>toString()</code> has changed so it is now consistent with the
             output of <code java="net.sf.saxon.s9api.XdmValue#toString">XdmValue.toString()</code> in the case where the <code>XdmValue</code>
             comprises a single node. That is, it is now output using the adaptive serialization method.</p>
         
@@ -139,22 +139,25 @@
     
     <category name="localization" class="javaonly">
         
-     <p>When using ICU localization of number formatting in SaxonJ-PE or SaxonJ-EE, ICU rule names may now be specified directly
+        <p>When using ICU localization of number formatting (see <a class="bodylink" href="/localization/ICU-numbers-and-dates">Numbers and dates from
+            ICU</a>) in SaxonJ-PE or SaxonJ-EE, ICU rule names may now be specified directly
      as suggested in the XSLT 3.0 and the Functions and Operators 3.0 specifications. For example:</p>
         
-        <p>In <code>xsl:number</code>, you can write <code>format="w" lang="de" ordinal="%spellout-ordinal-masculine"</code>
+        <p>In <a class="bodylink code" href="/xsl-elements/number">xsl:number</a>, you can write <code>format="w" lang="de"
+            ordinal="%spellout-ordinal-masculine"</code> 
         to get numbers formatted as German words, using the named ICU spellout rule. Note that the rule does not have to be
         one for ordinal numbering; you would request a cardinal numbering rule in the same way (the attribute name is a misnomer).</p>
         
-        <p>In <code>fn:format-integer</code>, you can write <code>fn:format-integer($n, 'wc;o(%spellout-ordinal-masculine)', 'de')</code>
+        <p>In <a class="bodylink code" href="/functions/fn/format-integer">fn:format-integer()</a>, you can write <code>fn:format-integer($n,
+            'wc;o(%spellout-ordinal-masculine)', 'de')</code> 
             or <code>fn:format-integer($n, 'wc;c(%spellout-ordinal-masculine)', 'de')</code> to achieve the same effect. If you use
         a spellout rule name in this way, it doesn't matter whether you request <code>c</code> for cardinal numbering or
         <code>o</code> for ordinal numbering: the spellout rule name takes precedence.</p>
         
         <p>To support this, there have been some minor changes in the <code>Numberer</code> API, which will affect applications that
-            implement <code>net.sf.saxon.lib.Numberer</code> or that extend one of its Saxon-supplied implementations. Specifically,
-        an extra argument (<code>cardinal</code>) has been added to the methods <code>format</code> and <code>toWords</code>. 
-            Implementations are free to ignore this argument.</p>
+            implement <code java="net.sf.saxon.lib.Numberer">net.sf.saxon.lib.Numberer</code> or that extend one of its Saxon-supplied
+            implementations. Specifically, an extra argument (<code>cardinal</code>) has been added to the methods <code>format</code> and
+            <code>toWords</code>. Implementations are free to ignore this argument.</p>
         
     </category>
     
@@ -241,7 +244,7 @@
         <!--<h2>Changes to Extension Functions</h2>-->
         
         <h2>New Extension Functions</h2>
-        L
+        
         <p>A number of proposed 4.0 functions are implemented (see <a class="bodylink" href="/v4extensions/new-functions">New functions</a>): 
             <code>fn:all()</code>, <code>fn:all-different()</code>, <code>fn:all-equal()</code>, <code>fn:characters()</code>, 
             <code>fn:contains-sequence()</code>, <code>fn:ends-with-sequence()</code>, 
