@@ -448,13 +448,13 @@ namespace Saxon.Api {
         }
         
         /// <summary>
-        /// Get the i'th item in the value, counting from zero.
+        /// Get a selected item in the sequence by position, counting from zero.
         /// </summary>
         /// <remarks>
         /// Retained for compatibility; but <c>xdmValue.ItemAt(i)</c> can also be written <c>xdmValue[i]</c>
         /// </remarks>
-        /// <param name="i">The item that is required, counting the first item in the sequence as item zero.</param>
-        /// <returns>The i'th item in the sequence making up the value, counting from zero.</returns>
+        /// <param name="index">The item that is required, counting the first item in the sequence as item zero.</param>
+        /// <returns>The item in the sequence at position <c>index</c>, counting from zero.</returns>
         
         // Indexer declaration
         public XdmItem this[int index] => ItemAt(index);

@@ -9,13 +9,13 @@ namespace Saxon.Api.Support {
     internal class ResultDocumentHandlerWrapper : ResultDocumentResolver
     {
 
-        private ResultDocumentHandler handler;
-        private ArrayList resultList = new ArrayList();
-        private ArrayList destinationList = new ArrayList();
-        private PipelineConfiguration pipe;
+        private readonly ResultDocumentHandler handler;
+        private readonly ArrayList resultList = new ();
+        private readonly ArrayList destinationList = new();
+        private readonly PipelineConfiguration pipe;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Saxon.Api.ResultDocumentHandlerWrapper"/> class.
+        /// Initializes a new instance of the <see cref="Saxon.Api.Support.ResultDocumentHandlerWrapper"/> class.
         /// </summary>
         /// <param name="handler">Handler.</param>
         /// <param name="pipe">Pipe.</param>
@@ -36,7 +36,7 @@ namespace Saxon.Api.Support {
         {
             for (int i = 0; i < resultList.Count; i++)
             {
-                if (Object.ReferenceEquals(resultList[i], result))
+                if (ReferenceEquals(resultList[i], result))
                 {
                     ((IDestination)destinationList[i]).GetUnderlyingDestination().close();
                     resultList.RemoveAt(i);
@@ -47,10 +47,12 @@ namespace Saxon.Api.Support {
         }
 
         /// <summary>
-        /// Resolve the specified href and baseString.
+        /// Get a Receiver for the specified secondary result document.
         /// </summary>
-        /// <param name="href">Href.</param>
-        /// <param name="baseString">Base string.</param>
+        /// <param name="xpc">XPath dynamic context</param>
+        /// <param name="href">Relative URI</param>
+        /// <param name="baseString">Base URI.</param>
+        /// <param name="sp">Serialization parameters</param>
         public Receiver resolve(Saxon.Hej.expr.XPathContext xpc, string href, string baseString, Saxon.Hej.serialize.SerializationProperties sp)
         {
             Uri baseUri;

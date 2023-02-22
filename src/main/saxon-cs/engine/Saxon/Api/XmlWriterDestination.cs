@@ -105,7 +105,7 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="Saxon.Hej.api.Destination"/> object 
+        /// <para>Information about the returned <see cref="Saxon.Hej.s9api.Destination"/> object 
         /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>
         /// </remarks>
