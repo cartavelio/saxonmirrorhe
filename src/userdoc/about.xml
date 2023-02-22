@@ -644,7 +644,7 @@
                      <p><span class="nowrap">saxon-he-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>4.9Mb</p>
+                   <p>5.5Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Home Edition. Contains all the software in SaxonJ-HE, except as noted
@@ -657,7 +657,7 @@
                      <p><span class="nowrap">saxon-pe-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>5.6Mb</p>
+                   <p>6.3Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Professional Edition. Contains all the software in SaxonJ-PE, except as
@@ -670,7 +670,7 @@
                      <p><span class="nowrap">saxon-ee-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>7.8Mb</p>
+                   <p>8Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Enterprise Edition. Contains all the software in SaxonJ-EE, except as
@@ -683,7 +683,7 @@
               
               <tr>
                 <td>
-                   <p><span class="nowrap">saxon-xqj-12.#.jar</span></p>
+                   <p><span class="nowrap">saxon-he-xqj-12.#.jar</span></p>
                 </td>
                 <td>
                   <p>102Kb</p>
@@ -702,7 +702,7 @@
                      <p><span class="nowrap">saxon-sql-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>63Kb</p>
+                   <p>77Kb</p>
                  </td>
                   <td>
                      <p>Supports XSLT and XPath extensions for accessing and updating a relational database
@@ -750,7 +750,7 @@
                    <p><span class="nowrap">saxon-ee-test-12.#.jar</span></p>
                 </td>
                 <td>
-                  <p>225Kb</p>
+                  <p>226Kb</p>
                 </td>
                 <td>
                   <p>Test drivers for running the W3C test suites for XSLT, XQuery, and XSD
@@ -799,10 +799,10 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolver-4.1.2.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-4.6.0.jar</span></p>
                   </td>
                   <td>
-                     <p>147Kb</p>
+                     <p>157Kb</p>
                   </td>
                   <td>
                      <p>XML Resolver: an open source library supporting the resolution of URIs using
@@ -814,10 +814,10 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolver-4.2.0-data.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-4.6.0-data.jar</span></p>
                   </td>
                   <td>
-                     <p>TBA</p>
+                     <p>1Mb</p>
                   </td>
                   <td>
                      <p>XML Resolver Data: a package of commonly used W3C resources, such as DTDs and
