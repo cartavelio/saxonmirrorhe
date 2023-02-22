@@ -78,7 +78,7 @@ public:
      * Get the first item in the sequence
      * @return XdmItem or nullptr if sequence is empty
      */
-	XdmItem * getHead();
+	virtual XdmItem * getHead();
 
   /**
      * Get the n'th item in the value, counting from zero.

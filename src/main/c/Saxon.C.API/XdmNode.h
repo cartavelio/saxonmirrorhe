@@ -39,6 +39,12 @@ public:
 
 	virtual bool isAtomic();
 
+	 /**
+         * Get the first item in the sequence
+         * @return XdmItem or nullptr if sequence is empty
+         */
+     XdmItem * getHead();
+
 
 	XDM_NODE_KIND getNodeKind();
 

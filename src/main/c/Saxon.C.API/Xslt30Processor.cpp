@@ -511,12 +511,9 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
                                                                            stylesheet), jitCompilation,
                                                                    comboArrays.stringArray, comboArrays.objectArray));
         if (!executableObject) {
-            std::cerr<<"compileFromFile cp0 - execObj is null"<<std::endl;
             createException();
             return nullptr;
 
-        } {
-            std::cerr<<"compileFromFile cp0 - execObj ok"<<std::endl;
         }
         if (comboArrays.stringArray != nullptr) {
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
@@ -750,10 +747,12 @@ const char * Xslt30Processor::transformFileToString(const char* source,
         jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
         jsize num_bytes = SaxonProcessor::sxn_environ->env->GetArrayLength(result);
 
-        const char *str = new char[num_bytes];
-        memcpy ((void *) str, b , num_bytes );
+            char* str = new char[num_bytes + 1];
+            memcpy ( str, b , num_bytes );
+            str[num_bytes] = '\0';
 
-        SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+             SaxonProcessor::sxn_environ->env->ReleaseByteArrayElements( result, b, 0);
+             SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
         return str;
 	} else  {
 	    createException();
