@@ -20,9 +20,9 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.streams.Predicates;
+import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -1780,6 +1780,43 @@ public class DOMTest {
             StringWriter sw = new StringWriter();
             transformerFactory.newTransformer().transform(new DOMSource(document), new StreamResult(sw));
         } catch (SAXException | TransformerException | ParserConfigurationException | IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testBug5859() {
+        try {
+            // Tests programmatic construction of a DOM with namespaced-elements and attributes,
+            // without explicitly creating corresponding namespace attributes
+            Processor proc = new Processor(false);
+            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+            documentFactory.setNamespaceAware(true);
+            Document doc = documentFactory.newDocumentBuilder().newDocument();
+            Element elem = doc.createElementNS("http://namespace.pq/", "outer");
+            doc.appendChild(elem);
+            elem.setAttributeNS("http://namespace.ab/", "ab:c", "someValue");
+            XdmNode wrappedDoc = proc.newDocumentBuilder().wrap(doc);
+            XdmNode wrappedElem = wrappedDoc.select(Steps.child("*")).asNode();
+            XdmValue namespaces = wrappedElem.select(Steps.namespace()).asXdmValue();
+            assertEquals(3, namespaces.size());
+            assertTrue(namespaces.itemAt(0) instanceof XdmNode);
+            assertTrue(namespaces.itemAt(1) instanceof XdmNode);
+            assertTrue(namespaces.itemAt(2) instanceof XdmNode);
+            assertEquals(XdmNodeKind.NAMESPACE, ((XdmNode) namespaces.itemAt(0)).getNodeKind());
+            assertEquals(XdmNodeKind.NAMESPACE, ((XdmNode) namespaces.itemAt(1)).getNodeKind());
+            assertEquals(XdmNodeKind.NAMESPACE, ((XdmNode) namespaces.itemAt(2)).getNodeKind());
+            Optional<XdmNode> xmlNs = namespaces.select(Steps.self().where(Predicates.hasLocalName("xml"))).asOptionalNode();
+            assertTrue(xmlNs.isPresent());
+            assertEquals(NamespaceConstant.XML, xmlNs.get().getStringValue());
+            Optional<XdmNode> abNs = namespaces.select(Steps.self().where(Predicates.hasLocalName("ab"))).asOptionalNode();
+            assertTrue(abNs.isPresent());
+            assertEquals("http://namespace.ab/", abNs.get().getStringValue());
+            Optional<XdmNode> pqNs = namespaces.select(Steps.self().where(Predicates.hasLocalName(""))).asOptionalNode();
+            assertTrue(pqNs.isPresent());
+            assertEquals("http://namespace.pq/", pqNs.get().getStringValue());
+        } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
