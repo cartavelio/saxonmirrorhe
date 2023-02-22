@@ -237,9 +237,9 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                 UserFunctionReference.BoundUserFunction buf =
                         new UserFunctionReference.BoundUserFunction(agent, userFunction, null, newController);
                 if (functionsMap.get(functionQName) != null) {
-                    newMap = ((MapItem) functionsMap.get(functionQName)).addEntry(new Int64Value(function.getNumberOfArguments()), buf);
+                    newMap = ((MapItem) functionsMap.get(functionQName)).addEntry(new Int64Value(function.getNumberOfParameters()), buf);
                 } else {
-                    newMap = new SingleEntryMap(Int64Value.makeIntegerValue(function.getNumberOfArguments()), buf);
+                    newMap = new SingleEntryMap(Int64Value.makeIntegerValue(function.getNumberOfParameters()), buf);
                 }
                 functionsMap = functionsMap.addEntry(functionQName, newMap);
             }

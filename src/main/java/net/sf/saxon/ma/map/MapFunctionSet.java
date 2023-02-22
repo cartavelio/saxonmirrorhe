@@ -10,10 +10,10 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.functions.InsertBefore;
-import net.sf.saxon.functions.OptionsParameter;
-import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -91,13 +91,37 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-        SpecificFunctionType indexArg = new SpecificFunctionType(
+        SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
-                SequenceType.SINGLE_ATOMIC);
+                SequenceType.OPTIONAL_ATOMIC);
 
-        register("index", 2, e -> e.populate( MapIndex::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        SpecificFunctionType mapBuildValueArg = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.ANY_SEQUENCE);
+
+        register("index", 2, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                // TODO: deprecate/drop this
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, indexArg, ONE, null));
+                .arg(1, mapBuildKeyArg, ONE, null));
+
+        Expression identityFunction;
+        try {
+            identityFunction = new FunctionLiteral(XPath40FunctionSet.getInstance().makeFunction("identity", 1));
+        } catch (XPathException e) {
+            throw new AssertionError(e);
+        }
+        FunctionItemType opFnType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE);
+        Callable concatCallable = new CallableDelegate(
+                (cxt, args) -> SequenceExtent.from(new InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
+        CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
+        register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, mapBuildKeyArg, ONE, null, identityFunction)
+                .arg(2, mapBuildValueArg, ONE, null, identityFunction)
+                .arg(3, opFnType, ONE, null, new FunctionLiteral(concatSeq)));
+        ;
 
         register("put", 3, e -> e.populate( MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
@@ -461,20 +485,32 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
     /**
      * Implementation of the proposed XPath 4.0 function
-     * map:index($sequence, function(item()) as xs:anyAtomicType) =&gt; map(*)
+     * map:build($sequence, $key, $value, $combined) as xs:anyAtomicType) =&gt; map(*)
      */
-    public static class MapIndex extends SystemFunction {
+    public static class MapBuild extends SystemFunction {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             HashTrieMap map = new HashTrieMap();
-            Function function = (Function)arguments[1];
+            Function keyFunction = (Function)arguments[1];
+            Function valueFunction = (Function) arguments[2];
+            Function combineFunction = (Function) arguments[3];
             SequenceIterator iter = arguments[0].iterate();
             Sequence[] args = new Sequence[1];
+            Sequence[] combineArgs = new Sequence[2];
             for (Item item; (item = iter.next()) != null; ) {
                 args[0] = item;
-                AtomicValue key = (AtomicValue)dynamicCall(function, context, args);
-                map.initialPut(key, item);
+                AtomicValue key = (AtomicValue)dynamicCall(keyFunction, context, args).head();
+                if (key != null) {
+                    GroundedValue value = dynamicCall(valueFunction, context, args).materialize();
+                    GroundedValue existing = map.get(key);
+                    if (existing != null) {
+                        combineArgs[0] = existing;
+                        combineArgs[1] = value;
+                        value = dynamicCall(combineFunction, context, combineArgs).materialize();
+                    }
+                    map.initialPut(key, value);
+                }
             }
             return map;
         }

@@ -45,7 +45,7 @@ public class SefFunction extends SystemFunction {
     public void setDetails(BuiltInFunctionSet.Entry entry) {
         super.setDetails(entry);
         functionAlias = new SymbolicName.F(
-                new StructuredQName("", FN_ALIAS, getDetails().name.getLocalPart()), getDetails().arity);
+                new StructuredQName("", FN_ALIAS, getDetails().name.getLocalPart()), getDetails().maxArity);
     }
 
     /**

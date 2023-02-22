@@ -7,8 +7,9 @@
 
 package net.sf.saxon.functions.registry;
 
-import net.sf.saxon.functions.*;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.functions.Error;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.NumericType;
@@ -515,12 +516,12 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("sum", 1, e -> e.populate(Sum::new, BuiltInAtomicType.ANY_ATOMIC, ONE, UO)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
+//        register("sum", 1, e -> e.populate(Sum::new, BuiltInAtomicType.ANY_ATOMIC, ONE, UO)
+//                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
 
-        register("sum", 2, e -> e.populate(Sum::new, BuiltInAtomicType.ANY_ATOMIC, OPT, UO)
+        register("sum", 1, 2, e -> e.populate(Sum::new, BuiltInAtomicType.ANY_ATOMIC, OPT, UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, OPT, null));
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, OPT, null, Literal.makeLiteral(Int64Value.ZERO)));
 
         register("timezone-from-date", 1, e -> e.populate(() -> new AccessorFn.TimezoneFromDate(), BuiltInAtomicType.DAY_TIME_DURATION, OPT, 0)
                 .arg(0, BuiltInAtomicType.DATE, OPT, EMPTY));

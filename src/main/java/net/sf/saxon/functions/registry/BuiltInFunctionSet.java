@@ -16,10 +16,7 @@ import net.sf.saxon.functions.Concat;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -27,6 +24,7 @@ import net.sf.saxon.type.PlainType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.z.IntHashMap;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -208,7 +206,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                         staticArgs = a2;
                     }
                 }
-                int declaredArity = entry.arity;
+                int declaredArity = entry.maxArity;
                 Expression[] newArgs = Arrays.copyOf(staticArgs, declaredArity);
                 if (declaredArity > staticArgs.length) {
                     newArgs[declaredArity - 1] = Literal.makeEmptySequence();
@@ -219,7 +217,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 }
                 staticArgs = newArgs;
 
-            } else if (keywords != null && ! keywords.isEmpty()) {
+            } else if ((keywords != null && !keywords.isEmpty()) || staticArgs.length < entry.maxArity) {
                 staticArgs = DeclaredFunction.makeExpandedArgumentArray(staticArgs, keywords, entry);
             }
             RetainedStaticContext rsc = new RetainedStaticContext(env);
@@ -260,7 +258,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         entry.ensurePopulated();
         SystemFunction f = entry.implementationFactory.get();
         f.setDetails(entry);
-        f.setArity(arity);
+        f.setArity(entry.maxArity);
         return f;
     }
 
@@ -410,10 +408,28 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                              java.util.function.Function<Entry, Entry> populator) {
         Entry e = new Entry();
         e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
-        e.arity = arity;
+        e.minArity = arity;
+        e.maxArity = arity;
         e.populator = populator;
         e.functionSet = this;
         functionTable.put(name + "#" + arity, e);
+        return e;
+    }
+
+
+    protected Entry register(String name,
+                             int minArity,
+                             int maxArity,
+                             java.util.function.Function<Entry, Entry> populator) {
+        Entry e = new Entry();
+        e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
+        e.minArity = minArity;
+        e.maxArity = maxArity;
+        e.populator = populator;
+        e.functionSet = this;
+        for (int a = minArity; a <= maxArity; a++) {
+            functionTable.put(name + "#" + a, e);
+        }
         return e;
     }
 
@@ -465,9 +481,13 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
         public net.sf.saxon.functions.registry.BuiltInFunctionSet functionSet;
         /**
-         * The arity of the function
+         * The upper bound of the arity range
          */
-        public int arity;
+        public int maxArity;
+        /**
+         * The lower bound of the arity range
+         */
+        public int minArity;
         /**
          * The item type of the result of the function
          */
@@ -495,6 +515,11 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
         public Sequence[] resultIfEmpty;
         /**
+         * An array holding functions to evaluate default arguments. The array is
+         * allocated only if there are parameters with default values defined
+         */
+        public IntHashMap<Expression> defaultValueExpressions;
+        /**
          * Any additional properties. Various bit settings are defined: for example SAME_AS_FIRST_ARGUMENT indicates that
          * the result type is the same as the type of the first argument
          */
@@ -519,18 +544,18 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             this.itemType = itemType;
             this.cardinality = cardinality;
             this.properties = properties;
-            if (this.arity == -1) {
+            if (this.maxArity == -1) {
                 // special case for concat()
                 this.paramTypes = new SequenceType[1];
                 this.resultIfEmpty = new AtomicValue[1];
                 this.usage = new OperandUsage[1];
             } else {
-                this.paramTypes = new SequenceType[arity];
-                this.resultIfEmpty = new Sequence[arity];
-                this.usage = new OperandUsage[arity];
+                this.paramTypes = new SequenceType[maxArity];
+                this.resultIfEmpty = new Sequence[maxArity];
+                this.usage = new OperandUsage[maxArity];
             }
             if ((properties & SEQV) != 0) {
-                this.functionSet.sequenceVariadicFunctions.put(name.getLocalPart(), this.arity - 1);
+                this.functionSet.sequenceVariadicFunctions.put(name.getLocalPart(), this.maxArity - 1);
             }
             NamespaceUri ns = name.getNamespaceUri();
             Map<String, String> paramNameMap;
@@ -546,6 +571,9 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 paramNameMap = Collections.emptyMap();
             }
             String keywords = paramNameMap.get(name.getLocalPart());
+            if (keywords == null) {
+                keywords = paramNameMap.get(name.getLocalPart() + "#" + maxArity);
+            }
             if (keywords == null) {
                 keywords = "a|b|c|d|e|f";
             }
@@ -566,6 +594,11 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
 
         public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(int a, ItemType type, int options, Sequence resultIfEmpty) {
+            return arg(a, type, options, resultIfEmpty, null);
+        }
+
+        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(
+                int a, ItemType type, int options, Sequence resultIfEmpty, Expression defaultValue) {
             int cardinality = options & StaticProperty.CARDINALITY_MASK;
             OperandUsage usage = OperandUsage.NAVIGATION;
             if ((options & ABS) != 0) {
@@ -581,9 +614,21 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 this.paramTypes[a] = SequenceType.makeSequenceType(type, cardinality);
                 this.resultIfEmpty[a] = resultIfEmpty;
                 this.usage[a] = usage;
+                if (defaultValue != null) {
+                    withDefault(a, defaultValue);
+                }
             } catch (ArrayIndexOutOfBoundsException err) {
                 System.err.println("Internal Saxon error: Can't set argument " + a + " of " + name);
             }
+            return this;
+        }
+
+        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Expression defaultValue) {
+            if (this.defaultValueExpressions == null) {
+                this.defaultValueExpressions = new IntHashMap<>(getNumberOfParameters());
+            }
+            this.defaultValueExpressions.put(arg, defaultValue);
+            // if argument N can be defaulted, then register a variant of the function with arity N-1
             return this;
         }
 
@@ -607,8 +652,8 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         }
 
         @Override
-        public int getNumberOfArguments() {
-            return arity;
+        public int getNumberOfParameters() {
+            return maxArity;
         }
 
         /**
@@ -630,7 +675,11 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
         @Override
         public Expression getDefaultValueExpression(int i) {
-            return null;  // for now
+            if (defaultValueExpressions != null) {
+                return defaultValueExpressions.get(i);
+            } else {
+                return null;
+            }
         }
 
         /**
@@ -641,7 +690,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
         @Override
         public int getPositionOfParameter(StructuredQName name) {
-            for (int i=0; i<arity; i++) {
+            for (int i = 0; i< maxArity; i++) {
                 if (paramNames[i].equals(name.getLocalPart())) {
                     return i;
                 }

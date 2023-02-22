@@ -524,7 +524,7 @@ public class GlobalVariable extends Actor
                     messageBuilder.append(" uses $").append(next.getVariableQName().getDisplayName());
                 } else if (referees.get(i + 1) instanceof XQueryFunction) {
                     XQueryFunction next = (XQueryFunction) referees.get(i + 1);
-                    messageBuilder.append(" calls ").append(next.getFunctionName().getDisplayName()).append("#").append(next.getNumberOfArguments()).append("()");
+                    messageBuilder.append(" calls ").append(next.getFunctionName().getDisplayName()).append("#").append(next.getNumberOfParameters()).append("()");
                 }
             }
             String message = messageBuilder.toString();

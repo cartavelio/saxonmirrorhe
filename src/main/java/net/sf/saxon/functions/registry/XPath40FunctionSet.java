@@ -8,6 +8,7 @@
 package net.sf.saxon.functions.registry;
 
 import com.saxonica.functions.extfn.CharactersFn;
+import com.saxonica.functions.extfn.ExpandedQNameFn;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.Parcel;
@@ -79,6 +80,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         // Concat changes in 4.0:
         register("concat", 1, e -> e.populate( Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
+
+        register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, BuiltInAtomicType.QNAME, OPT, null));
 
         register("highest", 1, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
@@ -170,6 +174,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("replicate", 2, e -> e.populate(Replicate::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
+
+        // 4.0 adds an arity-1 variant of fn:QName
+        register("QName", 1, e -> e.populate(QNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("slice", 2, e -> e.populate( Slice::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)

@@ -9,7 +9,6 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AbstractFunction;
-import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunction;
@@ -41,7 +40,7 @@ public class UnresolvedXQueryFunctionItem extends AbstractFunction {
 
     @Override
     public int getArity() {
-        return fd.getNumberOfArguments();
+        return fd.getNumberOfParameters();
     }
 
     @Override
