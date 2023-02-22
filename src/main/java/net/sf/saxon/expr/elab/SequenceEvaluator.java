@@ -16,12 +16,6 @@ public interface SequenceEvaluator {
 
     Sequence evaluate(XPathContext context) throws XPathException;
 
-    /**
-     * Get a code identifying the evaluator. Note that the codes are held in SEF files
-     * so they should be stable.
-     */
-
-    int getEvaluationMethodCode();
 }
 
 

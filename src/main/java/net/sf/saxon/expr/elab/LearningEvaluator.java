@@ -93,12 +93,4 @@ public class LearningEvaluator implements SequenceEvaluator {
         return flipped;
     }
 
-    /**
-     * Get a code identifying the evaluator. Note that the codes are held in SEF files
-     * so they should be stable.
-     */
-    @Override
-    public int getEvaluationMethodCode() {
-        return evaluator.getEvaluationMethodCode();
-    }
 }

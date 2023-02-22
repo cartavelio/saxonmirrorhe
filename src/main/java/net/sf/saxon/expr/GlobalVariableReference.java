@@ -9,7 +9,6 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -195,15 +194,6 @@ public class GlobalVariableReference extends VariableReference implements Compon
         public Sequence evaluate(XPathContext context) throws XPathException {
             GlobalVariableReference varRef = (GlobalVariableReference) getExpression();
             return varRef.evaluateVariable(context);
-        }
-
-        /**
-         * Get a code identifying the evaluator. Note that the codes are held in SEF files
-         * so they should be stable.
-         */
-        @Override
-        public int getEvaluationMethodCode() {
-            return Evaluators.EVALUATE_VARIABLE;
         }
 
         @Override

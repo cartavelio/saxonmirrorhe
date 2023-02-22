@@ -1253,14 +1253,6 @@ public class Choose extends Instruction implements ConditionalInstruction {
             return EmptySequence.getInstance();
         }
 
-        /**
-         * Get a code identifying the evaluator. Note that the codes are held in SEF files
-         * so they should be stable.
-         */
-        @Override
-        public int getEvaluationMethodCode() {
-            return 0;
-        }
     }
 }
 

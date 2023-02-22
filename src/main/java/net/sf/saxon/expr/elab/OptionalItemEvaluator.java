@@ -1,7 +1,6 @@
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -33,12 +32,4 @@ public class OptionalItemEvaluator implements SequenceEvaluator {
         }
     }
 
-    /**
-     * Get a code identifying the evaluator. Note that the codes are held in SEF files
-     * so they should be stable.
-     */
-    @Override
-    public int getEvaluationMethodCode() {
-        return Evaluators.CALL_EVALUATE_OPTIONAL_ITEM;
-    }
 }

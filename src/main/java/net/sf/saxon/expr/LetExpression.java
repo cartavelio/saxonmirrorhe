@@ -109,6 +109,10 @@ public class LetExpression extends Assignation {
         return needsLazyEvaluation;
     }
 
+    public boolean isNeedsEagerEvaluation() {
+        return needsEagerEvaluation;
+    }
+
     @Override
     public boolean supportsLazyEvaluation() {
         return !needsEagerEvaluation;
@@ -754,10 +758,11 @@ public class LetExpression extends Assignation {
             out.emitAttribute("indexable", "true");
         }
         out.emitAttribute("slot", getLocalSlotNumber() + "");
-//        if (evaluator == null) {
-//            setEvaluator(ExpressionTool.lazyEvaluator(getSequence(), getNominalReferenceCount() > 1));
-//        }
-        //out.emitAttribute("eval", getEvaluator().getCode() + "");
+        if (needsEagerEvaluation || needsLazyEvaluation) {
+            String flags = (needsEagerEvaluation ? "e" : "")
+                    + (needsLazyEvaluation ? "l" : "");
+            out.emitAttribute("flags", flags);
+        }
         getSequence().export(out);
         getAction().export(out);
         out.endElement();
@@ -1003,14 +1008,6 @@ public class LetExpression extends Assignation {
             return actionEval.evaluate(context);
         }
 
-        /**
-         * Get a code identifying the evaluator. Note that the codes are held in SEF files
-         * so they should be stable.
-         */
-        @Override
-        public int getEvaluationMethodCode() {
-            return Evaluators.EAGER_SEQUENCE;
-        }
     }
 
 }
