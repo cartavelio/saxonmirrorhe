@@ -1033,7 +1033,7 @@
       <p>If the standard Saxon <code>URIResolver</code> is used, and recognition of query parameters
          is enabled, it is also possible to control validation for each source document by means of
          query parameters in the document URI. For example,
-            <code>document('source.xml?val=strict')</code> requests the loading of the file
+            <code>document('source.xml?validation=strict')</code> requests the loading of the file
             <code>source.xml</code> with strict validation.</p>
 
       <p>The attribute <a class="javalink" href="net.sf.saxon.lib.Feature#VALIDATION_WARNINGS"
@@ -1167,7 +1167,7 @@
       <p>If the standard Saxon <code>URIResolver</code> is used, and recognition of query parameters
          is enabled, it is also possible to control validation for each source document by means of
          query parameters in the document URI. For example,
-            <code>doc('source.xml?val=strict')</code> requests the loading of the file
+            <code>doc('source.xml?validation=strict')</code> requests the loading of the file
             <code>source.xml</code> with strict validation.</p>
 
       <p>The <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> method

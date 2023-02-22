@@ -928,6 +928,16 @@
           application, which means the XPath <code>id()</code> and <code>idref()</code> functions do
           not work.)</p>
       </li>
+      <li>
+        <p>For a document read using the <code>doc()</code> or <code>document()</code> functions,
+          the parser (XMLReader) to be used can be specified using the query parameter
+          <code>?parser=full.class.name</code> in the document URI -- but only if the
+          <code>StandardURIResolver</code> is used, and the feature is enabled by calling
+          <code>Configuration.setParameterizedURIResolver()</code> or by setting <code>-p:on</code>
+          on the <code>Query</code> or <code>Transform</code> command lines. For example,
+          <code>parser=org.ccil.cowan.tagsoup.Parser</code> causes John Cowan's TagSoup parser
+          for HTML to be used.</p>
+      </li>
     </ul>
 
     <p>Saxonica traditionally recommended use of the Xerces parser from Apache in preference to the version bundled
@@ -1386,9 +1396,9 @@
 
     <p>Saxon's standard <code>URIResolver</code> uses this technique if it has been enabled (for
       example by using <code>-p</code> on the command line). With this option, any URI containing
-      the query parameter <code>?val=strict</code> (for example,
-        <code>doc('source.xml?val=strict')</code>) causes strict validation to be requested for that
-      document, while <code>?val=lax</code> requests lax validation, and <code>?val=strip</code>
+      the query parameter <code>?validation=strict</code> (for example,
+      <code>doc('source.xml?validation=strict')</code>) causes strict validation to be requested for that
+      document, while <code>?validation=lax</code> requests lax validation, and <code>?validation=strip</code>
       requests no validation.</p>
     
     <p>XSLT 3.0 provides a standard way of requesting validation for individual source documents,
