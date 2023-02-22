@@ -195,7 +195,7 @@ namespace SaxonCS_NUnit {
                 doc.Load(new StringReader(xml));
                 XdmNode xdmNode = builder.Wrap(doc);
 
-                XdmItemType showDomType = proc.ParseItemType("function(node()*) as xs:atomicValue*");
+                XdmItemType showDomType = proc.ParseItemType("function(node()*) as xs:anyAtomicType*");
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "showDomNodes"), showDomType, args => {
                     System.Collections.Generic.List<XdmAtomicValue> result = new();
                     foreach (XdmItem item in args[0]) {
