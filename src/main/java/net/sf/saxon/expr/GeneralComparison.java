@@ -525,8 +525,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         if (operator != Token.EQUALS &&
                 operator != Token.NE &&
                 (comparisonCardinality == ComparisonCardinality.MANY_TO_MANY ||
-                         comparisonCardinality == ComparisonCardinality.MANY_TO_ONE && (manyOperandIsLiftable() || manyOperandIsRangeExpression()) &&
-                (NumericType.isNumericType(t0) || NumericType.isNumericType(t1)))) {
+                         comparisonCardinality == ComparisonCardinality.MANY_TO_ONE && (manyOperandIsLiftable() || manyOperandIsRangeExpression())) &&
+                (NumericType.isNumericType(t0) || NumericType.isNumericType(t1))) {
 
             // System.err.println("** using minimax optimization **");
             ValueComparison vc;
