@@ -53,6 +53,10 @@ int main()
 
     if(!result) {
       printf("result is null \n");
+      const char * errorMessage = c_getErrorMessage(environi);
+      if(errorMessage) {
+        printf("Error message %s \n", errorMessage);
+      }
     }else {
       printf("%s", result);
     }

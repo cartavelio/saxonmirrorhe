@@ -147,6 +147,12 @@ const char * executeQueryToString(sxnc_environment *environi, sxnc_processor * p
 }
 
 
+const char * c_getErrorMessage(sxnc_environment *environi) {
+     return j_getErrorMessageInJavaMem(environi->thread);
+
+}
+
+
 
 
 

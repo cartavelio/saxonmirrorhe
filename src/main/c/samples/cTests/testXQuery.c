@@ -41,6 +41,8 @@ int main()
     create_graalvm_isolate(environi);
     c_createSaxonProcessor((environi->thread), processor, 0);
 
+    //setDebugMode(environi->thread, 1);
+
     char * verCh  = getProductVariantAndVersion(environi, processor);
     printf("XQuery Tests\n\nSaxon version: %s \n", verCh);
     setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
@@ -48,11 +50,15 @@ int main()
     setProperty(&properties, &propLen, &propCap, "cwd", cwd);
 
     setProperty(&properties, &propLen, &propCap, "qs", "<out>{count(/out/person)}</out>");
-
-    const char * result = executeQueryToString(environi, &processor, NULL, 0,properties,0,propLen);
+     
+    const char * result = executeQueryToString(environi, processor, cwd, 0,properties,0,propLen);
 
     if(!result) {
       printf("result is null\n");
+      const char * errorMessage = c_getErrorMessage(environi);
+      if(errorMessage) {
+        printf("Error message %s \n", errorMessage);
+      }
     }else {
       printf("%s",result);
     }
