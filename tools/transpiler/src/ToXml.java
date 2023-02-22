@@ -113,7 +113,7 @@ public class ToXml {
 
     public void processSingleFile(File filename, File digest) throws Exception {
 
-        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/jparser/xslt/xml-to-cs.xsl")));
+        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-cs.xsl")));
 
 //        // Generate XML representation
 //        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
@@ -235,7 +235,7 @@ public class ToXml {
     }
 
     public void processXmlToDigest(File xmlDir, File digest) throws Exception {
-        XsltExecutable digester = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/jparser/xslt/xml-to-digest.xsl")));
+        XsltExecutable digester = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-digest.xsl")));
         Xslt30Transformer trans = digester.load30();
         Map<QName, XdmValue> params = new HashMap<>();
         params.put(new QName("xmlDir"), new XdmAtomicValue(xmlDir.toURI()));
@@ -245,7 +245,7 @@ public class ToXml {
 
     public void processXmlDirToCSharp(File xmlDir, File digestFile, File csDir) throws Exception {
         XdmNode digest = parseDigest(digestFile);
-        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/jparser/xslt/xml-to-cs.xsl")));
+        xmlToCSharp = compiler.compile(new StreamSource(new File("/Users/mike/GitHub/saxon2020/tools/transpiler/xslt/xml-to-cs.xsl")));
         processXmlFileToCSharp(xmlDir, csDir, digest, xmlToCSharp);
     }
 
