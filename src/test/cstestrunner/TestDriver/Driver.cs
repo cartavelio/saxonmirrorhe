@@ -303,7 +303,7 @@ namespace TestDriver {
             }
             else {
                 foreach (XdmItem testSet in xpc.Evaluate("//test-set", catalog)) {
-                    processTestSet(catBuilder, xpc, ((XdmNode) testSet.Simplify));
+                    processTestSet(catBuilder, xpc, ((XdmNode) testSet.Simplify()));
                 }
             }
 
