@@ -154,7 +154,7 @@ namespace TestDriver {
 
             DocumentBuilder builder = environment.processor.NewDocumentBuilder();
             builder.LineNumbering = true;
-            builder.TreeModel = driver.TreeModel;
+            //builder.TreeModel = driver.TreeModel;
             environment.sourceDocs = new SysCollGen.Dictionary<string, XdmNode>();
             if (environments != null && name != null) {
                 try {
@@ -855,7 +855,10 @@ namespace TestDriver {
                 if (validation == null) {
                     validation = "skip";
                 }
-
+                string useTreeModel = driver.TreeModel;
+                if (validation != "skip") {
+                    useTreeModel = "tiny";
+                }
                 string streaming = ((XdmNode)source).GetAttributeValue(new QName("", "streaming"));
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
@@ -928,7 +931,29 @@ namespace TestDriver {
                             Uri absUri = builder.BaseUri =
                                 new Uri(res.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
                             try {
-                                doc = builder.Build(ss);
+                                switch (useTreeModel) {
+                                    case "condensed":
+                                        builder.TreeModel = TreeModel.TinyTreeCondensed;
+                                        doc = builder.Build(ss);
+                                        break;
+                                    case "linked":
+                                        builder.TreeModel = TreeModel.LinkedTree;
+                                        doc = builder.Build(ss);
+                                        break;
+                                    case "dom":
+                                        XmlDocument dom = new();
+                                        dom.PreserveWhitespace = true;
+                                        dom.Load(ss);
+                                        doc = builder.Wrap(dom);
+                                        break;
+                                    case "linq":
+                                        throw new Saxon.Ejava.lang.Exception("LINQ is not supported in 11.x");
+                                    default:
+                                        builder.TreeModel = TreeModel.TinyTree;
+                                        doc = builder.Build(ss);
+                                        break;
+                                    
+                                }
                                 environment.sourceDocs.Add(absUri.OriginalString, doc);
                             }
                             catch (Exception e) {

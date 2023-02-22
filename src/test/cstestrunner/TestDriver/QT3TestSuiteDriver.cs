@@ -264,8 +264,8 @@ namespace TestDriver {
                         return !inverse;
                     }
                     else if ("info-dtd".Equals(value)) {
-                        if (treeModel == TreeModel.TinyTree || treeModel == TreeModel.LinkedTree ||
-                            treeModel == TreeModel.TinyTreeCondensed) {
+                        if (treeModel == "tiny" || treeModel == "linked" ||
+                            treeModel == "condensed") {
                             return !inverse;
                         }
                         else {
