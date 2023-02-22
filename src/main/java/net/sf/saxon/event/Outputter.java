@@ -351,7 +351,7 @@ public abstract class Outputter implements Receiver {
      *                   as a text node item rather than a string
      */
 
-    public UniStringConsumer getStringReceiver(boolean asTextNode) {
+    public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
         if (asTextNode) {
             return new AbstractUniStringConsumer() {
 
@@ -367,7 +367,7 @@ public abstract class Outputter implements Receiver {
                 @Override
                 @CSharpModifiers(code = {"public", "override"})
                 public void close() throws XPathException {
-                    Outputter.this.characters(buffer.toUnicodeString(), Loc.NONE, ReceiverOption.NONE);
+                    Outputter.this.characters(buffer.toUnicodeString(), loc, ReceiverOption.NONE);
                 }
             };
         } else {

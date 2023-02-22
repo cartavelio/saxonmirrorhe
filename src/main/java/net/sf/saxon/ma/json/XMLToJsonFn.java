@@ -96,7 +96,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
             Options options = getOptions(context, arguments);
             PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             pipe.setXPathContext(context);
-            convertToJson(xml, destination.getStringReceiver(false), options, context);
+            convertToJson(xml, destination.getStringReceiver(false, Loc.NONE), options, context);
         }
     }
 

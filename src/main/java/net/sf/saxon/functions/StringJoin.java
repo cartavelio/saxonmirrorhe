@@ -14,6 +14,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -119,7 +120,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
     @Override
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
         UnicodeString separator = arguments.length > 1 ? ((GroundedValue) arguments[1].head()).getUnicodeStringValue() : EmptyUnicodeString.getInstance();
-        UniStringConsumer output = destination.getStringReceiver(false);
+        UniStringConsumer output = destination.getStringReceiver(false, Loc.NONE);
         output.open();
         boolean first = true;
         SequenceIterator iter = arguments[0].iterate();
