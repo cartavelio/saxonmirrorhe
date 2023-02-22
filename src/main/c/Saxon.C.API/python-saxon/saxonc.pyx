@@ -4348,7 +4348,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
              int: the number of members in the array. (Note that the size() method returns 1 (one),
               because an XDM array is an item.)
          """
-         return derivedaaptr.arrayLength()
+         return self.derivedaaptr.arrayLength()
 
      @property
      def string_value(self):
@@ -4492,7 +4492,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          TODO: handle memory management"""
          cdef list p_values = []
          cdef int count, i
-         count = derivedaaptr.arity()
+         count = self.derivedaaptr.arrayLength()
          cdef saxoncClasses.XdmValue **c_values
 
          cdef PyXdmNode val = None
@@ -4513,7 +4513,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          Returns:
              int: the arity of the function, that is, the number of arguments in the function's signature
          """
-         return derivedaaptr.arity()
+         return 1
 
      
 _o=PySaxonProcessor(None, False, True)       #  This is important to prevent Jet calling release until all Saxon objects have been garbage collected!
