@@ -11,6 +11,7 @@ import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
 import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.AugmentedSource;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.s9api.*;
@@ -1246,7 +1247,19 @@ public class Xslt30Processor extends SaxonCAPI {
                 valuei = map.get("im");
                 if (valuei instanceof String) {
                     initialMode = (String) valuei;
-                    transformer.setInitialMode(new QName(initialMode));
+                    QName qname = null;
+                    if(initialMode.equals("xsl:unnamed")) {
+                         qname = new QName("xsl", NamespaceConstant.XSLT, "unnamed");
+                    } else if(initialMode.equals("xsl:default")) {
+                        qname = new QName("xsl", NamespaceConstant.XSLT, "default");
+                    } else if(initialMode.startsWith("Q{")){
+                        qname = QName.fromEQName(initialMode);
+                    }  else if(initialMode.startsWith("{")) {
+                        qname = QName.fromClarkName(initialMode);
+                    } else {
+                        qname = new QName(initialMode);
+                    }
+                    transformer.setInitialMode(qname);
                 } else if (debug) {
                     System.err.println("DEBUG: value error for property 'im'");
                 }
