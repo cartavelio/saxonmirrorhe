@@ -44,7 +44,6 @@ configurations {
   jarjarAsm.extendsFrom(implementation)
   testDrivers.extendsFrom(testImplementation)
   productTests.extendsFrom(testImplementation)
-  ikvm.extendsFrom(implementation)
   compileDotNet.extendsFrom(implementation)
   asmDotNet.extendsFrom(implementation)
   transpiler.extendsFrom(implementation)
@@ -152,8 +151,6 @@ dependencies {
     [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
     [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
     [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
-    fileTree(dir: "extra/MyDotNet/classpath"),
-    fileTree(dir: "extra/MyDotNet/stubs"),
     fileTree(dir: "lib/asm-${asmVersion}"),
     files(saxonLicenseDir),
     files("lib/Tidy.jar"),
@@ -163,16 +160,7 @@ dependencies {
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
   )
-  ikvm (
-    fileTree(dir: "${ikvmDir}/stubs")
-  )
-  compileDotNet (
-    fileTree(dir: "${ikvmDir}/stubs"),
-    fileTree(dir: "${ikvmDir}/classpath")
-  )
   asmDotNet (
-    fileTree(dir: "${ikvmDir}/stubs"),
-    fileTree(dir: "${ikvmDir}/classpath"),
     fileTree(dir: "lib/asm-${asmVersion}")
   )
   testImplementation (
@@ -334,7 +322,6 @@ configurations.compileClasspath.each { cp ->
   }
 }
 
-apply from: "build-n.gradle"
 apply from: "build-cs.gradle"
 apply from: "build-c.gradle"
 apply from: "build-doc.gradle"
@@ -537,7 +524,7 @@ task "hej_preprocess"(
       main = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/hej", "/o:${buildDir}/src/hej",
-        "/p:EE=false", "/p:PE=false", "/p:DOTNET=false",
+        "/p:EE=false", "/p:PE=false",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
@@ -620,7 +607,7 @@ task "pej_preprocess"(
       main = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/pej", "/o:${buildDir}/src/pej",
-        "/p:EE=false", "/p:PE=true", "/p:DOTNET=false",
+        "/p:EE=false", "/p:PE=true",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
@@ -688,7 +675,7 @@ task "eej_preprocess"(
       main = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/eej", "/o:${buildDir}/src/eej",
-        "/p:EE=true", "/p:PE=false", "/p:DOTNET=false", "/p:HOF=true",
+        "/p:EE=true", "/p:PE=false", "/p:HOF=true",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=true",
         "/p:STREAM=true", "/p:PACKAGES=true", "/p:SCHEMA=true", "/p:CSHARP=false"
     }
