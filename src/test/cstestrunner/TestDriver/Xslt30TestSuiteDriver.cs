@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.lib;
+using Saxon.Hej.om;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
 using NamespaceConstant = Saxon.Api.NamespaceConstant;
@@ -266,9 +267,9 @@ namespace TestDriver {
 
         internal void CopySchemaNamespace(Environment env, XPathCompiler testXpc) {
             JConfiguration config = env.xpathCompiler.Processor.Implementation;
-            SysCollGen.ISet<string> ns = config.getImportedNamespaces();
-            foreach (string s in ns.ToArray()) {
-                testXpc.ImportSchemaNamespace(s);
+            SysCollGen.ISet<NamespaceUri> ns = config.getImportedNamespaces();
+            foreach (NamespaceUri s in ns.ToArray()) {
+                testXpc.ImportSchemaNamespace(s.ToString());
             }
         }
 
