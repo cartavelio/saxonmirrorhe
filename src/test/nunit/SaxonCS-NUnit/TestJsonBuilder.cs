@@ -36,7 +36,7 @@ namespace SaxonCS_NUnit {
             try {
                 StringReader sr = new("{\"one\": 1, \"two\": 2}");
                 JsonBuilder builder =  new Processor().NewJsonBuilder();
-                XdmValue d = builder.parseJson(sr);
+                XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
                 Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
