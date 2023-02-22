@@ -29,6 +29,7 @@ using Saxon.Eej.ee.stream;
 using Saxon.Impl.Helpers;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using Processor = Saxon.Api.Processor;
+using UriUtils = Org.XmlResolver.Utils.UriUtils;
 using XPathCompiler = Saxon.Api.XPathCompiler;
 using XPathSelector = Saxon.Api.XPathSelector;
 using XQueryCompiler = Saxon.Api.XQueryCompiler;
@@ -807,9 +808,9 @@ namespace TestDriver {
                     return new XmlReaderResource(builder, parser);
                 }
                 else {
-                    // Some tests, notably catalog tests, don't declare the documents they use
+                    // Some tests, notably test-catalog tests, don't declare the documents they use
                     try {
-                        Stream stream = new FileStream(uri.LocalPath, FileMode.Open);
+                        Stream stream = UriUtils.GetStream(uri);
                         return new TextResource(stream, uri);
                     }
                     catch (FileNotFoundException) {
