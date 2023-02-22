@@ -3565,9 +3565,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private void resolveFixups() throws XPathException {
         StylesheetPackage pack = packStack.peek();
         for (ComponentInvocation call : fixups.peek()) {
-            if (processComponentReference(pack, call)) {
-                break; // It will have a binding slot
-            }
+            processComponentReference(pack, call); // bug #5798
         }
         pack.allocateBinderySlots();
     }
