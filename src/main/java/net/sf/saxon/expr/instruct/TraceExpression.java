@@ -405,16 +405,17 @@ public class TraceExpression extends Instruction {
         @Override
         public PushEvaluator elaborateForPush() {
             TraceExpression expr = (TraceExpression) getExpression();
-            PushEvaluator baseEval = expr.getBody().makeElaborator().elaborateForPush();
+            Expression body = expr.getBody();
+            PushEvaluator baseEval = body.makeElaborator().elaborateForPush();
             return (output, context) -> {
                 Controller controller = context.getController();
                 assert controller != null;
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
-                    listener.enter(expr, expr.properties, context);
+                    listener.enter(body, expr.properties, context);
                     TailCall tc = baseEval.processLeavingTail(output, context);
                     dispatchTailCall(tc);
-                    listener.leave(expr);
+                    listener.leave(body);
                 } else {
                     dispatchTailCall(baseEval.processLeavingTail(output, context));
                 }
