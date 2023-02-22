@@ -139,10 +139,8 @@ def test_create_procs():
     """Create XPathProcessor, XsltProcessor from SaxonProcessor object"""
     sp = PySaxonProcessor()
     xp = sp.new_xpath_processor()
-    xsl = sp.new_xslt_processor()
     xsl30 = sp.new_xslt30_processor()
     assert isinstance(xp, PyXPathProcessor)
-    assert isinstance(xsl, PyXsltProcessor)
     assert isinstance(xsl30, PyXslt30Processor)
 def test_version():
     """SaxonProcessor version string content"""
@@ -153,19 +151,23 @@ def test_version():
     assert ver.endswith('from Saxonica')
 def test_schema_aware(saxonproc):
     assert saxonproc.is_schema_aware == False
+
 def test_schema_aware2():
     ''' This unit test requires a valid license - Saxon-EE/C '''
     sp = PySaxonProcessor(license=True)
     assert sp.is_schema_aware == True
+
 '''PyXsltProcessor test cases '''
-def test_xslt_processor(data_dir):
+def test_xslt30_processor(data_dir):
     sp = PySaxonProcessor()
-    xsltproc = sp.new_xslt_processor()
+    xsltproc = sp.new_xslt30_processor()
     xmlFile = data_dir + "cat.xml"
     node_ = sp.parse_xml(xml_file_name=xmlFile)
-    xsltproc.set_source(xdm_node=node_)
-    xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
-    output2 = xsltproc.transform_to_string()
+    assert node_ is not None
+    executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
+    assert executable is not None
+    executable.set_initial_match_selection(xdm_value=node_)
+    output2 = executable.transform_to_string()
     assert 'text1' in output2
 def test_Xslt_from_file(saxonproc, data_dir):
     xsltproc = saxonproc.new_xslt_processor()

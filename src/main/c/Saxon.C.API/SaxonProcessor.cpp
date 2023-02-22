@@ -178,7 +178,7 @@ SaxonApiException * SaxonProcessor::checkForExceptionCPP(JNIEnv *env, jclass cal
             env->ReleaseStringUTFChars(message, utfMessage);
 
             std::string prefix = "net.sf.saxon.s9api.SaxonApiException";
-            std::cerr<<"checkForExceptionCPP =======:: message = "<<result1<<" prefix length = "<<prefix.length()<<std::endl;
+            //std::cerr<<"checkForExceptionCPP =======:: message = "<<result1<<" prefix length = "<<prefix.length()<<std::endl;
             if (result1.compare(0, prefix.length(), "net.sf.saxon.s9api.SaxonApiException") == 0) {
                   //std::cerr<<"checkForExceptionCPP SaxonApiException found!"<<std::endl;
                 jclass saxonApiExceptionClass(env->FindClass("net/sf/saxon/s9api/SaxonApiException"));
