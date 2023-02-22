@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -42,10 +43,10 @@ public class TestStaxResult {
 
          XMLStreamReader reader = null;
         try{
-            byte[] byteArray = stylesheet.getBytes("UTF-8");
+            byte[] byteArray = stylesheet.getBytes(StandardCharsets.UTF_8);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
             reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
-        } catch(XMLStreamException | UnsupportedEncodingException e) {
+        } catch(XMLStreamException e) {
             fail(e.getMessage());
         }
         StAXSource source = new StAXSource(reader);
@@ -87,10 +88,10 @@ public class TestStaxResult {
             Templates templates = factory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             XMLStreamReader reader = null;
             try {
-                byte[] byteArray = stylesheet.getBytes("UTF-8");
+                byte[] byteArray = stylesheet.getBytes(StandardCharsets.UTF_8);
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
                 reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
-            } catch (XMLStreamException | UnsupportedEncodingException e) {
+            } catch (XMLStreamException e) {
                 fail(e.getMessage());
             }
             StAXSource source = new StAXSource(reader);

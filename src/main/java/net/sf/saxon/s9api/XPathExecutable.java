@@ -31,9 +31,9 @@ import java.util.stream.Stream;
 
 public class XPathExecutable {
 
-    private XPathExpression exp;
-    private Processor processor;
-    private IndependentContext env;
+    private final XPathExpression exp;
+    private final Processor processor;
+    private final IndependentContext env;
 
     // protected constructor
 

@@ -14,7 +14,7 @@ import net.sf.saxon.z.IntIterator;
  */
 public class EmptyIntIterator implements IntIterator {
 
-    private static EmptyIntIterator THE_INSTANCE = new EmptyIntIterator();
+    private static final EmptyIntIterator THE_INSTANCE = new EmptyIntIterator();
 
     /**
      * Get the singular instance of this class

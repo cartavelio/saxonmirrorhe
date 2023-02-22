@@ -32,7 +32,7 @@ import java.util.List;
 
 public class ConditionalBlock extends Instruction {
 
-    private Operand[] operanda;
+    private final Operand[] operanda;
     private boolean allNodesUntyped;
 
     /**

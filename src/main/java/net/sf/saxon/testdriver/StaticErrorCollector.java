@@ -18,9 +18,9 @@ import java.util.Set;
 
 public class StaticErrorCollector extends StandardErrorReporter {
 
-    private Set<String> errorCodes = new HashSet<>();
+    private final Set<String> errorCodes = new HashSet<>();
     private boolean foundWarnings = false;
-    private boolean madeEarlyExit = false;
+    private final boolean madeEarlyExit = false;
 
     public XmlProcessingError lastError;
 

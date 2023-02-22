@@ -32,15 +32,15 @@ import java.util.*;
 
 public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, LastPositionFinder {
 
-    private SequenceIterator baseItr;
+    private final SequenceIterator baseItr;
     private ObjectValue<ItemWithMergeKeys> currenti = null;
     private ObjectValue<ItemWithMergeKeys> next;
     private List<Item> currentMembers;
     private Map<String, List<Item>> currentSourceMembers;
-    private ItemOrderComparer comparer;
+    private final ItemOrderComparer comparer;
     private int position = 0;
     List<AtomicValue> compositeMergeKey;
-    private LastPositionFinder lastPositionFinder;
+    private final LastPositionFinder lastPositionFinder;
 
 
     public MergeGroupingIterator(

@@ -16,6 +16,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
@@ -340,7 +341,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                               location,
                                               ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
                         // output characters
-                        final CharSequence value = TinyTextImpl.getStringValue(tree, next);
+                        final CodePoints value = TinyTextImpl.getStringValue(tree, next);
                         receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                         receiver.endElement();
                     } else {
@@ -403,7 +404,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     closePending = false;
 
                     // output characters
-                    final CharSequence value = TinyTextImpl.getStringValue(tree, next);
+                    final CodePoints value = TinyTextImpl.getStringValue(tree, next);
                     receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                     break;
                 }
@@ -414,7 +415,8 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     closePending = false;
 
                     // output characters
-                    final CharSequence value = WhitespaceTextImpl.getStringValueCS(tree, next);
+                    long compressedValue = ((long) tree.alpha[next] << 32) | ((long) tree.beta[next] & 0xffffffffL);
+                    final CodePoints value = new CompressedWhitespace(compressedValue);
                     receiver.characters(value, location, ReceiverOption.WHOLE_TEXT_NODE);
                     break;
                 }
@@ -428,9 +430,9 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     int start = tree.alpha[next];
                     int len = tree.beta[next];
                     if (len > 0) {
-                        receiver.comment(tree.commentBuffer.subSequence(start, start + len), location, ReceiverOption.NONE);
+                        receiver.comment(tree.commentBuffer.substring(start, start + len), location, ReceiverOption.NONE);
                     } else {
-                        receiver.comment("", Loc.NONE, ReceiverOption.NONE);
+                        receiver.comment(EmptyUniString.getInstance(), Loc.NONE, ReceiverOption.NONE);
                     }
                     break;
                 }
@@ -441,7 +443,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
                     // output copy of PI
                     NodeInfo pi = tree.getNode(next);
-                    receiver.processingInstruction(pi.getLocalPart(), pi.getStringValue(), location, ReceiverOption.NONE);
+                    receiver.processingInstruction(pi.getLocalPart(), pi.getUnicodeStringValue(), location, ReceiverOption.NONE);
                     break;
                 }
 

@@ -27,9 +27,9 @@ import java.util.Set;
  */
 public class CompoundMode extends Mode {
 
-    private Mode base;
-    private SimpleMode overrides;
-    private int overridingPrecedence;
+    private final Mode base;
+    private final SimpleMode overrides;
+    private final int overridingPrecedence;
 
     /**
      * Create a compound Mode

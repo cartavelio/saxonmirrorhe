@@ -31,7 +31,7 @@ import java.util.function.IntPredicate;
 
 public class SameNameTest extends NodeTest implements QNameTest {
 
-    private NodeInfo origin;
+    private final NodeInfo origin;
     /**
      * Create a SameNameTest to match nodes by name
      *

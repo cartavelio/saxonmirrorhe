@@ -38,8 +38,8 @@ import java.util.Set;
 public class JAXPXPathStaticContext extends AbstractStaticContext
         implements NamespaceResolver {
 
-    private SlotManager stackFrameMap;
-    private XPathFunctionLibrary xpathFunctionLibrary;
+    private final SlotManager stackFrameMap;
+    private final XPathFunctionLibrary xpathFunctionLibrary;
 
     private NamespaceContext namespaceContext = new MinimalNamespaceContext();
     private XPathVariableResolver variableResolver;

@@ -36,10 +36,10 @@ import net.sf.saxon.value.*;
 
 public class ComputedElement extends ElementCreator {
 
-    private Operand nameOp;
+    private final Operand nameOp;
     private Operand namespaceOp;
 
-    private boolean allowNameAsQName;
+    private final boolean allowNameAsQName;
     private ItemType itemType;
 
     /**
@@ -173,9 +173,9 @@ public class ComputedElement extends ElementCreator {
         if (Literal.isAtomic(getNameExp())) {
             // Check we have a valid lexical QName, whose prefix is in scope where necessary
             try {
-                AtomicValue val = (AtomicValue) ((Literal) getNameExp()).getValue();
-                if (val instanceof StringValue) {
-                    String[] parts = NameChecker.checkQNameParts(val.getStringValueCS());
+                AtomicValue val = (AtomicValue) ((Literal) getNameExp()).getGroundedValue();
+                if (val instanceof StringItem) {
+                    String[] parts = NameChecker.checkQNameParts(val.getStringValue());
                     if (getNamespaceExp() == null) {
                         String prefix = parts[0];
                         String uri = getNamespaceResolver().getURIForPrefix(prefix, true);
@@ -299,10 +299,11 @@ public class ComputedElement extends ElementCreator {
             throw dynamicError(getLocation(), err1, context);
         }
         //nameValue = nameValue.getPrimitiveValue();
-        if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
+        if (nameValue instanceof StringItem) {  // which includes UntypedAtomic
             // this will always be the case in XSLT
             String rawName = nameValue.getStringValue();
-            rawName = Whitespace.trimWhitespace(rawName).toString();
+            rawName = Whitespace.trim(rawName);
+            // this will always be the case in XSLT
             if (rawName.startsWith("Q{") && allowNameAsQName) {
                 // Unclear whether this is allowed: see https://github.com/w3c/qtspecs/issues/9
                 // It clearly is NOT allowed in XSLT 3.0 (though for no good reason)
@@ -351,7 +352,7 @@ public class ComputedElement extends ElementCreator {
         } else {
             if (uri == null) {
                 if (getNamespaceExp() instanceof StringLiteral) {
-                    uri = ((StringLiteral) getNamespaceExp()).getStringValue();
+                    uri = ((StringLiteral) getNamespaceExp()).stringify();
                 } else {
                     uri = getNamespaceExp().evaluateAsString(context).toString();
                     if (!StandardURIChecker.getInstance().isValidURI(uri)) {

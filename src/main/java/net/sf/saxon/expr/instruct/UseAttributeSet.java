@@ -34,9 +34,9 @@ import java.util.List;
  */
 public class UseAttributeSet extends Instruction implements ComponentInvocation, ContextOriginator {
 
-    private StructuredQName targetName;
+    private final StructuredQName targetName;
     private AttributeSet target;
-    private boolean isDeclaredStreamable;
+    private final boolean isDeclaredStreamable;
     private int bindingSlot = -1;
 
     /**

@@ -18,9 +18,9 @@ import java.util.List;
 
 public class KeyDefinitionSet {
 
-    private StructuredQName keyName;
-    private int keySetNumber;               // unique among the KeyDefinitionSets within a KeyManager
-    private List<KeyDefinition> keyDefinitions;
+    private final StructuredQName keyName;
+    private final int keySetNumber;               // unique among the KeyDefinitionSets within a KeyManager
+    private final List<KeyDefinition> keyDefinitions;
     private String collationName;
     private boolean composite;
     private boolean backwardsCompatible;    // true if any of the keys is backwards compatible

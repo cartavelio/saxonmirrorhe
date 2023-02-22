@@ -9,10 +9,8 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.RangeIterator;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.AtomicArray;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
@@ -153,8 +151,8 @@ public class IntegerRange implements AtomicSequence {
      *         of casting to string according to the XPath 2.0 rules
      */
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        return getStringValueCS();
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        return getUnicodeStringValue();
     }
 
     /**
@@ -177,7 +175,7 @@ public class IntegerRange implements AtomicSequence {
     }
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         try {
             return SequenceTool.getStringValue(this);
         } catch (XPathException err) {
@@ -187,7 +185,11 @@ public class IntegerRange implements AtomicSequence {
 
     @Override
     public String getStringValue() {
-        return getStringValueCS().toString();
+        try {
+            return SequenceTool.stringify(this);
+        } catch (XPathException err) {
+            throw new AssertionError(err);
+        }
     }
 
     @Override

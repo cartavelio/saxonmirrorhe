@@ -26,8 +26,8 @@ import net.sf.saxon.type.UType;
 
 public final class SimplePositionalPattern extends Pattern {
 
-    private NodeTest nodeTest;
-    private int position;
+    private final NodeTest nodeTest;
+    private final int position;
 
     /**
      * Create a SimplePositionalPattern

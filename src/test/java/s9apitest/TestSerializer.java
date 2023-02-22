@@ -25,6 +25,7 @@ import java.io.*;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * JUnit tests for the s9api XQueryCompiler

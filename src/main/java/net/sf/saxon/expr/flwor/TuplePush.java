@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public abstract class TuplePush {
 
-    private Outputter outputter;
+    private final Outputter outputter;
     
     protected TuplePush(Outputter outputter) {
         this.outputter = outputter;

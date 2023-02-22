@@ -24,9 +24,9 @@ import java.util.EnumSet;
 
 final class NamedChildIterator implements AxisIterator, LookaheadIterator, AtomizedValueIterator {
 
-    private TinyTree tree;
+    private final TinyTree tree;
     private int nextNodeNr;
-    private int fingerprint;
+    private final int fingerprint;
     private TinyNodeImpl startNode;
     private boolean needToAdvance = false;
 

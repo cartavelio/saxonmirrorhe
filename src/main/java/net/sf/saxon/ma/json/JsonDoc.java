@@ -14,16 +14,16 @@ import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.z.IntSetPredicate;
 
-import java.util.function.IntPredicate;
-
 import java.io.Reader;
 import java.net.URI;
 import java.util.Map;
+import java.util.function.IntPredicate;
 
 /**
  * Implements the json-to-xml function defined in XSLT 3.0.
@@ -65,7 +65,7 @@ public class JsonDoc extends SystemFunction  {
             err.maybeSetErrorCode("FOUT1170");
             throw err;
         }
-        CharSequence content;
+        CodePoints content;
         try {
             content = UnparsedTextFunction.readFile(checker, reader);
         } catch (java.io.UnsupportedEncodingException encErr) {

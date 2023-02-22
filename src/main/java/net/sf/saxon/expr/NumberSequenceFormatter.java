@@ -18,6 +18,8 @@ import net.sf.saxon.functions.Number_1;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -42,12 +44,12 @@ public class NumberSequenceFormatter extends Expression {
     private Operand groupSeparatorOp;
     private Operand letterValueOp;
     private Operand ordinalOp;
-    private Operand startAtOp;
+    private final Operand startAtOp;
     private Operand langOp;
 
     private NumberFormatter formatter = null;
     private Numberer numberer = null;
-    private boolean backwardsCompatible;
+    private final boolean backwardsCompatible;
 
     /**
      * Construct a NumberSequenceFormatter
@@ -106,7 +108,7 @@ public class NumberSequenceFormatter extends Expression {
 
         if (formatter == null && format instanceof StringLiteral) {
             this.formatter = new NumberFormatter();
-            this.formatter.prepare(((StringLiteral)format).getStringValue());
+            this.formatter.prepare(((StringLiteral)format).stringify());
         }
     }
 
@@ -132,11 +134,11 @@ public class NumberSequenceFormatter extends Expression {
             numberer = config.makeNumberer(null, null);
         } else {
             if (langOp.getChildExpression() instanceof StringLiteral) {
-                String language = ((StringLiteral) langOp.getChildExpression()).getStringValue();
+                String language = ((StringLiteral) langOp.getChildExpression()).stringify();
                 if (!language.isEmpty()) {
-                    ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(language);
+                    ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.tidy(language));
                     if (vf != null) {
-                        langOp.setChildExpression(new StringLiteral(StringValue.EMPTY_STRING));
+                        langOp.setChildExpression(new StringLiteral(StringItem.EMPTY_STRING));
                         throw new XPathException("The lang attribute must be a valid language code", "XTDE0030");
                     }
                 }
@@ -169,7 +171,7 @@ public class NumberSequenceFormatter extends Expression {
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         optimizeChildren(visitor, contextInfo);
         if (hasFixedOperands()) {
-            StringValue val = evaluateItem(visitor.makeDynamicContext());
+            StringItem val = evaluateItem(visitor.makeDynamicContext());
             StringLiteral literal = new StringLiteral(val);
             ExpressionTool.copyLocationInfo(this, literal);
             return literal;
@@ -226,8 +228,7 @@ public class NumberSequenceFormatter extends Expression {
     }
 
     @Override
-    public StringValue evaluateItem(XPathContext context) throws XPathException {
-        long value = -1;
+    public StringItem evaluateItem(XPathContext context) throws XPathException {
         List<Object> vec = new ArrayList<>(4);    // a list whose items may be of type either Long or
                                                   // BigInteger or the string to be output (e.g. "NaN")
         final ConversionRules rules = context.getConfiguration().getConversionRules();
@@ -274,7 +275,7 @@ public class NumberSequenceFormatter extends Expression {
                 if (backwardsCompatible) {
                     vec.add("NaN");
                 } else {
-                    vec.add(val.getStringValue());
+                    vec.add(val.getUnicodeStringValue());
                     XPathException e = new XPathException("Cannot convert supplied value to an integer. " + err.getMessage());
                     e.setErrorCode("XTDE0980");
                     e.setLocation(getLocation());
@@ -322,7 +323,7 @@ public class NumberSequenceFormatter extends Expression {
                 numb = context.getConfiguration().makeNumberer(null, null);
             } else {
                 String language = langOp.getChildExpression().evaluateAsString(context).toString();
-                ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(language);
+                ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.tidy(language));
                 if (vf != null) {
                     throw new XPathException("The lang attribute of xsl:number must be a valid language code", "XTDE0030");
                 }
@@ -351,8 +352,8 @@ public class NumberSequenceFormatter extends Expression {
             nf = formatter;
         }
 
-        CharSequence s = nf.format(vec, gpsize, gpseparator, letterVal, ordinalVal, numb);
-        return new StringValue(s);
+        UnicodeString s = nf.format(vec, gpsize, gpseparator, letterVal, ordinalVal, numb);
+        return new StringItem(s);
     }
 
     public List<Integer> parseStartAtValue(String value) throws XPathException {

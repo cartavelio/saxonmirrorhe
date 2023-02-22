@@ -72,14 +72,17 @@ public class ValidationTest {
             Validator validator = grammar.newValidator();
 
             validator.setErrorHandler(new ErrorHandler() {
+                @Override
                 public void warning(SAXParseException exception) throws SAXException {
                     counts.set(0, counts.get(0) + 1);
                 }
 
+                @Override
                 public void error(SAXParseException exception) throws SAXException {
                     counts.set(1, counts.get(1) + 1);
                 }
 
+                @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
                     counts.set(2, counts.get(2) + 1);
                 }
@@ -108,14 +111,17 @@ public class ValidationTest {
         try {
             SchemaFactory schemaFactory = makeSchemaFactory();
             schemaFactory.setErrorHandler(new ErrorHandler() {
+                @Override
                 public void warning(SAXParseException exception) throws SAXException {
                     counts.set(0, counts.get(0) + 1);
                 }
 
+                @Override
                 public void error(SAXParseException exception) throws SAXException {
                     counts.set(1, counts.get(1) + 1);
                 }
 
+                @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
                     counts.set(2, counts.get(2) + 1);
                 }

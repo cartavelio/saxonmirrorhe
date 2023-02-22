@@ -7,14 +7,16 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.z.IntIterator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -37,10 +39,10 @@ public abstract class IntegerValue extends DecimalValue {
      * minimum (or no maximum) for this type. The special value MAX_UNSIGNED_LONG represents the
      * value 2^64-1
      */
-    private static long NO_LIMIT = -9999;
-    private static long MAX_UNSIGNED_LONG = -9998;
+    private static final long NO_LIMIT = -9999;
+    private static final long MAX_UNSIGNED_LONG = -9998;
 
-    /*@NotNull*/ private static long[] ranges = {
+    /*@NotNull*/ private static final long[] ranges = {
             // arrange so the most frequently used types are near the start
             StandardNames.XS_INTEGER, NO_LIMIT, NO_LIMIT,
             StandardNames.XS_LONG, Long.MIN_VALUE, Long.MAX_VALUE,
@@ -239,12 +241,12 @@ public abstract class IntegerValue extends DecimalValue {
     /**
      * Static factory method to convert strings to integers.
      *
-     * @param s CharSequence representing the string to be converted
+     * @param s the string to be converted
      * @return either an Int64Value or a BigIntegerValue representing the value of the String, or
      *         a ValidationFailure encapsulating an Exception if the value cannot be converted.
      */
 
-    public static ConversionResult stringToInteger(/*@NotNull*/ CharSequence s) {
+    public static ConversionResult stringToInteger(String s) {
 
         int len = s.length();
         int start = 0;
@@ -274,7 +276,7 @@ public abstract class IntegerValue extends DecimalValue {
                         " to integer: no digits after the sign");
             }
             while (i <= last) {
-                char d = s.charAt(i++);
+                int d = s.charAt(i++);
                 if (d >= '0' && d <= '9') {
                     value = 10 * value + (d - '0');
                 } else {
@@ -285,14 +287,16 @@ public abstract class IntegerValue extends DecimalValue {
         } else {
             // for longer numbers, rely on library routines
             try {
-                CharSequence t = Whitespace.trimWhitespace(s);
-                if (t.charAt(0) == '+') {
-                    t = t.subSequence(1, t.length());
+                if (start > 0 || last < len-1) {
+                    s = s.substring(start, last+1);
                 }
-                if (t.length() < 16) {
-                    return new Int64Value(Long.parseLong(t.toString()));
+                if (s.charAt(0) == '+') {
+                    s = s.substring(1);
+                }
+                if (s.length() < 16) {
+                    return new Int64Value(Long.parseLong(s));
                 } else {
-                    return new BigIntegerValue(new BigInteger(t.toString()));
+                    return new BigIntegerValue(new BigInteger(s));
                 }
             } catch (NumberFormatException err) {
                 return new ValidationFailure("Cannot convert string " + Err.wrap(s, Err.VALUE) + " to an integer");
@@ -308,28 +312,57 @@ public abstract class IntegerValue extends DecimalValue {
      */
 
     /*@Nullable*/
-    public static ValidationFailure castableAsInteger(CharSequence input) {
-        CharSequence s = Whitespace.trimWhitespace(input);
+    public static ValidationFailure castableAsInteger(UnicodeString input) {
+        IntIterator iter = input.codePoints();
+        int state = 0; // 0 - initial whitespace;
+                       // 1 - expecting digits;
+                       // 2 - expecting digits or final whitespace or EOS
+                       // 3 - expecting final whitespace or EOS
 
-        int last = s.length() - 1;
-        if (last < 0) {
-            return new ValidationFailure("Cannot convert empty string to an integer");
-        }
-        int i = 0;
-        if (s.charAt(i) == '+' || s.charAt(i) == '-') {
-            i++;
-        }
-        if (i > last) {
-            return new ValidationFailure("Cannot convert string " + Err.wrap(s, Err.VALUE) +
-                    " to integer: no digits after the sign");
-        }
-        while (i <= last) {
-            char d = s.charAt(i++);
-            if (d >= '0' && d <= '9') {
-                // OK
-            } else {
-                return new ValidationFailure("Cannot convert string " + Err.wrap(s, Err.VALUE) + " to an integer: contains a character that is not a digit");
+        while (iter.hasNext()) {
+            int c = iter.next();
+            switch (state) {
+                case 0:
+                    if (Whitespace.isWhite(c)) {
+                        state = 0;
+                    } else if (c == '+' || c == '-') {
+                        state = 1;
+                    } else if (c >= '0' && c <= '9') {
+                        state = 2;
+                    } else {
+                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: contains a character that is not a digit");
+                    }
+                    break;
+                case 1:
+                    if (c >= '0' && c <= '9') {
+                        state = 2;
+                    } else {
+                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: expected a digit, found " + c);
+                    }
+                    break;
+                case 2:
+                    if (c >= '0' && c <= '9') {
+                        state = 2;
+                    } else if (Whitespace.isWhite(c)) {
+                        state = 3;
+                    } else {
+                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: expected a digit, found " + c);
+                    }
+                    break;
+                case 3:
+                    if (Whitespace.isWhite(c)) {
+                        state = 3;
+                    } else {
+                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: found " + c + " after final whitespace");
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException();
             }
+
+        }
+        if (state == 0 || state == 1) {
+            return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: no digits found");
         }
         return null;
     }

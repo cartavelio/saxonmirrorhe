@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 // Some tests of the "native" XQuery API
 
 public class TestXQueryNative {
-    private static SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
+    private static final SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
 
 
     private static final String xml =
@@ -193,9 +193,10 @@ public class TestXQueryNative {
 
             sqc.setExtensionFunctionLibrary(new FunctionLibrary() {
 
-                SymbolicName.F fn = new SymbolicName.F(
+                final SymbolicName.F fn = new SymbolicName.F(
                         new StructuredQName("hello", "http://my.hello.com/", "world"), 0);
 
+                @Override
                 public Function getFunctionItem(SymbolicName.F functionName, StaticContext env) {
                     if (functionName.equals(fn)) {
                         return null;
@@ -204,10 +205,12 @@ public class TestXQueryNative {
                     }
                 }
 
+                @Override
                 public boolean isAvailable(SymbolicName.F functionName) {
                     return functionName.equals(fn);
                 }
 
+                @Override
                 public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
                     if (functionName.equals(fn)) {
                         return new StringLiteral("hello world");
@@ -216,6 +219,7 @@ public class TestXQueryNative {
                     }
                 }
 
+                @Override
                 public FunctionLibrary copy() {
                     return null;
                 }
@@ -228,8 +232,8 @@ public class TestXQueryNative {
             String result = (String)exp1.evaluateSingle(new DynamicQueryContext(sqc.getConfiguration()));
             assertEquals("hello world", result);
         } catch (Exception err) {
-            fail();
             err.printStackTrace();
+            fail();
         }
     }
 
@@ -247,6 +251,7 @@ public class TestXQueryNative {
     @Test
     public void testCustomSQC() {
         StaticQueryContextFactory factory = new StaticQueryContextFactory() {
+            @Override
             public StaticQueryContext newStaticQueryContext(Configuration config, boolean copyFromDefault) {
                 return new MyStaticQueryContext(config);
             }
@@ -306,7 +311,7 @@ public class TestXQueryNative {
         SequenceIterator itr = xqExp.iterator(dqc);
         Item item = itr.next();
         assertNotNull(item);
-        assertNotNull(item.getStringValue());
+        assertNotNull(item.getUnicodeStringValue());
     }
 
     @Test
@@ -331,7 +336,7 @@ public class TestXQueryNative {
         SequenceIterator itr = xqExp.iterator(dqc);
         Item item = itr.next();
         assertNotNull(item);
-        assertNotNull(item.getStringValue());
+        assertNotNull(item.getUnicodeStringValue());
     }
 
 

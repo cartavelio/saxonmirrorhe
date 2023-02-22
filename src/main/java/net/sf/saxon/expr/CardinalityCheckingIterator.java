@@ -26,8 +26,8 @@ import net.sf.saxon.value.Cardinality;
 
 public final class CardinalityCheckingIterator implements SequenceIterator {
 
-    private SequenceIterator base;
-    private Location locator;
+    private final SequenceIterator base;
+    private final Location locator;
     /*@Nullable*/ private Item first = null;
     private Item second = null;
     private int position = 0;

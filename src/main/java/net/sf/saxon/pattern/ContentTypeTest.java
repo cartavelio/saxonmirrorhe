@@ -29,9 +29,9 @@ import java.util.function.IntPredicate;
 
 public class ContentTypeTest extends NodeTest {
 
-    private int kind;          // element or attribute
-    private SchemaType schemaType;
-    private Configuration config;
+    private final int kind;          // element or attribute
+    private final SchemaType schemaType;
+    private final Configuration config;
     private boolean nillable = false;
 
     /**

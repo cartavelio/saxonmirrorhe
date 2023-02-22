@@ -1,9 +1,10 @@
 package commands;
 
 import jaxptest.ConfigTest;
-/* ndw: won't compile at the moment
+/*
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
+
  */
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

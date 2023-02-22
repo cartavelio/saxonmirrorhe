@@ -18,7 +18,7 @@ import net.sf.saxon.tree.wrapper.VirtualCopy;
  */
 public class VirtualAccumulatorData implements IAccumulatorData {
 
-    private IAccumulatorData realData;
+    private final IAccumulatorData realData;
 
     public VirtualAccumulatorData(IAccumulatorData realData) {
         this.realData = realData;

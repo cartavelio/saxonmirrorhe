@@ -20,7 +20,7 @@ import net.sf.saxon.type.Type;
 
 public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
-    private static XSLT30FunctionSet THE_INSTANCE = new XSLT30FunctionSet();
+    private static final XSLT30FunctionSet THE_INSTANCE = new XSLT30FunctionSet();
 
     public static XSLT30FunctionSet getInstance() {
         return THE_INSTANCE;

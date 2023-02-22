@@ -25,7 +25,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,14 +104,14 @@ public class AlphaCode {
 
         @Override
         public void setStringProperty(DictionaryMap container, String key, String value) {
-            container.initialPut(key, new StringValue(value));
+            container.initialPut(key, new StringItem(value));
         }
 
         @Override
         public void setMultiStringProperty(DictionaryMap container, String key, List<String> value) {
-            List<StringValue> xdmValue = new ArrayList<>();
+            List<StringItem> xdmValue = new ArrayList<>();
             for (String v : value) {
-                xdmValue.add(new StringValue(v));
+                xdmValue.add(new StringItem(v));
             }
             container.initialPut(key, new SequenceExtent(xdmValue));
         }
@@ -231,9 +231,9 @@ public class AlphaCode {
      */
 
     private static class AlphaCodeParser<T> {
-        private String input;
+        private final String input;
         private int position = 0;
-        private ParserCallBack<T> callBack;
+        private final ParserCallBack<T> callBack;
 
         private AlphaCodeParser(String input, ParserCallBack<T> callBack) {
             this.input = input;
@@ -412,11 +412,11 @@ public class AlphaCode {
         // TODO: may need updating. Used when running the XX compiler under Saxon/J
         StringBuilder out = new StringBuilder();
 
-        StringValue indicator = (StringValue) map.get(new StringValue("o"));
-        out.append(indicator == null ? "1" : indicator.getStringValue());
+        StringItem indicator = (StringItem) map.get(StringItem.bmp("o"));
+        out.append(indicator == null ? "1" : indicator.getUnicodeStringValue());
 
-        StringValue alphaCode = (StringValue) map.get(new StringValue("p"));
-        out.append(alphaCode == null ? "" : alphaCode.getStringValue());
+        StringItem alphaCode = (StringItem) map.get(StringItem.bmp("p"));
+        out.append(alphaCode == null ? "" : alphaCode.getUnicodeStringValue());
 
         out.append(" ");
 
@@ -430,7 +430,7 @@ public class AlphaCode {
                 case "c":
                 case "t":
                     out.append(key);
-                    out.append(((StringValue) kvp.value).getStringValue());
+                    out.append(((StringItem) kvp.value).getUnicodeStringValue());
                     out.append(" ");
                     break;
                 case "k":

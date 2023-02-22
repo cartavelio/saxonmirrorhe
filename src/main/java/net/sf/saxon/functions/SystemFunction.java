@@ -12,6 +12,8 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
@@ -20,6 +22,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Properties;
 
@@ -561,6 +564,16 @@ public abstract class SystemFunction extends AbstractFunction {
         return getFunctionName().getDisplayName() + '#' + getArity();
     }
 
-    
+    /**
+     * Helper method to get an argument value as a Unistring, in the case where an empty sequenec
+     * should be treated as a zero-length string
+     */
+
+    protected UnicodeString getUniStringArg(Sequence supplied) throws XPathException {
+        StringItem item = (StringItem)supplied.head();
+        return item == null ? EmptyUniString.getInstance() : item.getUnicodeStringValue();
+    }
+
+
 }
 

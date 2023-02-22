@@ -19,7 +19,7 @@ import java.util.EnumSet;
  */
 public class LookaheadIteratorImpl implements LookaheadIterator {
 
-    private SequenceIterator base;
+    private final SequenceIterator base;
     /*@Nullable*/ private Item next;
 
     private LookaheadIteratorImpl(/*@NotNull*/ SequenceIterator base) throws XPathException {

@@ -150,11 +150,11 @@ public class NextMatch extends ApplyNextMatchingTemplate {
 
     private class NextMatchPackage implements TailCall {
 
-        private Rule rule;
-        private ParameterSet params;
-        private ParameterSet tunnelParams;
-        private Outputter output;
-        private XPathContext evaluationContext;
+        private final Rule rule;
+        private final ParameterSet params;
+        private final ParameterSet tunnelParams;
+        private final Outputter output;
+        private final XPathContext evaluationContext;
 
         /**
          * Construct a NextMatchPackage that contains information about a call.

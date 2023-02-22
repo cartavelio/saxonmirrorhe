@@ -17,7 +17,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -348,8 +348,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
     public static class ToStringMappingFunction
             implements ItemMappingFunction {
         @Override
-        public StringValue mapItem(Item item) {
-            return StringValue.makeStringValue(item.getStringValueCS());
+        public StringItem mapItem(Item item) {
+            return new StringItem(item.getUnicodeStringValue());
         }
     }
 

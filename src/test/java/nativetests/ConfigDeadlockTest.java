@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,12 +53,14 @@ public class ConfigDeadlockTest {
         public static void main(String[] args) throws InterruptedException {
             testForDeadlock(
                     new Thread() {
+                        @Override
                         public void run() {
                             new Configuration();
                             new EnterpriseConfiguration();
                         }
                     },
                     new Thread() {
+                        @Override
                         public void run() {
                             new Configuration();
                         }
@@ -73,11 +76,13 @@ public class ConfigDeadlockTest {
         public static void main(String[] args) throws InterruptedException {
             testForDeadlock(
                     new Thread() {
+                        @Override
                         public void run() {
                             new EnterpriseConfiguration();
                         }
                     },
                     new Thread() {
+                        @Override
                         public void run() {
                             new Configuration();
                         }
@@ -87,12 +92,10 @@ public class ConfigDeadlockTest {
 
     }
 
-    private static enum Result {
+    private enum Result {
         SUSPECTED_DEADLOCK,
         NORMAL_COMPLETION
     }
-
-    ;
 
     //@Test(invocationCount = 10)
     public static void testWorkaroundForSaxonBug2327() throws IOException {
@@ -143,7 +146,7 @@ public class ConfigDeadlockTest {
     }
 
     public static String nextOutputLine(Process process) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
         return reader.readLine();
     }
 

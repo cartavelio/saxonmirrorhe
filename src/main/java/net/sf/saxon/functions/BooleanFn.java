@@ -55,7 +55,7 @@ public class BooleanFn extends SystemFunction {
         boolean forStreaming = visitor.isOptimizeForStreaming();
         exp = ExpressionTool.unsortedIfHomogeneous(exp, forStreaming);
         if (exp instanceof Literal) {
-            GroundedValue val = ((Literal)exp).getValue();
+            GroundedValue val = ((Literal)exp).getGroundedValue();
             if (val instanceof BooleanValue) {
                 return exp;
             }

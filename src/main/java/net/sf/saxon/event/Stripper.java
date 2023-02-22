@@ -7,9 +7,12 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
@@ -23,11 +26,12 @@ import java.util.Arrays;
 
 
 /**
- * The RuleBasedStripper class performs whitespace stripping according to the rules of
+ * The {@code Stripper} class performs whitespace stripping according to the rules of
  * the xsl:strip-space and xsl:preserve-space instructions.
  * It maintains details of which elements need to be stripped.
  * The code is written to act as a SAX-like filter to do the stripping.
  *
+ * <p>If you found this code as a result of a Google search, sorry about the disappointment.</p>
  */
 
 
@@ -110,7 +114,7 @@ public class Stripper extends ProxyReceiver {
     public void startElement(NodeName elemName, SchemaType type,
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
-        // System.err.println("startElement " + nameCode);
+        //System.err.println("startElement " + elemName.getDisplayName());
         nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
 
         byte preserveParent = stripStack[top];
@@ -144,7 +148,7 @@ public class Stripper extends ProxyReceiver {
 
         String xmlSpace = attributes.getValue(NamespaceConstant.XML, "space");
         if (xmlSpace != null) {
-            if (Whitespace.normalizeWhitespace(xmlSpace).equals("preserve")) {
+            if (Whitespace.normalizeWhitespace(StringView.of(xmlSpace)).equals(S_PRESERVE)) {
                 stripStack[top] |= PRESERVE_PARENT;
             } else {
                 stripStack[top] &= ~PRESERVE_PARENT;
@@ -152,22 +156,9 @@ public class Stripper extends ProxyReceiver {
         }
     }
 
-//    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-//            throws XPathException {
-//
-//        // test for xml:space="preserve" | "default"
-//
-//        if (nameCode.equals(XML_SPACE)) {
-//            if (Whitespace.normalizeWhitespace(value).equals("preserve")) {
-//                stripStack[top] |= PRESERVE_PARENT;
-//            } else {
-//                stripStack[top] &= ~PRESERVE_PARENT;
-//            }
-//        }
-//        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-//    }
+    private final static CodePoints S_PRESERVE = BMPString.of("preserve");
 
-    private static NodeName XML_SPACE = new FingerprintedQName("xml", NamespaceConstant.XML, "space", StandardNames.XML_SPACE);
+    private static final NodeName XML_SPACE = new FingerprintedQName("xml", NamespaceConstant.XML, "space", StandardNames.XML_SPACE);
 
     /**
      * Handle an end-of-element event
@@ -184,13 +175,13 @@ public class Stripper extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         // assume adjacent chunks of text are already concatenated
 
         if (((((stripStack[top] & (ALWAYS_PRESERVE | PRESERVE_PARENT | SIMPLE_CONTENT | ASSERTIONS_EXIST)) != 0) &&
                 (stripStack[top] & ALWAYS_STRIP) == 0)
-                || !Whitespace.isWhite(chars))
-                && chars.length() > 0) {
+                || !Whitespace.isAllWhite(chars))
+                && !chars.isEmpty()) {
             nextReceiver.characters(chars, locationId, properties);
         }
     }

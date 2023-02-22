@@ -30,7 +30,7 @@ public class XSLPackage extends XSLModuleRoot {
 
     /**
      * Initialise a new ElementImpl with an element name
-     *  @param elemName       Integer representing the element name, with namespaces resolved
+     * @param elemName       Integer representing the element name, with namespaces resolved
      * @param elementType    the schema type of the element node
      * @param atts           The attribute list: always null
      * @param parent         The parent node

@@ -8,6 +8,7 @@
 
 package net.sf.saxon.serialize;
 
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeName;
@@ -29,7 +30,7 @@ import java.util.Set;
 
 public class XHTML5Emitter extends XMLEmitter {
 
-    private static String[] html5ElementNames = {
+    private static final String[] html5ElementNames = {
             "a", "abbr", "address", "area", "article", "aside", "audio",
             "b", "base", "bdi", "bdo", "blockquote", "body", "br", "button",
             "canvas", "caption", "cite", "code", "col", "colgroup", /*"command",*/
@@ -57,7 +58,7 @@ public class XHTML5Emitter extends XMLEmitter {
 
     static Set<String> emptyTags5 = new HashSet<String>(31);
 
-    private static String[] emptyTagNames5 = {
+    private static final String[] emptyTagNames5 = {
             "area", "base", "br", "col", /*"command",*/ "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
             "source", "track", "wbr"
     };
@@ -121,8 +122,8 @@ public class XHTML5Emitter extends XMLEmitter {
      * Character data.
      */
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (!started && Whitespace.isWhite(chars)) {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (!started && Whitespace.isAllWhite(chars)) {
             // Ignore whitespace before the first start tag. This isn't explicit in the spec, but
             // we would otherwise need to buffer such whitespace, because we need to output a DOCTYPE
             // declaration based on the content of the first element tag.

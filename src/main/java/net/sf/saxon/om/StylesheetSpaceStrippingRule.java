@@ -43,7 +43,7 @@ public class StylesheetSpaceStrippingRule implements SpaceStrippingRule {
             StandardNames.XSL_TRANSFORM
     };
 
-    private NamePool namePool;
+    private final NamePool namePool;
 
     public StylesheetSpaceStrippingRule(NamePool pool) {
         this.namePool = pool;

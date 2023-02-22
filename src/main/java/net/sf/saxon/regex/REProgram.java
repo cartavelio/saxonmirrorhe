@@ -30,9 +30,10 @@
 
 package net.sf.saxon.regex;
 
-import java.util.function.IntPredicate;
+import net.sf.saxon.str.UnicodeString;
 
 import java.util.List;
+import java.util.function.IntPredicate;
 
 /**
  * A class that holds compiled regular expressions.

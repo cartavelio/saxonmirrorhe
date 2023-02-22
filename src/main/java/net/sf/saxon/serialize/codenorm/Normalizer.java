@@ -10,7 +10,6 @@ package net.sf.saxon.serialize.codenorm;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 
 /**
  * Implements Unicode Normalization Forms C, D, KC, KD.
@@ -25,6 +24,11 @@ import net.sf.saxon.tree.util.FastStringBuffer;
  * @author Mark Davis
  *         Updates for supplementary code points: Vladimir Weinstein &amp; Markus Scherer
  *         Modified to remove dependency on ICU code: Michael Kay
+ *
+ * @implNote 2020-07-22: in converting the rest of Saxon to use UniString and UnicodeBuilder
+ * classes, I considered rewriting this module, but decided to leave it alone as change seemed
+ * to risky. The only changes made are to replace FastStringBuffer with StringBuilder, and
+ * to change the interfaces to use String rather than CharSequence.
  */
 
 public class Normalizer {
@@ -32,7 +36,7 @@ public class Normalizer {
     /**
      * The requested normalization form.
      */
-    private int form;
+    private final int form;
 
     /**
      * Create a normalizer for a given form. Private constructor: use the {@link #make factory method}
@@ -82,7 +86,7 @@ public class Normalizer {
      * @param source the original text, unnormalized
      * @return target      the resulting normalized text
      */
-    public CharSequence normalize(CharSequence source) {
+    public String normalize(String source) {
 
         if (form == NO_ACTION || source.length() == 0) {
             return source;
@@ -91,12 +95,12 @@ public class Normalizer {
         // First decompose the source into target,
         // then compose if the form requires.
 
-        FastStringBuffer target = new FastStringBuffer(source.length() + 8);
+        StringBuilder target = new StringBuilder(source.length() + 8);
         internalDecompose(source, target);
         if ((form & COMPOSITION_MASK) != 0) {
             internalCompose(target);
         }
-        return target;
+        return target.toString();
     }
 
 
@@ -111,8 +115,8 @@ public class Normalizer {
      * @param source the original text, unnormalized
      * @param target the resulting normalized text
      */
-    private void internalDecompose(CharSequence source, FastStringBuffer target) {
-        FastStringBuffer buffer = new FastStringBuffer(8);
+    private void internalDecompose(String source, StringBuilder target) {
+        StringBuilder buffer = new StringBuilder(8);
         boolean canonical = (form & COMPATIBILITY_MASK) == 0;
         int ch32;
         for (int i = 0; i < source.length(); ) {
@@ -120,7 +124,7 @@ public class Normalizer {
             ch32 = source.charAt(i++);
             if (ch32 < 128) {
                 // fast path - for ASCII characters, decomposition is a no-op
-                target.cat((char) ch32);
+                target.append((char) ch32);
                 continue;
             }
             if (UTF16CharacterSet.isHighSurrogate(ch32)) {
@@ -162,7 +166,8 @@ public class Normalizer {
                 if (ch < 65536) {
                     target.insert(k, (char) ch);
                 } else {
-                    target.insertWideChar(k, ch);
+                    char[] pair = new char[]{UTF16CharacterSet.highSurrogate(ch), UTF16CharacterSet.lowSurrogate(ch)};
+                    target.insert(k, pair);
                 }
             }
         }
@@ -175,7 +180,7 @@ public class Normalizer {
      * @param target input: decomposed text.
      *               output: the resulting normalized text.
      */
-    private void internalCompose(FastStringBuffer target) {
+    private void internalCompose(StringBuilder target) {
 
         int starterPos = 0;
         //int starterCh = UTF16.charAt(target,0);
@@ -234,11 +239,11 @@ public class Normalizer {
      * @param ch32   the character to be inserted, as a 32-bit Unicode codepoint
      */
 
-    private static void setCharAt(FastStringBuffer target, int offset, int ch32) {
+    private static void setCharAt(StringBuilder target, int offset, int ch32) {
         if (ch32 < 65536) {
             if (UTF16CharacterSet.isHighSurrogate(target.charAt(offset))) {
                 target.setCharAt(offset, (char) ch32);
-                target.removeCharAt(offset + 1);
+                target.deleteCharAt(offset + 1);
             } else {
                 target.setCharAt(offset, (char) ch32);
             }

@@ -130,7 +130,7 @@ public class XSLIf extends StyleElement {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (test instanceof Literal) {
-            GroundedValue testVal = ((Literal) test).getValue();
+            GroundedValue testVal = ((Literal) test).getGroundedValue();
             // condition known statically, so we only need compile the code if true.
             // This can happen with expressions such as test="function-available('abc')".
             try {

@@ -9,11 +9,13 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -32,16 +34,17 @@ final class TinyCommentImpl extends TinyNodeImpl {
 
     /**
      * Get the XPath string value of the comment
+     * @return
      */
 
     @Override
-    public final String getStringValue() {
+    public final UnicodeString getUnicodeStringValue() {
         int start = tree.alpha[nodeNr];
         int len = tree.beta[nodeNr];
-        if (len == 0) return "";
-        char[] dest = new char[len];
-        tree.commentBuffer.getChars(start, start + len, dest, 0);
-        return new String(dest, 0, len);
+        if (len == 0) {
+            return EmptyUniString.getInstance();
+        }
+        return tree.commentBuffer.substring(start, start + len);
     }
 
     /**
@@ -51,7 +54,7 @@ final class TinyCommentImpl extends TinyNodeImpl {
 
     @Override
     public AtomicSequence atomize() {
-        return new StringValue(getStringValue());
+        return new StringItem(getUnicodeStringValue());
     }
 
 
@@ -72,7 +75,7 @@ final class TinyCommentImpl extends TinyNodeImpl {
 
     @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.comment(getStringValue(), locationId, ReceiverOption.NONE);
+        out.comment(getUnicodeStringValue(), locationId, ReceiverOption.NONE);
     }
 
 }

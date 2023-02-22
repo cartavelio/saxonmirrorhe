@@ -8,7 +8,7 @@
 package net.sf.saxon.z;
 
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.Arrays;
 
@@ -281,7 +281,7 @@ public class IntRangeSet implements IntSet {
 
 
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer(used * 8);
+        StringBuilder sb = new StringBuilder(used * 8);
         for (int i = 0; i < used; i++) {
             sb.append(startPoints[i] + "-" + endPoints[i] + ",");
         }

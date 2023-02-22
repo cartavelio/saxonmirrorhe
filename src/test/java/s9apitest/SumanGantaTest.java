@@ -19,15 +19,15 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Loads xquery module info by parsing the module text
  */
 public class SumanGantaTest {
-   private int mIterations = 2000;
+   private final int mIterations = 2000;
 
-    @Test
+   @Test
    public void testModuleLink()
    {
       parseWithModuleLinking(false);
    }
 
-    @Test
+   @Test
    public void testParse()
    {
       justParse(false);
@@ -95,6 +95,7 @@ public class SumanGantaTest {
          long start = System.currentTimeMillis();
          Runnable task = new Runnable()
          {
+            @Override
             public void run()
             {
                try

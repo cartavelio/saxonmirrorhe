@@ -12,7 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
@@ -94,7 +94,7 @@ public class MemoFunction extends UserFunction {
      */
 
     private static String getCombinedKey(Sequence[] params) throws XPathException {
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder sb = new StringBuilder(256);
 
         for (Sequence val : params) {
             SequenceIterator iter = val.iterate();
@@ -104,15 +104,15 @@ public class MemoFunction extends UserFunction {
                     NodeInfo node = (NodeInfo) item;
                     node.generateId(sb);
                 } else if (item instanceof QNameValue) {
-                    sb.cat(Type.displayTypeName(item)).cat('/').cat(((QNameValue) item).getClarkName());
+                    sb.append(Type.displayTypeName(item)).append('/').append(((QNameValue) item).getClarkName());
                 } else if (item instanceof AtomicValue) {
-                    sb.cat(Type.displayTypeName(item)).cat('/').cat(item.getStringValueCS());
+                    sb.append(Type.displayTypeName(item)).append('/').append(item.getUnicodeStringValue());
                 } else if (item instanceof Function) {
-                    sb.cat(item.getClass().getName()).cat("@").cat(""+System.identityHashCode(item));
+                    sb.append(item.getClass().getName()).append("@").append(""+System.identityHashCode(item));
                 }
-                sb.cat('\u0001');
+                sb.append('\u0001');
             }
-            sb.cat('\u0002');
+            sb.append('\u0002');
         }
         return sb.toString();
     }

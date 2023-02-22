@@ -94,7 +94,7 @@ public class StandardCollationURIResolver implements CollationURIResolver {
                 Properties props = new Properties();
                 String query = AnyURIValue.decode(uuri.getRawQuery());
                 for (String param : query.split(";")) {
-                    String tokens[] = param.split("=");
+                    String[] tokens = param.split("=");
                     if (tokens.length == 2) {
                         String kw = tokens[0];
                         String val = tokens[1];

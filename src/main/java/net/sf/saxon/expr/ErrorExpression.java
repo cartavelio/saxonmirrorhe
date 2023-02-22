@@ -29,7 +29,7 @@ import net.sf.saxon.type.ItemType;
 
 public class ErrorExpression extends Expression {
 
-    private XmlProcessingError exception;
+    private final XmlProcessingError exception;
     private Expression original;
 
     /**

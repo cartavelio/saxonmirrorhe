@@ -36,7 +36,7 @@ public class IdentityTransformerHandler extends ReceivingContentHandler implemen
 
     /*@Nullable*/ private Result result;
     private String systemId;
-    private IdentityTransformer controller;
+    private final IdentityTransformer controller;
 
     /**
      * Create a IdentityTransformerHandler and initialise variables. The constructor is protected, because

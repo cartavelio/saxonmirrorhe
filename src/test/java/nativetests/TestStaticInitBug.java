@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 // Fixed in 9.1
 
 public class TestStaticInitBug {
-   private static SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
+   private static final SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
 
    private static final String xsl =
       "<?xml version='1.0' encoding='UTF-8'?>" +

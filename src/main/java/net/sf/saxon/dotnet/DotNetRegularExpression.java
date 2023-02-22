@@ -11,11 +11,15 @@ import cli.System.ArgumentException;
 import cli.System.Text.RegularExpressions.Match;
 import cli.System.Text.RegularExpressions.Regex;
 import cli.System.Text.RegularExpressions.RegexOptions;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.function.Function;
 
@@ -36,7 +40,7 @@ public class DotNetRegularExpression implements RegularExpression {
      *          if the syntax of the regular expression or flags is incorrect
      */
 
-    public DotNetRegularExpression(CharSequence regex, CharSequence flags)
+    public DotNetRegularExpression(CodePoints regex, String flags)
             throws XPathException {
         String translated = "";
         try {
@@ -47,8 +51,8 @@ public class DotNetRegularExpression implements RegularExpression {
             }
         } catch (ArgumentException e) {
             throw new XPathException("Error in translated regular expression. Input regex = " +
-                    FastStringBuffer.diagnosticPrint(regex) + ". Translated regex = " +
-                    FastStringBuffer.diagnosticPrint(translated) + ". Message = " + e.getMessage());
+                                             Err.wrap(regex) + ". Translated regex = " +
+                    Err.wrap(translated) + ". Message = " + e.getMessage());
         }
     }
 
@@ -57,10 +61,11 @@ public class DotNetRegularExpression implements RegularExpression {
      * analyze-string instruction. The resulting RegexIterator provides both the matching and
      * non-matching substrings, and allows them to be distinguished. It also provides access
      * to matched subgroups.
+     * @param input
      */
 
     @Override
-    public RegexIterator analyze(CharSequence input) {
+    public RegexIterator analyze(UnicodeString input) {
         return new DotNetRegexIterator(input.toString(), pattern);
     }
 
@@ -72,7 +77,7 @@ public class DotNetRegularExpression implements RegularExpression {
      */
 
     @Override
-    public boolean containsMatch(CharSequence input) {
+    public boolean containsMatch(UnicodeString input) {
         return pattern.IsMatch(input.toString());
     }
 
@@ -84,7 +89,7 @@ public class DotNetRegularExpression implements RegularExpression {
      */
 
     @Override
-    public boolean matches(CharSequence input) {
+    public boolean matches(UnicodeString input) {
         Match m = pattern.Match(input.toString());
         return (m.get_Success() && m.get_Length() == input.length());
     }
@@ -101,18 +106,20 @@ public class DotNetRegularExpression implements RegularExpression {
      */
 
     @Override
-    public CharSequence replace(CharSequence input, CharSequence replacement) throws XPathException {
+    public UnicodeString replace(UnicodeString input, UnicodeString replacement) throws XPathException {
         // preprocess the replacement string: .NET uses $$ to represent $, and doesn't treat \ specially
         // The calling code will already have validated the replacement string, so we can assume for example
         // that "\" will be followed by "\" or "$".
-        FastStringBuffer sb = new FastStringBuffer(replacement.length() + 4);
-        for (int i = 0; i < replacement.length(); i++) {
-            final char ch = replacement.charAt(i);
+        int len = replacement.length32();
+        UnicodeBuilder sb = new UnicodeBuilder();
+        for (int i = 0; i < len; i++) {
+            final int ch = replacement.codePointAt(i);
             if (ch == '\\') {
-                if (replacement.charAt(i + 1) == '\\') {
-                    sb.cat('\\');
-                } else if (replacement.charAt(i + 1) == '$') {
-                    sb.append("$$");
+                int next = replacement.codePointAt(i + 1);
+                if (next == '\\') {
+                    sb.append("\\");
+                } else if (next == '$') {
+                    sb.append('$').append('$');
                 } else {
                     throw new IllegalArgumentException("bad replacement string");
                 }
@@ -120,10 +127,10 @@ public class DotNetRegularExpression implements RegularExpression {
             } else if (ch == '$') {
                 int n = 0;
                 while (true) {
-                    if (i + 1 >= replacement.length()) {
+                    if (i + 1 >= len) {
                         break;
                     }
-                    char d = replacement.charAt(i + 1);
+                    int d = replacement.codePointAt(i + 1);
                     int dval = "0123456789".indexOf(d);
                     if (dval < 0) {
                         break;
@@ -133,12 +140,12 @@ public class DotNetRegularExpression implements RegularExpression {
                 }
                 processGroupReference(n, sb);
             } else {
-                sb.cat(ch);
+                sb.append(ch);
             }
         }
         //System.err.println("original replacement string: " + replacement);
         //System.err.println("processed replacement string: " + sb);
-        return pattern.Replace(input.toString(), sb.toString());
+        return StringView.tidy(pattern.Replace(input.toString(), sb.toString()));
     }
 
     /**
@@ -152,7 +159,7 @@ public class DotNetRegularExpression implements RegularExpression {
      * @throws XPathException if the replacement string is invalid
      */
     @Override
-    public CharSequence replaceWith(CharSequence input, Function<CharSequence, CharSequence> replacement) throws XPathException {
+    public UnicodeString replaceWith(UnicodeString input, Function<UnicodeString, UnicodeString> replacement) throws XPathException {
         throw new XPathException("saxon:replace-with() is not supported with the .NET regex engine");
     }
 
@@ -165,11 +172,11 @@ public class DotNetRegularExpression implements RegularExpression {
      * @param sb teh buffer to contain the replacement string in .NET notation
      */
 
-    private void processGroupReference(int n, FastStringBuffer sb) {
+    private void processGroupReference(int n, UnicodeBuilder sb) {
         if (n == 0) {
-            sb.append("$0");
+            sb.appendLatin("$0");
         } else if (n <= groupCount) {
-            sb.append("${" + n + '}');
+            sb.appendLatin("${" + n + '}');
         } else if (n <= 9) {
             // no-op - group reference is replaced by zero-length string
         } else {
@@ -177,7 +184,7 @@ public class DotNetRegularExpression implements RegularExpression {
             int n0 = n / 10;
             int n1 = n % 10;
             processGroupReference(n0, sb);
-            sb.append("" + n1);
+            sb.appendLatin("" + n1);
         }
     }
 
@@ -189,8 +196,8 @@ public class DotNetRegularExpression implements RegularExpression {
      */
 
     @Override
-    public AtomicIterator tokenize(CharSequence input) {
-        return new DotNetTokenIterator(input, pattern);
+    public AtomicIterator tokenize(UnicodeString input) {
+        return new DotNetTokenIterator(input.toString(), pattern);
     }
 
     /**

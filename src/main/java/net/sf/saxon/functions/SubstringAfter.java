@@ -10,8 +10,10 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Implements the fn:substring-after() function with the collation already known
@@ -33,35 +35,28 @@ public class SubstringAfter extends CollatingFunctionFixed {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue arg1 = (StringValue) arguments[0].head();
-        StringValue arg2 = (StringValue) arguments[1].head();
-        return substringAfter(arg1, arg2, (SubstringMatcher)getStringCollator());
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+        UnicodeString s0 = getUniStringArg(arguments[0]);
+        UnicodeString s1 = getUniStringArg(arguments[1]);
+
+        return new StringItem(substringAfter(s0, s1, (SubstringMatcher)getStringCollator()));
     }
 
-    private static StringValue substringAfter(StringValue arg1, StringValue arg2, SubstringMatcher collator) {
+    private static UnicodeString substringAfter(UnicodeString arg1, UnicodeString arg2, SubstringMatcher collator) {
         if (arg1 == null) {
-            arg1 = StringValue.EMPTY_STRING;
+            arg1 = EmptyUniString.getInstance();
         }
         if (arg2 == null) {
-            arg2 = StringValue.EMPTY_STRING;
+            arg2 = EmptyUniString.getInstance();
         }
-        if (arg2.isZeroLength()) {
+        if (arg2.isEmpty()) {
             return arg1;
         }
-        if (arg1.isZeroLength()) {
-            return StringValue.EMPTY_STRING;
+        if (arg1.isEmpty()) {
+            return EmptyUniString.getInstance();
         }
 
-        String s1 = arg1.getStringValue();
-        String s2 = arg2.getStringValue();
-
-        String result = collator.substringAfter(s1, s2);
-        StringValue s = StringValue.makeStringValue(result);
-        if (arg1.isKnownToContainNoSurrogates()) {
-            s.setContainsNoSurrogates();
-        }
-        return s;
+        return collator.substringAfter(arg1, arg2);
     }
 
     @Override

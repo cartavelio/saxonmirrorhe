@@ -11,11 +11,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -319,26 +320,13 @@ public class VirtualCopy implements NodeInfo {
     }
 
     /**
-     * Return the string value of the node. The interpretation of this depends on the type
-     * of node. For an element it is the accumulated character content of the element,
-     * including descendant elements.
-     *
-     * @return the string value of the node
+     * Get the string value of the item
+     * @return the string value of this node
      */
 
     @Override
-    public String getStringValue() {
-        return getStringValueCS().toString();
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return original.getStringValueCS();
+    public UnicodeString getUnicodeStringValue() {
+        return original.getUnicodeStringValue();
     }
 
     /**
@@ -555,7 +543,7 @@ public class VirtualCopy implements NodeInfo {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
         buffer.append("d");
         buffer.append(Long.toString(getTreeInfo().getDocumentNumber()));
         original.generateId(buffer);
@@ -743,7 +731,7 @@ public class VirtualCopy implements NodeInfo {
     protected class VirtualCopier implements AxisIterator {
 
         protected AxisIterator base;
-        private VirtualCopy parent;
+        private final VirtualCopy parent;
         protected boolean testInclusion;
 
         public VirtualCopier(AxisIterator base, VirtualCopy parent, boolean testInclusion) {

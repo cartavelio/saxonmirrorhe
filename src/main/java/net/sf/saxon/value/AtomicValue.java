@@ -14,6 +14,7 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -54,7 +55,7 @@ public abstract class AtomicValue
     public AtomicSequence atomize() throws XPathException {
         return this;
     }
-
+    
     /**
      * To implement {@link net.sf.saxon.om.Sequence}, this method returns the item itself
      *
@@ -98,6 +99,15 @@ public abstract class AtomicValue
 
     public void setTypeLabel(AtomicType type) {
         typeLabel = type;
+    }
+
+    /**
+     * Ask whether the value is of type xs:untypedAtomic
+     * @return true if the value is untyped atomic
+     */
+
+    public boolean isUntypedAtomic() {
+        return typeLabel == BuiltInAtomicType.UNTYPED_ATOMIC;
     }
 
     /**
@@ -217,11 +227,12 @@ public abstract class AtomicValue
     /**
      * Get the value of the item as a CharSequence. This is in some cases more efficient than
      * the version of the method that returns a String.
+     * @return
      */
 
     @Override
-    public CharSequence getStringValueCS() {
-        CharSequence cs = getPrimitiveStringValue();
+    public UnicodeString getUnicodeStringValue() {
+        UnicodeString cs = getPrimitiveStringValue();
         try {
             return typeLabel.postprocess(cs);
         } catch (XPathException err) {
@@ -238,8 +249,8 @@ public abstract class AtomicValue
      *         of casting to string according to the XPath 2.0 rules
      */
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        return getStringValueCS();
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        return this.getUnicodeStringValue();
     }
 
     /**
@@ -323,18 +334,6 @@ public abstract class AtomicValue
     }
 
     /**
-     * Convert the value to a string, using the serialization rules.
-     * For atomic values this is the same as a cast; for sequence values
-     * it gives a space-separated list. This method is refined for AtomicValues
-     * so that it never throws an Exception.
-     */
-
-    @Override
-    public final String getStringValue() {
-        return getStringValueCS().toString();
-    }
-
-    /**
      * Convert the value to a string, using the serialization rules for the primitive type.
      * This is the result of conversion to a string except that postprocessing defined by the
      * saxon:preprocess facet is not (yet) applied.
@@ -342,7 +341,7 @@ public abstract class AtomicValue
      * @return the value converted to a string according to the rules for the primitive type
      */
 
-    protected abstract CharSequence getPrimitiveStringValue();
+    protected abstract UnicodeString getPrimitiveStringValue();
 
 
     /**
@@ -400,7 +399,7 @@ public abstract class AtomicValue
             if (stype != null && !stype.isNamespaceSensitive()) {
                 // Can't validate namespace-sensitive content statically
                 ValidationFailure err = stype.validateContent(
-                        getStringValueCS(), null, env.getConfiguration().getConversionRules());
+                        this.getUnicodeStringValue(), null, env.getConfiguration().getConversionRules());
                 if (err != null) {
                     throw err.makeException();
                 }
@@ -410,10 +409,10 @@ public abstract class AtomicValue
         if (parentType instanceof ComplexType &&
                 !((ComplexType) parentType).isSimpleContent() &&
                 !((ComplexType) parentType).isMixedContent() &&
-                !Whitespace.isWhite(getStringValueCS())) {
+                !Whitespace.isAllWhite(this.getUnicodeStringValue())) {
             XPathException err = new XPathException("Complex type " + parentType.getDescription() +
                     " does not allow text content " +
-                    Err.wrap(getStringValueCS()));
+                    Err.wrap(this.getUnicodeStringValue()));
             err.setIsTypeError(true);
             throw err;
         }
@@ -446,13 +445,28 @@ public abstract class AtomicValue
     }
 
     /**
-     * Get string value. In general toString() for an atomic value displays the value as it would be
+     * Get string value.
+     */
+
+    public String toString() {
+        return getStringValue();
+        //throw new UnsupportedOperationException();
+        //return typeLabel + "(\"" + getStringValueCS() + "\")";
+    }
+
+    @Override
+    public String toShortString() {
+        return show();
+    }
+
+    /**
+     * Display the value for diagnostics.  In general show() for an atomic value displays the value as it would be
      * written in XPath: that is, as a literal if available, or as a call on a constructor function
      * otherwise.
      */
 
-    public String toString() {
-        return typeLabel + "(\"" + getStringValueCS() + "\")";
+    public String show() {
+        return typeLabel + "(\"" + this.getUnicodeStringValue() + "\")";
     }
 
     /**

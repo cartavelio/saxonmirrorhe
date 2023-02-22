@@ -32,8 +32,8 @@ import java.util.List;
  */
 public class AccumulatorData implements IAccumulatorData {
 
-    private Accumulator accumulator;
-    private List<DataPoint> values = new ArrayList<>();
+    private final Accumulator accumulator;
+    private final List<DataPoint> values = new ArrayList<>();
     private boolean building = false;
 
     public AccumulatorData(Accumulator acc) {

@@ -210,7 +210,7 @@ public class DocumentBuilderImplTest {
             XPath xpath = xPathFactory.newXPath();
             NodeList list = (NodeList) xpath.evaluate(path, doc, XPathConstants.NODESET);
 
-            System.out.println(Integer.toString(list.getLength()));
+            System.out.println(list.getLength());
             assertEquals(1, list.getLength(), "length");
             for (int i = 0; i < list.getLength(); i++) {
                 Node n = list.item(i);

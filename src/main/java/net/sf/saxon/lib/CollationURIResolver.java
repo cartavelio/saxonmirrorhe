@@ -44,6 +44,6 @@ public interface CollationURIResolver {
      *        exception to be thrown
      */
 
-    public StringCollator resolve(String collationURI, Configuration config) throws XPathException;
+    StringCollator resolve(String collationURI, Configuration config) throws XPathException;
 }
 

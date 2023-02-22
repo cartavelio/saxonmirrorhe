@@ -13,6 +13,7 @@ import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.SchemaType;
 
 
@@ -62,7 +63,7 @@ public interface NodeFactory {
      * @return the constructed text node
      */
 
-    public TextImpl makeTextNode(NodeInfo parent, CharSequence content);
+    TextImpl makeTextNode(NodeInfo parent, UnicodeString content);
 
 }
 

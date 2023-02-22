@@ -31,7 +31,7 @@ public class CurrentMergeGroup extends SystemFunction {
 
     private boolean isInLoop = false;
     private MergeInstr controllingInstruction = null; // may be unknown, when current group has dynamic scope
-    private Set<String> allowedNames = new HashSet<>();
+    private final Set<String> allowedNames = new HashSet<>();
 
     /**
      * Set the containing xsl:merge instruction, if there is one

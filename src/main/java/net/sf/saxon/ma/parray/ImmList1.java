@@ -18,7 +18,7 @@ import java.util.Iterator;
 
 public class ImmList1<E> extends ImmList<E> {
 
-    private E member;
+    private final E member;
 
     public ImmList1(E member) {
         this.member = member;

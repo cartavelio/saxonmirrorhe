@@ -17,7 +17,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
 
 import java.util.function.Predicate;
@@ -74,9 +74,9 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
         switch (getNodeKind()) {
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return new StringValue(getStringValueCS());
+                return new StringItem(getUnicodeStringValue());
             default:
-                return new UntypedAtomicValue(getStringValueCS());
+                return new UntypedAtomicValue(getUnicodeStringValue());
         }
     }
 
@@ -125,7 +125,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     public String getSystemId() {
         if (treeInfo instanceof GenericTreeInfo) {
-            return ((GenericTreeInfo) treeInfo).getSystemId();
+            return treeInfo.getSystemId();
         } else {
             throw new UnsupportedOperationException();
             // must implement in subclass
@@ -140,7 +140,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     public void setSystemId(String uri) {
         if (treeInfo instanceof GenericTreeInfo) {
-            ((GenericTreeInfo) treeInfo).setSystemId(uri);
+            treeInfo.setSystemId(uri);
         } else {
             throw new UnsupportedOperationException();
             // must implement in subclass
@@ -206,19 +206,6 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     public Location saveLocation() {
         return this;
-    }
-
-    /**
-     * Return the string value of the node. The interpretation of this depends on the type
-     * of node. For an element it is the accumulated character content of the element,
-     * including descendant elements.
-     *
-     * @return the string value of the node
-     */
-
-    @Override
-    public String getStringValue() {
-        return getStringValueCS().toString();
     }
 
     /**

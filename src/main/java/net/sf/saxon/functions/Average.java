@@ -49,11 +49,11 @@ public class Average extends FoldingFunction {
     }
 
     private class AverageFold implements Fold {
-        private XPathContext context;
+        private final XPathContext context;
         private AtomicValue data;
         private boolean atStart = true;
-        private ConversionRules rules;
-        private StringConverter toDouble;
+        private final ConversionRules rules;
+        private final StringConverter toDouble;
         private int count = 0;
 
         public AverageFold(XPathContext context) {
@@ -71,8 +71,8 @@ public class Average extends FoldingFunction {
         @Override
         public void processItem(Item item) throws XPathException {
             AtomicValue next = (AtomicValue)item;
-            if (next instanceof UntypedAtomicValue) {
-                next = toDouble.convert((UntypedAtomicValue)next).asAtomic();
+            if (next.isUntypedAtomic()) {
+                next = toDouble.convert(next).asAtomic();
             }
             count++;
             if (atStart) {

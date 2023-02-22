@@ -9,6 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -76,9 +77,9 @@ public class CheckSumFilter extends ProxyReceiver {
      * Character data
      */
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (!Whitespace.isWhite(chars)) {
-            checksum ^= hash(chars, sequence++);
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (!Whitespace.isAllWhite(chars)) {
+            checksum ^= hash(chars.toString(), sequence++);
             if (DEBUG) {
                 System.err.println("After characters " + chars + ": " + Integer.toHexString(checksum));
             }
@@ -125,7 +126,7 @@ public class CheckSumFilter extends ProxyReceiver {
      * Processing Instruction
      */
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (target.equals(SIGMA)) {
             checksumFound = true;
             if (checkExistingChecksum) {
@@ -168,7 +169,7 @@ public class CheckSumFilter extends ProxyReceiver {
         return checksumCorrect || "skip".equals(System.getProperty("saxon-checksum"));
     }
 
-    private int hash(CharSequence s, int sequence) {
+    private int hash(String s, int sequence) {
         int h = sequence<<8;
         for (int i=0; i<s.length(); i++) {
             h = (h<<1) + s.charAt(i);

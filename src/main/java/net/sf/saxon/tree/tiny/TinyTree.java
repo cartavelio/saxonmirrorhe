@@ -12,9 +12,9 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.SystemIdMap;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.*;
@@ -41,9 +41,12 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     // the contents of the document
 
-    protected AppendableCharSequence charBuffer;
+    //protected LargeTextBuffer textBuffer;
     /*@Nullable*/
-    protected FastStringBuffer commentBuffer = null; // created when needed
+    protected UnicodeString commentBuffer = null; // created when needed
+    protected UnicodeString[] textChunks;
+    protected int textChunksUsed = 0;
+
 
     protected int numberOfNodes = 0;    // excluding attributes and namespaces
 
@@ -130,7 +133,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     protected int[] attCode;
 
     // attValue is the string value of the attribute
-    protected CharSequence[] attValue;
+    protected String[] attValue;
 
     // attTypedValue is the typed vlaue of the attribute, maintained only if the attribute type is
     // something other than string, untypedAtomic, or anyURI. It is maintained lazily on first reference
@@ -158,7 +161,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     protected PrefixPool prefixPool = new PrefixPool();
 
-    //private TinyDocumentImpl root;
+    private TinyDocumentImpl root;
     private HashMap<String, NodeInfo> idTable;
     protected HashMap<String, String[]> entityTable;
 
@@ -200,7 +203,10 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         numberOfNamespaces = 0;
         namespaceMaps = new NamespaceMap[namespaces];
 
-        charBuffer = characters > 65000 ? new LargeStringBuffer() : new FastStringBuffer(characters);
+        //charBuffer = characters > 65000 ? new LargeStringBuffer() : new StringBuilder(characters);
+        //textBuffer = new LargeTextBuffer();
+        textChunks = new UnicodeString[16]; // TODO: use the stats
+        textChunksUsed = 0;
 
         setConfiguration(config);
     }
@@ -274,6 +280,16 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 k = 10;
             }
             namespaceMaps = Arrays.copyOf(namespaceMaps, k);
+        }
+    }
+
+    private void ensureTextCapacity(int needed) {
+        if (textChunks.length < textChunksUsed + needed) {
+            int k = Math.max(textChunksUsed * 2, textChunksUsed + needed);
+            if (k == 0) {
+                k = 10;
+            }
+            textChunks = Arrays.copyOf(textChunks, k);
         }
     }
 
@@ -369,12 +385,10 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @param chars the character data to be appended
      */
 
-    void appendChars(CharSequence chars) {
-        if (charBuffer instanceof FastStringBuffer && charBuffer.length() > 65000) {
-            LargeStringBuffer lsb = new LargeStringBuffer();
-            charBuffer = lsb.cat(charBuffer);
-        }
-        charBuffer.cat(chars);
+    void appendChars(UnicodeString chars) {
+        //chars.supplyContent(textBuffer, 0, chars.length());
+        ensureTextCapacity(1);
+        textChunks[textChunksUsed++] = chars;
     }
 
     /**
@@ -451,7 +465,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
         prefixPool.condense();
 
-        statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, charBuffer.length());
+        statistics.updateStatistics(numberOfNodes, numberOfAttributes, numberOfNamespaces, textChunksUsed);
 //        System.err.println("STATS: " + averageNodes + ", " + averageAttributes + ", "
 //                + averageNamespaces + ", " + averageCharacters);
 
@@ -528,19 +542,18 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
             int annotation = stype.getFingerprint();
             if (annotation == StandardNames.XS_UNTYPED || annotation == StandardNames.XS_UNTYPED_ATOMIC ||
                     annotation == StandardNames.XS_ANY_TYPE) {
-                CharSequence stringValue = TinyParentNodeImpl.getStringValueCS(this, nodeNr);
+                UnicodeString stringValue = TinyParentNodeImpl.getStringValue(this, nodeNr);
                 return new UntypedAtomicValue(stringValue);
             } else if (annotation == StandardNames.XS_STRING) {
-                CharSequence stringValue = TinyParentNodeImpl.getStringValueCS(this, nodeNr);
-                return new StringValue(stringValue);
+                UnicodeString stringValue = TinyParentNodeImpl.getStringValue(this, nodeNr);
+                return new StringItem(stringValue);
             } else if (annotation == StandardNames.XS_ANY_URI) {
-                CharSequence stringValue = TinyParentNodeImpl.getStringValueCS(this, nodeNr);
+                UnicodeString stringValue = TinyParentNodeImpl.getStringValue(this, nodeNr);
                 return new AnyURIValue(stringValue);
             } else {
                 AtomicSequence value = stype.atomize(element);
                 if (allowTypedValueCache) {
                     if (typedValueArray == null) {
-                        //noinspection unchecked
                         typedValueArray = new AtomicSequence[nodeKind.length];
                     }
                     typedValueArray[nodeNr] = value;
@@ -566,23 +579,18 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
             SchemaType stype = getSchemaType(nodeNr);
             int annotation = stype.getFingerprint();
             if (annotation == StandardNames.XS_UNTYPED_ATOMIC || annotation == StandardNames.XS_UNTYPED) {
-                CharSequence stringValue = TinyParentNodeImpl.getStringValueCS(this, nodeNr);
-                return new UntypedAtomicValue(stringValue);
+                return new UntypedAtomicValue(TinyParentNodeImpl.getStringValue(this, nodeNr));
             } else if (annotation == StandardNames.XS_STRING) {
-                CharSequence stringValue = TinyParentNodeImpl.getStringValueCS(this, nodeNr);
-                return new StringValue(stringValue);
+                return new StringItem(TinyParentNodeImpl.getStringValue(this, nodeNr).tidy());
             } else if (annotation == StandardNames.XS_ANY_URI) {
-                CharSequence stringValue = TinyParentNodeImpl.getStringValueCS(this, nodeNr);
-                return new AnyURIValue(stringValue);
+                return new AnyURIValue(TinyParentNodeImpl.getStringValue(this, nodeNr));
             } else if (annotation == StandardNames.XS_ID) {
-                CharSequence stringValue = TinyParentNodeImpl.getStringValueCS(this, nodeNr);
-                return new StringValue(stringValue, BuiltInAtomicType.ID);
+                return new StringItem(TinyParentNodeImpl.getStringValue(this, nodeNr).tidy(), BuiltInAtomicType.ID);
             } else {
                 TinyNodeImpl element = getNode(nodeNr);
                 AtomicSequence value = stype.atomize(element);
                 if (allowTypedValueCache) {
                     if (typedValueArray == null) {
-                        //noinspection unchecked
                         typedValueArray = new AtomicSequence[nodeKind.length];
                     }
                     typedValueArray[nodeNr] = value;
@@ -609,16 +617,16 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     public AtomicSequence getTypedValueOfAttribute(/*@Nullable*/ TinyAttributeImpl att, int nodeNr) throws XPathException {
         if (attType == null) {
             // it's an untyped tree
-            return new UntypedAtomicValue(attValue[nodeNr]);
+            return new StringItem(attValue[nodeNr], BuiltInAtomicType.UNTYPED_ATOMIC);
         }
         if (attTypedValue == null || attTypedValue[nodeNr] == null) {
             SimpleType type = getAttributeType(nodeNr);
             if (type.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                return new UntypedAtomicValue(attValue[nodeNr]);
+                return new StringItem(attValue[nodeNr], BuiltInAtomicType.UNTYPED_ATOMIC);
             } else if (type.equals(BuiltInAtomicType.STRING)) {
-                return new StringValue(attValue[nodeNr]);
+                return new StringItem(attValue[nodeNr]);
             } else if (type.equals(BuiltInAtomicType.ANY_URI)) {
-                return new AnyURIValue(attValue[nodeNr]);
+                return new AnyURIValue((attValue[nodeNr].toString()));
             } else {
                 if (att == null) {
                     att = new TinyAttributeImpl(this, nodeNr);
@@ -626,7 +634,6 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 AtomicSequence value = type.atomize(att);
                 if (allowTypedValueCache) {
                     if (attTypedValue == null) {
-                        //noinspection unchecked
                         attTypedValue = new AtomicSequence[attParent.length];
                     }
                     attTypedValue[nodeNr] = value;
@@ -731,7 +738,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
 
-    void addAttribute(/*@NotNull*/ NodeInfo root, int parent, int nameCode, SimpleType type, CharSequence attValue, int properties) {
+    void addAttribute(/*@NotNull*/ NodeInfo root, int parent, int nameCode, SimpleType type, String attValue, int properties) {
         ensureAttributeCapacity(1);
         attParent[numberOfAttributes] = parent;
         attCode[numberOfAttributes] = nameCode;
@@ -791,7 +798,8 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                     // The attribute has the idref property only if at least one item in its typed value
                     // is an IDREF: see Saxon bug 2331
                     try {
-                        AtomicSequence as = type.getTypedValue(attValue, null, getConfiguration().getConversionRules());
+                        AtomicSequence as = type.getTypedValue(
+                                StringView.of(attValue).tidy(), null, getConfiguration().getConversionRules());
                         for (AtomicValue v : as) {
                             if (v.getItemType().isIdRefType()) {
                                 isIDREF = true;
@@ -868,7 +876,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     public void indexIDElement(/*@NotNull*/ NodeInfo root, int nodeNr) {
-        String id = Whitespace.trim(TinyParentNodeImpl.getStringValueCS(this, nodeNr));
+        String id = Whitespace.trim(TinyParentNodeImpl.getStringValue(this, nodeNr).tidy()).toString();
         if (root.getNodeKind() == Type.DOCUMENT && NameChecker.isValidNCName(id)) {
             NodeInfo e = getNode(nodeNr);
             registerID(e, id);
@@ -967,53 +975,45 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 // where it has a single text node as a child.
 
                 if (depth[next] <= level) {
-                    return UntypedAtomicValue.ZERO_LENGTH_UNTYPED;
+                    return StringItem.ZERO_LENGTH_UNTYPED;
                 } else if (nodeKind[next] == Type.TEXT && depth[next + 1] <= level) {
-                    int length = beta[next];
-                    int start = alpha[next];
-                    return new UntypedAtomicValue(charBuffer.subSequence(start, start + length));
+                    return new UntypedAtomicValue(textChunks[alpha[next]]);
+//                    int length = beta[next];
+//                    int start = alpha[next];
+//                    return new UntypedAtomicValue(textBuffer.substring(start, start + length));
                 } else if (nodeKind[next] == Type.WHITESPACE_TEXT && depth[next + 1] <= level) {
-                    return new UntypedAtomicValue(WhitespaceTextImpl.getStringValueCS(this, next));
+                    long compressedValue = ((long) alpha[next] << 32) | ((long) beta[next] & 0xffffffffL);
+                    return new UntypedAtomicValue(new CompressedWhitespace(compressedValue));
                 }
 
                 // Now handle the general case
 
-                FastStringBuffer sb = null;
+                UnicodeBuilder sb = new UnicodeBuilder();
                 while (next < numberOfNodes && depth[next] > level) {
                     if (nodeKind[next] == Type.TEXT) {
-                        if (sb == null) {
-                            sb = new FastStringBuffer(FastStringBuffer.C256);
-                        }
-                        sb.cat(TinyTextImpl.getStringValue(this, next));
+                        sb.append(TinyTextImpl.getStringValue(this, next));
                     } else if (nodeKind[next] == Type.WHITESPACE_TEXT) {
-                        if (sb == null) {
-                            sb = new FastStringBuffer(FastStringBuffer.C256);
-                        }
                         WhitespaceTextImpl.appendStringValue(this, next, sb);
                     }
                     next++;
                 }
-                if (sb == null) {
-                    return UntypedAtomicValue.ZERO_LENGTH_UNTYPED;
-                } else {
-                    return new UntypedAtomicValue(sb.condense());
-                }
+                return sb.toStringItem(BuiltInAtomicType.UNTYPED_ATOMIC);
 
             case Type.TEXT:
-                return new UntypedAtomicValue(TinyTextImpl.getStringValue(this, nodeNr));
+                return new StringItem(TinyTextImpl.getStringValue(this, nodeNr));
             case Type.WHITESPACE_TEXT:
-                return new UntypedAtomicValue(WhitespaceTextImpl.getStringValueCS(this, nodeNr));
+                long compressedValue = ((long) alpha[nodeNr] << 32) | ((long) beta[nodeNr] & 0xffffffffL);
+                return new UntypedAtomicValue(new CompressedWhitespace(compressedValue));
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
                 int start2 = alpha[nodeNr];
                 int len2 = beta[nodeNr];
                 if (len2 == 0) {
-                    return UntypedAtomicValue.ZERO_LENGTH_UNTYPED;
+                    return StringItem.ZERO_LENGTH_UNTYPED;
                 }
                 char[] dest = new char[len2];
                 assert commentBuffer != null;
-                commentBuffer.getChars(start2, start2 + len2, dest, 0);
-                return new StringValue(new CharSlice(dest, 0, len2));
+                return new StringItem(commentBuffer.substring(start2, start2 + len2));
             default:
                 throw new IllegalStateException("Unknown node kind");
         }
@@ -1460,7 +1460,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     public void showSize() {
-        System.err.println("Tree size: " + numberOfNodes + " nodes, " + charBuffer.length() + " characters, " +
+        System.err.println("Tree size: " + numberOfNodes + " nodes, " + textChunksUsed + " text chunks, " +
                                    numberOfAttributes + " attributes");
     }
 
@@ -1586,10 +1586,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return the character buffer
      */
 
-    public AppendableCharSequence getCharacterBuffer() {
-        //return new CharSlice(charBuffer, 0, charBufferLength);
-        return charBuffer;
-    }
+//    public LargeTextBuffer getCharacterBuffer() {
+//        return textBuffer;
+//    }
 
     /**
      * Get the character buffer used to hold all the comment data of the document
@@ -1598,7 +1597,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     /*@Nullable*/
-    public CharSequence getCommentBuffer() {
+    public CodePoints getCommentBuffer() {
         return commentBuffer;
     }
 
@@ -1639,7 +1638,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return an array of strings; the Nth string holds the string value of attribute N
      */
 
-    public CharSequence[] getAttributeValueArray() {
+    public String[] getAttributeValueArray() {
         return attValue;
     }
 
@@ -1684,173 +1683,173 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         return usesNamespaces;
     }
 
-    /**
-     * Bulk copy an element node from another TinyTree. Type annotations will always be
-     * stripped.
-     * @param source        the source tree
-     * @param nodeNr        the element node in the source tree to be deep-copied
-     * @param currentDepth  the current depth in this tree
-     * @param parentNodeNr  the node number in this tree of the parent which the copied node
-     *                      will be attached to
-     */
-
-    public void bulkCopy(TinyTree source, int nodeNr, int currentDepth, int parentNodeNr) {
-        //System.err.println(" **** doing bulk copy **** ");
-        int end = source.next[nodeNr];
-        while (end < nodeNr && end >= 0) {
-            end = source.next[end];
-        }
-        if (end == -1) {
-            end = source.numberOfNodes;
-            if (end - 1 < source.nodeKind.length && source.nodeKind[end - 1] == Type.STOPPER) {
-                end--;
-            }
-        }
-        int length = end - nodeNr;
-        assert length > 0;         // Bug 4089 bites here
-        ensureNodeCapacity(Type.ELEMENT, length);
-        System.arraycopy(source.nodeKind, nodeNr, nodeKind, numberOfNodes, length);
-        int depthDiff = currentDepth - source.depth[nodeNr];
-
-        NamespaceMap subtreeRoot = source.namespaceMaps[source.beta[nodeNr]];
-        NamespaceMap inherited = namespaceMaps[beta[parentNodeNr]];
-        boolean sameNamespaces = subtreeRoot == inherited || inherited.isEmpty();
-            // TODO: or more generally, if inherited is a subset of subtreeRoot
-
-        for (int i = 0; i < length; i++) {
-            int from = nodeNr + i;
-            int to = numberOfNodes + i;
-            depth[to] = (short) (source.depth[from] + depthDiff);
-            next[to] = source.next[from] + (to - from);
-            switch (source.nodeKind[from]) {
-                case Type.ELEMENT: {
-                    nameCode[to] = (source.nameCode[from] & NamePool.FP_MASK) |
-                            (prefixPool.obtainPrefixCode(source.getPrefix(from)) << 20);
-                    int firstAtt = source.alpha[from];
-                    if (firstAtt >= 0) {
-                        int lastAtt = firstAtt;
-                        while (lastAtt < source.numberOfAttributes && source.attParent[lastAtt] == from) {
-                            lastAtt++;
-                        }
-                        int atts = lastAtt - firstAtt;
-                        ensureAttributeCapacity(atts);
-                        int aFrom = firstAtt;
-                        int aTo = numberOfAttributes;
-                        alpha[to] = aTo;
-                        System.arraycopy(source.attValue, firstAtt, attValue, aTo, atts);
-                        Arrays.fill(attParent, aTo, aTo + atts, to);
-                        for (int a = 0; a < atts; a++, aFrom++, aTo++) {
-                            int attNameCode = attCode[aTo] = source.attCode[aFrom];
-                            if (NamePool.isPrefixed(attNameCode)) {
-                                String prefix = source.prefixPool.getPrefix(attNameCode >> 20);
-                                attCode[aTo] = (attNameCode & 0xfffff) | (prefixPool.obtainPrefixCode(prefix) << 20);
-                            } else {
-                                attCode[aTo] = attNameCode;
-                            }
-                            if (source.isIdAttribute(aFrom)) {
-                                registerID(getNode(to), source.attValue[aFrom].toString());
-                            }
-                            if (source.isIdrefAttribute(aFrom)) {
-                                if (idRefAttributes == null) {
-                                    idRefAttributes = new IntHashSet();
-                                }
-                                idRefAttributes.add(aTo);
-                            }
-                        }
-                        numberOfAttributes += atts;
-                    } else {
-                        alpha[to] = -1;
-                    }
-                    // Copy the namespaces. The namespaces present on nodes in the copied
-                    // subtree need to be augmented with namespaces inherited from the destination
-                    // tree
-                    if (sameNamespaces) {
-                        // The namespace map from the source tree can be copied unchanged
-                        if (source.beta[from] == source.beta[nodeNr]) {
-                            beta[to] = beta[parentNodeNr];
-                        } else {
-                            ensureNamespaceCapacity(1);
-                            namespaceMaps[numberOfNamespaces] = source.namespaceMaps[source.beta[nodeNr]];
-                            beta[to] = numberOfNamespaces++;
-                        }
-                    } else {
-                        if (i > 0 && source.beta[from] == source.beta[nodeNr]) {
-                            beta[to] = beta[parentNodeNr];
-                        } else {
-                            ensureNamespaceCapacity(1);
-                            NamespaceMap in = source.namespaceMaps[source.beta[from]];
-                            NamespaceMap out = inherited.putAll(in);
-                            namespaceMaps[numberOfNamespaces] = out;
-                            beta[to] = numberOfNamespaces++;
-                        }
-//                        ensureNamespaceCapacity(1);
-//                        namespaceMaps[numberOfNamespaces] = source.namespaceMaps[source.beta[nodeNr]];
-//                        beta[to] = numberOfNamespaces++;
-                    }
-                    break;
-                }
-                case Type.TEXTUAL_ELEMENT: {
-                    int start = source.alpha[from];
-                    int len = source.beta[from];
-                    nameCode[to] = (source.nameCode[from] & NamePool.FP_MASK) |
-                            (prefixPool.obtainPrefixCode(source.getPrefix(from)) << 20);
-                    alpha[to] = charBuffer.length();
-                    appendChars(source.charBuffer.subSequence(start, start + len));
-                    beta[to] = len;
-                    break;
-                }
-                case Type.TEXT: {
-                    int start = source.alpha[from];
-                    int len = source.beta[from];
-                    nameCode[to] = -1;
-                    alpha[to] = charBuffer.length();
-                    appendChars(source.charBuffer.subSequence(start, start + len));
-                    beta[to] = len;
-                    break;
-                }
-                case Type.WHITESPACE_TEXT: {
-                    nameCode[to] = -1;
-                    alpha[to] = source.alpha[from];
-                    beta[to] = source.beta[from];
-                    break;
-                }
-                case Type.COMMENT: {
-                    int start = source.alpha[from];
-                    int len = source.beta[from];
-                    nameCode[to] = -1;
-                    CharSequence text = source.commentBuffer.subSequence(start, start+len);
-                    if (commentBuffer == null) {
-                        commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
-                    }
-                    alpha[to] = commentBuffer.length();
-                    commentBuffer.cat(text);
-                    beta[to] = len;
-                    break;
-                }
-                case Type.PROCESSING_INSTRUCTION:
-                    int start = source.alpha[from];
-                    int len = source.beta[from];
-                    nameCode[to] = source.nameCode[from];
-                    CharSequence text = source.commentBuffer.subSequence(start, start + len);
-                    if (commentBuffer == null) {
-                        commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
-                    }
-                    alpha[to] = commentBuffer.length();
-                    commentBuffer.cat(text);
-                    beta[to] = len;
-                    break;
-
-                case Type.PARENT_POINTER:
-                    nameCode[to] = -1;
-                    alpha[to] = source.alpha[from] + (to - from);
-                    beta[to] = -1;
-                    break;
-                default:
-                    break;
-            }
-        }
-        numberOfNodes += length;
-    }
+//    /**
+//     * Bulk copy an element node from another TinyTree. Type annotations will always be
+//     * stripped.
+//     * @param source        the source tree
+//     * @param nodeNr        the element node in the source tree to be deep-copied
+//     * @param currentDepth  the current depth in this tree
+//     * @param parentNodeNr  the node number in this tree of the parent which the copied node
+//     *                      will be attached to
+//     */
+//
+//    public void bulkCopy(TinyTree source, int nodeNr, int currentDepth, int parentNodeNr) {
+//        //System.err.println(" **** doing bulk copy **** ");
+//        int end = source.next[nodeNr];
+//        while (end < nodeNr && end >= 0) {
+//            end = source.next[end];
+//        }
+//        if (end == -1) {
+//            end = source.numberOfNodes;
+//            if (end - 1 < source.nodeKind.length && source.nodeKind[end - 1] == Type.STOPPER) {
+//                end--;
+//            }
+//        }
+//        int length = end - nodeNr;
+//        assert length > 0;         // Bug 4089 bites here
+//        ensureNodeCapacity(Type.ELEMENT, length);
+//        System.arraycopy(source.nodeKind, nodeNr, nodeKind, numberOfNodes, length);
+//        int depthDiff = currentDepth - source.depth[nodeNr];
+//
+//        NamespaceMap subtreeRoot = source.namespaceMaps[source.beta[nodeNr]];
+//        NamespaceMap inherited = namespaceMaps[beta[parentNodeNr]];
+//        boolean sameNamespaces = subtreeRoot == inherited || inherited.isEmpty();
+//            // TODO: or more generally, if inherited is a subset of subtreeRoot
+//
+//        for (int i = 0; i < length; i++) {
+//            int from = nodeNr + i;
+//            int to = numberOfNodes + i;
+//            depth[to] = (short) (source.depth[from] + depthDiff);
+//            next[to] = source.next[from] + (to - from);
+//            switch (source.nodeKind[from]) {
+//                case Type.ELEMENT: {
+//                    nameCode[to] = (source.nameCode[from] & NamePool.FP_MASK) |
+//                            (prefixPool.obtainPrefixCode(source.getPrefix(from)) << 20);
+//                    int firstAtt = source.alpha[from];
+//                    if (firstAtt >= 0) {
+//                        int lastAtt = firstAtt;
+//                        while (lastAtt < source.numberOfAttributes && source.attParent[lastAtt] == from) {
+//                            lastAtt++;
+//                        }
+//                        int atts = lastAtt - firstAtt;
+//                        ensureAttributeCapacity(atts);
+//                        int aFrom = firstAtt;
+//                        int aTo = numberOfAttributes;
+//                        alpha[to] = aTo;
+//                        System.arraycopy(source.attValue, firstAtt, attValue, aTo, atts);
+//                        Arrays.fill(attParent, aTo, aTo + atts, to);
+//                        for (int a = 0; a < atts; a++, aFrom++, aTo++) {
+//                            int attNameCode = attCode[aTo] = source.attCode[aFrom];
+//                            if (NamePool.isPrefixed(attNameCode)) {
+//                                String prefix = source.prefixPool.getPrefix(attNameCode >> 20);
+//                                attCode[aTo] = (attNameCode & 0xfffff) | (prefixPool.obtainPrefixCode(prefix) << 20);
+//                            } else {
+//                                attCode[aTo] = attNameCode;
+//                            }
+//                            if (source.isIdAttribute(aFrom)) {
+//                                registerID(getNode(to), source.attValue[aFrom].toString());
+//                            }
+//                            if (source.isIdrefAttribute(aFrom)) {
+//                                if (idRefAttributes == null) {
+//                                    idRefAttributes = new IntHashSet();
+//                                }
+//                                idRefAttributes.add(aTo);
+//                            }
+//                        }
+//                        numberOfAttributes += atts;
+//                    } else {
+//                        alpha[to] = -1;
+//                    }
+//                    // Copy the namespaces. The namespaces present on nodes in the copied
+//                    // subtree need to be augmented with namespaces inherited from the destination
+//                    // tree
+//                    if (sameNamespaces) {
+//                        // The namespace map from the source tree can be copied unchanged
+//                        if (source.beta[from] == source.beta[nodeNr]) {
+//                            beta[to] = beta[parentNodeNr];
+//                        } else {
+//                            ensureNamespaceCapacity(1);
+//                            namespaceMaps[numberOfNamespaces] = source.namespaceMaps[source.beta[nodeNr]];
+//                            beta[to] = numberOfNamespaces++;
+//                        }
+//                    } else {
+//                        if (i > 0 && source.beta[from] == source.beta[nodeNr]) {
+//                            beta[to] = beta[parentNodeNr];
+//                        } else {
+//                            ensureNamespaceCapacity(1);
+//                            NamespaceMap in = source.namespaceMaps[source.beta[from]];
+//                            NamespaceMap out = inherited.putAll(in);
+//                            namespaceMaps[numberOfNamespaces] = out;
+//                            beta[to] = numberOfNamespaces++;
+//                        }
+////                        ensureNamespaceCapacity(1);
+////                        namespaceMaps[numberOfNamespaces] = source.namespaceMaps[source.beta[nodeNr]];
+////                        beta[to] = numberOfNamespaces++;
+//                    }
+//                    break;
+//                }
+//                case Type.TEXTUAL_ELEMENT: {
+//                    int start = source.alpha[from];
+//                    int len = source.beta[from];
+//                    nameCode[to] = (source.nameCode[from] & NamePool.FP_MASK) |
+//                            (prefixPool.obtainPrefixCode(source.getPrefix(from)) << 20);
+//                    alpha[to] = charBuffer.length();
+//                    appendChars(source.charBuffer.subSequence(start, start + len));
+//                    beta[to] = len;
+//                    break;
+//                }
+//                case Type.TEXT: {
+//                    int start = source.alpha[from];
+//                    int len = source.beta[from];
+//                    nameCode[to] = -1;
+//                    alpha[to] = charBuffer.length();
+//                    appendChars(source.charBuffer.subSequence(start, start + len));
+//                    beta[to] = len;
+//                    break;
+//                }
+//                case Type.WHITESPACE_TEXT: {
+//                    nameCode[to] = -1;
+//                    alpha[to] = source.alpha[from];
+//                    beta[to] = source.beta[from];
+//                    break;
+//                }
+//                case Type.COMMENT: {
+//                    int start = source.alpha[from];
+//                    int len = source.beta[from];
+//                    nameCode[to] = -1;
+//                    CharSequence text = source.commentBuffer.subSequence(start, start+len);
+//                    if (commentBuffer == null) {
+//                        commentBuffer = new StringBuilder(StringBuilder.C256);
+//                    }
+//                    alpha[to] = commentBuffer.length();
+//                    commentBuffer.cat(text);
+//                    beta[to] = len;
+//                    break;
+//                }
+//                case Type.PROCESSING_INSTRUCTION:
+//                    int start = source.alpha[from];
+//                    int len = source.beta[from];
+//                    nameCode[to] = source.nameCode[from];
+//                    CharSequence text = source.commentBuffer.subSequence(start, start + len);
+//                    if (commentBuffer == null) {
+//                        commentBuffer = new StringBuilder(StringBuilder.C256);
+//                    }
+//                    alpha[to] = commentBuffer.length();
+//                    commentBuffer.cat(text);
+//                    beta[to] = len;
+//                    break;
+//
+//                case Type.PARENT_POINTER:
+//                    nameCode[to] = -1;
+//                    alpha[to] = source.alpha[from] + (to - from);
+//                    beta[to] = -1;
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//        numberOfNodes += length;
+//    }
 
     /**
      * Get (and build if necessary) an index from local names to fingerprints

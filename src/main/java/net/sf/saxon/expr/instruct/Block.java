@@ -350,7 +350,7 @@ public class Block extends Instruction {
             for (int i = 0; i < size(); i++) {
                 if (isLiteralText[i]) {
                     pendingText = (pendingText == null ? "" : pendingText) +
-                            ((StringLiteral) ((ValueOf) child(i)).getSelect()).getStringValue();
+                            ((StringLiteral) ((ValueOf) child(i)).getSelect()).getString();
                 } else {
                     if (pendingText != null) {
                         ValueOf inst = new ValueOf(new StringLiteral(pendingText), false, false);
@@ -583,7 +583,7 @@ public class Block extends Instruction {
         } else if (allAtomic) {
             AtomicValue[] values = new AtomicValue[size()];
             for (int c = 0; c < size(); c++) {
-                values[c] = (AtomicValue) ((Literal) child(c)).getValue();
+                values[c] = (AtomicValue) ((Literal) child(c)).getGroundedValue();
             }
             Expression result = Literal.makeLiteral(new SequenceExtent(values), this);
             result.setParentExpression(getParentExpression());
@@ -612,8 +612,8 @@ public class Block extends Instruction {
                 flushCurrentLiteralList(currentLiteralList, targetList);
                 currentLiteralList = null;
                 ((Block) child).flatten(targetList);
-            } else if (child instanceof Literal && !(((Literal) child).getValue() instanceof IntegerRange)) {
-                SequenceIterator iterator = ((Literal) child).getValue().iterate();
+            } else if (child instanceof Literal && !(((Literal) child).getGroundedValue() instanceof IntegerRange)) {
+                SequenceIterator iterator = ((Literal) child).getGroundedValue().iterate();
                 if (currentLiteralList == null) {
                     currentLiteralList = new ArrayList<>(10);
                 }
@@ -679,7 +679,7 @@ public class Block extends Instruction {
                 canSimplify = true;
                 break;
             }
-            if (child instanceof Literal && !(((Literal) child).getValue() instanceof IntegerRange)) {
+            if (child instanceof Literal && !(((Literal) child).getGroundedValue() instanceof IntegerRange)) {
                 if (prevLiteral || Literal.isEmptySequence(child)) {
                     canSimplify = true;
                     break;

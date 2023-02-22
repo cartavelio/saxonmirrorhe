@@ -86,7 +86,7 @@ public class UnsafeXslt implements Runnable {
         }
     }
 
-    private CountDownLatch latch;
+    private final CountDownLatch latch;
 
     public UnsafeXslt(final CountDownLatch latch) {
         this.latch = latch;

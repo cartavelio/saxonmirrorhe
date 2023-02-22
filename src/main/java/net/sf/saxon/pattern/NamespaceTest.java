@@ -25,10 +25,10 @@ import java.util.function.IntPredicate;
 
 public final class NamespaceTest extends NodeTest implements QNameTest {
 
-    private NamePool namePool;
-    private int nodeKind;
-    private UType uType;
-    private String uri;
+    private final NamePool namePool;
+    private final int nodeKind;
+    private final UType uType;
+    private final String uri;
 
     public NamespaceTest(NamePool pool, int nodeKind, String uri) {
         namePool = pool;

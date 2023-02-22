@@ -90,7 +90,7 @@ public class XSLResultDocument extends StyleElement {
     private Expression formatExpression;     // used when format is an AVT
     private int validationAction = Validation.STRIP;
     private SchemaType schemaType = null;
-    private Map<StructuredQName, Expression> serializationAttributes = new HashMap<>(10);
+    private final Map<StructuredQName, Expression> serializationAttributes = new HashMap<>(10);
     private boolean async = true;
 
     /**
@@ -165,7 +165,7 @@ public class XSLResultDocument extends StyleElement {
 
         if (formatAttribute != null) {
             if (formatExpression instanceof StringLiteral) {
-                formatQName = makeQName(((StringLiteral) formatExpression).getStringValue(), "XTDE1460", "format");
+                formatQName = makeQName(((StringLiteral) formatExpression).stringify(), "XTDE1460", "format");
                 formatExpression = null;
             } else {
                 getPrincipalStylesheetModule().setNeedsDynamicOutputProperties(true);
@@ -278,7 +278,7 @@ public class XSLResultDocument extends StyleElement {
         for (StructuredQName property : serializationAttributes.keySet()) {
             Expression exp = serializationAttributes.get(property);
             if (exp instanceof StringLiteral) {
-                String s = ((StringLiteral) exp).getStringValue();
+                String s = ((StringLiteral) exp).stringify();
                 String lname = property.getLocalPart();
                 String uri = property.getURI();
                 try {

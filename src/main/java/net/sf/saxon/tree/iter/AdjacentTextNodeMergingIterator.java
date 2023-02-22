@@ -12,9 +12,9 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.EnumSet;
 
@@ -28,7 +28,7 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
     // Ideally we would specify bounds: AdjacentTextNodeMergingIterator<? extends Item super NodeInfo>,
     // but Java doesn't allow both an upper and a lower bound
 
-    private SequenceIterator base;
+    private final SequenceIterator base;
     private Item next;
 
     public AdjacentTextNodeMergingIterator(SequenceIterator base) throws XPathException {
@@ -51,19 +51,19 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
         next = base.next();
 
         if (AdjacentTextNodeMerger.isTextNode(current)) {
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
-            fsb.cat(current.getStringValueCS());
+            UnicodeBuilder ub = new UnicodeBuilder();
+            ub.append(current.getUnicodeStringValue());
             while (AdjacentTextNodeMerger.isTextNode(next)) {
-                fsb.cat(next.getStringValueCS() /*.toString() */);
+                ub.append(next.getUnicodeStringValue() /*.toString() */);
                 // NOTE: toString() shouldn't be necessary - added 2011-05-05 for bug workaround; removed again 2011-07-14
                 next = base.next();
             }
-            if (fsb.isEmpty()) {
+            if (ub.isEmpty()) {
                 return next();
             } else {
                 Orphan o = new Orphan(((NodeInfo) current).getConfiguration());
                 o.setNodeKind(Type.TEXT);
-                o.setStringValue(fsb);
+                o.setStringValue(ub.toUnicodeString());
                 current = o;
                 return current;
             }

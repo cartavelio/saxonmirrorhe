@@ -100,9 +100,9 @@ public class XSLElement extends StyleElement {
             reportAbsence("name");
         } else {
             if (elementName instanceof StringLiteral) {
-                if (!NameChecker.isQName(((StringLiteral) elementName).getStringValue())) {
+                if (!NameChecker.isQName(((StringLiteral) elementName).getGroundedValue().codePoints())) {
                     compileError("Element name " +
-                            Err.wrap(((StringLiteral) elementName).getStringValue()) +
+                            Err.wrap(((StringLiteral) elementName).stringify()) +
                             " is not a valid QName", "XTDE0820");
                     // to prevent duplicate error messages:
                     elementName = new StringLiteral("saxon-error-element");
@@ -112,7 +112,7 @@ public class XSLElement extends StyleElement {
 
         if (namespaceAtt != null) {
             if (namespace instanceof StringLiteral) {
-                if (!StandardURIChecker.getInstance().isValidURI(((StringLiteral) namespace).getStringValue())) {
+                if (!StandardURIChecker.getInstance().isValidURI(((StringLiteral) namespace).stringify())) {
                     compileError("The value of the namespace attribute must be a valid URI", "XTDE0835");
                 }
             }
@@ -159,7 +159,7 @@ public class XSLElement extends StyleElement {
         // deal specially with the case where the element name is known statically
 
         if (elementName instanceof StringLiteral) {
-            CharSequence qName = ((StringLiteral) elementName).getStringValue();
+            String qName = ((StringLiteral) elementName).stringify();
 
             String[] parts;
             try {
@@ -171,7 +171,7 @@ public class XSLElement extends StyleElement {
 
             String nsuri = null;
             if (namespace instanceof StringLiteral) {
-                nsuri = ((StringLiteral) namespace).getStringValue();
+                nsuri = ((StringLiteral) namespace).stringify();
                 if (nsuri.isEmpty()) {
                     parts[0] = "";
                 }

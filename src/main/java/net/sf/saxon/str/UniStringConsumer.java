@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-package net.sf.saxon.tree.util;
+package net.sf.saxon.str;
 
 import net.sf.saxon.trans.XPathException;
 
@@ -16,7 +16,7 @@ import net.sf.saxon.trans.XPathException;
  * string may never be materialized in memory)
  */
 
-public interface CharSequenceConsumer {
+public interface UniStringConsumer {
 
     /**
      * Initial processing. This should be called before any calls on append.
@@ -35,20 +35,8 @@ public interface CharSequenceConsumer {
      * @throws XPathException if processing fails for any reason
      */
 
-    CharSequenceConsumer cat(CharSequence chars) throws XPathException;
+    UniStringConsumer append(CodePoints chars) throws XPathException;
 
-    /**
-     * Process a single character. The default implementation invokes
-     * {@link #cat(CharSequence)}.
-     *
-     * @param c the character to be processed
-     * @return this CharSequenceConsumer
-     * @throws XPathException if processing fails for any reason
-     */
-
-    default CharSequenceConsumer cat(char c) throws XPathException {
-        return cat("" + c);
-    }
 
     /**
      * Complete the writing of characters to the result. The default implementation
@@ -56,7 +44,7 @@ public interface CharSequenceConsumer {
      * @throws XPathException if processing fails for any reason
      */
 
-    default void close() throws XPathException {};
+    default void close() throws XPathException {}
 
 
 }

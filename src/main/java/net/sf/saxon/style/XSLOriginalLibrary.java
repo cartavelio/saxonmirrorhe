@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class XSLOriginalLibrary implements FunctionLibrary {
 
-    private static XSLOriginalLibrary THE_INSTANCE = new XSLOriginalLibrary();
+    private static final XSLOriginalLibrary THE_INSTANCE = new XSLOriginalLibrary();
 
     public static XSLOriginalLibrary getInstance() {
         return THE_INSTANCE;

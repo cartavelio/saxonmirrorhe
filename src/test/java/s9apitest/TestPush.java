@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestPush {
 
     class Employee {
-        private String ssn;
-        private String name;
+        private final String ssn;
+        private final String name;
 
         private Employee(String s, String n) {
             ssn = s;

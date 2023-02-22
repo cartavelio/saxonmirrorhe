@@ -43,7 +43,7 @@ public class REFlags {
         }
         if (language.contains("XP20")) {
             xpath20 = true;
-        } else if (language.contains("XP30")) {
+        } else if (language.contains("XP30") || language.contains("XP31")) {
             xpath20 = true;
             xpath30 = true;
         }

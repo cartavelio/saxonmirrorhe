@@ -41,7 +41,7 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
         public Set<String> where;
     }
 
-    private static DisallowedCombination[] blackList = {
+    private static final DisallowedCombination[] blackList = {
             new DisallowedCombination(Annotation.SIMPLE, null, "XUST0032", "DV"),
             new DisallowedCombination(Annotation.UPDATING, null, "XUST0032", "DV"),
             new DisallowedCombination(Annotation.PUBLIC, null, "XQST0125", "IF"),
@@ -103,7 +103,7 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
     @Override
     public String getAssertionNamespace() {
         return "http://www.w3.org/2012/xquery";
-    };
+    }
 
     /**
      * Test whether a function with a given list of annotations satisfies an annotation assertion present

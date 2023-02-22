@@ -13,8 +13,8 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.InstructionInfo;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.type.Type;
@@ -26,12 +26,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Map;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * JUnit tests for the s9api XQueryCompiler
@@ -111,15 +109,14 @@ public class TestXQueryEvaluator {
         }
     }
 
-    @Test
-    public void testXdmDestinationItemSeparator() {
+    private void separatorTest(String separator, String expected) {
         try {
             Processor p = new Processor(false);
             XQueryCompiler c = p.newXQueryCompiler();
             String q = "declare namespace output = \"http://www.w3.org/2010/xslt-xquery-serialization\";" +
                     "declare option output:method   \"xml\";" +
                     "declare option output:omit-xml-declaration   \"yes\";" +
-                    "declare option output:item-separator '~';" +
+                    "declare option output:item-separator '" + separator + "';" +
                     "<!--start-->, 1 to 3, <!--end-->";
             XQueryEvaluator eval = c.compile(q).load();
 
@@ -128,7 +125,7 @@ public class TestXQueryEvaluator {
             XdmNode doc = dest.getXdmNode();
             assertEquals(XdmNodeKind.DOCUMENT, doc.getNodeKind(), "kind");
             assertEquals(3, doc.axisIterator(Axis.CHILD).stream().count(), "child-count");
-            assertEquals("<!--start-->~1~2~3~<!--end-->", doc.toString(), "content");
+            assertEquals(expected, doc.toString(), "content");
 
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -137,28 +134,13 @@ public class TestXQueryEvaluator {
     }
 
     @Test
+    public void testXdmDestinationItemSeparator() {
+        separatorTest("~", "<!--start-->~1~2~3~<!--end-->");
+    }
+
+    @Test
     public void testXdmDestinationSpaceSeparator() {
-        try {
-            Processor p = new Processor(false);
-            XQueryCompiler c = p.newXQueryCompiler();
-            String q = "declare namespace output = \"http://www.w3.org/2010/xslt-xquery-serialization\";" +
-                    "declare option output:method   \"xml\";" +
-                    "declare option output:omit-xml-declaration   \"yes\";" +
-                    "declare option output:item-separator '#absent';" +
-                    "<!--start-->, 1 to 3, <!--end-->";
-            XQueryEvaluator eval = c.compile(q).load();
-
-            XdmDestination dest = new XdmDestination();
-            eval.run(dest);
-            XdmNode doc = dest.getXdmNode();
-            assertEquals(XdmNodeKind.DOCUMENT, doc.getNodeKind(), "kind");
-            assertEquals(3, doc.axisIterator(Axis.CHILD).stream().count(), "child-count");
-            assertEquals("<!--start-->1 2 3<!--end-->", doc.toString(), "content");
-
-        } catch (SaxonApiException e) {
-            e.printStackTrace();
-            fail();
-        }
+        separatorTest("#absent", "<!--start-->1 2 3<!--end-->");
     }
 
 
@@ -420,7 +402,7 @@ public class TestXQueryEvaluator {
             final XQueryEvaluator ev = exp1.load();
             XdmValue v1 = new XdmAtomicValue(10);
             XdmValue v2 = new XdmAtomicValue("banana");
-            XdmValue result = ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
+            ev.callFunction(new QName("f.ns", "f:t1"), new XdmValue[]{v1, v2});
             fail("Failed to throw error"); // expect failure
         } catch (SaxonApiException e) {
             //e.printStackTrace();
@@ -433,7 +415,8 @@ public class TestXQueryEvaluator {
      * Query. Use global variable and global parameter, do two calls that share the global variable computation
      */
 
-    public static void testDirectFunctionRepeatedCalls() {
+    @Test
+    public void testDirectFunctionRepeatedCalls() {
         try {
             final Processor processor = new Processor(true);
             final XQueryCompiler qc = processor.newXQueryCompiler();
@@ -460,8 +443,8 @@ public class TestXQueryEvaluator {
         }
     }
 
-    public static void testDirectFunctionInLibraryModule() {
-        // 2013-01-25 - test currently failing.
+    @Test
+    public void testDirectFunctionInLibraryModule() {
         try {
             final Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
@@ -507,7 +490,7 @@ public class TestXQueryEvaluator {
                             "declare variable $lib:bang := '!';" +
                             "declare function lib:foo() { lib:bar() };" +
                             "declare function lib:bar() { " +
-                            "   let $a := <xml><ABC>A</ABC></xml>  " +
+                            "   let $a := parse-xml('<xml><ABC>azaz</ABC></xml>')  " +
                             "   return upper-case($a//xml/ABC) };"
             );
 
@@ -519,6 +502,8 @@ public class TestXQueryEvaluator {
 
             QName foo = new QName("http://example.com/library", "foo");
             XdmValue result = ev.callFunction(foo, new XdmValue[]{});
+            assertTrue(result instanceof XdmAtomicValue);
+            assertEquals("AZAZ", ((XdmAtomicValue)result).getStringValue());
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
@@ -551,7 +536,7 @@ public class TestXQueryEvaluator {
         try {
             String doc = "<a xmlns='http://a/'><b>1</b><b>2</b><b>3</b><b>4</b></a>";
             String q = "declare namespace p='http://a/';\n" +
-                    "for $i in //p:b \n where $i mod 2 = 0 \n order by -$i \n return $i";
+                    "for $i in //p:b where $i mod 2 = 0 order by -$i return $i";
             Processor p = new Processor(false);
             XQueryCompiler comp = p.newXQueryCompiler();
             comp.setCompileWithTracing(true);
@@ -561,52 +546,62 @@ public class TestXQueryEvaluator {
             eval.setTraceListener(new TraceListener() {
                 int i = 0;
 
-                @Override public void setOutputDestination(Logger stream) {
+                @Override
+                public void setOutputDestination(Logger stream) {
 
                 }
 
-                @Override public void open(Controller controller) {
-                    //To change body of implemented methods use File | Settings | File Templates.
+                @Override
+                public void open(Controller controller) {
+                    // no action
                 }
 
-                @Override public void close() {
-                    //To change body of implemented methods use File | Settings | File Templates.
+                @Override
+                public void close() {
+                    // no action
                 }
 
-                public void enter(InstructionInfo instruction, XPathContext context) {
+                @Override
+                public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
                     if (!(instruction instanceof TraceExpression)) {
                         switch (i++) {
                             case 0:
+                                assertTrue(instruction instanceof XQueryExpression, "isXQueryExpression");
+                                break;
+                            case 1:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo0");
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix0");
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof ForClause, "isForClause0");
-                                assertEquals(2, instruction.getLineNumber(), "lineNumber0");
+                                assertEquals(2, instruction.getLocation().getLineNumber(), "lineNumber0");
                                 break;
-                            case 1:
+                            case 2:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo1");
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix1");
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof WhereClause, "isWhereClause1");
-                                assertEquals(3, instruction.getLineNumber(), "lineNumber1");
+                                assertEquals(3, instruction.getLocation().getLineNumber(), "lineNumber1");
                                 break;
-                            case 4:
+                            case 5:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo4");
                                 assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix4");
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof OrderByClause, "isOrderBy4");
-                                assertEquals(4, instruction.getLineNumber(), "lineNumber4");
+                                assertEquals(4, instruction.getLocation().getLineNumber(), "lineNumber4");
                                 break;
                             default:
                         }
                     }
                 }
-                @Override public void leave(Traceable instruction) {
+                @Override
+                public void leave(Traceable instruction) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
-                @Override public void startCurrentItem(Item currentItem) {
+                @Override
+                public void startCurrentItem(Item currentItem) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
-                @Override public void endCurrentItem(Item currentItem) {
+                @Override
+                public void endCurrentItem(Item currentItem) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
 
@@ -624,7 +619,8 @@ public class TestXQueryEvaluator {
                 /**
                  * Method called when a search for a template rule is about to start
                  */
-                @Override public void startRuleSearch() {
+                @Override
+                public void startRuleSearch() {
                     //
                 }
             });
@@ -757,7 +753,7 @@ public class TestXQueryEvaluator {
             try {
                 eval = exec.load();
                 eval.setContextItem(new XdmAtomicValue(23));
-                result = eval.evaluateSingle();
+                eval.evaluateSingle();
                 fail();
             } catch (SaxonApiException e) {
                 assertEquals("XPTY0004", e.getErrorCode().getLocalName());
@@ -779,12 +775,12 @@ public class TestXQueryEvaluator {
             XQueryExecutable exec = c.compile("declare context item as node() := <bar/>; .");
 
             // First run with supplied arg
-            XQueryEvaluator eval = null;
-            XdmItem result = null;
+            XQueryEvaluator eval;
+            XdmItem result;
             try {
                 eval = exec.load();
                 eval.setContextItem(foo);
-                result = eval.evaluateSingle();
+                eval.evaluateSingle();
                 fail();
             } catch (SaxonApiException e) {
                 // expected failure
@@ -801,7 +797,7 @@ public class TestXQueryEvaluator {
             try {
                 eval = exec.load();
                 eval.setContextItem(new XdmAtomicValue(23));
-                result = eval.evaluateSingle();
+                eval.evaluateSingle();
                 fail();
             } catch (SaxonApiException e) {
                 // expected failure
@@ -833,19 +829,19 @@ public class TestXQueryEvaluator {
             // Now with no supplied arg
             try {
                 eval = exec.load();
-                result = eval.evaluateSingle();
+                eval.evaluateSingle();
                 fail();
             } catch (SaxonApiException e) {
                 // expected failure
                 assertEquals("XPDY0002", e.getErrorCode().getLocalName());
-                System.err.println(e.getMessage());
+                //System.err.println(e.getMessage());
             }
 
             // Now with arg of wrong type
             try {
                 eval = exec.load();
                 eval.setContextItem(new XdmAtomicValue(23));
-                result = eval.evaluateSingle();
+                eval.evaluateSingle();
                 fail();
             } catch (SaxonApiException e) {
                 assertEquals("XPTY0004", e.getErrorCode().getLocalName());
@@ -860,11 +856,8 @@ public class TestXQueryEvaluator {
     public void testContextItemInternalWithoutDefault() {
         try {
             Processor p = new Processor(false);
-            DocumentBuilder b = p.newDocumentBuilder();
-            XdmNode foo = b.build(new StreamSource(new StringReader("<foo/>"))).select(child()).asNode();
             XQueryCompiler c = p.newXQueryCompiler();
-
-            XQueryExecutable exec = c.compile("declare context item as node(); .");
+            c.compile("declare context item as node(); .");
             fail();
         } catch (SaxonApiException e) {
             assertEquals("XPST0003", e.getErrorCode().getLocalName());
@@ -892,6 +885,33 @@ public class TestXQueryEvaluator {
             fail();
         }
 
+    }
+
+    public void testLocalURIResolver() {
+        try {
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryEvaluator eval = c.compile("doc('file:///a.xml')/z").load();
+            eval.setURIResolver((href, base) -> new StreamSource(new StringReader("<z>17</z>")));
+
+            XdmItem result = eval.iterator().next();
+            assertEquals("17", result.getStringValue());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testGlobalURIResolver() {
+        try {
+            Processor p = new Processor(false);
+            p.getUnderlyingConfiguration().setURIResolver((href, base) -> new StreamSource(new StringReader("<z>17</z>")));
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryEvaluator eval = c.compile("doc('file:///a.xml')/z").load();
+            XdmItem result = eval.iterator().next();
+            assertEquals("17", result.getStringValue());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
     }
 
 

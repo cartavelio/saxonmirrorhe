@@ -21,7 +21,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -43,10 +43,10 @@ public class SystemProperty extends SystemFunction implements Callable {
      */
     @Override
     public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
-        if (arguments[0] instanceof Literal) {
+        if (arguments[0] instanceof StringLiteral) {
             try {
-                StringValue name = (StringValue) ((Literal) arguments[0]).getValue();
-                StructuredQName qName = StructuredQName.fromLexicalQName(name.getStringValue(),
+                String name = ((StringLiteral) arguments[0]).stringify();
+                StructuredQName qName = StructuredQName.fromLexicalQName(name,
                                                                          false, true,
                                                                          getRetainedStaticContext());
                 String uri = qName.getURI();
@@ -76,15 +76,15 @@ public class SystemProperty extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-        StringValue name = (StringValue) arguments[0].head();
+        String name = arguments[0].head().getStringValue();
         try {
-            StructuredQName qName = StructuredQName.fromLexicalQName(name.getStringValue(),
+            StructuredQName qName = StructuredQName.fromLexicalQName(name,
                     false, true,
                     getRetainedStaticContext());
 
-            return new StringValue(getProperty(
+            return new StringItem(getProperty(
                         qName.getURI(), qName.getLocalPart(), getRetainedStaticContext()));
 
         } catch (XPathException err) {
@@ -93,9 +93,9 @@ public class SystemProperty extends SystemFunction implements Callable {
     }
 
     private boolean allowsEarlyEvaluation(Sequence[] arguments, XPathContext context) throws XPathException {
-        StringValue name = (StringValue) arguments[0].head();
+        String name = arguments[0].head().getStringValue();
         try {
-            StructuredQName qName = StructuredQName.fromLexicalQName(name.getStringValue(),
+            StructuredQName qName = StructuredQName.fromLexicalQName(name,
                                                                      false, true,
                                                                      getRetainedStaticContext());
             String uri = qName.getURI();

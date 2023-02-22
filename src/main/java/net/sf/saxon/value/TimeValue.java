@@ -10,10 +10,11 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -129,10 +130,10 @@ public final class TimeValue extends CalendarValue implements Comparable {
      */
 
     /*@NotNull*/
-    public static ConversionResult makeTimeValue(CharSequence s) {
+    public static ConversionResult makeTimeValue(UnicodeString s) {
         // input must have format hh:mm:ss[.fff*][([+|-]hh:mm | Z)]
         TimeValue tv = new TimeValue();
-        StringTokenizer tok = new StringTokenizer(Whitespace.trimWhitespace(s).toString(), "-:.+Z", true);
+        StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:.+Z", true);
         if (!tok.hasMoreElements()) {
             return badTime("too short", s);
         }
@@ -300,7 +301,7 @@ public final class TimeValue extends CalendarValue implements Comparable {
     }
 
     /*@NotNull*/
-    private static ValidationFailure badTime(String msg, CharSequence value) {
+    private static ValidationFailure badTime(String msg, UnicodeString value) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid time " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
         err.setErrorCode("FORG0001");
@@ -380,22 +381,22 @@ public final class TimeValue extends CalendarValue implements Comparable {
 
     /*@NotNull*/
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+        UnicodeBuilder sb = new UnicodeBuilder();
 
         appendTwoDigits(sb, hour);
-        sb.cat(':');
+        sb.append(':');
         appendTwoDigits(sb, minute);
-        sb.cat(':');
+        sb.append(':');
         appendTwoDigits(sb, second);
         if (nanosecond != 0) {
-            sb.cat('.');
+            sb.append('.');
             int ms = nanosecond;
             int div = 100_000_000;
             while (ms > 0) {
                 int d = ms / div;
-                sb.cat((char) (d + '0'));
+                sb.append((char) (d + '0'));
                 ms = ms % div;
                 div /= 10;
             }
@@ -405,7 +406,7 @@ public final class TimeValue extends CalendarValue implements Comparable {
             appendTimezone(sb);
         }
 
-        return sb;
+        return sb.toUnicodeString();
 
     }
 
@@ -419,11 +420,11 @@ public final class TimeValue extends CalendarValue implements Comparable {
      */
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
+    public UnicodeString getCanonicalLexicalRepresentation() {
         if (hasTimezone() && getTimezoneInMinutes() != 0) {
-            return adjustTimezone(0).getStringValueCS();
+            return adjustTimezone(0).getUnicodeStringValue();
         } else {
-            return getStringValueCS();
+            return this.getUnicodeStringValue();
         }
     }
 

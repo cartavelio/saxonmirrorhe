@@ -49,15 +49,18 @@ public class JaxpPlusXqjTest {
 			namespaces.put(prefix, namespaceURI);
 		}
 
-		public String getNamespaceURI(String prefix) {
+		@Override
+        public String getNamespaceURI(String prefix) {
 			return namespaces.get(prefix);
 		}
 
-		public String getPrefix(String namespaceURI) {
+		@Override
+        public String getPrefix(String namespaceURI) {
 			return null;
 		}
 
-		public Iterator getPrefixes(String arg0) {
+		@Override
+        public Iterator getPrefixes(String arg0) {
 			return null;
 		}
 	}

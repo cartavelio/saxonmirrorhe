@@ -93,12 +93,12 @@ public class Sum extends FoldingFunction {
      */
 
     private static class SumFold implements Fold {
-        private XPathContext context;
-        private AtomicValue zeroValue; // null means empty sequence
+        private final XPathContext context;
+        private final AtomicValue zeroValue; // null means empty sequence
         private AtomicValue data;
         private boolean atStart = true;
-        private ConversionRules rules;
-        private StringConverter toDouble;
+        private final ConversionRules rules;
+        private final StringConverter toDouble;
 
         public SumFold(XPathContext context, AtomicValue zeroValue) {
             this.context = context;
@@ -118,7 +118,7 @@ public class Sum extends FoldingFunction {
             AtomicValue next = (AtomicValue)item;
             if (atStart) {
                 atStart = false;
-                if (next instanceof UntypedAtomicValue) {
+                if (next.isUntypedAtomic()) {
                     data = toDouble.convert(next).asAtomic();
                     return;
                 } else if (next instanceof NumericValue || next instanceof DayTimeDurationValue || next instanceof YearMonthDurationValue) {
@@ -136,7 +136,7 @@ public class Sum extends FoldingFunction {
             }
 
             if (data instanceof NumericValue) {
-                if (next instanceof UntypedAtomicValue) {
+                if (next.isUntypedAtomic()) {
                     next = toDouble.convert(next).asAtomic();
                 } else if (!(next instanceof NumericValue)) {
                     XPathException err = new XPathException("Input to sum() contains a mix of numeric and non-numeric values");

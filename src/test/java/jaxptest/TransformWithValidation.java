@@ -20,12 +20,14 @@ public class TransformWithValidation {
 
     private static int errorCount = 0;
 
-    private static ErrorListener errorListener = new ErrorListener() {
+    private static final ErrorListener errorListener = new ErrorListener() {
+        @Override
         public void warning(TransformerException ex) throws TransformerException {
             System.out.println("Warning: " + ex + "\nLocation: " + ex.getLocator());
             fail("Unexpected warning");
         }
 
+        @Override
         public void fatalError(TransformerException ex) throws TransformerException {
             errorCount++;
             if (!ex.getMessage().contains("contravenes the pattern facet")) {
@@ -34,17 +36,18 @@ public class TransformWithValidation {
             }
         }
 
+        @Override
         public void error(TransformerException ex) throws TransformerException {
             System.out.println("Error: " + ex + "\nLocation: " + ex.getLocator());
             errorCount++;
         }
     };
 
-    private static String dir = ConfigTest.DATA_DIR + "defaultAttTest/";
+    private static final String dir = ConfigTest.DATA_DIR + "defaultAttTest/";
 
-    private static String xslPath = dir+"samples/validation/bookstore/BookStore.xsl";
-    private static String xmlPath = dir+"samples/validation/bookstore/BookStore.xml";
-    private static String outPath = dir+"samples/validation/bookstore/out.xml";
+    private static final String xslPath = dir+"samples/validation/bookstore/BookStore.xsl";
+    private static final String xmlPath = dir+"samples/validation/bookstore/BookStore.xml";
+    private static final String outPath = dir+"samples/validation/bookstore/out.xml";
 
     @Test
     public void testWithInputValidation() {

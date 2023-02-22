@@ -130,7 +130,7 @@ public abstract class Pattern extends PseudoExpression {
      */
 
     public void setOriginalText(String text) {
-        originalText = text;
+        /*originalText = text;*/
     }
 
     /**
@@ -407,16 +407,6 @@ public abstract class Pattern extends PseudoExpression {
     }
 
     /**
-     * Get the original text of the pattern, if known
-     * @return the original text of the pattern as written; this may be null
-     * in the case of a pattern constructed programmatically
-     */
-
-    public String getOriginalText() {
-        return originalText;
-    }
-
-    /**
      * Get a string representation of the pattern. This will be in a form similar to the
      * original pattern text, but not necessarily identical. It is not guaranteed to be
      * in legal pattern syntax.
@@ -427,13 +417,12 @@ public abstract class Pattern extends PseudoExpression {
             return originalText;
         } else {
             return reconstruct();
-
         }
     }
 
     /**
-     * Reconstruct a string representation of the pattern in cases where the original
-     * string is not available
+     * Reconstruct a string representation of the pattern from its compiled form,
+     * in cases where the original text is not available
      */
 
     public String reconstruct() {
@@ -513,6 +502,15 @@ public abstract class Pattern extends PseudoExpression {
         return this;
     }
 
+    /**
+     * Get the original text of the pattern as written, if available. The result may be null if the original
+     * text is not available, for example where the pattern is constructed programmatically
+     * @return the original text of the pattern if available, or null otherwise
+     */
+
+    public String getOriginalText() {
+        return originalText;
+    }
 
     @Override
     public String toShortString() {

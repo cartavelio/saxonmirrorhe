@@ -391,7 +391,7 @@ public class TypeChecker {
         if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
             if (exp instanceof Literal) {
                 // Try a more detailed check, since for maps, functions etc getItemType() can be imprecise
-                if (req.matches(((Literal) exp).getValue(), th)) {
+                if (req.matches(((Literal) exp).getGroundedValue(), th)) {
                     return exp;
                 }
                 String msg = role.composeErrorMessage(reqItemType, supplied, th);
@@ -684,8 +684,8 @@ public class TypeChecker {
     private static Expression makePromoter(Expression exp, Converter converter, BuiltInAtomicType type) {
         ConversionRules rules = exp.getConfiguration().getConversionRules();
         converter.setConversionRules(rules);
-        if (exp instanceof Literal && ((Literal) exp).getValue() instanceof AtomicValue) {
-            ConversionResult result = converter.convert((AtomicValue) ((Literal) exp).getValue());
+        if (exp instanceof Literal && ((Literal) exp).getGroundedValue() instanceof AtomicValue) {
+            ConversionResult result = converter.convert((AtomicValue) ((Literal) exp).getGroundedValue());
             if (result instanceof AtomicValue) {
                 Literal converted = Literal.makeLiteral((AtomicValue) result, exp);
                 ExpressionTool.copyLocationInfo(exp, converted);

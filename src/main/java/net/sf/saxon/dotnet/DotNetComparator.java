@@ -12,8 +12,11 @@ import cli.System.Globalization.CompareOptions;
 import cli.System.Globalization.SortKey;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.SubstringMatcher;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * A Collation implemented as a wrapper around a .NET CompareInfo object. Note that the
@@ -79,7 +82,7 @@ public class DotNetComparator implements SubstringMatcher {
      *                            being compared by this Comparator.
      */
     @Override
-    public int compareStrings(CharSequence o1, CharSequence o2) {
+    public int compareStrings(UnicodeString o1, UnicodeString o2) {
         return comparer.Compare(o1.toString(), o2.toString(), options);
     }
 
@@ -95,7 +98,7 @@ public class DotNetComparator implements SubstringMatcher {
      */
 
     @Override
-    public boolean comparesEqual(CharSequence s1, CharSequence s2) {
+    public boolean comparesEqual(UnicodeString s1, UnicodeString s2) {
         return comparer.Compare(s1.toString(), s2.toString(), options) == 0;
     }
 
@@ -109,8 +112,8 @@ public class DotNetComparator implements SubstringMatcher {
      */
 
     @Override
-    public boolean contains(String s1, String s2) {
-        return comparer.IndexOf(s1, s2, options) >= 0;
+    public boolean contains(UnicodeString s1, UnicodeString s2) {
+        return comparer.IndexOf(s1.toString(), s2.toString(), options) >= 0;
     }
 
     /**
@@ -123,8 +126,8 @@ public class DotNetComparator implements SubstringMatcher {
      */
 
     @Override
-    public boolean endsWith(String s1, String s2) {
-        return comparer.IsSuffix(s1, s2, options);
+    public boolean endsWith(UnicodeString s1, UnicodeString s2) {
+        return comparer.IsSuffix(s1.toString(), s2.toString(), options);
     }
 
     /**
@@ -137,8 +140,8 @@ public class DotNetComparator implements SubstringMatcher {
      */
 
     @Override
-    public boolean startsWith(String s1, String s2) {
-        return comparer.IsPrefix(s1, s2, options);
+    public boolean startsWith(UnicodeString s1, UnicodeString s2) {
+        return comparer.IsPrefix(s1.toString(), s2.toString(), options);
     }
 
     /**
@@ -151,17 +154,19 @@ public class DotNetComparator implements SubstringMatcher {
      */
 
     @Override
-    public String substringAfter(String s1, String s2) {
-        int i = comparer.IndexOf(s1, s2, options);
+    public UnicodeString substringAfter(UnicodeString s1, UnicodeString s2) {
+        String g1 = s1.toString();
+        String g2 = s2.toString();
+        int i = comparer.IndexOf(g1, g2, options);
         if (i < 0) {
-            return "";
+            return EmptyUniString.getInstance();
         }
         // We need to know where the matched string ends. Start with a guess, that the matched string
         // is the same length as s2. If it's not, try shorter and longer strings until we find one that's
         // equal. The search strategy is designed on the assumption that the matched string is of similar
         // length to the input string.
-        int pivot = i + s2.length();
-        if (comparer.Compare(s1.substring(i, pivot), s2, options) == 0) {
+        int pivot = i + s2.length32();
+        if (comparer.Compare(g1.substring(i, pivot), g2, options) == 0) {
             return s1.substring(pivot);
         }
 
@@ -172,17 +177,21 @@ public class DotNetComparator implements SubstringMatcher {
             z++;
             reachedStart = pivot - z < i;
             reachedEnd = pivot + z >= s1.length();
-            if (!reachedEnd && comparer.Compare(s1.substring(i, pivot + z), s2, options) == 0) {
+            if (!reachedEnd && comparer.Compare(g1.substring(i, pivot + z), g2, options) == 0) {
                 return s1.substring(pivot + z);
             }
-            if (!reachedStart && comparer.Compare(s1.substring(i, pivot - z), s2, options) == 0) {
+            if (!reachedStart && comparer.Compare(g1.substring(i, pivot - z), g2, options) == 0) {
                 return s1.substring(pivot - z);
             }
             if (reachedStart && reachedEnd) {
                 // shouldn't happen
-                return "";
+                return EmptyUniString.getInstance();
             }
         }
+    }
+
+    private StringItem stringValueFrom(String s, int from) {
+        return new StringItem(s.substring(from));
     }
 
     /**
@@ -195,10 +204,12 @@ public class DotNetComparator implements SubstringMatcher {
      */
 
     @Override
-    public String substringBefore(String s1, String s2) {
-        int j = comparer.IndexOf(s1, s2, options);
+    public UnicodeString substringBefore(UnicodeString s1, UnicodeString s2) {
+        String g1 = s1.toString();
+        String g2 = s2.toString();
+        int j = comparer.IndexOf(g1, g2, options);
         if (j < 0) {
-            return "";
+            return EmptyUniString.getInstance();
         }
         return s1.substring(0, j);
     }
@@ -210,8 +221,13 @@ public class DotNetComparator implements SubstringMatcher {
      */
 
     @Override
-    public AtomicMatchKey getCollationKey(CharSequence value) {
+    public AtomicMatchKey getCollationKey(UnicodeString value) {
         final SortKey sortKey = comparer.GetSortKey(value.toString(), options);
+        return new SortKeyWrapper(sortKey);
+    }
+
+    public AtomicMatchKey getCollationKey(String value) {
+        final SortKey sortKey = comparer.GetSortKey(value, options);
         return new SortKeyWrapper(sortKey);
     }
 

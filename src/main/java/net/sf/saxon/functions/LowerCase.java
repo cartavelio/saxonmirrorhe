@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.ZeroOrOne;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -20,8 +20,8 @@ import net.sf.saxon.value.StringValue;
 public class LowerCase extends ScalarSystemFunction {
 
     @Override
-    public StringValue evaluate(Item arg, XPathContext context) {
-        return StringValue.makeStringValue(arg.getStringValue().toLowerCase());
+    public StringItem evaluate(Item arg, XPathContext context) {
+        return StringItem.makeStringValue(arg.getStringValue().toLowerCase());
     }
 
     @Override

@@ -24,10 +24,10 @@ import java.util.Iterator;
 
 public class SpaceStrippedDocument extends GenericTreeInfo {
 
-    private SpaceStrippingRule strippingRule;
-    private boolean preservesSpace;
-    private boolean containsAssertions;
-    private TreeInfo underlyingTree;
+    private final SpaceStrippingRule strippingRule;
+    private final boolean preservesSpace;
+    private final boolean containsAssertions;
+    private final TreeInfo underlyingTree;
 
     /**
      * Create a space-stripped view of a document

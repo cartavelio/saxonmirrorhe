@@ -9,13 +9,14 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NoNamespaceName;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * ProcInstImpl is an implementation of ProcInstInfo used by the Propagator to construct
@@ -27,13 +28,13 @@ import net.sf.saxon.value.StringValue;
 
 public class ProcInstImpl extends NodeImpl {
 
-    String content;
+    UnicodeString content;
     String name;
     String systemId;
     int lineNumber = -1;
     int columnNumber = -1;
 
-    public ProcInstImpl(String name, String content) {
+    public ProcInstImpl(String name, UnicodeString content) {
         this.name = name;
         this.content = content;
     }
@@ -51,7 +52,7 @@ public class ProcInstImpl extends NodeImpl {
 
 
     @Override
-    public String getStringValue() {
+    public UnicodeString getUnicodeStringValue() {
         return content;
     }
 
@@ -63,7 +64,7 @@ public class ProcInstImpl extends NodeImpl {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() {
-        return new StringValue(getStringValue());
+        return new StringItem(getUnicodeStringValue());
     }
 
     @Override
@@ -142,8 +143,8 @@ public class ProcInstImpl extends NodeImpl {
      */
 
     @Override
-    public void replaceStringValue(/*@NotNull*/ CharSequence stringValue) {
-        content = stringValue.toString();
+    public void replaceStringValue(/*@NotNull*/ UnicodeString stringValue) {
+        content = stringValue;
     }
 }
 

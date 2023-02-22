@@ -42,7 +42,7 @@ public abstract class XSLModuleRoot extends StyleElement {
             } catch (XPathException err) {
                 ((StyleElement) node).compileError(err);
             }
-        };
+        }
     }
 
 

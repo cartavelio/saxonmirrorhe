@@ -32,8 +32,8 @@ import net.sf.saxon.value.Cardinality;
 
 public final class SingletonAtomizer extends UnaryExpression {
 
-    private boolean allowEmpty;
-    private RoleDiagnostic roleDiagnostic;
+    private final boolean allowEmpty;
+    private final RoleDiagnostic roleDiagnostic;
 
     /**
      * Constructor
@@ -72,7 +72,7 @@ public final class SingletonAtomizer extends UnaryExpression {
     @Override
     public Expression simplify() throws XPathException {
         Expression operand = getBaseExpression().simplify();
-        if (operand instanceof Literal && ((Literal) operand).getValue() instanceof AtomicValue) {
+        if (operand instanceof Literal && ((Literal) operand).getGroundedValue() instanceof AtomicValue) {
             return operand;
         }
         setBaseExpression(operand);

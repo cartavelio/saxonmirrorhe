@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -82,16 +82,6 @@ public abstract class NodeImpl
     }
 
     /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return getStringValue();
-    }
-
-    /**
      * Get the type annotation
      *
      * @return the type annotation of the base node
@@ -150,7 +140,7 @@ public abstract class NodeImpl
     public AtomicSequence atomize() throws XPathException {
         SchemaType stype = getSchemaType();
         if (stype == Untyped.getInstance() || stype == BuiltInAtomicType.UNTYPED_ATOMIC) {
-            return new UntypedAtomicValue(getStringValueCS());
+            return new UntypedAtomicValue(getUnicodeStringValue());
         } else {
             return stype.atomize(this);
         }
@@ -240,15 +230,15 @@ public abstract class NodeImpl
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
         long seq = getSequenceNumber();
         if (seq == -1L) {
             getPhysicalRoot().generateId(buffer);
-            buffer.cat(NODE_LETTER[getNodeKind()]);
+            buffer.append(NODE_LETTER[getNodeKind()]);
             buffer.append(Long.toString(seq) + "h" + hashCode());
         } else {
             parent.generateId(buffer);
-            buffer.cat(NODE_LETTER[getNodeKind()]);
+            buffer.append(NODE_LETTER[getNodeKind()]);
             buffer.append(Integer.toString(index));
         }
     }
@@ -876,7 +866,7 @@ public abstract class NodeImpl
      */
 
     @Override
-    public void addAttribute(NodeName name, SimpleType attType, CharSequence value, int properties) {
+    public void addAttribute(NodeName name, SimpleType attType, String value, int properties) {
         // No action, unless this is an element node
     }
 

@@ -16,7 +16,7 @@ import java.io.StringReader;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- *  Test use of options XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ACCESS_EXTERNAL_DTD
+ * Test use of options XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ACCESS_EXTERNAL_DTD
  */
 public class AllowedProtocolsTest {
 
@@ -149,9 +149,9 @@ public class AllowedProtocolsTest {
     @Test
     public void testExternalProtocolsRunTime001() {
         externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
-                                     "{name(doc('birthdays.xml')/*)}",
-                                     "all",
-                                     true);
+                                 "{name(doc('birthdays.xml')/*)}",
+                                 "all",
+                                 true);
     }
 
     @Test
@@ -259,17 +259,17 @@ public class AllowedProtocolsTest {
     @Test
     public void testExternalProtocolsDTD001() {
         externalProtocolsDTD("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
-                                 "{name(doc('othello.xml')/*)}",
-                                 "all",
-                                 true);
+                             "{name(doc('othello.xml')/*)}",
+                             "all",
+                             true);
     }
 
     @Test
     public void testExternalProtocolsDTD002() {
         externalProtocolsDTD("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
-                                 "{name(doc('othello.xml')/*)}",
-                                 "file",
-                                 true);
+                             "{name(doc('othello.xml')/*)}",
+                             "file",
+                             true);
     }
 
     @Test

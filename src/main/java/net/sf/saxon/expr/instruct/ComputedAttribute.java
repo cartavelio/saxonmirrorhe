@@ -31,9 +31,9 @@ import net.sf.saxon.value.*;
 
 public final class ComputedAttribute extends AttributeCreator {
 
-    private Operand nameOp;
+    private final Operand nameOp;
     private Operand namespaceOp;
-    private boolean allowNameAsQName;
+    private final boolean allowNameAsQName;
 
     /**
      * Construct an Attribute instruction
@@ -217,9 +217,9 @@ public final class ComputedAttribute extends AttributeCreator {
         if (Literal.isAtomic(getNameExp())) {
             // Check we have a valid lexical QName, whose prefix is in scope where necessary
             try {
-                AtomicValue val = (AtomicValue) ((Literal) getNameExp()).getValue();
-                if (val instanceof StringValue) {
-                    String[] parts = NameChecker.checkQNameParts(val.getStringValueCS());
+                AtomicValue val = (AtomicValue) ((Literal) getNameExp()).getGroundedValue();
+                if (val instanceof StringItem) {
+                    String[] parts = NameChecker.checkQNameParts(val.getStringValue());
                     if (getNamespaceExp() == null) {
                         String uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
                         if (uri == null) {
@@ -333,10 +333,10 @@ public final class ComputedAttribute extends AttributeCreator {
         String localName;
         String uri = null;
 
-        if (nameValue instanceof StringValue) {
+        if (nameValue instanceof StringItem) {
             // this will always be the case in XSLT
             String rawName = nameValue.getStringValue();
-            rawName = Whitespace.trimWhitespace(rawName).toString(); // required in XSLT; possibly wrong in XQuery
+            rawName = Whitespace.trim(rawName); // required in XSLT; possibly wrong in XQuery
             if (rawName.startsWith("Q{") && allowNameAsQName) { // not allowed in XSLT; a little unclear in XQuery
                 StructuredQName qn = StructuredQName.fromEQName(rawName);
                 prefix = "";
@@ -359,15 +359,15 @@ public final class ComputedAttribute extends AttributeCreator {
                         throw dynamicError(getLocation(), err, context);
                     }
                 }
-            }
-            if (prefix.equals("xmlns")) {
-                if (getNamespaceExp() == null) {
-                    String errorCode = isXSLT() ? "XTDE0860" : "XQDY0044";
-                    XPathException err = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());
-                    throw dynamicError(getLocation(), err, context);
-                } else {
-                    // ignore the prefix "xmlns"
-                    prefix = "";
+                if (prefix.equals("xmlns")) {
+                    if (getNamespaceExp() == null) {
+                        String errorCode = isXSLT() ? "XTDE0860" : "XQDY0044";
+                        XPathException err = new XPathException("Invalid attribute name: " + rawName, errorCode, this.getLocation());
+                        throw dynamicError(getLocation(), err, context);
+                    } else {
+                        // ignore the prefix "xmlns"
+                        prefix = "";
+                    }
                 }
             }
 
@@ -431,7 +431,7 @@ public final class ComputedAttribute extends AttributeCreator {
             if (uri == null) {
                 // generate a name using the supplied namespace URI
                 if (getNamespaceExp() instanceof StringLiteral) {
-                    uri = ((StringLiteral) getNamespaceExp()).getStringValue();
+                    uri = ((StringLiteral) getNamespaceExp()).stringify();
                 } else {
                     uri = getNamespaceExp().evaluateAsString(context).toString();
                     if (!StandardURIChecker.getInstance().isValidURI(uri)) {

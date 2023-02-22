@@ -16,6 +16,8 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -77,8 +79,8 @@ public final class Comment extends SimpleNodeConstructor {
         // Do early checking of content if known statically
 
         if (getSelect() instanceof Literal) {
-            String s = ((Literal) getSelect()).getValue().getStringValue();
-            String s2 = checkContent(s, visitor.getStaticContext().makeEarlyEvaluationContext());
+            UnicodeString s = ((Literal) getSelect()).getGroundedValue().getUnicodeStringValue();
+            UnicodeString s2 = checkContent(s, visitor.getStaticContext().makeEarlyEvaluationContext());
             if (!s2.equals(s)) {
                 setSelect(new StringLiteral(s2));
             }
@@ -96,8 +98,8 @@ public final class Comment extends SimpleNodeConstructor {
      */
 
     @Override
-    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
-        String comment = checkContent(value.toString(), context);
+    public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
+        UnicodeString comment = checkContent(value, context);
         output.comment(comment, getLocation(), ReceiverOption.NONE);
     }
 
@@ -112,7 +114,7 @@ public final class Comment extends SimpleNodeConstructor {
      */
 
     @Override
-    protected String checkContent(String comment, XPathContext context) throws XPathException {
+    protected UnicodeString checkContent(UnicodeString comment, XPathContext context) throws XPathException {
         if (isXSLT()) {
             return checkContentXSLT(comment);
         } else {
@@ -133,13 +135,18 @@ public final class Comment extends SimpleNodeConstructor {
      * @return the adjusted text of the comment
      */
 
-    public static String checkContentXSLT(String comment) {
-        int hh;
-        while ((hh = comment.indexOf("--")) >= 0) {
-            comment = comment.substring(0, hh + 1) + ' ' + comment.substring(hh + 1);
-        }
-        if (comment.endsWith("-")) {
-            comment = comment + ' ';
+    public static UnicodeString checkContentXSLT(UnicodeString comment) {
+        String message = invalidity(comment);
+        if (message != null) {
+            int hh;
+            String cmt = comment.toString();
+            while ((hh = cmt.indexOf("--")) >= 0) {
+                cmt = cmt.substring(0, hh + 1) + ' ' + cmt.substring(hh + 1);
+            }
+            if (cmt.endsWith("-")) {
+                cmt = cmt + ' ';
+            }
+            comment = StringView.tidy(cmt);
         }
         return comment;
     }
@@ -153,14 +160,23 @@ public final class Comment extends SimpleNodeConstructor {
      *          if the content is invalid
      */
 
-    public static String checkContentXQuery(String comment) throws XPathException {
-        if (comment.contains("--")) {
-            throw new XPathException("Invalid characters (--) in comment", "XQDY0072");
-        }
-        if (comment.length() > 0 && comment.charAt(comment.length() - 1) == '-') {
-            throw new XPathException("Comment cannot end in '-'", "XQDY0072");
+    public static UnicodeString checkContentXQuery(UnicodeString comment) throws XPathException {
+        String message = invalidity(comment);
+        if (message != null) {
+            throw new XPathException(message, "XQDY0072");
         }
         return comment;
+    }
+
+    private static String invalidity(UnicodeString comment) {
+        String cmt = comment.toString();
+        if (cmt.contains("--")) {
+            return "Invalid characters (--) in comment";
+        }
+        if (cmt.length() > 0 && cmt.charAt(comment.length32() - 1) == '-') {
+            return "Comment cannot end in '-'";
+        }
+        return null;
     }
 
 

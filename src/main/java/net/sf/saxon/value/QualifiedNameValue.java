@@ -12,6 +12,8 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -46,7 +48,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
 
     /*@Nullable*/
     public static AtomicValue makeQName(String prefix, String uri, String local,
-                                        /*@NotNull*/ AtomicType targetType, CharSequence lexicalForm, ConversionRules rules)
+                                        /*@NotNull*/ AtomicType targetType, UnicodeString lexicalForm, ConversionRules rules)
             throws XPathException {
 
         if (targetType.getFingerprint() == StandardNames.XS_QNAME) {
@@ -72,11 +74,12 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
     /**
      * Get the string value as a String. Returns the QName as a lexical QName, retaining the original
      * prefix if available.
+     * @return
      */
 
     @Override
-    public final String getPrimitiveStringValue() {
-        return qName.getDisplayName();
+    public final UnicodeString getPrimitiveStringValue() {
+        return StringView.of(qName.getDisplayName()).tidy();
     }
 
     /**
@@ -174,14 +177,24 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
         return qName.identityHashCode();
     }
 
+//    /**
+//     * The toString() method returns the name in the form QName("uri", "local")
+//     *
+//     * @return the name in in the form QName("uri", "local")
+//     */
+//
+//    /*@NotNull*/
+//    public String toString() {
+//        return "QName(\"" + getNamespaceURI() + "\", \"" + getLocalName() + "\")";
+//    }
+
     /**
-     * The toString() method returns the name in the form QName("uri", "local")
-     *
+     * The show() method returns the name in the form QName("uri", "local")
      * @return the name in in the form QName("uri", "local")
      */
 
-    /*@NotNull*/
-    public String toString() {
+    @Override
+    public String show() {
         return "QName(\"" + getNamespaceURI() + "\", \"" + getLocalName() + "\")";
     }
 

@@ -16,9 +16,7 @@ import net.sf.saxon.expr.sort.MergeInstr.MergeSource;
 import net.sf.saxon.expr.sort.SortExpression;
 import net.sf.saxon.expr.sort.SortKeyDefinition;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -85,7 +83,7 @@ public class XSLMerge extends StyleElement {
                 childMask = childMask | 2;
             } else if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     compileError("No character data is allowed within xsl:merge", "XXXX");
                 }
             } else if (child instanceof XSLFallback) {

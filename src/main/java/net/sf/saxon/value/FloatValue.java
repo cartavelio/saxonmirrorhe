@@ -10,8 +10,10 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
@@ -30,7 +32,7 @@ public final class FloatValue extends NumericValue {
     public static final FloatValue ONE = new FloatValue((float) 1.0);
     public static final FloatValue NaN = new FloatValue(Float.NaN);
 
-    private float value;
+    private final float value;
 
     /**
      * Constructor supplying a float
@@ -107,7 +109,7 @@ public final class FloatValue extends NumericValue {
 
     @Override
     public double getDoubleValue() {
-        return (double) value;
+        return value;
     }
 
     /**
@@ -119,7 +121,7 @@ public final class FloatValue extends NumericValue {
      */
     @Override
     public BigDecimal getDecimalValue() throws ValidationException {
-        return new BigDecimal((double) value);
+        return new BigDecimal(value);
     }
 
     /**
@@ -186,7 +188,7 @@ public final class FloatValue extends NumericValue {
 
     /*@NotNull*/
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
         return floatToString(value);
     }
 
@@ -194,11 +196,12 @@ public final class FloatValue extends NumericValue {
      * Get the canonical lexical representation as defined in XML Schema. This is not always the same
      * as the result of casting to a string according to the XPath rules. For xs:float, the canonical
      * representation always uses exponential notation.
+     * @return
      */
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C16);
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        UnicodeBuilder fsb = new UnicodeBuilder();
         return FloatingPointConverter.appendFloat(fsb, value, true);
     }
 
@@ -209,8 +212,8 @@ public final class FloatValue extends NumericValue {
      * @return the value converted to a string, according to the XPath casting rules.
      */
 
-    public static CharSequence floatToString(float value) {
-        return FloatingPointConverter.appendFloat(new FastStringBuffer(FastStringBuffer.C16), value, false);
+    public static UnicodeString floatToString(float value) {
+        return FloatingPointConverter.appendFloat(new UnicodeBuilder(), value, false);
     }
 
     /**
@@ -429,11 +432,11 @@ public final class FloatValue extends NumericValue {
 
     @Override
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
-        return v instanceof FloatValue && DoubleSortComparer.getInstance().comparesEqual(this, (FloatValue) v);
+        return v instanceof FloatValue && DoubleSortComparer.getInstance().comparesEqual(this, v);
     }
 
     @Override
-    public FloatValue asAtomic() {
+    public AtomicValue asAtomic() {
         return this;
     }
 }

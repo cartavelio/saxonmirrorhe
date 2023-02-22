@@ -437,7 +437,7 @@ public class GlobalVariable extends Actor
                 // now, we do a quick check. See test bug64
                 Affinity relation = th.relationship(select.getItemType(), type.getPrimaryType());
                 if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMED_BY) {
-                    constantValue = ((Literal) select).getValue();
+                    constantValue = ((Literal) select).getGroundedValue();
                     type = SequenceType.makeSequenceType(SequenceTool.getItemType(constantValue, th), SequenceTool.getCardinality(constantValue));
                 }
             }
@@ -492,7 +492,7 @@ public class GlobalVariable extends Actor
                     setRequiredType(SequenceType.makeSequenceType(itemType, cardinality));
                     GroundedValue constantValue = null;
                     if (value2 instanceof Literal) {
-                        constantValue = ((Literal) value2).getValue();
+                        constantValue = ((Literal) value2).getGroundedValue();
                     }
                     for (BindingReference reference : references) {
                         if (reference instanceof VariableReference) {
@@ -629,7 +629,7 @@ public class GlobalVariable extends Actor
                     getVariableQName().getDisplayName() + "!!");
         } else if (select instanceof Literal) {
             // fast path for constant global variables
-            return ((Literal)select).getValue();
+            return ((Literal)select).getGroundedValue();
         } else {
             try {
                 Controller controller = context.getController();

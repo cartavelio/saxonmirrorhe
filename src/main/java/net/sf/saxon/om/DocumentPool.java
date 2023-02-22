@@ -31,13 +31,13 @@ public final class DocumentPool {
     // each time. For this purpose we use a hashtable from
     // URI to DocumentInfo object.
 
-    private Map<DocumentKey, TreeInfo> documentNameMap = new HashMap<DocumentKey, TreeInfo>(10);
+    private final Map<DocumentKey, TreeInfo> documentNameMap = new HashMap<DocumentKey, TreeInfo>(10);
 
 
     // The set of documents known to be unavailable. These documents must remain
     // unavailable for the duration of a transformation or query!
 
-    private Set<DocumentKey> unavailableDocuments = new HashSet<DocumentKey>(10);
+    private final Set<DocumentKey> unavailableDocuments = new HashSet<DocumentKey>(10);
 
     /**
      * Add a document to the pool

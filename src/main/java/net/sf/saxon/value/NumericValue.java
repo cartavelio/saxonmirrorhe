@@ -299,7 +299,8 @@ public abstract class NumericValue extends AtomicValue
      * @return The result of casting the number to a string
      */
 
-    public String toString() {
+    @Override
+    public String show() {
         return getStringValue();
     }
 

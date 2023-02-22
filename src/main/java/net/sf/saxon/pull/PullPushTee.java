@@ -14,6 +14,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -32,9 +33,9 @@ import java.util.Stack;
 
 public class PullPushTee extends PullFilter {
 
-    private Receiver branch;
+    private final Receiver branch;
     boolean previousAtomic = false;
-    private Stack<NamespaceMap> nsStack = new Stack<>();
+    private final Stack<NamespaceMap> nsStack = new Stack<>();
 
     /**
      * Create a PullPushTee
@@ -64,7 +65,7 @@ public class PullPushTee extends PullFilter {
      * copies it to the branch Receiver, and then returns the event to the caller.
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
@@ -152,10 +153,9 @@ public class PullPushTee extends PullFilter {
                     out.append(super.getAtomicValue(), loc, ReceiverOption.NONE);
                 } else {
                     if (previousAtomic) {
-                        out.characters(" ", loc, ReceiverOption.NONE);
+                        out.characters(UnicodeString.SINGLE_SPACE, loc, ReceiverOption.NONE);
                     }
-                    CharSequence chars = in.getStringValue();
-                    out.characters(chars, loc, ReceiverOption.NONE);
+                    out.characters(in.getStringValue(), loc, ReceiverOption.NONE);
                 }
                 break;
 
@@ -164,7 +164,7 @@ public class PullPushTee extends PullFilter {
                     Orphan o = new Orphan(in.getPipelineConfiguration().getConfiguration());
                     o.setNodeName(getNodeName());
                     o.setNodeKind(Type.ATTRIBUTE);
-                    o.setStringValue(getStringValue());
+                    o.setStringValue(getStringValue().tidy());
                     out.append(o, loc, ReceiverOption.NONE);
                 }
                 break;
@@ -174,7 +174,7 @@ public class PullPushTee extends PullFilter {
                     Orphan o = new Orphan(in.getPipelineConfiguration().getConfiguration());
                     o.setNodeName(getNodeName());
                     o.setNodeKind(Type.NAMESPACE);
-                    o.setStringValue(getStringValue());
+                    o.setStringValue(getStringValue().tidy());
                     out.append(o, loc, ReceiverOption.NONE);
                 }
                 break;

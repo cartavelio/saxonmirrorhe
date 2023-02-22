@@ -19,7 +19,7 @@ import net.sf.saxon.serialize.SerializationProperties;
  */
 public class DotNetDomDestination extends AbstractDestination {
 
-    private DotNetDomBuilder builder;
+    private final DotNetDomBuilder builder;
 
 
     public DotNetDomDestination(DotNetDomBuilder builder){

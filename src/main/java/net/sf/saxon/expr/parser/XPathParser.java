@@ -28,6 +28,7 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -1855,7 +1856,7 @@ public class XPathParser {
     private Expression makeUnaryExpression(int operator, Expression operand) {
         if (Literal.isAtomic(operand)) {
             // very early evaluation of expressions like "-1", so they are treated as numeric literals
-            AtomicValue val = (AtomicValue) ((Literal) operand).getValue();
+            AtomicValue val = (AtomicValue) ((Literal) operand).getGroundedValue();
             if (val instanceof NumericValue) {
                 if (env.isInBackwardsCompatibleMode()) {
                     val = new DoubleValue(((NumericValue) val).getDoubleValue());
@@ -2474,7 +2475,7 @@ public class XPathParser {
      */
 
     /*@NotNull*/
-    protected CharSequence unescape(String token) throws XPathException {
+    protected String unescape(String token) throws XPathException {
         return token;
     }
 
@@ -2578,7 +2579,7 @@ public class XPathParser {
         Expression result;
         if (token == Token.NAME) {
             String name = t.currentTokenValue;
-            if (!NameChecker.isValidNCName(name)) {
+            if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
                 grumble("The name following '?' must be a valid NCName");
             }
             nextToken();
@@ -2784,7 +2785,7 @@ public class XPathParser {
                     return NodeKindTest.PROCESSING_INSTRUCTION;
                 } else if (t.currentToken == Token.STRING_LITERAL) {
                     String piName = Whitespace.trim(unescape(t.currentTokenValue));
-                    if (!NameChecker.isValidNCName(piName)) {
+                    if (!NameChecker.isValidNCName(StringTool.codePoints(piName))) {
                         // Became an error as a result of XPath erratum XP.E7
                         grumble("Processing instruction name must be a valid NCName", "XPTY0004");
                     } else {
@@ -3095,11 +3096,11 @@ public class XPathParser {
                 nextToken();
                 Expression value = parseExprSingle();
                 Expression entry;
-                if (key instanceof Literal && ((Literal)key).getValue() instanceof AtomicValue
+                if (key instanceof Literal && ((Literal)key).getGroundedValue() instanceof AtomicValue
                         && value instanceof Literal) {
                     entry = Literal.makeLiteral(
-                            new SingleEntryMap((AtomicValue) ((Literal)key).getValue(),
-                                             ((Literal)value).getValue()));
+                            new SingleEntryMap((AtomicValue) ((Literal)key).getGroundedValue(),
+                                             ((Literal)value).getGroundedValue()));
                 } else {
                     entry = MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, value);
                 }
@@ -3127,8 +3128,8 @@ public class XPathParser {
                 Expression[] entriesArray = new Expression[entries.size()];
                 Block block = new Block(entries.toArray(entriesArray));
                 DictionaryMap options = new DictionaryMap();
-                options.initialPut("duplicates", new StringValue("reject"));
-                options.initialPut("duplicates-error-code", new StringValue("XQDY0137"));
+                options.initialPut("duplicates", StringItem.bmp("reject"));
+                options.initialPut("duplicates-error-code", StringItem.bmp("XQDY0137"));
                 result = MapFunctionSet.getInstance().makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
                 break;
         }
@@ -3255,7 +3256,7 @@ public class XPathParser {
         nextToken();
 
         if (scanOnly) {
-            return new StringLiteral(StringValue.EMPTY_STRING);
+            return new StringLiteral(StringItem.EMPTY_STRING);
         }
 
         Expression[] arguments = new Expression[args.size()];
@@ -3768,7 +3769,7 @@ public class XPathParser {
                     NameTest test2 = new NameTest(nodeType, fp2, pool);
                     return new CombinedNodeTest(test1, Token.UNION, test2);
                 case ANY_NAMESPACE:
-                    if (!NameChecker.isValidNCName(qname)) {
+                    if (!NameChecker.isValidNCName(StringTool.codePoints(qname))) {
                         grumble("Invalid name '" + qname + "'");
                     }
                     return new LocalNameTest(pool, nodeType, qname);
@@ -3832,7 +3833,7 @@ public class XPathParser {
     /*@NotNull*/
     public LocalNameTest makeLocalNameTest(short nodeType, String localName)
             throws XPathException {
-        if (!NameChecker.isValidNCName(localName)) {
+        if (!NameChecker.isValidNCName(StringTool.codePoints(localName))) {
             grumble("Local name [" + localName + "] contains invalid characters");
         }
         return new LocalNameTest(env.getConfiguration().getNamePool(), nodeType, localName);

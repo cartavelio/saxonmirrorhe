@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class StylesheetModule {
 
-    private StyleElement rootElement;
+    private final StyleElement rootElement;
     private int precedence;
     private int minImportPrecedence;
     private StylesheetModule importer;
@@ -452,7 +452,7 @@ public class StylesheetModule {
         for (NodeInfo child : getStylesheetElement().children()) {
             if (child.getNodeKind() == Type.TEXT) {
                 // in an embedded stylesheet, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     previousElement.compileError(
                             "No character data is allowed between top-level elements", "XTSE0120");
                 }

@@ -31,7 +31,7 @@ import java.util.Iterator;
  */
 public class RetainedStaticContext implements NamespaceResolver {
 
-    private Configuration config;
+    private final Configuration config;
     private PackageData packageData;
     private URI staticBaseUri;
     private String staticBaseUriString;

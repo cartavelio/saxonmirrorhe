@@ -15,7 +15,7 @@ import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.TextImpl;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.List;
 public class XSLText extends XSLLeafNodeConstructor {
 
     private boolean disable = false;
-    private StringValue value;
+    private StringItem value;
 
 
     @Override
@@ -55,13 +55,13 @@ public class XSLText extends XSLLeafNodeConstructor {
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
 
-        value = StringValue.EMPTY_STRING;
+        value = StringItem.EMPTY_STRING;
         for (NodeInfo child : children()) {
             if (child instanceof StyleElement) {
                 ((StyleElement) child).compileError("xsl:text must not contain child elements", "XTSE0010");
                 return;
             } else {
-                value = StringValue.makeStringValue(child.getStringValueCS());
+                value = new StringItem(child.getUnicodeStringValue());
                 //continue;
             }
         }
@@ -91,7 +91,7 @@ public class XSLText extends XSLLeafNodeConstructor {
                 block.setLocation(allocateLocation());
                 return block;
             } else {
-                return new ValueOf(new StringLiteral(StringValue.EMPTY_STRING), disable, false);
+                return new ValueOf(new StringLiteral(StringItem.EMPTY_STRING), disable, false);
             }
         } else {
             return new ValueOf(Literal.makeLiteral(value), disable, false);

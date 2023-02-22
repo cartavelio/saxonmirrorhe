@@ -23,7 +23,7 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public class XMLStreamWriterDestination extends AbstractDestination {
 
-    private XMLStreamWriter writer;
+    private final XMLStreamWriter writer;
 
     /**
      * Create an XMLStreamWriterDestination based on a supplied XMLStreamWriter

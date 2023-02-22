@@ -17,8 +17,8 @@ import net.sf.saxon.trans.XPathException;
  */
 public class FailedResource implements Resource {
 
-    private String uri;
-    private XPathException error;
+    private final String uri;
+    private final XPathException error;
 
     /**
      * Create a FailedResource

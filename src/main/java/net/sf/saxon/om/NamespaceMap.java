@@ -29,9 +29,9 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
     protected String[] prefixes;  // always sorted, for binary search
     protected String[] uris;
 
-    private static String[] emptyArray = new String[]{};
+    private static final String[] emptyArray = new String[]{};
 
-    private static NamespaceMap EMPTY_MAP = new NamespaceMap();
+    private static final NamespaceMap EMPTY_MAP = new NamespaceMap();
 
     /**
      * Get a namespace map containing no namespace bindings

@@ -8,7 +8,7 @@
 package net.sf.saxon.z;
 
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.Arrays;
 
@@ -269,7 +269,7 @@ public class IntArraySet implements IntSet {
     }
 
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer(contents.length * 4);
+        StringBuilder sb = new StringBuilder(contents.length * 4);
         for (int i = 0; i < contents.length; i++) {
             if (i == contents.length - 1) {
                 sb.append(contents[i] + "");
@@ -342,13 +342,13 @@ public class IntArraySet implements IntSet {
 
     public static class IntArrayIterator implements IntIterator {
 
-        private int[] contents;
-        private int limit;
+        private final int[] contents;
+        private final int limit;
         private int i = 0;
 
         /**
          * Create an iterator over the integers in an array (in positions 0 to n-1
-         * inclusive, were n is the value of the limit argument)
+         * inclusive, where n is the value of the limit argument)
          *
          * @param contents the array over which to iterate
          * @param limit    the number of items to be included in the iteration

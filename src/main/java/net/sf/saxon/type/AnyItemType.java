@@ -27,7 +27,7 @@ public class AnyItemType implements ItemType.WithSequenceTypeCache {
     private AnyItemType() {
     }
 
-    /*@NotNull*/ private static AnyItemType theInstance = new AnyItemType();
+    /*@NotNull*/ private static final AnyItemType theInstance = new AnyItemType();
 
     /**
      * Factory method to get the singleton instance

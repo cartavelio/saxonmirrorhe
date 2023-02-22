@@ -12,11 +12,11 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Implement the fn:path function with one argument
@@ -28,32 +28,30 @@ public class Path_1 extends ScalarSystemFunction {
         return makePath((NodeInfo)arg, context);
     }
 
-    public static StringValue makePath(NodeInfo node, XPathContext context) {
+    public static StringItem makePath(NodeInfo node, XPathContext context) {
         if (node.getNodeKind() == Type.DOCUMENT) {
-            return StringValue.makeStringValue("/");
+            return StringItem.makeStringValue("/");
         }
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         AxisIterator iter = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
         NodeInfo n;
         while ((n = iter.next()) != null) {
             if (n.getParent() == null) {
                 if (n.getNodeKind() == Type.DOCUMENT) {
-                    return new StringValue(fsb);
+                    return new StringItem(fsb);
                 } else {
-                    fsb.prepend("Q{http://www.w3.org/2005/xpath-functions}root()");
-                    return new StringValue(fsb);
+                    fsb.insert(0, "Q{http://www.w3.org/2005/xpath-functions}root()");
+                    return new StringItem(fsb);
                 }
             }
-            FastStringBuffer fsb2 = new FastStringBuffer(FastStringBuffer.C256);
+            StringBuilder fsb2 = new StringBuilder(256);
             switch (n.getNodeKind()) {
                 case Type.DOCUMENT:
-                    return new StringValue(fsb);
+                    return new StringItem(fsb);
                 case Type.ELEMENT:
-                    fsb2.append("/Q{");
-                    fsb2.append(n.getURI());
-                    fsb2.append("}");
+                    fsb2.append("/Q{").append(n.getURI()).append("}");
                     fsb2.append(n.getLocalPart());
-                    fsb2.append("[" + Navigator.getNumberSimple(n, context) + "]");
+                    fsb2.append("[").append(Navigator.getNumberSimple(n, context)).append("]");
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
@@ -61,31 +59,24 @@ public class Path_1 extends ScalarSystemFunction {
                     fsb2.append("/@");
                     String attURI = n.getURI();
                     if (!"".equals(attURI)) {
-                        fsb2.append("Q{");
-                        fsb2.append(attURI);
-                        fsb2.append("}");
+                        fsb2.append("Q{").append(attURI).append("}");
                     }
                     fsb2.append(n.getLocalPart());
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.TEXT:
-                    fsb2.append("/text()[");
-                    fsb2.append(Navigator.getNumberSimple(n, context) + "]");
-                    fsb2.append(fsb);
+                    fsb2.append("/text()[").append(Navigator.getNumberSimple(n, context) + "]").append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.COMMENT:
-                    fsb2.append("/comment()[");
-                    fsb2.append(Navigator.getNumberSimple(n, context) + "]");
+                    fsb2.append("/comment()[").append(Navigator.getNumberSimple(n, context)).append("]");
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
                 case Type.PROCESSING_INSTRUCTION:
-                    fsb2.append("/processing-instruction(");
-                    fsb2.append(n.getLocalPart());
-                    fsb2.append(")[");
-                    fsb2.append(Navigator.getNumberSimple(n, context) + "]");
+                    fsb2.append("/processing-instruction(").append(n.getLocalPart()).append(")[");
+                    fsb2.append(Navigator.getNumberSimple(n, context)).append("]");
                     fsb2.append(fsb);
                     fsb = fsb2;
                     break;
@@ -104,8 +95,8 @@ public class Path_1 extends ScalarSystemFunction {
             }
         }
         // should not reach here...
-        fsb.prepend("Q{http://www.w3.org/2005/xpath-functions}root()");
-        return new StringValue(fsb);
+        fsb.insert(0, "Q{http://www.w3.org/2005/xpath-functions}root()");
+        return new StringItem(fsb);
     }
 
 }

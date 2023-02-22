@@ -304,7 +304,7 @@ public class Numberer_tr extends AbstractNumberer {
         System.out.println(111111111111L + " in words: '" + tn.toWords(111111111111L, TITLE_CASE) + "'");
         System.out.println(156156L + " in words: '" + tn.toWords(156156L, TITLE_CASE) + "'");
 
-        System.out.println("");
+        System.out.println();
 
         System.out.println(Long.MAX_VALUE + " (Long.MAX_VALUE) in ordinal words: '" + tn.toOrdinalWords("", Long.MAX_VALUE, TITLE_CASE) + "'");
         System.out.println(4425408 + " in ordinal words: '" + tn.toOrdinalWords("", 4425408, TITLE_CASE) + "'");
@@ -314,7 +314,7 @@ public class Numberer_tr extends AbstractNumberer {
         System.out.println(111111111111L + " in ordinal words: '" + tn.toOrdinalWords("", 111111111111L, TITLE_CASE) + "'");
         System.out.println(156156L + " in ordinal words: '" + tn.toOrdinalWords("", 156156L, TITLE_CASE) + "'");
 
-        System.out.println("");
+        System.out.println();
 
         for (int month = 1; month <= 12; month++) {
             System.out.println("month " + month + " in 4 characters, minimum 5 characters wide result: '" + tn.monthName(month, 5, 4) + "'");
@@ -322,7 +322,7 @@ public class Numberer_tr extends AbstractNumberer {
             System.out.println("month " + month + " in 10 characters, minimum 10 characters wide result: '" + tn.monthName(month, 10, 10) + "'");
         }
 
-        System.out.println("");
+        System.out.println();
 
         for (int day = 1; day <= 7; day++) {
             System.out.println("day " + day + " in 4 characters, minimum 5 characters wide result: '" + tn.dayName(day, 5, 4) + "'");
@@ -330,7 +330,7 @@ public class Numberer_tr extends AbstractNumberer {
             System.out.println("day " + day + " in 10 characters, minimum 10 characters wide result: '" + tn.dayName(day, 10, 10) + "'");
         }
 
-        System.out.println("");
+        System.out.println();
 
         System.out.println("abbreviating 156156 in (lower case) words to 18 characters: '" + tn.abbreviate(tn.numberer(156156L, LOWER_CASE), 18) + "'");
         System.out.println("abbreviating 156156 in (upper case) words to 18 characters: '" + tn.abbreviate(tn.numberer(156156L, UPPER_CASE), 18) + "'");

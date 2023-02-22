@@ -21,8 +21,8 @@ import java.util.Iterator;
 
 final class AttributeInfoIterator implements Iterator<AttributeInfo> {
 
-    private TinyTree tree;
-    private int element;
+    private final TinyTree tree;
+    private final int element;
     private int index;
 
     /**

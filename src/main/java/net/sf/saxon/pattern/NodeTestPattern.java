@@ -24,7 +24,7 @@ import net.sf.saxon.type.UType;
 
 public class NodeTestPattern extends Pattern {
 
-    private NodeTest nodeTest;
+    private final NodeTest nodeTest;
 
 
     /**
@@ -94,11 +94,7 @@ public class NodeTestPattern extends Pattern {
 
     @Override
     public String toShortString() {
-        if (getOriginalText() != null) {
-            return getOriginalText();
-        } else {
-            return nodeTest.toShortString();
-        }
+        return nodeTest.toShortString();
     }
 
     /**

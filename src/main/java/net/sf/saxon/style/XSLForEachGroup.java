@@ -153,7 +153,7 @@ public final class XSLForEachGroup extends StyleElement {
                 compileError("A collation may be specified only if group-by or group-adjacent is specified", "XTSE1090");
             } else {
                 if (collationName instanceof StringLiteral) {
-                    String collation = ((StringLiteral) collationName).getStringValue();
+                    String collation = ((StringLiteral) collationName).stringify();
                     URI collationURI;
                     try {
                         collationURI = new URI(collation);
@@ -239,7 +239,7 @@ public final class XSLForEachGroup extends StyleElement {
         StringCollator collator = null;
         if (collationName instanceof StringLiteral) {
             // if the collation name is constant, then we've already resolved it against the base URI
-            final String uri = ((StringLiteral) collationName).getStringValue();
+            final String uri = ((StringLiteral) collationName).stringify();
             collator = findCollation(uri, getBaseURI());
             if (collator == null) {
                 compileError("The collation name '" + collationName + "' has not been defined", "XTDE1110");

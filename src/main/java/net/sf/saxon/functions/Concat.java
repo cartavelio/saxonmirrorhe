@@ -14,14 +14,15 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.Arrays;
 
@@ -87,50 +88,57 @@ public class Concat extends SystemFunction implements PushableFunction {
         }
         return new SystemFunctionCall.Optimized(this, arguments) {
             @Override
-            public CharSequence evaluateAsString(XPathContext context) throws XPathException {
-                FastStringBuffer buffer = new FastStringBuffer(256);
+            public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
+                UnicodeBuilder buffer = new UnicodeBuilder();
                 for (Operand o: operands()) {
                     Item it = o.getChildExpression().evaluateItem(context);
                     if (it != null) {
-                        buffer.cat(it.getStringValueCS());
+                        buffer.append(it.getStringValue());
                     }
                 }
-                return buffer;
+                return buffer.toUnicodeString();
             }
 
             @Override
             public Item evaluateItem(XPathContext context) throws XPathException {
-                return new StringValue(evaluateAsString(context));
+                return new StringItem(evaluateAsString(context));
             }
         };
 
     }
 
-    private boolean isSingleBoolean(Expression arg) {
-        return arg.getCardinality() == StaticProperty.EXACTLY_ONE && arg.getItemType() == BuiltInAtomicType.BOOLEAN;
-    }
-
-
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
-        for (Sequence arg : arguments) {
-            Item item = arg.head();
-            if (item != null) {
-                fsb.cat(item.getStringValueCS());
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (arguments.length == 2) {
+            Item s0 = arguments[0].head();
+            if (s0 == null) {
+                s0 = StringItem.EMPTY_STRING;
             }
+            Item s1 = arguments[1].head();
+            if (s1 == null) {
+                s1 = StringItem.EMPTY_STRING;
+            }
+            return new StringItem((s0.getUnicodeStringValue()).concat(s1.getUnicodeStringValue()));
+        } else {
+            UnicodeBuilder builder = new UnicodeBuilder();
+            for (Sequence arg : arguments) {
+                Item item = arg.head();
+                if (item != null) {
+                    builder.append(item.getUnicodeStringValue());
+                }
+            }
+            return new StringItem(builder.toUnicodeString());
         }
-        return new StringValue(fsb);
     }
 
     @Override
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
-        CharSequenceConsumer output = destination.getStringReceiver(false);
+        UniStringConsumer output = destination.getStringReceiver(false);
         output.open();
         for (Sequence arg : arguments) {
             Item item = arg.head();
             if (item != null) {
-                output.cat(item.getStringValueCS());
+                output.append(item.getUnicodeStringValue());
             }
         }
         output.close();

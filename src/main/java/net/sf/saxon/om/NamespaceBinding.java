@@ -20,8 +20,8 @@ import java.util.Iterator;
  */
 public final class NamespaceBinding implements NamespaceBindingSet {
 
-    private String prefix;
-    private String uri;
+    private final String prefix;
+    private final String uri;
 
     public final static NamespaceBinding XML = new NamespaceBinding("xml", NamespaceConstant.XML);
     public final static NamespaceBinding DEFAULT_UNDECLARATION = new NamespaceBinding("", "");

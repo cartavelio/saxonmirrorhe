@@ -15,7 +15,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntExceptPredicate;
 import net.sf.saxon.z.IntSet;
 
@@ -34,9 +34,9 @@ import java.util.function.IntPredicate;
 
 public class CombinedNodeTest extends NodeTest {
 
-    private NodeTest nodetest1;
-    private NodeTest nodetest2;
-    private int operator;
+    private final NodeTest nodetest1;
+    private final NodeTest nodetest2;
+    private final int operator;
 
     /**
      * Create a NodeTest that combines two other node tests
@@ -231,11 +231,11 @@ public class CombinedNodeTest extends NodeTest {
 
     public void addTypeDetails(DictionaryMap map) {
         if (nodetest1 instanceof NameTest && operator == Token.INTERSECT) {
-            map.initialPut("n", new StringValue(nodetest1.getMatchingNodeName().getEQName()));
+            map.initialPut("n", new StringItem(nodetest1.getMatchingNodeName().getEQName()));
             if (nodetest2 instanceof ContentTypeTest) {
                 SchemaType schemaType = ((ContentTypeTest) nodetest2).getSchemaType();
                 if (schemaType != Untyped.getInstance() && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
-                    map.initialPut("c", new StringValue(schemaType.getEQName() +
+                    map.initialPut("c", new StringItem(schemaType.getEQName() +
                             (nodetest2.isNillable() ? "?" : "")));
 
                 }

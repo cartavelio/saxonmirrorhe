@@ -8,6 +8,7 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -24,7 +25,7 @@ import net.sf.saxon.type.UType;
 
 public class ItemTypePattern extends Pattern {
 
-    private ItemType itemType;
+    private final ItemType itemType;
 
 
     /**
@@ -76,7 +77,6 @@ public class ItemTypePattern extends Pattern {
     /**
      * Display the pattern for diagnostics
      */
-
     @Override
     public String reconstruct() {
         return itemType.toString();
@@ -119,8 +119,10 @@ public class ItemTypePattern extends Pattern {
     /*@NotNull*/
     @Override
     public Pattern copy(RebindingMap rebindings) {
-        // (is this necessary? I think the class is immutable...)
-        return new ItemTypePattern(itemType);
+        Pattern n = new ItemTypePattern(itemType);
+        ExpressionTool.copyLocationInfo(this,n);
+        n.setOriginalText(getOriginalText());
+        return n;
     }
 
 

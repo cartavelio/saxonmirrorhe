@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NoNamespaceName;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.s9api.Push;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -21,8 +22,8 @@ import net.sf.saxon.type.Untyped;
 
 public class PushToReceiver implements Push {
 
-    private ComplexContentOutputter out;
-    private Configuration config;
+    private final ComplexContentOutputter out;
+    private final Configuration config;
 
     public PushToReceiver(Receiver out) {
         this.out = new ComplexContentOutputter(new RegularSequenceChecker(out, false));
@@ -86,7 +87,7 @@ public class PushToReceiver implements Push {
             try {
                 implicitClose();
                 if (value != null && value.length() > 0) {
-                    out.characters(value, Loc.NONE, ReceiverOption.NONE);
+                    out.characters(StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {
@@ -99,7 +100,7 @@ public class PushToReceiver implements Push {
             try {
                 implicitClose();
                 if (value != null) {
-                    out.comment(value, Loc.NONE, ReceiverOption.NONE);
+                    out.comment(StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {
@@ -112,7 +113,7 @@ public class PushToReceiver implements Push {
             try {
                 implicitClose();
                 if (value != null) {
-                    out.processingInstruction(name, value, Loc.NONE, ReceiverOption.NONE);
+                    out.processingInstruction(name, StringView.of(value.toString()), Loc.NONE, ReceiverOption.NONE);
                 }
                 return this;
             } catch (XPathException e) {

@@ -187,14 +187,17 @@ public class TestIdentityTransformer {
         public int warnings = 0;
         public int errors = 0;
         public int fatalErrors = 0;
+        @Override
         public void warning(TransformerException exception) throws TransformerException {
             warnings++;
         }
 
+        @Override
         public void error(TransformerException exception) throws TransformerException {
             errors++;
         }
 
+        @Override
         public void fatalError(TransformerException exception) throws TransformerException {
             fatalErrors++;
         }
@@ -231,7 +234,7 @@ public class TestIdentityTransformer {
             Document doc = db.parse(new FileInputStream(ConfigTest.XMARK_DIR + "xmark1.xml"));
 
             Transformer saxon = new TransformerFactoryImpl().newTransformer();
-            Transformer xalan = new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl().newTransformer();
+            Transformer xalan = saxon; //new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl().newTransformer();
 
             for (int i=0; i<10; i++) {
                 saxon.transform(new DOMSource(doc), new StreamResult(new StringWriter()));
@@ -270,13 +273,13 @@ public class TestIdentityTransformer {
     private static void gc() {
         try {
             System.gc();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
             System.runFinalization();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
             System.gc();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
             System.runFinalization();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
         } catch (Exception e) {
             e.printStackTrace();
         }

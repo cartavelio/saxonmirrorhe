@@ -40,7 +40,7 @@ import static net.sf.saxon.type.Affinity.*;
 
 public class TypeHierarchy {
 
-    private Map<ItemTypePair, Affinity> map;
+    private final Map<ItemTypePair, Affinity> map;
     protected Configuration config;
 
     /**
@@ -97,7 +97,7 @@ public class TypeHierarchy {
                 ItemMappingFunction converter;
                 if (nsSensitive) {
                     converter = item -> {
-                        if (item instanceof UntypedAtomicValue) {
+                        if (item instanceof AtomicValue && ((AtomicValue)item).isUntypedAtomic()) {
                             ValidationFailure vf = new ValidationFailure(
                                     "Failed to convert the " + role.getMessage() + ": " +
                                     "Implicit conversion of untypedAtomic value to " + requiredItemType +
@@ -111,10 +111,10 @@ public class TypeHierarchy {
                 } else if (((SimpleType) requiredItemType).isUnionType()) {
                     final ConversionRules rules = config.getConversionRules();
                     converter = item -> {
-                        if (item instanceof UntypedAtomicValue) {
+                        if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
                             try {
                                 return ((SimpleType) requiredItemType).getTypedValue(
-                                        item.getStringValueCS(), null, rules).head();
+                                        item.getUnicodeStringValue(), null, rules).head();
                             } catch (ValidationException ve) {
                                 ve.setErrorCode("XPTY0004");
                                 throw ve;
@@ -125,9 +125,9 @@ public class TypeHierarchy {
                     };
                 } else {
                     converter = item -> {
-                        if (item instanceof UntypedAtomicValue) {
+                        if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
                             return Converter.convert(
-                                    (UntypedAtomicValue) item, (AtomicType) requiredItemType, config.getConversionRules());
+                                    (StringItem) item, (AtomicType) requiredItemType, config.getConversionRules());
                         } else {
                             return item;
                         }
@@ -174,7 +174,7 @@ public class TypeHierarchy {
                     relationship(suppliedItemType, BuiltInAtomicType.ANY_URI) != DISJOINT) {
                 ItemMappingFunction promoter = item -> {
                     if (item instanceof AnyURIValue) {
-                        return new StringValue(item.getStringValueCS());
+                        return ((AnyURIValue)item).convertToString();
                     } else {
                         return item;
                     }

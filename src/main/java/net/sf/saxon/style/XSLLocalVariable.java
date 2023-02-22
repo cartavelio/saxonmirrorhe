@@ -20,7 +20,7 @@ import java.util.EnumSet;
 
 public class XSLLocalVariable extends XSLGeneralVariable {
 
-    private static EnumSet<SourceBinding.BindingProperty> permittedAttributes = EnumSet.of(
+    private static final EnumSet<SourceBinding.BindingProperty> permittedAttributes = EnumSet.of(
             SourceBinding.BindingProperty.SELECT,
             SourceBinding.BindingProperty.AS);
 

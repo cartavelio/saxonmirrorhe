@@ -25,7 +25,7 @@ import net.sf.saxon.value.NumericValue;
  */
 public class SubscriptExpression extends SingleItemFilter {
 
-    private Operand subscriptOp;
+    private final Operand subscriptOp;
 
     /**
      * Construct a SubscriptExpression

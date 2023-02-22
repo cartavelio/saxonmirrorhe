@@ -19,8 +19,8 @@ import net.sf.saxon.tree.iter.ManualIterator;
  */
 public class CallableWithBoundFocus implements Callable {
 
-    private Callable target;
-    private XPathContext boundContext;
+    private final Callable target;
+    private final XPathContext boundContext;
 
     public CallableWithBoundFocus(Callable target, final XPathContext context) {
         this.target = target;

@@ -16,11 +16,12 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
@@ -72,7 +73,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
 
         StringCollator stringCollator = null;
         if (collationName instanceof StringLiteral) {
-            String collationString = ((StringLiteral) collationName).getStringValue();
+            String collationString = ((StringLiteral) collationName).stringify();
             try {
                 URI collationURI = new URI(collationString);
                 if (!collationURI.isAbsolute()) {
@@ -196,16 +197,16 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
         }
 
         if (langAtt == null || langAtt.equals("")) {
-            lang = new StringLiteral(StringValue.EMPTY_STRING);
+            lang = new StringLiteral(StringItem.EMPTY_STRING);
         } else {
             useDefaultCollation = false;
             if (lang instanceof StringLiteral) {
-                String s = ((StringLiteral) lang).getStringValue();
-                if (s.length() != 0) {
+                UnicodeString s = ((StringLiteral) lang).getString();
+                if (!s.isEmpty()) {
                     ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(s);
                     if (vf != null) {
                         compileError("The lang attribute must be a valid language code", "XTDE0030");
-                        lang = new StringLiteral(StringValue.EMPTY_STRING);
+                        lang = new StringLiteral(StringItem.EMPTY_STRING);
                     }
                 }
             }

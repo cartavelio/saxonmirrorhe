@@ -11,6 +11,7 @@ import net.sf.saxon.Platform;
 import net.sf.saxon.Version;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.lib.SubstringMatcher;
+import net.sf.saxon.str.UnicodeString;
 
 import java.text.RuleBasedCollator;
 import java.util.Comparator;
@@ -21,9 +22,9 @@ import java.util.Comparator;
 
 public class SimpleCollation implements StringCollator {
 
-    private Comparator comparator;
-    private String uri;
-    /*@NotNull*/ private static Platform platform = Version.platform;
+    private Comparator<? super String> comparator;
+    private final String uri;
+    /*@NotNull*/ private static final Platform platform = Version.platform;
 
     /**
      * Create a SimpleCollation
@@ -32,7 +33,7 @@ public class SimpleCollation implements StringCollator {
      * @param comparator the Comparator that does the actual string comparison
      */
 
-    public SimpleCollation(String uri, Comparator comparator) {
+    public SimpleCollation(String uri, Comparator<? super String> comparator) {
         this.uri = uri;
         this.comparator = comparator;
     }
@@ -61,8 +62,8 @@ public class SimpleCollation implements StringCollator {
      *                            being compared by this Comparator.
      */
     @Override
-    public int compareStrings(CharSequence o1, CharSequence o2) {
-        return comparator.compare(o1, o2);
+    public int compareStrings(UnicodeString o1, UnicodeString o2) {
+        return comparator.compare(o1.toString(), o2.toString());
     }
 
     /**
@@ -75,8 +76,8 @@ public class SimpleCollation implements StringCollator {
      */
 
     @Override
-    public boolean comparesEqual(CharSequence s1, CharSequence s2) {
-        return comparator.compare(s1, s2) == 0;
+    public boolean comparesEqual(UnicodeString s1, UnicodeString s2) {
+        return comparator.compare(s1.toString(), s2.toString()) == 0;
     }
 
     /**
@@ -85,7 +86,7 @@ public class SimpleCollation implements StringCollator {
      * @return the underlying comparator
      */
 
-    public Comparator getComparator() {
+    public Comparator<? super String> getComparator() {
         return comparator;
     }
 
@@ -95,7 +96,7 @@ public class SimpleCollation implements StringCollator {
      * @param comparator the underlying comparator
      */
 
-    public void setComparator(Comparator comparator) {
+    public void setComparator(Comparator<? super String> comparator) {
         this.comparator = comparator;
     }
 
@@ -107,7 +108,7 @@ public class SimpleCollation implements StringCollator {
      */
 
     @Override
-    public AtomicMatchKey getCollationKey(CharSequence s) {
+    public AtomicMatchKey getCollationKey(UnicodeString s) {
         return platform.getCollationKey(this, s.toString());
     }
 

@@ -22,7 +22,7 @@ import java.util.*;
 public class AnnotationList implements Iterable<Annotation> {
 
 
-    private List<Annotation> list;
+    private final List<Annotation> list;
 
     /**
      * An empty annotation list

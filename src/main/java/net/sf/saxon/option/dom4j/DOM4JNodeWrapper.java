@@ -7,13 +7,11 @@
 
 package net.sf.saxon.option.dom4j;
 
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -192,27 +190,27 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         return getStringValue(node);
     }
 
-    private static String getStringValue(Node node) {
+    private static UnicodeString getStringValue(Node node) {
 
-        Short nodeType = node.getNodeType();
+        short nodeType = node.getNodeType();
         switch (nodeType) {
             case Node.ELEMENT_NODE:
             case Node.DOCUMENT_NODE:
-                return node.getStringValue();
+                return StringView.tidy(node.getStringValue());
             case Node.ATTRIBUTE_NODE:
             case Node.TEXT_NODE:
             case Node.CDATA_SECTION_NODE:
             case Node.COMMENT_NODE:
             case Node.PROCESSING_INSTRUCTION_NODE:
-                return node.getText();
+                return StringView.tidy(node.getText());
             case Node.NAMESPACE_NODE:
-                return ((Namespace) node).getURI();
+                return StringView.tidy(((Namespace) node).getURI());
             default:
-                return "";
+                return EmptyUniString.getInstance();
         }
     }
 
@@ -610,7 +608,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
     }
@@ -721,9 +719,9 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     private final class AttributeEnumeration implements AxisIterator {
 
-        private Iterator<Node> atts;
+        private final Iterator<Node> atts;
         private int ix = 0;
-        private DOM4JNodeWrapper start;
+        private final DOM4JNodeWrapper start;
 
         AttributeEnumeration(DOM4JNodeWrapper start) {
             this.start = start;
@@ -752,12 +750,12 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     private final class ChildEnumeration implements AxisIterator {
 
-        private DOM4JNodeWrapper start;
-        private DOM4JNodeWrapper commonParent;
-        private ListIterator<Node> children;
+        private final DOM4JNodeWrapper start;
+        private final DOM4JNodeWrapper commonParent;
+        private final ListIterator<Node> children;
         private int ix = 0;
-        private boolean downwards;  // iterate children of start node (not siblings)
-        private boolean forwards;   // iterate in document order (not reverse order)
+        private final boolean downwards;  // iterate children of start node (not siblings)
+        private final boolean forwards;   // iterate in document order (not reverse order)
 
         public ChildEnumeration(DOM4JNodeWrapper start,
                                 boolean downwards, boolean forwards) {

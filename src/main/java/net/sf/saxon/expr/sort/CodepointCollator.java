@@ -10,7 +10,8 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 
 
 /**
@@ -19,7 +20,7 @@ import net.sf.saxon.regex.UnicodeString;
 
 public class CodepointCollator implements StringCollator, SubstringMatcher {
 
-    private static CodepointCollator theInstance = new CodepointCollator();
+    private static final CodepointCollator theInstance = new CodepointCollator();
 
     public static CodepointCollator getInstance() {
         return theInstance;
@@ -40,60 +41,13 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      *
      * @return N &lt; 0 if a &lt; b, N = 0 if a=b, N &gt; 0 if a &gt; b
      * @throws ClassCastException if the objects are of the wrong type for this Comparer
+     * @param a
+     * @param b
      */
 
     @Override
-    public int compareStrings(CharSequence a, CharSequence b) {
-        //return ((String)a).compareTo((String)b);
-        // Note that Java does UTF-16 code unit comparison, which is not the same as Unicode codepoint comparison
-        // except in the "equals" case. So we have to do a character-by-character comparison
-        return compareCS(a, b);
-    }
-
-    /**
-     * Compare two CharSequence objects. This is hand-coded to avoid converting the objects into
-     * Strings.
-     *
-     * @return N &lt; 0 if a &lt; b, N = 0 if a=b, N &gt; 0 if a &gt; b
-     * @throws ClassCastException if the objects are of the wrong type for this Comparer
-     */
-
-    @SuppressWarnings("Duplicates")
-    public static int compareCS(CharSequence a, CharSequence b) {
-        if (a instanceof UnicodeString && b instanceof UnicodeString) {
-            return ((UnicodeString) a).compareTo((UnicodeString) b);
-        } else {
-            int alen = a.length();
-            int blen = b.length();
-            int i = 0;
-            int j = 0;
-            while (true) {
-                if (i == alen) {
-                    if (j == blen) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
-                }
-                if (j == blen) {
-                    return +1;
-                }
-                // Following code is needed when comparing a BMP character against a surrogate pair
-                // Note: we could do this comparison without fully computing the codepoint, but it's a very rare case
-                int nexta = (int) a.charAt(i++);
-                if (nexta >= 55296 && nexta <= 56319) {
-                    nexta = ((nexta - 55296) * 1024) + ((int) a.charAt(i++) - 56320) + 65536;
-                }
-                int nextb = (int) b.charAt(j++);
-                if (nextb >= 55296 && nextb <= 56319) {
-                    nextb = ((nextb - 55296) * 1024) + ((int) b.charAt(j++) - 56320) + 65536;
-                }
-                int c = nexta - nextb;
-                if (c != 0) {
-                    return c;
-                }
-            }
-        }
+    public int compareStrings(UnicodeString a, UnicodeString b) {
+        return a.compareTo(b);
     }
 
     /**
@@ -108,14 +62,8 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      */
 
     @Override
-    public boolean comparesEqual(CharSequence s1, CharSequence s2) {
-        if (s1 instanceof String) {
-            return ((String) s1).contentEquals(s2);
-        } else if (s1 instanceof UnicodeString) {
-            return s1.equals(UnicodeString.makeUnicodeString(s2));
-        } else {
-            return s1.length() == s2.length() && s1.toString().equals(s2.toString());
-        }
+    public boolean comparesEqual(UnicodeString s1, UnicodeString s2) {
+        return s1.equals(s2);
     }
 
     /**
@@ -128,8 +76,8 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      */
 
     @Override
-    public boolean contains(String s1, String s2) {
-        return s1.contains(s2);
+    public boolean contains(UnicodeString s1, UnicodeString s2) {
+        return s1.indexOf(s2, 0) >= 0;
     }
 
     /**
@@ -142,8 +90,11 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      */
 
     @Override
-    public boolean endsWith(String s1, String s2) {
-        return s1.endsWith(s2);
+    public boolean endsWith(UnicodeString s1, UnicodeString s2) {
+        if (s2.length() > s1.length()) {
+            return false;
+        }
+        return s1.hasSubstring(s2, s1.length() - s2.length());
     }
 
     /**
@@ -156,8 +107,8 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      */
 
     @Override
-    public boolean startsWith(String s1, String s2) {
-        return s1.startsWith(s2);
+    public boolean startsWith(UnicodeString s1, UnicodeString s2) {
+        return s1.hasSubstring(s2, 0);
     }
 
     /**
@@ -170,10 +121,10 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      */
 
     @Override
-    public String substringAfter(String s1, String s2) {
-        int i = s1.indexOf(s2);
+    public UnicodeString substringAfter(UnicodeString s1, UnicodeString s2) {
+        long i = s1.indexOf(s2, 0);
         if (i < 0) {
-            return "";
+            return EmptyUniString.getInstance();
         }
         return s1.substring(i + s2.length());
     }
@@ -188,10 +139,10 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      */
 
     @Override
-    public String substringBefore(/*@NotNull*/ String s1, String s2) {
-        int j = s1.indexOf(s2);
+    public UnicodeString substringBefore(/*@NotNull*/ UnicodeString s1, UnicodeString s2) {
+        long j = s1.indexOf(s2, 0);
         if (j < 0) {
-            return "";
+            return EmptyUniString.getInstance();
         }
         return s1.substring(0, j);
     }
@@ -204,8 +155,8 @@ public class CodepointCollator implements StringCollator, SubstringMatcher {
      */
 
     @Override
-    public AtomicMatchKey getCollationKey(CharSequence s) {
-        return UnicodeString.makeUnicodeString(s);
+    public AtomicMatchKey getCollationKey(UnicodeString s) {
+        return s;
     }
 }
 

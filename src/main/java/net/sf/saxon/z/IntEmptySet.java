@@ -12,7 +12,7 @@ package net.sf.saxon.z;
  */
 public class IntEmptySet implements IntSet {
 
-    private static IntEmptySet THE_INSTANCE = new IntEmptySet();
+    private static final IntEmptySet THE_INSTANCE = new IntEmptySet();
 
     public static IntEmptySet getInstance() {
         return THE_INSTANCE;

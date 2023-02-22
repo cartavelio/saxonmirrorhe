@@ -9,9 +9,10 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 
@@ -250,20 +251,10 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      */
 
     @Override
-    public final String getStringValue() {
-        return getStringValueCS().toString();
+    public UnicodeString getUnicodeStringValue() {
+        return node.getUnicodeStringValue();
     }
 
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        // default implementation returns the string value of the base node
-        return node.getStringValueCS();
-    }
 
     /**
      * Get the local part of the name of this node. This is the name after the ":" if any.
@@ -384,7 +375,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         // Note: giving the node the same ID as its underlying node is slightly questionable; depends on usage
         node.generateId(buffer);
     }

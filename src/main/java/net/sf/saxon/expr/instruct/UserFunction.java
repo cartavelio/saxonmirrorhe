@@ -18,6 +18,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
@@ -632,7 +633,6 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     @Override
     public Sequence call(XPathContext context, Sequence[] actualArgs)
             throws XPathException {
-//        long start = System.nanoTime();
         if (evaluator == null) {
             // should have been done at compile time
             computeEvaluationMode();
@@ -654,10 +654,6 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
                     + (getSystemId() != null ? " in module " + getSystemId() : "");
             throw new RuntimeException(message, err2);
         }
-//        result = result.materialize();
-//        long end = System.nanoTime();
-//        Instrumentation.count(functionName.getLocalPart());
-//        Instrumentation.count(functionName.getLocalPart() + "--nanosecs", end - start);
         return result;
     }
 
@@ -928,41 +924,16 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      * node as defined in the XPath 2.0 data model, except that all nodes are treated as being
      * untyped: it is not an error to get the string value of a node with a complex type.
      * For atomic values, the method returns the result of casting the atomic value to a string.
-     * <p>If the calling code can handle any CharSequence, the method {@link #getStringValueCS} should
-     * be used. If the caller requires a string, this method is preferred.</p>
      *
      * @return the string value of the item
      * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
      *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
      *                                       needed)
-     * @see #getStringValueCS
      * @since 8.4
      */
     @Override
-    public String getStringValue() {
+    public UnicodeString getUnicodeStringValue() {
         throw new UnsupportedOperationException("A function has no string value");
-    }
-
-    /**
-     * Get the string value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String. The method satisfies the rule that
-     * <code>X.getStringValueCS().toString()</code> returns a string that is equal to
-     * <code>X.getStringValue()</code>.
-     * <p>Note that two CharSequence values of different types should not be compared using equals(), and
-     * for the same reason they should not be used as a key in a hash table.</p>
-     * <p>If the calling code can handle any CharSequence, this method should
-     * be used. If the caller requires a string, the {@link #getStringValue} method is preferred.</p>
-     *
-     * @return the string value of the item
-     * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
-     *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
-     *                                       needed)
-     * @see #getStringValue
-     * @since 8.4
-     */
-    @Override
-    public CharSequence getStringValueCS() {
-        return getStringValue();
     }
 
     /**

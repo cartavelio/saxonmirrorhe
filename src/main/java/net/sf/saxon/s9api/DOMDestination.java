@@ -20,7 +20,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 
 public class DOMDestination extends AbstractDestination {
 
-    private DOMWriter domWriter;
+    private final DOMWriter domWriter;
 
     /**
      * Create a DOMDestination, supplying a node in a DOM document to which the

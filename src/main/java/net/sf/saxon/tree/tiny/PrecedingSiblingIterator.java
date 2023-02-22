@@ -21,11 +21,11 @@ import java.util.function.IntPredicate;
 
 final class PrecedingSiblingIterator implements AxisIterator {
 
-    private TinyTree document;
-    private TinyNodeImpl startNode;
+    private final TinyTree document;
+    private final TinyNodeImpl startNode;
     private int nextNodeNr;
-    private NodeTest test;
-    private TinyNodeImpl parentNode;
+    private final NodeTest test;
+    private final TinyNodeImpl parentNode;
     private final IntPredicate matcher;
 
     PrecedingSiblingIterator(TinyTree doc, /*@NotNull*/ TinyNodeImpl node, NodeTest nodeTest) {

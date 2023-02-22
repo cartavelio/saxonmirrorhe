@@ -20,6 +20,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 
@@ -122,9 +123,9 @@ abstract class AbstractXsltTransformer {
     /**
      * Get the ErrorListener being used during this transformation
      *
-     * @return listener The error listener in use. This is notified of all dynamic errors detected during the
-     * transformation. If no user-supplied ErrorListener has been set the method will return a system-supplied
-     * ErrorListener. If an explicit ErrorListener has been set using {@link #setErrorListener(ErrorListener)},
+     * @return the error listener in use. If no user-supplied {@code ErrorListener} has been set the method will return
+     * a system-supplied ErrorListener that delegates to the {@link ErrorReporter}.
+     * If an explicit {@code ErrorListener} has been set using {@link #setErrorListener(ErrorListener)},
      * then that ErrorListener will generally be returned, unless the internal ErrorListener has been changed
      * by some other mechanism.
      */

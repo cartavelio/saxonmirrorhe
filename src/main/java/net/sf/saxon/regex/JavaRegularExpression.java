@@ -10,10 +10,13 @@ package net.sf.saxon.regex;
 //import net.sf.saxon.expr.regexj.Matcher;
 //import net.sf.saxon.expr.regexj.Pattern;
 
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -38,10 +41,11 @@ public class JavaRegularExpression implements RegularExpression {
      * @param flags     the user-specified flags (prior to any semicolon)
      */
 
-    public JavaRegularExpression(CharSequence javaRegex, String flags) throws XPathException {
+    public JavaRegularExpression(CodePoints javaRegex, String flags) throws XPathException {
         this.flagBits = setFlags(flags);
         this.javaRegex = javaRegex.toString();
         try {
+            //noinspection MagicConstant
             pattern = Pattern.compile(this.javaRegex, flagBits & (~(Pattern.COMMENTS)));
         } catch (PatternSyntaxException e) {
             throw new XPathException("Incorrect syntax for Java regular expression", e);
@@ -73,10 +77,11 @@ public class JavaRegularExpression implements RegularExpression {
      * analyze-string instruction. The resulting RegexIterator provides both the matching and
      * non-matching substrings, and allows them to be distinguished. It also provides access
      * to matched subgroups.
+     * @param input
      */
 
     @Override
-    public RegexIterator analyze(CharSequence input) {
+    public RegexIterator analyze(UnicodeString input) {
         return new JRegexIterator(input.toString(), pattern);
     }
 
@@ -88,8 +93,8 @@ public class JavaRegularExpression implements RegularExpression {
      */
 
     @Override
-    public boolean containsMatch(CharSequence input) {
-        return pattern.matcher(input).find();
+    public boolean containsMatch(UnicodeString input) {
+        return pattern.matcher(input.toString()).find();
     }
 
     /**
@@ -100,8 +105,8 @@ public class JavaRegularExpression implements RegularExpression {
      */
 
     @Override
-    public boolean matches(CharSequence input) {
-        return pattern.matcher(input).matches();
+    public boolean matches(UnicodeString input) {
+        return pattern.matcher(input.toString()).matches();
     }
 
     /**
@@ -116,10 +121,10 @@ public class JavaRegularExpression implements RegularExpression {
      */
 
     @Override
-    public CharSequence replace(CharSequence input, CharSequence replacement) throws XPathException {
-        Matcher matcher = pattern.matcher(input);
+    public UnicodeString replace(UnicodeString input, UnicodeString replacement) throws XPathException {
+        Matcher matcher = pattern.matcher(input.toString());
         try {
-            return matcher.replaceAll(replacement.toString());
+            return StringView.tidy(matcher.replaceAll(replacement.toString()));
         } catch (IndexOutOfBoundsException e) {
             throw new XPathException(e.getMessage(), "FORX0004");
         }
@@ -136,7 +141,7 @@ public class JavaRegularExpression implements RegularExpression {
      * @throws XPathException if the replacement string is invalid
      */
     @Override
-    public CharSequence replaceWith(CharSequence input, Function<CharSequence, CharSequence> replacement) throws XPathException {
+    public UnicodeString replaceWith(UnicodeString input, Function<UnicodeString, UnicodeString> replacement) throws XPathException {
         throw new XPathException("saxon:replace-with() is not supported with the Java regex engine");
     }
 
@@ -148,11 +153,11 @@ public class JavaRegularExpression implements RegularExpression {
      */
 
     @Override
-    public AtomicIterator<StringValue> tokenize(CharSequence input) {
-        if (input.length() == 0) {
+    public AtomicIterator<StringItem> tokenize(UnicodeString input) {
+        if (input.isEmpty()) {
             return EmptyIterator.ofAtomic();
         }
-        return new JTokenIterator(input, pattern);
+        return new JTokenIterator(input.toString(), pattern);
     }
 
     /**

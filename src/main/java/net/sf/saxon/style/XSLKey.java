@@ -233,7 +233,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         }
     }
 
-    private static ContainsGlobalVariable containsGlobalVariable = new ContainsGlobalVariable();
+    private static final ContainsGlobalVariable containsGlobalVariable = new ContainsGlobalVariable();
 
     @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) {

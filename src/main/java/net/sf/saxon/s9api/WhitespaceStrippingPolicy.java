@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 
 public class WhitespaceStrippingPolicy {
 
-    private int policy;
+    private final int policy;
     private SpaceStrippingRule stripperRules;
 
     /**

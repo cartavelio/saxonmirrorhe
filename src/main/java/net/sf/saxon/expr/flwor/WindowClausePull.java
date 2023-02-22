@@ -23,16 +23,16 @@ import java.util.List;
  */
 public class WindowClausePull extends TuplePull {
 
-    private WindowClause windowClause;
-    private TuplePull source;
+    private final WindowClause windowClause;
+    private final TuplePull source;
     private SequenceIterator baseIterator;
     private boolean finished = false;
-    private XPathContext context;
+    private final XPathContext context;
     private Item previous = null;
     private Item current = null;
     private Item next = null;
     private int position = -1;
-    private List<WindowClause.Window> currentWindows = new ArrayList<>();
+    private final List<WindowClause.Window> currentWindows = new ArrayList<>();
 
 
     WindowClausePull(TuplePull source, WindowClause windowClause, XPathContext context) {

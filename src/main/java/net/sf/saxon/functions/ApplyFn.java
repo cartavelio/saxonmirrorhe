@@ -18,8 +18,7 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -101,7 +100,7 @@ public class ApplyFn extends SystemFunction  {
 
     private Expression makeGetCall(ExpressionVisitor visitor, BuiltInFunctionSet fnSet, ContextItemStaticInfo contextInfo, Expression[] arguments) throws XPathException {
         Expression target = arguments[0];
-        Expression key = ((SquareArrayConstructor)arguments[1]).getOperanda().getOperand(0).getChildExpression();
+        Expression key = ((SquareArrayConstructor) arguments[1]).getOperanda().getOperand(0).getChildExpression();
         Expression getter = fnSet.makeFunction("get", 2).makeFunctionCall(target, key);
         getter.setRetainedStaticContext(target.getRetainedStaticContext());
         // Use custom diagnostics for type errors on the argument of the call (bug 4772)

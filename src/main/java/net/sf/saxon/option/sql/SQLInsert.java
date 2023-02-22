@@ -9,9 +9,7 @@ package net.sf.saxon.option.sql;
 
 import com.saxonica.functions.sql.SQLFunctionSet;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
@@ -63,7 +61,7 @@ public class SQLInsert extends ExtensionInstruction {
         for (NodeInfo curr : children()) {
             if (curr instanceof SQLColumn) {
                 // OK
-            } else if (curr.getNodeKind() == Type.TEXT && Whitespace.isWhite(curr.getStringValueCS())) {
+            } else if (curr.getNodeKind() == Type.TEXT && Whitespace.isAllWhite(curr.getUnicodeStringValue())) {
                 // OK
             } else {
                 compileError("Only sql:column is allowed as a child of sql:insert", "XTSE0010");
@@ -168,7 +166,7 @@ public class SQLInsert extends ExtensionInstruction {
                     Object value;
                     switch (parameterClassName) {
                         case "java.lang.String":
-                            value = v.getStringValue();
+                            value = v.getUnicodeStringValue();
                             break;
                         case "java.sql.Date":
                             value = java.sql.Date.valueOf(v.getStringValue());

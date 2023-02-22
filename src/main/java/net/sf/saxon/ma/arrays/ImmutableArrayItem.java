@@ -9,6 +9,7 @@ package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.ma.parray.ImmList;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
@@ -21,7 +22,7 @@ import java.util.Arrays;
 
 public class ImmutableArrayItem extends AbstractArrayItem {
 
-    private ImmList<GroundedValue> vector;
+    private final ImmList<GroundedValue> vector;
 
     public ImmutableArrayItem(SimpleArrayItem other) {
         this.vector = ImmList.fromList(other.getMembers());

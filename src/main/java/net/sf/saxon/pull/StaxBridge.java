@@ -12,12 +12,10 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
-import net.sf.saxon.tree.tiny.CharSlice;
-import net.sf.saxon.tree.tiny.CompressedWhitespace;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
@@ -30,7 +28,6 @@ import javax.xml.stream.events.EntityDeclaration;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,8 +45,8 @@ public class StaxBridge implements PullProvider {
     private AttributeMap attributes;
     private PipelineConfiguration pipe;
     private NamePool namePool;
-    private HashMap<String, NodeName> nameCache = new HashMap<>();
-    private Stack<NamespaceMap> namespaceStack = new Stack<>();
+    private final HashMap<String, NodeName> nameCache = new HashMap<>();
+    private final Stack<NamespaceMap> namespaceStack = new Stack<>();
     private List unparsedEntities = null;
     Event currentEvent = Event.START_OF_INPUT;
     int depth = 0;
@@ -141,7 +138,7 @@ public class StaxBridge implements PullProvider {
      * Get the next event
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
@@ -384,7 +381,7 @@ public class StaxBridge implements PullProvider {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link Event#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
@@ -401,9 +398,9 @@ public class StaxBridge implements PullProvider {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
-     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}, but this is not guaranteed.
+     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
+     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link Event#END_ELEMENT}, but this is not guaranteed.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
      * If called when the current node is an unnamed namespace node (a node representing the default namespace)
      * the returned value is null.
@@ -443,9 +440,9 @@ public class StaxBridge implements PullProvider {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link Event#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link Event#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
@@ -453,42 +450,41 @@ public class StaxBridge implements PullProvider {
      */
 
     @Override
-    public CharSequence getStringValue() throws XPathException {
+    public CodePoints getStringValue() throws XPathException {
         switch (currentEvent) {
             case TEXT:
-                CharSlice cs = new CharSlice(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength());
-                return CompressedWhitespace.compress(cs);
+                return StringTool.compress(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength(), true);
 
             case COMMENT:
-                return new CharSlice(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength());
+                return StringView.of(new String(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength()));
 
             case PROCESSING_INSTRUCTION:
                 String s = reader.getPIData();
                 // The BEA parser includes the separator space in the value,
                 // which isn't part of the XPath data model
-                return Whitespace.removeLeadingWhitespace(s);
+                return Whitespace.removeLeadingWhitespace(StringView.tidy(s));
 
             case START_ELEMENT:
-                FastStringBuffer combinedText = null;
+                UnicodeBuilder combinedText = null;
                 try {
                     int depth = 0;
                     while (reader.hasNext()) {
                         int event = reader.next();
                         if (event == XMLStreamConstants.CHARACTERS) {
                             if (combinedText == null) {
-                                combinedText = new FastStringBuffer(FastStringBuffer.C64);
+                                combinedText = new UnicodeBuilder();
                             }
                             combinedText.append(
-                                    reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength());
+                                    StringView.of(new String(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength())));
                         } else if (event == XMLStreamConstants.START_ELEMENT) {
                             depth++;
                         } else if (event == XMLStreamConstants.END_ELEMENT) {
                             if (depth-- == 0) {
                                 currentEvent = Event.END_ELEMENT;
                                 if (combinedText != null) {
-                                    return combinedText.condense();
+                                    return combinedText.toUnicodeString();
                                 } else {
-                                    return "";
+                                    return EmptyUniString.getInstance();
                                 }
                             }
                         }

@@ -9,8 +9,9 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -115,13 +116,13 @@ public class NestedIntegerValue extends AtomicValue implements Comparable, Atomi
     }
 
     @Override
-    protected CharSequence getPrimitiveStringValue() {
-        FastStringBuffer buffer = new FastStringBuffer(value.length * 2);
+    protected UnicodeString getPrimitiveStringValue() {
+        UnicodeBuilder buffer = new UnicodeBuilder();
         for (int i = 0; i < value.length - 1; i++) {
             buffer.append(value[i] + ".");
         }
         buffer.append(value[value.length - 1] + "");
-        return buffer;
+        return buffer.toUnicodeString();
     }
 
 

@@ -28,7 +28,7 @@ import java.io.IOException;
 
 public class StreamingFilterImpl extends AbstractXMLFilter {
 
-    private Xslt30Transformer transformer;
+    private final Xslt30Transformer transformer;
 
     StreamingFilterImpl(Xslt30Transformer transformer) {
         this.transformer = transformer;

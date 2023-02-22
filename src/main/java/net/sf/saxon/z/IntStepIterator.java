@@ -14,8 +14,8 @@ package net.sf.saxon.z;
 public class IntStepIterator implements IntIterator {
 
     private int current;
-    private int step;
-    private int limit;
+    private final int step;
+    private final int limit;
 
     /**
      * Create an iterator over a sequence with regular steps

@@ -35,14 +35,17 @@ public class SAXTest {
             factory.setValidating(false);
             XMLReader parser = factory.newSAXParser().getXMLReader();
             parser.setErrorHandler(new ErrorHandler() {
+                @Override
                 public void warning(SAXParseException exception) throws SAXException {
                     System.err.println("Called warning");
                 }
 
+                @Override
                 public void error(SAXParseException exception) throws SAXException {
                     System.err.println("Called error");
                 }
 
+                @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
                     System.err.println("Called fatalError");
                 }

@@ -10,16 +10,18 @@ package net.sf.saxon.option.xom;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
 import nu.xom.*;
 
@@ -182,9 +184,9 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         switch (getNodeKind()) {
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return new StringValue(getStringValueCS());
+                return new StringItem(getUnicodeStringValue());
             default:
-                return new UntypedAtomicValue(getStringValueCS());
+                return new UntypedAtomicValue(getUnicodeStringValue());
         }
     }
 
@@ -379,18 +381,8 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public String getStringValue() {
-        return node.getValue();
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return node.getValue();
+    public UnicodeString getUnicodeStringValue() {
+        return StringView.tidy(node.getValue());
     }
 
     /**
@@ -726,7 +718,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
     }
@@ -844,11 +836,11 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
     private final class AttributeAxisIterator implements AxisIterator {
 
-        private XOMNodeWrapper start;
+        private final XOMNodeWrapper start;
 
         private int cursor;
 
-        private Predicate<? super NodeInfo> nodeTest;
+        private final Predicate<? super NodeInfo> nodeTest;
 
         AttributeAxisIterator(XOMNodeWrapper start, Predicate<? super NodeInfo> test) {
             // use lazy instead of eager materialization (performance)
@@ -892,14 +884,14 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
     private final class ChildAxisIterator implements AxisIterator {
 
-        private XOMNodeWrapper commonParent;
+        private final XOMNodeWrapper commonParent;
         private int ix;
-        private boolean forwards; // iterate in document order (not reverse order)
+        private final boolean forwards; // iterate in document order (not reverse order)
 
-        private ParentNode par;
+        private final ParentNode par;
         private int cursor;
 
-        private Predicate<? super NodeInfo> nodeTest;
+        private final Predicate<? super NodeInfo> nodeTest;
 
         private ChildAxisIterator(XOMNodeWrapper start, boolean downwards, boolean forwards, Predicate<? super NodeInfo> test) {
             this.forwards = forwards;

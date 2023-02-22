@@ -172,7 +172,7 @@ public class QuantifiedExpression extends Assignation {
             }
         }
         if (getSequence() instanceof Literal) {
-            GroundedValue seq = ((Literal)getSequence()).getValue();
+            GroundedValue seq = ((Literal)getSequence()).getGroundedValue();
             int len = seq.getLength();
             if (len == 0) {
                 Expression e2 = new Literal(BooleanValue.get(getOperator() == Token.EVERY));

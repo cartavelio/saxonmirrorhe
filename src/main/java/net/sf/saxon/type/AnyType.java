@@ -468,7 +468,7 @@ public enum AnyType implements ComplexType {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
-        return new UntypedAtomicValue(node.getStringValue());
+        return new UntypedAtomicValue(node.getUnicodeStringValue());
     }
 
     /**

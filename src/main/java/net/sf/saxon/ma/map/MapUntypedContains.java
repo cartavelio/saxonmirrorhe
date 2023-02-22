@@ -15,7 +15,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
  * Implementation of an internal function map:untyped-contains(Map, key) =&gt; boolean,
@@ -31,7 +30,7 @@ public class MapUntypedContains extends SystemFunction {
             ConversionRules rules = context.getConfiguration().getConversionRules();
             MapItem map = (MapItem) arguments[0].head();
             AtomicValue key = (AtomicValue) arguments[1].head();
-            if (key instanceof UntypedAtomicValue) {
+            if (key.isUntypedAtomic()) {
                 for (PrimitiveUType prim : map.getKeyUType().decompose()) {
                     BuiltInAtomicType t = (BuiltInAtomicType)prim.toItemType();
                     StringConverter converter = t.getStringConverter(rules);

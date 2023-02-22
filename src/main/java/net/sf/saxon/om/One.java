@@ -7,6 +7,7 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.ConstrainedIterator;
 import net.sf.saxon.value.*;
 
@@ -92,8 +93,19 @@ public class One<T extends Item> extends ZeroOrOne<T> {
      * @return the string value wrapped as a One&lt;StringValue&gt;
      */
 
-    public static One<StringValue> string (String value) {
-        return new One<>(new StringValue(value));
+    public static One<StringItem> string (String value) {
+        return new One<>(new StringItem(value));
+    }
+
+    /**
+     * Convenience function to create a singleton string value
+     *
+     * @param value the string value.. If null, the result will represent a zero-length string
+     * @return the string value wrapped as a One&lt;StringValue&gt;
+     */
+
+    public static One<StringItem> string(UnicodeString value) {
+        return new One<>(new StringItem(value));
     }
 
     /**

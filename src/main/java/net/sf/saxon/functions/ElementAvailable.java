@@ -13,10 +13,8 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
@@ -125,7 +123,7 @@ public class ElementAvailable extends SystemFunction {
     public int getSpecialProperties(Expression[] arguments) {
         try {
             if (arguments[0] instanceof StringLiteral) {
-                String arg = ((StringLiteral) arguments[0]).getStringValue();
+                String arg = ((StringLiteral) arguments[0]).stringify();
                 StructuredQName elem = getElementName(arg);
                 if (elem.hasURI(NamespaceConstant.XSLT) && elem.getLocalPart().equals("evaluate")) {
                     return super.getSpecialProperties(arguments) | StaticProperty.DEPENDS_ON_RUNTIME_ENVIRONMENT;
@@ -170,7 +168,7 @@ public class ElementAvailable extends SystemFunction {
 
     private StructuredQName getElementName(String lexicalName) throws XPathException {
         try {
-            if (lexicalName.indexOf(':') < 0 && NameChecker.isValidNCName(lexicalName)) {
+            if (NameChecker.isValidNCName(StringTool.codePoints(lexicalName))) {
                 String uri = getRetainedStaticContext().getURIForPrefix("", true);
                 return new StructuredQName("", uri, lexicalName);
             } else {

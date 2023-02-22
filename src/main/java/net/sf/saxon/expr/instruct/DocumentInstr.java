@@ -22,12 +22,13 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.TextFragmentValue;
 import net.sf.saxon.value.UntypedAtomicValue;
 
@@ -44,8 +45,8 @@ import net.sf.saxon.value.UntypedAtomicValue;
 
 public class DocumentInstr extends ParentNodeConstructor {
 
-    private boolean textOnly;
-    /*@Nullable*/ private String constantText;
+    private final boolean textOnly;
+    private final UnicodeString constantText;
 
     /**
      * Create a document constructor instruction
@@ -56,7 +57,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      */
 
     public DocumentInstr(boolean textOnly,
-                         String constantText) {
+                         UnicodeString constantText) {
         this.textOnly = textOnly;
         this.constantText = constantText;
     }
@@ -94,7 +95,7 @@ public class DocumentInstr extends ParentNodeConstructor {
      * @return the fixed text value if appropriate; otherwise null
      */
 
-    public /*@Nullable*/ CharSequence getConstantText() {
+    public /*@Nullable*/ UnicodeString getConstantText() {
         return constantText;
     }
 
@@ -196,7 +197,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                 return ((ValueOf) getContentExpression()).convertToCastAsString();
             } else {
                 Expression fn = SystemFunction.makeCall(
-                        "string-join", getRetainedStaticContext(), getContentExpression(), new StringLiteral(StringValue.EMPTY_STRING));
+                        "string-join", getRetainedStaticContext(), getContentExpression(), new StringLiteral(StringItem.EMPTY_STRING));
                 CastExpression cast = new CastExpression(fn, BuiltInAtomicType.UNTYPED_ATOMIC, false);
                 ExpressionTool.copyLocationInfo(this, cast);
                 return cast;
@@ -262,17 +263,17 @@ public class DocumentInstr extends ParentNodeConstructor {
 
         NodeInfo root;
         if (textOnly) {
-            CharSequence textValue;
+            UnicodeString textValue;
             if (constantText != null) {
                 textValue = constantText;
             } else {
-                FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+                UnicodeBuilder sb = new UnicodeBuilder();
                 SequenceIterator iter = getContentExpression().iterate(context);
                 Item item;
                 while ((item = iter.next()) != null) {
-                    sb.cat(item.getStringValueCS());
+                    sb.append(item.getUnicodeStringValue());
                 }
-                textValue = sb.condense();
+                textValue = sb.toUnicodeString();
             }
             root = TextFragmentValue.makeTextFragment(config, textValue, getStaticBaseURIString());
         } else {
@@ -346,7 +347,7 @@ public class DocumentInstr extends ParentNodeConstructor {
             out.emitAttribute("flags", flags);
         }
         if (constantText != null) {
-            out.emitAttribute("text", constantText);
+            out.emitAttribute("text", constantText.toString());
         }
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
             out.emitAttribute("validation", Validation.toString(getValidationAction()));

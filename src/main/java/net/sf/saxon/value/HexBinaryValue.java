@@ -10,8 +10,9 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -23,7 +24,7 @@ import java.util.Arrays;
 
 public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Comparable {
 
-    private byte[] binaryValue;
+    private final byte[] binaryValue;
 
 
     /**
@@ -34,17 +35,18 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
      * @throws XPathException if the input is invalid
      */
 
-    public HexBinaryValue(CharSequence in) throws XPathException {
-        CharSequence s = Whitespace.trimWhitespace(in);
-        if ((s.length() & 1) != 0) {
+    public HexBinaryValue(UnicodeString in) throws XPathException {
+        UnicodeString s = Whitespace.trim(in);
+        int len32 = s.length32();
+        if ((len32 & 1) != 0) {
             XPathException err = new XPathException("A hexBinary value must contain an even number of characters");
             err.setErrorCode("FORG0001");
             throw err;
         }
-        binaryValue = new byte[s.length() / 2];
+        binaryValue = new byte[len32 / 2];
         for (int i = 0; i < binaryValue.length; i++) {
-            binaryValue[i] = (byte) ((fromHex(s.charAt(2 * i)) << 4) +
-                    fromHex(s.charAt(2 * i + 1)));
+            binaryValue[i] = (byte) ((fromHex(s.codePointAt(2 * i)) << 4) +
+                    fromHex(s.codePointAt(2 * i + 1)));
         }
         typeLabel = BuiltInAtomicType.HEX_BINARY;
     }
@@ -134,7 +136,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
      * @throws XPathException if it isn't a hex digit
      */
 
-    private int fromHex(char c) throws XPathException {
+    private int fromHex(int c) throws XPathException {
         int d = "0123456789ABCDEFabcdef".indexOf(c);
         if (d > 15) {
             d = d - 6;
@@ -155,14 +157,14 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
 
     /*@NotNull*/
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
         String digits = "0123456789ABCDEF";
-        FastStringBuffer sb = new FastStringBuffer(binaryValue.length * 2);
+        UnicodeBuilder sb = new UnicodeBuilder();
         for (byte aBinaryValue : binaryValue) {
-            sb.cat(digits.charAt((aBinaryValue >> 4) & 0xf));
-            sb.cat(digits.charAt(aBinaryValue & 0xf));
+            sb.append(digits.charAt((aBinaryValue >> 4) & 0xf));
+            sb.append(digits.charAt(aBinaryValue & 0xf));
         }
-        return sb;
+        return sb.toUnicodeString();
     }
 
 

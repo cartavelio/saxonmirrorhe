@@ -278,7 +278,7 @@ public final class AxisInfo {
     private static final int COM = 1 << Type.COMMENT;
     private static final int NAM = 1 << Type.NAMESPACE;
 
-    private static int[] voidAxisTable = {
+    private static final int[] voidAxisTable = {
             DOC,                                // ANCESTOR
             0,                                  // ANCESTOR_OR_SELF;
             DOC | ATT | TEX | PIN | COM | NAM,  // ATTRIBUTE;
@@ -312,7 +312,7 @@ public final class AxisInfo {
      * The following table indicates the kinds of node found on each axis
      */
 
-    private static int[] nodeKindTable = {
+    private static final int[] nodeKindTable = {
             DOC | ELE,                                 // ANCESTOR
             DOC | ELE | ATT | TEX | PIN | COM | NAM,   // ANCESTOR_OR_SELF;
             ATT,                                       // ATTRIBUTE;
@@ -385,7 +385,7 @@ public final class AxisInfo {
     };
 
 
-    private static IntHashMap<UType> axisTransitions = new IntHashMap<>(50);
+    private static final IntHashMap<UType> axisTransitions = new IntHashMap<>(50);
 
     private static void e(PrimitiveUType origin, int axis, UType target) {
         axisTransitions.put(makeKey(origin, axis), target);
@@ -408,7 +408,7 @@ public final class AxisInfo {
         for (PrimitiveUType u : origins) {
             UType r = axisTransitions.get(makeKey(u, axis));
             if (r == null) {
-                System.err.println("Unknown transitions for primitive type " + u.toString() + "::" + axis);
+                throw new AssertionError("Unknown transitions for primitive type " + u.toString() + "::" + axis);
             }
             resultType = resultType.union(r);
         }

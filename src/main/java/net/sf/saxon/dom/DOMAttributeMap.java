@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 
 class DOMAttributeMap implements NamedNodeMap {
 
-    private NodeInfo element;
+    private final NodeInfo element;
     private NamespaceBinding[] namespaceDeltas;
     private boolean excludeNamespaceUndeclarations;
 

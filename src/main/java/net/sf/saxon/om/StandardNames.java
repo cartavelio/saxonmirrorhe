@@ -286,8 +286,8 @@ public abstract class StandardNames {
     public static final int XSI_SCHEMA_LOCATION_TYPE = XSI + 5;
 
 
-    private static String[] localNames = new String[1023];
-    private static HashMap<String, Integer> lookup = new HashMap<>(1023);
+    private static final String[] localNames = new String[1023];
+    private static final HashMap<String, Integer> lookup = new HashMap<>(1023);
     public static StructuredQName[] errorVariables = {
             new StructuredQName("err", NamespaceConstant.ERR, "code"),
             new StructuredQName("err", NamespaceConstant.ERR, "description"),

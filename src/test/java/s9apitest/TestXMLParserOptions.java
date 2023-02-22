@@ -56,7 +56,7 @@ public class TestXMLParserOptions {
         //test
 
         InputSource is = new InputSource("http://");
-                     InputStream ssTest = new ByteArrayInputStream(new String("<?xml version=\"1.1\"?><doc><rĳk RĲk=\"RIJK\"><bell>&#7;</bell><nbh>&#131;</nbh><nel>&#133;</nel><plain>vanilla</plain></rĳk></doc>").getBytes());
+                     InputStream ssTest = new ByteArrayInputStream("<?xml version=\"1.1\"?><doc><rĳk RĲk=\"RIJK\"><bell>&#7;</bell><nbh>&#131;</nbh><nel>&#133;</nel><plain>vanilla</plain></rĳk></doc>".getBytes());
                 is.setByteStream(ssTest);
                 //end
 

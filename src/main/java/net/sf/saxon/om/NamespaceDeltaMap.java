@@ -22,7 +22,7 @@ package net.sf.saxon.om;
 
 public class NamespaceDeltaMap extends NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
 
-    private static NamespaceDeltaMap EMPTY_MAP = new NamespaceDeltaMap();
+    private static final NamespaceDeltaMap EMPTY_MAP = new NamespaceDeltaMap();
 
     /**
      * Get a namespace map containing no namespace bindings

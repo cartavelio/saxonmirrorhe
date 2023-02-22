@@ -20,11 +20,11 @@ import net.sf.saxon.trans.XPathException;
 
 public class IntersectionEnumeration implements SequenceIterator {
 
-    private SequenceIterator e1;
-    private SequenceIterator e2;
+    private final SequenceIterator e1;
+    private final SequenceIterator e2;
     /*@Nullable*/ private NodeInfo nextNode1;
     private NodeInfo nextNode2;
-    private ItemOrderComparer comparer;
+    private final ItemOrderComparer comparer;
 
     /**
      * Form an enumeration of the intersection of the nodes in two nodesets

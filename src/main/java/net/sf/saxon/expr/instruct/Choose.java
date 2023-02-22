@@ -20,7 +20,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
@@ -38,8 +38,8 @@ import java.util.List;
 
 public class Choose extends Instruction implements ConditionalInstruction {
 
-    private Operand[] conditionOps;
-    private Operand[] actionOps;
+    private final Operand[] conditionOps;
+    private final Operand[] actionOps;
     private boolean isInstruction;
 
 
@@ -525,10 +525,10 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 setCondition(i, ebv);
             }
             if (getCondition(i) instanceof Literal &&
-                    !(((Literal) getCondition(i)).getValue() instanceof BooleanValue)) {
+                    !(((Literal) getCondition(i)).getGroundedValue() instanceof BooleanValue)) {
                 final boolean b;
                 try {
-                    b = ((Literal) getCondition(i)).getValue().effectiveBooleanValue();
+                    b = ((Literal) getCondition(i)).getGroundedValue().effectiveBooleanValue();
                 } catch (XPathException err) {
                     err.setLocation(getLocation());
                     throw err;
@@ -887,7 +887,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      */
 
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder sb = new StringBuilder(64);
         sb.append("if (");
         for (int i = 0; i < size(); i++) {
             sb.append(getCondition(i).toString());

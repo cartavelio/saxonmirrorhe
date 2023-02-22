@@ -19,9 +19,10 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.str.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.Untyped;
@@ -45,8 +46,8 @@ public class ExpressionPresenter {
     private int depth = 0;
     private boolean inStartTag = false;
     private String nextRole = null;
-    private Stack<Expression> expressionStack = new Stack<>();
-    private Stack<String> nameStack = new Stack<>();
+    private final Stack<Expression> expressionStack = new Stack<>();
+    private final Stack<String> nameStack = new Stack<>();
     private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
     private String defaultNamespace;
     private Options options = new ExportOptions();
@@ -321,7 +322,7 @@ public class ExpressionPresenter {
             return module;
         } else {
             // If not exporting the base URI, cut the filename used for diagnostic location of errors down to its last component
-            String parts[] = module.split("/");
+            String[] parts = module.split("/");
             for (int p = parts.length - 1; p >= 0; p--) {
                 if (!parts[p].isEmpty()) {
                     return parts[p];
@@ -348,25 +349,25 @@ public class ExpressionPresenter {
                 emitAttribute("defaultFunctionNS", sc.getDefaultFunctionNamespace());
             }
             if (!((ExportOptions)options).suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
-                FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+                UnicodeBuilder ub = new UnicodeBuilder();
                 for (Iterator<String> iter = sc.iteratePrefixes(); iter.hasNext(); ) {
                     String p = iter.next();
 
                     String uri = sc.getURIForPrefix(p, true);
-                    fsb.append(p);
-                    fsb.append("=");
+                    ub.append(p);
+                    ub.append("=");
 
-                    if (Whitespace.containsWhitespace(uri)) {
+                    if (Whitespace.containsWhitespace(StringTool.codePoints(uri))) {
                         throw new XPathException("Cannot export a stylesheet if namespaces contain whitespace: '" + uri + "'");
                     }
                     if (uri.equals(NamespaceConstant.getUriForConventionalPrefix(p))) {
                         uri = "~";
                     }
-                    fsb.append(uri);
-                    fsb.append(" ");
+                    ub.append(uri);
+                    ub.append(" ");
 
                 }
-                emitAttribute("ns", Whitespace.trim(fsb));
+                emitAttribute("ns", Whitespace.trim(ub.toUnicodeString()).toString());
             }
         } catch (XPathException e) {
             throw new AssertionError(e);
@@ -530,7 +531,7 @@ public class ExpressionPresenter {
         try {
             if (receiver instanceof CheckSumFilter) {
                 int c = ((CheckSumFilter) receiver).getChecksum();
-                cco.processingInstruction(CheckSumFilter.SIGMA, Integer.toHexString(c),
+                cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
                                           Loc.NONE, ReceiverOption.NONE);
             }
             cco.endDocument();
@@ -577,7 +578,7 @@ public class ExpressionPresenter {
      */
 
     public static String jsEscape(String in) {
-        FastStringBuffer out = new FastStringBuffer(in.length());
+        StringBuilder out = new StringBuilder(in.length());
         for (int i = 0; i < in.length(); i++) {
             char c = in.charAt(i);
             switch (c) {
@@ -614,14 +615,14 @@ public class ExpressionPresenter {
                         }
                         out.append(hex.toString());
                     } else {
-                        out.cat(c);
+                        out.append(c);
                     }
             }
         }
         return out.toString();
     }
 
-    public interface Options {};
+    public interface Options {}
 
     public static class ExportOptions implements Options {
         public String target = "";

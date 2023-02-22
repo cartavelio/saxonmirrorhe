@@ -36,12 +36,12 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
     // NOTE: have experimented with a dedicated iterator for the child axis matching against
     // elements only, by fingerprint - no measurable improvement obtained.
 
-    private TinyTree tree;
+    private final TinyTree tree;
     private int nextNodeNr;
-    /*@Nullable*/ private Predicate<? super NodeInfo> test;
-    private TinyNodeImpl startNode;
-    private TinyNodeImpl parentNode;
-    private boolean getChildren;
+    /*@Nullable*/ private final Predicate<? super NodeInfo> test;
+    private final TinyNodeImpl startNode;
+    private final TinyNodeImpl parentNode;
+    private final boolean getChildren;
     private boolean needToAdvance = false;
     private final IntPredicate matcher;
 
@@ -70,7 +70,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
             nextNodeNr = node.nodeNr + 1;
 
         } else {                    // following-sibling:: axis
-            parentNode = (TinyNodeImpl) node.getParent();
+            parentNode = node.getParent();
             if (parentNode == null) {
                 nextNodeNr = -1;
             } else {
@@ -174,7 +174,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
                 return new UntypedAtomicValue(TinyTextImpl.getStringValue(tree, nextNodeNr));
             }
             case Type.WHITESPACE_TEXT: {
-                return new UntypedAtomicValue(WhitespaceTextImpl.getStringValueCS(tree, nextNodeNr));
+                return new UntypedAtomicValue(WhitespaceTextImpl.getStringValue(tree, nextNodeNr));
             }
             case Type.ELEMENT:
             case Type.TEXTUAL_ELEMENT: {

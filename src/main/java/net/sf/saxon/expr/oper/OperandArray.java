@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 
 public class OperandArray implements Iterable<Operand> {
 
-    private Operand[] operandArray;
+    private final Operand[] operandArray;
 
     // operand role is currently always NAVIGATE, but this could change in the future
 

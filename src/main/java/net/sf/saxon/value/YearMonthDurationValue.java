@@ -9,8 +9,9 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -45,7 +46,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      *         not in the lexical space of xs:yearMonthDuration.
      */
 
-    public static ConversionResult makeYearMonthDurationValue(CharSequence s) {
+    public static ConversionResult makeYearMonthDurationValue(UnicodeString s) {
         ConversionResult d = DurationValue.makeDuration(s, true, false);
         if (d instanceof ValidationFailure) {
             return d;
@@ -88,25 +89,25 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
      */
 
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
         // The canonical representation has months in the range 0-11
 
         int y = getYears();
         int m = getMonths();
 
-        FastStringBuffer sb = new FastStringBuffer(32);
+        UnicodeBuilder sb = new UnicodeBuilder();
         if (negative) {
-            sb.cat('-');
+            sb.append('-');
         }
-        sb.cat('P');
+        sb.append('P');
         if (y != 0) {
             sb.append(y + "Y");
         }
         if (m != 0 || y == 0) {
             sb.append(m + "M");
         }
-        return sb;
+        return sb.toUnicodeString();
 
     }
 
@@ -164,7 +165,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
             err.setErrorCode("FOCA0005");
             throw err;
         }
-        double m = (double) getLengthInMonths();
+        double m = getLengthInMonths();
         double product = n * m;
         if (Double.isInfinite(product) || product > Integer.MAX_VALUE || product < Integer.MIN_VALUE) {
             XPathException err = new XPathException("Overflow when multiplying a duration by a number");
@@ -186,7 +187,7 @@ public final class YearMonthDurationValue extends DurationValue implements Compa
             err.setErrorCode("FOCA0005");
             throw err;
         }
-        double m = (double) getLengthInMonths();
+        double m = getLengthInMonths();
         double product = m / n;
         if (Double.isInfinite(product) || product > Integer.MAX_VALUE || product < Integer.MIN_VALUE) {
             XPathException err = new XPathException("Overflow when dividing a duration by a number");

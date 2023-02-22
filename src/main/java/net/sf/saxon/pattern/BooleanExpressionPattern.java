@@ -34,7 +34,7 @@ import net.sf.saxon.type.UType;
 
 public class BooleanExpressionPattern extends Pattern implements PatternWithPredicate {
 
-    private Operand expressionOp;
+    private final Operand expressionOp;
     //private Expression expression;
 
     /**

@@ -12,6 +12,7 @@ import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class StaxBridgeTest {
 
 
-    @Test
     public void testFromStaxToSerializer() {
         try {
             // Use Woodstox as the pull parser by default. The Sun (Zephyr) parser is too buggy...
@@ -105,9 +105,7 @@ public class StaxBridgeTest {
             assertEquals("instance for use with schema-with-param.xsd", comment);
             assertEquals("xml-stylesheet", piName);
             assertEquals("type=\"text/xsl\" href=\"bills.xsl\"", piContent);
-        } catch (XPathException e) {
-            fail(e.getMessage());
-        } catch (FileNotFoundException e) {
+        } catch (XPathException | FileNotFoundException e) {
             fail(e.getMessage());
         }
     }
@@ -133,7 +131,7 @@ public class StaxBridgeTest {
                     "</xsl:template>\n" +
                     "\n" +
                     "</xsl:transform>";
-            byte[] in = xsl.getBytes("utf-8");
+            byte[] in = xsl.getBytes(StandardCharsets.UTF_8);
             puller.setInputStream("dummy.xsl", new ByteArrayInputStream(in));
             XMLEmitter emitter = new XMLEmitter();
             emitter.setPipelineConfiguration(pipe);
@@ -149,13 +147,12 @@ public class StaxBridgeTest {
 //            assertTrue(sw.toString().contains("<?xml-stylesheet type=\"text/xsl\" href=\"bills.xsl\"?>"));
 //            assertTrue(sw.toString().contains("<Bill No=\"10030\" Name=\"John Doe\">"));
 //            assertTrue(sw.toString().contains("<!--Observation-->"));
-        } catch (XPathException | UnsupportedEncodingException e) {
+        } catch (XPathException e) {
             fail(e.getMessage());
         }
     }
 
 
-    @Test
     public void testDOMToStax() {
 //        try {
 //            String xml = "<a><b> <c>x</c></b></a>";

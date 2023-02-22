@@ -8,7 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.expr.number.NumericGroupFormatter;
-import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.str.UnicodeString;
 
 import java.util.Locale;
 
@@ -68,11 +68,11 @@ public interface Numberer {
      */
 
     String format(long number,
-                         UnicodeString picture,
-                         int groupSize,
-                         String groupSeparator,
-                         String letterValue,
-                         String ordinal);
+                  UnicodeString picture,
+                  int groupSize,
+                  String groupSeparator,
+                  String letterValue,
+                  String ordinal);
 
     /**
      * Format a number into a string
@@ -91,10 +91,10 @@ public interface Numberer {
      */
 
     String format(long number,
-                         UnicodeString picture,
-                         NumericGroupFormatter numGrpFormatter,
-                         String letterValue,
-                         String ordinal);
+                  UnicodeString picture,
+                  NumericGroupFormatter numGrpFormatter,
+                  String letterValue,
+                  String ordinal);
 
     /**
      * Get a month name or abbreviation

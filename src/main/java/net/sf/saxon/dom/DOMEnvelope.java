@@ -14,6 +14,7 @@ import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExternalObjectModel;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.AnyNodeTest;
@@ -104,7 +105,7 @@ public class DOMEnvelope implements ExternalObjectModel {
             return new JPConverter() {
                 /*@Nullable*/
                 @Override
-                public Sequence convert(Object object, XPathContext context) {
+                public GroundedValue convert(Object object, XPathContext context) {
                     return convertObjectToXPathValue(object);
                 }
 
@@ -220,7 +221,7 @@ public class DOMEnvelope implements ExternalObjectModel {
      * @return the value after conversion
      */
 
-    private Sequence convertObjectToXPathValue(Object object)  {
+    private GroundedValue convertObjectToXPathValue(Object object)  {
         if (object instanceof NodeList) {
             // NodeList needs great care, because Xerces element nodes implement the NodeList interface,
             // with the actual list being the children of the node in question. So we only recognize a

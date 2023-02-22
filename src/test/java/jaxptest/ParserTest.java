@@ -264,7 +264,7 @@ public class ParserTest {
         }
     }
 
-    private String lnTestXml = ""
+    private final String lnTestXml = ""
             + "<a b='2'>\n"
             + "  <!-- comment -->\n"
             + "  <?pi?>\n"

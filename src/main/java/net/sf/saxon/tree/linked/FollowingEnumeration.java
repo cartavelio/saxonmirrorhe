@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 
 final class FollowingEnumeration extends TreeEnumeration {
 
-    private NodeImpl root;
+    private final NodeImpl root;
 
     public FollowingEnumeration(NodeImpl node, Predicate<? super NodeInfo> nodeTest) {
         super(node, nodeTest);

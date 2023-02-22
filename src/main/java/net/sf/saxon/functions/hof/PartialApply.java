@@ -12,7 +12,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -29,8 +29,8 @@ import java.util.List;
 
 public class PartialApply extends Expression {
 
-    private Operand baseOp;
-    private Operand[] boundArgumentsOp; // contains null where the question marks appear
+    private final Operand baseOp;
+    private final Operand[] boundArgumentsOp; // contains null where the question marks appear
 
     /**
      * Create a partial function application expression
@@ -255,7 +255,7 @@ public class PartialApply extends Expression {
      */
     @Override
     public String toString() {
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder buff = new StringBuilder(64);
         boolean par = getBaseExpression().operands().iterator().hasNext();
         if (par) {
             buff.append("(" + getBaseExpression().toString() + ")");

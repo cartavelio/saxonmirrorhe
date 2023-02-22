@@ -230,14 +230,17 @@ public class TestXsltCompiler {
         final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -278,14 +281,17 @@ public class TestXsltCompiler {
         final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -329,14 +335,17 @@ public class TestXsltCompiler {
         final List<TransformerException> fatals = new ArrayList<>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -398,16 +407,19 @@ public class TestXsltCompiler {
         final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 System.out.println("Warning: " + exception + "\nlocation: " + exception.getLocator());
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 System.out.println("Error: " + exception + "\nlocation: " + exception.getLocator());
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 if (!exception.getMessage().contains("No such file or directory")) {
                     System.out.println("Fatal: " + exception + "\nlocation: " + exception.getLocator());
@@ -600,7 +612,6 @@ public class TestXsltCompiler {
                 }
             }
 
-            ;
         });
         p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, false);
         XsltExecutable q = null;

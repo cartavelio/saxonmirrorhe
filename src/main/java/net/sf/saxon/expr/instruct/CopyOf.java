@@ -21,11 +21,11 @@ import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.tree.wrapper.VirtualUntypedCopy;
 import net.sf.saxon.type.*;
@@ -41,15 +41,15 @@ import java.net.URISyntaxException;
 
 public class CopyOf extends Instruction implements ValidatingInstruction {
 
-    private Operand selectOp;
-    private boolean copyNamespaces;
+    private final Operand selectOp;
+    private final boolean copyNamespaces;
     private boolean copyAccumulators;
-    private int validation;
-    private SchemaType schemaType;
+    private final int validation;
+    private final SchemaType schemaType;
     private boolean requireDocumentOrElement = false;
-    private boolean rejectDuplicateAttributes;
+    private final boolean rejectDuplicateAttributes;
     //private boolean readOnce = false;
-    private boolean validating;
+    private final boolean validating;
     private boolean copyLineNumbers = false;
     private boolean copyForUpdate = false;
     private boolean isSchemaAware = true;
@@ -436,32 +436,32 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             out.emitAttribute("type", schemaType.getStructuredQName());
         }
 
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C16);
+        StringBuilder fsb = new StringBuilder(16);
         if (requireDocumentOrElement) {
-            fsb.cat('p');
+            fsb.append('p');
         }
         if (rejectDuplicateAttributes) {
-            fsb.cat('a');
+            fsb.append('a');
         }
         if (validating) {
-            fsb.cat('v');
+            fsb.append('v');
         }
         if (copyLineNumbers) {
-            fsb.cat('l');
+            fsb.append('l');
         }
         if (copyForUpdate) {
-            fsb.cat('u');
+            fsb.append('u');
         }
         if (isSchemaAware) {
-            fsb.cat('s');
+            fsb.append('s');
         }
         if (copyNamespaces) {
-            fsb.cat('c');
+            fsb.append('c');
         }
         if (copyAccumulators) {
-            fsb.cat('m');
+            fsb.append('m');
         }
-        if (!fsb.isEmpty()) {
+        if (fsb.length() != 0) {
             out.emitAttribute("flags", fsb.toString());
         }
         getSelect().export(out);
@@ -653,23 +653,23 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 break;
 
             case Type.TEXT:
-                out.characters(item.getStringValueCS(), getLocation(), ReceiverOption.NONE);
+                out.characters(item.getUnicodeStringValue(), getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.PROCESSING_INSTRUCTION:
                 if (copyBaseURI) {
                     out.setSystemId(item.getBaseURI());
                 }
-                out.processingInstruction(item.getDisplayName(), item.getStringValueCS(), getLocation(), ReceiverOption.NONE);
+                out.processingInstruction(item.getDisplayName(), item.getUnicodeStringValue(), getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.COMMENT:
-                out.comment(item.getStringValueCS(), getLocation(), ReceiverOption.NONE);
+                out.comment(item.getUnicodeStringValue(), getLocation(), ReceiverOption.NONE);
                 break;
 
             case Type.NAMESPACE:
                 try {
-                    out.namespace(item.getLocalPart(), item.getStringValue(),ReceiverOption.NONE);
+                    out.namespace(item.getLocalPart(), item.getStringValue(), ReceiverOption.NONE);
                 } catch (NoOpenStartTagException err) {
                     XPathException e = new XPathException(err.getMessage());
                     e.setXPathContext(context);
@@ -759,10 +759,10 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                               boolean rejectDuplicates)
             throws XPathException {
         int opt = rejectDuplicates ? ReceiverOption.REJECT_DUPLICATES : ReceiverOption.NONE;
-        CharSequence value = source.getStringValueCS();
+        UnicodeString value = source.getUnicodeStringValue();
         SimpleType annotation = validateAttribute(source, schemaType, validation, context);
         try {
-            output.attribute(NameOfNode.makeName(source), annotation, value, instruction.getLocation(), opt);
+            output.attribute(NameOfNode.makeName(source), annotation, value.toString(), instruction.getLocation(), opt);
         } catch (XPathException e) {
             e.maybeSetContext(context);
             e.maybeSetLocation(instruction.getLocation());
@@ -787,7 +787,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
     public static SimpleType validateAttribute(
             NodeInfo source, SimpleType schemaType, int validation, XPathContext context) throws XPathException {
-        CharSequence value = source.getStringValueCS();
+        UnicodeString value = source.getUnicodeStringValue();
         SimpleType annotation = BuiltInAtomicType.UNTYPED_ATOMIC;
         if (schemaType != null) {
             if (schemaType.isNamespaceSensitive()) {

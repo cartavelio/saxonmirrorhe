@@ -7,8 +7,8 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -23,14 +23,15 @@ import java.util.regex.Pattern;
 
 public class GDayValue extends GDateValue {
 
-    private static Pattern regex =
+    private static final Pattern regex =
             Pattern.compile("---([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
     private GDayValue() {
     }
 
-    public static ConversionResult makeGDayValue(CharSequence value) {
-        Matcher m = regex.matcher(Whitespace.trimWhitespace(value));
+    public static ConversionResult makeGDayValue(UnicodeString value) {
+        final UnicodeString trimmed = Whitespace.trim(value);
+        Matcher m = regex.matcher(trimmed.toString());
         if (!m.matches()) {
             return new ValidationFailure("Cannot convert '" + value + "' to a gDay");
         }
@@ -39,7 +40,7 @@ public class GDayValue extends GDateValue {
         String tz = m.group(2);
         String date = "2000-01-" + base + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_DAY;
-        return setLexicalValue(g, date, true);
+        return setLexicalValue(g, BMPString.of(date), true);
     }
 
     public GDayValue(byte day, int tz) {
@@ -81,18 +82,18 @@ public class GDayValue extends GDateValue {
 
     /*@NotNull*/
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+        UnicodeBuilder sb = new UnicodeBuilder();
 
-        sb.append("---");
+        sb.appendLatin("---");
         appendTwoDigits(sb, day);
 
         if (hasTimezone()) {
             appendTimezone(sb);
         }
 
-        return sb;
+        return sb.toUnicodeString();
 
     }
 

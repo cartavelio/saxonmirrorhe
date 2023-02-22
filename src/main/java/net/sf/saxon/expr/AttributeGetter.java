@@ -9,11 +9,9 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
@@ -34,7 +32,7 @@ public final class AttributeGetter extends Expression {
     //public static final int CHECK_CONTEXT_ITEM_PRESENT = 1;
     public static final int CHECK_CONTEXT_ITEM_IS_NODE = 2;
 
-    private FingerprintedQName attributeName;
+    private final FingerprintedQName attributeName;
     private int requiredChecks = CHECK_CONTEXT_ITEM_IS_NODE;
 
     public AttributeGetter(FingerprintedQName attributeName) {
@@ -110,7 +108,7 @@ public final class AttributeGetter extends Expression {
         if (item instanceof TinyElementImpl) {
             // fast path
             String val = ((TinyElementImpl) item).getAttributeValue(attributeName.getFingerprint());
-            return val == null ? null : new UntypedAtomicValue(val);
+            return val == null ? null : new UntypedAtomicValue(StringView.tidy(val));
         }
         if (item == null) {
             // This doesn't actually happen, we don't create an AttributeGetter unless we know statically
@@ -125,7 +123,7 @@ public final class AttributeGetter extends Expression {
         NodeInfo node = (NodeInfo) item;
         if (node.getNodeKind() == Type.ELEMENT) {
             String val = node.getAttributeValue(attributeName.getURI(), attributeName.getLocalPart());
-            return val == null ? null : new UntypedAtomicValue(val);
+            return val == null ? null : new UntypedAtomicValue(StringView.tidy(val));
         } else {
             return null;
         }

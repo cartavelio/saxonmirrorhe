@@ -19,7 +19,7 @@ final class PrecedingEnumeration extends TreeEnumeration {
         super(node, nodeTest);
 
         // we need to avoid returning ancestors of the starting node
-        nextAncestor = (NodeImpl) node.getParent();
+        nextAncestor = node.getParent();
         advance();
     }
 

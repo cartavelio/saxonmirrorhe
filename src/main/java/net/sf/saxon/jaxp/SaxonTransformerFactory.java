@@ -48,7 +48,7 @@ import java.util.Comparator;
 
 public class SaxonTransformerFactory extends SAXTransformerFactory implements Configuration.ApiProvider {
 
-    private Processor processor;
+    private final Processor processor;
     private ErrorListener errorListener = new StandardErrorListener();
 
     /**
@@ -331,7 +331,6 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
                 break;
         }
     }
-
     /**
      * Allows the user to retrieve specific attributes on the underlying
      * implementation.

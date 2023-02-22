@@ -28,7 +28,7 @@ public class StandardErrorHandler implements org.xml.sax.ErrorHandler {
     // Implement the org.xml.sax.ErrorHandler interface.
     ////////////////////////////////////////////////////////////////////////////
 
-    private ErrorReporter errorReporter;
+    private final ErrorReporter errorReporter;
     private int warningCount = 0;
     private int errorCount = 0;
     private int fatalErrorCount = 0;

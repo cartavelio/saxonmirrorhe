@@ -31,7 +31,7 @@ import net.sf.saxon.value.SequenceType;
 public class CoercedFunction extends AbstractFunction {
 
     private Function targetFunction;
-    private SpecificFunctionType requiredType;
+    private final SpecificFunctionType requiredType;
 
     /**
      * Create a CoercedFunction as a wrapper around a target function

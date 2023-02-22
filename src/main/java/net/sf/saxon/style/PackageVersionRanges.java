@@ -8,7 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.ArrayList;
 
@@ -48,7 +48,7 @@ public class PackageVersionRanges {
                 prefix = true;
                 low = new PackageVersion(s.replace(".*", ""));
             } else if (s.matches(".*\\s*to\\s+.*")) {
-                String range[] = s.split("\\s*to\\s+");
+                String[] range = s.split("\\s*to\\s+");
                 if (range.length > 2) {
                     throw new XPathException("Invalid version range:" + s, "XTSE0020");
                 }
@@ -109,7 +109,7 @@ public class PackageVersionRanges {
         if (ranges.size() == 1) {
             return ranges.get(0).display;
         } else {
-            FastStringBuffer buffer = new FastStringBuffer(256);
+            StringBuilder buffer = new StringBuilder(256);
             for (PackageVersionRange r : ranges) {
                 buffer.append(r.display);
                 buffer.append(",");

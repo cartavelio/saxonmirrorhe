@@ -16,8 +16,9 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.CompressedWhitespace;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
@@ -133,7 +134,6 @@ public class DotNetPullProvider implements PullProvider, Location {
                                                       Loc.NONE, ReceiverOption.NONE));
                 }
             }
-            parser.MoveToElement();
             return atts;
         } else {
             return EmptyAttributeMap.getInstance();
@@ -199,7 +199,6 @@ public class DotNetPullProvider implements PullProvider, Location {
             if (used < limit) {
                 nsBindings[used] = null;
             }
-            parser.MoveToElement();
             return nsBindings;
         } else {
             return NamespaceBinding.EMPTY_ARRAY;
@@ -237,9 +236,9 @@ public class DotNetPullProvider implements PullProvider, Location {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link Event#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link Event#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
@@ -247,12 +246,8 @@ public class DotNetPullProvider implements PullProvider, Location {
      */
 
     @Override
-    public CharSequence getStringValue() throws XPathException {
-        if (current == Event.TEXT) {
-            return CompressedWhitespace.compress(parser.get_Value());
-        } else {
-            return parser.get_Value();
-        }
+    public CodePoints getStringValue() {
+        return StringView.of(parser.get_Value());
     }
 
     /**
@@ -273,7 +268,7 @@ public class DotNetPullProvider implements PullProvider, Location {
      * Get the next event
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override

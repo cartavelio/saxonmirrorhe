@@ -14,8 +14,8 @@ import net.sf.saxon.Configuration;
  */
 public class Instantiator<T> implements Maker<T> {
 
-    private String className;
-    private Configuration config;
+    private final String className;
+    private final Configuration config;
 
     public Instantiator(String className, Configuration config) {
         this.className = className;

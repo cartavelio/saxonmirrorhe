@@ -30,8 +30,8 @@ import java.util.Arrays;
  */
 public class CurriedFunction extends AbstractFunction {
 
-    private Function targetFunction;
-    private Sequence[] boundValues;
+    private final Function targetFunction;
+    private final Sequence[] boundValues;
     private FunctionItemType functionType;
 
     /**

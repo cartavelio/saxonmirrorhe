@@ -28,7 +28,7 @@ import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -46,7 +46,7 @@ public class StylesheetPackage extends PackageData {
 
     private PackageVersion packageVersion = null;
     private String packageName;
-    private List<StylesheetPackage> usedPackages = new ArrayList<>();
+    private final List<StylesheetPackage> usedPackages = new ArrayList<>();
     private int xsltVersion;
 
     private RuleManager ruleManager;
@@ -54,7 +54,7 @@ public class StylesheetPackage extends PackageData {
 
     private boolean createsSecondaryResultDocuments;
 
-    private List<Action> completionActions = new ArrayList<>();
+    private final List<Action> completionActions = new ArrayList<>();
     protected GlobalContextRequirement globalContextRequirement = null;
     private boolean containsGlobalContextItemDeclaration = false;
     protected SpaceStrippingRule stripperRules;
@@ -81,13 +81,13 @@ public class StylesheetPackage extends PackageData {
     // component; value is the component itself. Hidden components are not included in this table because their names
     // need not be unique, and because they are not available for reference by name.
 
-    private HashMap<SymbolicName, Component> componentIndex = new HashMap<>(20);
+    private final HashMap<SymbolicName, Component> componentIndex = new HashMap<>(20);
 
     protected List<Component> hiddenComponents = new ArrayList<>();
 
     protected HashMap<SymbolicName, Component> overriddenComponents = new HashMap<>();
 
-    private HashMap<SymbolicName, Component> abstractComponents = new HashMap<>();
+    private final HashMap<SymbolicName, Component> abstractComponents = new HashMap<>();
 
     /**
      * Create a stylesheet package
@@ -1092,7 +1092,7 @@ public class StylesheetPackage extends PackageData {
             }
         }
         if (!abstractComponents.isEmpty()) {
-            FastStringBuffer buff = new FastStringBuffer(256);
+            StringBuilder buff = new StringBuilder(256);
             int count = 0;
             for (SymbolicName name : abstractComponents.keySet()) {
                 if (count++ > 0) {

@@ -13,7 +13,7 @@ import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.COUNT;
 
@@ -114,7 +114,7 @@ public class CountClause extends Clause {
     }
 
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         fsb.append("count $");
         fsb.append(rangeVariable.getVariableQName().getDisplayName());
         return fsb.toString();

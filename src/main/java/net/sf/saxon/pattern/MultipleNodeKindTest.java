@@ -10,7 +10,7 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 
 import java.util.LinkedList;
@@ -134,7 +134,7 @@ public final class MultipleNodeKindTest extends NodeTest {
 
     /*@NotNull*/
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
         format(types, fsb, ItemType::toString);
         return fsb.toString();
@@ -142,21 +142,21 @@ public final class MultipleNodeKindTest extends NodeTest {
 
     @Override
     public String toExportString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
         format(types, fsb, ItemType::toExportString);
         return fsb.toString();
     }
 
-    private void format(LinkedList<PrimitiveUType> list, FastStringBuffer fsb, Function<ItemType, String> show) {
+    private void format(LinkedList<PrimitiveUType> list, StringBuilder fsb, Function<ItemType, String> show) {
         if (list.size() == 1) {
             fsb.append(list.get(0).toItemType().toString());
         } else {
-            fsb.cat('(');
+            fsb.append('(');
             fsb.append(list.removeFirst().toItemType().toString());
-            fsb.cat('|');
+            fsb.append('|');
             format(list, fsb, show);
-            fsb.cat(')');
+            fsb.append(')');
         }
     }
 

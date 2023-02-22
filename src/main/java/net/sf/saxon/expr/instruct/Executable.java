@@ -45,7 +45,7 @@ public class Executable {
     private PackageData topLevelPackage;
 
     // the set of packages making up this Executable
-    private List<PackageData> packages = new ArrayList<>();
+    private final List<PackageData> packages = new ArrayList<>();
 
     // default output properties (for the unnamed output format)
     private Properties defaultOutputProperties;
@@ -66,7 +66,7 @@ public class Executable {
     private HostLanguage hostLanguage = HostLanguage.XSLT;
 
     // a list of required parameters, identified by the structured QName of their names
-    private Map<StructuredQName, GlobalParam> globalParams = new HashMap<>();
+    private final Map<StructuredQName, GlobalParam> globalParams = new HashMap<>();
 
     // Hash table of named (and unnamed) output declarations. This is assembled only
     // if there is a need for it: that is, if there is a call on xsl:result-document

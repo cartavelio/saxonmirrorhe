@@ -21,8 +21,8 @@ import java.util.function.Predicate;
 
 public class ProtocolRestricter implements Predicate<URI> {
 
-    private String rule;
-    private List<Predicate<URI>> permitted = new ArrayList<>();
+    private final String rule;
+    private final List<Predicate<URI>> permitted = new ArrayList<>();
 
     public static Predicate<URI> make(String value) {
         Objects.requireNonNull(value);

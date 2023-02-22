@@ -14,7 +14,7 @@ package net.sf.saxon.expr.sort;
 
 public class DecimalSortComparer extends ComparableAtomicValueComparer {
 
-    private static DecimalSortComparer THE_INSTANCE = new DecimalSortComparer();
+    private static final DecimalSortComparer THE_INSTANCE = new DecimalSortComparer();
 
     public static DecimalSortComparer getDecimalSortComparerInstance() {
         return THE_INSTANCE;

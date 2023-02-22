@@ -33,8 +33,8 @@ import javax.xml.xpath.XPathVariableResolver;
 
 public class JAXPVariableReference extends Expression implements Callable {
 
-    private StructuredQName name;
-    private XPathVariableResolver resolver;
+    private final StructuredQName name;
+    private final XPathVariableResolver resolver;
 
 
     /**

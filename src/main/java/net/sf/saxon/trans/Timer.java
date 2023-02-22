@@ -12,7 +12,7 @@ package net.sf.saxon.trans;
  */
 public class Timer {
 
-    private long start;
+    private final long start;
     private long prev;
 
     public Timer() {

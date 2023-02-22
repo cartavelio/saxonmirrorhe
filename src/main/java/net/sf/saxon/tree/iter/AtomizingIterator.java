@@ -26,7 +26,7 @@ import net.sf.saxon.value.AtomicValue;
                                     
 public class AtomizingIterator implements SequenceIterator /* of AtomicValue */ {
 
-    private SequenceIterator base;
+    private final SequenceIterator base;
     /*@Nullable*/ private AtomicSequence currentValue = null;
     private int currentValuePosition = 1;
     private int currentValueSize = 1;

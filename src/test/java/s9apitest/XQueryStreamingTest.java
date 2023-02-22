@@ -25,14 +25,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public class XQueryStreamingTest {
-    private Random rand = new Random();
+    private final Random rand = new Random();
 
     @Test
     public void testMultiPassSaxonStreaming() throws Exception {
         Configuration configuration = new EnterpriseConfiguration();
 
-        final Source source[] = new Source[]{null};
+        final Source[] source = new Source[]{null};
         configuration.setURIResolver(new URIResolver() {
+            @Override
             public Source resolve(String href, String base) throws TransformerException {
                 return source[0];
             }
@@ -62,14 +63,17 @@ public class XQueryStreamingTest {
                     };
                     XMLReader xmlReader = configuration.getSourceParser();
                     xmlReader.setErrorHandler(new ErrorHandler() {
+                        @Override
                         public void error(SAXParseException exception) throws SAXException {
                             System.err.println("E: " + exception.getMessage());
                         }
 
+                        @Override
                         public void warning(SAXParseException exception) throws SAXException {
                             System.err.println("W: " + exception.getMessage());
                         }
 
+                        @Override
                         public void fatalError(SAXParseException exception) throws SAXException {
                             System.err.println("F:" + exception.getMessage());
                         }
@@ -104,8 +108,8 @@ public class XQueryStreamingTest {
 
         public Reader newReader() {
             return new Reader() {
-                int generation = latest.incrementAndGet();
-                InputStreamReader inputStreamReader = new InputStreamReader(
+                final int generation = latest.incrementAndGet();
+                final InputStreamReader inputStreamReader = new InputStreamReader(
                     strawberryFieldsForever());
 
                 @Override

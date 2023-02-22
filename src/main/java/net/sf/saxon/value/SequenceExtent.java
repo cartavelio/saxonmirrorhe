@@ -11,17 +11,15 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ReverseListIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+
+import java.util.*;
 
 
 /**
@@ -30,7 +28,7 @@ import java.util.List;
  */
 
 public class SequenceExtent implements GroundedValue {
-    private List<? extends Item> value;
+    private final List<? extends Item> value;
 
     /**
      * Construct an sequence from an array of items. Note, the array of items is used as is,
@@ -154,9 +152,9 @@ public class SequenceExtent implements GroundedValue {
     /**
      * Factory method to make a Value holding the contents of any List of items
      *
-     * @param input a List containing the items in the sequence. The caller guarantees
-     *              that this list will not be subsequently modified.
-     * @return a ValueRepresentation holding the items in the list. If the
+     * @param input a List containing the items in the sequence. The caller guarantees that
+     *              the list will not be subsequently modified.
+     * @return a grounded sequence holding the items in the list. If the
      *         sequence is empty the result will be an instance of {@link EmptySequence}. If it is of length
      *         one, the result will be an {@link Item}. In all other cases, it will be an instance of
      *         {@link SequenceExtent}.
@@ -174,13 +172,13 @@ public class SequenceExtent implements GroundedValue {
     }
 
     @Override
-    public String getStringValue() throws XPathException {
+    public UnicodeString getUnicodeStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
     @Override
-    public CharSequence getStringValueCS() throws XPathException {
-        return SequenceTool.getStringValue(this);
+    public String getStringValue() throws XPathException {
+        return SequenceTool.stringify(this);
     }
 
     /**
@@ -315,12 +313,12 @@ public class SequenceExtent implements GroundedValue {
 
     /*@NotNull*/
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         for (int i = 0; i < value.size(); i++) {
             fsb.append(i == 0 ? "(" : ", ");
             fsb.append(value.get(i).toString());
         }
-        fsb.cat(')');
+        fsb.append(')');
         return fsb.toString();
     }
 

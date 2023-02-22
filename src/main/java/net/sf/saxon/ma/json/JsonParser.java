@@ -10,12 +10,13 @@ package net.sf.saxon.ma.json;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.StringToDouble;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
 
@@ -66,7 +67,12 @@ public class JsonParser {
         JsonTokenizer t = new JsonTokenizer(input);
         t.next();
 
-        parseConstruct(handler, t, flags, context);
+        try {
+            parseConstruct(handler, t, flags, context);
+        } catch (IllegalStateException e) {
+            // e.g. unmatched surrogate pairs
+            invalidJSON(e.getMessage(), ERR_GRAMMAR, t.lineNumber);
+        }
 
         if (t.next() != JsonToken.EOF) {
             invalidJSON("Unexpected token beyond end of JSON input", ERR_GRAMMAR, t.lineNumber);
@@ -82,15 +88,16 @@ public class JsonParser {
             flags |= DEBUG;
         }
 
-        boolean escape = ((BooleanValue) options.get("escape")).getBooleanValue();
-        if (escape) {
+        BooleanValue escape = ((BooleanValue) options.get("escape"));
+        if (escape != null && escape.getBooleanValue()) {
             flags |= ESCAPE;
             if (options.get("fallback") != null) {
                 throw new XPathException("Cannot specify a fallback function when escape=true", "FOJS0005");
             }
         }
 
-        if (((BooleanValue) options.get("liberal")).getBooleanValue()) {
+        BooleanValue liberal = ((BooleanValue) options.get("liberal"));
+        if (liberal != null && liberal.getBooleanValue()) {
             flags |= LIBERAL;
             flags |= ALLOW_ANY_TOP_LEVEL;
         }
@@ -107,7 +114,7 @@ public class JsonParser {
         }
 
         if (options.containsKey("duplicates")) {
-            String duplicates = ((StringValue) options.get("duplicates")).getStringValue();
+            String duplicates = ((StringItem) options.get("duplicates")).getStringValue();
             switch (duplicates) {
                 case "reject":
                     flags |= DUPLICATES_REJECTED;
@@ -204,7 +211,7 @@ public class JsonParser {
             }
             String key = tokenizer.currentTokenValue.toString();
             key = unescape(key, flags, ERR_GRAMMAR, tokenizer.lineNumber);
-            String reEscaped = handler.reEscape(key);
+            String reEscaped = handler.reEscape(key).toString();
             tok = tokenizer.next();
             if (tok != JsonToken.COLON) {
                 invalidJSON("Missing colon after \"" + Err.wrap(key) + "\"", ERR_GRAMMAR, tokenizer.lineNumber);
@@ -321,7 +328,7 @@ public class JsonParser {
                     }
                 }
             }
-            return StringToDouble.getInstance().stringToNumber(token);
+            return StringToDouble.getInstance().stringToNumber(StringView.tidy(token));
         } catch (NumberFormatException e) {
             invalidJSON("Invalid numeric literal: " + e.getMessage(), ERR_GRAMMAR, lineNumber);
             return Double.NaN;
@@ -343,7 +350,7 @@ public class JsonParser {
             return literal;
         }
         boolean liberal = (flags & LIBERAL) != 0;
-        FastStringBuffer buffer = new FastStringBuffer(literal.length());
+        StringBuilder buffer = new StringBuilder(literal.length());
         for (int i = 0; i < literal.length(); i++) {
             char c = literal.charAt(i);
             if (c == '\\') {
@@ -352,34 +359,34 @@ public class JsonParser {
                 }
                 switch (literal.charAt(i)) {
                     case '"':
-                        buffer.cat('"');
+                        buffer.append('"');
                         break;
                     case '\\':
-                        buffer.cat('\\');
+                        buffer.append('\\');
                         break;
                     case '/':
-                        buffer.cat('/');
+                        buffer.append('/');
                         break;
                     case 'b':
-                        buffer.cat('\b');
+                        buffer.append('\b');
                         break;
                     case 'f':
-                        buffer.cat('\f');
+                        buffer.append('\f');
                         break;
                     case 'n':
-                        buffer.cat('\n');
+                        buffer.append('\n');
                         break;
                     case 'r':
-                        buffer.cat('\r');
+                        buffer.append('\r');
                         break;
                     case 't':
-                        buffer.cat('\t');
+                        buffer.append('\t');
                         break;
                     case 'u':
                         try {
                             String hex = literal.substring(i + 1, i + 5);
                             int code = Integer.parseInt(hex, 16);
-                            buffer.cat((char) code);
+                            buffer.append((char) code);
                             i += 4;
                         } catch (Exception e) {
                             if (liberal) {
@@ -391,7 +398,7 @@ public class JsonParser {
                         break;
                     default:
                         if (liberal) {
-                            buffer.cat(literal.charAt(i));
+                            buffer.append(literal.charAt(i));
                         } else {
                             char next = literal.charAt(i);
                             String xx = next < 256 ? next + "" : "x" + Integer.toHexString(next);
@@ -399,7 +406,7 @@ public class JsonParser {
                         }
                 }
             } else {
-                buffer.cat(c);
+                buffer.append(c);
             }
         }
         return buffer.toString();
@@ -442,11 +449,11 @@ public class JsonParser {
 
     private class JsonTokenizer {
 
-        private String input;
+        private final String input;
         private int position;
         private int lineNumber = 1;
         public JsonToken currentToken;
-        public FastStringBuffer currentTokenValue = new FastStringBuffer(FastStringBuffer.C64);
+        public StringBuilder currentTokenValue = new StringBuilder(64);
 
         JsonTokenizer(String input) {
             this.input = input;
@@ -516,7 +523,7 @@ public class JsonParser {
                         if (c == '"' && !afterBackslash) {
                             break;
                         } else {
-                            currentTokenValue.cat(c);
+                            currentTokenValue.append(c);
                             afterBackslash = c == '\\' && !afterBackslash;
                         }
                     }
@@ -539,12 +546,12 @@ public class JsonParser {
                 case '8':
                 case '9':
                     currentTokenValue.setLength(0);
-                    currentTokenValue.cat(ch);
+                    currentTokenValue.append(ch);
                     if (position < input.length()) {   // We could be in ECMA mode when there is a single digit
                         while (true) {
                             char c = input.charAt(position);
                             if ((c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E') {
-                                currentTokenValue.cat(c);
+                                currentTokenValue.append(c);
                                 if (++position >= input.length()) {
                                     break;
                                 }
@@ -558,11 +565,11 @@ public class JsonParser {
                     // Allow unquoted strings in liberal mode
                     if (NameChecker.isNCNameChar(ch)) {
                         currentTokenValue.setLength(0);
-                        currentTokenValue.cat(ch);
+                        currentTokenValue.append(ch);
                         while (position < input.length()) {
                             char c = input.charAt(position);
                             if (NameChecker.isNCNameChar(c)) {
-                                currentTokenValue.cat(c);
+                                currentTokenValue.append(c);
                                 position++;
                             } else {
                                 break;
@@ -581,7 +588,8 @@ public class JsonParser {
                         }
                     } else {
                         char c = input.charAt(--position);
-                        invalidJSON("Unexpected character '" + c + "' (\\u" +
+                        String s = UTF16CharacterSet.isSurrogate(c) ? "" : " '" + c + "'";
+                        invalidJSON("Unexpected character" + s + " (\\u" +
                                             Integer.toHexString(c) + ") at position " + position, ERR_GRAMMAR, lineNumber);
                         return JsonToken.EOF;
                     }

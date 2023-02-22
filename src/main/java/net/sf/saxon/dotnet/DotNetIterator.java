@@ -26,10 +26,6 @@ public class DotNetIterator<T extends Object> implements Iterator<T> {
     private Mapper<T> mapper;
 
 
-    public DotNetIterator() {
-        this.enumerator = null;
-    }
-
     public DotNetIterator(IEnumerator enumerator) {
         this.enumerator = enumerator;
     }

@@ -10,13 +10,14 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeFactory;
 import net.sf.saxon.tree.linked.NodeImpl;
@@ -39,7 +40,7 @@ public class StyleNodeFactory implements NodeFactory {
 
     protected Configuration config;
     protected NamePool namePool;
-    private Compilation compilation;
+    private final Compilation compilation;
     private boolean topLevelModule;
 
     /**
@@ -471,11 +472,11 @@ public class StyleNodeFactory implements NodeFactory {
      * @return the constructed text node
      */
     @Override
-    public TextImpl makeTextNode(NodeInfo parent, CharSequence content) {
+    public TextImpl makeTextNode(NodeInfo parent, UnicodeString content) {
         if (parent instanceof StyleElement && ((StyleElement) parent).isExpandingText()) {
-            return new TextValueTemplateNode(content.toString());
+            return new TextValueTemplateNode(content);
         } else {
-            return new TextImpl(content.toString());
+            return new TextImpl(content);
         }
     }
 

@@ -419,14 +419,17 @@ public class TestXQueryCompiler {
             XQueryCompiler c = p.newXQueryCompiler();
 
             c.setErrorListener(new ErrorListener() {
+                @Override
                 public void error(TransformerException exception) {
                     errors.add(exception);
                 }
 
+                @Override
                 public void warning(TransformerException exception) {
                     warnings.add(exception);
                 }
 
+                @Override
                 public void fatalError(TransformerException exception) {
                     fatalErrors.add(exception);
                 }
@@ -559,7 +562,7 @@ public class TestXQueryCompiler {
             q = c.compile(goodQuery);
             assertTrue(counter.size() > 0, "URI accessed");
             assertTrue(q.getUnderlyingCompiledQuery().getExpression() instanceof Literal, "Compiled to Literal");
-            assertTrue(((Literal) q.getUnderlyingCompiledQuery().getExpression()).getValue().head() instanceof NodeInfo, "Compiled to NodeInfo");
+            assertTrue(((Literal) q.getUnderlyingCompiledQuery().getExpression()).getGroundedValue().head() instanceof NodeInfo, "Compiled to NodeInfo");
         } catch (Exception err) {
             fail("Compilation should not fail");
         }
@@ -578,14 +581,17 @@ public class TestXQueryCompiler {
         public final List<TransformerException> errors = new ArrayList<>();
         public final List<TransformerException> fatalErrors = new ArrayList<>();
 
+        @Override
         public void warning(TransformerException exception) {
             warnings.add(exception);
         }
 
+        @Override
         public void error(TransformerException exception) {
             errors.add(exception);
         }
 
+        @Override
         public void fatalError(TransformerException exception) {
             fatalErrors.add(exception);
         }

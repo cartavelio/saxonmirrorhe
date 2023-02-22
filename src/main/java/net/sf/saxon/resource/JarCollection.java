@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -38,8 +38,8 @@ import java.util.zip.ZipInputStream;
 
 public class JarCollection extends AbstractResourceCollection {
 
-    private XPathContext context;
-    private String collectionURI;
+    private final XPathContext context;
+    private final String collectionURI;
     private SpaceStrippingRule whitespaceRules;
 
 
@@ -213,13 +213,13 @@ public class JarCollection extends AbstractResourceCollection {
 
 
     private class JarIterator implements Iterator<Resource>, Closeable {
-        private FilenameFilter filter;
+        private final FilenameFilter filter;
         private Resource next = null;
-        private XPathContext context;
-        private ZipInputStream zipInputStream;
+        private final XPathContext context;
+        private final ZipInputStream zipInputStream;
         private String dirStr = "";
-        private ParseOptions options;
-        private boolean metadata;
+        private final ParseOptions options;
+        private final boolean metadata;
 
 
         public JarIterator(XPathContext context, ZipInputStream zipInputStream, FilenameFilter filter) {
@@ -356,7 +356,7 @@ public class JarCollection extends AbstractResourceCollection {
 
     protected Map<String, GroundedValue> makeProperties(ZipEntry entry) {
         HashMap<String, GroundedValue> map = new HashMap<>(10);
-        map.put("comment", StringValue.makeStringValue(entry.getComment()));
+        map.put("comment", StringItem.makeStringValue(entry.getComment()));
         map.put("compressed-size", new Int64Value(entry.getCompressedSize()));
         map.put("crc", new Int64Value(entry.getCrc()));
         byte[] extra = entry.getExtra();
@@ -364,7 +364,7 @@ public class JarCollection extends AbstractResourceCollection {
             map.put("extra", new Base64BinaryValue(extra));
         }
         map.put("compression-method", new Int64Value(entry.getMethod()));
-        map.put("entry-name", StringValue.makeStringValue(entry.getName()));
+        map.put("entry-name", StringItem.makeStringValue(entry.getName()));
         map.put("size", new Int64Value(entry.getSize()));
         try {
             map.put("last-modified", DateTimeValue.fromJavaTime(entry.getTime()));

@@ -68,9 +68,9 @@ public class ForEachPairFn extends SystemFunction {
 
     private static class PairedSequenceIterator implements SequenceIterator {
 
-        private SequenceIterator seq0;
-        private SequenceIterator seq1;
-        private Sequence[] args = new Sequence[2];
+        private final SequenceIterator seq0;
+        private final SequenceIterator seq1;
+        private final Sequence[] args = new Sequence[2];
 
         public PairedSequenceIterator(SequenceIterator seq0,
                                       SequenceIterator seq1) {

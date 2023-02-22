@@ -565,7 +565,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
         Configuration config = processor.getUnderlyingConfiguration();
         UserFunctionParameter[] params = uf.getParameterDefinitions();
         GroundedValue[] vr =
-                (GroundedValue[])new GroundedValue[arguments.length];
+                new GroundedValue[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
             net.sf.saxon.value.SequenceType type = params[i].getRequiredType();
             vr[i] = arguments[i].getUnderlyingValue();
@@ -731,8 +731,6 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
         serializer.setOutputStream(stream);
         return serializer;
     }
-
-
 
 
 }

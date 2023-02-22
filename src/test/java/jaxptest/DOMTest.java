@@ -1319,7 +1319,7 @@ public class DOMTest {
             XPath xpath = xPathFactory.newXPath();
             NodeList list = (NodeList) xpath.evaluate(path, doc, XPathConstants.NODESET);
 
-            System.out.println(Integer.toString(list.getLength()));
+            System.out.println(list.getLength());
             assertEquals(1, list.getLength());
             for (int i = 0; i < list.getLength(); i++) {
                 Node n = list.item(i);
@@ -1364,7 +1364,7 @@ public class DOMTest {
             XPath xpath = xPathFactory.newXPath();
             NodeList list = (NodeList) xpath.evaluate(path, doc, XPathConstants.NODESET);
 
-            System.out.println(Integer.toString(list.getLength()));
+            System.out.println(list.getLength());
             assertEquals(1, list.getLength());
             for (int i = 0; i < list.getLength(); i++) {
                 Node n = list.item(i);
@@ -1644,13 +1644,13 @@ public class DOMTest {
             for (int i = 0; i < element0.getAttributes().getLength(); i++) {
                 System.out.println(String.format("element0 attribute[%d] %s=%s", i, element0.getAttributes().item(i).getNodeName(), element0.getAttributes().item(i).getNodeValue()));
             }
-            System.out.println("");
+            System.out.println();
             Element element1 = (Element) root.getChildNodes().item(1);
             System.out.println(String.format("%s", element1.getNodeName()));
             for (int i = 0; i < element1.getAttributes().getLength(); i++) {
                 System.out.println(String.format("element1 attribute[%d] %s=%s", i, element1.getAttributes().item(i).getNodeName(), element1.getAttributes().item(i).getNodeValue()));
             }
-            System.out.println("");
+            System.out.println();
             System.out.println(String.format("treeModel=%s", documentBuilder.getTreeModel().getClass().getName()));
             System.out.println("java -cp 'SaxonHE9-9-17J\\saxon9he.jar';. TEST");
             System.out.println("ACTUAL OUTPUT ON MY PC");
@@ -1661,7 +1661,7 @@ public class DOMTest {
             System.out.println("element1 attribute[0] xmlns:xml=http://www.w3.org/XML/1998/namespace");
             System.out.println("element1 attribute[1] ghi=300");
             System.out.println("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
-            System.out.println("");
+            System.out.println();
             System.out.println("java -cp 'SaxonHE10-0J\\saxon-he-10.0.jar';. TEST");
             System.out.println("ACTUAL OUTPUT ON MY PC");
             System.out.println("element0");
@@ -1671,7 +1671,7 @@ public class DOMTest {
             System.out.println("element1 attribute[0] xmlns=namespace");
             System.out.println("element1 attribute[1] ghi=300");
             System.out.println("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
-            System.out.println("");
+            System.out.println();
         }
                 catch(Exception e){
         }

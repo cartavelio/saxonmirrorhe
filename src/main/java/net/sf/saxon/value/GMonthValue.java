@@ -7,8 +7,8 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 public class GMonthValue extends GDateValue {
 
-    private static Pattern regex =
+    private static final Pattern regex =
             //Pattern.compile("--([0-9][0-9])(--)?(Z|[+-][0-9][0-9]:[0-9][0-9])?");
             Pattern.compile("--([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
     // The commented-out pattern tolerates the bogus format --MM-- which was wrongly permitted by the original schema spec
@@ -31,9 +31,10 @@ public class GMonthValue extends GDateValue {
     private GMonthValue() {
     }
 
-    public static ConversionResult makeGMonthValue(CharSequence value) {
+    public static ConversionResult makeGMonthValue(UnicodeString value) {
         GMonthValue g = new GMonthValue();
-        Matcher m = regex.matcher(Whitespace.trimWhitespace(value));
+        final UnicodeString trimmed = Whitespace.trim(value);
+        Matcher m = regex.matcher(trimmed.toString());
         if (!m.matches()) {
             return new ValidationFailure("Cannot convert '" + value + "' to a gMonth");
         }
@@ -41,7 +42,7 @@ public class GMonthValue extends GDateValue {
         String tz = m.group(2);
         String date = "2000-" + base + "-01" + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_MONTH;
-        return setLexicalValue(g, date, true);
+        return setLexicalValue(g, BMPString.of(date), true);
     }
 
     public GMonthValue(byte month, int tz) {
@@ -83,18 +84,18 @@ public class GMonthValue extends GDateValue {
 
     /*@NotNull*/
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+        UnicodeBuilder sb = new UnicodeBuilder();
 
-        sb.append("--");
+        sb.appendLatin("--");
         appendTwoDigits(sb, month);
 
         if (hasTimezone()) {
             appendTimezone(sb);
         }
 
-        return sb;
+        return sb.toUnicodeString();
 
     }
 
@@ -125,7 +126,7 @@ public class GMonthValue extends GDateValue {
 
     @Override
     public CalendarValue adjustTimezone(int tz) {
-        DateTimeValue dt = (DateTimeValue) toDateTime().adjustTimezone(tz);
+        DateTimeValue dt = toDateTime().adjustTimezone(tz);
         return new GMonthValue(dt.getMonth(), dt.getTimezoneInMinutes());
     }
 }

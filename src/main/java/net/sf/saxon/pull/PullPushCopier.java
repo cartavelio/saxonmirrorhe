@@ -16,8 +16,8 @@ import net.sf.saxon.trans.XPathException;
  */
 public class PullPushCopier {
 
-    private PullProvider in;
-    private Receiver out;
+    private final PullProvider in;
+    private final Receiver out;
 
     /**
      * Create a PullPushCopier

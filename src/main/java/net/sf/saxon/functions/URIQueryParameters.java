@@ -9,17 +9,15 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AllElementsSpaceStrippingRule;
-import net.sf.saxon.om.IgnorableSpaceStrippingRule;
-import net.sf.saxon.om.NoElementsSpaceStrippingRule;
-import net.sf.saxon.om.SpaceStrippingRule;
+import net.sf.saxon.om.*;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Instantiator;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UnicodeBuilder;
 import org.xml.sax.XMLReader;
 
 import java.io.File;
@@ -74,7 +72,7 @@ public class URIQueryParameters {
         if (keyword.equals("select")) {
             filter = makeGlobFilter(value);
         } else if (keyword.equals("match")) {
-            ARegularExpression regex = new ARegularExpression(value, "", "XP", new ArrayList<>(), config);
+            ARegularExpression regex = new ARegularExpression(StringView.of(value).tidy(), "", "XP", new ArrayList<>(), config);
             filter = new RegexFilter(regex);
         } else if (keyword.equals("recurse")) {
             recurse = "yes".equals(value);
@@ -133,26 +131,26 @@ public class URIQueryParameters {
     }
 
     public static FilenameFilter makeGlobFilter(String value) throws XPathException {
-        FastStringBuffer sb = new FastStringBuffer(value.length() + 6);
-        sb.cat('^');
+        UnicodeBuilder sb = new UnicodeBuilder();
+        sb.append('^');
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             if (c == '.') {
                 // replace "." with "\."
-                sb.append("\\.");
+                sb.appendLatin("\\.");
             } else if (c == '*') {
                 // replace "*" with ".*"
-                sb.append(".*");
+                sb.appendLatin(".*");
             } else if (c == '?') {
                 // replace "?" with ".?"
-                sb.append(".?");
+                sb.appendLatin(".?");
             } else {
-                sb.cat(c);
+                sb.append(c);
             }
         }
-        sb.cat('$');
+        sb.append('$');
         try {
-            return new RegexFilter(new JavaRegularExpression(sb, ""));
+            return new RegexFilter(new JavaRegularExpression(sb.toUnicodeString(), ""));
         } catch (XPathException e) {
             throw new XPathException("Invalid glob " + value + " in collection URI", "FODC0004");
         }
@@ -247,7 +245,7 @@ public class URIQueryParameters {
 
     public static class RegexFilter implements FilenameFilter {
 
-        private RegularExpression pattern;
+        private final RegularExpression pattern;
 
 
         public RegexFilter(RegularExpression regex) {
@@ -266,7 +264,7 @@ public class URIQueryParameters {
 
         @Override
         public boolean accept(File dir, String name) {
-            return new File(dir, name).isDirectory() || pattern.matches(name);
+            return new File(dir, name).isDirectory() || pattern.matches(StringView.of(name).tidy());
         }
 
         /**
@@ -276,7 +274,7 @@ public class URIQueryParameters {
          * @return true if the name matches the pattern.
          */
         public boolean matches(String name) {
-            return pattern.matches(name);
+            return pattern.matches(StringView.of(name).tidy());
         }
     }
 

@@ -19,8 +19,8 @@ import javax.xml.transform.SourceLocator;
 
 public class Loc implements Location {
 
-    private String systemId;
-    private int lineNumber;
+    private final String systemId;
+    private final int lineNumber;
     private int columnNumber = -1;
 
     public static Loc NONE = new Loc(null, -1, -1);

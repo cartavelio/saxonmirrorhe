@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class AttributeMapWithIdentity implements AttributeMap {
 
-    private List<AttributeInfo> attributes;
+    private final List<AttributeInfo> attributes;
 
     AttributeMapWithIdentity(List<AttributeInfo> attributes) {
         this.attributes = attributes;

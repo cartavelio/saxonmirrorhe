@@ -25,8 +25,8 @@ import net.sf.saxon.trans.XPathException;
 
 public class MappingIterator implements SequenceIterator {
 
-    private SequenceIterator base;
-    private MappingFunction action;
+    private final SequenceIterator base;
+    private final MappingFunction action;
     private SequenceIterator results = null;
 
     /**

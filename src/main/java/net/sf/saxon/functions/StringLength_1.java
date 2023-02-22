@@ -12,11 +12,12 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.One;
 import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Implement the XPath string-length() function
@@ -50,16 +51,16 @@ public class StringLength_1 extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        if (arg instanceof StringValue) {
-            return Int64Value.makeIntegerValue(((StringValue) arg).getStringLength());
+        if (arg instanceof StringItem) {
+            return Int64Value.makeIntegerValue(((StringItem) arg).length());
         } else {
-            CharSequence s;
+            UnicodeString s;
             try {
-                s = arg.getStringValueCS();
+                s = arg.getUnicodeStringValue();
             } catch (UnsupportedOperationException e) {
                 throw new XPathException("Cannot get the string value of a function item", "FOTY0013");
             }
-            return Int64Value.makeIntegerValue(StringValue.getStringLength(s));
+            return Int64Value.makeIntegerValue(s.length());
         }
     }
 

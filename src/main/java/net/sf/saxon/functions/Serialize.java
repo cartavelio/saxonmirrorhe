@@ -23,11 +23,11 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -101,7 +101,7 @@ public class Serialize extends SystemFunction implements Callable {
         return "Q{" + NamespaceConstant.SAXON + "}" + s;
     }
 
-    private String[] paramNames = new String[]{
+    private final String[] paramNames = new String[]{
         "allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "doctype-public", "doctype-system",
         "encoding", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator",
         "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone",
@@ -117,7 +117,7 @@ public class Serialize extends SystemFunction implements Callable {
         return false;
     }
 
-    private String[] paramNamesSaxon = new String[]{
+    private final String[] paramNamesSaxon = new String[]{
             "attribute-order", "character-representation", "double-space", "indent-spaces", "line-length",
             /*"next-in-chain",*/ "property-order", "recognize-binary", "require-well-formed", "single-quotes",
             "supply-source-locator", "suppress-indentation"
@@ -196,7 +196,7 @@ public class Serialize extends SystemFunction implements Callable {
         AtomicIterator<?> keysIterator = map.keys();
         AtomicValue key;
         while ((key = keysIterator.next()) != null) {
-            if (key instanceof StringValue) {
+            if (key instanceof StringItem) {
                 String keyName = key.getStringValue();
                 if (isParamName(keyName)) {
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
@@ -208,9 +208,9 @@ public class Serialize extends SystemFunction implements Callable {
                     result = result.addEntry(key, converted.materialize());
                 }
             } else if (key instanceof QNameValue) {
-                if (key.getComponent(AccessorFn.Component.NAMESPACE).getStringValue().equals("")) {
+                if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals("")) {
                     throw new XPathException("A serialization parameter supplied with a QName key must have non-absent namespace", "SEPM0017");
-                } else if (key.getComponent(AccessorFn.Component.NAMESPACE).getStringValue().equals("http://saxon.sf.net/")) {
+                } else if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals("http://saxon.sf.net/")) {
                     // Capture Saxon serialization parameters
                     String keyName = ((QNameValue) key).getLocalName();
                     if (isParamNameSaxon(keyName)) {
@@ -264,10 +264,10 @@ public class Serialize extends SystemFunction implements Callable {
             if (item instanceof QNameValue) {
                 QNameValue qNameValue = (QNameValue) item;
                 stringVal.append(" Q{")
-                        .append(qNameValue.getComponent(AccessorFn.Component.NAMESPACE).getStringValue())
+                        .append(qNameValue.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue())
                         .append('}')
-                        .append(qNameValue.getComponent(AccessorFn.Component.LOCALNAME).getStringValue());
-            } else if (allowStar && item instanceof StringValue && item.getStringValue().equals("*")) {
+                        .append(qNameValue.getComponent(AccessorFn.Component.LOCALNAME).getUnicodeStringValue());
+            } else if (allowStar && item instanceof StringItem && item.getUnicodeStringValue().equals("*")) {
                 stringVal.append(" *");
             } else {
                 throw new XPathException("Invalid serialization parameter value: expected sequence of QNames "
@@ -285,7 +285,7 @@ public class Serialize extends SystemFunction implements Callable {
         Item item;
         StringBuilder stringVal = new StringBuilder();
         while ((item = iterator.next()) != null) {
-            stringVal.append(" ").append(item.getStringValue());
+            stringVal.append(" ").append(item.getUnicodeStringValue());
         }
         return stringVal.toString();
     }
@@ -314,15 +314,15 @@ public class Serialize extends SystemFunction implements Callable {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         for (KeyValuePair pair : map.keyValuePairs()) {
             AtomicValue key = pair.key;
-            if (!(key instanceof StringValue)) {
+            if (!(key instanceof StringItem)) {
                 throw new XPathException(
                         "Keys in a character map must all be strings. Found a value of type " + key.getItemType(), "XPTY0004");
             }
-            if (((StringValue) key).getStringLength() != 1) {
-                throw new XPathException("Keys in a character map must all be one-character strings. Found " + Err.wrap(key.toString()), "SEPM0016");
+            if (((StringItem) key).length() != 1) {
+                throw new XPathException("Keys in a character map must all be one-character strings. Found " + Err.wrap(key.show()), "SEPM0016");
             }
             if (!SequenceType.SINGLE_STRING.matches(pair.value, th)) {
-                throw new XPathException("Values in a character map must all be single strings. Found " + Err.wrap(key.toString()), "XPTY0004");
+                throw new XPathException("Values in a character map must all be single strings. Found " + Err.wrap(key.show()), "XPTY0004");
             }
         }
         return map;
@@ -340,14 +340,13 @@ public class Serialize extends SystemFunction implements Callable {
         AtomicValue charKey;
         IntHashMap<String> intHashMap = new IntHashMap<>();
         while ((charKey = iterator.next()) != null) {
-            String ch = charKey.getStringValue();
+            UnicodeString ch = ((StringItem)charKey).getUnicodeStringValue();
             String str = charMap.get(charKey).head().getStringValue();
-            UnicodeString chValue = UnicodeString.makeUnicodeString(ch);
-            if (chValue.uLength() != 1) {
+            if (ch.length() != 1) {
                 throw new XPathException("In the serialization parameter for the character map, each character to be mapped " +
                     "must be a single Unicode character", "SEPM0016");
             }
-            int code = chValue.uCharAt(0);
+            int code = ch.codePointAt(0);
             String prev = intHashMap.put(code, str);
             if (prev != null) { // This should never happen in this case because keys in a HashTrieMap must be unique
                 throw new XPathException("In the serialization parameters, the character map contains two entries for the character \\u" +
@@ -467,12 +466,12 @@ public class Serialize extends SystemFunction implements Callable {
 
 
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         return evalSerialize(arguments[0].iterate(),
             arguments.length == 1 ? null : arguments[1].head(), context);
     }
 
-    private StringValue evalSerialize(SequenceIterator iter, Item param, XPathContext context) throws XPathException {
+    private StringItem evalSerialize(SequenceIterator iter, Item param, XPathContext context) throws XPathException {
 
         SerializationProperties params;
 
@@ -500,7 +499,7 @@ public class Serialize extends SystemFunction implements Callable {
                 while ((k = keyIter.next()) != null) {
                     if (k instanceof QNameValue) {
                         String s = ((QNameValue) k).getStructuredQName().getEQName();
-                        paramMap = paramMap.addEntry(new StringValue(s), paramMap.get(k));
+                        paramMap = paramMap.addEntry(new StringItem(s), paramMap.get(k));
                     }
                 }
                 Map<String, Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);
@@ -531,7 +530,7 @@ public class Serialize extends SystemFunction implements Callable {
             PipelineConfiguration pipe = context.getConfiguration().makePipelineConfiguration();
             Receiver out = sf.getReceiver(new StreamResult(result), params, pipe);
             SequenceCopier.copySequence(iter, out);
-            return new StringValue(result.toString());
+            return new StringItem(result.toString());
         } catch (XPathException e) {
             e.maybeSetErrorCode("SENR0001");
             throw e;

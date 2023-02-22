@@ -9,16 +9,18 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class ARegexIterator - provides an iterator over matched and unmatched substrings.
@@ -27,9 +29,9 @@ import java.util.List;
 
 public class ARegexIterator implements RegexIterator, LastPositionFinder {
 
-    private UnicodeString theString;   // the input string being matched
-    private UnicodeString regex;
-    private REMatcher matcher;    // the Matcher object that does the matching, and holds the state
+    private final UnicodeString theString;   // the input string being matched
+    private final UnicodeString regex;
+    private final REMatcher matcher;    // the Matcher object that does the matching, and holds the state
     private UnicodeString current;     // the string most recently returned by the iterator
     private UnicodeString next;        // if the last string was a matching string, null; otherwise the next substring
     //        matched by the regex
@@ -49,6 +51,9 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     public ARegexIterator(UnicodeString string, UnicodeString regex, REMatcher matcher) {
+        Objects.requireNonNull(string);
+        Objects.requireNonNull(regex);
+        Objects.requireNonNull(matcher);
         theString = string;
         this.regex = regex;
         this.matcher = matcher;
@@ -72,7 +77,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public StringValue next() throws XPathException {
+    public StringItem next() throws XPathException {
         try {
             if (next == null && prevEnd >= 0) {
                 // we've returned a match (or we're at the start), so find the next match
@@ -80,9 +85,9 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                 if (skip) {
                     // previous match was zero-length
                     searchStart++;
-                    if (searchStart >= theString.uLength()) {
-                        if (prevEnd < theString.uLength()) {
-                            current = theString.uSubstring(prevEnd, theString.uLength());
+                    if (searchStart >= theString.length()) {
+                        if (prevEnd < theString.length()) {
+                            current = theString.substring(prevEnd);
                             next = null;
                         } else {
                             current = null;
@@ -98,17 +103,17 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                     if (prevEnd == start) {
                         // there's no intervening non-matching string to return
                         next = null;
-                        current = theString.uSubstring(start, end);
+                        current = theString.substring(start, end);
                         prevEnd = end;
                     } else {
                         // return the non-matching substring first
-                        current = theString.uSubstring(prevEnd, start);
-                        next = theString.uSubstring(start, end);
+                        current = theString.substring(prevEnd, start);
+                        next = theString.substring(start, end);
                     }
                 } else {
                     // there are no more regex matches, we must return the final non-matching text if any
-                    if (prevEnd < theString.uLength()) {
-                        current = theString.uSubstring(prevEnd, theString.uLength());
+                    if (prevEnd < theString.length()) {
+                        current = theString.substring(prevEnd);
                         next = null;
                     } else {
                         // this really is the end...
@@ -137,8 +142,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         }
     }
 
-    private StringValue currentStringValue() {
-        return StringValue.makeStringValue(current);
+    private StringItem currentStringValue() {
+        return new StringItem(current);
     }
 
 
@@ -146,8 +151,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+     *         and {@link Property#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
@@ -209,11 +214,11 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
     public void processMatchingSubstring(MatchHandler action) throws XPathException {
         int c = matcher.getParenCount() - 1;
         if (c == 0) {
-            action.characters(current.toString());
+            action.characters(current);
         } else {
             // Create a map from positions in the string to lists of actions.
             // The "actions" in each list are: +N: start group N; -N: end group N.
-            IntHashMap<List<Integer>> actions = new IntHashMap<List<Integer>>(c);
+            IntHashMap<List<Integer>> actions = new IntHashMap<>(c);
             for (int i = 1; i <= c; i++) {
                 int start = matcher.getParenStart(i) - matcher.getParenStart(0);
                 if (start != -1) {
@@ -222,14 +227,14 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                         // Add the start action after all other actions on the list for the same position
                         List<Integer> s = actions.get(start);
                         if (s == null) {
-                            s = new ArrayList<Integer>(4);
+                            s = new ArrayList<>(4);
                             actions.put(start, s);
                         }
                         s.add(i);
                         // Add the end action before all other actions on the list for the same position
                         List<Integer> e = actions.get(end);
                         if (e == null) {
-                            e = new ArrayList<Integer>(4);
+                            e = new ArrayList<>(4);
                             actions.put(end, e);
                         }
                         e.add(0, -i);
@@ -266,13 +271,13 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                 }
 
             }
-            FastStringBuffer buff = new FastStringBuffer(current.uLength());
-            for (int i = 0; i < current.uLength() + 1; i++) {
+            UnicodeBuilder buff = new UnicodeBuilder();
+            for (int i = 0; i < current.length() + 1; i++) {
                 List<Integer> events = actions.get(i);
                 if (events != null) {
-                    if (buff.length() > 0) {
-                        action.characters(buff);
-                        buff.setLength(0);
+                    if (!buff.isEmpty()) {
+                        action.characters(buff.toUnicodeString());
+                        buff.clear();
                     }
                     for (Integer group : events) {
                         if (group > 0) {
@@ -282,12 +287,12 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                         }
                     }
                 }
-                if (i < current.uLength()) {
-                    buff.appendWideChar(current.uCharAt(i));
+                if (i < current.length()) {
+                    buff.append(current.codePointAt(i));
                 }
             }
-            if (buff.length() > 0) {
-                action.characters(buff);
+            if (!buff.isEmpty()) {
+                action.characters(buff.toUnicodeString());
             }
         }
 
@@ -303,15 +308,15 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
     public static IntToIntHashMap computeNestingTable(UnicodeString regex) {
         // See bug 3211
         IntToIntHashMap nestingTable = new IntToIntHashMap(16);
-        int[] stack = new int[regex.uLength()];
+        int[] stack = new int[regex.length32()];
         int tos = 0;
-        boolean[] captureStack = new boolean[regex.uLength()];
+        boolean[] captureStack = new boolean[regex.length32()];
         int captureTos = 0;
         int group = 1;
         int inBrackets = 0;
         stack[tos++] = 0;
-        for (int i = 0; i < regex.uLength(); i++) {
-            int ch = regex.uCharAt(i);
+        for (int i = 0; i < regex.length(); i++) {
+            int ch = regex.codePointAt(i);
             if (ch == '\\') {
                 i++;
             } else if (ch == '[') {
@@ -319,7 +324,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
             } else if (ch == ']') {
                 inBrackets--;
             } else if (ch == '(' && inBrackets == 0) {
-                boolean capture = regex.uCharAt(i + 1) != '?';
+                boolean capture = regex.codePointAt(i + 1) != '?';
                 captureStack[captureTos++] = capture;
                 if (capture) {
                     nestingTable.put(group, stack[tos - 1]);

@@ -647,7 +647,7 @@ public abstract class NodeOverNodeInfo implements Node {
             AxisIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
             NodeInfo ns;
             while ((ns = iter.next()) != null) {
-                if (ns.getStringValue().equals(namespaceURI)) {
+                if (ns.getUnicodeStringValue().equals(namespaceURI)) {
                     return ns.getLocalPart();
                 }
             }

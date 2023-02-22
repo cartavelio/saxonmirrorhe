@@ -12,17 +12,15 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +31,9 @@ import java.util.List;
 
 public class AnalyzeString extends Instruction implements ContextOriginator {
 
-    private Operand selectOp;
-    private Operand regexOp;
-    private Operand flagsOp;
+    private final Operand selectOp;
+    private final Operand regexOp;
+    private final Operand flagsOp;
     private Operand matchingOp;
     private Operand nonMatchingOp;
 
@@ -223,11 +221,11 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
     public void precomputeRegex(Configuration config, List<String> warnings) throws XPathException {
         if (pattern == null && getRegex() instanceof StringLiteral && getFlags() instanceof StringLiteral) {
             try {
-                final CharSequence regex = ((StringLiteral) this.getRegex()).getStringValue();
-                final CharSequence flagstr = ((StringLiteral) getFlags()).getStringValue();
+                final String regex = ((StringLiteral) this.getRegex()).stringify();
+                final String flagstr = ((StringLiteral) getFlags()).stringify();
 
                 String hostLang = "XP30";
-                pattern = config.compileRegularExpression(regex, flagstr.toString(), hostLang, warnings);
+                pattern = config.compileRegularExpression(StringView.tidy(regex), flagstr, hostLang, warnings);
 
             } catch (XPathException err) {
                 if ("XTDE1150".equals(err.getErrorCodeLocalPart())) {
@@ -395,17 +393,19 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
      */
 
     private RegexIterator getRegexIterator(XPathContext context) throws XPathException {
-        CharSequence input = getSelect().evaluateAsString(context);
-
+        StringItem input = (StringItem)getSelect().evaluateItem(context);
+        if (input == null) {
+            input = StringItem.EMPTY_STRING;
+        }
         RegularExpression re = pattern;
         if (re == null) {
             String flagstr = getFlags().evaluateAsString(context).toString();
-            StringValue regexString = (StringValue)getRegex().evaluateItem(context);
+            StringItem regexString = (StringItem)getRegex().evaluateItem(context);
             re = context.getConfiguration().compileRegularExpression(
-                        getRegex().evaluateAsString(context), flagstr, "XP30", null);
+                    regexString.getUnicodeStringValue(), flagstr, "XP30", null);
         }
 
-        return re.analyze(input);
+        return re.analyze(input.getUnicodeStringValue());
     }
 
     /**

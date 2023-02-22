@@ -15,7 +15,7 @@ public class UnicodeTests {
     public void testCharacterIterator() {
         int[] ch = new int[]{65536, 65537, 65538};
         String s = new String(ch, 0, ch.length);
-        StringValue sv = new StringValue(s);
+        StringItem sv = new StringItem(s);
         UnfailingIterator it = sv.iterateCharacters();
         long next = ((Int64Value)it.next()).longValue();
         assertTrue(next == 65536);

@@ -9,11 +9,11 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
@@ -25,8 +25,6 @@ import java.util.Stack;
 /**
  * The TinyBuilder class is responsible for taking a stream of SAX events and constructing
  * a Document tree, using the "TinyTree" implementation.
- *
- * @author Michael H. Kay
  */
 
 public class TinyBuilder extends Builder {
@@ -38,7 +36,7 @@ public class TinyBuilder extends Builder {
     // the length of parent searches
 
     /*@Nullable*/ private TinyTree tree;
-    private Stack<NamespaceMap> namespaceStack = new Stack<>();
+    private final Stack<NamespaceMap> namespaceStack = new Stack<>();
 
     private int currentDepth = 0;
     private int nodeNr = 0;             // this is the local sequence within this document
@@ -47,7 +45,7 @@ public class TinyBuilder extends Builder {
     private Statistics statistics;
     private boolean markDefaultedAttributes = false;
     private Eligibility textualElementEligibilityState = Eligibility.INELIGIBLE;
-
+    private UnicodeBuilder commentBuilder = new UnicodeBuilder();
 
     /**
      * Create a TinyTree builder
@@ -176,6 +174,8 @@ public class TinyBuilder extends Builder {
     public void endDocument() throws XPathException {
 //        System.err.println("TinyBuilder: " + this + " End document");
 
+        tree.commentBuffer = commentBuilder.toUnicodeString();
+
         // Add a stopper node to ensure no-one walks off the end of the array; but
         // decrement numberOfNodes so the next node will overwrite it
         tree.addNode(Type.STOPPER, 0, 0, 0, -1);
@@ -208,8 +208,11 @@ public class TinyBuilder extends Builder {
 
     @Override
     public void close() throws XPathException {
+        //System.err.println("TinyBuilder.close() " + this);
         TinyTree tt = tree;
         if (tt != null) {
+            tree.commentBuffer = commentBuilder.toUnicodeString();
+            //tree.textBuffer.close();
             tt.addNode(Type.STOPPER, 0, 0, 0, -1);
             tt.condense(statistics);
         }
@@ -337,7 +340,7 @@ public class TinyBuilder extends Builder {
     }
 
 
-    private void attribute2(/*@NotNull*/ NodeName attName, SimpleType type, CharSequence value, Location locationId, int properties)
+    private void attribute2(/*@NotNull*/ NodeName attName, SimpleType type, String value, Location locationId, int properties)
             throws XPathException {
         // System.err.println("attribute " + nameCode + "=" + value);
         int fp = attName.obtainFingerprint(namePool);
@@ -416,8 +419,7 @@ public class TinyBuilder extends Builder {
      */
 
     @Override
-    public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
-        //System.err.println("characters: " + chars);
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (chars instanceof CompressedWhitespace &&
                 ReceiverOption.contains(properties, ReceiverOption.WHOLE_TEXT_NODE)) {
             TinyTree tt = tree;
@@ -438,9 +440,8 @@ public class TinyBuilder extends Builder {
             return;
         }
 
-        final int len = chars.length();
-        if (len > 0) {
-            nodeNr = makeTextNode(chars, len);
+        if (!chars.isEmpty()) {
+            nodeNr = makeTextNode(chars.tidy());
             if (lineNumbering) {
                 tree.setLineNumber(nodeNr, locationId.getLineNumber(), locationId.getColumnNumber());
             }
@@ -455,22 +456,28 @@ public class TinyBuilder extends Builder {
      * on the tree is already a text node, the new text will be appended to it.
      *
      * @param chars the contents of the text node
-     * @param len   the length of the text node
      * @return the node number of the created text node, or the text node to which
      *         this text has been appended.
      */
 
-    protected int makeTextNode(CharSequence chars, int len) {
+    protected int makeTextNode(UnicodeString chars) {
         TinyTree tt = tree;
         assert tt != null;
-        int bufferStart = tt.getCharacterBuffer().length();
+
+//        LargeTextBuffer buffer = tt.textBuffer;
+//        int bufferStart = buffer.length();
+//        tt.appendChars(chars);
+//        int bufferEnd = buffer.length();
+//        int len = bufferEnd - bufferStart;
+//        int n = tt.numberOfNodes - 1;
+//        if (tt.nodeKind[n] == Type.TEXT && tt.depth[n] == currentDepth) {
+//            // merge this text node with the previous text node
+//            tt.beta[n] += len;
+//        } else {
+            //System.err.println("Adding text node (" + bufferStart + " - " + bufferEnd + ") - " + Err.wrap(chars));
+            //nodeNr = tt.addNode(Type.TEXT, currentDepth, bufferStart, len, -1);
+        nodeNr = tt.addNode(Type.TEXT, currentDepth, tt.textChunksUsed, -1, -1);
         tt.appendChars(chars);
-        int n = tt.numberOfNodes - 1;
-        if (tt.nodeKind[n] == Type.TEXT && tt.depth[n] == currentDepth) {
-            // merge this text node with the previous text node
-            tt.beta[n] += len;
-        } else {
-            nodeNr = tt.addNode(Type.TEXT, currentDepth, bufferStart, len, -1);
 
             int prev = prevAtDepth[currentDepth];
             if (prev > 0) {
@@ -479,7 +486,7 @@ public class TinyBuilder extends Builder {
             tt.next[nodeNr] = prevAtDepth[currentDepth - 1];
             prevAtDepth[currentDepth] = nodeNr;
             siblingsAtDepth[currentDepth]++;
-        }
+//        }
         return nodeNr;
     }
 
@@ -488,19 +495,16 @@ public class TinyBuilder extends Builder {
      */
 
     @Override
-    public void processingInstruction(String piname, /*@NotNull*/ CharSequence remainder, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String piname, /*@NotNull*/ CodePoints remainder, Location locationId, int properties) throws XPathException {
         TinyTree tt = tree;
         assert tt != null;
 
         textualElementEligibilityState = Eligibility.INELIGIBLE;
-        if (tt.commentBuffer == null) {
-            tt.commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
-        }
-        int s = tt.commentBuffer.length();
-        tt.commentBuffer.append(remainder.toString());
+        int s = (int)commentBuilder.length();
+        commentBuilder.append(remainder);
         int nameCode = namePool.allocateFingerprint("", piname);
 
-        nodeNr = tt.addNode(Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.length(),
+        nodeNr = tt.addNode(Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.tidy().length32(),
                 nameCode);
 
         int prev = prevAtDepth[currentDepth];
@@ -527,17 +531,14 @@ public class TinyBuilder extends Builder {
      */
 
     @Override
-    public void comment(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
         TinyTree tt = tree;
         assert tt != null;
 
         textualElementEligibilityState = Eligibility.INELIGIBLE;
-        if (tt.commentBuffer == null) {
-            tt.commentBuffer = new FastStringBuffer(FastStringBuffer.C256);
-        }
-        int s = tt.commentBuffer.length();
-        tt.commentBuffer.append(chars.toString());
-        nodeNr = tt.addNode(Type.COMMENT, currentDepth, s, chars.length(), -1);
+        int s = (int)commentBuilder.length();
+        commentBuilder.append(chars);
+        nodeNr = tt.addNode(Type.COMMENT, currentDepth, s, chars.tidy().length32(), -1);
 
         int prev = prevAtDepth[currentDepth];
         if (prev > 0) {

@@ -75,7 +75,7 @@ public class HashTrieMap implements MapItem {
 
     /**
      * Create a singleton map with a single key and value
-     * @param key   the key value
+     * @param key the key value
      * @param value the associated value
      * @return a singleton map
      */
@@ -96,13 +96,14 @@ public class HashTrieMap implements MapItem {
 
     /**
      * Create a map whose entries are copies of the entries in an existing MapItem
-     * @param map the existing map to be copied
+     *
+     * @param map       the existing map to be copied
      * @return the new map
      */
 
     public static HashTrieMap copy(MapItem map) {
         if (map instanceof HashTrieMap) {
-            return (HashTrieMap) map;
+            return (HashTrieMap)map;
         }
         HashTrieMap m2 = new HashTrieMap();
         for (KeyValuePair pair : map.keyValuePairs()) {
@@ -113,12 +114,15 @@ public class HashTrieMap implements MapItem {
 
     /**
      * After adding an entry to the map, update the cached type information
-     * @param key      the new key
-     * @param val      the new associated value
+     * @param key the new key
+     * @param val the new associated value
      * @param wasEmpty true if the map was empty before adding these values
      */
 
     private void updateTypeInformation(AtomicValue key, Sequence val, boolean wasEmpty) {
+//        if (Instrumentation.ACTIVE) {
+//            Instrumentation.count("updateTypeInformation");
+//        }
         if (wasEmpty) {
             keyUType = key.getUType();
             valueUType = SequenceTool.getUType(val);
@@ -149,7 +153,7 @@ public class HashTrieMap implements MapItem {
         }
         int count = 0;
         //noinspection UnusedDeclaration
-        for (KeyValuePair entry : keyValuePairs()) {
+        for (KeyValuePair entry: keyValuePairs()) {
             count++;
         }
         return entries = count;
@@ -170,7 +174,7 @@ public class HashTrieMap implements MapItem {
      *
      * @param requiredKeyType   the required keyType
      * @param requiredValueType the required valueType
-     * @param th                the type hierarchy cache for the configuration
+     * @param th        the type hierarchy cache for the configuration
      * @return true if the map conforms to the required type
      */
     @Override
@@ -257,7 +261,7 @@ public class HashTrieMap implements MapItem {
                 valueType = SequenceTool.getItemType(val, th);
                 valueCard = SequenceTool.getCardinality(val);
             } else {
-                keyType = (AtomicType) Type.getCommonSuperType(keyType, key.getItemType(), th);
+                keyType = (AtomicType)Type.getCommonSuperType(keyType, key.getItemType(), th);
                 valueType = Type.getCommonSuperType(valueType, SequenceTool.getItemType(val, th), th);
                 valueCard = Cardinality.union(valueCard, SequenceTool.getCardinality(val));
             }
@@ -280,7 +284,7 @@ public class HashTrieMap implements MapItem {
      * Get the lowest common item type of the keys in the map
      *
      * @return the most specific type to which all the keys belong. If the map is
-     * empty, return UType.VOID (the type with no instances)
+     *         empty, return UType.VOID (the type with no instances)
      */
     @Override
     public UType getKeyUType() {
@@ -292,8 +296,8 @@ public class HashTrieMap implements MapItem {
      * without modifying the original. If there is already an entry with the specified key,
      * this entry is replaced by the new entry.
      *
-     * @param key   the key of the new entry
-     * @param value the value associated with the new entry
+     * @param key     the key of the new entry
+     * @param value   the value associated with the new entry
      * @return the new map containing the additional entry
      */
 
@@ -316,8 +320,8 @@ public class HashTrieMap implements MapItem {
      * must only be called while initially populating the map, and must not be called if
      * anyone else might already be using the map.
      *
-     * @param key   the key of the new entry. Any existing entry with this key is replaced.
-     * @param value the value associated with the new entry
+     * @param key     the key of the new entry. Any existing entry with this key is replaced.
+     * @param value   the value associated with the new entry
      * @return true if an existing entry with the same key was replaced
      */
 
@@ -341,9 +345,9 @@ public class HashTrieMap implements MapItem {
     /**
      * Remove an entry from the map
      *
-     * @param key the key of the entry to be removed
+     * @param key     the key of the entry to be removed
      * @return a new map in which the requested entry has been removed; or this map
-     * unchanged if the specified key was not present
+     *         unchanged if the specified key was not present
      */
 
     @Override
@@ -360,27 +364,27 @@ public class HashTrieMap implements MapItem {
         result.keyUType = keyUType;
         result.valueUType = valueUType;
         result.valueCardinality = valueCardinality;
-        result.entries = entries - 1;
+        result.entries = entries-1;
         return result;
     }
 
     /**
      * Get an entry from the Map
      *
-     * @param key the value of the key
+     * @param key     the value of the key
      * @return the value associated with the given key, or null if the key is not present in the map
      */
 
     @Override
-    public GroundedValue get(AtomicValue key) {
+    public GroundedValue get(AtomicValue key)  {
         KeyValuePair o = imap.get(makeKey(key));
-        return o == null ? null : o.value;
+        return o==null ? null : o.value;
     }
 
     /**
      * Get an key/value pair from the Map
      *
-     * @param key the value of the key
+     * @param key     the value of the key
      * @return the key-value-pair associated with the given key, or null if the key is not present in the map
      */
 
@@ -390,7 +394,6 @@ public class HashTrieMap implements MapItem {
 
     /**
      * Get the set of all key values in the map
-     *
      * @return an iterator over the keys, in undefined order
      */
 
@@ -398,7 +401,7 @@ public class HashTrieMap implements MapItem {
     public AtomicIterator<? extends AtomicValue> keys() {
         return new AtomicIterator<AtomicValue>() {
 
-            Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
+            final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
 
             @Override
             public AtomicValue next() {
@@ -415,7 +418,7 @@ public class HashTrieMap implements MapItem {
     /**
      * Get the set of all key-value pairs in the map
      *
-     * @return an iterable whose iterator delivers the key-value pairs
+     * @return an iterator over the key-value pairs
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
@@ -465,7 +468,7 @@ public class HashTrieMap implements MapItem {
 //        } else if (size > 5) {
 //            return "map{(:size " + size + ":)}";
 //        } else {
-//            FastStringBuffer buff = new FastStringBuffer(256);
+//            StringBuilder buff = new StringBuilder(256);
 //            buff.append("map{");
 //            Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> iter = imap.iterator();
 //            while (iter.hasNext()) {

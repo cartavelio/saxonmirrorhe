@@ -18,7 +18,11 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
+import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -37,7 +41,7 @@ import java.util.Properties;
 
 public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutputProperties {
 
-    private Writer writer;
+    private final Writer writer;
     private CharacterMap characterMap;
     private Properties outputProperties;
     private String itemSeparator = "\n";
@@ -89,6 +93,14 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         }
     }
 
+    private void emit(CodePoints s) throws XPathException {
+        try {
+            s.write(writer);
+        } catch (IOException e) {
+            throw new XPathException(e);
+        }
+    }
+
     /**
      * Abstract method to be supplied by subclasses: output one item in the sequence.
      *
@@ -122,19 +134,19 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         }
     }
 
+    static ARegularExpression QUOTES = ARegularExpression.compile("\"", "");
+
     private String serializeAtomicValue(AtomicValue value) throws XPathException {
         switch(value.getPrimitiveType().getFingerprint()) {
             case StandardNames.XS_STRING:
             case StandardNames.XS_ANY_URI:
             case StandardNames.XS_UNTYPED_ATOMIC: {
-                String s = value.getStringValue();
-                if (s.contains("\"")) {
-                    s = s.replace("\"", "\"\"");
-                }
+                UnicodeString s = value.getUnicodeStringValue();
+                s = QUOTES.replace(s, BMPString.of("\"\""));
                 if (characterMap != null) {
-                    s = characterMap.map(s, false).toString();
+                    s = characterMap.map(s, false);
                 }
-                return "\"" + s + "\"";
+                return "\"" + s.toString() + "\"";
             }
             case StandardNames.XS_BOOLEAN:
                 return value.effectiveBooleanValue() ? "true()" : "false()";
@@ -158,11 +170,11 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             case StandardNames.XS_G_DAY:
             case StandardNames.XS_HEX_BINARY:
             case StandardNames.XS_BASE64_BINARY:
-                return value.getPrimitiveType().getDisplayName() + "(\"" + value.getStringValue() + "\")";
+                return value.getPrimitiveType().getDisplayName() + "(\"" + value.getUnicodeStringValue() + "\")";
 
             case StandardNames.XS_DAY_TIME_DURATION:
             case StandardNames.XS_YEAR_MONTH_DURATION:
-                return "xs:duration(\"" + value.getStringValue() + "\")";
+                return "xs:duration(\"" + value.getUnicodeStringValue() + "\")";
 
             case StandardNames.XS_QNAME:
             case StandardNames.XS_NOTATION:
@@ -197,13 +209,13 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             case Type.ATTRIBUTE:
                 emit(node.getDisplayName());
                 emit("=\"");
-                emit(node.getStringValueCS());
+                emit(node.getUnicodeStringValue());
                 emit("\"");
                 break;
             case Type.NAMESPACE:
                 emit(node.getLocalPart().isEmpty() ? "xmlns" : "xmlns:" + node.getLocalPart());
                 emit("=\"");
-                emit(node.getStringValueCS());
+                emit(node.getUnicodeStringValue());
                 emit("\"");
                 break;
             default:

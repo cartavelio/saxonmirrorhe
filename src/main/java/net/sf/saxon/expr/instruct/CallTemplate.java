@@ -17,7 +17,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
@@ -32,12 +32,12 @@ import java.util.Arrays;
 public class CallTemplate extends Instruction implements ITemplateCall, ComponentInvocation {
 
     private NamedTemplate template = null; // Null only for saxon:call-template
-    private StructuredQName calledTemplateName;   // the name of the called template
+    private final StructuredQName calledTemplateName;   // the name of the called template
     private WithParam[] actualParams = WithParam.EMPTY_ARRAY;
     private WithParam[] tunnelParams = WithParam.EMPTY_ARRAY;
     private boolean useTailRecursion = false;
     private int bindingSlot = -1;
-    private boolean isWithinDeclaredStreamableConstruct;
+    private final boolean isWithinDeclaredStreamableConstruct;
 
     /**
      * Construct a CallTemplate instruction.
@@ -483,12 +483,12 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
 
     public static class CallTemplatePackage implements TailCall {
 
-        private Component targetComponent;
-        private ParameterSet params;
-        private ParameterSet tunnelParams;
-        private CallTemplate instruction;
-        private Outputter output;
-        private XPathContext evaluationContext;
+        private final Component targetComponent;
+        private final ParameterSet params;
+        private final ParameterSet tunnelParams;
+        private final CallTemplate instruction;
+        private final Outputter output;
+        private final XPathContext evaluationContext;
 
         /**
          * Construct a CallTemplatePackage that contains information about a call.
@@ -553,7 +553,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     @Override
     public String toString() {
         // fallback implementation
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder buff = new StringBuilder(64);
         buff.append("CallTemplate#");
         if (template.getObjectName() != null) {
             buff.append(template.getObjectName().getDisplayName());
@@ -575,7 +575,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     @Override
     public String toShortString() {
         // fallback implementation
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder buff = new StringBuilder(64);
         buff.append("CallTemplate#");
         buff.append(template.getObjectName().getDisplayName());
         return buff.toString();

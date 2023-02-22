@@ -53,9 +53,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class XPathCompiler {
 
-    private Processor processor;
-    private XPathEvaluator evaluator;
-    private IndependentContext env;
+    private final Processor processor;
+    private final XPathEvaluator evaluator;
+    private final IndependentContext env;
     private ItemType requiredContextItemType;
 
     private Map<String, XPathExecutable> cache = null;

@@ -11,8 +11,12 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -293,7 +297,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
     protected NodeInfo makeSeparator(XPathContext context) throws XPathException {
         NodeInfo separator;
-        CharSequence sepValue = separatorOp.getChildExpression().evaluateAsString(context);
+        UnicodeString sepValue = separatorOp.getChildExpression().evaluateAsString(context);
         Orphan orphan = new Orphan(context.getConfiguration());
         orphan.setNodeKind(Type.TEXT);
         orphan.setStringValue(sepValue);

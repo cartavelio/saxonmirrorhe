@@ -9,6 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.resource.Loader;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.stream.StreamSource;
@@ -137,9 +138,7 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
                     throw se;
                 }
             } else {
-                URL absoluteURL = absoluteURI.toURL();
-                URLConnection connection = absoluteURL.openConnection();
-                connection.connect();
+                URLConnection connection = Loader.urlConnection(absoluteURI.toURL());
                 is = connection.getInputStream();
 
                 // Get any external (HTTP) encoding label.

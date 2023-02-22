@@ -22,7 +22,7 @@ import net.sf.saxon.tree.AttributeLocation;
  */
 public class XmlProcessingException implements XmlProcessingError {
 
-    private XPathException exception;
+    private final XPathException exception;
     private boolean isWarning;
     private String fatalErrorMessage;
 

@@ -11,6 +11,8 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
@@ -20,9 +22,9 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.jiter.MonoIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.str.UnicodeBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -261,8 +263,8 @@ public abstract class ParentNodeImpl extends NodeImpl {
             if (node instanceof TextImpl) {
                 if (prevText) {
                     TextImpl prev = (TextImpl) c2[j - 1];
-                    prev.replaceStringValue(prev.getStringValue() + node.getStringValue());
-                } else if (!node.getStringValue().isEmpty()) {
+                    prev.replaceStringValue(prev.getUnicodeStringValue().concat(node.getUnicodeStringValue()));
+                } else if (!node.getUnicodeStringValue().isEmpty()) {
                     prevText = true;
                     node.setSiblingPosition(j);
                     c2[j++] = node;
@@ -289,29 +291,22 @@ public abstract class ParentNodeImpl extends NodeImpl {
      */
 
     @Override
-    public String getStringValue() {
-        return getStringValueCS().toString();
-    }
-
-
-    @Override
-    public CharSequence getStringValueCS() {
-        FastStringBuffer sb = null;
-
+    public UnicodeString getUnicodeStringValue() {
+        UnicodeBuilder sb = null;
         NodeImpl next = getFirstChild();
         while (next != null) {
             if (next instanceof TextImpl) {
                 if (sb == null) {
-                    sb = new FastStringBuffer(FastStringBuffer.C64);
+                    sb = new UnicodeBuilder();
                 }
-                sb.cat(next.getStringValueCS());
+                sb.append(next.getUnicodeStringValue());
             }
             next = next.getNextInDocument(this);
         }
         if (sb == null) {
-            return "";
+            return EmptyUniString.getInstance();
         }
-        return sb.condense();
+        return sb.toUnicodeString();
     }
 
     /**
@@ -406,10 +401,10 @@ public abstract class ParentNodeImpl extends NodeImpl {
             if (children instanceof TextImpl && source2[adjacent] instanceof TextImpl) {
                 if (index == 0) {
                     source2[adjacent].replaceStringValue(
-                            source2[adjacent].getStringValue() + ((TextImpl) children).getStringValue());
+                            source2[adjacent].getUnicodeStringValue().concat(((TextImpl) children).getUnicodeStringValue()));
                 } else {
                     source2[adjacent].replaceStringValue(
-                            ((TextImpl) children).getStringValue() + source2[adjacent].getStringValue());
+                            ((TextImpl) children).getUnicodeStringValue().concat(source2[adjacent].getUnicodeStringValue()));
                 }
                 children = cleanUpChildren(source2);
             } else {
@@ -440,11 +435,11 @@ public abstract class ParentNodeImpl extends NodeImpl {
             int kind = source.getNodeKind();
             switch (kind) {
                 case Type.TEXT:
-                    return new TextImpl(source.getStringValue());
+                    return new TextImpl(source.getUnicodeStringValue());
                 case Type.COMMENT:
-                    return new CommentImpl(source.getStringValue());
+                    return new CommentImpl(source.getUnicodeStringValue());
                 case Type.PROCESSING_INSTRUCTION:
-                    return new ProcInstImpl(source.getLocalPart(), source.getStringValue());
+                    return new ProcInstImpl(source.getLocalPart(), source.getUnicodeStringValue());
                 case Type.ELEMENT:
                     Builder builder = null;
                     try {

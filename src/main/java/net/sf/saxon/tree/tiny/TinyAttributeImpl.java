@@ -9,12 +9,12 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -83,7 +83,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
     protected long getSequenceNumber() {
         //noinspection ConstantConditions
         return
-                ((TinyNodeImpl) getParent()).getSequenceNumber()
+                getParent().getSequenceNumber()
                         + 0x8000 +
                         (nodeNr - tree.alpha[tree.attParent[nodeNr]]);
         // note the 0x8000 is to leave room for namespace nodes
@@ -107,19 +107,8 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
      */
 
     @Override
-    public CharSequence getStringValueCS() {
-        return tree.attValue[nodeNr];
-    }
-
-    /**
-     * Return the string value of the node.
-     *
-     * @return the attribute value
-     */
-
-    @Override
-    public String getStringValue() {
-        return tree.attValue[nodeNr].toString();
+    public UnicodeString getUnicodeStringValue() {
+        return StringView.of(tree.attValue[nodeNr]).tidy();
     }
 
     /**
@@ -244,7 +233,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         getParent().generateId(buffer);
         buffer.append("a");
         buffer.append(Integer.toString(tree.attCode[nodeNr]));

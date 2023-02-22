@@ -11,22 +11,26 @@ package net.sf.saxon.functions;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.number.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.regex.charclass.Categories;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
@@ -36,21 +40,14 @@ import java.util.function.IntPredicate;
 
 public class FormatInteger extends SystemFunction implements StatefulSystemFunction {
 
-    private static final RegularExpression badHashPattern;
-    private static final RegularExpression modifierPattern;
-    private static final RegularExpression decimalDigitPattern;
+    private static final RegularExpression badHashPattern
+            = ARegularExpression.compile("((\\d+|\\w+)#+.*)|(#+[^\\d]+)", "");
+    private static final RegularExpression modifierPattern
+            = ARegularExpression.compile("([co](\\(.*\\))?)?[at]?", "");
+    private static final RegularExpression decimalDigitPattern
+            = ARegularExpression.compile("^((\\p{Nd}|#|[^\\p{N}\\p{L}])+?)$", "");
 
     public static final String preface = "In the picture string for format-integer, ";
-
-    static {
-        try {
-            badHashPattern = new ARegularExpression("((\\d+|\\w+)#+.*)|(#+[^\\d]+)", "", "XP20", null, null);
-            modifierPattern = new ARegularExpression("([co](\\(.*\\))?)?[at]?", "", "XP20", null, null);
-            decimalDigitPattern = new ARegularExpression("^((\\p{Nd}|#|[^\\p{N}\\p{L}])+?)$", "", "XP20", null, null);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
-    }
 
     private Function<IntegerValue, String> formatter = null;
 
@@ -68,10 +65,12 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
         }
         Configuration config = visitor.getConfiguration();
 
-        String language = arguments.length == 3 ? ((Literal)arguments[2]).getValue().getStringValue() : config.getDefaultLanguage();
+        String language = arguments.length == 3
+                ? ((StringLiteral)arguments[2]).getGroundedValue().getStringValue()
+                : config.getDefaultLanguage();
         Numberer numb = config.makeNumberer(language, null);
 
-        formatter = makeFormatter(numb, ((Literal)arguments[1]).getValue().getStringValue());
+        formatter = makeFormatter(numb, ((StringLiteral)arguments[1]).getGroundedValue().getStringValue());
         return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
     }
 
@@ -85,19 +84,19 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         return formatInteger(
                 (IntegerValue) arguments[0].head(),
-                (StringValue) arguments[1].head(),
-                arguments.length == 2 ? null : (StringValue) arguments[2].head(),
+                (StringItem) arguments[1].head(),
+                arguments.length == 2 ? null : (StringItem) arguments[2].head(),
                 context);
     }
 
-    private StringValue formatInteger(IntegerValue num, StringValue picture, /*@Nullable*/ StringValue language, XPathContext context) throws XPathException {
+    private StringItem formatInteger(IntegerValue num, StringItem picture, /*@Nullable*/ StringItem language, XPathContext context) throws XPathException {
         Configuration config = context.getConfiguration();
 
         if (num == null) {
-            return StringValue.EMPTY_STRING;
+            return StringItem.EMPTY_STRING;
         }
 
         Function<IntegerValue, String> localFormatter = formatter;
@@ -116,7 +115,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
 
 
         try {
-            return new StringValue(localFormatter.apply(num));
+            return new StringItem(localFormatter.apply(num));
         } catch (UncheckedXPathException e) {
             throw e.getXPathException();
         }
@@ -139,7 +138,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
                 throw new XPathException(preface + "the primary format token cannot be empty", "FODF1310");
             }
             modifier = lastSemicolon < pic.length() - 1 ? pic.substring(lastSemicolon + 1) : "";
-            if (!modifierPattern.matches(modifier)) {
+            if (!modifierPattern.matches(StringView.tidy(modifier))) {
                 throw new XPathException(preface + "the modifier is invalid", "FODF1310");
             }
         } else {
@@ -161,22 +160,23 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
         String ordinalValue = ordinal ? "".equals(parenthetical) ? "yes" : parenthetical : "";
 
 
-        UnicodeString primary = UnicodeString.makeUnicodeString(primaryToken);
+        UnicodeString primary = StringView.tidy(primaryToken);
         IntPredicate isDecimalDigit = Categories.getCategory("Nd");
         boolean isDecimalDigitPattern = false;
-        for (int i = 0; i < primary.uLength(); i++) {
-            if (isDecimalDigit.test(primary.uCharAt(i))) {
+        IntIterator iter = primary.codePoints();
+        while (iter.hasNext()) {
+            if (isDecimalDigit.test(iter.next())) {
                 isDecimalDigitPattern = true;
                 break;
             }
         }
         if (isDecimalDigitPattern) {
-            if (!decimalDigitPattern.matches(primaryToken)) {
+            if (!decimalDigitPattern.matches(primary)) {
                 throw new XPathException(
                         preface + "the primary format token contains a decimal digit but does not " +
                                 "meet the rules for a decimal digit pattern", "FODF1310");
             }
-            NumericGroupFormatter picGroupFormat = getPicSeparators(primaryToken);
+            NumericGroupFormatter picGroupFormat = getPicSeparators(primary);
             UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
             return num -> {
                 try {
@@ -187,7 +187,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
                 }
             };
         } else {
-            UnicodeString token = UnicodeString.makeUnicodeString(primaryToken);
+            UnicodeString token = StringView.tidy(primaryToken);
             return num -> {
                 try {
                     String s = numb.format(num.abs().longValue(), token, null, letterValue, ordinalValue);
@@ -204,14 +204,13 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      * them out of the picture. Has side effect of creating a simplified picture, which
      * it makes available as the getAdjustedPicture() property of the returned NumericGroupFormatter.
      *
-     * @param pic the formatting picture, after stripping off any modifiers
+     * @param picExpanded the formatting picture, after stripping off any modifiers
      * @return a NumericGroupFormatter that implements the formatting defined in the picture
      * @throws net.sf.saxon.trans.XPathException
      *          if the picture is invalid
      */
-    public static NumericGroupFormatter getPicSeparators(String pic) throws XPathException {
+    public static NumericGroupFormatter getPicSeparators(UnicodeString picExpanded) throws XPathException {
 
-        UnicodeString picExpanded = UnicodeString.makeUnicodeString(pic);
         IntSet groupingPositions = new IntHashSet(5);
         List<Integer> separatorList = new ArrayList<>();
         int groupingPosition = 0; // number of digits to the right of a grouping separator
@@ -220,13 +219,13 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
         boolean regularCheck = true;
         int zeroDigit = -1;
 
-        if (badHashPattern.matches(pic)) {
+        if (badHashPattern.matches(picExpanded)) {
             throw new XPathException(preface + "the picture is not valid (it uses '#' where disallowed)", "FODF1310");
         }
 
-        for (int i = picExpanded.uLength() - 1; i >= 0; i--) {
+        for (long i = picExpanded.length() - 1; i >= 0; i--) {
 
-            final int codePoint = picExpanded.uCharAt(i);
+            final int codePoint = picExpanded.codePointAt(i);
             switch (Character.getType(codePoint)) {
 
                 case Character.DECIMAL_DIGIT_NUMBER:
@@ -251,13 +250,13 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
                     break;
 
                 default:
-                    if (i == picExpanded.uLength() - 1) {
+                    if (i == picExpanded.length() - 1) {
                         throw new XPathException(preface + "the picture cannot end with a separator", "FODF1310");
                     }
                     if (codePoint == '#') {
                         groupingPosition++;
                         if (i != 0) {
-                            switch (Character.getType(picExpanded.uCharAt(i - 1))) {
+                            switch (Character.getType(picExpanded.codePointAt(i - 1))) {
                                 case Character.DECIMAL_DIGIT_NUMBER:
                                 case Character.LETTER_NUMBER:
                                 case Character.OTHER_NUMBER:
@@ -299,7 +298,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
             }
         }
         if (regularCheck && groupingPositions.size() >= 1) {
-            if (picExpanded.uLength() - lastGroupingPos - groupingPositions.size() > firstGroupingPos) {
+            if (picExpanded.length() - lastGroupingPos - groupingPositions.size() > firstGroupingPos) {
                 regularCheck = false;
             }
         }
@@ -313,8 +312,8 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
             if (separatorList.isEmpty()) {
                 return new RegularGroupFormatter(0, "", adjustedPic);
             } else {
-                FastStringBuffer sb = new FastStringBuffer(4);
-                sb.appendWideChar(separatorList.get(0));
+                StringBuilder sb = new StringBuilder(4);
+                sb.appendCodePoint(separatorList.get(0));
                 return new RegularGroupFormatter(firstGroupingPos, sb.toString(), adjustedPic);
             }
         } else {
@@ -329,15 +328,17 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      * @param excludePositions the positions to be filtered out from the string, counted as positions from the end
      * @return the items from the original array that are not filtered out
      */
-    private static UnicodeString extractSeparators(UnicodeString arr, IntSet excludePositions) {
-
-        FastStringBuffer fsb = new FastStringBuffer(arr.uLength());
-        for (int i = 0; i < arr.uLength(); i++) {
-            if (NumberFormatter.isLetterOrDigit(arr.uCharAt(i))) {
-                fsb.appendWideChar(arr.uCharAt(i));
+    private static UnicodeString extractSeparators(CodePoints arr, IntSet excludePositions) {
+        // TODO: this doesn't do what the documentation says: it ignores the supplied positions entirely
+        UnicodeBuilder ub = new UnicodeBuilder();
+        IntIterator iter = arr.codePoints();
+        while (iter.hasNext()) {
+            int c = iter.next();
+            if (NumberFormatter.isLetterOrDigit(c)) {
+                ub.append(c);
             }
         }
-        return UnicodeString.makeUnicodeString(fsb);
+        return ub.toUnicodeString();
     }
 
     @Override

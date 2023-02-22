@@ -18,7 +18,7 @@ import net.sf.saxon.type.ValidationFailure;
  */
 public class InvalidityHandlerWrappingErrorReporter implements InvalidityHandler {
 
-    private ErrorReporter errorReporter;
+    private final ErrorReporter errorReporter;
 
     public InvalidityHandlerWrappingErrorReporter(ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;

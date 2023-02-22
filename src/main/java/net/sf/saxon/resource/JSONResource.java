@@ -15,7 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,9 +25,9 @@ import java.util.Map;
  */
 
 public class JSONResource implements Resource {
-    private String href;
+    private final String href;
     private String jsonStr;
-    private AbstractResourceCollection.InputDetails details;
+    private final AbstractResourceCollection.InputDetails details;
 
     public final static ResourceFactory FACTORY = (config, details) -> new JSONResource(details);
 
@@ -58,7 +58,7 @@ public class JSONResource implements Resource {
         }
         Map<String, Sequence> options = new HashMap<>();
         options.put("liberal", BooleanValue.FALSE);
-        options.put("duplicates", new StringValue("use-first"));
+        options.put("duplicates", StringItem.bmp("use-first"));
         options.put("escape", BooleanValue.FALSE);
         return ParseJsonFn.parse(jsonStr, options, context);
     }

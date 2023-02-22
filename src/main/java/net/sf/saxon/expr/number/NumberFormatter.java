@@ -8,10 +8,8 @@
 package net.sf.saxon.expr.number;
 
 import net.sf.saxon.lib.Numberer;
-import net.sf.saxon.regex.EmptyString;
-import net.sf.saxon.regex.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.regex.charclass.Categories;
-import net.sf.saxon.tree.util.FastStringBuffer;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -52,50 +50,50 @@ public class NumberFormatter {
             format = "1";
         }
 
-        formatTokens = new ArrayList<UnicodeString>(10);
-        punctuationTokens = new ArrayList<UnicodeString>(10);
+        formatTokens = new ArrayList<>(10);
+        punctuationTokens = new ArrayList<>(10);
 
-        UnicodeString uFormat = UnicodeString.makeUnicodeString(format);
-        int len = uFormat.uLength();
+        UnicodeString uFormat = StringView.tidy(format);
+        int len = uFormat.length32();
         int i = 0;
         int t;
         boolean first = true;
         startsWithPunctuation = true;
 
         while (i < len) {
-            int c = uFormat.uCharAt(i);
+            int c = uFormat.codePointAt(i);
             t = i;
             while (isLetterOrDigit(c)) {
                 i++;
                 if (i == len) break;
-                c = uFormat.uCharAt(i);
+                c = uFormat.codePointAt(i);
             }
             if (i > t) {
-                UnicodeString tok = uFormat.uSubstring(t, i);
+                UnicodeString tok = uFormat.substring(t, i);
                 formatTokens.add(tok);
                 if (first) {
-                    punctuationTokens.add(UnicodeString.makeUnicodeString("."));
+                    punctuationTokens.add(BMPString.of("."));
                     startsWithPunctuation = false;
                     first = false;
                 }
             }
             if (i == len) break;
             t = i;
-            c = uFormat.uCharAt(i);
+            c = uFormat.codePointAt(i);
             while (!isLetterOrDigit(c)) {
                 first = false;
                 i++;
                 if (i == len) break;
-                c = uFormat.uCharAt(i);
+                c = uFormat.codePointAt(i);
             }
             if (i > t) {
-                UnicodeString sep = uFormat.uSubstring(t, i);
+                UnicodeString sep = uFormat.substring(t, i);
                 punctuationTokens.add(sep);
             }
         }
 
         if (formatTokens.isEmpty()) {
-            formatTokens.add(UnicodeString.makeUnicodeString("1"));
+            formatTokens.add(BMPString.of("1"));
             if (punctuationTokens.size() == 1) {
                 punctuationTokens.add(punctuationTokens.get(0));
             }
@@ -119,7 +117,7 @@ public class NumberFormatter {
         }
     }
 
-    private static IntPredicate alphanumeric =
+    private static final IntPredicate alphanumeric =
             Categories.getCategory("N").or(Categories.getCategory("L"));
 
     /**
@@ -130,10 +128,10 @@ public class NumberFormatter {
      * @return the formatted output string.
      */
 
-    public CharSequence format(List numbers, int groupSize, String groupSeparator,
-                               String letterValue, String ordinal, /*@NotNull*/ Numberer numberer) {
+    public UnicodeString format(List numbers, int groupSize, String groupSeparator,
+                                String letterValue, String ordinal, /*@NotNull*/ Numberer numberer) {
 
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+        UnicodeBuilder sb = new UnicodeBuilder();
         int num = 0;
         int tok = 0;
         // output first punctuation token
@@ -155,14 +153,12 @@ public class NumberFormatter {
             String s;
             if (o instanceof Long) {
                 long nr = (Long) o;
-                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyString.THE_INSTANCE);
+                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyUniString.getInstance());
                 s = numberer.format(nr, formatTokens.get(tok), rgf, letterValue, ordinal);
             } else if (o instanceof BigInteger) {
                 // Saxon bug 2071; test case number-0111
-                FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
-                fsb.append(o.toString());
-                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyString.THE_INSTANCE);
-                s = rgf.format(fsb);
+                RegularGroupFormatter rgf = new RegularGroupFormatter(groupSize, groupSeparator, EmptyUniString.getInstance());
+                s = rgf.format(o.toString());
                 s = translateDigits(s, formatTokens.get(tok));
             } else {
                 // Not sure this can happen
@@ -178,14 +174,14 @@ public class NumberFormatter {
         if (punctuationTokens.size() > formatTokens.size()) {
             sb.append(punctuationTokens.get(punctuationTokens.size() - 1));
         }
-        return sb.condense();
+        return sb.toUnicodeString();
     }
 
     private String translateDigits(String in, UnicodeString picture) {
         if (picture.length() == 0) {
             return in;
         }
-        int formchar = picture.uCharAt(0);
+        int formchar = picture.codePointAt(0);
         int digitValue = Alphanumeric.getDigitValue(formchar);
         if (digitValue >= 0) {
             int zero = formchar - digitValue;
@@ -196,13 +192,13 @@ public class NumberFormatter {
             for (int z = 0; z <= 9; z++) {
                 digits[z] = zero + z;
             }
-            FastStringBuffer sb = new FastStringBuffer(128);
+            StringBuilder sb = new StringBuilder(128);
             for (int i = 0; i < in.length(); i++) {
                 char c = in.charAt(i);
                 if (c >= '0' && c <= '9') {
-                    sb.appendWideChar(digits[c - '0']);
+                    sb.appendCodePoint(digits[c - '0']);
                 } else {
-                    sb.cat(c);
+                    sb.append(c);
                 }
             }
             return sb.toString();

@@ -22,7 +22,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
@@ -46,11 +46,11 @@ public class ParseXml extends SystemFunction implements Callable {
      */
     @Override
     public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue input = (StringValue) arguments[0].head();
+        StringItem input = (StringItem) arguments[0].head();
         return input == null ? ZeroOrOne.empty() : new ZeroOrOne(evalParseXml(input, context));
     }
 
-    private NodeInfo evalParseXml(StringValue inputArg, XPathContext context) throws XPathException {
+    private NodeInfo evalParseXml(StringItem inputArg, XPathContext context) throws XPathException {
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
 
         RetentiveErrorHandler errorHandler = new RetentiveErrorHandler();
@@ -67,7 +67,7 @@ public class ParseXml extends SystemFunction implements Callable {
             Source source = new SAXSource(is);
             source.setSystemId(baseURI);
 
-            Builder b = controller.makeBuilder();
+            Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
             ParseOptions options = new ParseOptions(config.getParseOptions());
             PackageData pd = getRetainedStaticContext().getPackageData();

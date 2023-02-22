@@ -39,7 +39,7 @@ import java.util.List;
 
 public class AugmentedSource implements Source {
 
-    private Source source;
+    private final Source source;
     private ParseOptions options = new ParseOptions();
     private String systemID;
 

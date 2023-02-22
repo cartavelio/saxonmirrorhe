@@ -31,7 +31,7 @@ public class PackageData {
     private DecimalFormatManager decimalFormatManager = null;
     protected KeyManager keyManager = null;
     private AccumulatorRegistry accumulatorRegistry = null;
-    private List<GlobalVariable> globalVariables = new ArrayList<>();
+    private final List<GlobalVariable> globalVariables = new ArrayList<>();
     private SlotManager globalSlotManager;
     private int localLicenseId = -1;
     private String targetEdition;

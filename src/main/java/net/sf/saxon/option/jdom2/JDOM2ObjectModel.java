@@ -34,7 +34,7 @@ import javax.xml.transform.Source;
 
 public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
 
-    private final static JDOM2ObjectModel THE_INSTANCE = new JDOM2ObjectModel();
+    private static final JDOM2ObjectModel THE_INSTANCE = new JDOM2ObjectModel();
 
     public static JDOM2ObjectModel getInstance() {
         return THE_INSTANCE;
@@ -118,7 +118,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
         if (isRecognizedNodeClass(sourceClass)) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object object, XPathContext context) {
+                public GroundedValue convert(Object object, XPathContext context) {
                     return convertObjectToXPathValue(object, context.getConfiguration());
                 }
 
@@ -212,7 +212,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
      */
 
     /*@Nullable*/
-    private Sequence convertObjectToXPathValue(Object object, Configuration config) {
+    private GroundedValue convertObjectToXPathValue(Object object, Configuration config) {
         if (isRecognizedNode(object)) {
             if (object instanceof Document) {
                 return wrapDocument(object, config).getRootNode();

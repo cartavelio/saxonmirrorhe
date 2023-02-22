@@ -15,10 +15,11 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -188,7 +189,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
      */
 
     public int hashCode() {
-        FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder buffer = new StringBuilder(64);
         generateId(buffer);
         return buffer.toString().hashCode();
     }
@@ -216,37 +217,38 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     /**
      * Get the value of the item as a CharSequence. This is in some cases more efficient than
      * the version of the method that returns a String.
+     * @return
      */
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         switch (nodeKind) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                return node.get_InnerText();
+                return StringView.tidy(node.get_InnerText());
 
             case Type.ATTRIBUTE:
-                return node.get_Value();
+                return StringView.tidy(node.get_Value());
 
             case Type.TEXT:
                 if (span == 1) {
-                    return node.get_InnerText();
+                    return StringView.tidy(node.get_InnerText());
                 } else {
-                    FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+                    UnicodeBuilder fsb = new UnicodeBuilder();
                     XmlNode textNode = node;
                     for (int i = 0; i < span; i++) {
                         fsb.append(textNode.get_InnerText());
                         textNode = textNode.get_NextSibling();
                     }
-                    return fsb.condense();
+                    return fsb.toUnicodeString();
                 }
 
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return node.get_Value();
+                return StringView.tidy(node.get_Value());
 
             default:
-                return "";
+                return EmptyUniString.getInstance();
         }
     }
 
@@ -482,50 +484,6 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
     }
 
-
-    @Override
-    public NamespaceMap getAllNamespaces() {
-        // Note: in a DOM created by the XML parser, all namespaces are present as attribute nodes. But
-        // in a DOM created programmatically, this is not necessarily the case. So we need to add
-        // namespace bindings for the namespace of the element and any attributes
-        if (node.get_NodeType().Value == XmlNodeType.Element) {
-            XmlElement elem = (XmlElement) node;
-            XmlNamedNodeMap atts = elem.get_Attributes();
-
-            NamespaceMap codes =  NamespaceMap.emptyMap();
-            for (int i = 0; i < atts.get_Count(); i++) {
-                XmlAttribute att = (XmlAttribute) atts.Item(i);
-                String attName = att.get_Name();
-                if (attName.equals("xmlns")) {
-                    String prefix = "";
-                    String uri = att.get_Value();
-                    codes.put(prefix, uri);
-                } else if (attName.startsWith("xmlns:")) {
-                    String prefix = attName.substring(6);
-                    String uri = att.get_Value();
-                    codes.put(prefix, uri);
-                } else if (att.get_NamespaceURI().length() != 0) {
-                    codes.put(att.get_Prefix(), att.get_NamespaceURI());
-                }
-            }
-
-            if (elem.get_NamespaceURI().length() != 0) {
-                codes.put(elem.get_Prefix(), elem.get_NamespaceURI());
-            }
-            /*int count = codes.size();
-            NamespaceMap result = new NamespaceBinding[count];
-
-            int p = 0;
-            for (NamespaceBinding code : codes) {
-                result[p++] = code;
-            } */
-            return codes;
-        } else {
-            return null;
-        }
-
-    }
-
     /**
      * Get the string value of a given attribute of this node
      *
@@ -569,7 +527,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
     }
 
@@ -668,7 +626,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 
     @Override
     public DotNetNodeWrapper getSuccessorElement(DotNetNodeWrapper anchor, String uri, String local) {
-        XmlNode stop = (anchor == null ? null : anchor).node;
+        XmlNode stop = (anchor == null ? null : anchor.node);
         XmlNode next = node;
         do {
             next = getSuccessorNode(next, stop);
@@ -694,9 +652,6 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     private static XmlNode getSuccessorNode(XmlNode start, XmlNode anchor) {
         if (start.get_HasChildNodes()) {
             return start.get_FirstChild();
-        }
-        if (anchor != null && start == anchor) {
-            return null;
         }
         XmlNode p = start;
         while (true) {
@@ -753,9 +708,8 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
-         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+         *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+         *         and {@link Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */
@@ -780,8 +734,8 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         private final ArrayList<DotNetNodeWrapper> items = new ArrayList<DotNetNodeWrapper>(20);
         private int ix;
         private int position;
-        private boolean downwards;  // iterate children of start node (not siblings)
-        private boolean forwards;   // iterate in document order (not reverse order)
+        private final boolean downwards;  // iterate children of start node (not siblings)
+        private final boolean forwards;   // iterate in document order (not reverse order)
 
         public ChildEnumeration(DotNetNodeWrapper start,
                                 boolean downwards, boolean forwards) {
@@ -834,7 +788,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                if (isAtomizing()) {
 //                                    UntypedAtomicValue old = (UntypedAtomicValue)(items.get(items.size()-1));
 //                                    String newval = old.getStringValue() + getStringValue(node, node.get_NodeType().Value);
-//                                    items.set(items.size()-1, new UntypedAtomicValue(newval));
+//                                    items.set(items.size()-1, StringValue.untypedAtomic(newval));
 //                                } else {
                                 DotNetNodeWrapper old = items.get(items.size() - 1);
                                 old.span++;
@@ -845,7 +799,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
                         default:
                             previousText = thisText;
 //                            if (isAtomizing()) {
-//                                items.add(new UntypedAtomicValue(
+//                                items.add(StringValue.untypedAtomic(
 //                                        getStringValue(node, node.get_NodeType().Value)));
 //                            } else {
                             items.add(makeWrapper(node, docWrapper, commonParent, i));
@@ -879,7 +833,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                if (isAtomizing()) {
 //                                    UntypedAtomicValue old = (UntypedAtomicValue)(items.get(items.size()-1));
 //                                    String newval = old.getStringValue() + getStringValue(node, node.get_NodeType().Value);
-//                                    items.set(items.size()-1, new UntypedAtomicValue(newval));
+//                                    items.set(items.size()-1, StringValue.untypedAtomic(newval));
 //                                } else {
                                 DotNetNodeWrapper old = items.get(items.size() - 1);
                                 old.node = node;
@@ -891,7 +845,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
                         default:
                             previousText = thisText;
 //                            if (isAtomizing()) {
-//                                items.add(new UntypedAtomicValue(
+//                                items.add(StringValue.untypedAtomic(
 //                                        getStringValue(node, node.get_NodeType().Value)));
 //                            } else {
                             items.add(makeWrapper(node, docWrapper, commonParent, i));
@@ -921,9 +875,8 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
-         *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+         *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+         *         and {@link Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */

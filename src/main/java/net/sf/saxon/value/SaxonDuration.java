@@ -28,7 +28,7 @@ import java.util.Calendar;
  */
 public class SaxonDuration extends Duration {
 
-    private DurationValue duration;
+    private final DurationValue duration;
 
     /**
      * Create a SaxonDuration that wraps a supplied DurationValue

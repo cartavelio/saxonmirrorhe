@@ -12,9 +12,10 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
 
@@ -57,7 +58,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @return either a value of the appropriate type, or a ValidationFailure if the format is invalid
      */
 
-    public static ConversionResult makeCalendarValue(CharSequence s, ConversionRules rules) {
+    public static ConversionResult makeCalendarValue(UnicodeString s, ConversionRules rules) {
         ConversionResult cr = DateTimeValue.makeDateTimeValue(s, rules);
         ConversionResult firstError = cr;
         if (cr instanceof ValidationFailure) {
@@ -332,7 +333,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      *           representation
      */
 
-    public final void appendTimezone(/*@NotNull*/ FastStringBuffer sb) {
+    public final void appendTimezone(UnicodeBuilder sb) {
         if (hasTimezone()) {
             appendTimezone(getTimezoneInMinutes(), sb);
         }
@@ -345,14 +346,14 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @param sb the buffer
      */
 
-    public static void appendTimezone(int tz, /*@NotNull*/ FastStringBuffer sb) {
+    public static void appendTimezone(int tz, UnicodeBuilder sb) {
         if (tz == 0) {
-            sb.append("Z");
+            sb.append('Z');
         } else {
             sb.append(tz > 0 ? "+" : "-");
             tz = Math.abs(tz);
             appendTwoDigits(sb, tz / 60);
-            sb.cat(':');
+            sb.append(':');
             appendTwoDigits(sb, tz % 60);
         }
     }
@@ -365,7 +366,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @param size  the number of digits required (max 9)
      */
 
-    static void appendString(/*@NotNull*/ FastStringBuffer sb, int value, int size) {
+    static void appendString(UnicodeBuilder sb, int value, int size) {
         String s = "000000000" + value;
         sb.append(s.substring(s.length() - size));
     }
@@ -377,9 +378,9 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @param value the integer to be formatted (must be in the range 0..99
      */
 
-    static void appendTwoDigits(/*@NotNull*/ FastStringBuffer sb, int value) {
-        sb.cat((char) (value / 10 + '0'));
-        sb.cat((char) (value % 10 + '0'));
+    static void appendTwoDigits(UnicodeBuilder sb, int value) {
+        sb.append((char) (value / 10 + '0'));
+        sb.append((char) (value % 10 + '0'));
     }
 
     private class CalendarValueMapKey implements AtomicMatchKey {
@@ -389,7 +390,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
          * @return an atomic value that encapsulates this match key
          */
         @Override
-        public CalendarValue asAtomic() {
+        public AtomicValue asAtomic() {
             return CalendarValue.this;
         }
 
@@ -397,7 +398,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         public boolean equals(Object obj) {
             if (obj instanceof CalendarValueMapKey) {
                 CalendarValue a = CalendarValue.this;
-                CalendarValue b = ((CalendarValueMapKey)obj).asAtomic();
+                CalendarValue b = (CalendarValue)((CalendarValueMapKey)obj).asAtomic();
                 if (a.hasTimezone() == b.hasTimezone()) {
                     if (a.hasTimezone()) {
                         return a.adjustTimezone(b.tzMinutes).isIdentical(b);

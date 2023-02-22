@@ -7,30 +7,33 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
 /**
  * An Untyped Atomic value. This inherits from StringValue for implementation convenience, even
  * though an untypedAtomic value is not a String in the data model type hierarchy.
+ *
+ * <p>TODO: Still needed? Some untypedAtomic values are not instances of this class any more</p>
  */
 
-public class UntypedAtomicValue extends StringValue {
+public class UntypedAtomicValue extends StringItem {
 
     public static final UntypedAtomicValue ZERO_LENGTH_UNTYPED =
-            new UntypedAtomicValue("");
+            new UntypedAtomicValue(EmptyUniString.getInstance());
 
     /**
      * Constructor
      *
      * @param value the String value.  Must not be null.  The caller must ensure that the
      *              value will not subsequently change, even though it may be a mutable
-     *              object such as a FastStringBuffer.
+     *              object such as a StringBuilder.
      */
 
-    public UntypedAtomicValue(CharSequence value) {
-        this.value = value;
-        typeLabel = BuiltInAtomicType.UNTYPED_ATOMIC;
+    public UntypedAtomicValue(UnicodeString value) {
+        super(value, BuiltInAtomicType.UNTYPED_ATOMIC);
     }
 
     /**
@@ -42,7 +45,7 @@ public class UntypedAtomicValue extends StringValue {
 
     /*@NotNull*/
     @Override
-    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+    public UntypedAtomicValue copyAsSubType(AtomicType typeLabel) {
         if (!typeLabel.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
             throw new UnsupportedOperationException();
         }
@@ -60,16 +63,6 @@ public class UntypedAtomicValue extends StringValue {
     @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.UNTYPED_ATOMIC;
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public final CharSequence getStringValueCS() {
-        return value;
     }
 
     /**

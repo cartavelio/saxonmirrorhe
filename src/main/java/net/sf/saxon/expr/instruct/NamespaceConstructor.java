@@ -16,13 +16,11 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.AnyURIValue;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.value.*;
 
 /**
  * A namespace constructor instruction. (xsl:namespace in XSLT 2.0, or namespace{}{} in XQuery 1.1)
@@ -30,7 +28,7 @@ import net.sf.saxon.value.Whitespace;
 
 public class NamespaceConstructor extends SimpleNodeConstructor {
 
-    private Operand nameOp;
+    private final Operand nameOp;
 
     /**
      * Create an xsl:namespace instruction for dynamic construction of namespace nodes
@@ -124,14 +122,14 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         if (value == null) {
             return "";
         }
-        if (!(value instanceof net.sf.saxon.value.StringValue) || value instanceof AnyURIValue) {
+        if (!(value instanceof StringItem) || value instanceof AnyURIValue) {
             // Can only happen in XQuery
             XPathException err = new XPathException(
                 "Namespace prefix is not an xs:string or xs:untypedAtomic", "XPTY0004", getLocation());
             err.setIsTypeError(true);
             throw dynamicError(getLocation(), err, context);
         }
-        String prefix = Whitespace.trim(value.getStringValueCS());
+        String prefix = Whitespace.trim(value.getStringValue());
         if (!(prefix.isEmpty() || NameChecker.isValidNCName(prefix))) {
             String errorCode = isXSLT() ? "XTDE0920" : "XQDY0074";
             XPathException err = new XPathException("Namespace prefix is invalid: " + prefix, errorCode, getLocation());
@@ -147,7 +145,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
     }
 
     @Override
-    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
+    public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
         String prefix = evaluatePrefix(context);
         String uri = value.toString();
         checkPrefixAndUri(prefix, uri, context);

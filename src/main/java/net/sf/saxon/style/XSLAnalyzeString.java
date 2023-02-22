@@ -14,6 +14,8 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
@@ -103,10 +105,10 @@ public class XSLAnalyzeString extends StyleElement {
 
         if (regex instanceof StringLiteral && flags instanceof StringLiteral) {
             try {
-                final String regex = ((StringLiteral) this.regex).getStringValue();
-                final String flagstr = ((StringLiteral) flags).getStringValue();
+                final UnicodeString regex = ((StringLiteral) this.regex).getString();
+                final String flagstr = ((StringLiteral) flags).stringify();
 
-                List<String> warnings = new ArrayList<String>();
+                List<String> warnings = new ArrayList<>();
                 pattern = getConfiguration().compileRegularExpression(
                         regex, flagstr, getEffectiveVersion() >= 30 ? "XP30" : "XP20", warnings);
                 for (String w : warnings) {
@@ -137,7 +139,7 @@ public class XSLAnalyzeString extends StyleElement {
 
     private void setDummyRegex() {
         try {
-            pattern = getConfiguration().compileRegularExpression("x", "", "XP20", null);
+            pattern = getConfiguration().compileRegularExpression(BMPString.of("x"), "", "XP20", null);
         } catch (XPathException err) {
             throw new IllegalStateException();
         }

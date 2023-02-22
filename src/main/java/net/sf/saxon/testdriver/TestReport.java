@@ -103,10 +103,10 @@ public abstract class TestReport {
     }
 
     public static String getDate() {
-        return DateTimeValue.getCurrentDateTime(null).getStringValue().substring(0, 10);
+        return DateTimeValue.getCurrentDateTime(null).getUnicodeStringValue().substring(0, 10).toString();
     }
     public static String getTime() {
-        return DateTimeValue.getCurrentDateTime(null).getStringValue().substring(11);
+        return DateTimeValue.getCurrentDateTime(null).getUnicodeStringValue().substring(11).toString();
     }
 
 

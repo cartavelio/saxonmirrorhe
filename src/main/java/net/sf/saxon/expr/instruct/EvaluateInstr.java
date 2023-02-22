@@ -32,7 +32,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
@@ -53,7 +53,7 @@ import java.util.function.Predicate;
 public final class EvaluateInstr extends Expression {
 
     private Operand xpathOp;
-    private SequenceType requiredType;
+    private final SequenceType requiredType;
     private Operand contextItemOp;
     private Operand baseUriOp;
     private Operand namespaceContextOp;
@@ -285,7 +285,7 @@ public final class EvaluateInstr extends Expression {
 
         final String exprText = getXpath().evaluateAsString(context).toString();
         String baseUri =
-                getBaseUriExpr() == null ? getStaticBaseURIString() : Whitespace.trim(getBaseUriExpr().evaluateAsString(context));
+                getBaseUriExpr() == null ? getStaticBaseURIString() : Whitespace.trim(getBaseUriExpr().evaluateAsString(context).toString());
 
         Item focus = getContextItemExpr().evaluateItem(context);
 
@@ -294,7 +294,7 @@ public final class EvaluateInstr extends Expression {
             namespaceContextBase = (NodeInfo) getNamespaceContextExpr().evaluateItem(context);
         }
 
-        String schemaAwareAttr = Whitespace.trim(getSchemaAwareExpr().evaluateAsString(context));
+        String schemaAwareAttr = Whitespace.trim(getSchemaAwareExpr().evaluateAsString(context).toString());
         boolean isSchemaAware;
         if ("yes".equals(schemaAwareAttr)||"true".equals(schemaAwareAttr)||"1".equals(schemaAwareAttr)) {
             isSchemaAware = true;
@@ -313,7 +313,7 @@ public final class EvaluateInstr extends Expression {
 
         // Create a cache key so the compiled expression can be reused
 
-        FastStringBuffer fsb = new FastStringBuffer(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
+        StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
         fsb.append(baseUri);
         fsb.append("##");
         fsb.append(schemaAwareAttr);
@@ -389,7 +389,7 @@ public final class EvaluateInstr extends Expression {
             env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
             env.setXPathLanguageLevel(config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
             if (isSchemaAware) {
-                GroundedValue allowAny = options.get(new StringValue("allow-any-namespace"));
+                GroundedValue allowAny = options.get(StringItem.bmp("allow-any-namespace"));
                 if (allowAny != null && allowAny.effectiveBooleanValue()) {
                     env.setImportedSchemaNamespaces(config.getImportedNamespaces());
                 } else {
@@ -397,7 +397,7 @@ public final class EvaluateInstr extends Expression {
                 }
             }
 
-            GroundedValue defaultCollation = options.get(new StringValue("default-collation"));
+            GroundedValue defaultCollation = options.get(StringItem.bmp("default-collation"));
             if (defaultCollation != null) {
                 env.setDefaultCollationName(defaultCollation.head().getStringValue());
             }
@@ -527,13 +527,13 @@ public final class EvaluateInstr extends Expression {
             out.emitAttribute("as", requiredType.toAlphaCode());
         }
         if (importedSchemaNamespaces != null && !importedSchemaNamespaces.isEmpty()) {
-            FastStringBuffer buff = new FastStringBuffer(256);
+            StringBuilder buff = new StringBuilder(256);
             for (String s : importedSchemaNamespaces) {
                 if (s.isEmpty()) {
                     s = "##";
                 }
                 buff.append(s);
-                buff.cat(' ');
+                buff.append(' ');
             }
             buff.setLength(buff.length() - 1);
             out.emitAttribute("schNS", buff.toString());

@@ -15,7 +15,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 3.0 without the
@@ -24,7 +24,7 @@ import net.sf.saxon.value.StringValue;
 
 public class XPath30FunctionSet extends BuiltInFunctionSet {
 
-    private static XPath30FunctionSet THE_INSTANCE = new XPath30FunctionSet();
+    private static final XPath30FunctionSet THE_INSTANCE = new XPath30FunctionSet();
 
     public static XPath30FunctionSet getInstance() {
         return THE_INSTANCE;
@@ -193,7 +193,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         register("generate-id", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.STRING, ONE, CITEM | LATE);
 
         register("generate-id", 1, GenerateId_1.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
+                .arg(0, Type.NODE_TYPE, OPT | INS, StringItem.EMPTY_STRING);
 
         register("has-children", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.BOOLEAN,
                  ONE, CITEM | LATE);
@@ -243,7 +243,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
         register("string-join", 1, StringJoin.class, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING);
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringItem.EMPTY_STRING);
 
 //        register("string-join", 2, StringJoin.class, BuiltInAtomicType.STRING, ONE, CORE, 0)
 //                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING)

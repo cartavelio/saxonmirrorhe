@@ -13,11 +13,9 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.CharSlice;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
-import net.sf.saxon.tree.util.FastStringBuffer;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -57,7 +55,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file cannot be read
      */
 
-    public static void readFile(URI absoluteURI, String encoding, CharSequenceConsumer output, XPathContext context)
+    public static void readFile(URI absoluteURI, String encoding, UniStringConsumer output, XPathContext context)
             throws XPathException {
 
         final Configuration config = context.getConfiguration();
@@ -145,20 +143,15 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file contains illegal characters
      */
 
-    public static CharSequence readFile(IntPredicate checker, Reader reader) throws IOException, XPathException {
-        FastStringBuffer buffer = new FastStringBuffer(2048);
-        readFile(checker, reader, new CharSequenceConsumer() {
+    public static CodePoints readFile(IntPredicate checker, Reader reader) throws IOException, XPathException {
+        UnicodeBuilder buffer = new UnicodeBuilder();
+        readFile(checker, reader, new UniStringConsumer() {
             @Override
-            public CharSequenceConsumer cat(CharSequence chars) {
-                return buffer.cat(chars);
-            }
-
-            @Override
-            public CharSequenceConsumer cat(char c) {
-                return buffer.cat(c);
+            public UniStringConsumer append(CodePoints chars) {
+                return buffer.append(chars);
             }
         });
-        return buffer.condense();
+        return buffer.toUnicodeString();
     }
 
     /**
@@ -171,13 +164,13 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file contains illegal characters
      */
 
-    public static void readFile(IntPredicate checker, Reader reader, CharSequenceConsumer output) throws IOException, XPathException {
+    public static void readFile(IntPredicate checker, Reader reader, UniStringConsumer output) throws IOException, XPathException {
         char[] buffer = new char[2048];
         boolean first = true;
         int actual;
         int line = 1;
         int column = 1;
-        boolean latin = true;
+        int mask = 0;
         while (true) {
             actual = reader.read(buffer, 0, buffer.length);
             if (actual < 0) {
@@ -190,23 +183,22 @@ public abstract class UnparsedTextFunction extends SystemFunction {
                     column = 0;
                 }
                 column++;
-                if (ch32 > 255) {
-                    latin = false;
-                    if (UTF16CharacterSet.isHighSurrogate(ch32)) {
-                        if (c == actual) { // bug 3785, test case fn-unparsed-text-055
-                            // We've got a high surrogate right at the end of the buffer.
-                            // The path of least resistance is to extend the buffer.
-                            char[] buffer2 = new char[2048];
-                            int actual2 = reader.read(buffer2, 0, 2048);
-                            char[] buffer3 = new char[actual + actual2];
-                            System.arraycopy(buffer, 0, buffer3, 0, actual);
-                            System.arraycopy(buffer2, 0, buffer3, actual, actual2);
-                            buffer = buffer3;
-                            actual = actual + actual2;
-                        }
-                        char low = buffer[c++];
-                        ch32 = UTF16CharacterSet.combinePair((char) ch32, low);
+                mask |= ch32;
+                if (UTF16CharacterSet.isHighSurrogate(ch32)) {
+                    if (c == actual) { // bug 3785, test case fn-unparsed-text-055
+                        // We've got a high surrogate right at the end of the buffer.
+                        // The path of least resistance is to extend the buffer.
+                        char[] buffer2 = new char[2048];
+                        int actual2 = reader.read(buffer2, 0, 2048);
+                        char[] buffer3 = new char[actual + actual2];
+                        System.arraycopy(buffer, 0, buffer3, 0, actual);
+                        System.arraycopy(buffer2, 0, buffer3, actual, actual2);
+                        buffer = buffer3;
+                        actual = actual + actual2;
                     }
+                    char low = buffer[c++];
+                    ch32 = UTF16CharacterSet.combinePair((char) ch32, low);
+                    mask |= ch32;
                 }
                 if (!checker.test(ch32)) {
                     XPathException err = new XPathException("The text file contains a character that is illegal in XML (line=" +
@@ -215,24 +207,24 @@ public abstract class UnparsedTextFunction extends SystemFunction {
                     throw err;
                 }
             }
+            int start = 0;
+            int len = actual;
             if (first) {
-                first = false;
                 if (buffer[0] == '\ufeff') {
-                    // don't include the BOM in the result
-                    output.cat(new CharSlice(buffer, 1, actual - 1));
-                } else {
-                    output.cat(new CharSlice(buffer, 0, actual));
+                    start = 1;
+                    actual--;
                 }
+                first = false;
+            }
+            if (mask <= 0xff) {
+                output.append(new Twine8(buffer, start, actual));
+            } else if (mask <= 0xffff) {
+                output.append(new Twine16(buffer, start, actual));
             } else {
-                output.cat(new CharSlice(buffer, 0, actual));
+                output.append(StringView.of(new String(buffer, start, len)));
             }
         }
         reader.close();
-//        if (latin) {
-//            return new LatinString(sb);
-//        } else {
-//            return sb.condense();
-//        }
     }
 
 

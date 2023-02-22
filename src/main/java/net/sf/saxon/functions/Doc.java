@@ -72,7 +72,7 @@ public class Doc extends SystemFunction implements Callable {
                 public Expression preEvaluate(ExpressionVisitor visitor) {
                     Configuration config = visitor.getConfiguration();
                     try {
-                        GroundedValue firstArg = ((Literal) getArg(0)).getValue();
+                        GroundedValue firstArg = ((Literal) getArg(0)).getGroundedValue();
                         if (firstArg.getLength() == 0) {
                             return null;
                         } else if (firstArg.getLength() > 1) {

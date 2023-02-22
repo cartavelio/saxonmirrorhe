@@ -15,9 +15,10 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -237,7 +238,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
         int sequence = getRawSequenceNumber();
         if (sequence >= 0) {
             getPhysicalRoot().generateId(buffer);
@@ -415,11 +416,11 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     @Override
-    public void replaceStringValue(/*@NotNull*/ CharSequence stringValue) {
-        if (stringValue.length() == 0) {
+    public void replaceStringValue(/*@NotNull*/ UnicodeString stringValue) {
+        if (stringValue.isEmpty()) {
             setChildren(null);
         } else {
-            TextImpl text = new TextImpl(stringValue.toString());
+            TextImpl text = new TextImpl(stringValue);
             text.setRawParent(this);
             setChildren(text);
         }
@@ -464,7 +465,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     @Override
-    public void addAttribute(/*@NotNull*/ NodeName nodeName, SimpleType attType, /*@NotNull*/ CharSequence value, int properties) {
+    public void addAttribute(/*@NotNull*/ NodeName nodeName, SimpleType attType, /*@NotNull*/ String value, int properties) {
         AttributeMapWithIdentity atts = prepareAttributesForUpdate();
         atts = atts.add(new AttributeInfo(nodeName, attType, value.toString(), Loc.NONE, ReceiverOption.NONE));
         setAttributes(atts);
@@ -754,7 +755,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         try {
             SchemaType type = getSchemaType();
             return type.getFingerprint() == StandardNames.XS_ID ||
-                    type.isIdType() && NameChecker.isValidNCName(getStringValueCS());
+                    type.isIdType() && NameChecker.isValidNCName(getUnicodeStringValue().codePoints());
         } catch (MissingComponentException e) {
             return false;
         }

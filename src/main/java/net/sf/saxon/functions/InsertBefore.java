@@ -60,9 +60,9 @@ public class InsertBefore extends SystemFunction {
 
     public static class InsertIterator implements SequenceIterator {
 
-        private SequenceIterator base;
-        private SequenceIterator insert;
-        private int insertPosition;
+        private final SequenceIterator base;
+        private final SequenceIterator insert;
+        private final int insertPosition;
         private int position = 0;
         private boolean inserting = false;
 

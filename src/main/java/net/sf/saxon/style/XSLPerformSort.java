@@ -11,9 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.sort.SortExpression;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
@@ -86,7 +84,7 @@ public class XSLPerformSort extends StyleElement {
             for (NodeInfo child : children()) {
                 if (child instanceof XSLSort || child instanceof XSLFallback) {
                     // no action
-                } else if (child.getNodeKind() == Type.TEXT && !Whitespace.isWhite(child.getStringValueCS())) {
+                } else if (child.getNodeKind() == Type.TEXT && !Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     // with xml:space=preserve, white space nodes may still be there
                     compileError("Within xsl:perform-sort, significant text must not appear if there is a select attribute",
                             "XTSE1040");

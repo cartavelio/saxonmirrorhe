@@ -14,8 +14,8 @@ package net.sf.saxon.z;
 
 public class IntExceptPredicate implements java.util.function.IntPredicate {
 
-    private java.util.function.IntPredicate p1;
-    private java.util.function.IntPredicate p2;
+    private final java.util.function.IntPredicate p1;
+    private final java.util.function.IntPredicate p2;
 
     public IntExceptPredicate(java.util.function.IntPredicate p1, java.util.function.IntPredicate p2) {
         this.p1 = p1;

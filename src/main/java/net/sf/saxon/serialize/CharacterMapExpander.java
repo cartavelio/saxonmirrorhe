@@ -12,6 +12,9 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -82,9 +85,9 @@ public class CharacterMapExpander extends ProxyReceiver {
     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
         List<AttributeInfo> atts2 = new ArrayList<>(attributes.size());
         for (AttributeInfo att : attributes) {
-            String oldValue = att.getValue();
+            UnicodeString oldValue = StringView.of(att.getValue()).tidy();
             if (!ReceiverOption.contains(att.getProperties(), ReceiverOption.DISABLE_CHARACTER_MAPS)) {
-                CharSequence mapped = charMap.map(oldValue, useNullMarkers);
+                UnicodeString mapped = charMap.map(oldValue, useNullMarkers);
                 if (mapped != oldValue) {
                     // mapping was done
                     int p2 = (att.getProperties() | ReceiverOption.USE_NULL_MARKERS)
@@ -111,10 +114,10 @@ public class CharacterMapExpander extends ProxyReceiver {
      */
 
     @Override
-    public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
 
         if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_CHARACTER_MAPS)) {
-            CharSequence mapped = charMap.map(chars, useNullMarkers);
+            CodePoints mapped = charMap.map(chars.tidy(), useNullMarkers);
             if (mapped != chars) {
                 properties = (properties | ReceiverOption.USE_NULL_MARKERS)
                          &~ ReceiverOption.NO_SPECIAL_CHARS;

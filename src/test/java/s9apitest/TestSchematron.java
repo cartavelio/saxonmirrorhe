@@ -29,9 +29,9 @@ public class TestSchematron {
 
     public class XmlAssertor {
         public static final String SUCCESS = "SUCCESS";
-        private Processor proc = new Processor(true);
-        private XsltCompiler xsltCompiler = proc.newXsltCompiler();
-        private HashMap<String, XsltTransformer> mapTransformers = new HashMap<String, XsltTransformer>();
+        private final Processor proc = new Processor(true);
+        private final XsltCompiler xsltCompiler = proc.newXsltCompiler();
+        private final HashMap<String, XsltTransformer> mapTransformers = new HashMap<String, XsltTransformer>();
 
         private XsltExecutable xslSchematronISOTextXSLTExec = null;
         private XsltTransformer xslSchematronISOTextTransformer = null;
@@ -46,7 +46,7 @@ public class TestSchematron {
         }
 
         private XsltTransformer getAssertionTransformer(String sSchematronFilePath) {
-            XsltTransformer assertionTransformer = (XsltTransformer)mapTransformers.get(sSchematronFilePath);
+            XsltTransformer assertionTransformer = mapTransformers.get(sSchematronFilePath);
 
             // lazily generate the assertion xsl transformer for corresponding schematron file
             if (assertionTransformer == null) {

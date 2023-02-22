@@ -9,11 +9,13 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.UntypedAtomicValue;
 import org.apache.axiom.om.OMContainer;
 import org.apache.axiom.om.OMDocument;
@@ -56,24 +58,25 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
 
     @Override
     public AtomicSequence atomize() {
-        return new UntypedAtomicValue(getStringValueCS());
+        return new UntypedAtomicValue(getUnicodeStringValue());
     }
 
     /**
      * Get the value of the item as a CharSequence. This is in some cases more efficient than
      * the version of the method that returns a String.
+     * @return
      */
 
     @Override
-    public CharSequence getStringValueCS() {
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C256);
+    public UnicodeString getUnicodeStringValue() {
+        UnicodeBuilder buff = new UnicodeBuilder();
         for (Iterator iter = node.getDescendants(false); iter.hasNext(); ) {
             OMNode next = (OMNode) iter.next();
             if (next instanceof OMText) {
                 buff.append(((OMText) next).getText());
             }
         }
-        return buff.condense();
+        return buff.toUnicodeString();
     }
 
     /**
@@ -95,7 +98,7 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
     }
 

@@ -114,7 +114,7 @@ public class EmptyTextNodeRemover extends UnaryExpression
     public Item mapItem(Item item) throws XPathException {
         if (item instanceof NodeInfo &&
             ((NodeInfo) item).getNodeKind() == Type.TEXT &&
-            item.getStringValueCS().length() == 0) {
+                    item.getUnicodeStringValue().isEmpty()) {
             return null;
         } else {
             return item;

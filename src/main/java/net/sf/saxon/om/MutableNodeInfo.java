@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.event.Builder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 
@@ -128,7 +129,7 @@ public interface MutableNodeInfo extends NodeInfo {
      * @throws IllegalStateException if the element already has an attribute with the given name.
      */
 
-    void addAttribute(NodeName name, SimpleType attType, CharSequence value, int properties);
+    void addAttribute(NodeName name, SimpleType attType, String value, int properties);
 
     /**
      * Remove a namespace node from this node. The namespaces of its descendant nodes are unaffected.
@@ -213,7 +214,7 @@ public interface MutableNodeInfo extends NodeInfo {
      * @param stringValue the new string value
      */
 
-    void replaceStringValue(CharSequence stringValue);
+    void replaceStringValue(UnicodeString stringValue);
 
     /**
      * Rename this node.

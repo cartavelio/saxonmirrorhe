@@ -39,9 +39,9 @@ import javax.xml.xpath.XPathExpressionException;
 
 public class XPathExpressionImpl implements XPathExpression {
 
-    private Configuration config;
-    private Executable executable;
-    private Expression expression;
+    private final Configuration config;
+    private final Executable executable;
+    private final Expression expression;
     private Expression atomizer;
     private SlotManager stackFrameMap;
 
@@ -94,12 +94,9 @@ public class XPathExpressionImpl implements XPathExpression {
     /**
      * JAXP 1.3 evaluate() method
      *
-     * @param node  The context node. This must use a representation of nodes that this implementation understands.
-     *              This may be a Saxon NodeInfo, or a node in one of the external object models supported, for example
-     *              DOM, DOM4J, JDOM, or XOM, provided the support module for that object model is loaded.
-     *
-     *              <p>An instance of {@link TreeInfo} is also accepted.</p>
-     *
+     * @param node  The context node: generalized in Saxon to allow any XDM item to act as the context item.</p>
+     *              <p>The types of values accepted, and the conversions applied, are described in the Saxon
+     *              documentation.</p>
      *              <p><b>Contrary to the interface specification, Saxon does not supply an empty
      *              document when the value is null. This is because XPath 2.0 allows the context
      *              item to be "absent" (null). So Saxon executes the XPath expression with the
@@ -146,27 +143,27 @@ public class XPathExpressionImpl implements XPathExpression {
     @Override
     public Object evaluate(/*@Nullable*/ Object node, /*@NotNull*/ QName qName) throws XPathExpressionException {
         Item contextItem;
-        if (node instanceof ZeroOrOne) {
-            node = ((ZeroOrOne) node).head();
-        }
-        if (node instanceof TreeInfo) {
-            node = ((TreeInfo)node).getRootNode();
-        }
-        if (node instanceof NodeInfo) {
-            if (!((NodeInfo) node).getConfiguration().isCompatible(config)) {
-                throw new XPathExpressionException(
-                        "Supplied node must be built using the same or a compatible Configuration");
-            }
-            if (node instanceof TreeInfo && ((TreeInfo) node).isTyped() && !executable.isSchemaAware()) {
-                throw new XPathExpressionException(
-                        "The expression was compiled to handled untyped data, but the input is typed");
-            }
-            contextItem = (NodeInfo) node;
-        } else if (node instanceof Item) {
-            contextItem = (Item) node;
-        } else {
+//        if (node instanceof ZeroOrOne) {
+//            node = ((ZeroOrOne) node).head();
+//        }
+//        if (node instanceof TreeInfo) {
+//            node = ((TreeInfo)node).getRootNode();
+//        }
+//        if (node instanceof NodeInfo) {
+//            if (!((NodeInfo) node).getConfiguration().isCompatible(config)) {
+//                throw new XPathExpressionException(
+//                        "Supplied node must be built using the same or a compatible Configuration");
+//            }
+//            if (node instanceof TreeInfo && ((TreeInfo) node).isTyped() && !executable.isSchemaAware()) {
+//                throw new XPathExpressionException(
+//                        "The expression was compiled to handled untyped data, but the input is typed");
+//            }
+//            contextItem = (NodeInfo) node;
+//        } else if (node instanceof Item) {
+//            contextItem = (Item) node;
+//        } else {
             JPConverter converter = JPConverter.allocate(node.getClass(), null, config);
-            Sequence val;
+            GroundedValue val;
             try {
                 val = converter.convert(node, new EarlyEvaluationContext(config));
             } catch (XPathException e) {
@@ -174,22 +171,26 @@ public class XPathExpressionImpl implements XPathExpression {
                         "Failure converting a node of class " + node.getClass().getName() +
                                 ": " + e.getMessage());
             }
-            if (val instanceof NodeInfo) {
-                if (!((NodeInfo) val).getConfiguration().isCompatible(config)) {
-                    throw new XPathExpressionException(
-                            "Supplied node must be built using the same or a compatible Configuration");
-                }
-                if (((NodeInfo) val).getTreeInfo().isTyped() && !executable.isSchemaAware()) {
-                    throw new XPathExpressionException(
-                            "The expression was compiled to handled untyped data, but the input is typed");
-                }
-                contextItem = (NodeInfo) val;
-            } else {
+            if (val.getLength() == 0) {
+                contextItem = null;
+            } else if (val.getLength() > 1) {
                 throw new XPathExpressionException(
-                        "Cannot locate an object model implementation for nodes of class "
-                                + node.getClass().getName());
+                        "Supplied context item is a sequence of " + val.getLength() + " items");
+            } else {
+                val = val.head();
+                if (val instanceof NodeInfo) {
+                    if (!((NodeInfo) val).getConfiguration().isCompatible(config)) {
+                        throw new XPathExpressionException(
+                                "Supplied node must be built using the same or a compatible Configuration");
+                    }
+                    if (((NodeInfo) val).getTreeInfo().isTyped() && !executable.isSchemaAware()) {
+                        throw new XPathExpressionException(
+                                "The expression was compiled to handled untyped data, but the input is typed");
+                    }
+                }
+                contextItem = (Item)val;
             }
-        }
+//        }
 
         XPathContextMajor context = new XPathContextMajor(contextItem, executable);
         context.openStackFrame(stackFrameMap);
@@ -236,8 +237,8 @@ public class XPathExpressionImpl implements XPathExpression {
                 context.openStackFrame(stackFrameMap);
                 SequenceIterator iter = expression.iterate(context);
                 GroundedValue extent = iter.materialize();
-                PJConverter converter = PJConverter.allocateNodeListCreator(config, node);
-                return converter.convert(extent, Object.class, context);
+                PJConverter pj = PJConverter.allocateNodeListCreator(config, node);
+                return pj.convert(extent, Object.class, context);
             } else {
                 throw new IllegalArgumentException("qName: Unknown type for expected result");
             }
@@ -249,12 +250,13 @@ public class XPathExpressionImpl implements XPathExpression {
     /**
      * Evaluate the expression to return a string value
      *
-     * @param node the initial context node. This must be either an instance of NodeInfo or a node
-     *             recognized by a known external object model.
-     *             <p><b>Contrary to the interface specification, Saxon does not supply an empty
-     *             document when the value is null. This is because XPath 2.0 allows the context
-     *             item to be "absent" (null). So Saxon executes the XPath expression with the
-     *             context item undefined.</b></p>
+     * @param node  The context node: generalized in Saxon to allow any XDM item to act as the context item.</p>
+     *              <p>The types of values accepted, and the conversions applied, are described in the Saxon
+     *              documentation.</p>
+     *              <p><b>Contrary to the interface specification, Saxon does not supply an empty
+     *              document when the value is null. This is because XPath 2.0 allows the context
+     *              item to be "absent" (null). So Saxon executes the XPath expression with the
+     *              context item undefined.</b></p>
      * @return the results of the expression, converted to a String
      * @throws XPathExpressionException if evaluation fails
      */

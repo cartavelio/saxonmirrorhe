@@ -19,7 +19,6 @@ import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.VisibilityProvenance;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -215,7 +214,7 @@ public class Component {
     }
 
     public String listComponentReferences(Map<Component, Integer> componentIdMap) {
-        FastStringBuffer fsb = new FastStringBuffer(128);
+        StringBuilder fsb = new StringBuilder(128);
         for (ComponentBinding ref : getComponentBindings()) {
             Component target = ref.getTarget();
             int targetId = obtainComponentId(target, componentIdMap);

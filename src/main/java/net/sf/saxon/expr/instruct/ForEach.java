@@ -14,6 +14,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
@@ -532,7 +533,7 @@ public class ForEach extends Instruction implements ContextMappingFunction, Cont
 
     protected NodeInfo makeSeparator(XPathContext context) throws XPathException {
         NodeInfo separator;
-        CharSequence sepValue = separatorOp.getChildExpression().evaluateAsString(context);
+        UnicodeString sepValue = separatorOp.getChildExpression().evaluateAsString(context);
         Orphan orphan = new Orphan(context.getConfiguration());
         orphan.setNodeKind(Type.TEXT);
         orphan.setStringValue(sepValue);

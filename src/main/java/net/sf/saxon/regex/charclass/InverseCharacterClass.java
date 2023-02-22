@@ -18,7 +18,7 @@ import net.sf.saxon.z.IntSet;
 
 public class InverseCharacterClass implements CharacterClass {
 
-    private CharacterClass complement;
+    private final CharacterClass complement;
 
     /**
      * Create the complement of a character class, that is, a character class containing exactly

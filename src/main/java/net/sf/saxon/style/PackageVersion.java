@@ -62,10 +62,10 @@ public class PackageVersion implements Comparable<PackageVersion> {
      *
      * @param s The input string describing the package version according to the grammar given at:
      *          <a href="http://www.w3.org/TR/xslt-30/#package-versions">http://www.w3.org/TR/xslt-30/#package-versions</a>
-     * @throws XPathException
+     * @throws XPathException if the syntax of the package version is incorrect
      */
     public PackageVersion(String s) throws XPathException {
-        parts = new ArrayList<Integer>();
+        parts = new ArrayList<>();
         String original = s;
         if (s.contains("-")) {
             int i = s.indexOf('-');
@@ -125,7 +125,7 @@ public class PackageVersion implements Comparable<PackageVersion> {
 
     @Override
     public int compareTo(PackageVersion o) {
-        PackageVersion pv = (PackageVersion) o;
+        PackageVersion pv = o;
         List<Integer> p = pv.parts;
         int extent = parts.size() - p.size();
         int len = Math.min(parts.size(), p.size());

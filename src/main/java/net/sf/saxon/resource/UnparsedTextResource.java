@@ -14,7 +14,7 @@ import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.lib.StandardUnparsedTextResolver;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.io.*;
 import java.net.URL;
@@ -28,9 +28,9 @@ import java.net.URLConnection;
  * @since 9.7
  */
 public class UnparsedTextResource implements Resource {
-    private String contentType;
-    private String encoding;
-    private String href;
+    private final String contentType;
+    private final String encoding;
+    private final String href;
     private String unparsedText = null;
 
     /**
@@ -83,9 +83,7 @@ public class UnparsedTextResource implements Resource {
     public String getContent() throws XPathException {
         if (unparsedText == null) {
             try {
-                URL url = new URL(href);
-                URLConnection connection = url.openConnection();
-                InputStream stream = connection.getInputStream();
+                InputStream stream = Loader.urlStream(new URL(href));
                 StringBuilder builder = null;
 
                 String enc = encoding;
@@ -103,7 +101,7 @@ public class UnparsedTextResource implements Resource {
 
     @Override
     public Item getItem(XPathContext context) throws XPathException {
-        return new StringValue(getContent());
+        return new StringItem(getContent());
     }
 
     /**

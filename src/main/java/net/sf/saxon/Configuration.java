@@ -40,6 +40,8 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -125,7 +127,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private transient ApiProvider apiProcessor = null;
     private transient CharacterSetFactory characterSetFactory;
 
-    private Map<String, StringCollator> collationMap = new HashMap<>(10);
+    private final Map<String, StringCollator> collationMap = new HashMap<>(10);
     private CollationURIResolver collationResolver = new StandardCollationURIResolver();
     private String defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
 
@@ -134,7 +136,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private CollectionFinder collectionFinder = standardCollectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
     private String defaultCollection = null;
-    private ParseOptions defaultParseOptions = new ParseOptions();
+    private final ParseOptions defaultParseOptions = new ParseOptions();
 
     protected transient StaticQueryContext defaultStaticQueryContext;
     private StaticQueryContextFactory staticQueryContextFactory = new StaticQueryContextFactory();
@@ -145,6 +147,7 @@ public class Configuration implements SourceResolver, NotationSet {
         reporter.setLogger(config.getLogger());
         return reporter;
     };
+    protected IndependentContext staticContextForSystemFunctions;
 
     private String label = null;
 
@@ -159,13 +162,12 @@ public class Configuration implements SourceResolver, NotationSet {
     private Properties defaultOutputProperties = new Properties();
     private transient DynamicLoader dynamicLoader = new DynamicLoader();
 
-    private IntSet enabledProperties = new IntHashSet(64);
+    private final IntSet enabledProperties = new IntHashSet(64);
 
     private List<ExternalObjectModel> externalObjectModels = new ArrayList<>(4);
-    protected IndependentContext staticContextForSystemFunctions;
 
-    private DocumentPool globalDocumentPool = new DocumentPool();
-    private IntegratedFunctionLibrary integratedFunctionLibrary = new IntegratedFunctionLibrary();
+    private final DocumentPool globalDocumentPool = new DocumentPool();
+    private final IntegratedFunctionLibrary integratedFunctionLibrary = new IntegratedFunctionLibrary();
     private transient LocalizerFactory localizerFactory;
     private NamePool namePool = new NamePool();
 
@@ -177,7 +179,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private String sourceParserClass;
     private transient SourceResolver sourceResolver = this;
     private transient Logger traceOutput = new StandardLogger();
-    private ModuleURIResolver standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
+    private final ModuleURIResolver standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
     private String styleParserClass;
     private final StandardURIResolver systemURIResolver = new StandardURIResolver(this);
     private UnparsedTextURIResolver unparsedTextURIResolver = new StandardUnparsedTextResolver();
@@ -189,8 +191,8 @@ public class Configuration implements SourceResolver, NotationSet {
     private String traceListenerOutput = null;
     private String defaultRegexEngine = "S";
     protected transient TypeHierarchy typeHierarchy;
-    private TypeChecker typeChecker = new TypeChecker();
-    private TypeChecker10 typeChecker10 = new TypeChecker10();
+    private final TypeChecker typeChecker = new TypeChecker();
+    private final TypeChecker10 typeChecker10 = new TypeChecker10();
 
     private transient URIResolver uriResolver;
     protected FunctionLibraryList builtInExtensionLibraryList;
@@ -200,13 +202,13 @@ public class Configuration implements SourceResolver, NotationSet {
     private int xpathVersionForXslt = 31;
     // Plug-in to allow media queries in an xml-stylesheet processing instruction to be evaluated
     private Comparator<String> mediaQueryEvaluator = (o1, o2) -> 0;
-    private Map<String, String> fileExtensions = new HashMap<>();
-    private Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
-    private Map<String, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
+    private final Map<String, String> fileExtensions = new HashMap<>();
+    private final Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
+    private final Map<String, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
     protected int byteCodeThreshold = 100;
     private int regexBacktrackingLimit = 10000000;
 
-    private TreeStatistics treeStatistics = new TreeStatistics();
+    private final TreeStatistics treeStatistics = new TreeStatistics();
 
     /**
      * Constant indicating the XML Version 1.0
@@ -927,19 +929,6 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Register a new logger to be used in the Saxon event logging mechanism
-     *
-     * @param logger the Logger to be used as default. The caller is responsible for
-     *               ensuring that this is closed after use (if necessary), which can
-     *               be achieved by calling either {@link Logger#close} or
-     *               {@link Configuration#close};
-     * @since 9.6
-     */
-    public void setLogger(Logger logger) {
-        traceOutput = logger;
-    }
-
-    /**
      * Set the standard error output to be used in all cases where no more specific destination
      * is defined. This defaults to System.err.
      *
@@ -974,6 +963,20 @@ public class Configuration implements SourceResolver, NotationSet {
         } else {
             return System.err;
         }
+    }
+
+
+    /**
+     * Register a new logger to be used in the Saxon event logging mechanism
+     *
+     * @param logger the Logger to be used as default. The caller is responsible for
+     *               ensuring that this is closed after use (if necessary), which can
+     *               be achieved by calling either {@link Logger#close} or
+     *               {@link Configuration#close};
+     * @since 9.6
+     */
+    public void setLogger(Logger logger) {
+        traceOutput = logger;
     }
 
     /**
@@ -1885,7 +1888,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setDefaultLanguage(String language) {
-        ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(language);
+        ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.of(language).tidy());
         if (vf != null) {
             throw new IllegalArgumentException("The default language must be a valid language code");
         }
@@ -1970,7 +1973,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws XPathException if the regular expression or the flags are invalid
      */
 
-    public RegularExpression compileRegularExpression(CharSequence regex, String flags, String hostLanguage, List<String> warnings)
+    public RegularExpression compileRegularExpression(UnicodeString regex, String flags, String hostLanguage, List<String> warnings)
             throws XPathException {
         return Version.platform.compileRegularExpression(this, regex, flags, hostLanguage, warnings);
     }
@@ -2930,7 +2933,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return parser;
     }
 
-    private static LexicalHandler dummyLexicalHandler = new DefaultHandler2();
+    private static final LexicalHandler dummyLexicalHandler = new DefaultHandler2();
 
     /**
      * Return a stylesheet (or schema) parser to the pool, for reuse
@@ -3379,7 +3382,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws ValidationException if the value is invalid
      */
 
-    public SimpleType validateAttribute(StructuredQName nodeName, CharSequence value, int validation)
+    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
             throws ValidationException, MissingComponentException {
         return BuiltInAtomicType.UNTYPED_ATOMIC;
     }
@@ -3785,7 +3788,7 @@ public class Configuration implements SourceResolver, NotationSet {
      *
      * @param model The external object model.
      *              This can either be one of the system-supplied external
-     *              object models for JDOM, XOM, or DOM, or a user-supplied external object model.
+     *              object models such as Axiom, DOM4J, JDOM, or XOM, or a user-supplied external object model.
      * @see net.sf.saxon.option.axiom.AxiomObjectModel
      * @see net.sf.saxon.option.dom4j.DOM4JObjectModel
      * @see net.sf.saxon.option.jdom2.JDOM2ObjectModel
@@ -5077,7 +5080,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
             case FeatureCode.ERROR_LISTENER_CLASS:
                 // Obsolete
-                return (T) null;
+                return null;
 
             case FeatureCode.ENTITY_RESOLVER_CLASS:
                 EntityResolver er = defaultParseOptions.getEntityResolver();

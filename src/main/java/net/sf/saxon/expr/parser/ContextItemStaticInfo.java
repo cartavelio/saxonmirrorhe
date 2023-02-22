@@ -23,8 +23,8 @@ import net.sf.saxon.type.UType;
 public class ContextItemStaticInfo {
 
 
-    private ItemType itemType;
-    private boolean contextMaybeUndefined;
+    private final ItemType itemType;
+    private final boolean contextMaybeUndefined;
     private Expression contextSettingExpression;
     private boolean parentless;
 

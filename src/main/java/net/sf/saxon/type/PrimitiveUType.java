@@ -49,7 +49,7 @@ public enum PrimitiveUType {
 
     private final int bit;
 
-    private PrimitiveUType(int bit) {
+    PrimitiveUType(int bit) {
         this.bit = bit;
     }
 

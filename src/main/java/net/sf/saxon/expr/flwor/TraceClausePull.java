@@ -20,9 +20,9 @@ import java.util.Collections;
  */
 public class TraceClausePull extends TuplePull {
 
-    private TuplePull base;
-    private Clause baseClause;
-    private TraceClause traceClause;
+    private final TuplePull base;
+    private final Clause baseClause;
+    private final TraceClause traceClause;
 
     public TraceClausePull(TuplePull base, TraceClause traceClause, Clause baseClause) {
         this.base = base;

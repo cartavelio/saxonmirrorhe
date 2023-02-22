@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public class ParseJsonFn extends JsonToXMLFn {
                 new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING);
         OptionsParameter parseJsonOptions = new OptionsParameter();
         parseJsonOptions.addAllowedOption("liberal", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        parseJsonOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, new StringValue("use-first"));
+        parseJsonOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringItem.bmp("use-first"));
         parseJsonOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "use-last");
         parseJsonOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
@@ -48,7 +48,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @param input   JSON input string
      * @param options options for the conversion as a map of xs:string : value pairs
      * @param context XPath evaluation context
-     * @return the result of the parsing, as an XML element
+     * @return the result of the parsing, typically a map or array
      * @throws XPathException if the syntax of the input is incorrect
      */
     @Override
@@ -66,7 +66,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @param input   JSON input string
      * @param options options for the conversion as a map of xs:string : value pairs
      * @param context XPath evaluation context
-     * @return the result of the parsing, as an XML element
+     * @return the result of the parsing, as an item (null in the case where the JSON input is "null")
      * @throws XPathException if the syntax of the input is incorrect
      */
 

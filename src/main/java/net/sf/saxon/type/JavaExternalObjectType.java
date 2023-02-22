@@ -11,7 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.ObjectValue;
 
 /**
@@ -181,20 +181,20 @@ public class JavaExternalObjectType extends ExternalObjectType {
      */
 
     public static String localNameToClassName(String className) {
-        FastStringBuffer fsb = new FastStringBuffer(className.length());
+        StringBuilder fsb = new StringBuilder(className.length());
         boolean atStart = true;
         for (int i=0; i<className.length(); i++) {
             char c = className.charAt(i);
             if (atStart) {
                 if (c == '_' && i+1 < className.length()  && className.charAt(i+1) == '-') {
-                    fsb.cat('[');
+                    fsb.append('[');
                     i++;
                 } else {
                     atStart = false;
-                    fsb.cat(c == '-' ? '$' : c);
+                    fsb.append(c == '-' ? '$' : c);
                 }
             } else {
-                fsb.cat(c == '-' ? '$' : c);
+                fsb.append(c == '-' ? '$' : c);
             }
         }
         return fsb.toString();

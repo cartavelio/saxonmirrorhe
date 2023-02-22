@@ -7,8 +7,6 @@
 
 package net.sf.saxon.tree.util;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.Version;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.Attributes;
@@ -63,12 +61,15 @@ public class ProcInstParser {
                 }
             };
 
-            XMLReader reader = Version.platform.loadParserForXmlFragments();
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(false);  // allows attribute names containing colons or unbound prefixes
+            SAXParser parser = factory.newSAXParser();
+            XMLReader reader = parser.getXMLReader();
             reader.setContentHandler(filter);
             StringReader in = new StringReader("<e " + content + "/>");
             reader.parse(new InputSource(in));
             return result.isEmpty() ? null : result.get(0);
-        } catch (/*ParserConfigurationException |*/ SAXException | IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new XPathException("Invalid syntax for pseudo-attributes: " + e.getMessage(), SaxonErrorCode.SXCH0005);
         }
 

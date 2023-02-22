@@ -30,9 +30,9 @@ import java.util.Properties;
  */
 public class ExpandedStreamResult {
 
-    private Configuration config;
+    private final Configuration config;
     private Properties outputProperties;
-    private String systemId;
+    private final String systemId;
     private Writer writer;
     private OutputStream outputStream;
     private CharacterSet characterSet;

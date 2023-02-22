@@ -25,7 +25,7 @@ public class SmallAttributeMap implements AttributeMap {
 
     final static int LIMIT = 8;
 
-    private List<AttributeInfo> attributes;
+    private final List<AttributeInfo> attributes;
 
     public SmallAttributeMap(List<AttributeInfo> attributes) {
         // TODO: check uniqueness of names?

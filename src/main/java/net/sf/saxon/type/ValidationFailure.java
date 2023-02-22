@@ -15,7 +15,7 @@ import net.sf.saxon.om.AbsolutePath;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.AtomicValue;
 
 import javax.xml.transform.SourceLocator;
@@ -257,7 +257,7 @@ public class ValidationFailure
      * @return the String representation of this Exception
      */
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer("ValidationException: ");
+        StringBuilder sb = new StringBuilder("ValidationException: ");
         String message = getMessage();
         if (message != null) {
             sb.append(message);
@@ -368,7 +368,7 @@ public class ValidationFailure
 
     /**
      * Get the error code associated with the validity error. This is relevant only when validation
-     * is run from within XSLT or XQuery, which define different error codes for validation errors.
+     * is run from within XSLT or XQuery, which define different error codes for validition errors
      *
      * @return the error code associated with the error, if any. The error is returned as a simple
      * string if it is in the standard error namespace, or as an EQName (that is Q{uri}local) otherwise.
@@ -456,7 +456,7 @@ public class ValidationFailure
      */
 
     public String getValidationLocationText() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         AbsolutePath valPath = getAbsolutePath();
         if (valPath != null) {
             fsb.append("Validating ");
@@ -483,7 +483,7 @@ public class ValidationFailure
      */
 
     public String getContextLocationText() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         AbsolutePath contextPath = getContextPath();
         if (contextPath != null) {
             fsb.append("Currently processing ");

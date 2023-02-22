@@ -45,8 +45,8 @@ public class Categories {
 
     public static class Category implements CharacterClass {
 
-        private String label;
-        private IntPredicate predicate;
+        private final String label;
+        private final IntPredicate predicate;
 
         public Category(String label, java.util.function.IntPredicate predicate) {
             this.label = label;

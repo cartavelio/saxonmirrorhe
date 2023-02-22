@@ -24,7 +24,7 @@ import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -99,7 +99,7 @@ public class SQLQuery extends ExtensionInstruction {
 
         AttributeInfo dbWhere = atts.get("", "where");
         if (dbWhere == null) {
-            where = new StringLiteral(StringValue.EMPTY_STRING);
+            where = new StringLiteral(StringItem.EMPTY_STRING);
         } else {
             where = makeAttributeValueTemplate(dbWhere.getValue(), dbWhere);
         }

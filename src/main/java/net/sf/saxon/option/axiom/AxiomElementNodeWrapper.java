@@ -337,13 +337,13 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
      */
     private final class AttributeAxisIterator implements AxisIterator {
 
-        private AxiomElementNodeWrapper element;
-        private Iterator base;
+        private final AxiomElementNodeWrapper element;
+        private final Iterator base;
 
         private NodeInfo current;
         private int index;
 
-        private Predicate<? super NodeInfo> nodeTest;
+        private final Predicate<? super NodeInfo> nodeTest;
 
         public AttributeAxisIterator(AxiomElementNodeWrapper element, Predicate<? super NodeInfo> test) {
             this.element = element;

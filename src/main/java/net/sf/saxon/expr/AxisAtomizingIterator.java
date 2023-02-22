@@ -20,7 +20,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public final class AxisAtomizingIterator implements SequenceIterator {
 
-    private AtomizedValueIterator base;
+    private final AtomizedValueIterator base;
     private AtomicSequence results = null;
     private int atomicPosition = 0;
 

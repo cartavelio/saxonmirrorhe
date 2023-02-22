@@ -13,12 +13,14 @@ import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.SameNameTest;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.WhitespaceTextImpl;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.ComplexType;
@@ -408,9 +410,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 if ((flags & COMPARE_STRING_VALUES) == 0) {
                     ar = deepEqual(n1.atomize().iterate(), n2.atomize().iterate(), comparer, context, 0);
                 } else {
-                    ar = comparer.comparesEqual(
-                            new StringValue(n1.getStringValueCS()),
-                            new StringValue(n2.getStringValueCS()));
+                    ar = comparer.comparesEqual(new StringItem(n1.getUnicodeStringValue()), new StringItem(n2.getUnicodeStringValue()));
                 }
                 if (!ar) {
                     explain(reporter, "attribute values differ", flags, n1, n2);
@@ -440,8 +440,8 @@ public class DeepEqual extends CollatingFunctionFixed {
             case Type.COMMENT:
                 boolean vr = comparer.comparesEqual((AtomicValue) n1.atomize(), (AtomicValue) n2.atomize());
                 if (!vr && ((flags & WARNING_IF_FALSE) != 0)) {
-                    String v1 = n1.atomize().getStringValue();
-                    String v2 = n2.atomize().getStringValue();
+                    String v1 = n1.getStringValue();
+                    String v2 = n2.getStringValue();
                     String message = "";
                     if (v1.length() != v2.length()) {
                         message = "lengths (" + v1.length() + "," + v2.length() + ")";
@@ -453,7 +453,7 @@ public class DeepEqual extends CollatingFunctionFixed {
 
                         if (v1.substring(0, min).equals(v2.substring(0, min))) {
                             message += " different at char " + min + "(\"" +
-                                StringValue.diagnosticDisplay((v1.length() > v2.length() ? v1 : v2).substring(min)) + "\")";
+                                StringTool.diagnosticDisplay((v1.length() > v2.length() ? v1 : v2).substring(min)) + "\")";
                         } else if (v1.charAt(0) != v2.charAt(0)) {
                             message += " different at start " + "(\"" +
                                 v1.substring(0, Math.min(v1.length(), 10)) + "\", \"" +
@@ -488,7 +488,7 @@ public class DeepEqual extends CollatingFunctionFixed {
             return (flags & INCLUDE_PROCESSING_INSTRUCTIONS) == 0;
         } else if (kind == Type.TEXT) {
             return ((flags & EXCLUDE_WHITESPACE_TEXT_NODES) != 0) &&
-                    Whitespace.isWhite(node.getStringValueCS());
+                    Whitespace.isAllWhite(node.getUnicodeStringValue());
         }
         return false;
     }
@@ -505,7 +505,7 @@ public class DeepEqual extends CollatingFunctionFixed {
 
     private static String showKind(Item item) {
         if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.TEXT &&
-            Whitespace.isWhite(item.getStringValueCS())) {
+            Whitespace.isAllWhite(item.getUnicodeStringValue())) {
             return "whitespace text() node";
         } else {
             return Type.displayTypeName(item);
@@ -513,7 +513,7 @@ public class DeepEqual extends CollatingFunctionFixed {
     }
 
     private static String showNamespaces(HashSet<NamespaceBinding> bindings) {
-        FastStringBuffer sb = new FastStringBuffer(256);
+        StringBuilder sb = new StringBuilder(256);
         for (NamespaceBinding binding : bindings) {
             sb.append(binding.getPrefix());
             sb.append("=");
@@ -527,22 +527,22 @@ public class DeepEqual extends CollatingFunctionFixed {
     private static SequenceIterator mergeAdjacentTextNodes(SequenceIterator in) throws XPathException {
         List<Item> items = new ArrayList<>(20);
         boolean prevIsText = false;
-        FastStringBuffer textBuffer = new FastStringBuffer(FastStringBuffer.C64);
+        UnicodeBuilder textBuffer = new UnicodeBuilder();
         while (true) {
             Item next = in.next();
             if (next == null) {
                 break;
             }
             if (next instanceof NodeInfo && ((NodeInfo) next).getNodeKind() == Type.TEXT) {
-                textBuffer.cat(next.getStringValueCS());
+                textBuffer.append(next.getUnicodeStringValue());
                 prevIsText = true;
             } else {
                 if (prevIsText) {
                     Orphan textNode = new Orphan(null);
                     textNode.setNodeKind(Type.TEXT);
-                    textNode.setStringValue(textBuffer.toString()); // must copy the buffer before reusing it
+                    textNode.setStringValue(textBuffer.toUnicodeString());
                     items.add(textNode);
-                    textBuffer.setLength(0);
+                    textBuffer.clear();
                 }
                 prevIsText = false;
                 items.add(next);
@@ -551,7 +551,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         if (prevIsText) {
             Orphan textNode = new Orphan(null);
             textNode.setNodeKind(Type.TEXT);
-            textNode.setStringValue(textBuffer.toString()); // must copy the buffer before reusing it
+            textNode.setStringValue(textBuffer.toUnicodeString());
             items.add(textNode);
         }
         SequenceExtent extent = new SequenceExtent(items);

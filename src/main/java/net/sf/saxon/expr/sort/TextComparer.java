@@ -9,9 +9,11 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * A Comparer used for comparing sort keys when data-type="text". The items to be
@@ -23,7 +25,7 @@ import net.sf.saxon.value.StringValue;
 
 public class TextComparer implements AtomicComparer {
 
-    private AtomicComparer baseComparer;
+    private final AtomicComparer baseComparer;
 
     public TextComparer(AtomicComparer baseComparer) {
         this.baseComparer = baseComparer;
@@ -76,12 +78,8 @@ public class TextComparer implements AtomicComparer {
         return baseComparer.compareAtomicValues(toStringValue(a), toStringValue(b));
     }
 
-    private StringValue toStringValue(AtomicValue a) {
-        if (a instanceof StringValue) {
-            return (StringValue) a;
-        } else {
-            return new StringValue(a == null ? "" : a.getStringValue());
-        }
+    private StringItem toStringValue(AtomicValue a) {
+        return new StringItem(a==null ? (UnicodeString) EmptyUniString.getInstance() : a.getUnicodeStringValue());
     }
 
     /**

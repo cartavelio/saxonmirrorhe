@@ -49,6 +49,6 @@ public class SystemLogger extends Logger {
     public void println(String message, int severity) {
         log.log(getLevel(severity), message);
     }
-
+    
 }
 

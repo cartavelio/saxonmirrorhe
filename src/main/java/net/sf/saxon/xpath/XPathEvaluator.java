@@ -47,7 +47,7 @@ import javax.xml.xpath.*;
 
 public class XPathEvaluator implements XPath {
 
-    private Configuration config;
+    private final Configuration config;
     private JAXPXPathStaticContext staticContext;
 
     /**

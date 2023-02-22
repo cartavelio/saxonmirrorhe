@@ -14,7 +14,7 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.z.IntHashSet;
@@ -1154,7 +1154,7 @@ public final class AxisExpression extends Expression {
      */
 
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C16);
+        StringBuilder fsb = new StringBuilder(16);
         fsb.append(AxisInfo.axisName[axis]);
         fsb.append("::");
         fsb.append(test == null ? "node()" : test.toString());
@@ -1163,7 +1163,7 @@ public final class AxisExpression extends Expression {
 
     @Override
     public String toShortString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C16);
+        StringBuilder fsb = new StringBuilder(16);
         if (axis == AxisInfo.CHILD) {
             // no action
         } else if (axis == AxisInfo.ATTRIBUTE) {

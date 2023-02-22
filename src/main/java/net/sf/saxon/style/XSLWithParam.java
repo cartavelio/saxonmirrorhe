@@ -24,7 +24,7 @@ import java.util.EnumSet;
 
 public class XSLWithParam extends XSLGeneralVariable {
 
-    private EnumSet<SourceBinding.BindingProperty> allowedAttributes = EnumSet.of(
+    private final EnumSet<SourceBinding.BindingProperty> allowedAttributes = EnumSet.of(
             SourceBinding.BindingProperty.SELECT,
             SourceBinding.BindingProperty.AS,
             SourceBinding.BindingProperty.TUNNEL);

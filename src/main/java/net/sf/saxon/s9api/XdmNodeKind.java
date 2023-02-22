@@ -21,9 +21,9 @@ public enum XdmNodeKind {
     PROCESSING_INSTRUCTION(Type.PROCESSING_INSTRUCTION),
     NAMESPACE(Type.NAMESPACE);
 
-    private int number;
+    private final int number;
 
-    private XdmNodeKind(int number) {
+    XdmNodeKind(int number) {
         this.number = number;
     }
 

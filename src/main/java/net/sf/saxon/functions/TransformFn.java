@@ -29,7 +29,7 @@ import net.sf.saxon.trans.StylesheetCache;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.wrapper.RebasedDocument;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransformFn extends SystemFunction implements Callable {
 
 
-    private static String[] transformOptionNames30 = new String[]{
+    private static final String[] transformOptionNames30 = new String[]{
             "package-name", "package-version", "package-node", "package-location", "static-params", "global-context-item",
             "template-params", "tunnel-params", "initial-function", "function-params"
     };
@@ -194,7 +194,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
     private String enumerate(String... keys) {
         boolean first = true;
-        FastStringBuffer buffer = new FastStringBuffer(256);
+        StringBuilder buffer = new StringBuilder(256);
         for (String k : keys) {
             if (first) {
                 first = false;
@@ -217,8 +217,8 @@ public class TransformFn extends SystemFunction implements Callable {
     private boolean asBoolean(AtomicValue value) throws XPathException {
         if (value instanceof BooleanValue) {
             return ((BooleanValue)value).getBooleanValue();
-        } else if (value instanceof StringValue) {
-            String s = Whitespace.normalizeWhitespace(value.getStringValue()).toString();
+        } else if (value instanceof StringItem) {
+            String s = Whitespace.normalizeWhitespace(value.getUnicodeStringValue()).toString();
             if (s.equals("yes") || s.equals("true") || s.equals("1")) {
                 return true;
             } else if (s.equals("no") || s.equals("false") || s.equals("0")) {
@@ -238,20 +238,21 @@ public class TransformFn extends SystemFunction implements Callable {
                 AtomicValue value = (AtomicValue)requestedProps.get(option).head();
                 if (optionName.hasURI(NamespaceConstant.XSLT)) {
                     String localName = optionName.getLocalPart();
+                    String val = value.getStringValue();
                     switch (localName) {
                         case "vendor-url":
-                            if (!(value.getStringValue().contains("saxonica.com") || value.getStringValue().equals("Saxonica"))) {
-                                unsuitable("vendor-url", value.getStringValue());
+                            if (!(val.contains("saxonica.com") || value.getUnicodeStringValue().equals("Saxonica"))) {
+                                unsuitable("vendor-url", val);
                             }
                             break;
                         case "product-name":
-                            if (!value.getStringValue().equals("SAXON")) {
-                                unsuitable("vendor-url", value.getStringValue());
+                            if (!val.equals("SAXON")) {
+                                unsuitable("vendor-url", val);
                             }
                             break;
                         case "product-version":
-                            if (!Version.getProductVersion().startsWith(value.getStringValue())) {
-                                unsuitable("product-version", value.getStringValue());
+                            if (!Version.getProductVersion().startsWith(val)) {
+                                unsuitable("product-version", val);
                             }
                             break;
                         case "is-schema-aware": {
@@ -260,11 +261,11 @@ public class TransformFn extends SystemFunction implements Callable {
                                 if (processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
                                     processor.setConfigurationProperty(Feature.XSLT_SCHEMA_AWARE, true);
                                 } else {
-                                    unsuitable("is-schema-aware", value.getStringValue());
+                                    unsuitable("is-schema-aware", val);
                                 }
                             } else {
                                 if (processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
-                                    unsuitable("is-schema-aware", value.getStringValue());
+                                    unsuitable("is-schema-aware", val);
                                 }
                             }
                             break;
@@ -272,21 +273,21 @@ public class TransformFn extends SystemFunction implements Callable {
                         case "supports-serialization": {
                             boolean b = asBoolean(value);
                             if (!b) {
-                                unsuitable("supports-serialization", value.getStringValue());
+                                unsuitable("supports-serialization", val);
                             }
                             break;
                         }
                         case "supports-backwards-compatibility": {
                             boolean b = asBoolean(value);
                             if (!b) {
-                                unsuitable("supports-backwards-compatibility", value.getStringValue());
+                                unsuitable("supports-backwards-compatibility", val);
                             }
                             break;
                         }
                         case "supports-namespace-axis": {
                             boolean b = asBoolean(value);
                             if (!b) {
-                                unsuitable("supports-namespace-axis", value.getStringValue());
+                                unsuitable("supports-namespace-axis", val);
                             }
                             break;
                         }
@@ -294,7 +295,7 @@ public class TransformFn extends SystemFunction implements Callable {
                             boolean b = asBoolean(value);
                             if (b) {
                                 if (!processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
-                                    unsuitable("supports-streaming", value.getStringValue());
+                                    unsuitable("supports-streaming", val);
                                 }
                             } else {
                                 if (processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
@@ -313,29 +314,27 @@ public class TransformFn extends SystemFunction implements Callable {
                         case "supports-higher-order-functions": {
                             boolean b = asBoolean(value);
                             if (!b) {
-                                unsuitable("supports-higher-order-functions", value.getStringValue());
+                                unsuitable("supports-higher-order-functions", val);
                             }
                             break;
                         }
                         case "xpath-version": {
-                            String v = value.getStringValue();
                             try {
-                                if (Double.parseDouble(v) > 3.1) {
-                                    unsuitable("xpath-version", value.getStringValue());
+                                if (Double.parseDouble(val) > 3.1) {
+                                    unsuitable("xpath-version", val);
                                 }
                             } catch (NumberFormatException nfe) {
-                                unsuitable("xpath-version", value.getStringValue());
+                                unsuitable("xpath-version", val);
                             }
                             break;
                         }
                         case "xsd-version": {
-                            String v = value.getStringValue();
                             try {
-                                if (Double.parseDouble(v) > 1.1) {
-                                    unsuitable("xsd-version", value.getStringValue());
+                                if (Double.parseDouble(val) > 1.1) {
+                                    unsuitable("xsd-version", val);
                                 }
                             } catch (NumberFormatException nfe) {
-                                unsuitable("xsd-version", value.getStringValue());
+                                unsuitable("xsd-version", val);
                             }
                             break;
                         }
@@ -374,11 +373,11 @@ public class TransformFn extends SystemFunction implements Callable {
         URI stylesheetBaseUri = null;
         Sequence seq;
         if ((seq = options.get("stylesheet-base-uri")) != null) {
-            StringValue styleBaseUri = (StringValue) seq.head();
-            stylesheetBaseUri = URI.create(styleBaseUri.getStringValue());
+            String styleBaseUri = seq.head().getStringValue();
+            stylesheetBaseUri = URI.create(styleBaseUri);
             if (!stylesheetBaseUri.isAbsolute()) {
                 URI staticBase = getRetainedStaticContext().getStaticBaseUri();
-                stylesheetBaseUri = staticBase.resolve(styleBaseUri.getStringValue());
+                stylesheetBaseUri = staticBase.resolve(styleBaseUri);
             }
         }
         final List<XmlProcessingError> compileErrors = new ArrayList<>();
@@ -825,7 +824,7 @@ public class TransformFn extends SystemFunction implements Callable {
         // Add primary result
 
         if (result != null) {
-            AtomicValue resultKey = new StringValue(principalResultKey);
+            AtomicValue resultKey = new StringItem(principalResultKey);
             resultMap = resultMap.addEntry(resultKey, result.materialize());
         }
         return resultMap;
@@ -967,7 +966,7 @@ public class TransformFn extends SystemFunction implements Callable {
                 while ((param = paramIterator.next()) != null) {
                     // See bug 29440/29443. For the time being, accept both the old and new forms of serialization params
                     QName paramName;
-                    if (param instanceof StringValue) {
+                    if (param instanceof StringItem) {
                         paramName = new QName(param.getStringValue());
                     } else if (param instanceof QNameValue) {
                         paramName = new QName(((QNameValue) param.head()).getStructuredQName());
@@ -979,7 +978,7 @@ public class TransformFn extends SystemFunction implements Callable {
                     if (supplied.getLength() > 0) {
                         if (supplied.getLength() == 1) {
                             Item val = supplied.itemAt(0);
-                            if (val instanceof StringValue) {
+                            if (val instanceof StringItem) {
                                 paramValue = val.getStringValue();
                             } else if (val instanceof BooleanValue) {
                                 paramValue = ((BooleanValue) val).getBooleanValue() ? "yes" : "no";
@@ -1050,7 +1049,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         public GroundedValue postProcess(String uri, Sequence result) throws XPathException {
             if (postProcessor != null) {
-                result = postProcessor.call(context.newCleanContext(), new Sequence[]{new StringValue(uri), result});
+                result = postProcessor.call(context.newCleanContext(), new Sequence[]{new StringItem(uri), result});
             }
             return result.materialize();
         }
@@ -1061,8 +1060,8 @@ public class TransformFn extends SystemFunction implements Callable {
      */
 
     private static class DocumentDeliverer extends Deliverer {
-        private Map<String, TreeInfo> results = new ConcurrentHashMap<>();
-        private XdmDestination destination = new XdmDestination();
+        private final Map<String, TreeInfo> results = new ConcurrentHashMap<>();
+        private final XdmDestination destination = new XdmDestination();
 
         public DocumentDeliverer() {
         }
@@ -1095,7 +1094,7 @@ public class TransformFn extends SystemFunction implements Callable {
         public HashTrieMap populateResultMap(HashTrieMap resultMap) {
             for (Map.Entry<String, TreeInfo> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringValue(uri),
+                resultMap = resultMap.addEntry(new StringItem(uri),
                                                entry.getValue().getRootNode());
             }
             return resultMap;
@@ -1107,8 +1106,8 @@ public class TransformFn extends SystemFunction implements Callable {
      */
 
     private static class SerializedDeliverer extends Deliverer {
-        private Map<String, String> results = new ConcurrentHashMap<>();
-        private Map<String, StringWriter> workInProgress = new ConcurrentHashMap<>();
+        private final Map<String, String> results = new ConcurrentHashMap<>();
+        private final Map<String, StringWriter> workInProgress = new ConcurrentHashMap<>();
         private StringWriter primaryWriter;
 
         public SerializedDeliverer() {
@@ -1128,7 +1127,7 @@ public class TransformFn extends SystemFunction implements Callable {
             if (str.isEmpty()) {
                 return null;
             }
-            return postProcess(baseOutputUri, new StringValue(str));
+            return postProcess(baseOutputUri, new StringItem(str));
         }
 
         @Override
@@ -1156,16 +1155,16 @@ public class TransformFn extends SystemFunction implements Callable {
         public HashTrieMap populateResultMap(HashTrieMap resultMap) {
             for (Map.Entry<String, String> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringValue(uri),
-                                               new StringValue(entry.getValue()));
+                resultMap = resultMap.addEntry(new StringItem(uri),
+                                               new StringItem(entry.getValue()));
             }
             return resultMap;
         }
     }
 
     private static class RawDeliverer extends Deliverer {
-        private Map<String, XdmValue> results = new ConcurrentHashMap<>();
-        private RawDestination primaryDestination = new RawDestination();
+        private final Map<String, XdmValue> results = new ConcurrentHashMap<>();
+        private final RawDestination primaryDestination = new RawDestination();
 
         public RawDeliverer() {}
 
@@ -1193,7 +1192,7 @@ public class TransformFn extends SystemFunction implements Callable {
         public HashTrieMap populateResultMap(HashTrieMap resultMap) {
             for (Map.Entry<String, XdmValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringValue(uri),
+                resultMap = resultMap.addEntry(new StringItem(uri),
                                                entry.getValue().getUnderlyingValue());
             }
             return resultMap;

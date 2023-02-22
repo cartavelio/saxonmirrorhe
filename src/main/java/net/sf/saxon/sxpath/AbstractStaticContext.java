@@ -57,7 +57,7 @@ public abstract class AbstractStaticContext implements StaticContext {
     private boolean backwardsCompatible = false;
     private int xpathLanguageLevel = 31;
     protected boolean usingDefaultFunctionLibrary;
-    private Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
+    private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
     private UnprefixedElementMatchingPolicy unprefixedElementPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private BiConsumer<String, Location> warningHandler = (message, locator) -> {
         XmlProcessingIncident incident = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, locator).asWarning();

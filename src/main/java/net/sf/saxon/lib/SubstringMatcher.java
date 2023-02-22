@@ -7,6 +7,8 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.str.UnicodeString;
+
 /**
  * This interface is implemented by a collation that is capable of supporting
  * the XPath functions that require matching of a substring: namely contains(),
@@ -25,7 +27,7 @@ public interface SubstringMatcher extends StringCollator {
      * @return true iff s1 contains s2
      */
 
-    boolean contains(String s1, String s2);
+    boolean contains(UnicodeString s1, UnicodeString s2);
 
     /**
      * Test whether one string starts with another, according to the rules
@@ -36,7 +38,7 @@ public interface SubstringMatcher extends StringCollator {
      * @return true iff s1 starts with s2
      */
 
-    boolean startsWith(String s1, String s2);
+    boolean startsWith(UnicodeString s1, UnicodeString s2);
 
     /**
      * Test whether one string ends with another, according to the rules
@@ -47,7 +49,7 @@ public interface SubstringMatcher extends StringCollator {
      * @return true iff s1 ends with s2
      */
 
-    boolean endsWith(String s1, String s2);
+    boolean endsWith(UnicodeString s1, UnicodeString s2);
 
     /**
      * Return the part of a string before a given substring, according to the rules
@@ -58,7 +60,7 @@ public interface SubstringMatcher extends StringCollator {
      * @return the part of s1 that precedes the first occurrence of s2
      */
 
-    String substringBefore(String s1, String s2);
+    UnicodeString substringBefore(UnicodeString s1, UnicodeString s2);
 
     /**
      * Return the part of a string after a given substring, according to the rules
@@ -69,7 +71,7 @@ public interface SubstringMatcher extends StringCollator {
      * @return the part of s1 that follows the first occurrence of s2
      */
 
-    String substringAfter(String s1, String s2);
+    UnicodeString substringAfter(UnicodeString s1, UnicodeString s2);
 
 }
 

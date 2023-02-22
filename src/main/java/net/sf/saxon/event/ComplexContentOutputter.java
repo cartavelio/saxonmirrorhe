@@ -17,9 +17,9 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
@@ -253,14 +253,13 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void characters(CharSequence s, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints s, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
             previousAtomic = false;
             if (s == null) {
                 return;
             }
-            int len = s.length();
-            if (len == 0) {
+            if (s.isEmpty()) {
                 return;
             }
             if (state == StartTag) {
@@ -344,8 +343,8 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                 if (uri != null && !uri.equals(namespaceUri)) {
                     XPathException err = new XPathException(
                             "Cannot create two namespace nodes with the same prefix "
-                                    + "mapped to different URIs (prefix=\"" + prefix + "\", URIs=(\"" +
-                                    uri + "\", \"" + namespaceUri + "\"))");
+                                    + "mapped to different URIs (prefix=\"" + prefix + "\", URIs=(" +
+                                    uri + "\", \"" + namespaceUri + "\")");
                     err.setErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE0430" : "XQDY0102");
                     throw err;
                 }
@@ -357,7 +356,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.NAMESPACE);
             orphan.setNodeName(new NoNamespaceName(prefix));
-            orphan.setStringValue(namespaceUri);
+            orphan.setStringValue(StringView.tidy(namespaceUri));
             nextReceiver.append(orphan, Loc.NONE, properties);
         }
         previousAtomic = false;
@@ -400,7 +399,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location locationId, int properties) throws XPathException {
         //System.err.println("Write attribute " + attName + "=" + value + " to Outputter " + this);
         if (level >= 0 && state != StartTag) {
             // The complexity here is in identifying the right error message and error code
@@ -456,7 +455,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             orphan.setNodeKind(Type.ATTRIBUTE);
             orphan.setNodeName(attName);
             orphan.setTypeAnnotation(typeCode);
-            orphan.setStringValue(value);
+            orphan.setStringValue(StringView.tidy(value));
             nextReceiver.append(orphan, locationId, properties);
         }
 
@@ -469,7 +468,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     /**
      * Notify the start of an element. This version of the method supplies all attributes and
      * namespaces and implicitly invokes {@link #startContent()}, which means it cannot be followed
-     * by further calls on {@link #attribute(NodeName, SimpleType, CharSequence, Location, int)} or
+     * by further calls on {@link Outputter#attribute(NodeName, SimpleType, String, Location, int)} or
      * {@link #namespace} to define further attributes and namespaces.
      *
      * <p>This version of the method does not perform namespace fixup for prefixes used in the element
@@ -614,7 +613,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void comment(CharSequence comment, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints comment, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
             if (state == StartTag) {
                 startContent();
@@ -629,7 +628,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (level >= 0) {
             if (state == StartTag) {
                 startContent();
@@ -672,19 +671,19 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      */
 
     @Override
-    public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
+    public UniStringConsumer getStringReceiver(boolean asTextNode) {
         if (level >= 0) {
-            return new CharSequenceConsumer() {
+            return new UniStringConsumer() {
 
                 @Override
                 public void open() throws XPathException {
                     if (previousAtomic && !asTextNode) {
-                        ComplexContentOutputter.this.characters(" ", Loc.NONE, ReceiverOption.NONE);
+                        ComplexContentOutputter.this.characters(UnicodeString.SINGLE_SPACE, Loc.NONE, ReceiverOption.NONE);
                     }
                 }
 
                 @Override
-                public CharSequenceConsumer cat(CharSequence chars) throws XPathException {
+                public UniStringConsumer append(CodePoints chars) throws XPathException {
                     ComplexContentOutputter.this.characters(chars, Loc.NONE, ReceiverOption.NONE);
                     return this;
                 }
@@ -804,9 +803,9 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         if (item != null) {
             if (item instanceof AtomicValue || item instanceof ExternalObject) {
                 if (previousAtomic) {
-                    characters(" ", locationId, ReceiverOption.NONE);
+                    characters(UnicodeString.SINGLE_SPACE, locationId, ReceiverOption.NONE);
                 }
-                characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
+                characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 previousAtomic = true;
             } else if (item instanceof ArrayItem) {
                 flatten((ArrayItem) item, locationId, copyNamespaces);
@@ -827,7 +826,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                         if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
                             options = ReceiverOption.DISABLE_ESCAPING;
                         }
-                        characters(item.getStringValueCS(), locationId, options);
+                        characters(item.getUnicodeStringValue(), locationId, options);
                         break;
 
                     case Type.ATTRIBUTE:

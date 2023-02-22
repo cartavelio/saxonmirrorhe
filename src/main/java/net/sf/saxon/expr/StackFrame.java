@@ -28,7 +28,7 @@ public class StackFrame {
 
     public StackFrame(SlotManager map, Sequence[] slots) {
         this.map = map;
-        this.slots = (Sequence[])slots;
+        this.slots = slots;
     }
 
     public SlotManager getStackFrameMap() {
@@ -40,7 +40,7 @@ public class StackFrame {
     }
 
     public void setStackFrameValues(Sequence[] values) {
-        slots = (Sequence[])values;
+        slots = values;
     }
 
     public StackFrame copy() {

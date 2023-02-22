@@ -8,9 +8,9 @@
 package net.sf.saxon.query;
 
 import net.sf.saxon.functions.UnparsedTextFunction;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.stream.StreamSource;
@@ -127,7 +127,7 @@ public class QueryReader {
 
     private static String readQueryFromReader(Reader reader, IntPredicate charChecker) throws XPathException {
         try {
-            CharSequence content = UnparsedTextFunction.readFile(charChecker, reader);
+            CodePoints content = UnparsedTextFunction.readFile(charChecker, reader);
             return content.toString();
         } catch (XPathException err) {
             err.setErrorCode("XPST0003");
@@ -251,9 +251,9 @@ public class QueryReader {
         if (p >= len) {
             return new String(in, i, len - i);
         }
-        FastStringBuffer sb = new FastStringBuffer(p - i + 1);
+        StringBuilder sb = new StringBuilder(p - i + 1);
         for (int c = i; c <= p; c++) {
-            sb.cat((char) ch(in[c]));
+            sb.append((char) ch(in[c]));
         }
         return sb.toString();
     }

@@ -74,9 +74,9 @@ public abstract class Random {
     private static class RandomIterator implements UnfailingIterator {
 
         protected int position = 0;
-        private int count;
-        private long seed;
-        private java.util.Random generator;
+        private final int count;
+        private final long seed;
+        private final java.util.Random generator;
 
         public RandomIterator(int count, long seed) {
             this.count = count;

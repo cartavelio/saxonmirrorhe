@@ -19,9 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class StylesheetCache {
 
-    private Map<String, XsltExecutable> cacheByText = new ConcurrentHashMap<String, XsltExecutable>();
-    private Map<String, XsltExecutable> cacheByLocation = new ConcurrentHashMap<String, XsltExecutable>();
-    private Map<NodeInfo, XsltExecutable> cacheByNode = new ConcurrentHashMap<NodeInfo, XsltExecutable>();
+    private final Map<String, XsltExecutable> cacheByText = new ConcurrentHashMap<String, XsltExecutable>();
+    private final Map<String, XsltExecutable> cacheByLocation = new ConcurrentHashMap<String, XsltExecutable>();
+    private final Map<NodeInfo, XsltExecutable> cacheByNode = new ConcurrentHashMap<NodeInfo, XsltExecutable>();
 
     /**
      * Get the stylesheet (XsltExecutable) in the cache associated with the supplied stylesheet text string.

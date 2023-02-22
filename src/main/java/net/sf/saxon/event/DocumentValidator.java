@@ -8,6 +8,7 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
@@ -24,7 +25,7 @@ import net.sf.saxon.value.Whitespace;
 public class DocumentValidator extends ProxyReceiver {
     private boolean foundElement = false;
     private int level = 0;
-    private String errorCode;
+    private final String errorCode;
 
     public DocumentValidator(Receiver next, String errorCode) {
         super(next);
@@ -58,12 +59,12 @@ public class DocumentValidator extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
-            if (Whitespace.isWhite(chars)) {
+            if (Whitespace.isAllWhite(chars)) {
                 return; // ignore whitespace outside the outermost element
             }
-            throw new XPathException("A valid document must contain no text outside the outermost element (found \"" + Err.truncate30(chars) + "\")", errorCode);
+            throw new XPathException("A valid document must contain no text outside the outermost element (found \"" + Err.truncate30(chars.tidy()) + "\")", errorCode);
         }
         nextReceiver.characters(chars, locationId, properties);
     }

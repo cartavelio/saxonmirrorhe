@@ -24,13 +24,16 @@ import net.sf.saxon.pattern.QNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.style.AttributeValueTemplate;
-import net.sf.saxon.trans.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -176,6 +179,10 @@ public class XQueryParser extends XPathParser {
 
             exec.fixupQueryModules(mainModule);
 
+            // Make the XQueryExpression object
+
+            XQueryExpression queryExp = config.makeXQueryExpression(exp, mainModule, streaming);
+
             // Make the function library that's available at run-time (e.g. for saxon:evaluate() and function-lookup()).
             // This includes all user-defined functions regardless of which module they are in
 
@@ -189,12 +196,6 @@ public class XQueryParser extends XPathParser {
             config.addExtensionBinders(lib);
             lib.addFunctionLibrary(userlib);
             exec.setFunctionLibrary(lib);
-
-            // Make the XQueryExpression object
-
-            XQueryExpression queryExp = config.makeXQueryExpression(exp, mainModule, streaming);
-
-
 
             return queryExp;
         } catch (XPathException e) {
@@ -216,24 +217,24 @@ public class XQueryParser extends XPathParser {
         if (in.indexOf((char) 0xd) < 0 && in.indexOf((char) 0x85) < 0 && in.indexOf((char) 0x2028) < 0) {
             return in;
         }
-        FastStringBuffer sb = new FastStringBuffer(in.length());
+        StringBuilder sb = new StringBuilder(in.length());
         for (int i = 0; i < in.length(); i++) {
             char ch = in.charAt(i);
             switch (ch) {
                 case 0x85:
                 case 0x2028:
-                    sb.cat((char) 0xa);
+                    sb.append((char) 0xa);
                     break;
                 case 0xd:
                     if (i < in.length() - 1 && (in.charAt(i + 1) == (char) 0xa || in.charAt(i + 1) == (char) 0x85)) {
-                        sb.cat((char) 0xa);
+                        sb.append((char) 0xa);
                         i++;
                     } else {
-                        sb.cat((char) 0xa);
+                        sb.append((char) 0xa);
                     }
                     break;
                 default:
-                    sb.cat(ch);
+                    sb.append(ch);
             }
         }
         return sb.toString();
@@ -250,18 +251,18 @@ public class XQueryParser extends XPathParser {
         if (in.indexOf((char) 0xd) < 0) {
             return in;
         }
-        FastStringBuffer sb = new FastStringBuffer(in.length());
+        StringBuilder sb = new StringBuilder(in.length());
         for (int i = 0; i < in.length(); i++) {
             char ch = in.charAt(i);
             if (ch == 0xd) {
                 if (i < in.length() - 1 && in.charAt(i + 1) == (char) 0xa) {
-                    sb.cat((char) 0xa);
+                    sb.append((char) 0xa);
                     i++;
                 } else {
-                    sb.cat((char) 0xa);
+                    sb.append((char) 0xa);
                 }
             } else {
-                sb.cat(ch);
+                sb.append(ch);
             }
         }
         return sb.toString();
@@ -872,8 +873,8 @@ public class XQueryParser extends XPathParser {
                             grumble("Annotation parameter must be a literal");
                             return null;
                     }
-                    GroundedValue val = arg.getValue();
-                    if (val instanceof StringValue || val instanceof NumericValue) {
+                    GroundedValue val = arg.getGroundedValue();
+                    if (val instanceof StringItem || val instanceof NumericValue) {
                         annotation.addAnnotationParameter((AtomicValue) val);
                     } else {
                         grumble("Annotation parameter must be a string or number");
@@ -2280,7 +2281,8 @@ public class XQueryParser extends XPathParser {
                     SortSpec spec = (SortSpec) sortSpecList.get(i);
                     SortKeyDefinition key = new SortKeyDefinition();
                     key.setSortKey(((SortSpec) sortSpecList.get(i)).sortKey, false);
-                    key.setOrder(new StringLiteral(spec.ascending ? "ascending" : "descending"));
+                    String str = spec.ascending ? "ascending" : "descending";
+                    key.setOrder(new StringLiteral(BMPString.of(str)));
                     key.setEmptyLeast(spec.emptyLeast);
 
                     if (spec.collation != null) {
@@ -2833,7 +2835,7 @@ public class XQueryParser extends XPathParser {
             return exp;
         } else {
             RetainedStaticContext rsc = new RetainedStaticContext(env);
-            Expression fn = SystemFunction.makeCall("string-join", rsc, exp, new StringLiteral(StringValue.SINGLE_SPACE));
+            Expression fn = SystemFunction.makeCall("string-join", rsc, exp, new StringLiteral(StringItem.SINGLE_SPACE));
             ExpressionTool.copyLocationInfo(exp, fn);
             return fn;
         }
@@ -3201,7 +3203,7 @@ public class XQueryParser extends XPathParser {
                 mode = Validation.BY_TYPE;
                 nextToken();
                 expect(Token.KEYWORD_CURLY);
-                if (!NameChecker.isQName(t.currentTokenValue)) {
+                if (!NameChecker.isQName(StringTool.codePoints(t.currentTokenValue))) {
                     grumble("Schema type name expected after 'validate type");
                 }
                 requiredType = env.getConfiguration().getSchemaType(
@@ -3268,7 +3270,7 @@ public class XQueryParser extends XPathParser {
     @Override
     protected Expression parseExtensionExpression() throws XPathException {
         SchemaType requiredType = null;
-        CharSequence trimmed = Whitespace.removeLeadingWhitespace(t.currentTokenValue);
+        String trimmed = Whitespace.trim(t.currentTokenValue);
         int c = 0;
         int len = trimmed.length();
         while (c < len && " \t\r\n".indexOf(trimmed.charAt(c)) < 0) {
@@ -3296,7 +3298,7 @@ public class XQueryParser extends XPathParser {
                                     "you need the Saxon-EE processor from http://www.saxonica.com/");
                 } else {
                     String typeName = Whitespace.trim(pragmaContents);
-                    if (!NameChecker.isQName(typeName)) {
+                    if (!NameChecker.isQName(StringTool.codePoints(typeName))) {
                         grumble("Schema type name expected in saxon:validate-type pragma: found " + Err.wrap(typeName));
                     }
                     requiredType = env.getConfiguration().getSchemaType(
@@ -3502,11 +3504,11 @@ public class XQueryParser extends XPathParser {
 
         Instruction inst;
         if (name instanceof Literal) {
-            GroundedValue vName = ((Literal) name).getValue();
+            GroundedValue vName = ((Literal) name).getGroundedValue();
             // if element name is supplied as a literal, treat it like a direct element constructor
             NodeName elemName;
-            if (vName instanceof StringValue && !(vName instanceof AnyURIValue)) {
-                String lex = ((StringValue) vName).getStringValue();
+            if (vName instanceof StringItem && !(vName instanceof AnyURIValue)) {
+                String lex = ((StringItem) vName).getStringValue();
                 try {
                     QNameParser oldQP = getQNameParser();
                     setQNameParser(oldQP.withUnescaper(null));
@@ -3634,9 +3636,9 @@ public class XQueryParser extends XPathParser {
         lookAhead();  // after an RCURLY
         nextToken();
         if (name instanceof Literal) {
-            GroundedValue vName = ((Literal) name).getValue();
-            if (vName instanceof StringValue && !(vName instanceof AnyURIValue)) {
-                String lex = ((StringValue) vName).getStringValue();
+            GroundedValue vName = ((Literal) name).getGroundedValue();
+            if (vName instanceof StringItem && !(vName instanceof AnyURIValue)) {
+                String lex = ((StringItem) vName).getStringValue();
                 if (lex.equals("xmlns") || lex.startsWith("xmlns:")) {
                     grumble("Cannot create a namespace using an attribute constructor", "XQDY0044", offset);
                 }
@@ -4021,7 +4023,7 @@ public class XQueryParser extends XPathParser {
 
     protected void makeSimpleContent(Expression content, SimpleNodeConstructor inst, int offset) {
         if (content == null) {
-            inst.setSelect(new StringLiteral(StringValue.EMPTY_STRING));
+            inst.setSelect(new StringLiteral(StringItem.EMPTY_STRING));
         } else {
             inst.setSelect(stringify(content, false, env));
         }
@@ -4068,13 +4070,13 @@ public class XQueryParser extends XPathParser {
                     break;
                 case '/':
                     if (allowEndTag) {
-                        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+                        StringBuilder sb = new StringBuilder(16);
                         while (true) {
                             c = t.nextChar();
                             if (c == '>') {
                                 break;
                             }
-                            sb.cat(c);
+                            sb.append(c);
                         }
                         return new StringLiteral(sb.toString());
                     }
@@ -4109,14 +4111,14 @@ public class XQueryParser extends XPathParser {
         int offset = t.inputOffset - 1;
         // we're reading raw characters, so we don't want the currentTokenStartOffset
         char c;
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder buff = new StringBuilder(64);
         int namespaceCount = 0;
         while (true) {
             c = t.nextChar();
             if (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '/' || c == '>') {
                 break;
             }
-            buff.cat(c);
+            buff.append(c);
         }
         String elname = buff.toString();
         if (elname.isEmpty()) {
@@ -4142,11 +4144,11 @@ public class XQueryParser extends XPathParser {
             buff.setLength(0);
             // read the attribute name
             do {
-                buff.cat(c);
+                buff.append(c);
                 c = t.nextChar();
             } while (c != ' ' && c != '\n' && c != '\r' && c != '\t' && c != '=');
             String attName = buff.toString();
-            if (!NameChecker.isQName(attName)) {
+            if (!NameChecker.isQName(StringTool.codePoints(attName))) {
                 grumble("Invalid attribute name " + Err.wrap(attName, Err.ATTRIBUTE));
             }
             c = skipSpaces(c);
@@ -4171,7 +4173,7 @@ public class XQueryParser extends XPathParser {
                 }
 
                 // by convention, this returns the end position when called with scanOnly set
-                end = (int) ((Int64Value) ((Literal) avt).getValue()).longValue();
+                end = (int) ((Int64Value) ((Literal) avt).getGroundedValue()).longValue();
 
             }
             // save the value with its surrounding quotes
@@ -4192,7 +4194,7 @@ public class XQueryParser extends XPathParser {
             if (isNamespace) {
                 // Processing follows the resolution of bug 5083: doubled curly braces represent single
                 // curly braces, single curly braces are not allowed.
-                FastStringBuffer sb = new FastStringBuffer(rval.length());
+                StringBuilder sb = new StringBuilder(rval.length());
                 boolean prevDelim = false;
                 boolean prevOpenCurly = false;
                 boolean prevCloseCurly = false;
@@ -4220,7 +4222,7 @@ public class XQueryParser extends XPathParser {
                     } else if (prevCloseCurly) {
                         grumble("Namespace must not contain an unescaped closing brace", "XPST0003");
                     }
-                    sb.cat(n);
+                    sb.append(n);
                 }
                 if (prevOpenCurly) {
                     grumble("Namespace must not contain an unescaped opening brace", "XQST0022");
@@ -4501,7 +4503,7 @@ public class XQueryParser extends XPathParser {
         // is it empty?
 
         if (components.isEmpty()) {
-            return new StringLiteral(StringValue.EMPTY_STRING);
+            return new StringLiteral(StringItem.EMPTY_STRING);
         }
 
         // is it a single component?
@@ -4528,7 +4530,7 @@ public class XQueryParser extends XPathParser {
             throws XPathException {
         // analyze fixed text within the value of a direct attribute constructor.
         if (start < end) {
-            FastStringBuffer sb = new FastStringBuffer(end - start);
+            StringBuilder sb = new StringBuilder(end - start);
             for (int i = start; i < end; i++) {
                 char c = avt.charAt(i);
                 switch (c) {
@@ -4548,16 +4550,16 @@ public class XQueryParser extends XPathParser {
                         break;
                     case '\n':
                     case '\t':
-                        sb.cat(' ');
+                        sb.append(' ');
                         break;
                     case '\r':
-                        sb.cat(' ');
+                        sb.append(' ');
                         if (i + 1 < end && avt.charAt(i + 1) == '\n') {
                             i++;
                         }
                         break;
                     default:
-                        sb.cat(c);
+                        sb.append(c);
 
                 }
             }
@@ -4616,7 +4618,7 @@ public class XQueryParser extends XPathParser {
             boolean afterEnclosedExpr = false;
             while (true) {
                 // read all the components of the element value
-                FastStringBuffer text = new FastStringBuffer(FastStringBuffer.C64);
+                StringBuilder text = new StringBuilder(64);
                 char c;
                 boolean containsEntities = false;
                 while (true) {
@@ -4644,26 +4646,27 @@ public class XQueryParser extends XPathParser {
                         if (c != '}') {
                             grumble("'}' must be written as '}}' within element content");
                         }
-                        text.cat(c);
+                        text.append(c);
                     } else if (c == '{') {
                         c = t.nextChar();
                         if (c != '{') {
                             c = '{';
                             break;
                         }
-                        text.cat(c);
+                        text.append(c);
                     } else {
                         if (!charChecker.test(c) && !UTF16CharacterSet.isSurrogate(c)) {
                             grumble("Character code " + c + " is not a valid XML character");
                         }
-                        text.cat(c);
+                        text.append(c);
                     }
                 }
-                if (!text.isEmpty() &&
+                String textStr = text.toString();
+                if (!textStr.isEmpty() &&
                         (containsEntities |
                                  ((QueryModule) env).isPreserveBoundarySpace() ||
-                                 !Whitespace.isWhite(text))) {
-                    ValueOf inst = new ValueOf(new StringLiteral(new StringValue(text.condense())), false, false);
+                                 !Whitespace.isAllWhite(StringView.of(textStr)))) {
+                    ValueOf inst = new ValueOf(new StringLiteral(new StringItem(textStr)), false, false);
                     setLocation(inst);
                     components.add(inst);
                     afterEnclosedExpr = false;
@@ -4672,8 +4675,8 @@ public class XQueryParser extends XPathParser {
                     Expression exp = parsePseudoXML(true);
                     // An end tag can appear here, and is returned as a string value
                     if (exp instanceof StringLiteral) {
-                        String endTag = ((StringLiteral) exp).getStringValue();
-                        if (Whitespace.isWhitespace(endTag.charAt(0))) {
+                        String endTag = ((StringLiteral) exp).getString().toString();
+                        if (Whitespace.isWhite(endTag.charAt(0))) {
                             grumble("End tag contains whitespace before the name");
                         }
                         endTag = Whitespace.trim(endTag);
@@ -4697,7 +4700,7 @@ public class XQueryParser extends XPathParser {
                         if (!previousComponentIsNodeTest) {
                             // Add a zero-length text node, to prevent {"a"}{"b"} generating an intervening space
                             // See tests (qxmp132, qxmp261)
-                            ValueOf inst = new ValueOf(new StringLiteral(StringValue.EMPTY_STRING), false, false);
+                            ValueOf inst = new ValueOf(new StringLiteral(StringItem.EMPTY_STRING), false, false);
                             setLocation(inst);
                             components.add(inst);
                         }
@@ -4727,14 +4730,14 @@ public class XQueryParser extends XPathParser {
     /*@Nullable*/
     private Expression parsePIConstructor() throws XPathException {
         try {
-            FastStringBuffer pi = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder pi = new StringBuilder(64);
             int firstSpace = -1;
             while (!pi.toString().endsWith("?>")) {
                 char c = t.nextChar();
                 if (firstSpace < 0 && " \t\r\n".indexOf(c) >= 0) {
                     firstSpace = pi.length();
                 }
-                pi.cat(c);
+                pi.append(c);
             }
             pi.setLength(pi.length() - 2);
 
@@ -4772,7 +4775,7 @@ public class XQueryParser extends XPathParser {
         }
     }
 
-    private void readCDATASection(/*@NotNull*/ FastStringBuffer cdata) throws XPathException {
+    private void readCDATASection(StringBuilder cdata) throws XPathException {
         try {
             char c;
             // CDATA section
@@ -4789,7 +4792,7 @@ public class XQueryParser extends XPathParser {
             c = t.nextChar();
             expectChar(c, '[');
             while (!cdata.toString().endsWith("]]>")) {
-                cdata.cat(t.nextChar());
+                cdata.append(t.nextChar());
             }
             cdata.setLength(cdata.length() - 3);
         } catch (StringIndexOutOfBoundsException err) {
@@ -4803,16 +4806,16 @@ public class XQueryParser extends XPathParser {
             char c = t.nextChar();
             // XML-like comment
             expectChar(c, '-');
-            FastStringBuffer comment = new FastStringBuffer(FastStringBuffer.C256);
+            StringBuilder comment = new StringBuilder(256);
             while (!comment.toString().endsWith("--")) {
-                comment.cat(t.nextChar());
+                comment.append(t.nextChar());
             }
             if (t.nextChar() != '>') {
                 grumble("'--' is not permitted in an XML comment");
             }
             CharSequence commentText = comment.subSequence(0, comment.length() - 2);
             Comment instruction = new Comment();
-            instruction.setSelect(new StringLiteral(new StringValue(commentText)));
+            instruction.setSelect(new StringLiteral(new StringItem(commentText)));
             setLocation(instruction);
             return instruction;
         } catch (StringIndexOutOfBoundsException err) {
@@ -4848,7 +4851,7 @@ public class XQueryParser extends XPathParser {
         exp = new AtomicSequenceConverter(exp, BuiltInAtomicType.STRING);
         //((AtomicSequenceConverter) exp).allocateConverter(config, false);
         // Join the resulting strings with a separator
-        exp = SystemFunction.makeCall("string-join", exp.getRetainedStaticContext(), exp, new StringLiteral(StringValue.SINGLE_SPACE));
+        exp = SystemFunction.makeCall("string-join", exp.getRetainedStaticContext(), exp, new StringLiteral(StringItem.SINGLE_SPACE));
         assert exp != null;
         if (noNodeIfEmpty) {
             ((StringJoin) ((SystemFunctionCall) exp).getTargetFunction()).setReturnEmptyIfEmpty(true);
@@ -4876,7 +4879,7 @@ public class XQueryParser extends XPathParser {
             lit = new StringLiteral(token);
         } else {
             CharSequence sb = unescape(token);
-            lit = new StringLiteral(StringValue.makeStringValue(sb));
+            lit = new StringLiteral(StringItem.makeStringValue(sb));
         }
         setLocation(lit);
         return lit;
@@ -4893,7 +4896,7 @@ public class XQueryParser extends XPathParser {
 
     /*@NotNull*/
     @Override
-    protected CharSequence unescape(/*@NotNull*/ String token) throws XPathException {
+    protected String unescape(/*@NotNull*/ String token) throws XPathException {
         return new Unescaper(env.getConfiguration().getValidCharacterChecker()).unescape(token);
     }
 
@@ -4905,8 +4908,8 @@ public class XQueryParser extends XPathParser {
             this.characterChecker = characterChecker;
         }
 
-        public CharSequence unescape(String token) throws XPathException {
-            FastStringBuffer sb = new FastStringBuffer(token.length());
+        public String unescape(String token) throws XPathException {
+            StringBuilder sb = new StringBuilder(token.length());
             for (int i = 0; i < token.length(); i++) {
                 char c = token.charAt(i);
                 if (c == '&') {
@@ -4919,10 +4922,10 @@ public class XQueryParser extends XPathParser {
                         i = semic;
                     }
                 } else {
-                    sb.cat(c);
+                    sb.append(c);
                 }
             }
-            return sb;
+            return sb.toString();
         }
 
 
@@ -5010,13 +5013,13 @@ public class XQueryParser extends XPathParser {
     /*@Nullable*/
     private String readEntityReference() throws XPathException {
         try {
-            FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder sb = new StringBuilder(64);
             while (true) {
                 char c = t.nextChar();
                 if (c == ';') {
                     break;
                 }
-                sb.cat(c);
+                sb.append(c);
             }
             String entity = sb.toString();
             return new Unescaper(env.getConfiguration().getValidCharacterChecker()).analyzeEntityReference(entity);
@@ -5051,7 +5054,7 @@ public class XQueryParser extends XPathParser {
         while (true) {
             boolean emptyExpression = t.currentToken == Token.RCURLY;
             if (emptyExpression) {
-                components.add(new StringLiteral(StringValue.EMPTY_STRING));
+                components.add(new StringLiteral(StringItem.EMPTY_STRING));
             } else {
                 Expression enclosed = parseExpression();
                 Expression stringJoin = SystemFunction.makeCall(
@@ -5061,7 +5064,7 @@ public class XQueryParser extends XPathParser {
             if (t.currentToken != Token.RCURLY) {
                 grumble("Expected '}' after enclosed expression in string constructor");
             }
-            FastStringBuffer sb = new FastStringBuffer(256);
+            StringBuilder sb = new StringBuilder(256);
             char c = t.nextChar();
             if (c != '`') {
                 grumble("Expected '}`' after enclosed expression in string constructor");
@@ -5073,7 +5076,7 @@ public class XQueryParser extends XPathParser {
                     c = t.nextChar();
                     if (prior == '`' && c == '{') {
                         sb.setLength(sb.length() - 1);
-                        components.add(new StringLiteral(sb));
+                        components.add(new StringLiteral(sb.toString()));
                         t.lookAhead();
                         t.next();
                         if (t.currentToken == Token.RCURLY) {
@@ -5085,12 +5088,12 @@ public class XQueryParser extends XPathParser {
                         }
                     } else if (penult == ']' && prior == '`' && c == '`') {
                         sb.setLength(sb.length() - 2);
-                        components.add(new StringLiteral(sb));
+                        components.add(new StringLiteral(sb.toString()));
                         t.lookAhead();
                         t.next();
                         break outer;
                     }
-                    sb.cat(c);
+                    sb.append(c);
                     penult = prior;
                     prior = c;
                 }
@@ -5117,7 +5120,7 @@ public class XQueryParser extends XPathParser {
      */
 
     public String uriLiteral(/*@NotNull*/ String in) throws XPathException {
-        return Whitespace.applyWhitespaceNormalization(Whitespace.COLLAPSE, unescape(in)).toString();
+        return Whitespace.collapse(unescape(in)).toString();
     }
 
     /**

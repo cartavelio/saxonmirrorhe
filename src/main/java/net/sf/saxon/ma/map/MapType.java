@@ -14,7 +14,7 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -42,9 +42,9 @@ public class MapType extends AnyFunctionType {
     public static final SequenceType SEQUENCE_OF_MAPS =
             SequenceType.makeSequenceType(ANY_MAP_TYPE, StaticProperty.ALLOWS_ZERO_OR_MORE);
 
-    private AtomicType keyType;
-    private SequenceType valueType;
-    private boolean mustBeEmpty;
+    private final AtomicType keyType;
+    private final SequenceType valueType;
+    private final boolean mustBeEmpty;
 
     public MapType(AtomicType keyType, SequenceType valueType) {
         this.keyType = keyType;
@@ -218,7 +218,7 @@ public class MapType extends AnyFunctionType {
         } else if (this == EMPTY_MAP_TYPE) {
             return "map{}";
         } else {
-            FastStringBuffer sb = new FastStringBuffer(100);
+            StringBuilder sb = new StringBuilder(100);
             sb.append("map(");
             sb.append(keyType.toString());
             sb.append(", ");
@@ -244,7 +244,7 @@ public class MapType extends AnyFunctionType {
         } else if (this == EMPTY_MAP_TYPE) {
             return "map{}";
         } else {
-            FastStringBuffer sb = new FastStringBuffer(100);
+            StringBuilder sb = new StringBuilder(100);
             sb.append("map(");
             sb.append(keyType.toExportString());
             sb.append(", ");
@@ -327,7 +327,7 @@ public class MapType extends AnyFunctionType {
                 st = SequenceType.makeSequenceType(st.getPrimaryType(), Cardinality.union(st.getCardinality(), StaticProperty.ALLOWS_ZERO));
             }
             return new SpecificFunctionType(
-                        new SequenceType[]{SequenceType.ATOMIC_SEQUENCE}, st)
+                    new SequenceType[]{SequenceType.ATOMIC_SEQUENCE}, st)
                     .relationship(other, th);
         }
     }
@@ -346,13 +346,13 @@ public class MapType extends AnyFunctionType {
         if (item instanceof MapItem) {
             for (KeyValuePair kvp : ((MapItem)item).keyValuePairs()) {
                 if (!keyType.matches(kvp.key, th)) {
-                    String s = "The map contains a key (" + kvp.key + ") of type " + kvp.key.getItemType() +
+                    String s = "The map contains a key (" + kvp.key.show() + ") of type " + kvp.key.getItemType() +
                             " that is not an instance of the required type " + keyType;
                     return Optional.of(s);
                 }
                 try {
                     if (!valueType.matches(kvp.value, th)) {
-                        String s = "The map contains an entry with key (" + kvp.key +
+                        String s = "The map contains an entry with key (" + kvp.key.show() +
                                 ") whose corresponding value (" + Err.depictSequence(kvp.value) +
                                 ") is not an instance of the required type " + valueType;
                         Optional<String> more = valueType.explainMismatch(kvp.value, th);

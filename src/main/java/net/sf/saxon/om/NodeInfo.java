@@ -14,10 +14,11 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
@@ -272,7 +273,7 @@ public interface NodeInfo extends Source, Item, Location {
      */
 
     @Override
-    String getStringValue();
+    UnicodeString getUnicodeStringValue();
 
     /**
      * Ask whether this NodeInfo implementation holds a fingerprint identifying the name of the
@@ -544,7 +545,7 @@ public interface NodeInfo extends Source, Item, Location {
      *        <p>Changed in Saxon 8.7 to generate the ID value in a client-supplied buffer</p>
      */
 
-    void generateId(FastStringBuffer buffer);
+    void generateId(StringBuilder buffer);
 
     /**
      * Copy this node to a given Receiver.
@@ -678,14 +679,14 @@ public interface NodeInfo extends Source, Item, Location {
             case Type.ATTRIBUTE:
                 return "@" + getDisplayName();
             case Type.TEXT:
-                return "text(\"" + Err.truncate30(getStringValue()) + "\")";
+                return "text(\"" + Err.truncate30(getUnicodeStringValue()) + "\")";
             case Type.COMMENT:
-                return "<!--" + Err.truncate30(getStringValue()) + "-->";
+                return "<!--" + Err.truncate30(getUnicodeStringValue()) + "-->";
             case Type.PROCESSING_INSTRUCTION:
                 return "<?" + getDisplayName() + "?>";
             case Type.NAMESPACE:
                 String prefix = getLocalPart();
-                return "xmlns" + (prefix.equals("") ? "" : ":" + prefix) + "=\"" + getStringValue() + '"';
+                return "xmlns" + (prefix.equals("") ? "" : ":" + prefix) + "=\"" + getUnicodeStringValue() + '"';
             default:
                 return "";
         }

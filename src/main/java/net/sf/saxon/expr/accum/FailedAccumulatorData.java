@@ -17,8 +17,8 @@ import net.sf.saxon.trans.XPathException;
  */
 public class FailedAccumulatorData implements IAccumulatorData {
 
-    private Accumulator acc;
-    private XPathException error;
+    private final Accumulator acc;
+    private final XPathException error;
 
     public FailedAccumulatorData(Accumulator acc, XPathException error) {
         this.acc = acc;

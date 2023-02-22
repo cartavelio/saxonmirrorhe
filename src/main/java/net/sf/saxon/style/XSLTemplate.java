@@ -57,7 +57,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     // A compiled named template exists if the template has a name
     private NamedTemplate compiledNamedTemplate;
     // A set of compiled template rules exists if the template has a match pattern: one TemplateRule for each mode
-    private Map<StructuredQName, TemplateRule> compiledTemplateRules = new HashMap<>();
+    private final Map<StructuredQName, TemplateRule> compiledTemplateRules = new HashMap<>();
     private SequenceType requiredType = SequenceType.ANY_SEQUENCE;
     private boolean declaresRequiredType = false;
     private boolean hasRequiredParams = false;

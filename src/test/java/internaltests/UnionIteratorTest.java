@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
- *  Tests of the NodeInfo interface as implemented by the tinytree
+ * Tests of the NodeInfo interface as implemented by the tinytree
  */
 public class UnionIteratorTest {
 
@@ -36,7 +36,7 @@ public class UnionIteratorTest {
             Processor p = new Processor(config);
             NodeInfo root = config.buildDocumentTree(new StreamSource(new StringReader(xml))).getRootNode();
             List<List<NodeInfo>> listOfLists = new ArrayList<>();
-            for (int i=0; i<10; i++) {
+            for (int i = 0; i < 10; i++) {
                 listOfLists.add(new ArrayList<>());
             }
             AxisIterator top = root.iterateAxis(AxisInfo.CHILD);

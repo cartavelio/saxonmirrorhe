@@ -26,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class StreamTest {
 
-    private String xml1 = "<doc id='a'><section id='b1'><para id='c1.1'>One</para><para id='c1.2'>Two</para></section>"
+    private final String xml1 = "<doc id='a'><section id='b1'><para id='c1.1'>One</para><para id='c1.2'>Two</para></section>"
             + "<section id='b2'><para id='c2.1'>One</para><para id='c2.2'>Two</para></section></doc>";
 
-    private String xml2 = "<doc><thing xml:id='t1' contains='t2 t3'>1</thing>"
+    private final String xml2 = "<doc><thing xml:id='t1' contains='t2 t3'>1</thing>"
             + "<thing xml:id='t2' contains='t4'>2</thing>"
             + "<thing xml:id='t3' contains=''>3</thing>"
             + "<thing xml:id='t4' contains='t5'>4</thing>"

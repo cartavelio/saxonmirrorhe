@@ -13,7 +13,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -29,9 +29,9 @@ import java.util.Optional;
  */
 public class RoleDiagnostic {
 
-    private int kind;
-    private String operation;
-    private int operand;
+    private final int kind;
+    private final String operation;
+    private final int operand;
     private String errorCode = "XPTY0004";  // default error code for type errors
 
     public static final int FUNCTION = 0;
@@ -221,7 +221,7 @@ public class RoleDiagnostic {
         if (supplied instanceof Literal) {
             String s = composeRequiredMessage(requiredItemType);
             Optional<String> more = SequenceType.makeSequenceType(requiredItemType, StaticProperty.ALLOWS_ZERO_OR_MORE)
-                    .explainMismatch(((Literal)supplied).getValue(), th);
+                    .explainMismatch(((Literal)supplied).getGroundedValue(), th);
             if (more.isPresent()) {
                 s = s + ". " + more.get();
             }
@@ -244,10 +244,10 @@ public class RoleDiagnostic {
 
     public String composeErrorMessage(ItemType requiredItemType, Item item, TypeHierarchy th) {
 
-        FastStringBuffer message = new FastStringBuffer(256);
+        StringBuilder message = new StringBuilder(256);
         message.append(composeRequiredMessage(requiredItemType));
         message.append("; the supplied value ");
-        message.cat(Err.depict(item));
+        message.append(Err.depict(item));
 
         if (requiredItemType.getGenre() != item.getGenre()) {
             message.append(" is ");
@@ -283,7 +283,7 @@ public class RoleDiagnostic {
      */
 
     public String save() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         fsb.append(kind + "|");
         fsb.append(operand + "|");
         fsb.append(errorCode.equals("XPTY0004") ? "" : errorCode);

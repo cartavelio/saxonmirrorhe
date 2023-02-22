@@ -65,9 +65,9 @@ import java.util.Objects;
  */
 public class XsltCompiler {
 
-    private Processor processor;
-    private Configuration config;
-    private CompilerInfo compilerInfo;
+    private final Processor processor;
+    private final Configuration config;
+    private final CompilerInfo compilerInfo;
 
 
     /**

@@ -21,7 +21,7 @@ import javax.xml.transform.Source;
 public class PullSource implements Source {
 
     private String systemId;
-    private PullProvider provider;
+    private final PullProvider provider;
 
     /**
      * Create a PullSource based on a supplied PullProvider

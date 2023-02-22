@@ -12,10 +12,11 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -458,8 +459,8 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
-        buffer.cat('d');
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
+        buffer.append('d');
         buffer.append(Long.toString(documentNumber));
     }
 
@@ -536,7 +537,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
                 //noinspection ConstantConditions
                 ElementImpl e = (ElementImpl) curr;
                 if (e.isId()) {
-                    registerID(e, Whitespace.trim(e.getStringValueCS()));
+                    registerID(e, Whitespace.trim(e.getStringValue()));
                 }
                 AttributeMap atts = e.attributes();
                 for (AttributeInfo att : atts) {
@@ -583,7 +584,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
         }
         assert idTable != null;
         NodeInfo node = idTable.get(id);
-        if (node != null && getParent && node.isId() && node.getStringValue().equals(id)) {
+        if (node != null && getParent && node.isId() && node.getUnicodeStringValue().equals(id)) {
             node = node.getParent();
         }
         return node;
@@ -710,7 +711,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     @Override
-    public void replaceStringValue(CharSequence stringValue) {
+    public void replaceStringValue(UnicodeString stringValue) {
         throw new UnsupportedOperationException("Cannot replace the value of a document node");
     }
 

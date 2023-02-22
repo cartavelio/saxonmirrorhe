@@ -25,10 +25,10 @@ import java.util.function.IntPredicate;
 
 public final class LocalNameTest extends NodeTest implements QNameTest {
 
-    private NamePool namePool;
-    private int nodeKind;
-    private String localName;
-    private UType uType;
+    private final NamePool namePool;
+    private final int nodeKind;
+    private final String localName;
+    private final UType uType;
 
     public LocalNameTest(NamePool pool, int nodeKind, String localName) {
         this.namePool = pool;

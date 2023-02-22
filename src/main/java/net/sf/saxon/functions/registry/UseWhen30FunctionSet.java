@@ -17,7 +17,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 
 public class UseWhen30FunctionSet extends BuiltInFunctionSet {
 
-    private static UseWhen30FunctionSet THE_INSTANCE = new UseWhen30FunctionSet();
+    private static final UseWhen30FunctionSet THE_INSTANCE = new UseWhen30FunctionSet();
 
     public static UseWhen30FunctionSet getInstance() {
         return THE_INSTANCE;

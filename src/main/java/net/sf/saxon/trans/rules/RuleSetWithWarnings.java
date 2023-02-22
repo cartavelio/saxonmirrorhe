@@ -26,7 +26,7 @@ import net.sf.saxon.tree.util.Navigator;
 public class RuleSetWithWarnings implements BuiltInRuleSet {
 
 
-    private BuiltInRuleSet baseRuleSet;
+    private final BuiltInRuleSet baseRuleSet;
 
     public RuleSetWithWarnings(BuiltInRuleSet baseRuleSet) {
         this.baseRuleSet = baseRuleSet;
@@ -71,7 +71,7 @@ public class RuleSetWithWarnings implements BuiltInRuleSet {
     public void outputWarning(Item item, XPathContext context) {
         String id = item instanceof NodeInfo ?
                 "the node " + Navigator.getPath((NodeInfo) item) :
-                "the atomic value " + item.getStringValue();
+                "the atomic value " + item.getUnicodeStringValue();
         XmlProcessingIncident warning = new XmlProcessingIncident("No user-defined template rule matches " + id, "XTDE0555").asWarning();
         context.getController().getErrorReporter().report(warning);
     }

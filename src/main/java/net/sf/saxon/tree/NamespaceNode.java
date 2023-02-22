@@ -11,14 +11,18 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.PrependAxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -223,18 +227,13 @@ public class NamespaceNode implements NodeInfo {
      */
 
     @Override
-    public String getStringValue() {
-        return nsBinding.getURI();
+    public UnicodeString getUnicodeStringValue() {
+        return StringView.tidy(nsBinding.getURI());
     }
 
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
     @Override
-    public CharSequence getStringValueCS() {
-        return getStringValue();
+    public String getStringValue() {
+        return nsBinding.getURI();
     }
 
     /**
@@ -485,7 +484,7 @@ public class NamespaceNode implements NodeInfo {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
         element.generateId(buffer);
         buffer.append("n");
         buffer.append(Integer.toString(position));
@@ -563,7 +562,7 @@ public class NamespaceNode implements NodeInfo {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new StringValue(getStringValueCS());
+        return new StringItem(getStringValue());
     }
 
     @Override

@@ -12,8 +12,8 @@ package net.sf.saxon.s9api;
  */
 public class SequenceType {
 
-    private ItemType itemType;
-    private OccurrenceIndicator occurrenceIndicator;
+    private final ItemType itemType;
+    private final OccurrenceIndicator occurrenceIndicator;
 
     /**
      * Constant representing the universal sequence type <code>item()*</code>, which permits any value
