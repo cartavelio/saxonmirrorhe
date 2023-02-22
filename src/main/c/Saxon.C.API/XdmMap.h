@@ -107,7 +107,7 @@ public:
     XdmValue * get(int key);
 
     //! Returns the value to which the specified double-valued key is mapped,
-    //! or {@code null} if this map contains no mapping for the key. This is a convenience
+    //! or NULL if this map contains no mapping for the key. This is a convenience
     //! method to save the trouble of converting the double to an <code>XdmAtomicValue</code>.
     /**
      *
@@ -128,7 +128,7 @@ public:
      *            as an instance of <code>xs:integer</code> (which will also match
      *            entries whose key belongs to another numeric type)
      * @return the value to which the specified key is mapped, or
-     * {@code null} if this map contains no mapping for the key
+     * NULL if this map contains no mapping for the key
      */
     XdmValue *  get(long key);
 
@@ -202,9 +202,9 @@ public:
      */
     XdmValue** values();
 
+    //! Determine whether the item is a function or some other type of item
     /**
-     * Determine whether the item is a function or some other type of item
-     *
+     * 
      * @return true if the item is a Xdm function item, false if it is an atomic value or a function (including maps and arrays)
      */
     bool isFunction(){
