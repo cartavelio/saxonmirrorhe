@@ -28,11 +28,12 @@ public class GMonthValue extends GDateValue {
             Pattern.compile("--([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
     // The commented-out pattern tolerates the bogus format --MM-- which was wrongly permitted by the original schema spec
 
-    private GMonthValue() {
+    private GMonthValue(MutableGDateValue m) {
+        super(m);
     }
 
     public static ConversionResult makeGMonthValue(UnicodeString value) {
-        GMonthValue g = new GMonthValue();
+        MutableGDateValue g = new MutableGDateValue();
         final UnicodeString trimmed = Whitespace.trim(value);
         Matcher m = regex.matcher(trimmed.toString());
         if (!m.matches()) {
@@ -42,7 +43,8 @@ public class GMonthValue extends GDateValue {
         String tz = m.group(2);
         String date = "2000-" + base + "-01" + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_MONTH;
-        return setLexicalValue(g, BMPString.of(date), true);
+        setLexicalValue(g, BMPString.of(date), true);
+        return g.error == null ? new GMonthValue(g) : g.error;
     }
 
     public GMonthValue(byte month, int tz) {
@@ -50,11 +52,7 @@ public class GMonthValue extends GDateValue {
     }
 
     public GMonthValue(byte month, int tz, AtomicType type) {
-        this.year = 2000;
-        this.month = month;
-        this.day = 1;
-        setTimezoneInMinutes(tz);
-        this.typeLabel = type;
+        this(new MutableGDateValue(2000, month, 1, false, tz, type));
     }
 
     /**
@@ -67,9 +65,9 @@ public class GMonthValue extends GDateValue {
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        GMonthValue v = new GMonthValue(month, getTimezoneInMinutes());
-        v.typeLabel = typeLabel;
-        return v;
+        MutableGDateValue m = makeMutableCopy();
+        m.typeLabel = typeLabel;
+        return new GMonthValue(m);
     }
 
     /**

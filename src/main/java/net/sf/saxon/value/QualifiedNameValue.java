@@ -20,6 +20,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationFailure;
 
 import javax.xml.namespace.QName;
+import java.util.Objects;
 
 
 /**
@@ -29,7 +30,13 @@ import javax.xml.namespace.QName;
 
 public abstract class QualifiedNameValue extends AtomicValue implements AtomicMatchKey {
 
-    /*@NotNull*/ protected StructuredQName qName;
+    /*@NotNull*/ protected final StructuredQName qName;
+
+    public QualifiedNameValue(StructuredQName qName, AtomicType typeLabel) {
+        super(typeLabel);
+        Objects.requireNonNull(qName);
+        this.qName = qName;
+    }
 
     /**
      * Factory method to construct either a QName or a NOTATION value, or a subtype of either of these.
@@ -59,13 +66,12 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
             if (targetType.getPrimitiveType() == StandardNames.XS_QNAME) {
                 qnv = new QNameValue(prefix, uri, local, targetType, true);
             } else {
-                qnv = new NotationValue(prefix, uri, local, null);
+                qnv = new NotationValue(prefix, uri, local, targetType);
             }
             ValidationFailure vf = targetType.validate(qnv, lexicalForm, rules);
             if (vf != null) {
                 throw vf.makeException();
             }
-            qnv.setTypeLabel(targetType);
             return qnv;
         }
     }

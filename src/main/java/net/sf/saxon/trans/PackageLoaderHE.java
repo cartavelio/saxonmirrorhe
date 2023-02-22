@@ -3022,8 +3022,7 @@ public class PackageLoaderHE implements IPackageLoader {
             if (type.getPrimitiveType() == StandardNames.XS_QNAME) {
                 val = new QNameValue(preAtt, uriAtt, locAtt, type, false);
             } else {
-                val = new NotationValue(preAtt, uriAtt, locAtt, null);
-                val.setTypeLabel(type);
+                val = new NotationValue(preAtt, uriAtt, locAtt, type);
             }
             return Literal.makeLiteral(val);
         });

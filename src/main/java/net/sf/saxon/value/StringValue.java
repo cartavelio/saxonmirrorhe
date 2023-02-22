@@ -33,7 +33,7 @@ import net.sf.saxon.z.IntIterator;
 public class StringValue extends AtomicValue {
 
 
-    protected UnicodeString content;
+    protected final UnicodeString content;
 
     public static final StringValue EMPTY_STRING = new StringValue(EmptyUnicodeString.getInstance());
     public static final StringValue SINGLE_SPACE = new StringValue(StringConstants.SINGLE_SPACE);
@@ -48,8 +48,17 @@ public class StringValue extends AtomicValue {
      */
 
     protected StringValue() {
+        super(BuiltInAtomicType.STRING);
         content = EmptyUnicodeString.getInstance();
-        typeLabel = BuiltInAtomicType.STRING;
+    }
+
+    /**
+     * Protected constructor for use by subtypes
+     */
+
+    protected StringValue(AtomicType typeLabel) {
+        super(typeLabel);
+        content = EmptyUnicodeString.getInstance();
     }
 
     /**
@@ -69,8 +78,8 @@ public class StringValue extends AtomicValue {
      */
 
     public StringValue(UnicodeString content, AtomicType type) {
+        super(type);
         this.content = content;
-        this.typeLabel = type;
     }
 
     /**
@@ -93,8 +102,8 @@ public class StringValue extends AtomicValue {
      */
 
     public StringValue(String value, AtomicType typeLabel) {
+        super(typeLabel);
         this.content = StringView.of(value).tidy();
-        this.typeLabel = typeLabel;
     }
 
     /**
@@ -119,10 +128,7 @@ public class StringValue extends AtomicValue {
         if (typeLabel == this.typeLabel) {
             return this;
         } else {
-            StringValue v = new StringValue();
-            v.typeLabel = typeLabel;
-            v.content = content;
-            return v;
+            return new StringValue(this.content, typeLabel);
         }
     }
 

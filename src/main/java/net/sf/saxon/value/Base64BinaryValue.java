@@ -39,8 +39,8 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, XP
      */
 
     public Base64BinaryValue(UnicodeString s) throws XPathException {
+        super(BuiltInAtomicType.BASE64_BINARY);
         binaryValue = decode(s);
-        typeLabel = BuiltInAtomicType.BASE64_BINARY;
     }
 
     /**
@@ -50,8 +50,20 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, XP
      */
 
     public Base64BinaryValue(byte[] value) {
+        super(BuiltInAtomicType.BASE64_BINARY);
         binaryValue = value;
-        typeLabel = BuiltInAtomicType.BASE64_BINARY;
+    }
+
+    /**
+     * Constructor: create a base64Binary value from a given array of bytes
+     *
+     * @param value array of bytes holding the octet sequence
+     * @param typeLabel the specific type (must be a subtype of BASE64_BINARY)
+     */
+
+    public Base64BinaryValue(byte[] value, AtomicType typeLabel) {
+        super(typeLabel);
+        binaryValue = value;
     }
 
     /**
@@ -65,9 +77,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, XP
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        Base64BinaryValue v = new Base64BinaryValue(binaryValue);
-        v.typeLabel = typeLabel;
-        return v;
+        return new Base64BinaryValue(binaryValue, typeLabel);
     }
 
     /**

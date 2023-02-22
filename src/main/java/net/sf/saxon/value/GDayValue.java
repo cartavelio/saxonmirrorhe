@@ -26,7 +26,8 @@ public class GDayValue extends GDateValue {
     private static final Pattern regex =
             Pattern.compile("---([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
-    private GDayValue() {
+    protected GDayValue(MutableGDateValue m) {
+        super(m);
     }
 
     public static ConversionResult makeGDayValue(UnicodeString value) {
@@ -35,12 +36,13 @@ public class GDayValue extends GDateValue {
         if (!m.matches()) {
             return new ValidationFailure("Cannot convert '" + value + "' to a gDay");
         }
-        GDayValue g = new GDayValue();
+        MutableGDateValue g = new MutableGDateValue();
         String base = m.group(1);
         String tz = m.group(2);
         String date = "2000-01-" + base + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_DAY;
-        return setLexicalValue(g, BMPString.of(date), true);
+        setLexicalValue(g, BMPString.of(date), true);
+        return g.error == null ? new GDayValue(g) : g.error;
     }
 
     public GDayValue(byte day, int tz) {
@@ -48,11 +50,7 @@ public class GDayValue extends GDateValue {
     }
 
     public GDayValue(byte day, int tz, AtomicType type) {
-        this.year = 2000;
-        this.month = 1;
-        this.day = day;
-        setTimezoneInMinutes(tz);
-        this.typeLabel = type;
+        this(new MutableGDateValue(2000, 1, day, false, tz, type));
     }
 
     /**
@@ -65,9 +63,9 @@ public class GDayValue extends GDateValue {
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        GDayValue v = new GDayValue(day, getTimezoneInMinutes());
-        v.typeLabel = typeLabel;
-        return v;
+        MutableGDateValue m = makeMutableCopy();
+        m.typeLabel = typeLabel;
+        return new GDayValue(m);
     }
 
     /**

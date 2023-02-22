@@ -34,6 +34,8 @@ public final class BigDecimalValue extends DecimalValue {
     public static final int DIVIDE_PRECISION = 18;
 
     private final BigDecimal value;
+
+    // cached property holding the equivalent double. (Note: breaks immutability...)
     private double doubleValue = Double.NaN; // meaning unknown
 
     public static final BigDecimal BIG_DECIMAL_ONE_MILLION = BigDecimal.valueOf(1_000_000);
@@ -52,8 +54,20 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     public BigDecimalValue(BigDecimal value) {
+        super(BuiltInAtomicType.DECIMAL);
         this.value = value.stripTrailingZeros();
-        typeLabel = BuiltInAtomicType.DECIMAL;
+    }
+
+    /**
+     * Constructor supplying a BigDecimal and a type label
+     *
+     * @param value the value of the DecimalValue
+     * @param typeLabel the type label, which must be a subtype of DECIMAL
+     */
+
+    public BigDecimalValue(BigDecimal value, AtomicType typeLabel) {
+        super(typeLabel);
+        this.value = value.stripTrailingZeros();
     }
 
     private static final Pattern decimalPattern = Pattern.compile("(\\-|\\+)?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))");
@@ -198,6 +212,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     public BigDecimalValue(double in) throws ValidationException {
+        super(BuiltInAtomicType.DECIMAL);
         try {
             BigDecimal d = new BigDecimal(in);
             // Note, this gives a different result from BigDecimal.valueOf(in) - it retains more precision.
@@ -209,7 +224,6 @@ public final class BigDecimalValue extends DecimalValue {
             e.setErrorCode("FOCA0002");
             throw e.makeException();
         }
-        typeLabel = BuiltInAtomicType.DECIMAL;
     }
 
     /**
@@ -219,8 +233,8 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     public BigDecimalValue(long in) {
+        super(BuiltInAtomicType.DECIMAL);
         value = BigDecimal.valueOf(in);
-        typeLabel = BuiltInAtomicType.DECIMAL;
     }
 
     /**
@@ -235,9 +249,7 @@ public final class BigDecimalValue extends DecimalValue {
         if (typeLabel.getPrimitiveItemType() == BuiltInAtomicType.INTEGER) {
             return IntegerValue.makeIntegerValue(value.toBigInteger()).copyAsSubType(typeLabel);
         } else {
-            BigDecimalValue v = new BigDecimalValue(value);
-            v.typeLabel = typeLabel;
-            return v;
+            return new BigDecimalValue(value, typeLabel);
         }
     }
 

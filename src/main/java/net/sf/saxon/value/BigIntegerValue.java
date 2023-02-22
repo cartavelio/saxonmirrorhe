@@ -44,8 +44,8 @@ public final class BigIntegerValue extends IntegerValue {
      */
 
     public BigIntegerValue(BigInteger value) {
+        super(BuiltInAtomicType.INTEGER);
         this.value = value;
-        typeLabel = BuiltInAtomicType.INTEGER;
     }
 
     /**
@@ -58,8 +58,8 @@ public final class BigIntegerValue extends IntegerValue {
      */
 
     public BigIntegerValue(BigInteger value, AtomicType typeLabel) {
+        super(typeLabel);
         this.value = value;
-        this.typeLabel = typeLabel;
     }
 
     /**
@@ -71,8 +71,8 @@ public final class BigIntegerValue extends IntegerValue {
      */
 
     public BigIntegerValue(long value) {
+        super(BuiltInAtomicType.INTEGER);
         this.value = BigInteger.valueOf(value);
-        typeLabel = BuiltInAtomicType.INTEGER;
     }
 
     /**
@@ -86,39 +86,11 @@ public final class BigIntegerValue extends IntegerValue {
     @Override
     public AtomicValue copyAsSubType(/*@NotNull*/ AtomicType typeLabel) {
         if (typeLabel.getPrimitiveType() == StandardNames.XS_INTEGER) {
-            BigIntegerValue v = new BigIntegerValue(value);
-            v.typeLabel = typeLabel;
-            return v;
+            return new BigIntegerValue(value, typeLabel);
         } else {
-            return new BigDecimalValue(new BigDecimal(value));
+            return new BigDecimalValue(new BigDecimal(value), typeLabel);
         }
 
-    }
-
-    /**
-     * This class allows subtypes of xs:integer to be held, as well as xs:integer values.
-     * This method sets the required type label. Note that this method modifies the value in situ.
-     *
-     * @param type the subtype of integer required
-     * @return null if the operation succeeds, or a ValidationException if the value is out of range
-     */
-
-    /*@Nullable*/
-    @Override
-    public ValidationFailure convertToSubType(/*@NotNull*/ BuiltInAtomicType type, boolean validate) {
-        if (!validate) {
-            typeLabel = type;
-            return null;
-        }
-        if (IntegerValue.checkBigRange(value, type)) {
-            typeLabel = type;
-            return null;
-        } else {
-            ValidationFailure err = new ValidationFailure(
-                    "Integer value is out of range for subtype " + type.getDisplayName());
-            err.setErrorCode("FORG0001");
-            return err;
-        }
     }
 
 
@@ -134,7 +106,6 @@ public final class BigIntegerValue extends IntegerValue {
     @Override
     public ValidationFailure validateAgainstSubType(/*@NotNull*/ BuiltInAtomicType type) {
         if (IntegerValue.checkBigRange(value, type)) {
-            typeLabel = type;
             return null;
         } else {
             ValidationFailure err = new ValidationFailure(
@@ -549,9 +520,7 @@ public final class BigIntegerValue extends IntegerValue {
     @Override
     public IntegerValue reduce() {
         if (compareTo(Long.MAX_VALUE) < 0 && compareTo(Long.MIN_VALUE) > 0) {
-            Int64Value iv = new Int64Value(longValue());
-            iv.setTypeLabel(typeLabel);
-            return iv;
+            return new Int64Value(longValue(), typeLabel);
         }
         return this;
     }

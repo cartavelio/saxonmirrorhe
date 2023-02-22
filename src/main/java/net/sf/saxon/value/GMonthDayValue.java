@@ -7,7 +7,9 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -26,7 +28,8 @@ public class GMonthDayValue extends GDateValue {
     private static final Pattern regex =
             Pattern.compile("--([0-9][0-9]-[0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
-    private GMonthDayValue() {
+    private GMonthDayValue(MutableGDateValue m) {
+        super(m);
     }
 
     public static ConversionResult makeGMonthDayValue(UnicodeString value) {
@@ -35,12 +38,13 @@ public class GMonthDayValue extends GDateValue {
         if (!m.matches()) {
             return new ValidationFailure("Cannot convert '" + value + "' to a gMonthDay");
         }
-        GMonthDayValue g = new GMonthDayValue();
+        MutableGDateValue g = new MutableGDateValue();
         String base = m.group(1);
         String tz = m.group(2);
         String date = "2000-" + base + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_MONTH_DAY;
-        return setLexicalValue(g, BMPString.of(date), true);
+        setLexicalValue(g, BMPString.of(date), true);
+        return g.error == null ? new GMonthDayValue(g) : g.error;
     }
 
     public GMonthDayValue(byte month, byte day, int tz) {
@@ -48,11 +52,7 @@ public class GMonthDayValue extends GDateValue {
     }
 
     public GMonthDayValue(byte month, byte day, int tz, AtomicType type) {
-        this.year = 2000;
-        this.month = month;
-        this.day = day;
-        setTimezoneInMinutes(tz);
-        this.typeLabel = type;
+        this(new MutableGDateValue(2000, month, day, false, tz, type));
     }
 
     /**
@@ -65,9 +65,9 @@ public class GMonthDayValue extends GDateValue {
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        GMonthDayValue v = new GMonthDayValue(month, day, getTimezoneInMinutes());
-        v.typeLabel = typeLabel;
-        return v;
+        MutableGDateValue m = makeMutableCopy();
+        m.typeLabel = typeLabel;
+        return new GMonthDayValue(m);
     }
 
     /**

@@ -16,6 +16,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
 
@@ -32,7 +33,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
 
     // This is a reimplementation that makes no use of the Java Calendar/Date types except for computations.
 
-    private int tzMinutes = NO_TIMEZONE;  // timezone offset in minutes: or the special value NO_TIMEZONE
+    private final int tzMinutes;  // timezone offset in minutes: or the special value NO_TIMEZONE
 
     /**
      * The value NO_TIMEZONE is used in a value that has no timezone, and it can be passed as an argument
@@ -88,6 +89,16 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         return cr;
     }
 
+    public CalendarValue(AtomicType typeLabel) {
+        super(typeLabel);
+        this.tzMinutes = NO_TIMEZONE;
+    }
+
+    public CalendarValue(AtomicType typeLabel, int tzMinutes) {
+        super(typeLabel);
+        this.tzMinutes = tzMinutes;
+    }
+
     /**
      * Determine whether this value includes a timezone
      *
@@ -96,19 +107,6 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
 
     public final boolean hasTimezone() {
         return tzMinutes != NO_TIMEZONE;
-    }
-
-    /**
-     * Modify the timezone value held in this object. This must be done only while the value is being
-     * constructed.
-     *
-     * @param minutes The timezone offset from GMT in minutes, positive or negative; or the special
-     *                value NO_TIMEZONE indicating that the value is not in a timezone (this is the default if this
-     *                method is not called)
-     */
-
-    public final void setTimezoneInMinutes(int minutes) {
-        tzMinutes = minutes;
     }
 
     /**
@@ -207,16 +205,15 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
 
     /*@NotNull*/
     public final CalendarValue removeTimezone() {
-        CalendarValue c = (CalendarValue) copyAsSubType(typeLabel);
-        c.tzMinutes = NO_TIMEZONE;
-        return c;
+        return adjustTimezone(NO_TIMEZONE);
     }
 
     /**
      * Return a new date, time, or dateTime with the same normalized value, but
      * in a different timezone
      *
-     * @param tz the new timezone offset from UTC, in minutes
+     * @param tz the new timezone offset from UTC, in minutes; the value {@link #NO_TIMEZONE} indicates
+     *           that any existing timezone should be removed
      * @return the date/time in the new timezone
      */
 

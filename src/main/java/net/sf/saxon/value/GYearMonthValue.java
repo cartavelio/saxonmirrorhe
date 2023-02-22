@@ -27,7 +27,8 @@ public class GYearMonthValue extends GDateValue {
     private static final Pattern regex =
             Pattern.compile("(-?[0-9]+-[0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
-    private GYearMonthValue() {
+    private GYearMonthValue(MutableGDateValue m) {
+        super(m);
     }
 
     public static ConversionResult makeGYearMonthValue(UnicodeString value, ConversionRules rules) {
@@ -36,25 +37,21 @@ public class GYearMonthValue extends GDateValue {
         if (!m.matches()) {
             return new ValidationFailure("Cannot convert '" + value + "' to a gYearMonth");
         }
-        GYearMonthValue g = new GYearMonthValue();
+        MutableGDateValue g = new MutableGDateValue();
         String base = m.group(1);
         String tz = m.group(2);
         String date = base + "-01" + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_YEAR_MONTH;
-        return setLexicalValue(g, BMPString.of(date), rules.isAllowYearZero());
+        setLexicalValue(g, BMPString.of(date), rules.isAllowYearZero());
+        return g.error == null ? new GYearMonthValue(g) : g.error;
     }
 
     public GYearMonthValue(int year, byte month, int tz, boolean xsd10) {
-        this(year, month, tz, BuiltInAtomicType.G_YEAR_MONTH);
-        this.hasNoYearZero = xsd10;
+        this(new MutableGDateValue(year, month, 1, xsd10, tz, BuiltInAtomicType.G_YEAR_MONTH));
     }
 
     public GYearMonthValue(int year, byte month, int tz, AtomicType type) {
-        this.year = year;
-        this.month = month;
-        day = 1;
-        setTimezoneInMinutes(tz);
-        typeLabel = type;
+        this(new MutableGDateValue(year, month, 1,false, tz, type));
     }
 
     /**
@@ -67,9 +64,9 @@ public class GYearMonthValue extends GDateValue {
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        GYearMonthValue v = new GYearMonthValue(year, month, getTimezoneInMinutes(), hasNoYearZero);
-        v.typeLabel = typeLabel;
-        return v;
+        MutableGDateValue m = makeMutableCopy();
+        m.typeLabel = typeLabel;
+        return new GYearMonthValue(m);
     }
 
     /**

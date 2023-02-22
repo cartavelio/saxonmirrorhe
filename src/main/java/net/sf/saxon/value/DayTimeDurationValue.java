@@ -21,7 +21,7 @@ import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
- * A value of type xs:dayTimeDuration.
+ * A value of type xs:dayTimeDuration (or a subtype thereof).
  * <p>Internally this is held as an integer number of seconds held in a positive long, a positive integer
  * number of microseconds in the range 0 to 999,999,999, and a boolean sign. Some of the constructor
  * and accessor methods cannot handle the full range of values.</p>
@@ -29,14 +29,6 @@ import java.util.Objects;
 
 public final class DayTimeDurationValue extends DurationValue
         implements XPathComparable, ContextFreeAtomicValue {
-
-    /**
-     * Private constructor for internal use
-     */
-
-    private DayTimeDurationValue() {
-        typeLabel = BuiltInAtomicType.DAY_TIME_DURATION;
-    }
 
     /**
      * Factory method: create a duration value from a supplied string, in
@@ -74,28 +66,29 @@ public final class DayTimeDurationValue extends DurationValue
 
     public DayTimeDurationValue(int sign, int days, int hours, int minutes, long seconds, int microseconds)
             throws IllegalArgumentException {
-        if (days < 0 || hours < 0 || minutes < 0 || seconds < 0 || microseconds < 0) {
-            throw new IllegalArgumentException("Negative component value");
-        }
-        if ((double) days * (24 * 60 * 60) + (double) hours * (60 * 60) +
-                (double) minutes * 60 + (double) seconds > Long.MAX_VALUE) {
-            throw new IllegalArgumentException("Duration seconds limit exceeded");
-        }
-        _negative = sign < 0;
-        _months = 0;
-        long h = (long) days * 24L + (long) hours;
-        long m = h * 60L + (long) minutes;
-        long s = m * 60L + seconds;
-        if (microseconds > 1000000) {
-            s += microseconds / 1000000;
-            microseconds %= 1000000;
-        }
-        this._seconds = s;
-        this._nanoseconds = microseconds*1000;
-        if (s == 0 && microseconds == 0) {
-            _negative = false;
-        }
-        typeLabel = BuiltInAtomicType.DAY_TIME_DURATION;
+        super(sign > 0, 0, 0, days, hours, minutes, seconds, microseconds, BuiltInAtomicType.DAY_TIME_DURATION);
+//        if (days < 0 || hours < 0 || minutes < 0 || seconds < 0 || microseconds < 0) {
+//            throw new IllegalArgumentException("Negative component value");
+//        }
+//        if ((double) days * (24 * 60 * 60) + (double) hours * (60 * 60) +
+//                (double) minutes * 60 + (double) seconds > Long.MAX_VALUE) {
+//            throw new IllegalArgumentException("Duration seconds limit exceeded");
+//        }
+//        _negative = sign < 0;
+//        _months = 0;
+//        long h = (long) days * 24L + (long) hours;
+//        long m = h * 60L + (long) minutes;
+//        long s = m * 60L + seconds;
+//        if (microseconds > 1000000) {
+//            s += microseconds / 1000000;
+//            microseconds %= 1000000;
+//        }
+//        this._seconds = s;
+//        this._nanoseconds = microseconds*1000;
+//        if (s == 0 && microseconds == 0) {
+//            _negative = false;
+//        }
+//        typeLabel = BuiltInAtomicType.DAY_TIME_DURATION;
     }
 
     /**
@@ -117,34 +110,57 @@ public final class DayTimeDurationValue extends DurationValue
 
     public DayTimeDurationValue(int days, int hours, int minutes, long seconds, int nanoseconds)
             throws IllegalArgumentException {
-        boolean somePositive = days > 0 || hours > 0 || minutes > 0 || seconds > 0 || nanoseconds > 0;
-        boolean someNegative = days < 0 || hours < 0 || minutes < 0 || seconds < 0 || nanoseconds < 0;
-        if (somePositive && someNegative) {
-            throw new IllegalArgumentException("Some component values are positive and others are negative");
-        }
-        if (someNegative) {
-            _negative = true;
-            days = -days;
-            hours = -hours;
-            minutes = -minutes;
-            seconds = -seconds;
-            nanoseconds = -nanoseconds;
-        }
-        if ((double) days * (24 * 60 * 60) + (double) hours * (60 * 60) +
-                (double) minutes * 60 + (double) seconds > Long.MAX_VALUE) {
-            throw new IllegalArgumentException("Duration seconds limit exceeded");
-        }
-        _months = 0;
-        long h = (long) days * 24L + (long) hours;
-        long m = h * 60L + (long) minutes;
-        long s = m * 60L + seconds;
-        if (nanoseconds > 1_000_000_000) {
-            s += nanoseconds / 1_000_000_000;
-            nanoseconds %= 1_000_000_000;
-        }
-        this._seconds = s;
-        this._nanoseconds = nanoseconds;
-        typeLabel = BuiltInAtomicType.DAY_TIME_DURATION;
+        super(0, 0, days, hours, minutes, seconds, nanoseconds, BuiltInAtomicType.DAY_TIME_DURATION);
+//        boolean somePositive = days > 0 || hours > 0 || minutes > 0 || seconds > 0 || nanoseconds > 0;
+//        boolean someNegative = days < 0 || hours < 0 || minutes < 0 || seconds < 0 || nanoseconds < 0;
+//        if (somePositive && someNegative) {
+//            throw new IllegalArgumentException("Some component values are positive and others are negative");
+//        }
+//        if (someNegative) {
+//            _negative = true;
+//            days = -days;
+//            hours = -hours;
+//            minutes = -minutes;
+//            seconds = -seconds;
+//            nanoseconds = -nanoseconds;
+//        }
+//        if ((double) days * (24 * 60 * 60) + (double) hours * (60 * 60) +
+//                (double) minutes * 60 + (double) seconds > Long.MAX_VALUE) {
+//            throw new IllegalArgumentException("Duration seconds limit exceeded");
+//        }
+//        _months = 0;
+//        long h = (long) days * 24L + (long) hours;
+//        long m = h * 60L + (long) minutes;
+//        long s = m * 60L + seconds;
+//        if (nanoseconds > 1_000_000_000) {
+//            s += nanoseconds / 1_000_000_000;
+//            nanoseconds %= 1_000_000_000;
+//        }
+//        this._seconds = s;
+//        this._nanoseconds = nanoseconds;
+//        typeLabel = BuiltInAtomicType.DAY_TIME_DURATION;
+    }
+
+    /**
+     * Create a dayTimeDuration given the number of days, hours, minutes, seconds, and nanoseconds. This
+     * constructor performs limited validation. The components need not be normalized (for example,
+     * 36 hours is acceptable)
+     * <p>To construct a positive duration, all the component values should be positive integers (or zero).
+     * To construct a negative duration, all the component values should be negative integers (or zero).</p>
+     *
+     * @param days        number of days
+     * @param hours       number of hours
+     * @param minutes     number of minutes
+     * @param seconds     number of seconds
+     * @param nanoseconds number of nanoseconds
+     * @throws IllegalArgumentException if the value is out of range; specifically, if the total
+     *                                  number of seconds exceeds 2^63; or if some values are positive and
+     *                                  others are negative
+     */
+
+    public DayTimeDurationValue(int days, int hours, int minutes, long seconds, int nanoseconds, AtomicType typeLabel)
+            throws IllegalArgumentException {
+        super(0, 0, days, hours, minutes, seconds, nanoseconds, typeLabel);
     }
 
     /**
@@ -157,9 +173,7 @@ public final class DayTimeDurationValue extends DurationValue
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        DayTimeDurationValue v = DayTimeDurationValue.fromSeconds(getTotalSeconds());
-        v.typeLabel = typeLabel;
-        return v;
+        return DayTimeDurationValue.fromSeconds(getTotalSeconds(), typeLabel);
     }
 
     /**
@@ -269,21 +283,16 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     public static DayTimeDurationValue fromSeconds(BigDecimal seconds) {
-        DayTimeDurationValue sdv = new DayTimeDurationValue();
-        sdv._negative = seconds.signum() < 0;
-        if (sdv._negative) {
-            seconds = seconds.negate();
-        }
+        return fromSeconds(seconds, BuiltInAtomicType.DAY_TIME_DURATION);
+    }
+
+    public static DayTimeDurationValue fromSeconds(BigDecimal seconds, AtomicType typeLabel) {
         BigInteger wholeSeconds = seconds.toBigInteger();
-        sdv._seconds = wholeSeconds.longValueExact(); // ArithmeticException if out of range
+        long wholeSecondsL = wholeSeconds.longValueExact(); // ArithmeticException if out of range
         BigDecimal fractionalPart = seconds.remainder(BigDecimal.ONE);
         BigDecimal nanoseconds = fractionalPart.multiply(BigDecimalValue.BIG_DECIMAL_ONE_BILLION);
-        sdv._nanoseconds = nanoseconds.intValue();
-        if (sdv._seconds == 0 && sdv._nanoseconds == 0) {
-            // can happen with underflow (division by a very large number)
-            sdv._negative = false;
-        }
-        return sdv;
+        int nanosecondsL = nanoseconds.intValue();
+        return new DayTimeDurationValue(0, 0, 0, wholeSecondsL, nanosecondsL, typeLabel);
     }
 
 
@@ -384,10 +393,9 @@ public final class DayTimeDurationValue extends DurationValue
     @Override
     public DurationValue multiply(long factor) throws XPathException {
         // Fast path for simple cases
-        if (Math.abs(factor) < 0x7fff_ffff && Math.abs(_seconds) < 0x7fff_ffff) {
+        if (Math.abs(factor) < 0x7fff_ffff && Math.abs(_seconds) < 0x7fff_ffff && _nanoseconds == 0) {
             return new DayTimeDurationValue(0, 0, 0,
-                                            _seconds * factor * (_negative ? -1 : 1),
-                                            (int)(_nanoseconds * factor * (_negative ? -1 : 1)));
+                                            _seconds * factor * (_negative ? -1 : 1), 0);
         } else {
             return multiply(BigDecimal.valueOf(factor));
         }
@@ -561,12 +569,11 @@ public final class DayTimeDurationValue extends DurationValue
 
     @Override
     public DurationValue negate() throws IllegalArgumentException {
-        DayTimeDurationValue d2 = new DayTimeDurationValue();
-        d2.setTypeLabel(typeLabel);
-        d2._seconds = _seconds;
-        d2._nanoseconds = _nanoseconds;
-        d2._negative = !_negative;
-        return d2;
+        if (_negative) {
+            return new DayTimeDurationValue(0, 0, 0, _seconds, _nanoseconds);
+        } else {
+            return new DayTimeDurationValue(0, 0, 0, -_seconds, -_nanoseconds);
+        }
     }
 
     @Override

@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
@@ -752,7 +753,8 @@ public class SaxonXMLGregorianCalendar extends XMLGregorianCalendar {
             }
             return new DateValue(year.intValue(), (byte) month, (byte) day, tzOffset, true);
         } else if (year == null) {
-            return new TimeValue((byte) hour, (byte) minute, (byte) second, getMicrosecond()*1000, tzOffset, "");
+            return new TimeValue((byte) hour, (byte) minute, (byte) second, getMicrosecond()*1000,
+                                 tzOffset, BuiltInAtomicType.TIME);
         } else {
             return new DateTimeValue(year.intValue(), (byte) month, (byte) day,
                     (byte) hour, (byte) minute, (byte) second, getMicrosecond(), tzOffset, true);

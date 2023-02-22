@@ -27,11 +27,12 @@ public class GYearValue extends GDateValue {
     private static final Pattern regex =
             Pattern.compile("(-?[0-9]+)(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
-    private GYearValue() {
+    private GYearValue(MutableGDateValue m) {
+        super(m);
     }
 
     public static ConversionResult makeGYearValue(UnicodeString value, ConversionRules rules) {
-        GYearValue g = new GYearValue();
+        MutableGDateValue g = new MutableGDateValue();
         final UnicodeString trimmed = Whitespace.trim(value);
         Matcher m = regex.matcher(trimmed.toString());
         if (!m.matches()) {
@@ -41,20 +42,16 @@ public class GYearValue extends GDateValue {
         String tz = m.group(2);
         String date = base + "-01-01" + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_YEAR;
-        return setLexicalValue(g, BMPString.of(date), rules.isAllowYearZero());
+        setLexicalValue(g, BMPString.of(date), rules.isAllowYearZero());
+        return g.error == null ? new GYearValue(g) : g.error;
     }
 
     public GYearValue(int year, int tz, boolean xsd10) {
-        this(year, tz, BuiltInAtomicType.G_YEAR);
-        this.hasNoYearZero = xsd10;
+        this(new MutableGDateValue(year, 1, 1, xsd10,tz, BuiltInAtomicType.G_YEAR));
     }
 
     public GYearValue(int year, int tz, AtomicType type) {
-        this.year = year;
-        this.month = 1;
-        this.day = 1;
-        setTimezoneInMinutes(tz);
-        this.typeLabel = type;
+        this(new MutableGDateValue(year, 1, 1, false, tz, type));
     }
 
     /**
@@ -67,9 +64,9 @@ public class GYearValue extends GDateValue {
 
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        GYearValue v = new GYearValue(year, getTimezoneInMinutes(), true);
-        v.typeLabel = typeLabel;
-        return v;
+        MutableGDateValue m = makeMutableCopy();
+        m.typeLabel = typeLabel;
+        return new GYearValue(m);
     }
 
     /**

@@ -36,6 +36,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
      */
 
     public HexBinaryValue(UnicodeString in) throws XPathException {
+        super(BuiltInAtomicType.HEX_BINARY);
         UnicodeString s = Whitespace.trim(in);
         int len32 = s.length32();
         if ((len32 & 1) != 0) {
@@ -48,7 +49,6 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
             binaryValue[i] = (byte) ((fromHex(s.codePointAt(2 * i)) << 4) +
                     fromHex(s.codePointAt(2 * i + 1)));
         }
-        typeLabel = BuiltInAtomicType.HEX_BINARY;
     }
 
     /**
@@ -58,8 +58,20 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
      */
 
     public HexBinaryValue(byte[] value) {
+        super(BuiltInAtomicType.HEX_BINARY);
         binaryValue = value;
-        typeLabel = BuiltInAtomicType.HEX_BINARY;
+    }
+
+    /**
+     * Constructor: create a hexBinary value from a given array of bytes and a specified type label
+     *
+     * @param value the value as an array of bytes
+     * @param typeLabel the type label, which must be a subtype of HEX_BINARY
+     */
+
+    public HexBinaryValue(byte[] value, AtomicType typeLabel) {
+        super(typeLabel);
+        binaryValue = value;
     }
 
     /**
@@ -71,9 +83,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        HexBinaryValue v = new HexBinaryValue(binaryValue);
-        v.typeLabel = typeLabel;
-        return v;
+        return new HexBinaryValue(binaryValue, typeLabel);
     }
 
     /**
