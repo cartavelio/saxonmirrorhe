@@ -103,6 +103,25 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         return _isInstruction;
     }
 
+    /**
+     * Set whether this expression contains a call (on call-template or apply-templates) that is
+     * treated as a tail call because the select expression is known to be a singleton
+     * @param tc true if the action expression is to be treated as a tail call
+     */
+
+    public void setContainsTailCall(boolean tc) {
+        containsTailCall = tc;
+    }
+
+    /**
+     * Ask whether this expression contains a call (on call-template or apply-templates) that is
+     * treated as a tail call because the select expression is known to be a singleton
+     * @return true if the action expression is to be treated as a tail call
+     */
+
+    public boolean isContainsTailCall() {
+        return containsTailCall;
+    }
 
     /**
      * Get the select expression
@@ -326,7 +345,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return new SimpleStepExpression(getSelect(), getAction());
         }
 
-        if (threadsOp != null && !Literal.isEmptySequence(getThreads())) {
+        if (threadsOp != null && !Literal.isEmptySequence(getThreads()) && !containsTailCall) {
             return visitor.obtainOptimizer().generateMultithreadedInstruction(this);
         }
         return this;
@@ -608,6 +627,9 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("forEach", this);
+        if (containsTailCall) {
+            out.emitAttribute("flags", "t");
+        }
         getSelect().export(out);
         getAction().export(out);
         if (separatorOp != null) {
