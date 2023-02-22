@@ -47,11 +47,9 @@ configurations.all {
 
 configurations {
   preprocessor.extendsFrom(runtimeOnly)
-  jarjarAsm.extendsFrom(implementation)
   testDrivers.extendsFrom(testImplementation)
   productTests.extendsFrom(testImplementation)
   compileDotNet.extendsFrom(implementation)
-  asmDotNet.extendsFrom(implementation)
   transpiler.extendsFrom(implementation)
   documentation.extendsFrom(implementation)
   jeldoclet.extendsFrom(implementation)
@@ -197,18 +195,11 @@ dependencies {
     [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
     [group: 'org.graalvm.sdk', name: 'graal-sdk', version: graalVersion],
     [group: 'org.graalvm.nativeimage', name: 'svm', version: graalVersion],
-    fileTree(dir: "lib/asm-${asmVersion}"),
     files(saxonLicenseDir),
     files("lib/Tidy.jar"),
     //fileTree(dir: 'extra/lib/', include: ['*.jar'])
     fileTree(dir: '/usr/lib/jvm/graalvm/lib/graalvm', include: ['*.jar']),
     fileTree(dir: '/usr/lib/jvm/graalvm/lib/*', include: ['*.jar'])
-  )
-  jarjarAsm (
-    fileTree(dir: "${buildDir}/lib/asm")
-  )
-  asmDotNet (
-    fileTree(dir: "lib/asm-${asmVersion}")
   )
   testImplementation (
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
@@ -219,7 +210,6 @@ dependencies {
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
     files("${projectDir}/tools/xqj/tck/classes"),
-    fileTree("${buildDir}/lib/asm")
   )
   testRuntimeOnly (
     [group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.4.2'],
@@ -489,15 +479,6 @@ apply from: "run-samples.gradle"
         }
       }
     }
-    if (release == "ee") {
-      doLast {
-        copy {
-          into "${buildDir}/releases/${release}j/notices"
-          from "${projectDir}/src/docs/notices"
-          include "ASM.txt"
-        }
-      }
-    }
   }
 
   task "${release}jZip"(
@@ -718,7 +699,7 @@ task "pej_preprocess"(
 }
 
 task "eej_preprocess"(
-  dependsOn: ["hej_featureKeys", "record_branch", "asm_jarjar"],
+  dependsOn: ["hej_featureKeys", "record_branch"],
   description: "Preprocess PE sources for a production build"
 ) {
   int baselen = "${projectDir}/src/main/java/".length()
@@ -830,7 +811,7 @@ task eejCompile(
   dependsOn: ["eej_preprocess"],
   description: "Compile EE for Saxon/Java"
 ) {
-  classpath = configurations.compileClasspath + configurations.jarjarAsm
+  classpath = configurations.compileClasspath
   source eej_preprocess.outputs
   destinationDirectory = new File("${buildDir}/classes/eej")
 }
@@ -917,74 +898,6 @@ task eej_copyTestDrivers(
       copy {
         from source
         into fileMap[source].getParent()
-      }
-    }
-  }
-}
-
-// ============================================================
-// These tasks all relate to renaming (re-jarring) the ASM jar files
-// for EE so that the class names begin com.saxonica. This avoids a
-// problem where a different version of the ASM libraries is used in
-// the application that is using Saxon.
-
-task asm_jarjar(
-  description: "Rejar the asm classes for EE"
-) {
-  def jars = ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"]
-  jars.each { asm ->
-    inputs.file "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar"
-    outputs.file "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
-  }
-
-  doFirst {
-    mkdir "${buildDir}/lib/asm"
-  }
-
-  doLast {
-    new File("${buildDir}/jarjar-asm.rules")
-      .withWriter("utf-8") { writer ->
-        writer.writeLine("rule org.objectweb.** com.saxonica.objectweb.@1")
-      }
-  }
-
-  doLast {
-    jars.each { asm ->
-      javaexec {
-        classpath = configurations.preprocessor
-        main = "com.tonicsystems.jarjar.Main"
-        args "--rules", "${buildDir}/jarjar-asm.rules",
-          "lib/asm-${asmVersion}/${asm}-${asmVersion}.jar",
-          "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
-      }
-    }
-  }
-}
-
-task asm_unzip(dependsOn: ["asm_jarjar"]) {
-  inputs.file "lib/asm-${asmVersion}/asm-xml-${asmVersion}.jar"
-  ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
-    inputs.file "${buildDir}/lib/asm/${asm}-${asmVersion}.jar"
-  }
-  outputs.files fileTree("${buildDir}/classes/eej")
-
-  doLast {
-    copy {
-      // This one is from the original ASM
-      def zipFile = file("lib/asm-${asmVersion}/asm-xml-${asmVersion}.jar")
-      def outputDir = "${buildDir}/classes/eej"
-      from zipTree(zipFile)
-      into outputDir
-    }
-  }
-
-  doLast {
-    ["asm", "asm-analysis", "asm-commons", "asm-tree", "asm-util"].each { asm ->
-      copy {
-        def zipFile = file("${buildDir}/lib/asm/${asm}-${asmVersion}.jar")
-        def outputDir = "${buildDir}/classes/eej"
-        from zipTree(zipFile)
-        into outputDir
       }
     }
   }
@@ -1305,7 +1218,7 @@ pejJarSql.finalizedBy(testPejJarSql)
 
 task eejJar(
   type: Jar,
-  dependsOn: ["eej_MetaInf", "eejCompile", "asm_unzip", "compile_function_library"],
+  dependsOn: ["eej_MetaInf", "eejCompile", "compile_function_library"],
   description: "Build the EE jar file"
 ) {
   archiveBaseName = "saxon-ee-${saxonVersion}"

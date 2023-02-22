@@ -7,8 +7,7 @@ testSuite.configure([
   // If the value ends with a colon, the map value will be passed
   // with the option, otherwise it's just a flag. Use "on" as the
   // value for flags in the map.
-  "optionMap": ["bytecode": "-bytecode:",
-                "unfolded": "-unfolded",
+  "optionMap": ["unfolded": "-unfolded",
                 "export": "-export",
                 "debug": "-debug",
                 "jit": "-jit",
@@ -137,12 +136,10 @@ def testSuiteMatrix = [
       "_depends": ["cloneQT3TestSuite"],
 
       "XP31": [
-        "": [:],
-        "bc": ["bytecode": "on"]
+        "": [:]
       ],
       "XQ31": [
         "": [:],
-        "bc": ["bytecode": "on"],
         "unfold": ["unfolded": "on"],
       ]
     ],
@@ -152,12 +149,10 @@ def testSuiteMatrix = [
       "_depends": ["copySaxonExtraTestSuites"],
 
       "XP31": [
-        "": ["catalog":"j-catalog.xml"],
-        "bc": ["bytecode": "on", "catalog":"j-catalog.xml"]
+        "": ["catalog":"j-catalog.xml"]
       ],
       "XQ31": [
-        "": ["catalog":"j-catalog.xml"],
-        "bc": ["bytecode": "on", "catalog":"j-catalog.xml"],
+        "": ["catalog":"j-catalog.xml"]
       ]
     ],
     "expath": [
@@ -166,12 +161,10 @@ def testSuiteMatrix = [
       "_depends": ["copyEXPathTestSuite"],
 
       "XP31": [
-        "": [:],
-        "bc": ["bytecode": "on"]
+        "": [:]
       ],
       "XQ31": [
-        "": [:],
-        "bc": ["bytecode": "on"],
+        "": [:]
       ]
     ],
     "qt4": [
@@ -180,17 +173,14 @@ def testSuiteMatrix = [
       "_depends": ["cloneQT4TestSuite"],
 
       "XP40": [
-        "": [:],
-        "bc": ["bytecode": "on"]
+        "": [:]
       ],
       "XQ31": [
         "": [:],
-        "bc": ["bytecode": "on"],
         "unfold": ["unfolded": "on"],
       ],
       "XQ40": [
-        "": [:],
-        "bc": ["bytecode": "on"]
+        "": [:]
       ]
     ],
     "xslt30": [
@@ -200,11 +190,7 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
-        "ex": ["export": "on"],
-        "bc": ["bytecode": "on"],
-        "bc_jit": ["bytecode": "on", "jit": "on"],
-        "bc_ex": ["bytecode": "on", "export": "on"],
-        "bc_ex_jit": ["bytecode": "on", "export": "on", "jit": "on"],
+        "ex": ["export": "on"]
       ]
     ],
     "xslt30extra": [
@@ -214,11 +200,7 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
-        "ex": ["export": "on"],
-        "bc": ["bytecode": "on"],
-        "bc_jit": ["bytecode": "on", "jit": "on"],
-        "bc_ex": ["bytecode": "on", "export": "on"],
-        "bc_ex_jit": ["bytecode": "on", "export": "on", "jit": "on"],
+        "ex": ["export": "on"]
       ]
     ],
     "xsd": [
@@ -228,13 +210,11 @@ def testSuiteMatrix = [
 
       "XSD10": [
         "_exceptions": "${projectDir}/src/test/exceptions/xsd.xml",
-        "": [:],
-        "bc": ["bytecode": "on"]
+        "": [:]
       ],
       "XSD11": [
         "_exceptions": "${projectDir}/src/test/exceptions/xsd11.xml",
-        "": [:],
-        "bc": ["bytecode": "on"]
+        "": [:]
       ]
     ]
   ],
@@ -265,8 +245,7 @@ def testSuiteMatrix = [
       "_depends": ["copySaxonExtraTestSuites"],
 
       "XP31": [
-        "": ["catalog":"j-catalog.xml"],
-        "bc": ["bytecode": "on", "catalog":"j-catalog.xml"]
+        "": ["catalog":"j-catalog.xml"]
       ],
       "XQ31": [
         "": ["catalog":"j-catalog.xml"]
@@ -280,8 +259,7 @@ def testSuiteMatrix = [
       "_depends": ["copyEXPathTestSuite"],
 
       "XP31": [
-        "": [:],
-        "bc": ["bytecode": "on"]
+        "": [:]
       ],
       "XQ31": [
         "": [:]
