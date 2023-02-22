@@ -1,6 +1,7 @@
 using System;
 using SysCollGen = System.Collections.Generic;
 using System.Text;
+using net.sf.saxon.functions;
 using SysUri = System.Uri;
 using SysIO = System.IO;
 using SysIOFile = System.IO.File;
@@ -37,8 +38,7 @@ namespace java.io {
             this.fileName = this.fullPath = combined;
         }
         
-        public File(string dir, string name) {
-            throw new NotImplementedException();
+        public File(string dir, string name) : this(new File(dir), name) {
         }
 
         public static string separator = "/";
@@ -61,7 +61,7 @@ namespace java.io {
         }
 
         public string getName() {
-            return fileName;
+            return new SysIO.FileInfo(fileName).Name;
         }
 
         public string getPath() {
@@ -76,6 +76,7 @@ namespace java.io {
         }
 
         public bool exists() {
+            string name = SysIO.Path.GetFileName(this.fullPath);
             return SysIOFile.Exists(this.fullPath) || SysIODirectory.Exists(this.fullPath);
         }
 
@@ -120,7 +121,7 @@ namespace java.io {
         }
 
         public File getCanonicalFile() {
-            throw new NotImplementedException();
+            return new File(getCanonicalPath());
         }
 
         public bool isHidden() {
@@ -128,7 +129,14 @@ namespace java.io {
         }
 
         public bool delete() {
-            throw new NotImplementedException();
+            try {
+                SysIOFile.SetAttributes(fullPath, SysIO.FileAttributes.Normal);
+                SysIOFile.Delete(fullPath);
+                return true;
+            }
+            catch (Exception) {
+                return false;
+            }
         }
         
         public void deleteOnExit() {
@@ -166,7 +174,21 @@ namespace java.io {
         }
         
         public File[] listFiles() {
-            throw new NotImplementedException();
+            SysCollGen.IList<string> files = new SysCollGen.List<string>();
+            foreach (string dir in SysIODirectory.EnumerateDirectories(fullPath)) {
+                files.Add(dir);
+            }
+            foreach (string file in SysIODirectory.EnumerateFiles(fullPath)) {
+                files.Add(file);
+            }
+
+            File[] result = new File[files.Count];
+            int i = 0;
+            foreach (string f in files) {
+                result[i++] = new File(f);
+            }
+
+            return result;
         }
 
         public File[] listFiles(FilenameFilter filter) {
