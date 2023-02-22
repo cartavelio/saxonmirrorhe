@@ -112,6 +112,20 @@ public class testRegex {
     }
 
     @Test
+    public void TestJFlagTokenize() {  // bug 5655
+        try {
+            Processor p = new Processor(false);
+            XPathCompiler c = p.newXPathCompiler();
+            XdmValue v = c.evaluate("tokenize('dole0021', '\\W+|(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)', ';j')", null);
+            Assertions.assertEquals(2, v.size());
+            Assertions.assertEquals(v.itemAt(0).getStringValue(), "dole");
+            Assertions.assertEquals(v.itemAt(1).getStringValue(), "0021");
+        } catch (Exception e) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
     public void testJFlagReplace() {
         // Saxon extension; j flag causes use of Java regex engine
         try {
