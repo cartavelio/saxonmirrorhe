@@ -383,46 +383,46 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
             String[] u1 = uris;
             String[] p2 = delta.prefixes;
             String[] u2 = delta.uris;
-            List<String> prefixes = new ArrayList<>(p1.length + p2.length);
-            List<String> uris = new ArrayList<>(p1.length + p2.length);
+            List<String> prefixList = new ArrayList<>(p1.length + p2.length);
+            List<String> uriList = new ArrayList<>(p1.length + p2.length);
             int i1 = 0;
             int i2 = 0;
             while (i1 < p1.length && i2 < p2.length) {
                 int c = p1[i1].compareTo(p2[i2]);
                 if (c < 0) {
-                    prefixes.add(p1[i1]);
-                    uris.add(u1[i1]);
+                    prefixList.add(p1[i1]);
+                    uriList.add(u1[i1]);
                     i1++;
                 } else if (c > 0) {
                     if (!u2[i2].isEmpty()) {
-                        prefixes.add(p2[i2]);
-                        uris.add(u2[i2]);
+                        prefixList.add(p2[i2]);
+                        uriList.add(u2[i2]);
                     }
                     i2++;
                 } else { // c == 0
                     if (!u2[i2].isEmpty()) {
-                        prefixes.add(p2[i2]);
-                        uris.add(u2[i2]);
+                        prefixList.add(p2[i2]);
+                        uriList.add(u2[i2]);
                     }
                     i1++;
                     i2++;
                 }
             }
             while (i1 < p1.length) {
-                prefixes.add(p1[i1]);
-                uris.add(u1[i1]);
+                prefixList.add(p1[i1]);
+                uriList.add(u1[i1]);
                 i1++;
             }
             while (i2 < p2.length) {
                 if (!u2[i2].isEmpty()) {
-                    prefixes.add(p2[i2]);
-                    uris.add(u2[i2]);
+                    prefixList.add(p2[i2]);
+                    uriList.add(u2[i2]);
                 }
                 i2++;
             }
             NamespaceMap n2 = new NamespaceMap();
-            n2.prefixes = prefixes.toArray(new String[]{});
-            n2.uris = uris.toArray(new String[]{});
+            n2.prefixes = prefixList.toArray(new String[]{});
+            n2.uris = uriList.toArray(new String[]{});
             return n2;
         }
     }

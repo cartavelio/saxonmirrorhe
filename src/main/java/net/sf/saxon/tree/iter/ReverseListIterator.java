@@ -22,10 +22,10 @@ import java.util.List;
  */
 
 
-public class ReverseListIterator<T extends Item> implements UnfailingIterator,
+public class ReverseListIterator implements UnfailingIterator,
         ReversibleIterator, LookaheadIterator, LastPositionFinder {
 
-    private final List<T> items;
+    private final List<? extends Item> items;
     private int index;
 
     /**
@@ -34,7 +34,7 @@ public class ReverseListIterator<T extends Item> implements UnfailingIterator,
      * @param items The list of items
      */
 
-    public ReverseListIterator(List<T> items) {
+    public ReverseListIterator(List<? extends Item> items) {
         this.items = items;
         index = items.size() - 1;
 
@@ -56,7 +56,7 @@ public class ReverseListIterator<T extends Item> implements UnfailingIterator,
 
     /*@Nullable*/
     @Override
-    public T next() {
+    public Item next() {
         if (index >= 0) {
             return items.get(index--);
         } else {
@@ -94,7 +94,7 @@ public class ReverseListIterator<T extends Item> implements UnfailingIterator,
 
     @Override
     public SequenceIterator getReverseIterator() {
-        return new ListIterator<>(items);
+        return new ListIterator(items);
     }
 }
 

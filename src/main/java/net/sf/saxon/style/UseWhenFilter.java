@@ -73,13 +73,12 @@ public class UseWhenFilter extends ProxyReceiver {
     private final LinkedTreeBuilder treeBuilder;
 
 
-
     /**
      * Create a UseWhenFilter
      *
      * @param compilation the compilation episode
      * @param next        the next receiver in the pipeline
-     * @param precedence the import precedence expressed as a dotted-decimal integer, e.g. 1.4.6
+     * @param precedence  the import precedence expressed as a dotted-decimal integer, e.g. 1.4.6
      */
 
     public UseWhenFilter(Compilation compilation, Receiver next, NestedIntegerValue precedence) {
@@ -87,8 +86,8 @@ public class UseWhenFilter extends ProxyReceiver {
         this.compilation = compilation;
         this.precedence = precedence;
         assert (next instanceof LinkedTreeBuilder); // Currently always true; but the design
-                  // tries to avoid assuming it will always be true
-        treeBuilder = (LinkedTreeBuilder)next;
+        // tries to avoid assuming it will always be true
+        treeBuilder = (LinkedTreeBuilder) next;
     }
 
     /**
@@ -227,7 +226,7 @@ public class UseWhenFilter extends ProxyReceiver {
             }
 
             if (inXsltNamespace) {
-                
+
                 if (defaultNamespaceStack.size() == 2) {
                     switch (fp) {
                         case StandardNames.XSL_VARIABLE:
@@ -278,7 +277,7 @@ public class UseWhenFilter extends ProxyReceiver {
             dropUnderscoredAttributes = inXsltNamespace;
             nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
             if (includedDoc != null) {
-                XSLGeneralIncorporate node = (XSLGeneralIncorporate)treeBuilder.getCurrentParentNode();
+                XSLGeneralIncorporate node = (XSLGeneralIncorporate) treeBuilder.getCurrentParentNode();
                 node.setTargetDocument(includedDoc);
             }
         } else {
@@ -297,7 +296,7 @@ public class UseWhenFilter extends ProxyReceiver {
         DocumentKey key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), resolver, false);
         Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
         if (map.containsKey(key)) {
-            return (DocumentImpl)map.get(key);
+            return (DocumentImpl) map.get(key);
         } else {
             Source source;
             try {
@@ -408,7 +407,11 @@ public class UseWhenFilter extends ProxyReceiver {
                     throw createXPathException("The parameter is implicitly required because it does not accept an "
                                                        + "empty sequence, but no value has been supplied", "XTDE0700", location);
                 } else {
-                    value = asStr == null ? StringItem.EMPTY_STRING : EmptySequence.getInstance();
+                    if (asStr == null) {
+                        value = StringItem.EMPTY_STRING;
+                    } else {
+                        value = EmptySequence.getInstance();
+                    }
                     compilation.declareStaticVariable(varName, value, precedence, isParam);
                 }
 
@@ -419,7 +422,7 @@ public class UseWhenFilter extends ProxyReceiver {
                     value = sequence.materialize();
                 } catch (XPathException e) {
                     throw createXPathException("Error in " + elemName.getLocalPart() + " expression. " + e.getMessage(),
-                            e.getErrorCodeLocalPart(), attLoc);
+                                               e.getErrorCodeLocalPart(), attLoc);
                 }
             }
             RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0);
@@ -451,11 +454,16 @@ public class UseWhenFilter extends ProxyReceiver {
                         new AttributeLocation(elemName.getStructuredQName(), attName.getStructuredQName(), location);
                 String newValue = processShadowAttribute(value, baseUri.toString(), nsResolver, attLocation);
                 String plainName = local.substring(1);
-                NodeName newName = uri.isEmpty() ?
-                        new NoNamespaceName(plainName) : new FingerprintedQName(attName.getPrefix(), NamespaceConstant.SAXON, plainName);
+                NodeName newName;
+                if (uri.isEmpty()) {
+                    newName = new NoNamespaceName(plainName);
+                } else {
+                    newName = new FingerprintedQName(attName.getPrefix(), NamespaceConstant.SAXON, plainName);
+                }
+                ;
                 // if a corresponding attribute exists with no underscore, overwrite it.
                 // Drop the shadow attribute itself.
-                AttributeInfo newAtt = new AttributeInfo(newName, att.getType(), newValue, att.getLocation(),ReceiverOption.NONE);
+                AttributeInfo newAtt = new AttributeInfo(newName, att.getType(), newValue, att.getLocation(), ReceiverOption.NONE);
                 attMap.put(newName, newAtt);
                 attMap.remove(attName);
             }
@@ -501,7 +509,7 @@ public class UseWhenFilter extends ProxyReceiver {
             if (cr instanceof ValidationFailure) {
                 throw new XPathException("Invalid version number: " + version, "XTSE0110");
             }
-            BigDecimalValue d = (BigDecimalValue)cr.asAtomic();
+            BigDecimalValue d = (BigDecimalValue) cr.asAtomic();
             return d.getDecimalValue().multiply(BigDecimal.TEN).intValue();
         } else {
             return Integer.MIN_VALUE;
@@ -510,9 +518,10 @@ public class UseWhenFilter extends ProxyReceiver {
 
     /**
      * Perform evaluation of the nested expressions within a shadow attribute
+     *
      * @param expression the value of the shadow attribute as written
-     * @param baseUri the base URI of the containing element
-     * @param loc the location of the attribute, for diagnostics
+     * @param baseUri    the base URI of the containing element
+     * @param loc        the location of the attribute, for diagnostics
      * @return the result of evaluating nested expressions in the value
      * @throws XPathException if the syntax is invalid, or if evaluation of nested expressions fails
      */
@@ -590,8 +599,8 @@ public class UseWhenFilter extends ProxyReceiver {
      * Evaluate a use-when attribute
      *
      * @param expression the expression to be evaluated
-     * @param location identifies the location of the expression in case error need to be reported
-     * @param baseUri the base URI of the element containing the expression
+     * @param location   identifies the location of the expression in case error need to be reported
+     * @param baseUri    the base URI of the element containing the expression
      * @return the effective boolean value of the result of evaluating the expression
      * @throws XPathException if evaluation of the expression fails
      */
@@ -602,7 +611,7 @@ public class UseWhenFilter extends ProxyReceiver {
         staticContext.setContainingLocation(location);
         setNamespaceBindings(staticContext);
         Expression expr = ExpressionTool.make(expression, staticContext,
-            0, Token.EOF, null);
+                                              0, Token.EOF, null);
         expr.setRetainedStaticContext(staticContext.makeRetainedStaticContext());
         expr = typeCheck(expr, staticContext);
         SlotManager stackFrameMap = allocateSlots(expression, expr);
@@ -656,8 +665,8 @@ public class UseWhenFilter extends ProxyReceiver {
     /**
      * Evaluate a static expression (to initialize a static variable)
      *
-     * @param expression the expression to be evaluated
-     * @param locationId identifies the location of the expression in case error need to be reported
+     * @param expression    the expression to be evaluated
+     * @param locationId    identifies the location of the expression in case error need to be reported
      * @param staticContext the static context for evaluation of the expression
      * @return the effective boolean value of the result of evaluating the expression
      * @throws XPathException if evaluation of the expression fails
@@ -666,7 +675,7 @@ public class UseWhenFilter extends ProxyReceiver {
     public Sequence evaluateStatic(String expression, Location locationId, UseWhenStaticContext staticContext) throws XPathException {
         setNamespaceBindings(staticContext);
         Expression expr = ExpressionTool.make(expression, staticContext,
-            0, Token.EOF, null);
+                                              0, Token.EOF, null);
         expr = typeCheck(expr, staticContext);
         SlotManager stackFrameMap = getPipelineConfiguration().getConfiguration().makeSlotManager();
         ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);
@@ -674,7 +683,6 @@ public class UseWhenFilter extends ProxyReceiver {
         ((XPathContextMajor) dynamicContext).openStackFrame(stackFrameMap);
         return expr.iterate(dynamicContext).materialize();
     }
-
 
 
     /**
@@ -690,7 +698,7 @@ public class UseWhenFilter extends ProxyReceiver {
          * @param base The base URI against which the first argument will be made
          *             absolute if the absolute URI is required.
          * @return A Source object, or null if the href cannot be resolved,
-         *         and the processor should try to resolve the URI itself.
+         * and the processor should try to resolve the URI itself.
          * @throws XPathException if an error occurs when trying to
          *                        resolve the URI.
          */

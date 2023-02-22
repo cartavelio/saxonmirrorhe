@@ -72,8 +72,7 @@ public class PackageLibrary {
      */
 
     public PackageLibrary(PackageLibrary library) {
-        packageVersions =
-                new HashMap<>(library.packageVersions);
+        packageVersions = new HashMap<String, List<PackageVersion>>(library.packageVersions);
         packages = new HashMap<>(library.packages);
         compilerInfo = library.compilerInfo;
         config = library.config;

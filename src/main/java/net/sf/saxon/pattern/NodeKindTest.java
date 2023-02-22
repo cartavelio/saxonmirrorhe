@@ -12,9 +12,9 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 /**
  * NodeTest is an interface that enables a test of whether a node has a particular
@@ -116,7 +116,7 @@ public class NodeKindTest extends NodeTest {
     }
 
     @Override
-    public IntPredicate getMatcher(final NodeVectorTree tree) {
+    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         if (kind == Type.TEXT) {
             return nodeNr -> {

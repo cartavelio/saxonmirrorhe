@@ -18,6 +18,7 @@ public class StringConstants {
 
     public static final byte[] COMMENT_START = bytes("<!--");
     public static final byte[] COMMENT_END = bytes("-->");
+    public static final byte[] TWO_HYPHENS = bytes("--");
     public static final byte[] PI_START = bytes("<?");
     public static final byte[] PI_END = bytes("?>");
     public static final byte[] EMPTY_TAG_MIDDLE = bytes("></");

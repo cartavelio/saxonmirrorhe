@@ -294,8 +294,7 @@ public class GlobalVariable extends Actor
      */
     @Override
     public Iterator<String> getProperties() {
-        List<String> list = Collections.emptyList();
-        return list.iterator();
+        return Collections.emptyIterator();
     }
 
     /**
@@ -364,7 +363,7 @@ public class GlobalVariable extends Actor
      * @return an iterator over the references: returns objects of class {@link VariableReference}
      */
 
-    public Iterator iterateReferences() {
+    public Iterator<BindingReference> iterateReferences() {
         return references.iterator();
     }
 

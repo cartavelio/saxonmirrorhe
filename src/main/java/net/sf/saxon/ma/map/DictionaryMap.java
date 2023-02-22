@@ -109,7 +109,7 @@ public class DictionaryMap extends MapItem {
      * @return a set containing all the key values present in the map, in unpredictable order
      */
     @Override
-    public AtomicIterator<StringItem> keys() {
+    public AtomicIterator keys() {
         Iterator<String> base = hashMap.keySet().iterator();
         return () -> base.hasNext() ? new StringItem(base.next()) : null;
     }

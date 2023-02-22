@@ -18,6 +18,7 @@ import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
@@ -432,8 +433,20 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         c2.trackFocus(iter);
         c2.setCurrentRegexIterator(iter);
 
-        AnalyzeMappingFunction fn = new AnalyzeMappingFunction(iter, c2, getNonMatching(), getMatching());
-        return new ContextMappingIterator(fn, c2);
+        Expression matchingExpr = getMatching();
+        Expression nonMatchExpr = getNonMatching();
+        return new ContextMappingIterator(cxt -> {
+            if (iter.isMatching()) {
+                if (matchingExpr != null) {
+                    return matchingExpr.iterate(c2);
+                }
+            } else {
+                if (nonMatchExpr != null) {
+                    return nonMatchExpr.iterate(c2);
+                }
+            }
+            return EmptyIterator.getInstance();
+        }, c2);
     }
 
     /**

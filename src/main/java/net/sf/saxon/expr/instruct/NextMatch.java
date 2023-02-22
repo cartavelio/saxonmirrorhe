@@ -101,7 +101,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
             // clear all the local variables: they are no longer needed
             Arrays.fill(context.getStackFrame().getStackFrameValues(), null);
             ((XPathContextMajor) context).setCurrentComponent(modeComponent); // bug 2818
-            return new NextMatchPackage(rule, params, tunnels, output, context);
+            return new NextMatchPackage(this, rule, params, tunnels, output, context);
         } else {
             TemplateRule nh = (TemplateRule) rule.getAction();
             nh.initialize();
@@ -148,8 +148,9 @@ public class NextMatch extends ApplyNextMatchingTemplate {
      * template to execute in a finite stack size
      */
 
-    private class NextMatchPackage implements TailCall {
+    private static class NextMatchPackage implements TailCall {
 
+        private final NextMatch instruction;
         private final Rule rule;
         private final ParameterSet params;
         private final ParameterSet tunnelParams;
@@ -158,7 +159,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
 
         /**
          * Construct a NextMatchPackage that contains information about a call.
-         *
+         * @param instruction       the xsl:next-match instruction
          * @param rule              the rule identifying the Template to be called
          * @param params            the parameters to be supplied to the called template
          * @param tunnelParams      the tunnel parameter supplied to the called template
@@ -167,11 +168,13 @@ public class NextMatch extends ApplyNextMatchingTemplate {
          *                          intact
          */
 
-        public NextMatchPackage(Rule rule,
+        public NextMatchPackage(NextMatch instruction,
+                                Rule rule,
                                 ParameterSet params,
                                 ParameterSet tunnelParams,
                                 Outputter output,
                                 XPathContext evaluationContext) {
+            this.instruction = instruction;
             this.rule = rule;
             this.params = params;
             this.tunnelParams = tunnelParams;
@@ -194,7 +197,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
             TemplateRule nh = (TemplateRule) rule.getAction();
             nh.initialize();
             XPathContextMajor c2 = evaluationContext.newContext();
-            c2.setOrigin(NextMatch.this);
+            c2.setOrigin(instruction);
             //c2.setOriginatingConstructType(LocationKind.TEMPLATE);
             c2.setLocalParameters(params);
             c2.setTunnelParameters(tunnelParams);

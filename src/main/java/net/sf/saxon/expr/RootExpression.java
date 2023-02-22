@@ -139,7 +139,7 @@ public class RootExpression extends Expression {
      */
 
     @Override
-    public final int computeCardinality() {
+    protected final int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

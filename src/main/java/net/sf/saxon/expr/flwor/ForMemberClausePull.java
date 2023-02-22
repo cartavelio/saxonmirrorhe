@@ -34,7 +34,7 @@ public class ForMemberClausePull extends ForClausePull {
         Expression sequence = forClause.getSequence();
         arrayItem = (ArrayItem)sequence.evaluateItem(context);
         Iterator<GroundedValue> members = arrayItem.members().iterator();
-        return () -> members.hasNext() ? new ObjectValue<>(members.next()) : null;
+        return () -> members.hasNext() ? new ObjectValue<GroundedValue>(members.next()) : null;
     }
 
     @Override

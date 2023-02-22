@@ -14,6 +14,7 @@ import net.sf.saxon.functions.String_1;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -348,7 +349,7 @@ public class CastExpression extends CastingExpression implements Callable {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue result = doCast((AtomicValue)arguments[0].head(), context);
-        return result == null ? EmptySequence.getInstance() : result;
+        return SequenceTool.itemOrEmpty(result);
     }
 
     private AtomicValue doCast(AtomicValue value, XPathContext context) throws XPathException {

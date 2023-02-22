@@ -158,7 +158,7 @@ public class SequenceExtent implements GroundedValue {
      *         {@link SequenceExtent}.
      */
 
-    public static <T extends Item> GroundedValue makeSequenceExtent(/*@NotNull*/ List<T> input) {
+    public static GroundedValue makeSequenceExtent(/*@NotNull*/ List<? extends Item> input) {
         int len = input.size();
         if (len == 0) {
             return EmptySequence.getInstance();
@@ -246,8 +246,8 @@ public class SequenceExtent implements GroundedValue {
 
     /*@NotNull*/
     @Override
-    public ListIterator<? extends Item> iterate() {
-        return new ListIterator<>(value);
+    public ListIterator iterate() {
+        return new ListIterator(value);
     }
 
     /**
@@ -258,7 +258,7 @@ public class SequenceExtent implements GroundedValue {
 
     /*@NotNull*/
     public UnfailingIterator reverseIterate() {
-        return new ReverseListIterator<>(value);
+        return new ReverseListIterator(value);
     }
 
     /**

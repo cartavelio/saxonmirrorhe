@@ -431,9 +431,9 @@ public class TypeChecker {
         if (!cardOK) {
             if (exp instanceof Literal) {
                 XPathException err = new XPathException("Required cardinality of " + role.getMessage() +
-                                                                " is " + Cardinality.toString(reqCard) +
+                                                                " is " + Cardinality.describe(reqCard) +
                                                                 "; supplied value has cardinality " +
-                                                                Cardinality.toString(suppliedCard), role.getErrorCode(), supplied.getLocation());
+                                                                Cardinality.describe(suppliedCard), role.getErrorCode(), supplied.getLocation());
                 err.setIsTypeError(role.isTypeError());
                 throw err;
             } else {
@@ -595,9 +595,9 @@ public class TypeChecker {
         if (!cardOK) {
             if (exp instanceof Literal) {
                 XPathException err = new XPathException("Required cardinality of " + role.getMessage() +
-                                                                " is " + Cardinality.toString(reqCard) +
+                                                                " is " + Cardinality.describe(reqCard) +
                                                                 "; supplied value has cardinality " +
-                                                                Cardinality.toString(suppliedCard), role.getErrorCode(), supplied.getLocation());
+                                                                Cardinality.describe(suppliedCard), role.getErrorCode(), supplied.getLocation());
                 err.setIsTypeError(role.isTypeError());
                 throw err;
             } else {

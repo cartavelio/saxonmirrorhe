@@ -355,7 +355,7 @@ public class KeyIndex {
             return SingleNodeIterator.makeIterator((NodeInfo) value);
         } else {
             List<NodeInfo> nodes = (List<NodeInfo>) value;
-            return new ListIterator<>(nodes);
+            return new ListIterator(nodes);
         }
     }
 

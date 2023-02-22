@@ -18,17 +18,17 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.regex.charclass.Categories;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringItem;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
@@ -36,7 +36,6 @@ import net.sf.saxon.z.IntSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 
 public class FormatInteger extends SystemFunction implements StatefulSystemFunction {
 
@@ -161,7 +160,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
 
 
         UnicodeString primary = StringView.tidy(primaryToken);
-        IntPredicate isDecimalDigit = Categories.getCategory("Nd");
+        Categories.Category isDecimalDigit = Categories.getCategory("Nd");
         boolean isDecimalDigitPattern = false;
         IntIterator iter = primary.codePoints();
         while (iter.hasNext()) {

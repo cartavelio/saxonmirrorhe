@@ -7,8 +7,6 @@
 
 package net.sf.saxon.expr.parser;
 
-import net.sf.saxon.annotate.CSharp;
-import net.sf.saxon.expr.ForMemberExpression;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
@@ -35,13 +33,14 @@ import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.SourceBinding;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntArraySet;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 
 import java.util.*;
-import java.util.function.IntPredicate;
 
 import static net.sf.saxon.type.BuiltInAtomicType.*;
 
@@ -67,7 +66,7 @@ public class XPathParser {
     protected QNameParser qNameParser;
     protected ParserExtension parserExtension = new ParserExtension();
 
-    protected IntPredicate charChecker;
+    protected IntPredicateProxy charChecker;
 
     protected boolean allowXPath30Syntax = false;
     protected boolean allowXPath30XSLTExtensions = false;
@@ -2580,7 +2579,7 @@ public class XPathParser {
                     AnnotationList annotations = AnnotationList.EMPTY;
                     return parseInlineFunction(annotations);
                 }
-                CSharp.emitCode("goto case Token.NAME");
+                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.NAME");
                 // fall through!
             case Token.NAME:
             case Token.PREFIX:
@@ -2663,7 +2662,7 @@ public class XPathParser {
                     case "_":
                         return parserExtension.parseUnderscoreFunction(this);
                 }
-                CSharp.emitCode("goto case Token.ELEMENT_NAME");
+                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.ELEMENT_NAME");
                 // else fall through
             case Token.ELEMENT_QNAME:
             case Token.ATTRIBUTE_QNAME:

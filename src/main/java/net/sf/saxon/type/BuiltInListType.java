@@ -9,6 +9,7 @@ package net.sf.saxon.type;
 
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.MappingFunction;
 import net.sf.saxon.expr.MappingIterator;
 import net.sf.saxon.expr.SequenceMapper;
 import net.sf.saxon.lib.ConversionRules;
@@ -17,7 +18,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
@@ -531,7 +531,7 @@ public class BuiltInListType implements ListType {
         return t;
     }
 
-    private static class ListTypeMappingFunction {
+    private static class ListTypeMappingFunction implements MappingFunction {
 
         public NamespaceResolver resolver;
         /*@Nullable*/ public AtomicType atomicType;
@@ -544,7 +544,7 @@ public class BuiltInListType implements ListType {
          * For details see {@link net.sf.saxon.expr.MappingFunction}
          */
 
-        public AtomicIterator<AtomicValue> map(Item item) throws XPathException {
+        public AtomicIterator map(Item item) throws XPathException {
             try {
                 return atomicType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate();
             } catch (ValidationException err) {

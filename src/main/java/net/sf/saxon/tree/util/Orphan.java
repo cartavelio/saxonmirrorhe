@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -21,6 +20,8 @@ import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
+
+import java.util.function.Predicate;
 
 /**
  * A node (implementing the NodeInfo interface) representing an attribute, text node,
@@ -498,7 +499,7 @@ public final class Orphan implements MutableNodeInfo {
 
     /*@NotNull*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR_OR_SELF:
             case AxisInfo.DESCENDANT_OR_SELF:

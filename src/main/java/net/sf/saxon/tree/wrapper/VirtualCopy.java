@@ -10,7 +10,6 @@ package net.sf.saxon.tree.wrapper;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -24,6 +23,7 @@ import net.sf.saxon.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -445,7 +445,7 @@ public class VirtualCopy implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         VirtualCopy newParent = null;
         switch (axisNumber) {
             case AxisInfo.CHILD:

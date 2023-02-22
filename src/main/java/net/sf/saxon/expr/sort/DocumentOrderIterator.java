@@ -59,7 +59,7 @@ public final class DocumentOrderIterator implements SequenceIterator {
         if (sequence.size() > 1) {
             sequence.sort(comparer);
         }
-        iterator = new ListIterator<>(sequence);
+        iterator = new ListIterator(sequence);
     }
 
     // Implement the SequenceIterator as a wrapper around the underlying iterator

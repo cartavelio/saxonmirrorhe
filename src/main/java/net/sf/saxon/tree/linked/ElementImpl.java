@@ -18,6 +18,7 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * ElementImpl implements an element node in the Linked tree model. Subclasses of ElementImpl,
@@ -771,7 +773,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         return isIdRefNode(this);
     }
 
-    static boolean isIdRefNode(NodeImpl node) {
+    public static boolean isIdRefNode(NodeImpl node) {
         SchemaType type = node.getSchemaType();
         try {
             if (type.isIdRefType()) {

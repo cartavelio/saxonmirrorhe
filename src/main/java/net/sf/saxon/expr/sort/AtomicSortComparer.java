@@ -13,7 +13,9 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * An AtomicComparer used for comparing atomic values of arbitrary item types. It encapsulates
@@ -164,13 +166,13 @@ public class AtomicSortComparer implements AtomicComparer {
             return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();
-            Comparable ac = (Comparable) a.getXPathComparable(true, collator, implicitTimezone);
-            Comparable bc = (Comparable) b.getXPathComparable(true, collator, implicitTimezone);
+            AtomicMatchKey ac = a.getXPathComparable(true, collator, implicitTimezone);
+            AtomicMatchKey bc = b.getXPathComparable(true, collator, implicitTimezone);
             if (ac == null || bc == null) {
                 return compareNonComparables(a, b);
             } else {
                 try {
-                    return ac.compareTo(bc);
+                    return ((Comparable<AtomicMatchKey>)ac).compareTo(bc);
                 } catch (ClassCastException e) {
                     String message = "Cannot compare " + a.getPrimitiveType().getDisplayName() +
                             " with " + b.getPrimitiveType().getDisplayName();
@@ -223,10 +225,10 @@ public class AtomicSortComparer implements AtomicComparer {
     public static AtomicMatchKey COLLATION_KEY_NaN = new AtomicMatchKey() {
         @Override
         public AtomicValue asAtomic() {
-        // The logic here is to choose a value that compares equal to itself but not equal to any other
-        // number. We use StructuredQName because it has a simple equals() method.
+            // The logic here is to choose a value that compares equal to itself but not equal to any other
+            // number. We use StructuredQName because it has a simple equals() method.
 
-        return new QNameValue("saxon", "http://saxon.sf.net/collation-key", "NaN");
+            return new QNameValue("saxon", "http://saxon.sf.net/collation-key", "NaN");
         }
     };
 

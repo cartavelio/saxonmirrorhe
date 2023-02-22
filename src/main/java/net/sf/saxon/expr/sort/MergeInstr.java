@@ -603,7 +603,7 @@ public class MergeInstr extends Instruction {
                     FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
                     MergeKeyMappingFunction addMergeKeys = new MergeKeyMappingFunction(c4, ms);
                     ContextMappingIterator contextMapKeysItr =
-                            new ContextMappingIterator(addMergeKeys, c4);
+                            new ContextMappingIterator(addMergeKeys::map, c4);
                     inputIterator = makeMergeIterator(inputIterator, comps, ms, contextMapKeysItr);
                 }
             } else if (ms.getForEachItem() != null) {
@@ -628,7 +628,7 @@ public class MergeInstr extends Instruction {
         FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
         MergeKeyMappingFunction addMergeKeys = new MergeKeyMappingFunction(c4, ms);
         ContextMappingIterator contextMapKeysItr =
-                new ContextMappingIterator(addMergeKeys, c4);
+                new ContextMappingIterator(addMergeKeys::map, c4);
         inputIterator = makeMergeIterator(inputIterator, comps, ms, contextMapKeysItr);
         return inputIterator;
     }
@@ -789,7 +789,7 @@ public class MergeInstr extends Instruction {
                 out.emitAttribute("name", mergeSource.sourceName);
             }
             if (mergeSource.validation != Validation.SKIP && mergeSource.validation != Validation.BY_TYPE) {
-                out.emitAttribute("validation", Validation.toString(mergeSource.validation));
+                out.emitAttribute("validation", Validation.describe(mergeSource.validation));
             }
             if (mergeSource.validation == Validation.BY_TYPE) {
                 SchemaType type = mergeSource.schemaType;
@@ -860,7 +860,7 @@ public class MergeInstr extends Instruction {
      * item and its merge keys into a single composite object
      */
 
-    public static class MergeKeyMappingFunction implements ContextMappingFunction {
+    public static class MergeKeyMappingFunction {
         private final MergeSource ms;
         private final XPathContext baseContext;
         private final XPathContext keyContext;
@@ -876,7 +876,7 @@ public class MergeInstr extends Instruction {
             manualIterator.setPosition(1);
             keyContext.setCurrentIterator(manualIterator);
         }
-        @Override
+
         public SequenceIterator map(XPathContext context) throws XPathException {
             Item currentItem = context.getContextItem();
             manualIterator.setContextItem(currentItem);

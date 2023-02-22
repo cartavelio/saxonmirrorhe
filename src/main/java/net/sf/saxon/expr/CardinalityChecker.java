@@ -12,15 +12,14 @@ import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ArrayIterator;
-
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
+import net.sf.saxon.tree.iter.TwoItemIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Cardinality;
@@ -297,9 +296,8 @@ public final class CardinalityChecker extends UnaryExpression {
             }
             Item second = iter.next();
             if (second != null) {
-                Item[] leaders = new Item[]{first, second};
                 typeError("A sequence of more than one item is not allowed as the " +
-                    role.getMessage() + depictSequenceStart(new ArrayIterator<Item>(leaders), 2), role.getErrorCode(), context);
+                    role.getMessage() + depictSequenceStart(new TwoItemIterator(first, second), 2), role.getErrorCode(), context);
                 return null;
             }
         }

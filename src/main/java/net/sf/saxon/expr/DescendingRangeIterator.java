@@ -27,7 +27,7 @@ import java.util.EnumSet;
  * a RangeIterator that works in descending order.
  */
 
-public class DescendingRangeIterator extends RangeIterator implements AtomicIterator<IntegerValue>,
+public class DescendingRangeIterator extends RangeIterator implements AtomicIterator,
         ReversibleIterator,
         LastPositionFinder,
         LookaheadIterator {
@@ -43,7 +43,6 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
      * @param start the first integer to be delivered (the highest in the range)
      * @param step the difference between successive values, supplied as a positive integer
      * @param end   the last integer to be delivered (the lowest in the range). Must be &lt;= start
-     * @throws XPathException if the values are inconsistent or if the length is greater than 2^31
      */
 
     public DescendingRangeIterator(long start, long step, long end) {
@@ -157,7 +156,7 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
     }
 
     @Override
-    public AtomicIterator<IntegerValue> getReverseIterator() {
+    public AtomicIterator getReverseIterator() {
         return new AscendingRangeIterator(start, step, limit);
     }
 

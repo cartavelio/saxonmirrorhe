@@ -11,16 +11,15 @@ import cli.System.ArgumentException;
 import cli.System.Text.RegularExpressions.Match;
 import cli.System.Text.RegularExpressions.Regex;
 import cli.System.Text.RegularExpressions.RegexOptions;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.value.StringItem;
 
 import java.util.function.Function;
 
@@ -197,7 +196,7 @@ public class DotNetRegularExpression implements RegularExpression {
      */
 
     @Override
-    public AtomicIterator<StringItem> tokenize(UnicodeString input) {
+    public AtomicIterator tokenize(UnicodeString input) {
         return new DotNetTokenIterator(input.toString(), pattern);
     }
 

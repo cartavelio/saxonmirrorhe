@@ -7,7 +7,7 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.annotate.CSharp;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
@@ -174,7 +174,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                     continue;
                 }
 
-                if (item1 instanceof ObjectValue || item2 instanceof ObjectValue) {
+                if (item1 instanceof ObjectValue<?> || item2 instanceof ObjectValue<?>) {
                     if (!item1.equals(item2)) {
                         return false;
                     }
@@ -359,7 +359,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                         return false;
                     }
                 }
-                CSharp.emitCode("goto case Type.DOCUMENT");
+                CSharp.emitCode("goto case net.sf.saxon.type.Type.DOCUMENT");
                 // fall through
             case Type.DOCUMENT:
                 AxisIterator c1 = n1.iterateAxis(AxisInfo.CHILD);
@@ -438,6 +438,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                     explain(reporter, Type.displayTypeName(n1) + " names differ", flags, n1, n2);
                     return false;
                 }
+                CSharp.emitCode("goto case net.sf.saxon.type.Type.TEXT");
                 // drop through
             case Type.TEXT:
             case Type.COMMENT:

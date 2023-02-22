@@ -17,18 +17,16 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.UntypedAtomicValue;
-import net.sf.saxon.z.IntValuePredicate;
 
 import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 /**
  * An element node in the TinyTree that has no attributes or namespace declarations and that
@@ -139,7 +137,7 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
                 return EmptyIterator.ofNodes();
@@ -415,7 +413,6 @@ public class TinyTextualElement extends TinyElementImpl {
             return getParent().getLineNumber();
         }
 
-        private final IntPredicate isNewline = new IntValuePredicate(10);
 
         /**
          * Return the character position where the current document event ends.
@@ -565,13 +562,14 @@ public class TinyTextualElement extends TinyElementImpl {
          * Return an enumeration over the nodes reached by the given axis from this node
          *
          * @param axisNumber the axis to be iterated over
-         * @param nodeTest   A pattern to be matched by the returned nodes
+         * @param predicate   A pattern to be matched by the returned nodes
          * @return a AxisIterator that scans the nodes reached by the axis in turn.
          */
 
         /*@NotNull*/
         @Override
-        public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+        public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+            NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
                     return getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);

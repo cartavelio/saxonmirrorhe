@@ -99,7 +99,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
 
     @Override
     protected int computeHashCode() {
-        int h = 0x836b12a0;
+        int h = 0x136b12a0;
         return h + getLhsExpression().hashCode() ^ (int)comparand;
     }
 

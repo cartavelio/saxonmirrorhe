@@ -9,7 +9,6 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -29,6 +28,7 @@ import org.apache.axiom.om.OMContainer;
 import org.apache.axiom.om.OMElement;
 
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content,
@@ -396,7 +396,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         // for clarifications, see the W3C specs or:
         // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/xmlsdk/html/xmrefaxes.asp
         switch (axisNumber) {

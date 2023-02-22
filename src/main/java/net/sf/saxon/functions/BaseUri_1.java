@@ -14,6 +14,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * This class implements the fn:base-uri() function in XPath 2.0
@@ -22,16 +23,16 @@ import net.sf.saxon.value.AnyURIValue;
 public class BaseUri_1 extends SystemFunction implements Callable {
 
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo)arguments[0].head();
         if (node == null) {
             return ZeroOrOne.empty();
         }
         String s = node.getBaseURI();
         if (s == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
-        return new ZeroOrOne(new AnyURIValue(s));
+        return new AnyURIValue(s);
 
     }
 

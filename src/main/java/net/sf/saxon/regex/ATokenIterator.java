@@ -15,7 +15,7 @@ import net.sf.saxon.value.StringItem;
  * A ATokenIterator is an iterator over the strings that result from tokenizing a string using a regular expression
  */
 
-public class ATokenIterator implements AtomicIterator<StringItem> {
+public class ATokenIterator implements AtomicIterator {
 
     private final UnicodeString input;
     private final REMatcher matcher;

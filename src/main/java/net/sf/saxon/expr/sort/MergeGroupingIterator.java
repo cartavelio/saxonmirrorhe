@@ -155,7 +155,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
     @Override
     public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator<>(currentMembers);
+        return new ListIterator(currentMembers);
     }
 
     public SequenceIterator iterateCurrentGroup(String source) {
@@ -163,7 +163,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
         if (sourceMembers == null) {
             return EmptyIterator.emptyIterator();
         } else {
-            return new ListIterator<>(sourceMembers);
+            return new ListIterator(sourceMembers);
         }
     }
 
@@ -180,7 +180,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
         @Override
         public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator<>(currentGroup);
+            return new ListIterator(currentGroup);
         }
 
         @Override

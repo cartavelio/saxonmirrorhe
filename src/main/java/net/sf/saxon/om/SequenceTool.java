@@ -517,5 +517,17 @@ public class SequenceTool {
             }
         };
     }
+
+    /**
+     * Helper method to convert an Item or null to a Sequence
+     */
+
+    public static GroundedValue itemOrEmpty(Item item) {
+        if (item == null) {
+            return EmptySequence.getInstance();
+        } else {
+            return item;
+        }
+    }
 }
 

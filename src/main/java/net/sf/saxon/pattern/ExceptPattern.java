@@ -140,7 +140,7 @@ public class ExceptPattern extends VennPattern {
 
     @Override
     protected int computeHashCode() {
-        return 0x9bd7dfa6 ^ p1.hashCode() ^ p2.hashCode();
+        return 0x7bd7dfa6 ^ p1.hashCode() ^ p2.hashCode();
     }
 
     /**

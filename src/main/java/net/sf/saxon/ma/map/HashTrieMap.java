@@ -216,7 +216,7 @@ public class HashTrieMap extends MapItem {
 
         if (needFullCheck) {
             // we need to test the entries individually
-            AtomicIterator<?> keyIter = keys();
+            AtomicIterator keyIter = keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
                 if (!requiredKeyType.matches(key, th)) {
@@ -246,7 +246,7 @@ public class HashTrieMap extends MapItem {
         ItemType valueType = null;
         int valueCard = 0;
         // we need to test the entries individually
-        AtomicIterator<?> keyIter = keys();
+        AtomicIterator keyIter = keys();
         AtomicValue key;
         while ((key = keyIter.next()) != null) {
             Sequence val = get(key);
@@ -395,8 +395,8 @@ public class HashTrieMap extends MapItem {
      */
 
     @Override
-    public AtomicIterator<? extends AtomicValue> keys() {
-        return new AtomicIterator<AtomicValue>() {
+    public AtomicIterator keys() {
+        return new AtomicIterator() {
 
             final Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> base = imap.iterator();
 

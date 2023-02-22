@@ -283,7 +283,7 @@ public final class FixedAttribute extends AttributeCreator {
             out.emitAttribute("nsuri", nodeName.getStructuredQName().getURI());
         }
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
-            out.emitAttribute("validation", Validation.toString(getValidationAction()));
+            out.emitAttribute("validation", Validation.describe(getValidationAction()));
         }
         if (getSchemaType() != null) {
             out.emitAttribute("type", getSchemaType().getStructuredQName());

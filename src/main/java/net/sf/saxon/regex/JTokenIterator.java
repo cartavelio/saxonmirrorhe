@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * a regular expression, in this case a regular expression evaluated using the JDK regex engine
  */
 
-public class JTokenIterator implements AtomicIterator<StringItem> {
+public class JTokenIterator implements AtomicIterator {
 
     private final CharSequence input;
     private final Pattern pattern;

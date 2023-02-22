@@ -50,7 +50,7 @@ public final class XSLWherePopulated extends StyleElement {
      */
 
     @Override
-    public boolean mayContainFallback() {
+    protected boolean mayContainFallback() {
         return true;
     }
 

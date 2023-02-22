@@ -83,7 +83,7 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        // For .NEU - don't use a lambda expression here
+        // For C# - don't use a lambda expression here
         return new Iterable<KeyValuePair>() {
             @Override
             public Iterator<KeyValuePair> iterator() {
@@ -115,7 +115,11 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return (get(key) == null) ? this : new HashTrieMap();
+        if (get(key) == null) {
+            return this;
+        } else {
+            return new HashTrieMap();
+        }
     }
 
     /**

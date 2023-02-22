@@ -30,17 +30,16 @@
 
 package net.sf.saxon.regex;
 
-import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.regex.charclass.*;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.IntPredicate;
 
 /**
  * A regular expression compiler class.  This class compiles a pattern string into a
@@ -707,7 +706,7 @@ public class RECompiler {
         IntSet is1 = p1.getIntSet();
         IntSet is2 = p2.getIntSet();
         if (is1 == null || is2 == null) {
-            return new PredicateCharacterClass(p1.or(p2));
+            return new PredicateCharacterClass(ch -> p1.test(ch) || p2.test(ch));
         } else {
             return new IntSetCharacterClass(is1.union(is2));
         }
@@ -731,7 +730,7 @@ public class RECompiler {
         IntSet is1 = p1.getIntSet();
         IntSet is2 = p2.getIntSet();
         if (is1 == null || is2 == null) {
-            return new PredicateCharacterClass(new IntExceptPredicate(p1, p2));
+            return new PredicateCharacterClass(IntExceptPredicate.makeDifference(p1, p2));
         } else {
             return new IntSetCharacterClass(is1.except(is2));
         }
@@ -839,7 +838,7 @@ public class RECompiler {
                 case '\\': {
                     // Get the escaped character (advances input automatically)
                     int idxBeforeEscape = idx;
-                    IntPredicate charClass = escape(false);
+                    CharacterClass charClass = escape(false);
 
                     // Check if it's a simple escape (as opposed to, say, a backreference)
                     if (!(charClass instanceof IntValuePredicate)) {
@@ -913,7 +912,7 @@ public class RECompiler {
 
             case '.':
                 idx++;
-                IntPredicate predicate;
+                IntPredicateProxy predicate;
                 if (reFlags.isSingleLine()) {
                     // in XPath with the 's' flag, '.' matches everything
                     predicate = IntSetPredicate.ALWAYS_TRUE;

@@ -113,7 +113,7 @@ public final class SequenceCollector extends SequenceWriter {
         if (list.isEmpty()) {
             return EmptyIterator.emptyIterator();
         } else {
-            return new ListIterator<>(list);
+            return new ListIterator(list);
         }
     }
 

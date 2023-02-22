@@ -60,7 +60,7 @@ public class EncodeForUri extends ScalarSystemFunction {
                 sb.append(c);
             } else if (c <= 0x20 || c >= 0x7f) {
                 escapeChar(c, sb);
-            } else if (allowedPunctuation.indexOf(c) >= 0) {
+            } else if (allowedPunctuation.indexOf((char)c) >= 0) {
                 sb.append(c);
             } else {
                 escapeChar(c, sb);

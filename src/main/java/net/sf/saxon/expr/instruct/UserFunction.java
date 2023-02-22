@@ -31,6 +31,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 /**
@@ -308,32 +309,32 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
      */
 
     /*@Nullable*/
-    public Boolean isInlineable() {
+    public Optional<Boolean> isInlineable() {
         if (inlineable != -1) {
-            return inlineable > 0 && inliningCount < MAX_INLININGS;
+            return Optional.of(inlineable > 0 && inliningCount < MAX_INLININGS);
         }
         if (body == null) {
             // bug 2226
-            return null;
+            return Optional.empty();
         }
         if (body.hasSpecialProperty(StaticProperty.HAS_SIDE_EFFECTS) || tailCalls) {
             // This is mainly to handle current-output-uri()
-            return false;
+            return Optional.of(false);
         }
         Component component = getDeclaringComponent();
         if (component != null) {
             Visibility visibility = getDeclaringComponent().getVisibility();
             if (visibility == Visibility.PRIVATE || visibility == Visibility.FINAL) {
                 if (inlineable < 0) {
-                    return null;
+                    return Optional.empty();
                 } else {
-                    return inlineable > 0;
+                    return Optional.of(inlineable > 0);
                 }
             } else {
-                return false;
+                return Optional.of(false);
             }
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 

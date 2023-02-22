@@ -11,9 +11,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
@@ -102,9 +102,9 @@ public class DistinctValues extends CollatingFunctionFixed {
     }
 
     @Override
-    public ZeroOrMore<AtomicValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringCollator collator = getStringCollator();
-        return new ZeroOrMore<>(new DistinctIterator(arguments[0].iterate(), collator, context));
+        return new LazySequence(new DistinctIterator(arguments[0].iterate(), collator, context));
     }
 
 }

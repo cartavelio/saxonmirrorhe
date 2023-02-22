@@ -116,7 +116,7 @@ public class NestedIntegerValue extends AtomicValue implements Comparable<Nested
     }
 
     @Override
-    protected UnicodeString getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
         UnicodeBuilder buffer = new UnicodeBuilder();
         for (int i = 0; i < value.length - 1; i++) {
             buffer.append(value[i] + ".");

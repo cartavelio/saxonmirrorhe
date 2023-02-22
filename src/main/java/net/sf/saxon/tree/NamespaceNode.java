@@ -15,6 +15,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -380,7 +381,7 @@ public class NamespaceNode implements NodeInfo {
      *
      * @param axisNumber an integer identifying the axis; one of the constants
      *                   defined in class net.sf.saxon.om.Axis
-     * @param nodeTest   A pattern to be matched by the returned nodes; nodes
+     * @param predicate  A pattern to be matched by the returned nodes; nodes
      *                   that do not match this pattern are not included in the result
      * @return a NodeEnumeration that scans the nodes reached by the axis in
      *         turn.
@@ -390,7 +391,8 @@ public class NamespaceNode implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+        NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
                 return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
@@ -580,7 +582,7 @@ public class NamespaceNode implements NodeInfo {
      */
 
     /*@NotNull*/
-    public static AxisIterator makeIterator(final NodeInfo element, NodeTest test) {
+    public static AxisIterator makeIterator(final NodeInfo element, @CSharpParameterType(key = "net.sf.saxon.pattern.NodeTest") Predicate<? super NodeInfo> test) {
         List<NodeInfo> nodes = new ArrayList<>();
         Iterator<NamespaceBinding> bindings = element.getAllNamespaces().iterator();
         int position = 0;

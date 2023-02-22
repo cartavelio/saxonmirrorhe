@@ -168,17 +168,16 @@ public final class Comment extends SimpleNodeConstructor {
     }
 
     private static String invalidity(UnicodeString comment) {
-        String cmt = comment.toString();
         if (comment.indexOf(TWO_HYPHENS, 0) >= 0) {
             return "Invalid characters (--) in comment";
         }
-        if (cmt.length() > 0 && cmt.charAt(comment.length32() - 1) == '-') {
+        if (comment.length() > 0 && comment.codePointAt(comment.length() - 1) == '-') {
             return "Comment cannot end in '-'";
         }
         return null;
     }
 
-    private final static UnicodeString TWO_HYPHENS = new Twine8(new byte[]{'-', '-'});
+    private final static UnicodeString TWO_HYPHENS = new Twine8(StringConstants.TWO_HYPHENS);
 
 
     /**

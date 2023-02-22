@@ -18,8 +18,6 @@ import java.util.List;
 /**
  * ArrayIterator is used to enumerate items held in an array.
  * The items are always held in the correct sorted order for the sequence.
- *
- * @author Michael H. Kay
  */
 
 

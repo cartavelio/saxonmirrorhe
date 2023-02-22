@@ -9,7 +9,8 @@ package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.flwor.FLWORExpression;
@@ -21,8 +22,6 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardLogger;
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryModule;
@@ -34,7 +33,6 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
@@ -98,6 +96,7 @@ public class ExpressionTool {
     /**
      * Ensure that every node in the expression tree has a retained static context.
      * A node that already has a retained static context will propagate it to its children.
+     *
      * @param exp the root of the expression tree
      * @param rsc the retained static context to be applied to nodes that do not already have one,
      *            and that do not have an ancestor with an existing retained static context.
@@ -161,15 +160,16 @@ public class ExpressionTool {
     /**
      * Inject extra code into an expression, recursively, by applying a supplied {@link CodeInjector}
      * to every expression (and FLWOR clause) in the subtree
-     * @param exp the expression to be augmented with injected code
+     *
+     * @param exp      the expression to be augmented with injected code
      * @param injector the code injector
      * @return the augmented expression
      */
 
     public static Expression injectCode(Expression exp, CodeInjector injector) {
         if (exp instanceof FLWORExpression) {
-            ((FLWORExpression)exp).injectCode(injector);
-        } else if (!(exp instanceof TraceExpression)){
+            ((FLWORExpression) exp).injectCode(injector);
+        } else if (!(exp instanceof TraceExpression)) {
             for (Operand o : exp.operands()) {
                 o.setChildExpression(injectCode(o.getChildExpression(), injector));
             }
@@ -182,7 +182,7 @@ public class ExpressionTool {
      * preferred. This method is called at compile time, after all optimizations have been done,
      * to determine the preferred strategy for lazy evaluation, depending on the type of expression.
      *
-     * @param exp the expression to be evaluated
+     * @param exp        the expression to be evaluated
      * @param repeatable true if the returned value needs to be readable more than once
      * @return an expression evaluator
      */
@@ -283,14 +283,14 @@ public class ExpressionTool {
      * Do lazy evaluation of an expression. This will return a value, which may optionally
      * be a SequenceIntent, which is a wrapper around an iterator over the value of the expression.
      *
-     * @param exp     the expression to be evaluated
-     * @param context the run-time evaluation context for the expression. If
-     *                the expression is not evaluated immediately, then parts of the
-     *                context on which the expression depends need to be saved as part of
-     *                the Closure
-     * @param repeatable     an indication of how the value will be used. The value false indicates that the value
-     *                is only expected to be used once, so that there is no need to keep it in memory. The value true
-     *                indicates multiple references, so the value will be saved when first evaluated.
+     * @param exp        the expression to be evaluated
+     * @param context    the run-time evaluation context for the expression. If
+     *                   the expression is not evaluated immediately, then parts of the
+     *                   context on which the expression depends need to be saved as part of
+     *                   the Closure
+     * @param repeatable an indication of how the value will be used. The value false indicates that the value
+     *                   is only expected to be used once, so that there is no need to keep it in memory. The value true
+     *                   indicates multiple references, so the value will be saved when first evaluated.
      * @return a value: either the actual value obtained by evaluating the
      * expression, or a Closure containing all the information needed to
      * evaluate it later
@@ -351,6 +351,7 @@ public class ExpressionTool {
 
     /**
      * Ask whether one expression is a subexpression of another
+     *
      * @param a the containing expression
      * @param b the putative contained expression
      * @return true if and only if b is a subexpression (at some level) of a
@@ -392,7 +393,7 @@ public class ExpressionTool {
     public static boolean containsLocalVariableReference(final Expression exp) {
         return contains(exp, false, e -> {
             if (e instanceof LocalVariableReference) {
-                LocalVariableReference vref = (LocalVariableReference)e;
+                LocalVariableReference vref = (LocalVariableReference) e;
                 LocalBinding binding = vref.getBinding();
                 return !(binding instanceof Expression && contains(exp, (Expression) binding));
             }
@@ -525,10 +526,11 @@ public class ExpressionTool {
 
     /**
      * Get the focus-setting container of an expression
-     *
-     *      *
+     * <p>
+     * *
      * <p>Note, this always returns an expression or null. Unlike the like-named concept in the
      * spec, it can't return a component such as a template or an attribute set.</p>
+     *
      * @param exp the expression whose focus-setting container is required
      * @return the focus-setting container, or null if the focus for the expression is the same as the
      * focus for the containing component as a whole
@@ -568,7 +570,7 @@ public class ExpressionTool {
         Expression parent = child.getParentExpression();
         while (parent != null) {
             if (parent instanceof ContextSwitchingExpression) {
-                ContextSwitchingExpression switcher = (ContextSwitchingExpression)parent;
+                ContextSwitchingExpression switcher = (ContextSwitchingExpression) parent;
                 if (child == switcher.getActionExpression()) {
                     if (switcher.getSelectExpression().hasSpecialProperty(StaticProperty.CONTEXT_DOCUMENT_NODESET)) {
                         parent.resetLocalStaticProperties();
@@ -762,54 +764,60 @@ public class ExpressionTool {
         if (first == null) {
             return false;
         }
-        if (first instanceof NodeInfo) {
-            iterator.close();
-            return true;
-        } else if (first instanceof AtomicValue) {
-            if (first instanceof BooleanValue) {
-                if (iterator.next() != null) {
-                    iterator.close();
-                    ebvError("a sequence of two or more items starting with a boolean");
-                }
+
+        switch (first.getGenre()) {
+            case NODE:
                 iterator.close();
-                return ((BooleanValue) first).getBooleanValue();
-            } else if (first instanceof StringItem) {   // includes anyURI value
-                if (iterator.next() != null) {
+                return true;
+            case ATOMIC: {
+                if (first instanceof BooleanValue) {
+                    if (iterator.next() != null) {
+                        iterator.close();
+                        ebvError("a sequence of two or more items starting with a boolean");
+                    }
                     iterator.close();
-                    ebvError("a sequence of two or more items starting with a string ('" + first.getStringValue() + "')");
-                }
-                return !((StringItem) first).isEmpty();
-            } else if (first instanceof NumericValue) {
-                if (iterator.next() != null) {
+                    return ((BooleanValue) first).getBooleanValue();
+                } else if (first instanceof StringItem) {   // includes anyURI value
+                    if (iterator.next() != null) {
+                        iterator.close();
+                        ebvError("a sequence of two or more items starting with a string ('" + first.getStringValue() + "')");
+                    }
+                    return !((StringItem) first).isEmpty();
+                } else if (first instanceof NumericValue) {
+                    if (iterator.next() != null) {
+                        iterator.close();
+                        ebvError("a sequence of two or more items starting with a numeric value (" + first.getStringValue() + ")");
+                    }
+                    final NumericValue n = (NumericValue) first;
+                    return (n.compareTo(0) != 0) && !n.isNaN();
+                } else {
                     iterator.close();
-                    ebvError("a sequence of two or more items starting with a numeric value (" + first.getStringValue() + ")");
+                    ebvError("a sequence starting with an atomic value of type " + ((AtomicValue) first).getItemType().getTypeName().getDisplayName());
+                    return false;
                 }
-                final NumericValue n = (NumericValue) first;
-                return (n.compareTo(0) != 0) && !n.isNaN();
-            } else {
-                iterator.close();
-                ebvError("a sequence starting with an atomic value of type " + ((AtomicValue) first).getItemType().getTypeName().getDisplayName());
-                return false;
             }
-        } else if (first instanceof Function) {
-            iterator.close();
-            if (first instanceof ArrayItem) {
+            case ARRAY:
+                iterator.close();
                 ebvError("a sequence starting with an array item (" + first.toShortString() + ")");
                 return false;
-            } else if (first instanceof MapItem) {
+            case MAP:
+                iterator.close();
                 ebvError("a sequence starting with a map (" + first.toShortString() + ")");
                 return false;
-            } else {
+            case FUNCTION: {
+                iterator.close();
                 ebvError("a sequence starting with a function (" + first.toShortString() + ")");
                 return false;
             }
-        } else if (first instanceof ObjectValue) {
-            if (iterator.next() != null) {
-                iterator.close();
-                ebvError("a sequence of two or more items starting with an external object value");
+            case EXTERNAL: {
+                if (iterator.next() != null) {
+                    iterator.close();
+                    ebvError("a sequence of two or more items starting with an external object value");
+                }
+                return true;
             }
-            return true;
         }
+
         ebvError("a sequence starting with an item of unknown kind");
         return false;
     }
@@ -827,7 +835,7 @@ public class ExpressionTool {
         }
         if (item instanceof NodeInfo) {
             return true;
-        } else if (item instanceof AtomicValue){
+        } else if (item instanceof AtomicValue) {
             if (item instanceof BooleanValue) {
                 return ((BooleanValue) item).getBooleanValue();
             } else if (item instanceof StringItem) {   // includes anyURI value
@@ -959,7 +967,7 @@ public class ExpressionTool {
     }
 
     public static boolean isCallOnSystemFunction(Expression e, String localName) {
-        return e instanceof StaticFunctionCall && localName.equals(((StaticFunctionCall)e).getFunctionName().getLocalPart());
+        return e instanceof StaticFunctionCall && localName.equals(((StaticFunctionCall) e).getFunctionName().getLocalPart());
     }
 
     /**
@@ -1035,7 +1043,7 @@ public class ExpressionTool {
      * @param body           the expression forming the body of the component
      * @param compilation    the current compilation. May be null.
      * @param visitor        the expression visitor
-     * @param cisi            information about the context item for evaluation of the component body
+     * @param cisi           information about the context item for evaluation of the component body
      * @param extractGlobals true if constant expressions are to be extracted as global variables
      * @return the optimized expression body
      * @throws XPathException if anything goes wrong
@@ -1129,7 +1137,7 @@ public class ExpressionTool {
                 ((UserFunctionCall) expression).allocateArgumentEvaluators();
             }
             if (expression instanceof LocalParam) {
-                ((LocalParam)expression).computeEvaluationMode();
+                ((LocalParam) expression).computeEvaluationMode();
             }
             return false;
         });
@@ -1137,6 +1145,7 @@ public class ExpressionTool {
 
     /**
      * Clear all computed streamability properties for an expression and its contained subtree
+     *
      * @param exp the expression whose streamability data is to be reset
      * @throws XPathException should not happen
      */
@@ -1409,8 +1418,8 @@ public class ExpressionTool {
      * Make a mapping expression. The resulting expression will include logic to check that the first operand
      * returns nodes, and that the expression as a whole is homogeneous, unless the caller requests otherwise.
      *
-     * @param start              the start expression (the first operand of "/")
-     * @param step               the step expression (the second operand of "/")
+     * @param start the start expression (the first operand of "/")
+     * @param step  the step expression (the second operand of "/")
      * @return the resulting expression.
      */
 
@@ -1518,7 +1527,7 @@ public class ExpressionTool {
             }
             return exp;
         } else if ((exp.getDependencies() &
-                (StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)) != 0) {
+                            (StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)) != 0) {
             LetExpression let = new LetExpression();
             let.setVariableQName(
                     new StructuredQName("saxon", NamespaceConstant.SAXON, "dot" + exp.hashCode()));
@@ -1547,7 +1556,7 @@ public class ExpressionTool {
     public static boolean factorOutDot(Expression exp, Binding variable) {
         boolean changed = false;
         if ((exp.getDependencies() &
-                (StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)) != 0) {
+                     (StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)) != 0) {
             for (Operand info : exp.operands()) {
                 if (info.hasSameFocus()) {
                     Expression child = info.getChildExpression();
@@ -1805,6 +1814,7 @@ public class ExpressionTool {
      * Ask whether a supplied expression is a nested node constructor.
      * That is, return true if the child expression creates nodes that will only be
      * used as children of some parent node (meaning that they never need to be copied).
+     *
      * @param child child expression to be tested
      * @return true if the node constructed by the child expression does not need to be copied.
      */

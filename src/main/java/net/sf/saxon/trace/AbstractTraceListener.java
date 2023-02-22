@@ -35,7 +35,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected int indent = 0;
     private int detail = 2; // none=0; low=1; normal=2; high=3
     protected Logger out = new StandardLogger();
-    /*@NotNull*/ private static final StringBuffer spaceBuffer = new StringBuffer("                ");
+    /*@NotNull*/ private static final StringBuilder spaceBuffer = new StringBuilder("                ");
 
     /**
      * Get the associated CodeInjector to be used at compile time to generate the tracing calls

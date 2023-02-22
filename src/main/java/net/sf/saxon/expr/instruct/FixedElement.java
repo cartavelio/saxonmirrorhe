@@ -363,7 +363,7 @@ public class FixedElement extends ElementCreator {
         return elementName;
     }
 
-    public NodeName getElementName() {
+    public NodeName getFixedElementName() {
         return elementName;
     }
 
@@ -377,7 +377,7 @@ public class FixedElement extends ElementCreator {
      */
     @Override
     public void gatherProperties(BiConsumer<String, Object> consumer) {
-        consumer.accept("name", getElementName());
+        consumer.accept("name", getFixedElementName());
     }
 
 

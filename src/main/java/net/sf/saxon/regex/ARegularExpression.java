@@ -13,7 +13,6 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.StringItem;
 
 import java.util.List;
 import java.util.function.Function;
@@ -123,7 +122,7 @@ public class ARegularExpression implements RegularExpression {
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
     @Override
-    public AtomicIterator<StringItem> tokenize(UnicodeString input) {
+    public AtomicIterator tokenize(UnicodeString input) {
         return new ATokenIterator(input.tidy(), new REMatcher(regex));
     }
 

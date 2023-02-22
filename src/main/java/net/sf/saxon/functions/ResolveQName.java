@@ -12,6 +12,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.QNameValue;
 
 
@@ -31,11 +32,13 @@ public class ResolveQName extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue lex = (AtomicValue) arguments[0].head();
-        return new ZeroOrOne(
-                lex == null ? null :
-                        resolveQName(lex.getStringValue(), (NodeInfo) arguments[1].head()));
+        if (lex == null) {
+            return EmptySequence.getInstance();
+        } else {
+            return resolveQName(lex.getStringValue(), (NodeInfo) arguments[1].head());
+        }
     }
 
     /**

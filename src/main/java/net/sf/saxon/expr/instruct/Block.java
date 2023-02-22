@@ -209,14 +209,14 @@ public class Block extends Instruction {
         boolean allChildAxis = true;
         boolean allSubtreeAxis = true;
         for (Operand o : operands()) {
-            Expression child = o.getChildExpression();
-            if (!(child instanceof AxisExpression)) {
+            Expression childExpr = o.getChildExpression();
+            if (!(childExpr instanceof AxisExpression)) {
                 allAxisExpressions = false;
                 allChildAxis = false;
                 allSubtreeAxis = false;
                 break;
             }
-            int axis = ((AxisExpression) child).getAxis();
+            int axis = ((AxisExpression) childExpr).getAxis();
             if (axis != AxisInfo.CHILD) {
                 allChildAxis = false;
             }
@@ -292,8 +292,8 @@ public class Block extends Instruction {
             if ((reqCard & suppliedCard) == 0) {
                 XPathException err = new XPathException(
                         "The required cardinality of the " + role.getMessage() +
-                                " is " + Cardinality.toString(reqCard) +
-                                ", but the supplied cardinality is " + Cardinality.toString(suppliedCard), role.getErrorCode(), getLocation());
+                                " is " + Cardinality.describe(reqCard) +
+                                ", but the supplied cardinality is " + Cardinality.describe(suppliedCard), role.getErrorCode(), getLocation());
                 err.setIsTypeError(true);
                 err.setFailingExpression(this);
                 throw err;
@@ -409,9 +409,9 @@ public class Block extends Instruction {
         ItemType t1 = null;
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
         for (int i = 0; i < size(); i++) {
-            Expression child = child(i);
-            if (!(child instanceof Message)) {
-                ItemType t = child.getItemType();
+            Expression childExpr = child(i);
+            if (!(childExpr instanceof Message)) {
+                ItemType t = childExpr.getItemType();
                 t1 = t1 == null ? t : Type.getCommonSuperType(t1, t, th);
                 if (t1 instanceof AnyItemType) {
                     return t1;  // no point going any further
@@ -633,7 +633,7 @@ public class Block extends Instruction {
 
     private void flushCurrentLiteralList(List<Item> currentLiteralList, List<Expression> list) {
         if (currentLiteralList != null) {
-            ListIterator<Item> iter = new ListIterator<>(currentLiteralList);
+            ListIterator iter = new ListIterator(currentLiteralList);
             Literal lit = Literal.makeLiteral(iter.materialize(), this);
             list.add(lit);
         }

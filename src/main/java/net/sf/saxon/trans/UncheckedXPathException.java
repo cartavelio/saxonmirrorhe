@@ -21,18 +21,16 @@ package net.sf.saxon.trans;
 
 public class UncheckedXPathException extends RuntimeException {
 
-    private final XPathException cause;
-
     public UncheckedXPathException(XPathException cause) {
-        this.cause = cause;
+        super(cause);
     }
 
     public XPathException getXPathException() {
-        return cause;
+        return (XPathException)getCause();
     }
 
     @Override
     public String getMessage() {
-        return cause.getMessage();
+        return getCause().getMessage();
     }
 }

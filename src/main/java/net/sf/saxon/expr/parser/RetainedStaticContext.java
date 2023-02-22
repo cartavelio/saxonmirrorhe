@@ -307,7 +307,7 @@ public class RetainedStaticContext implements NamespaceResolver {
     }
 
     public int hashCode() {
-        int h = 0x8457cbce;
+        int h = 0x2457cbce;
         if (staticBaseUriString != null) {
             h ^= staticBaseUriString.hashCode();
         }

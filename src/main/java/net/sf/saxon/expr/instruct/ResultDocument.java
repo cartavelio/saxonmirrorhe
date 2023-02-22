@@ -857,7 +857,7 @@ public class ResultDocument extends Instruction
         out.emitAttribute("global", exportProperties(globalProperties));
         out.emitAttribute("local", exportProperties(localProperties));
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
-            out.emitAttribute("validation", Validation.toString(getValidationAction()));
+            out.emitAttribute("validation", Validation.describe(getValidationAction()));
         }
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {

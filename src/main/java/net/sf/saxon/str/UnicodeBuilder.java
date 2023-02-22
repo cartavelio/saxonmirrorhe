@@ -35,6 +35,17 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     }
 
     /**
+     * Append a character (which must not be a surrogate. (Method needed for C#, because implicit
+     * conversion of char to int isn't supported)
+     * @param ch the character
+     * @return the builder, with the new character added
+     */
+    public UnicodeBuilder append(char ch) {
+        append((int)ch);
+        return this;
+    }
+
+    /**
      * Append a single unicode character to the content
      * @param codePoint the unicode codepoint. The caller is responsible for ensuring that this
      *                  is not a surrogate

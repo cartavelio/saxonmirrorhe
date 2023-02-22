@@ -47,8 +47,8 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
         this.e2 = p2;
         this.comparer = comparer;
 
-        nextNode1 = next(e1);
-        nextNode2 = next(e2);
+        nextNode1 = nextNode(e1);
+        nextNode2 = nextNode(e2);
     }
 
     /**
@@ -60,7 +60,7 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
      * @throws XPathException if reading from either of the input sequences fails
      */
 
-    private NodeInfo next(SequenceIterator iter) throws XPathException {
+    private NodeInfo nextNode(SequenceIterator iter) throws XPathException {
         return (NodeInfo) iter.next();
         // we rely on the type-checking mechanism to prevent a ClassCastException here
     }
@@ -79,18 +79,18 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
             int c = comparer.compare(nextNode1, nextNode2);
             if (c < 0) {
                 NodeInfo current = nextNode1;
-                nextNode1 = next(e1);
+                nextNode1 = nextNode(e1);
                 return current;
 
             } else if (c > 0) {
                 NodeInfo current = nextNode2;
-                nextNode2 = next(e2);
+                nextNode2 = nextNode(e2);
                 return current;
 
             } else {
                 NodeInfo current = nextNode2;
-                nextNode2 = next(e2);
-                nextNode1 = next(e1);
+                nextNode2 = nextNode(e2);
+                nextNode1 = nextNode(e1);
                 return current;
             }
         }
@@ -99,12 +99,12 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
 
         if (nextNode1 != null) {
             NodeInfo current = nextNode1;
-            nextNode1 = next(e1);
+            nextNode1 = nextNode(e1);
             return current;
         }
         if (nextNode2 != null) {
             NodeInfo current = nextNode2;
-            nextNode2 = next(e2);
+            nextNode2 = nextNode(e2);
             return current;
         }
         return null;
