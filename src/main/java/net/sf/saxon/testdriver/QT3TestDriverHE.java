@@ -280,16 +280,12 @@ public class QT3TestDriverHE extends TestDriver {
             if ("namespace-axis".equals(value)) {
                 return !inverse;
             } else if ("higherOrderFunctions".equals(value)) {
-                return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
+                return !inverse;
             } else if ("schemaImport".equals(value) || "schemaValidation".equals(value) || "schemaAware".equals(value)) {
                 return makeSchemaAware(env, inverse);
             } else if ("xpath-1.0-compatibility".equals(value)) {
-                if (env != null && !env.processor.getSaxonEdition().equals("HE")) {
-                    env.xpathCompiler.setBackwardsCompatible(!inverse);
-                    return true;
-                } else {
-                    return false;
-                }
+                env.xpathCompiler.setBackwardsCompatible(!inverse);
+                return true;
             } else if ("staticTyping".equals(value)) {
                 return inverse;
             } else if ("remote_http".equals(value)) {
