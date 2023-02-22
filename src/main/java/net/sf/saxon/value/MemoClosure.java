@@ -53,6 +53,7 @@ import net.sf.saxon.tree.iter.GroundedIterator;
 public class MemoClosure extends Closure implements ContextOriginator {
 
     private Sequence sequence;
+    private MemoClosureStatisticsGatherer bindingExpression;
 
     /**
      * Constructor should not be called directly, instances should be made using the make() method.
@@ -60,8 +61,6 @@ public class MemoClosure extends Closure implements ContextOriginator {
 
     //private static int closureCount = 0;
     public MemoClosure() {
-        //System.err.println("************** Creating MemoClosure " + closureCount);
-        //closureCount++; if ((closureCount % 1000) == 0) System.err.println("MemoClosures: " + closureCount);
     }
     //private static int closureCount = 0;
 
@@ -71,6 +70,10 @@ public class MemoClosure extends Closure implements ContextOriginator {
         c2.setOrigin(this);
         setSavedXPathContext(c2);
         saveContext(expr, context);
+    }
+
+    public void setBindingExpression(MemoClosureStatisticsGatherer bindingExpression) {
+        this.bindingExpression = bindingExpression;
     }
 
     /**
@@ -96,8 +99,21 @@ public class MemoClosure extends Closure implements ContextOriginator {
 //                // completion now, because there's no guarantee we will be able to close it later.
             if (inputIterator instanceof GroundedIterator && ((GroundedIterator)inputIterator).isActuallyGrounded()) {
                 sequence = ((GroundedIterator)inputIterator).materialize();
+                // If we find that the input iterator is grounded, this means there was no point
+                // in doing lazy evaluation. If this happens once, it will probably happen all the time,
+                // so send a message back to the binding instruction encouraging it to use eager
+                // evaluation in future.
+                if (bindingExpression != null) {
+                    MemoClosureStatistics stats = new MemoClosureStatistics();
+                    stats.allRead = true;
+                    stats.size = ((GroundedValue)sequence).getLength();
+                    bindingExpression.supplyFeedback(stats);
+                }
             } else {
                 sequence = SequenceTool.toMemoSequence(inputIterator);
+                if (sequence instanceof MemoSequence && bindingExpression != null) {
+                    ((MemoSequence) sequence).setCallingExpression(bindingExpression);
+                }
             }
         }
     }
@@ -147,6 +163,15 @@ public class MemoClosure extends Closure implements ContextOriginator {
     @Override
     public Sequence makeRepeatable() {
         return this;
+    }
+
+    public static class MemoClosureStatistics {
+        public boolean allRead;
+        public int size;
+    }
+
+    public interface MemoClosureStatisticsGatherer {
+        void supplyFeedback(MemoClosureStatistics statistics);
     }
 
 

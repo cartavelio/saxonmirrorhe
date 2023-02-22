@@ -277,7 +277,6 @@ public class TryCatch extends Expression {
     @Override
     public SequenceIterator iterate(XPathContext c) throws XPathException {
         XPathContextMajor c1 = c.newContext();
-        Instrumentation.count(getLocation().getSystemId());
         c1.createThreadManager();
         c1.setErrorReporter(new FilteringErrorReporter(c.getErrorReporter(), catchClauses));
         try {
@@ -321,7 +320,6 @@ public class TryCatch extends Expression {
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
         PipelineConfiguration pipe = output.getPipelineConfiguration();
-        Instrumentation.count(getLocation().getSystemId());
         XPathContextMajor c1 = context.newContext();
         c1.createThreadManager();
         c1.setErrorReporter(new FilteringErrorReporter(context.getErrorReporter(), catchClauses));
