@@ -22,9 +22,20 @@ import java.util.Arrays;
 
 public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
+    // The data held by the UnicodeBuilder is in two parts: an archive part
+    // of arbitrary length, held as a ZenoString, and an active part which
+    // is typically up to 65535 characters. For short strings the archive part
+    // is always empty. The active part is held as an integer array, 32 bits per
+    // character.
+
+    // As characters are added to the active part, the variable "bits" is used
+    // to track the widest character added so far, which is subsequently used
+    // to reduce the memory requirement for storing the string.
+
     private int[] codepoints;
     private int used;
     private int bits;
+    private ZenoString archive = ZenoString.EMPTY;
 
     /**
      * Create a Unicode builder with an initial allocation of 256 codepoints
@@ -65,6 +76,13 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
         bits |= codePoint;
         return this;
     }
+
+    /**
+     * Append multiple unicode characters to the content
+     *
+     * @param codePoints an iterator delivering the codepoints to be added.
+     * @return this builder, with the new character added
+     */
 
     public UnicodeBuilder append(IntIterator codePoints) {
         while (codePoints.hasNext()) {
@@ -145,7 +163,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return the size in codepoints
      */
     public long length() {
-        return used;
+        return archive.length() + used;
     }
 
     /**
@@ -153,7 +171,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @return true if the size is zero
      */
     public boolean isEmpty() {
-        return used == 0;
+        return archive.isEmpty() && used == 0;
     }
 
     /**
@@ -163,6 +181,12 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     private void ensureCapacity(int required) {
+        // For very long strings, archive what we've already accumulated as a ZenoString
+        if (used > 65535) {
+            archive = archive.concat(getActivePart());
+            used = 0;
+            bits = 0xff;
+        }
         while (used + required > codepoints.length) {
             codepoints = Arrays.copyOf(codepoints, codepoints.length * 2);
         }
@@ -175,10 +199,23 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public UnicodeString toUnicodeString() {
+        if (archive.isEmpty()) {
+            return getActivePart();
+        } else {
+            return archive.concat(getActivePart());
+        }
+    }
+
+    /**
+     * Get the contents of the active part, as a UnicodeString
+     * @return a UnicodeString representing the active part of the builder's data
+     */
+
+    private UnicodeString getActivePart() {
         if ((bits & 0xff0000) != 0) {
             // use 24-bit codes
             return new Twine24(codepoints, used);
-        } else if ((bits & 0xffff) != 0) {
+        } else if ((bits & 0xff00) != 0) {
             // use 16-bit codes
             char[] chars = new char[used];
             for (int i = 0; i < used; i++) {
@@ -195,12 +232,12 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     }
 
     /**
-     * Construct a StringItem whose value is formed from the contents of this builder
+     * Construct a StringValue whose value is formed from the contents of this builder
      * @param type the required type, for example BuiltInAtomicType.STRING or
      *             BuiltInAtomicType.UNTYPED_ATOMIC. The caller warrants that the value is
      *             a valid instance of this type. No validation or whitespace normalization
      *             is carried out
-     * @return the constructed StringItem
+     * @return the constructed StringValue
      */
 
     public StringValue toStringItem(AtomicType type) {
@@ -222,6 +259,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      */
 
     public void clear() {
+        archive = ZenoString.EMPTY;
         codepoints = new int[256];
         used = 0;
         bits = 0;
