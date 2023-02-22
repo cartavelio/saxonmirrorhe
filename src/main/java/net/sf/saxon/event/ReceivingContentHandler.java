@@ -373,7 +373,17 @@ public class ReceivingContentHandler
 
             int options = ReceiverOption.NAMESPACE_OK | ReceiverOption.ALL_NAMESPACES;
             NodeName elementName = getNodeName(uri, localname, rawname);
-            AttributeMap attributes = makeAttributeMap(atts, localLocator);
+
+            AttributeMap attributes;
+
+            if (atts.getLength() == 0) {
+                attributes = EmptyAttributeMap.getInstance();
+            }
+            else
+            {
+                attributes = makeAttributeMap(atts, localLocator);
+            }
+
             receiver.startElement(elementName, Untyped.getInstance(),
                                   attributes, currentNamespaceMap,
                                   localLocator, options);
@@ -391,10 +401,8 @@ public class ReceivingContentHandler
     private AttributeMap makeAttributeMap(Attributes atts, Location location) throws SAXException {
         boolean isAttributes2 = atts instanceof Attributes2;
         int length = atts.getLength();
-        if (length == 0) {
-            return EmptyAttributeMap.getInstance();
-        }
-        List<AttributeInfo> list = new ArrayList<>(atts.getLength());
+
+        List<AttributeInfo> list = new ArrayList<>(length);
         for (int a=0; a<length; a++) {
             int properties = ReceiverOption.NAMESPACE_OK;
             String value = atts.getValue(a);
