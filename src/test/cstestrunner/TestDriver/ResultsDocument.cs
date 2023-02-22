@@ -6,7 +6,7 @@ using Saxon.Api;
 using System.IO;
 using System.Xml;
 
-namespace TestRunner
+namespace TestDriver
 {
     public abstract class ResultsDocument
     {
@@ -78,7 +78,7 @@ namespace TestRunner
         try {
             results.WriteEndElement();
         } catch (Exception e) {
-            throw new DynamicError(e.Message);
+            throw new SaxonApiException(e);
         }
     }
 
@@ -92,7 +92,7 @@ namespace TestRunner
             }
             this.results.WriteEndElement();
         } catch (Exception e) {
-            throw new DynamicError(e.Message);
+            throw new SaxonApiException(e.Message);
         }
     }
 

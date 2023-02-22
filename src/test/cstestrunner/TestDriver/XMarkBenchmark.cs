@@ -292,11 +292,11 @@ namespace TestRunner {
                             long min = Int64.MaxValue;
                             ;
                             long max = 0;
-                            XmlDestination sink = new NullDestination();
+                            IDestination sink = new NullDestination();
                             for (int t = 0; t < MAX_RUNS; t++) {
                                 XQueryEvaluator eval = exp.Load();
                                 eval.ContextItem = doc;
-                                XmlDestination result = sink;
+                                IDestination result = sink;
                                 long start, end;
                                 stopWatch.Reset();
                                 stopWatch.Start();
@@ -397,9 +397,9 @@ namespace TestRunner {
                     long totalTime = 0;
                     long min = Int64.MaxValue;
                     long max = 0;
-                    XmlDestination sink = new NullDestination();
+                    IDestination sink = new NullDestination();
                     for (int t = 0; t < 10; t++) {
-                        XmlDestination result = sink;
+                        IDestination result = sink;
                         long start, end;
 
                         start = now();

@@ -13,12 +13,13 @@ using JConfiguration = net.sf.saxon.Configuration;
 using JVersion = net.sf.saxon.Version;
 using System.Linq;
 using java.util;
+using TestRunner;
 
-namespace TestRunner {
+namespace TestDriver {
     /**
      * Test Driver for the QT3 test suite
      */
-    public class QT3TestSuiteDriver : TestDriver {
+    public class QT3TestSuiteDriver : Driver {
         public static string RNS = "http://www.w3.org/2012/08/qt-fots-results";
         public static string CNS = "http://www.w3.org/2010/09/qt-fots-catalog";
 
@@ -27,8 +28,7 @@ namespace TestRunner {
             return dependencyDictionary;
         }
 
-        private SysCollGen.Dictionary<string, Dependency> dependencyDictionary =
-            new SysCollGen.Dictionary<string, Dependency>();
+        private readonly SysCollGen.Dictionary<string, Dependency> dependencyDictionary = new ();
         
 
         public override string catalogNamespace() {
@@ -547,7 +547,7 @@ namespace TestRunner {
                 }
                 catch (Exception err) {
                     println("*** Failed to read query: " + err.Message);
-                    outcome.SetException((DynamicError) err);
+                    outcome.SetException((SaxonApiException) err);
                 }
 
                 //noinspection ThrowableResultOfMethodCallIgnored

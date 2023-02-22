@@ -34,3 +34,15 @@
 /Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.CurrencyData.dll
 /Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.RegionData.dll
 /Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/ICU4N.Transliterator.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.AspNetCore.Hosting.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.AspNetCore.Hosting.Server.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.AspNetCore.Http.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.AspNetCore.Http.Extensions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.AspNetCore.Http.Features.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.AspNetCore.StaticFiles.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.Configuration.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.FileProviders.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.Hosting.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.Logging.Abstractions.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Extensions.WebEncoders.dll
+/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/bin/Debug/net5.0/Microsoft.Net.Http.Headers.dll

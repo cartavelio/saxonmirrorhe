@@ -43,7 +43,7 @@ using XsltCompiler = Saxon.Api.XsltCompiler;
 using XsltExecutable = Saxon.Api.XsltExecutable;
 using XsltPackage = Saxon.Api.XsltPackage;
 
-namespace TestRunner {
+namespace TestDriver {
     /**
      * This class represents a collection of resources (source documents, schemas, collections etc) used for a number
      * of test cases.
@@ -84,7 +84,7 @@ namespace TestRunner {
                 processor = new Processor(true)
             };
 
-            environment.processor.Implementation.setLogger(new TestDriver.MyLogger());
+            environment.processor.Implementation.setLogger(new Driver.MyLogger());
 
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
             string version = SpecAttr.VersionOf(spec);
@@ -107,7 +107,7 @@ namespace TestRunner {
             return environment;
         }
 
-        private static void DeclareOutputControls(TestRunner.TestDriver driver, XPathCompiler xpc, XdmItem env,
+        private static void DeclareOutputControls(TestDriver.Driver driver, XPathCompiler xpc, XdmItem env,
             Environment environment) {
             string needsTree = xpc.Evaluate("string((output/@tree,'yes')[1])", env).ToString();
             environment.outputTree = "yes".Equals(needsTree);
@@ -124,7 +124,7 @@ namespace TestRunner {
          * @return the constructed Environment object
          * @throws SaxonApiException
          */
-        public static Environment processEnvironment(TestRunner.TestDriver driver,
+        public static Environment processEnvironment(TestDriver.Driver driver,
                 XPathCompiler xpc, XdmNode env, SysCollGen.Dictionary<string, Environment> environments,
                 Environment defaultEnvironment) {
             Environment environment = new Environment();
@@ -141,7 +141,7 @@ namespace TestRunner {
             }
 
             // AutoActivate.activate(environment.processor);
-            string version = SpecAttr.VersionOf(driver.Spec);
+            string version = SpecAttr.VersionOf(driver.RequestedSpec);
             string xpVersion = version == "3.0" ? "3.1" : version;
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
             environment.xpathCompiler.BaseUri = env.BaseUri;
@@ -149,7 +149,7 @@ namespace TestRunner {
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = env.BaseUri;
             environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
-            if (driver.Spec.ToString().Contains("XT")) {
+            if (driver.RequestedSpec.ToString().Contains("XT")) {
                 environment.xsltCompiler = environment.processor.NewXsltCompiler();
                 environment.xsltCompiler.XsltLanguageVersion = version;
             }
@@ -159,7 +159,7 @@ namespace TestRunner {
             }
 
             DocumentBuilder builder = environment.processor.NewDocumentBuilder();
-            builder.IsLineNumbering = true;
+            builder.LineNumbering = true;
             builder.TreeModel = driver.TreeModel;
             environment.sourceDocs = new SysCollGen.Dictionary<string, XdmNode>();
             if (environments != null && name != null) {
@@ -272,7 +272,7 @@ namespace TestRunner {
         }
 
 
-        private static void SetBaseUri(TestDriver driver, XPathCompiler xpc, XdmItem env, Environment environment) {
+        private static void SetBaseUri(Driver driver, XPathCompiler xpc, XdmItem env, Environment environment) {
             foreach (XdmItem basei in xpc.Evaluate("static-base-uri", env)) {
                 string uri = ((XdmNode) basei).GetAttributeValue(new QName("uri"));
                 if (uri == null || "#UNDEFINED".Equals(uri)) {
@@ -342,7 +342,7 @@ namespace TestRunner {
             }
         }
 
-        private static bool LoadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env,
+        private static bool LoadSchemaDocuments(Driver driver, XPathCompiler xpc, XdmNode env,
                 Environment environment, Saxon.Api.SchemaManager manager) {
             bool validateSources = false;
             Configuration config = environment.processor.Implementation;
@@ -412,7 +412,7 @@ namespace TestRunner {
             return validateSources;
         }
 
-        private static void DeclareExternalVariables(TestDriver driver, XPathCompiler xpc, XdmItem env,
+        private static void DeclareExternalVariables(Driver driver, XPathCompiler xpc, XdmItem env,
             Environment environment) {
             foreach (XdmItem param in xpc.Evaluate("param", env)) {
                 String varName = ((XdmNode) param).GetAttributeValue(new QName("name"));
@@ -466,7 +466,7 @@ namespace TestRunner {
             }
         }
 
-        private static void RegisterDecimalFormats(TestDriver driver, XPathCompiler xpc, XdmItem env,
+        private static void RegisterDecimalFormats(Driver driver, XPathCompiler xpc, XdmItem env,
             Environment environment) {
             foreach (XdmItem decimalFormat in xpc.Evaluate("decimal-format", env)) {
                 //DecimalFormatManager dfm = environment.xpathCompiler..getUnderlyingStaticContext().getDecimalFormatManager();
@@ -511,7 +511,7 @@ namespace TestRunner {
             }
         }
 
-        private static void CreateUnparsedTextResolver(TestDriver driver, XPathCompiler xpc, XdmItem env,
+        private static void CreateUnparsedTextResolver(Driver driver, XPathCompiler xpc, XdmItem env,
                 Environment environment) {
             SysCollGen.Dictionary<Uri, Func<TextReader>> resources = new SysCollGen.Dictionary<Uri, Func<TextReader>>();
             SysCollGen.Dictionary<Uri, String> encodings = new SysCollGen.Dictionary<Uri, String>();
@@ -654,7 +654,7 @@ namespace TestRunner {
             }
         }
 
-        private static void CreateCollectionFinder(TestDriver driver, XPathCompiler xpc, XdmNode env,
+        private static void CreateCollectionFinder(Driver driver, XPathCompiler xpc, XdmNode env,
             Environment environment, DocumentBuilder builder) {
             
             Configuration config = environment.processor.Implementation;
@@ -872,7 +872,7 @@ namespace TestRunner {
             return base.ResolveUri(basei, href);
         }
 
-        private static void LoadSourceDocuments(TestDriver driver, XPathCompiler xpc, XdmItem env,
+        private static void LoadSourceDocuments(Driver driver, XPathCompiler xpc, XdmItem env,
             Environment environment, DocumentBuilder builder, SchemaManager manager, bool validateSources) {
             XmlUrlResolver res = new XmlUrlResolver();
             foreach (XdmItem source in xpc.Evaluate("source", env)) {
@@ -898,7 +898,7 @@ namespace TestRunner {
                 else {
                     SchemaValidator validator = manager.NewSchemaValidator();
                     if ("lax".Equals(validation)) {
-                        validator.IsLax = true;
+                        validator.Lax = true;
                         builder.SchemaValidator = validator;
                         builder.SchemaValidationMode = SchemaValidationMode.Lax;
                     }

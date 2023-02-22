@@ -18,14 +18,14 @@ using java.util;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
 
-namespace TestRunner {
+namespace TestDriver {
     //C:/work/repositories/hg/xslt30-test C:/work/repositories/hg/xslt30-test/results/saxon/ -lang:XT30 -xt30:on
 
     // file:////C:/work/repositories/hg/xslt30-test/ C:/work/repositories/hg/xslt30-test/results/saxon/ -lang:XT30 -xt30:on -s:mode -t:mode-1801
     /**
      * This class runs the W3C XSLT Test Suite, driven from the test catalog.
      */
-    public class Xslt30TestSuiteDriver : TestDriver {
+    public class Xslt30TestSuiteDriver : Driver {
         private readonly SysCollGen.HashSet<string> alwaysOn = new SysCollGen.HashSet<string>();
 
         private readonly SysCollGen.HashSet<string> alwaysOff = new SysCollGen.HashSet<string>();
@@ -393,7 +393,7 @@ namespace TestRunner {
                 compiler.ErrorReporter = err => {
                     if (!expectStaticError) {
                         Console.Error.WriteLine("*** STATIC ERROR: " + err.ErrorCode.LocalName + " at " + 
-                                                err.Location.getSystemId() + "#" + err.Location.getLineNumber() + 
+                                                err.Location.SystemId + "#" + err.Location.LineNumber + 
                                                 "\n   " + err.Message);
                     }
                     outcome.ReportError(err.ErrorCode);
@@ -404,7 +404,7 @@ namespace TestRunner {
                     styleSource = new FileStream(hrefFile.AbsolutePath, FileMode.Open, FileAccess.Read);
                     compiler.BaseUri = hrefFile;
                 }
-                catch (Exception e) {
+                catch (Exception) {
                     Console.WriteLine("*** Failed to load stylesheet");
                     recordFailure(testSetName, testName);
                     throw;
@@ -623,15 +623,15 @@ namespace TestRunner {
                         Serializer serializer = env.processor.NewSerializer();
                         serializer.SetOutputWriter(sw);
 
-                        XmlDestination dest = null;
+                        IDestination dest = null;
                         if (resultAsTree && !resultSerialized) {
                             // If we want non-serialized, we need to accumulate any result documents as trees too
-                            transformer.ResultDocumentHandler =
-                                new ResultDocumentHandler(env.processor, outcome, baseOutputURI, false);
+                            ResultDocumentHandler rdh = new (env.processor, outcome, baseOutputURI, false);
+                            transformer.ResultDocumentHandler = rdh.HandleResultDocument;
                             dest = new XdmDestination();
                         } else {
-                            transformer.ResultDocumentHandler =
-                                new ResultDocumentHandler(env.processor, outcome, baseOutputURI, true);
+                            ResultDocumentHandler rdh = new (env.processor, outcome, baseOutputURI, true);
+                            transformer.ResultDocumentHandler = rdh.HandleResultDocument;
                             if (resultSerialized) {
                                 dest = serializer;
                             }
@@ -740,9 +740,8 @@ namespace TestRunner {
                             }
                             else {
                                 if (validator != null) {
-                                    validator.SetSource(src, srcBaseUri);
                                     validator.SetDestination(transformer.AsDocumentDestination(dest));
-                                    validator.Run();
+                                    validator.Validate(src, srcBaseUri);
                                 } else if (src != null) {
                                     transformer.ApplyTemplates(src, srcBaseUri, dest);
                                 }
@@ -837,10 +836,8 @@ namespace TestRunner {
                         // run with serialization
                         StringWriter sw = new StringWriter();
                         Serializer serializer = env.processor.NewSerializer(sw);
-                        transformer.ResultDocumentHandler = new ResultDocumentHandler(env.processor, outcome,
-                            testCase.BaseUri.AbsolutePath, true);
-
-
+                        ResultDocumentHandler rdh = new (env.processor, outcome, testCase.BaseUri.AbsolutePath, true);
+                        transformer.ResultDocumentHandler = rdh.HandleResultDocument;
                         transformer.Run(serializer);
 
                         outcome.SetPrincipalSerializedResult(sw.ToString());
@@ -871,12 +868,12 @@ namespace TestRunner {
                         }
 
                         XdmDestination destination = new XdmDestination();
-                        transformer.ResultDocumentHandler = new ResultDocumentHandler(env.processor, outcome,
-                            testCase.BaseUri.AbsolutePath, false);
+                        ResultDocumentHandler rdh2 = new (env.processor, outcome, testCase.BaseUri.AbsolutePath, false);
+                        transformer.ResultDocumentHandler = rdh2.HandleResultDocument;
                         transformer.Run(destination);
                         outcome.SetPrincipalResult(destination.XdmNode);
                     }
-                    catch (DynamicError err) {
+                    catch (SaxonApiException err) {
                         outcome.SetException(err);
                     }
                     catch (Exception err) {
@@ -1060,7 +1057,7 @@ namespace TestRunner {
             }
         }
 
-        public class ResultDocumentHandler : IResultDocumentHandler {
+        public class ResultDocumentHandler {
             private Processor proc;
             private TestOutcome outcome;
             private Uri baseOutputUri;
@@ -1079,7 +1076,7 @@ namespace TestRunner {
                 this.serialized = serialized;
             }
 
-            public XmlDestination HandleResultDocument(string href, Uri baseUri) {
+            public IDestination HandleResultDocument(string href, Uri baseUri) {
                 if (serialized) {
                     StringWriter writer = new StringWriter();
                     Serializer dest = proc.NewSerializer();
@@ -1615,9 +1612,9 @@ namespace TestRunner {
     public class ModuleResolver : IQueryResolver {
         XQueryCompiler catXQC;
         XdmNode testCase;
-        TestDriver driver = null;
+        Driver driver = null;
 
-        public ModuleResolver(XQueryCompiler xqc, TestDriver driveri) {
+        public ModuleResolver(XQueryCompiler xqc, Driver driveri) {
             this.catXQC = xqc;
             driver = driveri;
         }

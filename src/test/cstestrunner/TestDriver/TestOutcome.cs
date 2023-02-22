@@ -26,7 +26,7 @@ using JItemMappingFunction = net.sf.saxon.expr.ItemMappingFunction;
 using JItem = net.sf.saxon.om.Item;
 using JGroundedValue = net.sf.saxon.om.GroundedValue;
 
-namespace TestRunner {
+namespace TestDriver {
     public class TestOutcome {
         /**
          * The outcome of a test is either an XDM value or an exception. The object also has the ability to
@@ -47,7 +47,7 @@ namespace TestRunner {
             }
         }
 
-        private TestDriver driver;
+        private Driver driver;
         private SingleResultDoc principalResult = new ();
         private SysCollGen.HashSet<QName> errorsReported;
         private Exception exception;
@@ -61,7 +61,7 @@ namespace TestRunner {
         private Uri baseOutputUri;
         private string resultVar = "result";
 
-        public TestOutcome(TestDriver driver) {
+        public TestOutcome(Driver driver) {
             this.driver = driver;
             errorsReported = new SysCollGen.HashSet<QName>();
         }
@@ -69,21 +69,8 @@ namespace TestRunner {
         public void SetException(Exception ex) {
             this.exception = ex;
 
-            if (ex is DynamicError) {
-                if (((DynamicError) ex).ErrorCode != null) {
-                    errorsReported.Add(((DynamicError) ex).ErrorCode);
-                }
-                else {
-                    errorsReported.Add(new QName("DYNAMIC-999999"));
-                }
-            }
-            else if (ex is StaticError) {
-                if (((StaticError) ex).ErrorCode != null) {
-                    errorsReported.Add(((StaticError) ex).ErrorCode);
-                }
-                else {
-                    errorsReported.Add(new QName("STATIC-999999"));
-                }
+            if (ex is SaxonApiException sapie) {
+                errorsReported.Add(sapie.ErrorCode ?? new QName("DYNAMIC-999999"));
             }
             else {
                 Console.Error.WriteLine(ex);
@@ -112,15 +99,7 @@ namespace TestRunner {
         }
 
         public QName GetErrorCode() {
-            if (exception is DynamicError) {
-                return ((DynamicError) exception).ErrorCode;
-            }
-            else if (exception is StaticError) {
-                return ((StaticError) exception).ErrorCode;
-            }
-            else {
-                return null;
-            }
+            return exception is SaxonApiException sapie ? sapie.ErrorCode : null;
         }
 
         /**
@@ -506,7 +485,7 @@ namespace TestRunner {
                     b = IsException() && compareExpectedError(assertion);
                 }
                 catch (Exception) {
-                    if (GetException() is StaticError) {
+                    if (GetException() is Saxon.Api.SaxonApiException) {
                         string expectedError = assertion.GetAttributeValue(new QName("code"));
                         QName expectedErrorQ;
                         if (expectedError.Equals("*")) {
@@ -528,7 +507,7 @@ namespace TestRunner {
                         return true;
                     }
 
-                    if (GetException() is DynamicError) {
+                    if (GetException() is SaxonApiException) {
                         string expectedError = assertion.GetAttributeValue(new QName("code"));
                         QName expectedErrorQ;
                         if (expectedError.Equals("*")) {
@@ -860,7 +839,7 @@ namespace TestRunner {
                     //serializer.serializeXdmValue(result.value);
                     return false;
                 }
-                catch (DynamicError err) {
+                catch (SaxonApiException err) {
                     bool b = expectedError.Equals(err.ErrorCode.LocalName);
                     if (!b) {
                         driver.println("Expected " + expectedError + ", got " + err.ErrorCode.LocalName);
@@ -883,20 +862,14 @@ namespace TestRunner {
                 }
 
                 UnicodeString regex = ((NodeInfo)assertion.Unwrap()).getUnicodeStringValue();
-                //IList warnings = new ArrayList();
-                try {
-                    ARegularExpression re = ARegularExpression.compile(regex, flagsAtt);
-                    if (re.containsMatch(StringView.of(result.serialization).tidy())) {
-                        return true;
-                    }
-                    else {
-                        driver.println("Serialized result:");
-                        driver.println(getPrincipalSerializedResult());
-                        return false;
-                    }
+                ARegularExpression re = ARegularExpression.compile(regex, flagsAtt);
+                if (re.containsMatch(StringView.of(result.serialization).tidy())) {
+                    return true;
                 }
-                catch (DynamicError e) {
-                    throw;
+                else {
+                    driver.println("Serialized result:");
+                    driver.println(getPrincipalSerializedResult());
+                    return false;
                 }
             }
         }
@@ -973,9 +946,9 @@ namespace TestRunner {
                         return false;
                     }
 
-                    if (value.Count == 1 && value.Simplify is XdmNode &&
-                        ((XdmNode) value.Simplify).NodeKind == System.Xml.XmlNodeType.Document) {
-                        iter0 = ((XdmNode) value.Simplify).Implementation.iterateAxis(JAxisInfo.CHILD);
+                    if (value.Count == 1 && value.Simplify is XdmNode node &&
+                        node.NodeKind == XdmNodeKind.Document) {
+                        iter0 = node.Implementation.iterateAxis(JAxisInfo.CHILD);
                     }
                     else {
                         iter0 = value.Unwrap().iterate();
@@ -1021,7 +994,7 @@ namespace TestRunner {
 
                     return success;
                 }
-                catch (DynamicError e) {
+                catch (SaxonApiException e) {
                     Console.WriteLine(e);
                     return false;
                 }
@@ -1081,7 +1054,7 @@ namespace TestRunner {
 
                     return actualItems == expectedItems;
                 }
-                catch (DynamicError) {
+                catch (SaxonApiException) {
                     return false;
                 }
             }
