@@ -410,7 +410,6 @@
     lazyConstructionMode="false"
     lineNumbering="true"
     markDefaultedAttributes="true"
-    maxCompiledClasses="10000"
     optimizationLevel="10"
     parser=""
     preEvaluateDoc="false"
@@ -499,7 +498,6 @@
     multipleSchemaImports="false"
     occurrenceLimits="100,250"
     schemaUriResolver="com.saxonica.config.ee.StandardSchemaResolver"
-    thresholdForCompilingTypes="100"
     useXsiSchemaLocation="false"
     version="1.1"
   />
