@@ -27,7 +27,7 @@ namespace Saxon.Api {
         }
 
         internal static Step<XdmNode, XdmNode> AxisStep(XdmAxis axis) {
-            return new Step<XdmNode, XdmNode>(item => { return item.EnumerableOverAxis(axis); });
+            return new Step<XdmNode, XdmNode>(item => item.EnumerableOverAxis(axis));
         }
 
 
@@ -713,7 +713,7 @@ namespace Saxon.Api {
             return new Step<XdmAtomicValue, XdmAtomicValue>(item => {
                 {
                     return new SequenceEnumerable<XdmAtomicValue>(
-                        new Saxon.Hej.value.Whitespace.Tokenizer(item.GetStringValue()));
+                        () => new Saxon.Hej.value.Whitespace.Tokenizer(item.StringValue));
                 }
             });
         }
@@ -729,7 +729,7 @@ namespace Saxon.Api {
             return new Step<XdmNode, XdmNode>(item => {
                 IList<XdmNode> list = new List<XdmNode>();
                 NodeInfo target = ((NodeInfo) doc.value).getTreeInfo()
-                    .selectID(doc.GetStringValue(), true);
+                    .selectID(doc.StringValue, true);
 
                 if (target != null) {
                     list.Add(new XdmNode(target));

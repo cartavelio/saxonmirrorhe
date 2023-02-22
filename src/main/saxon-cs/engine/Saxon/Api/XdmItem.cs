@@ -57,13 +57,8 @@ namespace Saxon.Api {
         /// </list>
         /// <para>In all cases the result is the same as applying the XPath <c>string()</c> function.</para>
         /// </remarks>
-        /// <returns>The result of converting the item to a string.</returns>
-
-        public String GetStringValue()
-        {
-            return ((Item)value).getStringValue();
-        }
-
+        /// <value>The result of converting the item to a string.</value>
+        public string StringValue => ((Item) value).getStringValue();
 
 
         /// <summary>

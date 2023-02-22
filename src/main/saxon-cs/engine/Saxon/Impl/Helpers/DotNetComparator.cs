@@ -223,12 +223,13 @@ namespace Saxon.Impl.Helpers {
             /**
              * Returns a hash code value for the object.
              */
-            public int hashCode() {
+            public override int GetHashCode() {
                 byte[] data = key.KeyData;
                 int h = 0x7d6a8521;
                 for (int i = 0; i < data.Length; i++) {
                     h ^= data[i] << (i & 31);
                 }
+                //Console.Error.WriteLine("Hashcode for " + key + " = " + h);
                 return h;
             }
 
@@ -236,12 +237,12 @@ namespace Saxon.Impl.Helpers {
              * Indicates whether some other SortKeyWrapper is "equal to" this one (that is, it represents
              * the sortkey of a value that is equal to this value).
              */
-            public bool equals(Object obj) {
-                if (!(obj is SortKeyWrapper)) {
+            public override bool Equals(object obj) {
+                if (obj is not SortKeyWrapper wrapper) {
                     return false;
                 }
                 byte[] data1 = key.KeyData;
-                byte[] data2 = ((SortKeyWrapper) obj).key.KeyData;
+                byte[] data2 = wrapper.key.KeyData;
                 if (data1.Length != data2.Length) {
                     return false;
                 }

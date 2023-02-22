@@ -1,13 +1,17 @@
 using System.Collections.Generic;
 using System.Xml;
 using HtmlAgilityPack;
+using Saxon.Api;
 using Saxon.Ejava.lang;
 using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
+using Saxon.Hej.type;
 
 namespace Saxon.Impl.Dom {
+    
+    
     /// <summary>
     /// Implements Saxon.Hej.om.NodeInfo as a wrapper over an element, text, or comment node in
     /// the HtmlAgilityPack HTML document tree. The node always has a parent (which may be an element
@@ -22,6 +26,13 @@ namespace Saxon.Impl.Dom {
         private HtmlContainerNodeWrapper parent;
         private HtmlDocumentWrapper docWrapper;
         private int index;
+        
+        public static NamespaceMap XhtmlNamespaceMap;
+
+        static HtmlNodeWrapper() {
+            XhtmlNamespaceMap = new NamespaceMap().put("", NamespaceConstant.XHTML);
+        }
+
         
         private HtmlNodeWrapper(HtmlNode node, HtmlContainerNodeWrapper parent, int index) {
             this.node = node;
@@ -107,7 +118,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override string getURI() {
-            return "";
+            return getNodeKind() == Type.ELEMENT ? NamespaceConstant.XHTML : "";
         }
 
         public override string getPrefix() {
@@ -129,6 +140,10 @@ namespace Saxon.Impl.Dom {
                 }
             }
             return parent;
+        }
+
+        public override string getSystemId() {
+            return ((GenericTreeInfo)getTreeInfo()).getSystemId();
         }
 
         public int getSiblingPosition() {
@@ -215,6 +230,10 @@ namespace Saxon.Impl.Dom {
             return new NamespaceBinding[0];
         }
 
+        public override NamespaceMap getAllNamespaces() {
+            return XhtmlNamespaceMap;
+        }
+
         public SteppingNode getNextSibling() {
             HtmlNode currNode = node.NextSibling;
             if ((currNode != null)) {
@@ -282,4 +301,5 @@ namespace Saxon.Impl.Dom {
 
        
     }
+    
 }

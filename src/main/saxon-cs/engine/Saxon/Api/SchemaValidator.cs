@@ -48,13 +48,12 @@ namespace Saxon.Api {
     public class SchemaValidator {
         private Configuration config;
         private List<Source> sources = new List<Source>();
-        private Saxon.Hej.s9api.SchemaValidator s9SchemaValidator;
         private SchemaType documentElementType;
 
         // internal constructor
 
         internal SchemaValidator(Saxon.Hej.s9api.SchemaValidator validator, Processor processor) {
-            this.s9SchemaValidator = validator;
+            this.UnderlyingSchemaValidator = validator;
             this.config = processor.Implementation;
         }
 
@@ -66,8 +65,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public bool Lax {
-            get => s9SchemaValidator.isLax();
-            set => s9SchemaValidator.setLax(value);
+            get => UnderlyingSchemaValidator.isLax();
+            set => UnderlyingSchemaValidator.setLax(value);
         }
 
         /// <summary>
@@ -77,22 +76,22 @@ namespace Saxon.Api {
         /// </summary>
 
         public bool UseXsiSchemaLocation {
-            get => s9SchemaValidator.isUseXsiSchemaLocation();
-            set => s9SchemaValidator.setUseXsiSchemaLocation(value);
+            get => UnderlyingSchemaValidator.isUseXsiSchemaLocation();
+            set => UnderlyingSchemaValidator.setUseXsiSchemaLocation(value);
         }
 
 
         /// <summary>Set the validation reporting feature, which saves the validation errors in an XML file</summary>
         /// <param name="destination"> destination where XML will be sent</param>
         public void SetValidityReporting(IDestination destination) {
-            s9SchemaValidator.setValidityReporting(destination.GetUnderlyingDestination());
+            UnderlyingSchemaValidator.setValidityReporting(destination.GetUnderlyingDestination());
         }
         
         /// <summary>Set the <c>InvalidityHandler</c> to be used when validating instance documents;
         /// the invalidity handler is called once at the start of validation, once for each
         /// validation failure, and once at the end.</summary>
         public IInvalidityHandler InvalidityHandler {
-            set => s9SchemaValidator.setInvalidityHandler(new InvalidityHandlerWrapper(value));
+            set => UnderlyingSchemaValidator.setInvalidityHandler(new InvalidityHandlerWrapper(value));
         }
         
         /// <summary>Set the <c>InvalidityListener</c> to be used when validating instance documents;
@@ -171,7 +170,7 @@ namespace Saxon.Api {
         public void AddSource(XmlReader reader) {
             PullProvider pp = new DotNetPullProvider(reader);
             PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setUseXsiSchemaLocation(s9SchemaValidator.isUseXsiSchemaLocation());
+            pipe.setUseXsiSchemaLocation(UnderlyingSchemaValidator.isUseXsiSchemaLocation());
             pp.setPipelineConfiguration(pipe);
             // pp = new PullTracer(pp);  /* diagnostics */
             PullSource pSource = new PullSource(pp);
@@ -198,7 +197,7 @@ namespace Saxon.Api {
         /// <param name="baseUri">The base URI to be used for resolving any relative
         /// references, for example a reference to an <c>xsi:schemaLocation</c></param>                  
         public void Validate(Stream source, Uri baseUri) {
-            s9SchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
+            UnderlyingSchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
         }
         
         /// <summary>
@@ -224,7 +223,7 @@ namespace Saxon.Api {
         /// <param name="baseUri">The base URI to be used for resolving any relative
         /// references, for example a reference to an <c>xsi:schemaLocation</c></param>                  
         public void Validate(TextReader source, Uri baseUri) {
-            s9SchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
+            UnderlyingSchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
         }
         
         /// <summary>
@@ -248,7 +247,7 @@ namespace Saxon.Api {
             StreamSource ss = new StreamSource(uri.ToString());
             AugmentedSource aug = AugmentedSource.makeAugmentedSource(ss);
             aug.setPleaseCloseAfterUse(true);
-            s9SchemaValidator.validate(aug);
+            UnderlyingSchemaValidator.validate(aug);
         }
 
         /// <summary>
@@ -262,15 +261,17 @@ namespace Saxon.Api {
         /// plain <c>XmlTextReader</c> is discouraged, because it does not expand entity
         /// references. This may cause validation failures.
         /// </param>
+        /// <exception cref="SaxonApiException">Throws an exception if the document is found to be
+        /// invalid (and also on other conditions like a failure to read the source document)</exception>
         public void Validate(XmlReader reader) {
             PullProvider pp = new DotNetPullProvider(reader);
             PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setUseXsiSchemaLocation(s9SchemaValidator.isUseXsiSchemaLocation());
+            pipe.setUseXsiSchemaLocation(UnderlyingSchemaValidator.isUseXsiSchemaLocation());
             pp.setPipelineConfiguration(pipe);
             // pp = new PullTracer(pp);  /* diagnostics */
             PullSource psource = new PullSource(pp);
             psource.setSystemId(reader.BaseURI);
-            s9SchemaValidator.validate(psource);
+            UnderlyingSchemaValidator.validate(psource);
         }
 
         /// <summary>
@@ -285,9 +286,11 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <param name="source">The document or element node at the root of the tree
-        /// to be validated</param>        
+        /// to be validated</param>
+        /// <exception cref="SaxonApiException">Throws an exception if the document is found to be
+        /// invalid (and also on other conditions like a failure to read the source document)</exception> 
         public void Validate(XdmNode source) {
-            s9SchemaValidator.validate(((NodeInfo) source.value).asActiveSource());
+            UnderlyingSchemaValidator.validate(((NodeInfo) source.value).asActiveSource());
         }
 
         /// <summary>
@@ -305,7 +308,7 @@ namespace Saxon.Api {
         /// The destination to hold the validated document.
         /// </param>
         public void SetDestination(IDestination destination) {
-            s9SchemaValidator.setDestination(destination.GetUnderlyingDestination());
+            UnderlyingSchemaValidator.setDestination(destination.GetUnderlyingDestination());
         }
 
         /// <summary>
@@ -313,18 +316,18 @@ namespace Saxon.Api {
         /// when it has finished writing to the destination
         /// </summary>
         public void Close() {
-            s9SchemaValidator.close();
+            UnderlyingSchemaValidator.close();
         }
 
 
         /// <summary>
         /// The name of the required top-level element of the document to be validated (that is, the
         /// name of the outermost element of the document).
-        /// if no value is supplied, there is no constraint on the required element name
+        /// If no value is supplied, there is no constraint on the required element name.
         /// </summary>
         public QName DocumentElementName {
-            get => s9SchemaValidator.getDocumentElementName();
-            set => s9SchemaValidator.setDocumentElementName(value);
+            get => UnderlyingSchemaValidator.getDocumentElementName();
+            set => UnderlyingSchemaValidator.setDocumentElementName(value);
         }
 
 
@@ -334,16 +337,12 @@ namespace Saxon.Api {
         /// If no value is supplied, there is no constraint on the required type
         /// </summary>
         public QName DocumentElementTypeName {
-            get => s9SchemaValidator.getDocumentElementTypeName();
-            set {
-                s9SchemaValidator.setDocumentElementTypeName(value);
-                documentElementType = config.getSchemaType(value.GetStructuredQName());
-            }
+            get => UnderlyingSchemaValidator.getDocumentElementTypeName();
+            set => UnderlyingSchemaValidator.setDocumentElementTypeName(value);
         }
+        
 
-        internal SchemaType DocumentElementType => documentElementType;
-
-        internal Saxon.Hej.s9api.SchemaValidator UnderlyingSchemaValidator => s9SchemaValidator;
+        internal Saxon.Hej.s9api.SchemaValidator UnderlyingSchemaValidator { get; }
 
 
         /// <summary>
@@ -352,7 +351,7 @@ namespace Saxon.Api {
         /// <param name="name">the name of the schema parameter, as a QName</param>
         /// <param name="value">the value of the schema  parameter, or null to clear a previously set value</param>
         public void SetParameter(QName name, XdmValue value) {
-            s9SchemaValidator.setParameter(name, value);
+            UnderlyingSchemaValidator.setParameter(name, value);
         }
 
 
@@ -363,18 +362,18 @@ namespace Saxon.Api {
         /// <param name="name">the parameter whose name is required</param>
         /// <returns>the value that has been set for the parameter, or the EmptySequence if no value has been set</returns>
         public XdmValue GetParameter(QName name) {
-            return s9SchemaValidator.getParameter(name);
+            return UnderlyingSchemaValidator.getParameter(name);
         }
 
 
         /// <summary>
         /// Ask and set whether attribute defaults defined in a schema are to be expanded or not
-        /// (by default, fixed and default attribute values are expaned, that is, they are inserted) into
+        /// (by default, fixed and default attribute values are expanded, that is, they are inserted) into
         /// the document during validation as if they were present in the instance being validated)
         /// </summary>
         public bool ExpendAttributeDefaults {
-            get => s9SchemaValidator.isExpandAttributeDefaults();
-            set => s9SchemaValidator.setExpandAttributeDefaults(value);
+            get => UnderlyingSchemaValidator.isExpandAttributeDefaults();
+            set => UnderlyingSchemaValidator.setExpandAttributeDefaults(value);
         }
 
         /// <summary>
@@ -391,10 +390,12 @@ namespace Saxon.Api {
         /// the PSVIs) are not made available to the calling application.</para>
         /// <para>The method does not throw an exception if any of the source documents
         /// is found to be invalid. It does however throw an exception if any of the source
-        /// documents cannot be read, or is not well-formed XML.</para>
+        /// documents cannot be read, or is not well-formed XML. (This method
+        /// can therefore be useful even when there is only one document to be validated,
+        /// to avoid the exception condition.)</para>
         /// </remarks>
         public void ValidateMultipleDocuments() {
-            s9SchemaValidator.validateMultiple(sources);
+            UnderlyingSchemaValidator.validateMultiple(sources);
         }
     }
 }
