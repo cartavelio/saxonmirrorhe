@@ -55,13 +55,13 @@ ext_modules = [Extension(
 setup(
     name='saxonc@@edition@@',
     version='@@VERSION@@.0',
-    description='A python package for the SaxonC-@@EDITION@@ @@VERSION@@, an XSLT 3.0, XQuery 3.1, XPath 3.1 and Schema Validator processor by Saxonica.',
+    description='Official Saxonica python package for the SaxonC-@@EDITION@@ @@VERSION@@ processor: for XSLT 3.0, XQuery 3.1, XPath 3.1 and XML Schema processing.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='ONeil Delpratt',
     author_email='oneil@saxonica.com',
     include_package_data=True,
-    url='https://www.saxonica.com/download/c.xml',
+    url='https://www.saxonica.com/saxon-c/index.xml',
     package_dir={'saxonc@@edition@@':'.'},
     packages=['saxonc@@edition@@'],
     python_requires='>=3.8',                # Minimum version requirement of the package
