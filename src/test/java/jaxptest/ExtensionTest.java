@@ -4,9 +4,14 @@ import com.saxonica.config.JavaExtensionFunctionFactory;
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.expr.JavaExtensionFunctionCall;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.expr.JPConverter;
+import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.option.jdom2.JDOM2DocumentWrapper;
@@ -21,9 +26,7 @@ import org.jdom2.input.SAXBuilder;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
-import javax.xml.transform.Templates;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
+import javax.xml.transform.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
@@ -472,6 +475,61 @@ public class ExtensionTest {
             assertTrue(result.itemAt(0).getUnderlyingValue() instanceof Int64Value);
         } catch (SaxonApiException e) {
             fail();
+        }
+    }
+
+    @Test
+    public void testRegisterUserDefinedObjectModel() {
+        // Register a dummy model, just to show it doesn't interfere with anything
+        try {
+            Processor proc = new Processor(true);
+            proc.getUnderlyingConfiguration().clearExternalObjectModels();
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new MyObjectModel());
+            proc.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
+            XQueryEvaluator eval = proc.newXQueryCompiler().compile(
+                    "name(Q{java:jaxptest.ExtensionTest}parseToJdom('<magic/>')/*)").load();
+            XdmValue result = eval.evaluate();
+            assertEquals("magic", ((XdmAtomicValue) result).getStringValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    public static class MyObjectModel implements ExternalObjectModel {
+        @Override
+        public String getDocumentClassName() {
+            return "jaxptest.MyModel";
+        }
+
+        @Override
+        public String getIdentifyingURI() {
+            return "http://www.saxonica.com/testns/mymodel";
+        }
+
+        @Override
+        public PJConverter getPJConverter(Class<?> targetClass) {
+            throw new IllegalStateException(getDocumentClassName());
+        }
+
+        @Override
+        public JPConverter getJPConverter(Class sourceClass, Configuration config) {
+            throw new IllegalStateException(getDocumentClassName());
+        }
+
+        @Override
+        public PJConverter getNodeListCreator(Object node) {
+            return null;
+        }
+
+        @Override
+        public Receiver getDocumentBuilder(Result result) throws XPathException {
+            return null;
+        }
+
+        @Override
+        public NodeInfo unravel(Source source, Configuration config) {
+            return null;
         }
     }
 
