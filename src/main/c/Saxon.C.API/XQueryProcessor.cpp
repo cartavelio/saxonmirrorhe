@@ -32,7 +32,7 @@
         cppXQ = j_createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread, (void *)p->procRef);
         if(cppXQ == -1) {
 
-            std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
+            throw SaxonApiException("Error: Failed to create the XPathProcessor internal object");
 
             return;
         }
@@ -103,8 +103,8 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
     */
     void XQueryProcessor::setContextItem(XdmItem * value){
     	if(value != nullptr){
-	 value->incrementRefCount();
-     	 parameters["node"] = (XdmValue *)value;
+	        value->incrementRefCount();
+     	    parameters["node"] = (XdmValue *)value;
     	}
     }
 
