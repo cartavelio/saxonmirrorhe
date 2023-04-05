@@ -396,7 +396,7 @@ void SaxonProcessor::applyConfigurationProperties() {
                           XdmItem * xdmItem = nullptr;
                           if(typeRef == -2) {
 
-                              return nullptr;
+                              throw SaxonApiException();
                           }
                           if(typeRef == 1) {
                               value = new XdmValue();
@@ -438,7 +438,7 @@ void SaxonProcessor::applyConfigurationProperties() {
 
                           return value;
                       } else if(results == -2){
-                          // Exception should have been handled in the calling program
+                          throw SaxonApiException();
                       }
 
 

@@ -287,7 +287,31 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
             		XdmValue * value = nobj->xdmValue;
             		arguments[num_key] = value;
         	}
-	}
+	    } else if(strcmp(objName, "Saxon\\XdmFunctionItem")==0) {
+		zend_object* ooth = Z_OBJ_P(val);
+		xdmFunctionItem_object * nobj = (xdmFunctionItem_object *)((char *)ooth - XtOffsetOf(xdmFunctionItem_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = (XdmValue *)nobj->xdmFunctionItem;
+            		arguments[num_key] = value;
+        	}
+
+	    } else if (strcmp(objName, "Saxon\\XdmMap")==0) {
+		zend_object* ooth = Z_OBJ_P(val);
+		xdmMap_object * nobj = (xdmMap_object *)((char *)ooth - XtOffsetOf(xdmMap_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = (XdmValue *)nobj->xdmMap;
+            		arguments[num_key] = value;
+        	}
+
+	    } else if (strcmp(objName, "Saxon\\XdmArray")==0){
+		zend_object* ooth = Z_OBJ_P(val);
+		xdmArray_object * nobj = (xdmArray_object *)((char *)ooth - XtOffsetOf(xdmArray_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = (XdmValue *)nobj->xdmArray;
+            		arguments[num_key] = value;
+        	}
+
+	    }
 	else {//TODO error warning}
          }}else {
 		//TODO error warning
@@ -307,6 +331,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
 		xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmValue = result;
+                return;
             }
         }
     }catch(SaxonApiException &e) {
@@ -518,7 +543,7 @@ PHP_METHOD(XsltExecutable, callTemplateReturningValue){
 		xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmValue = result;
-
+                return;
             }
         }
     } catch(SaxonApiException &e) {
@@ -620,9 +645,11 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningValue){
         	xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmValue = result;
+                return;
             }
-        }
-	    RETURN_NULL();
+        }  else {
+	        RETURN_NULL();
+	    }
 	} catch(SaxonApiException &e) {
            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
