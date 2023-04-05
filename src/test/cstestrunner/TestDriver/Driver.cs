@@ -197,7 +197,7 @@ namespace TestDriver {
                     }
 
                     if (args[i].Equals("-strict")) {
-                        export = true;
+                        strict = true;
                     }
 
                     if (args[i].Equals("-export")) {
