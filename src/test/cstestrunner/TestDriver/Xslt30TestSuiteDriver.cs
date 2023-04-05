@@ -14,6 +14,7 @@ using System.Linq;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.lib;
 using Saxon.Hej.om;
+using Saxon.Hej.trans;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
 using NamespaceConstant = Saxon.Api.NamespaceConstant;
@@ -406,16 +407,15 @@ namespace TestDriver {
                             string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
                             Location loc = err.Location;
                             try {
-                                Console.Error.WriteLine("*** STATIC ERROR: " + code + " at " +
+                                Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
                                                         loc.SystemId + "#" + loc.LineNumber +
                                                         "\n   " + err.Message);
                             }
                             catch (Exception) {
                                 // No action
                             }
-
-                            outcome.ReportError(err.ErrorCode);
                         }
+                        outcome.ReportError(err.ErrorCode);
                     }
                 };
                 Stream styleSource;
@@ -762,9 +762,11 @@ namespace TestDriver {
                                     validator.Validate(src, srcBaseUri);
                                 } else if (src != null) {
                                     transformer.ApplyTemplates(src, srcBaseUri, dest);
+                                } else if (srcNode != null) {
+                                    transformer.ApplyTemplates(srcNode, dest);
                                 }
                                 else {
-                                    transformer.ApplyTemplates(srcNode, dest);
+                                    throw new SaxonApiException(new XPathException("(In test driver) No Source supplied", "XTDE0044"));
                                 }
                             }
                         }
