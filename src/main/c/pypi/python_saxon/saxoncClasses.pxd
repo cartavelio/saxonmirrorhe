@@ -545,7 +545,7 @@ cdef extern from "@@location@@Saxon.C.API/XdmValue.h":
 
         int size()
 
-        const char * toString()
+        const char * toString()  except +raise_py_error
 
         void incrementRefCount()
 
@@ -583,7 +583,6 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
         XdmValue * getTypedValue()
 
         const char* getBaseUri()
-
 
         XdmNode* getParent()
 

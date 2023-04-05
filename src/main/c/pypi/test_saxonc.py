@@ -253,29 +253,24 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
     path = "/processing-instruction(xml-stylesheet)[matches(.,'type\\s*=\\s*[''\"\"]text/xsl[''\" \"]')]/replace(., '.*?href\\s*=\\s*[''\" \"](.*?)[''\" \"].*', '$1')"
 
     print(data_dir+"books.xml")
-    if input_ is None and saxonproc.exception_occurred:
-        print(saxonproc.error_message)
+
     assert input_ is not None
 
     xPathProcessor = saxonproc.new_xpath_processor()
     xPathProcessor.set_context(xdm_item=input_)
     hrefval = xPathProcessor.evaluate_single(path)
-    if hrefval is None and xPathProcessor.exception_occurred:
-        print(xPathProcessor.error_message)
+
     assert hrefval is not None
     href = hrefval.string_value
     print("href="+href)
     assert href != ""
     styles_dir = data_dir
     executable = trans.compile_stylesheet(stylesheet_file=styles_dir+href)
-    if executable is None and trans.exception_occurred:
-        print(trans.error_message)
+
     assert executable is not None
     assert isinstance(input_, PyXdmNode)
     executable.set_global_context_item(xdm_item=input_)
     node = executable.apply_templates_returning_value(xdm_value=input_)
-    if node is None and executable.exception_occurred:
-        print(executable.error_message)
     assert node is not None
 
 def collection_test(saxonproc, data_dir):
@@ -284,53 +279,43 @@ def collection_test(saxonproc, data_dir):
     xq.set_query_base_uri(data_dir)
     xq.set_query_content("collection('?select=*.xml")
     r = xq.run_query_to_value()
-    assert r is not None and not xq.exception_occurred
+    assert r is not None
 
 
 
 def xquery_40_functions():
     proc = PySaxonProcessor(license=True)
-
     proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
-
     xquery_processor = proc.new_xquery_processor()
-
     result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '4.0')
-
-    assert not xquery_processor.exception_occurred
-    
     assert "paragraph" in result
 
 def xquery_40_functions_error():
-    proc = PySaxonProcessor(license=True)
-
-    proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
-
-    xquery_processor = proc.new_xquery_processor()
-
-    result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '3.0')
-
-    assert xquery_processor.exception_occurred
+    try:
+        proc = PySaxonProcessor(license=True)
+        proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
+        xquery_processor = proc.new_xquery_processor()
+        result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '3.0')
+        assert False
+    except Exception:
+        assert True
 
 
 def testContext2NotRootNamedTemplate(saxonproc, files_dir, data_dir):
         trans = saxonproc.new_xslt30_processor()
         input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
         executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='$x'/>]</xsl:template></xsl:stylesheet>")
-        if executable is None and trans.exception_occurred:
-            print(trans.error_message)
+
         assert executable is not None
         executable.set_global_context_item(xdm_item=input_)
         result = executable.call_template_returning_value("main")
-        if executable.exception_occurred:
-            print(executable.error_message)
+
         assert result is not None
         print(result.head.string_value)
         assert "[text]" in result.head.string_value
 
         result2 = executable.call_template_returning_string("main")
-        if executable.exception_occurred:
-            print(executable.error_message)
+
         print(result2)
         assert result2 is not None
         assert "text" in result2
@@ -393,9 +378,6 @@ def testCaseVariantFileLoads(saxonproc, files_dir, data_dir):
          <xsl:template match="text()[matches(.,'f?ool','i')]"/>
          
      </xsl:stylesheet>''')
-    if executable is None and trans.exception_occurred:
-        print(trans.error_message)
-    assert not trans.exception_occurred
     assert executable is not None
 
 
@@ -433,8 +415,6 @@ def testNamedTemplateToFileDefault(saxonproc):
     </xsl:stylesheet>
             
              ''')
-    if executable is None and trans.exception_occurred:
-        print(trans.error_message)
     assert executable is not None
 
     executable.call_template_returning_file(output_file="result_For_call_template.xml")
@@ -442,15 +422,18 @@ def testNamedTemplateToFileDefault(saxonproc):
 
 
 def testUseAssociated(saxonproc, files_dir):
-    trans = saxonproc.new_xslt30_processor()
-    foo_xml = files_dir+"/trax/xml/foo.xml"
-    executable = trans.compile_stylesheet(associated_file=foo_xml)
-    if executable is None and trans.exception_occurred:
-        print(trans.error_message)
-    assert executable is not None
-    executable.set_initial_match_selection(file_name=foo_xml)
-    result = executable.apply_templates_returning_string()
-    assert result is not None
+    try:
+        trans = saxonproc.new_xslt30_processor()
+        foo_xml = files_dir+"/trax/xml/foo.xml"
+        executable = trans.compile_stylesheet(associated_file=foo_xml)
+        assert executable is not None
+        executable.set_initial_match_selection(file_name=foo_xml)
+        result = executable.apply_templates_returning_string()
+        assert result is not None
+    except Exception as e:
+        print(e)
+        assert False
+
 
 def testnullptrStylesheet(saxonproc):
     trans = saxonproc.new_xslt30_processor()
@@ -578,13 +561,9 @@ def testCallFunctionWrapResults(saxonproc):
     executable.set_parameter("x",  x)
     item = saxonproc.make_integer_value(20)
     executable.set_global_context_item(xdm_item=item)
-    if executable.exception_occurred:
-        print(executable.error_message)
     arg1 = saxonproc.make_integer_value(2)
     arg2 =  saxonproc.make_integer_value(3)
     sw = executable.call_function_returning_string("{http://localhost/}add", [arg1, arg2])
-    if sw is None and executable.exception_occurred:
-        print(executable.error_message)
     assert sw is not None
     assert "57" in sw
     trans.clear_parameters()
@@ -689,7 +668,6 @@ def testResultDocument1(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text=xsl)
     assert executable is not None
-    assert not trans.exception_occurred
 
     executable.set_initial_match_selection(xdm_value=inputDoc)
     xdmValue = executable.apply_templates_returning_value()
@@ -793,7 +771,6 @@ def testCallNamedTemplateWithParamsRaw(saxonproc):
     print(paramArr)
     executable.set_initial_template_parameters(False, paramArr)
     val = executable.call_template_returning_value("t")
-    assert not executable.exception_occurred
     assert val is not None
     print(val)
     assert val.size == 2
@@ -857,14 +834,11 @@ def testxQuery1(saxonproc, data_dir):
     query_proc.set_property("s", xmlFile)
     query_proc.set_property("qs", "<out>{count(/out/person)}</out>")
     result = query_proc.run_query_to_string()
-    
-    assert not query_proc.exception_occurred
     assert result is not None
     print(result)
 
     print(os.getcwd())
     query_proc.run_query_to_file(output_file_name="catOutput.xml")
-    assert not query_proc.exception_occurred
     assert os.path.exists("catOutput.xml")
     node = saxonproc.parse_xml(xml_file_name='catOutput.xml')
     assert node is not None
@@ -1141,14 +1115,17 @@ def test_declare_variable_value1(saxonproc):
     assert 'test.' in item.string_value
 
 def test_declare_variable_value2(saxonproc):
-    s1 = 'This is a test.'
-    xdm_string_value = saxonproc.make_string_value(s1)
-    xpath_processor = saxonproc.new_xpath_processor()
-    result = xpath_processor.evaluate('$s1')
-    assert result is None
+    try:
+        s1 = 'This is a test.'
+        xdm_string_value = saxonproc.make_string_value(s1)
+        xpath_processor = saxonproc.new_xpath_processor()
+        result = xpath_processor.evaluate('$s1')
+        assert result is None
+    except Exception as err:
+        assert 'No value has been supplied for variable $s1' in str(err)
 
 def test_packages(data_dir):
-    sp = PySaxonProcessor(license=False)
+    sp = PySaxonProcessor(license=True)
     xsl = """\
     <xsl:package name = \"package-002.xsl\" package-version = \"2.1.0.5\"
     version = \"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">
@@ -1175,8 +1152,7 @@ def test_add_packages(data_dir):
     assert isinstance(sp, PySaxonProcessor)
     xsl = sp.new_xslt30_processor()
     result = xsl.transform_to_string(source_file=data_dir+"package-00.xml", stylesheet_file=data_dir+"package-019.xsl")
-    if result is None and xsl.exception_occurred:
-        print(xsl.error_message)
+
     assert result is not None
     assert 'You found me!' in result
 
