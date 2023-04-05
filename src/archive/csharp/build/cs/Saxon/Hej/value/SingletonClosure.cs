@@ -9,13 +9,11 @@ namespace Saxon.Hej.value {
             setInputEvaluator(inputEvaluator);
             savedXPathContext = context.newContext();
             saveContext(exp, context);
-            Saxon.Hej.trace.Instrumentation.count("SingletonClosure.new()");
         }
         public SingletonClosure(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.XPathContext context)  {
             setInputEvaluator(exp.makeElaborator().elaborateForPull());
             savedXPathContext = context.newContext();
             saveContext(exp, context);
-            Saxon.Hej.trace.Instrumentation.count("SingletonClosure.new()");
         }
         public override Saxon.Hej.om.SequenceIterator iterate() {
             try {
@@ -47,7 +45,6 @@ namespace Saxon.Hej.value {
                 savedXPathContext = null;
                 if ((learningEvaluator != null)) {
                     learningEvaluator.reportCompletion(serialNumber);
-                    Saxon.Hej.trace.Instrumentation.count("SingletonClosure.reportCompletion()");
                     learningEvaluator = null;
                 }
             }

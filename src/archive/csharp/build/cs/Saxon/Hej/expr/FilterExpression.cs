@@ -746,7 +746,7 @@ namespace Saxon.Hej.expr {
                     return context => {
                         Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/baseEval(context);
                         Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
-                        c2.setCurrentIterator(Saxon.Hej.om.SequenceTool.focusTracker(@base));
+                        c2.setCurrentIterator(c2.getController().makeFocusTracker(@base, false));
                         return new Saxon.Hej.expr.FilterExpression.FilterExprElaborator.SimpleFilteredIterator(c2, conditionEval);
                     } ;
                 } else {
@@ -754,7 +754,7 @@ namespace Saxon.Hej.expr {
                     return context => {
                         Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/baseEval(context);
                         Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
-                        c2.setCurrentIterator(Saxon.Hej.om.SequenceTool.focusTracker(@base));
+                        c2.setCurrentIterator(c2.getController().makeFocusTracker(@base, false));
                         return new Saxon.Hej.expr.FilterExpression.FilterExprElaborator.PositionalFilteredIterator(c2, conditionEval);
                     } ;
                 }

@@ -54,9 +54,6 @@ namespace Saxon.Hej.functions {
                 }
                 return Saxon.Hej.value.Int64Value.makeIntegerValue(currentIterator.position());
             }
-            public override string getCompilerName() {
-                return "PositionCompiler";
-            }
             public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
                 return new Saxon.Hej.functions.PositionAndLast.Position.PositionFnElaborator();
             }
@@ -91,9 +88,6 @@ namespace Saxon.Hej.functions {
                 } catch (Saxon.Hej.trans.UncheckedXPathException e) {
                     throw Saxon.Hej.trans.XPathException.makeXPathException(e);
                 }
-            }
-            public override string getCompilerName() {
-                return "LastCompiler";
             }
             public override string getStreamerName() {
                 return "Last";

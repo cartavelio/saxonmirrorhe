@@ -28,11 +28,14 @@ namespace Saxon.Ejava.lang
 
         public static string getProperty(string name) {
             if (name == "user.dir") {
-                return Saxon.Ejava.io.File.CurrentDirectoryUri().AbsoluteUri;
+                return Sys.Environment.CurrentDirectory;
             } else if (name == "line.separator") {
                 return Sys.Environment.NewLine;
             } else if (name == "java.io.tmpdir") {
                 return SysIO.Path.GetTempPath();
+            } else if (name == "file.separator")
+            {
+                return SysIO.Path.DirectorySeparatorChar.ToString();
             }
             return Sys.Environment.GetEnvironmentVariable(name);
         }

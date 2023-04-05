@@ -799,7 +799,11 @@ namespace Saxon.Eej.config {
             return null;
         }
         public override System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> getFocusTrackerFactory(Saxon.Hej.expr.instruct.Executable exec, bool multithreaded) {
-            return /* ctor#1 */ (a) => new Saxon.Hej.om.FocusTrackingIterator(a);
+            if ((multithreaded || (((getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_MULTITHREADING) && exec.createsSecondaryResult()) && isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT))))) {
+                return /* ctor#1 */ (a) => new Saxon.Eej.ee.parallel.MultithreadedFocusTrackingIterator(a);
+            } else {
+                return /* ctor#1 */ (a) => new Saxon.Hej.om.FocusTrackingIterator(a);
+            }
         }
         public void setStreamabilityEnabled(bool enabled) {
             this.streamabilityEnabled = Saxon.Ejava.util.Optional<bool>.of(enabled);

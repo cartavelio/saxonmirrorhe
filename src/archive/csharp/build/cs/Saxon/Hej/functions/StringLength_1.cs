@@ -22,9 +22,6 @@ namespace Saxon.Hej.functions {
                 return Saxon.Hej.value.Int64Value.makeIntegerValue(s.length());
             }
         }
-        public override string getCompilerName() {
-            return "StringLengthCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.StringLength_1.StringLengthFnElaborator();
         }

@@ -18,9 +18,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
             return new Inner_SystemFunctionCall_5(this, this, arguments);
         }
-        public override string getCompilerName() {
-            return "NormalizeSpaceCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.NormalizeSpace_1.NormalizeSpaceFnElaborator();
         }

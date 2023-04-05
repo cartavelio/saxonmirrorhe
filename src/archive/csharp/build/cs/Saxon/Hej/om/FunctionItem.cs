@@ -13,6 +13,7 @@ namespace Saxon.Hej.om {
         Saxon.Hej.query.AnnotationList getAnnotations();
         Saxon.Hej.expr.XPathContext makeNewContext(Saxon.Hej.expr.XPathContext callingContext, Saxon.Hej.expr.ContextOriginator originator);
         bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags);
+        bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options);
         string getDescription();
         void export(Saxon.Hej.trace.ExpressionPresenter @out);
         bool isTrustedResultType();

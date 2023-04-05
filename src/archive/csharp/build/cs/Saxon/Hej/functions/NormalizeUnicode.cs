@@ -9,9 +9,9 @@ namespace Saxon.Hej.functions {
                 return Saxon.Hej.value.StringValue.EMPTY_STRING;
             }
             string nf = ((arguments.Length == 1) ? "NFC" : Saxon.Hej.value.Whitespace.trim(arguments[1].head().getStringValue()));
-            return new Saxon.Hej.value.StringValue(normalize(sv.getStringValue(), nf, context));
+            return new Saxon.Hej.value.StringValue(normalize(sv.getStringValue(), nf));
         }
-        public static string normalize(string sv, string form, Saxon.Hej.expr.XPathContext c) {
+        public static string normalize(string sv, string form) {
             Saxon.Ejava.text.Normalizer.Form fb;
             if (Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(form, "NFC")) {
                 fb = Saxon.Ejava.text.Normalizer.Form.NFC;
@@ -29,10 +29,7 @@ namespace Saxon.Hej.functions {
                                 return sv;
                             } else {
                                 string msg = (("Normalization form "+form)+" is not supported");
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg);
-                                err.setErrorCode("FOCH0003");
-                                err.setXPathContext(c);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(msg, "FOCH0003");
                             }
                         }
                     }

@@ -50,9 +50,10 @@ namespace Saxon.Hej.style {
                     endingAtt = value;
                     break ;
                   case "break-when":
-                    requireXslt40("break-when");
-                    breakWhenAtt = ((("function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean "+"{ Q{http://www.w3.org/2005/xpath-functions}boolean(")+value)+") }");
-                    breakWhen = makeExpression(breakWhenAtt, att);
+                    if (requireXslt40Attribute("break-when")) {
+                        breakWhenAtt = ((("function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean "+"{ Q{http://www.w3.org/2005/xpath-functions}boolean(")+value)+") }");
+                        breakWhen = makeExpression(breakWhenAtt, att);
+                    }
                     break ;
                   case "collation":
                     collationAtt = Saxon.Hej.value.Whitespace.trim(value);
@@ -164,9 +165,15 @@ namespace Saxon.Hej.style {
             Saxon.Hej.lib.StringCollator collator = null;
             if ((collationName is Saxon.Hej.expr.StringLiteral)) {
                 string uri = ((Saxon.Hej.expr.StringLiteral)(collationName)).stringify();
-                collator = findCollation(uri, getBaseURI());
+                try {
+                    collator = findCollation(uri, getBaseURI());
+                } catch (Saxon.Hej.trans.XPathException err) {
+                    compileError(((("Failed to load collation "+uri)+": ")+err.Message), "XTDE1110");
+                    collator = Saxon.Hej.expr.sort.CodepointCollator.getInstance();
+                }
                 if ((collator == null)) {
-                    compileError((("The collation name '"+collationName)+"' has not been defined"), "XTDE1110");
+                    compileError((("The collation name '"+uri)+"' has not been defined"), "XTDE1110");
+                    collator = Saxon.Hej.expr.sort.CodepointCollator.getInstance();
                 }
             }
             byte algorithm = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY;

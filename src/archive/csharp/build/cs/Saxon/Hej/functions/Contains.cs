@@ -20,9 +20,6 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.value.StringValue s1 = (Saxon.Hej.value.StringValue)(arguments[1].head());
             return Saxon.Hej.value.BooleanValue.get(contains(s0, s1, (Saxon.Hej.lib.SubstringMatcher)(getStringCollator())));
         }
-        public override string getCompilerName() {
-            return "ContainsCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.Contains.ContainsFnElaborator();
         }

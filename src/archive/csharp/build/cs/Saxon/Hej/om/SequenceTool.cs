@@ -72,24 +72,20 @@ namespace Saxon.Hej.om {
             }
         }
         public static bool sameLength(Saxon.Hej.om.SequenceIterator a, Saxon.Hej.om.SequenceIterator b) {
-            if (Saxon.Hej.om.SequenceTool.supportsGetLength(a)) {
-                return hasLength(b, ((Saxon.Hej.expr.LastPositionFinder)(a)).getLength());
+            if ((Saxon.Hej.om.SequenceTool.supportsGetLength(a) && Saxon.Hej.om.SequenceTool.supportsGetLength(b))) {
+                return (((Saxon.Hej.expr.LastPositionFinder)(a)).getLength() == ((Saxon.Hej.expr.LastPositionFinder)(b)).getLength());
             } else {
-                if (Saxon.Hej.om.SequenceTool.supportsGetLength(b)) {
-                    return hasLength(a, ((Saxon.Hej.expr.LastPositionFinder)(b)).getLength());
-                } else {
-                    while (true) {
-                        Saxon.Hej.om.Item itA = a.next();
-                        Saxon.Hej.om.Item itB = b.next();
-                        if (((itA == null) || (itB == null))) {
-                            if ((itA != null)) {
-                                a.close();
-                            }
-                            if ((itB != null)) {
-                                b.close();
-                            }
-                            return ((itA == null) && (itB == null));
+                while (true) {
+                    Saxon.Hej.om.Item itA = a.next();
+                    Saxon.Hej.om.Item itB = b.next();
+                    if (((itA == null) || (itB == null))) {
+                        if ((itA != null)) {
+                            a.close();
                         }
+                        if ((itB != null)) {
+                            b.close();
+                        }
+                        return ((itA == null) && (itB == null));
                     }
                 }
             }

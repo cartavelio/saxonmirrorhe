@@ -18,7 +18,7 @@ namespace Saxon.Hej.lib {
             if ((config == null)) {
                 throw new Saxon.Ejava.lang.NullPointerException("No Configuration available in StandardModuleResolver");
             }
-            Saxon.Ejavax.xml.transform.stream.StreamSource source = resolveModuleURI(moduleURI, baseURI);
+            Saxon.Ejavax.xml.transform.stream.StreamSource source = ((((moduleURI != null) || (baseURI != null))) ? resolveModuleURI(moduleURI, baseURI) : null);
             if ((source != null)) {
                 return new Saxon.Ejavax.xml.transform.stream.StreamSource[]{source};
             }

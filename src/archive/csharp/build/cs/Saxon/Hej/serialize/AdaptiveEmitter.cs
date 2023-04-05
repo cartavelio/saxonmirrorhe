@@ -164,7 +164,6 @@ namespace Saxon.Hej.serialize {
                 System.IO.StringWriter sw = new System.IO.StringWriter();
                 Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties(outputProperties);
                 props.setProperty("method", "xml");
-                props.setProperty("indent", "no");
                 if ((props.getProperty("omit-xml-declaration") == null)) {
                     props.setProperty("omit-xml-declaration", "no");
                 }

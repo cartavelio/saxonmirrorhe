@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.value.AtomicValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             return evaluate(getRetainedStaticContext());
         }
-        public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
+        public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
             return Saxon.Hej.expr.Literal.makeLiteral(evaluate(getRetainedStaticContext()));
         }
         public class DefaultCollation : Saxon.Hej.functions.StaticContextAccessor {

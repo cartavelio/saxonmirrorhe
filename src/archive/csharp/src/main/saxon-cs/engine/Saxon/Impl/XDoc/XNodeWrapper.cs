@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
+using Saxon.Api.Support;
+using Saxon.Hej.@event;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
 using Saxon.Hej.str;
@@ -10,8 +13,10 @@ using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
 using Saxon.Hej.type;
+using Saxon.Hej.value;
 using Saxon.Impl.DataModel;
 using Saxon.Impl.Dom;
+using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Impl.XDoc {
     
@@ -81,7 +86,7 @@ namespace Saxon.Impl.XDoc {
                     break;
                 default:
                     throw new Saxon.Ejava.lang.IllegalArgumentException(
-                        ("Unsupported node type in DOM! " + node.NodeType + " instance " + node.ToString()));
+                        ("Unsupported node type in LINQ tree! " + node.NodeType + " instance " + node.ToString()));
             }
 
             wrapper.docTree = docTree;
@@ -160,6 +165,10 @@ namespace Saxon.Impl.XDoc {
             return "";
         }
 
+        public override NamespaceUri getNamespaceUri() {
+            return NamespaceUri.of(getURI());
+        }
+
         public override string getPrefix() {
             if (node is XElement element) {
                 XNamespace nse = element.Name.Namespace;
@@ -173,6 +182,8 @@ namespace Saxon.Impl.XDoc {
             if (node is XElement) {
                 string p = getPrefix();
                 return p == "" ? getLocalPart() : p + ":" + getLocalPart();
+            } else if (node is XProcessingInstruction) {
+                return ((XProcessingInstruction)node).Target;
             }
             return "";
         }
@@ -213,12 +224,24 @@ namespace Saxon.Impl.XDoc {
             return nodeTest.getUType() == UType.ELEMENT; 
         }
 
+        // Predicates to exclude unwanted children of the document node (specifically Doctype
+        // nodes and whitespace text nodes)
+        
+        private static readonly Regex ALL_WHITE = new("^[\\x20\\x09\\x0A\\x0D]*$");
+
+        private static readonly Predicate<XNode> docChildren =
+            child => (child.NodeType != XmlNodeType.DocumentType
+                      && !(child.NodeType == XmlNodeType.Text && ALL_WHITE.IsMatch(((XText)child).Value)));
         protected internal override AxisIterator iterateChildren(NodeTest nodeTest) {
             if (node is XContainer container) {
                 System.Collections.Generic.IEnumerator<XNode> childEnum = 
                     isElementOnly(nodeTest) 
                         ? container.Elements().GetEnumerator() 
                         : container.Nodes().GetEnumerator();
+                if (node is XDocument && !isElementOnly(nodeTest)) {
+                    // Drop whitespace text node children and DocType children of a document node
+                    childEnum = new FilterEnumerator<XNode>(childEnum, docChildren);
+                }
                 int index = 0;
                 AxisIterator axisIter = new AxisIteratorOverEnumerator<XNode>(
                     childEnum, xNode => makeWrapper(xNode, docTree, this, index++));
@@ -234,19 +257,41 @@ namespace Saxon.Impl.XDoc {
         
         protected internal override AxisIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
             AxisIterator baseIter;
-            if (forwards) {
-                baseIter = new IncrementalIterator(this, n => {
-                    XNode following = ((XNodeWrapper)n).node.NextNode;
-                    return following == null ? null : makeWrapper(following, docTree, parent, index + 1);
-                });
+            if (getParent().getNodeKind() == Type.DOCUMENT) {
+                if (forwards) {
+                    baseIter = new IncrementalIterator(this, n => {
+                        XNode curr = ((XNodeWrapper)n).node;
+                        do {
+                            curr = curr.NextNode;
+                        } while (curr != null && !docChildren.Invoke(curr));
+                        return curr == null ? null : makeWrapper(curr, docTree, parent, index + 1);
+                    });
+                }
+                else {
+                    baseIter = new IncrementalIterator(this, n => {
+                        XNode curr = ((XNodeWrapper)n).node;
+                        do {
+                            curr = curr.PreviousNode;
+                        } while (curr != null && !docChildren.Invoke(curr));
+                        return curr == null ? null : makeWrapper(curr, docTree, parent, index + 1);
+                    });
+                }
             }
             else {
-                baseIter = new IncrementalIterator(this, n => {
-                    XNode preceding = ((XNodeWrapper)n).node.PreviousNode;
-                    return preceding == null ? null : makeWrapper(preceding, docTree, parent, index + 1);
-                });
+                if (forwards) {
+                    baseIter = new IncrementalIterator(this, n => {
+                        XNode following = ((XNodeWrapper)n).node.NextNode;
+                        return following == null ? null : makeWrapper(following, docTree, parent, index + 1);
+                    });
+                }
+                else {
+                    baseIter = new IncrementalIterator(this, n => {
+                        XNode preceding = ((XNodeWrapper)n).node.PreviousNode;
+                        return preceding == null ? null : makeWrapper(preceding, docTree, parent, index + 1);
+                    });
+                }
             }
-            
+
             if (nodeTest != AnyNodeTest.getInstance()) {
                 baseIter = new Navigator.AxisFilter(baseIter, nodeTest);
             }
@@ -267,6 +312,16 @@ namespace Saxon.Impl.XDoc {
             if (node is XElement element) {
                 // TODO: disallow requests for a namespace
                 XNamespace ns = uri ?? XNamespace.None;
+                XAttribute att = element.Attribute(ns + local);
+                return att?.Value;
+            }
+            return null;
+        }
+        
+        public override string getAttributeValue(NamespaceUri uri, string local) {
+            if (node is XElement element) {
+                // TODO: disallow requests for a namespace
+                XNamespace ns = uri.ToString() == "" ? XNamespace.None : uri.ToString();
                 XAttribute att = element.Attribute(ns + local);
                 return att?.Value;
             }
@@ -330,6 +385,7 @@ namespace Saxon.Impl.XDoc {
                     ? parent.getAllNamespaces()
                     : NamespaceMap.emptyMap();
 
+                bool namespacedAtts = false;
                 foreach (XAttribute att in elem.Attributes()) {
                     if (att.IsNamespaceDeclaration) {
                         if (att.Name.LocalName == "xmlns") {
@@ -338,7 +394,34 @@ namespace Saxon.Impl.XDoc {
                             nsMap = nsMap.bind(att.Name.LocalName, NamespaceUri.of(att.Value));
                         }
                     }
+
+                    if (att.Name.Namespace != XNamespace.None) {
+                        namespacedAtts = true;
+                    }
                 }
+
+                XNamespace ns = elem.Name.Namespace;
+                if (ns != XNamespace.None) {
+                    string prefix = elem.GetPrefixOfNamespace(ns);
+                    if (prefix == null) {
+                        prefix = "";
+                    }
+                    if (nsMap.getNamespaceUri(prefix) != NamespaceUri.of(ns.NamespaceName)) {
+                        nsMap = nsMap.put(prefix, NamespaceUri.of(ns.NamespaceName));
+                    }
+                }
+
+                if (namespacedAtts) {
+                    foreach (XAttribute att in elem.Attributes()) {
+                        if (att.Name.Namespace != XNamespace.None && !att.IsNamespaceDeclaration) {
+                            string prefix = elem.GetPrefixOfNamespace(att.Name.Namespace);
+                            if (nsMap.getNamespaceUri(prefix) != NamespaceUri.of(att.Name.Namespace.NamespaceName)) {
+                                nsMap = nsMap.put(prefix, NamespaceUri.of(att.Name.Namespace.NamespaceName));
+                            }
+                        }
+                    }
+                }
+
                 return inScopeNamespaces = nsMap;
             }
 

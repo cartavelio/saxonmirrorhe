@@ -273,7 +273,7 @@ namespace Saxon.Hej.style {
             if ((visibilityAtt != null)) {
                 visibility = interpretVisibilityValue(visibilityAtt, "");
                 if ((nameAtt == null)) {
-                    compileError("xsl:template/@visibility can be specified only if the template has a @name attribute", "XTSE0020");
+                    compileError("xsl:template/@visibility can be specified only if the template has a @name attribute", "XTSE0500");
                 } else {
                     compiledNamedTemplate.setDeclaredVisibility(getVisibility());
                 }
@@ -796,7 +796,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.type.Affinity rel = config.getTypeHierarchy().relationship(contextItemType, requiredContextItemType);
                 switch (rel) {
                   case Saxon.Hej.type.Affinity.DISJOINT:
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The declared context item type is inconsistent with the match pattern", "XPTY0004", this);
+                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The declared context item type is inconsistent with the match pattern", "XTTE0590", this);
                     e.setIsTypeError(true);
                     throw e;
                   case Saxon.Hej.type.Affinity.SUBSUMED_BY:

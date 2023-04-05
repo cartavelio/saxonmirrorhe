@@ -11,6 +11,15 @@ namespace Saxon.Eej.functions.qt4 {
             if ((input.getLength() == 0)) {
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
+            if ((arguments[1] is Saxon.Hej.value.IntegerRange)) {
+                Saxon.Hej.value.IntegerRange range = (Saxon.Hej.value.IntegerRange)(arguments[1]);
+                if ((((range.getStep() == 1L) && (System.Math.Abs(range.getStart())<System.Int32.MaxValue)) && (System.Math.Abs(range.getEnd())<System.Int32.MaxValue))) {
+                    int start = (int)(range.getStart());
+                    if ((start>0)) {
+                        return new Saxon.Hej.om.LazySequence(Saxon.Hej.expr.SubsequenceIterator.make(arguments[0].iterate(), start, ((start-1)+(int)(range.getEnd()))));
+                    }
+                }
+            }
             Saxon.Hej.ma.zeno.ZenoSequence result = new Saxon.Hej.ma.zeno.ZenoSequence();
             Saxon.Hej.om.SequenceIterator positions = arguments[1].iterate();
             for (Saxon.Hej.om.Item it; ((it = positions.next()) != null); ) {

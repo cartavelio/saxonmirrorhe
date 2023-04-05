@@ -104,6 +104,9 @@ namespace Saxon.Hej.expr.flwor {
         protected internal override int computeCardinality() {
             return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
+        public override int computeDependencies() {
+            return (base.computeDependencies()|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES);
+        }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             System.Collections.Generic.IList<Saxon.Hej.expr.Operand> list = new System.Collections.Generic.List<Saxon.Hej.expr.Operand>(5);
             try {

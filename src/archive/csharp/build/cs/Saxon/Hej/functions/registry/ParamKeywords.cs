@@ -44,11 +44,14 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "all-equal", "values|collation");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "analyze-string", "value|pattern|flags");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "apply", "function|arguments");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "atomic-equal", "value1|value2");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "available-environment-variables", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "avg", "values");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "base-uri", "node");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "boolean", "input");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "build-uri", "parts|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "ceiling", "value");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "char", "name");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "characters", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "codepoint-equal", "value1|value2");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "codepoints-to-string", "values");
@@ -68,7 +71,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "day-from-date", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "day-from-dateTime", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "days-from-duration", "value");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "deep-equal", "input1|input2|collation");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "deep-equal", "input1|input2|collation|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "default-collation", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "default-language", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "differences", "input1|input2|options|collation");
@@ -164,7 +167,9 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parcel", "input");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-ietf-date", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-json", "json|options");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-html", "html|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-QName", "eqname");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-uri", "uri|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-xml", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-xml-fragment", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parts", "");
@@ -172,7 +177,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "position", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "prefix-from-QName", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "random-number-generator", "seed");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "remove", "input|position");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "remove", "input|positions");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "replace", "value|pattern|replacement|flags|action");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "replicate", "input|count");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "resolve-QName", "qname|element");

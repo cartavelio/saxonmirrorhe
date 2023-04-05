@@ -90,7 +90,7 @@ namespace Saxon.Hej.expr.parser {
                 }
                 break ;
             }
-            if (((currentToken == Saxon.Hej.expr.parser.Token.TAG) || (currentToken == Saxon.Hej.expr.parser.Token.RCURLY))) {
+            if ((((currentToken == Saxon.Hej.expr.parser.Token.TAG) || (currentToken == Saxon.Hej.expr.parser.Token.RCURLY)) || (currentToken == Saxon.Hej.expr.parser.Token.BACKTICK))) {
                 return ;
             }
             int oldPrecedingToken = precedingToken;
@@ -600,7 +600,10 @@ namespace Saxon.Hej.expr.parser {
                     nextToken = Saxon.Hej.expr.parser.Token.STRING_LITERAL;
                     return ;
                   case '`':
-                    if ((((isXQuery && (inputOffset<(inputLength-1))) && (input[inputOffset] == '`')) && (input[(inputOffset+1)] == '['))) {
+                    if ((((inputOffset<(inputLength-1)) && (input[inputOffset] == '`')) && (input[(inputOffset+1)] == '['))) {
+                        if (!(isXQuery)) {
+                            throw new Saxon.Hej.trans.XPathException("String constructors (starting '``[') are allowed only in XQuery, not XPath");
+                        }
                         inputOffset += 2;
                         int j = inputOffset;
                         int newlines = 0;
@@ -630,7 +633,8 @@ namespace Saxon.Hej.expr.parser {
                             j++;
                         }
                     } else {
-                        throw new Saxon.Hej.trans.XPathException("Invalid character '`' (backtick) in expression");
+                        nextToken = Saxon.Hej.expr.parser.Token.BACKTICK;
+                        return ;
                     }
                   case '\n':
                     incrementLineNumber();
@@ -887,6 +891,9 @@ namespace Saxon.Hej.expr.parser {
             newlineOffsets.Add(offset);
         }
         public void unreadChar() {
+            if ((inputOffset>=inputLength)) {
+                return ;
+            }
             if ((input[--inputOffset] == '\n')) {
                 nextLineNumber--;
                 lineNumber--;

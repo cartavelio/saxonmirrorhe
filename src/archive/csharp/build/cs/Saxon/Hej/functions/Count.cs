@@ -29,9 +29,6 @@ namespace Saxon.Hej.functions {
             int size = ((arg is Saxon.Hej.om.GroundedValue) ? ((Saxon.Hej.om.GroundedValue)(arg)).getLength() : count(arg.iterate()));
             return Saxon.Hej.value.Int64Value.makeIntegerValue(size);
         }
-        public override string getCompilerName() {
-            return "CountCompiler";
-        }
         public override string getStreamerName() {
             return "Count";
         }

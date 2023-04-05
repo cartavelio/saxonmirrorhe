@@ -48,6 +48,11 @@ namespace Saxon.Hej.style {
                                 ufp.setFunctionStreamability(uf.getDeclaredStreamability());
                             }
                             Saxon.Hej.expr.Expression defaultVal = sourceBinding.getSelectExpression();
+                            if ((defaultVal != null)) {
+                                if (!((((defaultVal is Saxon.Hej.expr.Literal) || (defaultVal is Saxon.Hej.expr.ContextItemExpression))))) {
+                                    compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
+                                }
+                            }
                             if (((defaultVal == null) && !(sourceBinding.hasProperty(Saxon.Hej.style.SourceBinding.BindingProperty.REQUIRED)))) {
                                 defaultVal = new Saxon.Hej.expr.DefaultedArgumentExpression();
                             }
@@ -96,6 +101,7 @@ namespace Saxon.Hej.style {
                     }
                     if (((isFunction && isRequiredParam()) && !(((Saxon.Hej.style.XSLLocalParam)(node)).isRequiredParam()))) {
                         compileError((((("Parameter "+name)+" is required, but an earlier parameter ")+((Saxon.Hej.style.XSLLocalParam)(node)).sourceBinding.getVariableQName())+" is optional"), "XTSE0761");
+                        ((Saxon.Hej.style.XSLLocalParam)(node)).sourceBinding.setProperty(Saxon.Hej.style.SourceBinding.BindingProperty.REQUIRED, true);
                     }
                 } else {
                     if (((node is Saxon.Hej.style.StyleElement) && (((Saxon.Hej.style.StyleElement)(node)).getFingerprint() != Saxon.Hej.om.StandardNames.XSL_CONTEXT_ITEM))) {
@@ -115,10 +121,12 @@ namespace Saxon.Hej.style {
             }
             if (sourceBinding.hasProperty(Saxon.Hej.style.SourceBinding.BindingProperty.REQUIRED)) {
                 if ((sourceBinding.getSelectExpression() != null)) {
-                    compileError("The select attribute must be omitted when required='yes'", "XTSE0760");
+                    string errorCode = (isFunction ? "XTSE0760" : "XTSE0010");
+                    compileError("The select attribute must be omitted when required='yes'", errorCode);
                 }
                 if (hasChildNodes()) {
-                    compileError("A parameter specifying required='yes' must have empty content", "XTSE0760");
+                    string errorCode = (isFunction ? "XTSE0760" : "XTSE0010");
+                    compileError("A parameter specifying required='yes' must have empty content", errorCode);
                 }
             }
             base.validate(decl);
@@ -143,6 +151,14 @@ namespace Saxon.Hej.style {
                     Saxon.Hej.expr.Expression selectExpression = sourceBinding.getSelectExpression();
                     if ((selectExpression == null)) {
                         selectExpression = Saxon.Hej.expr.Literal.makeEmptySequence();
+                    } else {
+                        Saxon.Hej.expr.Expression underlyingExpression = selectExpression;
+                        while (((underlyingExpression is Saxon.Hej.expr.ItemChecker) || (underlyingExpression is Saxon.Hej.expr.CardinalityChecker))) {
+                            underlyingExpression = ((Saxon.Hej.expr.UnaryExpression)(underlyingExpression)).getBaseExpression();
+                        }
+                        if (!((((underlyingExpression is Saxon.Hej.expr.Literal) || (underlyingExpression is Saxon.Hej.expr.ContextItemExpression))))) {
+                            compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
+                        }
                     }
                     int pos = getParameterPosition();
                     ((Saxon.Hej.style.XSLFunction)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getCompiledFunction().getParameterDefinitions()[pos].setDefaultValueExpression(selectExpression);

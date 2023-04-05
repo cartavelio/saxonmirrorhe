@@ -660,7 +660,12 @@ namespace Saxon.Eej.functions.extfn {
         }
         public class FileTempDir : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                return new Saxon.Hej.value.StringValue(Saxon.Ejava.lang.System.getProperty("java.io.tmpdir"));
+                string fs = Saxon.Ejava.lang.System.getProperty("file.separator");
+                string tmp = Saxon.Ejava.lang.System.getProperty("java.io.tmpdir");
+                if (!(tmp.EndsWith(fs))) {
+                    tmp += fs;
+                }
+                return new Saxon.Hej.value.StringValue(tmp);
             }
         
         }

@@ -24,9 +24,6 @@ namespace Saxon.Hej.functions {
             }
             return null;
         }
-        public override string getCompilerName() {
-            return "StringFnCompiler";
-        }
         public override string getStreamerName() {
             return "StringFn";
         }

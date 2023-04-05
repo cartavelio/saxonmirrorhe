@@ -35,8 +35,9 @@ namespace Saxon.Hej.style {
                     select = makeExpression(value, att);
                 } else {
                     if (f.Equals("separator")) {
-                        requireXslt40("separator");
-                        separator = makeAttributeValueTemplate(value, att);
+                        if (requireXslt40Attribute("separator")) {
+                            separator = makeAttributeValueTemplate(value, att);
+                        }
                     } else {
                         if ((attName.getLocalPart().Equals("threads") && attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON))) {
                             threads = makeAttributeValueTemplate(Saxon.Hej.value.Whitespace.trim(value), att);

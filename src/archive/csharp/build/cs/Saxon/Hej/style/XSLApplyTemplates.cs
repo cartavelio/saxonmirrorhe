@@ -30,8 +30,9 @@ namespace Saxon.Hej.style {
                     defaultedSelectExpression = false;
                     break ;
                   case "separator":
-                    requireXslt40("separator");
-                    separator = makeAttributeValueTemplate(value, att);
+                    if (requireXslt40Attribute("separator")) {
+                        separator = makeAttributeValueTemplate(value, att);
+                    }
                     break ;
                   default:
                     checkUnknownAttribute(attName);

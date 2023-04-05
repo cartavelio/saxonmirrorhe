@@ -12,7 +12,6 @@ namespace Saxon.Hej.value {
         public Closure()  {
         }
         public void saveContext(Saxon.Hej.expr.Expression expression, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.trace.Instrumentation.count("Closure.saveContext()");
             if ((((expression.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LOCAL_VARIABLES)) != 0)) {
                 Saxon.Hej.expr.StackFrame localStackFrame = context.getStackFrame();
                 Saxon.Hej.om.Sequence[] local = localStackFrame.getStackFrameValues();
@@ -33,6 +32,13 @@ namespace Saxon.Hej.value {
                         }
                         savedStackFrame[i] = local[i];
                     }
+                    savedXPathContext.setStackFrame(stackFrameMap, savedStackFrame);
+                }
+            } else {
+                if ((((expression.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES)) != 0)) {
+                    Saxon.Hej.expr.StackFrame localStackFrame = context.getStackFrame();
+                    Saxon.Hej.expr.instruct.SlotManager stackFrameMap = localStackFrame.getStackFrameMap();
+                    Saxon.Hej.om.Sequence[] savedStackFrame = new Saxon.Hej.om.Sequence[stackFrameMap.getNumberOfVariables()];
                     savedXPathContext.setStackFrame(stackFrameMap, savedStackFrame);
                 }
             }

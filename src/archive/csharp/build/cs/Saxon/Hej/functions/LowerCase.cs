@@ -9,9 +9,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.om.Sequence resultWhenEmpty() {
             return Saxon.Hej.value.StringValue.EMPTY_STRING;
         }
-        public override string getCompilerName() {
-            return "ForceCaseCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.LowerCase.LowerCaseFnElaborator();
         }
@@ -23,7 +20,7 @@ namespace Saxon.Hej.functions {
                 return context => {
                     Saxon.Hej.str.UnicodeString s0 = /*Delegate.eval()*/argEval(context);
                     if ((s0 == null)) {
-                        return handleNullUnicodeString(zeroLengthWhenAbsent);
+                        return Saxon.Hej.str.EmptyUnicodeString.getInstance();
                     }
                     return Saxon.Hej.str.ToLower.toLower(s0);
                 } ;
@@ -38,7 +35,7 @@ namespace Saxon.Hej.functions {
                 return context => {
                     Saxon.Hej.str.UnicodeString s0 = /*Delegate.eval()*/argEval(context);
                     if ((s0 == null)) {
-                        return (zeroLengthWhenAbsent ? "" : null);
+                        return "";
                     }
                     return Saxon.Hej.str.ToLower.toLower(s0).ToString();
                 } ;

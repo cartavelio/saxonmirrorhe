@@ -6,9 +6,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.value.AtomicValue evaluate(Saxon.Hej.om.Item arg, Saxon.Hej.expr.XPathContext context) {
             return ((Saxon.Hej.value.NumericValue)(arg)).abs();
         }
-        public override string getCompilerName() {
-            return "RoundingCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.Abs.AbsElaborator();
         }

@@ -9,9 +9,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.om.Sequence resultWhenEmpty() {
             return Saxon.Hej.value.StringValue.EMPTY_STRING;
         }
-        public override string getCompilerName() {
-            return "LocalNameCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.LocalName_1.LocalNameElaborator();
         }

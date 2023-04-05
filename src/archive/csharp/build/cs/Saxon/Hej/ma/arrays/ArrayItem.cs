@@ -164,6 +164,11 @@ namespace Saxon.Hej.ma.arrays {
             throw new System.NotImplementedException();
         }
 
+        /* Creating stub method deepEqual40 to satisfy interface FunctionItem */
+        public virtual bool deepEqual40(Saxon.Hej.om.FunctionItem arg1, Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions arg3) {
+            throw new System.NotImplementedException();
+        }
+
         /* Creating stub method getDescription to satisfy interface FunctionItem */
         public virtual string getDescription() {
             throw new System.NotImplementedException();

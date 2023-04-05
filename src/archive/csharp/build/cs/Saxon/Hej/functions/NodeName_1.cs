@@ -12,9 +12,6 @@ namespace Saxon.Hej.functions {
             }
             return new Saxon.Hej.value.QNameValue(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart(), Saxon.Hej.type.BuiltInAtomicType.QNAME);
         }
-        public override string getCompilerName() {
-            return "NodeNameFnCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.NodeName_1.NodeNameFnElaborator();
         }

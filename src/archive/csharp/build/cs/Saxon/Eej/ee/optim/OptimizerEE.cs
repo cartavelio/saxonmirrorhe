@@ -939,7 +939,7 @@ namespace Saxon.Eej.ee.optim {
             if ((function.getDeclaredStreamability() != Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED)) {
                 isInlineable = false;
             } else {
-                if (functionInlineable.isEmpty()) {
+                if (!(functionInlineable.isPresent())) {
                     if ((function.getBody() == null)) {
                         return functionCall;
                     }
@@ -1202,7 +1202,7 @@ namespace Saxon.Eej.ee.optim {
             }
         }
         public override Saxon.Hej.expr.Expression generateMultithreadedInstruction(Saxon.Hej.expr.Expression instruction) {
-            if (((instruction is Saxon.Hej.expr.instruct.ForEach) && config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_MULTITHREADING))) {
+            if ((((instruction is Saxon.Hej.expr.instruct.ForEach) && config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_MULTITHREADING)) && !(((Saxon.Hej.expr.instruct.ForEach)(instruction)).isContainsTailCall()))) {
                 Saxon.Hej.expr.instruct.ForEach @base = (Saxon.Hej.expr.instruct.ForEach)(instruction);
                 Saxon.Eej.ee.parallel.MultithreadedForEach result = new Saxon.Eej.ee.parallel.MultithreadedForEach(@base.getSelectExpression(), @base.getActionExpression(), false, @base.getNumberOfThreadsExpression());
                 result.setInstruction(@base.isInstruction());

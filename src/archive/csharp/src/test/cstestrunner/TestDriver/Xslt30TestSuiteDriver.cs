@@ -14,6 +14,7 @@ using System.Linq;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.lib;
 using Saxon.Hej.om;
+using Saxon.Hej.trans;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
 using NamespaceConstant = Saxon.Api.NamespaceConstant;
@@ -42,7 +43,7 @@ namespace TestDriver {
         public static void MainXSLT(string[] args) {
             if (args.Length == 0 || args[0].Equals("-?")) {
                 System.Console.WriteLine("testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                                         " [-t:testNamePattern] [-bytecode:on|off|debug] [-tree] [-lang] [-save][-export][-strict]");
+                                         " [-t:testNamePattern] [-tree] [-lang] [-save][-export][-strict]");
             }
 
             System.Console.WriteLine("Testing Saxon " + (new Processor()).ProductVersion);
@@ -325,7 +326,7 @@ namespace TestDriver {
                         value = "!" + value;
                     }
 
-                    String message = "dependency not satisfied" + value;
+                    String message = "dependency not satisfied: " + value;
                     if (value.StartsWith("feature:")) {
                         message = "requires optional " + value;
                     }
@@ -406,16 +407,15 @@ namespace TestDriver {
                             string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
                             Location loc = err.Location;
                             try {
-                                Console.Error.WriteLine("*** STATIC ERROR: " + code + " at " +
+                                Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
                                                         loc.SystemId + "#" + loc.LineNumber +
                                                         "\n   " + err.Message);
                             }
                             catch (Exception) {
                                 // No action
                             }
-
-                            outcome.ReportError(err.ErrorCode);
                         }
+                        outcome.ReportError(err.ErrorCode);
                     }
                 };
                 Stream styleSource;
@@ -532,17 +532,15 @@ namespace TestDriver {
                 Stream styleSource = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
                 compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 compiler.BaseUri = fileUri;
+
                 try {
-                    XsltPackage xpack = compiler.CompilePackage(styleSource, fileUri);
-                    sheet = xpack.Link();
+                    sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource);
                 }
                 catch (Exception err) {
-                    println(err.Message);
+                    Console.WriteLine(err.Message);
                     outcome.SetException(err);
                 }
 
-
-                sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource);
             }
 
             if (sheet != null) {
@@ -764,9 +762,11 @@ namespace TestDriver {
                                     validator.Validate(src, srcBaseUri);
                                 } else if (src != null) {
                                     transformer.ApplyTemplates(src, srcBaseUri, dest);
+                                } else if (srcNode != null) {
+                                    transformer.ApplyTemplates(srcNode, dest);
                                 }
                                 else {
-                                    transformer.ApplyTemplates(srcNode, dest);
+                                    throw new SaxonApiException(new XPathException("(In test driver) No Source supplied", "XTDE0044"));
                                 }
                             }
                         }
@@ -986,7 +986,7 @@ namespace TestDriver {
             XsltExecutable sheet, Stream styleSource) {
             try {
                 Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
-                Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                Stream exportFile = FileStreamCreate(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
 
                 XsltPackage compiledPack = compiler.CompilePackage(styleSource);
                 compiledPack.Save(exportFile);
@@ -1017,7 +1017,7 @@ namespace TestDriver {
                 if (export) {
                     try {
                         Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".base.sef");
-                        Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        Stream exportFile = FileStreamCreate(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
 
                         Console.WriteLine("Exported package to " + fileUri);
                         pack.Save(exportFile);
@@ -1255,6 +1255,18 @@ namespace TestDriver {
                 case "platform":
                     string[] platforms = value.Split(' ');
                     return Array.IndexOf(platforms, "CS") >= 0;
+                case "version":
+                    int thisVersion = JVersion.getStructuredVersionNumber()[0];
+                    foreach (string p in value.Split(" ")) {
+                        if (p.Equals(thisVersion + "")) {
+                            return !inverse;
+                        }
+                        if (p.EndsWith("+") && int.Parse(p.Replace("+", "")) <= thisVersion) {
+                            return !inverse;
+                        }
+                    }
+                    return inverse;
+
                 case "default_language_for_numbering": {
                     string old = (string)env.processor.GetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE);
                     if (!value.Equals(old)) {
@@ -1580,6 +1592,18 @@ namespace TestDriver {
             return (qname == null ? null : (QName) qname.Value);
         }
 
+        private FileStream FileStreamCreate(String path, FileMode mode, FileAccess access) 
+        {
+            String pathName = path.Replace(@"\", "/");
+            int pos = pathName.LastIndexOf("/");
+            pathName = pathName.Substring(0, pos);
+            if (!Directory.Exists(pathName))
+            {
+                Directory.CreateDirectory(pathName);
+            }
+
+            return new FileStream(path, mode, access);
+        }
     }
 
     public class ModuleResolver : ModuleURIResolver {

@@ -236,6 +236,7 @@ namespace Saxon.Hej.expr {
                 } else {
                     string message = expandMessage(e.Message);
                     Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                    e2.setErrorCodeQName(e.getErrorCodeQName());
                     e2.setXPathContext(context);
                     e2.maybeSetLocation(getLocation());
                     throw e2;
@@ -400,6 +401,7 @@ namespace Saxon.Hej.expr {
                         } else {
                             string message = expr.expandMessage(e.Message);
                             Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                            e2.setErrorCodeQName(e.getErrorCodeQName());
                             e2.setXPathContext(context);
                             e2.maybeSetLocation(expr.getLocation());
                             throw e2;

@@ -5,7 +5,6 @@ namespace Saxon.Hej.value {
     public class MemoClosure : Saxon.Hej.value.Closure, Saxon.Hej.expr.ContextOriginator {
         private Saxon.Hej.om.Sequence sequence;
         public MemoClosure(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.elab.PullEvaluator inputEvaluator, Saxon.Hej.expr.XPathContext context)  {
-            Saxon.Hej.trace.Instrumentation.count("MemoClosure(X)");
             setInputEvaluator(inputEvaluator);
             Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
             c2.setOrigin(this);
@@ -13,7 +12,6 @@ namespace Saxon.Hej.value {
             saveContext(expr, context);
         }
         public MemoClosure(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context)  {
-            Saxon.Hej.trace.Instrumentation.count("MemoClosure(X)");
             setInputEvaluator(expr.makeElaborator().elaborateForPull());
             Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
             c2.setOrigin(this);

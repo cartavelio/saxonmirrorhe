@@ -58,9 +58,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
             return new Inner_SystemFunctionCall_32(this, this, arguments);
         }
-        public override string getCompilerName() {
-            return "BooleanFnCompiler";
-        }
         public override string getStreamerName() {
             return "BooleanFn";
         }

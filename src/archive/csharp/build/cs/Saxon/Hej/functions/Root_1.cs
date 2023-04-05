@@ -21,9 +21,6 @@ namespace Saxon.Hej.functions {
         public override string getStreamerName() {
             return "Root";
         }
-        public override string getCompilerName() {
-            return "RootFunctionCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.Root_1.RootFnElaborator();
         }

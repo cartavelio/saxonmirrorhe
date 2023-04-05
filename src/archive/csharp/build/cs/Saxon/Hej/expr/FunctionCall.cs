@@ -102,7 +102,16 @@ namespace Saxon.Hej.expr {
                         if ((i<fd.getMinimumArity())) {
                             throw new Saxon.Hej.trans.XPathException(((("No value supplied for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
                         }
-                        arg = fd.getDefaultValueExpression(i);
+                        if ((arg is Saxon.Hej.expr.DefaultedArgumentExpression.DefaultCollationArgument)) {
+                            arg = new Saxon.Hej.expr.StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+                        } else {
+                            Saxon.Hej.expr.Expression defaultValue = fd.getDefaultValueExpression(i);
+                            if ((defaultValue == null)) {
+                                throw new Saxon.Hej.trans.XPathException(((("No value or default available for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
+                            }
+                            arg = defaultValue.copy(new Saxon.Hej.expr.parser.RebindingMap());
+                            adoptChildExpression(arg);
+                        }
                     }
                     if (((arg != null) && !(((arg is Saxon.Hej.expr.DefaultedArgumentExpression))))) {
                         setArg(i, tc.staticTypeCheck(arg, argTypes[i], role, visitor));

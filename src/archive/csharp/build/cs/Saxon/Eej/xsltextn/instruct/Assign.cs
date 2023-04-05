@@ -24,9 +24,11 @@ namespace Saxon.Eej.xsltextn.instruct {
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             typeCheckChildren(visitor, contextInfo);
-            Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
-            selectOp.setChildExpression(tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
+            if ((binding.getRequiredType() != null)) {
+                Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
+                selectOp.setChildExpression(tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
+            }
             return this;
         }
         public override int getIntrinsicDependencies() {

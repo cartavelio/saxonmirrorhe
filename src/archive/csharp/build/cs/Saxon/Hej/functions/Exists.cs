@@ -39,9 +39,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.value.BooleanValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             return Saxon.Hej.value.BooleanValue.get(exists(arguments[0].iterate()));
         }
-        public override string getCompilerName() {
-            return "ExistsCompiler";
-        }
         public override string getStreamerName() {
             return "Exists";
         }

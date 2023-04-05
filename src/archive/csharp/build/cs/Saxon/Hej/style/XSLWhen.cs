@@ -16,8 +16,9 @@ namespace Saxon.Hej.style {
                     test = makeExpression(att.getValue(), att);
                 } else {
                     if (f.Equals("select")) {
-                        requireXslt40("select");
-                        select = makeExpression(att.getValue(), att);
+                        if (requireXslt40Attribute("select")) {
+                            select = makeExpression(att.getValue(), att);
+                        }
                     } else {
                         checkUnknownAttribute(attName);
                     }

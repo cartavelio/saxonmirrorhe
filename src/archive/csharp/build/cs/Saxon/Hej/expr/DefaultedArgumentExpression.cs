@@ -17,6 +17,12 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
+        public class DefaultCollationArgument : Saxon.Hej.expr.DefaultedArgumentExpression {
+            public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
+                return new Saxon.Hej.expr.StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+            }
+        
+        }
     
     }
 }

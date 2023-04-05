@@ -414,7 +414,7 @@ namespace Saxon.Hej {
                     if (isURI) {
                         Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                         request.relativeUri = styleFileName;
-                        System.Uri cwd = getCurrentWorkingDirectory();
+                        System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                         request.baseUri = cwd.OriginalString;
                         request.uri = new System.Uri(cwd, styleFileName).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
@@ -422,7 +422,7 @@ namespace Saxon.Hej {
                         styleSource = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     } else {
                         if (styleFileName.Equals("-")) {
-                            string sysId = getCurrentWorkingDirectory().OriginalString;
+                            string sysId = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory().OriginalString;
                             styleSource = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In, sysId);
                         } else {
                             Saxon.Hej.trans.packages.PackageLibrary library = config.getDefaultXsltCompilerInfo().getPackageLibrary();
@@ -563,9 +563,6 @@ namespace Saxon.Hej {
         public void doTransform(string[] args, string command) {
             doTransform(args);
         }
-        private static System.Uri getCurrentWorkingDirectory() {
-            return Saxon.Ejava.io.File.CurrentDirectoryUri();
-        }
         protected internal void initializeConfiguration(Saxon.Hej.Configuration config) {
         }
         public void setFactoryConfiguration(bool schemaAware, string className) {
@@ -705,7 +702,7 @@ namespace Saxon.Hej {
                 Saxon.Hej.s9api.Xslt30Transformer transformer = newTransformer(sheet, options);
                 Saxon.Hej.s9api.Serializer serializer;
                 if ((outputFile == null)) {
-                    transformer.setBaseOutputURI(getCurrentWorkingDirectory().OriginalString);
+                    transformer.setBaseOutputURI(Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory().OriginalString);
                     serializer = processor.newSerializer(System.Console.Out);
                 } else {
                     serializer = processor.newSerializer(outputFile);

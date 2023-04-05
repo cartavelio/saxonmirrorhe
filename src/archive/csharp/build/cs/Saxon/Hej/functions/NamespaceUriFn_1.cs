@@ -10,9 +10,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.value.AnyURIValue resultWhenEmpty() {
             return new Saxon.Hej.value.AnyURIValue("");
         }
-        public override string getCompilerName() {
-            return "NamespaceUriFnCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.NamespaceUriFn_1.NamespaceUriFnElaborator();
         }

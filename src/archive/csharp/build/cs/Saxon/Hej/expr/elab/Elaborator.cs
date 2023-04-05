@@ -50,7 +50,8 @@ namespace Saxon.Hej.expr.elab {
         public abstract Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean();
         public abstract Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthWhenAbsent);
         public virtual Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthWhenAbsent) {
-            return context => /*Delegate.eval()*/elaborateForUnicodeString(zeroLengthWhenAbsent)(context).ToString();
+            Saxon.Hej.expr.elab.UnicodeStringEvaluator evaluator = elaborateForUnicodeString(zeroLengthWhenAbsent);
+            return context => /*Delegate.eval()*/evaluator(context).ToString();
         }
         protected internal Saxon.Hej.str.UnicodeString handleNullUnicodeString(bool zeroLengthWhenAbsent) {
             return (zeroLengthWhenAbsent ? Saxon.Hej.str.EmptyUnicodeString.getInstance() : null);

@@ -27,9 +27,6 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.str.UnicodeString s1 = getUniStringArg(arguments[1]);
             return Saxon.Hej.value.BooleanValue.get(endsWith(s0, s1, (Saxon.Hej.lib.SubstringMatcher)(getStringCollator())));
         }
-        public override string getCompilerName() {
-            return "StartsWithCompiler";
-        }
     
         private class Inner_Optimized_3 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
             private readonly EndsWith outerInstance;

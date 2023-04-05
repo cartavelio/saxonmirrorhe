@@ -710,7 +710,7 @@ namespace Saxon.Hej.trans {
             props.setProperty(att.getLocalPart(), att.getStringValue());
         }
         fn.importAttributes(props);
-        loader.addCompletionAction(() => fn.fixArguments(args));
+        loader.addCompletionAction(() => fn.fixArguments(((Saxon.Hej.expr.SystemFunctionCall)(e)).getArguments()));
     }
     loader.contextStack.Pop();
     return e;
@@ -784,6 +784,9 @@ namespace Saxon.Hej.trans {
         if ((sep != null)) {
             forEach.setSeparatorExpression(sep);
         }
+        string flags = element.getAttributeValue("", "flags");
+        bool containsTailCall = ((flags != null) && flags.Contains("t"));
+        forEach.setContainsTailCall(containsTailCall);
         return forEach;
     } else {
         Saxon.Hej.expr.instruct.ForEach forEach = new Saxon.Hej.expr.instruct.ForEach(lhs, rhs, false, threads);

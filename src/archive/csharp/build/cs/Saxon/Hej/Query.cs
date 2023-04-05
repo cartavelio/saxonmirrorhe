@@ -84,7 +84,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("xsiloc", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Load schemas named in xsi:schemaLocation (default on)");
             options.addRecognizedOption("?", Saxon.Hej.trans.CommandLineOptions.VALUE_PROHIBITED, "Display command line help text");
         }
-        public void doQuery(string[] args, string command) {
+        public void doQuery(string[] args) {
             Saxon.Hej.trans.CommandLineOptions options = new Saxon.Hej.trans.CommandLineOptions();
             setPermittedOptions(options);
             try {
@@ -295,6 +295,9 @@ namespace Saxon.Hej {
                 quit(((("Fatal error during query: "+err2.GetType().Name)+": ")+(((err2.Message == null) ? " (no message)" : err2.Message))), 2);
             }
         }
+        public void doQuery(string[] args, string command) {
+            doQuery(args);
+        }
         internal static  /* REPLACING static */ Saxon.Api.XdmValue parseJson(Saxon.Hej.s9api.Processor processor, System.IO.TextReader jsonReader) {
             return new Saxon.Api.JsonBuilder(processor.getUnderlyingConfiguration()).ParseJson(jsonReader);
         }
@@ -468,7 +471,7 @@ namespace Saxon.Hej {
             if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(sourceFileName))) {
                 Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                 request.relativeUri = sourceFileName;
-                System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                 request.baseUri = cwd.ToString();
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
@@ -492,12 +495,12 @@ namespace Saxon.Hej {
             Saxon.Hej.s9api.XQueryExecutable exp;
             if (queryFileName.Equals("-")) {
                 System.IO.TextReader queryReader = standardInputReader();
-                compiler.setBaseURI(new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI());
+                compiler.setBaseURI(Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory());
                 exp = compiler.compile(queryReader);
             } else {
                 if ((queryFileName.StartsWith("{") && queryFileName.EndsWith("}"))) {
                     string q = queryFileName.Substring(1, (queryFileName.Length-1) - 1);
-                    compiler.setBaseURI(new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI());
+                    compiler.setBaseURI(Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory());
                     exp = compiler.compile(q);
                 } else {
                     if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(queryFileName))) {

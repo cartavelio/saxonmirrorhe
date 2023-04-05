@@ -287,9 +287,6 @@ namespace Saxon.Hej.functions.registry {
                 return this;
             }
             public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry arg(int a, Saxon.Hej.type.ItemType type, int options, Saxon.Hej.om.Sequence resultIfEmpty) {
-                return arg(a, type, options, resultIfEmpty, null);
-            }
-            public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry arg(int a, Saxon.Hej.type.ItemType type, int options, Saxon.Hej.om.Sequence resultIfEmpty, Saxon.Hej.expr.Expression defaultValue) {
                 int cardinality = (options&Saxon.Hej.expr.StaticProperty.CARDINALITY_MASK);
                 Saxon.Hej.expr.OperandUsage usage = Saxon.Hej.expr.OperandUsage.NAVIGATION;
                 if ((((options&ABS)) != 0)) {
@@ -311,19 +308,9 @@ namespace Saxon.Hej.functions.registry {
                     this.paramTypes[a] = Saxon.Hej.value.SequenceType.makeSequenceType(type, cardinality);
                     this.resultIfEmpty[a] = resultIfEmpty;
                     this.usage[a] = usage;
-                    if ((defaultValue != null)) {
-                        withDefault(a, defaultValue);
-                    }
                 } catch (System.IndexOutOfRangeException err) {
                     System.Console.Error.WriteLine(((("Internal Saxon error: Can't set argument "+a)+" of ")+name));
                 }
-                return this;
-            }
-            public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Saxon.Hej.expr.Expression defaultValue) {
-                if ((this.defaultValueExpressions == null)) {
-                    this.defaultValueExpressions = new Saxon.Hej.z.IntHashMap<Saxon.Hej.expr.Expression>(getNumberOfParameters());
-                }
-                this.defaultValueExpressions.put(arg, defaultValue);
                 return this;
             }
             public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry setOptionDetails(Saxon.Hej.functions.OptionsParameter details) {

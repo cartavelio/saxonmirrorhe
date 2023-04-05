@@ -140,4 +140,4 @@ namespace Saxon.Impl.Overrides {
     
 }
 
-// Copyright (c) 2021-2022 Saxonica Limited
+// Copyright (c) 2021 - 2023 Saxonica Limited

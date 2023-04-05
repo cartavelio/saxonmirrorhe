@@ -29,38 +29,38 @@ namespace Saxon.Eej.ee.stream.adjunct {
             internal Saxon.Hej.expr.sort.AtomicComparer comparer;
             internal bool done;
             internal bool closed;
+            internal Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options;
             public GroundedDeepEqualFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.SystemFunctionCall exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context, int consumingArg) : base (exp, result, context) {
                 this.watchManager = watchManager;
                 other = exp.getArg((1-consumingArg)).iterate(context);
                 this.consumingArg = consumingArg;
                 Saxon.Hej.expr.SystemFunctionCall call = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
-                Saxon.Hej.functions.DeepEqual function;
-                if (call.isCallOn(typeof(Saxon.Hej.functions.CollatingFunctionFree))) {
-                    Saxon.Hej.functions.CollatingFunctionFree fn = (Saxon.Hej.functions.CollatingFunctionFree)(call.getTargetFunction());
-                    string collation = call.getArg(2).evaluateAsString(context).ToString();
-                    try {
-                        function = (Saxon.Hej.functions.DeepEqual)(fn.bindCollation(collation));
-                    } catch (Saxon.Hej.trans.XPathException e) {
-                        dynamicError(e);
-                        done = true;
-                        return ;
-                    }
-                } else {
-                    function = (Saxon.Hej.functions.DeepEqual)(call.getTargetFunction());
+                Saxon.Hej.expr.Expression collationArg = exp.getArg(2);
+                Saxon.Hej.om.Item collationVal = collationArg.evaluateItem(context);
+                string collationName = ((collationVal == null) ? call.getRetainedStaticContext().getDefaultCollationName() : collationVal.getStringValue());
+                Saxon.Hej.expr.Expression optionsArg = exp.getArg(3);
+                Saxon.Hej.ma.map.MapItem suppliedOptions = (Saxon.Hej.ma.map.MapItem)(optionsArg.evaluateItem(context));
+                try {
+                    options = new Saxon.Hej.functions.DeepEqual40.DeepEqualOptions(suppliedOptions, collationName, context);
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    dynamicError(e);
                 }
-                comparer = function.getAtomicComparer(getContext());
             }
             public override void append(Saxon.Hej.om.Item item) {
-                if (!(done)) {
+                if ((!(done) && !(hasFailed()))) {
                     Saxon.Hej.om.Item otherItem = other.next();
-                    if (((otherItem == null) || !(Saxon.Hej.functions.DeepEqual.deepEqual(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(item), Saxon.Hej.tree.iter.SingletonIterator.makeIterator(otherItem), comparer, getContext(), 0)))) {
-                        getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
-                        done = true;
-                        if (watchManager.allowsEarlyExit()) {
-                            closed = true;
-                            getNextOutputter().close();
-                            getTerminator().terminate();
+                    try {
+                        if (((otherItem == null) || !(Saxon.Hej.functions.DeepEqual40.deepEqual(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(item), Saxon.Hej.tree.iter.SingletonIterator.makeIterator(otherItem), getContext(), options)))) {
+                            getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
+                            done = true;
+                            if (watchManager.allowsEarlyExit()) {
+                                closed = true;
+                                getNextOutputter().close();
+                                getTerminator().terminate();
+                            }
                         }
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        dynamicError(e);
                     }
                 }
             }

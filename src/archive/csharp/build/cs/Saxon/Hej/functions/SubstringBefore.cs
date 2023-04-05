@@ -12,9 +12,6 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.lib.StringCollator collator = getStringCollator();
             return new Saxon.Hej.value.StringValue(((Saxon.Hej.lib.SubstringMatcher)(collator)).substringBefore(s0, s1));
         }
-        public override string getCompilerName() {
-            return "SubstringBeforeCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.SubstringBefore.SubstringBeforeFnElaborator();
         }

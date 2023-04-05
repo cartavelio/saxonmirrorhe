@@ -71,9 +71,6 @@ namespace Saxon.Hej.functions {
                 return translate(sv0, sv1, sv2);
             }
         }
-        public override string getCompilerName() {
-            return "TranslateCompiler";
-        }
         public Saxon.Hej.functions.SystemFunction copy() {
             Saxon.Hej.functions.Translate copy = (Saxon.Hej.functions.Translate)(Saxon.Hej.functions.SystemFunction.makeFunction(getFunctionName().getLocalPart(), getRetainedStaticContext(), getArity()));
             copy.staticMap = staticMap;

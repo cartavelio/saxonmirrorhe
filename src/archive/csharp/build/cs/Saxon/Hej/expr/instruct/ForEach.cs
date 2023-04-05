@@ -17,6 +17,7 @@ namespace Saxon.Hej.expr.instruct {
             if ((threads != null)) {
                 threadsOp = new Saxon.Hej.expr.Operand(this, threads, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
             }
+            this.containsTailCall = containsTailCall;
         }
         public void setSeparatorExpression(Saxon.Hej.expr.Expression separator) {
             separatorOp = new Saxon.Hej.expr.Operand(this, separator, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
@@ -29,6 +30,12 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override bool isInstruction() {
             return _isInstruction;
+        }
+        public void setContainsTailCall(bool tc) {
+            containsTailCall = tc;
+        }
+        public bool isContainsTailCall() {
+            return containsTailCall;
         }
         public Saxon.Hej.expr.Expression getSelect() {
             return selectOp.getChildExpression();
@@ -119,7 +126,7 @@ namespace Saxon.Hej.expr.instruct {
             if (((getSelect().getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && (getAction() is Saxon.Hej.expr.AxisExpression))) {
                 return new Saxon.Hej.expr.SimpleStepExpression(getSelect(), getAction());
             }
-            if (((threadsOp != null) && !(Saxon.Hej.expr.Literal.isEmptySequence(getThreads())))) {
+            if ((((threadsOp != null) && !(Saxon.Hej.expr.Literal.isEmptySequence(getThreads()))) && !(containsTailCall))) {
                 return visitor.obtainOptimizer().generateMultithreadedInstruction(this);
             }
             return this;
@@ -198,6 +205,9 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("forEach", this);
+            if (containsTailCall) {
+                @out.emitAttribute("flags", "t");
+            }
             getSelect().export(@out);
             getAction().export(@out);
             if ((separatorOp != null)) {
@@ -265,16 +275,28 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.elab.PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
                 Saxon.Hej.expr.elab.PushEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPush();
                 if ((forEach.getSeparatorExpression() == null)) {
-                    return (@out, context) => {
-                        Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
-                        Saxon.Hej.om.FocusIterator iter = c2.trackFocus(/*Delegate.iterate()*/select(context));
-                        Saxon.Hej.expr.instruct.TailCall tc = null;
-                        while ((iter.next() != null)) {
-                            dispatchTailCall(tc);
-                            tc = /*Delegate.processLeavingTail()*/action(@out, c2);
-                        }
-                        return tc;
-                    } ;
+                    if (forEach.containsTailCall) {
+                        return (@out, context) => {
+                            Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                            Saxon.Hej.om.FocusIterator iter = c2.trackFocus(/*Delegate.iterate()*/select(context));
+                            Saxon.Hej.expr.instruct.TailCall tc = null;
+                            if ((iter.next() != null)) {
+                                tc = /*Delegate.processLeavingTail()*/action(@out, c2);
+                            }
+                            return tc;
+                        } ;
+                    } else {
+                        return (@out, context) => {
+                            Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                            Saxon.Hej.om.FocusIterator iter = c2.trackFocus(/*Delegate.iterate()*/select(context));
+                            Saxon.Hej.expr.instruct.TailCall tc = null;
+                            while ((iter.next() != null)) {
+                                dispatchTailCall(tc);
+                                tc = /*Delegate.processLeavingTail()*/action(@out, c2);
+                            }
+                            return tc;
+                        } ;
+                    }
                 } else {
                     Saxon.Hej.expr.elab.UnicodeStringEvaluator sepEval = forEach.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
                     return (@out, context) => {

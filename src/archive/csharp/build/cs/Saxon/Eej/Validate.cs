@@ -161,7 +161,7 @@ namespace Saxon.Eej {
                     if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(schemaFileName))) {
                         Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                         request.relativeUri = schemaFileName;
-                        System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                        System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                         request.baseUri = cwd.ToString();
                         request.uri = new System.Uri(cwd, schemaFileName).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSD_NATURE;
@@ -328,7 +328,7 @@ namespace Saxon.Eej {
             if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(sourceFileName))) {
                 Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                 request.relativeUri = sourceFileName;
-                System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
+                System.Uri cwd = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory();
                 request.baseUri = cwd.ToString();
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;

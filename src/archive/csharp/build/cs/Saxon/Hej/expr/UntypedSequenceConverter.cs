@@ -119,7 +119,7 @@ namespace Saxon.Hej.expr {
                 mapper.setConverter(converter);
                 if ((expr.getRoleSupplier() != null)) {
                     string errorCode = expr.getRoleSupplier()().getErrorCode();
-                    mapper.setErrorCode(("XPTY0004".Equals(errorCode) ? "FORG0001" : "XPTY0004"));
+                    mapper.setErrorCode(("XPTY0004".Equals(errorCode) ? "FORG0001" : errorCode));
                 }
                 Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
                 return context => {
@@ -138,7 +138,16 @@ namespace Saxon.Hej.expr {
                     if ((nullable && (baseValue == null))) {
                         return null;
                     }
-                    return converter.convert(baseValue).asAtomic();
+                    Saxon.Hej.type.ConversionResult result = converter.convert(baseValue);
+                    if ((result is Saxon.Hej.type.ValidationFailure)) {
+                        if ((expr.getRoleSupplier() != null)) {
+                            string errorCode = expr.getRoleSupplier()().getErrorCode();
+                            throw new Saxon.Hej.trans.XPathException(((Saxon.Hej.type.ValidationFailure)(result)).getMessage(), errorCode);
+                        } else {
+                            throw ((Saxon.Hej.type.ValidationFailure)(result)).makeException();
+                        }
+                    }
+                    return result.asAtomic();
                 } ;
             }
         

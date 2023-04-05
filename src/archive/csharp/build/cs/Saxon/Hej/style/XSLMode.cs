@@ -55,7 +55,7 @@ namespace Saxon.Hej.style {
         protected internal override void prepareAttributes() {
             string nameAtt = null;
             string visibilityAtt = null;
-            string extraAsAtt = null;
+            string asAtt = null;
             if (prepared) {
                 return ;
             }
@@ -101,7 +101,7 @@ namespace Saxon.Hej.style {
                         break ;
                       case "shallow-skip-all":
                       case "shallow-copy-all":
-                        requireXslt40("onNoMatch");
+                        requireXslt40Attribute("onNoMatch");
                         break ;
                       default:
                         invalidAttribute(f, "text-only-copy|shallow-copy|deep-copy|shallow-skip|deep-skip|fail");
@@ -131,6 +131,11 @@ namespace Saxon.Hej.style {
                     }
                     mode.setDeclaredVisibility(visibility);
                     break ;
+                  case "as":
+                    if (requireXslt40Attribute("as")) {
+                        asAtt = value;
+                    }
+                    break ;
                   default:
                     if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                         isExtensionAttributeAllowed(attName.getDisplayName());
@@ -138,7 +143,7 @@ namespace Saxon.Hej.style {
                             traceMatching = processBooleanAttribute("saxon:trace", value);
                         } else {
                             if (attName.getLocalPart().Equals("as")) {
-                                extraAsAtt = value;
+                                asAtt = value;
                             }
                         }
                     } else {
@@ -164,10 +169,10 @@ namespace Saxon.Hej.style {
             }
             mode.obtainDeclaringComponent(this);
             mode.setModeTracing(traceMatching);
-            if ((extraAsAtt != null)) {
+            if ((asAtt != null)) {
                 Saxon.Hej.value.SequenceType extraResultType;
                 try {
-                    extraResultType = makeExtendedSequenceType(extraAsAtt);
+                    extraResultType = makeExtendedSequenceType(asAtt);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "saxon:as");
                     extraResultType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;

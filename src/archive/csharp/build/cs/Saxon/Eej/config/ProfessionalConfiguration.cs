@@ -333,6 +333,9 @@ namespace Saxon.Eej.config {
             }
             return null;
         }
+        public override Saxon.Hej.functions.registry.UseWhen30FunctionSet getUseWhenFunctionLibrary(int version) { lock(this) {
+            return /*134*/Saxon.Eej.functions.registry.UseWhen40FunctionSet.getInstance(version);
+        }}
         protected internal override Saxon.Hej.functions.FunctionLibraryList makeBuiltInExtensionLibraryList(int version) { lock(this) {
             Saxon.Hej.functions.FunctionLibraryList result = new Saxon.Hej.functions.FunctionLibraryList();
             result.addFunctionLibrary(getVendorFunctionSet());

@@ -117,6 +117,9 @@ namespace Saxon.Hej.query {
                 } else {
                     Saxon.Hej.expr.Expression[] expandedArgs = Saxon.Hej.expr.instruct.UserFunction.makeExpandedArgumentArray(arguments, keywords, fd);
                     ufc.setArguments(expandedArgs);
+                    foreach (Saxon.Hej.expr.Expression e in expandedArgs) {
+                        ufc.adoptChildExpression(e);
+                    }
                 }
                 ufc.setStaticType(fd.getResultType());
                 Saxon.Hej.expr.instruct.UserFunction fn = fd.getUserFunction();
@@ -178,7 +181,8 @@ namespace Saxon.Hej.query {
                     }
                     for (int a = 0; (a<maxArity); a++) {
                         if ((expandedArgs[a] == null)) {
-                            expandedArgs[a] = fd.getParameterDefinitions()[a].getDefaultValueExpression();
+                            Saxon.Hej.expr.Expression expr = fd.getParameterDefinitions()[a].getDefaultValueExpression();
+                            expandedArgs[a] = expr.copy(new Saxon.Hej.expr.parser.RebindingMap());
                         }
                     }
                     ufc.setArguments(expandedArgs);

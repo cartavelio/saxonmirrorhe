@@ -55,7 +55,7 @@ namespace Saxon.Hej.style {
                 }
             }
             if (((asAtt != null) && absentFocus)) {
-                compileError("The 'as' attribute must be omitted when use='absent' is specified", "XTSE3089");
+                compileError("The 'as' attribute must be omitted when use='absent' is specified", ((this is Saxon.Hej.style.XSLGlobalContextItem) ? "XTSE3089" : "XTSE3088"));
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {

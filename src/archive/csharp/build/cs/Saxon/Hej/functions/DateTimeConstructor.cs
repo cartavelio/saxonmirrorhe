@@ -11,9 +11,6 @@ namespace Saxon.Hej.functions {
             }
             return Saxon.Hej.value.DateTimeValue.makeDateTimeValue(arg0, arg1);
         }
-        public override string getCompilerName() {
-            return "DateTimeConstructorCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.DateTimeConstructor.DateTimeFnElaborator();
         }

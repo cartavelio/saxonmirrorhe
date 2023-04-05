@@ -9,8 +9,9 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
                 string f = attName.getDisplayName();
                 if (f.Equals("select")) {
-                    requireXslt40("select");
-                    select = makeExpression(att.getValue(), att);
+                    if (requireXslt40Attribute("select")) {
+                        select = makeExpression(att.getValue(), att);
+                    }
                 } else {
                     checkUnknownAttribute(attName);
                 }

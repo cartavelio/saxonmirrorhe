@@ -521,6 +521,9 @@ namespace Saxon.Hej {
             }
             return result;
         }}
+        public virtual Saxon.Hej.functions.registry.UseWhen30FunctionSet getUseWhenFunctionLibrary(int version) { lock(this) {
+            return Saxon.Hej.functions.registry.UseWhen30FunctionSet.getInstance(version);
+        }}
         protected internal virtual Saxon.Hej.functions.FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
             Saxon.Hej.functions.FunctionLibraryList result = new Saxon.Hej.functions.FunctionLibraryList();
             result.addFunctionLibrary(Saxon.Hej.functions.registry.VendorFunctionSetHE.getInstance());
@@ -1148,7 +1151,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_440(this, source, config);
+                return new Inner_ActiveSource_441(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1918,9 +1921,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_440 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_441 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_440(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_441(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;

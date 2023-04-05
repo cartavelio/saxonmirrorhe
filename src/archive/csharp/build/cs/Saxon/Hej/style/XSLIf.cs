@@ -21,12 +21,14 @@ namespace Saxon.Hej.style {
                     test = makeExpression(att.getValue(), att);
                     break ;
                   case "then":
-                    requireXslt40("then");
-                    thenExp = makeExpression(att.getValue(), att);
+                    if (requireXslt40Attribute("then")) {
+                        thenExp = makeExpression(att.getValue(), att);
+                    }
                     break ;
                   case "else":
-                    requireXslt40("else");
-                    elseExp = makeExpression(att.getValue(), att);
+                    if (requireXslt40Attribute("else")) {
+                        elseExp = makeExpression(att.getValue(), att);
+                    }
                     break ;
                   default:
                     checkUnknownAttribute(attName);

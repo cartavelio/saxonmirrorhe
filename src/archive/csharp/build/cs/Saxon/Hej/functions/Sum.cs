@@ -3,6 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions {
     public class Sum : Saxon.Hej.functions.FoldingFunction {
+        public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
+            Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[2];
+            newArgs[0] = arguments[0];
+            if (((arguments.Length<2) || (arguments[1] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
+                newArgs[1] = Saxon.Hej.functions.hof.FunctionLiteral.makeLiteral(Saxon.Hej.value.Int64Value.ZERO);
+                setArity(2);
+            } else {
+                newArgs[1] = arguments[1];
+            }
+            return base.makeFunctionCall(newArgs);
+        }
         public override Saxon.Hej.type.ItemType getResultItemType(Saxon.Hej.expr.Expression[] args) {
             Saxon.Hej.type.TypeHierarchy th = getRetainedStaticContext().getConfiguration().getTypeHierarchy();
             Saxon.Hej.type.ItemType @base = Saxon.Hej.expr.Atomizer.getAtomizedItemType(args[0], false, th);
@@ -123,9 +134,6 @@ namespace Saxon.Hej.functions {
             }
         
         }
-        public override string getCompilerName() {
-            return "SumCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.Sum.SumFnElaborator();
         }
@@ -133,7 +141,8 @@ namespace Saxon.Hej.functions {
             public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
                 Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
                 Saxon.Hej.expr.elab.PullEvaluator puller = fnc.getArg(0).makeElaborator().elaborateForPull();
-                Saxon.Hej.expr.elab.ItemEvaluator zero = ((fnc.getArity() == 2) ? fnc.getArg(1).makeElaborator().elaborateForItem() : context => Saxon.Hej.value.Int64Value.ZERO);
+                bool defaultSecondArg = ((fnc.getArity()<2) || (fnc.getArg(1) is Saxon.Hej.expr.DefaultedArgumentExpression));
+                Saxon.Hej.expr.elab.ItemEvaluator zero = (defaultSecondArg ? context => Saxon.Hej.value.Int64Value.ZERO : fnc.getArg(1).makeElaborator().elaborateForItem());
                 return context => {
                     Saxon.Hej.functions.Sum.SumFold fold = new Saxon.Hej.functions.Sum.SumFold(context, (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/zero(context)));
                     Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/puller(context);

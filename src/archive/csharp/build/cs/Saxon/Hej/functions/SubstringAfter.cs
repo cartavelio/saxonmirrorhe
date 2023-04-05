@@ -26,9 +26,6 @@ namespace Saxon.Hej.functions {
             }
             return collator.substringAfter(arg1, arg2);
         }
-        public override string getCompilerName() {
-            return "SubstringAfterCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.SubstringAfter.SubstringAfterFnElaborator();
         }

@@ -64,14 +64,12 @@ namespace Saxon.Hej.expr {
             last = null;
         }
         public Saxon.Hej.om.FocusIterator trackFocus(Saxon.Hej.om.SequenceIterator iter) {
-            System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> factory = controller.getFocusTrackerFactory(false);
-            Saxon.Hej.om.FocusIterator fit = factory(iter);
+            Saxon.Hej.om.FocusIterator fit = controller.makeFocusTracker(iter, false);
             setCurrentIterator(fit);
             return fit;
         }
         public Saxon.Hej.om.FocusIterator trackFocusMultithreaded(Saxon.Hej.om.SequenceIterator iter) {
-            System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> factory = controller.getFocusTrackerFactory(true);
-            Saxon.Hej.om.FocusIterator fit = factory(iter);
+            Saxon.Hej.om.FocusIterator fit = controller.makeFocusTracker(iter, true);
             setCurrentIterator(fit);
             return fit;
         }

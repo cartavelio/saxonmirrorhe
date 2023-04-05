@@ -108,10 +108,8 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <value>The underlying Destination object</value>
-        public Saxon.Hej.s9api.Destination UnderlyingDestination {
-            get { return destination; }
-        }
+        public Saxon.Hej.s9api.Destination UnderlyingDestination => destination;
     }
 }
 
-// Copyright (c) 2021 Saxonica Limited
+// Copyright (c) 2021 - 2023 Saxonica Limited

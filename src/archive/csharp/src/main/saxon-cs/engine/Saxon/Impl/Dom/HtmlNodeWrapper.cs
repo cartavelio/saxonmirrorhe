@@ -224,6 +224,10 @@ namespace Saxon.Impl.Dom {
                 }
             }
         }
+        
+        public override string getAttributeValue(NamespaceUri uri, string local) {
+            return ((AngleSharp.Dom.Element)node).GetAttribute(local);
+        }
 
         public override string getAttributeValue(string uri, string local) {
             return ((AngleSharp.Dom.Element)node).GetAttribute(local);
@@ -320,4 +324,4 @@ namespace Saxon.Impl.Dom {
     
 }
 
-// Copyright (c) 2021 Saxonica Limited
+// Copyright (c) 2021 - 2023 Saxonica Limited

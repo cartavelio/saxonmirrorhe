@@ -100,9 +100,6 @@ namespace Saxon.Hej.functions {
             }
         
         }
-        public override string getCompilerName() {
-            return "StringJoinCompiler";
-        }
     
     }
 }

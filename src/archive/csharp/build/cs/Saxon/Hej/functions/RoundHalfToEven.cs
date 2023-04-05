@@ -26,9 +26,6 @@ namespace Saxon.Hej.functions {
             }
             return val0.roundHalfToEven(scale);
         }
-        public override string getCompilerName() {
-            return "RoundingCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.RoundHalfToEven.RoundHalfToEvenElaborator();
         }

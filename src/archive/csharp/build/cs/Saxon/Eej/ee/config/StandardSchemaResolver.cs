@@ -31,6 +31,12 @@ namespace Saxon.Eej.ee.config {
             if (Saxon.Hej.lib.NamespaceConstant.XLINK.Equals(targetNamespace)) {
                 locations = null;
             }
+            if (((((locations == null) || (locations.Length == 0))) && (targetNamespace != null))) {
+                Saxon.Ejavax.xml.transform.Source source = resolveNamespaceURI(targetNamespace, baseURI);
+                if ((source != null)) {
+                    return new Saxon.Ejavax.xml.transform.Source[]{source};
+                }
+            }
             if (((locations == null) || (locations.Length == 0))) {
                 return EMPTY_SOURCE_ARRAY;
             }

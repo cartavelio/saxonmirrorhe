@@ -12,10 +12,11 @@ namespace Saxon.Hej.style {
             this.compilation = compilation;
             setPackageData(compilation.getPackageData());
             this.namespaceContext = namespaceContext;
-            setXPathLanguageLevel(31);
+            int version = compilation.getCompilerInfo().getXsltVersion();
+            setXPathLanguageLevel(((version == 40) ? 40 : 31));
             Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-            lib.addFunctionLibrary(Saxon.Hej.functions.registry.UseWhen30FunctionSet.getInstance());
-            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
+            lib.addFunctionLibrary(getConfiguration().getUseWhenFunctionLibrary(version));
+            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(version));
             lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(getConfiguration()));
             lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             config.addExtensionBinders(lib);

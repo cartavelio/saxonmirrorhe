@@ -36,6 +36,12 @@ namespace Saxon.Hej.functions {
         public bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
             throw new Saxon.Hej.trans.XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
         }
+        public bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
+            if (options.falseOnError) {
+                return false;
+            }
+            throw new Saxon.Hej.trans.XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
+        }
         public virtual void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException(("export() not implemented for "+this.GetType()));
         }

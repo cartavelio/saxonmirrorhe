@@ -413,6 +413,12 @@ namespace Saxon.Hej.expr.instruct {
             err.setXPathContext(context);
             throw err;
         }
+        public bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
+            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot compare functions using deep-equal", "FOTY0015");
+            err.setIsTypeError(true);
+            err.setXPathContext(context);
+            throw err;
+        }
         public Saxon.Hej.om.Item itemAt(int n) {
             return ((n == 0) ? this : null);
         }
@@ -487,10 +493,7 @@ namespace Saxon.Hej.expr.instruct {
             }
             for (int a = 0; (a<maxArity); a++) {
                 if ((expandedArgs[a] == null)) {
-                    Saxon.Hej.expr.Expression defaultVal = fd.getDefaultValueExpression(a);
-                    if ((defaultVal == null)) {
-                        defaultVal = new Saxon.Hej.expr.DefaultedArgumentExpression();
-                    }
+                    Saxon.Hej.expr.Expression defaultVal = new Saxon.Hej.expr.DefaultedArgumentExpression();
                     expandedArgs[a] = defaultVal;
                 }
             }

@@ -45,13 +45,12 @@ namespace Saxon.Hej.style {
                 throw new Saxon.Hej.trans.XPathException("The package-version cannot end with '.'", "XTSE0020");
             }
             foreach (string p in System.Text.RegularExpressions.Regex.Split(s.Trim(), "\\.")) {
-                try {
-                    parts.Add(System.Int32.Parse(p));
-                } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                    throw new Saxon.Hej.trans.XPathException(("Error in package-version: "+e.Message), "XTSE0020");
-                }
+                parts.Add(parseInteger(p));
             }
             trimTrailingZeroes();
+        }
+        public static int parseInteger(string s) {
+            try{return System.Int32.Parse(s);} catch (Exception e) {throw new Saxon.Hej.trans.XPathException("Error in package-version: " + e.Message, "XTSE0020");}
         }
         public override bool Equals(System.Object o) {
             if ((o is Saxon.Hej.style.PackageVersion)) {

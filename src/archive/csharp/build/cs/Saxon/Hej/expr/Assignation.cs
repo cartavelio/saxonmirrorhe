@@ -47,7 +47,7 @@ namespace Saxon.Hej.expr {
             return slotNumber;
         }
         public override int computeDependencies() {
-            int d = base.computeDependencies();
+            int d = (base.computeDependencies()|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES);
             if (!(Saxon.Hej.expr.parser.ExpressionTool.containsLocalVariableReference(this))) {
                 d &= ~(Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LOCAL_VARIABLES);
             }
@@ -55,7 +55,7 @@ namespace Saxon.Hej.expr {
         }
         public Saxon.Hej.om.Sequence evaluateVariable(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.Sequence actual = context.evaluateLocalVariable(slotNumber);
-            if (!((((actual is Saxon.Hej.om.GroundedValue) || (actual is Saxon.Hej.om.NodeInfo))))) {
+            if (!(((actual is Saxon.Hej.om.GroundedValue)))) {
                 actual = actual.materialize();
                 context.setLocalVariable(slotNumber, actual);
             }

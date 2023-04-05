@@ -80,6 +80,7 @@ namespace Saxon.Hej.expr.parser {
             tokens[BY] = "by";
             tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
             tokens[STRING_LITERAL_BACKTICKED] = "``[<string>]``";
+            tokens[BACKTICK] = "`";
             tokens[OTHERWISE] = "otherwise";
             tokens[NAME] = "<name>";
             tokens[STRING_LITERAL] = "<string-literal>";
@@ -290,6 +291,7 @@ namespace Saxon.Hej.expr.parser {
         public const int COPY = 219;
         public const int COUNT = 220;
         public const int STRING_LITERAL_BACKTICKED = 222;
+        public const int BACKTICK = 223;
         public const int NEGATE = 299;
         public readonly static string[] tokens = new string[300];
         public static System.Collections.Generic.Dictionary<string,int> doubleKeywords = new System.Collections.Generic.Dictionary<string, int>(30);

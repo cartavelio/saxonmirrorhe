@@ -339,4 +339,4 @@ namespace System.Impl.Helpers {
     }
 }
 
-// Copyright (c) 2021 Saxonica Limited
+// Copyright (c) 2021 - 2023 Saxonica Limited

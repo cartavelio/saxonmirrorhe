@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions {
     public class CollatingFunctionFree : Saxon.Hej.functions.SystemFunction {
-        private int getCollationArgument() {
+        protected internal int getCollationArgument() {
             return (getArity()-1);
         }
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
-            Saxon.Hej.expr.Expression c = arguments[(arguments.Length-1)];
+            Saxon.Hej.expr.Expression c = arguments[getCollationArgument()];
             if ((c is Saxon.Hej.expr.StringLiteral)) {
                 string coll = ((Saxon.Hej.expr.StringLiteral)(c)).stringify();
                 try {

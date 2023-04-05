@@ -58,9 +58,6 @@ namespace Saxon.Hej.functions {
                 return Saxon.Hej.value.DoubleValue.NaN;
             }
         }
-        public override string getCompilerName() {
-            return "NumberFnCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.Number_1.NumberFnElaborator();
         }

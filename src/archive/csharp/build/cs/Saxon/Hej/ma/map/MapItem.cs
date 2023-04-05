@@ -167,6 +167,25 @@ namespace Saxon.Hej.ma.map {
             }
             return false;
         }
+        public virtual bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
+            if (((other is Saxon.Hej.ma.map.MapItem) && (((Saxon.Hej.ma.map.MapItem)(other)).size() == size()))) {
+                Saxon.Hej.tree.iter.AtomicIterator keyIter = keys();
+                Saxon.Hej.value.AtomicValue key;
+                while (((key = ((/*1430*/Saxon.Hej.value.AtomicValue)keyIter.next())) != null)) {
+                    Saxon.Hej.om.Sequence thisValue = get(key);
+                    System.Diagnostics.Debug.Assert((thisValue != null));
+                    Saxon.Hej.om.Sequence otherValue = ((Saxon.Hej.ma.map.MapItem)(other)).get(key);
+                    if ((otherValue == null)) {
+                        return false;
+                    }
+                    if (!(Saxon.Hej.functions.DeepEqual40.deepEqual(otherValue.iterate(), thisValue.iterate(), context, options))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
         public Saxon.Hej.om.Item itemAt(int n) {
             return ((n == 0) ? this : null);
         }

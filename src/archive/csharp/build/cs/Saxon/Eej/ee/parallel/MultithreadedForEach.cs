@@ -94,7 +94,9 @@ namespace Saxon.Eej.ee.parallel {
                 return context => {
                     int threads = evaluateThreads(forEach, context);
                     Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
-                    c2.trackFocus(/*Delegate.iterate()*/select(context));
+                    Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/select(context);
+                    Saxon.Hej.om.FocusIterator fit = c2.getController().makeFocusTracker(iter, true);
+                    c2.setCurrentIterator(fit);
                     return new Saxon.Impl.Parallel.MultithreadedContextMappingIterator(action, c2, threads);
                 } ;
             }

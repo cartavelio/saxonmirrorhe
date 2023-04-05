@@ -14,9 +14,6 @@ namespace Saxon.Hej.functions {
             }
             return new Saxon.Hej.value.AnyURIValue(s);
         }
-        public override string getCompilerName() {
-            return "BaseURICompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.BaseUri_1.BaseUriFnElaborator();
         }

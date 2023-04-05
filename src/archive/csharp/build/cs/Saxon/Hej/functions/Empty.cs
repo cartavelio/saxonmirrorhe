@@ -39,9 +39,6 @@ namespace Saxon.Hej.functions {
             iter.close();
             return result;
         }
-        public override string getCompilerName() {
-            return "EmptyCompiler";
-        }
         public override string getStreamerName() {
             return "Empty";
         }

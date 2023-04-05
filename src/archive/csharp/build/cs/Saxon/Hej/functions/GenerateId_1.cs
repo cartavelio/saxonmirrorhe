@@ -18,9 +18,6 @@ namespace Saxon.Hej.functions {
             node.generateId(buffer);
             return new Saxon.Hej.value.StringValue(buffer.ToString());
         }
-        public override string getCompilerName() {
-            return "GenerateIdCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.GenerateId_1.GenerateIdElaborator();
         }

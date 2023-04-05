@@ -45,8 +45,7 @@ namespace Saxon.Hej.ma.map {
                 }
                 Saxon.Hej.type.FunctionItemType opFnType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
                 Saxon.Hej.expr.Callable concatCallable = new Saxon.Hej.expr.CallableDelegate((cxt, args) => Saxon.Hej.value.SequenceExtent.from(new Saxon.Hej.functions.InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
-                Saxon.Hej.functions.CallableFunction concatSeq = new Saxon.Hej.functions.CallableFunction(2, concatCallable, opFnType);
-                register("build", 1, 4, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapBuild(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, mapBuildKeyArg, ONE, null, identityFunction).arg(2, mapBuildValueArg, ONE, null, identityFunction).arg(3, opFnType, ONE, null, new Saxon.Hej.functions.hof.FunctionLiteral(concatSeq)));
+                register("build", 1, 4, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapBuild(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, mapBuildKeyArg, ONE, null).arg(2, mapBuildValueArg, ONE, null).arg(3, opFnType, ONE, null));
                 register("key-value-pairs", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapKeyValuePairs(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
                 register("entries", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapEntries(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
                 register("untyped-contains", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapUntypedContains(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null));
@@ -266,6 +265,27 @@ namespace Saxon.Hej.ma.map {
         
         }
         public class MapBuild : Saxon.Hej.functions.SystemFunction {
+            public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
+                Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[4];
+                newArgs[0] = arguments[0];
+                if (((arguments.Length<2) || (arguments[1] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
+                    newArgs[1] = Saxon.Hej.functions.hof.FunctionLiteral.makeLiteral(Saxon.Hej.functions.SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1));
+                } else {
+                    newArgs[1] = arguments[1];
+                }
+                if (((arguments.Length<3) || (arguments[2] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
+                    newArgs[2] = Saxon.Hej.functions.hof.FunctionLiteral.makeLiteral(Saxon.Hej.functions.SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1));
+                } else {
+                    newArgs[2] = arguments[2];
+                }
+                if (((arguments.Length<4) || (arguments[3] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
+                    newArgs[3] = Saxon.Hej.functions.hof.FunctionLiteral.makeLiteral(new Saxon.Hej.functions.CallableFunction(2, new Saxon.Hej.expr.CallableDelegate((context, args) => Saxon.Hej.value.SequenceExtent.from(new Saxon.Hej.functions.InsertBefore.InsertIterator(args[1].iterate(), args[0].iterate(), 1))), new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE)));
+                } else {
+                    newArgs[3] = arguments[3];
+                }
+                setArity(4);
+                return base.makeFunctionCall(newArgs);
+            }
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Impl.DataModel.ImmMap map = new Saxon.Impl.DataModel.ImmMap();
                 Saxon.Hej.om.FunctionItem keyFunction = (Saxon.Hej.om.FunctionItem)(arguments[1].head());

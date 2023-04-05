@@ -1461,6 +1461,10 @@ namespace Saxon.Hej.query {
                         foundDefault = true;
                         nextToken();
                         Saxon.Hej.expr.Expression defaultValue = parseExprSingle();
+                        if (!((((defaultValue is Saxon.Hej.expr.Literal) || (defaultValue is Saxon.Hej.expr.ContextItemExpression))))) {
+                            grumble("The default value for a function parameter must be either a constant, or '.' (temporary Saxon restriction)");
+                        }
+                        defaultValue.setRetainedStaticContext(env.makeRetainedStaticContext());
                         arg.setDefaultValueExpression(defaultValue);
                         arg.setRequired(false);
                     } else {
@@ -3094,10 +3098,17 @@ namespace Saxon.Hej.query {
                 expectChar(c, '=');
                 c = t.nextChar();
                 c = skipSpaces(c);
-                if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
-                    grumble("End of input encountered within element start tag");
+                if (((c != '"') && (c != '\''))) {
+                    if ((c == Saxon.Hej.expr.parser.Tokenizer.NUL)) {
+                        grumble("End of input encountered within element start tag");
+                    } else {
+                        grumble((("Expected ' or \" as attribute delimiter - found '"+c)+"'"));
+                    }
                 }
                 char delim = c;
+                if (((c != '"') && (c != '\''))) {
+                    grumble((("Expected ' or \" as attribute delimiter - found '"+c)+"'"));
+                }
                 bool isNamespace = ("xmlns".Equals(attName) || attName.StartsWith("xmlns:"));
                 int end;
                 if (isNamespace) {

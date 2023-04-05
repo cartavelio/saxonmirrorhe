@@ -25,7 +25,7 @@ namespace Saxon.Hej.style {
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             if (isInXsltNamespace()) {
-                requireXslt40(null);
+                requireXslt40Element();
             } else {
                 if (!(getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION))) {
                     compileError("saxon:array requires a Saxon-PE or -EE license");

@@ -21,7 +21,7 @@ namespace Saxon.Hej.style {
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
-            requireXslt40("switch");
+            requireXslt40Element();
             select = typeCheck("select", select);
             base.validate(decl);
         }

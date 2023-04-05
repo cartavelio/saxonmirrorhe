@@ -87,6 +87,14 @@ namespace Saxon.Hej.ma.map {
                 return false;
             }
         }
+        public override bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
+            if ((other is Saxon.Hej.ma.map.RangeKey)) {
+                Saxon.Hej.ma.map.RangeKey rk = (Saxon.Hej.ma.map.RangeKey)(other);
+                return ((min.Equals(rk.min) && max.Equals(rk.max)) && index.Equals(rk.index));
+            } else {
+                return false;
+            }
+        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("range-key-map");
             @out.emitAttribute("size", (size()+""));

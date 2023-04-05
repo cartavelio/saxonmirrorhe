@@ -31,9 +31,6 @@ namespace Saxon.Hej.functions {
             bool result = re.containsMatch(@in);
             return Saxon.Hej.value.BooleanValue.get(result);
         }
-        public override string getCompilerName() {
-            return "MatchesCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.Matches.MatchesFnElaborator();
         }

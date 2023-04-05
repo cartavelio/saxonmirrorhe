@@ -208,9 +208,6 @@ namespace Saxon.Hej.functions {
         }
         public virtual void importAttributes(Saxon.Ejava.util.Properties attributes) {
         }
-        public virtual string getCompilerName() {
-            return null;
-        }
         public virtual string getStreamerName() {
             return null;
         }

@@ -91,7 +91,7 @@ namespace Saxon.Hej.expr {
             foreach (Saxon.Hej.expr.Operand o in operands()) {
                 Saxon.Hej.expr.Expression arg = o.getChildExpression();
                 if (((arg is Saxon.Hej.expr.ErrorExpression) && ((Saxon.Hej.expr.ErrorExpression)(arg)).getErrorCodeLocalPart().Equals("UseDefault"))) {
-                    arg = target.getDefaultValueExpression(i);
+                    arg = target.getDefaultValueExpression(i).copy(new Saxon.Hej.expr.parser.RebindingMap());
                     o.setChildExpression(arg);
                 }
                 if (((i == 0) && target.getDeclaredStreamability().isConsuming())) {

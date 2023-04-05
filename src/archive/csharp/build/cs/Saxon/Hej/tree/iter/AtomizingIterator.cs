@@ -40,6 +40,7 @@ namespace Saxon.Hej.tree.iter {
                         } else {
                             string message = ((e.Message+". Failed while atomizing the ")+roleDiagnostic.getMessage());
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                            err.setErrorCodeQName(e.getErrorCodeQName());
                             throw new Saxon.Hej.trans.UncheckedXPathException(err);
                         }
                     }

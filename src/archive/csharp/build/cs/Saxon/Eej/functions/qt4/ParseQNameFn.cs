@@ -36,9 +36,6 @@ namespace Saxon.Eej.functions.qt4 {
             Saxon.Hej.om.StructuredQName qn = Saxon.Hej.om.StructuredQName.fromLexicalQName(input, false, false, getRetainedStaticContext());
             return new Saxon.Hej.value.QNameValue(qn, Saxon.Hej.type.BuiltInAtomicType.QNAME);
         }
-        public override string getCompilerName() {
-            return "QNameFnCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Eej.functions.qt4.ParseQNameFn.QNameFnElaborator();
         }

@@ -431,11 +431,19 @@ namespace Saxon.Hej {
             if ((source is Saxon.Hej.om.NodeSource)) {
                 return ((Saxon.Hej.om.NodeSource)(source)).getNode();
             } else {
-                if (((((source is Saxon.Ejavax.xml.transform.stream.StreamSource) && (source.getSystemId() != null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getInputStream() == null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getReader() == null))) {
-                    Saxon.Hej.om.DocumentKey key = new Saxon.Hej.om.DocumentKey(source.getSystemId());
-                    Saxon.Hej.om.TreeInfo existing = sourceDocumentPool.find(key);
-                    if ((existing != null)) {
-                        return existing.getRootNode();
+                if ((source is Saxon.Hej.om.TreeInfo)) {
+                    return ((Saxon.Hej.om.TreeInfo)(source)).getRootNode();
+                } else {
+                    if ((source is Saxon.Hej.om.NodeInfo)) {
+                        return ((Saxon.Hej.om.NodeInfo)(source));
+                    } else {
+                        if (((((source is Saxon.Ejavax.xml.transform.stream.StreamSource) && (source.getSystemId() != null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getInputStream() == null)) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getReader() == null))) {
+                            Saxon.Hej.om.DocumentKey key = new Saxon.Hej.om.DocumentKey(source.getSystemId());
+                            Saxon.Hej.om.TreeInfo existing = sourceDocumentPool.find(key);
+                            if ((existing != null)) {
+                                return existing.getRootNode();
+                            }
+                        }
                     }
                 }
             }
@@ -562,6 +570,13 @@ namespace Saxon.Hej {
         }}
         public System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> getFocusTrackerFactory(bool multithreaded) {
             return ((multithreaded && (multiThreadedFocusTrackerFactory != null)) ? multiThreadedFocusTrackerFactory : focusTrackerFactory);
+        }
+        public Saxon.Hej.om.FocusIterator makeFocusTracker(Saxon.Hej.om.SequenceIterator iter, bool multithreaded) {
+            if ((iter is Saxon.Hej.om.FocusIterator)) {
+                return (Saxon.Hej.om.FocusIterator)(iter);
+            } else {
+                return getFocusTrackerFactory(multithreaded)(iter);
+            }
         }
         public void setFocusTrackerFactory(System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> focusTrackerFactory) {
             this.focusTrackerFactory = focusTrackerFactory;

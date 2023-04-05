@@ -21,8 +21,9 @@ namespace Saxon.Hej.style {
                 string value = att.getValue();
                 if (attName.getLocalPart().Equals("on-duplicates")) {
                     if (attName.getNamespaceUri().isEmpty()) {
-                        requireXslt40("on-duplicates");
-                        onDuplicates = makeExpression(value, att);
+                        if (requireXslt40Attribute("on-duplicates")) {
+                            onDuplicates = makeExpression(value, att);
+                        }
                     } else {
                         if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                             if (getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {

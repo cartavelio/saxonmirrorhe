@@ -22,7 +22,11 @@ namespace Saxon.Hej.functions {
             return f.call(context, new Saxon.Hej.om.Sequence[]{item}).materialize();
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            return evaluate(context.getContextItem(), context);
+            Saxon.Hej.om.Item contextItem = context.getContextItem();
+            if ((contextItem == null)) {
+                throw new Saxon.Hej.trans.XPathException("Dynamic call to context-dependent function with no bound context", "XPDY0002");
+            }
+            return evaluate(contextItem, context);
         }
         public override  /* REPLACING public override */ Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
             Saxon.Hej.expr.Expression arg = new Saxon.Hej.expr.ContextItemExpression();

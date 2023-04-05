@@ -838,6 +838,10 @@ namespace Saxon.Hej.expr.parser {
             expect(Saxon.Hej.expr.parser.Token.RPAR);
             nextToken();
             int thenoffset = t.currentTokenStartOffset;
+            if ((t.currentToken == Saxon.Hej.expr.parser.Token.LCURLY)) {
+                checkLanguageVersion40();
+                return parseBracedActions(condition);
+            }
             expect(Saxon.Hej.expr.parser.Token.THEN);
             nextToken();
             Saxon.Hej.expr.Expression thenExp = makeTracer(parseExprSingle(), null);
@@ -850,6 +854,47 @@ namespace Saxon.Hej.expr.parser {
             Saxon.Hej.expr.Expression ifExp = Saxon.Hej.expr.instruct.Choose.makeConditional(condition, thenExp, elseExp);
             setLocation(ifExp, ifoffset);
             return makeTracer(ifExp, null);
+        }
+        private Saxon.Hej.expr.Expression parseBracedActions(Saxon.Hej.expr.Expression condition) {
+            System.Collections.Generic.IList<Saxon.Hej.expr.Expression> conditions = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>();
+            System.Collections.Generic.IList<Saxon.Hej.expr.Expression> actions = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>();
+            conditions.Add(condition);
+            nextToken();
+            Saxon.Hej.expr.Expression thenExp = parseExpression();
+            actions.Add(thenExp);
+            expect(Saxon.Hej.expr.parser.Token.RCURLY);
+            t.lookAhead();
+            nextToken();
+            while ((t.currentToken == Saxon.Hej.expr.parser.Token.ELSE)) {
+                nextToken();
+                if ((t.currentToken == Saxon.Hej.expr.parser.Token.IF)) {
+                    nextToken();
+                    condition = parseExpression();
+                    expect(Saxon.Hej.expr.parser.Token.RPAR);
+                    nextToken();
+                    expect(Saxon.Hej.expr.parser.Token.LCURLY);
+                    nextToken();
+                    thenExp = parseExpression();
+                    expect(Saxon.Hej.expr.parser.Token.RCURLY);
+                    t.lookAhead();
+                    nextToken();
+                    conditions.Add(condition);
+                    actions.Add(thenExp);
+                } else {
+                    expect(Saxon.Hej.expr.parser.Token.LCURLY);
+                    nextToken();
+                    Saxon.Hej.expr.Expression elseExp = parseExpression();
+                    expect(Saxon.Hej.expr.parser.Token.RCURLY);
+                    t.lookAhead();
+                    nextToken();
+                    conditions.Add(Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE));
+                    actions.Add(elseExp);
+                    break ;
+                }
+            }
+            Saxon.Hej.expr.instruct.Choose result = new Saxon.Hej.expr.instruct.Choose(conditions.ToArray(), actions.ToArray());
+            setLocation(result);
+            return result;
         }
         private Saxon.Hej.type.ItemType getPlainType(string qname) {
             if (scanOnly) {
@@ -1697,6 +1742,9 @@ namespace Saxon.Hej.expr.parser {
                 return parseBackTickedStringLiteral();
               case Saxon.Hej.expr.parser.Token.STRING_CONSTRUCTOR_INITIAL:
                 return parseStringConstructor();
+              case Saxon.Hej.expr.parser.Token.BACKTICK:
+                checkLanguageVersion40();
+                return parseStringTemplate();
               case Saxon.Hej.expr.parser.Token.NUMBER:
                 return parseNumericLiteral(true);
               case Saxon.Hej.expr.parser.Token.FUNCTION:
@@ -1892,6 +1940,74 @@ namespace Saxon.Hej.expr.parser {
         protected internal virtual Saxon.Hej.expr.Expression parseStringConstructor() {
             grumble("String constructor expressions are allowed only in XQuery");
             return null;
+        }
+        public Saxon.Hej.expr.Expression parseStringTemplate() {
+            int offset = t.inputOffset;
+            System.Collections.Generic.IList<Saxon.Hej.expr.Expression> components = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>();
+            Saxon.Ejava.lang.StringBuilder currentPart = new Saxon.Ejava.lang.StringBuilder();
+            bool finished = false;
+            do {
+                char c = t.nextChar();
+                switch (c) {
+                  case (char)(0):
+                    grumble("Unclosed string template");
+                    return null;
+                  case '`':
+                    c = t.nextChar();
+                    if ((c == '`')) {
+                        currentPart.append('`');
+                    } else {
+                        Saxon.Hej.expr.Expression @fixed = new Saxon.Hej.expr.StringLiteral(currentPart.ToString());
+                        components.Add(@fixed);
+                        finished = true;
+                        t.unreadChar();
+                        t.lookAhead();
+                        nextToken();
+                    }
+                    break ;
+                  case '{':
+                    c = t.nextChar();
+                    if ((c == '{')) {
+                        currentPart.append('{');
+                    } else {
+                        Saxon.Hej.expr.Expression @fixed = new Saxon.Hej.expr.StringLiteral(currentPart.ToString());
+                        components.Add(@fixed);
+                        currentPart.setLength(0);
+                        t.unreadChar();
+                        t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
+                        t.lookAhead();
+                        nextToken();
+                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.RCURLY)) {
+                        } else {
+                            Saxon.Hej.expr.Expression exp = parseExpression();
+                            Saxon.Hej.expr.parser.RetainedStaticContext rscSJ = new Saxon.Hej.expr.parser.RetainedStaticContext(env);
+                            Saxon.Hej.expr.Expression fnSJ = Saxon.Hej.functions.SystemFunction.makeCall("string-join", rscSJ, exp, new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.SINGLE_SPACE));
+                            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, fnSJ);
+                            components.Add(fnSJ);
+                            expect(Saxon.Hej.expr.parser.Token.RCURLY);
+                        }
+                    }
+                    break ;
+                  case '}':
+                    c = t.nextChar();
+                    if ((c == '}')) {
+                        currentPart.append('}');
+                    } else {
+                        grumble("Closing brace ('}') in string template must be doubled");
+                    }
+                    break ;
+                  default:
+                    currentPart.append(c);
+                    break ;
+                }
+            } while (!(finished));
+            Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(env);
+            Saxon.Hej.expr.instruct.Block block = new Saxon.Hej.expr.instruct.Block(components.ToArray());
+            setLocation(block);
+            Saxon.Hej.expr.Expression fn = Saxon.Hej.functions.SystemFunction.makeCall("string-join", rsc, block, new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.EMPTY_STRING));
+            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(block, fn);
+            components.Add(fn);
+            return fn;
         }
         public Saxon.Hej.expr.Expression parseVariableReference() {
             int offset = t.currentTokenStartOffset;

@@ -45,9 +45,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.value.SequenceType getRequiredType(int arg) {
             return getDetails().paramTypes[0];
         }
-        public override string getCompilerName() {
-            return "ConcatCompiler";
-        }
     
         private class Inner_Optimized_7 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
             private readonly Concat outerInstance;

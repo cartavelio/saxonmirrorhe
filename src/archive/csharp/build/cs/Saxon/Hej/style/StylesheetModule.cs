@@ -33,6 +33,10 @@ namespace Saxon.Hej.style {
             Saxon.Hej.om.StylesheetSpaceStrippingRule rule = new Saxon.Hej.om.StylesheetSpaceStrippingRule(config.getNamePool());
             Saxon.Hej.@event.Stripper styleStripper = new Saxon.Hej.@event.Stripper(rule, useWhenFilter);
             Saxon.Hej.@event.CommentStripper commentStripper = new Saxon.Hej.@event.CommentStripper(styleStripper);
+            if ((compilation.getCompilerInfo().getXsltVersion() == 40)) {
+                Saxon.Hej.om.NamePool pool = config.getNamePool();
+                commentStripper.setSkippedElementTest(name => (name.obtainFingerprint(pool) == Saxon.Hej.om.StandardNames.XSL_NOTE));
+            }
             Saxon.Hej.tree.linked.DocumentImpl doc;
             Saxon.Hej.lib.ParseOptions options = makeStylesheetParseOptions(styleSource, pipe);
             try {
@@ -86,6 +90,10 @@ namespace Saxon.Hej.style {
             Saxon.Hej.om.StylesheetSpaceStrippingRule rule = new Saxon.Hej.om.StylesheetSpaceStrippingRule(config.getNamePool());
             Saxon.Hej.@event.Stripper styleStripper = new Saxon.Hej.@event.Stripper(rule, useWhenFilter);
             Saxon.Hej.@event.CommentStripper commentStripper = new Saxon.Hej.@event.CommentStripper(styleStripper);
+            if ((compilation.getCompilerInfo().getXsltVersion() == 40)) {
+                Saxon.Hej.om.NamePool pool = config.getNamePool();
+                commentStripper.setSkippedElementTest(name => (name.obtainFingerprint(pool) == Saxon.Hej.om.StandardNames.XSL_NOTE));
+            }
             Saxon.Hej.tree.tiny.TinyBuilder packageBuilder = new Saxon.Hej.tree.tiny.TinyBuilder(pipe);
             packageBuilder.setSystemId(styleSource.getSystemId());
             Saxon.Hej.@event.CheckSumFilter checksummer = new Saxon.Hej.@event.CheckSumFilter(packageBuilder);

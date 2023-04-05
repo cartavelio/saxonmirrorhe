@@ -182,6 +182,7 @@ namespace Saxon.Hej.expr {
                                 Saxon.Hej.expr.parser.RoleDiagnostic role = expr.roleSupplier();
                                 string message = ((e.Message+". Failed while atomizing the ")+role.getMessage());
                                 Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                                e2.setErrorCodeQName(e.getErrorCodeQName());
                                 e2.setXPathContext(context);
                                 e2.maybeSetLocation(expr.getLocation());
                                 throw e2;

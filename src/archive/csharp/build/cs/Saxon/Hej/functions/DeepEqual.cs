@@ -14,6 +14,25 @@ namespace Saxon.Hej.functions {
         public const int JOIN_ADJACENT_TEXT_NODES = (1<<8);
         public const int COMPARE_ID_FLAGS = (1<<9);
         public const int EXCLUDE_VARIETY = (1<<10);
+        public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
+            if ((arguments.Length == 4)) {
+                return base.makeFunctionCall(arguments);
+            }
+            Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[4];
+            newArgs[0] = arguments[0];
+            newArgs[1] = arguments[1];
+            if (((arguments.Length<3) || (arguments[2] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
+                newArgs[2] = new Saxon.Hej.expr.StringLiteral(getRetainedStaticContext().getDefaultCollationName());
+            } else {
+                newArgs[2] = arguments[2];
+            }
+            if (((arguments.Length<4) || (arguments[3] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
+                newArgs[3] = Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.ma.map.DictionaryMap());
+            } else {
+                newArgs[2] = arguments[2];
+            }
+            return base.makeFunctionCall(newArgs);
+        }
         public static bool deepEqual(Saxon.Hej.om.SequenceIterator op1, Saxon.Hej.om.SequenceIterator op2, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context, int flags) {
             bool result = true;
             string reason = null;

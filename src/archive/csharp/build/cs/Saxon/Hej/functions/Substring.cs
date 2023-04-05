@@ -126,9 +126,6 @@ namespace Saxon.Hej.functions {
                 return substring(arg0, arg1, arg2);
             }
         }
-        public override string getCompilerName() {
-            return "SubstringCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.Substring.SubstringFnElaborator();
         }

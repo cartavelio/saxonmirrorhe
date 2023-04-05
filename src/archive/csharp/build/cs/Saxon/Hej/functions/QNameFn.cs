@@ -30,9 +30,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             return expandedQName((Saxon.Hej.value.StringValue)(arguments[0].head()), (Saxon.Hej.value.StringValue)(arguments[1].head()));
         }
-        public override string getCompilerName() {
-            return "QNameFnCompiler";
-        }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.functions.QNameFn.QNameFnElaborator();
         }

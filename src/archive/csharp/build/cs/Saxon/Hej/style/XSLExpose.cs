@@ -4,6 +4,9 @@ using System.Linq;
 namespace Saxon.Hej.style {
     public class XSLExpose : Saxon.Hej.style.XSLAcceptExpose {
         protected internal void checkCompatibility(Saxon.Hej.trans.SymbolicName name, Saxon.Hej.trans.Visibility declared, Saxon.Hej.trans.Visibility exposed) {
+            if (((exposed == Saxon.Hej.trans.Visibility.ABSTRACT) && (declared != Saxon.Hej.trans.Visibility.ABSTRACT))) {
+                compileError((((("The "+name)+" cannot be exposed as ")+Saxon.Hej.trans.Err.describeVisibility(exposed))+" because it is not originally declared as abstract"), "XTSE3025");
+            }
             if (!(isCompatible(declared, exposed))) {
                 string code = "XTSE3010";
                 compileError(((((("The "+name)+" is declared as ")+Saxon.Hej.trans.Err.describeVisibility(declared))+" and cannot be exposed as ")+Saxon.Hej.trans.Err.describeVisibility(exposed)), code);
@@ -75,7 +78,7 @@ namespace Saxon.Hej.style {
                             checkCompatibility(sName, mode.getDeclaredVisibility(), getVisibility());
                         }
                         if ((getVisibility() == Saxon.Hej.trans.Visibility.ABSTRACT)) {
-                            compileError("The visibility of a mode cannot be abstract");
+                            compileError("The visibility of a mode cannot be abstract", "XTSE3025");
                         }
                         break ;
                       case Saxon.Hej.om.StandardNames.XSL_FUNCTION:
@@ -100,7 +103,7 @@ namespace Saxon.Hej.style {
                         }
                         break ;
                     }
-                    if (!(found)) {
+                    if ((!(found) && !(qName.Equals(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "error-name"))))) {
                         compileError((("No "+sName)+" exists in the containing package"), "XTSE3020");
                     }
                 }

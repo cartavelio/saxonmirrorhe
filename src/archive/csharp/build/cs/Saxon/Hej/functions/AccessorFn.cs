@@ -41,9 +41,6 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.value.AtomicValue evaluate(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context) {
             return ((Saxon.Hej.value.AtomicValue)(item)).getComponent(getComponentId());
         }
-        public override string getCompilerName() {
-            return "AccessorFnCompiler";
-        }
         public class YearFromDateTime : Saxon.Hej.functions.AccessorFn {
             public override Saxon.Hej.functions.AccessorFn.Component getComponentId() {
                 return Saxon.Hej.functions.AccessorFn.Component.YEAR;

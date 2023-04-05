@@ -143,7 +143,7 @@ namespace Saxon.Hej.style {
                                         compileErrorInAttribute("When component='*' is specified, all names must be wildcards", ((this is Saxon.Hej.style.XSLAccept) ? "XTSE3032" : "XTSE3022"), "names");
                                     } else {
                                         if ((componentTypeCode == Saxon.Hej.om.StandardNames.XSL_FUNCTION)) {
-                                            compileErrorInAttribute("When the name identifies a function, the arity must be given (XSLT 3.0 erratum E36)", "XTSE3020", "names");
+                                            compileErrorInAttribute((("The name "+tok)+" identifies a function, so the arity must be given (XSLT 3.0 erratum E36)"), "XTSE3020", "names");
                                         } else {
                                             Saxon.Hej.om.StructuredQName name = makeQName(tok, null, "names");
                                             test = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), getNamePool());

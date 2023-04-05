@@ -57,6 +57,22 @@ namespace Saxon.Hej.ma.arrays {
                 return false;
             }
         }
+        public override bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
+            if ((other is Saxon.Hej.ma.arrays.ArrayItem)) {
+                Saxon.Hej.ma.arrays.ArrayItem that = (Saxon.Hej.ma.arrays.ArrayItem)(other);
+                if ((this.arrayLength() != that.arrayLength())) {
+                    return false;
+                }
+                for (int i = 0; (i<this.arrayLength()); i++) {
+                    if (!(Saxon.Hej.functions.DeepEqual40.deepEqual(this.get(i).iterate(), that.get(i).iterate(), context, options))) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
         public override bool effectiveBooleanValue() {
             throw new Saxon.Hej.trans.XPathException("Effective boolean value is not defined for arrays", "FORG0006");
         }

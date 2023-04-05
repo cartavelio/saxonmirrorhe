@@ -176,7 +176,7 @@ namespace Saxon.Hej.style {
             }
             if (Saxon.Hej.om.NamespaceUri.isReserved(qName.getNamespaceUri())) {
                 if (qName.hasURI(Saxon.Hej.om.NamespaceUri.XSLT)) {
-                    if ((qName.getLocalPart().Equals("initial-template") && (((this is Saxon.Hej.style.XSLTemplate) || (this is Saxon.Hej.style.XSLCallTemplate))))) {
+                    if ((qName.getLocalPart().Equals("initial-template") && ((((this is Saxon.Hej.style.XSLTemplate) || (this is Saxon.Hej.style.XSLCallTemplate)) || (this is Saxon.Hej.style.XSLAcceptExpose))))) {
                         return qName;
                     }
                     if (qName.getLocalPart().Equals("original")) {
@@ -560,7 +560,7 @@ namespace Saxon.Hej.style {
             }
         }
         internal bool forwardsCompatibleModeIsEnabled() {
-            return (getEffectiveVersion()>30);
+            return (getEffectiveVersion()>getCompilation().getCompilerInfo().getXsltVersion());
         }
         internal bool xPath10ModeIsEnabled() {
             return (getEffectiveVersion()<20);
@@ -1312,13 +1312,21 @@ namespace Saxon.Hej.style {
         protected internal void invalidAttribute(string attributeName, string allowedValues) {
             compileErrorInAttribute(((((("Attribute "+getDisplayName())+"/@")+attributeName)+" must be ")+allowedValues), "XTSE0020", attributeName);
         }
-        protected internal void requireXslt40(string attributeName) {
+        protected internal bool requireXslt40Attribute(string attributeName) {
+            Saxon.Ejava.util.Objects.requireNonNull(attributeName);
             if ((compilation.getCompilerInfo().getXsltVersion() != 40)) {
-                if ((attributeName == null)) {
-                    compileError((("Element "+getDisplayName())+" is allowed only if XSLT 4.0 is enabled"), "XTSE0010");
+                if (forwardsCompatibleModeIsEnabled()) {
+                    compileWarning(((((("Attribute "+getDisplayName())+"/@")+attributeName)+" is ignored in forwards compatibility mode ")+"(running an XSLT 3.0 processor against an XSLT 4.0 stylesheet)"), "XTSE0090");
+                    return false;
                 } else {
                     compileErrorInAttribute((((("Attribute "+getDisplayName())+"/@")+attributeName)+" is allowed only if XSLT 4.0 is enabled"), "XTSE0020", attributeName);
                 }
+            }
+            return true;
+        }
+        protected internal void requireXslt40Element() {
+            if ((compilation.getCompilerInfo().getXsltVersion() != 40)) {
+                compileError((("Element "+getDisplayName())+" is allowed only if XSLT 4.0 is enabled"), "XTSE0010");
             }
         }
         internal void undeclaredNamespaceError(string prefix, string errorCode, string attributeName) {
@@ -1383,36 +1391,37 @@ namespace Saxon.Hej.style {
                 return @implicit;
             }
             if (!(isTopLevel())) {
-                if (seesAvuncularVariables()) {
-                    Saxon.Hej.tree.iter.AxisIterator preceding = curr.iterateAxis(Saxon.Hej.om.AxisInfo.PRECEDING_SIBLING);
-                    while (true) {
-                        curr = ((/*1430*/Saxon.Hej.om.NodeInfo)preceding.next());
-                        while ((curr == null)) {
-                            curr = prev.getParent();
-                            if ((curr is Saxon.Hej.style.StyleElement)) {
-                                @implicit = ((Saxon.Hej.style.StyleElement)(curr)).hasImplicitBinding(qName);
-                                if ((@implicit != null)) {
-                                    return @implicit;
-                                }
+                while (((curr is Saxon.Hej.style.StyleElement) && !(((Saxon.Hej.style.StyleElement)(curr)).seesAvuncularVariables()))) {
+                    curr = curr.getParent();
+                }
+                Saxon.Hej.tree.iter.AxisIterator preceding = curr.iterateAxis(Saxon.Hej.om.AxisInfo.PRECEDING_SIBLING);
+                while (true) {
+                    curr = ((/*1430*/Saxon.Hej.om.NodeInfo)preceding.next());
+                    while ((curr == null)) {
+                        curr = prev.getParent();
+                        if ((curr is Saxon.Hej.style.StyleElement)) {
+                            @implicit = ((Saxon.Hej.style.StyleElement)(curr)).hasImplicitBinding(qName);
+                            if ((@implicit != null)) {
+                                return @implicit;
                             }
-                            while (((curr is Saxon.Hej.style.StyleElement) && !(((Saxon.Hej.style.StyleElement)(curr)).seesAvuncularVariables()))) {
-                                curr = curr.getParent();
-                            }
-                            prev = curr;
-                            if ((curr.getParent() is Saxon.Hej.style.XSLModuleRoot)) {
-                                break ;
-                            }
-                            preceding = curr.iterateAxis(Saxon.Hej.om.AxisInfo.PRECEDING_SIBLING);
-                            curr = ((/*1430*/Saxon.Hej.om.NodeInfo)preceding.next());
                         }
+                        while (((curr is Saxon.Hej.style.StyleElement) && !(((Saxon.Hej.style.StyleElement)(curr)).seesAvuncularVariables()))) {
+                            curr = curr.getParent();
+                        }
+                        prev = curr;
                         if ((curr.getParent() is Saxon.Hej.style.XSLModuleRoot)) {
                             break ;
                         }
-                        if ((curr is Saxon.Hej.style.XSLGeneralVariable)) {
-                            Saxon.Hej.style.SourceBinding sourceBinding = ((Saxon.Hej.style.XSLGeneralVariable)(curr)).getBindingInformation(qName);
-                            if ((sourceBinding != null)) {
-                                return sourceBinding;
-                            }
+                        preceding = curr.iterateAxis(Saxon.Hej.om.AxisInfo.PRECEDING_SIBLING);
+                        curr = ((/*1430*/Saxon.Hej.om.NodeInfo)preceding.next());
+                    }
+                    if ((curr.getParent() is Saxon.Hej.style.XSLModuleRoot)) {
+                        break ;
+                    }
+                    if ((curr is Saxon.Hej.style.XSLGeneralVariable)) {
+                        Saxon.Hej.style.SourceBinding sourceBinding = ((Saxon.Hej.style.XSLGeneralVariable)(curr)).getBindingInformation(qName);
+                        if ((sourceBinding != null)) {
+                            return sourceBinding;
                         }
                     }
                 }
