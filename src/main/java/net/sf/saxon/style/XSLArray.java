@@ -8,14 +8,18 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * xsl:array element in stylesheet - proposed XSLT 4.0 instruction
@@ -26,7 +30,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class XSLArray extends XSLSequence {
 
-    private boolean composite;
+    private FunctionItem use;
 
     /**
      * Ask whether the element is in the XSLT namespace
@@ -40,18 +44,50 @@ public class XSLArray extends XSLSequence {
 
     @Override
     protected void prepareAttributes() {
-
+        Expression useExpression = null;
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
             String f = attName.getDisplayName();
-            if (f.equals("select")) {
-                setSelectExpression(makeExpression(value, att));
-            } else if (f.equals("composite")) {
-                composite = processBooleanAttribute("composite", value);
-            } else {
-                checkUnknownAttribute(attName);
+            switch (f) {
+                case "select":
+                    setSelectExpression(makeExpression(value, att));
+                    break;
+                case "use":
+                    useExpression = makeExpression(value, att);
+                    break;
+                case "composite":
+                    compileWarning("XSLT 4.0 spec change: replace composite='yes' with use='?value'", "SXWN0001");
+                    boolean composite = processBooleanAttribute("composite", value);
+                    if (composite) {
+                        useExpression = makeExpression("?value", att);
+                    }
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
+        }
+        if (useExpression != null) {
+            use = new CallableFunction(1, new FocusFunction(useExpression),
+                                       new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ITEM},
+                                                                SequenceType.ANY_SEQUENCE));
+        }
+    }
+
+    private static class FocusFunction implements Callable {
+
+        SequenceEvaluator evaluator;
+
+        public FocusFunction(Expression expression) {
+            this.evaluator = expression.makeElaborator().eagerly();
+        }
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            Item current = arguments[0].head();
+            XPathContextMinor c2 = context.newMinorContext();
+            c2.setCurrentIterator(new ManualIterator(current));
+            return evaluator.evaluate(c2);
         }
     }
 
@@ -67,12 +103,12 @@ public class XSLArray extends XSLSequence {
         }
 
         Expression functionCall;
-        if (composite) {
-            SystemFunction arrayOf = ArrayFunctionSet.getInstance(40).makeFunction("of", 1);
-            functionCall = arrayOf.makeFunctionCall(getSelectExpression());
+        if (use == null || use instanceof ContextItemExpression) {
+            SystemFunction build = ArrayFunctionSet.getInstance(40).makeFunction("build", 1);
+            functionCall = build.makeFunctionCall(getSelectExpression());
         } else {
-            SystemFunction arrayFromSeq = ArrayFunctionSet.getInstance(40).makeFunction("_from-sequence", 1);
-            functionCall = arrayFromSeq.makeFunctionCall(getSelectExpression());
+            SystemFunction build = ArrayFunctionSet.getInstance(40).makeFunction("build", 2);
+            functionCall = build.makeFunctionCall(getSelectExpression(), new FunctionLiteral(use));
         }
         ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);
         return functionCall;
