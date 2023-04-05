@@ -31,7 +31,7 @@ namespace Saxon.Api {
         
         /// <summary>After construction, retrieve the newly constructed document node.</summary>
 
-        public XDocument XDocument => builder.getDocumentNode();
+        public System.Xml.Linq.XDocument XDocument => builder.getDocumentNode();
 
 
         /// <summary>
