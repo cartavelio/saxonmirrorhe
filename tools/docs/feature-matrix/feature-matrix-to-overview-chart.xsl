@@ -28,8 +28,8 @@
                 <p>This chart describes the features present in each edition of Saxon <xsl:value-of
                     select="$version"/> available for Java, .NET, and C/C++, PHP and Python, and the latest
                     release of SaxonJS.</p>
-                <p>Full <a class="bodylink" href="#PDs">Product descriptions</a> are also available
-                    below.</p>
+                <p>Full <a class="bodylink" href="#PDs">Product descriptions</a> are also available to
+                    download below.</p>
                 <p>
                     <i>For features in older versions of the products, see the relevant Feature Matrix:<br />
                         <xsl:for-each select="(11, 10, 9.9, 9.8, 9.7, 9.6)[number($version) ge .]">
@@ -42,7 +42,8 @@
                     </i>
                 </p>
                 <p>The table below lists product features and indicates which features are available for
-                    products on the different platforms. If the feature is restricted to certain packages on
+                    products on the different platforms. (See the "Product packages" box on the right for
+                    the definitions of these packages and platform availability.) If the feature is restricted to certain packages on
                     a platform, then the table shows the <b>minimal</b> product package(s) required. The
                     product packages are ordered as: PE &#x2282; EEV &#x2282; (EET | EEQ) &#x2282; EE. For
                     instance, this means all PE and EEV features are available with all EE packages.</p>
@@ -241,7 +242,7 @@
                 <div id="aside">
                     <h2>Packages by platform</h2>
                     <p><b>Java:</b> SaxonJ 12 first released Jan 2023.</p>
-                    <p><b>.NET:</b> SaxonCS 12 for .NET 6 available only as the Enterprise Edition, first
+                    <p><b>.NET:</b> SaxonCS 12 for .NET 6 <b>available only as the Enterprise Edition</b>, first
                         released Jan 2023.</p>
                     <p><b>Native:</b> SaxonC 12 first released Jan 2023, built from SaxonJ 12.</p>
                     <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>
