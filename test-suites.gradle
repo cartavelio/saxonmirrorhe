@@ -442,6 +442,18 @@ task copyEXPathTestSuite(
       from "${testsuites.w3cEXPathTestSuiteDir}"
     }
   }
+
+  doLast {
+    // Also, make sure that the file "test.bin" exists
+    // or some tests will fail.
+    copy  {
+      into "${buildDir}/tests/expath/file/sandpit"
+      from "${projectDir}/tools"
+      include "sample-check.py"
+      rename { "test.bin" }
+    }
+  }
+
   doLast {
     // Hack. Where are these supposed to come from?
     copy {
