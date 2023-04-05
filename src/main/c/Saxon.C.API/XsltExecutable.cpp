@@ -189,14 +189,14 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
 
         saxonResultDocRef = createSaxonCResultDocumentHandler(SaxonProcessor::sxn_environ->thread, (int)rawResultsFlag);
 
-        if(saxonResultDocRef == -1) {
-            std::cerr << "Error: Failed to create SaxonCResultDocumentHandler" <<  std::endl;
+        if(saxonResultDocRef == -2) {
+            throw SaxonApiException();
         }
     } else {
         setProperty("rd", "off");
         
-        if(saxonResultDocRef != -1) {
-            //TODO delete SaxonResultDoc from ObjectHandles pool
+        if(saxonResultDocRef > 0 ) {
+            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)saxonResultDocRef);
             saxonResultDocRef = -1;
         }
 
@@ -395,7 +395,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef >0 ) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -439,7 +439,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -480,7 +480,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -513,7 +513,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
         /*if(saxonMessageListenerRef != -1 ) {
             additions++;
         }
-        if(saxonResultDocRef != -1) {
+        if(saxonResultDocRef > 0) {
             additions++;
         }*/
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -525,7 +525,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
             addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
         }
-        if(saxonResultDocRef != -1) {
+        if(saxonResultDocRef > 0) {
             optionStr = "rd";
             addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
         }
@@ -560,7 +560,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -572,7 +572,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -611,7 +611,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -623,7 +623,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -661,7 +661,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
     if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     }
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -673,7 +673,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -699,7 +699,7 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     } */
     std::string optionStr;
@@ -711,7 +711,7 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -737,7 +737,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -749,7 +749,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -784,7 +784,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -796,7 +796,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -827,7 +827,7 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -839,7 +839,7 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
@@ -925,7 +925,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
     /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         additions++;
     }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -937,7 +937,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != -1) {
+    if(saxonResultDocRef > 0) {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (char *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }

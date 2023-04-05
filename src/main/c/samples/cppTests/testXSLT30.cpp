@@ -1715,12 +1715,19 @@ void  testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans, sRes
 
 
     executable->setCaptureResultDocuments(true);
-
+    executable->setInitialMatchSelection(inputDoc);
+    XdmValue * result   =executable->applyTemplatesReturningValue();
     std::map<std::string,XdmValue*>& mmap = executable->getResultDocuments();
-    //TODO check map
 
+    if(mmap.size() == 2) {
+        sresult->success++;
+    } else {
+       sresult->failure++;
+       sresult->failureList.push_back("testResultDocumentAsMap");
+    }
 
-    sresult->success++;
+    delete result;
+
     delete executable;
     return;
 

@@ -896,7 +896,7 @@ public class SaxonCAPI {
         Processor proci = null;
         String cwd = null;
         String xml = null;
-        SchemaValidator validator = null;
+        SchemaValidatorForCpp validatorForCpp = null;
         if (cxml == WordFactory.nullPointer()) {
             throw new SaxonApiException("XML string is null");
         } else {
@@ -931,8 +931,8 @@ public class SaxonCAPI {
             }
         }
         if (validatorRef != WordFactory.nullPointer()) {
-            validator = objectHandles.get(validatorRef);
-            builder.setSchemaValidator(validator);
+            validatorForCpp = objectHandles.get(validatorRef);
+            builder.setSchemaValidator(validatorForCpp.getSchemaManager().newSchemaValidator());
         }
         Source source = new SAXSource(new InputSource(reader));
         if (cwd != null && cwd.length() > 0) {
@@ -1080,8 +1080,9 @@ public class SaxonCAPI {
 
             Source source = resolveFileToSource(proci, cwd, filename, ResourceRequest.XML_NATURE);
             if (validatorRef == WordFactory.nullPointer()) {
-                SchemaValidator validator = objectHandles.get(validatorRef);
-                builder.setSchemaValidator(validator);
+                SchemaValidatorForCpp validatorForCpp = objectHandles.get(validatorRef);
+
+                builder.setSchemaValidator(validatorForCpp.getSchemaManager().newSchemaValidator());
             }
             XdmNode node = builder.build(source);
 
