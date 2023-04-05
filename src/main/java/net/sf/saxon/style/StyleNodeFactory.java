@@ -7,6 +7,8 @@
 
 package net.sf.saxon.style;
 
+import com.saxonica.trans.XSLArray;
+import com.saxonica.trans.XSLArrayMember;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
