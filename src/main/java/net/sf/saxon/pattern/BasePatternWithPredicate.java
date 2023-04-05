@@ -41,6 +41,10 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
     public BasePatternWithPredicate(Pattern basePattern, Expression predicate) {
         basePatternOp = new Operand(this, basePattern, OperandRole.ATOMIC_SEQUENCE);
         predicateOp = new Operand(this, predicate, OperandRole.FOCUS_CONTROLLED_ACTION);
+        if (basePattern instanceof ItemTypePattern) {
+            // TODO: this is a pragmatic approximation to the actual rules
+            setPriority(basePattern.getDefaultPriority() - 1e-12);
+        }
         adoptChildExpression(getBasePattern());
         adoptChildExpression(getPredicate());
     }

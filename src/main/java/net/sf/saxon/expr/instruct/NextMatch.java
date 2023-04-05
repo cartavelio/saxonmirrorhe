@@ -217,8 +217,13 @@ public class NextMatch extends ApplyNextMatchingTemplate {
 
                 Item currentItem = context.getCurrentIterator().current();
 
-                Rule rule = mode.getNextMatchRule(currentItem, currentRule, context);
-                //Rule rule = controller.getRuleManager().getNextMatchHandler(currentItem, mode.getCode(), currentRule, context);
+                Rule rule;
+                try {
+                    rule = mode.getNextMatchRule(currentItem, currentRule, context);
+                } catch (XPathException e) {
+                    e.setLocation(this.getExpression().getLocation());
+                    throw e;
+                }
 
                 if (rule == null) {             // use the default action for the node
                     mode.getBuiltInRuleSet().process(currentItem, params, tunnels, output, context, loc);
