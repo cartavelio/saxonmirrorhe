@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
@@ -22,8 +23,10 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 
@@ -32,7 +35,10 @@ public class RegexGroup extends ContextAccessorFunction {
     @Override
     public FunctionItem bindContext(XPathContext context) throws XPathException {
         if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
-            return new FixedValueFunction(StringValue.EMPTY_STRING);
+            return new CallableFunction(1, new AlwaysEmpty(),
+                                           new SpecificFunctionType(
+                                                  new SequenceType[]{SequenceType.SINGLE_INTEGER},
+                                                  SequenceType.SINGLE_STRING));
         }
         RegexIterator ri = context.getCurrentRegexIterator();
         if (ri == null) {
@@ -69,6 +75,13 @@ public class RegexGroup extends ContextAccessorFunction {
         NumericValue gp0 = (NumericValue) arguments[0].head();
         UnicodeString s = iter.getRegexGroup((int) gp0.longValue());
         return StringValue.makeUStringValue(s);
+    }
+
+    private static class AlwaysEmpty implements Callable {
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            return StringValue.EMPTY_STRING;
+        }
+
     }
 }
 
