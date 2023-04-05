@@ -10,6 +10,7 @@ package net.sf.saxon.testdriver;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Query;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.functions.ResolveQName;
 import net.sf.saxon.functions.ResolveURI;
@@ -1431,8 +1432,22 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 return value.equals("5");
                 
             case "platform":  // saxon:platform
-                if ("J".equals(value)) {
-                    return !inverse;
+                for (String p : value.split(" ")) {
+                    if (p.equals("J")) {
+                        return !inverse;
+                    }
+                }
+                return inverse;
+
+            case "version":  // saxon:version
+                int thisVersion = Version.getStructuredVersionNumber()[0];
+                for (String p : value.split(" ")) {
+                    if (p.equals(thisVersion + "")) {
+                        return !inverse;
+                    }
+                    if (p.endsWith("+") && Integer.parseInt(p.replace("+", "")) <= thisVersion) {
+                        return !inverse;
+                    }
                 }
                 return inverse;
 
