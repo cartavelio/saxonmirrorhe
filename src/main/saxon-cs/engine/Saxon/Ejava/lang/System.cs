@@ -33,6 +33,9 @@ namespace Saxon.Ejava.lang
                 return Sys.Environment.NewLine;
             } else if (name == "java.io.tmpdir") {
                 return SysIO.Path.GetTempPath();
+            } else if (name == "file.separator")
+            {
+                return SysIO.Path.DirectorySeparatorChar.ToString();
             }
             return Sys.Environment.GetEnvironmentVariable(name);
         }
