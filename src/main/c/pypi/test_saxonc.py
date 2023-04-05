@@ -848,6 +848,32 @@ def testxQuery1(saxonproc, data_dir):
     if os.path.exists('catOutput.xml'):
         os.remove("catOutput.xml")
 
+def testxQuery2(saxonproc, data_dir):
+    query_proc = saxonproc.new_xquery_processor()
+    query_proc.set_cwd(os.getcwd())
+    saxonproc.set_cwd(os.getcwd())
+    query_proc.clear_properties()
+    query_proc.clear_parameters()
+    xmlFile = data_dir+"cat.xml"
+    query_proc.set_property("s", xmlFile)
+    query_proc.set_property("qs", "<out>{count(/out/person)}</out>")
+    result = query_proc.run_query_to_string()
+    assert result is not None
+    print(result)
+
+    print(os.getcwd())
+    query_proc.run_query_to_file(output_file_name="catOutput2.xml")
+    assert os.path.exists("catOutput2.xml")
+    builder = saxonproc.new_document_builder()
+
+    node = builder.parse_xml(xml_file_name='catOutput2.xml')
+    assert node is not None
+    xp = saxonproc.new_xpath_processor()
+    xp.set_context(xdm_item=node)
+    assert xp.effective_boolean_value("/out/text()=3")
+    if os.path.exists('catOutput2.xml'):
+        os.remove("catOutput2.xml")
+
 def test_default_namespace(saxonproc):
     query_proc = saxonproc.new_xquery_processor()
     query_proc.declare_namespace("", "http://one.uri/")
@@ -856,6 +882,13 @@ def test_default_namespace(saxonproc):
     query_proc.set_query_content("/foo")
     value = query_proc.run_query_to_value()
     assert value.size == 1
+
+def test_document_builder(saxonproc):
+    builder = saxonproc.new_document_builder()
+    builder.set_base_uri("file:/tmp")
+    node = builder.parse_xml(xml_text="<foo xmlns='http://one.uri/'><bar/></foo>")
+    assert node is not None
+    assert node.base_uri is "file:/tmp"
 
 def test_default_namespace2(saxonproc):
     query_proc = saxonproc.new_xquery_processor()
