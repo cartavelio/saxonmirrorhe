@@ -1,6 +1,6 @@
-#ifndef _WIN64
-#include "CythonExceptionHandler.h"
 #include "Python.h"
+#include "CythonExceptionHandler.h"
+
 #include <exception>
 #include <string>
 #include "SaxonApiException.h"
@@ -26,6 +26,3 @@ void raise_py_error()
     PyErr_SetString(PyExc_RuntimeError, e.what() );
   }
 }
-
-
-#endif
