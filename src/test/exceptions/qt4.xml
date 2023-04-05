@@ -111,19 +111,29 @@
       <reason>Known bug in ICU</reason>
    </exception>
    
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-build-uri-1" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-12-02"/>
-      <reason>Function fn-build-uri not yet implemented</reason>
+   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-build-uri-1" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-03-16"/>
+      <reason>Auto-generated test is incorrect</reason>
    </exception>
    
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-parse-uri-1" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-12-02"/>
-      <reason>Function fn-parse-uri not yet implemented</reason>
+   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-parse-uri-1" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-03-16"/>
+      <reason>Auto-generated test is incorrect</reason>
    </exception>
    
    <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-iterate-while-1" run="false" report="disputed">
       <created by="Michael Kay" on="2022-12-02"/>
       <reason>Generated test appears to be incorrect</reason>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-map-get-1" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-03-16"/>
+      <reason>map:get#3 not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-array-get-1" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-03-16"/>
+      <reason>array:get#3 not yet implemented</reason>
    </exception>
    
 
