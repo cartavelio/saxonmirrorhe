@@ -222,7 +222,7 @@ public class TransformTest  {
             transformer.transform(xmlSource, new StreamResult(writer));
             fail("Unexpected success");
         } catch (XPathException e) {
-            assertEquals("XPDY0002", e.getErrorCodeLocalPart());
+            assertEquals("XPDY0002", e.getErrorCodeQName().getLocalPart());
         } catch (TransformerException e) {
             e.printStackTrace();
             fail();
