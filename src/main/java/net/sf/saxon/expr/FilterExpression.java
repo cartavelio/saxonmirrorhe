@@ -1291,7 +1291,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 return context -> {
                     SequenceIterator base = baseEval.iterate(context);
                     XPathContext c2 = context.newMinorContext();
-                    c2.setCurrentIterator(SequenceTool.focusTracker(base));
+                    c2.setCurrentIterator(c2.getController().makeFocusTracker(base, false));
                     return new SimpleFilteredIterator(c2, conditionEval);
                 };
             } else {
@@ -1299,7 +1299,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 return context -> {
                     SequenceIterator base = baseEval.iterate(context);
                     XPathContext c2 = context.newMinorContext();
-                    c2.setCurrentIterator(SequenceTool.focusTracker(base));
+                    c2.setCurrentIterator(c2.getController().makeFocusTracker(base, false));
                     return new PositionalFilteredIterator(c2, conditionEval);
                 };
             }

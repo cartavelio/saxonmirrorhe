@@ -174,7 +174,6 @@ public class ManualIterator implements FocusIterator, SequenceIterator,
         if (lengthFinder == null) {
             throw new UncheckedXPathException("Saxon streaming restriction: last() cannot be used when consuming a sequence of streamed nodes, even if the items being processed are grounded");
         } else {
-            //System.err.println("ManualIterator " + this + ".length = " + length);
             return lengthFinder.get();
         }
     }

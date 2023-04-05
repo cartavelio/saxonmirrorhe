@@ -24,7 +24,6 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.DateTimeValue;
 
 import java.util.Iterator;
-import java.util.function.Function;
 
 /**
  * This class represents a minor change in the dynamic context in which an XPath expression is evaluated:
@@ -191,10 +190,7 @@ public class XPathContextMinor implements XPathContext {
 
     @Override
     public FocusIterator trackFocus(SequenceIterator iter) {
-        Function<SequenceIterator, FocusTrackingIterator> factory =
-                controller.getFocusTrackerFactory(false);
-        //noinspection unchecked
-        FocusIterator fit = factory.apply(iter);
+        FocusIterator fit = controller.makeFocusTracker(iter, false);
         setCurrentIterator(fit);
         return fit;
     }
@@ -209,8 +205,7 @@ public class XPathContextMinor implements XPathContext {
      */
 
     public FocusIterator trackFocusMultithreaded(SequenceIterator iter) {
-        Function<SequenceIterator, FocusTrackingIterator> factory = controller.getFocusTrackerFactory(true);
-        FocusIterator fit = factory.apply(iter);
+        FocusIterator fit = controller.makeFocusTracker(iter, true);
         setCurrentIterator(fit);
         return fit;
     }
@@ -240,14 +235,10 @@ public class XPathContextMinor implements XPathContext {
         if (currentIterator == null) {
             return null;
         }
-       // ExitCounter.count(currentIterator.getClass().getSimpleName());
-
-        if (currentIterator instanceof FocusTrackingIterator)
-        {
+        if (currentIterator instanceof FocusTrackingIterator) {
+            // Common case extracted to reduce overhead of megamorphism
             return ((FocusTrackingIterator)currentIterator).current();
-        }
-        else
-        {
+        } else {
             return currentIterator.current();
         }
     }
@@ -272,7 +263,6 @@ public class XPathContextMinor implements XPathContext {
         }
         try {
             int length = currentIterator.getLength();
-            //System.err.println("Current iterator.length = " + length);
             last = new LastValue(length);
             return length;
         } catch (XPathException err) {

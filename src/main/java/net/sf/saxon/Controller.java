@@ -1547,6 +1547,23 @@ public class Controller implements ContextOriginator {
     }
 
     /**
+     * Use the factory function to create a FocusIterator. If the supplied iterator is already
+     * a FocusIterator then it is returned unchanged
+     * @param iter the supplied iterator to be wrapped
+     * @param multithreaded true if multithreaded access is requiried
+     * @return a FocusIterator that returns the same items as the supplied iterator, while tracking
+     * the current item and current position, and enabling look-eahead to evaluate last().
+     */
+
+    public FocusIterator makeFocusTracker(SequenceIterator iter, boolean multithreaded) {
+        if (iter instanceof FocusIterator) {
+            return (FocusIterator)iter;
+        } else {
+            return getFocusTrackerFactory(multithreaded).apply(iter);
+        }
+    }
+
+    /**
      * Set a factory function that will be used to create new instances of FocusTrackingIterator.
      * The standard function for instantiating a FocusTrackingIterator can be overridden to deliver
      * one with extra diagnostic capability for use in debuggers.
