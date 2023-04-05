@@ -47,17 +47,6 @@
                <li><p>Calls to user-written host language extension functions.</p></li>
             </ul>
                <p>We hope to restore these features (perhaps in a slightly different form) in the future.</p></li>
-            <li><p>From SaxonC 12.1:</p>
-               <ul>
-                  <li>Support for the Saxon Gizmo command line utility has been added. This can be used
-                     interactively or in batch mode, to perform simple operations. For information see the <a
-                        href="https://www.saxonica.com/documentation12/index.html#!gizmo">Gizmo utility</a>
-                     section in the main Saxon 12 documentation.</li>
-                  <li>Exceptions that are thrown from the underlying Java code are now handled in the C++ API
-                     and re-thrown as C++ exceptions. Likewise these exceptions are thrown in the Python API
-                     as <code>PySaxonApiError</code> and in the PHP extension as PHP exceptions.</li>
-               </ul>
-            </li>
             
          </ul>
       </category>
