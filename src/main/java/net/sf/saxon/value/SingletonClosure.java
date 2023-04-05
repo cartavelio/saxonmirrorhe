@@ -11,7 +11,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -51,14 +50,14 @@ public class SingletonClosure extends Closure implements Sequence {
         setInputEvaluator(inputEvaluator);
         savedXPathContext = context.newContext();
         saveContext(exp, context);
-        Instrumentation.count("SingletonClosure.new()");
+        //Instrumentation.count("SingletonClosure.new()");
     }
 
     public SingletonClosure(Expression exp, XPathContext context) throws XPathException {
         setInputEvaluator(exp.makeElaborator().elaborateForPull());
         savedXPathContext = context.newContext();
         saveContext(exp, context);
-        Instrumentation.count("SingletonClosure.new()");
+        //Instrumentation.count("SingletonClosure.new()");
     }
 
     /**
@@ -114,7 +113,7 @@ public class SingletonClosure extends Closure implements Sequence {
             savedXPathContext = null;   // release variables saved in the context to the garbage collector
             if (learningEvaluator != null) {
                 learningEvaluator.reportCompletion(serialNumber);
-                Instrumentation.count("SingletonClosure.reportCompletion()");
+                //Instrumentation.count("SingletonClosure.reportCompletion()");
                 learningEvaluator = null;
             }
         }
