@@ -22,6 +22,7 @@ import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.LicenseException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 
@@ -610,6 +611,17 @@ public class QT3TestDriverHE extends TestDriver {
                             } catch (SaxonApiException err) {
                                 println(err.getMessage());
                                 outcome.setException(err.getErrorCode() == null ? new QName("XXXX99999") : err.getErrorCode());
+                            } catch (UncheckedXPathException err) {
+                                if (err.getCause() instanceof XPathException) {
+                                    XPathException xperr = (XPathException) err.getCause();
+                                    QName errcode = null;
+                                    if (xperr.getErrorCodeQName() != null) {
+                                        errcode = new QName(xperr.getErrorCodeNamespace().toString(), xperr.getErrorCodeLocalPart());
+                                    }
+                                    outcome.setException(errcode);
+                                } else {
+                                    throw err;
+                                }
                             } catch (Exception err) {
                                 println(err.getMessage());
                                 err.printStackTrace();
