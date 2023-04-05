@@ -1246,270 +1246,52 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
             <code>math:sqrt(2)</code>.</p>
 
       <p>More details of this mechanism are found in <a class="bodylink"
-         href="/extensibility/extension-functions-J/reflexive-functions">Extension functions</a>.</p>
+         href="/extensibility/extension-functions-J/reflexive-functions">Reflexive extension functions</a>.</p>
       </div>
       
-      <p>Saxon recognizes the XQuery pragma syntax, but it currently defines only one pragma of its
-         own, the <code>saxon:validate-type</code> pragma (see <a class="bodylink"
-            href="../extensions">Extensions</a>), and this is now redundant since the equivalent
-         facility is standard in XQuery 3.0. Saxon will adopt the correct fallback behavior if
-         presented with a query that uses another vendor's extensions, provided these are designed
-         in conformance with the W3C pragma specification.</p>
+      <h2 class="subtitle">Extensions</h2>
       
-      <p>A function may be marked as a memo function either by using the function annotation
-      <code>%saxon:memo-function</code> or by preceding the function declaration with the
-         option declaration <code>declare option saxon:memo-function</code>.</p>
-
-      <p>Saxon recognizes the XQuery option declaration syntax. Several specific option
-         declarations are provided, but most of these are obsolete:</p>
+      <p>Saxon provides many extensions and implementation-defined features which can be used in XQuery. See
+         <a class="bodylink" href="/extensions">Extensions</a> for full details about using these.</p>
       
-      <ul>
-         <li><code>declare option saxon:default</code> declares a default
-            value for external variables (query parameters). No longer needed in
-         XQuery 3.0, which provides native syntax for declaring default values.</li>
-         <li><code>declare option saxon:output</code>
-            declares a serialization parameter. Superseded by <code>declare option output:XXXXX</code>.</li>
-         <li><code>declare option saxon:memo-function</code>
-            defines whether the following function declaration is to be implemented as a memo function;
-         superseded by the function annotation <code>%saxon:memo-function</code>.</li>
-      </ul>
-      <p>Any other option declaration in the Saxon namespace is ignored with a warning; an option
-         declaration in any other namespace is ignored silently.</p>
-   </section>
-   <section id="extensions" title="Extensions">
-      <h1>XQuery extensions</h1>
-
-
-      <p>The full library of Saxon, EXSLT and EXPath functions described in <a class="bodylink"
-            href="/extensions">Extensions</a> is available, except for those (for example, some
+      <p>The full library of Saxon, EXSLT and EXPath functions described in the <a class="bodylink"
+         href="/functions">Function library</a> is available, except for those (for example, some
          forms of <code>saxon:serialize</code>) that have an intrinsic dependency on an XSLT
          stylesheet.</p>
-     
-     <p>The XPath syntax extensions described in <a class="bodylink"
-        href="/v4extensions">Experimental 4.0 extensions</a> are also available in XQuery.</p>
-     
-      <h2 class="subtitle">declare option saxon:default</h2>
-
-      <aside>
-         This extension is obsolete, as the functionality is available from Saxon 9.2 onwards
-            using the syntax in the XQuery 3.0 specification.
-      </aside>
-
-      <p>An XQuery option declaration is defined allowing a default value to be specified for a
-         query parameter (external variable). The syntax is illustrated below:</p>
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
-declare option saxon:default "20";
-declare variable $x external;
-]]></samp>
-
-      <p>The default value is written as an XPath expression. The surrounding quotes are part of the
-         "declare option" syntax, not part of the expression: therefore, if the default value is to
-         be supplied as a string literal, two sets of quotes are needed.</p>
-      <p>From XQuery 3.0, the above syntax can be replaced by:</p>
       
-      <samp><![CDATA[declare variable $x external := 20;]]></samp>
-      <h2 class="subtitle">declare option saxon:output</h2>
+      <p>The XPath syntax extensions described in <a class="bodylink"
+         href="/v4extensions">Experimental 4.0 extensions</a> are also available in XQuery.</p>
       
-      <aside>
-         From XQuery 3.0, standard serialization parameters can be set using
-         <code>declare option output:XXXX</code>. Saxon-specific option declarations
-         are still needed for Saxon-specific serialization parameters such as
-         <code>saxon:double-space</code>.
-      </aside>
-
-      <p>Saxon provides an option declaration to set serialization parameters. This takes the form
-         shown in the following example:</p>
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
-declare option saxon:output "method=html";
-declare option saxon:output "saxon:indent-spaces=1";
-]]></samp>
-
-      <p>All the standard serialization parameters described in the <a
-         href="http://www.w3.org/TR/xslt-xquery-serialization-31/" class="bodylink">W3C
-            Serialization specification</a> are available</p>
+      <p>There are a number of XQuery specific extensions available, which are fully documented in <a
+         class="bodylink" href="/extensions/xquery-syntax">XQuery syntax extensions</a>:</p>
+      
       <ul>
-         <li>
-            <p>allow-duplicate-names</p>
-         </li>
-         <li>
-            <p>build-tree</p>
-         </li>
-         <li>
-            <p>byte-order-mark</p>
-         </li>
-         <li>
-            <p>cdata-section-elements</p>
-         </li>
-         <li>
-            <p>doctype-public</p>
-         </li>
-         <li>
-            <p>doctype-system</p>
-         </li>
-         <li>
-            <p>encoding</p>
-         </li>
-         <li>
-            <p>escape-uri-attributes</p>
-         </li>
-         <li>
-            <p>html-version</p>
-         </li>
-         <li>
-            <p>include-content-type</p>
-         </li>
-         <li>
-            <p>indent</p>
-         </li>
-         <li>
-            <p>item-separator</p>
-         </li>
-         <li>
-            <p>json-node-output-method</p>
-         </li>
-         <li>
-            <p>media-type</p>
-         </li>
-         <li>
-            <p>method</p>
-         </li>
-         <li>
-            <p>normalization-form</p>
-         </li>
-         <li>
-            <p>omit-xml-declaration</p>
-         </li>
-         <li>
-            <p>standalone</p>
-         </li>
-         <li>
-            <p>suppress-indentation</p>
-         </li>
-         <li>
-            <p>undeclare-prefixes</p>
-         </li>
-         <li>
-            <p>use-character-maps</p>
-         </li>
-         <li>
-            <p>version</p>
-         </li>
+         <li><p>Saxon recognizes the XQuery pragma syntax, but it currently defines only one pragma of its
+            own, <a class="bodylink" href="/extensions/xquery-syntax/validate-type">the
+               <code>saxon:validate-type</code> pragma</a>, and this is now mostly redundant since the equivalent
+            facility is standard in XQuery 3.0. It serves one remaining purpose, which
+            is to allow attributes to be validated. Saxon will adopt the correct fallback behavior if
+            presented with a query that uses another vendor's extensions, provided these are designed
+            in conformance with the W3C pragma specification.</p></li>
+         <li><p>Saxon recognizes the XQuery option declaration syntax. Some specific option
+            declarations are provided, but these are mostly obsolete:</p>
+            <ul>
+               <li><code>declare option saxon:output</code>
+                  declares a serialization parameter. Superseded by <code>declare option output:XXXXX</code>;
+                  except Saxon-specific option declarations are still needed for declaring Saxon-specific
+                  serialization parameters. (See <a class="bodylink"
+                     href="/extensions/xquery-syntax/output">The <code>saxon:output</code> option
+                     declaration</a>.)</li>
+               <li><code>declare option saxon:memo-function</code>
+                  defines whether the following function declaration is to be implemented as a memo function;
+                  superseded by the function annotation <code>%saxon:memo-function</code>.
+                  (See <a class="bodylink" href="/extensions/xquery-syntax/memo-function">The
+                     <code>saxon:memo-function</code> option declaration</a>.)</li>
+            </ul>
+            <p>Any other option declaration in the Saxon namespace is ignored with a warning; an option
+               declaration in any other namespace is ignored silently.</p></li>
       </ul>
-
-      <p>In addition some Saxon-specific serialization parameters are available: see <a
-            class="bodylink" href="/extensions/output-extras">Additional serialization
-            parameters</a>.</p>
-      <h2 class="subtitle">declare option saxon:memo-function</h2>
-
-      <p>Saxon provides an option declaration to treat the immediately following function as a
-         memo-function. This takes the form shown in the following example:</p>
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
-declare option saxon:memo-function "true";
-declare function local:factorial($n as xs:integer) as xs:integer {
-  local:factorial($n - 1) * n
-};
-]]></samp>
       
-      <p>Alternatively:</p>
-      
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
-declare %saxon:memo-function function local:factorial($n as xs:integer) as xs:integer {
-  local:factorial($n - 1) * n
-};
-]]></samp>
-
-      <p>A memo function remembers the results of previous calls, so if it is called twice with the
-         same arguments, it will not repeat the computation, but return the previous result.</p>
-
-      <p>The allowed values of the option are "true" and "false" (the default is false), and any
-         other value is ignored with a warning.</p>
-      <h2 class="subtitle">declare option saxon:allow-cycles</h2>
-      
-      <p>In XQuery 1.0, it was an error XQST0093 for a function or variable in module A to reference a function
-         or variable in module B if there is a function or variable in module B that references one
-         in A. This restriction was dropped in XQuery 3.0. Saxon introduced the option <code>declare option saxon:allow-cycles
-            "true"</code> to disable the check in XQuery 1.0. The option also disables error XQST0073, which
-         otherwise occurs when two modules in different namespaces import each other.</p>
-
-      <p>The allowed values of the option are "true" and "false" (the default is false), and any
-         other value is ignored with a warning.</p>
-
-      <p>This option does not disable the check for cycles that would actually cause execution to
-         fail, for example a global variable <code>$V1</code> whose initializer uses
-            <code>$V2</code>, when <code>$V2</code> similarly depends on <code>$V1</code>.</p>
-
-      <p>Note that this option declaration must be written <i>after</i> the module imports, but
-         before any variable or function declarations.</p>
-      <h2 class="subtitle">The saxon:validate-type pragma</h2>
-
-      <p>
-         <i>This extension is largely obsolescent: since version 9.3, Saxon implements the XQuery
-            3.0 syntax for validation by type. The extension does serve one remaining purpose, which
-            is to allow attributes to be validated. (The standard syntax requires an element or
-            document node.)</i>
-      </p>
-
-      <p>Saxon-EE provides a pragma (a language extension) to allow constructed elements to be
-         validated against a schema-defined global type definition. The standard
-            <code>validate</code> expression allows validation only against a global element
-         declaration, but some schemas (an example is FpML) provide very few global elements, and
-         instead rely heavily on locally-declared elements having a global type. This makes it
-         impossible to construct fragments of an FpML document in a way that takes advantage of
-         static and dynamic type checking.</p>
-
-      <p>The extension takes the form:</p>
-      <samp><![CDATA[(# saxon:validate-type my:personType #) { expr }
-]]></samp>
-
-      <p>Conceptually, it makes a copy of the result of evaluating <code>expr</code> and validates
-         it against the named schema type, causing the copied nodes to acquire type annotations
-         based on the validation process. The effect is the same as that of the <code>type</code>
-         attribute in XSLT instructions such as <code>xsl:element</code> and
-            <code>xsl:copy-of</code>. The schema type (shown in the above example as
-            <code>myPersonType</code>) may be a simple type or a complex type defined in an imported
-         schema, or a built-in type; it is written as a QName, using the default namespace for
-         elements and types if it is unprefixed.</p>
-
-      <p>Note that XQuery processors other than Saxon will typically ignore this pragma, and return
-         the value of <code>expr</code> unchanged. Such processors will report type-checking
-         failures if the value is used in a context where the required type is <code>element(*,
-            type-name)</code>.</p>
-
-      <p>You can use a different namespace prefix in place of <code>saxon</code>, but it must be
-         bound using a namespace declaration to the namespace
-         <code>"http://saxon.sf.net/"</code>.</p>
-
-      <p>Here is a complete example:</p>
-      <samp><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
-declare namespace saxon="http://saxon.sf.net/";
-import schema namespace fpml = "http://www.fpml.org/2005/FpML-4-2" at "....";
-
-declare function time:getCurrentHourMinuteTime() as element(*, fpml:HourMinuteTime) {
-    let $time = string(current-time())
-    return
-        (# saxon:validate-type fpml:HourMinuteTime #) {
-            <time>{substring($time, 1, 5)}:00</time>
-        }
-};        
-]]></samp>
-
-      <p>Saxon ignores any pragmas in a namespace other than the Saxon namespace; it rejects any
-         pragmas whose QName is ill-formed, as well as pragmas in the Saxon namespace whose local
-         name is not recognized.</p>
-
-      <p>The construct also allows validation of attributes against a simple type definition, for
-         example:</p>
-      <samp><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
-declare namespace saxon="http://saxon.sf.net/";
-import schema namespace fpml = "http://www.fpml.org/2005/FpML-4-2" at "....";
-
-declare function time:getCurrentHourMinuteTime() as attribute(*, fpml:HourMinuteTime) {
-    let $time = string(current-time())
-    return (# saxon:validate-type fpml:HourMinuteTime #) {
-       attribute time {concat(substring($time, 1, 5), ':00')}
-    }
-};        
-]]></samp>
    </section>
    <section id="usecases" title="Use cases">
       <h1>Use cases</h1>

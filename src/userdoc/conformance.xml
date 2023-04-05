@@ -1230,7 +1230,7 @@
             <p>
                ► Saxon-EE recognizes one pragma:
                <code>saxon:validate-type</code>. For details, see
-               <a class="bodylink" href="/using-xquery/extensions">XQuery extensions</a>.
+               <a class="bodylink" href="/extensions/xquery-syntax">XQuery syntax extensions</a>.
             </p>
          </li>
          <li>
