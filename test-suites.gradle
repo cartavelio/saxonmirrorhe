@@ -72,6 +72,15 @@ def testSuiteMatrix = [
         "": [:],
         "strict": ["strict":"on"]
       ]
+    ],
+    "xslt30extra": [
+      "_class": "net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30extra.xml",
+      "_depends": ["copySaxonExtraTestSuites"],
+      "XT30": [
+        "": [:],
+        "strict": ["strict":"on"]
+      ]
     ]
   ],
   "pej": [
@@ -133,6 +142,17 @@ def testSuiteMatrix = [
         "": [:],
         "strict": ["strict":"on"]
       ]
+    ],
+    "xslt30extra": [
+      "_class": "com.saxonica.testdriver.Xslt30TestSuiteDriverPE",
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt30extra.xml",
+      "_depends": ["copySaxonExtraTestSuites"],
+      "XT30": [
+        "": [:],
+/*
+        "strict": ["strict":"on"]
+*/
+      ]
     ]
   ],
   "eej": [
@@ -142,7 +162,8 @@ def testSuiteMatrix = [
       "_depends": ["cloneQT3TestSuite"],
 
       "XP31": [
-        "": [:]
+        "": [:],
+        "unfold": ["unfolded": "on"],
       ],
       "XQ31": [
         "": [:],
@@ -160,6 +181,9 @@ def testSuiteMatrix = [
       ],
       "XQ31": [
         "": [:]
+      ],
+      "XQ40": [
+        "": [:]
       ]
     ],
     "expath": [
@@ -168,9 +192,13 @@ def testSuiteMatrix = [
       "_depends": ["copyEXPathTestSuite"],
 
       "XP31": [
-        "": [:]
+        "": [:],
+        "unfold": ["unfolded": "on"],
       ],
       "XQ31": [
+        "": [:]
+      ],
+      "XQ40": [
         "": [:]
       ]
     ],
@@ -280,6 +308,10 @@ def testSuiteMatrix = [
       "_exceptions": "${projectDir}/src/test/exceptions/qt3cs.xml",
       "_depends": ["cloneQT4TestSuite"],
 
+      "XQ31": [
+        "": [:],
+        "unfold": ["unfolded": "on"],
+      ],
       "XP40": [
         "": [:],
       ],
@@ -301,6 +333,15 @@ def testSuiteMatrix = [
       "_depends": ["copySaxonExtraTestSuites"],
 
       "XT30": [
+        "": [:],
+        "strict": ["strict":"on"]
+      ]
+    ],
+    "xslt40": [
+      "_exceptions": "${projectDir}/src/test/exceptions/xslt40.xml",
+      "_depends": ["cloneXslt40TestSuite"],
+
+      "XT40": [
         "": [:],
         "strict": ["strict":"on"]
       ]
