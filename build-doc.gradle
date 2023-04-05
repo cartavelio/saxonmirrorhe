@@ -964,9 +964,10 @@ task saxonc_api_doc(
         "saxonc.html"
       }
       filter { line ->
-        line.contains("saxoncee.html")
-                ? line.replace("saxoncee.html", "saxonc.html")
-                : line
+        line.replaceAll('@@VERSION@@', saxonVersion)
+          .replace('@@edition@@', 'ee')
+          .replace('@@EDITION@@', 'EE')
+          .replace("saxoncee.html", "saxonc.html")
       }
     }
   }
