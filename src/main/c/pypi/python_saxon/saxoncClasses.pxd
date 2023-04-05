@@ -20,9 +20,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setcwd(char* cwd)
         const char* getcwd()
 
-        void attachCurrentThread()
+        void attachCurrentThread() except +raise_py_error
 
-        void detachCurrentThread()
+        void detachCurrentThread()  except +raise_py_error
 
         XdmValue ** createXdmValueArray(int len)
 
@@ -48,13 +48,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setResourcesDirectory(const char* dir)
 
-        Xslt30Processor * newXslt30Processor()
+        Xslt30Processor * newXslt30Processor()    except +raise_py_error
 
-        XQueryProcessor * newXQueryProcessor()
+        XQueryProcessor * newXQueryProcessor()  except +raise_py_error
 
-        XPathProcessor * newXPathProcessor()
+        XPathProcessor * newXPathProcessor()   except +raise_py_error
 
-        SchemaValidator * newSchemaValidator()
+        SchemaValidator * newSchemaValidator() except +raise_py_error
 
         DocumentBuilder * newDocumentBuilder() except +raise_py_error
 
@@ -96,15 +96,15 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         XdmMap *makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int len_)
 
-        void setCatalog(const char * filename)
+        void setCatalog(const char * filename)  except +raise_py_error
 
         const char * getStringValue(XdmItem * item)
 
-        XdmNode * parseXmlFromString(const char* source, SchemaValidator * validator)
+        XdmNode * parseXmlFromString(const char* source, SchemaValidator * validator) except +raise_py_error
 
-        XdmNode * parseXmlFromFile(const char* source, SchemaValidator * validator)
+        XdmNode * parseXmlFromFile(const char* source, SchemaValidator * validator)  except +raise_py_error
 
-        XdmNode * parseXmlFromUri(const char* source, SchemaValidator * validator)
+        XdmNode * parseXmlFromUri(const char* source, SchemaValidator * validator)   except +raise_py_error
 
         bool isSchemaAwareProcessor()
 
@@ -251,7 +251,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         # Set the source from file for the transformation.
         void setGlobalContextFromFile(const char * filename)
 
-        void setInitialMode(const char * modeName)
+        void setInitialMode(const char * modeName)  except +raise_py_error
 
         void setCaptureResultDocuments(bool flag, bool rawResult)
 
