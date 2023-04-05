@@ -6318,7 +6318,7 @@
       <status>
         <p>Available since Saxon 11.</p>
       </status>
-      <saxon-edition>EE 11</saxon-edition>
+      <saxon-edition>PE/EE 11</saxon-edition>
       <details>
         <div>
           <p>If the supplied string is a valid NCName, it is returned unchanged.</p>
@@ -8412,7 +8412,6 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
 
         </div>
       </details>
-      <see-also name="query" namespace="http://saxon.sf.net/"/>
     </function>
     
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -10098,7 +10097,7 @@ return saxon:transform($splitter, $results)]]></samp>
       <status>
         <p>Available since Saxon 11.</p>
       </status>
-      <saxon-edition>EE 11</saxon-edition>
+      <saxon-edition>PE/EE 11</saxon-edition>
       <details>
         <div>
           <p>If the supplied string is valid according to the escaping rules of the <code>saxon:escape-NCName</code>
