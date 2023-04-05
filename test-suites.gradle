@@ -70,7 +70,7 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
-        "strict": ["strict":"on"]
+        "ex": ["export": "on"],
       ]
     ],
     "xslt30extra": [
@@ -79,7 +79,6 @@ def testSuiteMatrix = [
       "_depends": ["copySaxonExtraTestSuites"],
       "XT30": [
         "": [:],
-        "strict": ["strict":"on"]
       ]
     ]
   ],
@@ -121,18 +120,6 @@ def testSuiteMatrix = [
         "": [:]
       ]
     ],
-    "qt4": [
-      "_class": "com.saxonica.testdriver.QT3TestDriverPE",
-      "_exceptions": "${projectDir}/src/test/exceptions/qt4.xml",
-      "_depends": ["cloneQT4TestSuite"],
-
-      "XP40": [
-        "": [:]
-      ],
-      "XQ40": [
-        "": [:]
-      ]
-    ],
     "xslt30": [
       "_class": "com.saxonica.testdriver.Xslt30TestSuiteDriverPE",
       "_exceptions": "${projectDir}/src/test/exceptions/xslt30.xml",
@@ -140,6 +127,7 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
+        "ex": ["export": "on"],
         "strict": ["strict":"on"]
       ]
     ],
