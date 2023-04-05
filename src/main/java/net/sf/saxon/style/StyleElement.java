@@ -390,7 +390,7 @@ public abstract class StyleElement extends ElementImpl {
         if (NamespaceUri.isReserved(qName.getNamespaceUri())) {
             if (qName.hasURI(NamespaceUri.XSLT)) {
                 if (qName.getLocalPart().equals("initial-template")
-                        && (this instanceof XSLTemplate || this instanceof XSLCallTemplate)) {
+                        && (this instanceof XSLTemplate || this instanceof XSLCallTemplate || this instanceof XSLAcceptExpose)) {
                     return qName;
                 }
                 if (qName.getLocalPart().equals("original")) {

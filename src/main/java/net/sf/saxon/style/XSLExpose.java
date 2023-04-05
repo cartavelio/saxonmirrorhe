@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.NamedTemplate;
 import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
@@ -145,7 +146,7 @@ public class XSLExpose extends XSLAcceptExpose {
                         }
                         break;
                 }
-                if (!found) {
+                if (!found && !qName.equals(new StructuredQName("saxon", NamespaceUri.SAXON, "error-name"))) {
                     compileError("No " + sName + " exists in the containing package", "XTSE3020");
                 }
 
