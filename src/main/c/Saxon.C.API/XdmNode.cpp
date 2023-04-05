@@ -166,14 +166,12 @@ return this;}
 
     
     const char* XdmNode::getBaseUri(){
-
 	    if(baseURI != nullptr) {
 		    return baseURI;
 	    }
         allocFn fn = operator new;
         baseURI = getBaseURIForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
 	    return baseURI;
-
     }
     
     

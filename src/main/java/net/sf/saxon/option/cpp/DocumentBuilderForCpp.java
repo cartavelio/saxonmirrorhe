@@ -17,6 +17,7 @@ import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -40,8 +41,9 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
             if(baseUri != WordFactory.nullPointer()) {
                 try {
-                    builder.setBaseURI(new URI(CTypeConversion.toJavaString(baseUri)));
-                } catch (URISyntaxException e) {
+                    URI cwdURI = new File(CTypeConversion.toJavaString(baseUri)).toURI();
+                    builder.setBaseURI(cwdURI);
+                } catch (Exception e) {
                     throw new SaxonApiException(e);
                 }
             }
