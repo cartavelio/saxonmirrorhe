@@ -275,109 +275,116 @@ function exampleXMLFilterChain($proc, $xmlFile, $xsl1File, $xsl2File, $xsl3File)
 {
     echo '====== <b>XML Filter Chain using setSource</b><br/> =======';
 
+    try {
+        $executable = $proc->compileFromFile($xsl1File);
+        $executable->setInitialMatchSelectionAsFile($xmlFile);
 
-    $executable = $proc->compileFromFile($xsl1File);
-    $executable->setInitialMatchSelectionAsFile($xmlFile);
+        $xdmValue1 = $executable->applyTemplatesReturningValue();
 
-    $xdmValue1 = $executable->applyTemplatesReturningValue();
+        $executable2 = $proc->compileFromFile($xsl2File);
 
-    $executable2 = $proc->compileFromFile($xsl2File);
+        $executable2->setInitialMatchSelection($xdmValue1);
 
-    $executable2->setInitialMatchSelection($xdmValue1);
-
-    unset($xdmValue1);
-    $xdmValue1 = $executable2->applyTemplatesReturningValue();
+        unset($xdmValue1);
+        $xdmValue1 = $executable2->applyTemplatesReturningValue();
 
 
-    $executable3 = $proc->compileFromFile($xsl3File);
-    $executable3->setInitialMatchSelection($xdmValue1);
-    $result = $executable3->applyTemplatesReturningValue();
-    if ($result != null) {
-        echo 'Output:' . $result;
-    } else {
-        echo 'Result is null';
-        if ($executable3->exceptionOccurred()) {
+        $executable3 = $proc->compileFromFile($xsl3File);
+        $executable3->setInitialMatchSelection($xdmValue1);
+        $result = $executable3->applyTemplatesReturningValue();
+        if ($result != null) {
+            echo 'Output:' . $result;
+        } else {
+            echo 'Result is null';
+            if ($executable3->exceptionOccurred()) {
                 $errMessage = $executable2->getErrorMessage();
                 echo 'Expected error:  Message=' . $errMessage;
 
-            $executable3->exceptionClear();
+                $executable3->exceptionClear();
+            }
         }
+        $executable3->clearParameters();
+        $executable3->clearProperties();
+    } catch (Exception $e) {
+        echo "Exception: ".$e->getMessage();
     }
-    $executable3->clearParameters();
-    $executable3->clearProperties();
 }
 
 function exampleXMLFilterChain2($saxonProc, $proc, $xmlFile, $xsl1File, $xsl2File, $xsl3File)
 {
     echo '<b>exampleXMLFilterChain2: XML Filter Chain using Parameters</b><br/>';
-    $xdmNode = $saxonProc->parseXmlFromFile($xmlFile);
+    try {
+        $xdmNode = $saxonProc->parseXmlFromFile($xmlFile);
 
-    if ($xdmNode == NULL) {
-        echo "source node is NULL";
-        return;
-    }
+        if ($xdmNode == NULL) {
+            echo "source node is NULL";
+            return;
+        }
 
 
-    $executable = $proc->compileFromFile($xsl1File);
-    if ($executable == null) {
+        $executable = $proc->compileFromFile($xsl1File);
+        if ($executable == null) {
 
-        // $errCode = $proc->getErrorCode();
-        $errMessage = $proc->getErrorMessage();
-        echo 'Expected error:  Message=' . $errMessage;
-        $proc->exceptionClear();
-        return;
-    }
-    //$executable->setParameter('node', $xdmNode);
-    $executable->setInitialMatchSelection($xdmNode);
-    $xdmValue1 = $executable->applyTemplatesReturningValue();
-    if ($xdmValue1 == null) {
-        echo '<b>XML Filter Chain using using Parameters is NULL</b><br/>';
-        if ($executable->exceptionOccurred()) {
+            // $errCode = $proc->getErrorCode();
+            $errMessage = $proc->getErrorMessage();
+            echo 'Expected error:  Message=' . $errMessage;
+            $proc->exceptionClear();
+            return;
+        }
+        //$executable->setParameter('node', $xdmNode);
+        $executable->setInitialMatchSelection($xdmNode);
+        $xdmValue1 = $executable->applyTemplatesReturningValue();
+        if ($xdmValue1 == null) {
+            echo '<b>XML Filter Chain using using Parameters is NULL</b><br/>';
+            if ($executable->exceptionOccurred()) {
 
-                 // $errCode = $proc->getErrorCode();
-                  $errMessage = $executable->getErrorMessage();
-                  echo 'Expected error:  Message=' . $errMessage;
-              $executable->exceptionClear();
-          }
-        $proc->clearParameters();
-        return;
-    }
-      echo  "cp0 ===============x";
-   // $proc->clearParameters();
+                // $errCode = $proc->getErrorCode();
+                $errMessage = $executable->getErrorMessage();
+                echo 'Expected error:  Message=' . $errMessage;
+                $executable->exceptionClear();
+            }
+            $proc->clearParameters();
+            return;
+        }
 
-    $executable2 = $proc->compileFromFile($xsl2File);
+        // $proc->clearParameters();
 
-    $executable2->setInitialMatchSelection($xdmValue1);
-     echo "After xdmValue1";
-    $xdmValue2 = $executable2->applyTemplatesReturningValue();
-    if ($executable2->exceptionOccurred()) {
+        $executable2 = $proc->compileFromFile($xsl2File);
+
+        $executable2->setInitialMatchSelection($xdmValue1);
+        echo "After xdmValue1";
+        $xdmValue2 = $executable2->applyTemplatesReturningValue();
+        if ($executable2->exceptionOccurred()) {
             //$errCode = $proc->getErrorCode();
             $errMessage = $executable2->getErrorMessage();
             echo 'Expected error:  Message=' . $errMessage;
 
-        $executable2->exceptionClear();
-    }
-    $executable2->clearParameters();
+            $executable2->exceptionClear();
+        }
+        $executable2->clearParameters();
 
-    $executable3 = $proc->compileFromFile($xsl3File);
-    $executable3->setParameter('node', $xdmValue2);
-    $executable3->setInitialMatchSelection($xdmValue2);
-    echo "After setParameter xdmVaue2 \n";
-    $result = $executable3->applyTemplatesReturningValue();
-    echo "After result ";
-    if ($result != null) {
-        echo 'Output:' . $result;
-    } else {
-        echo 'Result is null';
-        if ($executable3->exceptionOccurred()) {
+        $executable3 = $proc->compileFromFile($xsl3File);
+        $executable3->setParameter('node', $xdmValue2);
+        $executable3->setInitialMatchSelection($xdmValue2);
+        echo "After setParameter xdmVaue2 \n";
+        $result = $executable3->applyTemplatesReturningValue();
+        echo "After result ";
+        if ($result != null) {
+            echo 'Output:' . $result;
+        } else {
+            echo 'Result is null';
+            if ($executable3->exceptionOccurred()) {
                 $errMessage = $executable3->getErrorMessage();
                 echo 'Expected error:  Message=' . $errMessage;
-            $executable3->exceptionClear();
+                $executable3->exceptionClear();
+            }
+            //return;
         }
-        //return;
-    }
-    $executable3->clearParameters();
-    $executable3->clearProperties();  
+        $executable3->clearParameters();
+        $executable3->clearProperties();
+    } catch (Exception $e) {
+         echo "Exception: ".$e->getMessage();
+     }
 }
 
 /* simple example to detect and handle errors from a transformation */
@@ -452,39 +459,36 @@ function testCallFunction($proc, $trans)
 
 
     echo "Test: testCallFunction:";
+    try {
+        $valueArray = array($proc->createAtomicValue((int)2), $proc->createAtomicValue((int)3));
+        $executable = $trans->compileFromFile("CallFunctionExample.xsl");
 
-    $valueArray = array($proc->createAtomicValue((int)2), $proc->createAtomicValue((int)3));
-    $executable = $trans->compileFromFile("php/CallFunctionExample.xsl");
+        $v = $executable->callFunctionReturningValue("{http://localhost/}add", $valueArray);
+        if ($v != NULL) {
 
-    $v = $executable->callFunctionReturningValue("{http://localhost/}add", $valueArray);
-    if ($v != NULL) {
+            $item = $v->getHead();
+            if ($item != NULL) {
+                if ($item->isAtomic() && ($item->getAtomicValue()->getLongValue() == 5)) {
+                    echo "Result is true";
+                } else {
+                    echo "Result is false" . $item->getAtomicValue()->getLongValue();
+                }
 
-        $item = $v->getHead();
-        if ($item != NULL) {
-            if ($item->isAtomic() && ($item->getAtomicValue()->getLongValue() == 5)) {
-                echo "Result is true";
             } else {
-                echo "Result is false" . $item->getAtomicValue()->getLongValue();
+                echo "Item is NULL";
+                echo $v;
             }
-
         } else {
-            echo "Item is NULL";
-            echo $v;
+
+            echo "Value is null";
+
+
+            echo "testCallFunction ======= FAIL ======";
         }
-    } else {
-
-        echo "Value is null";
-
-
-        echo "testCallFunction ======= FAIL ======";
-        if ($executable->exceptionOccurred()) {
-            $errMessage = $executable->getErrorMessage();
-            echo 'Expected error: Message=' . $errMessage;
-
-            $executable->exceptionClear();
-        }
+    } catch(Exception $ex) {
+        echo "Exception: ".$ex->getMessage();
+        return;
     }
-
 
 }
 
@@ -495,55 +499,60 @@ function testCallTemplate1($proc, $trans)
 
 
     echo "Test: testCallTemplate1:";
-    $executable = $trans->compileFromFile("xsl/addition.xsl");
-    if (!$trans->exceptionOccurred()) {
-
-        $a = $proc->createAtomicValue((int)2);
-
-        $b = $proc->createAtomicValue((int)3);
-
-        $valueArray = array("a" => $a, "b" => $b);
-
-        //$valueArray["a"] = $a;
-        //$valueArray["b"] = $b;
+    try {
         $executable = $trans->compileFromFile("xsl/addition.xsl");
+        if (!$trans->exceptionOccurred()) {
 
-        $executable->setProperty("omit-xml-declaration", "true");
+            $a = $proc->createAtomicValue((int)2);
 
-        $executable->setInitialTemplateParameters($valueArray);
+            $b = $proc->createAtomicValue((int)3);
 
-        $v = $executable->callTemplateReturningValue("t");
+            $valueArray = array("a" => $a, "b" => $b);
 
-        if ($v != NULL) {
+            //$valueArray["a"] = $a;
+            //$valueArray["b"] = $b;
+            $executable = $trans->compileFromFile("xsl/addition.xsl");
 
-            $item = $v->getHead();
-            if ($item != NULL) {
+            $executable->setProperty("omit-xml-declaration", "true");
 
-                if ($item->isNode() && ($item->getStringValue() == 5)) {  //($item->getAtomicValue()->getLongValue() == 5)) {
-                    echo "Result is true";
+            $executable->setInitialTemplateParameters($valueArray);
+
+            $v = $executable->callTemplateReturningValue("t");
+
+            if ($v != NULL) {
+
+                $item = $v->getHead();
+                if ($item != NULL) {
+
+                    if ($item->isNode() && ($item->getStringValue() == 5)) {  //($item->getAtomicValue()->getLongValue() == 5)) {
+                        echo "Result is true";
+                    }
+
+                } else {
+                    echo "Item is NULL";
+                    echo $v;
                 }
 
             } else {
-                echo "Item is NULL";
-                echo $v;
-            }
 
+                echo "Value is null";
+
+
+                echo "testCallTemplate ======= FAIL ======";
+                if ($executable->exceptionOccurred()) {
+                    $errMessage = $executable->getErrorMessage();
+                    echo 'Expected error: Message=' . $errMessage;
+                    $executable->exceptionClear();
+                }
+            }
+            $executable->clearParameters();
         } else {
 
-            echo "Value is null";
-
-
-            echo "testCallTemplate ======= FAIL ======";
-            if ($executable->exceptionOccurred()) {
-                $errMessage = $executable->getErrorMessage();
-                echo 'Expected error: Message=' . $errMessage;
-                $executable->exceptionClear();
-            }
+            echo "Error found in stylesheet";
         }
-        $executable->clearParameters();
-    } else {
-
-        echo "Error found in stylesheet";
+    } catch(Exception $ex) {
+        echo "Exception: ".$ex->getMessage();
+        return;
     }
 
 
@@ -597,29 +606,33 @@ function testPerformance()
         echo 'Processor is not schema aware';
 
      }
- $proc = $saxonProc->newXslt30Processor();   
-echo '<br/>';
- //testCallFunction($saxonProc, $proc);
-     testCallTemplate1($saxonProc, $proc);
-     exampleSimple1($saxonProc, $proc, $foo_xml, $foo_xsl);
-     echo '<br/>';
-       exampleSimple2($proc, "xml/foo.xml", $foo_xsl);
-      echo '<br/>';
-      exampleSimple3($saxonProc, $proc);
-      echo '<br/>';
-  exampleLoopVar($saxonProc, $proc, $foo_xml, $foo_xsl);
-      exampleParam($saxonProc, $proc, $foo_xml, $foo_xsl);
-      exampleError1($proc, $foo_xml, $err_xsl);
-      echo '<br/>';
-  exampleError2($proc, $foo_xml, $err1_xsl);
-      echo '<br/>';
-      exampleXMLFilterChain($proc, $foo_xml, $foo_xsl, $foo2_xsl, $foo3_xsl);
-      echo '<br/>';
-     exampleXMLFilterChain2($saxonProc, $proc, $foo_xml, $foo_xsl, $foo2_xsl, $foo3_xsl);
-      echo '<br/>';
-      unset($proc);
-  unset($saxonproc);
-//testPerformance();
+
+     $proc = $saxonProc->newXslt30Processor();
+
+    echo '<br/>';
+    testCallFunction($saxonProc, $proc);
+    echo '<br/>';
+    testCallTemplate1($saxonProc, $proc);
+    echo '<br/>';
+    exampleSimple1($saxonProc, $proc, $foo_xml, $foo_xsl);
+    echo '<br/>';
+    exampleSimple2($proc, "xml/foo.xml", $foo_xsl);
+    echo '<br/>';
+    exampleSimple3($saxonProc, $proc);
+    echo '<br/>';
+    exampleLoopVar($saxonProc, $proc, $foo_xml, $foo_xsl);
+    exampleParam($saxonProc, $proc, $foo_xml, $foo_xsl);
+    exampleError1($proc, $foo_xml, $err_xsl);
+    echo '<br/>';
+    exampleError2($proc, $foo_xml, $err1_xsl);
+    echo '<br/>';
+    exampleXMLFilterChain($proc, $foo_xml, $foo_xsl, $foo2_xsl, $foo3_xsl);
+    echo '<br/>';
+    exampleXMLFilterChain2($saxonProc, $proc, $foo_xml, $foo_xsl, $foo2_xsl, $foo3_xsl);
+    echo '<br/>';
+    unset($proc);
+    unset($saxonproc);
+    testPerformance();
 
 
 ?>
