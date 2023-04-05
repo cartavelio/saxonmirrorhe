@@ -204,21 +204,30 @@ provide any other feedback.</p>
          purchased from our <a target="_blank" href="https://www.saxonica.com/shop/shop.html">online
             store</a>).</p>
 
-      <h3>Location of the Saxon license file</h3>
-
-      <p>SaxonC looks in the path relative to where the main library has been installed. For
-        example, in <code>/usr/lib</code> if this is where <code>libsaxon-[EDITION]c-[VERSION].so</code> has
-          been installed for Linux.</p> <!-- Alternatively, Saxon also looks for the license according to the
-         environment variable <code>SAXONC_HOME</code>, if this has been set.</p>
-      <p>The license file can also be placed in the same directory as the stylesheet, but we advise
-         against this for PHP servers where the license might be compromised.</p>-->
-
-      <p>Alternatively the <code>licenseFileLocation</code> configuration property can be used to
-         provide the license location (see <a href="/configuration">Configuration</a> for more
-         details about setting configuration features). For example, to provide the
-            <code>licenseFileLocation</code> in PHP:</p>
-      <samp><![CDATA[$saxonProc = new Saxon\SaxonProcessor(true);
+     <h3>Location of the Saxon license file</h3>
+     
+     <p>SaxonC will search for the license key in the following locations:</p>
+     
+     <ol>
+       <li><p>If you supply a Saxon configuration file, the location given in the
+         <code>licenseFileLocation</code> attribute of the outermost <code>configuration</code> element in
+         this file.</p>
+       </li>
+       <li><p>The location specified using the configuration property <code>licenseFileLocation</code>.</p>
+         <p>When this configuration property is set, Saxon will immediately attempt to load the specified
+           file, avoiding any subsequent attempt to search for it on the classpath and elsewhere.</p>
+         <p>See <a href="/configuration">Configuration</a> for more details about setting configuration
+           properties with SaxonC. For example, to provide the <code>licenseFileLocation</code> in PHP:</p>
+         <samp><![CDATA[$saxonProc = new Saxon\SaxonProcessor(true);
 $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");]]></samp>
+       </li>
+       <li><p>The directory where the main SaxonC library has been installed.</p>
+         <p>For example on Linux, in <code>/usr/lib</code> if this is where
+           <code>libsaxon-[EDITION]c-[VERSION].so</code> has been installed.</p>
+       </li>
+       <li><p>The directory identified by the environment variable <code>SAXONC_HOME</code>.</p>
+       </li>
+     </ol>
 
       <h2 class="subtitle">SaxonC-HE</h2>
 
