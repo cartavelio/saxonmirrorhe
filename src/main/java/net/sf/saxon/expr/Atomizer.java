@@ -685,6 +685,7 @@ public final class Atomizer extends UnaryExpression {
                     } else {
                         String message = expr.expandMessage(e.getMessage());
                         XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                        e2.setErrorCodeQName(e.getErrorCodeQName());
                         e2.setXPathContext(context);
                         e2.maybeSetLocation(expr.getLocation());
                         throw e2;
