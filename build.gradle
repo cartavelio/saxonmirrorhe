@@ -89,6 +89,7 @@ ext {
   resolverJar = null
   resolverDataJar = null
   jlineJar = null
+  htmlparserJar = null
   version_h = saxonVersion.replace(".", "-")
   fileSeparator = System.getProperty("file.separator")
   DSTAMP=new Date().format("yyyyMMdd")
@@ -209,7 +210,7 @@ dependencies {
     [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
     [group: 'org.graalvm.sdk', name: 'graal-sdk', version: graalVersion],
     [group: 'org.graalvm.nativeimage', name: 'svm', version: graalVersion],
-    [group: 'nu.validator', name: 'htmlparser', version: '1.4.16'],
+    [group: 'nu.validator', name: 'htmlparser', version: htmlparserVersion],
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
     //fileTree(dir: 'extra/lib/', include: ['*.jar'])
@@ -223,7 +224,7 @@ dependencies {
     [group: 'junit', name: 'junit', version: '4.12'],
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     [group: sqlDriverGroup, name: sqlDriverName, version: sqlDriverVersion],
-    [group: 'nu.validator', name: 'htmlparser', version: '1.4.16'],
+    [group: 'nu.validator', name: 'htmlparser', version: htmlparserVersion],
     files("src/main/resources"),
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
@@ -275,7 +276,7 @@ dependencies {
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15']
   )
   pePomDependencies (
-    [group: 'nu.validator', name: 'htmlparser', version: '1.4.16']
+    [group: 'nu.validator', name: 'htmlparser', version: htmlparserVersion]
   )
 }
 
@@ -405,6 +406,7 @@ mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
 jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
 resolverJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}.jar"
 resolverDataJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}-data.jar"
+htmlparserJar = "${fileSeparator}htmlparser-${htmlparserVersion}.jar"
 configurations.compileClasspath.each { cp ->
   if (cp.toString().endsWith(icu4jJar)) {
     icu4jJar = cp.toString()
@@ -423,6 +425,9 @@ configurations.compileClasspath.each { cp ->
   }
   if (cp.toString().endsWith(jlineJar)) {
     jlineJar = cp.toString()
+  }
+  if (cp.toString().endsWith(htmlparserJar)) {
+    htmlparserJar = cp.toString()
   }
 }
 

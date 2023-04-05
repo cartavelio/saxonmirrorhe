@@ -453,6 +453,15 @@ task graal_eecCompile(
   destinationDirectory = new File("${buildDir}/classes/eec")
 }
 
+task unjar_htmlParser(
+  type: Copy,
+  description: "Unjar html parser"
+) {
+  inputs.file(htmlparserJar)
+  from zipTree(file(htmlparserJar))
+  into "${buildDir}/htmlparser"
+}
+
 task graal_hec_jar(
   type: Jar,
   dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces", "compile_function_library"],
@@ -497,7 +506,7 @@ task graal_hec_jar(
 
 task graal_pec_jar(
   type: Jar,
-  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser", "compile_function_library"],
   description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
@@ -543,6 +552,11 @@ task graal_pec_jar(
       exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
       exclude "META-INF/MANIFEST.MF"
     }
+  from ("${buildDir}/htmlparser") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }   
   from ("src/main/resources") {
     include "net/**"
   }
@@ -568,7 +582,7 @@ task graal_pec_jar(
 
 task graal_eec_jar(
   type: Jar,
-  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser", "compile_function_library"],
   description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
@@ -602,6 +616,11 @@ task graal_eec_jar(
       include "**/*.class"
       include "**/*.properties"
       exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/htmlparser") {
+      include "**/*.class"
+      include "**/*.properties"
       exclude "META-INF/MANIFEST.MF"
     }
   from ("${buildDir}/icu") {
