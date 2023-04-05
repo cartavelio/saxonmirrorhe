@@ -81,7 +81,7 @@ public:
   void registerSchemaFromString(const char * schemaStr, const char * systemID = nullptr);
 
 
-   //! Register the schema supplied as an Xdm Node Object
+   //! Register the schema supplied as an XDM Node Object
    /**
     *
     * @param schemaStr - The schema document supplied as an XdmNode object

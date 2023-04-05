@@ -81,6 +81,8 @@ public:
 
    //! Say whether just-in-time compilation of template rules should be used.
     /**
+    * <p><b>Recommendation:</b> disable this option unless you are confident that the
+    * stylesheet you are compiling is error-free.</p>
     *
     * @param jit true if just-in-time compilation is to be enabled. With this option enabled,
     *            static analysis of a template rule is deferred until the first time that the
@@ -92,8 +94,6 @@ public:
     *            or <code>ErrorList</code>, but this may happen after the <code>compile(Source)</code>
     *            method returns). This option is enabled by default in Saxon-EE, and is not available
     *            in Saxon-HE or Saxon-PE.
-    *            <p><b>Recommendation:</b> disable this option unless you are confident that the
-    *            stylesheet you are compiling is error-free.</p>
     */
     void setJustInTimeCompilation(bool jit);
 

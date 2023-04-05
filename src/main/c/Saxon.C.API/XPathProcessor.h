@@ -149,10 +149,10 @@ public:
      * Set the language version for the XPath compiler.
      *
      * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1.
-     *              <p>Setting the option to 1.0 requests an XPath 2.0 processor running in 1.0 compatibility mode;
+     *              Setting the option to 1.0 requests an XPath 2.0 processor running in 1.0 compatibility mode;
      *              this is equivalent to setting the language version to 2.0 and backwards compatibility mode to true.
      *              Requesting "3.05" gives XPath 3.0 plus the extensions defined in the XSLT 3.0 specification
-     *              (map types and map constructors).</p>
+     *              (map types and map constructors).
      */
     void setLanguageVersion(const char * version);
 
