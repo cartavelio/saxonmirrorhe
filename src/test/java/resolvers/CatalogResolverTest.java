@@ -1,7 +1,11 @@
 package resolvers;
 
+import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -10,12 +14,15 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Files;
 import java.util.Iterator;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CatalogResolverTest {
+    private final ConfigTest configTest = new ConfigTest();
+
     @Test
     public void noResolverFail() {
         Configuration config = new Configuration();
@@ -190,4 +197,67 @@ public class CatalogResolverTest {
         }
     }
 
+    @Test
+    public void resolveWithJAXPEntityResolver() {
+        // This is a test for #5950
+        
+        Processor processor = new Processor(false);
+        processor.getUnderlyingConfiguration().setResourceResolver(new Bug5950Resolver());
+
+        try {
+            XsltCompiler compiler = processor.newXsltCompiler();
+
+            String fn = configTest.getDataDir() + "bug5950/identity.xsl";
+            Source xsl = new SAXSource(new InputSource(Files.newInputStream(new File(fn).toPath())));
+            XsltExecutable exec = compiler.compile(xsl);
+
+            Xslt30Transformer transformer = exec.load30();
+
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            builder.setDTDValidation(true);
+            XdmNode doc = builder.build(new File(configTest.getDataDir() + "bug5950/doc.xml"));
+
+            transformer.setGlobalContextItem(doc);
+
+            XdmDestination destination = new XdmDestination();
+            transformer.applyTemplates(doc, destination);
+
+            System.out.println(destination.getXdmNode());
+
+        } catch (Exception ex) {
+            fail();
+        }
+    }
+
+    private class Bug5950Resolver implements ResourceResolver {
+
+        @Override
+        public Source resolve(ResourceRequest request) throws XPathException {
+            if ("chapter.xml".equals(request.uri)) {
+                return new SAXSource(new InputSource(configTest.getDataDir() + "bug5950/chapter.xml"));
+                /*
+                // This shows what happens if you return a StAXSource...it goes bang.
+                try {
+                    XMLInputFactory factory = XMLInputFactory.newInstance();
+                    XMLEventReader reader = factory.createXMLEventReader(new FileInputStream(configTest.getDataDir() + "bug5950/chapter.xml"));
+                    return new StAXSource(reader);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+                 */
+                /*
+                // This shows what happens if you return a DOMSource...also bang.
+                try {
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    javax.xml.parsers.DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document doc = builder.parse(configTest.getDataDir() + "bug5950/chapter.xml");
+                    return new DOMSource(doc);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+                 */
+            }
+            return null;
+        }
+    }
 }

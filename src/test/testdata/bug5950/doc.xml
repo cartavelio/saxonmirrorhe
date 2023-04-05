@@ -1,0 +1,6 @@
+<!DOCTYPE book SYSTEM "book.dtd" [
+<!ENTITY chap PUBLIC "-//XML//foo//EN" "chapter.xml">
+]>
+<book>
+&chap;
+</book>
