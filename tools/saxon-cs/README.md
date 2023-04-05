@@ -79,9 +79,19 @@ language, for example by using delegates rather than interfaces for callbacks.
 The older Saxon/.NET product will remain supported for the time being,
 but will not be further developed.
 
+## What's new in SaxonCS?
+
+SaxonCS is built with .NET Core (SaxonCS 12 supports .NET 6). SaxonCS includes
+lots of new features to make processing JSON easier; it's getting close to
+the point where JSON is supported almost as well as XML. Certainly, there's
+no better library available for applications that need to mix and match XML
+and JSON, or do custom conversions from one to the other.
+
+
 ## What's new in this version?
 
-There's a comprehensive list of changes in the documentation.
+There's a comprehensive list of changes in the 
+[documentation](https://www.saxonica.com/documentation12/).
 
 For a record of bugs fixed in each maintenance release, please consult the
 [issues list](https://saxonica.plan.io/projects/saxon/issues) — you can filter
