@@ -984,6 +984,56 @@ public class TestIntegratedFunctions {
         }
     }
 
+    @Test
+    public void testBug5937 () {
+        Processor processor = new Processor(false);
+
+        processor.registerExtensionFunction(new ExtensionFunction() {
+            @Override
+            public QName getName() {
+                return new QName("http://example.math.co.uk/demo", "sqrtSimple");
+            }
+
+            @Override
+            public SequenceType[] getArgumentTypes() {
+                return new SequenceType[]
+                        {
+                                SequenceType.makeSequenceType(ItemType.DOUBLE, OccurrenceIndicator.ZERO_OR_ONE)
+                        };
+            }
+
+            @Override
+            public SequenceType getResultType() {
+                return SequenceType.makeSequenceType(ItemType.DOUBLE, OccurrenceIndicator.ZERO_OR_ONE);
+            }
+
+            @Override
+            public XdmValue call(XdmValue[] xdmValues) throws SaxonApiException {
+                return xdmValues[0].isEmpty() ? XdmEmptySequence.getInstance() : new XdmAtomicValue(Math.sqrt(((XdmAtomicValue) xdmValues[0]).getDoubleValue()));
+            }
+        });
+
+        String xslt = "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "    xmlns:math='http://example.math.co.uk/demo'> " +
+                " <xsl:template name='xsl:initial-template'> " +
+                "   <out sqrt2='{math:sqrtSimple(2.0e0)}' " +
+                "        sqrtEmpty='{math:sqrtSimple(())}'/> " +
+                " </xsl:template>" +
+                " </xsl:transform>";
+
+        try {
+            Xslt30Transformer xslt30Transformer = processor.newXsltCompiler().compile(new StreamSource(new StringReader(xslt))).load30();
+            XdmDestination out = new XdmDestination();
+            xslt30Transformer.callTemplate(null, out);
+            assertTrue(out.getXdmNode().getOutermostElement().getAttributeValue(new QName("", "sqrt2")).startsWith("1.4142"));
+            assertEquals(out.getXdmNode().getOutermostElement().getAttributeValue(new QName("", "sqrtEmpty")), "");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+    }
+
 
     public static class ConstructDocument implements ExtensionFunction {
 
