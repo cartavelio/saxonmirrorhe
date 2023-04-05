@@ -532,14 +532,6 @@ namespace TestDriver {
                 Stream styleSource = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
                 compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 compiler.BaseUri = fileUri;
-                // try {
-                //     XsltPackage xpack = compiler.CompilePackage(styleSource, fileUri);
-                //     sheet = xpack.Link();
-                // }
-                // catch (Exception err) {
-                //     println(err.Message);
-                //     outcome.SetException(err);
-                // }
 
                 try {
                     sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource);
@@ -1023,7 +1015,7 @@ namespace TestDriver {
                 if (export) {
                     try {
                         Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".base.sef");
-                        Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
+                        Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
 
                         Console.WriteLine("Exported package to " + fileUri);
                         pack.Save(exportFile);

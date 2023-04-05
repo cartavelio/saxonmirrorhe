@@ -1113,6 +1113,9 @@ namespace TestDriver {
                 fsb.Append(expectedErrorQ.LocalName);
                 fsb.Append("; got ");
                 foreach (QName e in errorsReported) {
+                    if (e?.LocalName == "CRASH-999999") {
+                        return false;
+                    }
                     fsb.Append(e==null ? "ERR?????" : e.LocalName);
                     fsb.Append("|");
                 }
