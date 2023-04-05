@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 	SchemaValidator * validator = nullptr;
 
 	try {
-	processor->newSchemaValidator();
+	    validator = processor->newSchemaValidator();
 	} catch(SaxonApiException &e) {
 	    cout<<"Exception thrown when creating SchemaValidator message="<<e.what()<<endl;
 	    processor->release();
