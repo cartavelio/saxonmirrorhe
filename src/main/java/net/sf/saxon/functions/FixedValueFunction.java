@@ -7,26 +7,27 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.SequenceType;
 
 /**
- * A ConstantFunction is a zero-argument function that always delivers the same result, supplied
- * at the time the function is instantiated. It is a subclass of system function, which means there must
- * be a "details" entry giving information about the function name, signature, etc
+ * A ConstantFunction is a zero-argument anonymous function that always delivers the same result, supplied
+ * at the time the function is instantiated.
  */
 
-public class ConstantFunction extends SystemFunction  {
+public class FixedValueFunction extends AbstractFunction  {
 
-    public GroundedValue value;
+    private final GroundedValue value;
+    private final static SpecificFunctionType TYPE = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
 
-    public ConstantFunction(GroundedValue value) {
+
+    public FixedValueFunction(GroundedValue value) {
         this.value = value;
     }
 
@@ -36,30 +37,23 @@ public class ConstantFunction extends SystemFunction  {
     }
 
     @Override
-    public Expression makeFunctionCall(Expression[] arguments) {
-        return Literal.makeLiteral(value);
+    public FunctionItemType getFunctionItemType() {
+        return TYPE;
     }
 
     @Override
-    public IntegerValue[] getIntegerBounds() {
-        if (value instanceof IntegerValue) {
-            return new IntegerValue[]{(IntegerValue) value, (IntegerValue) value};
-        } else {
-            return null;
-        }
+    public StructuredQName getFunctionName() {
+        return null;
     }
 
-    public static class True extends ConstantFunction {
-        public True() {
-            super(BooleanValue.TRUE);
-        }
+    @Override
+    public int getArity() {
+        return 0;
     }
 
-    public static class False extends ConstantFunction {
-        public False() {
-            super(BooleanValue.FALSE);
-        }
+    @Override
+    public String getDescription() {
+        return "function(){" + value.toShortString() + "}";
     }
-
 }
 

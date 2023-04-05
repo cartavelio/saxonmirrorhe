@@ -23,6 +23,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A function obtained by currying another function, that is, the result of calling
@@ -43,7 +44,7 @@ public class CurriedFunction extends AbstractFunction {
      */
 
     public CurriedFunction(FunctionItem targetFunction, Sequence[] boundValues) {
-        this.targetFunction = targetFunction;
+        this.targetFunction = Objects.requireNonNull(targetFunction);
         this.boundValues = boundValues;
     }
 

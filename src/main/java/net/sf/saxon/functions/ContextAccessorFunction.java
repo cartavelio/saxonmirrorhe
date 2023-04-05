@@ -21,9 +21,9 @@ import net.sf.saxon.trans.XPathException;
 public abstract class ContextAccessorFunction extends SystemFunction {
 
     /**
-     * Bind a context item to appear as part of the function's closure. If this method
-     * has been called, the supplied context item will be used in preference to the
-     * context item at the point where the function is actually called.
+     * Bind context information to appear as part of the function's closure. If this method
+     * has been called, the supplied context will be used in preference to the
+     * context at the point where the function is actually called.
      * @param context the context to which the function applies. Must not be null.
      */
 

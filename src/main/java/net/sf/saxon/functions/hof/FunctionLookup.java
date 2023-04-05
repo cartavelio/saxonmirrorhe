@@ -128,6 +128,16 @@ public class FunctionLookup extends ContextAccessorFunction {
         }
     }
 
+    /**
+     * Determine the special properties of this function.
+     * @param arguments the actual arguments to the function call
+     */
+    @Override
+    public int getSpecialProperties(Expression[] arguments) {
+        // Prevent inlining of stylesheet functions or variables calling function-lookup(), because
+        // the dynamic context might be different
+        return super.getSpecialProperties(arguments) | StaticProperty.HAS_SIDE_EFFECTS;
+    }
 
     /**
      * Evaluate the expression
