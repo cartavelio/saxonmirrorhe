@@ -45,10 +45,8 @@ public class UriCollection extends SystemFunction {
 
         if (collection == null) {
             // Should not happen, we're calling user code so we check for it.
-            XPathException err = new XPathException("No collection has been defined for href: " + (absoluteURI == null ? "" : absoluteURI));
-            err.setErrorCode("FODC0002");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("No collection has been defined for href: " + (absoluteURI == null ? "" : absoluteURI))
+                    .withErrorCode("FODC0002").withXPathContext(context);
 
         }
         final Iterator<String> sources = collection.getResourceURIs(context);

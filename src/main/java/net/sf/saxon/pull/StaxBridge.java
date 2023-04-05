@@ -202,10 +202,9 @@ public class StaxBridge implements PullProvider {
                     message = message.substring(c + 10);
                 }
             }
-            XPathException err = new XPathException("Error reported by XML parser: " + message, e);
-            err.setErrorCode(SaxonErrorCode.SXXP0003);
-            err.setLocator(translateLocation(e.getLocation()));
-            throw err;
+            throw new XPathException("Error reported by XML parser: " + message, e)
+                    .withErrorCode(SaxonErrorCode.SXXP0003)
+                    .withLocation(translateLocation(e.getLocation()));
         }
         return currentEvent;
     }

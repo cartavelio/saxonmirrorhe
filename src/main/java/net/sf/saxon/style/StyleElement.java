@@ -366,25 +366,13 @@ public abstract class StyleElement extends ElementImpl {
             qName = StructuredQName.fromLexicalQName((lexicalQName), false,
                                                      true, this);
         } catch (XPathException e) {
-            e.setIsStaticError(true);
-            if (errorCode == null) {
-                String code = e.getErrorCodeLocalPart();
-                if ("FONS0004".equals(code)) {
-                    e.setErrorCode("XTSE0280");
-                } else if ("FOCA0002".equals(code)) {
-                    e.setErrorCode("XTSE0020");
-                } else if (code == null) {
-                    e.setErrorCode("XTSE0020");
-                }
-            } else {
-                e.setErrorCode(errorCode);
-            }
-            if (attributeName == null) {
-                e.setLocator(this);
-            } else {
-                e.setLocator(new AttributeLocation(this, StructuredQName.fromEQName((attributeName))));
-            }
-            compileError(e);
+            XPathException e2 = e.asStaticError()
+                    .replacingErrorCode("FONS0004", "XTSE0280")
+                    .replacingErrorCode("FOCA0002", "XTSE0020")
+                    .maybeWithErrorCode(errorCode == null ? "XTSE0020": errorCode)
+                    .asStaticError()
+                    .withLocation(attributeName == null ? this : new AttributeLocation(this, StructuredQName.fromEQName((attributeName))));
+            compileError(e2);
             qName = new StructuredQName("saxon", NamespaceUri.SAXON, "error-name");
         }
         if (NamespaceUri.isReserved(qName.getNamespaceUri())) {
@@ -741,10 +729,8 @@ public abstract class StyleElement extends ElementImpl {
             return p;
         } catch (XPathException err) {
             err.maybeSetErrorCode("XTSE0340");
-            if ("XPST0003".equals(err.getErrorCodeLocalPart())) {
-                err.setErrorCode("XTSE0340");
-            }
-            compileError(err);
+            XPathException err2 = err.replacingErrorCode("XPST0003", "XTSE0340");
+            compileError(err2);
             NodeTestPattern nsp = new NodeTestPattern(AnyNodeTest.getInstance());
             nsp.setLocation(allocateLocation());
             return nsp;
@@ -2378,7 +2364,7 @@ public abstract class StyleElement extends ElementImpl {
         if (err.getLocator() == null) {
             err.setLocation(this);
         }
-        XmlProcessingIncident se = new XmlProcessingIncident(err.getMessage(), err.getErrorCodeLocalPart(), err.getLocator());
+        XmlProcessingIncident se = new XmlProcessingIncident(err.getMessage(), err.showErrorCode(), err.getLocator());
         se.setHostLanguage(HostLanguage.XSLT);
         compileError(se);
     }
@@ -2435,6 +2421,11 @@ public abstract class StyleElement extends ElementImpl {
         StructuredQName att = StructuredQName.fromClarkName(attributeName);
         Location location = new AttributeLocation(this, att);
         compileError(new XPathException(message, errorCode, location));
+    }
+
+    public void compileErrorInAttribute(XPathException ex, String attributeName) {
+        StructuredQName att = StructuredQName.fromClarkName(attributeName);
+        compileError(ex.withLocation(new AttributeLocation(this, att)));
     }
 
     protected void invalidAttribute(String attributeName, String allowedValues) {

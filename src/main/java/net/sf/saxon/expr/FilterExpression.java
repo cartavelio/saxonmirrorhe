@@ -233,8 +233,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     return Literal.makeEmptySequence();
                 }
             } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw e;
+                throw e.maybeWithLocation(getLocation());
             }
         }
 
@@ -1163,8 +1162,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     }
                 }
             } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw e;
+                throw e.maybeWithLocation(getLocation());
             }
         }
 

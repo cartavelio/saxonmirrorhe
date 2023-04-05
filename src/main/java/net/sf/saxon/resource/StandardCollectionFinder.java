@@ -74,10 +74,9 @@ public class StandardCollectionFinder
             }
 
         } catch (URISyntaxException e) {
-            XPathException err = new XPathException("Invalid relative URI " + Err.wrap(collectionURI, Err.VALUE) + " passed to collection() function");
-            err.setErrorCode("FODC0004");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("Invalid relative URI " + Err.wrap(collectionURI, Err.VALUE)
+                                             + " passed to collection() function")
+                    .withErrorCode("FODC0004").withXPathContext(context);
         }
 
         URI resolvedURI;
@@ -148,10 +147,9 @@ public class StandardCollectionFinder
 
     public static void checkFileExists(File file, URI resolvedURI, XPathContext context) throws XPathException {
         if (!file.exists()) {
-            XPathException err = new XPathException("The file or directory " + resolvedURI + " does not exist");
-            err.setErrorCode("FODC0002");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("The file or directory " + resolvedURI + " does not exist")
+                    .withErrorCode("FODC0002")
+                    .withXPathContext(context);
         }
     }
 }

@@ -105,11 +105,10 @@ public abstract class TextLinesIterator implements SequenceIterator {
                 ch32 = UTF16CharacterSet.combinePair((char) ch32, low);
             }
             if (!checker.test(ch32)) {
-                XPathException err = new XPathException("The unparsed-text file contains a character that is illegal in XML (line=" +
-                        position + " column=" + (c + 1) + " value=hex " + Integer.toHexString(ch32) + ')');
-                err.setErrorCode("FOUT1190");
-                err.setLocator(location);
-                throw err;
+                throw new XPathException("The unparsed-text file contains a character that is illegal in XML (line=" +
+                        position + " column=" + (c + 1) + " value=hex " + Integer.toHexString(ch32) + ')')
+                        .withErrorCode("FOUT1190")
+                        .withLocation(location);
             }
         }
     }

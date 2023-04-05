@@ -118,10 +118,8 @@ public class ParseIetfDate extends SystemFunction implements Callable {
     }
 
     private static void badDate(String msg, String value) throws XPathException{
-        XPathException err = new XPathException(
-                "Invalid IETF date value " + value + " (" + msg + ")");
-        err.setErrorCode("FORG0010");
-        throw err;
+        throw new XPathException(
+                "Invalid IETF date value " + value + " (" + msg + ")", "FORG0010");
     }
 
     private final String[] timezoneNames = new String[]{

@@ -11,9 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.StringView;
@@ -232,23 +230,23 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
                 pattern = config.compileRegularExpression(StringView.tidy(regex), flagstr, hostLang, warnings);
 
             } catch (XPathException err) {
-                if ("XTDE1150".equals(err.getErrorCodeLocalPart())) {
+                if (err.hasErrorCode("XTDE1150")) {
                     throw err;
                 }
-                if ("FORX0001".equals(err.getErrorCodeLocalPart())) {
-                    invalidRegex("Error in regular expression flags: " + err, "FORX0001");
+                if (err.hasErrorCode("FORX0001")) {
+                    invalidRegex("Error in regular expression flags: " + err, err.getErrorCodeQName());
                 } else {
-                    invalidRegex("Error in regular expression: " + err, err.getErrorCodeLocalPart());
+                    invalidRegex("Error in regular expression: " + err, err.getErrorCodeQName());
                 }
             }
         }
     }
 
-    private void invalidRegex(String message, String errorCode) throws XPathException {
+    private void invalidRegex(String message, StructuredQName errorCode) throws XPathException {
         pattern = null;
-        XPathException err = new XPathException(message, errorCode);
-        err.setLocation(getLocation());
-        throw err;
+        throw new XPathException(message)
+                .withErrorCode(errorCode)
+                .withLocation(getLocation());
     }
 
     /**

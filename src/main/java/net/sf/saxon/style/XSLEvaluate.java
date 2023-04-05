@@ -156,7 +156,7 @@ public class XSLEvaluate extends StyleElement {
             try {
                 requiredType = makeSequenceType(asAtt);
             } catch (XPathException e) {
-                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
+                compileErrorInAttribute(e, "as");
             }
         }
 

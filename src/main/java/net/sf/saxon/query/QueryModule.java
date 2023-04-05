@@ -256,16 +256,10 @@ public class QueryModule implements StaticContext {
 
         NamespaceUri namespace = module.getModuleNamespace();
         if (namespace == null) {
-            XPathException err = new XPathException("Imported module must be a library module");
-            err.setErrorCode("XQST0059");
-            err.setIsStaticError(true);
-            throw err;
+            staticError("Imported module must be a library module", "XQST0059");
         }
         if (!namespace.equals(namespaceURI)) {
-            XPathException err = new XPathException("Imported module's namespace does not match requested namespace");
-            err.setErrorCode("XQST0059");
-            err.setIsStaticError(true);
-            throw err;
+            staticError("Imported module's namespace does not match requested namespace", "XQST0059");
         }
 
         return module;
@@ -790,13 +784,11 @@ public class QueryModule implements StaticContext {
                     oldloc += " in module " + oldVar.getSystemId();
                 }
                 oldloc += ")";
-                XPathException err = new XPathException("Duplicate definition of global variable "
-                        + var.getVariableQName().getDisplayName()
-                        + oldloc);
-                err.setErrorCode("XQST0049");
-                err.setIsStaticError(true);
-                err.setLocation(var);
-                throw err;
+                throw new XPathException("Duplicate definition of global variable "
+                        + var.getVariableQName().getDisplayName() + oldloc)
+                        .withErrorCode("XQST0049")
+                        .asStaticError()
+                        .withLocation(var);
             }
         }
         variables.put(key, var);
@@ -807,13 +799,12 @@ public class QueryModule implements StaticContext {
         if (old == null || old == var) {
             // do nothing
         } else {
-            XPathException err = new XPathException("Duplicate definition of global variable "
+            throw new XPathException("Duplicate definition of global variable "
                     + var.getVariableQName().getDisplayName()
-                    + " (see line " + old.getLineNumber() + " in module " + old.getSystemId() + ')');
-            err.setErrorCode("XQST0049");
-            err.setIsStaticError(true);
-            err.setLocation(var);
-            throw err;
+                    + " (see line " + old.getLineNumber() + " in module " + old.getSystemId() + ')')
+                    .withErrorCode("XQST0049")
+                    .asStaticError()
+                    .withLocation(var);
         }
 
         if (!isMainModule()) {
@@ -985,18 +976,12 @@ public class QueryModule implements StaticContext {
 //                    }
                 } else {
                     if (var.isPrivate()) {
-                        XPathException err = new XPathException("Variable $" + qName.getDisplayName() + " is private");
-                        err.setErrorCode("XPST0008");
-                        err.setIsStaticError(true);
-                        throw err;
+                        staticError("Variable $" + qName.getDisplayName() + " is private", "XPST0008");
                     }
                 }
             } else {
                 // If the namespace hasn't been imported then we might as well throw the error right away
-                XPathException err = new XPathException("Variable $" + qName.getDisplayName() + " has not been declared");
-                err.setErrorCode("XPST0008");
-                err.setIsStaticError(true);
-                throw err;
+                staticError("Variable $" + qName.getDisplayName() + " has not been declared", "XPST0008");
             }
         } else {
             if (var.isPrivate() && (var.getSystemId() == null || !var.getSystemId().equals(getSystemId()))) {
@@ -1004,9 +989,7 @@ public class QueryModule implements StaticContext {
                 if (var.getSystemId() == null) {
                     message += " (no base URI known)";
                 }
-                XPathException err = new XPathException(message, "XPST0008");
-                err.setIsStaticError(true);
-                throw err;
+                staticError(message, "XPST0008");
             }
         }
         GlobalVariableReference vref = new GlobalVariableReference(qName);
@@ -1056,11 +1039,10 @@ public class QueryModule implements StaticContext {
             StructuredQName name = function.getFunctionName();
             SchemaType t = config.getSchemaType(name);
             if (t != null && t.isAtomicType()) {
-                XPathException err = new XPathException("Function name " + function.getDisplayName() +
-                        " clashes with the name of the constructor function for an atomic type");
-                err.setErrorCode("XQST0034");
-                err.setIsStaticError(true);
-                throw err;
+                String message = "Function name " + function.getDisplayName() +
+                        " clashes with the name of the constructor function for an atomic type";
+                String errorCode = "XQST0034";
+                staticError(message, errorCode);
             }
         }
         XQueryFunctionLibrary local = getLocalFunctionLibrary();
@@ -1069,6 +1051,10 @@ public class QueryModule implements StaticContext {
         QueryModule main = getTopLevelModule();
         main.globalFunctionLibrary.declareFunction(function);
         //}
+    }
+
+    private static void staticError(String message, String errorCode) throws XPathException {
+        throw new XPathException(message, errorCode).asStaticError();
     }
 
     /**
@@ -1167,16 +1153,10 @@ public class QueryModule implements StaticContext {
                 }
             }
             if (var == null) {
-                XPathException err = new XPathException("Unresolved reference to variable $" +
-                        uv.getVariableQName().getDisplayName());
-                err.setErrorCode("XPST0008");
-                err.setIsStaticError(true);
-                throw err;
+                staticError("Unresolved reference to variable $" +
+                        uv.getVariableQName().getDisplayName(), "XPST0008");
             } else if (var.isPrivate() && !var.getSystemId().equals(getSystemId())) {
-                XPathException err = new XPathException("Cannot reference a private variable in a different module");
-                err.setErrorCode("XPST0008");
-                err.setIsStaticError(true);
-                throw err;
+                staticError("Cannot reference a private variable in a different module", "XPST0008");
             } else {
                 uv.transferReferences(var);
             }
@@ -1335,16 +1315,10 @@ public class QueryModule implements StaticContext {
             throw new NullPointerException("Null namespace URI supplied to declarePrologNamespace()");
         }
         if (prefix.equals("xml") != uri.equals(NamespaceUri.XML)) {
-            XPathException err = new XPathException("Invalid declaration of the XML namespace");
-            err.setErrorCode("XQST0070");
-            err.setIsStaticError(true);
-            throw err;
+            staticError("Invalid declaration of the XML namespace", "XQST0070");
         }
         if (explicitPrologNamespaces.get(prefix) != null) {
-            XPathException err = new XPathException("Duplicate declaration of namespace prefix \"" + prefix + '"');
-            err.setErrorCode("XQST0033");
-            err.setIsStaticError(true);
-            throw err;
+            staticError("Duplicate declaration of namespace prefix \"" + prefix + '"', "XQST0033");
         } else {
             explicitPrologNamespaces.put(prefix, uri);
         }

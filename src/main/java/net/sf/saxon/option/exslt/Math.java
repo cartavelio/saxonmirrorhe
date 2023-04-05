@@ -238,9 +238,7 @@ public abstract class Math {
         } else if (name.equals("SQRT1_2")) {
             con = "0.7071067811865476";
         } else {
-            XPathException e = new XPathException("Unknown math constant " + name);
-            e.setXPathContext(context);
-            throw e;
+            throw new XPathException("Unknown math constant " + name).withXPathContext(context);
         }
 
         return Double.parseDouble(con.substring(0, ((int) precision) + 2));

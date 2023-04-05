@@ -132,9 +132,7 @@ public abstract class NameChecker {
             }
             return parts;
         } catch (QNameException e) {
-            XPathException err = new XPathException(e.getMessage());
-            err.setErrorCode("FORG0001");
-            throw err;
+            throw new XPathException(e.getMessage(), "FORG0001");
         }
     }
 

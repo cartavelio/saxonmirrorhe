@@ -50,9 +50,7 @@ public class UnicodeNormalizer extends ProxyReceiver {
                 normForm = Normalizer.Form.NFKD;
                 break;
             default:
-                XPathException err = new XPathException("Unknown normalization form " + form);
-                err.setErrorCode("SESU0011");
-                throw err;
+                throw new XPathException("Unknown normalization form " + form, "SESU0011");
         }
     }
 

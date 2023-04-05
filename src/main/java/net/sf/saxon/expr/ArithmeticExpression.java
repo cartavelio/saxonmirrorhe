@@ -149,10 +149,8 @@ public class ArithmeticExpression extends BinaryExpression {
         }
 
         if (itemType0.getUType().union(itemType1.getUType()).overlaps(UType.EXTENSION)) {
-            XPathException de = new XPathException("Arithmetic operators are not defined for external objects");
-            de.setLocation(getLocation());
-            de.setErrorCode("XPTY0004");
-            throw de;
+            throw new XPathException("Arithmetic operators are not defined for external objects")
+                    .withLocation(getLocation()).withErrorCode("XPTY0004");
         }
 
         if (getLhsExpression() != oldOp0) {
@@ -192,12 +190,9 @@ public class ArithmeticExpression extends BinaryExpression {
                 type0.getFingerprint(), type1.getFingerprint(), mapOpCode(operator), mustResolve);
 
         if (calculator == null) {
-            XPathException de = new XPathException("Arithmetic operator is not defined for arguments of types (" +
-                    type0.getDescription() + ", " + type1.getDescription() + ")");
-            de.setLocation(getLocation());
-            de.setIsTypeError(true);
-            de.setErrorCode("XPTY0004");
-            throw de;
+            throw new XPathException("Arithmetic operator is not defined for arguments of types (" +
+                    type0.getDescription() + ", " + type1.getDescription() + ")")
+                    .withLocation(getLocation()).asTypeError().withErrorCode("XPTY0004");
         }
 
         // If the calculator is going to promote arguments to xs:double, then promote any literal arguments now.
@@ -484,9 +479,7 @@ public class ArithmeticExpression extends BinaryExpression {
                     try {
                         return calc.compute(v0, v1, context);
                     } catch (XPathException e) {
-                        e.maybeSetContext(context);
-                        e.maybeSetLocation(exp.getLocation());
-                        throw e;
+                        throw e.maybeWithLocation(exp.getLocation()).maybeWithContext(context);
                     }
                 };
             } else if (calc instanceof Calculator.DoublePlusDouble && exp.getRhsExpression() instanceof Literal) {
@@ -500,9 +493,7 @@ public class ArithmeticExpression extends BinaryExpression {
                     try {
                         return calc.compute(v0, v1, context);
                     } catch (XPathException e) {
-                        e.maybeSetContext(context);
-                        e.maybeSetLocation(exp.getLocation());
-                        throw e;
+                        throw e.maybeWithLocation(exp.getLocation()).maybeWithContext(context);
                     }
                 };
             }

@@ -116,7 +116,7 @@ public class XSLAnalyzeString extends StyleElement {
                     issueWarning(w, SaxonErrorCode.SXWN9022);
                 }
             } catch (XPathException err) {
-                if ("FORX0001".equals(err.getErrorCodeLocalPart())) {
+                if (err.hasErrorCode("FORX0001")) {
                     invalidFlags("Error in regular expression flags: " + err.getMessage());
                 } else {
                     invalidRegex("Error in regular expression: " + err.getMessage());

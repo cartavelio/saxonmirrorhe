@@ -64,10 +64,9 @@ public class FormatDate extends SystemFunction implements Callable {
         try {
             cal = StructuredQName.fromLexicalQName((calendarVal), false, true, getRetainedStaticContext());
         } catch (XPathException e) {
-            XPathException err = new XPathException("Invalid calendar name. " + e.getMessage());
-            err.setErrorCode("FOFD1340");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("Invalid calendar name. " + e.getMessage())
+                    .withErrorCode("FOFD1340")
+                    .withXPathContext(context);
         }
 
         if (cal.hasURI(NamespaceUri.NULL)) {
@@ -77,10 +76,9 @@ public class FormatDate extends SystemFunction implements Callable {
             } else if (Arrays.binarySearch(knownCalendars, calLocal) >= 0) {
                 result = "[Calendar: AD]" + result;
             } else {
-                XPathException err = new XPathException("Unknown no-namespace calendar: " + calLocal);
-                err.setErrorCode("FOFD1340");
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException("Unknown no-namespace calendar: " + calLocal)
+                        .withErrorCode("FOFD1340")
+                        .withXPathContext(context);
             }
         } else {
             result = "[Calendar: AD]" + result;
@@ -143,10 +141,9 @@ public class FormatDate extends SystemFunction implements Callable {
                 if (format.charAt(i) == ']') {
                     i++;
                     if (i == format.length() || format.charAt(i) != ']') {
-                        XPathException e = new XPathException("Closing ']' in date picture must be written as ']]'");
-                        e.setErrorCode("FOFD1340");
-                        e.setXPathContext(context);
-                        throw e;
+                        throw new XPathException("Closing ']' in date picture must be written as ']]'")
+                                .withErrorCode("FOFD1340")
+                                .withXPathContext(context);
                     }
                 }
                 i++;
@@ -162,10 +159,9 @@ public class FormatDate extends SystemFunction implements Callable {
             } else {
                 int close = i < format.length() ? format.indexOf("]", i) : -1;
                 if (close == -1) {
-                    XPathException e = new XPathException("Date format contains a '[' with no matching ']'");
-                    e.setErrorCode("FOFD1340");
-                    e.setXPathContext(context);
-                    throw e;
+                    throw new XPathException("Date format contains a '[' with no matching ']'")
+                            .withErrorCode("FOFD1340")
+                            .withXPathContext(context);
                 }
                 String componentFormat = format.substring(i, close);
                 sb.append(formatComponent(value, Whitespace.removeAllWhitespace(componentFormat),
@@ -190,10 +186,9 @@ public class FormatDate extends SystemFunction implements Callable {
         ARegexIterator matcher = (ARegexIterator)componentPattern.analyze(uSpecifier);
         Item firstMatch = matcher.next();
         if (firstMatch == null || firstMatch.getUnicodeStringValue().length32() != uSpecifier.length32() || !matcher.isMatching()) {
-            XPathException error = new XPathException("Unrecognized date/time component [" + specifier + ']');
-            error.setErrorCode("FOFD1340");
-            error.setXPathContext(context);
-            throw error;
+            throw new XPathException("Unrecognized date/time component [" + specifier + ']')
+                    .withErrorCode("FOFD1340")
+                    .withXPathContext(context);
         }
         UnicodeString component = matcher.getRegexGroup(1);
         UnicodeString format = matcher.getRegexGroup(2);
@@ -228,10 +223,9 @@ public class FormatDate extends SystemFunction implements Callable {
         switch (component.codePointAt(0)) {
             case 'Y':       // year
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): an xs:time value does not contain a year component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): an xs:time value does not contain a year component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int year = dtvalue.getYear();
                     if (year < 0) {
@@ -241,60 +235,54 @@ public class FormatDate extends SystemFunction implements Callable {
                 }
             case 'M':       // month
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): an xs:time value does not contain a month component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): an xs:time value does not contain a month component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int month = dtvalue.getMonth();
                     return formatNumber(component, month, format, defaultFormat, numberer, context);
                 }
             case 'D':       // day in month
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): an xs:time value does not contain a day component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): an xs:time value does not contain a day component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int day = dtvalue.getDay();
                     return formatNumber(component, day, format, defaultFormat, numberer, context);
                 }
             case 'd':       // day in year
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): an xs:time value does not contain a day component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): an xs:time value does not contain a day component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int day = DateValue.getDayWithinYear(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, day, format, defaultFormat, numberer, context);
                 }
             case 'W':       // week of year
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): cannot obtain the week number from an xs:time value");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): cannot obtain the week number from an xs:time value")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int week = DateValue.getWeekNumber(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, week, format, defaultFormat, numberer, context);
                 }
             case 'w':       // week in month
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): cannot obtain the week number from an xs:time value");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): cannot obtain the week number from an xs:time value")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int week = DateValue.getWeekNumberWithinMonth(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, week, format, defaultFormat, numberer, context);
                 }
             case 'H':       // hour in day
                 if (ignoreTime) {
-                    XPathException error = new XPathException("In format-date(): an xs:date value does not contain an hour component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-date(): an xs:date value does not contain an hour component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     Int64Value hour = (Int64Value) value.getComponent(AccessorFn.Component.HOURS);
                     assert hour != null;
@@ -302,10 +290,9 @@ public class FormatDate extends SystemFunction implements Callable {
                 }
             case 'h':       // hour in half-day (12 hour clock)
                 if (ignoreTime) {
-                    XPathException error = new XPathException("In format-date(): an xs:date value does not contain an hour component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-date(): an xs:date value does not contain an hour component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     Int64Value hour = (Int64Value) value.getComponent(AccessorFn.Component.HOURS);
                     assert hour != null;
@@ -320,10 +307,9 @@ public class FormatDate extends SystemFunction implements Callable {
                 }
             case 'm':       // minutes
                 if (ignoreTime) {
-                    XPathException error = new XPathException("In format-date(): an xs:date value does not contain a minutes component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-date(): an xs:date value does not contain a minutes component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     Int64Value minutes = (Int64Value) value.getComponent(AccessorFn.Component.MINUTES);
                     assert minutes != null;
@@ -331,10 +317,9 @@ public class FormatDate extends SystemFunction implements Callable {
                 }
             case 's':       // seconds
                 if (ignoreTime) {
-                    XPathException error = new XPathException("In format-date(): an xs:date value does not contain a seconds component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-date(): an xs:date value does not contain a seconds component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     IntegerValue seconds = (IntegerValue) value.getComponent(AccessorFn.Component.WHOLE_SECONDS);
                     assert seconds != null;
@@ -343,10 +328,9 @@ public class FormatDate extends SystemFunction implements Callable {
             case 'f':       // fractional seconds
                 // ignore the format
                 if (ignoreTime) {
-                    XPathException error = new XPathException("In format-date(): an xs:date value does not contain a fractional seconds component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-date(): an xs:date value does not contain a fractional seconds component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     Int64Value micros = (Int64Value) value.getComponent(AccessorFn.Component.MICROSECONDS);
                     assert micros != null;
@@ -378,20 +362,18 @@ public class FormatDate extends SystemFunction implements Callable {
 
             case 'F':       // day of week
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): an xs:time value does not contain day-of-week component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): an xs:time value does not contain day-of-week component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int day = DateValue.getDayOfWeek(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, day, format, defaultFormat, numberer, context);
                 }
             case 'P':       // am/pm marker
                 if (ignoreTime) {
-                    XPathException error = new XPathException("In format-date(): an xs:date value does not contain an am/pm component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-date(): an xs:date value does not contain an am/pm component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int minuteOfDay = dtvalue.getHour() * 60 + dtvalue.getMinute();
                     return formatNumber(component, minuteOfDay, format, defaultFormat, numberer, context);
@@ -400,19 +382,17 @@ public class FormatDate extends SystemFunction implements Callable {
                 return StringView.of(numberer.getCalendarName("AD")).tidy();
             case 'E':       // era
                 if (ignoreDate) {
-                    XPathException error = new XPathException("In format-time(): an xs:time value does not contain an AD/BC component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new XPathException("In format-time(): an xs:time value does not contain an AD/BC component")
+                            .withErrorCode("FOFD1350")
+                            .withXPathContext(context);
                 } else {
                     int year = dtvalue.getYear();
                     return StringView.of(numberer.getEraName(year)).tidy();
                 }
             default:
-                XPathException e = new XPathException("Unknown format-date/time component specifier '" + format.substring(0, 1) + '\'');
-                e.setErrorCode("FOFD1340");
-                e.setXPathContext(context);
-                throw e;
+                throw new XPathException("Unknown format-date/time component specifier '" + format.substring(0, 1) + '\'')
+                        .withErrorCode("FOFD1340")
+                        .withXPathContext(context);
         }
     }
 
@@ -618,10 +598,7 @@ public class FormatDate extends SystemFunction implements Callable {
         try {
             picGroupFormat = FormatInteger.getPicSeparators(primary);
         } catch (XPathException e) {
-            if ("FODF1310".equals(e.getErrorCodeLocalPart())) {
-                e.setErrorCode("FOFD1340");
-            }
-            throw e;
+            throw e.replacingErrorCode("FODF1310", "FOFD1340");
         }
         UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
 
@@ -690,9 +667,7 @@ public class FormatDate extends SystemFunction implements Callable {
             result[1] = max;
             return result;
         } catch (NumberFormatException err) {
-            XPathException e = new XPathException("Invalid integer used as width in date/time picture");
-            e.setErrorCode("FOFD1340");
-            throw e;
+            throw new XPathException("Invalid integer used as width in date/time picture", "FOFD1340");
         }
     }
 

@@ -764,10 +764,9 @@ public class ExpressionTool {
      */
 
     public static void ebvError(String reason) throws XPathException {
-        XPathException err = new XPathException("Effective boolean value is not defined for " + reason);
-        err.setErrorCode("FORG0006");
-        err.setIsTypeError(true);
-        throw err;
+        throw new XPathException("Effective boolean value is not defined for " + reason)
+                .withErrorCode("FORG0006")
+                .asTypeError();
     }
 
     /**
@@ -779,11 +778,10 @@ public class ExpressionTool {
      */
 
     public static void ebvError(String reason, Expression cause) throws XPathException {
-        XPathException err = new XPathException("Effective boolean value is not defined for " + reason);
-        err.setErrorCode("FORG0006");
-        err.setIsTypeError(true);
-        err.setFailingExpression(cause);
-        throw err;
+        throw new XPathException("Effective boolean value is not defined for " + reason)
+                .withErrorCode("FORG0006")
+                .asTypeError()
+                .withFailingExpression(cause);
     }
 
     /**

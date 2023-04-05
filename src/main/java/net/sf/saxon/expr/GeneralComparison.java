@@ -248,11 +248,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         }
 
         if (t0.getUType().union(t1.getUType()).overlaps(UType.EXTENSION)) {
-            XPathException err = new XPathException("Cannot perform comparisons involving external objects");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            err.setLocator(getLocation());
-            throw err;
+            throw new XPathException("Cannot perform comparisons involving external objects")
+                    .asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
         }
 
         BuiltInAtomicType pt0 = (BuiltInAtomicType) t0.getPrimitiveItemType();
@@ -285,11 +282,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                                 " operand is empty, and in that case will always be false", SaxonErrorCode.SXWN9025, getLocation());
                     }
                 } else {
-                    XPathException err = new XPathException(message);
-                    err.setErrorCode("XPTY0004");
-                    err.setIsTypeError(true);
-                    err.setLocator(getLocation());
-                    throw err;
+                    throw new XPathException(message)
+                            .withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
                 }
             }
 
@@ -913,10 +907,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 }
                 return false;
             } catch (XPathException e) {
-                // re-throw the exception with location information added
-                e.maybeSetLocation(loc);
-                e.maybeSetContext(context);
-                throw e;
+                throw e.maybeWithLocation(loc).maybeWithContext(context);
             }
 
 
@@ -990,10 +981,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                     }
                 }
             } catch (XPathException e) {
-                // re-throw the exception with location information added
-                e.maybeSetLocation(loc);
-                e.maybeSetContext(context);
-                throw e;
+                throw e.maybeWithLocation(loc).maybeWithContext(context);
             }
         }
     }

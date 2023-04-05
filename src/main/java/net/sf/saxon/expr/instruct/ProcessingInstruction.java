@@ -172,9 +172,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
             try {
                 return checkContentXQuery(data);
             } catch (XPathException err) {
-                err.setXPathContext(context);
-                err.setLocation(getLocation());
-                throw err;
+                throw err.withLocation(getLocation()).withXPathContext(context);
             }
         }
     }
@@ -230,9 +228,9 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
             // Always true under XSLT
             return checkName(av, context);
         } else {
-            XPathException e = new XPathException("Processing instruction name is not a string");
-            e.setXPathContext(context);
-            e.setErrorCode("XPTY0004");
+            XPathException e = new XPathException("Processing instruction name is not a string")
+                    .withXPathContext(context)
+                    .withErrorCode("XPTY0004");
             throw dynamicError(getLocation(), e, context);
         }
     }
@@ -241,24 +239,24 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         if (name instanceof StringValue && !(name instanceof AnyURIValue)) {
             String expandedName = Whitespace.trim(name.getStringValue());
             if (!NameChecker.isValidNCName(expandedName)) {
-                XPathException e = new XPathException("Processing instruction name " + Err.wrap(expandedName) + " is not a valid NCName");
-                e.setXPathContext(context);
-                e.setErrorCode(isXSLT() ? "XTDE0890" : "XQDY0041");
+                XPathException e = new XPathException("Processing instruction name " + Err.wrap(expandedName) + " is not a valid NCName")
+                        .withXPathContext(context)
+                        .withErrorCode(isXSLT() ? "XTDE0890" : "XQDY0041");
                 throw dynamicError(getLocation(), e, context);
             }
             if (expandedName.equalsIgnoreCase("xml")) {
-                XPathException e = new XPathException("Processing instructions cannot be named 'xml' in any combination of upper/lower case");
-                e.setXPathContext(context);
-                e.setErrorCode(isXSLT() ? "XTDE0890" : "XQDY0064");
+                XPathException e = new XPathException("Processing instructions cannot be named 'xml' in any combination of upper/lower case")
+                        .withXPathContext(context)
+                        .withErrorCode(isXSLT() ? "XTDE0890" : "XQDY0064");
                 throw dynamicError(getLocation(), e, context);
             }
             return expandedName;
         } else {
             XPathException e = new XPathException("Processing instruction name " + Err.wrap(name.getUnicodeStringValue()) +
-                                                          " is not of type xs:string or xs:untypedAtomic");
-            e.setXPathContext(context);
-            e.setErrorCode("XPTY0004");
-            e.setIsTypeError(true);
+                                                          " is not of type xs:string or xs:untypedAtomic")
+                    .withXPathContext(context)
+                    .withErrorCode("XPTY0004")
+                    .asTypeError();
             throw dynamicError(getLocation(), e, context);
         }
     }

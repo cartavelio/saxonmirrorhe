@@ -135,7 +135,7 @@ public class XSLAccumulatorRule extends StyleElement {
     protected SourceBinding hasImplicitBinding(StructuredQName name) {
         if (name.getLocalPart().equals("value") && name.hasURI(NamespaceUri.NULL)) {
             SourceBinding sb = new SourceBinding(this);
-            sb.setVariableQName(new StructuredQName("", NamespaceUri.NULL, "value"));
+            sb.setVariableQName(NamespaceUri.NULL.qName("value"));
             assert getParent() != null;
             sb.setDeclaredType(((XSLAccumulator)getParent()).getResultType());
             sb.setProperty(SourceBinding.BindingProperty.IMPLICITLY_DECLARED, true);

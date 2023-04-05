@@ -229,21 +229,18 @@ public class DocumentFn extends SystemFunction implements Callable {
             if (controller instanceof XsltController &&
                     !((XsltController)controller).checkUniqueOutputDestination(documentKey)) {
                 pool.markUnavailable(documentKey);
-                XPathException err = new XPathException(
-                        "Cannot read a document that was written during the same transformation: " + documentKey);
-                err.setXPathContext(c);
-                err.setErrorCode("XTRE1500");
-                err.setLocator(locator);
-                throw err;
+                throw new XPathException(
+                            "Cannot read a document that was written during the same transformation: " + documentKey)
+                        .withXPathContext(c)
+                        .withErrorCode("XTRE1500")
+                        .withLocation(locator);
             }
 
             if (pool.isMarkedUnavailable(documentKey)) {
-                XPathException err = new XPathException(
-                        "Document has been marked not available: " + documentKey);
-                err.setXPathContext(c);
-                err.setErrorCode("FODC0002");
-                err.setLocator(locator);
-                throw err;
+                throw new XPathException("Document has been marked not available: " + documentKey)
+                        .withXPathContext(c)
+                        .withErrorCode("FODC0002")
+                    .withLocation(locator);
             }
         }
 
@@ -317,12 +314,10 @@ public class DocumentFn extends SystemFunction implements Callable {
                     newdoc = b.getCurrentRoot().getTreeInfo();
                     b.reset();
                 } catch (XPathException err) {
-                    if (err.getErrorCodeLocalPart() == null || err.getErrorCodeLocalPart().equals("SXXP0003")) {
+                    if (err.getErrorCodeQName() == null || err.hasErrorCode("SXXP0003")) {
                         err.setErrorCode("FODC0002");
                     }
-                    err.maybeSetLocation(locator);
-                    err.maybeSetContext(c);
-                    throw err;
+                    throw err.maybeWithLocation(locator).maybeWithContext(c);
                 } finally {
                     if (options.isPleaseCloseAfterUse()) {
                         ParseOptions.close(source);
@@ -349,11 +344,9 @@ public class DocumentFn extends SystemFunction implements Callable {
 
         } catch (TransformerException err) {
             pool.markUnavailable(documentKey);
-            XPathException xerr = XPathException.makeXPathException(err);
-            xerr.maybeSetLocation(locator);
             String code = (err.getException() instanceof URISyntaxException) ? "FODC0005" : "FODC0002";
-            xerr.maybeSetErrorCode(code);
-            throw xerr;
+            XPathException xerr = XPathException.makeXPathException(err);
+            throw xerr.maybeWithLocation(locator).maybeWithErrorCode(code);
         }
     }
 
@@ -371,9 +364,9 @@ public class DocumentFn extends SystemFunction implements Callable {
                 fragmentId = href.substring(hash + 1);
                 href = href.substring(0, hash);
                 if (!NameChecker.isValidNCName(fragmentId)) {
-                    XPathException de = new XPathException("The fragment identifier " + Err.wrap(fragmentId) + " is not a valid NCName");
-                    de.setErrorCode("XTDE1160");
-                    throw de;
+                    throw new XPathException(
+                            "The fragment identifier " + Err.wrap(fragmentId) + " is not a valid NCName",
+                            "XTDE1160");
                 }
             }
         }
@@ -645,9 +638,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         try {
             Sender.send(source, out, parseOptions);
         } catch (XPathException e) {
-            e.maybeSetLocation(locator);
-            e.maybeSetErrorCode("FODC0002");
-            throw e;
+            throw e.maybeWithLocation(locator).maybeWithErrorCode("FODC0002");
         }
     }
 

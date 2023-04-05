@@ -152,16 +152,12 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
     @Override
     public YearMonthDurationValue multiply(double n) throws XPathException {
         if (Double.isNaN(n)) {
-            XPathException err = new XPathException("Cannot multiply a duration by NaN");
-            err.setErrorCode("FOCA0005");
-            throw err;
+            throw new XPathException("Cannot multiply a duration by NaN", "FOCA0005");
         }
         double m = getLengthInMonths();
         double product = n * m;
         if (Double.isInfinite(product) || product > Integer.MAX_VALUE || product < Integer.MIN_VALUE) {
-            XPathException err = new XPathException("Overflow when multiplying a duration by a number");
-            err.setErrorCode("FODT0002");
-            throw err;
+            throw new XPathException("Overflow when multiplying a duration by a number", "FODT0002");
         }
         // following code is needed to get the correct rounding on both Java and C#
         return fromMonths((int)new DoubleValue(product).round(0).longValue());
@@ -176,9 +172,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
         int m = getLengthInMonths();
         BigDecimal product = n.multiply(BigDecimal.valueOf(m));
         if (product.abs().compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
-            XPathException err = new XPathException("Overflow when multiplying a duration by a number");
-            err.setErrorCode("FODT0002");
-            throw err;
+            throw new XPathException("Overflow when multiplying a duration by a number", "FODT0002");
         }
         // following code is needed to get the correct rounding on both Java and C#
         return fromMonths((int) new BigDecimalValue(product).round(0).longValue());
@@ -192,16 +186,12 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
     @Override
     public DurationValue divide(double n) throws XPathException {
         if (Double.isNaN(n)) {
-            XPathException err = new XPathException("Cannot divide a duration by NaN");
-            err.setErrorCode("FOCA0005");
-            throw err;
+            throw new XPathException("Cannot divide a duration by NaN", "FOCA0005");
         }
         double m = getLengthInMonths();
         double product = m / n;
         if (Double.isInfinite(product) || product > Integer.MAX_VALUE || product < Integer.MIN_VALUE) {
-            XPathException err = new XPathException("Overflow when dividing a duration by a number");
-            err.setErrorCode("FODT0002");
-            throw err;
+            throw new XPathException("Overflow when dividing a duration by a number", "FODT0002");
         }
         // following code is needed to get the correct rounding on both Java and C#
         return fromMonths((int) new DoubleValue(product).round(0).longValue());
@@ -244,9 +234,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
             return fromMonths(getLengthInMonths() +
                     ((YearMonthDurationValue) other).getLengthInMonths());
         } else {
-            XPathException err = new XPathException("Cannot add two durations of different type");
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Cannot add two durations of different type", "XPTY0004").asTypeError();
         }
     }
 
@@ -260,9 +248,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
             return fromMonths(getLengthInMonths() -
                     ((YearMonthDurationValue) other).getLengthInMonths());
         } else {
-            XPathException err = new XPathException("Cannot subtract two durations of different type");
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Cannot subtract two durations of different type", "XPTY0004").asTypeError();
         }
     }
 

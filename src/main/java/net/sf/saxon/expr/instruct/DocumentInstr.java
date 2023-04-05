@@ -395,9 +395,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                         out.close();
                         return builder.getCurrentRoot();
                     } catch (XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        e.maybeSetContext(context);
-                        throw e;
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     }
                 };
             }

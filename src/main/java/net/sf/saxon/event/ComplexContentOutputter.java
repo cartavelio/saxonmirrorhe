@@ -333,10 +333,9 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
             if (prefix.isEmpty() && !namespaceUri.isEmpty()) {
                 if (pendingStartTag.hasURI(NamespaceUri.NULL)) {
-                    XPathException err = new XPathException("Cannot output a namespace node for the default namespace ("
-                                                                    + namespaceUri + ") when the element is in no namespace");
-                    err.setErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE0440" : "XQDY0102");
-                    throw err;
+                    throw new XPathException("Cannot output a namespace node for the default namespace ("
+                                                                    + namespaceUri + ") when the element is in no namespace")
+                            .withErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE0440" : "XQDY0102");
                 }
             }
 
@@ -346,12 +345,11 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                 // Handle declarations whose prefix is duplicated for this element.
                 NamespaceUri uri = pendingNSMap.getNamespaceUri(prefix);
                 if (uri != null && !uri.equals(namespaceUri)) {
-                    XPathException err = new XPathException(
+                    throw new XPathException(
                             "Cannot create two namespace nodes with the same prefix "
                                     + "mapped to different URIs (prefix=\"" + prefix + "\", URIs=(" +
-                                    uri + "\", \"" + namespaceUri + "\")");
-                    err.setErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE0430" : "XQDY0102");
-                    throw err;
+                                    uri + "\", \"" + namespaceUri + "\")")
+                            .withErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE0430" : "XQDY0102");
                 }
             }
             pendingNSMap = pendingNSMap.put(prefix, namespaceUri);
@@ -430,10 +428,9 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                         pendingAttributes.set(a, attInfo);
                         return;
                     } else {
-                        XPathException err = new XPathException("Cannot create an element having two attributes with the same name: " +
-                                Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE));
-                        err.setErrorCode("XQDY0025");
-                        throw err;
+                        throw new XPathException("Cannot create an element having two attributes with the same name: " +
+                                Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE))
+                                .withErrorCode("XQDY0025");
                     }
                 }
             }
@@ -447,10 +444,9 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
             // commenting-out in line above done MHK 22 Jul 2011 to pass test Constr-cont-nsmode-8
             // reverted 2011-07-27 to pass tests in qischema family
             if (typeCode.isNamespaceSensitive()) {
-                XPathException err = new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
-                        Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE));
-                err.setErrorCode(hostLanguage == HostLanguage.XSLT ? "XTTE0950" : "XQTY0086");
-                throw err;
+                throw new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
+                        Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE))
+                        .withErrorCode(hostLanguage == HostLanguage.XSLT ? "XTTE0950" : "XQTY0086");
             }
         }
 
@@ -885,10 +881,9 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
         case Type.ATTRIBUTE:
             if (((SimpleType) node.getSchemaType()).isNamespaceSensitive()) {
-                XPathException err = new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
-                        Err.wrap(node.getDisplayName(), Err.ATTRIBUTE));
-                err.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                throw err;
+                throw new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
+                        Err.wrap(node.getDisplayName(), Err.ATTRIBUTE))
+                        .withErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
             }
             attribute(NameOfNode.makeName(node), (SimpleType) node.getSchemaType(), node.getStringValue(), locationId, ReceiverOption.NONE);
             break;

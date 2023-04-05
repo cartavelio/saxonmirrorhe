@@ -664,10 +664,8 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
             return new TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(),
                     dt.getNanosecond(), getTimezoneInMinutes(), BuiltInAtomicType.TIME);
         } else {
-            XPathException err = new XPathException("Time+Duration arithmetic is supported only for xs:dayTimeDuration");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("Time+Duration arithmetic is supported only for xs:dayTimeDuration", "XPTY0004")
+                    .asTypeError();
         }
     }
 

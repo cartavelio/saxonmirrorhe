@@ -231,15 +231,11 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
     public final CalendarValue adjustTimezone(/*@NotNull*/ DayTimeDurationValue tz) throws XPathException {
         long microseconds = tz.getLengthInMicroseconds();
         if (microseconds % 60000000 != 0) {
-            XPathException err = new XPathException("Timezone is not an integral number of minutes");
-            err.setErrorCode("FODT0003");
-            throw err;
+            throw new XPathException("Timezone is not an integral number of minutes", "FODT0003");
         }
         int tzminutes = (int) (microseconds / 60000000);
         if (Math.abs(tzminutes) > 14 * 60) {
-            XPathException err = new XPathException("Timezone out of range (-14:00 to +14:00)");
-            err.setErrorCode("FODT0003");
-            throw err;
+            throw new XPathException("Timezone out of range (-14:00 to +14:00)", "FODT0003");
         }
         return adjustTimezone(tzminutes);
     }

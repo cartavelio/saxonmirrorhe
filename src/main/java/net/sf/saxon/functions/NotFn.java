@@ -76,9 +76,7 @@ public class NotFn extends SystemFunction {
                 try {
                     return !this.getArg(0).effectiveBooleanValue(c);
                 } catch (XPathException e) {
-                    e.maybeSetLocation(this.getLocation());
-                    e.maybeSetContext(c);
-                    throw e;
+                    throw e.maybeWithLocation(this.getLocation()).maybeWithContext(c);
                 }
             }
         };

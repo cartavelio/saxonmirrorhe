@@ -281,13 +281,13 @@ public class TimingTraceListener implements TraceListener {
                 controller.setTraceListener(null);
                 TransformerReceiver tr = new TransformerReceiver(controller);
                 final GlobalParameterSet params = new GlobalParameterSet();
-                params.put(new StructuredQName("", NamespaceUri.NULL, "lang"),
+                params.put(NamespaceUri.NULL.qName("lang"),
                            StringValue.bmp(this.lang == HostLanguage.XSLT ? "XSLT" : "XQuery"));
-                params.put(new StructuredQName("", NamespaceUri.NULL, "startTime"),
+                params.put(NamespaceUri.NULL.qName("startTime"),
                            startTime);
-                params.put(new StructuredQName("", NamespaceUri.NULL, "executableUri"),
+                params.put(NamespaceUri.NULL.qName("executableUri"),
                            StringValue.bmp(executableUri == null ? "" : executableUri));
-                params.put(new StructuredQName("", NamespaceUri.NULL, "nested"),
+                params.put(NamespaceUri.NULL.qName("nested"),
                            BooleanValue.get(depth > 0));
                 controller.initializeController(params);
                 tr.open();

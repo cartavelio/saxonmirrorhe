@@ -93,9 +93,8 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         try {
             readFile(checker, reader, output);
         } catch (java.io.UnsupportedEncodingException encErr) {
-            XPathException e = new XPathException("Unknown encoding " + Err.wrap(encoding), encErr);
-            e.setErrorCode("FOUT1190");
-            throw e;
+            throw new XPathException("Unknown encoding " + Err.wrap(encoding), encErr)
+                    .withErrorCode("FOUT1190");
         } catch (java.io.IOException ioErr) {
 //            System.err.println("ProxyHost: " + System.getProperty("http.proxyHost"));
 //            System.err.println("ProxyPort: " + System.getProperty("http.proxyPort"));
@@ -112,9 +111,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
             return null;
         }
         if (absoluteURI.getFragment() != null) {
-            XPathException e = new XPathException("URI for unparsed-text() must not contain a fragment identifier");
-            e.setErrorCode("FOUT1170");
-            throw e;
+            throw new XPathException("URI for unparsed-text() must not contain a fragment identifier", "FOUT1170");
         }
 
         // The URL dereferencing classes throw all kinds of strange exceptions if given
@@ -128,17 +125,15 @@ public abstract class UnparsedTextFunction extends SystemFunction {
     @CSharpReplaceBody(code="handleURISyntaxExceptionCSharp(href, baseURI, err);")
     private static void handleURISyntaxException(String href, String baseURI, java.net.URISyntaxException err)
             throws XPathException {
-        XPathException e = new XPathException(err.getReason() + ": " + err.getInput(), err);
-        e.setErrorCode("FOUT1170");
-        throw e;
+        throw new XPathException(err.getReason() + ": " + err.getInput(), err)
+                .withErrorCode("FOUT1170");
     }
 
     //#if CSHARP==true
     private static void handleURISyntaxExceptionCSharp(String href, String base, java.net.URISyntaxException err)
             throws XPathException {
-        XPathException e = new XPathException("Failed to resolve " + href + " against " + base + ": " + err.getMessage());
-        e.setErrorCode("FOUT1170");
-        throw e;
+        throw new XPathException("Failed to resolve " + href + " against " + base + ": " + err.getMessage())
+                .withErrorCode("FOUT1170");
     }
     //#endif
 
@@ -148,10 +143,8 @@ public abstract class UnparsedTextFunction extends SystemFunction {
             message += ' ' + absoluteURI.toString();
         }
         message += " (" + ioErr.getClass().getName() + ')';
-        XPathException e = new XPathException(message, ioErr);
-        String errorCode = getErrorCode(ioErr);
-        e.setErrorCode(errorCode);
-        return e;
+        return new XPathException(message, ioErr)
+                .withErrorCode(getErrorCode(ioErr));
     }
 
     @CSharpReplaceBody(code="return \"FOUT1170\";")
@@ -245,10 +238,9 @@ public abstract class UnparsedTextFunction extends SystemFunction {
                     mask |= ch32;
                 }
                 if (!checker.test(ch32)) {
-                    XPathException err = new XPathException("The text file contains a character that is illegal in XML (line=" +
-                                                                    line + " column=" + column + " value=hex " + Integer.toHexString(ch32) + ')');
-                    err.setErrorCode("FOUT1190");
-                    throw err;
+                    throw new XPathException("The text file contains a character that is illegal in XML (line=" +
+                                                                    line + " column=" + column + " value=hex " + Integer.toHexString(ch32) + ')')
+                            .withErrorCode("FOUT1190");
                 }
             }
             int start = 0;

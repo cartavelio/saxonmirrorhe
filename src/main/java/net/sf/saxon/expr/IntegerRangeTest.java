@@ -204,8 +204,7 @@ public class IntegerRangeTest extends Expression {
                         context -> getValue().iterate(context),
                         c);
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.maybeWithLocation(getLocation()).maybeWithContext(c);
         }
     }
 

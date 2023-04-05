@@ -111,7 +111,7 @@ public class CatalogCollection extends AbstractResourceCollection {
                 if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_FAIL) {
                     return new FailedResource(uri, e);
                 } else if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_WARNING) {
-                    context.getController().warning("collection(): failed to parse " + uri + ": " + e.getMessage(), e.getErrorCodeLocalPart(), null);
+                    context.getController().warning("collection(): failed to parse " + uri + ": " + e.getMessage(), e.showErrorCode(), null);
                     return null;
                 } else {
                     return null;
@@ -166,10 +166,9 @@ public class CatalogCollection extends AbstractResourceCollection {
         TreeInfo catalog = context.getConfiguration().buildDocumentTree(source, options);
         if (catalog == null) {
             // we failed to read the catalogue
-            XPathException err = new XPathException("Failed to load collection catalog " + href);
-            err.setErrorCode("FODC0004");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("Failed to load collection catalog " + href)
+                    .withErrorCode("FODC0004")
+                    .withXPathContext(context);
         }
 
         // Now return an iterator over the documents that it refers to
@@ -185,10 +184,9 @@ public class CatalogCollection extends AbstractResourceCollection {
                 message = "Outermost element of collection catalog should be Q{}collection " +
                         "(found Q{" + top.getNamespaceUri() + "}" + top.getLocalPart() + ")";
             }
-            XPathException err = new XPathException(message);
-            err.setErrorCode("FODC0004");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException(message)
+                    .withErrorCode("FODC0004")
+                    .withXPathContext(context);
         }
         iter.close();
 
@@ -199,11 +197,10 @@ public class CatalogCollection extends AbstractResourceCollection {
             } else if ("false".equals(stableAtt)) {
                 stable = false;
             } else {
-                XPathException err = new XPathException(
-                        "The 'stable' attribute of element <collection> must be true or false");
-                err.setErrorCode("FODC0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException(
+                        "The 'stable' attribute of element <collection> must be true or false")
+                        .withErrorCode("FODC0004")
+                        .withXPathContext(context);
             }
         }
 
@@ -214,27 +211,24 @@ public class CatalogCollection extends AbstractResourceCollection {
 
             if (!("doc".equals(item.getLocalPart()) &&
                           item.getNamespaceUri() == NamespaceUri.NULL)) {
-                XPathException err = new XPathException("Children of <collection> element must be <doc> elements");
-                err.setErrorCode("FODC0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException("Children of <collection> element must be <doc> elements")
+                        .withErrorCode("FODC0004")
+                        .withXPathContext(context);
             }
             String hrefAtt = item.getAttributeValue(NamespaceUri.NULL, "href");
             if (hrefAtt == null) {
-                XPathException err = new XPathException("A <doc> element in the collection catalog has no @href attribute");
-                err.setErrorCode("FODC0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException("A <doc> element in the collection catalog has no @href attribute")
+                        .withErrorCode("FODC0004")
+                        .withXPathContext(context);
             }
             String uri;
             try {
                 uri = ResolveURI.makeAbsolute(hrefAtt, item.getBaseURI()).toString();
             } catch (URISyntaxException e) {
-                XPathException err = new XPathException("Invalid base URI or href URI in collection catalog: ("
-                                                                + item.getBaseURI() + ", " + hrefAtt + ")");
-                err.setErrorCode("FODC0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException("Invalid base URI or href URI in collection catalog: ("
+                                                                + item.getBaseURI() + ", " + hrefAtt + ")")
+                        .withErrorCode("FODC0004")
+                        .withXPathContext(context);
             }
             result.add(uri);
 

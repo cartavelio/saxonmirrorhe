@@ -253,10 +253,10 @@ public class XPathContextMinor implements XPathContext {
     @Override
     public final int getLast() throws UncheckedXPathException {
         if (currentIterator == null) {
-            XPathException e = new XPathException("The context item is absent, so last() is undefined");
-            e.setXPathContext(this);
-            e.setErrorCode("XPDY0002");
-            throw new UncheckedXPathException(e);
+            throw new UncheckedXPathException(
+                    new XPathException("The context item is absent, so last() is undefined")
+                    .withXPathContext(this)
+                    .withErrorCode("XPDY0002"));
         }
         if (last != null) {
             return last.value;

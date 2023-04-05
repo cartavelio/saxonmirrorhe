@@ -274,9 +274,8 @@ public class UseWhenFilter extends ProxyReceiver {
                 map.put(key, includedDoc);
                 return includedDoc;
             } catch (XPathException e) {
-                e.maybeSetLocation(location);
                 e.maybeSetErrorCode("XTSE0165");
-                if ("XTSE0180".equals(e.getErrorCodeLocalPart())) {
+                if (e.hasErrorCode("XTSE0180")) {
                     if (isImport) {
                         e.setErrorCode("XTSE0210");
                     }
@@ -284,7 +283,7 @@ public class UseWhenFilter extends ProxyReceiver {
                 if (!e.hasBeenReported()) {
                     compilation.reportError(e);
                 }
-                throw e;
+                throw e.maybeWithLocation(location);
             }
         }
     }
@@ -419,7 +418,7 @@ public class UseWhenFilter extends ProxyReceiver {
         UseWhenStaticContext staticContext = new UseWhenStaticContext(compilation, nsResolver);
         staticContext.setBaseURI(baseUri.toString());
         staticContext.setContainingLocation(
-                new AttributeLocation(elemName.getStructuredQName(), new StructuredQName("", NamespaceUri.NULL, "as"), location));
+                new AttributeLocation(elemName.getStructuredQName(), NamespaceUri.NULL.qName("as"), location));
         SequenceType requiredType = SequenceType.ANY_SEQUENCE;
 
         int languageLevel = compilation.getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
@@ -439,24 +438,25 @@ public class UseWhenFilter extends ProxyReceiver {
         } catch (XPathException err) {
             throw createXPathException(
                     "Invalid variable name:" + nameStr + ". " + err.getMessage(),
-                    err.getErrorCodeLocalPart(), location);
+                    err.getErrorCodeQName(), location);
         }
 
         boolean isVariable = elemName.getLocalPart().equals("variable");
         boolean isParam = elemName.getLocalPart().equals("param");
         boolean isSupplied = isParam && compilation.getParameters().containsKey(varName);
         AttributeLocation attLoc =
-                new AttributeLocation(elemName.getStructuredQName(), new StructuredQName("", NamespaceUri.NULL, "select"), location);
+                new AttributeLocation(elemName.getStructuredQName(), NamespaceUri.NULL.qName("select"), location);
 
         if (isParam) {
             if (isRequired && !isSupplied) {
                 String selectStr = attributes.getValue(NamespaceUri.NULL, "select");
                 if (selectStr != null) {
-                    throw createXPathException("Cannot supply a default value when required='yes'", "XTSE0010", attLoc);
+                    throw createXPathException("Cannot supply a default value when required='yes'",
+                                               NamespaceUri.ERR.qName("XTSE0010"), attLoc);
                 } else {
                     throw createXPathException(
                             "No value was supplied for the required static parameter $" + varName.getDisplayName(),
-                            "XTDE0050", location);
+                            NamespaceUri.ERR.qName("XTDE0050"), location);
                 }
             }
 
@@ -475,10 +475,11 @@ public class UseWhenFilter extends ProxyReceiver {
                 if (isVariable) {
                     throw createXPathException(
                             "The select attribute is required for a static global variable",
-                            "XTSE0010", location);
+                            NamespaceUri.ERR.qName("XTSE0010"), location);
                 } else if (!Cardinality.allowsZero(requiredType.getCardinality())) {
                     throw createXPathException("The parameter is implicitly required because it does not accept an "
-                                                       + "empty sequence, but no value has been supplied", "XTDE0700", location);
+                                                       + "empty sequence, but no value has been supplied",
+                                               NamespaceUri.ERR.qName("XTDE0700"), location);
                 } else {
                     if (asStr == null) {
                         value = StringValue.EMPTY_STRING;
@@ -495,7 +496,7 @@ public class UseWhenFilter extends ProxyReceiver {
                     value = sequence.materialize();
                 } catch (XPathException e) {
                     throw createXPathException("Error in " + elemName.getLocalPart() + " expression. " + e.getMessage(),
-                                               e.getErrorCodeLocalPart(), attLoc);
+                                               e.getErrorCodeQName(), attLoc);
                 }
             }
             Supplier<RoleDiagnostic> role =
@@ -506,7 +507,7 @@ public class UseWhenFilter extends ProxyReceiver {
             try {
                 compilation.declareStaticVariable(varName, value, precedence, isParam);
             } catch (XPathException e) {
-                throw createXPathException(e.getMessage(), e.getErrorCodeLocalPart(), attLoc);
+                throw createXPathException(e.getMessage(), e.getErrorCodeQName(), attLoc);
             }
         }
     }
@@ -612,9 +613,9 @@ public class UseWhenFilter extends ProxyReceiver {
         return expr.evaluateAsString(dynamicContext).toString();
     }
 
-    private XPathException createXPathException(String message, String errorCode, Location location) {
+    private XPathException createXPathException(String message, StructuredQName errorCode, Location location) {
         XPathException err = new XPathException(message);
-        err.setErrorCode(errorCode);
+        err.setErrorCodeQName(errorCode);
         err.setIsStaticError(true);
         err.setLocator(location.saveLocation());
         getPipelineConfiguration().getErrorReporter().report(new XmlProcessingException(err));

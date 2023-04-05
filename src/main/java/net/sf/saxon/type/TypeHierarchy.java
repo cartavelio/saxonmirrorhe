@@ -147,8 +147,7 @@ public class TypeHierarchy {
                                     return ((SimpleType) requiredItemType).getTypedValue(
                                             item.getUnicodeStringValue(), null, rules).head();
                                 } catch (ValidationException ve) {
-                                    ve.setErrorCode("XPTY0004");
-                                    throw ve;
+                                    throw ve.withErrorCode("XPTY0004");
                                 }
                             } else {
                                 return item;

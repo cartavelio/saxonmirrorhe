@@ -143,7 +143,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
                     SequenceType requiredType = makeSequenceType(value);
                     accumulator.setType(requiredType);
                 } catch (XPathException e) {
-                    compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
+                    compileErrorInAttribute(e, "as");
                 }
             } else if (attName.hasURI(NamespaceUri.SAXON) && attName.getLocalPart().equals("trace")) {
                 if (isExtensionAttributeAllowed(attName.getDisplayName())) {
@@ -206,7 +206,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
                     () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
             newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
-            slotManager.allocateSlotNumber(new StructuredQName("", NamespaceUri.NULL, "value"));
+            slotManager.allocateSlotNumber(NamespaceUri.NULL.qName("value"));
             ExpressionTool.allocateSlots(newValueExp, 1, slotManager);
             boolean isPreDescent = !rule.isPostDescent();
             SimpleMode mode = isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules();

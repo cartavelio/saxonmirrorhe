@@ -83,9 +83,8 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
             });
             //GenericSorter.quickSort(0, array.arrayLength(), sortable);
         } catch (ClassCastException e) {
-            XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Non-comparable types found while sorting: " + e.getMessage())
+                    .withErrorCode("XPTY0004").asTypeError();
         }
         List<GroundedValue> outputList = new ArrayList<>(array.arrayLength());
         for (MemberToBeSorted member: inputList) {

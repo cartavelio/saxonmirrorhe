@@ -53,10 +53,8 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
     public void open() throws XPathException {
         if (closed) {
             String uri = getSystemId().equals(XsltController.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(no URI supplied)" : getSystemId();
-            XPathException err = new XPathException(
-                        "Cannot write more than one result document to the principal output destination: " + uri);
-            err.setErrorCode("XTDE1490");
-            throw err;
+            throw new XPathException(
+                        "Cannot write more than one result document to the principal output destination: " + uri, "XTDE1490");
         }
         super.open();
         opened = true;
@@ -105,32 +103,28 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
 
     private synchronized void useAsPrimary() throws XPathException {
         if (closed) {
-            XPathException err = new XPathException(
-                    "Cannot write to the principal output destination as it has already been closed: " + identifySystemId());
-            err.setErrorCode("XTDE1490");
-            throw err;
+            throw new XPathException(
+                    "Cannot write to the principal output destination as it has already been closed: " + identifySystemId())
+                    .withErrorCode("XTDE1490");
         }
         if (usedAsSecondaryResult) {
-            XPathException err = new XPathException(
-                    "Cannot write to the principal output destination as it has already been used by xsl:result-document: " + identifySystemId());
-            err.setErrorCode("XTDE1490");
-            throw err;
+            throw new XPathException(
+                    "Cannot write to the principal output destination as it has already been used by xsl:result-document: " + identifySystemId())
+                    .withErrorCode("XTDE1490");
         }
         usedAsPrimaryResult = true;
     }
 
     public synchronized void useAsSecondary() throws XPathException {
         if (usedAsPrimaryResult) {
-            XPathException err = new XPathException(
-                    "Cannot use xsl:result-document to write to a destination already used for the principal output: " + identifySystemId());
-            err.setErrorCode("XTDE1490");
-            throw err;
+            throw new XPathException(
+                    "Cannot use xsl:result-document to write to a destination already used for the principal output: " + identifySystemId())
+                    .withErrorCode("XTDE1490");
         }
         if (usedAsSecondaryResult) {
-            XPathException err = new XPathException(
-                    "Cannot write more than one xsl:result-document to the principal output destination: " + identifySystemId());
-            err.setErrorCode("XTDE1490");
-            throw err;
+            throw new XPathException(
+                    "Cannot write more than one xsl:result-document to the principal output destination: " + identifySystemId())
+                    .withErrorCode("XTDE1490");
         }
         usedAsSecondaryResult = true;
     }

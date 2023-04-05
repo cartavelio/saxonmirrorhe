@@ -255,8 +255,7 @@ public class ResultDocument extends Instruction
             try {
                 DocumentInstr.checkContentSequence(visitor.getStaticContext(), contentOp, validationOptions);
             } catch (XPathException err) {
-                err.maybeSetLocation(getLocation());
-                throw err;
+                throw err.maybeWithLocation(getLocation());
             }
         }
         return this;
@@ -405,9 +404,7 @@ public class ResultDocument extends Instruction
             dispatchTailCall(tc);
         } catch (XPathException err) {
             failed = true;
-            err.maybeSetContext(context);
-            err.maybeSetLocation(getLocation());
-            throw err;
+            throw err.maybeWithLocation(getLocation()).maybeWithContext(context);
         } finally {
             try {
                 out.close();
@@ -481,9 +478,7 @@ public class ResultDocument extends Instruction
                                    resolver, serParams, resolveAgainstStaticBase);
                 traceDestination(context, out);
             } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw e;
+                throw e.maybeWithLocation(getLocation()).maybeWithContext(context);
             }
         }
         out.getPipelineConfiguration().setController(controller);
@@ -505,11 +500,10 @@ public class ResultDocument extends Instruction
 
     private void checkNotTemporaryOutputState(XPathContext context) throws XPathException {
         if (context.getTemporaryOutputState() != 0) {
-            XPathException err = new XPathException("Cannot execute xsl:result-document while evaluating xsl:" +
-                                                            context.getNamePool().getLocalName(context.getTemporaryOutputState()));
-            err.setErrorCode("XTDE1480");
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("Cannot execute xsl:result-document while evaluating xsl:" +
+                                                            context.getNamePool().getLocalName(context.getTemporaryOutputState()))
+                    .withErrorCode("XTDE1480")
+                    .withLocation(getLocation());
         }
     }
 
@@ -572,22 +566,20 @@ public class ResultDocument extends Instruction
         assert controller != null;
         if (uri != null) {
             if (controller.getDocumentPool().find(uri) != null) {
-                XPathException err = new XPathException("Cannot write to a URI that has already been read: " +
-                                                                (uri.equals(Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri));
-                err.setXPathContext(context);
-                err.setErrorCode("XTDE1500");
-                throw err;
+                throw new XPathException("Cannot write to a URI that has already been read: " +
+                                                                (uri.equals(Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri))
+                        .withXPathContext(context)
+                        .withErrorCode("XTDE1500");
             }
 
             DocumentKey documentKey = new DocumentKey(uri);
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(controller) {
                 if (!controller.checkUniqueOutputDestination(documentKey)) {
-                    XPathException err = new XPathException("Cannot write more than one result document to the same URI: " +
-                                                                    (uri.equals(Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri));
-                    err.setXPathContext(context);
-                    err.setErrorCode("XTDE1490");
-                    throw err;
+                    throw new XPathException("Cannot write more than one result document to the same URI: " +
+                                                                    (uri.equals(Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri))
+                            .withXPathContext(context)
+                            .withErrorCode("XTDE1490");
                 } else {
                     controller.addUnavailableOutputDestination(documentKey);
                 }
@@ -623,28 +615,25 @@ public class ResultDocument extends Instruction
                 try {
                     parts = NameChecker.getQNameParts(format);
                 } catch (QNameException e) {
-                    XPathException err = new XPathException("The requested output format " + Err.wrap(format) + " is not a valid QName");
-                    err.maybeSetLocation(getFormatExpression().getLocation());
-                    err.setErrorCode("XTDE1460");
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new XPathException("The requested output format " + Err.wrap(format) + " is not a valid QName")
+                            .withErrorCode("XTDE1460")
+                            .withXPathContext(context)
+                            .withLocation(getFormatExpression().getLocation());
                 }
                 NamespaceUri uri = nsResolver.getURIForPrefix(parts[0], false);
                 if (uri == null) {
-                    XPathException err = new XPathException("The namespace prefix in the format name " + format + " is undeclared");
-                    err.maybeSetLocation(getFormatExpression().getLocation());
-                    err.setErrorCode("XTDE1460");
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new XPathException("The namespace prefix in the format name " + format + " is undeclared")
+                            .withLocation(getFormatExpression().getLocation())
+                            .withErrorCode("XTDE1460")
+                            .withXPathContext(context);
                 }
                 qName = new StructuredQName(parts[0], uri, parts[1]);
             }
             computedGlobalProps = ((StylesheetPackage) getRetainedStaticContext().getPackageData()).getNamedOutputProperties(qName);
             if (computedGlobalProps == null) {
-                XPathException err = new XPathException("There is no xsl:output format named " + format);
-                err.setErrorCode("XTDE1460");
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException("There is no xsl:output format named " + format)
+                        .withErrorCode("XTDE1460")
+                        .withXPathContext(context);
             }
 
         }
@@ -661,9 +650,7 @@ public class ResultDocument extends Instruction
                 setSerializationProperty(computedLocalProps, qName.getNamespaceUri(), qName.getLocalPart(),
                                          localProperties.getProperty(key), nsResolver, true, config);
             } catch (XPathException e) {
-                e.setErrorCode("XTDE0030");
-                e.maybeSetLocation(getLocation());
-                throw e;
+                throw e.withErrorCode("XTDE0030").maybeWithLocation(getLocation());
             }
         }
 
@@ -680,8 +667,8 @@ public class ResultDocument extends Instruction
                     e.setErrorCode("XTDE0030");
                     e.maybeSetLocation(getLocation());
                     e.maybeSetContext(context);
-                    if (NamespaceUri.SAXON.equals(e.getErrorCodeNamespace()) &&
-                            "SXWN".equals(e.getErrorCodeLocalPart().substring(0, 4))) {
+                    if (e.getErrorCodeQName().hasURI(NamespaceUri.SAXON) &&
+                            "SXWN".equals(e.getErrorCodeQName().getLocalPart().substring(0, 4))) {
                         XmlProcessingException ee = new XmlProcessingException(e);
                         ee.setWarning(true);
                         controller.getErrorReporter().report(ee);
@@ -763,27 +750,21 @@ public class ResultDocument extends Instruction
                             parts = NameChecker.getQNameParts(value);
                             String prefix = parts[0];
                             if (prefix.isEmpty()) {
-                                XPathException err = new XPathException("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name");
-                                err.setErrorCode("SEPM0016");
-                                err.setIsStaticError(true);
-                                throw err;
+                                throw new XPathException("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name")
+                                        .withErrorCode("SEPM0016").asStaticError();
                             } else if (nsResolver != null) {
                                 NamespaceUri muri = nsResolver.getURIForPrefix(prefix, false);
                                 if (muri == null) {
-                                    XPathException err = new XPathException("Namespace prefix '" + prefix + "' has not been declared");
-                                    err.setErrorCode("SEPM0016");
-                                    err.setIsStaticError(true);
-                                    throw err;
+                                    throw new XPathException("Namespace prefix '" + prefix + "' has not been declared")
+                                            .withErrorCode("SEPM0016").asStaticError();
                                 }
                                 details.setProperty(OutputKeys.METHOD, '{' + muri.toString() + '}' + parts[1]);
                             } else {
                                 details.setProperty(OutputKeys.METHOD, value);
                             }
                         } catch (QNameException e) {
-                            XPathException err = new XPathException("Invalid method name. " + e.getMessage());
-                            err.setErrorCode("SEPM0016");
-                            err.setIsStaticError(true);
-                            throw err;
+                            throw new XPathException("Invalid method name. " + e.getMessage())
+                                    .withErrorCode("SEPM0016").asStaticError();
                         }
                     }
                     break;

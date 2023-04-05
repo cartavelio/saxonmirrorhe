@@ -145,8 +145,7 @@ public class UnionConstructorFunction extends AbstractFunction {
             try {
                 return targetType.getTypedValue(value.getUnicodeStringValue(), resolver, rules);
             } catch (ValidationException e) {
-                e.setErrorCode("FORG0001");
-                throw e;
+                throw e.withErrorCode("FORG0001");
             }
         }
 

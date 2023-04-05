@@ -129,7 +129,7 @@ public final class SimpleStepExpression extends SlashExpression {
         try {
             origin = (NodeInfo) getStart().evaluateItem(context);
         } catch (XPathException e) {
-            if ("XPDY0002".equals(e.getErrorCodeLocalPart()) && !e.hasBeenReported()) {
+            if (e.hasErrorCode("XPDY0002") && !e.hasBeenReported()) {
                 throw new XPathException("The context item for axis step "
                     + toShortString() + " is absent", "XPDY0002", getLocation());
             } else {

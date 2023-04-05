@@ -302,8 +302,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                             try {
                                 checkNotNamespaceSensitiveElement(elementType, next);
                             } catch (CopyNamespaceSensitiveException e) {
-                                e.setErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                                throw e;
+                                throw e.withErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
                             }
                         }
                     }
@@ -376,8 +375,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                         try {
                                             checkNotNamespaceSensitiveAttribute(attributeType, att);
                                         } catch (CopyNamespaceSensitiveException e) {
-                                            e.setErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                                            throw e;
+                                            throw e.withErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
                                         }
                                     }
                                 }

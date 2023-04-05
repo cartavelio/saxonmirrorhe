@@ -616,7 +616,7 @@ public class QT3TestDriverHE extends TestDriver {
                                     XPathException xperr = (XPathException) err.getCause();
                                     QName errcode = null;
                                     if (xperr.getErrorCodeQName() != null) {
-                                        errcode = new QName(xperr.getErrorCodeNamespace().toString(), xperr.getErrorCodeLocalPart());
+                                        errcode = new QName(xperr.getErrorCodeQName());
                                     }
                                     outcome.setException(errcode);
                                 } else {

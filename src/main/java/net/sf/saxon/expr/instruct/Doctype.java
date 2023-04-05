@@ -137,18 +137,16 @@ public class Doctype extends Instruction {
                 SequenceIterator children = dtdRoot.iterateAxis(AxisInfo.CHILD);
                 NodeInfo docType = (NodeInfo) children.next();
                 if (docType == null || !"doctype".equals(docType.getLocalPart())) {
-                    XPathException e = new XPathException("saxon:doctype instruction must contain dtd:doctype");
-                    e.setXPathContext(context);
-                    throw e;
+                    throw new XPathException("saxon:doctype instruction must contain dtd:doctype")
+                            .withXPathContext(context);
                 }
                 String name = docType.getAttributeValue("", "name");
                 String system = docType.getAttributeValue("", "system");
                 String publicid = docType.getAttributeValue("", "public");
 
                 if (name == null) {
-                    XPathException e = new XPathException("dtd:doctype must have a name attribute");
-                    e.setXPathContext(context);
-                    throw e;
+                    throw new XPathException("dtd:doctype must have a name attribute")
+                            .withXPathContext(context);
                 }
 
                 write(output, "<!DOCTYPE " + name + ' ');
@@ -176,23 +174,20 @@ public class Doctype extends Instruction {
                         String elname = child.getAttributeValue("", "name");
                         String content = child.getAttributeValue("", "content");
                         if (elname == null) {
-                            XPathException e = new XPathException("dtd:element must have a name attribute");
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new XPathException("dtd:element must have a name attribute")
+                                    .withXPathContext(context);
                         }
                         if (content == null) {
-                            XPathException e = new XPathException("dtd:element must have a content attribute");
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new XPathException("dtd:element must have a content attribute")
+                                    .withXPathContext(context);
                         }
                         write(output, "\n  <!ELEMENT " + elname + ' ' + content + '>');
 
                     } else if (localname.equals("attlist")) {
                         String elname = child.getAttributeValue("", "element");
                         if (elname == null) {
-                            XPathException e = new XPathException("dtd:attlist must have an attribute named 'element'");
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new XPathException("dtd:attlist must have an attribute named 'element'")
+                                    .withXPathContext(context);
                         }
                         write(output, "\n  <!ATTLIST " + elname + ' ');
 
@@ -209,25 +204,21 @@ public class Doctype extends Instruction {
                                 String type = attDef.getAttributeValue("", "type");
                                 String value = attDef.getAttributeValue("", "value");
                                 if (atname == null) {
-                                    XPathException e = new XPathException("dtd:attribute must have a name attribute");
-                                    e.setXPathContext(context);
-                                    throw e;
+                                    throw new XPathException("dtd:attribute must have a name attribute")
+                                            .withXPathContext(context);
                                 }
                                 if (type == null) {
-                                    XPathException e = new XPathException("dtd:attribute must have a type attribute");
-                                    e.setXPathContext(context);
-                                    throw e;
+                                    throw new XPathException("dtd:attribute must have a type attribute")
+                                            .withXPathContext(context);
                                 }
                                 if (value == null) {
-                                    XPathException e = new XPathException("dtd:attribute must have a value attribute");
-                                    e.setXPathContext(context);
-                                    throw e;
+                                    throw new XPathException("dtd:attribute must have a value attribute")
+                                            .withXPathContext(context);
                                 }
                                 write(output, "\n    " + atname + ' ' + type + ' ' + value);
                             } else {
-                                XPathException e = new XPathException("Unrecognized element within dtd:attlist");
-                                e.setXPathContext(context);
-                                throw e;
+                                throw new XPathException("Unrecognized element within dtd:attlist")
+                                        .withXPathContext(context);
                             }
                         }
                         write(output, ">");
@@ -241,9 +232,8 @@ public class Doctype extends Instruction {
                         String notation = child.getAttributeValue("", "notation");
 
                         if (entname == null) {
-                            XPathException e = new XPathException("dtd:entity must have a name attribute");
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new XPathException("dtd:entity must have a name attribute")
+                                .withXPathContext(context);
                         }
 
                         // we could do a lot more checking now...
@@ -275,14 +265,12 @@ public class Doctype extends Instruction {
                         String nsystem = child.getAttributeValue("", "system");
                         String npublicid = child.getAttributeValue("", "public");
                         if (notname == null) {
-                            XPathException e = new XPathException("dtd:notation must have a name attribute");
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new XPathException("dtd:notation must have a name attribute")
+                                    .withXPathContext(context);
                         }
                         if ((nsystem == null) && (npublicid == null)) {
-                            XPathException e = new XPathException("dtd:notation must have a system attribute or a public attribute");
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new XPathException("dtd:notation must have a system attribute or a public attribute")
+                                    .withXPathContext(context);
                         }
                         write(output, "\n  <!NOTATION " + notname);
                         if (npublicid != null) {
@@ -297,9 +285,8 @@ public class Doctype extends Instruction {
                     } else if (child.getNodeKind() == Type.TEXT) {
                         write(output, child.getStringValue());
                     } else {
-                        XPathException e = new XPathException("Unrecognized element " + localname + " in DTD output");
-                        e.setXPathContext(context);
-                        throw e;
+                        throw new XPathException("Unrecognized element " + localname + " in DTD output")
+                                .withXPathContext(context);
                     }
                     child = (NodeInfo) children.next();
                 }

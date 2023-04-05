@@ -74,9 +74,8 @@ public class HTML40Emitter extends HTMLEmitter {
             if (versionProperty.equals("4.0") || versionProperty.equals("4.01")) {
                 version = 4;
             } else {
-                XPathException err = new XPathException("Unsupported HTML version: " + versionProperty);
-                err.setErrorCode("SESU0013");
-                throw err;
+                throw new XPathException("Unsupported HTML version: " + versionProperty)
+                        .withErrorCode("SESU0013");
             }
         }
         super.openDocument();

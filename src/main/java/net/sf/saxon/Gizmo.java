@@ -381,7 +381,7 @@ public class Gizmo {
                 }
 
             } catch (XPathException e) {
-                sysOut.println(e.getErrorCodeLocalPart() + ": " + e.getMessage());
+                sysOut.println(e.showErrorCode() + ": " + e.getMessage());
                 if (interactive) {
                     //sysOut.print("|>");
                 } else {

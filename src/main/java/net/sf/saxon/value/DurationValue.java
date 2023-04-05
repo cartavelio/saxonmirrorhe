@@ -726,10 +726,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue add(DurationValue other) throws XPathException {
-        XPathException err = new XPathException("Only subtypes of xs:duration can be added");
-        err.setErrorCode("XPTY0004");
-        err.setIsTypeError(true);
-        throw err;
+        throw new XPathException("Only subtypes of xs:duration can be added", "XPTY0004").asTypeError();
     }
 
     /**
@@ -741,10 +738,9 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue subtract(DurationValue other) throws XPathException {
-        XPathException err = new XPathException("Only subtypes of xs:duration can be subtracted");
-        err.setErrorCode("XPTY0004");
-        err.setIsTypeError(true);
-        throw err;
+        throw new XPathException("Only subtypes of xs:duration can be subtracted")
+                .withErrorCode("XPTY0004")
+                .asTypeError();
     }
 
     /**
@@ -783,10 +779,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue multiply(double factor) throws XPathException {
-        XPathException err = new XPathException("Only subtypes of xs:duration can be multiplied by a number");
-        err.setErrorCode("XPTY0004");
-        err.setIsTypeError(true);
-        throw err;
+        throw new XPathException("Only subtypes of xs:duration can be multiplied by a number", "XPTY0004").asTypeError();
     }
 
     /**
@@ -798,10 +791,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue multiply(BigDecimal factor) throws XPathException {
-        XPathException err = new XPathException("Only subtypes of xs:duration can be multiplied by a number");
-        err.setErrorCode("XPTY0004");
-        err.setIsTypeError(true);
-        throw err;
+        throw new XPathException("Only subtypes of xs:duration can be multiplied by a number", "XPTY0004").asTypeError();
     }
 
     /**
@@ -813,10 +803,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public DurationValue divide(double factor) throws XPathException {
-        XPathException err = new XPathException("Only subtypes of xs:duration can be divided by a number");
-        err.setErrorCode("XPTY0004");
-        err.setIsTypeError(true);
-        throw err;
+        throw new XPathException("Only subtypes of xs:duration can be divided by a number", "XPTY0004").asTypeError();
     }
 
     /**
@@ -828,10 +815,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public BigDecimalValue divide(DurationValue other) throws XPathException {
-        XPathException err = new XPathException("Only subtypes of xs:duration can be divided by another duration");
-        err.setErrorCode("XPTY0004");
-        err.setIsTypeError(true);
-        throw err;
+        throw new XPathException("Only subtypes of xs:duration can be divided by another duration", "XPTY0004").asTypeError();
     }
 
     /**

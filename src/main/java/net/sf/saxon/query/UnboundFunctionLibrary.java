@@ -184,10 +184,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
                     if (!config.getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
                         msg += ". Note: external function calls have been disabled";
                     }
-                    XPathException err = new XPathException(msg);
-                    err.setErrorCode("XPST0017");
-                    err.setIsStaticError(true);
-                    throw err;
+                    throw new XPathException(msg).withErrorCode("XPST0017").asStaticError();
                 }
             }
         }

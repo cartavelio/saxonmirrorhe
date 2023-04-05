@@ -307,25 +307,24 @@ public class SQLQuery extends ExtensionInstruction {
                 return new SequenceExtent.Of<>(resultElements);
 
             } catch (SQLException ex) {
-                de = new XPathException("(SQL) " + ex.getMessage());
-                de.setXPathContext(context);
-                throw de;
+                throw new XPathException("(SQL) " + ex.getMessage())
+                        .withXPathContext(context);
             } finally {
                 boolean wasDEThrown = de != null;
                 if (rs != null) {
                     try {
                         rs.close();
                     } catch (SQLException ex) {
-                        de = new XPathException("(SQL) " + ex.getMessage());
-                        de.setXPathContext(context);
+                        de = new XPathException("(SQL) " + ex.getMessage())
+                                .withXPathContext(context);
                     }
                 }
                 if (ps != null) {
                     try {
                         ps.close();
                     } catch (SQLException ex) {
-                        de = new XPathException("(SQL) " + ex.getMessage());
-                        de.setXPathContext(context);
+                        de = new XPathException("(SQL) " + ex.getMessage())
+                                .withXPathContext(context);
                     }
                 }
                 if (!wasDEThrown && de != null) {

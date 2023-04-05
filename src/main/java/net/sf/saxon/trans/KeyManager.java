@@ -15,14 +15,16 @@ import net.sf.saxon.functions.IntegratedFunctionLibrary;
 import net.sf.saxon.functions.IsIdRef;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.BasePatternWithPredicate;
 import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
@@ -36,8 +38,8 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 
 import static net.sf.saxon.trans.KeyIndex.Status.BUILT;
-import static net.sf.saxon.trans.KeyIndex.Status.UNDER_CONSTRUCTION;
 import static net.sf.saxon.trans.KeyIndex.Status.FAILED;
+import static net.sf.saxon.trans.KeyIndex.Status.UNDER_CONSTRUCTION;
 
 
 /**
@@ -357,11 +359,10 @@ public class KeyManager {
             KeyIndex.Status status = index.getStatus();
             if (status == UNDER_CONSTRUCTION) {
                 if (index.isCreatedInThisThread()) {
-                    XPathException de = new XPathException(
-                            "Key definition " + keySet.getKeyName().getDisplayName() + " is circular");
-                    de.setXPathContext(context);
-                    de.setErrorCode("XTDE0640");
-                    throw de;
+                    throw new XPathException(
+                            "Key definition " + keySet.getKeyName().getDisplayName() + " is circular")
+                            .withXPathContext(context)
+                            .withErrorCode("XTDE0640");
                 } else {
                     // if the index is under construction in another thread, then we plough on regardless.
                     // Both threads will construct the index, but only one will be saved
@@ -415,11 +416,10 @@ public class KeyManager {
             KeyIndex.Status status = index.getStatus();
             if (status == UNDER_CONSTRUCTION) {
                 if (index.isCreatedInThisThread()) {
-                    XPathException de = new XPathException(
-                            "Key definition " + keySet.getKeyName().getDisplayName() + " is circular");
-                    de.setXPathContext(context);
-                    de.setErrorCode("XTDE0640");
-                    throw de;
+                    throw new XPathException(
+                            "Key definition " + keySet.getKeyName().getDisplayName() + " is circular")
+                            .withXPathContext(context)
+                            .withErrorCode("XTDE0640");
                 } else {
                     // if the index is under construction in another thread, then we plough on regardless.
                     // Both threads will construct the index, but only one will be saved

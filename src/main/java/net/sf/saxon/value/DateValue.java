@@ -370,10 +370,8 @@ public class DateValue extends GDateValue implements XPathComparable {
             }
             return new DateValue(y, (byte) m, (byte) d, getTimezoneInMinutes(), hasNoYearZero);
         } else {
-            XPathException err = new XPathException("Date arithmetic is not available for xs:duration, only for its subtypes");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Date arithmetic is not available for xs:duration, only for its subtypes")
+                    .asTypeError().withErrorCode("XPTY0004");
         }
     }
 
@@ -390,10 +388,8 @@ public class DateValue extends GDateValue implements XPathComparable {
     @Override
     public DayTimeDurationValue subtract(/*@NotNull*/ CalendarValue other, /*@Nullable*/ XPathContext context) throws XPathException {
         if (!(other instanceof DateValue)) {
-            XPathException err = new XPathException("First operand of '-' is a date, but the second is not");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("First operand of '-' is a date, but the second is not")
+                    .asTypeError().withErrorCode("XPTY0004");
         }
         return super.subtract(other, context);
     }

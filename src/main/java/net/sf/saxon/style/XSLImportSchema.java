@@ -87,10 +87,7 @@ public class XSLImportSchema extends StyleElement {
                                             "xsl:import-schema",
                                             getPackageData().getLocalLicenseId());
             } catch (LicenseException err) {
-                XPathException xe = new XPathException(err);
-                xe.setErrorCode("XTSE1650");
-                xe.setLocator(this);
-                throw xe;
+                throw new XPathException(err).withErrorCode("XTSE1650").withLocation(this);
             }
             NodeInfo inlineSchema = null;
             NamespaceUri targetNamespace = null;
@@ -153,8 +150,8 @@ public class XSLImportSchema extends StyleElement {
             }
             getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
         } catch (SchemaException err) {
-            String errorCode = err.getErrorCodeLocalPart() == null ? "XTSE0220" : err.getErrorCodeLocalPart();
-            compileError(err.getMessage(), errorCode);
+            compileError(new XPathException(err.getMessage())
+                                 .withErrorCode(err.getErrorCodeQName()).withLocation(this));
         }
 
     }

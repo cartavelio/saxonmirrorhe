@@ -424,7 +424,7 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get("use-character-maps")) != null) {
             CharacterMap characterMap = toCharacterMap(seqVal, context);
-            charMapIndex.putCharacterMap(new StructuredQName("", NamespaceUri.NULL, "charMap"), characterMap);
+            charMapIndex.putCharacterMap(NamespaceUri.NULL.qName("charMap"), characterMap);
             props.setProperty(SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
         }
         if ((seqVal = map.get("version")) != null) {

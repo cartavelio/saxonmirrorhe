@@ -25,7 +25,7 @@ public class Current extends SystemFunction {
      */
 
     /*@NotNull*/ public static final StructuredQName FN_CURRENT =
-        new StructuredQName("", NamespaceUri.FN, "current");
+        NamespaceUri.FN.qName("current");
 
     //@Override
     public FunctionItem bindContext(XPathContext context) {

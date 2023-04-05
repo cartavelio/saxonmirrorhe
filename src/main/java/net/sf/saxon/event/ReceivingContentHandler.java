@@ -273,8 +273,7 @@ public class ReceivingContentHandler
         } catch (QuitParsingException err) {
             // no action: not worth bothering at this stage of the game
         } catch (XPathException err) {
-            err.maybeSetLocation(localLocator);
-            throw new SAXException(err);
+            throw new SAXException(err.maybeWithLocation(localLocator));
         }
     }
 
@@ -393,8 +392,7 @@ public class ReceivingContentHandler
             afterStartTag = true;
 
         } catch (XPathException err) {
-            err.maybeSetLocation(localLocator);
-            throw new SAXException(err);
+            throw new SAXException(err.maybeWithLocation(localLocator));
         }
     }
 
@@ -586,8 +584,7 @@ public class ReceivingContentHandler
             err.setHasBeenReported(true);
             throw new SAXException(err);
         } catch (XPathException err) {
-            err.maybeSetLocation(localLocator);
-            throw new SAXException(err);
+            throw new SAXException(err.maybeWithLocation(localLocator));
         }
         afterStartTag = false;
         namespaceStack.pop();

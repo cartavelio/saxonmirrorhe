@@ -392,14 +392,17 @@ public class XPathParser {
 
         Location loc = makeNestedLocation(env.getContainingLocation(), line, column, nearbyText);
 
-        XPathException err = new XPathException(message);
-        err.setLocation(loc);
+        XPathException err = new XPathException(message)
+                .withLocation(loc)
+                .asStaticError()
+                .withErrorCode(errorCode);
         err.setIsSyntaxError("XPST0003".equals(errorCode.getLocalPart()));
-        err.setIsStaticError(true);
         err.setHostLanguage(getLanguage());
-//        err.setAdditionalLocationText(prefix);
-        err.setErrorCodeQName(errorCode);
         throw err;
+    }
+
+    protected void grumble(String message, StructuredQName errorCode) throws XPathException {
+        grumble(message, errorCode, -1);
     }
 
 
@@ -1553,7 +1556,7 @@ public class XPathParser {
         try {
             sq = qNameParser.parse(qname, env.getDefaultElementNamespace());
         } catch (XPathException e) {
-            grumble(e.getMessage(), e.getErrorCodeLocalPart());
+            grumble(e.getMessage(), e.getErrorCodeQName());
             return null;
         }
         return getPlainType(sq);
@@ -1676,7 +1679,7 @@ public class XPathParser {
         try {
             sq = qNameParser.parse(qname, env.getDefaultElementNamespace());
         } catch (XPathException e) {
-            grumble(e.getMessage(), e.getErrorCodeLocalPart());
+            grumble(e.getMessage(), e.getErrorCodeQName());
             assert false;
         }
         NamespaceUri uri = sq.getNamespaceUri();
@@ -2988,8 +2991,7 @@ public class XPathParser {
             try {
                 ref = env.bindVariable(vtest);
             } catch (XPathException err) {
-                err.maybeSetLocation(makeLocation());
-                throw err;
+                throw err.maybeWithLocation(makeLocation());
             }
         }
         setLocation(ref, offset);
@@ -4101,13 +4103,13 @@ public class XPathParser {
     /*@NotNull*/
     protected StructuredQName resolveFunctionName(String fname) throws XPathException {
         if (scanOnly) {
-            return new StructuredQName("", NamespaceUri.SAXON, "dummy");
+            return NamespaceUri.SAXON.qName("dummy");
         }
         StructuredQName functionName = null;
         try {
             functionName = qNameParser.parse(fname, env.getDefaultFunctionNamespace());
         } catch (XPathException e) {
-            grumble(e.getMessage(), e.getErrorCodeLocalPart());
+            grumble(e.getMessage(), e.getErrorCodeQName());
             assert false;
         }
 
@@ -4174,7 +4176,7 @@ public class XPathParser {
                 }
             }
         } catch (XPathException e) {
-            grumble(e.getMessage(), e.getErrorCodeLocalPart());
+            grumble(e.getMessage(), e.getErrorCodeQName());
             assert functionName != null;
         }
 
@@ -4774,7 +4776,7 @@ public class XPathParser {
             StructuredQName sq = qNameParser.parse(qname, defaultNS);
             return env.getConfiguration().getNamePool().allocateFingerprint(sq.getNamespaceUri(), sq.getLocalPart());
         } catch (XPathException e) {
-            grumble(e.getMessage(), e.getErrorCodeLocalPart());
+            grumble(e.getMessage(), e.getErrorCodeQName());
             return -1;
         }
     }
@@ -4795,7 +4797,7 @@ public class XPathParser {
     public final StructuredQName makeStructuredQNameSilently(/*@NotNull*/ String qname, NamespaceUri defaultUri)
             throws XPathException {
         if (scanOnly) {
-            return new StructuredQName("", NamespaceUri.SAXON, "dummy");
+            return NamespaceUri.SAXON.qName("dummy");
         }
         return qNameParser.parse(qname, defaultUri);
     }
@@ -4816,8 +4818,8 @@ public class XPathParser {
         try {
             return makeStructuredQNameSilently(qname, defaultUri);
         } catch (XPathException err) {
-            grumble(err.getMessage(), err.getErrorCodeLocalPart());
-            return new StructuredQName("", NamespaceUri.NULL, "error");  // Not executed; here to keep the compiler happy
+            grumble(err.getMessage(), err.getErrorCodeQName());
+            return NamespaceUri.NULL.qName("error");  // Not executed; here to keep the compiler happy
         }
     }
 
@@ -4931,7 +4933,7 @@ public class XPathParser {
             StructuredQName sq = qNameParser.parse(prefix + ":dummy", NamespaceUri.NULL);
             return new NamespaceTest(pool, nodeType, sq.getNamespaceUri());
         } catch (XPathException err) {
-            grumble(err.getMessage(), err.getErrorCodeLocalPart());
+            grumble(err.getMessage(), err.getErrorCodeQName());
             return null;
         }
     }

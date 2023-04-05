@@ -589,7 +589,7 @@ public class Executable {
                 } catch (XPathException e) {
                     // XPDY0002 here means there is no context item, which means the default value
                     // of the context item depends on the context item: a circularity.
-                    if ("XPDY0002".equals(e.getErrorCodeLocalPart())) {
+                    if (e.hasErrorCode("XPDY0002")) {
                         if (e.getMessage().contains("last()") || e.getMessage().contains("position()")) {
                             // no action
                         } else {

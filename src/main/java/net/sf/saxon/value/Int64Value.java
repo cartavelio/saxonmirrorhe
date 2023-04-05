@@ -115,11 +115,9 @@ public final class Int64Value extends IntegerValue {
         super(typeLabel);
         value = val;
         if (check && !checkRange(value, typeLabel)) {
-            XPathException err = new XPathException("Integer value " + val +
-                    " is out of range for the requested type " + typeLabel.getDescription());
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("Integer value " + val +
+                    " is out of range for the requested type " + typeLabel.getDescription())
+                    .withErrorCode("XPTY0004").asTypeError();
         }
     }
 

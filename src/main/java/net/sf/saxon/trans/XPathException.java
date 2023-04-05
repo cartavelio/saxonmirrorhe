@@ -93,22 +93,6 @@ public class XPathException extends TransformerException {
     }
 
     /**
-     * Create an XPathException that supplies an error message and wraps an underlying exception
-     * and supplies location information
-     *
-     * @param message the error message (which should generally explain what Saxon was doing when the
-     *                underlying exception occurred)
-     * @param loc     indicates where in the user-written query or stylesheet (or sometimes in a source
-     *                document) the error occurred
-     * @param err     the underlying exception (the cause of this exception)
-     */
-
-    public XPathException(String message, Location loc, Throwable err) {
-        super(message, loc, err);
-        breakPoint();
-    }
-
-    /**
      * Create an XPathException that supplies an error message and an error code
      *
      * @param message   the error message
@@ -207,6 +191,24 @@ public class XPathException extends TransformerException {
     //#endif
 
     /**
+     * Construct an exception that differs from a supplied exception only
+     * by changing the error message
+     * @param message the new message
+     * @return a new exception, copying all the properties of this exception except
+     * for the message
+     */
+    public XPathException withMessage(String message) {
+        XPathException e2 = new XPathException(message);
+        e2.setErrorCodeQName(getErrorCodeQName());
+        e2.setLocation(getLocator());
+        e2.setIsSyntaxError(isSyntaxError());
+        e2.setIsTypeError(isTypeError());
+        e2.setHostLanguage(getHostLanguage());
+        e2.setXPathContext(getXPathContext());
+        return e2;
+    }
+
+    /**
      * Set dynamic context information in the exception object
      *
      * @param context the dynamic context at the time the exception occurred
@@ -216,10 +218,33 @@ public class XPathException extends TransformerException {
         this.context = context;
     }
 
+    /**
+     * Set dynamic context information in the exception object
+     *
+     * @param context the dynamic context at the time the exception occurred
+     * @return this XPathException object in a modified state
+     */
+    public XPathException withXPathContext(XPathContext context) {
+        this.context = context;
+        return this;
+    }
+
     public void setLocation(Location loc) {
         if (loc != null) {
             setLocator(loc.saveLocation());
         }
+    }
+
+    /**
+     * Set location information in the exception object
+     *
+     * @param loc indicating where the exception occurred
+     * @return this XPathException object in a modified state
+     */
+
+    public XPathException withLocation(Location loc) {
+        setLocation(loc);
+        return this;
     }
 
 
@@ -227,15 +252,19 @@ public class XPathException extends TransformerException {
         return failingExpression;
     }
 
-    public void setFailingExpression(Expression failingExpression) {
+    public XPathException withFailingExpression(Expression failingExpression) {
         this.failingExpression = failingExpression;
+        maybeSetLocation(failingExpression.getLocation());
+        return this;
     }
 
-    public void maybeSetFailingExpression(Expression failingExpression) {
+
+    public XPathException maybeWithFailingExpression(Expression failingExpression) {
         if (this.failingExpression == null) {
             this.failingExpression = failingExpression;
         }
         maybeSetLocation(failingExpression.getLocation());
+        return this;
     }
 
 
@@ -276,6 +305,11 @@ public class XPathException extends TransformerException {
 
     public void setIsStaticError(boolean is) {
         _isStaticError = is;
+    }
+
+    public XPathException asStaticError() {
+        setIsStaticError(true);
+        return this;
     }
 
     /**
@@ -320,6 +354,22 @@ public class XPathException extends TransformerException {
 
     public void setIsTypeError(boolean is) {
         _isTypeError = is;
+    }
+
+    /**
+     * Mark this exception to indicate that it represents a type error
+     *
+     * @return this XPathException in a modified state
+     */
+
+    public XPathException asTypeError() {
+        setIsTypeError(true);
+        return this;
+    }
+
+    public XPathException asTypeErrorIf(boolean condition) {
+        setIsTypeError(condition);
+        return this;
     }
 
     /**
@@ -400,6 +450,30 @@ public class XPathException extends TransformerException {
     }
 
     /**
+     * Set the error code. The error code is a QName; this method sets the local part of the name,
+     * setting the namespace of the error code to the standard system namespace {@link net.sf.saxon.lib.NamespaceConstant#ERR}
+     *
+     * @param code The local part of the name of the error code
+     * @return this XPathException object in a modified state
+     */
+    public XPathException withErrorCode(String code) {
+        setErrorCode(code);
+        return this;
+    }
+
+    public XPathException withErrorCode(StructuredQName code) {
+        setErrorCodeQName(code);
+        return this;
+    }
+
+    public XPathException replacingErrorCode(String oldCode, String newCode) {
+        if (hasErrorCode(oldCode)) {
+            setErrorCode(newCode);
+        }
+        return this;
+    }
+
+    /**
      * Set the error code, provided it has not already been set.
      * The error code is a QName; this method sets the local part of the name,
      * setting the namespace of the error code to the standard system namespace {@link NamespaceConstant#ERR}
@@ -411,6 +485,11 @@ public class XPathException extends TransformerException {
         if (errorCode == null && code != null) {
             errorCode = new StructuredQName("err", NamespaceUri.ERR, code);
         }
+    }
+
+    public XPathException maybeWithErrorCode(String code) {
+        maybeSetErrorCode(code);
+        return this;
     }
 
     /**
@@ -434,26 +513,32 @@ public class XPathException extends TransformerException {
         return errorCode;
     }
 
-    /**
-     * Get the local part of the name of the error code
-     *
-     * @return the local part of the name of the error code
-     */
-
-    /*@Nullable*/
-    public String getErrorCodeLocalPart() {
-        return errorCode == null ? null : errorCode.getLocalPart();
+    public String showErrorCode() {
+        if (errorCode == null) {
+            return "no_error_code";
+        } else if (errorCode.hasURI(NamespaceUri.ERR)) {
+            return errorCode.getLocalPart();
+        } else {
+            return errorCode.getEQName();
+        }
     }
 
     /**
-     * Get the namespace URI part of the name of the error code
-     *
-     * @return the namespace URI part of the name of the error code
+     * Ask whether the error code is a specific system error code
+     * @param codes the local part of the error(s) expected
+     * @return true if the error code matches one of the required codes,
+     * treated as local names in the standard error namespace
      */
 
-    /*@Nullable*/
-    public NamespaceUri getErrorCodeNamespace() {
-        return errorCode == null ? null : errorCode.getNamespaceUri();
+    public boolean hasErrorCode(String... codes) {
+        if (errorCode != null && errorCode.hasURI(NamespaceUri.ERR)) {
+            for (String code : codes) {
+                if (errorCode.getLocalPart().equals(code)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -515,6 +600,11 @@ public class XPathException extends TransformerException {
         }
     }
 
+    public XPathException maybeWithLocation(Location here) {
+        maybeSetLocation(here);
+        return this;
+    }
+
     /**
      * Set the context of a message, only if it is not already set
      *
@@ -525,6 +615,13 @@ public class XPathException extends TransformerException {
         if (getXPathContext() == null) {
             setXPathContext(context);
         }
+    }
+
+    public XPathException maybeWithContext(XPathContext context) {
+        if (getXPathContext() == null) {
+            setXPathContext(context);
+        }
+        return this;
     }
 
     /**

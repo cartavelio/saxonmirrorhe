@@ -699,10 +699,9 @@ public final class LocalParam extends Instruction implements LocalBinding {
                                     message += ". A tunnel parameter with this name was supplied, but a non-tunnel parameter is required";
                                 }
                             }
-                            XPathException e = new XPathException(message);
-                            e.setXPathContext(context);
-                            e.setErrorCode("XTDE0700");
-                            throw e;
+                            throw new XPathException(message)
+                                    .withXPathContext(context)
+                                    .withErrorCode("XTDE0700");
                         }
                         if (selectEvaluator == null) {
                             throw new AssertionError("Internal error: No select expression");

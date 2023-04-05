@@ -100,13 +100,10 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 return;
             }
             if (hasOverlappingArity(function, existing)) {
-                XPathException err = new XPathException("Conflicting definition of function " +
+                throw new XPathException("Conflicting definition of function " +
                                                                 function.getDisplayName() +
-                                                                " (see line " + existing.getLineNumber() + " in " + existing.getSystemId() + ')');
-                err.setErrorCode("XQST0034");
-                err.setIsStaticError(true);
-                err.setLocator(function);
-                throw err;
+                                                                " (see line " + existing.getLineNumber() + " in " + existing.getSystemId() + ')')
+                        .withErrorCode("XQST0034").asStaticError().withLocation(function);
             }
         }
         functions.put(keyObj, function);

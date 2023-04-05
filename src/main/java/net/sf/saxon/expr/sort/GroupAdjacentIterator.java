@@ -132,11 +132,9 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
                     return;
                 }
             } catch (ClassCastException e) {
-                String message = "Grouping key values are of non-comparable types";
-                XPathException err = new XPathException(message);
-                err.setIsTypeError(true);
-                err.setXPathContext(runningContext);
-                throw err;
+                throw new XPathException("Grouping key values are of non-comparable types")
+                        .asTypeError()
+                        .withXPathContext(runningContext);
             }
         }
         nextItem = null;

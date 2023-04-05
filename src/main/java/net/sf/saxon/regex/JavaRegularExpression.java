@@ -213,9 +213,7 @@ public class JavaRegularExpression implements RegularExpression {
                     flags |= Pattern.CANON_EQ;
                     break;
                 default:
-                    XPathException err = new XPathException("Invalid character '" + c + "' in regular expression flags");
-                    err.setErrorCode("FORX0001");
-                    throw err;
+                    throw new XPathException("Invalid character '" + c + "' in regular expression flags", "FORX0001");
             }
         }
         return flags;

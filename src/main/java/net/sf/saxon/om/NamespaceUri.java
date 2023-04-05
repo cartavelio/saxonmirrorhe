@@ -77,6 +77,17 @@ public class NamespaceUri {
     }
 
     /**
+     * Construct an unprefixed QName using this namespace and a supplied local name
+     * @param localName the local part of the name
+     * @return a StructuredQName representing a QName with this namespace URI, with
+     * the supplied local part, and with no prefix.
+     */
+
+    public StructuredQName qName(String localName) {
+        return new StructuredQName("", this, localName);
+    }
+
+    /**
      * A URI representing the null namespace (actually, an empty string)
      */
 

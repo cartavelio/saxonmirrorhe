@@ -185,11 +185,10 @@ public class SQLConnect extends ExtensionInstruction {
                 // the following hack is necessary to load JDBC drivers
                 Class.forName(dbDriverString);
             } catch (ClassNotFoundException e) {
-                XPathException err = new XPathException("Failed to load JDBC driver " + dbDriverString, e);
-                err.setXPathContext(context);
-                err.setErrorCode(SaxonErrorCode.SXSQ0003);
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException("Failed to load JDBC driver " + dbDriverString, e)
+                        .withXPathContext(context)
+                        .withErrorCode(SaxonErrorCode.SXSQ0003)
+                        .withLocation(getLocation());
             }
             try {
                 if (context.getConfiguration().isTiming()) {
@@ -197,11 +196,10 @@ public class SQLConnect extends ExtensionInstruction {
                 }
                 connection = DriverManager.getConnection(dbString, userString, pwdString);
             } catch (SQLException ex) {
-                XPathException err = new XPathException("JDBC Connection Failure", ex);
-                err.setXPathContext(context);
-                err.setErrorCode(SaxonErrorCode.SXSQ0003);
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException("JDBC Connection Failure", ex)
+                        .withXPathContext(context)
+                        .withErrorCode(SaxonErrorCode.SXSQ0003)
+                        .withLocation(getLocation());
             }
 
             try {
@@ -209,11 +207,10 @@ public class SQLConnect extends ExtensionInstruction {
                     connection.setAutoCommit("yes".equals(autoCommitString));
                 }
             } catch (SQLException e) {
-                XPathException err = new XPathException("Failed to set autoCommit on JDBC connection " + dbDriverString, e);
-                err.setXPathContext(context);
-                err.setErrorCode(SaxonErrorCode.SXSQ0003);
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException("Failed to set autoCommit on JDBC connection " + dbDriverString, e)
+                        .withXPathContext(context)
+                        .withErrorCode(SaxonErrorCode.SXSQ0003)
+                        .withLocation(getLocation());
             }
 
             return new ObjectValue<>(connection);

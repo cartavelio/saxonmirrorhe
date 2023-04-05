@@ -390,11 +390,10 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
             TailCall tc = t.expand(output, c2);
             dispatchTailCall(tc);
         } catch (StackOverflowError e) {
-            XPathException err = new XPathException.StackOverflow(
+            throw new XPathException.StackOverflow(
                     "Too many nested template or function calls. The stylesheet may be looping.",
-                    SaxonErrorCode.SXLM0001, getLocation());
-            err.setXPathContext(context);
-            throw err;
+                    SaxonErrorCode.SXLM0001, getLocation())
+                    .withXPathContext(context);
         }
     }
 
@@ -636,11 +635,10 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
                         TailCall tc = t.expand(output, c2);
                         dispatchTailCall(tc);
                     } catch (StackOverflowError e) {
-                        XPathException err = new XPathException.StackOverflow(
+                        throw new XPathException.StackOverflow(
                                 "Too many nested template or function calls. The stylesheet may be looping.",
-                                SaxonErrorCode.SXLM0001, expr.getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                                SaxonErrorCode.SXLM0001, expr.getLocation())
+                                .withXPathContext(context);
                     }
                     return null;
                 };

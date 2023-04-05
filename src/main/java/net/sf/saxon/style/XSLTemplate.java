@@ -330,12 +330,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 getModeNames();
             }
         } catch (XPathException err) {
-            err.maybeSetErrorCode("XTSE0280");
-            if (err.getErrorCodeLocalPart().equals("XTSE0020")) {
-                err.setErrorCode("XTSE0550");
-            }
-            err.setIsStaticError(true);
-            compileError(err);
+            XPathException e2 = err.replacingErrorCode("XTSE0020", "XTSE0550");
+            e2.maybeSetErrorCode("XTSE0280");
+            e2.setIsStaticError(true);
+            compileError(e2);
         }
 
         if (nameAtt != null) {
@@ -384,7 +382,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 requiredType = makeSequenceType(asAtt);
                 declaresRequiredType = true;
             } catch (XPathException e) {
-                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
+                compileErrorInAttribute(e, "as");
             }
         }
 
@@ -394,7 +392,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             try {
                 extraResultType = makeExtendedSequenceType(extraAsAtt);
             } catch (XPathException e) {
-                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "saxon:as");
+                compileErrorInAttribute(e, "saxon:as");
                 extraResultType = requiredType; // error recovery
             }
             if (asAtt != null) {
@@ -876,8 +874,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     try {
                         match2 = match1.convertToTypedPattern(typed);
                     } catch (XPathException e) {
-                        e.maybeSetLocation(this);
-                        throw e;
+                        throw e.maybeWithLocation(this);
                     }
                     if (match2 != match1) {
                         ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
@@ -1066,8 +1063,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                         }
                     }
                 } catch (XPathException e) {
-                    e.maybeSetLocation(this);
-                    compileError(e);
+                    compileError(e.maybeWithLocation(this));
                 }
 
             }

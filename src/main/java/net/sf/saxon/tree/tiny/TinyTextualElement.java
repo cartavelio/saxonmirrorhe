@@ -78,8 +78,7 @@ public class TinyTextualElement extends TinyElementImpl {
             try {
                 checkNotNamespaceSensitiveElement(type, nodeNr);
             } catch (CopyNamespaceSensitiveException e) {
-                e.setErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                throw e;
+                throw e.withErrorCode(receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
             }
         }
 

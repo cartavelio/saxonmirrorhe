@@ -41,11 +41,9 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
         try {
             return SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, context));
         } catch (XPathException e) {
-            if (e.getErrorCodeQName() == null) {
-                e.setErrorCode("FOUT1170");
-            }
-            if (getArity() == 2 && "FOUT1200".equals(e.getErrorCodeLocalPart())) {
-                e.setErrorCode("FOUT1190");
+            e.maybeSetErrorCode("FOUT1170");
+            if (getArity() == 2) {
+                throw e.replacingErrorCode("FOUT1200", "FOUT1190");
             }
             throw e;
         }

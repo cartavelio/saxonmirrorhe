@@ -119,11 +119,10 @@ public class AccumulatorData implements IAccumulatorData {
             }
             return value;
         } catch (StackOverflowError e) {
-            XPathException err = new XPathException.StackOverflow(
+            throw new XPathException.StackOverflow(
                     "Too many nested accumulator evaluations. The accumulator definition may have cyclic dependencies",
-                    "XTDE3400", accumulator);
-            err.setXPathContext(context);
-            throw err;
+                    "XTDE3400", accumulator)
+                    .withXPathContext(context);
         }
     }
 

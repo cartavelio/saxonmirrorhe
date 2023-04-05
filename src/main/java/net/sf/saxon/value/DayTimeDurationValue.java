@@ -412,14 +412,10 @@ public final class DayTimeDurationValue extends DurationValue
     @Override
     public DayTimeDurationValue multiply(double n) throws XPathException {
         if (Double.isNaN(n)) {
-            XPathException err = new XPathException("Cannot multiply a duration by NaN");
-            err.setErrorCode("FOCA0005");
-            throw err;
+            throw new XPathException("Cannot multiply a duration by NaN", "FOCA0005");
         }
         if (Double.isInfinite(n)) {
-            XPathException err = new XPathException("Cannot multiply a duration by infinity");
-            err.setErrorCode("FODT0002");
-            throw err;
+            throw new XPathException("Cannot multiply a duration by infinity", "FODT0002");
         }
         BigDecimal factor = BigDecimal.valueOf(n);
         return multiply(factor);
@@ -434,9 +430,8 @@ public final class DayTimeDurationValue extends DurationValue
             if (err.getCause() instanceof XPathException) {
                 throw (XPathException) err.getCause();
             } else {
-                XPathException err2 = new XPathException("Overflow when multiplying a duration by a number", err);
-                err2.setErrorCode("FODT0002");
-                throw err2;
+                throw new XPathException("Overflow when multiplying a duration by a number", err)
+                        .withErrorCode("FODT0002");
             }
         }
     }
@@ -452,14 +447,10 @@ public final class DayTimeDurationValue extends DurationValue
     @Override
     public DurationValue divide(double n) throws XPathException {
         if (Double.isNaN(n)) {
-            XPathException err = new XPathException("Cannot divide a duration by NaN");
-            err.setErrorCode("FOCA0005");
-            throw err;
+            throw new XPathException("Cannot divide a duration by NaN", "FOCA0005");
         }
         if (n == 0) {
-            XPathException err = new XPathException("Cannot divide a duration by zero");
-            err.setErrorCode("FODT0002");
-            throw err;
+            throw new XPathException("Cannot divide a duration by zero", "FODT0002");
         }
         BigDecimal secs = getTotalSeconds();
         BigDecimal product = secs.divide(BigDecimal.valueOf(n));
@@ -469,9 +460,8 @@ public final class DayTimeDurationValue extends DurationValue
             if (err.getCause() instanceof XPathException) {
                 throw (XPathException) err.getCause();
             } else {
-                XPathException err2 = new XPathException("Overflow when dividing a duration by a number", err);
-                err2.setErrorCode("FODT0002");
-                throw err2;
+                throw new XPathException("Overflow when dividing a duration by a number", err)
+                        .withErrorCode("FODT0002");
             }
         }
     }
@@ -493,9 +483,7 @@ public final class DayTimeDurationValue extends DurationValue
             }
             return new BigDecimalValue(v1.divide(v2, 20, RoundingMode.HALF_EVEN));
         } else {
-            XPathException err = new XPathException("Cannot divide two durations of different type");
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Cannot divide two durations of different type", "XPTY0004");
         }
     }
 
@@ -514,18 +502,14 @@ public final class DayTimeDurationValue extends DurationValue
                     BigDecimal v2 = other.getTotalSeconds();
                     return fromSeconds(v1.add(v2));
                 } catch (IllegalArgumentException e) {
-                    XPathException err = new XPathException("Overflow when adding two durations");
-                    err.setErrorCode("FODT0002");
-                    throw err;
+                    throw new XPathException("Overflow when adding two durations", "FODT0002");
                 }
             } else {
                 // fast path for common case: no risk of overflow
                 return DayTimeDurationValue.fromNanoseconds(getLengthInNanoseconds() + d2.getLengthInNanoseconds());
             }
         } else {
-            XPathException err = new XPathException("Cannot add two durations of different type");
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Cannot add two durations of different type", "XPTY0004");
         }
     }
 
@@ -544,18 +528,14 @@ public final class DayTimeDurationValue extends DurationValue
                     BigDecimal v2 = other.getTotalSeconds();
                     return fromSeconds(v1.subtract(v2));
                 } catch (IllegalArgumentException e) {
-                    XPathException err = new XPathException("Overflow when subtracting two durations");
-                    err.setErrorCode("FODT0002");
-                    throw err;
+                    throw new XPathException("Overflow when subtracting two durations", "FODT0002");
                 }
             } else {
                 // fast path for common case: no risk of overflow
                 return DayTimeDurationValue.fromNanoseconds(getLengthInNanoseconds() - d2.getLengthInNanoseconds());
             }
         } else {
-            XPathException err = new XPathException("Cannot subtract two durations of different type");
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Cannot subtract two durations of different type", "XPTY0004").asTypeError();
         }
     }
 

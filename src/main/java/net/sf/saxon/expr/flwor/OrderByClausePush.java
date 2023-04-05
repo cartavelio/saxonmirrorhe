@@ -85,9 +85,7 @@ public class OrderByClausePush extends TuplePush {
                 return a.originalPosition - b.originalPosition;
             });
         } catch (ClassCastException e) {
-            XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Non-comparable types found while sorting: " + e.getMessage(), "XPTY0004");
         }
 
         for (ItemToBeSorted itbs : tupleArray) {

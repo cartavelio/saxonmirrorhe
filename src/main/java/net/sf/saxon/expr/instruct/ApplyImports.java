@@ -112,11 +112,10 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
 
                 Rule currentTemplateRule = context.getCurrentTemplateRule();
                 if (currentTemplateRule == null) {
-                    XPathException e = new XPathException("There is no current template rule");
-                    e.setXPathContext(context);
-                    e.setErrorCode("XTDE0560");
-                    e.setLocation(loc);
-                    throw e;
+                    throw new XPathException("There is no current template rule")
+                            .withXPathContext(context)
+                            .withErrorCode("XTDE0560")
+                            .withLocation(loc);
                 }
 
                 int min = currentTemplateRule.getMinImportPrecedence();

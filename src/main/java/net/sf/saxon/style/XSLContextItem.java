@@ -56,7 +56,7 @@ public class XSLContextItem extends StyleElement {
                 st = makeSequenceType(asAtt);
             } catch (XPathException e) {
                 st = SequenceType.SINGLE_ITEM;
-                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
+                compileErrorInAttribute(e, "as");
             }
             if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
                 compileError("The xsl:context-item/@use attribute must be an item type (no occurrence indicator allowed)", "XTSE0020");

@@ -394,9 +394,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
             } else if (ch < 160) {
                 if (rejectControlCharacters()) {
                     // these control characters are illegal in HTML
-                    XPathException err = new XPathException("Illegal HTML character: decimal " + ch);
-                    err.setErrorCode("SERE0014");
-                    throw err;
+                    throw new XPathException("Illegal HTML character: decimal " + ch, "SERE0014");
                 } else {
                     characterReferenceGenerator.outputCharacterReference(ch, writer);
                 }
@@ -489,9 +487,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
         }
         UnicodeString t = data.tidy();
         if (t.indexOf('>') >= 0) {
-            XPathException err = new XPathException("A processing instruction in HTML must not contain a > character");
-            err.setErrorCode("SERE0015");
-            throw err;
+            throw new XPathException("A processing instruction in HTML must not contain a > character", "SERE0015");
         }
         try {
             if (openStartTag) {

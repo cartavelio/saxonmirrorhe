@@ -206,11 +206,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                     value = var.evaluateVariable(newContext);
                 } catch (XPathException e) {
                     e.setIsGlobalError(false);  // to make it catchable
-                    if (e.getErrorCodeLocalPart().equals("XPTY0004")) {
-                        throw new XPathException(e.getMessage(), "FOQM0005"); // catches when external variables have wrong type
-                    } else {
-                        throw e;
-                    }
+                    throw e.replacingErrorCode("XPTY0004", "FOQM0005"); // catches when external variables have wrong type
                 }
                 variablesMap = variablesMap.addEntry(qNameValue, value);
             }

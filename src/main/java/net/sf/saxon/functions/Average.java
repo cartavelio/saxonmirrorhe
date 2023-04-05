@@ -103,10 +103,7 @@ public class Average extends FoldingFunction {
                     try {
                         data = ((DurationValue) data).add((DurationValue) next);
                     } catch (XPathException e) {
-                        if ("XPTY0004".equals(e.getErrorCodeLocalPart())){
-                            e.setErrorCode("FORG0006");
-                        }
-                        throw e;
+                        throw e.replacingErrorCode("XPTY0004", "FORG0006");
                     }
                 } else {
                     throw new XPathException(

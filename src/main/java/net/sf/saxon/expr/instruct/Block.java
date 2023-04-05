@@ -295,14 +295,13 @@ public class Block extends Instruction {
         if (!Cardinality.subsumes(req.getCardinality(), suppliedCard)) {
             if ((reqCard & suppliedCard) == 0) {
                 RoleDiagnostic role = roleSupplier.get();
-                XPathException err = new XPathException(
+                throw new XPathException(
                         "The required cardinality of the " + role.getMessage() +
                                 " is " + Cardinality.describe(reqCard) +
                                 ", but the supplied cardinality is " +
-                                Cardinality.describe(suppliedCard), role.getErrorCode(), getLocation());
-                err.setIsTypeError(true);
-                err.setFailingExpression(this);
-                throw err;
+                                Cardinality.describe(suppliedCard), role.getErrorCode(), getLocation())
+                        .asTypeError()
+                        .withFailingExpression(this);
             } else {
                 return CardinalityChecker.makeCardinalityChecker(b2, reqCard, roleSupplier);
             }

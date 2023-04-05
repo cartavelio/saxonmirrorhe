@@ -469,8 +469,7 @@ public class FixedElement extends ElementCreator {
         try {
             getContentExpression().checkPermittedContents(type, true);
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.maybeWithLocation(getLocation());
         }
     }
 
@@ -657,9 +656,7 @@ public class FixedElement extends ElementCreator {
                     out.endElement();
 
                 } catch (XPathException e) {
-                    e.maybeSetLocation(expr.getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+                    throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                 }
                 return null;
             };

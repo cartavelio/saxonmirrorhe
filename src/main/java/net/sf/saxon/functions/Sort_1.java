@@ -75,9 +75,8 @@ public class Sort_1 extends SystemFunction {
             });
             //GenericSorter.quickSort(0, inputList.size(), sortable);
         } catch (ClassCastException e) {
-            XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new XPathException("Non-comparable types found while sorting: " + e.getMessage(), "XPTY0004")
+                    .asTypeError();
         }
         ArrayList<Item> outputList = new ArrayList<>(inputList.size());
         for (ItemToBeSorted member : inputList) {

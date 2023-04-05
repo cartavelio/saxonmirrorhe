@@ -367,10 +367,9 @@ public class TryCatch extends Expression {
                                     // rollback=no was specified, and output has been written, so we cannot recover
                                     String message = err.getMessage() +
                                             ". The error could not be caught, because rollback-output=no was specified, and output was already written to the result tree";
-                                    XPathException xe = new XPathException(message, "XTDE3530");
-                                    xe.setLocation(err.getLocator());
-                                    xe.setXPathContext(context);
-                                    throw xe;
+                                    throw new XPathException(message, "XTDE3530")
+                                            .withLocation(err.getLocator())
+                                            .withXPathContext(context);
                                 }
                                 Expression caught = clause.catchOp.getChildExpression();
                                 XPathContextMajor c2 = context.newContext();

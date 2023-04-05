@@ -200,14 +200,13 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         try {
             arg2 = argument2.head();
         } catch (XPathException e) {
-            String code = e.getErrorCodeLocalPart();
-            if ("XPDY0002".equals(code) && argument2 instanceof RootExpression) {
+            if (e.hasErrorCode("XPDY0002") && argument2 instanceof RootExpression) {
                 throw new XPathException("Cannot call the key() function when there is no context node", "XTDE1270", context);
-            } else if ("XPDY0050".equals(code)) {
+            } else if (e.hasErrorCode("XPDY0050")) {
                 throw new XPathException("In the key() function," +
                                                  " the node supplied in the third argument (or the context node if absent)" +
                                                  " must be in a tree whose root is a document node", "XTDE1270", context);
-            } else if ("XPTY0020".equals(code) || "XPTY0019".equals(code)) {
+            } else if (e.hasErrorCode("XPTY0020", "XPTY0019")) {
                 throw new XPathException("Cannot call the key() function when the context item is an atomic value",
                                          "XTDE1270", context);
             }
