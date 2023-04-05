@@ -50,15 +50,13 @@ import static net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE.isTrue;
  * Test Driver for the QT3 test suite
  */
 public class QT3TestDriverHE extends TestDriver {
-
-
     public static String RNS = "http://www.w3.org/2012/08/qt-fots-results";
     public static String CNS = "http://www.w3.org/2010/09/qt-fots-catalog";
 
     public Map<String, Dependency> getDependencyMap() {
         return dependencyMap;
     }
-
+    private static final URI EMPTY_STRING_URI = URI.create("");
 
     //private FotsResultsDocument resultsDoc;
 
@@ -584,6 +582,14 @@ public class QT3TestDriverHE extends TestDriver {
 
                             mr.setTestCase(testCase);
                             testXpc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
+
+                            // Is a static base URI defined? Note: the XPathCompiler returns URI("") if the
+                            // base URI is not set. This is distinct from XQueryCompiler which returns null
+                            if (env.xpathCompiler != null && EMPTY_STRING_URI.equals(env.xpathCompiler.getBaseURI())) {
+                                // If not, establish one.
+                                // This avoids a fail in qt3extra test -s:fn-doc -t:fn-doc-101
+                                testXpc.setBaseURI(testCase.getBaseURI());
+                            }
 
                             try {
                                 XPathSelector selector = testXpc.compile(exp).load();
