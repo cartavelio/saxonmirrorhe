@@ -70,8 +70,9 @@
          <p>From SaxonC 12.1:</p>
          <ul>
             <li>Exceptions that are thrown from the underlying Java code are now handled in the C++ API
-               and re-thrown as C++ exceptions. Likewise these exceptions are thrown in the Python API
-               as <code>PySaxonApiError</code> and in the PHP extension as PHP exceptions.</li>
+               and re-thrown as a C++ exception called SaxonApiException. Likewise these exceptions are thrown in the Python API
+               as <code>PySaxonApiError</code> and in the PHP extension as PHP exceptions. Note: For the Python API on Windows
+            the <code>PySaxonApiError</code> is not available therefore we throw <code>RuntimeError</code> if there are any failures.</li>
             <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code>.</li>
             <li>The <code>setStreaming()</code> and <code>isStreaming()</code> methods have been added to
                <code>XQueryProcessor</code>.</li>
