@@ -311,6 +311,7 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
+        "ex": ["export": "on"],
         "strict": ["strict":"on"]
       ]
     ],
@@ -320,6 +321,7 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
+        "ex": ["export": "on"],
         "strict": ["strict":"on"]
       ]
     ],
