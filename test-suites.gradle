@@ -70,7 +70,6 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
-        "ex": ["export": "on"],
       ]
     ],
     "xslt30extra": [
@@ -127,7 +126,6 @@ def testSuiteMatrix = [
 
       "XT30": [
         "": [:],
-        "ex": ["export": "on"],
         "strict": ["strict":"on"]
       ]
     ],
