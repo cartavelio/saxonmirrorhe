@@ -346,7 +346,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         }
         if (!definition.trustResultType()) {
             final ItemType type = resultType.getPrimaryType();
-            if (!type.matches(result, th) || (result == null && !Cardinality.allowsZero(resultType.getCardinality()))) {
+            if (result == null ? !Cardinality.allowsZero(resultType.getCardinality()) : !type.matches(result, th)) {
                 String msg = role.composeErrorMessage(type, result, th);
                 XPathException err = new XPathException(msg, "XPTY0004");
                 err.setLocation(getLocation());

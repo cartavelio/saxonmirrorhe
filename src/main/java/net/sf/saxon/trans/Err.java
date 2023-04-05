@@ -146,6 +146,9 @@ public class Err {
      */
 
     public static String depict(Item item) {
+        if (item == null) {
+            return "(*null*)";
+        }
         if (item instanceof NodeInfo) {
             NodeInfo node = (NodeInfo)item;
             switch (node.getNodeKind()) {
