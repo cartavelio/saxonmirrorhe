@@ -31,10 +31,10 @@ public class XSLArrayMember extends XSLSequence {
      *
      * @return true if the element is in the XSLT namespace
      */
-    //@Override
-    /*public boolean isInXsltNamespace() {
+    @Override
+    public boolean isInXsltNamespace() {
         return getNodeName().hasURI(NamespaceUri.XSLT);
-    }*/
+    }
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
