@@ -49,6 +49,11 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
                     URI cwdURI = new File(userDir).toURI();
                     cwdURI = cwdURI.resolve(CTypeConversion.toJavaString(baseUri));
                     builder.setBaseURI(cwdURI);
+                    if(SaxonCAPI.debug) {
+                        System.err.println("setBaseURI user.dir="+userDir);
+                        System.err.println("setBaseURI baseURI="+baseUri);
+                        System.err.println("setBaseURI="+cwdURI);
+                    }
                 } catch (Exception e) {
                     throw new SaxonApiException(e);
                 }
