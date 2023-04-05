@@ -377,6 +377,7 @@ public final class AncestorQualifiedPattern extends Pattern {
         ExpressionTool.copyLocationInfo(this, n);
         n.setOriginalText(getOriginalText());
         n.testUpperPatternFirst = testUpperPatternFirst;
+
         return n;
     }
 
