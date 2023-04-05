@@ -117,13 +117,42 @@ def check_s9apiexamplesom_ee(output):
          }, output)
 
 
-def check_s9apiexamples_he_pe(output):
+def check_s9apiexamples_he(output):
     check_against_map(
         {"QueryA": ["", r"^<a b=.c.>7<"],
          "QueryB": ["", r"Total: 385"],
          "QueryC": ["", "apple: true", "banana: false", "cherry: true"],
          "QueryD": ["", r"<\?xml.*<out><e>11<.*<e>12<.*<e>13"],
          "QueryE": ["", r"Start element {}copy", r"^Start element {}ITEM"],
+
+         "TransformA": ["", "Output written to books.html"],
+         "TransformB": ["", "Output written to tour.html"],
+         "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
+         "TransformD": ["", "103"],
+         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"is here", r"^.*<head>"],
+         "TransformF": ["", r"^<\?xml", r"^.*<exists>false<"],
+         "TransformG": ["", "BOOKLIST/BOOKS/ITEM/TITLE", "BOOKLIST/BOOKS/ITEM/AUTHOR"],
+         "XPathA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "XPathB": ["", "Result: 6.11"],
+         "XPathDOM": ["", "Pride and Prejudice", "Wuthering Heights"],
+         "SerializeA": ["", r"^<a ", r"^.*<z xmlns=../>"],
+         "SerializeB": ["", r"<d>4</d>", r"<c>3</c>", r"<b>2</b>"],
+         "SerializeC": ["", r"Serialized result: 5 6 7 8 9 10 & 20"],
+         "SerializeD": ["", "Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
+         "NavigationA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
+         "NavigationD": ["", r"^Tess of the .*", r"^Jude the Obscure"]
+         }, output)
+
+
+def check_s9apiexamples_pe(output):
+    check_against_map(
+        {"QueryA": ["", r"^<a b=.c.>7<"],
+         "QueryB": ["", r"Total: 385"],
+         "QueryC": ["", "apple: true", "banana: false", "cherry: true"],
+         "QueryD": ["", r"<\?xml.*<out><e>11<.*<e>12<.*<e>13"],
+         "QueryE": ["", r"Start element {}copy", r"^Start element {}ITEM"],
+         "QueryF": ["", "Locale: Italian"],
+
          "TransformA": ["", "Output written to books.html"],
          "TransformB": ["", "Output written to tour.html"],
          "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
@@ -150,6 +179,14 @@ def check_s9apiexamples_ee(output):
          "QueryC": ["", "apple: true", "banana: false", "cherry: true"],
          "QueryD": ["", r"<\?xml.*<out><e>11<.*<e>12<.*<e>13"],
          "QueryE": ["", r"Start element {}copy", r"^Start element {}ITEM"],
+         "QueryF": ["", "Locale: Italian"],
+         "QueryG": ["", "Result1: 12", "Result2: 8"],
+
+         "QueryUpdateA": ["", r"^.*<?xml-stylesheet.*",
+                          r" *xsi:noNamespaceSchemaLocation=.books.xsd.>",
+                          r"^ *<BOOKS>", r"^ *<ITEM CAT"],
+         # FIXME: more to QueryUpdateA surely?
+         
          "TransformA": ["", "Output written to books.html"],
          "TransformB": ["", "Output written to tour.html"],
          "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
@@ -288,9 +325,9 @@ def check_samples(edition, sample, output, ignore_errors):
         elif sample == "S9APIExamplesOM_pe":
             check_s9apiexamplesom_pe(output)
         elif sample == "S9APIExamples_he":
-            check_s9apiexamples_he_pe(output)
+            check_s9apiexamples_he(output)
         elif sample == "S9APIExamples_pe":
-            check_s9apiexamples_he_pe(output)
+            check_s9apiexamples_pe(output)
         elif sample == "S9APIExamples_ee":
             check_s9apiexamples_ee(output)
         elif sample == "JDOM2Example":
