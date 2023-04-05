@@ -1079,7 +1079,7 @@ public class SaxonCAPI {
             }
 
             Source source = resolveFileToSource(proci, cwd, filename, ResourceRequest.XML_NATURE);
-            if (validatorRef == WordFactory.nullPointer()) {
+            if (validatorRef != WordFactory.nullPointer()) {
                 SchemaValidatorForCpp validatorForCpp = objectHandles.get(validatorRef);
 
                 builder.setSchemaValidator(validatorForCpp.getSchemaManager().newSchemaValidator());

@@ -207,7 +207,7 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor, Xslt30Processor *tran
             sresult->failure++;
             sresult->failureList.push_back("testApplyTemplates2a_Error");
             cerr<<"Error ="<<e.what();
-
+            return;
 
         }
 
@@ -216,7 +216,7 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor, Xslt30Processor *tran
 
         sresult->failure++;
         sresult->failureList.push_back("testApplyTemplates2a_Error");
-        return;
+    
     }
     try {
     XsltExecutable * executable = trans->compileFromFile("test-error.xsl");
