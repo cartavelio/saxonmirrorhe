@@ -206,9 +206,9 @@ public class XdmUtils {
      * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
      */
     @CEntryPoint(name = "xdmNodeToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer toString_XdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+    public static CCharPointer toString_XdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) throws SaxonApiException{
         if(value == WordFactory.nullPointer()) {
-            return WordFactory.nullPointer();
+            throw new SaxonApiException("XdmNode object is null");
         }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
 

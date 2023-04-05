@@ -2236,7 +2236,8 @@ cdef class PyXsltExecutable:
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
-        c_templateName = py_template_name_string if template_name is not None else ""
+        if template_name is not None:
+            c_templateName = py_template_name_string
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
@@ -2244,7 +2245,7 @@ cdef class PyXsltExecutable:
         cdef PyXdmArray aaval = None
         cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
-        xdmValue = self.thisxptr.callTemplateReturningValue(c_templateName if c_templateName != "" else NULL)
+        xdmValue = self.thisxptr.callTemplateReturningValue(c_templateName)
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
@@ -2305,9 +2306,10 @@ cdef class PyXsltExecutable:
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
-        c_templateName = py_template_name_string if template_name is not None else ""
+        if template_name is not None:
+            c_templateName = py_template_name_string
         
-        c_string  = self.thisxptr.callTemplateReturningString(c_templateName if c_templateName != "" else NULL)
+        c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         return make_py_str(c_string)
      
      def call_template_returning_file(self, str template_name=None, **kwds):
@@ -2344,8 +2346,9 @@ cdef class PyXsltExecutable:
               py_output_string = value.encode('UTF-8') if value is not None else None
               c_outputfile = py_output_string if value is not None else ""
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
-        c_templateName = py_template_name_string if template_name is not None else ""
-        self.thisxptr.callTemplateReturningFile(c_templateName if c_templateName != "" else NULL, c_outputfile)
+        if template_name is not None:
+            c_templateName = py_template_name_string
+        self.thisxptr.callTemplateReturningFile(c_templateName)
 
      def call_function_returning_value(self, str function_name, list args, **kwds):
         """
