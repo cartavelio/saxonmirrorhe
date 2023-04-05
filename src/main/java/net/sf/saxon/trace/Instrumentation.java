@@ -24,19 +24,23 @@ public class Instrumentation {
 
     // Increment a named counter
     public static void count(String counter) {
-        if (counters.containsKey(counter)) {
-            counters.put(counter, counters.get(counter) + 1);
-        } else {
-            counters.put(counter, 1L);
+        if (ACTIVE) {
+            if (counters.containsKey(counter)) {
+                counters.put(counter, counters.get(counter) + 1);
+            } else {
+                counters.put(counter, 1L);
+            }
         }
     }
 
     // Increase a named counter by a set amount
     public static void count(String counter, long increment) {
-        if (counters.containsKey(counter)) {
-            counters.put(counter, counters.get(counter) + increment);
-        } else {
-            counters.put(counter, increment);
+        if (ACTIVE) {
+            if (counters.containsKey(counter)) {
+                counters.put(counter, counters.get(counter) + increment);
+            } else {
+                counters.put(counter, increment);
+            }
         }
     }
 
@@ -61,7 +65,9 @@ public class Instrumentation {
 
     // Reset all counters
     public static void reset() {
-        counters.clear();
+        if (ACTIVE) {
+            counters.clear();
+        }
     }
 
 }
