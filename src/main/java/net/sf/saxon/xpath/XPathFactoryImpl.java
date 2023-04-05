@@ -98,7 +98,11 @@ public class XPathFactoryImpl extends XPathFactory implements Configuration.ApiP
     }
 
     private boolean silentIsObjectModelSupported(String model) {
-        return model.equals(NamespaceConstant.OBJECT_MODEL_SAXON) || config.getExternalObjectModel(model) != null;
+        try {
+            return model.equals(NamespaceConstant.OBJECT_MODEL_SAXON) || config.getExternalObjectModel(model) != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**

@@ -3814,6 +3814,31 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
+     * Remove an entry from the list of registered external object models
+     * @param model the model to be removed
+     */
+
+    public void deregisterExternalObjectModel(ExternalObjectModel model) {
+        // copy the list in case of concurrency issues
+        List<ExternalObjectModel> newList = new ArrayList<>(externalObjectModels.size());
+        for (ExternalObjectModel existing : externalObjectModels) {
+            if (existing != model) {
+                newList.add(existing);
+            }
+        }
+        externalObjectModels = newList;
+    }
+
+    /**
+     * Clear all the registered external object models
+     */
+
+    public void clearExternalObjectModels() {
+        externalObjectModels = new ArrayList<>();
+    }
+
+
+    /**
      * Get the external object model with a given URI, if registered
      *
      * @param uri the identifying URI of the required external object model

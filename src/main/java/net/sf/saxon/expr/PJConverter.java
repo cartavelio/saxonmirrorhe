@@ -217,9 +217,13 @@ public abstract class PJConverter {
         if (!itemType.isPlainType()) {
             List<ExternalObjectModel> externalObjectModels = config.getExternalObjectModels();
             for (ExternalObjectModel model : externalObjectModels) {
-                PJConverter converter = model.getPJConverter(targetClass);
-                if (converter != null) {
-                    return converter;
+                try {
+                    PJConverter converter = model.getPJConverter(targetClass);
+                    if (converter != null) {
+                        return converter;
+                    }
+                } catch (Exception e) {
+                    config.deregisterExternalObjectModel(model);
                 }
             }
 
