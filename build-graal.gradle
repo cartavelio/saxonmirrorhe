@@ -882,14 +882,14 @@ task all_saxonc_releases() {
   if (systemOsName == 'linux') {
     lastLinePatch = ('[tool.cibuildwheel]\n'
                      + 'build = "*"\n'
-                     + 'skip = ["cp36*", "cp37*", "pp37*", "cp*musl*"]\n'
+                     + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n'
                      + 'archs = ["x86_64"]\n'
                      + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
   } else if (systemOsName == 'windows') {
     lastLinePatch = ('[tool.cibuildwheel]\n'
                      + 'build = "*"\n'
                      + 'archs = ["AMD64"]\n'
-                     + 'skip = ["*-win32", "cp36*", "cp37*", "pp37*", "cp*musl*"]\n')
+                     + 'skip = ["*-win32", "cp36*", "cp37*", "pp*", "cp*musl*"]\n')
     libpath = "libs\\\\win\\\\"
   }
 
