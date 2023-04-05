@@ -83,13 +83,15 @@ SchemaValidator::~SchemaValidator() {
 }
 
    void SchemaValidator::setcwd(const char* dir){
-	if(dir==nullptr) {
+	if(dir!=nullptr) {
     		cwdV = std::string(dir);
 	}
    }
 
   void SchemaValidator::setOutputFile(const char * sourceFile){
-	outputFile = std::string(sourceFile);
+  	if(sourceFile != nullptr) {
+	    outputFile = std::string(sourceFile);
+	}
   }
 
 
