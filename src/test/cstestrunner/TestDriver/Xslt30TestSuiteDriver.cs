@@ -325,7 +325,7 @@ namespace TestDriver {
                         value = "!" + value;
                     }
 
-                    String message = "dependency not satisfied" + value;
+                    String message = "dependency not satisfied: " + value;
                     if (value.StartsWith("feature:")) {
                         message = "requires optional " + value;
                     }
@@ -1255,6 +1255,18 @@ namespace TestDriver {
                 case "platform":
                     string[] platforms = value.Split(' ');
                     return Array.IndexOf(platforms, "CS") >= 0;
+                case "version":
+                    int thisVersion = JVersion.getStructuredVersionNumber()[0];
+                    foreach (string p in value.Split(" ")) {
+                        if (p.Equals(thisVersion + "")) {
+                            return !inverse;
+                        }
+                        if (p.EndsWith("+") && int.Parse(p.Replace("+", "")) <= thisVersion) {
+                            return !inverse;
+                        }
+                    }
+                    return inverse;
+
                 case "default_language_for_numbering": {
                     string old = (string)env.processor.GetProperty(Saxon.Api.Feature.DEFAULT_LANGUAGE);
                     if (!value.Equals(old)) {
