@@ -124,7 +124,7 @@ public class XSLMode extends StyleElement {
 
         String nameAtt = null;
         String visibilityAtt = null;
-        String extraAsAtt = null;
+        String asAtt = null;
 
         if (prepared) {
             return;
@@ -174,7 +174,7 @@ public class XSLMode extends StyleElement {
                             break;
                         case "shallow-skip-all":
                         case "shallow-copy-all":
-                            requireXslt40("onNoMatch");
+                            requireXslt40Attribute("onNoMatch");
                             break;
                         default:
                             invalidAttribute(f, "text-only-copy|shallow-copy|deep-copy|shallow-skip|deep-skip|fail");
@@ -201,7 +201,11 @@ public class XSLMode extends StyleElement {
                         invalidAttribute(f, "public|private|final");
                     }
                     mode.setDeclaredVisibility(visibility);
-
+                    break;
+                case "as":
+                    if (requireXslt40Attribute("as")) {
+                        asAtt = value;
+                    }
                     break;
                 default:
                     if (attName.hasURI(NamespaceUri.SAXON)) {
@@ -209,7 +213,7 @@ public class XSLMode extends StyleElement {
                         if (attName.getLocalPart().equals("trace")) {
                             traceMatching = processBooleanAttribute("saxon:trace", value);
                         } else if (attName.getLocalPart().equals("as")) {
-                            extraAsAtt = value;
+                            asAtt = value;
                         }
                     } else {
                         checkUnknownAttribute(attName);
@@ -239,10 +243,10 @@ public class XSLMode extends StyleElement {
         mode.obtainDeclaringComponent(this);    // TODO: how does this work with multiple mode declarations?
         mode.setModeTracing(traceMatching);     // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
 
-        if (extraAsAtt != null) {               // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
+        if (asAtt != null) {               // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
             SequenceType extraResultType;
             try {
-                extraResultType = makeExtendedSequenceType(extraAsAtt);
+                extraResultType = makeExtendedSequenceType(asAtt);
             } catch (XPathException e) {
                 compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "saxon:as");
                 extraResultType = SequenceType.ANY_SEQUENCE; // error recovery

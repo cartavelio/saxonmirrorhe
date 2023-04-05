@@ -28,8 +28,9 @@ public class XSLOtherwise extends StyleElement {
             String f = attName.getDisplayName();
             if (f.equals("select")) {
                 // XSLT 4.0 proposed extension
-                requireXslt40("select");
-                select = makeExpression(att.getValue(), att);
+                if (requireXslt40Attribute("select")) {
+                    select = makeExpression(att.getValue(), att);
+                }
             } else {
                 checkUnknownAttribute(attName);
             }

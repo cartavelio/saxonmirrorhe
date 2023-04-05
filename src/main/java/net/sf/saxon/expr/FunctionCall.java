@@ -247,7 +247,19 @@ public abstract class FunctionCall extends Expression {
                                                          (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
                                                  "XPST0141");
                     }
-                    arg = fd.getDefaultValueExpression(i).copy(new RebindingMap());
+                    if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
+                        arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+                    } else {
+                        Expression defaultValue = fd.getDefaultValueExpression(i);
+                        if (defaultValue == null) {
+                            // This only happens if there's an error in the function definition
+                            throw new XPathException("No value or default available for " + RoleDiagnostic.ordinal(i + 1) +
+                                                             " parameter of function " +
+                                                             (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
+                                                     "XPST0141");
+                        }
+                        arg = defaultValue.copy(new RebindingMap());
+                    }
                 }
                 if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {
                     setArg(i, tc.staticTypeCheck(

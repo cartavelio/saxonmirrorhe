@@ -86,8 +86,9 @@ public class XSLForEach extends StyleElement {
             if (f.equals("select")) {
                 select = makeExpression(value, att);
             } else if (f.equals("separator")) {
-                requireXslt40("separator");
-                separator = makeAttributeValueTemplate(value, att);
+                if (requireXslt40Attribute("separator")) {
+                    separator = makeAttributeValueTemplate(value, att);
+                }
             } else if (attName.getLocalPart().equals("threads") && attName.hasURI(NamespaceUri.SAXON)) {
                 threads = makeAttributeValueTemplate(Whitespace.trim(value), att);
                 if (getCompilation().getCompilerInfo().isCompileWithTracing()) {

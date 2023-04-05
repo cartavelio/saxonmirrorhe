@@ -58,7 +58,7 @@ public class XSLArray extends XSLSequence {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         if (isInXsltNamespace()) {
-            requireXslt40(null);
+            requireXslt40Element();
         } else if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
             compileError("saxon:array requires a Saxon-PE or -EE license");
         }

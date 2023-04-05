@@ -167,6 +167,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 if (isFunction && isRequiredParam() && !((XSLLocalParam) node).isRequiredParam()) {
                     compileError("Parameter " + name + " is required, but an earlier parameter "
                                          + ((XSLLocalParam) node).sourceBinding.getVariableQName() + " is optional", "XTSE0761");
+                    ((XSLLocalParam) node).sourceBinding.setProperty(SourceBinding.BindingProperty.REQUIRED, true);
                 }
             } else if (node instanceof StyleElement && ((StyleElement) node).getFingerprint() != StandardNames.XSL_CONTEXT_ITEM) {
                 compileError("xsl:param must not be preceded by other instructions", "XTSE0010");
