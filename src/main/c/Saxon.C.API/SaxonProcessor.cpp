@@ -342,7 +342,8 @@ SaxonProcessor::~SaxonProcessor() {
     clearConfigurationProperties();
     if(procRef != -1) {
     	//SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
-	procRef = -1;
+    	j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+	    procRef = -1;
     }
     if (!versionStr.empty()) {
         versionStr.clear();
