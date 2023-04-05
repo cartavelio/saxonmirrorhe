@@ -173,10 +173,8 @@ function exampleLoopVar($saxonProc, $proc, $xml, $xslt)
     foreach ($params as $name => $value) {
         echo "==== loop itr =====\n";
         $xdmValue = $saxonProc->createAtomicValue(strval($value));
-        echo "after createAtomicValue \n";
         if ($xdmValue != null) {
             $executable->setParameter($name, $xdmValue);
-            echo "after setParameter \n";
         } else {
             echo "Xdmvalue is null";
         }
