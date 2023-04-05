@@ -178,8 +178,9 @@ public class StyleNodeFactory implements NodeFactory {
             // Detect a mis-spelt XSLT element, or a 3.0 element used in a 2.0 stylesheet
 
             if (uri.equals(NamespaceUri.XSLT)) {
+                int processorVersion = compilation.getCompilerInfo().getXsltVersion();
                 if (parent instanceof XSLStylesheet) {
-                    if (((XSLStylesheet) parent).getEffectiveVersion() <= 20) {
+                    if (((XSLStylesheet) parent).getEffectiveVersion() <= processorVersion) {
                         temp = new AbsentExtensionElement();
                         temp.setCompilation(compilation);
                         temp.setValidationError(new XmlProcessingIncident(
@@ -195,16 +196,11 @@ public class StyleNodeFactory implements NodeFactory {
                     int effectiveVersion = temp.getEffectiveVersion();
                     XmlProcessingIncident incident = new XmlProcessingIncident(
                             "Unknown XSLT instruction xsl:" + localname, "XTSE0010", location);
-                    if (effectiveVersion > compilation.getCompilerInfo().getXsltVersion()) {
-                        temp.setValidationError(incident,
-                                                StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
-                    } else if (effectiveVersion == 10){
-                        temp.setValidationError(incident,
-                                                StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
-                    } else {
-                        temp.setValidationError(incident,
-                                                StyleElement.OnFailure.REPORT_ALWAYS);
-                    }
+                    temp.setValidationError(
+                            new XmlProcessingIncident("Unknown XSLT instruction " + elemName.getDisplayName(), "XTSE0010", location),
+                            temp.getEffectiveVersion() > processorVersion
+                                    ? StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE
+                                    : StyleElement.OnFailure.REPORT_ALWAYS);
                 }
             }
 
