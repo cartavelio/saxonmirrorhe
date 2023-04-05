@@ -267,6 +267,11 @@ public class FLWORExpression extends Expression {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
+    @Override
+    public int computeDependencies() {
+        return super.computeDependencies() | StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES;
+    }
+
     /**
      * Get the immediate sub-expressions of this expression, with information about the relationship
      * of each expression to its parent expression. Default implementation

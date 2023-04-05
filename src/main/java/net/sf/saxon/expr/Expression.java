@@ -1282,7 +1282,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      * on the context position, while (position()+1) does not. The default implementation
      * of the method returns 0, indicating "no dependencies".
      *
-     * @return a set of bit-significant flags identifying the "intrinsic"
+     * @return an integer containing bit-significant flags identifying the "intrinsic"
      *         dependencies. The flags are documented in class net.sf.saxon.value.StaticProperty
      */
 
