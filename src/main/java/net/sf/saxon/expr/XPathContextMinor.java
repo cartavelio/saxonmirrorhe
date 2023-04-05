@@ -17,7 +17,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trace.ContextStackFrame;
 import net.sf.saxon.trace.ContextStackIterator;
-import net.sf.saxon.trace.ExitCounter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
