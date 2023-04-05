@@ -556,7 +556,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         Optional<String> earlyExit = testCase.select(
                 path(child("result"), attribute("early-exit-possible"))).asOptionalString();
         boolean expectEarlyExit = earlyExit.equals(Optional.of("true"));
-        if (expectEarlyExit != collector.isMadeEarlyExit() && !laxTests.contains(testName)) {
+        if (expectEarlyExit != collector.isMadeEarlyExit() && !laxTests.contains(testName) && !outcome.isException()) {
             outcome.setComment(expectEarlyExit ? "Failed to make early exit" : "Unexpected early exit");
             System.err.println(expectEarlyExit ? "Failed to make early exit" : "Unexpected early exit");
             if (strict) {
