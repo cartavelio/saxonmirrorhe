@@ -1,2 +1,13 @@
 <exceptions>
+   
+   <exception test-case="si-group-064" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2020-09-09"/>
+      <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
+   </exception>
+   
+   <exception test-case="function-40-012" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2023-03-02"/>
+      <reason>Imposing a temporary restriction on default function parameters until spec clarified.</reason>
+   </exception>
+   
 </exceptions>
