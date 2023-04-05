@@ -464,7 +464,7 @@ cout<<endl<<"============================================================="<<end
 
     std::list<std::string>::iterator it;
     std::cout << "Failed tests:" << std::endl;
-// Make iterate point to begining and incerement it one by one till it reaches the end of list.
+// Make iterate point to beginning and increment it one by one till it reaches the end of list.
     for (it = sresult->failureList.begin(); it != sresult->failureList.end(); it++) {
         //Print the contents
         std::cout << it->c_str() << std::endl;
