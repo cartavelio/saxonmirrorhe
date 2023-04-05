@@ -1085,6 +1085,13 @@ public class Xslt30Processor extends SaxonCAPI {
             qname = QName.fromClarkName(CTypeConversion.toJavaString(cclarkName));
         }
 
+        if(SaxonCAPI.debug) {
+            if(qname!= null) {
+                System.err.println("DEBUG: j_callTemplateReturningString qname="+qname);
+            } else {
+                System.err.println("DEBUG: j_callTemplateReturningString qname is null");
+            }
+        }
 
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
@@ -1106,6 +1113,12 @@ public class Xslt30Processor extends SaxonCAPI {
 
         transformer.callTemplate(qname, serializer);
         CCharPointer result = SaxonCAPI.stringToNative(alloc, bStream);
+
+        if(SaxonCAPI.debug) {
+            if(result == WordFactory.nullPointer()) {
+                System.err.println("DEBUG: j_callTemplateReturningString result is null");
+            }
+        }
         return result;
 
     }

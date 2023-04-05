@@ -121,6 +121,10 @@ public class SaxonCAPI {
     @CEntryPoint(name = "createSaxonProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createSaxonProcessor(IsolateThread thread, int license) {
         boolean licensei = CTypeConversion.toBoolean(license);
+        String debugFlag  = System.getenv("SAXONC_DEBUG_FLAG");
+        if(debugFlag.equals("true")) {
+            SaxonCAPI.debug = true;
+        }
         if (debug && licensei) {
             System.err.println("Flag is true to create SaxonProcessor with license");
         }
