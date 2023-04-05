@@ -247,9 +247,6 @@ public abstract class FunctionCall extends Expression {
                                                          (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
                                                  "XPST0141");
                     }
-<<<<<<< HEAD
-                    arg = fd.getDefaultValueExpression(i).copy(new RebindingMap());
-=======
                     if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
                         arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
                     } else {
@@ -262,8 +259,8 @@ public abstract class FunctionCall extends Expression {
                                                      "XPST0141");
                         }
                         arg = defaultValue.copy(new RebindingMap());
+                        adoptChildExpression(arg);
                     }
->>>>>>> QT4-features-for-12.x
                 }
                 if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {
                     setArg(i, tc.staticTypeCheck(

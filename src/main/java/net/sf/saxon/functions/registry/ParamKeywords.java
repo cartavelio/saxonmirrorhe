@@ -69,11 +69,13 @@ public class ParamKeywords {
         fnParamNames.put("all-equal", "values|collation");
         fnParamNames.put("analyze-string", "value|pattern|flags");
         fnParamNames.put("apply", "function|arguments");
+        fnParamNames.put("atomic-equal", "value1|value2");
         fnParamNames.put("available-environment-variables", "");
         fnParamNames.put("avg", "values");
         fnParamNames.put("base-uri", "node");
         fnParamNames.put("boolean", "input");
         fnParamNames.put("ceiling", "value");
+        fnParamNames.put("char", "name");
         fnParamNames.put("characters", "value");
         fnParamNames.put("codepoint-equal", "value1|value2");
         fnParamNames.put("codepoints-to-string", "values");
@@ -189,6 +191,7 @@ public class ParamKeywords {
         fnParamNames.put("parcel", "input");
         fnParamNames.put("parse-ietf-date", "value");
         fnParamNames.put("parse-json", "json|options");
+        fnParamNames.put("parse-html", "html|options");
         fnParamNames.put("parse-QName", "eqname");
         fnParamNames.put("parse-xml", "value");
         fnParamNames.put("parse-xml-fragment", "value");
@@ -197,7 +200,7 @@ public class ParamKeywords {
         fnParamNames.put("position", "");
         fnParamNames.put("prefix-from-QName", "value");
         fnParamNames.put("random-number-generator", "seed");
-        fnParamNames.put("remove", "input|position");
+        fnParamNames.put("remove", "input|positions");
         fnParamNames.put("replace", "value|pattern|replacement|flags|action");
         fnParamNames.put("replicate", "input|count");
         fnParamNames.put("resolve-QName", "qname|element");

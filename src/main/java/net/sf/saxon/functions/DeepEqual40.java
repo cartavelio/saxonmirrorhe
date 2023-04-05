@@ -7,7 +7,7 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
@@ -76,6 +76,24 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.getInstance());
 
         OPTION_DETAILS = o;
+    }
+
+    @Override
+    public Expression makeFunctionCall(Expression... arguments) {
+        Expression[] newArgs = new Expression[4];
+        newArgs[0] = arguments[0];
+        newArgs[1] = arguments[1];
+        if (arguments.length < 3 || arguments[2] instanceof DefaultedArgumentExpression) {
+            newArgs[2] = new StringLiteral(getRetainedStaticContext().getDefaultCollationName());
+        } else {
+            newArgs[2] = arguments[2];
+        }
+        if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
+            newArgs[3] = Literal.makeLiteral(new DictionaryMap());
+        } else {
+            newArgs[3] = arguments[3];
+        }
+        return super.makeFunctionCall(newArgs);
     }
 
 

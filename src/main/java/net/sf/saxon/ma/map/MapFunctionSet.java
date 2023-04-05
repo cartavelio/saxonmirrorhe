@@ -158,12 +158,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.ANY_SEQUENCE);
             Callable concatCallable = new CallableDelegate(
                     (cxt, args) -> SequenceExtent.from(new InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
-            CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
+            //CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
             register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, AnyItemType.getInstance(), STAR, null)
-                    .arg(1, mapBuildKeyArg, ONE, null, identityFunction)
-                    .arg(2, mapBuildValueArg, ONE, null, identityFunction)
-                    .arg(3, opFnType, ONE, null, new FunctionLiteral(concatSeq)));
+                    .arg(1, mapBuildKeyArg, ONE, null)
+                    .arg(2, mapBuildValueArg, ONE, null)
+                    .arg(3, opFnType, ONE, null));
             ;
 
 
@@ -509,6 +509,36 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      * map:build($sequence, $key, $value, $combined) as xs:anyAtomicType) =&gt; map(*)
      */
     public static class MapBuild extends SystemFunction {
+
+        @Override
+        public Expression makeFunctionCall(Expression... arguments) {
+            Expression[] newArgs = new Expression[4];
+            newArgs[0] = arguments[0];
+            if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
+                newArgs[1] = FunctionLiteral.makeLiteral(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1));
+            } else {
+                newArgs[1] = arguments[1];
+            }
+            if (arguments.length < 3 || arguments[2] instanceof DefaultedArgumentExpression) {
+                newArgs[2] = FunctionLiteral.makeLiteral(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1));
+            } else {
+                newArgs[2] = arguments[2];
+            }
+            if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
+                newArgs[3] = FunctionLiteral.makeLiteral(
+                        new CallableFunction(2,
+                                             new CallableDelegate((context, args) -> SequenceExtent.from(
+                                                     new InsertBefore.InsertIterator(args[1].iterate(), args[0].iterate(), 1)
+                                             )),
+                                             new SpecificFunctionType(
+                                                     new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                                                     SequenceType.ANY_SEQUENCE) {
+                                             }));
+            } else {
+                newArgs[3] = arguments[3];
+            }
+            return super.makeFunctionCall(newArgs);
+        }
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {

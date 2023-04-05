@@ -1980,6 +1980,10 @@ public class XQueryParser extends XPathParser {
                     foundDefault = true;
                     nextToken();
                     Expression defaultValue = parseExprSingle();
+                    if (!(defaultValue instanceof Literal || defaultValue instanceof ContextItemExpression)) {
+                        grumble("The default value for a function parameter must be either a constant, or '.' (temporary Saxon restriction)");
+                    }
+                    defaultValue.setRetainedStaticContext(env.makeRetainedStaticContext());
                     arg.setDefaultValueExpression(defaultValue);
                     arg.setRequired(false);
                 } else if (foundDefault) {
