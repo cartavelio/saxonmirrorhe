@@ -21,6 +21,8 @@ import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.Affinity;
+import net.sf.saxon.type.PlainType;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
@@ -380,6 +382,15 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         int arity = getNumberOfParameters();
         if (arity == 0 && streamability != FunctionStreamability.UNCLASSIFIED) {
             compileError("A function with no arguments must have streamability=unclassified", "XTSE3155");
+        }
+
+        int maxArity = getNumberOfParameters();
+        int minArity = maxArity - getNumberOfOptionalParameters();
+        if (minArity <= 1 && maxArity >= 1) {
+            SchemaType type = getConfiguration().getSchemaType(getObjectName());
+            if (type instanceof PlainType) {
+                compileError("Stylesheet function clashes with constructor function for an imported atomic type", "XTSE0770");
+            }
         }
 
     }
