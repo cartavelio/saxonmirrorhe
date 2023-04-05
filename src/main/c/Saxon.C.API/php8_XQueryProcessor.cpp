@@ -50,24 +50,26 @@ PHP_METHOD(XQueryProcessor, runQueryToValue)
     xqueryProcessor = obj->xqueryProcessor;
 
     if (xqueryProcessor != nullptr) {
-        XdmValue * node = xqueryProcessor->runQueryToValue();
-        if(node != nullptr) {
-            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
-                RETURN_NULL();
-                return;
-            } else {
-                //struct xdmValue_object* vobj = (struct xdmValue_object *)Z_OBJ_P(return_value TSRMLS_CC);
-		zend_object *vvobj =  Z_OBJ_P(return_value);
-		xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
-                assert (vobj != nullptr);
-                vobj->xdmValue = node;
-                return;
+        try {
+            XdmValue * node = xqueryProcessor->runQueryToValue();
+            if(node != nullptr) {
+                if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+                    RETURN_NULL();
+                    return;
+                } else {
+		            zend_object *vvobj =  Z_OBJ_P(return_value);
+		            xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+                    assert (vobj != nullptr);
+                    vobj->xdmValue = node;
+                    return;
+                }
             }
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
-        xqueryProcessor->checkException();//TODO
-    } else {
-        RETURN_NULL();
+
     }
+    RETURN_NULL();
 }
 
 PHP_METHOD(XQueryProcessor, runQueryToString)
@@ -83,16 +85,17 @@ PHP_METHOD(XQueryProcessor, runQueryToString)
     xqueryProcessor = obj->xqueryProcessor;
 
     if (xqueryProcessor != nullptr) {
-        const char * result = xqueryProcessor->runQueryToString();
-        if(result != nullptr) {
-            //char *str = estrdup(result);
-            _RETURN_STRING(result);
-	    return;
-        } else {
-          xqueryProcessor->checkException(); //TODO
-	}
+        try{
+            const char * result = xqueryProcessor->runQueryToString();
+            if(result != nullptr) {
+                _RETURN_STRING(result);
+	            return;
+            }
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
     }
-   RETURN_NULL();
+    RETURN_NULL();
 }
 
 PHP_METHOD(XQueryProcessor, runQueryToFile)
@@ -115,12 +118,15 @@ PHP_METHOD(XQueryProcessor, runQueryToFile)
     xqueryProcessor = obj->xqueryProcessor;
 
     if (xqueryProcessor != nullptr) {
-	if(ofilename != nullptr) {
-		xqueryProcessor->setOutputFile(ofilename);
-	}
-        xqueryProcessor->runQueryToFile();
+	    if(ofilename != nullptr) {
+		    xqueryProcessor->setOutputFile(ofilename);
+	    }
+	    try {
+            xqueryProcessor->runQueryToFile();
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
     }
-
 }
 
 PHP_METHOD(XQueryProcessor, setQueryContent)
@@ -418,9 +424,6 @@ PHP_METHOD(XQueryProcessor, setLanguageVersion){
             xqueryProcessor->setLanguageVersion(str);
         }
     }
-
-
-
 }
 
 

@@ -60,8 +60,11 @@ PHP_METHOD(SchemaValidator, registerSchemaFromNode)
         xdmNode_object* ooth = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
         if(ooth != nullptr) {
             XdmNode * node = ooth->xdmNode;
-
-            schemaValidator->registerSchemaFromNode(node);
+            try {
+                schemaValidator->registerSchemaFromNode(node);
+            } catch(SaxonApiException &e) {
+                zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+            }
         }
     }
 }
@@ -80,7 +83,11 @@ PHP_METHOD(SchemaValidator, registerSchemaFromFile)
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (name != nullptr && schemaValidator != nullptr) {
-        schemaValidator->registerSchemaFromFile(name);
+        try {
+            schemaValidator->registerSchemaFromFile(name);
+        } catch(SaxonApiException &e) {
+                zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
     }
 }
 
@@ -96,7 +103,11 @@ PHP_METHOD(SchemaValidator, registerSchemaFromString)
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaStr!= nullptr && schemaValidator != nullptr) {
-        schemaValidator->registerSchemaFromString(schemaStr);
+        try {
+            schemaValidator->registerSchemaFromString(schemaStr);
+        } catch(SaxonApiException &e) {
+                zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
     }
 }
 
@@ -115,7 +126,11 @@ PHP_METHOD(SchemaValidator, validate)
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaValidator != nullptr) {
-        schemaValidator->validate(name);
+        try {
+            schemaValidator->validate(name);
+        } catch(SaxonApiException &e) {
+                zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+       }
     }
 }
 
@@ -134,21 +149,23 @@ PHP_METHOD(SchemaValidator, validateToNode)
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaValidator != nullptr) {
-        XdmNode * node = schemaValidator->validateToNode(name);
-	if(node != nullptr) {
-	    if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
-                RETURN_NULL();
-                return;
-            } else {
-                //struct xdmNode_object* vobj = (struct xdmNode_object *)Z_OBJ_P(return_value TSRMLS_CC);
-		zend_object* vvobj = Z_OBJ_P(return_value);
- 		xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
-                assert (vobj != nullptr);
-                vobj->xdmNode = node;
-                return;
-            }
-	}
-    	schemaValidator->checkException();//TODO
+        try {
+            XdmNode * node = schemaValidator->validateToNode(name);
+	        if(node != nullptr) {
+	            if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+                    RETURN_NULL();
+                    return;
+                } else {
+		            zend_object* vvobj = Z_OBJ_P(return_value);
+ 		            xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+                    assert (vobj != nullptr);
+                    vobj->xdmNode = node;
+                    return;
+                }
+	        }
+        } catch(SaxonApiException &e) {
+           zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
     }
     RETURN_NULL();
 }
@@ -193,21 +210,24 @@ PHP_METHOD(SchemaValidator, getValidationReport)
    schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
     schemaValidator = obj->schemaValidator;
     if (schemaValidator != nullptr) {
-        XdmNode * node = schemaValidator->getValidationReport();
-	if(node != nullptr) {
-	    if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+        try {
+            XdmNode * node = schemaValidator->getValidationReport();
+	        if(node != nullptr) {
+	            if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
 
-                RETURN_NULL();
-                return;
-            } else {
-                zend_object* vvobj = Z_OBJ_P(return_value);
- 		xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
-                assert (vobj != nullptr);
-                vobj->xdmNode = node;
-                return;
-            }
-	}
-    	schemaValidator->checkException();//TODO
+                    RETURN_NULL();
+                    return;
+                } else {
+                    zend_object* vvobj = Z_OBJ_P(return_value);
+ 		            xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+                    assert (vobj != nullptr);
+                    vobj->xdmNode = node;
+                    return;
+                }
+	        }
+        } catch(SaxonApiException &e) {
+           zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
     }
     RETURN_NULL();
 }
@@ -234,7 +254,7 @@ PHP_METHOD(SchemaValidator, setSourceNode)
         if(ooth != nullptr) {
             XdmNode * value = ooth->xdmNode;
             if(value != nullptr) {
-		schemaValidator->setSourceNode(value);
+		        schemaValidator->setSourceNode(value);
 
             }
         }

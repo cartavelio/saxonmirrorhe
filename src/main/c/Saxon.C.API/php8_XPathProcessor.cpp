@@ -152,9 +152,11 @@ PHP_METHOD(XPathProcessor, declareNamespace)
 
     	xpathProcessor = obj->xpathProcessor;
     	if (xpathProcessor != nullptr) {
-    	std::cerr<<"PHPXPATHPROCXX len1="<< len1<< ", len2="<<len2 <<std::endl;
-             std::cerr<<"PHPXPATHPROC prefix="<<(len1 == 0 ? "" : prefixi)<< ", ns="<<(len2 == 0 ? "" : ns)<<std::endl;
-    	    xpathProcessor->declareNamespace((len1 == 0 ? nullptr : prefixi), (len2 == 0 ? "" : ns));
+    	    try{
+    	        xpathProcessor->declareNamespace((len1 == 0 ? nullptr : prefixi), (len2 == 0 ? "" : ns));
+            } catch(SaxonApiException &e) {
+                zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+            }
     	}
     }
 
@@ -196,6 +198,26 @@ PHP_METHOD(XPathProcessor, setCaching){
 	 }
 }
 
+PHP_METHOD(XPathProcessor, setLanguageVersion){
+    XPathProcessor *xpathProcessor;
+    char * str;
+    size_t len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &str, &str) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xpathProcessor_object * obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
+    xpathProcessor = obj->xpathProcessor;
+    if (xpathProcessor != nullptr) {
+
+        if(str != nullptr) {
+            xpathProcessor->setLanguageVersion(str);
+        }
+    }
+}
+
 PHP_METHOD(XPathProcessor, importSchemaNamespace){
       char * name;
       size_t len1;
@@ -226,9 +248,12 @@ PHP_METHOD(XPathProcessor, effectiveBooleanValue)
     xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
     xpathProcessor = obj->xpathProcessor;
     if (xpathProcessor != nullptr && xpathStr != nullptr) {
-
-        bool result = xpathProcessor->effectiveBooleanValue(xpathStr);
-		RETURN_BOOL(result);
+        try {
+            bool result = xpathProcessor->effectiveBooleanValue(xpathStr);
+		    RETURN_BOOL(result);
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
     }
 }
 
@@ -246,37 +271,37 @@ PHP_METHOD(XPathProcessor, evaluate)
     xpathProcessor_object *obj = (xpathProcessor_object *)((char *)pobj - XtOffsetOf(xpathProcessor_object, std));
     xpathProcessor = obj->xpathProcessor;
     if (xpathProcessor != nullptr && xpathStr != nullptr) {
+        try{
+            XdmValue * node = xpathProcessor->evaluate(xpathStr);
+	        if(node != nullptr) {
+	            node->incrementRefCount();
+                if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+                    RETURN_NULL();
+                    return;
+                } else {
+		            zend_object* vvobj = Z_OBJ_P(return_value);
 
-        XdmValue * node = xpathProcessor->evaluate(xpathStr);
-	if(node != nullptr) {
-	        node->incrementRefCount();
-            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
-                RETURN_NULL();
-                return;
-            } else {
-		zend_object* vvobj = Z_OBJ_P(return_value);
-
-		if(node->getType() == XDM_NODE) {
-			xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
-             	   	assert (vobj != nullptr);
-               	   	vobj->xdmNode = (XdmNode *)node;
-                	return;
-
-		} else if (node->getType() == XDM_ATOMIC_VALUE) {
-        	xdmAtomicValue_object * vobj = (xdmAtomicValue_object *)((char *)vvobj - XtOffsetOf(xdmAtomicValue_object, std));
-                assert (vobj != nullptr);
-                vobj->xdmAtomicValue = (XdmAtomicValue *)node;
-                return;
-
-		} else {
-        	  xdmValue_object * vobj = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
-                  assert (vobj != nullptr);
-                  vobj->xdmValue = node;
-                  return;
-		}
+		            if(node->getType() == XDM_NODE) {
+			            xdmNode_object * vobj = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+             	   	    assert (vobj != nullptr);
+               	   	    vobj->xdmNode = (XdmNode *)node;
+                	    return;
+		            } else if (node->getType() == XDM_ATOMIC_VALUE) {
+        	            xdmAtomicValue_object * vobj = (xdmAtomicValue_object *)((char *)vvobj - XtOffsetOf(xdmAtomicValue_object, std));
+                        assert (vobj != nullptr);
+                        vobj->xdmAtomicValue = (XdmAtomicValue *)node;
+                        return;
+		            } else {
+        	            xdmValue_object * vobj = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+                        assert (vobj != nullptr);
+                        vobj->xdmValue = node;
+                        return;
+		            }
+                }
             }
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
-       // xpathProcessor->checkException();//TODO
     }
     RETURN_NULL();
 
@@ -301,26 +326,26 @@ PHP_METHOD(XPathProcessor, evaluateSingle)
     }
 
     if (xpathProcessor != nullptr) {
-        XdmItem * node = xpathProcessor->evaluateSingle(xpathStr);
-	if( node != nullptr) {
-		node->incrementRefCount();
-
-
-		if (object_init_ex(return_value, xdmItem_ce) != SUCCESS) {
+        try {
+            XdmItem * node = xpathProcessor->evaluateSingle(xpathStr);
+	        if( node != nullptr) {
+		        node->incrementRefCount();
+		        if (object_init_ex(return_value, xdmItem_ce) != SUCCESS) {
         	        RETURN_NULL();
                 	return;
-        	} else {
-        	    zend_object* vvobj = Z_OBJ_P(return_value);
-       			xdmItem_object * vobj = (xdmItem_object *)((char *)vvobj - XtOffsetOf(xdmItem_object, std));
-               	assert (vobj != nullptr);
-                if(vobj == NULL) {
-                    std::cerr<<"vobj is null"<<std::endl;
-                }
-               	vobj->xdmItem = node;
-               	return;
-    		}
-	}    
-   		// xpathProcessor->checkException();//TODO
+        	    } else {
+        	        zend_object* vvobj = Z_OBJ_P(return_value);
+       			    xdmItem_object * vobj = (xdmItem_object *)((char *)vvobj - XtOffsetOf(xdmItem_object, std));
+               	    assert (vobj != nullptr);
+               	    vobj->xdmItem = node;
+               	    return;
+    		    }
+	        }
+
+    } catch(SaxonApiException &e) {
+       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+    }
+
     }
     RETURN_NULL();
 }
@@ -541,6 +566,7 @@ zend_function_entry XPathProcessor_methods[] = {
         PHP_ME(XPathProcessor,  evaluateSingle,      arginfo_saxonc_xpath_evaluateSingle, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  setParameter,      arginfo_saxonc_xpath_setParameter, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  setProperty,      arginfo_saxonc_xpath_setProperty, ZEND_ACC_PUBLIC)
+        PHP_ME(XPathProcessor,  setLanguageVersion,      arginfo_saxonc_xpath_setLanguageVersion, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  clearParameters,      arginfo_saxonc_xpath_clearParameters, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  clearProperties,      arginfo_saxonc_xpath_clearProperties, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor,  exceptionOccurred, arginfo_saxonc_xpath_exceptionOccurred, ZEND_ACC_PUBLIC)
