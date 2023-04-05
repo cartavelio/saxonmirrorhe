@@ -60,8 +60,7 @@ public class XSLGlobalContextItem extends XSLContextItem {
         try {
             top.getStylesheetPackage().setContextItemRequirements(req);
         } catch (XPathException e) {
-            e.setLocation(decl.getSourceElement());
-            throw e;
+            throw e.withLocation(decl.getSourceElement());
         }
     }
 }

@@ -220,8 +220,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
                 try {
                     rule = mode.getNextMatchRule(currentItem, currentRule, context);
                 } catch (XPathException e) {
-                    e.setLocation(this.getExpression().getLocation());
-                    throw e;
+                    throw e.withLocation(this.getExpression().getLocation());
                 }
 
                 if (rule == null) {             // use the default action for the node

@@ -347,33 +347,18 @@ public class TypeCheckingFilter extends ProxyOutputter {
             message = roleDiagnostic.composeErrorMessage(itemType, item, typeHierarchy);
         }
         String errorCode = roleDiagnostic.getErrorCode();
-        XPathException err = new XPathException(message, errorCode);
-        if (!"XPDY0050".equals(errorCode)) {
-            err.setIsTypeError(true);
-        }
-        if (locationId == null) {
-            err.setLocation(locator);
-        } else {
-            err.setLocation(locationId.saveLocation());
-        }
-        throw err;
+        throw new XPathException(message, errorCode)
+                .asTypeErrorIf(!"XPDY0050".equals(errorCode))
+                .withLocation(locationId == null ? locator : locationId.saveLocation());
     }
 
     private void checkAllowsMany(Location locationId) throws XPathException {
         if (!Cardinality.allowsMany(cardinality)) {
-            XPathException err = new XPathException("A sequence of more than one item is not allowed as the " +
-                                                            roleDiagnostic.getMessage());
-            String errorCode = roleDiagnostic.getErrorCode();
-            err.setErrorCode(errorCode);
-            if (!"XPDY0050".equals(errorCode)) {
-                err.setIsTypeError(true);
-            }
-            if (locationId == null || locationId == Loc.NONE) {
-                err.setLocator(locator);
-            } else {
-                err.setLocator(locationId);
-            }
-            throw err;
+            throw new XPathException("A sequence of more than one item is not allowed as the " +
+                                                            roleDiagnostic.getMessage())
+                    .withErrorCode(roleDiagnostic.getErrorCode())
+                    .asTypeErrorIf(!"XPDY0050".equals(roleDiagnostic.getErrorCode()))
+                    .withLocation(locationId == null || locationId == Loc.NONE ? locator : locationId);
         }
     }
 

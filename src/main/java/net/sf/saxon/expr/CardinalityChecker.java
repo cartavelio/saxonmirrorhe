@@ -141,11 +141,10 @@ public final class CardinalityChecker extends UnaryExpression {
         }
         if ((base.getCardinality() & requiredCardinality) == 0) {
             RoleDiagnostic role = roleSupplier.get();
-            XPathException err = new XPathException("The " + role.getMessage() +
-                    " does not satisfy the cardinality constraints", role.getErrorCode());
-            err.setLocation(getLocation());
-            err.setIsTypeError(role.isTypeError());
-            throw err;
+            throw new XPathException("The " + role.getMessage() +
+                    " does not satisfy the cardinality constraints", role.getErrorCode())
+                    .withLocation(getLocation())
+                    .asTypeErrorIf(role.isTypeError());
         }
         // do cardinality checking before item checking (may avoid the need for a mapping iterator)
         if (base instanceof ItemChecker) {

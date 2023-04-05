@@ -189,10 +189,8 @@ public class LookupExpression extends BinaryExpression {
             if (!tt.isExtensible()) {
                 String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                 if (tt.getFieldType(fieldName) == null) {
-                    XPathException err = new XPathException("Field '" + fieldName + "' is not defined in the record type", "XPTY0004");
-                    err.setIsTypeError(true);
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new XPathException("Field '" + fieldName + "' is not defined in the record type", "XPTY0004")
+                            .asTypeError().withLocation(getLocation());
                 }
             }
         }

@@ -397,11 +397,10 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
                 } else {
                     target = context.getTargetComponent(expr.bindingSlot);
                     if (target.isHiddenAbstractComponent()) {
-                        XPathException err = new XPathException("Cannot expand an abstract attribute set ("
+                        throw new XPathException("Cannot expand an abstract attribute set ("
                                                                         + expr.targetName.getDisplayName()
-                                                                        + ") with no implementation", "XTDE3052");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                                                                        + ") with no implementation", "XTDE3052")
+                                .withLocation(expr.getLocation());
                     }
                 }
                 if (target == null) {

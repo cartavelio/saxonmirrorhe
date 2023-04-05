@@ -529,7 +529,6 @@ public class GlobalVariable extends Actor
             }
             String message = messageBuilder.toString();
             message += '.';
-            XPathException err = new XPathException(message);
             String errorCode;
             if (getPackageData().isXSLT()) {
                 errorCode = "XTDE0640";
@@ -539,10 +538,7 @@ public class GlobalVariable extends Actor
             } else {
                 errorCode = "XQDY0054";
             }
-            err.setErrorCode(errorCode);
-            err.setIsStaticError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException(message, errorCode).asStaticError().withLocation(getLocation());
         }
         Expression select = getBody();
         if (select != null) {

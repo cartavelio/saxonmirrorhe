@@ -454,10 +454,9 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
     @Override
     public void checkForUpdatingSubexpressions() throws XPathException {
         if (getSelect().isUpdatingExpression()) {
-            XPathException err = new XPathException(
-                    "Updating expression appears in a context where it is not permitted", "XUST0001");
-            err.setLocation(getSelect().getLocation());
-            throw err;
+            throw new XPathException(
+                    "Updating expression appears in a context where it is not permitted", "XUST0001")
+                    .withLocation(getSelect().getLocation());
         }
     }
 

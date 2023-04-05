@@ -502,19 +502,17 @@ public class Block extends Instruction {
             Expression child = o.getChildExpression();
             if (ExpressionTool.isNotAllowedInUpdatingContext(child)) {
                 if (updating) {
-                    XPathException err = new XPathException(
-                            "If any subexpression is updating, then all must be updating", "XUST0001");
-                    err.setLocation(child.getLocation());
-                    throw err;
+                    throw new XPathException(
+                            "If any subexpression is updating, then all must be updating", "XUST0001")
+                            .withLocation(child.getLocation());
                 }
                 nonUpdating = true;
             }
             if (child.isUpdatingExpression()) {
                 if (nonUpdating) {
-                    XPathException err = new XPathException(
-                            "If any subexpression is updating, then all must be updating", "XUST0001");
-                    err.setLocation(child.getLocation());
-                    throw err;
+                    throw new XPathException(
+                            "If any subexpression is updating, then all must be updating", "XUST0001")
+                            .withLocation(child.getLocation());
                 }
                 updating = true;
             }

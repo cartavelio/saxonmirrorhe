@@ -242,11 +242,8 @@ public class NamedTemplate extends Actor implements TraceableComponent {
         Item contextItem = context.getContextItem();
         if (contextItem == null) {
             if (!mayOmitContextItem) {
-                XPathException err =
-                        new XPathException("The template requires a context item, but none has been supplied", "XTTE3090");
-                err.setLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw new XPathException("The template requires a context item, but none has been supplied", "XTTE3090")
+                                .withLocation(getLocation()).asTypeError();
             }
         } else {
             TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
@@ -255,10 +252,8 @@ public class NamedTemplate extends Actor implements TraceableComponent {
                 RoleDiagnostic role = new RoleDiagnostic(
                         RoleDiagnostic.MISC, "context item for the named template", 0);
                 String message = role.composeErrorMessage(requiredContextItemType, contextItem, th);
-                XPathException err = new XPathException(message, "XTTE0590");
-                err.setLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw new XPathException(message, "XTTE0590")
+                        .withLocation(getLocation()).asTypeError();
             }
             if (absentFocus) {
                 context = context.newMinorContext();

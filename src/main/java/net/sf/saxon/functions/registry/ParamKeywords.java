@@ -31,6 +31,7 @@ public class ParamKeywords {
     static {
 
         arrayParamNames.put("append", "array|add");
+        arrayParamNames.put("build", "input|action");
         arrayParamNames.put("empty", "array");
         arrayParamNames.put("exists", "array");
         arrayParamNames.put("filter", "array|predicate");

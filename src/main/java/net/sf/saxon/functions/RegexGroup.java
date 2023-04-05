@@ -34,11 +34,12 @@ public class RegexGroup extends ContextAccessorFunction {
 
     @Override
     public FunctionItem bindContext(XPathContext context) throws XPathException {
+        FunctionItem alwaysEmptyFunction = new CallableFunction(1, new AlwaysEmpty(),
+                                                                new SpecificFunctionType(
+                                                                        new SequenceType[]{SequenceType.SINGLE_INTEGER},
+                                                                        SequenceType.SINGLE_STRING));
         if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
-            return new CallableFunction(1, new AlwaysEmpty(),
-                                           new SpecificFunctionType(
-                                                  new SequenceType[]{SequenceType.SINGLE_INTEGER},
-                                                  SequenceType.SINGLE_STRING));
+            return alwaysEmptyFunction;
         }
         RegexIterator ri = context.getCurrentRegexIterator();
         if (ri == null) {
@@ -54,7 +55,7 @@ public class RegexGroup extends ContextAccessorFunction {
 
         SymbolicName.F symbolicName = new SymbolicName.F(mapGetName, 3);
         FunctionItem mapGet3 = lib.getFunctionItem(symbolicName, new IndependentContext(context.getConfiguration()));
-        return new CurriedFunction(mapGet3, new Sequence[]{map, null, new FixedValueFunction(StringValue.EMPTY_STRING)});
+        return new CurriedFunction(mapGet3, new Sequence[]{map, null, alwaysEmptyFunction});
     }
 
     /**

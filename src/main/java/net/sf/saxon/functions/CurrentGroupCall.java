@@ -226,9 +226,8 @@ public class CurrentGroupCall extends Expression implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         GroupIterator gi = context.getCurrentGroupIterator();
         if (gi == null) {
-            XPathException err = new XPathException("There is no current group", "XTDE1061");
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("There is no current group", "XTDE1061")
+                    .withLocation(getLocation());
         }
         return gi.currentGroup();
     }
@@ -290,9 +289,8 @@ public class CurrentGroupCall extends Expression implements Callable {
             return context -> {
                 GroupIterator gi = context.getCurrentGroupIterator();
                 if (gi == null) {
-                    XPathException err = new XPathException("There is no current group", "XTDE1061");
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException("There is no current group", "XTDE1061")
+                            .withLocation(expr.getLocation());
                 }
                 return gi.currentGroup().iterate();
             };

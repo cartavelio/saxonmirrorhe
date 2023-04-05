@@ -287,12 +287,11 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
                         NameOfNode.makeName(orphan).getStructuredQName(), orphan.getUnicodeStringValue(), validationAction);
                 orphan.setTypeAnnotation(ann);
             } catch (ValidationException e) {
-                XPathException err = XPathException.makeXPathException(e);
-                err.setErrorCodeQName(e.getErrorCodeQName());
-                err.setXPathContext(context);
-                err.setLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw XPathException.makeXPathException(e)
+                        .withErrorCode(e.getErrorCodeQName())
+                        .withXPathContext(context)
+                        .withLocation(getLocation())
+                        .asTypeError();
             }
         }
     }

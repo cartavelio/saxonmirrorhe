@@ -156,9 +156,9 @@ public class XSLDecimalFormat extends StyleElement {
         try {
             symbols.setProperty(propertyCode, value, precedence);
         } catch (XPathException err) {
-            String attName = DecimalSymbols.propertyNames[propertyCode];
-            err.setLocation(new AttributeLocation(this, StructuredQName.fromClarkName(attName)));
-            throw err;
+            throw err.withLocation(
+                    new AttributeLocation(this,
+                                          StructuredQName.fromClarkName(DecimalSymbols.propertyNames[propertyCode])));
         }
     }
 
