@@ -4,7 +4,9 @@
     
     <category name="installation">
         
-        <p class="javaonly">SaxonJ 12 is built and tested using Java 11, but should still be usable with Java 8 or later.</p>
+        <p class="javaonly">SaxonJ 12 is built and tested using Java 11, but is supported with Java 8 or later.</p>
+        
+        <p class="javaonly">Note: 12.0 did not work under Java 8; this is fixed in 12.1</p>
         
         <p class="csonly">SaxonCS 12 is targeted at .NET 6.</p>
         
@@ -234,6 +236,9 @@
         shuts down when the <code>Cleaner</code> is garbage-collected, which typically happens when the <code>Configuration</code>
         is garbage collected; it can also be forced by calling <code>Configuration.close()</code>.</p>
         
+        <p><i>The <code>Cleaner</code> class requires Java 9 or later. Under Java 8, no equivalent is available, so under some
+        circumstances, files that are not read to completion may be left open.</i></p>
+        
         <p>Saxon's original XQuery API, in which a query is compiled using a <code>StaticQueryContext</code> object
             and executed using a <code>DynamicQueryContext</code> object, has been gradually downgraded over
             a number of releases. It remains present in the product, but should no longer be considered as
@@ -313,6 +318,12 @@
         <p>The proposed 4.0 functions <code>array:empty()</code>, <code>array:exists()</code>, 
             <code>array:foot()</code>, <code>array:index-where()</code>, and <code>array:trunk()</code> are implemented.</p>
         
+        <p>From Saxon 12.1, the <code>options</code> parameter of <code>fn:deep-equal()</code> is implemented.</p>
+        
+        <p>From Saxon 12.1, the <code>fn:atomic-equal()</code> function is implemented.</p>
+        
+        <p>From Saxon 12.1, the <code>fn:slice()</code> function is dropped.</p>
+        
         <h2>Dropped or Changed Extension Functions</h2>
         
         <p>The Saxon extension functions <code>saxon:evaluate()</code>, <code>saxon:eval()</code>, and <code>saxon:expression()</code>
@@ -334,7 +345,7 @@
         
         <!--<h2>Extension Instructions</h2>-->
         
-        <h2>XPath Syntax Extensions</h2>
+        <h2>XPath 4.0 Syntax Extensions</h2>
         
         <p>Some experimental syntax extensions intended for 4.0 have been dropped. "Dot Functions" (written as <code>.{.+1}</code>
             or <code>fn{.+1}</code>)
@@ -344,13 +355,23 @@
         <p>Union NodeTests are implemented. This feature allows steps such as <code>ancestor::(div1|div2|div3)</code>,
         <code>@(id|name)</code>, and <code>following-sibling::(comment()|processing-instruction())</code>.</p>
         
-        <p>TODO: In 12.x, XPath string templates are implemented. Example: <code>let $message := `{$day} of {$month}, {$year}`</code>.</p>
+        <p>Static function calls may supply arguments by keyword as well as by position.</p>
         
-        <p>TODO: In 12.x, XPath braced if expressions are implemented. Examples: 
+        <p>From Saxon 12.1, XPath 4.0 string templates are implemented. 
+            Example: <code>let $message := `{$day} of {$month}, {$year}`</code>.</p>
+        
+        <p>From Saxon 12.1, XPath braced if expressions are implemented. Examples: 
             (1) <code>if ($condition) {&lt;x>It's true&lt;/x>}</code>;
             (2) <code>if ($condition) {&lt;x>It's true&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code>;
             (2) <code>if ($condition) {&lt;x>It's true&lt;/x>} else if ($polite) {&lt;x>He mis-spoke&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code>;
         </p>
+        
+        <h2>XQuery 4.0 extensions</h2>
+        
+        <p>Function declarations may declare some parameters as optional, with a default value. From Saxon 12.1, the default
+        value must either be a constant (for example, <code>()</code>, <code>0</code>, <code>false()</code>, or
+        <code>""</code>), or the context item expression <code>.</code>. This restriction is imposed pending clarification
+        of the specification.</p>
         
         <h2>XSLT extensions</h2>
         
@@ -398,6 +419,12 @@
             <code>select="array:members($array)"</code> or <code>select="map:key-value-pairs($map)"</code>.</p>
         
         <p>The proposed instruction <code>xsl:match</code> added in Saxon 11 has been dropped.</p>
+        
+        <p>Function declarations (<code>xsl:function</code>) may declare some parameters as optional, 
+            with a default value. From Saxon 12.1, the default
+            value must either be a constant (for example, <code>()</code>, <code>0</code>, <code>false()</code>, or
+            <code>""</code>), or the context item expression <code>.</code>. This restriction is imposed pending clarification
+            of the specification.</p>
         
         <aside>Our general policy on implementation of new features in the draft 4.0 specifications is that
         the Saxon product will modify or remove such features when the specification changes, even if this
