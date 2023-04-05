@@ -25,7 +25,7 @@ public:
     /**
      * A default Constructor. Create a SaxonApiException
      */
-     SaxonApiException();
+     SaxonApiException(bool staticError = false);
 
 
          /**
@@ -109,11 +109,13 @@ public:
 
 
 private:
+	bool cppException;
+	bool isStaticError;
 	char * message;
 	int lineNumber;
 	char * errorCode;
 	char * systemId;
-	bool cppException;
+
 };
 
 #endif /* SAXON_API_EXCEPTION_H */

@@ -16,12 +16,13 @@
 	    return message;
   }
 
-  SaxonApiException::SaxonApiException(){
+  SaxonApiException::SaxonApiException(bool staticError){
 	    message = nullptr;
 	    lineNumber = -1;
 	    errorCode = nullptr;
 	    systemId = nullptr;
 	    cppException = false;
+	    isStaticError = staticError;
     }
 
 
@@ -31,6 +32,7 @@
 		errorCode = ex.errorCode;
 		systemId = ex.systemId;
         cppException = ex.cppException;
+        isStaticError = ex.isStaticError;
 	}
 
 
@@ -48,6 +50,7 @@ SaxonApiException::SaxonApiException(const char * m){
     errorCode = nullptr;
     systemId = nullptr;
     cppException = true;
+    isStaticError = false;
 }
 
 
@@ -74,6 +77,7 @@ SaxonApiException::SaxonApiException(const char * m){
             systemId = nullptr;
         }
         cppException = true;
+        isStaticError = false;
 	}
 
 
@@ -130,7 +134,11 @@ SaxonApiException::SaxonApiException(const char * m){
 	const char * SaxonApiException::getMessage(){
 	    if(message == nullptr && !cppException) {
             allocFn fn = operator new;
-            message = j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            if(isStaticError) {
+                message = j_getCombinedStaticErrorMessages(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            } else {
+                message = j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            }
 	    }
 	    return message;
 
@@ -140,7 +148,11 @@ SaxonApiException::SaxonApiException(const char * m){
 
 	    if(!cppException) {
             allocFn fn = operator new;
-            return j_getErrorMessageWithErrorCode(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            if(isStaticError) {
+                return j_getCombinedStaticErrorMessages(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            } else {
+                return j_getErrorMessageWithErrorCode(SaxonProcessor::sxn_environ->thread, (void *)fn);
+            }
 	    }
 	    return message;
 
