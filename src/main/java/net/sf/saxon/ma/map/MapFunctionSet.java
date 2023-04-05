@@ -131,8 +131,18 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
 
+
         //#if EE==true || PE==true
         if (version >= 40) {
+
+            ItemType fallbackType = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.SINGLE_ATOMIC},
+                    SequenceType.ANY_SEQUENCE);
+
+            register("get", 3, e -> e.populate(MapGet::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
+                    .arg(2, fallbackType, ONE | INS, null));
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.SINGLE_ITEM},
@@ -257,7 +267,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) throws XPathException {
             ItemType it = arguments[0].getItemType();
-            if (it instanceof TupleType) {
+            if (it instanceof TupleType && arguments.length == 2) {
                 if (arguments[1] instanceof StringLiteral) {
                     String key = ((StringLiteral)arguments[1]).stringify();
                     if (((TupleType)it).getFieldType(key) == null) {
@@ -284,22 +294,23 @@ public class MapFunctionSet extends BuiltInFunctionSet {
          */
         @Override
         public ItemType getResultItemType(Expression[] args) {
-            ItemType mapType = args[0].getItemType();
-            if (mapType instanceof RecordTest && args[1] instanceof StringLiteral) {
-                String key = ((StringLiteral) args[1]).stringify();
-                RecordTest tit = (RecordTest) mapType;
-                SequenceType valueType = tit.getFieldType(key);
-                if (valueType == null) {
-                    warning("Field " + key + " is not defined in tuple type");
-                    return AnyItemType.getInstance();
-                } else {
-                    return valueType.getPrimaryType();
+            if (args.length == 2) {
+                ItemType mapType = args[0].getItemType();
+                if (mapType instanceof RecordTest && args[1] instanceof StringLiteral) {
+                    String key = ((StringLiteral) args[1]).stringify();
+                    RecordTest tit = (RecordTest) mapType;
+                    SequenceType valueType = tit.getFieldType(key);
+                    if (valueType == null) {
+                        warning("Field " + key + " is not defined in record type");
+                        return AnyItemType.getInstance();
+                    } else {
+                        return valueType.getPrimaryType();
+                    }
+                } else if (mapType instanceof MapType) {
+                    return ((MapType) mapType).getValueType().getPrimaryType();
                 }
-            } else if (mapType instanceof MapType) {
-                return ((MapType)mapType).getValueType().getPrimaryType();
-            } else {
-                return super.getResultItemType(args);
             }
+            return super.getResultItemType(args);
         }
 
         /**
@@ -316,7 +327,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 RecordTest tit = (RecordTest) mapType;
                 SequenceType valueType = tit.getFieldType(key);
                 if (valueType == null) {
-                    warning("Field " + key + " is not defined in tuple type");
+                    warning("Field " + key + " is not defined in record type");
                     return StaticProperty.ALLOWS_MANY;
                 } else {
                     return valueType.getCardinality();
@@ -363,7 +374,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             AtomicValue key = (AtomicValue) arguments[1].head();
             Sequence value = map.get(key);
             if (value == null) {
-                return EmptySequence.getInstance();
+                if (arguments.length > 2) {
+                    FunctionItem fn = (FunctionItem)arguments[2].head();
+                    return dynamicCall(fn, context, key);
+                } else {
+                    return EmptySequence.getInstance();
+                }
             } else {
                 return value;
             }
