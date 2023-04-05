@@ -11,10 +11,10 @@ void raise_py_error()
   try {
     throw;
   } 
-  catch (SaxonApiException e) {
+  catch (const SaxonApiException& e) {
       const char * errorMessage = e.getMessageWithErrorCode();
 
-    PyErr_SetString(pysaxonapierror, errorMessage);
+      PyErr_SetString(pysaxonapierror, errorMessage);
 
    // PyErr_SetString(PyExc_RuntimeError, msg);
   }  catch (const std::exception& e) {

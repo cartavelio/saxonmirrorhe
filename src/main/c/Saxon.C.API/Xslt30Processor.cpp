@@ -234,7 +234,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     long status = j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT,  (void *)node->getUnderlyingValue(),  (char *)cwdXT.c_str(), (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(status == -2) {
-        throw SaxonApiException();
+        throw SaxonApiException(true);
     }
 
 }
@@ -261,7 +261,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
         long status = j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)xslFilename, (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
         if(status == -2) {
-            throw SaxonApiException();
+            throw SaxonApiException(true);
         }
 }
 
@@ -274,7 +274,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 
 	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
         if(objRef == -2) {
-            throw SaxonApiException();
+            throw SaxonApiException(true);
         }
 	    XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
         if(processorDataRef > 0) {
@@ -294,7 +294,7 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromXdmNode(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (void *)node->getUnderlyingValue(), (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
-        throw SaxonApiException();
+        throw SaxonApiException(true);
     }
     XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
     if(processorDataRef > 0) {
@@ -314,7 +314,7 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromAssociatedFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)source, (int)jitCompilation , (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
-        throw SaxonApiException();
+        throw SaxonApiException(true);
     }
     XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
     return executable;
@@ -329,7 +329,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheet, (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
-        throw SaxonApiException();
+        throw SaxonApiException(true);
     }
     XsltExecutable * executable = new XsltExecutable(proc,objRef, cwdXT, proc->getResourcesDirectory());
     if(processorDataRef > 0) {
