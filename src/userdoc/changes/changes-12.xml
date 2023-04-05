@@ -6,7 +6,7 @@
         
         <div class="javaonly">
             <p>SaxonJ 12 is built and tested using Java 11, but is supported with Java 8 or later.</p>
-            <p>Note: 12.0 did not work under Java 8; this is fixed in 12.1.</p>
+            <p>Note: Saxon 12.0 did not work under Java 8; this is fixed in Saxon 12.1.</p>
         </div>
         
         <p class="csonly">SaxonCS 12 is targeted at .NET 6.</p>
@@ -187,6 +187,9 @@
             implement <code java="net.sf.saxon.lib.Numberer">net.sf.saxon.lib.Numberer</code> or that extend one of its Saxon-supplied
             implementations. Specifically, an extra argument (<code>cardinal</code>) has been added to the methods <code>format</code> and
             <code>toWords</code>. Implementations are free to ignore this argument.</p>
+        
+        <p>From Saxon 12.1, the ICU library is updated from version 59.2 to version 72.1, which supports
+            Unicode 14.</p>
         
     </category>
     
