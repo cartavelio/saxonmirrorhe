@@ -138,6 +138,7 @@ public:
     //! A default constructor.
     /*!
       * Create Saxon Processor.
+      * @throws SaxonApiException
     */
 
     SaxonProcessor();
@@ -145,6 +146,7 @@ public:
     //! constructor based upon a Saxon configuration file.
     /*!
       * Create Saxon Processor.
+      * @throws SaxonApiException
     */
 
     SaxonProcessor(const char *configFile);
@@ -153,7 +155,8 @@ public:
     //! A constructor.
     /*!
       * Create Saxon Processor.
-      * @param l - Flag that a license is to be used. Default is false.	
+      * @param l - Flag that a license is to be used. Default is false.
+      * @throws SaxonApiException
     */
     SaxonProcessor(bool l);
 
@@ -423,8 +426,9 @@ public:
     /**
      *
      * @param source the source document as a lexical string
-     * @param validator
+     * @param validator SchemaValidator object if it exists. Default is null
      * @return an XdmNode
+     * @throws SaxonApiException if there is a failure in the parsing of the XML document
     */
     XdmNode *parseXmlFromString(const char *source, SchemaValidator * validator = nullptr);
 
@@ -432,8 +436,9 @@ public:
     /**
      *
      * @param source the filename of the source document
-     * @param validator
+     * @param validator the SchemaValidator if it exists. Default is null
      * @return an XdmNode
+     * @throws SaxonApiException  if there ia a failure in the parsing of the XML file
     */
     XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
@@ -441,8 +446,9 @@ public:
     /**
      *
      * @param source the URI of the source document
-     * @param validator
+     * @param validator  SchemaValidator object. Default is null
      * @return an XdmNode
+     * @throws SaxonApiException if there ia failure in the parsing of the XML file
     */
     XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 
@@ -520,6 +526,8 @@ public:
 
     /**
      * set catalog to be used in Saxon
+     * @param catalogFile file name to the catalog
+      * @throws SaxonApiException if fail to set the catalog file
     */
     void setCatalog(const char *catalogFile);
 
