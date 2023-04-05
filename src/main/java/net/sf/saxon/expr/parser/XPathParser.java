@@ -1955,7 +1955,7 @@ public class XPathParser {
                 optionalFieldNames.add(name);
                 p.nextToken();
             }
-            SequenceType arg = SequenceType.NON_EMPTY_SEQUENCE;
+            SequenceType arg = SequenceType.ANY_SEQUENCE;
             if (t.currentToken == Token.AS) {
                 p.nextToken();
                 if (t.currentToken == Token.DOTDOT) {
