@@ -260,7 +260,16 @@ int main(int argc, char* argv[])
 
 	//processor->setConfigurationProperty("xsdversion", "1.1");
 	
-	 SchemaValidator * validator = processor->newSchemaValidator();
+	SchemaValidator * validator = nullptr;
+
+	try {
+	processor->newSchemaValidator();
+	} catch(SaxonApiException &e) {
+	    cout<<"Exception thrown when creating SchemaValidator message="<<e.what()<<endl;
+	    processor->release();
+        delete processor;
+	    return 0;
+	}
 	testValidator1(validator);
 	testValidator2();
 
@@ -276,6 +285,7 @@ int main(int argc, char* argv[])
 	delete validator;
 	delete validator2;
 	delete validator3;
-        processor->release();
+    processor->release();
+    delete processor;
 	return 0;
 }
