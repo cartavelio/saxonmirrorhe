@@ -5,7 +5,9 @@
 #include <string>
 #include "SaxonApiException.h"
 
+#ifndef _WIN64
 extern PyObject *pysaxonapierror;
+#endif
 
 void raise_py_error()
 {
