@@ -280,6 +280,7 @@ class SaxonTestSuite {
       inputs.files project.fileTree(dir: "${project.projectDir}/src/main/java")
       outputs.file resultFn
       outputs.file errorFn
+      outputs.upToDateWhen { false }
 
       doFirst {
         project.mkdir options["reportDirectory"]
@@ -415,6 +416,7 @@ class SaxonTestSuite {
     Task run = project.task("run__${testTaskName}", type: Exec) {
       inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file "${options['report']}.xml"
+      outputs.upToDateWhen { false }
       dependsOn "eecs_featureKeys"
 
       doFirst {
@@ -556,6 +558,7 @@ class SaxonTestSuite {
       inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file resultFn
       outputs.file errorFn
+      outputs.upToDateWhen { false }
       dependsOn "eecs_featureKeys"
 
       doFirst {
