@@ -89,11 +89,13 @@ element name=out
 value2
 ```
 As we can see, we can explore the XML node structure, attributes, and many other things if you check more on the [APIs](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api).
+It is also to parse an XML source document using the [PyDocumentBuilder](https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder) which provides properties controlling how the document is built.  
 
 ### Example #2
 Let's use the XML path processor. 
 ```python
 from saxonc@@edition@@ import PySaxonProcessor
+from saxonc@@edition@@ import PyXdmNode
 
 with PySaxonProcessor(license=False) as proc:
 	xml = """\
@@ -130,11 +132,10 @@ with PySaxonProcessor(license=False) as proc:
 	xsltproc = proc.new_xslt30_processor()
 	
 	document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
+    
+	executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
 
-	xsltproc.set_source(xdm_node=document)
-	exeuctable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
-
-	output2 = exeuctable.transform_to_string()
+	output2 = executable.apply_templates_returning_string(xdm_value=document)
 	print(output2)
 ```
 Here is the output that shows the result of transformation.
@@ -151,32 +152,32 @@ Watch out for the not-pythonic way!
 from saxonc@@edition@@ import PySaxonProcessor
 
 with PySaxonProcessor(license=False) as proc:
-	xsltproc = proc.new_xslt30_processor()
+        xsltproc = proc.new_xslt30_processor()
 
-	xml = '<a><b>Text</b></a>'
-	xslt = '''\
-		<xsl:stylesheet version="1.0"
-		xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-		<xsl:param name="a" />
-		<xsl:output method='xml' indent='yes' />
-		<xsl:template match="/">
-		<foo><xsl:value-of select="$a" /></foo>
-		</xsl:template>
-		</xsl:stylesheet>'''
+        xml = '<a><b>Text</b></a>'
+        xslt = '''\
+                <xsl:stylesheet version="1.0"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                <xsl:param name="a" />
+                <xsl:output method='xml' indent='yes' />
+                <xsl:template name="main">
+                <foo><xsl:copy-of select="/" /><xsl:value-of select="$a" /></foo>
+                </xsl:template>
+                </xsl:stylesheet>'''
 
-	document = proc.parse_xml(xml_text=xml)
+        document = proc.parse_xml(xml_text=xml)
 
-	#please note the not Python way in the next two lines.
-	xdm_a = proc.make_string_value('a was given in the parameter')
-	xsltproc.set_parameter('a', xdm_a)
+        #please note the not Python way in the next two lines.
+        xdm_a = proc.make_string_value('a was given in the parameter')
+        xsltproc.set_parameter('a', xdm_a)
 
-	xsltproc.set_source(xdm_node=document)
-	executable = xsltproc.compile_stylesheet(stylesheet_text=xslt)
-	output2 = xsltproc.transform_to_string()
-	print(output2)
+        executable = xsltproc.compile_stylesheet(stylesheet_text=xslt)
+        executable.set_global_context_item(xdm_item=document)
+        output2 = executable.call_template_returning_value(template_name="main")
+        print(output2)
 ```
 Here we use an XSLT/stylesheet parameter. Note that the Python string is not the same string that Saxon uses, and the same goes for other types. We need to convert it by calling `make_string_value`. This is because there isn't an exact match between the type system used by XSLT (called XDM) and Python's data types: for some types like strings and booleans there is a very close correspondence, but for numbers, dates, URIs etc it's less exact.
-
+                         
 Please check out [Saxonica's documentation](https://www.saxonica.com/saxon-c/documentation/index.html) for `xquery`, schema validation, and others.
 
 ## Why the `with` keyword?

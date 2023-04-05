@@ -20,8 +20,7 @@ function userFunction($param, $param2)
     echo("userspace function called with two paramXXX\n");
     if (is_numeric($param2)) {
         echo("userspace function called cp1\n");
-        $param32 = $param32 * 2;
-        echo("PAram3 = " . $param2);
+        echo("Param3 = " . $param2);
     }
 
     if (is_a($param2, "Saxon\\XdmNode")) {
@@ -75,55 +74,48 @@ function userFunctionExample($saxon, $proc, $xmlfile, $xslFile)
 function exampleSimple1($saxonproc, $proc, $xmlfile, $xslFile)
 {
     echo '<b>exampleSimple1:</b><br/>';
+    try {
+        $executable = $proc->compileFromFile($xslFile);
+        if ($executable != null) {
+            $inputNode = $saxonproc->parseXmlFromFile($xmlfile);
+            if ($inputNode != null) {
+                $result = $executable->transformToString($inputNode);
+                if ($result != null) {
 
-    $executable = $proc->compileFromFile($xslFile);
-    if($executable != null) {
-        $inputNode = $saxonproc->parseXmlFromFile($xmlfile);
-        if($inputNode != null) {
-            $result = $executable->transformToString($inputNode);
-            if ($result != null) {
-
-                echo 'Output:' . $result;
-            } else {
-                echo "Result is null";
-                if ($executable->exceptionOccurred()) {
-                    $executable->getErrorMessage();
+                    echo 'Output:' . $result;
+                } else {
+                    echo "Result is null";
                 }
-            }
-           // $executable->clearParameters();
-            $executable->clearProperties();
-        } else {
-            if ($proc->exceptionOccurred()) {
-                $proc->getErrorMessage();
+                // $executable->clearParameters();
+                $executable->clearProperties();
             }
         }
-    } else {
-        if ($proc->exceptionOccurred()) {
-            $proc->getErrorMessage();
-        }
-
-    }   
+    } catch(Exception $e) {
+        echo "Exception".$e->getMessage();
+    }
 }
 
 /* simple example to show transforming to file */
 function exampleSimple2($proc, $xmlFile, $xslFile)
 {
     echo '<b>exampleSimple2:</b><br/>';
+    try {
+        $executable = $proc->compileFromFile($xslFile);
+        $filename = "/home/ond1/temp/output1.xml";
+        $executable->setOutputFile($filename);
+        $executable->transformFileToFile($xmlFile, null);
 
-    $executable = $proc->compileFromFile($xslFile);
-    $filename = "/home/ond1/temp/output1.xml";
-    $executable->setOutputFile($filename);
-    $executable->transformFileToFile($xmlFile, null);
-
-    if (file_exists($filename)) {
-        echo "The file $filename exists";
-        unlink($filename);
-    } else {
-        echo "The file $filename does not exist";
+        if (file_exists($filename)) {
+            echo "The file $filename exists";
+            unlink($filename);
+        } else {
+            echo "The file $filename does not exist";
+        }
+        $executable->clearParameters();
+        $executable->clearProperties();
+    } catch(Exception $e) {
+        echo "Exception".$e->getMessage();
     }
-    $executable->clearParameters();
-    $executable->clearProperties();
-
 }
 
 /* simple example to show importing a document as string and stylesheet as a string */
@@ -131,39 +123,35 @@ function exampleSimple3($saxonProc, $proc)
 {
     echo '<b>exampleSimple3:</b><br/>';
     //$proc->clearParameters();
-    $xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value of out</b></doc>");
-    if ($xdmNode == null) {
-        echo 'xdmNode is null';
-        return;
-    }
-    echo "cp0======\n";
-    $executable = $proc->compileFromString("<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
+    try {
+        $xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value of out</b></doc>");
+        if ($xdmNode == null) {
+            echo 'xdmNode is null';
+            return;
+        }
+        echo "cp0======\n";
+        $executable = $proc->compileFromString("<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
 					    	<xsl:template match='/'>
 					    	    <xsl:copy-of select='.'/>
 					    	</xsl:template>
 					    </xsl:stylesheet>");
-    echo "cp1======\n";
-    if ($executable == null) {
-        echo 'executable is null';
-        if ($executable->exceptionOccurred()) {
-            $executable->getErrorMessage();
-        }
-        return;
-    }
-    echo "cp3======\n";
-    $executable->setInitialMatchSelection($xdmNode);
-    echo "cp4======\n";
-    $result = $executable->transformToString();
-    echo '<b>exampleSimple3</b>:<br/>';
-    if ($result != null) {
-        echo 'Output:' . $result;
-    } else {
-        echo "Result is null";
-    }
 
-    $executable->clearParameters();
-    $executable->clearProperties();
-    unset($xdmNode);
+        $executable->setInitialMatchSelection($xdmNode);
+
+        $result = $executable->transformToString();
+        echo '<b>exampleSimple3</b>:<br/>';
+        if ($result != null) {
+            echo 'Output:' . $result;
+        } else {
+            echo "Result is null";
+        }
+
+        $executable->clearParameters();
+        $executable->clearProperties();
+        unset($xdmNode);
+    } catch(Exception $e) {
+        echo "Exception".$e->getMessage();
+    }
 }
 
 function exampleLoopVar($saxonProc, $proc, $xml, $xslt)
@@ -194,16 +182,14 @@ function exampleLoopVar($saxonProc, $proc, $xml, $xslt)
         }
         //unset($xdmValue);
     }
-    echo "Before transformToString \n";
-    $result = $executable->applyTemplatesReturningString();
-    if ($result != null) {
-        echo 'Output:' . $result;
-    } else {
-        echo "Result is null";
-        if ($executable->exceptionOccurred()) {
-            echo 'Error Message=' . $executable->getErrorMessage();
-            //$executable->exceptionClear();
+    try {
+        $result = $executable->applyTemplatesReturningString();
+        if ($result != null) {
+            echo 'Output:' . $result;
         }
+    } catch (Exception $e) {
+        echo "Exception".$e->getMessage();
+
     }
 
    $executable->clearParameters();
@@ -215,59 +201,58 @@ function exampleParam($saxonProc, $proc, $xmlFile, $xslFile)
 {
     echo "\n", '<b>ExampleParam ======================:</b><br/>';
 
-    $executable = $proc->compileFromFile($xslFile);
-    if($executable == null) {
-        echo "executable is null";
-        return;
-    }
-    $executable->setInitialMatchSelectionAsFile($xmlFile);
-    $xdmvalue = $saxonProc->createAtomicValue(strval("Hello to you"));
-    if ($xdmvalue != null) {
-        echo "Name of Class ", get_class($xdmvalue), "\n";
-        $str = $xdmvalue->getStringValue();
-        if ($str != null) {
-            echo "XdmValue:" . $str;
-        }
-        $executable->setParameter('a-param', $xdmvalue);
-    } else {
-        echo "Xdmvalue is null";
-    }
-    $result = $executable->applyTemplatesReturningString();
-    if ($result != null) {
-        echo 'Output:' . $result . "<br/>";
-    } else {
-        echo "Result is NULL<br/>";
-    }
-
-    $executable->clearParameters();
-    //unset($result);
-    echo 'again with a no parameter value<br/>';
-    $executable->setProperty('!indent', 'yes');
-    $result = $executable->applyTemplatesReturningString();
-    $executable->clearParameters();
-    $executable->clearProperties();
-
-    echo $result;
-    echo '<br/>';
-    //  unset($result);
-    echo 'again with no parameter and no properties value set. This should fail as no contextItem set<br/>';
-    $xdmvalue = $saxonProc->createAtomicValue(strval("goodbye to you"));
-    $executable->setParameter('a-param', $xdmvalue);
-    
     try {
+        $executable = $proc->compileFromFile($xslFile);
+        if ($executable == null) {
+            echo "executable is null";
+            return;
+        }
+        $executable->setInitialMatchSelectionAsFile($xmlFile);
+        $xdmvalue = $saxonProc->createAtomicValue(strval("Hello to you"));
+        if ($xdmvalue != null) {
+            echo "Name of Class ", get_class($xdmvalue), "\n";
+            $str = $xdmvalue->getStringValue();
+            if ($str != null) {
+                echo "XdmValue:" . $str;
+            }
+            $executable->setParameter('a-param', $xdmvalue);
+        } else {
+            echo "Xdmvalue is null";
+        }
         $result = $executable->applyTemplatesReturningString();
-        echo "cp0 ==============";
         if ($result != null) {
-               echo 'Output =' . $result;
-           }
+            echo 'Output:' . $result . "<br/>";
+        } else {
+            echo "Result is NULL<br/>";
+        }
+
+        $executable->clearParameters();
+        //unset($result);
+        echo 'again with a no parameter value<br/>';
+        $executable->setProperty('!indent', 'yes');
+        $result = $executable->applyTemplatesReturningString();
+        $executable->clearParameters();
+        $executable->clearProperties();
+
+        echo $result;
+        echo '<br/>';
+        //  unset($result);
+        echo 'again with no parameter and no properties value set. This should fail as no contextItem set<br/>';
+        $xdmvalue = $saxonProc->createAtomicValue(strval("goodbye to you"));
+        $executable->setParameter('a-param', $xdmvalue);
+
+        $result = $executable->applyTemplatesReturningString();
+
+        if ($result != null) {
+            echo 'Output =' . $result;
+        }
+
+
+        $executable->clearParameters();
+        $executable->clearProperties();
     } catch (Exception $e) {
         echo "Exception".$e->getMessage();
     }
-
-   
-    $executable->clearParameters();
-    $executable->clearProperties();
-
 }
 
 

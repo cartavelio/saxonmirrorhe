@@ -67,6 +67,7 @@
             <code>setRelocatable()</code>, <code>setTargetEdition()</code> and
                <code>setXsltLanguageVersion()</code>. These methods are available across all languages (C++,
                PHP and Python).</li>
+            <i>The XPathProcessor class now has the <code>setLanguageVersion</code> method from version SaxonC 12.1.</i>
          </ul>
       </category>
       
