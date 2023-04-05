@@ -94,6 +94,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         } else {
             newArgs[3] = arguments[3];
         }
+        setArity(4);
         return super.makeFunctionCall(newArgs);
     }
 

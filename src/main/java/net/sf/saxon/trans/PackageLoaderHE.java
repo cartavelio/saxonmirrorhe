@@ -2300,8 +2300,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     props.setProperty(att.getLocalPart(), att.getStringValue());
                 }
                 fn.importAttributes(props);
-                //loader.addCompletionAction(() -> ((SystemFunctionCall) e).allocateArgumentEvaluators(args));
-                loader.addCompletionAction(() -> fn.fixArguments(args));
+                loader.addCompletionAction(() -> fn.fixArguments(((SystemFunctionCall) e).getArguments()));
             }
             loader.contextStack.pop();
             return e;

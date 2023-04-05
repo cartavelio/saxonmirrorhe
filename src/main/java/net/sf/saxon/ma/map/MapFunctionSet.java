@@ -537,6 +537,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             } else {
                 newArgs[3] = arguments[3];
             }
+            setArity(4);
             return super.makeFunctionCall(newArgs);
         }
 

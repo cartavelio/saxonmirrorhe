@@ -32,6 +32,7 @@ public class Sum extends FoldingFunction {
         newArgs[0] = arguments[0];
         if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
             newArgs[1] = FunctionLiteral.makeLiteral(Int64Value.ZERO);
+            setArity(2);
         } else {
             newArgs[1] = arguments[1];
         }
