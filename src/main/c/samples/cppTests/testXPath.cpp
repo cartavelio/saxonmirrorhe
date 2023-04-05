@@ -16,29 +16,20 @@ void testXPathSingle(SaxonProcessor * processor, XPathProcessor * xpath, sResult
     XdmNode * input = processor->parseXmlFromString("<out><person>text1</person><person>text2</person><person>text3</person></out>");
 
 	xpath->setContextItem((XdmItem *)input);
-	XdmItem * result = xpath->evaluateSingle("//person[1]");
-	
-	if(result == nullptr) {
-		 printf("result is null \n");
-        SaxonApiException * exception = xpath->getException();
-        if(exception != nullptr) {
-            const char *message = xpath->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            xpath->exceptionClear();
-        }
-        sresult->failure++;
-        sresult->failureList.push_back("testXPathSingle");
-
-	} else {
+	try {
+	    XdmItem * result = xpath->evaluateSingle("//person[1]");
 	    const char * messagei = result->getStringValue();
 		cout<<"Number of items="<<result->size()<<endl;
 		cout<<"String Value of result="<<messagei<<endl;
 		sresult->success++;
-		//delete messagei;
-		//messagei = nullptr;
-	}
-	delete result;
+		delete result;
+	} catch(SaxonApiException &e) {
+	    cout << "Error Message = " << e.what() << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testXPathSingle");
 
+	}
+	
 	xpath->clearParameters();
 	xpath->clearProperties();
 	delete input;
@@ -52,14 +43,10 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
      cout<<endl<<"Test testXPathValues:"<<endl; 
   	xpath->clearParameters();
   	xpath->clearProperties();
+  	try {
 	 XdmNode * input = processor->parseXmlFromString("<out><person>text1</person><person>text2</person><person1>text3</person1></out>");
 	if(input == nullptr) {
-        SaxonApiException * exception = xpath->getException();
-        if(exception != nullptr) {
-            const char *message = xpath->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            xpath->exceptionClear();
-        }
+
         sresult->failure++;
         sresult->failureList.push_back("testXPathValues");
 
@@ -102,12 +89,7 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
     XdmValue * resultValues = xpath->evaluate("//person");
     if(resultValues == nullptr) {
          printf("result is null \n");
-        SaxonApiException * exception = xpath->getException();
-        if(exception != nullptr) {
-            const char *message = xpath->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            xpath->exceptionClear();
-        }
+
         sresult->failure++;
         sresult->failureList.push_back("testXPathValues");
 
@@ -134,6 +116,12 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
     delete input;
     xpath->clearParameters();
     xpath->clearProperties();
+    } catch(SaxonApiException &e) {
+        cout<<"Exception found = "<<e.what()<<endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testXPathValues");
+
+    }
 
 }
 
@@ -142,14 +130,10 @@ void testXPathAttrValues(SaxonProcessor * processor, XPathProcessor * xpath, sRe
      cout<<endl<<"Test testXPathValues1:"<<endl; 
   	xpath->clearParameters();
   	xpath->clearProperties();
+  	try{
 	 XdmNode * input = processor->parseXmlFromString("<out attr='valuex'><person attr1='value1' attr2='value2'>text1</person><person>text2</person><person1>text3</person1></out>");
 	if(input == nullptr) {
-        SaxonApiException * exception = xpath->getException();
-        if(exception != nullptr) {
-            const char *message = xpath->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            xpath->exceptionClear();
-        }
+
         sresult->failure++;
         sresult->failureList.push_back("testXPathAttrValues");
 
@@ -191,7 +175,14 @@ void testXPathAttrValues(SaxonProcessor * processor, XPathProcessor * xpath, sRe
 		sresult->success++;
 	//TODO test if attr value is not there
 	}
-	
+	} catch(SaxonApiException &e) {
+
+        const char *message = e.getMessage();
+        cout << "Error Message = " << message << endl;
+
+        sresult->failure++;
+        sresult->failureList.push_back("testXPathAttrValues");
+	}
 	
 
 }
@@ -201,17 +192,13 @@ void testXPathValues2(SaxonProcessor * processor, XPathProcessor * xpath, sResul
 
 
     cout<<endl<<"Test testXPathValues2:"<<endl;
+    try{
     XdmValue * resultValues = xpath->evaluate("1, 'string', true(), parse-xml-fragment(string-join((1 to 3) ! ('<item>' || . || '</item>')))/node(), array { 1 to 5 }, map { 'key1' : 1, 'key2' : 'foo' }");
 
 
     if(resultValues == nullptr) {
         printf("result is null \n");
-        SaxonApiException * exception = xpath->getException();
-        if(exception != nullptr) {
-            const char *message = xpath->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            xpath->exceptionClear();
-        }
+
         sresult->failure++;
         sresult->failureList.push_back("testXPathValues2");
 
@@ -224,6 +211,14 @@ void testXPathValues2(SaxonProcessor * processor, XPathProcessor * xpath, sResul
         }
 
     }
+    } catch(SaxonApiException &e) {
+
+              const char *message = e.getMessage();
+              cout << "Error Message = " << message << endl;
+
+              sresult->failure++;
+              sresult->failureList.push_back("testXPathAttrValues2");
+      	}
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have morethan one XdmItem.
@@ -233,16 +228,12 @@ void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath, sResult
   	xpath->clearProperties(); 
 	xpath->setContextFile("../data/cat.xml");
 
+    try{
 	XdmValue * resultValues = xpath->evaluate("//person");
 	
 	if(resultValues == nullptr) {
 		 printf("result is null \n");
-        SaxonApiException * exception = xpath->getException();
-        if(exception != nullptr) {
-            const char *message = xpath->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            xpath->exceptionClear();
-        }
+
         sresult->failure++;
         sresult->failureList.push_back("testXPathOnFile");
 	} else {
@@ -257,6 +248,15 @@ void testXPathOnFile(SaxonProcessor * processor, XPathProcessor * xpath, sResult
 		}
 	}
 	delete resultValues;
+
+	} catch(SaxonApiException &e) {
+
+            const char *message = e.getMessage();
+            cout << "Error Message = " << message << endl;
+
+            sresult->failure++;
+            sresult->failureList.push_back("testXPathOnFile");
+    	}
 	
 
 }
@@ -267,7 +267,7 @@ void testXPathOnFile2(XPathProcessor * xpath, sResultCount *sresult){
   	xpath->clearParameters();
   	xpath->clearProperties(); 
 	xpath->setContextFile("../data/cat.xml");
-
+    try {
 	XdmItem * result = xpath->evaluateSingle("//person[1]");
 	
 	if(result == nullptr) {
@@ -302,6 +302,15 @@ void testXPathOnFile2(XPathProcessor * xpath, sResultCount *sresult){
 		sresult->success++;
 	}
 	delete result;
+
+	}  catch(SaxonApiException &e) {
+
+                   const char *message = e.getMessage();
+                   cout << "Error Message = " << message << endl;
+
+                   sresult->failure++;
+                   sresult->failureList.push_back("testXPathOnFile2");
+           	}
 }
 
 int main()

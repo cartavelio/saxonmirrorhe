@@ -774,7 +774,16 @@ void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
 void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
     cout << "ExampleSimple1 taken from PHP:" << endl;
 
-    XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    XsltExecutable * executable = nullptr;
+    try {
+        executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    } catch(SaxonApiException &e) {
+       cerr<<"Failed - Exception throwbn = "<<e.what()<<endl;
+        sresult->failure++;
+        sresult->failureList.push_back("exampleSimple1");
+       return;
+
+    }
 
     if(executable== nullptr) {
         sresult->failure++;
@@ -2621,6 +2630,8 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     //testValidation(trans,sresult);
+     
+
 
     testInitialTemplate(processor, trans, sresult);
 
