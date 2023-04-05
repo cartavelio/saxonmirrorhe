@@ -276,8 +276,10 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * in a document node) to a given Destination. The invocation uses any initial mode set using {@link #setInitialMode(QName)},
      * and any template parameters set using {@link #setInitialTemplateParameters(java.util.Map, boolean)}.
      *
-     * <p>This method does not set the global context item for the transformation. If that is required, it
-     * can be done separately using the method {@link #setGlobalContextItem(XdmItem)}.</p>
+     * <p>Note that this method does <b>not</b> cause the supplied Source document to become the global
+     * context item (that is, to be available as the value of "." when evaluating global variables. If
+     * a global context item is required, this must be set separately using {@link #setGlobalContextItem(XdmItem)}.
+     * Alternatively, use the {@link #transform(Source, Destination)} method.</p>
      *
      * @param source      the source document. For streamed processing, this must be a SAXSource or StreamSource.
      *                    <p>Note: supplying a <code>DOMSource</code> is allowed, but is much less efficient than using a
@@ -315,6 +317,11 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * Invoke the stylesheet by applying templates to a supplied Source document, returning the raw results
      * as an {@link XdmValue}. The invocation uses any initial mode set using {@link #setInitialMode(QName)},
      * and any template parameters set using {@link #setInitialTemplateParameters(java.util.Map, boolean)}.
+     *
+     * <p>Note that this method does <b>not</b> cause the supplied Source document to become the global
+     * context item (that is, to be available as the value of "." when evaluating global variables. If
+     * a global context item is required, this must be set separately using {@link #setGlobalContextItem(XdmItem)}.
+     * Alternatively, use the {@link #transform(Source, Destination)} method.</p>
      *
      * @param source the source document. For streamed processing, this must be a SAXSource or StreamSource.
      *               <p>Note: supplying a <code>DOMSource</code> is allowed, but is much less efficient than using a
@@ -404,6 +411,11 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * in a document node) to a given Destination. The invocation uses any initial mode set using {@link #setInitialMode(QName)},
      * and any template parameters set using {@link #setInitialTemplateParameters(java.util.Map, boolean)}.
      *
+     * <p>Note that this method does <b>not</b> cause the supplied Source document to become the global
+     * context item (that is, to be available as the value of "." when evaluating global variables. If
+     * a global context item is required, this must be set separately using {@link #setGlobalContextItem(XdmItem)}.
+     * Alternatively, use the {@link #transform(Source, Destination)} method.</p>
+     *
      * @param selection   the initial value to which templates are to be applied (equivalent to the <code>select</code>
      *                    attribute of <code>xsl:apply-templates</code>)
      * @param destination the destination for the result document. In most cases this causes the raw result of
@@ -439,6 +451,11 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * Invoke the stylesheet by applying templates to a supplied input sequence, returning the raw results.
      * as an {@link XdmValue}. The invocation uses any initial mode set using {@link #setInitialMode(QName)},
      * and any template parameters set using {@link #setInitialTemplateParameters(java.util.Map, boolean)}.
+     *
+     * <p>Note that this method does <b>not</b> cause the supplied selection to become the global
+     * context item (that is, to be available as the value of "." when evaluating global variables. If
+     * a global context item is required, this must be set separately using {@link #setGlobalContextItem(XdmItem)}.
+     * Alternatively, use the {@link #transform(Source, Destination)} method.</p>
      *
      * @param selection the initial value to which templates are to be applied (equivalent to the <code>select</code>
      *                  attribute of <code>xsl:apply-templates</code>)
