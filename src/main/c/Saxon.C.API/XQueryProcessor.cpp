@@ -246,8 +246,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
         int64_t  status = j_executeQueryToFile(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)cwdXQ.c_str(), (char *)ofilename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
         if(status == -2) {
-            exception = new SaxonApiException();
-            throw exception;
+            throw SaxonApiException();
         }
         if(processorDataRef > 0) {
             j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -275,8 +274,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
         if(result > 0) {
          return SaxonProcessor::makeXdmValueFromRef(result);
         } else if (result == -2) {
-            exception = new SaxonApiException();
-            throw exception;
+            throw SaxonApiException();
         }
 
 
@@ -299,8 +297,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
         char *result = j_executeQueryToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef, (char *)cwdXQ.c_str(), (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
         if(result == nullptr){
-            exception = new SaxonApiException();
-            throw exception;
+            throw SaxonApiException();
         }
         if(processorDataRef > 0) {
             j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);

@@ -276,8 +276,7 @@ void SaxonProcessor::initialize(bool l) {
     procRef = createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
 
     if(procRef== -2) {
-        exception = new SaxonApiException("Failed to create Processor object");
-        throw exception;
+        throw SaxonApiException("Failed to create Processor object");
     }
 
 #ifdef DEBUG
@@ -338,8 +337,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
     }
     procRef = createSaxonProcessorWithConfigurationFile((SaxonProcessor::sxn_environ->thread), (char *)configFile);
     if(procRef== -2) {
-        exception = new SaxonApiException("Failed to create SaxonProcessor object - with configuration file");
-        throw exception;
+        throw SaxonApiException("Failed to create SaxonProcessor object - with configuration file");
     }
 
 #ifdef DEBUG

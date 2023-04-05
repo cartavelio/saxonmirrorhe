@@ -102,8 +102,7 @@ XPathProcessor::~XPathProcessor(){
 
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
   	if (xpathStr == nullptr) {
-	exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
-	throw exception;
+        throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
     }
     SaxonProcessor::attachCurrentThread();
 
@@ -117,8 +116,7 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 	if(results >0) {
         return SaxonProcessor::makeXdmValueFromRef(results);
 	} else if(results == -2){
-	    exception = new SaxonApiException();
-	    throw exception;
+	    throw SaxonApiException();
 
 	}
 
@@ -131,8 +129,7 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
 
 
     if (xpathStr == nullptr) {
-        exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
-        throw exception;
+        throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
     }
     SaxonProcessor::attachCurrentThread();
 
@@ -172,8 +169,7 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
         return xdmItem;
     }else if(result== -2){
 
-        exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
 
     }
     return nullptr;
@@ -209,12 +205,10 @@ void XPathProcessor::setContextFile(const char * filename) {
 void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
     SaxonProcessor::attachCurrentThread();
     if (prefix == nullptr) {
-        exception = new SaxonApiException("Null prefix supplied to declareNamespace()");
-        throw exception;
+        throw SaxonApiException("Null prefix supplied to declareNamespace()");
     }
     if (uri == nullptr) {
-        exception = new SaxonApiException("Null namespace URI supplied to declareNamespace()");
-        throw exception;
+        throw SaxonApiException("Null namespace URI supplied to declareNamespace()");
     }
 	j_xp_declareNamespace(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)prefix, (char *)uri);
 
@@ -276,8 +270,7 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
         processorDataRef = -1;
     }
     if(resultsi == -2) {
-        exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
     }
 
     return (bool)resultsi;

@@ -9,7 +9,11 @@
 #endif
 
   const char * SaxonApiException::what () {
-        return message;
+	    if(message == nullptr && !cppException) {
+            allocFn fn = operator new;
+            message = j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
+	    }
+	    return message;
   }
 
   SaxonApiException::SaxonApiException(){

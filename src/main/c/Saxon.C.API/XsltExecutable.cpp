@@ -124,8 +124,7 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
         selectionRef = j_createStringObject(SaxonProcessor::sxn_environ->thread, (char *)filename);
         if(selectionRef == -2) {
             exceptionFound = true;
-            SaxonApiException *exception = new SaxonApiException();
-            throw exception;
+            throw SaxonApiException();
         }
     }   else {
        selectionRef = -1;
@@ -232,16 +231,14 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
                     if(value != nullptr && str != nullptr) {
                         resultDocumentMap[str] = value;
                     } else {
-                        SaxonApiException *exception = new SaxonApiException("getResultDocuments failed to create value");
-                        throw exception;
+                        throw SaxonApiException("getResultDocuments failed to create value");
                     }
                 }
                 delete results;
                 j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)resultUrisRef);
             } else {
                 exceptionFound = true;
-                SaxonApiException *exception = new SaxonApiException();
-                throw exception;
+                throw SaxonApiException();
             }
 
         }
@@ -367,8 +364,7 @@ void XsltExecutable::exportStylesheet(const char *filename) {
     long status = j_save(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)filename);
     if(status == -2) {
         exceptionFound = true;
-        SaxonApiException *exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
     }
 
 }
@@ -376,8 +372,7 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
     proc->attachCurrentThread();
     if (selectionRef == -1) {
-        SaxonApiException *exception = new SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile.");
-        throw exception;
+        throw SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile.");
     }
 
 
@@ -409,8 +404,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
     if(status == -2) {
         exceptionFound = true;
-        SaxonApiException *exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
     }
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -424,8 +418,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 
     proc->attachCurrentThread();
     if (selectionRef == -1) {
-        SaxonApiException *exception = new SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile.");
-        throw exception;
+        throw SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile.");
     }
 
 
@@ -455,8 +448,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     char * result = j_applyTemplatesReturningString(SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(), (void *)executableRef, (selectionRef == -1 ? (void *)NULL : (void *)selectionRef), (processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(result == nullptr) {
         exceptionFound = true;
-        SaxonApiException *exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
     }
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -501,8 +493,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result==-2){
         exceptionFound = true;
-        SaxonApiException *exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
 
 
     }
@@ -643,8 +634,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
     }else if(result== -2){
 
         exceptionFound = true;
-        SaxonApiException *exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
 
     }
     return nullptr;
@@ -757,8 +747,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     }else if(result == -2) {
 
         exceptionFound = true;
-        SaxonApiException *exception = new SaxonApiException();
-        throw exception;
+        throw SaxonApiException();
 
     }
 

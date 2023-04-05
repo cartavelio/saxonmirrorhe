@@ -795,22 +795,33 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
 
 void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
     cout << "ExampleSimple1Err taken from PHP:" << endl;
+    XsltExecutable * executable = nullptr;
+    try
+    {
+        executable = proc->compileFromFile("err.xsl");
+    }
+    catch (SaxonApiException e)
+        {
+            const char * errorCode = e.getErrorCode();
+            const char * emessage = e.what();
+            cerr << "Exception as expected: ";
+            if(errorCode != nullptr) {
+                cerr<<"ErrorCode = "<<errorCode<<endl;
+            }
+            if(emessage != nullptr) {
+                cerr << " "<<emessage << endl;
+            }
+            proc->exceptionClear();
+            sresult->success++;
+            return;
+    }
 
-    XsltExecutable * executable = proc->compileFromFile("err.xsl");
-    if(executable == nullptr || proc->exceptionOccurred()) {
-        if( proc->exceptionOccurred()) {
-            cout << "Error Message= "<< proc->getErrorMessage() << endl;
-        }
-        cout << "Result expected as null " << endl;
-        proc->exceptionClear();
-        sresult->success++;
-        return;
-    } else {
-        sresult->failure++;
-        sresult->failureList.push_back("exampleSimple1Err");
-
+    sresult->failure++;
+    sresult->failureList.push_back("exampleSimple1Err");
+    if(executable != nullptr) {
         delete executable;
     }
+
 
 }
 
