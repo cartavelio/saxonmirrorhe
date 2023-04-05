@@ -789,13 +789,13 @@ public class SaxonCAPI {
         if (ccwd != WordFactory.nullPointer()) {
             cwd = CTypeConversion.toJavaString(ccwd);
         }
-        return j_main_parseXmlFile(thread, ccwd, WordFactory.nullPointer(), processorRef, WordFactory.nullPointer(), filename);
+        return j_main_parseXmlFile(thread, ccwd, processorRef, WordFactory.nullPointer(), WordFactory.nullPointer(), filename);
 
     }
 
     @CEntryPoint(name = "parseXmlFileWithValidator", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long parseXmlFileWithValidator(IsolateThread thread, CCharPointer ccwd, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer filename) throws SaxonApiException {
-        return j_main_parseXmlFile(thread, ccwd, WordFactory.nullPointer(), processorRef, validatorRef, filename);
+        return j_main_parseXmlFile(thread, ccwd, processorRef, WordFactory.nullPointer(), validatorRef, filename);
     }
 
 
