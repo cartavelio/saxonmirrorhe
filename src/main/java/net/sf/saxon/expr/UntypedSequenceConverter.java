@@ -297,7 +297,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
             mapper.setConverter(converter);
             if (expr.getRoleSupplier() != null) {
                 String errorCode = expr.getRoleSupplier().get().getErrorCode();
-                mapper.setErrorCode("XPTY0004".equals(errorCode) ? "FORG0001" : "XPTY0004");
+                mapper.setErrorCode("XPTY0004".equals(errorCode) ? "FORG0001" : errorCode);
             }
             final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             return context -> {
