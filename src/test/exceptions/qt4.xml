@@ -175,5 +175,59 @@
       <created by="Michael Kay" on="2023-01-03"/>
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
    </exception>
+   
+   <exception test-set="prod-FunctionDecl" test-case="
+      function-decl-40-019
+      function-decl-40-020
+      function-decl-40-023
+      function-decl-40-024
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Currently restricting default value of a user function parameter to be a literal or "."</reason>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" test-case="
+      Keywords-fn-char-1
+      Keywords-fn-remove-1
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Function (changes) not implemented</reason>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" test-case="
+      Keywords-fn-parse-html-1
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Generated test case contains incorrect syntax</reason>
+   </exception>
+   
+   <exception test-set="misc-HtmlTestSuite" test-case="
+      html-test-1050
+      html-test-1054
+      html-test-1147
+      html-test-1216
+      html-test-1238
+      html-test-1258
+      html-test-1294
+      html-test-1296
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Wrong results from validator.nu? Needs checking.</reason>
+   </exception>
+   
+   <exception test-set="fn-format-number" test-case="
+      numberformat-40-87 numberformat-40-88
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-02-28"/>
+      <reason>Third argument as xs:QName not yet implemented</reason>
+   </exception>
+   
+   
+
+   
+   
+   
+ 
+   
 
 </exceptions>
