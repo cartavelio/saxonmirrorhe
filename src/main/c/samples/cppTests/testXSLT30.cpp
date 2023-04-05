@@ -961,7 +961,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
 
     XdmNode* xmlfile = nullptr;
     try {
-    sproc->parseXmlFromString("<xml><value>5</value></xml>");
+        xmlfile = sproc->parseXmlFromString("<xml><value>5</value></xml>");
     } catch(SaxonApiException &e){
         sresult->failure++;
         sresult->failureList.push_back("exampleTransformToString");
@@ -1100,10 +1100,11 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc, sRes
 
 void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount *sresult) {
     cout << "Test: ExampleParam" << endl;
-
+          proc->exceptionClear();
     XsltExecutable * executable = nullptr;
     try {
         executable = proc->compileFromFile("../php/xsl/foo.xsl");
+        executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
     } catch(SaxonApiException &e) {
                 cout << "Expected failure of test exampleSimple3aError:" << endl;
                 const char * message = e.getMessage();
@@ -1129,9 +1130,7 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount
 
     XdmAtomicValue *xdmvalue = saxonProc->makeStringValue("Hello to you");
     if (xdmvalue != nullptr) {
-
         executable->setParameter("a-param", (XdmValue *) xdmvalue);
-
     } else {
         cout << "Xdmvalue is NULL - ====== FAIL =====" << endl;
         sresult->failure++;
@@ -1148,7 +1147,8 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCount
     try {
         result = executable->applyTemplatesReturningString();
     } catch(SaxonApiException &e){
-        cout << "Result is NULL<br/>  ======= fail =====" << endl;
+        cout << "Exception thrown ======= fail =====" << endl;
+         cerr<<"Error: " << e.what() <<endl;
         sresult->failure++;
         sresult->failureList.push_back("exampleParam");
         const char * emessage = e.getMessage();
@@ -1289,7 +1289,7 @@ void exampleParam2(SaxonProcessor *saxonProc, Xslt30Processor *proc, sResultCoun
     const char *result = nullptr;
 
     try {
-    result = executable->applyTemplatesReturningString();
+        result = executable->applyTemplatesReturningString();
     } catch(SaxonApiException &e) {
         cout<<"Result is NULL<br/>  ======= fail ====="<<endl;
         const char * emessage = e.getMessage();
@@ -2341,34 +2341,24 @@ void testCatalog(const char * cwd, SaxonProcessor * proc, sResultCount *sresult)
 
         XsltExecutable  * executable = trans->compileFromFile("../data/example.xsl");
 
-        sresult->failure++;
-        sresult->failureList.push_back("testCatalog");
+        executable->setInitialMatchSelectionAsFile("../data/example.xml");
+
+        const char *result = executable->applyTemplatesReturningString();
+
+        if(result != NULL) {
+            std::cerr << "testCatalog result= " << result << std::endl;
+            delete result;
+            sresult->success++; // TODO - check the results more carefully
+        } else {
+            sresult->failure++;
+            sresult->failureList.push_back("testCatalog-1");
+            return;
+        }
+
+        delete executable;
+        executable = nullptr;
         delete trans;
-        trans= nullptr;
-        return;
-
-
-
-    executable->setInitialMatchSelectionAsFile("../data/example.xml");
-
-    const char *result = executable->applyTemplatesReturningString();
-
-    if(result != NULL) {
-        std::cerr << "testCatalog result= " << result << std::endl;
-        delete result;
-        sresult->success++; // TODO - check the results more carefully
-    } else {
-        sresult->failure++;
-        sresult->failureList.push_back("testCatalog-1");
-        return;
-     }
-  
-
-
-    delete executable;
-    executable = nullptr;
-    delete trans;
-    trans = nullptr;
+        trans = nullptr;
 
     } catch(SaxonApiException &e) {
         const char *message = e.getMessage();

@@ -42,12 +42,14 @@
 
 SaxonApiException::SaxonApiException(const char * m){
     if(m != nullptr) {
-        //message = (char *)m;
-        size_t destination_size = sizeof (m);
+        //message = m;
+        size_t destination_size = strlen(m);
         message = (char *)malloc(sizeof(char)*destination_size);
         snprintf(message, destination_size, "%s", m);
     } else {
-        message = nullptr;
+        size_t destination_size = 18;
+        message = (char *)malloc(sizeof(char)*destination_size);
+        snprintf(message, destination_size, "%s", "unknown exception");
     }
 
     lineNumber = -1;
@@ -60,7 +62,10 @@ SaxonApiException::SaxonApiException(const char * m){
 
 	SaxonApiException::SaxonApiException(const char * m, const char * ec, const char * sysId, int linenumber){
 		if(m != nullptr) {
-		    message = (char *)m;
+		    //message = (char *)m;
+		    size_t destination_size = strlen(m);
+            message = (char *)malloc(sizeof(char)*destination_size);
+            snprintf(message, destination_size, "%s", m);
 		} else {
 		    message = nullptr;
 		}
@@ -68,7 +73,10 @@ SaxonApiException::SaxonApiException(const char * m){
         lineNumber = linenumber;
 
         if (ec != nullptr) {
-            errorCode = (char *)ec;
+            //errorCode = (char *)ec;
+            size_t destination_size = strlen(ec);
+            errorCode = (char *)malloc(sizeof(char)*destination_size);
+            snprintf(errorCode, destination_size, "%s", ec);
             //std::cerr<<"SaxonApiException =======: errorCode = "<<errorCode<<std::endl;
         } else {
             errorCode = nullptr;
@@ -76,7 +84,10 @@ SaxonApiException::SaxonApiException(const char * m){
         }
 
         if(sysId != nullptr) {
-            systemId = (char *)sysId;
+            //systemId = (char *)sysId;
+            size_t destination_size = strlen(ec);
+            systemId = (char *)malloc(sizeof(char)*destination_size);
+            snprintf(systemId, destination_size, "%s", sysId);
         } else {
             systemId = nullptr;
         }

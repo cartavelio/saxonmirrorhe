@@ -372,7 +372,7 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
     proc->attachCurrentThread();
     if (selectionRef == -1) {
-        throw SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile.");
+        throw SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
     }
 
 
@@ -416,12 +416,10 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 }
 
 const char *XsltExecutable::applyTemplatesReturningString() {
-
     proc->attachCurrentThread();
     if (selectionRef == -1) {
-        throw SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile.");
+        throw SaxonApiException("Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
     }
-
 
     setProperty("resources", resources_dir.c_str());
 
@@ -447,7 +445,6 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     }
     allocFn fn = operator new;
     char * result = j_applyTemplatesReturningString(SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(), (void *)executableRef, (selectionRef == -1 ? (void *)NULL : (void *)selectionRef), (processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
         processorDataRef = -1;
