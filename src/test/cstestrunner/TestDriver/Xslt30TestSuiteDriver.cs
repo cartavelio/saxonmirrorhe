@@ -984,7 +984,7 @@ namespace TestDriver {
             XsltExecutable sheet, Stream styleSource) {
             try {
                 Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
-                Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
+                Stream exportFile = FileStreamCreate(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
 
                 XsltPackage compiledPack = compiler.CompilePackage(styleSource);
                 compiledPack.Save(exportFile);
@@ -1015,7 +1015,7 @@ namespace TestDriver {
                 if (export) {
                     try {
                         Uri fileUri = new Uri(resultsDir + "/export/" + testSetName + "/" + testName + ".base.sef");
-                        Stream exportFile = new FileStream(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
+                        Stream exportFile = FileStreamCreate(fileUri.AbsolutePath, FileMode.Create, FileAccess.Write);
 
                         Console.WriteLine("Exported package to " + fileUri);
                         pack.Save(exportFile);
@@ -1590,6 +1590,18 @@ namespace TestDriver {
             return (qname == null ? null : (QName) qname.Value);
         }
 
+        private FileStream FileStreamCreate(String path, FileMode mode, FileAccess access) 
+        {
+            String pathName = path.Replace(@"\", "/");
+            int pos = pathName.LastIndexOf("/");
+            pathName = pathName.Substring(0, pos);
+            if (!Directory.Exists(pathName))
+            {
+                Directory.CreateDirectory(pathName);
+            }
+
+            return new FileStream(path, mode, access);
+        }
     }
 
     public class ModuleResolver : ModuleURIResolver {
