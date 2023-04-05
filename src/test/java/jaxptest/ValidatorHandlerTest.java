@@ -1,54 +1,156 @@
 package jaxptest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
-import net.sf.saxon.TransformerFactoryImpl;
-import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.Validation;
+import net.sf.saxon.lib.NamespaceConstant;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
+import org.xml.sax.ext.DefaultHandler2;
 
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
+import javax.xml.validation.TypeInfoProvider;
+import javax.xml.validation.ValidatorHandler;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Tests for JAXP validation interface
+ * Tests for JAXP validatorHandler interface
  */
-public class ValidationTest {
+public class ValidatorHandlerTest {
     private final ConfigTest configTest = new ConfigTest();
+
+    private void parseToValidator(ValidatorHandler handler, InputSource source) {
+        try {
+            SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+            parserFactory.setNamespaceAware(true);
+            SAXParser parser = parserFactory.newSAXParser();
+            XMLReader reader = parser.getXMLReader();
+            reader.setContentHandler(handler);
+            reader.parse(source);
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testTypeAnnotations() {
+        try {
+            SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
+            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            ValidatorHandler validator = grammar.newValidatorHandler();
+            TypeInfoProvider provider = validator.getTypeInfoProvider();
+            validator.setContentHandler(new TypeInfoChecker(provider));
+            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books.xml"))));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    private static class TypeInfoChecker extends DefaultHandler2 {
+
+        private TypeInfoProvider provider;
+
+        public TypeInfoChecker(TypeInfoProvider provider) {
+            this.provider = provider;
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            if (localName.equals("AUTHOR")) {
+                assertEquals(provider.getElementTypeInfo().getTypeName(), "string");
+                assertEquals(provider.getElementTypeInfo().getTypeNamespace(), NamespaceConstant.SCHEMA);
+            }
+            if (localName.equals("DIMENSIONS")) {
+                assertEquals(provider.getElementTypeInfo().getTypeName(), "dimensionsType");
+                assertEquals(provider.getElementTypeInfo().getTypeNamespace(), "");
+            }
+            if (localName.equals("ITEM")) {
+                int index = attributes.getIndex("", "CAT");
+                assertEquals("IDREF", provider.getAttributeTypeInfo(index).getTypeName());
+                assertEquals(NamespaceConstant.SCHEMA, provider.getAttributeTypeInfo(index).getTypeNamespace());
+            }
+            if (localName.equals("CATEGORY")) {
+                int index = attributes.getIndex("", "CODE");
+                assertEquals("ID", provider.getAttributeTypeInfo(index).getTypeName());
+                assertEquals(NamespaceConstant.SCHEMA, provider.getAttributeTypeInfo(index).getTypeNamespace());
+                assertTrue(provider.isIdAttribute(index));
+            }
+        }
+    }
+
 
     @Test
     public void testDefaultErrorHandling() {
         try {
-            SchemaFactoryImpl schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl();
+            SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
             Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
-            Validator validator = grammar.newValidator();
-            validator.validate(new StreamSource(new File(configTest.getDataDir() + "books-invalid.xml")));
-            fail("Unexpected success");
+            ValidatorHandler validator = grammar.newValidatorHandler();
+            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books-invalid.xml"))));
 
-        } catch (SAXException e) {
-            // OK
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             fail();
         }
+    }
+
+    @Test
+    public void testResolver() {
+        try {
+            SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
+            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            ValidatorHandler validator = grammar.newValidatorHandler();
+            Resolver resolver = new Resolver();
+            validator.setResourceResolver(resolver);
+            assertEquals(resolver, validator.getResourceResolver());
+            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books-invalid.xml"))));
+
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    /**
+     * Inner class to implement a resource resolver. This version always returns null, which
+     * has the same effect as not supplying a resource resolver at all. The LSResourceResolver
+     * is part of the DOM Level 3 load/save module.
+     */
+
+    protected static class Resolver implements LSResourceResolver {
+
+        /**
+         * Resolve a reference to a resource
+         *
+         * @param type      The type of resource, for example a schema, source XML document, or query
+         * @param namespace The target namespace (in the case of a schema document)
+         * @param publicId  The public ID
+         * @param systemId  The system identifier (as written, possibly a relative URI)
+         * @param baseURI   The base URI against which the system identifier should be resolved
+         * @return an LSInput object typically containing the character stream or byte stream identified
+         * by the supplied parameters; or null if the reference cannot be resolved or if the resolver chooses
+         * not to resolve it.
+         */
+
+        public LSInput resolveResource(String type, String namespace, String publicId, String systemId, String baseURI) {
+            return null;
+        }
+
     }
 
     // Switch to allow running tests with Xerces, for comparison purposes
@@ -58,7 +160,7 @@ public class ValidationTest {
         if (USE_XERCES) {
             return new org.apache.xerces.jaxp.validation.XMLSchemaFactory();
         } else {
-            return new com.saxonica.ee.jaxp.SchemaFactoryImpl();
+            return new SchemaFactoryImpl();
         }
     }
 
@@ -71,7 +173,7 @@ public class ValidationTest {
         try {
             SchemaFactory schemaFactory = makeSchemaFactory();
             Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
-            Validator validator = grammar.newValidator();
+            ValidatorHandler validator = grammar.newValidatorHandler();
 
             validator.setErrorHandler(new ErrorHandler() {
                 @Override
@@ -89,112 +191,31 @@ public class ValidationTest {
                     counts.set(2, counts.get(2) + 1);
                 }
             });
-            validator.validate(new StreamSource(new File(configTest.getDataDir() + "books-invalid.xml")));
+            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books-invalid.xml"))));
             assertEquals(0, (int) counts.get(0), "warnings");
             assertEquals(3, (int) counts.get(1), "errors");
             assertEquals(0, (int) counts.get(2), "fatals");
 
-        } catch (SAXException e) {
-            e.printStackTrace();
-            fail();
-        } catch (IOException e) {
+        } catch (SAXException | IOException e) {
             e.printStackTrace();
             fail();
         }
     }
 
 
-    @Test
-    public void testInvalidSchema() {
-        final List<Integer> counts = new ArrayList<Integer>();
-        counts.add(0);
-        counts.add(0);
-        counts.add(0);
-        try {
-            SchemaFactory schemaFactory = makeSchemaFactory();
-            schemaFactory.setErrorHandler(new ErrorHandler() {
-                @Override
-                public void warning(SAXParseException exception) throws SAXException {
-                    counts.set(0, counts.get(0) + 1);
-                }
 
-                @Override
-                public void error(SAXParseException exception) throws SAXException {
-                    counts.set(1, counts.get(1) + 1);
-                }
 
-                @Override
-                public void fatalError(SAXParseException exception) throws SAXException {
-                    counts.set(2, counts.get(2) + 1);
-                }
-            });
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books-invalid.xsd"));
-//            Validator validator = grammar.newValidator();
-//
-//            validator.setErrorHandler(
-//            validator.validate(new StreamSource(new File(configTest.getDataDir() + "books-invalid.xml")));
-
-            fail("Expected exception to be thrown, though we didn't do so in 9.9");
-        } catch (SAXException e) {
-            assertEquals(0, (int) counts.get(0), "warnings");
-            assertEquals(4, (int) counts.get(1), "errors");
-            assertEquals(0, (int) counts.get(2), "fatals");
-
-        }
-    }
-
-    @Test
-    public void testDefaultAttributeHandling() {
-        try {
-            File xslFile = new File(configTest.getBugsDir() + "4338/copy_stylesheet.xsl");
-            InputSource inputSource = new InputSource(xslFile.toURI().toString());
-            Source source = new SAXSource(inputSource);
-
-            TransformerFactoryImpl transformerFactory = new EnterpriseTransformerFactory();
-
-            transformerFactory.getConfiguration().setConfigurationProperty(
-                    FeatureKeys.SCHEMA_VALIDATION_MODE,
-                    Validation.describe(Validation.STRICT));
-
-            transformerFactory.setAttribute(net.sf.saxon.lib.FeatureKeys.XSLT_SCHEMA_AWARE, true);
-
-            Transformer transformer = transformerFactory.newTransformer(source);
-
-            // Create XML SAX source
-            InputSource inputSource2 = new InputSource(new File(configTest.getBugsDir() + "4338/defAttr.xml").toURI().toString());
-            SAXSource xmlSource = new SAXSource(inputSource2);
-            XMLReader saxParser = transformerFactory.getConfiguration().getSourceParser();
-
-            //EXM-11081 Set this feature so that the default attributes from the schema are reported...
-            //saxParser.setFeature("http://apache.org/xml/features/validation/schema", true);
-            //saxParser.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE, true);
-
-            xmlSource.setXMLReader(saxParser);
-
-            // Output stream result
-            StringWriter sw = new StringWriter();
-            Result outputTarget = new StreamResult(sw);
-
-            // Run transformation
-            transformer.transform(xmlSource, outputTarget);
-            System.err.println(sw.toString());
-            assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><root xmlns:gns1=\"alreadyGenerated\" xmlns:gns2=\"testNS\" xmlns:ns2=\"http://dita.oasis-open.org/architecture/2005/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"main.xsd\" ns2:DITAArchVersion=\"defVal\" gns1:attr1=\"defVal\"/>", sw.toString(), "result");
-        } catch (Exception err) {
-            err.printStackTrace();
-            fail(err.getMessage());
-        }
-    }
 
     private void validate(String xsd, String xml, int expectedErrors) {
         try {
             EnterpriseConfiguration conf = new EnterpriseConfiguration();
-            SchemaFactory schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl(conf);
+            SchemaFactory schemaFactory = new SchemaFactoryImpl(conf);
             Schema schema = schemaFactory.newSchema(new StreamSource(new StringReader(xsd)));
 
-            Validator validator = schema.newValidator();
+            ValidatorHandler validator = schema.newValidatorHandler();
             CustomHandler handler = new CustomHandler();
             validator.setErrorHandler(handler);
-            validator.validate(new StreamSource(new StringReader(xml)));
+            parseToValidator(validator, new InputSource(new StringReader(xml)));
             assertEquals(expectedErrors, handler.errorCount());
         } catch (Exception err) {
             fail(err);
