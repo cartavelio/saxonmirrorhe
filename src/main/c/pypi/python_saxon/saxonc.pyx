@@ -2348,7 +2348,7 @@ cdef class PyXsltExecutable:
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
         if template_name is not None:
             c_templateName = py_template_name_string
-        self.thisxptr.callTemplateReturningFile(c_templateName)
+        self.thisxptr.callTemplateReturningFile(c_templateName, c_outputfile)
 
      def call_function_returning_value(self, str function_name, list args, **kwds):
         """
