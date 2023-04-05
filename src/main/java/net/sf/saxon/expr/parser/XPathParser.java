@@ -2911,10 +2911,10 @@ public class XPathParser {
                             //components.add(Literal.makeEmptySequence());
                         } else {
                             Expression exp = parseExpression();
-                            RetainedStaticContext rsc = new RetainedStaticContext(env);
-                            Expression fn = SystemFunction.makeCall("string-join", rsc, exp, new StringLiteral(StringValue.SINGLE_SPACE));
-                            ExpressionTool.copyLocationInfo(exp, fn);
-                            components.add(fn);
+                            RetainedStaticContext rscSJ = new RetainedStaticContext(env);
+                            Expression fnSJ = SystemFunction.makeCall("string-join", rscSJ, exp, new StringLiteral(StringValue.SINGLE_SPACE));
+                            ExpressionTool.copyLocationInfo(exp, fnSJ);
+                            components.add(fnSJ);
                             expect(Token.RCURLY);
                         }
                     }
