@@ -16,11 +16,11 @@
         
     </category>
     
-    <category name="documentation">
+    <!--<category name="documentation">
         
  
         
-    </category>
+    </category>-->
     
     <!--<category name="xslt30">
 
@@ -258,11 +258,11 @@
    
     </category>
 
-    <category name="serialization">
+    <!--<category name="serialization">
         
     
  
-    </category>
+    </category>-->
     
     <category name="command-line">
         
@@ -486,18 +486,18 @@
             implemented as a node in the expression tree, this copying was found to be unnecessary.</p>
     </category>
     
-    <category name="sql" class="javaonly">
+    <!--<category name="sql" class="javaonly">
         
        
   
-    </category>
+    </category>-->
     
     
     
-    <category name="xquery-update" class="javaonly">
+    <!--<category name="xquery-update" class="javaonly">
         
        
-    </category>
+    </category>-->
     
     <category name="optimization">
         
