@@ -11,8 +11,8 @@ void raise_py_error()
   try {
     throw;
   } 
-  catch (SaxonApiException* e) {
-      const char * errorMessage = e->getMessageWithErrorCode();
+  catch (SaxonApiException e) {
+      const char * errorMessage = e.getMessageWithErrorCode();
 
     PyErr_SetString(pysaxonapierror, errorMessage);
 

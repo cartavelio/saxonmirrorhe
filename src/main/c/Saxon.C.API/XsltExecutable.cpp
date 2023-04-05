@@ -87,7 +87,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
 
 bool XsltExecutable::exceptionOccurred() {
-    return exceptionFound; //return SaxonProcessor::sxn_environ->env->ExceptionCheck();
+    return exceptionFound;
 }
 
 
@@ -977,27 +977,10 @@ void XsltExecutable::transformToFile(XdmNode *source) {
 
 
 SaxonApiException *XsltExecutable::getException() {
-
-    if(exceptionFound) {
-        SaxonApiException *exception = new SaxonApiException();
-        return exception;
-    } else {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 
 const char * XsltExecutable::getErrorMessage() {
-    SaxonApiException * exception = getException();
-    if(exception != nullptr) {
-        std::string str = std::string(exception->getMessage());
-        if(str.length() > 0) {
-            char * cstr = new char [str.length()+1];
-            strcpy (cstr, str.c_str());
-            delete exception;
-            return cstr;
-        }
-    }
-
     return nullptr;
 }

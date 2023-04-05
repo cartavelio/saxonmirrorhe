@@ -57,7 +57,7 @@
         lineNumbering = option;
         int64_t  status = j_db_setLineNumbering(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject, (int)option);
         if(status== -2) {
-            createException();
+            throw SaxonApiException();
         }
 
     }
@@ -84,8 +84,7 @@
         dtdVal= option;
         int64_t  status = j_db_setDTDValidation(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject, (int)option);
         if(status== -2) {
-            createException();
-            throw exception;
+            throw SaxonApiException();
         }
 
 
@@ -105,8 +104,7 @@
 
         int64_t  status = j_db_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject, (char *)uri);
         if(status== -2) {
-            createException();
-            throw exception;
+            throw SaxonApiException();
         }
     }
 
@@ -120,8 +118,7 @@
             XdmNode * node = new XdmNode(result);
             return node;
         } else if(result == -2) {
-            createException();
-            throw exception;
+            throw SaxonApiException();
         }
 
 
@@ -138,8 +135,7 @@
            XdmNode * node = new XdmNode(result);
            return node;
        } else if(result == -2) {
-           createException();
-           throw exception;
+           throw SaxonApiException();
        }
     return nullptr;
   }
@@ -151,8 +147,7 @@
            XdmNode * node = new XdmNode(result);
            return node;
        } else if(result == -2) {
-           createException();
-           throw exception;
+           throw SaxonApiException();
        }
 
         return nullptr;
@@ -163,44 +158,30 @@
 
 void DocumentBuilder::exceptionClear(){
 
-    if(exception != nullptr) {
-        delete exception;
-        exception = nullptr;
-
-    }
+    j_clearException(SaxonProcessor::sxn_environ->thread);
 
 }
 
 const char * DocumentBuilder::getErrorCode() {
-	if(exception == nullptr) {return nullptr;}
-	return exception->getErrorCode();
+	return nullptr;
 }
 
 const char * DocumentBuilder::getErrorMessage(){
-	if(exception == nullptr) {return nullptr;}
-	return exception->getMessage();
+	return nullptr;
 }
 
     SaxonApiException * DocumentBuilder::getException() {
-        return exception;
+        return nullptr;
 
 }
 
 bool DocumentBuilder::exceptionOccurred() {
-    return proc->exceptionOccurred() || exception != nullptr;
+    return proc->exceptionOccurred();
 }
 
 
 
 void DocumentBuilder::createException(const char * message) {
-    if(exception != nullptr) {
-        delete exception;
-        exception = nullptr;
-    }
-    if(message == nullptr) {
-        exception = new SaxonApiException();
-    } else {
-        exception = new SaxonApiException(message);
-    }
+
 
 }
