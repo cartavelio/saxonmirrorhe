@@ -253,17 +253,21 @@ public class XPathException extends TransformerException {
     }
 
     public XPathException withFailingExpression(Expression failingExpression) {
-        this.failingExpression = failingExpression;
-        maybeSetLocation(failingExpression.getLocation());
+        if (failingExpression != null) {
+            this.failingExpression = failingExpression;
+            maybeSetLocation(failingExpression.getLocation());
+        }
         return this;
     }
 
 
     public XPathException maybeWithFailingExpression(Expression failingExpression) {
-        if (this.failingExpression == null) {
-            this.failingExpression = failingExpression;
+        if (failingExpression != null) {
+            if (this.failingExpression == null) {
+                this.failingExpression = failingExpression;
+            }
+            maybeSetLocation(failingExpression.getLocation());
         }
-        maybeSetLocation(failingExpression.getLocation());
         return this;
     }
 
