@@ -39,6 +39,7 @@ public:
     /*!
       @param proc - Pointer to the SaxonProcessor object
       @param cwd - The current working directory
+      @throws SaxonApiException
     */
     XPathProcessor(SaxonProcessor* proc, std::string cwd="");
 
@@ -60,7 +61,8 @@ public:
     //! Compile and evaluate an XPath expression
    /**
      * @param xpathStr - supplied as a character string
-	@return XdmValue
+	*  @return XdmValue
+	* @throws SaxonApiException
    */
    XdmValue * evaluate(const char * xpathStr);
    
@@ -70,6 +72,7 @@ public:
      * @param xpathStr - supplied as a character string
 	@return XdmItem - XdmItem object or nullptr if the expression returns an empty sequence.
     * If the expression returns a sequence of more than one item, any items after the first are ignored.
+    * @throws SaxonApiException
    */
    XdmItem * evaluateSingle(const char * xpathStr);
 
@@ -88,7 +91,8 @@ public:
 
     //! Evaluate the XPath expression, returning the effective boolean value of the result.
      /** @param xpathStr - supplied as a character string
-	@return bool
+	   *  @return bool
+	   * @throws SaxonApiException
    */
    bool effectiveBooleanValue(const char * xpathStr);
 
