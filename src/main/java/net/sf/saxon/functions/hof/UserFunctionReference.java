@@ -480,7 +480,8 @@ public class UserFunctionReference extends Expression
                 FunctionDefinition fd = (FunctionDefinition)function;
                 Sequence[] extendedArgs = Arrays.copyOf(args, fd.getNumberOfParameters());
                 for (int i=args.length; i<extendedArgs.length; i++) {
-                    extendedArgs[i] = fd.getDefaultValueExpression(i).makeElaborator().lazily(true).evaluate(context);
+                    extendedArgs[i] = fd.getDefaultValueExpression(i).copy(new RebindingMap())
+                            .makeElaborator().lazily(true).evaluate(context);
                 }
                 args = extendedArgs;
             }
