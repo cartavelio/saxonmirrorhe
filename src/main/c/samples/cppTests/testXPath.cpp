@@ -313,19 +313,151 @@ void testXPathOnFile2(XPathProcessor * xpath, sResultCount *sresult){
            	}
 }
 
+
+XdmValue * good(XPathProcessor * xpath, sResultCount *sresult, XdmNode * document, const char * expr) {
+        try {
+            xpath->setContextItem(document);
+            XdmValue * result = xpath->evaluate(expr);
+            sresult->success++;
+            return result;
+        } catch (SaxonApiException &e1) {
+            return nullptr;
+        }
+    }
+
+void bad(const char * testName, XPathProcessor * xpath, sResultCount *sresult, XdmNode * document, const char * expr) {
+        try {
+            xpath->setContextItem(document);
+            XdmValue * result = xpath->evaluate(expr);
+            sresult->failure++;
+            sresult->failureList.push_back(testName);
+            delete result;
+            return;
+        } catch (SaxonApiException &e1) {
+            sresult->success++;
+        }
+    }
+
+void runTest(const char * testName, const char * expr, const char * expectedResult, XPathProcessor * xpath, sResultCount *sresult, XdmNode * document) {
+          cout<<endl<<"Test "<<testName<<endl;
+          XdmValue * result = good(xpath, sresult, document, expr);
+          if (result != nullptr && CppTestUtils::assertEquals(expectedResult, result->toString())) {
+            sresult->success++;
+            delete result;
+          } else {
+            if(result != nullptr) {
+                cout<<"Failed result="<<result->toString()<<endl;
+            }
+            sresult->failure++;
+            sresult->failureList.push_back(testName);
+          }
+      }
+
+
+
+
+
+
 int main()
 {
 
     SaxonProcessor * processor = new SaxonProcessor(false);
     XPathProcessor * xpathProc = processor->newXPathProcessor();
+    xpathProc->setLanguageVersion("3.1");
     sResultCount *sresult = new sResultCount();
     cout<<endl<<"Test: XPathProcessor with Saxon version="<<processor->version()<<endl; 
     testXPathSingle(processor, xpathProc, sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
     testXPathValues(processor, xpathProc, sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
     testXPathAttrValues(processor, xpathProc, sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
     testXPathOnFile(processor, xpathProc, sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
     testXPathOnFile2(xpathProc, sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
     testXPathValues2(processor, xpathProc, sresult);
+    cout<<endl<<"============================================================="<<endl<<endl;
+    XdmNode * document = processor->parseXmlFromString("<foo x='1'><bar/><baz/></foo>");
+    runTest("testArith", "2+2", "4",xpathProc,sresult,document);
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testIf", "if (//*) then 3 else 4", "3",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testBang", "string-join((1 to 3)!(. + 1), '-')","2-3-4",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testFor", "string-join(for $i in 1 to 4 return $i, '-')", "1-2-3-4",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testExist", "exists(//*)", "true",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testConcat", "'abc' || 'def'", "abcdef",xpathProc,sresult,document);
+
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testLet", "let $x := 3 return $x + 1", "4",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testInlineFunctions", "function($x){$x + 1}(3)", "4",xpathProc,sresult,document);
+
+cout<<endl<<"============================================================="<<endl<<endl;
+    bad("testNoAnnotations", xpathProc,sresult,document, "%private function($x){$x + 1}(3)");
+
+
+
+cout<<endl<<"============================================================="<<endl<<endl;
+    bad("testNoConstructors", xpathProc,sresult,document, "<a/>");
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testMaps", "map{1:'a'}?1", "a",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testMapType", "map{1:'a'} instance of map(*)", "true",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testMapArrays", "['1a','2a','3a','4a']?2", "2a",xpathProc,sresult,document);
+
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testArrayType", "['1a','2a','3a','4a'] instance of array(*)", "true",xpathProc,sresult,document);
+
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    bad("testNoWhere", xpathProc,sresult,document, "for $i in 1 to 10 where $i gt 3 return $i");
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    bad("testNoOrderBy", xpathProc,sresult,document, "for $i in 1 to 10 order by -$i return $i");
+
+
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    bad("testNoCurrent", xpathProc,sresult,document, "current()");
+
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testRound", "round(12.341, 2)", "12.34",xpathProc,sresult,document);
+
+    //cout<<endl<<"============================================================="<<endl<<endl;
+    //runTest("testGenerateId", "generate-id(/)", strlen() > 0,xpathProc,sresult,document);
+
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testQFlag", "matches('quid', 'quod', 'q')", "false",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testNoNonCapturingGroups", "replace('abcdef', '(?:abc)(def)', '$1')", "def",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testMapFunctions", "Q{http://www.w3.org/2005/xpath-functions/map}get(Q{http://www.w3.org/2005/xpath-functions/map}entry('a', 'b'), 'a')", "b",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testArrayFunctions", "Q{http://www.w3.org/2005/xpath-functions/array}flatten(Q{http://www.w3.org/2005/xpath-functions/array}append([], '12'))", "12",xpathProc,sresult,document);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+    runTest("testDefaultLanguage", "default-language()", "en",xpathProc,sresult,document);
+
 
     std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
               << sresult->success << ",  Failures= " << sresult->failure << std::endl;
@@ -338,7 +470,7 @@ int main()
         std::cout << it->c_str() << std::endl;
 
     }
-
+    delete document;
     delete xpathProc;
     delete processor;
 
