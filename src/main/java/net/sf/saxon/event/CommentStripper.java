@@ -16,18 +16,24 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
+import java.util.function.Predicate;
+
 /**
  * The CommentStripper class is a filter that removes all comments and processing instructions.
  * It also concatenates text nodes that are split by comments and PIs. This follows the rules for
  * processing stylesheets; it is also used for removing comments and PIs from the tree seen
- * by XPath expressions used to process XSD 1.1 assertions
+ * by XPath expressions used to process XSD 1.1 assertions.
+ *
+ * <p>It also has the ability to deep-skip xsl:note (or any other) elements, as required for XSLT 4.0.</p>
  *
  */
 
 
 public class CommentStripper extends ProxyReceiver {
 
-    /*@Nullable*/ private UnicodeString currentTextNode = null;
+    private UnicodeString currentTextNode = null;
+    private Predicate<NodeName> skippedElementTest = (NodeName name) -> false;
+    private int depthOfHole = 0;
 
     /**
      * Default constructor for use in subclasses
@@ -39,13 +45,25 @@ public class CommentStripper extends ProxyReceiver {
         super(next);
     }
 
+    public void setSkippedElementTest(Predicate<NodeName> test) {
+        this.skippedElementTest = test;
+    }
+
     @Override
     public void startElement(NodeName elemName, SchemaType type,
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties)
             throws XPathException {
-        flush();
-        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
+        if (depthOfHole == 0) {
+            if (skippedElementTest.test(elemName)) {
+                depthOfHole++;
+            } else {
+                flush();
+                nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
+            }
+        } else {
+            depthOfHole++;
+        }
     }
 
     /**
@@ -54,8 +72,12 @@ public class CommentStripper extends ProxyReceiver {
 
     @Override
     public void endElement() throws XPathException {
-        flush();
-        nextReceiver.endElement();
+        if (depthOfHole > 0) {
+            depthOfHole--;
+        } else {
+            flush();
+            nextReceiver.endElement();
+        }
     }
 
     /**
@@ -68,12 +90,13 @@ public class CommentStripper extends ProxyReceiver {
 
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
-        if (currentTextNode == null) {
-            currentTextNode = chars;
-        } else {
-            currentTextNode = currentTextNode.concat(chars);
+        if (depthOfHole == 0) {
+            if (currentTextNode == null) {
+                currentTextNode = chars;
+            } else {
+                currentTextNode = currentTextNode.concat(chars);
+            }
         }
-
     }
 
     /**

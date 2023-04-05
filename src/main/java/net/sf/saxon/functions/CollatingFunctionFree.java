@@ -38,7 +38,7 @@ public class CollatingFunctionFree extends SystemFunction {
      * @return the position of the argument containing the collation URI
      */
 
-    private int getCollationArgument() {
+    protected int getCollationArgument() {
         // the collation argument is generally the last, but we keep it flexible
         return getArity() - 1;
     }
@@ -55,7 +55,7 @@ public class CollatingFunctionFree extends SystemFunction {
      */
     @Override
     public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
-        Expression c = arguments[arguments.length - 1];
+        Expression c = arguments[getCollationArgument()];
         if (c instanceof StringLiteral) {
             String coll = ((StringLiteral) c).stringify();
             try {

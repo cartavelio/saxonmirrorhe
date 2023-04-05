@@ -10,6 +10,7 @@ package net.sf.saxon.ma.arrays;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
@@ -174,6 +175,24 @@ public abstract class AbstractArrayItem extends ArrayItem {
             }
             for (int i = 0; i < this.arrayLength(); i++) {
                 if (!DeepEqual.deepEqual(this.get(i).iterate(), that.get(i).iterate(), comparer, context, flags)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
+        if (other instanceof ArrayItem) {
+            ArrayItem that = (ArrayItem) other;
+            if (this.arrayLength() != that.arrayLength()) {
+                return false;
+            }
+            for (int i = 0; i < this.arrayLength(); i++) {
+                if (!DeepEqual40.deepEqual(this.get(i).iterate(), that.get(i).iterate(), context, options)) {
                     return false;
                 }
             }

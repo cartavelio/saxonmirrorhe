@@ -13,6 +13,7 @@ import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -444,6 +445,29 @@ public abstract class MapItem implements FunctionItem {
                 }
                 if (!DeepEqual.deepEqual(otherValue.iterate(),
                                          thisValue.iterate(), comparer, context, flags)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
+        if (other instanceof MapItem &&
+                ((MapItem) other).size() == size()) {
+            AtomicIterator keyIter = keys();
+            AtomicValue key;
+            while ((key = keyIter.next()) != null) {
+                Sequence thisValue = get(key);
+                assert thisValue != null;
+                Sequence otherValue = ((MapItem) other).get(key);
+                if (otherValue == null) {
+                    return false;
+                }
+                if (!DeepEqual40.deepEqual(otherValue.iterate(),
+                                         thisValue.iterate(), context, options)) {
                     return false;
                 }
             }

@@ -12,6 +12,8 @@ import net.sf.saxon.event.CommentStripper;
 import net.sf.saxon.event.ReceivingContentHandler;
 import net.sf.saxon.event.Stripper;
 import net.sf.saxon.om.Durability;
+import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StylesheetSpaceStrippingRule;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -76,6 +78,10 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
         StylesheetSpaceStrippingRule rule = new StylesheetSpaceStrippingRule(config.getNamePool());
         Stripper styleStripper = new Stripper(rule, useWhenFilter);
         CommentStripper commentStripper = new CommentStripper(styleStripper);
+        if (info.getXsltVersion() == 40) {
+            final NamePool pool = config.getNamePool();
+            commentStripper.setSkippedElementTest(name -> name.obtainFingerprint(pool) == StandardNames.XSL_NOTE);
+        }
         setReceiver(commentStripper);
 
     }

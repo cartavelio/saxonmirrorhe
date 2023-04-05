@@ -8,6 +8,8 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -71,6 +73,13 @@ public class DefaultedArgumentExpression extends PseudoExpression {
     @Override
     public Elaborator getElaborator() {
         throw new UnsupportedOperationException();
+    }
+
+    public static class DefaultCollationArgument extends DefaultedArgumentExpression {
+        @Override
+        public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+            return new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+        }
     }
 
 

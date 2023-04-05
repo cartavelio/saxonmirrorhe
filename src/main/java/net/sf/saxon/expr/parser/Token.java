@@ -606,9 +606,15 @@ public abstract class Token {
      */
     public static final int COUNT = 220;
     /**
-     * Complete string template with no embedded expressions
+     * Complete string constructor with no embedded expressions
      */
     public static final int STRING_LITERAL_BACKTICKED = 222;
+
+    /**
+     * Backtick (introducing a 4.0 string template)
+     */
+
+    public static final int BACKTICK = 223;
 
     /**
      * Unary minus sign
@@ -702,6 +708,7 @@ public abstract class Token {
         tokens[BY] = "by";
         tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
         tokens[STRING_LITERAL_BACKTICKED] = "``[<string>]``";
+        tokens[BACKTICK] = "`";
         tokens[OTHERWISE] = "otherwise";
 
         tokens[NAME] = "<name>";

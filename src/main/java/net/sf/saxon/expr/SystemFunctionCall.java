@@ -88,7 +88,6 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         if ((getTargetFunction().getDetails().properties & BuiltInFunctionSet.LATE) == 0) {
             return preEvaluateIfConstant(visitor);
         }
-        //allocateArgumentEvaluators(getArguments());
         return this;
     }
 

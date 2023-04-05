@@ -99,6 +99,10 @@ public class StylesheetModule {
         StylesheetSpaceStrippingRule rule = new StylesheetSpaceStrippingRule(config.getNamePool());
         Stripper styleStripper = new Stripper(rule, useWhenFilter);
         CommentStripper commentStripper = new CommentStripper(styleStripper);
+        if (compilation.getCompilerInfo().getXsltVersion() == 40) {
+            final NamePool pool = config.getNamePool();
+            commentStripper.setSkippedElementTest(name -> name.obtainFingerprint(pool) == StandardNames.XSL_NOTE);
+        }
 
         // build the stylesheet document
 
@@ -207,6 +211,10 @@ public class StylesheetModule {
         StylesheetSpaceStrippingRule rule = new StylesheetSpaceStrippingRule(config.getNamePool());
         Stripper styleStripper = new Stripper(rule, useWhenFilter);
         CommentStripper commentStripper = new CommentStripper(styleStripper);
+        if (compilation.getCompilerInfo().getXsltVersion() == 40) {
+            final NamePool pool = config.getNamePool();
+            commentStripper.setSkippedElementTest(name -> name.obtainFingerprint(pool) == StandardNames.XSL_NOTE);
+        }
 
         // Pipeline for compiled XSLT code
 

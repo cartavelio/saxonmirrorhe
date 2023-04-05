@@ -13,6 +13,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
@@ -875,6 +876,14 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
      */
     @Override
     public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+        XPathException err = new XPathException("Cannot compare functions using deep-equal", "FOTY0015");
+        err.setIsTypeError(true);
+        err.setXPathContext(context);
+        throw err;
+    }
+
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
         XPathException err = new XPathException("Cannot compare functions using deep-equal", "FOTY0015");
         err.setIsTypeError(true);
         err.setXPathContext(context);
