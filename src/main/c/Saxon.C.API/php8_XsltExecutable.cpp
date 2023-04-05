@@ -647,15 +647,16 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningString){
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != nullptr) {
+    try{
         const char * result = xsltExecutable->applyTemplatesReturningString();
 
 	if(result != nullptr) {
             _RETURN_STRING(result);
-        } else {
-            if(xsltExecutable->exceptionOccurred()){
-//TODO: xsltExecutable->getException() then build PHP exception
-           }
         }
+    } catch(SaxonApiException &e){
+        zend_throw_exception(zend_ce_exception, e.what(), 0);
+
+    }
     }
 
      RETURN_NULL();
@@ -1429,8 +1430,9 @@ PHP_METHOD(XsltExecutable, clone) {
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
 if (xsltExecutable != nullptr) {
-        XsltExecutable * executable = xsltExecutable->clone();
-        if(executable != nullptr) {
+        try {
+            XsltExecutable * executable = xsltExecutable->clone();
+
             if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
@@ -1438,18 +1440,15 @@ if (xsltExecutable != nullptr) {
                 xsltExecutable_object *vobj = (xsltExecutable_object * )((char *) ooth - XtOffsetOf(xsltExecutable_object, std));
                 assert (vobj!= nullptr);
                 vobj->xsltExecutable = executable;
+                return;
             }
 
-        } else if(xsltExecutable->exceptionOccurred()){
-            SaxonApiException * exception = xsltExecutable->getException();
-            if(exception != nullptr) {
-                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-            }
-
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.what(), 0);
         }
-        } else {
+        }
         RETURN_NULL();
-    }
+        
 }
 
 PHP_METHOD(XsltExecutable, clearParameters)
