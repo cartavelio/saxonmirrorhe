@@ -239,7 +239,7 @@ namespace Saxon.Api {
         public XsltExecutable Compile(Stream input) {
             StreamSource ss = new StreamSource(input);
             if (baseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                ss.setSystemId(baseUri.ToString());
             }
 
             XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(ss));
@@ -318,11 +318,11 @@ namespace Saxon.Api {
 
             StreamSource ss = new StreamSource(input);
             if (theBaseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(theBaseUri));
+                ss.setSystemId(theBaseUri);
             }
             else {
                 if (baseUri != null) {
-                    ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                    ss.setSystemId(baseUri.ToString());
                 }
             }
 
@@ -356,7 +356,7 @@ namespace Saxon.Api {
         public XsltPackage CompilePackage(Stream input) {
             StreamSource ss = new (input);
             if (baseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                ss.setSystemId(baseUri.ToString());
             }
             return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
         }
@@ -570,7 +570,7 @@ namespace Saxon.Api {
         public XsltExecutable Compile(TextReader input) {
             StreamSource ss = new StreamSource(input);
             if (baseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                ss.setSystemId(baseUri.ToString());
             }
 
             XsltExecutable executable = new(jXsltCompiler.compile(ss)) {
@@ -686,7 +686,7 @@ namespace Saxon.Api {
                     throw new ArgumentNullException("BaseUri");
                 }
 
-                baseu = Uri.EscapeUriString(baseUri.ToString());
+                baseu = baseUri.ToString();
                 pp.setBaseURI(baseu);
             }
 
