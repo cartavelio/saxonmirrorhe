@@ -94,8 +94,9 @@ public abstract class AbstractNumberer implements Numberer {
      *                       of xsl:number, e.g. "1", "01", "i", or "a"
      * @param groupSize      number of digits per group (0 implies no grouping)
      * @param groupSeparator string to appear between groups of digits
-     * @param letterValue    The letter-value specified to xsl:number: "alphabetic" or
-     *                       "traditional". Can also be an empty string or null.
+     * @param letterValue     The letter-value specified to xsl:number: "alphabetic" or
+     *                        "traditional". The value "Xnn" or "xnn" signifies use of a radix other than 10,
+     *                        in the range 2 to 36. Can also be an empty string or null.
      * @param cardinal       When called from xsl:number, the value is set to an empty string.
      *                       When called from format-integer, the value is the value within
      *                       parentheses after "c", for example "c(%spellout-masculine)"  supplies
@@ -130,8 +131,9 @@ public abstract class AbstractNumberer implements Numberer {
      * @param picture           The format token. This is a single component of the format attribute
      *                          of xsl:number, e.g. "1", "01", "i", or "a"
      * @param numGroupFormatter object contains separators to appear between groups of digits
-     * @param letterValue       The letter-value specified to xsl:number: "alphabetic" or
-     *                          "traditional". Can also be an empty string or null.
+     * @param letterValue     The letter-value specified to xsl:number: "alphabetic" or
+     *                        "traditional". The value "Xnn" or "xnn" signifies use of a radix other than 10,
+     *                        in the range 2 to 36. Can also be an empty string or null.
      * @param cardinal       When called from xsl:number, the value is set to an empty string.
      *                       When called from format-integer, the value is the value within
      *                       parentheses after "c", for example "c(%spellout-masculine)"  supplies
@@ -151,7 +153,21 @@ public abstract class AbstractNumberer implements Numberer {
                          String cardinal,
                          String ordinal) {
 
-
+        int radix = 10;
+        int[] digits = westernDigits;
+        if (letterValue != null && letterValue.startsWith("x")) {
+            radix = Integer.parseInt(letterValue.substring(1));
+            digits = new int[radix];
+            for (int i=0; i<radix; i++) {
+                digits[i] = "0123456789abcdefghijklmnopqrstuvwxyz".charAt(i);
+            }
+        } else if (letterValue != null && letterValue.startsWith("X")) {
+            radix = Integer.parseInt(letterValue.substring(1));
+            digits = new int[radix];
+            for (int i = 0; i < radix; i++) {
+                digits[i] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(i);
+            }
+        }
         if (number < 0) {
             return "" + number;
         }
@@ -162,6 +178,9 @@ public abstract class AbstractNumberer implements Numberer {
 
         StringBuilder sb = new StringBuilder(16);
         int formchar = picture.codePointAt(0);
+        if (radix != 10) {
+            formchar = '0';
+        }
 
         StringBuilder fsb = new StringBuilder(2);
 
@@ -169,7 +188,7 @@ public abstract class AbstractNumberer implements Numberer {
 
             case '0':
             case '1':
-                sb.append(toRadical(number, westernDigits, pictureLength, numGroupFormatter));
+                sb.append(toRadical(number, digits, pictureLength, numGroupFormatter));
                 if (ordinal != null && !ordinal.isEmpty()) {
                     sb.append(ordinalSuffix(ordinal, number));
                 }
@@ -424,7 +443,7 @@ public abstract class AbstractNumberer implements Numberer {
                 if (digitValue >= 0) {
 
                     int zero = formchar - digitValue;
-                    int[] digits = new int[10];
+                    digits = new int[10];
                     for (int z = 0; z <= 9; z++) {
                         digits[z] = zero + z;
                     }
