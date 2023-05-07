@@ -232,6 +232,9 @@
                href="https://www.saxonica.com/saxon-c/doc12/html/classXdmMap.html">XdmMap</a>
          </li>
       </ul>
+
+      <p>SaxonC exceptions are thrown as <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonApiException.html">SaxonApiException</a></p>
       <p>See the API class list: <a href="https://www.saxonica.com/saxon-c/doc12/html/annotated.html"
             >C++ documentation</a></p>
    </section>
