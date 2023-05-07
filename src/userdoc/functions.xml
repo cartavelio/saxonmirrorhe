@@ -4300,6 +4300,12 @@
           documents read using the <code>doc()</code> or <code>document()</code> functions.
           Neither option affects documents supplied in the <code>initial-match-selection</code> option, 
         or in any of the <code>xxx-params</code> options (such as <code>stylesheet-params</code>).</p>
+        <p>To enable use of XSLT 4.0 features in the called stylesheet, it is not enough simply to set 
+          <code>xsl:stylesheet/@version="4.0"</code> in the called stylesheet module. Instead, you need to do two things:</p>
+        <ol>
+          <li><p>Ensure that 4.0 is enabled in the calling stylesheet (or query)</p></li>
+          <li><p>Use the option <code>xslt-version="4.0"</code> in the options passed to the <code>fn:transform</code> call.</p></li>
+        </ol>
       </status>
       <saxon-edition>ALL_SINCE_9.8 PE/EE_9.7</saxon-edition>
       <description>
