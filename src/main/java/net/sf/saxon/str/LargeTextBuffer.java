@@ -381,10 +381,10 @@ public final class LargeTextBuffer {
     }
 
     public void close() {
-        if (lastSegment != null && lastSegmentLength > 0) {
-            addSegment(lastSegment);
-        }
-        lastSegment = null;
+//        if (lastSegment != null && lastSegmentLength > 0) {
+//            addSegment(lastSegment);
+//        }
+//        lastSegment = null;
     }
 
     /**
@@ -392,7 +392,9 @@ public final class LargeTextBuffer {
      * @return the number of characters present
      */
     public int length() {
-        if (lastSegment == null) {
+        if (lastSegment == EMPTY_SEGMENT) {
+            return 0;
+        } else if (lastSegment == null) {
             return (completeSegments.size()-1) * SEGLEN + lastSegmentLength;
         } else {
             return completeSegments.size() * SEGLEN + lastSegmentLength;
