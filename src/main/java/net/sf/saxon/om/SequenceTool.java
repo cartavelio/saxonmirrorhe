@@ -410,6 +410,8 @@ public class SequenceTool {
     public static ItemType getItemType(Sequence sequence, TypeHierarchy th) {
         if (sequence instanceof Item) {
             return Type.getItemType((Item) sequence, th);
+        } else if (sequence instanceof IntegerRange) {
+            return BuiltInAtomicType.INTEGER;
         } else if (sequence instanceof GroundedValue) {
             try {
                 ItemType type = null;
