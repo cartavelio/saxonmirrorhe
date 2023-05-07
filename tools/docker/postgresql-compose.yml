@@ -7,7 +7,7 @@ services:
       ports:
         - 5432:5432
       volumes:
-        - ../../build/sql/postgres/data:/var/lib/postgresql/data
+        - postgresql-data:/var/lib/postgresql/data
         - ../sql/postgresql:/app/sql
       environment:
         POSTGRES_PASSWORD: admin
@@ -16,3 +16,7 @@ services:
 
 networks:
   external_net: {}
+
+volumes:
+  postgresql-data:
+    external: true

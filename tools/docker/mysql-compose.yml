@@ -7,7 +7,7 @@ services:
       ports:
         - 3306:3306
       volumes:
-        - ../../build/sql/mysql/data:/var/lib/postgresql/data
+        - mysql-data:/var/lib/postgresql/data
         - ../sql/mysql:/app/sql
       environment:
         MYSQL_ROOT_PASSWORD: admin
@@ -16,3 +16,7 @@ services:
 
 networks:
   external_net: {}
+
+volumes:
+  mysql-data:
+    external: true
