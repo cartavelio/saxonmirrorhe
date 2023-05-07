@@ -1,28 +1,82 @@
 # Building Saxon HE, PE, and EE
 
-The Saxon family of products  is built with Gradle.
+The Saxon family of products is built with Gradle.
 
 ## Prerequisites
 
-* A Java environment suitable for running Gradle.
+* A Java environment suitable for running Gradle. We currently build with JDK 11.
 
 ## Environment variables
 
 Some prerequisites for building and/or testing are outside the scope
-of the build. Environment variables are used to configure access to
-these items.
+of the `saxondev` repository. Environment variables are used to
+configure access to these items.
 
-* `SAXON_LICENSE_DIR`: The directory that contains your Saxon EE license.
-* `W3C_QT3_TEST_SUITE_DIR`: The directory that contains your local
-  clone of the [W3C QT3 test suite repository](https://github.com/w3c/qt3tests).
-* `W3C_XSLT30_TEST_SUITE_DIR`: The directory that contains your local
-  clone of the W3C [XSLT 3.0 test suite repository](https://github.com/w3c/xslt30-test).
-* `W3C_XSD_TEST_SUITE_DIR`: The directory that contains your local
-  clone of the W3C [XSD test suite repository](https://github.com/w3c/xsdtests).
+* `SAXON_LICENSE_DIR`, the directory that contains your Saxon license.
+* `SAXON_EXTRA_TEST_SUITE_DIR`, the Saxon extra test suites from the
+  `git@saxonica.plan.io:saxonica/extra-test-suites.git` repository.
+* `SAXON_XMARK_DATA`, the XMark test data, usually
+  `$SAXON_EXTRA_TEST_SUITE_DIR/data/xmark`.
+* `W3C_EXPATH_TEST_SUITE_DIR`, the `tests/qt3` directory of the XPath test suite
+  from `git@github.com:expath/expath-cg.git`.
+* `W3C_QT3_TEST_SUITE_DIR`, the `qt3tests` directory of the QT3 test suite
+  from `git@github.com:w3c/qt3tests.git`.
+* `W3C_QT4_TEST_SUITE_DIR`, the `qt4cg/tests` directory of the QT4 test suite
+  from `git@github.com:qt4cg/qt4tests.git`.
+* `W3C_XSD_TEST_SUITE_DIR` the `xsdtests` directory of the XSD test suite
+  from `git@github.com:w3c/xsdtests.git`.
+* `W3C_XSLT30_TEST_SUITE_DIR`, the XSLT 3.0 test suite from
+  `git@github.com:w3c/xslt30-test.git`.
+* `W3C_XSLT40_TEST_SUITE_DIR`, the XSLT 4.0 test suite from
+  `git@github.com:qt4cg/xslt40-test.git`.
+
+
+## Build targets
+
+An (incomplete) list of interesting build targets.
+
+* `hecRelease`, `pecRelease`, `eecRelease` builds release artifacts for Java versions
+* `javaZips` builds all the Java release zip files
+* `all_saxonc_releases` builds all the SaxonC releases
+* `saxonc_stage_wheels` builds the staging artifacts for SaxonC Python
+  wheels. (Note that the Linux flavor must be built in a container
+  with a specific Linux environment.)
+* `dotnetPublishZip` builds the SaxonCS release artifact
+* `javaArchiveHE` makes the Java source artifact for Saxon-HE.
+* `dotnetMakeApp` on the Mac, this builds and release application.
+  We use DMGCanvas to build and sign the DMG file.
+* `releaseResources` builds the release resources.
+* `documentation` builds all the documentation. This is a bit finicky
+  and may not run easily on all systems.
 
 ## Gradle properties
 
-T.B.D.
+* `sqlServer`, the SQL server to use in testing (either `mysql` or
+  `postgresql`), defaults to `postgresql`
+* `csconfiguration`, the SaxonCS build configuration, defaults to `Release`
+* `csoptimize`, the SaxonCS build optimizer configuration, defaults to `false`
+* `saxonLicenseDir`, alternative to the environment variable for locating the Saxon license file
+* `saxonTestJava`, path to the version of Java to be used for running unit tests,
+  defaults to the current version of Java being used by Gradle.
+* `releaseBuild`, is this a release build? If true, extra checks are performed (the build
+  must be able to sign release artifacts, etc.)
+* `mavenLocalPublish` if set, must be a local filesystem path. All of the maven build
+  artifacts for the `publish` target will be placed there.
+* `sonatypeUsername` and `sonatypePassword`, credentials for Maven central publication.
+
+### Testing properties
+
+The following properties apply to test suites.
+
+* `td_…` Any property that begins `td_` is passed to the test suite driver. For example,
+  `td_t=xxx` will pass `-t:xxx` to the test suite driver.
+* `saxonicaTestDriverReportArchive` location of archival test reports.
+* `saxonicaTestDriverOutputRedirect`, if `true`, test driver output is
+  redirected instead of printed on the console. Redirected output
+  appears in the `build/test-results` directory for the test suite.
+* `saxonicaTestDriverDebugExec` for debugging the test suite runner; if `true` will
+  print the test suite runner command line.
+* `saxonicaIgnoreFailures`, if `true` a failing test suite will not abort the build as a failure.
 
 ## Running the build
 
@@ -33,14 +87,11 @@ version and configuration of Gradle that is known to work. (Other
 versions may also work, but then again, they may not.)
 
 These build scripts are shared across the open source HE repository,
-the commercial EE/PE repository, and an internal repository that is
-used for both current and future development.
+the commercial EE/PE repository.
 
 In the open source HE repository, only the HE product can be built.
 There are build targets for PE and EE artifacts, but they will not,
 and are not expected to, succeed.
-
-## T.B.D.
 
 ## Build outputs
 
@@ -53,27 +104,7 @@ rebuilt from the current sources.
 ## Signing jars
 
 If your environment is configured to sign jars, running the release
-and zip tasks with the Gradle property `signJars` set to `true` will
-create signed jars. For example,
-
-```
-./gradlew -PsignJars=true javaZips
-```
-
-## Debugging
-
-Many tasks in the build script come in two versions, one that begins with
-`debug_` and one that doesn’t. For example:
-
-* `eeXslt30TestSuite_XT30_bcon_jit` and `debug_eeXslt30TestSuite_XT30_bcon_jit` or
-* `run_he_samples_JAXPExamples_ee` and `debug_he_samples_JAXPExamples_ee`
-
-The distinction is this: the task with `debug_` prepended runs against
-the source code compiled without any preprocessing. This is the
-version that you will want to run in the debugger, for example.
-
-The version without `debug_` in the front runs against the production
-version of the release.
+and zip tasks will create signed jars.
 
 ## Running JUnit tests
 
@@ -147,57 +178,22 @@ test suite against EE with bytecode and jit enabled, you can run just
 that task (e.g., `eeXslt30TestSuite_XT30_bcon_jit`).
 (The names get a little clunky.)
 
-### The testSuite closures
+### The test suites
 
-Tests are now configured with a set of methods on the `testSuite` extension.
-For example:
-
-```
-testSuite.qt3 {
-  debug true
-  taskName "adHocTest"
-  release "ee"
-  language "XP31"
-  directory "${projectDir}/src/test/extra/qt3"
-  bytecode true
-  option "-s:saxon-doc"
-  option "-t:s-doc-001"
-}
-```
-
-That creates two tasks that run the W3C QT3 test suite on the
-specified directory using the EE release, the XP31 language, with
-bytecode enabled. The additional options `-s:saxon-doc` and
-`-t:s-doc-001` will be passed to the test suite.
-
-The tasks are named `adHocTest` and `debug_adHocTest`. If you don’t
-specify at task name, you’ll probably get a conflict with existing
-tests because the default names are computed from the options.
-
-Enabling `debug` will cause Gradle to print out the properties that
-will be used to run the test suite. Most can be changed with methods
-in the closure.
-
-It would be tedious if you had to edit the Gradle build file and
-create a new test for every set of options you might want to run, so
-you can pass arbitrary options by encoding them in Gradle parameters.
-The equivalent task using this method would be this one:
-
-`./gradlew -Ptd_s=saxon-doc -Ptd_t=s-doc-001 debug_eeQT3ExtraTestSuite_XP31_bcoff`
-
-Any Gradle parameter of the form `td_x=y` will be passed to the test suite driver as `-x:y`.
-
-There’s one other option recognized by the driver configuration,
-`tdReport`. This changes the output reporting directory.
+Instructions for configuring the test suites can be found at the top of 
+`test-suites.gradle`.
 
 ## Viewing task dependencies
 
-You can get nice diagrams showing task dependencies by adding
-this plugin to `build.gradle`:
+The [Talaiot plugin](https://github.com/cdsap/Talaiot) can be used to view task
+dependencies. It’s not installed by default because it often generates
+warnings when Gradle is upgraded.
+
+Try:
 
 ```
 plugins {
-  id "com.cdsap.talaiot" version "1.3.5"
+  id "com.cdsap.talaiot" version "1.5.1"
 }
 ```
 
@@ -217,6 +213,3 @@ talaiot {
   }
 }
 ```
-
-It’s not in the build by default because it generates a deprecation warning for Gradle 7.0 on every run.
-
