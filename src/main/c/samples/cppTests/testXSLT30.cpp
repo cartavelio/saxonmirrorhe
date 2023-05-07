@@ -1039,6 +1039,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
     }
 
     string baseURI = string("file://")+sproc->getcwd();
+    cerr<<"baseURI = "<<baseURI<<endl;
     executable->setBaseOutputURI(baseURI.c_str());
 
     executable->setInitialMatchSelection(xmlfile);
@@ -1061,7 +1062,18 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
         sresult->failureList.push_back("exampleTransformToString");
     } else {
         cout<< "exampleTransformToString = "<<result<<endl;
-        sresult->success++;
+        string filename = baseURI+"/output.xml";
+        if (CppTestUtils::exists(filename.c_str())) {
+            cout << "The file output.xml exists" << endl;
+            remove("output.xml");
+            sresult->success++;
+        } else {
+            cout << "The file output.xml does not exist" << endl;
+
+            sresult->failure++;
+            sresult->failureList.push_back("exampleTransformToString");
+        }
+
     }
     delete result;
     delete executable;
