@@ -1918,8 +1918,6 @@ net/sf/saxon/style/XSLAccumulatorRule.class
 net/sf/saxon/style/XSLAnalyzeString.class
 net/sf/saxon/style/XSLApplyImports.class
 net/sf/saxon/style/XSLApplyTemplates.class
-net/sf/saxon/style/XSLArray.class
-net/sf/saxon/style/XSLArrayMember.class
 net/sf/saxon/style/XSLAssert.class
 net/sf/saxon/style/XSLAttribute.class
 net/sf/saxon/style/XSLAttributeSet.class
