@@ -1,20 +1,24 @@
+if (System.getProperty("os.arch") == "aarch64") {
+  csbuildarch = "arm64"
+  csarcarch = "aarch64"
+} else {
+  csbuildarch = "x64"
+  csarcarch = "x86_64"
+}
+
 if (systemOs.isWindows()) {
-  csplatform = "Windows"
-  csrid = "win-x64"
+  csplatform = "Windows-${csarcarch}"
+  csrid = "win-${csbuildarch}"
 }
 
 if (systemOs.isMacOsX()) {
-  csplatform = "MacOS"
-  if (System.getProperty("os.arch") == "aarch64") {
-    csrid = "osx-arm64"
-  } else {
-    csrid = "osx-x64"
-  }
+  csplatform = "MacOS-${csarcarch}"
+  csrid = "osx-${csbuildarch}"
 }
 
 if (systemOs.isLinux()) {
-  csplatform = "Linux"
-  csrid= "linux-x64"
+  csplatform = "Linux-${csarcarch}"
+  csrid= "linux-${csbuildarch}"
 }
 
 if (csplatform == null) {
