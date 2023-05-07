@@ -222,16 +222,18 @@ namespace Saxon.Api {
 
         /// <summary>
         /// This property indicates which version of XPath language syntax is accepted. The accepted values
-        /// are "2.0", "3.0", and "3.1". The default is "3.1".
+        /// are "2.0", "3.0", "3.1", and "4.0". The default is "3.1".
         /// </summary>
         /// <remarks>
-        /// <para>Requesting a value other than 3.1 restricts the XPath grammar to constructs defined
+        /// <para>Requesting a value lower than 3.1 restricts the XPath grammar to constructs defined
         /// in the appropriate version, and uses the appropriate subsets of the functions in the standard
         /// function library. However, the semantics of remaining constructs will generally follow the XPath 3.1
         /// rules. For example, there is a rule in XPath 2.0 that casting to
         /// <c>xs:QName</c> is only permitted if the operand is a string literal, but this is not enforced when
         /// this property is set to "2.0".</para>
         /// <para>There is no support for XPath 1.0.</para>
+        /// <para>The value "4.0" enables use of XPath 4.0 syntax. XPath 4.0 is work in progress, and the
+        /// specification is far from stable.</para>
         /// </remarks>
 
 
