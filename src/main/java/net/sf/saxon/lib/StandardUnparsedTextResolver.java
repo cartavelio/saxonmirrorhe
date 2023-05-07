@@ -17,6 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,10 +87,60 @@ public class StandardUnparsedTextResolver
         if (resolved == null) {
             throw new XPathException("unparsed-text(): failed to resolve URI " + absoluteURI);
         }
+
+        if (resolved instanceof AugmentedSource
+            && ((AugmentedSource) resolved).getContainedSource() instanceof SAXSource) {
+            return getReaderFromSAXSource((SAXSource) ((AugmentedSource) resolved).getContainedSource(), encoding, config, debug);
+        }
+
         if (resolved instanceof StreamSource) {
             return getReaderFromStreamSource((StreamSource)resolved, encoding, config, debug);
         } else {
             throw new XPathException("Resolver for unparsed-text() returned non-StreamSource");
+        }
+    }
+
+    public static Reader getReaderFromSAXSource(SAXSource source, String encoding, Configuration config, boolean debug) throws XPathException {
+        Logger err = config.getLogger();
+        InputStream inputStream = null;
+
+        if (source.getInputSource() != null) {
+            inputStream = source.getInputSource().getByteStream();
+        }
+
+        if (inputStream == null) {
+            String systemId = source.getSystemId();
+            if (systemId != null) {
+                try {
+                    return ResourceLoader.urlReader(config, systemId, encoding);
+                } catch (IOException e) {
+                    throw new XPathException("unparsed-text(): cannot retrieve " + systemId, e);
+                }
+            } else {
+                throw new XPathException("unparsed-text(): resolver returned empty StreamSource");
+            }
+        }
+
+        return detectEncoding(inputStream, encoding, config, debug);
+    }
+
+    private static Reader detectEncoding(InputStream inputStream, String encoding, Configuration config, boolean debug) throws XPathException {
+        try {
+            if (encoding == null) {
+                Logger err = config.getLogger();
+                inputStream = InputStreamMarker.ensureMarkSupported(inputStream);
+                encoding = EncodingDetector.inferStreamEncoding(inputStream, "utf-8", debug ? err : null);
+                if (debug) {
+                    err.info("unparsed-text(): inferred encoding = " + encoding);
+                }
+            }
+        } catch (IOException e) {
+            encoding = "UTF-8";
+        }
+        try {
+            return ResourceLoader.getReaderFromStream(inputStream, encoding);
+        } catch (UnsupportedEncodingException e) {
+            throw new XPathException(e).withErrorCode("FOUT1200");
         }
     }
 
@@ -105,13 +156,7 @@ public class StandardUnparsedTextResolver
                 String systemId = source.getSystemId();
                 if (systemId != null) {
                     try {
-                        if (systemId.startsWith("classpath:")) {
-                            inputStream = openClasspathResource(config, systemId);
-                        } else {
-                            URL url = new URL(systemId);
-                            // This handles encoding detection for HTTP resources
-                            return ResourceLoader.urlReader(url, encoding);
-                        }
+                        return ResourceLoader.urlReader(config, systemId, encoding);
                     } catch (IOException e) {
                         throw new XPathException("unparsed-text(): cannot retrieve " + systemId, e);
                     }
@@ -125,7 +170,6 @@ public class StandardUnparsedTextResolver
         // external encoding information or media type. So we use the requested
         // encoding if supplied; otherwise "heuristics" (peeking at the start of the stream),
         // or failing that, UTF-8.
-
 
         // Use the contentType from the HTTP header if available
         String contentType = null;
@@ -154,22 +198,7 @@ public class StandardUnparsedTextResolver
             }
         }
 
-        try {
-            if (encoding == null) {
-                inputStream = InputStreamMarker.ensureMarkSupported(inputStream);
-                encoding = EncodingDetector.inferStreamEncoding(inputStream, "utf-8", debug ? err : null);
-                if (debug) {
-                    err.info("unparsed-text(): inferred encoding = " + encoding);
-                }
-            }
-        } catch (IOException e) {
-            encoding = "UTF-8";
-        }
-        try {
-            return ResourceLoader.getReaderFromStream(inputStream, encoding);
-        } catch (UnsupportedEncodingException e) {
-            throw new XPathException(e).withErrorCode("FOUT1200");
-        }
+        return detectEncoding(inputStream, encoding, config, debug);
     }
 
     @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"classpath: URI scheme is not supported on .NET\");")

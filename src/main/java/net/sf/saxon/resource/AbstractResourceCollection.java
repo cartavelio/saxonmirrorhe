@@ -234,8 +234,8 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
          * @return the content, as an input stream
          * @throws IOException if the input cannot be read
          */
-        public InputStream getInputStream() throws IOException {
-            return ResourceLoader.urlStream(new URL(resourceUri));
+        public InputStream getInputStream(Configuration config) throws IOException {
+            return ResourceLoader.urlStream(config, resourceUri);
         }
 
         /**
@@ -246,14 +246,14 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
          * @throws XPathException if the binary content cannot be obtained
          */
 
-        public byte[] obtainBinaryContent() throws XPathException {
+        public byte[] obtainBinaryContent(Configuration config) throws XPathException {
             if (binaryContent != null) {
                 return binaryContent;
             } else if (characterContent != null) {
                 String e = encoding != null ? encoding : "UTF-8";
                 return BinaryResource.encode(characterContent, e);
             } else {
-                try (InputStream stream = getInputStream()) {
+                try (InputStream stream = getInputStream(config)) {
                     return BinaryResource.readBinaryFromStream(stream, resourceUri);
                 } catch (IOException e) {
                     throw new XPathException(e);
@@ -271,14 +271,14 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
          * otherwise, return null in the event of a failure.
          */
 
-        public String obtainCharacterContent() throws XPathException {
+        public String obtainCharacterContent(Configuration config) throws XPathException {
             if (characterContent != null) {
                 return characterContent;
             } else if (binaryContent != null && encoding != null) {
                 return BinaryResource.decode(binaryContent, encoding);
             } else {
                 try {
-                    InputStream stream = getInputStream();
+                    InputStream stream = getInputStream(config);
                     String enc = encoding;
                     if (enc == null) {
                         stream = InputStreamMarker.ensureMarkSupported(stream);
@@ -341,7 +341,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                         stream = new ByteArrayInputStream(inputDetails.binaryContent);
                     }
                 } else {
-                    stream = ResourceLoader.urlStream(uri.toURL());
+                    stream = ResourceLoader.urlStream(config, uri.toString());
                 }
                 inputDetails.contentType = guessContentTypeFromContent(stream);
                 stream.close();

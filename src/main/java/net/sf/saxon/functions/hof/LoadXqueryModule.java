@@ -151,7 +151,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         try {
             // Note: Location hints other than the first are ignored
-            String sourceQuery = QueryReader.readSourceQuery(streamSources[0], config.getValidCharacterChecker() );
+            String sourceQuery = QueryReader.readSourceQuery(config, streamSources[0], config.getValidCharacterChecker() );
             staticQueryContext.compileLibrary(sourceQuery);
         } catch (XPathException e) {
             throw new XPathException(e.getMessage(), "FOQM0003"); // catch when module is invalid

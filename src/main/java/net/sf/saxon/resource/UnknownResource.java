@@ -7,6 +7,7 @@
 
 package net.sf.saxon.resource;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.Resource;
@@ -28,13 +29,14 @@ import java.net.URLConnection;
  */
 
 public class UnknownResource implements Resource {
-
+    private final Configuration config;
     private final XPathContext context;
     private final AbstractResourceCollection.InputDetails details;
 
     public static final ResourceFactory FACTORY = CSharp.constructorRef(UnknownResource::new, 2);
 
     public UnknownResource(XPathContext context, AbstractResourceCollection.InputDetails details) {
+        this.config = context.getConfiguration();
         this.context = context;
         this.details = details;
     }
@@ -58,7 +60,7 @@ public class UnknownResource implements Resource {
             stream = new ByteArrayInputStream(details.binaryContent);
         } else {
             try {
-                stream = details.getInputStream();
+                stream = details.getInputStream(config);
             } catch (IOException e) {
                 if (details.onError == URIQueryParameters.ON_ERROR_FAIL) {
                     throw new XPathException(e);

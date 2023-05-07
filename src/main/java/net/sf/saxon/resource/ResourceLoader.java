@@ -7,6 +7,9 @@
 
 package net.sf.saxon.resource;
 
+import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.Resource;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -83,27 +86,39 @@ public class ResourceLoader {
     }
 
     /**
-     * Open a stream to retrieve the content identified by the URI. For HTTP URIs, this
+     * Open a stream to retrieve the content identified by the URI. If the URI is a classpath:
+     * URI, then it will be retrieved with the configuration's dynamic loader. For HTTP URIs, this
      * method will follow up to MAX_REDIRECTS redirects or until it detects a loop.
      * This method automatically accepts and decompresses gzip encoded responses.
      *
+     * @param config The current configuration.
      * @param url The URL to retrieve.
      * @return An InputStream for the resource content.
      * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
      */
-    public static InputStream urlStream(URL url) throws IOException  {
-        URLConnection conn = ResourceLoader.urlConnection(url);
-        InputStream inputStream =  conn.getInputStream();
-        String contentEncoding = conn.getContentEncoding();
-        if ("gzip".equals(contentEncoding)) {
-            inputStream = new GZIPInputStream(inputStream);
+    public static InputStream urlStream(Configuration config, String url) throws IOException  {
+        if (config != null && url.startsWith("classpath:")) {
+            final String path;
+            if (url.length() > 10 && url.charAt(10) == '/') {
+                path = url.substring(11);
+            } else {
+                path = url.substring(10);
+            }
+            return config.getDynamicLoader().getResourceAsStream(path);
+        } else {
+            URLConnection conn = ResourceLoader.urlConnection(new URL(url));
+            InputStream inputStream =  conn.getInputStream();
+            String contentEncoding = conn.getContentEncoding();
+            if ("gzip".equals(contentEncoding)) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
+            return inputStream;
         }
-        return inputStream;
     }
 
     /**
      * Open a reader to retrieve the content identified by the URI. This handles HTTP
-     * redirects in the same way as {@link #urlStream(URL)}, but then it also wraps
+     * redirects in the same way as {@link #urlStream}, but then it also wraps
      * the stream in a Reader, using the logic prescribed for the {@code fn:unparsed-text}
      * function.
      *
@@ -113,33 +128,38 @@ public class ResourceLoader {
      * @return A Reader for the resource content.
      * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
      */
-    public static Reader urlReader(URL url, String requestedEncoding) throws IOException {
-        URLConnection conn = ResourceLoader.urlConnection(url);
-        InputStream inputStream = conn.getInputStream();
-        String contentEncoding = conn.getContentEncoding();
+    public static Reader urlReader(Configuration config, String url, String requestedEncoding) throws IOException {
         String resourceEncoding = null;
-        if ("gzip".equals(contentEncoding)) {
-            inputStream = new GZIPInputStream(inputStream);
-        }
-        if (!inputStream.markSupported()) {
-            inputStream = new BufferedInputStream(inputStream);
-        }
         // Get any external (HTTP) requestedEncoding label.
         boolean isXmlMediaType = false;
 
-        // The file:// URL scheme gives no useful information...
-        if (!"file".equals(url.getProtocol())) {
+        URLConnection conn = null;
+        InputStream inputStream = null;
+        if (config != null && url.startsWith("classpath:")) {
+            inputStream = ResourceLoader.urlStream(config, url);
+        } else {
+            conn = ResourceLoader.urlConnection(new URL(url));
+            inputStream = conn.getInputStream();
+            String contentEncoding = conn.getContentEncoding();
+            if ("gzip".equals(contentEncoding)) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
+        }
 
+        if (!inputStream.markSupported()) {
+            inputStream = new BufferedInputStream(inputStream);
+        }
+
+        // If conn was used and the url isn't a file: URI, try to get encoding information from it
+        if (conn != null && !url.startsWith("file:")) {
             // Use the contentType from the HTTP header if available, and parse it
             String contentType = conn.getContentType();
             if (contentType != null) {
                 ParsedContentType parsedContentType = new ParsedContentType(contentType);
-
                 isXmlMediaType = parsedContentType.isXmlMediaType;
                 resourceEncoding = parsedContentType.encoding;
             }
         }
-
 
         try {
             if (requestedEncoding == null) {
@@ -155,7 +175,6 @@ public class ResourceLoader {
         assert resourceEncoding != null;
 
         return getReaderFromStream(inputStream, resourceEncoding);
-
     }
 
     /**

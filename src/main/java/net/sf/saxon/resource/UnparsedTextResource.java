@@ -7,6 +7,8 @@
 
 package net.sf.saxon.resource;
 
+import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.om.Item;
@@ -26,6 +28,7 @@ import java.net.URL;
  * @since 9.7
  */
 public class UnparsedTextResource implements Resource {
+    private final Configuration config;
     private String contentType;
     private String encoding;
     private final String href;
@@ -38,7 +41,8 @@ public class UnparsedTextResource implements Resource {
      * @throws XPathException for an unsupported encoding
      */
 
-    public UnparsedTextResource(AbstractResourceCollection.InputDetails details) throws XPathException {
+    private UnparsedTextResource(XPathContext context, AbstractResourceCollection.InputDetails details) throws XPathException {
+        this.config = context.getConfiguration();
         this.href = details.resourceUri;
         this.contentType = details.contentType;
         this.encoding = details.encoding;
@@ -59,6 +63,7 @@ public class UnparsedTextResource implements Resource {
     }
 
     public UnparsedTextResource(String uri, String content) {
+        this.config = null;
         this.href = uri;
         this.unparsedText = content;
     }
@@ -72,7 +77,7 @@ public class UnparsedTextResource implements Resource {
         }
     }
 
-    public final static ResourceFactory FACTORY = (context, details) -> new UnparsedTextResource(details);
+    public final static ResourceFactory FACTORY = UnparsedTextResource::new;
 
     @Override
     public String getResourceURI() {
@@ -86,7 +91,7 @@ public class UnparsedTextResource implements Resource {
     public String getContent() throws XPathException {
         if (unparsedText == null) {
             try {
-                InputStream stream = ResourceLoader.urlStream(new URL(href));
+                InputStream stream = ResourceLoader.urlStream(config, href);
                 String enc = encoding;
                 if (enc == null) {
                     stream = InputStreamMarker.ensureMarkSupported(stream);

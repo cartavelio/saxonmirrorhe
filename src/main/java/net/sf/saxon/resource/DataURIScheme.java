@@ -68,7 +68,10 @@ public class DataURIScheme {
             details.binaryContent = utf8content;
             details.onError = URIQueryParameters.ON_ERROR_FAIL;
             details.parseOptions = new ParseOptions();
-            return new UnparsedTextResource(details);
+
+            // Passing null for the context is harmless here. The context is used to resolve
+            // classpath: URIs and we know this is a data: URI.
+            return UnparsedTextResource.FACTORY.makeResource(null, details);
         }
     }
 

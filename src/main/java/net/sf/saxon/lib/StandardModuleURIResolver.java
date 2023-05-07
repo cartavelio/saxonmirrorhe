@@ -147,6 +147,10 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
     }
 
     private StreamSource toStreamSource(Source src) throws XPathException {
+        if (src instanceof AugmentedSource) {
+            src = ((AugmentedSource) src).getContainedSource();
+        }
+
         if (src instanceof StreamSource) {
             return (StreamSource) src;
         //#if CSHARP==false
