@@ -143,7 +143,7 @@ public class QueryTests {
     @Test
     public void testQueryUpdate() {
         // This is an update test; copy the file into temp
-        String tempfn = configTest.getDataDir() + "temp/books.xml";
+        String tempfn = configTest.getTempDir() + "books.xml";
         String origfn = configTest.getDataDir() + "books.xml";
         InputStream instream = null;
         OutputStream outstream = null;
