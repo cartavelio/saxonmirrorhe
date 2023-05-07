@@ -1,6 +1,7 @@
 using System;
 using SysCollGen = System.Collections.Generic;
 using System.Text;
+using Saxon.Eej;
 using Saxon.Hej.functions;
 using SysUri = System.Uri;
 using SysIO = System.IO;
@@ -8,6 +9,7 @@ using SysIOFile = System.IO.File;
 using SysIODirectory = System.IO.Directory;
 using SysIOPath = System.IO.Path;
 using JLSystem = Saxon.Ejava.lang.System;
+using Query = Saxon.Hej.Query;
 
 namespace Saxon.Ejava.io {
     public class File {
@@ -301,6 +303,11 @@ namespace Saxon.Ejava.io {
             }
 
             return new SysUri(dir);
+        }
+
+        public static void copyFile(File from, File to) {
+            Query.createFileIfNecessary(to);
+            SysIOFile.Copy(from.getPath(), to.getPath(), true);
         }
     }
 }
