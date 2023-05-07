@@ -2161,8 +2161,9 @@
                 <p>The <code>xsl:import</code> element may also be used at the top level of the
                     included stylesheet, and so on recursively.</p>
 
-                <p>The elements in the imported stylesheet have lower precedence than the elements
-                    in the importing stylesheet. The main effect of this is on selection of a
+                <p>The elements in the importing stylesheet have higher precedence than the elements in the
+                    imported stylesheet, and later imports within the same stylesheet have higher precedence
+                    than earlier imports. The main effect of this is on selection of a
                     template when <code>xsl:apply-templates</code> is used: if there is a matching
                     template with precedence X, all templates with precedence less than X are
                     ignored, regardless of their priority.</p>
