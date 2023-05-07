@@ -1,5 +1,6 @@
 package nativetests;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.ee.optim.StaticQueryContextEE;
 import com.saxonica.expr.StaticQueryContextPE;
@@ -88,7 +89,7 @@ public class TestXQueryNative {
     @Test
     public void testSeparateCompilation() {
         try {
-            Configuration c = new Configuration();
+            EnterpriseConfiguration c = new EnterpriseConfiguration();
             StaticQueryContextEE s = new StaticQueryContextEE(c);
             s.compileLibrary("module namespace m='http://www.example.com/module-one'; " +
                     "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
@@ -96,11 +97,11 @@ public class TestXQueryNative {
             String q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
             XQueryExpression e = s.compileQuery(q1);
             DynamicQueryContext d = new DynamicQueryContext(c);
-            assertTrue("4".equals(e.evaluateSingle(d).toString()), "2+2");
+            assertEquals("4", e.evaluateSingle(d).toString(), "2+2");
             String q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
             e = s.compileQuery(q2);
             d = new DynamicQueryContext(c);
-            assertTrue("15".equals(e.evaluateSingle(d).toString()), "10+5");
+            assertEquals("15", e.evaluateSingle(d).toString(), "10+5");
         } catch (XPathException e) {
             fail(e.getMessage());
         }
