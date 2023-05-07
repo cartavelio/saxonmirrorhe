@@ -6,7 +6,10 @@ import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
@@ -39,6 +42,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1864,6 +1870,35 @@ public class TestValidator {
             assertEquals(1, errorList.size());
             assertTrue(sapie.getMessage().contains("Far too many errors"));
         } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParallelSchemaCompile() {   // Bug 5978
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager manager = proc.getSchemaManager();
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            for (int i = 0; i < 30; i++) {
+                executor.execute(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            manager.load(new File(configTest.getDataDir() + "../bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
+                        } catch (Throwable ex) {
+                            System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
+                            ex.printStackTrace();
+                            fail();
+                        }
+                    }
+                });
+            }
+            executor.shutdown();
+            executor.awaitTermination(300, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
             fail(e.getMessage());
         }
     }
