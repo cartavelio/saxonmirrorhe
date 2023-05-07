@@ -17,10 +17,7 @@ namespace Saxon.Hej.resource {
                     collectionURI = Saxon.Hej.functions.ResolveURI.escapeSpaces(collectionURI.Substring(0, q - 0));
                 }
             } catch (System.UriFormatException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Invalid relative URI "+Saxon.Hej.trans.Err.wrap(collectionURI, Saxon.Hej.trans.Err.VALUE))+" passed to collection() function"));
-                err.setErrorCode("FODC0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("Invalid relative URI "+Saxon.Hej.trans.Err.wrap(collectionURI, Saxon.Hej.trans.Err.VALUE))+" passed to collection() function")).withErrorCode("FODC0004").withXPathContext(context);
             }
             System.Uri resolvedURI;
             try {
@@ -55,10 +52,7 @@ namespace Saxon.Hej.resource {
         }
         public static void checkFileExists(Saxon.Ejava.io.File file, System.Uri resolvedURI, Saxon.Hej.expr.XPathContext context) {
             if (!(file.exists())) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The file or directory "+resolvedURI)+" does not exist"));
-                err.setErrorCode("FODC0002");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The file or directory "+resolvedURI)+" does not exist")).withErrorCode("FODC0002").withXPathContext(context);
             }
         }
     

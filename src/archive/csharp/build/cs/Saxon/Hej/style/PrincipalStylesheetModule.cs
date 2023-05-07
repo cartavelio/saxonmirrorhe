@@ -231,10 +231,7 @@ namespace Saxon.Hej.style {
             for (int i = (topLevel.Count-1); (i>=0); i--) {
                 Saxon.Hej.style.ComponentDeclaration decl = topLevel[i];
                 if ((decl.getSourceElement() is Saxon.Hej.style.XSLImportSchema)) {
-                    Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException("xsl:import-schema requires Saxon-EE");
-                    xe.setErrorCode("XTSE1650");
-                    xe.setLocator(decl.getSourceElement());
-                    throw xe;
+                    throw new Saxon.Hej.trans.XPathException("xsl:import-schema requires Saxon-EE").withErrorCode("XTSE1650").withLocation(decl.getSourceElement());
                 }
             }
         }
@@ -917,9 +914,7 @@ namespace Saxon.Hej.style {
                 foreach (Saxon.Hej.trans.ComponentTest test in exposure.getWildcardComponentTests()) {
                     if (test.matches(component.getActor())) {
                         if (((exposure.getVisibility() == Saxon.Hej.trans.Visibility.ABSTRACT) && (component.getVisibility() != Saxon.Hej.trans.Visibility.ABSTRACT))) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The non-abstract component "+component.getActor().getSymbolicName())+" cannot be made abstract by means of xsl:expose"), "XTSE3025");
-                            err.setLocation(exposure);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((("The non-abstract component "+component.getActor().getSymbolicName())+" cannot be made abstract by means of xsl:expose"), "XTSE3025").withLocation(exposure);
                         }
                         component.setVisibility(exposure.getVisibility(), Saxon.Hej.trans.VisibilityProvenance.EXPOSED);
                         return ;
@@ -932,9 +927,7 @@ namespace Saxon.Hej.style {
                 foreach (Saxon.Hej.trans.ComponentTest test in exposure.getWildcardComponentTests()) {
                     if ((test.isPartialWildcard() && test.matches(component.getActor()))) {
                         if (((exposure.getVisibility() == Saxon.Hej.trans.Visibility.ABSTRACT) && (component.getVisibility() != Saxon.Hej.trans.Visibility.ABSTRACT))) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The non-abstract component "+component.getActor().getSymbolicName())+" cannot be made abstract by means of xsl:expose"), "XTSE3025");
-                            err.setLocation(exposure);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((("The non-abstract component "+component.getActor().getSymbolicName())+" cannot be made abstract by means of xsl:expose"), "XTSE3025").withLocation(exposure);
                         }
                         component.setVisibility(exposure.getVisibility(), Saxon.Hej.trans.VisibilityProvenance.EXPOSED);
                         return true;

@@ -126,16 +126,12 @@ namespace Saxon.Hej.serialize {
                         if (unfailing) {
                             version = "1.0";
                         } else {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("XML version must be 1.0 or 1.1");
-                            err.setErrorCode("SESU0013");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException("XML version must be 1.0 or 1.1").withErrorCode("SESU0013");
                         }
                     }
                     if (((!(version.Equals("1.0")) && omitXMLDeclaration.Equals("yes")) && (outputProperties.getProperty(Saxon.Ejavax.xml.transform.OutputKeys.DOCTYPE_SYSTEM) != null))) {
                         if (!(unfailing)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Values of 'version', 'omit-xml-declaration', and 'doctype-system' conflict");
-                            err.setErrorCode("SEPM0009");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException("Values of 'version', 'omit-xml-declaration', and 'doctype-system' conflict").withErrorCode("SEPM0009");
                         }
                     }
                 }
@@ -147,9 +143,7 @@ namespace Saxon.Hej.serialize {
                     if (unfailing) {
                         undeclareNamespaces = false;
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot undeclare namespaces with XML version 1.0");
-                        err.setErrorCode("SEPM0010");
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Cannot undeclare namespaces with XML version 1.0").withErrorCode("SEPM0010");
                     }
                 }
                 string standalone = outputProperties.getProperty(Saxon.Ejavax.xml.transform.OutputKeys.STANDALONE);
@@ -159,9 +153,7 @@ namespace Saxon.Hej.serialize {
                 if ((standalone != null)) {
                     requireWellFormed = true;
                     if ((omitXMLDeclaration.Equals("yes") && !(unfailing))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Values of 'standalone' and 'omit-xml-declaration' conflict");
-                        err.setErrorCode("SEPM0009");
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Values of 'standalone' and 'omit-xml-declaration' conflict").withErrorCode("SEPM0009");
                     }
                 }
                 string systemId = outputProperties.getProperty(Saxon.Ejavax.xml.transform.OutputKeys.DOCTYPE_SYSTEM);
@@ -260,9 +252,7 @@ namespace Saxon.Hej.serialize {
                 openDocument();
             } else {
                 if ((((requireWellFormed && (elementStack.Count==0)) && startedElement) && !(unfailing))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("When 'standalone' or 'doctype-system' is specified, "+"the document must be well-formed; but this document contains more than one top-level element"));
-                    err.setErrorCode("SEPM0004");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("When 'standalone' or 'doctype-system' is specified, "+"the document must be well-formed; but this document contains more than one top-level element")).withErrorCode("SEPM0004");
                 }
             }
             startedElement = true;
@@ -270,9 +260,7 @@ namespace Saxon.Hej.serialize {
             if (!(allCharactersEncodable)) {
                 int badchar = testCharacters(Saxon.Hej.str.StringView.of(displayName));
                 if ((badchar != 0)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Element name contains a character (decimal + "+badchar)+") not available in the selected encoding"));
-                    err.setErrorCode("SERE0008");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Element name contains a character (decimal + "+badchar)+") not available in the selected encoding")).withErrorCode("SERE0008");
                 }
             }
             elementStack.Push(displayName);
@@ -337,9 +325,7 @@ namespace Saxon.Hej.serialize {
                     } else {
                         int badchar = testCharacters(Saxon.Hej.str.StringView.of(nsprefix));
                         if ((badchar != 0)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Namespace prefix contains a character (decimal + "+badchar)+") not available in the selected encoding"));
-                            err.setErrorCode("SERE0008");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((("Namespace prefix contains a character (decimal + "+badchar)+") not available in the selected encoding")).withErrorCode("SERE0008");
                         }
                         if ((undeclareNamespaces || !(nsuri.isEmpty()))) {
                             if (isFirst) {
@@ -366,9 +352,7 @@ namespace Saxon.Hej.serialize {
                     if (unfailing) {
                         displayName = convertToAscii(Saxon.Hej.str.StringView.of(displayName)).ToString();
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Attribute name contains a character (decimal + "+badchar)+") not available in the selected encoding"));
-                        err.setErrorCode("SERE0008");
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("Attribute name contains a character (decimal + "+badchar)+") not available in the selected encoding")).withErrorCode("SERE0008");
                     }
                 }
             }
@@ -481,9 +465,7 @@ namespace Saxon.Hej.serialize {
                 openDocument();
             }
             if ((((requireWellFormed && (elementStack.Count==0)) && !(Saxon.Hej.value.Whitespace.isAllWhite(chars))) && !(unfailing))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("When 'standalone' or 'doctype-system' is specified, "+"the document must be well-formed; but this document contains a top-level text node"));
-                err.setErrorCode("SEPM0004");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("When 'standalone' or 'doctype-system' is specified, "+"the document must be well-formed; but this document contains a top-level text node")).withErrorCode("SEPM0004");
             }
             try {
                 if (openStartTag) {
@@ -539,9 +521,7 @@ namespace Saxon.Hej.serialize {
                 if (unfailing) {
                     target = convertToAscii(Saxon.Hej.str.StringView.of(target)).ToString();
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Character in processing instruction name cannot be represented "+"in the selected encoding (code ")+x)+')'));
-                    err.setErrorCode("SERE0008");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((("Character in processing instruction name cannot be represented "+"in the selected encoding (code ")+x)+')')).withErrorCode("SERE0008");
                 }
             }
             x = testCharacters(data);
@@ -549,9 +529,7 @@ namespace Saxon.Hej.serialize {
                 if (unfailing) {
                     data = convertToAscii(data);
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Character in processing instruction data cannot be represented "+"in the selected encoding (code ")+x)+')'));
-                    err.setErrorCode("SERE0008");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((("Character in processing instruction data cannot be represented "+"in the selected encoding (code ")+x)+')')).withErrorCode("SERE0008");
                 }
             }
             try {
@@ -599,9 +577,7 @@ namespace Saxon.Hej.serialize {
                 } else {
                     if (disabled) {
                         if (((c>127) && !(characterSet.inCharset(c)))) {
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((((("Character "+c)+" (x")+Saxon.Impl.Helpers.Utils.intToHexString(c))+") is not available in the chosen encoding"));
-                            de.setErrorCode("SERE0008");
-                            throw de;
+                            throw new Saxon.Hej.trans.XPathException((((("Character "+c)+" (x")+Saxon.Impl.Helpers.Utils.intToHexString(c))+") is not available in the chosen encoding")).withErrorCode("SERE0008");
                         }
                         writeCodePoint(c);
                     } else {
@@ -667,9 +643,7 @@ namespace Saxon.Hej.serialize {
                 if (unfailing) {
                     chars = convertToAscii(chars);
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Character in comment cannot be represented "+"in the selected encoding (code ")+x)+')'));
-                    err.setErrorCode("SERE0008");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((("Character in comment cannot be represented "+"in the selected encoding (code ")+x)+')')).withErrorCode("SERE0008");
                 }
             }
             try {

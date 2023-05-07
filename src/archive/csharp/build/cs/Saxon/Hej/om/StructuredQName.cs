@@ -67,13 +67,9 @@ namespace Saxon.Hej.om {
                 Saxon.Hej.om.NamespaceUri uri = resolver.getURIForPrefix(parts[0], useDefault);
                 if ((uri == null)) {
                     if (Saxon.Hej.om.NameChecker.isValidNCName(parts[0])) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Namespace prefix '"+parts[0])+"' has not been declared"));
-                        de.setErrorCode("FONS0004");
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Namespace prefix '"+parts[0])+"' has not been declared"), "FONS0004");
                     } else {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Invalid namespace prefix '"+parts[0])+"'"));
-                        de.setErrorCode("FOCA0002");
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Invalid namespace prefix '"+parts[0])+"'"), "FOCA0002");
                     }
                 }
                 return new Saxon.Hej.om.StructuredQName(parts[0], uri, parts[1]);

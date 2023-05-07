@@ -80,18 +80,11 @@ namespace Saxon.Hej.expr.instruct {
                 selectOp.typeCheck(visitor, contextInfo);
             } catch (Saxon.Hej.trans.XPathException e) {
                 if (implicitSelect) {
-                    string code = e.getErrorCodeLocalPart();
-                    if (("XPTY0020".Equals(code) || "XPTY0019".Equals(code))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot apply-templates to child nodes when the context item is an atomic value");
-                        err.setErrorCode("XTTE0510");
-                        err.setIsTypeError(true);
-                        throw err;
+                    if (e.hasErrorCode("XPTY0020", "XPTY0019")) {
+                        throw new Saxon.Hej.trans.XPathException("Cannot apply-templates to child nodes when the context item is an atomic value").withErrorCode("XTTE0510").asTypeError();
                     } else {
-                        if ("XPDY0002".Equals(code)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot apply-templates to child nodes when the context item is absent");
-                            err.setErrorCode("XTTE0510");
-                            err.setIsTypeError(true);
-                            throw err;
+                        if (e.hasErrorCode("XPDY0002")) {
+                            throw new Saxon.Hej.trans.XPathException("Cannot apply-templates to child nodes when the context item is absent").withErrorCode("XTTE0510").asTypeError();
                         }
                     }
                 }
@@ -310,9 +303,7 @@ namespace Saxon.Hej.expr.instruct {
                             Saxon.Hej.expr.instruct.TailCall tc = thisMode.applyTemplates(@params, tunnels, separator, output, c2, expr.getLocation());
                             dispatchTailCall(tc);
                         } catch (System.StackOverflowException e) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested apply-templates calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, expr.getLocation());
-                            err.setXPathContext(context);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested apply-templates calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, expr.getLocation()).withXPathContext(context);
                         }
                         pipe.setXPathContext(context);
                         return null;

@@ -89,7 +89,7 @@ namespace Saxon.Hej.style {
             return null;
         }
         private class TypeAliasContext : Saxon.Hej.style.ExpressionContext {
-            public TypeAliasContext(Saxon.Hej.style.XSLItemType declaration) : base (declaration, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "as")) {
+            public TypeAliasContext(Saxon.Hej.style.XSLItemType declaration) : base (declaration, Saxon.Hej.om.NamespaceUri.NULL.qName("as")) {
             }
             public override Saxon.Hej.type.ItemType resolveTypeAlias(Saxon.Hej.om.StructuredQName typeName) {
                 Saxon.Hej.type.ItemType resolved = base.resolveTypeAlias(typeName);

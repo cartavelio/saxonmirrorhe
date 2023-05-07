@@ -53,7 +53,7 @@ namespace Saxon.Hej.expr {
             try {
                 origin = (Saxon.Hej.om.NodeInfo)(getStart().evaluateItem(context));
             } catch (Saxon.Hej.trans.XPathException e) {
-                if (("XPDY0002".Equals(e.getErrorCodeLocalPart()) && !(e.hasBeenReported()))) {
+                if ((e.hasErrorCode("XPDY0002") && !(e.hasBeenReported()))) {
                     throw new Saxon.Hej.trans.XPathException((("The context item for axis step "+toShortString())+" is absent"), "XPDY0002", getLocation());
                 } else {
                     throw;

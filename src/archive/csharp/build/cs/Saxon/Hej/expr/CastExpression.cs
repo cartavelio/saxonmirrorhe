@@ -21,11 +21,7 @@ namespace Saxon.Hej.expr {
                 if (allowsEmpty()) {
                     return Saxon.Hej.expr.Literal.makeEmptySequence();
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cast does not allow an empty sequence as input");
-                    err.setErrorCode("XPTY0004");
-                    err.setLocation(getLocation());
-                    err.setIsTypeError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("Cast does not allow an empty sequence as input").withErrorCode("XPTY0004").withLocation(getLocation()).asTypeError();
                 }
             }
             Saxon.Hej.type.PlainType sourceType = (Saxon.Hej.type.PlainType)(sourceItemType);
@@ -40,11 +36,7 @@ namespace Saxon.Hej.expr {
                     if ((sourceType.isAtomicType() && (sourceType != Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC))) {
                         converter = rules.getConverter((Saxon.Hej.type.AtomicType)(sourceType), getTargetType());
                         if ((converter == null)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Casting from "+sourceType)+" to ")+getTargetType())+" can never succeed"));
-                            err.setErrorCode("XPTY0004");
-                            err.setLocation(getLocation());
-                            err.setIsTypeError(true);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((((("Casting from "+sourceType)+" to ")+getTargetType())+" can never succeed")).withErrorCode("XPTY0004").withLocation(getLocation()).asTypeError();
                         } else {
                             if (getTargetType().isNamespaceSensitive()) {
                                 converter = converter.setNamespaceResolver(getRetainedStaticContext());
@@ -201,11 +193,7 @@ namespace Saxon.Hej.expr {
                 if (allowsEmpty()) {
                     return null;
                 } else {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Cast does not allow an empty sequence");
-                    e.setXPathContext(context);
-                    e.setLocation(getLocation());
-                    e.setErrorCode("XPTY0004");
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException("Cast does not allow an empty sequence").withXPathContext(context).withLocation(getLocation()).withErrorCode("XPTY0004");
                 }
             }
             Saxon.Hej.type.Converter converter = this.converter;
@@ -213,11 +201,7 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.lib.ConversionRules rules = context.getConfiguration().getConversionRules();
                 converter = rules.getConverter(value.getPrimitiveType(), getTargetType());
                 if ((converter == null)) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((((("Casting from "+value.getPrimitiveType())+" to ")+getTargetType())+" is not permitted"));
-                    e.setXPathContext(context);
-                    e.setLocation(getLocation());
-                    e.setErrorCode("XPTY0004");
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException((((("Casting from "+value.getPrimitiveType())+" to ")+getTargetType())+" is not permitted")).withXPathContext(context).withLocation(getLocation()).withErrorCode("XPTY0004");
                 }
                 if (getTargetType().isNamespaceSensitive()) {
                     converter = converter.setNamespaceResolver(getRetainedStaticContext());
@@ -226,10 +210,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.type.ConversionResult result = converter.convert(value);
             if ((result is Saxon.Hej.type.ValidationFailure)) {
                 Saxon.Hej.type.ValidationFailure err = (Saxon.Hej.type.ValidationFailure)(result);
-                Saxon.Hej.trans.XPathException xe = err.makeException();
-                xe.maybeSetErrorCode("FORG0001");
-                xe.maybeSetLocation(getLocation());
-                throw xe;
+                throw err.makeException().maybeWithErrorCode("FORG0001").maybeWithLocation(getLocation());
             }
             return (Saxon.Hej.value.AtomicValue)(result);
         }

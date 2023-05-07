@@ -43,10 +43,7 @@ namespace Saxon.Hej.style {
                 try {
                     config.checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT, "xsl:import-schema", getPackageData().getLocalLicenseId());
                 } catch (Saxon.Hej.trans.LicenseException err) {
-                    Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(err);
-                    xe.setErrorCode("XTSE1650");
-                    xe.setLocator(this);
-                    throw xe;
+                    throw new Saxon.Hej.trans.XPathException(err).withErrorCode("XTSE1650").withLocation(this);
                 }
                 Saxon.Hej.om.NodeInfo inlineSchema = null;
                 Saxon.Hej.om.NamespaceUri targetNamespace = null;
@@ -98,8 +95,11 @@ namespace Saxon.Hej.style {
                 }
                 getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
             } catch (Saxon.Hej.type.SchemaException err) {
-                string errorCode = ((err.getErrorCodeLocalPart() == null) ? "XTSE0220" : err.getErrorCodeLocalPart());
-                compileError(err.Message, errorCode);
+                if ((err.getErrorCodeQName() == null)) {
+                    compileError(err.Message, "XTSE0220");
+                } else {
+                    compileError(err.Message, err.getErrorCodeQName());
+                }
             }
         }
         public override void compileDeclaration(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {

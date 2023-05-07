@@ -42,10 +42,7 @@ namespace Saxon.Eej.functions.extfn {
             try {
                 expr = Saxon.Hej.expr.parser.ExpressionTool.make(exprText, env, 0, Saxon.Hej.expr.parser.Token.EOF, null);
             } catch (Saxon.Hej.trans.XPathException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Static error in XPath expression supplied to "+functionName)+": ")+e.Message.Trim()));
-                err.setErrorCodeQName(e.getErrorCodeQName());
-                err.setXPathContext(context);
-                throw err;
+                throw e.withMessage(((("Static error in XPath expression supplied to "+functionName)+": ")+e.Message.Trim())).withXPathContext(context);
             }
             Saxon.Hej.type.ItemType contextItemType = Saxon.Hej.type.AnyItemType.getInstance();
             Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(env);

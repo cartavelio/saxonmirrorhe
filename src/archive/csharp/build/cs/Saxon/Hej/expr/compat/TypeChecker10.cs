@@ -23,9 +23,7 @@ namespace Saxon.Hej.expr.compat {
                 try {
                     return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.maybeSetLocation(supplied.getLocation());
-                    err.setIsStaticError(true);
-                    throw;
+                    throw err.maybeWithLocation(supplied.getLocation()).asStaticError();
                 }
             }
             if ((reqItemType.Equals(Saxon.Hej.type.NumericType.getInstance()) || ((reqItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.DOUBLE) && !(Saxon.Hej.value.Cardinality.allowsMany(req.getCardinality()))) && !(th.isSubType(supplied.getItemType(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE))))) {
@@ -34,9 +32,7 @@ namespace Saxon.Hej.expr.compat {
                 try {
                     return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.maybeSetLocation(supplied.getLocation());
-                    err.setIsStaticError(true);
-                    throw;
+                    throw err.maybeWithLocation(supplied.getLocation()).asStaticError();
                 }
             }
             return base.staticTypeCheck(supplied, req, roleSupplier, visitor);

@@ -9,11 +9,9 @@ namespace Saxon.Hej.functions {
             try {
                 return Saxon.Hej.om.SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
             } catch (Saxon.Hej.trans.XPathException e) {
-                if ((e.getErrorCodeQName() == null)) {
-                    e.setErrorCode("FOUT1170");
-                }
-                if (((getArity() == 2) && e.getErrorCodeLocalPart().Equals("FOUT1200"))) {
-                    e.setErrorCode("FOUT1190");
+                e.maybeSetErrorCode("FOUT1170");
+                if ((getArity() == 2)) {
+                    throw e.replacingErrorCode("FOUT1200", "FOUT1190");
                 }
                 throw;
             }
@@ -36,7 +34,7 @@ namespace Saxon.Hej.functions {
                     readFile(absoluteURI, encoding, consumer, context);
                     consumer.close();
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    if (((getArity() == 2) && e.getErrorCodeLocalPart().Equals("FOUT1200"))) {
+                    if (((getArity() == 2) && e.hasErrorCode("FOUT1200"))) {
                         e.setErrorCode("FOUT1190");
                     }
                     throw;

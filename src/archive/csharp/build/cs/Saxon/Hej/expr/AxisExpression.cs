@@ -35,10 +35,7 @@ namespace Saxon.Hej.expr {
             bool noWarnings = (doneOptimize || ((doneTypeCheck && this.staticInfo.getItemType().Equals(contextItemType))));
             doneTypeCheck = true;
             if ((contextItemType == Saxon.Hej.type.ErrorType.getInstance())) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Axis step "+this)+" cannot be used here: the context item is absent"));
-                err.setErrorCode("XPDY0002");
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("Axis step "+this)+" cannot be used here: the context item is absent")).withErrorCode("XPDY0002").withLocation(getLocation());
             } else {
                 staticInfo = contextInfo;
             }
@@ -47,11 +44,7 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
                 Saxon.Hej.type.Affinity relation = th.relationship(contextItemType, Saxon.Hej.pattern.AnyNodeTest.getInstance());
                 if ((relation == Saxon.Hej.type.Affinity.DISJOINT)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Axis step "+this)+" cannot be used here: the context item is not a node"));
-                    err.setIsTypeError(true);
-                    err.setErrorCode("XPTY0020");
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Axis step "+this)+" cannot be used here: the context item is not a node")).asTypeError().withErrorCode("XPTY0020").withLocation(getLocation());
                 } else {
                     if (((relation == Saxon.Hej.type.Affinity.OVERLAPS) || (relation == Saxon.Hej.type.Affinity.SUBSUMES))) {
                         Saxon.Hej.expr.Expression thisExp = checkPlausibility(visitor, contextInfo, !(noWarnings));
@@ -680,12 +673,7 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.Item item = context.getContextItem();
             if ((item == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The context item for axis step "+this)+" is absent"));
-                err.setErrorCode("XPDY0002");
-                err.setXPathContext(context);
-                err.setLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The context item for axis step "+this)+" is absent")).withErrorCode("XPDY0002").withXPathContext(context).withLocation(getLocation()).asTypeError();
             }
             try {
                 if ((test == null)) {
@@ -694,18 +682,10 @@ namespace Saxon.Hej.expr {
                     return ((Saxon.Hej.om.NodeInfo)(item)).iterateAxis(axis, test);
                 }
             } catch (System.InvalidCastException cce) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The context item for axis step "+this)+" is not a node"));
-                err.setErrorCode("XPTY0020");
-                err.setXPathContext(context);
-                err.setLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The context item for axis step "+this)+" is not a node")).withErrorCode("XPTY0020").withXPathContext(context).withLocation(getLocation()).asTypeError();
             } catch (Saxon.Ejava.lang.UnsupportedOperationException err) {
                 if ((err.InnerException is Saxon.Hej.trans.XPathException)) {
-                    Saxon.Hej.trans.XPathException ec = (Saxon.Hej.trans.XPathException)(err.InnerException);
-                    ec.maybeSetLocation(getLocation());
-                    ec.maybeSetContext(context);
-                    throw ec;
+                    throw ((Saxon.Hej.trans.XPathException)(err.InnerException)).maybeWithLocation(getLocation()).maybeWithContext(context);
                 } else {
                     dynamicError(err.Message, "XPST0010", context);
                     return null;
@@ -773,20 +753,10 @@ namespace Saxon.Hej.expr {
         }
         public class AxisExpressionElaborator : Saxon.Hej.expr.elab.PullElaborator {
             private void reportDoesNotExist(Saxon.Hej.expr.Expression expression, Saxon.Hej.expr.XPathContext context) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The context item for axis step "+expression)+" is absent"));
-                err.setErrorCode("XPDY0002");
-                err.setXPathContext(context);
-                err.setLocation(expression.getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The context item for axis step "+expression)+" is absent")).withErrorCode("XPDY0002").withXPathContext(context).withLocation(expression.getLocation()).asTypeError();
             }
             private void reportIsNotNode(Saxon.Hej.expr.Expression expression, Saxon.Hej.expr.XPathContext context) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The context item for axis step "+expression)+" is not a node"));
-                err.setErrorCode("XPTY0020");
-                err.setXPathContext(context);
-                err.setLocation(expression.getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The context item for axis step "+expression)+" is not a node")).withErrorCode("XPTY0020").withXPathContext(context).withLocation(expression.getLocation()).asTypeError();
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
                 Saxon.Hej.expr.AxisExpression axisExpression = (Saxon.Hej.expr.AxisExpression)(getExpression());

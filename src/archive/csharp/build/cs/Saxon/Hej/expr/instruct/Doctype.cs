@@ -60,17 +60,13 @@ namespace Saxon.Hej.expr.instruct {
                     Saxon.Hej.om.SequenceIterator children = dtdRoot.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD);
                     Saxon.Hej.om.NodeInfo docType = (Saxon.Hej.om.NodeInfo)(children.next());
                     if (((docType == null) || !("doctype".Equals(docType.getLocalPart())))) {
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("saxon:doctype instruction must contain dtd:doctype");
-                        e.setXPathContext(context);
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException("saxon:doctype instruction must contain dtd:doctype").withXPathContext(context);
                     }
                     string name = docType.getAttributeValue("", "name");
                     string system = docType.getAttributeValue("", "system");
                     string publicid = docType.getAttributeValue("", "public");
                     if ((name == null)) {
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:doctype must have a name attribute");
-                        e.setXPathContext(context);
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException("dtd:doctype must have a name attribute").withXPathContext(context);
                     }
                     write(output, (("<!DOCTYPE "+name)+' '));
                     if ((system != null)) {
@@ -93,23 +89,17 @@ namespace Saxon.Hej.expr.instruct {
                             string elname = child.getAttributeValue("", "name");
                             string content = child.getAttributeValue("", "content");
                             if ((elname == null)) {
-                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:element must have a name attribute");
-                                e.setXPathContext(context);
-                                throw e;
+                                throw new Saxon.Hej.trans.XPathException("dtd:element must have a name attribute").withXPathContext(context);
                             }
                             if ((content == null)) {
-                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:element must have a content attribute");
-                                e.setXPathContext(context);
-                                throw e;
+                                throw new Saxon.Hej.trans.XPathException("dtd:element must have a content attribute").withXPathContext(context);
                             }
                             write(output, (((("\n  <!ELEMENT "+elname)+' ')+content)+'>'));
                         } else {
                             if (localname.Equals("attlist")) {
                                 string elname = child.getAttributeValue("", "element");
                                 if ((elname == null)) {
-                                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:attlist must have an attribute named 'element'");
-                                    e.setXPathContext(context);
-                                    throw e;
+                                    throw new Saxon.Hej.trans.XPathException("dtd:attlist must have an attribute named 'element'").withXPathContext(context);
                                 }
                                 write(output, (("\n  <!ATTLIST "+elname)+' '));
                                 Saxon.Hej.om.SequenceIterator attributes = child.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD);
@@ -123,25 +113,17 @@ namespace Saxon.Hej.expr.instruct {
                                         string type = attDef.getAttributeValue("", "type");
                                         string value = attDef.getAttributeValue("", "value");
                                         if ((atname == null)) {
-                                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:attribute must have a name attribute");
-                                            e.setXPathContext(context);
-                                            throw e;
+                                            throw new Saxon.Hej.trans.XPathException("dtd:attribute must have a name attribute").withXPathContext(context);
                                         }
                                         if ((type == null)) {
-                                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:attribute must have a type attribute");
-                                            e.setXPathContext(context);
-                                            throw e;
+                                            throw new Saxon.Hej.trans.XPathException("dtd:attribute must have a type attribute").withXPathContext(context);
                                         }
                                         if ((value == null)) {
-                                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:attribute must have a value attribute");
-                                            e.setXPathContext(context);
-                                            throw e;
+                                            throw new Saxon.Hej.trans.XPathException("dtd:attribute must have a value attribute").withXPathContext(context);
                                         }
                                         write(output, ((((("\n    "+atname)+' ')+type)+' ')+value));
                                     } else {
-                                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Unrecognized element within dtd:attlist");
-                                        e.setXPathContext(context);
-                                        throw e;
+                                        throw new Saxon.Hej.trans.XPathException("Unrecognized element within dtd:attlist").withXPathContext(context);
                                     }
                                 }
                                 write(output, ">");
@@ -153,9 +135,7 @@ namespace Saxon.Hej.expr.instruct {
                                     string epublicid = child.getAttributeValue("", "public");
                                     string notation = child.getAttributeValue("", "notation");
                                     if ((entname == null)) {
-                                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:entity must have a name attribute");
-                                        e.setXPathContext(context);
-                                        throw e;
+                                        throw new Saxon.Hej.trans.XPathException("dtd:entity must have a name attribute").withXPathContext(context);
                                     }
                                     write(output, "\n  <!ENTITY ");
                                     if ("yes".Equals(parameter)) {
@@ -182,14 +162,10 @@ namespace Saxon.Hej.expr.instruct {
                                         string nsystem = child.getAttributeValue("", "system");
                                         string npublicid = child.getAttributeValue("", "public");
                                         if ((notname == null)) {
-                                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:notation must have a name attribute");
-                                            e.setXPathContext(context);
-                                            throw e;
+                                            throw new Saxon.Hej.trans.XPathException("dtd:notation must have a name attribute").withXPathContext(context);
                                         }
                                         if ((((nsystem == null)) && ((npublicid == null)))) {
-                                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("dtd:notation must have a system attribute or a public attribute");
-                                            e.setXPathContext(context);
-                                            throw e;
+                                            throw new Saxon.Hej.trans.XPathException("dtd:notation must have a system attribute or a public attribute").withXPathContext(context);
                                         }
                                         write(output, ("\n  <!NOTATION "+notname));
                                         if ((npublicid != null)) {
@@ -205,9 +181,7 @@ namespace Saxon.Hej.expr.instruct {
                                         if ((child.getNodeKind() == Saxon.Hej.type.Type.TEXT)) {
                                             write(output, child.getStringValue());
                                         } else {
-                                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Unrecognized element "+localname)+" in DTD output"));
-                                            e.setXPathContext(context);
-                                            throw e;
+                                            throw new Saxon.Hej.trans.XPathException((("Unrecognized element "+localname)+" in DTD output")).withXPathContext(context);
                                         }
                                     }
                                 }

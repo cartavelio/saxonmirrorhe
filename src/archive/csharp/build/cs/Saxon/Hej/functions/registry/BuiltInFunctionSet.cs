@@ -128,15 +128,9 @@ namespace Saxon.Hej.functions.registry {
             if ((entry == null)) {
                 string diagName = (getNamespace().Equals(Saxon.Hej.om.NamespaceUri.FN) ? ("System function "+name) : ((("Function Q{"+getNamespace())+"}")+name));
                 if ((getFunctionDetails(name, -1) == null)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((diagName+"() does not exist or is not available in this environment"));
-                    err.setErrorCode("XPST0017");
-                    err.setIsStaticError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((diagName+"() does not exist or is not available in this environment")).withErrorCode("XPST0017").asStaticError();
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((diagName+"() cannot be called with ")+pluralArguments(arity)));
-                    err.setErrorCode("XPST0017");
-                    err.setIsStaticError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((diagName+"() cannot be called with ")+pluralArguments(arity))).withErrorCode("XPST0017").asStaticError();
                 }
             }
             entry.ensurePopulated();

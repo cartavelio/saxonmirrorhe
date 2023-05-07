@@ -52,8 +52,7 @@ namespace Saxon.Hej.om {
                     return new Saxon.Hej.tree.iter.ArrayIterator.Of<Saxon.Hej.om.Item>(reservoir, 0, used);
                 }
               case Saxon.Hej.om.MemoSequence.State.BUSY:
-                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException("Attempt to access a variable while it is being evaluated");
-                de.setErrorCode("XTDE0640");
+                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException("Attempt to access a variable while it is being evaluated", "XTDE0640");
                 throw new Saxon.Hej.trans.UncheckedXPathException(de);
               case Saxon.Hej.om.MemoSequence.State.EMPTY:
                 return Saxon.Hej.tree.iter.EmptyIterator.getInstance();

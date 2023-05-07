@@ -143,9 +143,7 @@ namespace Saxon.Hej.expr.instruct {
             if ((bindingSlot>=0)) {
                 target = context.getTargetComponent(bindingSlot);
                 if (target.isHiddenAbstractComponent()) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot call an abstract template ("+calledTemplateName.getDisplayName())+") with no implementation"), "XTDE3052");
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Cannot call an abstract template ("+calledTemplateName.getDisplayName())+") with no implementation"), "XTDE3052").withLocation(getLocation());
                 }
             }
             t = (Saxon.Hej.expr.instruct.NamedTemplate)(target.getActor());
@@ -163,9 +161,7 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.instruct.TailCall tc = t.expand(output, c2);
                 dispatchTailCall(tc);
             } catch (System.StackOverflowException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested template or function calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, getLocation());
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested template or function calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, getLocation()).withXPathContext(context);
             }
         }
         public override Saxon.Hej.om.StructuredQName getObjectName() {
@@ -288,9 +284,7 @@ namespace Saxon.Hej.expr.instruct {
                         if ((bindingSlot>=0)) {
                             target = context.getTargetComponent(bindingSlot);
                             if (target.isHiddenAbstractComponent()) {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot call an abstract template ("+expr.calledTemplateName.getDisplayName())+") with no implementation"), "XTDE3052");
-                                err.setLocation(expr.getLocation());
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException((("Cannot call an abstract template ("+expr.calledTemplateName.getDisplayName())+") with no implementation"), "XTDE3052").withLocation(expr.getLocation());
                             }
                         }
                         t = (Saxon.Hej.expr.instruct.NamedTemplate)(target.getActor());
@@ -308,9 +302,7 @@ namespace Saxon.Hej.expr.instruct {
                             Saxon.Hej.expr.instruct.TailCall tc = t.expand(output, c2);
                             dispatchTailCall(tc);
                         } catch (System.StackOverflowException e) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested template or function calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, expr.getLocation());
-                            err.setXPathContext(context);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested template or function calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, expr.getLocation()).withXPathContext(context);
                         }
                         return null;
                     } ;

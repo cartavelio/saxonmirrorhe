@@ -193,9 +193,7 @@ namespace Saxon.Hej.expr.instruct {
                 conditionOps[i].typeCheck(visitor, contextInfo);
                 Saxon.Hej.trans.XPathException err = Saxon.Hej.expr.parser.TypeChecker.ebvError(getCondition(i), th);
                 if ((err != null)) {
-                    err.setLocator(getCondition(i).getLocation());
-                    err.maybeSetFailingExpression(getCondition(i));
-                    throw err;
+                    throw err.withLocation(getCondition(i).getLocation()).maybeWithFailingExpression(getCondition(i));
                 }
             }
             for (int i = 0; (i<size()); i++) {
@@ -205,19 +203,18 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     actionOps[i].typeCheck(visitor, contextInfo);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.maybeSetLocation(getLocation());
-                    err.maybeSetFailingExpression(getAction(i));
-                    if (err.isStaticError()) {
-                        throw;
+                    Saxon.Hej.trans.XPathException e2 = err.maybeWithLocation(getLocation()).maybeWithFailingExpression(getAction(i));
+                    if (e2.isStaticError()) {
+                        throw e2;
                     } else {
-                        if (err.isTypeError()) {
+                        if (e2.isTypeError()) {
                             if ((Saxon.Hej.expr.Literal.isEmptySequence(getAction(i)) || Saxon.Hej.expr.Literal.hasEffectiveBooleanValue(getCondition(i), false))) {
-                                setAction(i, new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(err)));
+                                setAction(i, new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(e2)));
                             } else {
-                                throw;
+                                throw e2;
                             }
                         } else {
-                            setAction(i, new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(err)));
+                            setAction(i, new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(e2)));
                         }
                     }
                 }
@@ -284,8 +281,7 @@ namespace Saxon.Hej.expr.instruct {
                     try {
                         b = ((Saxon.Hej.expr.Literal)(getCondition(i))).getGroundedValue().effectiveBooleanValue();
                     } catch (Saxon.Hej.trans.XPathException err) {
-                        err.setLocation(getLocation());
-                        throw;
+                        throw err.withLocation(getLocation());
                     }
                     setCondition(i, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.get(b), this));
                 }

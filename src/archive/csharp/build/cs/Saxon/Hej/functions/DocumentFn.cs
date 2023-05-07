@@ -97,18 +97,10 @@ namespace Saxon.Hej.functions {
                 }
                 if (((controller is Saxon.Hej.trans.XsltController) && !(((Saxon.Hej.trans.XsltController)(controller)).checkUniqueOutputDestination(documentKey)))) {
                     pool.markUnavailable(documentKey);
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot read a document that was written during the same transformation: "+documentKey));
-                    err.setXPathContext(c);
-                    err.setErrorCode("XTRE1500");
-                    err.setLocator(locator);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("Cannot read a document that was written during the same transformation: "+documentKey)).withXPathContext(c).withErrorCode("XTRE1500").withLocation(locator);
                 }
                 if (pool.isMarkedUnavailable(documentKey)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Document has been marked not available: "+documentKey));
-                    err.setXPathContext(c);
-                    err.setErrorCode("FODC0002");
-                    err.setLocator(locator);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("Document has been marked not available: "+documentKey)).withXPathContext(c).withErrorCode("FODC0002").withLocation(locator);
                 }
             }
             try {
@@ -162,12 +154,10 @@ namespace Saxon.Hej.functions {
                         newdoc = b.getCurrentRoot().getTreeInfo();
                         b.reset();
                     } catch (Saxon.Hej.trans.XPathException err) {
-                        if (((err.getErrorCodeLocalPart() == null) || err.getErrorCodeLocalPart().Equals("SXXP0003"))) {
+                        if (((err.getErrorCodeQName() == null) || err.hasErrorCode("SXXP0003"))) {
                             err.setErrorCode("FODC0002");
                         }
-                        err.maybeSetLocation(locator);
-                        err.maybeSetContext(c);
-                        throw;
+                        throw err.maybeWithLocation(locator).maybeWithContext(c);
                     } finally {
                         if (options.isPleaseCloseAfterUse()) {
                             Saxon.Hej.lib.ParseOptions.close(source);
@@ -187,11 +177,9 @@ namespace Saxon.Hej.functions {
                 return getFragment(newdoc, fragmentId, c, locator);
             } catch (Saxon.Ejavax.xml.transform.TransformerException err) {
                 pool.markUnavailable(documentKey);
-                Saxon.Hej.trans.XPathException xerr = Saxon.Hej.trans.XPathException.makeXPathException(err);
-                xerr.maybeSetLocation(locator);
                 string code = (((err.getException() is System.UriFormatException)) ? "FODC0005" : "FODC0002");
-                xerr.maybeSetErrorCode(code);
-                throw xerr;
+                Saxon.Hej.trans.XPathException xerr = Saxon.Hej.trans.XPathException.makeXPathException(err);
+                throw xerr.maybeWithLocation(locator).maybeWithErrorCode(code);
             }
         }
         private static string[] extractFragment(string href) {
@@ -204,9 +192,7 @@ namespace Saxon.Hej.functions {
                     fragmentId = href.Substring((hash+1));
                     href = href.Substring(0, hash - 0);
                     if (!(Saxon.Hej.om.NameChecker.isValidNCName(fragmentId))) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("The fragment identifier "+Saxon.Hej.trans.Err.wrap(fragmentId))+" is not a valid NCName"));
-                        de.setErrorCode("XTDE1160");
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("The fragment identifier "+Saxon.Hej.trans.Err.wrap(fragmentId))+" is not a valid NCName"), "XTDE1160");
                     }
                 }
             }
@@ -376,9 +362,7 @@ namespace Saxon.Hej.functions {
             try {
                 Saxon.Hej.@event.Sender.send(source, @out, parseOptions);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(locator);
-                e.maybeSetErrorCode("FODC0002");
-                throw;
+                throw e.maybeWithLocation(locator).maybeWithErrorCode("FODC0002");
             }
         }
         private static Saxon.Hej.om.NodeInfo getFragment(Saxon.Hej.om.TreeInfo doc, string fragmentId, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locator) {

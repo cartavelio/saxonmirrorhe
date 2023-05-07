@@ -54,11 +54,7 @@ namespace Saxon.Eej.ee.update {
             Saxon.Hej.type.TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             Saxon.Hej.type.ItemType supplied = getNameExp().getItemType();
             if ((((th.relationship(supplied, Saxon.Hej.type.BuiltInAtomicType.STRING) == Saxon.Hej.type.Affinity.DISJOINT) && (th.relationship(supplied, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) == Saxon.Hej.type.Affinity.DISJOINT)) && (th.relationship(supplied, Saxon.Hej.type.BuiltInAtomicType.QNAME) == Saxon.Hej.type.Affinity.DISJOINT))) {
-                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException("The new name must be a string, QName, or untypedAtomic");
-                de.setErrorCode("XPTY0004");
-                de.setIsTypeError(true);
-                de.setLocation(getLocation());
-                throw de;
+                throw new Saxon.Hej.trans.XPathException("The new name must be a string, QName, or untypedAtomic").withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
             }
             return this;
         }
@@ -91,14 +87,10 @@ namespace Saxon.Eej.ee.update {
                     Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/targetEval(context));
                     int nodeKind = node.getNodeKind();
                     if (!(((((nodeKind == Saxon.Hej.type.Type.ELEMENT) || (nodeKind == Saxon.Hej.type.Type.ATTRIBUTE)) || (nodeKind == Saxon.Hej.type.Type.PROCESSING_INSTRUCTION))))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Node to be renamed is not an element, attribute, or processing-instruction", "XUTY0012");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Node to be renamed is not an element, attribute, or processing-instruction", "XUTY0012").withLocation(expr.getLocation());
                     }
                     if (!(node.getTreeInfo().isMutable())) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Node to be renamed is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Node to be renamed is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081).withLocation(expr.getLocation());
                     }
                     Saxon.Hej.value.AtomicValue nameValue = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/nameEval(context));
                     string prefix;
@@ -111,18 +103,14 @@ namespace Saxon.Eej.ee.update {
                             prefix = parts[0];
                             localName = parts[1];
                         } catch (Saxon.Hej.om.QNameException err11) {
-                            Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException(("Invalid node name. "+err11.Message), "XQDY0074", expr.getLocation());
-                            err1.setXPathContext(context);
-                            throw err1;
+                            throw new Saxon.Hej.trans.XPathException(("Invalid node name. "+err11.Message), "XQDY0074", expr.getLocation()).withXPathContext(context);
                         }
                         if (prefix.Length==0) {
                             uri = ((nodeKind == Saxon.Hej.type.Type.ELEMENT) ? expr.defaultNamespace : Saxon.Hej.om.NamespaceUri.NULL);
                         } else {
                             uri = expr.nsContext.getURIForPrefix(prefix, true);
                             if ((uri == null)) {
-                                Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException(("Undeclared prefix in new node name: "+prefix), "XQDY0074", expr.getLocation());
-                                err1.setXPathContext(context);
-                                throw err1;
+                                throw new Saxon.Hej.trans.XPathException(("Undeclared prefix in new node name: "+prefix), "XQDY0074", expr.getLocation()).withXPathContext(context);
                             }
                         }
                     } else {
@@ -131,12 +119,7 @@ namespace Saxon.Eej.ee.update {
                             uri = ((Saxon.Hej.value.QNameValue)(nameValue)).getNamespaceURI();
                             prefix = ((Saxon.Hej.value.QNameValue)(nameValue)).getPrefix();
                         } else {
-                            Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException("Computed element name has incorrect type");
-                            err1.setErrorCode("XPTY0004");
-                            err1.setIsTypeError(true);
-                            err1.setXPathContext(context);
-                            err1.setLocation(expr.getLocation());
-                            throw err1;
+                            throw new Saxon.Hej.trans.XPathException("Computed element name has incorrect type").withErrorCode("XPTY0004").asTypeError().withXPathContext(context).withLocation(expr.getLocation());
                         }
                     }
                     if (uri.isEmpty()) {
@@ -147,12 +130,7 @@ namespace Saxon.Eej.ee.update {
                     }
                     if ((nodeKind == Saxon.Hej.type.Type.PROCESSING_INSTRUCTION)) {
                         if (((prefix.Length>0) || !(uri.isEmpty()))) {
-                            Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException("Processing instruction cannot be in a namespace");
-                            err1.setErrorCode("XUDY0025");
-                            err1.setIsTypeError(true);
-                            err1.setXPathContext(context);
-                            err1.setLocation(expr.getLocation());
-                            throw err1;
+                            throw new Saxon.Hej.trans.XPathException("Processing instruction cannot be in a namespace").withErrorCode("XUDY0025").asTypeError().withXPathContext(context).withLocation(expr.getLocation());
                         }
                     }
                     Saxon.Hej.om.NodeName name = new Saxon.Hej.om.FingerprintedQName(prefix, uri, localName);
@@ -168,12 +146,7 @@ namespace Saxon.Eej.ee.update {
                         Saxon.Hej.om.NamespaceResolver nr = targetNode.getAllNamespaces();
                         Saxon.Hej.om.NamespaceUri existingURI = nr.getURIForPrefix(prefix, true);
                         if ((((existingURI != null) && !(existingURI.isEmpty())) && !(existingURI.Equals(uri)))) {
-                            Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException("New name conflicts with existing namespace binding");
-                            err1.setErrorCode("XUDY0023");
-                            err1.setIsTypeError(true);
-                            err1.setXPathContext(context);
-                            err1.setLocation(expr.getLocation());
-                            throw err1;
+                            throw new Saxon.Hej.trans.XPathException("New name conflicts with existing namespace binding").withErrorCode("XUDY0023").asTypeError().withXPathContext(context).withLocation(expr.getLocation());
                         }
                     }
                     try {
@@ -181,9 +154,7 @@ namespace Saxon.Eej.ee.update {
                         action.setOriginator(expr);
                         ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        e.maybeSetContext(context);
-                        throw;
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     }
                 } ;
             }

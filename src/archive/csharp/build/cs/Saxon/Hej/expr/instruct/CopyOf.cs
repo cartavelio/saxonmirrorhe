@@ -226,6 +226,19 @@ namespace Saxon.Hej.expr.instruct {
             if (getSelect().getItemType().isPlainType()) {
                 return getSelect();
             }
+            if ((getSelect() is Saxon.Hej.expr.instruct.Block)) {
+                Saxon.Hej.expr.instruct.Block b1 = (Saxon.Hej.expr.instruct.Block)(getSelect());
+                Saxon.Hej.expr.Expression[] splitCopy = new Saxon.Hej.expr.Expression[b1.size()];
+                for (int i = 0; (i<splitCopy.Length); i++) {
+                    Saxon.Hej.expr.Expression exp = b1.getOperanda()[i].getChildExpression().copy(new Saxon.Hej.expr.parser.RebindingMap());
+                    if (exp.getItemType().isPlainType()) {
+                        splitCopy[i] = exp;
+                    } else {
+                        splitCopy[i] = new Saxon.Hej.expr.instruct.CopyOf(exp, copyNamespaces, validation, schemaType, rejectDuplicateAttributes);
+                    }
+                }
+                return new Saxon.Hej.expr.instruct.Block(splitCopy);
+            }
             return this;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
@@ -285,10 +298,7 @@ namespace Saxon.Hej.expr.instruct {
             bool copyBaseURI = (@out.getSystemId() == null);
             int kind = item.getNodeKind();
             if ((requireDocumentOrElement && !((((kind == Saxon.Hej.type.Type.ELEMENT) || (kind == Saxon.Hej.type.Type.DOCUMENT)))))) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Operand of validate expression must be a document or element node");
-                e.setXPathContext(context);
-                e.setErrorCode("XQTY0030");
-                throw e;
+                throw new Saxon.Hej.trans.XPathException("Operand of validate expression must be a document or element node").withXPathContext(context).withErrorCode("XQTY0030");
             }
             Saxon.Hej.Configuration config = controller.getConfiguration();
             switch (kind) {
@@ -334,19 +344,13 @@ namespace Saxon.Hej.expr.instruct {
                 }
               case Saxon.Hej.type.Type.ATTRIBUTE:
                 if (((schemaType != null) && schemaType.isComplexType())) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("When copying an attribute with schema validation, the requested type must not be a complex type");
-                    e.setLocation(getLocation());
-                    e.setXPathContext(context);
-                    e.setErrorCode("XTTE1535");
+                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("When copying an attribute with schema validation, the requested type must not be a complex type").withLocation(getLocation()).withXPathContext(context).withErrorCode("XTTE1535");
                     throw dynamicError(getLocation(), e, context);
                 }
                 try {
                     copyAttribute(item, (Saxon.Hej.type.SimpleType)(schemaType), validation, this, @out, context, rejectDuplicateAttributes);
                 } catch (Saxon.Hej.@event.NoOpenStartTagException err) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(err.Message);
-                    e.setLocation(getLocation());
-                    e.setXPathContext(context);
-                    e.setErrorCodeQName(err.getErrorCodeQName());
+                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(err.Message).withLocation(getLocation()).withXPathContext(context).withErrorCode(err.getErrorCodeQName());
                     throw dynamicError(getLocation(), e, context);
                 }
                 break ;
@@ -366,9 +370,7 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     @out.@namespace(item.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(item.getStringValue()), Saxon.Hej.@event.ReceiverOption.NONE);
                 } catch (Saxon.Hej.@event.NoOpenStartTagException err) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(err.Message);
-                    e.setXPathContext(context);
-                    e.setErrorCodeQName(err.getErrorCodeQName());
+                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(err.Message).withXPathContext(context).withErrorCode(err.getErrorCodeQName());
                     throw dynamicError(getLocation(), e, context);
                 }
                 break ;
@@ -428,12 +430,10 @@ namespace Saxon.Hej.expr.instruct {
             try {
                 output.attribute(Saxon.Hej.om.NameOfNode.makeName(source), annotation, value.ToString(), instruction.getLocation(), opt);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetContext(context);
-                e.maybeSetLocation(instruction.getLocation());
-                if (((instruction.getPackageData().getHostLanguage() == Saxon.Api.HostLanguage.XQUERY) && e.getErrorCodeLocalPart().Equals("XTTE0950"))) {
+                if (((instruction.getPackageData().getHostLanguage() == Saxon.Api.HostLanguage.XQUERY) && e.hasErrorCode("XTTE0950"))) {
                     e.setErrorCode("XQTY0086");
                 }
-                throw;
+                throw e.maybeWithLocation(instruction.getLocation()).maybeWithContext(context);
             }
         }
         public static Saxon.Hej.type.SimpleType validateAttribute(Saxon.Hej.om.NodeInfo source, Saxon.Hej.type.SimpleType schemaType, int validation, Saxon.Hej.expr.XPathContext context) {

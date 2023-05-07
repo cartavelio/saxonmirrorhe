@@ -72,15 +72,11 @@ namespace Saxon.Hej.value {
         public Saxon.Hej.value.CalendarValue adjustTimezone(Saxon.Hej.value.DayTimeDurationValue tz) {
             long microseconds = tz.getLengthInMicroseconds();
             if (((microseconds%60000000) != 0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Timezone is not an integral number of minutes");
-                err.setErrorCode("FODT0003");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Timezone is not an integral number of minutes", "FODT0003");
             }
             int tzminutes = (int)(((microseconds/60000000)));
             if ((System.Math.Abs(tzminutes)>(14*60))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Timezone out of range (-14:00 to +14:00)");
-                err.setErrorCode("FODT0003");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Timezone out of range (-14:00 to +14:00)", "FODT0003");
             }
             return adjustTimezone(tzminutes);
         }

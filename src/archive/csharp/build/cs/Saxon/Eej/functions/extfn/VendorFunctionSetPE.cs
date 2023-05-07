@@ -222,9 +222,7 @@ namespace Saxon.Eej.functions.extfn {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.om.Item pi = context.getContextItem();
                 if ((pi == null)) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The context item for saxon:get-pseudo-attribute() is not set");
-                    e.setXPathContext(context);
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException("The context item for saxon:get-pseudo-attribute() is not set").withXPathContext(context);
                 }
                 string value = Saxon.Impl.Helpers.ProcInstParser.getPseudoAttribute(pi.getStringValue(), arguments[0].head().getStringValue());
                 return ((value == null) ? Saxon.Hej.value.EmptySequence.getInstance() : new Saxon.Hej.value.StringValue(value));
@@ -505,9 +503,7 @@ namespace Saxon.Eej.functions.extfn {
         private static void checkBytes(char[] array, int start, int end, Saxon.Hej.z.IntPredicateProxy checker) {
             int ch32 = Saxon.Hej.serialize.charcode.UTF16CharacterSet.firstInvalidChar(Saxon.Hej.str.StringTool.codePoints(new string(array, start, (end-start))), checker);
             if ((ch32 != -1)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The byte sequence contains a character not allowed by XML (hex "+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')'));
-                err.setErrorCode("XTDE1180");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The byte sequence contains a character not allowed by XML (hex "+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')')).withErrorCode("XTDE1180");
             }
         }
     

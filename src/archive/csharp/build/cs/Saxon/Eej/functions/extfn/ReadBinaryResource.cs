@@ -8,8 +8,7 @@ namespace Saxon.Eej.functions.extfn {
                 string arg = arguments[0].head().getStringValue();
                 System.IO.Stream stream;
                 try {
-                    Saxon.Ejava.net.URL url = new Saxon.Ejava.net.URL(arg);
-                    stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(url);
+                    stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(context.getConfiguration(), arg);
                 } catch (System.Exception e) {
                     throw new Saxon.Hej.trans.XPathException(("saxon:read-binary-resource - invalid or inaccessible URL "+arg), Saxon.Hej.trans.SaxonErrorCode.SXJE0053);
                 }

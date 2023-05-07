@@ -27,10 +27,7 @@ namespace Saxon.Eej.ee.optim {
                         Saxon.Hej.type.ConversionResult result = untypedConverter.convert(val);
                         if ((result is Saxon.Hej.type.ValidationFailure)) {
                             string msg = ((("Failure converting untypedAtomic value to "+untypedType.getDisplayName())+" during comparison operation. ")+((Saxon.Hej.type.ValidationFailure)(result)).getMessage());
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(msg);
-                            de.setErrorCode("FORG0001");
-                            de.setXPathContext(context);
-                            throw de;
+                            throw new Saxon.Hej.trans.XPathException(msg, "FORG0001").withXPathContext(context);
                         } else {
                             val2 = (Saxon.Hej.value.AtomicValue)(result);
                         }
@@ -87,10 +84,7 @@ namespace Saxon.Eej.ee.optim {
                             }
                             if (!(Saxon.Hej.type.Type.isGuaranteedComparable(type, soughtType, false))) {
                                 string message = ((("General comparison: cannot compare "+type)+" to ")+soughtType);
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                                err.setErrorCode("XPTY0004");
-                                err.setIsTypeError(true);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(message, "XPTY0004").asTypeError();
                             }
                         } ;
                     } else {
@@ -105,10 +99,7 @@ namespace Saxon.Eej.ee.optim {
                             }
                             if (!(Saxon.Hej.type.Type.isGuaranteedComparable(t0, t1, false))) {
                                 string message = ((("Value comparison: cannot compare "+type)+" to ")+soughtType);
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                                err.setErrorCode("XPTY0004");
-                                err.setIsTypeError(true);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(message, "XPTY0004").asTypeError();
                             }
                         } ;
                     }
@@ -122,10 +113,7 @@ namespace Saxon.Eej.ee.optim {
                             Saxon.Hej.type.BuiltInAtomicType indexedType = (Saxon.Hej.type.BuiltInAtomicType)(Saxon.Hej.type.BuiltInType.getSchemaType(type));
                             if (!(Saxon.Hej.type.Type.isGuaranteedComparable(soughtType, indexedType, false))) {
                                 string message = ((("Cannot compare "+indexedType)+" to ")+soughtType);
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                                err.setErrorCode("XPTY0004");
-                                err.setIsTypeError(true);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(message, "XPTY0004").asTypeError();
                             }
                         }
                         vi.typesChecked.add(soughtType.getFingerprint());
@@ -140,10 +128,7 @@ namespace Saxon.Eej.ee.optim {
                         Saxon.Hej.type.ConversionResult result = Saxon.Hej.type.Converter.convert(value, requiredType, rules);
                         if ((result is Saxon.Hej.type.ValidationFailure)) {
                             string msg = ((("Failure converting untypedAtomic value to "+requiredType.getDisplayName())+" during comparison operation. ")+((Saxon.Hej.type.ValidationFailure)(result)).getMessage());
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(msg);
-                            de.setErrorCode("FORG0001");
-                            de.setXPathContext(context);
-                            throw de;
+                            throw new Saxon.Hej.trans.XPathException(msg, "FORG0001").withXPathContext(context);
                         } else {
                             conv = (Saxon.Hej.value.AtomicValue)(result);
                         }

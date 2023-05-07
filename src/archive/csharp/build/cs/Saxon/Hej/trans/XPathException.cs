@@ -26,9 +26,6 @@ namespace Saxon.Hej.trans {
             setLocator(loc);
             breakPoint();
         }
-        public XPathException(string message, Saxon.Hej.s9api.Location loc, System.Exception err) : base (message, loc, err) {
-            breakPoint();
-        }
         public XPathException(string message, string errorCode) : base (message) {
             setErrorCode(errorCode);
             breakPoint();
@@ -81,25 +78,50 @@ namespace Saxon.Hej.trans {
                 return ((base.Message+": ")+InnerException.Message);
             }
         }
+        public Saxon.Hej.trans.XPathException withMessage(string message) {
+            Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message);
+            e2.setErrorCodeQName(getErrorCodeQName());
+            e2.setLocation(getLocator());
+            e2.setIsSyntaxError(isSyntaxError());
+            e2.setIsTypeError(isTypeError());
+            e2.setHostLanguage(getHostLanguage());
+            e2.setXPathContext(getXPathContext());
+            return e2;
+        }
         public void setXPathContext(Saxon.Hej.expr.XPathContext context) {
             this.context = context;
+        }
+        public Saxon.Hej.trans.XPathException withXPathContext(Saxon.Hej.expr.XPathContext context) {
+            this.context = context;
+            return this;
         }
         public void setLocation(Saxon.Hej.s9api.Location loc) {
             if ((loc != null)) {
                 setLocator(loc.saveLocation());
             }
         }
+        public Saxon.Hej.trans.XPathException withLocation(Saxon.Hej.s9api.Location loc) {
+            setLocation(loc);
+            return this;
+        }
         public Saxon.Hej.expr.Expression getFailingExpression() {
             return failingExpression;
         }
-        public void setFailingExpression(Saxon.Hej.expr.Expression failingExpression) {
-            this.failingExpression = failingExpression;
-        }
-        public void maybeSetFailingExpression(Saxon.Hej.expr.Expression failingExpression) {
-            if ((this.failingExpression == null)) {
+        public Saxon.Hej.trans.XPathException withFailingExpression(Saxon.Hej.expr.Expression failingExpression) {
+            if ((failingExpression != null)) {
                 this.failingExpression = failingExpression;
+                maybeSetLocation(failingExpression.getLocation());
             }
-            maybeSetLocation(failingExpression.getLocation());
+            return this;
+        }
+        public Saxon.Hej.trans.XPathException maybeWithFailingExpression(Saxon.Hej.expr.Expression failingExpression) {
+            if ((failingExpression != null)) {
+                if ((this.failingExpression == null)) {
+                    this.failingExpression = failingExpression;
+                }
+                maybeSetLocation(failingExpression.getLocation());
+            }
+            return this;
         }
         public override  /* REPLACING public */ Saxon.Hej.s9api.Location getLocator() {
             Saxon.Ejavax.xml.transform.SourceLocator locator = base.getLocator();
@@ -119,6 +141,10 @@ namespace Saxon.Hej.trans {
         public void setIsStaticError(bool @is) {
             _isStaticError = @is;
         }
+        public Saxon.Hej.trans.XPathException asStaticError() {
+            setIsStaticError(true);
+            return this;
+        }
         public bool isStaticError() {
             return _isStaticError;
         }
@@ -133,6 +159,14 @@ namespace Saxon.Hej.trans {
         }
         public void setIsTypeError(bool @is) {
             _isTypeError = @is;
+        }
+        public Saxon.Hej.trans.XPathException asTypeError() {
+            setIsTypeError(true);
+            return this;
+        }
+        public Saxon.Hej.trans.XPathException asTypeErrorIf(bool condition) {
+            setIsTypeError(condition);
+            return this;
         }
         public bool isTypeError() {
             return _isTypeError;
@@ -157,10 +191,28 @@ namespace Saxon.Hej.trans {
                 errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, code);
             }
         }
+        public Saxon.Hej.trans.XPathException withErrorCode(string code) {
+            setErrorCode(code);
+            return this;
+        }
+        public Saxon.Hej.trans.XPathException withErrorCode(Saxon.Hej.om.StructuredQName code) {
+            setErrorCodeQName(code);
+            return this;
+        }
+        public Saxon.Hej.trans.XPathException replacingErrorCode(string oldCode, string newCode) {
+            if (hasErrorCode(oldCode)) {
+                setErrorCode(newCode);
+            }
+            return this;
+        }
         public void maybeSetErrorCode(string code) {
             if (((errorCode == null) && (code != null))) {
                 errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, code);
             }
+        }
+        public Saxon.Hej.trans.XPathException maybeWithErrorCode(string code) {
+            maybeSetErrorCode(code);
+            return this;
         }
         public void setErrorCodeQName(Saxon.Hej.om.StructuredQName code) {
             errorCode = code;
@@ -168,11 +220,26 @@ namespace Saxon.Hej.trans {
         public Saxon.Hej.om.StructuredQName getErrorCodeQName() {
             return errorCode;
         }
-        public string getErrorCodeLocalPart() {
-            return ((errorCode == null) ? null : errorCode.getLocalPart());
+        public string showErrorCode() {
+            if ((errorCode == null)) {
+                return "no_error_code";
+            } else {
+                if (errorCode.hasURI(Saxon.Hej.om.NamespaceUri.ERR)) {
+                    return errorCode.getLocalPart();
+                } else {
+                    return errorCode.getEQName();
+                }
+            }
         }
-        public Saxon.Hej.om.NamespaceUri getErrorCodeNamespace() {
-            return ((errorCode == null) ? null : errorCode.getNamespaceUri());
+        public bool hasErrorCode(params string[]  codes) {
+            if (((errorCode != null) && errorCode.hasURI(Saxon.Hej.om.NamespaceUri.ERR))) {
+                foreach (string code in codes) {
+                    if (errorCode.getLocalPart().Equals(code)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
         public void setErrorObject(Saxon.Hej.om.Sequence value) {
             errorObject = value;
@@ -197,10 +264,20 @@ namespace Saxon.Hej.trans {
                 }
             }
         }
+        public Saxon.Hej.trans.XPathException maybeWithLocation(Saxon.Hej.s9api.Location here) {
+            maybeSetLocation(here);
+            return this;
+        }
         public void maybeSetContext(Saxon.Hej.expr.XPathContext context) {
             if ((getXPathContext() == null)) {
                 setXPathContext(context);
             }
+        }
+        public Saxon.Hej.trans.XPathException maybeWithContext(Saxon.Hej.expr.XPathContext context) {
+            if ((getXPathContext() == null)) {
+                setXPathContext(context);
+            }
+            return this;
         }
         public bool isReportableStatically() {
             if ((isStaticError() || isTypeError())) {

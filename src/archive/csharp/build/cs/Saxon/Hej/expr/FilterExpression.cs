@@ -76,8 +76,7 @@ namespace Saxon.Hej.expr {
                         return Saxon.Hej.expr.Literal.makeEmptySequence();
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    throw;
+                    throw e.maybeWithLocation(getLocation());
                 }
             }
             if (getFilter().isCallOn(typeof(Saxon.Hej.functions.PositionAndLast.Last))) {
@@ -680,8 +679,7 @@ namespace Saxon.Hej.expr {
                         }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    throw;
+                    throw e.maybeWithLocation(getLocation());
                 }
             }
             Saxon.Hej.om.SequenceIterator baseIter = getBase().iterate(context);

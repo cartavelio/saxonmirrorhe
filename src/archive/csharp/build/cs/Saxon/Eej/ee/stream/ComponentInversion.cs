@@ -18,7 +18,7 @@ namespace Saxon.Eej.ee.stream {
             } catch (Saxon.Hej.trans.XPathException e) {
                 string frag = (isW3CStreamable ? "although it is" : "and is not");
                 Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(((("Component cannot be streamed, "+frag)+" guaranteed streamable according to W3C rules. ")+e.Message), Saxon.Hej.trans.SaxonErrorCode.SXST0062);
-                e2.setErrorCode(e.getErrorCodeLocalPart());
+                e2.setErrorCodeQName(e.getErrorCodeQName());
                 e2.setLocator(body.getLocation());
                 e2.setXPathContext(e.getXPathContext());
                 throw e2;

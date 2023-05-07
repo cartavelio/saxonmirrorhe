@@ -14,9 +14,7 @@ namespace Saxon.Hej.serialize {
         public override void open() {
             if (closed) {
                 string uri = (getSystemId().Equals(Saxon.Hej.trans.XsltController.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(no URI supplied)" : getSystemId());
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot write more than one result document to the principal output destination: "+uri));
-                err.setErrorCode("XTDE1490");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Cannot write more than one result document to the principal output destination: "+uri), "XTDE1490");
             }
             base.open();
             opened = true;
@@ -49,27 +47,19 @@ namespace Saxon.Hej.serialize {
         }
         private void useAsPrimary() { lock(this) {
             if (closed) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot write to the principal output destination as it has already been closed: "+identifySystemId()));
-                err.setErrorCode("XTDE1490");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Cannot write to the principal output destination as it has already been closed: "+identifySystemId())).withErrorCode("XTDE1490");
             }
             if (usedAsSecondaryResult) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot write to the principal output destination as it has already been used by xsl:result-document: "+identifySystemId()));
-                err.setErrorCode("XTDE1490");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Cannot write to the principal output destination as it has already been used by xsl:result-document: "+identifySystemId())).withErrorCode("XTDE1490");
             }
             usedAsPrimaryResult = true;
         }}
         public void useAsSecondary() { lock(this) {
             if (usedAsPrimaryResult) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot use xsl:result-document to write to a destination already used for the principal output: "+identifySystemId()));
-                err.setErrorCode("XTDE1490");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Cannot use xsl:result-document to write to a destination already used for the principal output: "+identifySystemId())).withErrorCode("XTDE1490");
             }
             if (usedAsSecondaryResult) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot write more than one xsl:result-document to the principal output destination: "+identifySystemId()));
-                err.setErrorCode("XTDE1490");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Cannot write more than one xsl:result-document to the principal output destination: "+identifySystemId())).withErrorCode("XTDE1490");
             }
             usedAsSecondaryResult = true;
         }}

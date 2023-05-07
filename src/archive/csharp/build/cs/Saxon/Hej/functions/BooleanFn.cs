@@ -100,9 +100,7 @@ namespace Saxon.Hej.functions {
                 try {
                     return /*superMethod*/getArg(0).effectiveBooleanValue(/*localparam*/c);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    /*exception*/e.maybeSetLocation(/*superMethod*/getLocation());
-                    /*exception*/e.maybeSetContext(/*localparam*/c);
-                    throw;
+                    throw /*exception*/e.maybeWithLocation(/*superMethod*/getLocation()).maybeWithContext(/*localparam*/c);
                 }
             }
             public override  /* REPLACING public */ Saxon.Hej.value.BooleanValue evaluateItem(Saxon.Hej.expr.XPathContext context) {

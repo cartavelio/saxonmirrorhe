@@ -254,28 +254,36 @@ namespace Saxon.Hej.trans {
         }
         public abstract int getStackFrameSlotsNeeded();
         public string getCodeForBuiltInRuleSet(Saxon.Hej.trans.rules.BuiltInRuleSet builtInRuleSet) {
-            if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowCopyRuleSet)) {
-                return "SC";
+            if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowCopyAllRuleSet)) {
+                return "CA";
             } else {
-                if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowSkipRuleSet)) {
-                    return "SS";
+                if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowSkipAllRuleSet)) {
+                    return "SA";
                 } else {
-                    if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepCopyRuleSet)) {
-                        return "DC";
+                    if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowCopyRuleSet)) {
+                        return "SC";
                     } else {
-                        if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepSkipRuleSet)) {
-                            return "DS";
+                        if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowSkipRuleSet)) {
+                            return "SS";
                         } else {
-                            if ((builtInRuleSet is Saxon.Hej.trans.rules.FailRuleSet)) {
-                                return "FF";
+                            if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepCopyRuleSet)) {
+                                return "DC";
                             } else {
-                                if ((builtInRuleSet is Saxon.Hej.trans.rules.TextOnlyCopyRuleSet)) {
-                                    return "TC";
+                                if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepSkipRuleSet)) {
+                                    return "DS";
                                 } else {
-                                    if ((builtInRuleSet is Saxon.Hej.trans.rules.RuleSetWithWarnings)) {
-                                        return (getCodeForBuiltInRuleSet(((Saxon.Hej.trans.rules.RuleSetWithWarnings)(builtInRuleSet)).getBaseRuleSet())+"+W");
+                                    if ((builtInRuleSet is Saxon.Hej.trans.rules.FailRuleSet)) {
+                                        return "FF";
                                     } else {
-                                        return "???";
+                                        if ((builtInRuleSet is Saxon.Hej.trans.rules.TextOnlyCopyRuleSet)) {
+                                            return "TC";
+                                        } else {
+                                            if ((builtInRuleSet is Saxon.Hej.trans.rules.RuleSetWithWarnings)) {
+                                                return (getCodeForBuiltInRuleSet(((Saxon.Hej.trans.rules.RuleSetWithWarnings)(builtInRuleSet)).getBaseRuleSet())+"+W");
+                                            } else {
+                                                return "???";
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -304,7 +312,15 @@ namespace Saxon.Hej.trans {
                                 if (code.StartsWith("TC")) {
                                     @base = Saxon.Hej.trans.rules.TextOnlyCopyRuleSet.getInstance();
                                 } else {
-                                    throw new Saxon.Ejava.lang.IllegalArgumentException(code);
+                                    if (code.StartsWith("CA")) {
+                                        @base = Saxon.Hej.trans.rules.ShallowCopyAllRuleSet.getInstance();
+                                    } else {
+                                        if (code.StartsWith("SA")) {
+                                            @base = Saxon.Hej.trans.rules.ShallowSkipAllRuleSet.getInstance();
+                                        } else {
+                                            throw new Saxon.Ejava.lang.IllegalArgumentException(code);
+                                        }
+                                    }
                                 }
                             }
                         }

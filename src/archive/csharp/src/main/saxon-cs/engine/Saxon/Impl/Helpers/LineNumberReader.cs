@@ -9,6 +9,10 @@ namespace Saxon.Impl.Helpers {
         public LineNumberReader(System.IO.TextReader reader) {
             this.reader = reader;
         }
+        
+        public LineNumberReader(System.IO.TextReader reader, int bufferSize) {
+            this.reader = reader;
+        }
 
         public int getLineNumber() {
             return this.line;

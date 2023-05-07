@@ -152,11 +152,7 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.type.FunctionItemType fit = fn.getFunctionItemType();
                     if ((fn.getArity() != argEvaluators.Length)) {
                         string errorCode = "XPTY0004";
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Number of arguments required for dynamic call to "+fn.getDescription())+" is ")+fn.getArity())+"; number supplied = ")+argEvaluators.Length), errorCode);
-                        err.setIsTypeError(true);
-                        err.setXPathContext(context);
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException(((((("Number of arguments required for dynamic call to "+fn.getDescription())+" is ")+fn.getArity())+"; number supplied = ")+argEvaluators.Length), errorCode).asTypeError().withXPathContext(context).withLocation(expr.getLocation());
                     }
                     Saxon.Hej.om.Sequence[] argValues = new Saxon.Hej.om.Sequence[argEvaluators.Length];
                     if ((fit == Saxon.Hej.type.AnyFunctionType.ANY_FUNCTION)) {

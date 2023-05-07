@@ -39,10 +39,7 @@ namespace Saxon.Hej.style {
             if ((val != null)) {
                 return Saxon.Hej.expr.Literal.makeLiteral(val);
             } else {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Variables (other than XSLT 3.0 static variables) cannot be used in a static expression: "+qName.getDisplayName()));
-                err.setErrorCode("XPST0008");
-                err.setIsStaticError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Variables (other than XSLT 3.0 static variables) cannot be used in a static expression: "+qName.getDisplayName())).withErrorCode("XPST0008").asStaticError();
             }
         }
         public override Saxon.Hej.functions.FunctionLibrary getFunctionLibrary() {

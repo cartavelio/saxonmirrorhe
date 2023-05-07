@@ -103,8 +103,7 @@ namespace Saxon.Hej.functions.hof {
                     checkAnnotations((Saxon.Hej.om.FunctionItem)(item), requiredItemType, config);
                     return new Saxon.Hej.functions.hof.CoercedFunction((Saxon.Hej.om.FunctionItem)(item), requiredItemType);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.maybeSetLocation(locator);
-                    throw;
+                    throw err.maybeWithLocation(locator);
                 }
             }
         

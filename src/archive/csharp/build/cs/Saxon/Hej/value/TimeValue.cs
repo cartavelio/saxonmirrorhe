@@ -360,10 +360,7 @@ namespace Saxon.Hej.value {
                 Saxon.Hej.value.DateTimeValue dt = toDateTime().add(duration);
                 return new Saxon.Hej.value.TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(), dt.getNanosecond(), getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.TIME);
             } else {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Time+Duration arithmetic is supported only for xs:dayTimeDuration");
-                err.setErrorCode("XPTY0004");
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Time+Duration arithmetic is supported only for xs:dayTimeDuration", "XPTY0004").asTypeError();
             }
         }
         public override Saxon.Hej.value.DayTimeDurationValue subtract(Saxon.Hej.value.CalendarValue other, Saxon.Hej.expr.XPathContext context) {

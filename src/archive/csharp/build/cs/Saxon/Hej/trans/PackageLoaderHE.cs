@@ -396,15 +396,20 @@ namespace Saxon.Hej.trans {
     Saxon.Hej.type.ItemType fromType = loader.parseAlphaCodeForItemType(element, "from");
     Saxon.Hej.type.ItemType toType = loader.parseAlphaCodeForItemType(element, "to");
     Saxon.Hej.expr.AtomicSequenceConverter asc = new Saxon.Hej.expr.AtomicSequenceConverter(body, (Saxon.Hej.type.PlainType)(toType));
-    if ("p".Equals(element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "flags"))) {
+    string flags = element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "flags");
+    if ("p".Equals(flags)) {
         if (toType.Equals(Saxon.Hej.type.BuiltInAtomicType.DOUBLE)) {
             asc.setConverter(new Saxon.Hej.type.Converter.PromoterToDouble());
         } else {
             asc.setConverter(new Saxon.Hej.type.Converter.PromoterToFloat());
         }
     } else {
-        Saxon.Hej.type.Converter c = asc.allocateConverter(loader.config, false, fromType);
-        asc.setConverter(c);
+        if ("d".Equals(flags)) {
+            asc.setConverter(new Saxon.Hej.type.Converter.DownCastingConverter((Saxon.Hej.type.AtomicType)(toType), loader.config.getConversionRules()));
+        } else {
+            Saxon.Hej.type.Converter c = asc.allocateConverter(loader.config, false, fromType);
+            asc.setConverter(c);
+        }
     }
     string diag = element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "diag");
     if ((diag != null)) {
@@ -1823,6 +1828,10 @@ namespace Saxon.Hej.trans {
             }
             if (!(packageElement.getLocalPart().Equals("package"))) {
                 throw new Saxon.Hej.trans.XPathException("Outermost element of XSLT export file must be 'package'", Saxon.Hej.trans.SaxonErrorCode.SXPK0002);
+            }
+            string versionAtt = packageElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "version");
+            if ((versionAtt != null)) {
+                pack.setHostLanguage(Saxon.Api.HostLanguage.XSLT, Saxon.Impl.Helpers.Utils.ParseInt(versionAtt));
             }
             string saxonVersionAtt = packageElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "saxonVersion");
             if ((saxonVersionAtt == null)) {

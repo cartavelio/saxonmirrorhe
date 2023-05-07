@@ -246,8 +246,15 @@ namespace Saxon.Hej.expr {
             destination.startElement("convert", this);
             destination.emitAttribute("from", Saxon.Hej.type.AlphaCode.fromItemType(getBaseExpression().getItemType()));
             destination.emitAttribute("to", Saxon.Hej.type.AlphaCode.fromItemType(requiredItemType));
+            string flags = "";
             if (((converter is Saxon.Hej.type.Converter.PromoterToDouble) || (converter is Saxon.Hej.type.Converter.PromoterToFloat))) {
-                destination.emitAttribute("flags", "p");
+                flags = "p";
+            }
+            if ((converter is Saxon.Hej.type.Converter.DownCastingConverter)) {
+                flags = "d";
+            }
+            if (!(flags.Length==0)) {
+                destination.emitAttribute("flags", flags);
             }
             if ((getRoleSupplier() != null)) {
                 destination.emitAttribute("diag", getRoleSupplier()().save());

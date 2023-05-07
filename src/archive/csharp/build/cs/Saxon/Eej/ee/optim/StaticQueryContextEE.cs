@@ -39,6 +39,7 @@ namespace Saxon.Eej.ee.optim {
         public override void compileLibrary(string query) {
             try {
                 Saxon.Hej.Configuration config = getConfiguration();
+                getConfiguration().checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY, "separate XQuery compilation", -1);
                 Saxon.Hej.expr.instruct.Executable executable = makeExecutable();
                 Saxon.Hej.functions.FunctionLibraryList libList = new Saxon.Hej.functions.FunctionLibraryList();
                 libList.addFunctionLibrary(new Saxon.Hej.functions.ExecutableFunctionLibrary(config));

@@ -43,11 +43,7 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             if ((contextItemType == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The context item is undefined at this point");
-                err.setErrorCode(getErrorCodeForUndefinedContext());
-                err.setIsTypeError(absentContextIsTypeError);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("The context item is undefined at this point").withErrorCode(getErrorCodeForUndefinedContext()).withLocation(getLocation()).asTypeErrorIf(absentContextIsTypeError);
             }
             return this;
         }

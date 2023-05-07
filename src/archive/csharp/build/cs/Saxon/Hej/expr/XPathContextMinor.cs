@@ -88,10 +88,7 @@ namespace Saxon.Hej.expr {
         }
         public int getLast() {
             if ((currentIterator == null)) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The context item is absent, so last() is undefined");
-                e.setXPathContext(this);
-                e.setErrorCode("XPDY0002");
-                throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                throw new Saxon.Hej.trans.UncheckedXPathException(new Saxon.Hej.trans.XPathException("The context item is absent, so last() is undefined").withXPathContext(this).withErrorCode("XPDY0002"));
             }
             if ((last != null)) {
                 return last.value;

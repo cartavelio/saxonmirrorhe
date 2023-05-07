@@ -201,7 +201,6 @@ namespace Saxon.Hej.expr.instruct {
                 }
                 string message = messageBuilder.ToString();
                 message += '.';
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
                 string errorCode;
                 if (getPackageData().isXSLT()) {
                     errorCode = "XTDE0640";
@@ -212,10 +211,7 @@ namespace Saxon.Hej.expr.instruct {
                         errorCode = "XQDY0054";
                     }
                 }
-                err.setErrorCode(errorCode);
-                err.setIsStaticError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(message, errorCode).asStaticError().withLocation(getLocation());
             }
             Saxon.Hej.expr.Expression select = getBody();
             if ((select != null)) {

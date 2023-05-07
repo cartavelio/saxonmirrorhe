@@ -307,10 +307,10 @@ namespace Saxon.Hej {
             options.applyToConfiguration(processor);
             allowExit = !("off".Equals(options.getOptionValue("quit")));
             backup = "on".Equals(options.getOptionValue("backup"));
-            explainOutputFileName = options.getOptionValue("explain");
+            explainOutputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("explain"));
             explaining = (explainOutputFileName != null);
             moduleURIResolverClass = options.getOptionValue("mr");
-            outputFileName = options.getOptionValue("o");
+            outputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("o"));
             streaming = "on".Equals(options.getOptionValue("stream"));
             string value = options.getOptionValue("p");
             if ("on".Equals(value)) {
@@ -476,7 +476,7 @@ namespace Saxon.Hej {
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
                 request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
-                sourceInput = request.resolve(config.getResourceResolver());
+                sourceInput = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
             } else {
                 if (sourceFileName.Equals("-")) {
                     string sysId = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString;
@@ -519,8 +519,7 @@ namespace Saxon.Hej {
                                 if ((e is Saxon.Hej.trans.XPathException)) {
                                     throw new Saxon.Api.SaxonApiException(e);
                                 } else {
-                                    Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException("Exception in ModuleURIResolver: ", e);
-                                    xe.setErrorCode("XQST0059");
+                                    Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException("Exception in ModuleURIResolver: ", "XQST0059");
                                     throw new Saxon.Api.SaxonApiException(xe);
                                 }
                             }
@@ -536,7 +535,7 @@ namespace Saxon.Hej {
                                     quit("Module URI Resolver must return a single StreamSource", 2);
                                 }
                                 try {
-                                    string queryText = Saxon.Hej.query.QueryReader.readSourceQuery((Saxon.Ejavax.xml.transform.stream.StreamSource)(sources[0]), config.getValidCharacterChecker());
+                                    string queryText = Saxon.Hej.query.QueryReader.readSourceQuery(config, (Saxon.Ejavax.xml.transform.stream.StreamSource)(sources[0]), config.getValidCharacterChecker());
                                     exp = compiler.compile(queryText);
                                 } catch (Saxon.Hej.trans.XPathException e) {
                                     throw new Saxon.Api.SaxonApiException(e);

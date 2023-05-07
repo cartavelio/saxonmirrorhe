@@ -126,8 +126,7 @@ namespace Saxon.Hej.tree.linked {
                 try {
                     checkNotNamespaceSensitiveElement(getSchemaType());
                 } catch (Saxon.Hej.@event.CopyNamespaceSensitiveException e) {
-                    e.setErrorCode((@out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
-                    throw;
+                    throw e.withErrorCode((@out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
                 }
             }
             System.Collections.Generic.IList<Saxon.Hej.om.AttributeInfo> atts = new System.Collections.Generic.List<Saxon.Hej.om.AttributeInfo>(attributes().size());
@@ -139,8 +138,7 @@ namespace Saxon.Hej.tree.linked {
                         try {
                             checkNotNamespaceSensitiveAttribute(attributeType, att);
                         } catch (Saxon.Hej.@event.CopyNamespaceSensitiveException e) {
-                            e.setErrorCode((@out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
-                            throw;
+                            throw e.withErrorCode((@out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
                         }
                     }
                 }

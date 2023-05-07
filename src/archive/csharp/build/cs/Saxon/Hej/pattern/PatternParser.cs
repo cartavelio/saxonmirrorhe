@@ -209,6 +209,8 @@ namespace Saxon.Hej.pattern {
                     }
                   case Saxon.Hej.expr.parser.Token.STRING_LITERAL:
                   case Saxon.Hej.expr.parser.Token.NUMBER:
+                  case Saxon.Hej.expr.parser.Token.HEX_INTEGER:
+                  case Saxon.Hej.expr.parser.Token.BINARY_INTEGER:
                   case Saxon.Hej.expr.parser.Token.KEYWORD_CURLY:
                   case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME:
                   case Saxon.Hej.expr.parser.Token.ATTRIBUTE_QNAME:

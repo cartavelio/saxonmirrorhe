@@ -27,10 +27,7 @@ namespace Saxon.Hej.serialize {
             long foundInvalid = @in.indexWhere(c => !(Saxon.Hej.serialize.charcode.XMLCharacterData.isValid10(c)), 0);
             if ((foundInvalid>=0)) {
                 int ch32 = @in.codePointAt(foundInvalid);
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The result tree contains a character not allowed by XML 1.0 (hex "+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')'));
-                err.setErrorCode("SERE0006");
-                err.setLocator(locationId);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The result tree contains a character not allowed by XML 1.0 (hex "+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')')).withErrorCode("SERE0006").withLocation(locationId);
             }
         }
     

@@ -43,11 +43,7 @@ namespace Saxon.Hej.expr {
                 t1 = Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC;
             }
             if (t0.getUType().union(t1.getUType()).overlaps(Saxon.Hej.type.UType.EXTENSION)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot perform comparisons involving external objects");
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Cannot perform comparisons involving external objects").asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
             }
             Saxon.Hej.type.BuiltInAtomicType pt0 = (Saxon.Hej.type.BuiltInAtomicType)(t0.getPrimitiveItemType());
             Saxon.Hej.type.BuiltInAtomicType pt1 = (Saxon.Hej.type.BuiltInAtomicType)(t1.getPrimitiveItemType());

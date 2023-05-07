@@ -58,8 +58,7 @@ namespace Saxon.Hej.expr {
             return null;
         }
         public int getLast() {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The context item is absent");
-            err.setErrorCode("XPDY0002");
+            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The context item is absent", "XPDY0002");
             throw new Saxon.Hej.trans.UncheckedXPathException(err);
         }
         public Saxon.Hej.expr.instruct.ParameterSet getLocalParameters() {

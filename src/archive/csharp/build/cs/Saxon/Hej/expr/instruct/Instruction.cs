@@ -34,9 +34,7 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context);
                 dispatchTailCall(tc);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetFailingExpression(this);
-                err.maybeSetContext(context);
-                throw;
+                throw err.maybeWithFailingExpression(this).maybeWithContext(context);
             }
         }
         public Saxon.Ejavax.xml.transform.SourceLocator getSourceLocator() {
@@ -46,9 +44,7 @@ namespace Saxon.Hej.expr.instruct {
             if ((error is Saxon.Hej.expr.instruct.TerminationException)) {
                 return error;
             }
-            error.maybeSetLocation(loc);
-            error.maybeSetContext(context);
-            return error;
+            return error.maybeWithLocation(loc).maybeWithContext(context);
         }
         public static Saxon.Hej.expr.instruct.ParameterSet assembleParams(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.instruct.WithParam[] actualParams) {
             if (((actualParams == null) || (actualParams.Length == 0))) {

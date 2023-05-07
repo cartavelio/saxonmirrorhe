@@ -35,9 +35,7 @@ namespace Saxon.Hej.functions {
             try {
                 readFile(checker, reader, output);
             } catch (Saxon.Ejava.io.UnsupportedEncodingException encErr) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("Unknown encoding "+Saxon.Hej.trans.Err.wrap(encoding)), encErr);
-                e.setErrorCode("FOUT1190");
-                throw e;
+                throw new Saxon.Hej.trans.XPathException(("Unknown encoding "+Saxon.Hej.trans.Err.wrap(encoding)), encErr).withErrorCode("FOUT1190");
             } catch (System.IO.IOException ioErr) {
                 throw handleIOError(absoluteURI, ioErr);
             }
@@ -51,9 +49,7 @@ namespace Saxon.Hej.functions {
                 return null;
             }
             if ((Saxon.Impl.Helpers.UriUtils.GetFragment(absoluteURI) != null)) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("URI for unparsed-text() must not contain a fragment identifier");
-                e.setErrorCode("FOUT1170");
-                throw e;
+                throw new Saxon.Hej.trans.XPathException("URI for unparsed-text() must not contain a fragment identifier", "FOUT1170");
             }
             Saxon.Hej.functions.EncodeForUri.checkPercentEncoding(absoluteURI.ToString());
             return absoluteURI;
@@ -62,9 +58,7 @@ namespace Saxon.Hej.functions {
             handleURISyntaxExceptionCSharp(href, baseURI, err);
         }
         private static void handleURISyntaxExceptionCSharp(string href, string @base, System.UriFormatException err) {
-            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(((((("Failed to resolve "+href)+" against ")+@base)+": ")+err.Message));
-            e.setErrorCode("FOUT1170");
-            throw e;
+            throw new Saxon.Hej.trans.XPathException(((((("Failed to resolve "+href)+" against ")+@base)+": ")+err.Message)).withErrorCode("FOUT1170");
         }
         public static Saxon.Hej.trans.XPathException handleIOError(System.Uri absoluteURI, System.IO.IOException ioErr) {
             string message = "Failed to read input file";
@@ -72,10 +66,7 @@ namespace Saxon.Hej.functions {
                 message += (' '+absoluteURI.ToString());
             }
             message += ((" ("+ioErr.GetType().Name)+')');
-            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message, ioErr);
-            string errorCode = getErrorCode(ioErr);
-            e.setErrorCode(errorCode);
-            return e;
+            return new Saxon.Hej.trans.XPathException(message, ioErr).withErrorCode(getErrorCode(ioErr));
         }
         public static string getErrorCode(System.IO.IOException ioErr) {
             return "FOUT1170";
@@ -124,9 +115,7 @@ namespace Saxon.Hej.functions {
                         mask |= ch32;
                     }
                     if (!(checker.test(ch32))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((((("The text file contains a character that is illegal in XML (line="+line)+" column=")+column)+" value=hex ")+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')'));
-                        err.setErrorCode("FOUT1190");
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((((((("The text file contains a character that is illegal in XML (line="+line)+" column=")+column)+" value=hex ")+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')')).withErrorCode("FOUT1190");
                     }
                 }
                 int start = 0;

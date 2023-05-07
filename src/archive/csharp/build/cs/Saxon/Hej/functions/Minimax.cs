@@ -107,10 +107,7 @@ namespace Saxon.Hej.functions {
                         prim = min;
                         foundDouble = true;
                     } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Failure converting "+Saxon.Hej.trans.Err.wrap(min.getUnicodeStringValue()))+" to a number"));
-                        de.setErrorCode("FORG0001");
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Failure converting "+Saxon.Hej.trans.Err.wrap(min.getUnicodeStringValue()))+" to a number")).withErrorCode("FORG0001").withXPathContext(context);
                     }
                 } else {
                     if ((prim is Saxon.Hej.value.DoubleValue)) {
@@ -138,11 +135,7 @@ namespace Saxon.Hej.functions {
                     }
                 } else {
                     if (!(prim.getPrimitiveType().isOrdered(false))) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Type "+prim.getPrimitiveType())+" is not an ordered type"));
-                        de.setErrorCode("FORG0006");
-                        de.setIsTypeError(true);
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Type "+prim.getPrimitiveType())+" is not an ordered type")).withErrorCode("FORG0006").asTypeError().withXPathContext(context);
                     }
                     break ;
                 }
@@ -163,10 +156,7 @@ namespace Saxon.Hej.functions {
                         prim = test2;
                         foundDouble = true;
                     } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Failure converting "+Saxon.Hej.trans.Err.wrap(test.getStringValue()))+" to a number"));
-                        de.setErrorCode("FORG0001");
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Failure converting "+Saxon.Hej.trans.Err.wrap(test.getStringValue()))+" to a number")).withErrorCode("FORG0001").withXPathContext(context);
                     }
                 } else {
                     if ((prim is Saxon.Hej.value.DoubleValue)) {
@@ -202,11 +192,7 @@ namespace Saxon.Hej.functions {
                         if ((min.getItemType() == test2.getItemType())) {
                             throw;
                         } else {
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(((("Cannot compare "+min.getItemType())+" with ")+test2.getItemType()));
-                            de.setErrorCode("FORG0006");
-                            de.setIsTypeError(true);
-                            de.setXPathContext(context);
-                            throw de;
+                            throw new Saxon.Hej.trans.XPathException(((("Cannot compare "+min.getItemType())+" with ")+test2.getItemType())).withErrorCode("FORG0006").asTypeError().withXPathContext(context);
                         }
                     }
                 }

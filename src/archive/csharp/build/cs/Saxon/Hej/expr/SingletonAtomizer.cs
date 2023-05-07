@@ -49,10 +49,7 @@ namespace Saxon.Hej.expr {
                         err = new Saxon.Hej.trans.XPathException("Cannot atomize an element that is defined in the schema to have element-only content", "FOTY0012");
                     }
                 }
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                err.setFailingExpression(getParentExpression());
-                throw err;
+                throw err.asTypeError().withLocation(getLocation()).withFailingExpression(getParentExpression());
             }
             return this;
         }
@@ -181,11 +178,7 @@ namespace Saxon.Hej.expr {
                             } else {
                                 Saxon.Hej.expr.parser.RoleDiagnostic role = expr.roleSupplier();
                                 string message = ((e.Message+". Failed while atomizing the ")+role.getMessage());
-                                Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-                                e2.setErrorCodeQName(e.getErrorCodeQName());
-                                e2.setXPathContext(context);
-                                e2.maybeSetLocation(expr.getLocation());
-                                throw e2;
+                                throw new Saxon.Hej.trans.XPathException(message).withErrorCode(e.getErrorCodeQName()).withLocation(e.getLocator()).withXPathContext(context);
                             }
                         }
                         found += seq.getLength();

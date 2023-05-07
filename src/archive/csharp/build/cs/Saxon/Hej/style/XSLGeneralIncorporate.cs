@@ -80,9 +80,7 @@ namespace Saxon.Hej.style {
                 importer.setInputTypeAnnotations((includedSheet.getInputTypeAnnotationsAttribute()|incModule.getInputTypeAnnotations()));
                 return incModule;
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.setErrorCode("XTSE0165");
-                err.setIsStaticError(true);
-                compileError(err);
+                compileError(err.withErrorCode("XTSE0165").asStaticError());
                 return null;
             }
         }

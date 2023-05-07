@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions.hof {
         private readonly Saxon.Hej.om.Sequence[] boundValues;
         private Saxon.Hej.type.FunctionItemType functionType;
         public CurriedFunction(Saxon.Hej.om.FunctionItem targetFunction, Saxon.Hej.om.Sequence[] boundValues)  {
-            this.targetFunction = targetFunction;
+            this.targetFunction = Saxon.Ejava.util.Objects.requireNonNull(targetFunction);
             this.boundValues = boundValues;
         }
         public override Saxon.Hej.type.FunctionItemType getFunctionItemType() {

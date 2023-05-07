@@ -308,8 +308,7 @@ namespace Saxon.Hej.expr.sort {
                 c3.trackFocus(inputIterator);
                 return new Saxon.Hej.expr.ContextMappingIterator(cxt => getAction().iterate(cxt), c3);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
+                throw e.maybeWithLocation(getLocation());
             }
         }
         private Saxon.Hej.om.SequenceIterator getMergedInputIterator(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
@@ -422,7 +421,7 @@ namespace Saxon.Hej.expr.sort {
             return mergeSources[0].mergeKeyDefinitions.getSortKeyDefinition(0).getSortKey();
         }
         public System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> getComparer(Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
-            return new Inner_Comparator_215(this, sKeys, comps);
+            return new Inner_Comparator_214(this, sKeys, comps);
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.sort.MergeInstr newMerge = new Saxon.Hej.expr.sort.MergeInstr();
@@ -519,8 +518,7 @@ namespace Saxon.Hej.expr.sort {
                         c3.trackFocus(inputIterator);
                         return new Saxon.Hej.expr.ContextMappingIterator(cxt => /*Delegate.iterate()*/actionPull(cxt), c3);
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        throw;
+                        throw e.maybeWithLocation(expr.getLocation());
                     }
                 } ;
             }
@@ -533,10 +531,7 @@ namespace Saxon.Hej.expr.sort {
                         Saxon.Hej.om.SequenceTool.supply(iter, it => output.append(it, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES));
                     } catch (Saxon.Hej.trans.UncheckedXPathException err) {
                         iter.close();
-                        Saxon.Hej.trans.XPathException e = err.getXPathException();
-                        e.maybeSetLocation(expr.getLocation());
-                        e.maybeSetContext(context);
-                        throw e;
+                        throw err.getXPathException().maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     } finally {
                         iter.close();
                     }
@@ -577,9 +572,9 @@ namespace Saxon.Hej.expr.sort {
             }
         }
 
-        private class Inner_Comparator_215 : System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> {
+        private class Inner_Comparator_214 : System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> {
             private readonly MergeInstr outerInstance;
-            public Inner_Comparator_215(MergeInstr outerInstance, Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
+            public Inner_Comparator_214(MergeInstr outerInstance, Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
                 this.outerInstance = outerInstance;
                 this.sKeys = sKeys;
                 this.comps = comps;

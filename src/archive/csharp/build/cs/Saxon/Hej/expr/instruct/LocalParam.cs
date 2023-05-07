@@ -262,10 +262,7 @@ namespace Saxon.Hej.expr.instruct {
                                     message += ". A tunnel parameter with this name was supplied, but a non-tunnel parameter is required";
                                 }
                             }
-                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message);
-                            e.setXPathContext(context);
-                            e.setErrorCode("XTDE0700");
-                            throw e;
+                            throw new Saxon.Hej.trans.XPathException(message).withXPathContext(context).withErrorCode("XTDE0700");
                         }
                         if ((selectEvaluator == null)) {
                             throw new Saxon.Ejava.lang.AssertionError("Internal error: No select expression");

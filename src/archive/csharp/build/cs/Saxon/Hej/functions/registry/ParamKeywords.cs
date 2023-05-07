@@ -6,6 +6,7 @@ namespace Saxon.Hej.functions.registry {
 
         static ParamKeywords() {
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "append", "array|add");
+            Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "build", "input|action");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "empty", "array");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "exists", "array");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "filter", "array|predicate");
@@ -16,7 +17,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "for-each", "array|action");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "for-each-pair", "array1|array2|action");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "from-sequence", "input|action");
-            Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "get", "array|position");
+            Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "get", "array|position|fallback");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "head", "array");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "index-where", "array|predicate");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "insert-before", "array|position|member");
@@ -233,7 +234,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "filter", "map|predicate");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "find", "input|key");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "for-each", "map|action");
-            Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "get", "map|key");
+            Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "get", "map|key|fallback");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "group-by", "input|key");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "keys", "map");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "merge", "maps|options");

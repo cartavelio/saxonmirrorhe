@@ -109,8 +109,7 @@ namespace Saxon.Hej.functions {
             try {
                 result = function.call(context, argValues).iterate();
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
+                throw e.maybeWithLocation(getLocation());
             }
             if (!(definition.trustResultType())) {
                 int card = resultType.getCardinality();
@@ -122,9 +121,7 @@ namespace Saxon.Hej.functions {
                     result = new Saxon.Hej.expr.ItemMappingIterator(result, Saxon.Hej.expr.ItemMapper.of(item => {
                         if (!(type.matches(item, th))) {
                             string msg = role().composeErrorMessage(type, item, th);
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, "XPTY0004");
-                            err.setLocation(getLocation());
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(msg, "XPTY0004").withLocation(getLocation());
                         }
                         return item;
                     } ), true);
@@ -148,16 +145,13 @@ namespace Saxon.Hej.functions {
             try {
                 result = function.call(context, argValues).head();
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
+                throw e.maybeWithLocation(getLocation());
             }
             if (!(definition.trustResultType())) {
                 Saxon.Hej.type.ItemType type = resultType.getPrimaryType();
-                if ((!(type.matches(result, th)) || (((result == null) && !(Saxon.Hej.value.Cardinality.allowsZero(resultType.getCardinality())))))) {
+                if (((result == null) ? !(Saxon.Hej.value.Cardinality.allowsZero(resultType.getCardinality())) : !(type.matches(result, th)))) {
                     string msg = role.composeErrorMessage(type, result, th);
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, "XPTY0004");
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(msg, "XPTY0004").withLocation(getLocation());
                 }
                 if (((result is Saxon.Hej.om.NodeInfo) && !(config.isCompatible(((Saxon.Hej.om.NodeInfo)(result)).getConfiguration())))) {
                     throw new Saxon.Hej.trans.XPathException("Node returned by extension function was created with an incompatible Configuration", Saxon.Hej.trans.SaxonErrorCode.SXXP0004);
@@ -173,8 +167,7 @@ namespace Saxon.Hej.functions {
             try {
                 return function.effectiveBooleanValue(context, argValues);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
+                throw e.maybeWithLocation(getLocation());
             }
         }
         public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {

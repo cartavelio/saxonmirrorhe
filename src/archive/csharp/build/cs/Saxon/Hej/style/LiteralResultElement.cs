@@ -201,19 +201,13 @@ namespace Saxon.Hej.style {
                 } else {
                     message = "The supplied file does not appear to be a stylesheet";
                 }
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                err.setLocation(allocateLocation());
-                err.setErrorCode("XTSE0150");
-                err.setIsStaticError(true);
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message).withLocation(allocateLocation()).withErrorCode("XTSE0150").asStaticError();
                 compileError(err);
                 throw err;
             }
             string version = getAttributeValue(Saxon.Hej.om.NamespaceUri.XSLT, "version");
             if ((version == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Simplified stylesheet: xsl:version attribute is missing");
-                err.setErrorCode("XTSE0150");
-                err.setIsStaticError(true);
-                err.setLocation(allocateLocation());
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Simplified stylesheet: xsl:version attribute is missing").withErrorCode("XTSE0150").asStaticError().withLocation(allocateLocation());
                 compileError(err);
                 throw err;
             }
@@ -243,8 +237,7 @@ namespace Saxon.Hej.style {
                 newRoot.graftLocationMap(oldRoot);
                 return newRoot;
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.setLocation(allocateLocation());
-                throw;
+                throw err.withLocation(allocateLocation());
             }
         }
         public override Saxon.Hej.om.StructuredQName getObjectName() {

@@ -140,11 +140,10 @@ namespace Saxon.Hej.style {
             return element.xPath10ModeIsEnabled();
         }
         public int getXPathVersion() {
-            if ((((element.getEffectiveVersion() == 40) || (element.getCompilation().getCompilerInfo().getXsltVersion() == 40)) || (((attributeName != null) && attributeName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON))))) {
+            if (((element.getCompilation().getCompilerInfo().getXsltVersion() == 40) || getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS))) {
                 return 40;
-            } else {
-                return getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT);
             }
+            return getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT);
         }
         public bool isImportedSchema(Saxon.Hej.om.NamespaceUri @namespace) {
             return element.getPrincipalStylesheetModule().isImportedSchema(@namespace);

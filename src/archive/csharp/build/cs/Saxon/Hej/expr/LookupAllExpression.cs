@@ -36,11 +36,7 @@ namespace Saxon.Hej.expr {
                     if (Saxon.Hej.value.Cardinality.allowsZero(getBaseExpression().getCardinality())) {
                         visitor.issueWarning(("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "+containerType), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("The left-hand operand of '?' must be a map or an array; the supplied expression is of type "+containerType), "XPTY0004");
-                        err.setLocation(getLocation());
-                        err.setIsTypeError(true);
-                        err.setFailingExpression(this);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("The left-hand operand of '?' must be a map or an array; "+"the supplied expression is of type ")+containerType), "XPTY0004").withLocation(getLocation()).asTypeError().withFailingExpression(this);
                     }
                 }
             }

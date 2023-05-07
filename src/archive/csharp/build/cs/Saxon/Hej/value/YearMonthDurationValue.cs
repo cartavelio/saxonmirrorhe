@@ -50,16 +50,12 @@ namespace Saxon.Hej.value {
         }
         public override Saxon.Hej.value.YearMonthDurationValue multiply(double n) {
             if (System.Double.IsNaN(n)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot multiply a duration by NaN");
-                err.setErrorCode("FOCA0005");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Cannot multiply a duration by NaN", "FOCA0005");
             }
             double m = getLengthInMonths();
             double product = (n*m);
             if (((System.Double.IsInfinity(product) || (product>System.Int32.MaxValue)) || (product<System.Int32.MinValue))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Overflow when multiplying a duration by a number");
-                err.setErrorCode("FODT0002");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Overflow when multiplying a duration by a number", "FODT0002");
             }
             return fromMonths((int)(new Saxon.Hej.value.DoubleValue(product).round(0).longValue()));
         }
@@ -67,24 +63,18 @@ namespace Saxon.Hej.value {
             int m = getLengthInMonths();
             Singulink.Numerics.BigDecimal product = (n*Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(m));
             if ((Singulink.Numerics.BigDecimal.Abs(product).CompareTo(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(System.Int32.MaxValue))>0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Overflow when multiplying a duration by a number");
-                err.setErrorCode("FODT0002");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Overflow when multiplying a duration by a number", "FODT0002");
             }
             return fromMonths((int)(new Saxon.Hej.value.BigDecimalValue(product).round(0).longValue()));
         }
         public override Saxon.Hej.value.DurationValue divide(double n) {
             if (System.Double.IsNaN(n)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot divide a duration by NaN");
-                err.setErrorCode("FOCA0005");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Cannot divide a duration by NaN", "FOCA0005");
             }
             double m = getLengthInMonths();
             double product = (m/n);
             if (((System.Double.IsInfinity(product) || (product>System.Int32.MaxValue)) || (product<System.Int32.MinValue))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Overflow when dividing a duration by a number");
-                err.setErrorCode("FODT0002");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Overflow when dividing a duration by a number", "FODT0002");
             }
             return fromMonths((int)(new Saxon.Hej.value.DoubleValue(product).round(0).longValue()));
         }
@@ -107,18 +97,14 @@ namespace Saxon.Hej.value {
             if ((other is Saxon.Hej.value.YearMonthDurationValue)) {
                 return fromMonths((getLengthInMonths()+((Saxon.Hej.value.YearMonthDurationValue)(other)).getLengthInMonths()));
             } else {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot add two durations of different type");
-                err.setErrorCode("XPTY0004");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Cannot add two durations of different type", "XPTY0004").asTypeError();
             }
         }
         public override Saxon.Hej.value.DurationValue subtract(Saxon.Hej.value.DurationValue other) {
             if ((other is Saxon.Hej.value.YearMonthDurationValue)) {
                 return fromMonths((getLengthInMonths()-((Saxon.Hej.value.YearMonthDurationValue)(other)).getLengthInMonths()));
             } else {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot subtract two durations of different type");
-                err.setErrorCode("XPTY0004");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Cannot subtract two durations of different type", "XPTY0004").asTypeError();
             }
         }
         public override Saxon.Hej.value.DurationValue negate() {

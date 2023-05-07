@@ -155,10 +155,7 @@ namespace Saxon.Hej.expr.instruct {
             if (!(Saxon.Hej.value.Cardinality.subsumes(req.getCardinality(), suppliedCard))) {
                 if ((((reqCard&suppliedCard)) == 0)) {
                     Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("The required cardinality of the "+role.getMessage())+" is ")+Saxon.Hej.value.Cardinality.describe(reqCard))+", but the supplied cardinality is ")+Saxon.Hej.value.Cardinality.describe(suppliedCard)), role.getErrorCode(), getLocation());
-                    err.setIsTypeError(true);
-                    err.setFailingExpression(this);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((((("The required cardinality of the "+role.getMessage())+" is ")+Saxon.Hej.value.Cardinality.describe(reqCard))+", but the supplied cardinality is ")+Saxon.Hej.value.Cardinality.describe(suppliedCard)), role.getErrorCode(), getLocation()).asTypeError().withFailingExpression(this);
                 } else {
                     return Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(b2, reqCard, roleSupplier);
                 }
@@ -284,17 +281,13 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.Expression child = o.getChildExpression();
                 if (Saxon.Hej.expr.parser.ExpressionTool.isNotAllowedInUpdatingContext(child)) {
                     if (updating) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("If any subexpression is updating, then all must be updating", "XUST0001");
-                        err.setLocation(child.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("If any subexpression is updating, then all must be updating", "XUST0001").withLocation(child.getLocation());
                     }
                     nonUpdating = true;
                 }
                 if (child.isUpdatingExpression()) {
                     if (nonUpdating) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("If any subexpression is updating, then all must be updating", "XUST0001");
-                        err.setLocation(child.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("If any subexpression is updating, then all must be updating", "XUST0001").withLocation(child.getLocation());
                     }
                     updating = true;
                 }

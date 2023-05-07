@@ -72,20 +72,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             try {
                 qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(lexicalQName, false, true, this);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.setIsStaticError(true);
-                string code = e.getErrorCodeLocalPart();
-                if ("FONS0004".Equals(code)) {
-                    e.setErrorCode("XTSE0280");
-                } else {
-                    if ("FOCA0002".Equals(code)) {
-                        e.setErrorCode("XTSE0020");
-                    } else {
-                        if ((code == null)) {
-                            e.setErrorCode("XTSE0020");
-                        }
-                    }
-                }
-                throw new Saxon.Hej.type.SchemaException(e);
+                throw new Saxon.Hej.type.SchemaException(e.asStaticError().maybeWithErrorCode("XTSE0020").replacingErrorCode("FONS0004", "XTSE0280").replacingErrorCode("FOCA0002", "XTSE0020"));
             }
             return qName;
         }

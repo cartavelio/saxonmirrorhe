@@ -37,9 +37,7 @@ namespace Saxon.Eej.functions.extfn {
                     }
                     return imap;
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Second argument of saxon:index must be a function item");
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("Second argument of saxon:index must be a function item").withXPathContext(context);
                 }
             }
         }

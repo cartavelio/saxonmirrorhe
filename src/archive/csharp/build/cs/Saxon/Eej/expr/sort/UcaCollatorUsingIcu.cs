@@ -501,7 +501,7 @@ namespace Saxon.Eej.expr.sort {
                 return ICU4N.Text.CollationElementIterator.PrimaryOrder(ce1).CompareTo(ICU4N.Text.CollationElementIterator.PrimaryOrder(ce2));
             }
             public override bool isIgnored(int ce) {
-                return ((ce != ICU4N.Text.CollationElementIterator.NullOrder) && (((ICU4N.Text.CollationElementIterator.PrimaryOrder(ce) == ICU4N.Text.CollationElementIterator.Ingorable) || (ce<collator.maxIgnorable[0]))));
+                return ((ce != ICU4N.Text.CollationElementIterator.NullOrder) && (((ICU4N.Text.CollationElementIterator.PrimaryOrder(ce) == ICU4N.Text.CollationElementIterator.Ignorable) || (ce<collator.maxIgnorable[0]))));
             }
         
         }

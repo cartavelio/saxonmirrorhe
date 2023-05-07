@@ -36,7 +36,7 @@ namespace Saxon.Hej.resource {
                 details.binaryContent = utf8content;
                 details.onError = Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL;
                 details.parseOptions = new Saxon.Hej.lib.ParseOptions();
-                return new Saxon.Hej.resource.UnparsedTextResource(details);
+                return /*Delegate.makeResource()*/Saxon.Hej.resource.UnparsedTextResource.FACTORY(null, details);
             }
         }
         private static string getMediaType(string contentType) {

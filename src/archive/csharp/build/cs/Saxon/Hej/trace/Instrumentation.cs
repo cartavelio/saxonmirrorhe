@@ -6,17 +6,21 @@ namespace Saxon.Hej.trace {
         public const bool ACTIVE = false;
         public static System.Collections.Generic.Dictionary<string,System.Int64> counters = new System.Collections.Generic.Dictionary<string, System.Int64>();
         public static void count(string counter) {
-            if (counters.ContainsKey(counter)) {
-                Saxon.Impl.Helpers.MapUtils.Put(counters, counter, (Saxon.Impl.Helpers.MapUtils.Get(counters, counter)+1));
-            } else {
-                Saxon.Impl.Helpers.MapUtils.Put(counters, counter, 1L);
+            if (ACTIVE) {
+                if (counters.ContainsKey(counter)) {
+                    Saxon.Impl.Helpers.MapUtils.Put(counters, counter, (Saxon.Impl.Helpers.MapUtils.Get(counters, counter)+1));
+                } else {
+                    Saxon.Impl.Helpers.MapUtils.Put(counters, counter, 1L);
+                }
             }
         }
         public static void count(string counter, long increment) {
-            if (counters.ContainsKey(counter)) {
-                Saxon.Impl.Helpers.MapUtils.Put(counters, counter, (Saxon.Impl.Helpers.MapUtils.Get(counters, counter)+increment));
-            } else {
-                Saxon.Impl.Helpers.MapUtils.Put(counters, counter, increment);
+            if (ACTIVE) {
+                if (counters.ContainsKey(counter)) {
+                    Saxon.Impl.Helpers.MapUtils.Put(counters, counter, (Saxon.Impl.Helpers.MapUtils.Get(counters, counter)+increment));
+                } else {
+                    Saxon.Impl.Helpers.MapUtils.Put(counters, counter, increment);
+                }
             }
         }
         public static void report() {
@@ -28,7 +32,9 @@ namespace Saxon.Hej.trace {
             }
         }
         public static void reset() {
-            counters.Clear();
+            if (ACTIVE) {
+                counters.Clear();
+            }
         }
     
     }

@@ -52,7 +52,7 @@ namespace Saxon.Hej.resource {
                         return new Saxon.Hej.resource.FailedResource(@in, e);
                     } else {
                         if ((onError.isPresent() && (onError.get() == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_WARNING))) {
-                            context.getController().warning(((("collection(): failed to parse "+@in)+": ")+e.Message), e.getErrorCodeLocalPart(), null);
+                            context.getController().warning(((("collection(): failed to parse "+@in)+": ")+e.Message), e.showErrorCode(), null);
                             return null;
                         } else {
                             return null;

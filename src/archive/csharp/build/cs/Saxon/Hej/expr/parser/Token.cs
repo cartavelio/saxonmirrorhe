@@ -91,6 +91,8 @@ namespace Saxon.Hej.expr.parser {
             tokens[STAR] = "*";
             tokens[PREFIX] = "<prefix:*>";
             tokens[NUMBER] = "<numeric-literal>";
+            tokens[HEX_INTEGER] = "<hex-integer>";
+            tokens[BINARY_INTEGER] = "<binary-integer>";
             tokens[NODEKIND] = "<node-type>()";
             tokens[FOR] = "for";
             tokens[SUFFIX] = "<*:local-name>";
@@ -292,6 +294,8 @@ namespace Saxon.Hej.expr.parser {
         public const int COUNT = 220;
         public const int STRING_LITERAL_BACKTICKED = 222;
         public const int BACKTICK = 223;
+        public const int HEX_INTEGER = 224;
+        public const int BINARY_INTEGER = 225;
         public const int NEGATE = 299;
         public readonly static string[] tokens = new string[300];
         public static System.Collections.Generic.Dictionary<string,int> doubleKeywords = new System.Collections.Generic.Dictionary<string, int>(30);

@@ -13,18 +13,13 @@ namespace Saxon.Hej.functions {
             try {
                 string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(lexical.getStringValue());
                 if ((!(parts[0].Length==0) && !(Saxon.Hej.om.NameChecker.isValidNCName(parts[0])))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Malformed prefix in QName: '"+parts[0])+'\''));
-                    err.setErrorCode("FOCA0002");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Malformed prefix in QName: '"+parts[0])+'\''), "FOCA0002");
                 }
                 return new Saxon.Hej.value.QNameValue(parts[0], Saxon.Hej.om.NamespaceUri.of(uri), parts[1], Saxon.Hej.type.BuiltInAtomicType.QNAME, true);
             } catch (Saxon.Hej.om.QNameException e) {
                 throw new Saxon.Hej.trans.XPathException(e.Message, "FOCA0002");
             } catch (Saxon.Hej.trans.XPathException err) {
-                if (err.getErrorCodeLocalPart().Equals("FORG0001")) {
-                    err.setErrorCode("FOCA0002");
-                }
-                throw;
+                throw err.replacingErrorCode("FORG0001", "FOCA0002");
             }
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {

@@ -210,7 +210,7 @@ namespace Saxon.Hej.expr.instruct {
                     try {
                         contextItem = globalContextRequirement.getDefaultValue().evaluateItem(context);
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        if ("XPDY0002".Equals(e.getErrorCodeLocalPart())) {
+                        if (e.hasErrorCode("XPDY0002")) {
                             if ((e.Message.Contains("last()") || e.Message.Contains("position()"))) {
                             } else {
                                 e.setErrorCode("XQDY0054");

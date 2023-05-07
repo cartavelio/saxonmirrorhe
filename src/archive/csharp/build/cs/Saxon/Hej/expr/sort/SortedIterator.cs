@@ -144,13 +144,7 @@ namespace Saxon.Hej.expr.sort {
             try {
                 Saxon.Ejava.util.Arrays.sort(values, 0, count, new Saxon.Hej.expr.sort.SortedIterator.SortComparer(comparators));
             } catch (System.InvalidCastException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message));
-                if ((hostLanguage == Saxon.Api.HostLanguage.XSLT)) {
-                    err.setErrorCode("XTDE1030");
-                } else {
-                    err.setErrorCode("XPTY0004");
-                }
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message)).withErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTDE1030" : "XPTY0004"));
             }
         }
     

@@ -67,11 +67,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.type.PlainType t0 = getLhsExpression().getItemType().getAtomizedItemType();
             Saxon.Hej.type.PlainType t1 = getRhsExpression().getItemType().getAtomizedItemType();
             if (t0.getUType().union(t1.getUType()).overlaps(Saxon.Hej.type.UType.EXTENSION)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot perform comparisons involving external objects");
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Cannot perform comparisons involving external objects").asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
             }
             Saxon.Hej.type.BuiltInAtomicType p0 = (Saxon.Hej.type.BuiltInAtomicType)(((/*1430*/Saxon.Hej.type.AtomicType)t0.getPrimitiveItemType()));
             if (p0.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
@@ -100,11 +96,7 @@ namespace Saxon.Hej.expr {
                     needsRuntimeCheck = true;
                 } else {
                     string message = ((((("In {"+toShortString())+"}: cannot compare ")+t0)+" to ")+t1);
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                    err.setIsTypeError(true);
-                    err.setErrorCode("XPTY0004");
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(message).asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
                 }
             }
             if (!((((@operator == Saxon.Hej.expr.parser.Token.FEQ) || (@operator == Saxon.Hej.expr.parser.Token.FNE))))) {
@@ -115,11 +107,7 @@ namespace Saxon.Hej.expr {
         }
         private void mustBeOrdered(Saxon.Hej.type.PlainType t1, Saxon.Hej.type.BuiltInAtomicType p1) {
             if (!(p1.isOrdered(true))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Type "+t1.ToString())+" is not an ordered type"));
-                err.setErrorCode("XPTY0004");
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("Type "+t1.ToString())+" is not an ordered type")).withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
             }
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
@@ -162,10 +150,7 @@ namespace Saxon.Hej.expr {
         }
         public static bool compare(Saxon.Hej.value.AtomicValue v0, int op, Saxon.Hej.value.AtomicValue v1, Saxon.Hej.expr.sort.AtomicComparer comparer, bool checkTypes) {
             if ((checkTypes && !(Saxon.Hej.type.Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), Saxon.Hej.expr.parser.Token.isOrderedOperator(op))))) {
-                Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(((("Cannot compare "+Saxon.Hej.type.Type.displayTypeName(v0))+" to ")+Saxon.Hej.type.Type.displayTypeName(v1)));
-                e2.setErrorCode("XPTY0004");
-                e2.setIsTypeError(true);
-                throw e2;
+                throw new Saxon.Hej.trans.XPathException(((("Cannot compare "+Saxon.Hej.type.Type.displayTypeName(v0))+" to ")+Saxon.Hej.type.Type.displayTypeName(v1))).withErrorCode("XPTY0004").asTypeError();
             }
             if ((v0.isNaN() || v1.isNaN())) {
                 return (op == Saxon.Hej.expr.parser.Token.FNE);
@@ -190,10 +175,7 @@ namespace Saxon.Hej.expr {
             } catch (Saxon.Hej.expr.sort.ComparisonException err) {
                 throw err.getReason();
             } catch (System.InvalidCastException err) {
-                Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(((("Cannot compare "+Saxon.Hej.type.Type.displayTypeName(v0))+" to ")+Saxon.Hej.type.Type.displayTypeName(v1)));
-                e2.setErrorCode("XPTY0004");
-                e2.setIsTypeError(true);
-                throw e2;
+                throw new Saxon.Hej.trans.XPathException(((("Cannot compare "+Saxon.Hej.type.Type.displayTypeName(v0))+" to ")+Saxon.Hej.type.Type.displayTypeName(v1))).withErrorCode("XPTY0004").asTypeError();
             }
         }
         public override Saxon.Hej.value.BooleanValue evaluateItem(Saxon.Hej.expr.XPathContext context) {

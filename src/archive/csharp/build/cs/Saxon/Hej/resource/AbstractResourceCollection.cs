@@ -12,10 +12,7 @@ namespace Saxon.Hej.resource {
         }
         public static void checkNotNull(string collectionURI, Saxon.Hej.expr.XPathContext context) {
             if ((collectionURI == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("No default collection has been defined");
-                err.setErrorCode("FODC0002");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("No default collection has been defined").withErrorCode("FODC0002").withXPathContext(context);
             }
         }
         public string getCollectionURI() {
@@ -100,10 +97,10 @@ namespace Saxon.Hej.resource {
             public string encoding;
             public Saxon.Hej.lib.ParseOptions parseOptions;
             public int onError = Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL;
-            public System.IO.Stream getInputStream() {
-                return Saxon.Impl.Overrides.ResourceLoader.urlStream(new Saxon.Ejava.net.URL(resourceUri));
+            public System.IO.Stream getInputStream(Saxon.Hej.Configuration config) {
+                return Saxon.Impl.Overrides.ResourceLoader.urlStream(config, resourceUri);
             }
-            public byte[] obtainBinaryContent() {
+            public byte[] obtainBinaryContent(Saxon.Hej.Configuration config) {
                 if ((binaryContent != null)) {
                     return binaryContent;
                 } else {
@@ -111,7 +108,7 @@ namespace Saxon.Hej.resource {
                         string e = ((encoding != null) ? encoding : "UTF-8");
                         return Saxon.Hej.resource.BinaryResource.encode(characterContent, e);
                     } else {
-                        using (System.IO.Stream stream = getInputStream()) {                            try {
+                        using (System.IO.Stream stream = getInputStream(config)) {                            try {
                                 return Saxon.Hej.resource.BinaryResource.readBinaryFromStream(stream, resourceUri);
                             } catch (System.IO.IOException e) {
                                 throw new Saxon.Hej.trans.XPathException(e);
@@ -119,7 +116,7 @@ namespace Saxon.Hej.resource {
                         }                    }
                 }
             }
-            public string obtainCharacterContent() {
+            public string obtainCharacterContent(Saxon.Hej.Configuration config) {
                 if ((characterContent != null)) {
                     return characterContent;
                 } else {
@@ -127,7 +124,7 @@ namespace Saxon.Hej.resource {
                         return Saxon.Hej.resource.BinaryResource.decode(binaryContent, encoding);
                     } else {
                         try {
-                            System.IO.Stream stream = getInputStream();
+                            System.IO.Stream stream = getInputStream(config);
                             string enc = encoding;
                             if ((enc == null)) {
                                 stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
@@ -180,7 +177,7 @@ namespace Saxon.Hej.resource {
                             stream = new System.IO.MemoryStream(inputDetails.binaryContent);
                         }
                     } else {
-                        stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(Saxon.Impl.Helpers.UriUtils.ToURL(uri));
+                        stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(config, uri.ToString());
                     }
                     inputDetails.contentType = guessContentTypeFromContent(stream);
                     stream.Close();

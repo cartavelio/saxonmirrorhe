@@ -27,9 +27,7 @@ namespace Saxon.Hej.ma.json {
             try {
                 content = Saxon.Hej.functions.UnparsedTextFunction.readFile(checker, reader);
             } catch (Saxon.Ejava.io.UnsupportedEncodingException encErr) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("Unknown encoding "+Saxon.Hej.trans.Err.wrap(encoding)), encErr);
-                e.setErrorCode("FOUT1190");
-                throw e;
+                throw new Saxon.Hej.trans.XPathException(("Unknown encoding "+Saxon.Hej.trans.Err.wrap(encoding)), encErr).withErrorCode("FOUT1190");
             } catch (System.IO.IOException ioErr) {
                 throw Saxon.Hej.functions.UnparsedTextFunction.handleIOError(absoluteURI, ioErr);
             }

@@ -50,9 +50,7 @@ namespace Saxon.Hej.value {
             return sb.toUnicodeString();
         }
         public override Saxon.Hej.value.CalendarValue add(Saxon.Hej.value.DurationValue duration) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot add a duration to an xs:gYearMonth");
-            err.setErrorCode("XPTY0004");
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Cannot add a duration to an xs:gYearMonth", "XPTY0004").asTypeError();
         }
         public override Saxon.Hej.value.CalendarValue adjustTimezone(int tz) {
             Saxon.Hej.value.DateTimeValue dt = toDateTime().adjustTimezone(tz);

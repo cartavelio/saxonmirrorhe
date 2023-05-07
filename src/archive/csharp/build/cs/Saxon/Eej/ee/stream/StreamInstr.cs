@@ -176,11 +176,7 @@ namespace Saxon.Eej.ee.stream {
                             throw;
                         }
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        if ((e.getErrorCodeQName() == null)) {
-                            e.setErrorCode("FODC0002");
-                        }
-                        throw;
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithErrorCode("FODC0002");
                     }
                     return null;
                 } ;

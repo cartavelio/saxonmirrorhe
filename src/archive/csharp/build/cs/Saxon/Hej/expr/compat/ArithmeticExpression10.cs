@@ -80,10 +80,7 @@ namespace Saxon.Hej.expr.compat {
         private Saxon.Hej.expr.Calculator assignCalculator(Saxon.Hej.type.AtomicType type0, Saxon.Hej.type.AtomicType type1, bool mustResolve) {
             Saxon.Hej.expr.Calculator calculator = Saxon.Hej.expr.Calculator.getCalculator(type0.getFingerprint(), type1.getFingerprint(), Saxon.Hej.expr.ArithmeticExpression.mapOpCode(@operator), mustResolve);
             if ((calculator == null)) {
-                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((((("Arithmetic operator is not defined for arguments of types ("+type0.getDescription())+", ")+type1.getDescription())+")"));
-                de.setLocation(getLocation());
-                de.setErrorCode("XPTY0004");
-                throw de;
+                throw new Saxon.Hej.trans.XPathException((((("Arithmetic operator is not defined for arguments of types ("+type0.getDescription())+", ")+type1.getDescription())+")")).withLocation(getLocation()).withErrorCode("XPTY0004");
             }
             return calculator;
         }

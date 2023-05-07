@@ -179,9 +179,7 @@ namespace Saxon.Hej.expr.compat {
                             }
                             seq1.Add(item1);
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetLocation(getLocation());
-                            e.maybeSetContext(context);
-                            throw;
+                            throw e.maybeWithLocation(getLocation()).maybeWithContext(context);
                         }
                     }
                 } else {

@@ -544,6 +544,21 @@ namespace Saxon.Hej.trans {
         public static bool isImplicitURI(string name) {
             return ((((name.StartsWith("http:") || name.StartsWith("https:")) || name.StartsWith("file:")) || name.StartsWith("classpath:")) || name.StartsWith("jar:"));
         }
+        public static string coerceImplicitOutputURI(string outputName) {
+            if ((outputName == null)) {
+                return null;
+            }
+            if (outputName.StartsWith("file:")) {
+                outputName = outputName.Substring(5);
+                if (outputName.StartsWith("/")) {
+                    outputName = new System.Text.RegularExpressions.Regex("^/+").Replace(outputName, "/", 1);
+                }
+                if ((Saxon.Ejava.lang.System.getProperty("os.name").StartsWith("Windows") && System.Text.RegularExpressions.Regex.IsMatch(outputName, "^/[A-Za-z]:.*$"))) {
+                    outputName = outputName.Substring(1);
+                }
+            }
+            return outputName;
+        }
         public static void loadAdditionalSchemas(Saxon.Hej.Configuration config, string additionalSchemas) {
             Saxon.Ejava.util.StringTokenizer st = new Saxon.Ejava.util.StringTokenizer(additionalSchemas, System.IO.Path.PathSeparator.ToString());
             while (st.hasMoreTokens()) {

@@ -41,9 +41,7 @@ namespace Saxon.Hej.functions {
                     Saxon.Hej.expr.sort.GroupIterator gi = context.getCurrentGroupIterator();
                     Saxon.Hej.om.AtomicSequence result = ((gi == null) ? null : gi.getCurrentGroupingKey());
                     if ((result == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no current grouping key", "XTDE1071");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("There is no current grouping key", "XTDE1071").withLocation(expr.getLocation());
                     }
                     return ((/*1430*/Saxon.Hej.tree.iter.AtomicIterator)result.iterate());
                 } ;

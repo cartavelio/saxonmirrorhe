@@ -74,7 +74,7 @@ namespace Saxon.Eej.ee.stream.feed {
                     getNextOutputter().close();
                 } catch (Saxon.Hej.trans.XPathException e) {
                     if ((expression != null)) {
-                        e.maybeSetLocation(expression.getLocation());
+                        throw e.maybeWithLocation(expression.getLocation());
                     }
                     throw;
                 }

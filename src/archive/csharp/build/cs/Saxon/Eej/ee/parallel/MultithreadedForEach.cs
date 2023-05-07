@@ -37,12 +37,9 @@ namespace Saxon.Eej.ee.parallel {
                 string threadsValue = getThreads().evaluateAsString(context).ToString();
                 int threads = 0;
                 try {
-                    threads = Saxon.Impl.Helpers.Utils.ParseInt(threadsValue.ToString());
+                    threads = Saxon.Impl.Helpers.Utils.ParseInt(threadsValue);
                 } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Value of 'threads' is not an integer ("+threadsValue)+")"));
-                    err.setLocation(getLocation());
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Value of 'threads' is not an integer ("+threadsValue)+")")).withLocation(getLocation()).withXPathContext(context);
                 }
                 return threads;
             }
@@ -78,10 +75,7 @@ namespace Saxon.Eej.ee.parallel {
                     try {
                         threads = Saxon.Impl.Helpers.Utils.ParseInt(threadsValue);
                     } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Value of 'threads' is not an integer ("+threadsValue)+")"));
-                        err.setLocation(forEach.getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("Value of 'threads' is not an integer ("+threadsValue)+")")).withLocation(forEach.getLocation()).withXPathContext(context);
                     }
                     return threads;
                 }

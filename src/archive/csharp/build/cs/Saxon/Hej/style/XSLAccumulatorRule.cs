@@ -98,7 +98,7 @@ namespace Saxon.Hej.style {
         protected internal override Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName name) {
             if ((name.getLocalPart().Equals("value") && name.hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
                 Saxon.Hej.style.SourceBinding sb = new Saxon.Hej.style.SourceBinding(this);
-                sb.setVariableQName(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "value"));
+                sb.setVariableQName(Saxon.Hej.om.NamespaceUri.NULL.qName("value"));
                 System.Diagnostics.Debug.Assert((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) != null));
                 sb.setDeclaredType(((Saxon.Hej.style.XSLAccumulator)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getResultType());
                 sb.setProperty(Saxon.Hej.style.SourceBinding.BindingProperty.IMPLICITLY_DECLARED, true);

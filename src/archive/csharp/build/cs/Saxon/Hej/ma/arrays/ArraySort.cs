@@ -50,9 +50,7 @@ namespace Saxon.Hej.ma.arrays {
     }
 } );
             } catch (System.InvalidCastException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message));
-                err.setErrorCode("XPTY0004");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message)).withErrorCode("XPTY0004").asTypeError();
             }
             System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> outputList = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>(array.arrayLength());
             foreach (Saxon.Hej.ma.arrays.ArraySort.MemberToBeSorted member in inputList) {

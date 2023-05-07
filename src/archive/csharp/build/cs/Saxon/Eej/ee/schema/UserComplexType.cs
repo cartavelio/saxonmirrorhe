@@ -1702,10 +1702,7 @@ namespace Saxon.Eej.ee.schema {
             foreach (Saxon.Eej.ee.schema.AttributeUse use in getAttributeGroup().getAttributeUses()) {
                 if (use.isRequired()) {
                     if ((th.relationship(expression.getItemType(), Saxon.Hej.pattern.NodeKindTest.ATTRIBUTE) == Saxon.Hej.type.Affinity.DISJOINT)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Type "+getDescription())+" defines a mandatory attribute ")+use.getTargetComponentName().getDisplayName())+", but there is no instruction to create such an attribute"));
-                        err.setLocation(expression.getLocation());
-                        err.setIsStaticError(true);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((((("Type "+getDescription())+" defines a mandatory attribute ")+use.getTargetComponentName().getDisplayName())+", but there is no instruction to create such an attribute")).withLocation(expression.getLocation()).asStaticError();
                     }
                     if ((expression is Saxon.Hej.expr.instruct.Block)) {
                         Saxon.Hej.expr.Operand[] children = ((Saxon.Hej.expr.instruct.Block)(expression)).getOperanda();
@@ -1727,9 +1724,7 @@ namespace Saxon.Eej.ee.schema {
                             }
                         }
                         if (!(foundPossible)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Type "+getDescription())+" defines a mandatory attribute ")+use.getTargetComponentName().getDisplayName())+", but there is no instruction to create such an attribute"));
-                            err.setLocation(expression.getLocation());
-                            err.setIsStaticError(true);
+                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Type "+getDescription())+" defines a mandatory attribute ")+use.getTargetComponentName().getDisplayName())+", but there is no instruction to create such an attribute")).withLocation(expression.getLocation()).asStaticError();
                             throw err;
                         }
                     }
@@ -1774,18 +1769,12 @@ namespace Saxon.Eej.ee.schema {
                                 } else {
                                     message = ((((("The content model does not allow element "+Saxon.Hej.trans.Err.wrap(elementName.getDisplayName(), Saxon.Hej.trans.Err.ELEMENT))+" to appear here")+(((openContentWildcard == null) ? "" : " (it does not match the open content wildcard)")))+". ")+sb);
                                 }
-                                Saxon.Hej.trans.XPathException ve = new Saxon.Hej.trans.XPathException(message);
-                                ve.setErrorCode("XPTY0004");
-                                ve.setLocation(child.getLocation());
-                                throw ve;
+                                throw new Saxon.Hej.trans.XPathException(message, "XPTY0004").withLocation(child.getLocation());
                             }
                             try {
                                 state = edge.makeTransition(state);
                             } catch (Saxon.Hej.type.ValidationException e) {
-                                Saxon.Hej.trans.XPathException ve = new Saxon.Hej.trans.XPathException(e.Message);
-                                ve.setErrorCode("XPTY0004");
-                                ve.setLocation(expression.getLocation());
-                                throw ve;
+                                throw new Saxon.Hej.trans.XPathException(e.Message, "XPTY0004").withLocation(expression.getLocation());
                             }
                         } else {
                             Saxon.Hej.type.ItemType t = child.getItemType();
@@ -1797,15 +1786,9 @@ namespace Saxon.Eej.ee.schema {
                     if (!(state.isFinalState())) {
                         int len = children.Length;
                         if ((len == 0)) {
-                            Saxon.Hej.trans.XPathException ve = new Saxon.Hej.trans.XPathException("The generated content is empty: the schema requires at least one child element");
-                            ve.setErrorCode("XPTY0004");
-                            ve.setLocation(expression.getLocation());
-                            throw ve;
+                            throw new Saxon.Hej.trans.XPathException("The generated content is empty: the schema requires at least one child element").withErrorCode("XPTY0004").withLocation(expression.getLocation());
                         } else {
-                            Saxon.Hej.trans.XPathException ve = new Saxon.Hej.trans.XPathException("The generated content is incomplete: the schema requires further child elements");
-                            ve.setErrorCode("XPTY0004");
-                            ve.setLocation(children[(len-1)].getChildExpression().getLocation());
-                            throw ve;
+                            throw new Saxon.Hej.trans.XPathException("The generated content is incomplete: the schema requires further child elements").withErrorCode("XPTY0004").withLocation(children[(len-1)].getChildExpression().getLocation());
                         }
                     }
                 }
@@ -1833,10 +1816,7 @@ namespace Saxon.Eej.ee.schema {
                     if (isEmptyContent()) {
                         return Saxon.Hej.om.EmptyAtomicSequence.getInstance();
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot get the typed value of an element ("+node.getDisplayName())+") with element-only content"));
-                        err.setErrorCode("FOTY0012");
-                        err.setIsTypeError(true);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("Cannot get the typed value of an element ("+node.getDisplayName())+") with element-only content")).withErrorCode("FOTY0012").asTypeError();
                     }
                 }
             }

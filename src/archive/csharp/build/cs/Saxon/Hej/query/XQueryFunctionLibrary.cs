@@ -24,11 +24,7 @@ namespace Saxon.Hej.query {
                     return ;
                 }
                 if (hasOverlappingArity(function, existing)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((((("Conflicting definition of function "+function.getDisplayName())+" (see line ")+existing.getLineNumber())+" in ")+existing.getSystemId())+')'));
-                    err.setErrorCode("XQST0034");
-                    err.setIsStaticError(true);
-                    err.setLocator(function);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((((((("Conflicting definition of function "+function.getDisplayName())+" (see line ")+existing.getLineNumber())+" in ")+existing.getSystemId())+')')).withErrorCode("XQST0034").asStaticError().withLocation(function);
                 }
             }
             Saxon.Impl.Helpers.MapUtils.Put(functions, keyObj, function);

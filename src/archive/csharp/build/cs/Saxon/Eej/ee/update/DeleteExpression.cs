@@ -52,9 +52,7 @@ namespace Saxon.Eej.ee.update {
                         Saxon.Hej.om.NodeInfo node;
                         while (((node = (Saxon.Hej.om.NodeInfo)(iter.next())) != null)) {
                             if (!((node.getTreeInfo().isMutable()))) {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Node to be deleted is not an updatable node", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
-                                err.setLocation(expr.getLocation());
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException("Node to be deleted is not an updatable node", Saxon.Hej.trans.SaxonErrorCode.SXUP0081).withLocation(expr.getLocation());
                             }
                             if ((node.getParent() == null)) {
                             } else {
@@ -63,9 +61,7 @@ namespace Saxon.Eej.ee.update {
                                     action.setOriginator(expr);
                                     ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
                                 } catch (Saxon.Hej.trans.XPathException e) {
-                                    e.maybeSetLocation(expr.getLocation());
-                                    e.maybeSetContext(context);
-                                    throw;
+                                    throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                                 }
                             }
                         }

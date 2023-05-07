@@ -5,10 +5,10 @@ namespace Saxon.Eej.ee.trans {
     public abstract class SaxonElementFactoryEE {
         public readonly static Saxon.Eej.xsltextn.ExtensionElementCreator FACTORY = localname => {
             if (localname.Equals("array")) {
-                return new Saxon.Hej.style.XSLArray();
+                return new Saxon.Eej.trans.XSLArray();
             }
             if (localname.Equals("array-member")) {
-                return new Saxon.Hej.style.XSLArrayMember();
+                return new Saxon.Eej.trans.XSLArrayMember();
             }
             if (localname.Equals("assign")) {
                 return new Saxon.Eej.xsltextn.style.SaxonAssign();

@@ -49,9 +49,7 @@ namespace Saxon.Hej.expr.accum {
                 }
                 return value;
             } catch (System.StackOverflowException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested accumulator evaluations. The accumulator definition may have cyclic dependencies", "XTDE3400", accumulator);
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested accumulator evaluations. The accumulator definition may have cyclic dependencies", "XTDE3400", accumulator).withXPathContext(context);
             }
         }
         private void logChange(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.Sequence value, Saxon.Hej.expr.XPathContext context, string phase) {

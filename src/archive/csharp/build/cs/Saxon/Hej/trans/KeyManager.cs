@@ -19,7 +19,7 @@ namespace Saxon.Hej.trans {
                 try {
                     Saxon.Hej.sxpath.IndependentContext sc = new Saxon.Hej.sxpath.IndependentContext(config);
                     sc.setPackageData(packageData);
-                    sc.setXPathLanguageLevel(31);
+                    sc.setXPathLanguageLevel(((packageData.getHostLanguageVersion() == 40) ? 40 : 31));
                     Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(sc);
                     Saxon.Hej.expr.Expression sf = Saxon.Hej.functions.SystemFunction.makeCall("string", rsc, new Saxon.Hej.expr.ContextItemExpression());
                     Saxon.Hej.expr.Expression use = Saxon.Hej.functions.SystemFunction.makeCall("tokenize", rsc, sf);
@@ -121,10 +121,7 @@ namespace Saxon.Hej.trans {
                 Saxon.Hej.trans.KeyIndex.Status status = index.getStatus();
                 if ((status == /*explicit enum*/ Saxon.Hej.trans.KeyIndex.Status.UNDER_CONSTRUCTION)) {
                     if (index.isCreatedInThisThread()) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Key definition "+keySet.getKeyName().getDisplayName())+" is circular"));
-                        de.setXPathContext(context);
-                        de.setErrorCode("XTDE0640");
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Key definition "+keySet.getKeyName().getDisplayName())+" is circular")).withXPathContext(context).withErrorCode("XTDE0640");
                     } else {
                         index = null;
                     }
@@ -161,10 +158,7 @@ namespace Saxon.Hej.trans {
                 Saxon.Hej.trans.KeyIndex.Status status = index.getStatus();
                 if ((status == /*explicit enum*/ Saxon.Hej.trans.KeyIndex.Status.UNDER_CONSTRUCTION)) {
                     if (index.isCreatedInThisThread()) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Key definition "+keySet.getKeyName().getDisplayName())+" is circular"));
-                        de.setXPathContext(context);
-                        de.setErrorCode("XTDE0640");
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Key definition "+keySet.getKeyName().getDisplayName())+" is circular")).withXPathContext(context).withErrorCode("XTDE0640");
                     } else {
                         index = null;
                     }

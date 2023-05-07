@@ -41,6 +41,9 @@ namespace Saxon.Hej.serialize {
                 if (((systemId == null) && (publicId == null))) {
                     if (Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(name.getLocalPart(), "html")) {
                         writer.writeAscii(DOCTYPE);
+                        if ("yes".Equals(outputProperties.getProperty("indent", "yes"))) {
+                            writer.writeAscii(NEWLINE);
+                        }
                     }
                 } else {
                     base.writeDocType(name, displayName, systemId, publicId);
@@ -50,6 +53,7 @@ namespace Saxon.Hej.serialize {
             }
         }
         private readonly static new byte[] DOCTYPE = Saxon.Hej.str.StringConstants.bytes("<!DOCTYPE HTML>");
+        private readonly static byte[] NEWLINE = Saxon.Hej.str.StringConstants.bytes("\n");
         protected internal override bool writeDocTypeWithNullSystemId() {
             return true;
         }

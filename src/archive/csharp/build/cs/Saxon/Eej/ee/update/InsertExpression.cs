@@ -85,61 +85,37 @@ namespace Saxon.Eej.ee.update {
                     System.Collections.Generic.IList<Saxon.Hej.om.Item> content = new System.Collections.Generic.List<Saxon.Hej.om.Item>();
                     Saxon.Hej.om.NodeInfo target = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/targetEval(context));
                     if ((target == null)) {
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Target of insert expression must not be empty", "XUDY0027");
-                        e.setLocation(expr.getLocation());
-                        e.setXPathContext(context);
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException("Target of insert expression must not be empty", "XUDY0027").withLocation(expr.getLocation()).withXPathContext(context);
                     }
                     int kind = target.getNodeKind();
                     if (((expr.position == Saxon.Hej.expr.parser.Token.AFTER) || (expr.position == Saxon.Hej.expr.parser.Token.BEFORE))) {
                         if (!((((((kind == Saxon.Hej.type.Type.ELEMENT) || (kind == Saxon.Hej.type.Type.TEXT)) || (kind == Saxon.Hej.type.Type.COMMENT)) || (kind == Saxon.Hej.type.Type.PROCESSING_INSTRUCTION))))) {
-                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("When inserting before or after a node, that node must "+"be an element, text, comment, or processing-instruction node"), "XUTY0006");
-                            e.setLocation(expr.getLocation());
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new Saxon.Hej.trans.XPathException(("When inserting before or after a node, that node must "+"be an element, text, comment, or processing-instruction node"), "XUTY0006").withLocation(expr.getLocation()).withXPathContext(context);
                         }
                     } else {
                         if (!((((kind == Saxon.Hej.type.Type.ELEMENT) || (kind == Saxon.Hej.type.Type.DOCUMENT))))) {
-                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("When inserting into a target node, that node must be an element or document node", "XUTY0005");
-                            e.setLocation(expr.getLocation());
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new Saxon.Hej.trans.XPathException("When inserting into a target node, that node must be an element or document node", "XUTY0005").withLocation(expr.getLocation()).withXPathContext(context);
                         }
                     }
                     Saxon.Hej.om.NodeInfo parent = (((expr.position == Saxon.Hej.expr.parser.Token.AFTER) || (expr.position == Saxon.Hej.expr.parser.Token.BEFORE)) ? target.getParent() : target);
                     if ((parent == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("When inserting before or after a node, that node must have a parent", "XUDY0029");
-                        err.setLocation(expr.getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("When inserting before or after a node, that node must have a parent", "XUDY0029").withLocation(expr.getLocation()).withXPathContext(context);
                     }
                     if (!(((parent is Saxon.Hej.om.MutableNodeInfo)))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Target node of insert expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
-                        err.setLocation(expr.getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Target node of insert expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081).withLocation(expr.getLocation()).withXPathContext(context);
                     }
                     bool foundNonAttribute = false;
                     Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/sourceEval(context);
                     for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                         if (((item is Saxon.Hej.om.NodeInfo) && (((Saxon.Hej.om.NodeInfo)(item)).getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE))) {
                             if (foundNonAttribute) {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Attributes must precede non-attributes in the list of nodes to be inserted", "XUTY0004");
-                                err.setLocation(expr.getLocation());
-                                err.setXPathContext(context);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException("Attributes must precede non-attributes in the list of nodes to be inserted", "XUTY0004").withLocation(expr.getLocation()).withXPathContext(context);
                             }
                             if ((parent.getNodeKind() != Saxon.Hej.type.Type.ELEMENT)) {
                                 if (((expr.position == Saxon.Hej.expr.parser.Token.AFTER) || (expr.position == Saxon.Hej.expr.parser.Token.BEFORE))) {
-                                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("When inserting an attribute before or after a node, that node must "+"have a parent and the parent must be an element"), "XUDY0030");
-                                    err.setLocation(expr.getLocation());
-                                    err.setXPathContext(context);
-                                    throw err;
+                                    throw new Saxon.Hej.trans.XPathException(("When inserting an attribute before or after a node, that node must "+"have a parent and the parent must be an element"), "XUDY0030").withLocation(expr.getLocation()).withXPathContext(context);
                                 } else {
-                                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("When inserting an attribute into a target node, the target node must be an element", "XUTY0022");
-                                    err.setLocation(expr.getLocation());
-                                    err.setXPathContext(context);
-                                    throw err;
+                                    throw new Saxon.Hej.trans.XPathException("When inserting an attribute into a target node, the target node must be an element", "XUTY0022").withLocation(expr.getLocation()).withXPathContext(context);
                                 }
                             }
                             Saxon.Hej.om.NodeInfo copiedNode = (Saxon.Hej.om.NodeInfo)(item);
@@ -161,9 +137,7 @@ namespace Saxon.Eej.ee.update {
                                 action.setOriginator(expr);
                                 ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
                             } catch (Saxon.Hej.trans.XPathException e) {
-                                e.maybeSetLocation(expr.getLocation());
-                                e.maybeSetContext(context);
-                                throw;
+                                throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                             }
                         } else {
                             foundNonAttribute = true;

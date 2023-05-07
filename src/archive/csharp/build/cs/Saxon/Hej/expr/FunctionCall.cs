@@ -178,10 +178,7 @@ namespace Saxon.Hej.expr {
                 }
             }
             if ((msg != null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, "XPST0017");
-                err.setIsStaticError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(msg, "XPST0017").asStaticError().withLocation(getLocation());
             }
             return numArgs;
         }

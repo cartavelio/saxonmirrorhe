@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions {
     public class ConstantFunction : Saxon.Hej.functions.SystemFunction {
-        public Saxon.Hej.om.GroundedValue value;
+        private readonly Saxon.Hej.om.GroundedValue value;
         public ConstantFunction(Saxon.Hej.om.GroundedValue value)  {
             this.value = value;
         }

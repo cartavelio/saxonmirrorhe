@@ -172,10 +172,7 @@ namespace Saxon.Hej.expr {
                                 if (clause.nameTest.matches(code)) {
                                     if (((o2 is Saxon.Hej.@event.EventMonitor) && ((Saxon.Hej.@event.EventMonitor)(o2)).hasBeenWrittenTo())) {
                                         string message = (err.Message+". The error could not be caught, because rollback-output=no was specified, and output was already written to the result tree");
-                                        Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(message, "XTDE3530");
-                                        xe.setLocation(err.getLocator());
-                                        xe.setXPathContext(context);
-                                        throw xe;
+                                        throw new Saxon.Hej.trans.XPathException(message, "XTDE3530").withLocation(err.getLocator()).withXPathContext(context);
                                     }
                                     Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();
                                     Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();

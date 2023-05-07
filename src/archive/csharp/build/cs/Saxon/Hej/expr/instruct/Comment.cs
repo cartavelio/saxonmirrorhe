@@ -40,9 +40,7 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     return checkContentXQuery(comment);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.setXPathContext(context);
-                    err.setLocation(getLocation());
-                    throw;
+                    throw err.withXPathContext(context).withLocation(getLocation());
                 }
             }
         }

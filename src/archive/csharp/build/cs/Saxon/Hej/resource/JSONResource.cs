@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.resource {
     public class JSONResource : Saxon.Hej.lib.Resource {
+        private readonly Saxon.Hej.Configuration config;
         private readonly string href;
         private string jsonStr;
         private Saxon.Hej.om.Item item;
@@ -10,6 +11,7 @@ namespace Saxon.Hej.resource {
         private Saxon.Hej.resource.AbstractResourceCollection.InputDetails details;
         public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.JSONResource(context, details);
         public JSONResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
+            this.config = context.getConfiguration();
             this.href = details.resourceUri;
             this.context = context;
             if ((details.encoding == null)) {
@@ -25,7 +27,7 @@ namespace Saxon.Hej.resource {
                 return item;
             }
             if ((jsonStr == null)) {
-                jsonStr = details.obtainCharacterContent();
+                jsonStr = details.obtainCharacterContent(config);
                 if ((jsonStr == null)) {
                     return null;
                 }

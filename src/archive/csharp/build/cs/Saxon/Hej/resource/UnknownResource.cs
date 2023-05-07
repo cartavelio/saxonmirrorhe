@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.resource {
     public class UnknownResource : Saxon.Hej.lib.Resource {
+        private readonly Saxon.Hej.Configuration config;
         private readonly Saxon.Hej.expr.XPathContext context;
         private readonly Saxon.Hej.resource.AbstractResourceCollection.InputDetails details;
         public static readonly Saxon.Hej.lib.ResourceFactory FACTORY = /* ctor#2 */ (a, b) => new Saxon.Hej.resource.UnknownResource(a, b);
         public UnknownResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
+            this.config = context.getConfiguration();
             this.context = context;
             this.details = details;
         }
@@ -19,7 +21,7 @@ namespace Saxon.Hej.resource {
                 stream = new System.IO.MemoryStream(details.binaryContent);
             } else {
                 try {
-                    stream = details.getInputStream();
+                    stream = details.getInputStream(config);
                 } catch (System.IO.IOException e) {
                     if ((details.onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL)) {
                         throw new Saxon.Hej.trans.XPathException(e);

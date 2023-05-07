@@ -149,29 +149,9 @@ namespace Saxon.Hej.style {
             try {
                 qName = Saxon.Hej.om.StructuredQName.fromLexicalQName((lexicalQName), false, true, this);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.setIsStaticError(true);
-                if ((errorCode == null)) {
-                    string code = e.getErrorCodeLocalPart();
-                    if ("FONS0004".Equals(code)) {
-                        e.setErrorCode("XTSE0280");
-                    } else {
-                        if ("FOCA0002".Equals(code)) {
-                            e.setErrorCode("XTSE0020");
-                        } else {
-                            if ((code == null)) {
-                                e.setErrorCode("XTSE0020");
-                            }
-                        }
-                    }
-                } else {
-                    e.setErrorCode(errorCode);
-                }
-                if ((attributeName == null)) {
-                    e.setLocator(this);
-                } else {
-                    e.setLocator(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromEQName((attributeName))));
-                }
-                compileError(e);
+                string requestedError = ((errorCode == null) ? "XTSE0020" : errorCode);
+                Saxon.Hej.trans.XPathException e2 = e.asStaticError().replacingErrorCode("FONS0004", "XTSE0280").replacingErrorCode("FOCA0002", requestedError).maybeWithErrorCode(requestedError).withLocation(((attributeName == null) ? this : new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromEQName((attributeName)))));
+                compileError(e2);
                 qName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "error-name");
             }
             if (Saxon.Hej.om.NamespaceUri.isReserved(qName.getNamespaceUri())) {
@@ -342,10 +322,8 @@ namespace Saxon.Hej.style {
                 return p;
             } catch (Saxon.Hej.trans.XPathException err) {
                 err.maybeSetErrorCode("XTSE0340");
-                if ("XPST0003".Equals(err.getErrorCodeLocalPart())) {
-                    err.setErrorCode("XTSE0340");
-                }
-                compileError(err);
+                Saxon.Hej.trans.XPathException err2 = err.replacingErrorCode("XPST0003", "XTSE0340");
+                compileError(err2);
                 Saxon.Hej.pattern.NodeTestPattern nsp = new Saxon.Hej.pattern.NodeTestPattern(Saxon.Hej.pattern.AnyNodeTest.getInstance());
                 nsp.setLocation(allocateLocation());
                 return nsp;
@@ -647,9 +625,7 @@ namespace Saxon.Hej.style {
             if (((psm != null) && psm.isDeclaredModes())) {
                 psm.addFixupAction(() => {
                     if ((psm.getRuleManager().obtainMode(checkedName, false) == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Mode "+checkedName.getDisplayName())+" is not declared in an xsl:mode declaration"), "XTSE3085");
-                        err.setLocation(this);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("Mode "+checkedName.getDisplayName())+" is not declared in an xsl:mode declaration"), "XTSE3085").withLocation(this);
                     }
                 } );
             }
@@ -830,8 +806,7 @@ namespace Saxon.Hej.style {
                 return exp;
             } catch (Saxon.Hej.trans.XPathException err) {
                 if (err.isReportableStatically()) {
-                    err.setLocation(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromClarkName(name)));
-                    compileError(err);
+                    compileError(err.withLocation(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromClarkName(name))));
                     return exp;
                 } else {
                     Saxon.Hej.expr.ErrorExpression erexp = new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(err));
@@ -1286,7 +1261,7 @@ namespace Saxon.Hej.style {
             if ((err.getLocator() == null)) {
                 err.setLocation(this);
             }
-            Saxon.Hej.trans.XmlProcessingIncident se = new Saxon.Hej.trans.XmlProcessingIncident(err.Message, err.getErrorCodeLocalPart(), err.getLocator());
+            Saxon.Hej.trans.XmlProcessingIncident se = new Saxon.Hej.trans.XmlProcessingIncident(err.Message, err.showErrorCode(), err.getLocator());
             se.setHostLanguage(Saxon.Api.HostLanguage.XSLT);
             compileError(se);
         }
@@ -1308,6 +1283,10 @@ namespace Saxon.Hej.style {
             Saxon.Hej.om.StructuredQName att = Saxon.Hej.om.StructuredQName.fromClarkName(attributeName);
             Saxon.Hej.s9api.Location location = new Saxon.Hej.tree.AttributeLocation(this, att);
             compileError(new Saxon.Hej.trans.XPathException(message, errorCode, location));
+        }
+        public void compileErrorInAttribute(Saxon.Hej.trans.XPathException ex, string attributeName) {
+            Saxon.Hej.om.StructuredQName att = Saxon.Hej.om.StructuredQName.fromClarkName(attributeName);
+            compileError(ex.withLocation(new Saxon.Hej.tree.AttributeLocation(this, att)));
         }
         protected internal void invalidAttribute(string attributeName, string allowedValues) {
             compileErrorInAttribute(((((("Attribute "+getDisplayName())+"/@")+attributeName)+" must be ")+allowedValues), "XTSE0020", attributeName);

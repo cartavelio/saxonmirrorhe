@@ -192,7 +192,7 @@ namespace Saxon.Hej.style {
                 try {
                     declaredType = sourceElement.makeSequenceType(asAtt);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    sourceElement.compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "as");
+                    sourceElement.compileErrorInAttribute(e.Message, e.showErrorCode(), "as");
                 }
             }
             if ((extraAsAtt != null)) {
@@ -200,7 +200,7 @@ namespace Saxon.Hej.style {
                 try {
                     extraResultType = sourceElement.makeExtendedSequenceType(extraAsAtt);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    sourceElement.compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "saxon:as");
+                    sourceElement.compileErrorInAttribute(e.Message, e.showErrorCode(), "saxon:as");
                     extraResultType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
                 }
                 if ((asAtt != null)) {

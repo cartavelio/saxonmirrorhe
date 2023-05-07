@@ -434,9 +434,7 @@ namespace Saxon.Eej.ee.optim {
                     foreach (string reason in reasons) {
                         message.append("\n  * ").append(reason);
                     }
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message.ToString());
-                    err.setErrorCode("XTSE3430");
-                    err.setLocator(sourceTemplate);
+                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message.ToString(), "XTSE3430").withLocation(sourceTemplate);
                     if (fallback) {
                         message.append("\n  * Falling back to non-streaming implementation");
                         sourceTemplate.getStaticContext().issueWarning(message.ToString(), Saxon.Hej.trans.SaxonErrorCode.SXWN9024, sourceTemplate);
@@ -1236,7 +1234,7 @@ namespace Saxon.Eej.ee.optim {
                     return null;
                 }
                 Saxon.Hej.expr.instruct.SlotManager slots = getConfiguration().makeSlotManager();
-                Saxon.Hej.om.StructuredQName valueName = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "value");
+                Saxon.Hej.om.StructuredQName valueName = Saxon.Hej.om.NamespaceUri.NULL.qName("value");
                 slots.allocateSlotNumber(valueName);
                 Saxon.Hej.expr.SuppliedParameterReference @ref = new Saxon.Hej.expr.SuppliedParameterReference(0);
                 Saxon.Hej.expr.ArithmeticExpression increment = new Saxon.Hej.expr.ArithmeticExpression(@ref, Saxon.Hej.expr.parser.Token.PLUS, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.PLUS_ONE, ni));

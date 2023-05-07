@@ -80,10 +80,7 @@ namespace Saxon.Hej.query {
                             if (!(config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_EXTERNAL_FUNCTIONS))) {
                                 msg += ". Note: external function calls have been disabled";
                             }
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg);
-                            err.setErrorCode("XPST0017");
-                            err.setIsStaticError(true);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(msg).withErrorCode("XPST0017").asStaticError();
                         }
                     }
                 }

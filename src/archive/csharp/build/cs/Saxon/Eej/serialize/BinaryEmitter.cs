@@ -59,9 +59,7 @@ namespace Saxon.Eej.serialize {
                 streamResult.setOutputStream(outputStream);
                 mustClose = true;
             } catch (Exception fnf) when (fnf is Saxon.Ejava.io.FileNotFoundException || fnf is System.UriFormatException || fnf is Saxon.Ejava.lang.IllegalArgumentException) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Unable to write to output destination", fnf);
-                err.setErrorCode(Saxon.Hej.trans.SaxonErrorCode.SXRD0004);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Unable to write to output destination", fnf).withErrorCode(Saxon.Hej.trans.SaxonErrorCode.SXRD0004);
             }
             return outputStream;
         }

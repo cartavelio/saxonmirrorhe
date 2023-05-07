@@ -117,9 +117,7 @@ namespace Saxon.Hej.style {
             try {
                 symbols.setProperty(propertyCode, value, precedence);
             } catch (Saxon.Hej.trans.XPathException err) {
-                string attName = Saxon.Hej.trans.DecimalSymbols.propertyNames[propertyCode];
-                err.setLocation(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromClarkName(attName)));
-                throw;
+                throw err.withLocation(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromClarkName(Saxon.Hej.trans.DecimalSymbols.propertyNames[propertyCode])));
             }
         }
         public override void index(Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.style.PrincipalStylesheetModule top) {

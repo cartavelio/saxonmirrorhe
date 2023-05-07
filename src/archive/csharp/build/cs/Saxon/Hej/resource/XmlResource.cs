@@ -48,7 +48,7 @@ namespace Saxon.Hej.resource {
                         source = new Saxon.Ejavax.xml.transform.stream.StreamSource(new System.IO.MemoryStream(details.binaryContent), resourceURI);
                     } else {
                         try {
-                            System.IO.Stream stream = details.getInputStream();
+                            System.IO.Stream stream = details.getInputStream(config);
                             source = new Saxon.Ejavax.xml.transform.stream.StreamSource(stream, resourceURI);
                         } catch (System.IO.IOException e) {
                             if ((details.onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL)) {
@@ -68,11 +68,10 @@ namespace Saxon.Hej.resource {
                     doc = config.buildDocumentTree(source, options).getRootNode();
                 } catch (Saxon.Hej.trans.XPathException e) {
                     if ((details.onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_FAIL)) {
-                        Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(((("collection(): failed to parse XML file "+source.getSystemId())+": ")+e.Message), e.getErrorCodeLocalPart());
-                        throw e2;
+                        throw e.withMessage(((("collection(): failed to parse XML file "+source.getSystemId())+": ")+e.Message));
                     } else {
                         if ((details.onError == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_WARNING)) {
-                            context.getController().warning(((("collection(): failed to parse XML file "+source.getSystemId())+": ")+e.Message), e.getErrorCodeLocalPart(), null);
+                            context.getController().warning(((("collection(): failed to parse XML file "+source.getSystemId())+": ")+e.Message), e.showErrorCode(), null);
                         }
                     }
                     doc = null;

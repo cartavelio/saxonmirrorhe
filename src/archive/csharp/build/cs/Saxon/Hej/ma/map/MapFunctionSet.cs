@@ -34,6 +34,8 @@ namespace Saxon.Hej.ma.map {
             register("for-each", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapForEach(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, actionType, (ONE|INS), null));
             register("get", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapGet(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null));
             if ((version>=40)) {
+                Saxon.Hej.type.ItemType fallbackType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ATOMIC}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
+                register("get", 3, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapGet(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null).arg(2, fallbackType, (ONE|INS), null));
                 Saxon.Hej.type.SpecificFunctionType mapBuildKeyArg = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC);
                 Saxon.Hej.type.SpecificFunctionType mapBuildValueArg = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
                 register("index", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapBuild(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, mapBuildKeyArg, ONE, null));
@@ -86,7 +88,7 @@ namespace Saxon.Hej.ma.map {
             internal string pendingWarning = null;
             public override void supplyTypeInformation(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType, Saxon.Hej.expr.Expression[] arguments) {
                 Saxon.Hej.type.ItemType it = arguments[0].getItemType();
-                if ((it is Saxon.Hej.ma.map.TupleType)) {
+                if (((it is Saxon.Hej.ma.map.TupleType) && (arguments.Length == 2))) {
                     if ((arguments[1] is Saxon.Hej.expr.StringLiteral)) {
                         string key = ((Saxon.Hej.expr.StringLiteral)(arguments[1])).stringify();
                         if ((((Saxon.Hej.ma.map.TupleType)(it)).getFieldType(key) == null)) {
@@ -105,24 +107,25 @@ namespace Saxon.Hej.ma.map {
                 }
             }
             public override Saxon.Hej.type.ItemType getResultItemType(Saxon.Hej.expr.Expression[] args) {
-                Saxon.Hej.type.ItemType mapType = args[0].getItemType();
-                if (((mapType is Saxon.Hej.ma.map.RecordTest) && (args[1] is Saxon.Hej.expr.StringLiteral))) {
-                    string key = ((Saxon.Hej.expr.StringLiteral)(args[1])).stringify();
-                    Saxon.Hej.ma.map.RecordTest tit = (Saxon.Hej.ma.map.RecordTest)(mapType);
-                    Saxon.Hej.value.SequenceType valueType = tit.getFieldType(key);
-                    if ((valueType == null)) {
-                        warning((("Field "+key)+" is not defined in tuple type"));
-                        return Saxon.Hej.type.AnyItemType.getInstance();
+                if ((args.Length == 2)) {
+                    Saxon.Hej.type.ItemType mapType = args[0].getItemType();
+                    if (((mapType is Saxon.Hej.ma.map.RecordTest) && (args[1] is Saxon.Hej.expr.StringLiteral))) {
+                        string key = ((Saxon.Hej.expr.StringLiteral)(args[1])).stringify();
+                        Saxon.Hej.ma.map.RecordTest tit = (Saxon.Hej.ma.map.RecordTest)(mapType);
+                        Saxon.Hej.value.SequenceType valueType = tit.getFieldType(key);
+                        if ((valueType == null)) {
+                            warning((("Field "+key)+" is not defined in record type"));
+                            return Saxon.Hej.type.AnyItemType.getInstance();
+                        } else {
+                            return valueType.getPrimaryType();
+                        }
                     } else {
-                        return valueType.getPrimaryType();
-                    }
-                } else {
-                    if ((mapType is Saxon.Hej.ma.map.MapType)) {
-                        return ((Saxon.Hej.ma.map.MapType)(mapType)).getValueType().getPrimaryType();
-                    } else {
-                        return base.getResultItemType(args);
+                        if ((mapType is Saxon.Hej.ma.map.MapType)) {
+                            return ((Saxon.Hej.ma.map.MapType)(mapType)).getValueType().getPrimaryType();
+                        }
                     }
                 }
+                return base.getResultItemType(args);
             }
             public override int getCardinality(Saxon.Hej.expr.Expression[] args) {
                 Saxon.Hej.type.ItemType mapType = args[0].getItemType();
@@ -131,7 +134,7 @@ namespace Saxon.Hej.ma.map {
                     Saxon.Hej.ma.map.RecordTest tit = (Saxon.Hej.ma.map.RecordTest)(mapType);
                     Saxon.Hej.value.SequenceType valueType = tit.getFieldType(key);
                     if ((valueType == null)) {
-                        warning((("Field "+key)+" is not defined in tuple type"));
+                        warning((("Field "+key)+" is not defined in record type"));
                         return Saxon.Hej.expr.StaticProperty.ALLOWS_MANY;
                     } else {
                         return valueType.getCardinality();
@@ -162,7 +165,12 @@ namespace Saxon.Hej.ma.map {
                 Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(arguments[1].head());
                 Saxon.Hej.om.Sequence value = map.get(key);
                 if ((value == null)) {
-                    return Saxon.Hej.value.EmptySequence.getInstance();
+                    if ((arguments.Length>2)) {
+                        Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(arguments[2].head());
+                        return dynamicCall(fn, context, key);
+                    } else {
+                        return Saxon.Hej.value.EmptySequence.getInstance();
+                    }
                 } else {
                     return value;
                 }

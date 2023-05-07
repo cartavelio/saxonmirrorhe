@@ -24,9 +24,7 @@ namespace Saxon.Eej.ee.stream.feed {
                 next.startElement(elemName, typeCode, instr.getLocation(), properties);
                 instr.outputNamespaceNodes(next, elemName, null);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(instr.getLocation());
-                e.maybeSetContext(context);
-                throw;
+                throw e.maybeWithLocation(instr.getLocation()).maybeWithContext(context);
             }
         }
         protected internal override void processRight(Saxon.Hej.expr.XPathContext context) {

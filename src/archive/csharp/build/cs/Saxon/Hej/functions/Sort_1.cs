@@ -40,9 +40,7 @@ namespace Saxon.Hej.functions {
     }
 } );
             } catch (System.InvalidCastException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message));
-                err.setErrorCode("XPTY0004");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message), "XPTY0004").asTypeError();
             }
             System.Collections.Generic.List<Saxon.Hej.om.Item> outputList = new System.Collections.Generic.List<Saxon.Hej.om.Item>(inputList.Count);
             foreach (Saxon.Hej.functions.Sort_1.ItemToBeSorted member in inputList) {

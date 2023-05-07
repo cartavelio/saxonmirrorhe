@@ -451,10 +451,14 @@ namespace Saxon.Hej.functions {
             processor.setConfigurationProperty(Saxon.Hej.lib.Feature<Saxon.Hej.Configuration>.CONFIGURATION, targetConfig);
             int languageVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             checkTransformOptions(options, context, languageVersion);
+            bool request40 = false;
             if ((Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version") != null)) {
-                double targetVersion = ((Saxon.Hej.value.BigDecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head())).getDoubleValue();
-                if (((targetVersion*10)>languageVersion)) {
-                    throw new Saxon.Hej.trans.XPathException("The transform option xslt-version is higher than the language version supported by this processor", "FOXT0002");
+                Saxon.Hej.value.BigDecimalValue requestedVersion = ((Saxon.Hej.value.BigDecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head()));
+                if (((requestedVersion.getDoubleValue()*10)>languageVersion)) {
+                    throw new Saxon.Hej.trans.XPathException("The transform option xslt-version is higher than the language version supported by the calling transformation", "FOXT0002");
+                }
+                if ((requestedVersion.getDoubleValue() == 4)) {
+                    request40 = true;
                 }
             }
             string principalInput = oneOf(options, "source-node", "source-location", "initial-match-selection");
@@ -483,6 +487,9 @@ namespace Saxon.Hej.functions {
             xsltCompiler.setResourceResolver(context.getResourceResolver());
             xsltCompiler.setJustInTimeCompilation(false);
             xsltCompiler.setErrorReporter(context.getErrorReporter());
+            if (request40) {
+                xsltCompiler.setXsltLanguageVersion("4.0");
+            }
             if ((Saxon.Impl.Helpers.MapUtils.Get(options, "static-params") != null)) {
                 setStaticParams(options, xsltCompiler, allowTypedNodes);
             }

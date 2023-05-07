@@ -77,9 +77,7 @@ namespace Saxon.Hej.regex {
                     flags |= Saxon.Ejava.util.regex.Pattern.CANON_EQ;
                     break ;
                   default:
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Invalid character '"+c)+"' in regular expression flags"));
-                    err.setErrorCode("FORX0001");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Invalid character '"+c)+"' in regular expression flags"), "FORX0001");
                 }
             }
             return flags;

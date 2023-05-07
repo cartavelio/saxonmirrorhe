@@ -22,8 +22,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 try {
                     next.endDocument();
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.setXPathContext(context);
-                    throw;
+                    throw err.withXPathContext(context);
                 }
                 next.close();
             }

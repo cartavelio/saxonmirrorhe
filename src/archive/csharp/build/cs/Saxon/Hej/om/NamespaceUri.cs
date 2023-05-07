@@ -24,6 +24,9 @@ namespace Saxon.Hej.om {
         public bool isEmpty() {
             return (this == Saxon.Hej.om.NamespaceUri.NULL);
         }
+        public Saxon.Hej.om.StructuredQName qName(string localName) {
+            return new Saxon.Hej.om.StructuredQName("", this, localName);
+        }
         public static readonly Saxon.Hej.om.NamespaceUri NULL = Saxon.Hej.om.NamespaceUri.of("");
         public static readonly Saxon.Hej.om.NamespaceUri XML = Saxon.Hej.om.NamespaceUri.of("http://www.w3.org/XML/1998/namespace");
         public static readonly Saxon.Hej.om.NamespaceUri XSLT = Saxon.Hej.om.NamespaceUri.of("http://www.w3.org/1999/XSL/Transform");

@@ -288,7 +288,7 @@ namespace Saxon.Eej.config {
         public override void addSchemaSource(Saxon.Ejavax.xml.transform.Source schemaSource, Saxon.Hej.lib.ErrorReporter errorReporter) {
             addSchemaSource(schemaSource, errorReporter, newSchemaCompiler());
         }
-        public void addSchemaSource(Saxon.Ejavax.xml.transform.Source schemaSource, Saxon.Hej.lib.ErrorReporter errorReporter, Saxon.Eej.ee.schema.SchemaCompiler compiler) {
+        public void addSchemaSource(Saxon.Ejavax.xml.transform.Source schemaSource, Saxon.Hej.lib.ErrorReporter errorReporter, Saxon.Eej.ee.schema.SchemaCompiler compiler) { lock(this) {
             try {
                 if ((errorReporter != null)) {
                     compiler.setErrorReporter(errorReporter);
@@ -315,7 +315,7 @@ namespace Saxon.Eej.config {
                     throw new Saxon.Hej.type.SchemaException(xe);
                 }
             }
-        }
+        }}
         public void addSchema(Saxon.Eej.ee.schema.PreparedSchema pschema) { lock(this) {
             checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", pschema.getLocalLicenseId());
             if ((pschema == superSchema)) {
@@ -524,6 +524,7 @@ namespace Saxon.Eej.config {
                 }
                 vc.setController(pipe.getController());
                 vc.setValidationParams(@params);
+                pipe.setComponent("com.saxonica.ee.validate.ValidationContext", vc);
                 if (validationOptions.isCheckEntityReferences()) {
                     Saxon.Eej.ee.validate.EntityValidator ev = new Saxon.Eej.ee.validate.EntityValidator(destination);
                     ev.setValidationContext(vc);

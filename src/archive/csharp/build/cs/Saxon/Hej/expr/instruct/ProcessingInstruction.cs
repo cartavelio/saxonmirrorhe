@@ -65,9 +65,7 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     return checkContentXQuery(data);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.setXPathContext(context);
-                    err.setLocation(getLocation());
-                    throw;
+                    throw err.withLocation(getLocation()).withXPathContext(context);
                 }
             }
         }
@@ -94,9 +92,7 @@ namespace Saxon.Hej.expr.instruct {
             if (((av is Saxon.Hej.value.StringValue) && !(((av is Saxon.Hej.value.AnyURIValue))))) {
                 return checkName(av, context);
             } else {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Processing instruction name is not a string");
-                e.setXPathContext(context);
-                e.setErrorCode("XPTY0004");
+                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Processing instruction name is not a string").withXPathContext(context).withErrorCode("XPTY0004");
                 throw dynamicError(getLocation(), e, context);
             }
         }
@@ -104,23 +100,16 @@ namespace Saxon.Hej.expr.instruct {
             if (((name is Saxon.Hej.value.StringValue) && !(((name is Saxon.Hej.value.AnyURIValue))))) {
                 string expandedName = Saxon.Hej.value.Whitespace.trim(name.getStringValue());
                 if (!(Saxon.Hej.om.NameChecker.isValidNCName(expandedName))) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Processing instruction name "+Saxon.Hej.trans.Err.wrap(expandedName))+" is not a valid NCName"));
-                    e.setXPathContext(context);
-                    e.setErrorCode((isXSLT() ? "XTDE0890" : "XQDY0041"));
+                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Processing instruction name "+Saxon.Hej.trans.Err.wrap(expandedName))+" is not a valid NCName")).withXPathContext(context).withErrorCode((isXSLT() ? "XTDE0890" : "XQDY0041"));
                     throw dynamicError(getLocation(), e, context);
                 }
                 if (Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(expandedName, "xml")) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Processing instructions cannot be named 'xml' in any combination of upper/lower case");
-                    e.setXPathContext(context);
-                    e.setErrorCode((isXSLT() ? "XTDE0890" : "XQDY0064"));
+                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Processing instructions cannot be named 'xml' in any combination of upper/lower case").withXPathContext(context).withErrorCode((isXSLT() ? "XTDE0890" : "XQDY0064"));
                     throw dynamicError(getLocation(), e, context);
                 }
                 return expandedName;
             } else {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Processing instruction name "+Saxon.Hej.trans.Err.wrap(name.getUnicodeStringValue()))+" is not of type xs:string or xs:untypedAtomic"));
-                e.setXPathContext(context);
-                e.setErrorCode("XPTY0004");
-                e.setIsTypeError(true);
+                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Processing instruction name "+Saxon.Hej.trans.Err.wrap(name.getUnicodeStringValue()))+" is not of type xs:string or xs:untypedAtomic")).withXPathContext(context).withErrorCode("XPTY0004").asTypeError();
                 throw dynamicError(getLocation(), e, context);
             }
         }

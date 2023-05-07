@@ -408,16 +408,10 @@ namespace Saxon.Hej.value {
             return (getLengthInSeconds()).GetHashCode();
         }
         public virtual Saxon.Hej.value.DurationValue add(Saxon.Hej.value.DurationValue other) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be added");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be added", "XPTY0004").asTypeError();
         }
         public virtual Saxon.Hej.value.DurationValue subtract(Saxon.Hej.value.DurationValue other) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be subtracted");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be subtracted").withErrorCode("XPTY0004").asTypeError();
         }
         public virtual Saxon.Hej.value.DurationValue negate() {
             if (_negative) {
@@ -430,28 +424,16 @@ namespace Saxon.Hej.value {
             return multiply((double)(factor));
         }
         public virtual Saxon.Hej.value.DurationValue multiply(double factor) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be multiplied by a number");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be multiplied by a number", "XPTY0004").asTypeError();
         }
         public virtual Saxon.Hej.value.DurationValue multiply(Singulink.Numerics.BigDecimal factor) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be multiplied by a number");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be multiplied by a number", "XPTY0004").asTypeError();
         }
         public virtual Saxon.Hej.value.DurationValue divide(double factor) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be divided by a number");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be divided by a number", "XPTY0004").asTypeError();
         }
         public virtual Saxon.Hej.value.BigDecimalValue divide(Saxon.Hej.value.DurationValue other) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be divided by another duration");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Only subtypes of xs:duration can be divided by another duration", "XPTY0004").asTypeError();
         }
         public Saxon.Hej.value.DurationValue.DurationComparable getSchemaComparable() {
             int m = this._months;

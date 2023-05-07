@@ -31,8 +31,7 @@ namespace Saxon.Hej.tree.tiny {
                 try {
                     checkNotNamespaceSensitiveElement(type, nodeNr);
                 } catch (Saxon.Hej.@event.CopyNamespaceSensitiveException e) {
-                    e.setErrorCode((receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
-                    throw;
+                    throw e.withErrorCode((receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
                 }
             }
             System.Func<Saxon.Hej.om.NodeInfo,System.Object> informee = receiver.getPipelineConfiguration().getCopyInformee();

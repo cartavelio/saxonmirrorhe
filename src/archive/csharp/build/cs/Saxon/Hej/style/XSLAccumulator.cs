@@ -65,7 +65,7 @@ namespace Saxon.Hej.style {
                                     Saxon.Hej.value.SequenceType requiredType = makeSequenceType(value);
                                     accumulator.setType(requiredType);
                                 } catch (Saxon.Hej.trans.XPathException e) {
-                                    compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "as");
+                                    compileErrorInAttribute(e, "as");
                                 }
                             } else {
                                 if ((attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && attName.getLocalPart().Equals("trace"))) {
@@ -118,7 +118,7 @@ namespace Saxon.Hej.style {
                 Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
                 newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
                 newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
-                slotManager.allocateSlotNumber(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "value"));
+                slotManager.allocateSlotNumber(Saxon.Hej.om.NamespaceUri.NULL.qName("value"));
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(newValueExp, 1, slotManager);
                 bool isPreDescent = !(rule.isPostDescent());
                 Saxon.Hej.trans.SimpleMode mode = (isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules());

@@ -13,6 +13,9 @@ namespace Saxon.Hej.ma.arrays {
         }
         private void init(int version) {
             register("append", 2, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayAppend(), Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|NAV), null));
+            register("build", 1, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayBuild(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|NAV), null));
+            Saxon.Hej.type.ItemType buildFunctionType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
+            register("build", 2, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayBuild(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|NAV), null).arg(1, buildFunctionType, (ONE|INS), null));
             Saxon.Hej.type.ItemType filterFunctionType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
             register("filter", 2, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayFilter(), Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, (ONE|INS), null).arg(1, filterFunctionType, (ONE|INS), null));
             register("flatten", 1, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayFlatten(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|ABS), null));
@@ -40,6 +43,8 @@ namespace Saxon.Hej.ma.arrays {
             register("_to-sequence", 1, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayToSequence(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, (ONE|INS), null));
             register("_from-sequence", 1, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayFromSequence(), Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|INS), null));
             if ((version>=40)) {
+                Saxon.Hej.type.ItemType fallbackType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_INTEGER}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
+                register("get", 3, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayGet(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.INTEGER, (ONE|ABS), null).arg(2, fallbackType, (ONE|INS), null));
                 register("empty", 1, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayEmpty(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, (ONE|INS), null));
                 register("exists", 1, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayExists(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, (ONE|INS), null));
                 register("foot", 1, e => e.populate(() => new Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayFoot(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE, (ONE|INS), null));
@@ -222,7 +227,17 @@ namespace Saxon.Hej.ma.arrays {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(arguments[0].head());
                 Saxon.Hej.value.IntegerValue index = (Saxon.Hej.value.IntegerValue)(arguments[1].head());
-                return array.get((checkSubscript(index, array.arrayLength())-1));
+                if ((arguments.Length<=2)) {
+                    return array.get((checkSubscript(index, array.arrayLength())-1));
+                } else {
+                    int i = index.asSubscript();
+                    if (((i<=0) || (i>=array.arrayLength()))) {
+                        Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(arguments[2].head());
+                        return dynamicCall(fn, context, index);
+                    } else {
+                        return array.get((i-1));
+                    }
+                }
             }
         
         }
@@ -372,6 +387,34 @@ namespace Saxon.Hej.ma.arrays {
             }
         
         }
+        public class ArrayBuild : Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayGeneratingFunction {
+            public override Saxon.Hej.ma.arrays.ArrayItem call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>(expectedSize());
+                Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
+                if ((arguments.Length == 1)) {
+                    try {
+                        for (Saxon.Hej.om.Item it; ((it = iter.next()) != null); ) {
+                            members.Add(it);
+                        }
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        iter.close();
+                        throw e.getXPathException();
+                    }
+                } else {
+                    Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
+                    try {
+                        for (Saxon.Hej.om.Item it; ((it = iter.next()) != null); ) {
+                            members.Add(dynamicCall(fn, context, new Saxon.Hej.om.GroundedValue[]{it}).materialize());
+                        }
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        iter.close();
+                        throw e.getXPathException();
+                    }
+                }
+                return makeArray(members);
+            }
+        
+        }
         public class ArrayTrunk : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.ma.arrays.ArrayItem call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(arguments[0].head());
@@ -432,12 +475,12 @@ namespace Saxon.Hej.ma.arrays {
                 }
             }
             public override Saxon.Hej.functions.Fold getFold(Saxon.Hej.expr.XPathContext context, params Saxon.Hej.om.Sequence[]  additionalArguments) {
-                return new Inner_Fold_264(this);
+                return new Inner_Fold_288(this);
             }
         
-            private class Inner_Fold_264 : Saxon.Hej.functions.Fold {
+            private class Inner_Fold_288 : Saxon.Hej.functions.Fold {
                 private readonly ArrayFromSequence outerInstance;
-                public Inner_Fold_264(ArrayFromSequence outerInstance) {
+                public Inner_Fold_288(ArrayFromSequence outerInstance) {
                     this.outerInstance = outerInstance;
                     members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
                 }
@@ -455,9 +498,9 @@ namespace Saxon.Hej.ma.arrays {
 
         }
     
-        private class Inner_Fold_264 : Saxon.Hej.functions.Fold {
+        private class Inner_Fold_288 : Saxon.Hej.functions.Fold {
             private readonly ArrayFromSequence outerInstance;
-            public Inner_Fold_264(ArrayFromSequence outerInstance) {
+            public Inner_Fold_288(ArrayFromSequence outerInstance) {
                 this.outerInstance = outerInstance;
                 members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
             }

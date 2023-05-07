@@ -200,17 +200,11 @@ namespace Saxon.Hej.expr.instruct {
                         setCollationNameExpression(new Saxon.Hej.expr.StringLiteral(collationNameString));
                         collator = visitor.getConfiguration().getCollation(collationNameString);
                         if ((collator == null)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Unknown collation "+Saxon.Hej.trans.Err.wrap(collationURI.ToString(), Saxon.Hej.trans.Err.URI)));
-                            err.setErrorCode("XTDE1110");
-                            err.setLocation(getLocation());
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(("Unknown collation "+Saxon.Hej.trans.Err.wrap(collationURI.ToString(), Saxon.Hej.trans.Err.URI))).withErrorCode("XTDE1110").withLocation(getLocation());
                         }
                     }
                 } catch (System.UriFormatException err) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Collation name '"+getCollationNameExpression())+"' is not a valid URI"));
-                    e.setErrorCode("XTDE1110");
-                    e.setLocation(getLocation());
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException((("Collation name '"+getCollationNameExpression())+"' is not a valid URI")).withErrorCode("XTDE1110").withLocation(getLocation());
                 }
             }
             return this;
@@ -298,8 +292,7 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     return context.getConfiguration().getCollation(cname, getStaticBaseURIString(), "FOCH0002");
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.setLocation(getLocation());
-                    throw;
+                    throw e.withLocation(getLocation());
                 }
             } else {
                 return Saxon.Hej.expr.sort.CodepointCollator.getInstance();

@@ -88,10 +88,7 @@ namespace Saxon.Hej.expr.instruct {
                     Saxon.Hej.expr.instruct.ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
                     Saxon.Hej.trans.rules.Rule currentRule = context.getCurrentTemplateRule();
                     if ((currentRule == null)) {
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("There is no current template rule", "XTDE0560");
-                        e.setXPathContext(context);
-                        e.setLocation(loc);
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException("There is no current template rule", "XTDE0560").withXPathContext(context).withLocation(loc);
                     }
                     Saxon.Hej.expr.Component.M modeComponent = context.getCurrentMode();
                     if ((modeComponent == null)) {
@@ -99,7 +96,12 @@ namespace Saxon.Hej.expr.instruct {
                     }
                     Saxon.Hej.trans.Mode mode = modeComponent.getActor();
                     Saxon.Hej.om.Item currentItem = context.getCurrentIterator().current();
-                    Saxon.Hej.trans.rules.Rule rule = mode.getNextMatchRule(currentItem, currentRule, context);
+                    Saxon.Hej.trans.rules.Rule rule;
+                    try {
+                        rule = mode.getNextMatchRule(currentItem, currentRule, context);
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        throw e.withLocation(this.getExpression().getLocation());
+                    }
                     if ((rule == null)) {
                         mode.getBuiltInRuleSet().process(currentItem, @params, tunnels, output, context, loc);
                     } else {

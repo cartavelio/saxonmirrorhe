@@ -79,12 +79,7 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.Configuration config = context.getConfiguration();
                         ann = config.validateAttribute(attName.getStructuredQName(), value, validationAction);
                     } catch (Saxon.Hej.type.ValidationException e) {
-                        Saxon.Hej.trans.XPathException err = Saxon.Hej.trans.XPathException.makeXPathException(e);
-                        err.maybeSetErrorCode(((validationAction == Saxon.Hej.lib.Validation.STRICT) ? "XTTE1510" : "XTTE1515"));
-                        err.setXPathContext(context);
-                        err.maybeSetLocation(getLocation());
-                        err.setIsTypeError(true);
-                        throw err;
+                        throw Saxon.Hej.trans.XPathException.makeXPathException(e).maybeWithErrorCode(((validationAction == Saxon.Hej.lib.Validation.STRICT) ? "XTTE1510" : "XTTE1515")).withXPathContext(context).maybeWithLocation(getLocation()).asTypeError();
                     }
                 } else {
                     ann = Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC;
@@ -116,12 +111,7 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.type.SimpleType ann = controller.getConfiguration().validateAttribute(Saxon.Hej.om.NameOfNode.makeName(orphan).getStructuredQName(), orphan.getUnicodeStringValue(), validationAction);
                         orphan.setTypeAnnotation(ann);
                     } catch (Saxon.Hej.type.ValidationException e) {
-                        Saxon.Hej.trans.XPathException err = Saxon.Hej.trans.XPathException.makeXPathException(e);
-                        err.setErrorCodeQName(e.getErrorCodeQName());
-                        err.setXPathContext(context);
-                        err.setLocation(getLocation());
-                        err.setIsTypeError(true);
-                        throw err;
+                        throw Saxon.Hej.trans.XPathException.makeXPathException(e).withErrorCode(e.getErrorCodeQName()).withXPathContext(context).withLocation(getLocation()).asTypeError();
                     }
                 }
             }

@@ -105,10 +105,7 @@ namespace Saxon.Hej.expr.instruct {
                     return ;
                 }
                 if (((((parentType is Saxon.Hej.type.ComplexType) && !(((Saxon.Hej.type.ComplexType)(parentType)).isSimpleContent())) && !(((Saxon.Hej.type.ComplexType)(parentType)).isMixedContent())) && !(Saxon.Hej.value.Whitespace.isAllWhite(selectValue.getUnicodeStringValue())))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("The containing element must be of type "+parentType.getDescription())+", which does not allow text content ")+Saxon.Hej.trans.Err.wrap(selectValue.getUnicodeStringValue())));
-                    err.setLocation(getLocation());
-                    err.setIsTypeError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((("The containing element must be of type "+parentType.getDescription())+", which does not allow text content ")+Saxon.Hej.trans.Err.wrap(selectValue.getUnicodeStringValue()))).withLocation(getLocation()).asTypeError();
                 }
             } else {
             }
@@ -129,8 +126,7 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.om.Item content = /*Delegate.eval()*/getSelect().makeElaborator().elaborateForItem()(context);
                 return makeTextNode(content, noNodeIfEmpty, isDisableOutputEscaping(), context);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                throw;
+                throw err.maybeWithLocation(getLocation()).maybeWithContext(context);
             }
         }
         private static Saxon.Hej.om.NodeInfo makeTextNode(Saxon.Hej.om.Item content, bool noNodeIfEmpty, bool doe, Saxon.Hej.expr.XPathContext context) {

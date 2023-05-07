@@ -50,15 +50,9 @@ namespace Saxon.Hej.expr {
                             return this;
                         } else {
                             if (((Saxon.Hej.om.FunctionItem)(i)).isMap()) {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(expandMessage((("Cannot atomize a map ("+i.toShortString())+")")), "FOTY0013");
-                                err.setIsTypeError(true);
-                                err.setLocation(getLocation());
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(expandMessage((("Cannot atomize a map ("+i.toShortString())+")"))).withErrorCode("FOTY0013").asTypeError().withLocation(getLocation());
                             } else {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(expandMessage("Cannot atomize a function item"), "FOTY0013");
-                                err.setIsTypeError(true);
-                                err.setLocation(getLocation());
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(expandMessage("Cannot atomize a function item")).withErrorCode("FOTY0013").asTypeError().withLocation(getLocation());
                             }
                         }
                     }
@@ -86,13 +80,11 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.trans.XPathException err;
                 if ((operandType is Saxon.Hej.type.FunctionItemType)) {
                     string thing = ((operandType is Saxon.Hej.ma.map.MapType) ? "map" : "function item");
-                    err = new Saxon.Hej.trans.XPathException(expandMessage(("Cannot atomize a "+thing)), "FOTY0013");
+                    err = new Saxon.Hej.trans.XPathException(expandMessage(("Cannot atomize a "+thing))).withErrorCode("FOTY0013");
                 } else {
-                    err = new Saxon.Hej.trans.XPathException(expandMessage("Cannot atomize an element that is defined in the schema to have element-only content"), "FOTY0012");
+                    err = new Saxon.Hej.trans.XPathException(expandMessage("Cannot atomize an element that is defined in the schema to have element-only content")).withErrorCode("FOTY0012");
                 }
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw err.asTypeError().withLocation(getLocation());
             }
             getBaseExpression().setFlattened(true);
             return this;
@@ -235,11 +227,7 @@ namespace Saxon.Hej.expr {
                     throw;
                 } else {
                     string message = expandMessage(e.Message);
-                    Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-                    e2.setErrorCodeQName(e.getErrorCodeQName());
-                    e2.setXPathContext(context);
-                    e2.maybeSetLocation(getLocation());
-                    throw e2;
+                    throw new Saxon.Hej.trans.XPathException(message).withErrorCode(e.getErrorCodeQName()).withLocation(e.getLocator()).withXPathContext(context).maybeWithLocation(getLocation());
                 }
             }
         }
@@ -400,11 +388,7 @@ namespace Saxon.Hej.expr {
                             throw;
                         } else {
                             string message = expr.expandMessage(e.Message);
-                            Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-                            e2.setErrorCodeQName(e.getErrorCodeQName());
-                            e2.setXPathContext(context);
-                            e2.maybeSetLocation(expr.getLocation());
-                            throw e2;
+                            throw new Saxon.Hej.trans.XPathException(message).withErrorCode(e.getErrorCodeQName()).withLocation(e.getLocator()).withXPathContext(context).maybeWithLocation(expr.getLocation());
                         }
                     }
                 } ;

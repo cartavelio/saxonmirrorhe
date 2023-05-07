@@ -122,8 +122,7 @@ namespace Saxon.Hej.tree.tiny {
                                 try {
                                     checkNotNamespaceSensitiveElement(elementType, next);
                                 } catch (Saxon.Hej.@event.CopyNamespaceSensitiveException e) {
-                                    e.setErrorCode((receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
-                                    throw;
+                                    throw e.withErrorCode((receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
                                 }
                             }
                         }
@@ -179,8 +178,7 @@ namespace Saxon.Hej.tree.tiny {
                                             try {
                                                 checkNotNamespaceSensitiveAttribute(attributeType, att);
                                             } catch (Saxon.Hej.@event.CopyNamespaceSensitiveException e) {
-                                                e.setErrorCode((receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
-                                                throw;
+                                                throw e.withErrorCode((receiver.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
                                             }
                                         }
                                     }

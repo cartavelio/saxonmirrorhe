@@ -133,18 +133,14 @@ namespace Saxon.Hej.@event {
                     }
                     if ((prefix.Length==0 && !(namespaceUri.isEmpty()))) {
                         if (pendingStartTag.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot output a namespace node for the default namespace ("+namespaceUri)+") when the element is in no namespace"));
-                            err.setErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTDE0440" : "XQDY0102"));
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((("Cannot output a namespace node for the default namespace ("+namespaceUri)+") when the element is in no namespace")).withErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTDE0440" : "XQDY0102"));
                         }
                     }
                     bool rejectDuplicates = Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.REJECT_DUPLICATES);
                     if (rejectDuplicates) {
                         Saxon.Hej.om.NamespaceUri uri = pendingNSMap.getNamespaceUri(prefix);
                         if (((uri != null) && !(uri.Equals(namespaceUri)))) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((((("Cannot create two namespace nodes with the same prefix "+"mapped to different URIs (prefix=\"")+prefix)+"\", URIs=(")+uri)+"\", \"")+namespaceUri)+"\")"));
-                            err.setErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTDE0430" : "XQDY0102"));
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(((((((("Cannot create two namespace nodes with the same prefix "+"mapped to different URIs (prefix=\"")+prefix)+"\", URIs=(")+uri)+"\", \"")+namespaceUri)+"\")")).withErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTDE0430" : "XQDY0102"));
                         }
                     }
                     pendingNSMap = pendingNSMap.put(prefix, namespaceUri);
@@ -179,18 +175,14 @@ namespace Saxon.Hej.@event {
                             pendingAttributes[a] = attInfo;
                             return ;
                         } else {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot create an element having two attributes with the same name: "+Saxon.Hej.trans.Err.wrap(attName.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE)));
-                            err.setErrorCode("XQDY0025");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(("Cannot create an element having two attributes with the same name: "+Saxon.Hej.trans.Err.wrap(attName.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE))).withErrorCode("XQDY0025");
                         }
                     }
                 }
             }
             if ((((level == 0) && !(typeCode.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC))) && currentLevelIsDocument[0])) {
                 if (typeCode.isNamespaceSensitive()) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): "+Saxon.Hej.trans.Err.wrap(attName.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE)));
-                    err.setErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTTE0950" : "XQTY0086"));
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): "+Saxon.Hej.trans.Err.wrap(attName.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE))).withErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTTE0950" : "XQTY0086"));
                 }
             }
             if ((level<0)) {
@@ -436,9 +428,7 @@ namespace Saxon.Hej.@event {
                 break ;
               case Saxon.Hej.type.Type.ATTRIBUTE:
                 if (((Saxon.Hej.type.SimpleType)(node.getSchemaType())).isNamespaceSensitive()) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): "+Saxon.Hej.trans.Err.wrap(node.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE)));
-                    err.setErrorCode((getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): "+Saxon.Hej.trans.Err.wrap(node.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE))).withErrorCode((getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
                 }
                 attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
                 break ;

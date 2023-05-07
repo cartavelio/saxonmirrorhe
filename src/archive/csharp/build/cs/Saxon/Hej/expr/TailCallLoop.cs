@@ -51,9 +51,7 @@ namespace Saxon.Hej.expr {
             try {
                 return userFunction.getBodyEvaluator().evaluate(cm);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                err.maybeSetContext(cm);
-                throw;
+                throw err.maybeWithLocation(getLocation()).maybeWithContext(cm);
             }
         }
         public override Saxon.Hej.type.ItemType getItemType() {
@@ -98,10 +96,7 @@ namespace Saxon.Hej.expr {
                             }
                         }
                     } catch (Saxon.Hej.trans.UncheckedXPathException e) {
-                        Saxon.Hej.trans.XPathException xpe = e.getXPathException();
-                        xpe.maybeSetContext(context);
-                        xpe.maybeSetLocation(expr.getLocation());
-                        throw xpe;
+                        throw e.getXPathException().maybeWithContext(context).maybeWithLocation(expr.getLocation());
                     }
                 } ;
             }

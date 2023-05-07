@@ -102,23 +102,17 @@ namespace Saxon.Eej.ee.update {
                         break ;
                     }
                     if ((err != null)) {
-                        err.setLocation(expr.getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                        throw err.withLocation(expr.getLocation()).withXPathContext(context);
                     }
                     if (!(((targetNode is Saxon.Hej.om.MutableNodeInfo)))) {
-                        Saxon.Hej.trans.XPathException er = new Saxon.Hej.trans.XPathException("Target node of replace value expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
-                        er.setLocation(expr.getLocation());
-                        throw er;
+                        throw new Saxon.Hej.trans.XPathException("Target node of replace value expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081).withLocation(expr.getLocation());
                     }
                     try {
                         Saxon.Eej.ee.update.ReplaceValueAction action = new Saxon.Eej.ee.update.ReplaceValueAction(Saxon.Hej.str.StringView.tidy(newString), (Saxon.Hej.om.MutableNodeInfo)(targetNode));
                         action.setOriginator(expr);
                         ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        e.maybeSetContext(context);
-                        throw;
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     }
                 } ;
             }

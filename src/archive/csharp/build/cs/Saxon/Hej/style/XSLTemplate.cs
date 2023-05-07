@@ -199,12 +199,10 @@ namespace Saxon.Hej.style {
                     getModeNames();
                 }
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetErrorCode("XTSE0280");
-                if (err.getErrorCodeLocalPart().Equals("XTSE0020")) {
-                    err.setErrorCode("XTSE0550");
-                }
-                err.setIsStaticError(true);
-                compileError(err);
+                Saxon.Hej.trans.XPathException e2 = err.replacingErrorCode("XTSE0020", "XTSE0550");
+                e2.maybeSetErrorCode("XTSE0280");
+                e2.setIsStaticError(true);
+                compileError(e2);
             }
             if ((nameAtt != null)) {
                 if ((getObjectName() == null)) {
@@ -247,7 +245,7 @@ namespace Saxon.Hej.style {
                     requiredType = makeSequenceType(asAtt);
                     declaresRequiredType = true;
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "as");
+                    compileErrorInAttribute(e, "as");
                 }
             }
             if ((extraAsAtt != null)) {
@@ -256,7 +254,7 @@ namespace Saxon.Hej.style {
                 try {
                     extraResultType = makeExtendedSequenceType(extraAsAtt);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "saxon:as");
+                    compileErrorInAttribute(e, "saxon:as");
                     extraResultType = requiredType;
                 }
                 if ((asAtt != null)) {
@@ -632,8 +630,7 @@ namespace Saxon.Hej.style {
                         try {
                             match2 = match1.convertToTypedPattern(typed);
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetLocation(this);
-                            throw;
+                            throw e.maybeWithLocation(this);
                         }
                         if ((match2 != match1)) {
                             Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), mayOmitContextItem);
@@ -780,8 +777,7 @@ namespace Saxon.Hej.style {
                             }
                         }
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(this);
-                        compileError(e);
+                        compileError(e.maybeWithLocation(this));
                     }
                 }
             }

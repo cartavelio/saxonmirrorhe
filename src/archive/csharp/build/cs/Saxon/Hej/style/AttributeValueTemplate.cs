@@ -21,10 +21,7 @@ namespace Saxon.Hej.style {
                 } else {
                     if (((i8>=0) && (((i0<0) || (i8<i0))))) {
                         if ((i8 != i9)) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Closing curly brace in attribute value template \""+avt.Substring(0, len - 0))+"\" must be doubled"));
-                            err.setErrorCode("XTSE0370");
-                            err.setIsStaticError(true);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((("Closing curly brace in attribute value template \""+avt.Substring(0, len - 0))+"\" must be doubled")).withErrorCode("XTSE0370").asStaticError();
                         }
                         addStringComponent(components, avt, last, (i8+1));
                         last = (i8+2);

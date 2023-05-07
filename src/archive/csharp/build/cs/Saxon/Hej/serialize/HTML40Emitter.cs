@@ -34,9 +34,7 @@ namespace Saxon.Hej.serialize {
                 if ((versionProperty.Equals("4.0") || versionProperty.Equals("4.01"))) {
                     version = 4;
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Unsupported HTML version: "+versionProperty));
-                    err.setErrorCode("SESU0013");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("Unsupported HTML version: "+versionProperty)).withErrorCode("SESU0013");
                 }
             }
             base.openDocument();

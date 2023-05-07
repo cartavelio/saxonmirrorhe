@@ -49,9 +49,7 @@ namespace Saxon.Hej.expr.flwor {
     return (a.originalPosition-b.originalPosition);
 } );
                 } catch (/* no matching annotation */ System.InvalidCastException e) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message));
-                    err.setErrorCode("XPTY0004");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("Non-comparable types found while sorting: "+e.Message)).withErrorCode("XPTY0004").asTypeError();
                 }
             }
             if ((currentPosition<tupleArray.Count)) {

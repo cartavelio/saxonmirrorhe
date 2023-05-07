@@ -51,9 +51,7 @@ namespace Saxon.Hej.functions {
                 try {
                     return !(this.getArg(0).effectiveBooleanValue(/*localparam*/c));
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    /*exception*/e.maybeSetLocation(this.getLocation());
-                    /*exception*/e.maybeSetContext(/*localparam*/c);
-                    throw;
+                    throw /*exception*/e.maybeWithLocation(this.getLocation()).maybeWithContext(/*localparam*/c);
                 }
             }
         }

@@ -47,9 +47,7 @@ namespace Saxon.Hej.functions {
                         try {
                             return fn.evalMatches(/*Delegate.eval()*/arg0eval(context), /*Delegate.eval()*/arg1eval(context), /*Delegate.eval()*/arg2eval(context), context);
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetLocation(fnc.getLocation());
-                            err.maybeSetContext(context);
-                            throw;
+                            throw err.maybeWithLocation(fnc.getLocation()).maybeWithContext(context);
                         }
                     } ;
                 } else {

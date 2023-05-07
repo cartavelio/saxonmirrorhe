@@ -13,8 +13,7 @@ namespace Saxon.Hej.functions {
                     qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(lexicalName, false, true, getRetainedStaticContext());
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.setErrorCode("XTDE1428");
-                throw;
+                throw e.withErrorCode("XTDE1428");
             }
             Saxon.Hej.om.NamespaceUri uri = qName.getNamespaceUri();
             if (uri.Equals(Saxon.Hej.om.NamespaceUri.JAVA_TYPE)) {

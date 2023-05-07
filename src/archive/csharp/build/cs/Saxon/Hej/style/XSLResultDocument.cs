@@ -155,7 +155,7 @@ namespace Saxon.Hej.style {
             }
             getContainingPackage().setCreatesSecondaryResultDocuments(true);
         }
-        public static Saxon.Hej.om.StructuredQName METHOD = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "method");
+        public static Saxon.Hej.om.StructuredQName METHOD = Saxon.Hej.om.NamespaceUri.NULL.qName("method");
         public static Saxon.Hej.om.StructuredQName BUILD_TREE = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "build-tree");
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.tree.iter.AxisIterator ai = iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR);
@@ -211,11 +211,10 @@ namespace Saxon.Hej.style {
                             method = s;
                         }
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        if (Saxon.Hej.om.NamespaceUri.SAXON.Equals(e.getErrorCodeNamespace())) {
+                        if (e.getErrorCodeQName().hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                             compileWarning(e.Message, e.getErrorCodeQName());
                         } else {
-                            e.setErrorCode("XTSE0020");
-                            compileError(e);
+                            compileError(e.withErrorCode("XTSE0020"));
                         }
                     }
                 }

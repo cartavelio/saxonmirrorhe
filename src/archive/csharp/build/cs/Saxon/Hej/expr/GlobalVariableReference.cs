@@ -50,9 +50,7 @@ namespace Saxon.Hej.expr {
                 }
                 Saxon.Hej.expr.Component target = c.getTargetComponent(bindingSlot);
                 if (target.isHiddenAbstractComponent()) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot evaluate an abstract variable ("+getVariableName().getDisplayName())+") with no overriding declaration"), "XTDE3052");
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Cannot evaluate an abstract variable ("+getVariableName().getDisplayName())+") with no overriding declaration"), "XTDE3052").withLocation(getLocation());
                 }
                 Saxon.Hej.expr.instruct.GlobalVariable p = (Saxon.Hej.expr.instruct.GlobalVariable)(target.getActor());
                 return p.evaluateVariable(c, target);

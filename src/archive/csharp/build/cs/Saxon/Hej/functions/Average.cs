@@ -56,10 +56,7 @@ namespace Saxon.Hej.functions {
                             try {
                                 data = ((Saxon.Hej.value.DurationValue)(data)).add((Saxon.Hej.value.DurationValue)(next));
                             } catch (Saxon.Hej.trans.XPathException e) {
-                                if ("XPTY0004".Equals(e.getErrorCodeLocalPart())) {
-                                    e.setErrorCode("FORG0006");
-                                }
-                                throw;
+                                throw e.replacingErrorCode("XPTY0004", "FORG0006");
                             }
                         } else {
                             throw new Saxon.Hej.trans.XPathException((("Input to avg() contains a value ("+Saxon.Hej.trans.Err.depict(data))+") that is neither numeric, nor a duration"), "FORG0006");

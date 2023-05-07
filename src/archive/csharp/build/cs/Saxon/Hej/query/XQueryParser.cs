@@ -588,6 +588,12 @@ namespace Saxon.Hej.query {
                           case Saxon.Hej.expr.parser.Token.NUMBER:
                             arg = (Saxon.Hej.expr.Literal)(parseNumericLiteral(false));
                             break ;
+                          case Saxon.Hej.expr.parser.Token.HEX_INTEGER:
+                            arg = (Saxon.Hej.expr.Literal)(parseHexLiteral(false));
+                            break ;
+                          case Saxon.Hej.expr.parser.Token.BINARY_INTEGER:
+                            arg = (Saxon.Hej.expr.Literal)(parseBinaryLiteral(false));
+                            break ;
                           default:
                             grumble("Annotation parameter must be a literal");
                             return null;
@@ -647,8 +653,7 @@ namespace Saxon.Hej.query {
                     applySchemaImport(imp);
                 } catch (Saxon.Hej.trans.XPathException err) {
                     if (!(err.hasBeenReported())) {
-                        err.maybeSetLocation(makeLocation(imp.offset));
-                        throw;
+                        throw err.maybeWithLocation(makeLocation(imp.offset));
                     }
                 }
             }
@@ -657,8 +662,7 @@ namespace Saxon.Hej.query {
                     applyModuleImport(imp);
                 } catch (Saxon.Hej.trans.XPathException err) {
                     if (!(err.hasBeenReported())) {
-                        err.maybeSetLocation(makeLocation(imp.offset));
-                        throw;
+                        throw err.maybeWithLocation(makeLocation(imp.offset));
                     }
                 }
             }
@@ -1024,7 +1028,7 @@ namespace Saxon.Hej.query {
                     break ;
                 }
                 try {
-                    string queryText = Saxon.Hej.query.QueryReader.readSourceQuery(ss, charChecker);
+                    string queryText = Saxon.Hej.query.QueryReader.readSourceQuery(env.getConfiguration(), ss, charChecker);
                     try {
                         if ((ss.getInputStream() != null)) {
                             ss.getInputStream().Close();
@@ -1038,8 +1042,7 @@ namespace Saxon.Hej.query {
                     }
                     Saxon.Hej.query.QueryModule.makeQueryModule(baseURI, executable, (Saxon.Hej.query.QueryModule)(env), queryText, mImport.namespaceURI);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.maybeSetLocation(makeLocation());
-                    reportError(err);
+                    reportError(err.maybeWithLocation(makeLocation()));
                 }
             }
         }
@@ -1125,8 +1128,7 @@ namespace Saxon.Hej.query {
                     try {
                         dfs.setZeroDigit(propertyValue);
                     } catch (Saxon.Hej.trans.XPathException err) {
-                        err.setErrorCode("XQST0097");
-                        throw;
+                        throw err.withErrorCode("XQST0097");
                     }
                     break ;
                   case "digit":
@@ -2615,11 +2617,10 @@ namespace Saxon.Hej.query {
                         setQNameParser(oldQP);
                         elemName.obtainFingerprint(env.getConfiguration().getNamePool());
                     } catch (Saxon.Hej.trans.XPathException staticError) {
-                        string code = staticError.getErrorCodeLocalPart();
-                        if (("XPST0008".Equals(code) || "XPST0081".Equals(code))) {
+                        if (staticError.hasErrorCode("XPST0008", "XPST0081")) {
                             staticError.setErrorCode("XQDY0074");
                         } else {
-                            if ("XPST0003".Equals(code)) {
+                            if (staticError.hasErrorCode("XPST0003")) {
                                 grumble(("Invalid QName in element constructor: "+lex), "XQDY0074", offset);
                                 return new Saxon.Hej.expr.ErrorExpression();
                             }
@@ -2714,12 +2715,11 @@ namespace Saxon.Hej.query {
                         attributeName = makeNodeName(lex, false);
                         setQNameParser(oldQP);
                     } catch (Saxon.Hej.trans.XPathException staticError) {
-                        string code = staticError.getErrorCodeLocalPart();
                         staticError.setLocator(makeLocation());
-                        if (("XPST0008".Equals(code) || "XPST0081".Equals(code))) {
+                        if (staticError.hasErrorCode("XPST0008", "XPST0081")) {
                             staticError.setErrorCode("XQDY0074");
                         } else {
-                            if ("XPST0003".Equals(code)) {
+                            if (staticError.hasErrorCode("XPST0003")) {
                                 grumble(("Invalid QName in attribute constructor: "+lex), "XQDY0074", offset);
                                 return new Saxon.Hej.expr.ErrorExpression();
                             }

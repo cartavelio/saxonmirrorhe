@@ -271,11 +271,7 @@ namespace Saxon.Hej.expr.instruct {
                         if ((("no".Equals(schemaAwareAttr) || "false".Equals(schemaAwareAttr)) || "0".Equals(schemaAwareAttr))) {
                             isSchemaAware = false;
                         } else {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The schema-aware attribute of xsl:evaluate must be yes|no|true|false|0|1");
-                            err.setErrorCode("XTDE0030");
-                            err.setLocation(instr.getLocation());
-                            err.setXPathContext(context);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException("The schema-aware attribute of xsl:evaluate must be yes|no|true|false|0|1").withErrorCode("XTDE0030").withLocation(instr.getLocation()).withXPathContext(context);
                         }
                     }
                     Saxon.Hej.expr.Expression expr = null;
@@ -382,10 +378,7 @@ namespace Saxon.Hej.expr.instruct {
                         try {
                             expr = Saxon.Hej.expr.parser.ExpressionTool.make(exprText, env, 0, Saxon.Hej.expr.parser.Token.EOF, null);
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Static error in XPath expression supplied to xsl:evaluate: "+e.Message)+". Expression: {")+exprText)+"}"));
-                            err.setErrorCode("XTDE3160");
-                            err.setLocation(instr.getLocation());
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((((("Static error in XPath expression supplied to xsl:evaluate: "+e.Message)+". Expression: {")+exprText)+"}")).withErrorCode("XTDE3160").withLocation(instr.getLocation());
                         }
                         expr.setRetainedStaticContext(env.makeRetainedStaticContext());
                         Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.EVALUATE_RESULT, exprText, 0);
@@ -445,10 +438,7 @@ namespace Saxon.Hej.expr.instruct {
                     try {
                         return expr.iterate(c2);
                     } catch (Saxon.Hej.trans.XPathException err) {
-                        Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException((("Dynamic error in expression {"+exprText)+"} called using xsl:evaluate"), err);
-                        e2.setLocation(instr.getLocation());
-                        e2.setErrorCodeQName(err.getErrorCodeQName());
-                        throw e2;
+                        throw err.withMessage((("Dynamic error in expression {"+exprText)+"} called using xsl:evaluate")).withLocation(instr.getLocation());
                     }
                 } ;
             }

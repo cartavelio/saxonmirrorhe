@@ -151,16 +151,10 @@ namespace Saxon.Hej.query {
             qp.parseLibraryModule(query, module);
             Saxon.Hej.om.NamespaceUri @namespace = module.getModuleNamespace();
             if ((@namespace == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Imported module must be a library module");
-                err.setErrorCode("XQST0059");
-                err.setIsStaticError(true);
-                throw err;
+                staticError("Imported module must be a library module", "XQST0059");
             }
             if (!(@namespace.Equals(namespaceURI))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Imported module's namespace does not match requested namespace");
-                err.setErrorCode("XQST0059");
-                err.setIsStaticError(true);
-                throw err;
+                staticError("Imported module's namespace does not match requested namespace", "XQST0059");
             }
             return module;
         }
@@ -335,11 +329,7 @@ namespace Saxon.Hej.query {
                         oldloc += (" in module "+oldVar.getSystemId());
                     }
                     oldloc += ")";
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Duplicate definition of global variable "+var.getVariableQName().getDisplayName())+oldloc));
-                    err.setErrorCode("XQST0049");
-                    err.setIsStaticError(true);
-                    err.setLocation(var);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Duplicate definition of global variable "+var.getVariableQName().getDisplayName())+oldloc)).withErrorCode("XQST0049").asStaticError().withLocation(var);
                 }
             }
             Saxon.Impl.Helpers.MapUtils.Put(variables, key, var);
@@ -348,11 +338,7 @@ namespace Saxon.Hej.query {
             Saxon.Hej.expr.instruct.GlobalVariable old = Saxon.Impl.Helpers.MapUtils.Get(libVars, key);
             if (((old == null) || (old == var))) {
             } else {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((((("Duplicate definition of global variable "+var.getVariableQName().getDisplayName())+" (see line ")+old.getLineNumber())+" in module ")+old.getSystemId())+')'));
-                err.setErrorCode("XQST0049");
-                err.setIsStaticError(true);
-                err.setLocation(var);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((((((("Duplicate definition of global variable "+var.getVariableQName().getDisplayName())+" (see line ")+old.getLineNumber())+" in module ")+old.getSystemId())+')')).withErrorCode("XQST0049").asStaticError().withLocation(var);
             }
             if (!(isMainModule())) {
                 Saxon.Impl.Helpers.MapUtils.Put(libVars, key, var);
@@ -439,17 +425,11 @@ namespace Saxon.Hej.query {
                         }
                     } else {
                         if (var.isPrivate()) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Variable $"+qName.getDisplayName())+" is private"));
-                            err.setErrorCode("XPST0008");
-                            err.setIsStaticError(true);
-                            throw err;
+                            staticError((("Variable $"+qName.getDisplayName())+" is private"), "XPST0008");
                         }
                     }
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Variable $"+qName.getDisplayName())+" has not been declared"));
-                    err.setErrorCode("XPST0008");
-                    err.setIsStaticError(true);
-                    throw err;
+                    staticError((("Variable $"+qName.getDisplayName())+" has not been declared"), "XPST0008");
                 }
             } else {
                 if ((var.isPrivate() && (((var.getSystemId() == null) || !(var.getSystemId().Equals(getSystemId())))))) {
@@ -457,9 +437,7 @@ namespace Saxon.Hej.query {
                     if ((var.getSystemId() == null)) {
                         message += " (no base URI known)";
                     }
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message, "XPST0008");
-                    err.setIsStaticError(true);
-                    throw err;
+                    staticError(message, "XPST0008");
                 }
             }
             Saxon.Hej.expr.GlobalVariableReference vref = new Saxon.Hej.expr.GlobalVariableReference(qName);
@@ -478,16 +456,18 @@ namespace Saxon.Hej.query {
                 Saxon.Hej.om.StructuredQName name = function.getFunctionName();
                 Saxon.Hej.type.SchemaType t = config.getSchemaType(name);
                 if (((t != null) && t.isAtomicType())) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Function name "+function.getDisplayName())+" clashes with the name of the constructor function for an atomic type"));
-                    err.setErrorCode("XQST0034");
-                    err.setIsStaticError(true);
-                    throw err;
+                    string message = (("Function name "+function.getDisplayName())+" clashes with the name of the constructor function for an atomic type");
+                    string errorCode = "XQST0034";
+                    staticError(message, errorCode);
                 }
             }
             Saxon.Hej.query.XQueryFunctionLibrary local = getLocalFunctionLibrary();
             local.declareFunction(function);
             Saxon.Hej.query.QueryModule main = getTopLevelModule();
             main.globalFunctionLibrary.declareFunction(function);
+        }
+        private static void staticError(string message, string errorCode) {
+            throw new Saxon.Hej.trans.XPathException(message, errorCode).asStaticError();
         }
         public void bindUnboundFunctionCalls() {
             Saxon.Hej.query.UnboundFunctionLibrary lib = (Saxon.Hej.query.UnboundFunctionLibrary)(functionLibraryList.get(unboundFunctionLibraryNr));
@@ -517,16 +497,10 @@ namespace Saxon.Hej.query {
                     }
                 }
                 if ((var == null)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Unresolved reference to variable $"+uv.getVariableQName().getDisplayName()));
-                    err.setErrorCode("XPST0008");
-                    err.setIsStaticError(true);
-                    throw err;
+                    staticError(("Unresolved reference to variable $"+uv.getVariableQName().getDisplayName()), "XPST0008");
                 } else {
                     if ((var.isPrivate() && !(var.getSystemId().Equals(getSystemId())))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot reference a private variable in a different module");
-                        err.setErrorCode("XPST0008");
-                        err.setIsStaticError(true);
-                        throw err;
+                        staticError("Cannot reference a private variable in a different module", "XPST0008");
                     } else {
                         uv.transferReferences(var);
                     }
@@ -598,16 +572,10 @@ namespace Saxon.Hej.query {
                 throw new Saxon.Ejava.lang.NullPointerException("Null namespace URI supplied to declarePrologNamespace()");
             }
             if ((prefix.Equals("xml") != uri.Equals(Saxon.Hej.om.NamespaceUri.XML))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Invalid declaration of the XML namespace");
-                err.setErrorCode("XQST0070");
-                err.setIsStaticError(true);
-                throw err;
+                staticError("Invalid declaration of the XML namespace", "XQST0070");
             }
             if ((Saxon.Impl.Helpers.MapUtils.Get(explicitPrologNamespaces, prefix) != null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Duplicate declaration of namespace prefix \""+prefix)+'"'));
-                err.setErrorCode("XQST0033");
-                err.setIsStaticError(true);
-                throw err;
+                staticError((("Duplicate declaration of namespace prefix \""+prefix)+'"'), "XQST0033");
             } else {
                 Saxon.Impl.Helpers.MapUtils.Put(explicitPrologNamespaces, prefix, uri);
             }
@@ -626,7 +594,7 @@ namespace Saxon.Hej.query {
             activeNamespaces.pop();
         }
         public Saxon.Hej.om.NamespaceResolver getLiveNamespaceResolver() {
-            return new Inner_NamespaceResolver_305(this);
+            return new Inner_NamespaceResolver_271(this);
         }
         public Saxon.Hej.om.NamespaceUri checkURIForPrefix(string prefix) {
             if ((activeNamespaces != null)) {
@@ -765,9 +733,9 @@ namespace Saxon.Hej.query {
         
         }
     
-        private class Inner_NamespaceResolver_305 : Saxon.Hej.om.NamespaceResolver {
+        private class Inner_NamespaceResolver_271 : Saxon.Hej.om.NamespaceResolver {
             private readonly QueryModule outerInstance;
-            public Inner_NamespaceResolver_305(QueryModule outerInstance) {
+            public Inner_NamespaceResolver_271(QueryModule outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {

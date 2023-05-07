@@ -74,10 +74,7 @@ namespace Saxon.Hej.value {
         }
         public abstract Saxon.Hej.str.UnicodeString getPrimitiveStringValue();
         public virtual bool effectiveBooleanValue() {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Effective boolean value is not defined for an atomic value of type "+Saxon.Hej.type.Type.displayTypeName(this)));
-            err.setIsTypeError(true);
-            err.setErrorCode("FORG0006");
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(("Effective boolean value is not defined for an atomic value of type "+Saxon.Hej.type.Type.displayTypeName(this))).asTypeError().withErrorCode("FORG0006");
         }
         public virtual Saxon.Hej.value.AtomicValue getComponent(Saxon.Hej.functions.AccessorFn.Component component) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException("Data type does not support component extraction");

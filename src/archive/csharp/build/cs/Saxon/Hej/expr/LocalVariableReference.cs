@@ -90,9 +90,7 @@ namespace Saxon.Hej.expr {
                         }
                         return null;
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(getExpression().getLocation());
-                        e.maybeSetContext(context);
-                        throw;
+                        throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                     }
                 } ;
             }
@@ -103,9 +101,7 @@ namespace Saxon.Hej.expr {
                     try {
                         return context.evaluateLocalVariable(slot).head();
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(getExpression().getLocation());
-                        e.maybeSetContext(context);
-                        throw;
+                        throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                     }
                 } ;
             }

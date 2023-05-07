@@ -144,10 +144,7 @@ namespace Saxon.Hej.expr.instruct {
             if (((requiredContextItemType != Saxon.Hej.type.AnyItemType.getInstance()) && !(requiredContextItemType.matches(context.getContextItem(), th)))) {
                 Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "context item for the template rule", 0);
                 string message = role.composeErrorMessage(requiredContextItemType, context.getContextItem(), th);
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message, "XTTE0590");
-                err.setLocation(this);
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(message, "XTTE0590").withLocation(this).asTypeError();
             }
             if (absentFocus) {
                 context = context.newMinorContext();
@@ -157,14 +154,9 @@ namespace Saxon.Hej.expr.instruct {
                 ensureBodyEvaluatorExists();
                 return /*Delegate.processLeavingTail()*/bodyEvaluator(output, context);
             } catch (Saxon.Hej.trans.UncheckedXPathException e) {
-                Saxon.Hej.trans.XPathException xe = e.getXPathException();
-                xe.maybeSetLocation(this);
-                xe.maybeSetContext(context);
-                throw xe;
+                throw e.getXPathException().maybeWithLocation(this).maybeWithContext(context);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(this);
-                e.maybeSetContext(context);
-                throw;
+                throw e.maybeWithLocation(this).maybeWithContext(context);
             } catch (System.Exception e2) {
                 string message = (("Internal error evaluating template rule "+(((getLineNumber()>0) ? (" at line "+getLineNumber()) : "")))+(((getSystemId() != null) ? (" in module "+getSystemId()) : "")));
                 System.Console.Error.WriteLine(e2);

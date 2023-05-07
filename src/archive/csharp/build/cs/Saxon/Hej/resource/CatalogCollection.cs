@@ -40,7 +40,7 @@ namespace Saxon.Hej.resource {
                         return new Saxon.Hej.resource.FailedResource(uri, e);
                     } else {
                         if ((onError.isPresent() && (onError.get() == Saxon.Hej.functions.URIQueryParameters.ON_ERROR_WARNING))) {
-                            context.getController().warning(((("collection(): failed to parse "+uri)+": ")+e.Message), e.getErrorCodeLocalPart(), null);
+                            context.getController().warning(((("collection(): failed to parse "+uri)+": ")+e.Message), e.showErrorCode(), null);
                             return null;
                         } else {
                             return null;
@@ -60,10 +60,7 @@ namespace Saxon.Hej.resource {
             Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP).withDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
             Saxon.Hej.om.TreeInfo catalog = context.getConfiguration().buildDocumentTree(source, options);
             if ((catalog == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Failed to load collection catalog "+href));
-                err.setErrorCode("FODC0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Failed to load collection catalog "+href)).withErrorCode("FODC0004").withXPathContext(context);
             }
             Saxon.Hej.tree.iter.AxisIterator iter = catalog.getRootNode().iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.ELEMENT);
             Saxon.Hej.om.NodeInfo top = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next());
@@ -74,10 +71,7 @@ namespace Saxon.Hej.resource {
                 } else {
                     message = ((((("Outermost element of collection catalog should be Q{}collection "+"(found Q{")+top.getNamespaceUri())+"}")+top.getLocalPart())+")");
                 }
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                err.setErrorCode("FODC0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(message).withErrorCode("FODC0004").withXPathContext(context);
             }
             iter.close();
             string stableAtt = top.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "stable");
@@ -88,10 +82,7 @@ namespace Saxon.Hej.resource {
                     if ("false".Equals(stableAtt)) {
                         stable = false;
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The 'stable' attribute of element <collection> must be true or false");
-                        err.setErrorCode("FODC0004");
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("The 'stable' attribute of element <collection> must be true or false").withErrorCode("FODC0004").withXPathContext(context);
                     }
                 }
             }
@@ -100,26 +91,17 @@ namespace Saxon.Hej.resource {
             Saxon.Hej.om.NodeInfo item;
             while (((item = ((/*1430*/Saxon.Hej.om.NodeInfo)documents.next())) != null)) {
                 if (!((("doc".Equals(item.getLocalPart()) && (item.getNamespaceUri() == Saxon.Hej.om.NamespaceUri.NULL))))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Children of <collection> element must be <doc> elements");
-                    err.setErrorCode("FODC0004");
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("Children of <collection> element must be <doc> elements").withErrorCode("FODC0004").withXPathContext(context);
                 }
                 string hrefAtt = item.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "href");
                 if ((hrefAtt == null)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("A <doc> element in the collection catalog has no @href attribute");
-                    err.setErrorCode("FODC0004");
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("A <doc> element in the collection catalog has no @href attribute").withErrorCode("FODC0004").withXPathContext(context);
                 }
                 string uri;
                 try {
                     uri = Saxon.Hej.functions.ResolveURI.makeAbsolute(hrefAtt, item.getBaseURI()).ToString();
                 } catch (System.UriFormatException e) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Invalid base URI or href URI in collection catalog: ("+item.getBaseURI())+", ")+hrefAtt)+")"));
-                    err.setErrorCode("FODC0004");
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((((("Invalid base URI or href URI in collection catalog: ("+item.getBaseURI())+", ")+hrefAtt)+")")).withErrorCode("FODC0004").withXPathContext(context);
                 }
                 result.Add(uri);
             }

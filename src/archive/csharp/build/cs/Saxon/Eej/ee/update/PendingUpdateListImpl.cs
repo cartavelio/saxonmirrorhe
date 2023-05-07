@@ -113,11 +113,7 @@ namespace Saxon.Eej.ee.update {
         }
         public void addPutAction(Saxon.Hej.om.NodeInfo node, string uri, Saxon.Hej.expr.Expression originator) {
             if (!(putURIs.Add(uri))) {
-                Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException((("Cannot put() two documents to the same URI ("+uri)+")"));
-                err1.setErrorCode("XUDY0031");
-                err1.setIsTypeError(false);
-                err1.setLocation(originator.getLocation());
-                throw err1;
+                throw new Saxon.Hej.trans.XPathException((("Cannot put() two documents to the same URI ("+uri)+")")).withErrorCode("XUDY0031").withLocation(originator.getLocation());
             }
             Saxon.Eej.ee.update.PutAction action = new Saxon.Eej.ee.update.PutAction(node, uri);
             action.setOriginator(originator);
@@ -130,11 +126,7 @@ namespace Saxon.Eej.ee.update {
                 Saxon.Hej.om.NamespaceMap map = targetNode.getAllNamespaces();
                 Saxon.Hej.om.NamespaceUri existingURI = map.getNamespaceUri(prefix);
                 if ((((existingURI != null) && !(existingURI.isEmpty())) && !(existingURI.Equals(uri)))) {
-                    Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException(("An update action creates a namespace binding that conflicts with an existing "+"namespace binding on the same target element"));
-                    err1.setErrorCode("XUDY0023");
-                    err1.setIsTypeError(false);
-                    err1.setLocation(action.getOriginator().getLocation());
-                    throw err1;
+                    throw new Saxon.Hej.trans.XPathException(("An update action creates a namespace binding that conflicts with an existing "+"namespace binding on the same target element")).withErrorCode("XUDY0023").withLocation(action.getOriginator().getLocation());
                 }
                 Saxon.Hej.om.NamespaceMap nsmap = Saxon.Impl.Helpers.MapUtils.Get(newNamespaceBindings, targetNode);
                 if ((nsmap == null)) {
@@ -147,10 +139,7 @@ namespace Saxon.Eej.ee.update {
                         Saxon.Impl.Helpers.MapUtils.Put(newNamespaceBindings, targetNode, nsmap);
                     } else {
                         if (!(existingUri.Equals(uri))) {
-                            Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException("Two updates create conflicting namespace bindings on the same target node");
-                            err1.setErrorCode("XUDY0024");
-                            err1.setIsTypeError(false);
-                            throw err1;
+                            throw new Saxon.Hej.trans.XPathException("Two updates create conflicting namespace bindings on the same target node").withErrorCode("XUDY0024").withLocation(action.getOriginator().getLocation());
                         }
                     }
                 }

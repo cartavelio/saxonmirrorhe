@@ -90,11 +90,7 @@ namespace Saxon.Eej.ee.update {
             System.Collections.Generic.ISet<Saxon.Hej.om.NodeInfo> copiedNodes = new System.Collections.Generic.HashSet<Saxon.Hej.om.NodeInfo>();
             Saxon.Hej.om.SequenceTool.supply(getCopyBindings().iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((node => copiedNodes.Add((Saxon.Hej.om.NodeInfo)(node)))));
             if (!((pul.getAffectedTrees()).All(copiedNodes.Contains))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("A node that was not created during the copy phase has been updated during the modify phase");
-                err.setErrorCode("XUDY0014");
-                err.setLocation(getLocation());
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("A node that was not created during the copy phase has been updated during the modify phase").withErrorCode("XUDY0014").withLocation(getLocation()).withXPathContext(context);
             }
         }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {

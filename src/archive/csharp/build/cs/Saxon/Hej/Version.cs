@@ -10,10 +10,10 @@ namespace Saxon.Hej {
               platform = new Saxon.Impl.Helpers.DotNetPlatform();
         }
         private const int MAJOR_VERSION = 12;
-        private const int MINOR_VERSION = 1;
-        private const int BUILD = 32112;
+        private const int MINOR_VERSION = 2;
+        private const int BUILD = 42712;
         private const string MAJOR_RELEASE_DATE = "2023-01-12";
-        private const string MINOR_RELEASE_DATE = "2023-03-21";
+        private const string MINOR_RELEASE_DATE = "2023-04-27";
         private Version()  {
         }
         public static string getProductName() {

@@ -98,9 +98,7 @@ namespace Saxon.Hej.functions {
             return i;
         }
         private static void badDate(string msg, string value) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Invalid IETF date value "+value)+" (")+msg)+")"));
-            err.setErrorCode("FORG0010");
-            throw err;
+            throw new Saxon.Hej.trans.XPathException((((("Invalid IETF date value "+value)+" (")+msg)+")"), "FORG0010");
         }
         private readonly string[] timezoneNames = new string[]{"UT", "UTC", "GMT", "EST", "EDT", "CST", "CDT", "MST", "MDT", "PST", "PDT"};
         private bool isTimezoneName(string str) {

@@ -19,10 +19,7 @@ namespace Saxon.Hej.value {
         public Int64Value(long val, Saxon.Hej.type.BuiltInAtomicType typeLabel, bool check) : base (typeLabel) {
             value = val;
             if ((check && !(checkRange(value, typeLabel)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Integer value "+val)+" is out of range for the requested type ")+typeLabel.getDescription()));
-                err.setErrorCode("XPTY0004");
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(((("Integer value "+val)+" is out of range for the requested type ")+typeLabel.getDescription())).withErrorCode("XPTY0004").asTypeError();
             }
         }
         public static Saxon.Hej.value.Int64Value makeIntegerValue(long value) {

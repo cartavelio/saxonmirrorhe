@@ -77,7 +77,7 @@ namespace Saxon.Hej.style {
                 try {
                     packageVersion = new Saxon.Hej.style.PackageVersion(packageVersionAtt);
                 } catch (Saxon.Hej.trans.XPathException ex) {
-                    compileErrorInAttribute(ex.Message, ex.getErrorCodeLocalPart(), "package-version");
+                    compileErrorInAttribute(ex, "package-version");
                 }
             }
             if ((version == -1)) {

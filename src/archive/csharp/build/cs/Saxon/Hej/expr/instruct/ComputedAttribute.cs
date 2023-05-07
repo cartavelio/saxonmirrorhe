@@ -69,11 +69,7 @@ namespace Saxon.Hej.expr.instruct {
                 bool maybeString = ((th.relationship(nameItemType, Saxon.Hej.type.BuiltInAtomicType.STRING) != Saxon.Hej.type.Affinity.DISJOINT) || (th.relationship(nameItemType, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) != Saxon.Hej.type.Affinity.DISJOINT));
                 bool maybeQName = (th.relationship(nameItemType, Saxon.Hej.type.BuiltInAtomicType.QNAME) != Saxon.Hej.type.Affinity.DISJOINT);
                 if (!(((maybeString || maybeQName)))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The attribute name must be either an xs:string, an xs:QName, or untyped atomic");
-                    err.setErrorCode("XPTY0004");
-                    err.setIsTypeError(true);
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("The attribute name must be either an xs:string, an xs:QName, or untyped atomic").withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
                 }
             } else {
                 if (!(th.isSubType(getNameExp().getItemType(), Saxon.Hej.type.BuiltInAtomicType.STRING))) {
@@ -91,27 +87,21 @@ namespace Saxon.Hej.expr.instruct {
                         if ((getNamespaceExp() == null)) {
                             Saxon.Hej.om.NamespaceUri uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
                             if ((uri == null)) {
-                                Saxon.Hej.trans.XPathException se = new Saxon.Hej.trans.XPathException((("Prefix "+parts[0])+" has not been declared"));
+                                string message = (("Prefix "+parts[0])+" has not been declared");
                                 if (isXSLT()) {
-                                    se.setErrorCode("XTDE0860");
-                                    se.setIsStaticError(true);
-                                    throw se;
+                                    throw new Saxon.Hej.trans.XPathException(message, "XTDE0860").asStaticError();
                                 } else {
-                                    se.setErrorCode("XQDY0074");
-                                    se.setIsStaticError(false);
-                                    throw se;
+                                    throw new Saxon.Hej.trans.XPathException(message, "XQDY0074");
                                 }
                             }
                             setNamespace(new Saxon.Hej.expr.StringLiteral(uri.ToString()));
                         }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    if (((e.getErrorCodeQName() == null) || e.getErrorCodeLocalPart().Equals("FORG0001"))) {
+                    if (((e.getErrorCodeQName() == null) || e.hasErrorCode("FORG0001"))) {
                         e.setErrorCode((isXSLT() ? "XTDE0850" : "XQDY0074"));
                     }
-                    e.maybeSetLocation(getLocation());
-                    e.setIsStaticError(true);
-                    throw;
+                    throw e.maybeWithLocation(getLocation()).asStaticError();
                 }
             }
         }
@@ -144,10 +134,7 @@ namespace Saxon.Hej.expr.instruct {
                 } else {
                     msg += ("the containing element is of simple type "+parentType.getDescription());
                 }
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg);
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(msg).asTypeError().withLocation(getLocation());
             }
         }
         public override Saxon.Hej.om.NodeName evaluateNodeName(Saxon.Hej.expr.XPathContext context) {

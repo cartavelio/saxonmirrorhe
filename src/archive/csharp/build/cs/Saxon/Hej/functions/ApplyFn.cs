@@ -67,9 +67,8 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.ma.arrays.ArrayItem args = (Saxon.Hej.ma.arrays.ArrayItem)(arguments[1].head());
             if ((function.getArity() != args.arrayLength())) {
                 string errorCode = (isDynamicFunctionCall() ? "XPTY0004" : "FOAP0001");
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Number of arguments required for dynamic call to "+function.getDescription())+" is ")+function.getArity())+"; number supplied = ")+args.arrayLength()), errorCode);
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Number of arguments required for dynamic call to "+function.getDescription())+" is ")+function.getArity())+"; number supplied = ")+args.arrayLength()), errorCode).withXPathContext(context);
                 err.setIsTypeError(isDynamicFunctionCall());
-                err.setXPathContext(context);
                 throw err;
             }
             Saxon.Hej.om.Sequence[] argArray = new Saxon.Hej.om.Sequence[args.arrayLength()];

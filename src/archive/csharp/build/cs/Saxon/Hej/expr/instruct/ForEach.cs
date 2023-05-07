@@ -166,9 +166,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override void checkForUpdatingSubexpressions() {
             if (getSelect().isUpdatingExpression()) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Updating expression appears in a context where it is not permitted", "XUST0001");
-                err.setLocation(getSelect().getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Updating expression appears in a context where it is not permitted", "XUST0001").withLocation(getSelect().getLocation());
             }
         }
         public override int getImplementationMethod() {

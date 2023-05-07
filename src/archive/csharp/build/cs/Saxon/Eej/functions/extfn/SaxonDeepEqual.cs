@@ -20,9 +20,7 @@ namespace Saxon.Eej.functions.extfn {
             string collation = ((collationValue == null) ? config.getDefaultCollationName() : collationValue.getStringValue());
             Saxon.Hej.lib.StringCollator collator = config.getCollation(collation);
             if ((collator == null)) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("Unknown collation "+collation));
-                e.setErrorCode("FOCH0002");
-                throw e;
+                throw new Saxon.Hej.trans.XPathException(("Unknown collation "+collation), "FOCH0002");
             }
             Saxon.Hej.expr.sort.GenericAtomicComparer comparer = new Saxon.Hej.expr.sort.GenericAtomicComparer(collator, context);
             int flag = 0;

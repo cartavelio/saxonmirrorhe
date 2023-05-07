@@ -123,22 +123,20 @@ namespace Saxon.Hej.expr.instruct {
                     string hostLang = "XP30";
                     pattern = config.compileRegularExpression(Saxon.Hej.str.StringView.tidy(regex), flagstr, hostLang, warnings);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    if ("XTDE1150".Equals(err.getErrorCodeLocalPart())) {
+                    if (err.hasErrorCode("XTDE1150")) {
                         throw;
                     }
-                    if ("FORX0001".Equals(err.getErrorCodeLocalPart())) {
-                        invalidRegex(("Error in regular expression flags: "+err), "FORX0001");
+                    if (err.hasErrorCode("FORX0001")) {
+                        invalidRegex(("Error in regular expression flags: "+err), err.getErrorCodeQName());
                     } else {
-                        invalidRegex(("Error in regular expression: "+err), err.getErrorCodeLocalPart());
+                        invalidRegex(("Error in regular expression: "+err), err.getErrorCodeQName());
                     }
                 }
             }
         }
-        private void invalidRegex(string message, string errorCode) {
+        private void invalidRegex(string message, Saxon.Hej.om.StructuredQName errorCode) {
             pattern = null;
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message, errorCode);
-            err.setLocation(getLocation());
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(message).withErrorCode(errorCode).withLocation(getLocation());
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rm) {
             Saxon.Hej.expr.instruct.AnalyzeString a2 = new Saxon.Hej.expr.instruct.AnalyzeString(copy(getSelect(), rm), copy(getRegex(), rm), copy(getFlags(), rm), copy(getMatching(), rm), copy(getNonMatching(), rm), pattern);

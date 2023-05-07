@@ -287,8 +287,7 @@ namespace Saxon.Eej.ee.stream.watch {
             eventNumber++;
         }
         private void warning(Saxon.Hej.trans.QuitParsingException exception) {
-            exception.maybeSetLocation(lastLocationId);
-            Saxon.Hej.trans.XmlProcessingException err = new Saxon.Hej.trans.XmlProcessingException(exception);
+            Saxon.Hej.trans.XmlProcessingException err = new Saxon.Hej.trans.XmlProcessingException(exception.maybeWithLocation(lastLocationId));
             err.setWarning(true);
             getPipelineConfiguration().getErrorReporter().report(err);
         }

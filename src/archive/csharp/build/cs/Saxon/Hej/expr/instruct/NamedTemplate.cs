@@ -83,20 +83,14 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.om.Item contextItem = context.getContextItem();
             if ((contextItem == null)) {
                 if (!(mayOmitContextItem)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The template requires a context item, but none has been supplied", "XTTE3090");
-                    err.setLocation(getLocation());
-                    err.setIsTypeError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("The template requires a context item, but none has been supplied", "XTTE3090").withLocation(getLocation()).asTypeError();
                 }
             } else {
                 Saxon.Hej.type.TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
                 if (((requiredContextItemType != Saxon.Hej.type.AnyItemType.getInstance()) && !(requiredContextItemType.matches(contextItem, th)))) {
                     Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MISC, "context item for the named template", 0);
                     string message = role.composeErrorMessage(requiredContextItemType, contextItem, th);
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message, "XTTE0590");
-                    err.setLocation(getLocation());
-                    err.setIsTypeError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(message, "XTTE0590").withLocation(getLocation()).asTypeError();
                 }
                 if (absentFocus) {
                     context = context.newMinorContext();

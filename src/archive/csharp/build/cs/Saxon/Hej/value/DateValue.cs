@@ -136,19 +136,13 @@ namespace Saxon.Hej.value {
                     }
                     return new Saxon.Hej.value.DateValue(y, (byte)(m), (byte)(d), getTimezoneInMinutes(), hasNoYearZero);
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Date arithmetic is not available for xs:duration, only for its subtypes");
-                    err.setIsTypeError(true);
-                    err.setErrorCode("XPTY0004");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("Date arithmetic is not available for xs:duration, only for its subtypes").asTypeError().withErrorCode("XPTY0004");
                 }
             }
         }
         public override Saxon.Hej.value.DayTimeDurationValue subtract(Saxon.Hej.value.CalendarValue other, Saxon.Hej.expr.XPathContext context) {
             if (!(((other is Saxon.Hej.value.DateValue)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("First operand of '-' is a date, but the second is not");
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("First operand of '-' is a date, but the second is not").asTypeError().withErrorCode("XPTY0004");
             }
             return base.subtract(other, context);
         }

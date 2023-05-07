@@ -262,8 +262,7 @@ namespace Saxon.Hej.expr {
                 System.Diagnostics.Debug.Assert((actual != null));
                 return actual.iterate();
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                throw;
+                throw err.maybeWithLocation(getLocation());
             } catch (Saxon.Ejava.lang.NullPointerException err) {
                 string msg = (((("Internal error: no value for variable $"+getDisplayName())+" at line ")+getLocation().getLineNumber())+(((getLocation().getSystemId() == null) ? "" : (" of "+getLocation().getSystemId()))));
                 new Saxon.Hej.lib.StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
@@ -280,8 +279,7 @@ namespace Saxon.Hej.expr {
                 System.Diagnostics.Debug.Assert((actual != null));
                 return actual.head();
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                throw;
+                throw err.maybeWithLocation(getLocation()).maybeWithContext(c);
             }
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext c) {
@@ -290,12 +288,9 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.s9api.Location loc = getLocation();
                 Saxon.Hej.om.SequenceTool.supply(iter, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => output.append(item, loc, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES))));
             } catch (Saxon.Hej.trans.UncheckedXPathException uxe) {
-                Saxon.Hej.trans.XPathException xpe = uxe.getXPathException();
-                xpe.maybeSetLocation(getLocation());
-                throw xpe;
+                throw uxe.getXPathException().maybeWithLocation(getLocation()).maybeWithContext(c);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                throw;
+                throw err.maybeWithLocation(getLocation()).maybeWithContext(c);
             }
         }
         public virtual Saxon.Hej.om.Sequence evaluateVariable(Saxon.Hej.expr.XPathContext c) {

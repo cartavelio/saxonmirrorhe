@@ -45,16 +45,10 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.om.NodeInfo target;
             Saxon.Hej.om.Item current = context.getContextItem();
             if ((current == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The context item for lang() is absent");
-                err.setErrorCode("XPDY0002");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("The context item for lang() is absent").withErrorCode("XPDY0002").withXPathContext(context);
             }
             if (!(((current is Saxon.Hej.om.NodeInfo)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The context item for lang() is not a node");
-                err.setErrorCode("XPTY0004");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("The context item for lang() is not a node").withErrorCode("XPTY0004").withXPathContext(context);
             }
             target = (Saxon.Hej.om.NodeInfo)(current);
             return target;

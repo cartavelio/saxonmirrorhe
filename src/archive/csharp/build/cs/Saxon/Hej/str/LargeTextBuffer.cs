@@ -211,16 +211,16 @@ namespace Saxon.Hej.str {
             }
         }
         public void close() {
-            if (((lastSegment != null) && (lastSegmentLength>0))) {
-                addSegment(lastSegment);
-            }
-            lastSegment = null;
         }
         public int length() {
-            if ((lastSegment == null)) {
-                return ((((completeSegments.Count-1))*SEGLEN)+lastSegmentLength);
+            if ((lastSegment == EMPTY_SEGMENT)) {
+                return 0;
             } else {
-                return ((completeSegments.Count*SEGLEN)+lastSegmentLength);
+                if ((lastSegment == null)) {
+                    return ((((completeSegments.Count-1))*SEGLEN)+lastSegmentLength);
+                } else {
+                    return ((completeSegments.Count*SEGLEN)+lastSegmentLength);
+                }
             }
         }
         public void setLength(int newLength) {

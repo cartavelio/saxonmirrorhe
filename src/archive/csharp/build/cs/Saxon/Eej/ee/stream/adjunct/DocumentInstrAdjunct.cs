@@ -18,9 +18,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     }
                     next.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(exp.getLocation());
-                    e.maybeSetContext(context);
-                    dynamicError(e);
+                    dynamicError(e.maybeWithLocation(exp.getLocation()).maybeWithContext(context));
                 }
             }
             protected internal override void processRight(Saxon.Hej.expr.XPathContext context) {

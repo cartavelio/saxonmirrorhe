@@ -62,10 +62,7 @@ namespace Saxon.Hej.tree.iter {
                     ch32 = Saxon.Hej.serialize.charcode.UTF16CharacterSet.combinePair((char)(ch32), low);
                 }
                 if (!(checker.test(ch32))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((((("The unparsed-text file contains a character that is illegal in XML (line="+position)+" column=")+((c+1)))+" value=hex ")+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')'));
-                    err.setErrorCode("FOUT1190");
-                    err.setLocator(location);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((((((("The unparsed-text file contains a character that is illegal in XML (line="+position)+" column=")+((c+1)))+" value=hex ")+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')')).withErrorCode("FOUT1190").withLocation(location);
                 }
             }
         }

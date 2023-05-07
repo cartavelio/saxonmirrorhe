@@ -46,8 +46,7 @@ namespace Saxon.Hej.expr {
                 try {
                     return targetType.getTypedValue(value.getUnicodeStringValue(), resolver, rules);
                 } catch (Saxon.Hej.type.ValidationException e) {
-                    e.setErrorCode("FORG0001");
-                    throw;
+                    throw e.withErrorCode("FORG0001");
                 }
             }
             Saxon.Hej.type.AtomicType label = value.getItemType();

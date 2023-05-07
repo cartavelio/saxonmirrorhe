@@ -31,7 +31,7 @@ namespace Saxon.Hej.style {
                     st = makeSequenceType(asAtt);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     st = Saxon.Hej.value.SequenceType.SINGLE_ITEM;
-                    compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "as");
+                    compileErrorInAttribute(e, "as");
                 }
                 if ((st.getCardinality() != Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) {
                     compileError("The xsl:context-item/@use attribute must be an item type (no occurrence indicator allowed)", "XTSE0020");

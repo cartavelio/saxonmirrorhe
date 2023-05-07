@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.query {
     public class Annotation {
-        public static readonly Saxon.Hej.om.StructuredQName UPDATING = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.XQUERY, "updating");
-        public static readonly Saxon.Hej.om.StructuredQName SIMPLE = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.XQUERY, "simple");
-        public static readonly Saxon.Hej.om.StructuredQName PRIVATE = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.XQUERY, "private");
-        public static readonly Saxon.Hej.om.StructuredQName PUBLIC = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.XQUERY, "public");
+        public static readonly Saxon.Hej.om.StructuredQName UPDATING = Saxon.Hej.om.NamespaceUri.XQUERY.qName("updating");
+        public static readonly Saxon.Hej.om.StructuredQName SIMPLE = Saxon.Hej.om.NamespaceUri.XQUERY.qName("simple");
+        public static readonly Saxon.Hej.om.StructuredQName PRIVATE = Saxon.Hej.om.NamespaceUri.XQUERY.qName("private");
+        public static readonly Saxon.Hej.om.StructuredQName PUBLIC = Saxon.Hej.om.NamespaceUri.XQUERY.qName("public");
         private Saxon.Hej.om.StructuredQName qName = null;
         private System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> annotationParameters = null;
         public Annotation(Saxon.Hej.om.StructuredQName name)  {

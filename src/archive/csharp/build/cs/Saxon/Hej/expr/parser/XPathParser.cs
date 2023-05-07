@@ -149,13 +149,13 @@ namespace Saxon.Hej.expr.parser {
                 }
             }
             Saxon.Hej.s9api.Location loc = makeNestedLocation(env.getContainingLocation(), line, column, nearbyText);
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-            err.setLocation(loc);
+            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message).withLocation(loc).asStaticError().withErrorCode(errorCode);
             err.setIsSyntaxError("XPST0003".Equals(errorCode.getLocalPart()));
-            err.setIsStaticError(true);
             err.setHostLanguage(getLanguage());
-            err.setErrorCodeQName(errorCode);
             throw err;
+        }
+        protected internal void grumble(string message, Saxon.Hej.om.StructuredQName errorCode) {
+            grumble(message, errorCode, -1);
         }
         protected internal void warning(string message, string errorCode) {
             if (!(env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.SUPPRESS_XPATH_WARNINGS))) {
@@ -332,11 +332,9 @@ namespace Saxon.Hej.expr.parser {
             this.env = env;
             language = Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.EXTENDED_ITEM_TYPE;
             t = new Saxon.Hej.expr.parser.Tokenizer();
-            t.languageLevel = languageVersion = env.getXPathVersion();
+            t.languageLevel = languageVersion = 40;
             allowSaxonExtensions = t.allowSaxonExtensions = true;
-            allowXPath30Syntax = (languageVersion>=30);
-            allowXPath31Syntax = (languageVersion>=31);
-            allowXPath40Syntax = (languageVersion>=40);
+            allowXPath30Syntax = allowXPath31Syntax = allowXPath40Syntax = true;
             try {
                 t.tokenize(input, 0, -1);
             } catch (Saxon.Hej.trans.XPathException err) {
@@ -380,6 +378,10 @@ namespace Saxon.Hej.expr.parser {
                     return parseStringLiteral(true);
                   case Saxon.Hej.expr.parser.Token.NUMBER:
                     return parseNumericLiteral(true);
+                  case Saxon.Hej.expr.parser.Token.HEX_INTEGER:
+                    return parseHexLiteral(true);
+                  case Saxon.Hej.expr.parser.Token.BINARY_INTEGER:
+                    return parseBinaryLiteral(true);
                   case Saxon.Hej.expr.parser.Token.NAME:
                   case Saxon.Hej.expr.parser.Token.PREFIX:
                   case Saxon.Hej.expr.parser.Token.SUFFIX:
@@ -904,7 +906,7 @@ namespace Saxon.Hej.expr.parser {
             try {
                 sq = qNameParser.parse(qname, env.getDefaultElementNamespace());
             } catch (Saxon.Hej.trans.XPathException e) {
-                grumble(e.Message, e.getErrorCodeLocalPart());
+                grumble(e.Message, e.getErrorCodeQName());
                 return null;
             }
             return getPlainType(sq);
@@ -1000,7 +1002,7 @@ namespace Saxon.Hej.expr.parser {
             try {
                 sq = qNameParser.parse(qname, env.getDefaultElementNamespace());
             } catch (Saxon.Hej.trans.XPathException e) {
-                grumble(e.Message, e.getErrorCodeLocalPart());
+                grumble(e.Message, e.getErrorCodeQName());
                 System.Diagnostics.Debug.Assert(false);
             }
             Saxon.Hej.om.NamespaceUri uri = sq.getNamespaceUri();
@@ -1134,6 +1136,8 @@ namespace Saxon.Hej.expr.parser {
                             primaryType = parseRecordTest(this);
                             break ;
                           case "atomic":
+                            checkLanguageVersion40();
+                            warning("The pattern syntax atomic(typename) is likely to be dropped from the 4.0 specification. Use type(typename) instead.", Saxon.Hej.trans.SaxonErrorCode.SXWN9000);
                             nextToken();
                             expect(Saxon.Hej.expr.parser.Token.NAME);
                             Saxon.Hej.om.StructuredQName typeName = getQNameParser().parse(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.SCHEMA);
@@ -1160,16 +1164,23 @@ namespace Saxon.Hej.expr.parser {
                           case "type":
                             checkLanguageVersion40();
                             nextToken();
-                            expect(Saxon.Hej.expr.parser.Token.NAME);
-                            Saxon.Hej.om.StructuredQName typeAlias = getQNameParser().parse(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
-                            Saxon.Hej.type.ItemType realType = getStaticContext().resolveTypeAlias(typeAlias);
-                            if ((realType == null)) {
-                                grumble((("Named type ("+typeAlias.getDisplayName())+") has not been defined"));
+                            if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
+                                Saxon.Hej.om.StructuredQName qName = getQNameParser().parse(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
+                                Saxon.Hej.type.ItemType realType = getStaticContext().resolveTypeAlias(qName);
+                                if ((realType != null)) {
+                                    nextToken();
+                                    expect(Saxon.Hej.expr.parser.Token.RPAR);
+                                    nextToken();
+                                    return realType;
+                                }
                             }
-                            nextToken();
+                            if ((language != Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XSLT_PATTERN)) {
+                                grumble("In an XPath expression (as distinct from an XSLT pattern), type(N) must refer to a named item type");
+                            }
+                            Saxon.Hej.type.ItemType it = parseItemType();
                             expect(Saxon.Hej.expr.parser.Token.RPAR);
                             nextToken();
-                            return realType;
+                            return it;
                           default:
                             primaryType = parseKindTest();
                             break ;
@@ -1260,7 +1271,7 @@ namespace Saxon.Hej.expr.parser {
                     optionalFieldNames.Add(name);
                     p.nextToken();
                 }
-                Saxon.Hej.value.SequenceType arg = Saxon.Hej.value.SequenceType.NON_EMPTY_SEQUENCE;
+                Saxon.Hej.value.SequenceType arg = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
                 if ((t.currentToken == Saxon.Hej.expr.parser.Token.AS)) {
                     p.nextToken();
                     if ((t.currentToken == Saxon.Hej.expr.parser.Token.DOTDOT)) {
@@ -1529,6 +1540,8 @@ namespace Saxon.Hej.expr.parser {
               case Saxon.Hej.expr.parser.Token.FUNCTION:
               case Saxon.Hej.expr.parser.Token.STRING_LITERAL:
               case Saxon.Hej.expr.parser.Token.NUMBER:
+              case Saxon.Hej.expr.parser.Token.HEX_INTEGER:
+              case Saxon.Hej.expr.parser.Token.BINARY_INTEGER:
               case Saxon.Hej.expr.parser.Token.LPAR:
               case Saxon.Hej.expr.parser.Token.DOLLAR:
               case Saxon.Hej.expr.parser.Token.PRAGMA:
@@ -1747,6 +1760,10 @@ namespace Saxon.Hej.expr.parser {
                 return parseStringTemplate();
               case Saxon.Hej.expr.parser.Token.NUMBER:
                 return parseNumericLiteral(true);
+              case Saxon.Hej.expr.parser.Token.HEX_INTEGER:
+                return parseHexLiteral(true);
+              case Saxon.Hej.expr.parser.Token.BINARY_INTEGER:
+                return parseBinaryLiteral(true);
               case Saxon.Hej.expr.parser.Token.FUNCTION:
                 return parseFunctionCall(null);
               case Saxon.Hej.expr.parser.Token.QMARK:
@@ -1927,6 +1944,55 @@ namespace Saxon.Hej.expr.parser {
             setLocation(lit, offset);
             return (traceable ? makeTracer(lit, null) : lit);
         }
+        public Saxon.Hej.expr.Expression parseHexLiteral(bool traceable) {
+            try {
+                int offset = t.currentTokenStartOffset;
+                Saxon.Hej.value.IntegerValue val;
+                if ((t.currentTokenValue.Length<16)) {
+                    if (t.currentTokenValue.Length==0) {
+                        grumble("Empty hex literal");
+                    }
+                    long parsed = System.Int64.Parse(t.currentTokenValue, System.Globalization.NumberStyles.HexNumber);
+                    val = new Saxon.Hej.value.Int64Value(parsed);
+                } else {
+                    System.Numerics.BigInteger big = Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(t.currentTokenValue, 16);
+                    val = new Saxon.Hej.value.BigIntegerValue(big);
+                }
+                nextToken();
+                Saxon.Hej.expr.Literal lit = Saxon.Hej.expr.Literal.makeLiteral(val);
+                setLocation(lit, offset);
+                return (traceable ? makeTracer(lit, null) : lit);
+            } catch (/* substitute exception */ System.FormatException e) {
+                grumble("Invalid hex literal");
+                return null;
+            }
+        }
+        public Saxon.Hej.expr.Expression parseBinaryLiteral(bool traceable) {
+            try {
+                int offset = t.currentTokenStartOffset;
+                Saxon.Hej.value.IntegerValue val;
+                if ((t.currentTokenValue.Length<64)) {
+                    if (t.currentTokenValue.Length==0) {
+                        grumble("Empty binary literal");
+                    }
+                    long parsed = binaryStringToLong(t.currentTokenValue);
+                    val = new Saxon.Hej.value.Int64Value(parsed);
+                } else {
+                    System.Numerics.BigInteger big = Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(t.currentTokenValue, 2);
+                    val = new Saxon.Hej.value.BigIntegerValue(big);
+                }
+                nextToken();
+                Saxon.Hej.expr.Literal lit = Saxon.Hej.expr.Literal.makeLiteral(val);
+                setLocation(lit, offset);
+                return (traceable ? makeTracer(lit, null) : lit);
+            } catch (Saxon.Ejava.lang.NumberFormatException e) {
+                grumble("Invalid binary literal");
+                return null;
+            }
+        }
+        private long binaryStringToLong(string input) {
+            return Convert.ToInt64(input, 2);
+        }
         protected internal Saxon.Hej.expr.Expression parseStringLiteral(bool traceable) {
             Saxon.Hej.expr.Literal literal = makeStringLiteral(t.currentTokenValue, true);
             nextToken();
@@ -2038,8 +2104,7 @@ namespace Saxon.Hej.expr.parser {
                 try {
                     @ref = env.bindVariable(vtest);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.maybeSetLocation(makeLocation());
-                    throw;
+                    throw err.maybeWithLocation(makeLocation());
                 }
             }
             setLocation(@ref, offset);
@@ -2875,13 +2940,13 @@ namespace Saxon.Hej.expr.parser {
         }
         protected internal Saxon.Hej.om.StructuredQName resolveFunctionName(string fname) {
             if (scanOnly) {
-                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.SAXON, "dummy");
+                return Saxon.Hej.om.NamespaceUri.SAXON.qName("dummy");
             }
             Saxon.Hej.om.StructuredQName functionName = null;
             try {
                 functionName = qNameParser.parse(fname, env.getDefaultFunctionNamespace());
             } catch (Saxon.Hej.trans.XPathException e) {
-                grumble(e.Message, e.getErrorCodeLocalPart());
+                grumble(e.Message, e.getErrorCodeQName());
                 System.Diagnostics.Debug.Assert(false);
             }
             if (functionName.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
@@ -2919,7 +2984,7 @@ namespace Saxon.Hej.expr.parser {
                     }
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
-                grumble(e.Message, e.getErrorCodeLocalPart());
+                grumble(e.Message, e.getErrorCodeQName());
                 System.Diagnostics.Debug.Assert((functionName != null));
             }
             Saxon.Hej.om.FunctionItem fcf = null;
@@ -2935,7 +3000,7 @@ namespace Saxon.Hej.expr.parser {
             }
             if ((functionName.hasURI(Saxon.Hej.om.NamespaceUri.FN) && (fcf is Saxon.Hej.functions.SystemFunction))) {
                 Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry details = ((Saxon.Hej.functions.SystemFunction)(fcf)).getDetails();
-                if (((details != null) && (((details.properties&((Saxon.Hej.functions.registry.BuiltInFunctionSet.FOCUS|Saxon.Hej.functions.registry.BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)))) != 0))) {
+                if (((fcf is Saxon.Hej.functions.ContextAccessorFunction) || (((details != null) && (((details.properties&((Saxon.Hej.functions.registry.BuiltInFunctionSet.FOCUS|Saxon.Hej.functions.registry.BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)))) != 0))))) {
                     Saxon.Hej.functions.SystemFunction lookup = Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
                     lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
                     return lookup.makeFunctionCall(Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.value.QNameValue(functionName, Saxon.Hej.type.BuiltInAtomicType.QNAME)), Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.makeIntegerValue(arity)));
@@ -3295,13 +3360,13 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.om.StructuredQName sq = qNameParser.parse(qname, defaultNS);
                 return env.getConfiguration().getNamePool().allocateFingerprint(sq.getNamespaceUri(), sq.getLocalPart());
             } catch (Saxon.Hej.trans.XPathException e) {
-                grumble(e.Message, e.getErrorCodeLocalPart());
+                grumble(e.Message, e.getErrorCodeQName());
                 return -1;
             }
         }
         public Saxon.Hej.om.StructuredQName makeStructuredQNameSilently(string qname, Saxon.Hej.om.NamespaceUri defaultUri) {
             if (scanOnly) {
-                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.SAXON, "dummy");
+                return Saxon.Hej.om.NamespaceUri.SAXON.qName("dummy");
             }
             return qNameParser.parse(qname, defaultUri);
         }
@@ -3309,8 +3374,8 @@ namespace Saxon.Hej.expr.parser {
             try {
                 return makeStructuredQNameSilently(qname, defaultUri);
             } catch (Saxon.Hej.trans.XPathException err) {
-                grumble(err.Message, err.getErrorCodeLocalPart());
-                return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "error");
+                grumble(err.Message, err.getErrorCodeQName());
+                return Saxon.Hej.om.NamespaceUri.NULL.qName("error");
             }
         }
         public Saxon.Hej.om.NodeName makeNodeName(string qname, bool useDefault) {
@@ -3374,7 +3439,7 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.om.StructuredQName sq = qNameParser.parse((prefix+":dummy"), Saxon.Hej.om.NamespaceUri.NULL);
                 return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, sq.getNamespaceUri());
             } catch (Saxon.Hej.trans.XPathException err) {
-                grumble(err.Message, err.getErrorCodeLocalPart());
+                grumble(err.Message, err.getErrorCodeQName());
                 return null;
             }
         }

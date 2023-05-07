@@ -5,15 +5,11 @@ namespace Saxon.Hej.value {
     public sealed class NotationValue : Saxon.Hej.value.QualifiedNameValue {
         public NotationValue(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName, bool check) : base (new Saxon.Hej.om.StructuredQName(prefix, uri, localName), Saxon.Hej.type.BuiltInAtomicType.NOTATION) {
             if ((check && !(Saxon.Hej.om.NameChecker.isValidNCName(localName)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Malformed local name in NOTATION: '"+localName)+'\''));
-                err.setErrorCode("FORG0001");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("Malformed local name in NOTATION: '"+localName)+'\''), "FORG0001");
             }
             prefix = ((prefix == null) ? "" : prefix);
             if (((check && uri.isEmpty()) && (prefix.Length != 0))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("NOTATION has null namespace but non-empty prefix");
-                err.setErrorCode("FOCA0002");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("NOTATION has null namespace but non-empty prefix", "FOCA0002");
             }
         }
         public NotationValue(string prefix, string uri, string localName, bool check) : this (prefix, Saxon.Hej.om.NamespaceUri.of(uri), localName, check) {

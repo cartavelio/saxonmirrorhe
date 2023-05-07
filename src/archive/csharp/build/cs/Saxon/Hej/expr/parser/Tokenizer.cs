@@ -496,6 +496,36 @@ namespace Saxon.Hej.expr.parser {
                     }
                     goto case '0';
                   case '0':
+                    if (((inputOffset<inputLength) && (languageLevel>=40))) {
+                        if ((input[inputOffset] == 'x')) {
+                            inputOffset++;
+                            while (((inputOffset<inputLength) && ("0123456789abcdefABCDEF_".IndexOf(input[inputOffset])>=0))) {
+                                inputOffset++;
+                            }
+                            string body = input.Substring((nextTokenStartOffset+2), inputOffset - (nextTokenStartOffset+2));
+                            if ((body.StartsWith("_") || body.EndsWith("_"))) {
+                                throw new Saxon.Hej.trans.XPathException("Underscore not allowed at start or end of hex literal");
+                            }
+                            nextTokenValue = body.Replace("_", "");
+                            nextToken = Saxon.Hej.expr.parser.Token.HEX_INTEGER;
+                            return ;
+                        } else {
+                            if ((input[inputOffset] == 'b')) {
+                                inputOffset++;
+                                while (((inputOffset<inputLength) && ("01_".IndexOf(input[inputOffset])>=0))) {
+                                    inputOffset++;
+                                }
+                                string body = input.Substring((nextTokenStartOffset+2), inputOffset - (nextTokenStartOffset+2));
+                                if ((body.StartsWith("_") || body.EndsWith("_"))) {
+                                    throw new Saxon.Hej.trans.XPathException("Underscore not allowed at start or end of binary literal");
+                                }
+                                nextTokenValue = body.Replace("_", "");
+                                nextToken = Saxon.Hej.expr.parser.Token.BINARY_INTEGER;
+                                return ;
+                            }
+                        }
+                    }
+                    goto case '1';
                   case '1':
                   case '2':
                   case '3':
@@ -509,6 +539,7 @@ namespace Saxon.Hej.expr.parser {
                     bool allowSign = false;
                     bool allowDot = true;
                     bool keepGoing = true;
+                    bool allowUnderscore = (languageLevel>=40);
                     while (true) {
                         switch (c) {
                           case '0':
@@ -532,6 +563,18 @@ namespace Saxon.Hej.expr.parser {
                                 keepGoing = false;
                             }
                             break ;
+                          case '_':
+                            if (allowUnderscore) {
+                                if (((inputOffset>=inputLength) || ("0123456789_".IndexOf(input[inputOffset])<0))) {
+                                    throw new Saxon.Hej.trans.XPathException("Underscore must be followed by a digit (or another underscore)");
+                                }
+                                if (((inputOffset<2) || ("0123456789_".IndexOf(input[(inputOffset-2)])<0))) {
+                                    throw new Saxon.Hej.trans.XPathException("Underscore must be preceded by a digit (or another underscore)");
+                                }
+                                break ;
+                            } else {
+                                throw new Saxon.Hej.trans.XPathException("Underscore is not allowed in numeric literal unless 4.0 is enabled");
+                            }
                           case 'E':
                           case 'e':
                             if (allowE) {
@@ -564,7 +607,7 @@ namespace Saxon.Hej.expr.parser {
                         }
                         c = input[inputOffset++];
                     }
-                    nextTokenValue = input.Substring(nextTokenStartOffset, inputOffset - nextTokenStartOffset);
+                    nextTokenValue = input.Substring(nextTokenStartOffset, inputOffset - nextTokenStartOffset).Replace("_", "");
                     nextToken = Saxon.Hej.expr.parser.Token.NUMBER;
                     return ;
                   case '"':

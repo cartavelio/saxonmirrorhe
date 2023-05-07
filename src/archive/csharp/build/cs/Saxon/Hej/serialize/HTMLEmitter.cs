@@ -256,9 +256,7 @@ namespace Saxon.Hej.serialize {
                         } else {
                             if ((ch<160)) {
                                 if (rejectControlCharacters()) {
-                                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Illegal HTML character: decimal "+ch));
-                                    err.setErrorCode("SERE0014");
-                                    throw err;
+                                    throw new Saxon.Hej.trans.XPathException(("Illegal HTML character: decimal "+ch), "SERE0014");
                                 } else {
                                     characterReferenceGenerator.outputCharacterReference(ch, writer);
                                 }
@@ -317,9 +315,7 @@ namespace Saxon.Hej.serialize {
             }
             Saxon.Hej.str.UnicodeString t = data.tidy();
             if ((t.indexOf('>')>=0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("A processing instruction in HTML must not contain a > character");
-                err.setErrorCode("SERE0015");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("A processing instruction in HTML must not contain a > character", "SERE0015");
             }
             try {
                 if (openStartTag) {

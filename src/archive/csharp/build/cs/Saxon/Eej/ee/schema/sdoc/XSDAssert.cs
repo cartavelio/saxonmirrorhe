@@ -49,7 +49,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             env.setBaseURI(getBaseURI());
             env.setRequiredContextItemType(Saxon.Hej.pattern.NodeKindTest.ELEMENT);
             env.setContextItemParentless(true);
-            env.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(this, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "test")));
+            env.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.NamespaceUri.NULL.qName("test")));
             int xpathVersion = config.getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSD);
             if (getXSDSchema().getAllowedExtensions().Contains("any-xpath-version")) {
                 xpathVersion = 31;

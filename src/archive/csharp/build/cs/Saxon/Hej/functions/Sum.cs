@@ -51,8 +51,7 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.om.SequenceTool.supply(@in, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */fold.processItem));
                 return (Saxon.Hej.value.AtomicValue)(fold.result().head());
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(locator);
-                throw;
+                throw e.maybeWithLocation(locator).maybeWithContext(context);
             }
         }
         public class SumFold : Saxon.Hej.functions.Fold {
@@ -80,10 +79,7 @@ namespace Saxon.Hej.functions {
                             data = next;
                             return ;
                         } else {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Input to sum() contains a value of type "+next.getPrimitiveType().getDisplayName())+" which is neither numeric, nor a duration"));
-                            err.setXPathContext(context);
-                            err.setErrorCode("FORG0006");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((("Input to sum() contains a value of type "+next.getPrimitiveType().getDisplayName())+" which is neither numeric, nor a duration")).withXPathContext(context).withErrorCode("FORG0006");
                         }
                     }
                 }
@@ -92,33 +88,21 @@ namespace Saxon.Hej.functions {
                         next = toDouble.convert(next).asAtomic();
                     } else {
                         if (!(((next is Saxon.Hej.value.NumericValue)))) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Input to sum() contains a mix of numeric and non-numeric values");
-                            err.setXPathContext(context);
-                            err.setErrorCode("FORG0006");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException("Input to sum() contains a mix of numeric and non-numeric values").withXPathContext(context).withErrorCode("FORG0006");
                         }
                     }
                     data = Saxon.Hej.expr.ArithmeticExpression.compute(data, Saxon.Hej.expr.Calculator.PLUS, next, context);
                 } else {
                     if ((data is Saxon.Hej.value.DurationValue)) {
                         if (!(((((data is Saxon.Hej.value.DayTimeDurationValue)) || ((data is Saxon.Hej.value.YearMonthDurationValue)))))) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Input to sum() contains a duration that is neither a dayTimeDuration nor a yearMonthDuration");
-                            err.setXPathContext(context);
-                            err.setErrorCode("FORG0006");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException("Input to sum() contains a duration that is neither a dayTimeDuration nor a yearMonthDuration").withXPathContext(context).withErrorCode("FORG0006");
                         }
                         if (!(((next is Saxon.Hej.value.DurationValue)))) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Input to sum() contains a mix of duration and non-duration values");
-                            err.setXPathContext(context);
-                            err.setErrorCode("FORG0006");
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException("Input to sum() contains a mix of duration and non-duration values").withXPathContext(context).withErrorCode("FORG0006");
                         }
                         data = ((Saxon.Hej.value.DurationValue)(data)).add((Saxon.Hej.value.DurationValue)(next));
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Input to sum() contains a value of type "+data.getPrimitiveType().getDisplayName())+" which is neither numeric, nor a duration"));
-                        err.setXPathContext(context);
-                        err.setErrorCode("FORG0006");
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("Input to sum() contains a value of type "+data.getPrimitiveType().getDisplayName())+" which is neither numeric, nor a duration")).withXPathContext(context).withErrorCode("FORG0006");
                     }
                 }
             }

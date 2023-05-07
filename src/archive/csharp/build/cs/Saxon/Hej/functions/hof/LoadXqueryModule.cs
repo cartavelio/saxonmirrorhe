@@ -81,7 +81,7 @@ namespace Saxon.Hej.functions.hof {
                 throw new Saxon.Hej.trans.XPathException(("No library module found with specified target namespace "+moduleUri), "FOQM0002");
             }
             try {
-                string sourceQuery = Saxon.Hej.query.QueryReader.readSourceQuery(streamSources[0], config.getValidCharacterChecker());
+                string sourceQuery = Saxon.Hej.query.QueryReader.readSourceQuery(config, streamSources[0], config.getValidCharacterChecker());
                 staticQueryContext.compileLibrary(sourceQuery);
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Hej.trans.XPathException(e.Message, "FOQM0003");
@@ -126,11 +126,7 @@ namespace Saxon.Hej.functions.hof {
                         value = ((/*1430*/Saxon.Hej.om.GroundedValue)var.evaluateVariable(newContext));
                     } catch (Saxon.Hej.trans.XPathException e) {
                         e.setIsGlobalError(false);
-                        if (e.getErrorCodeLocalPart().Equals("XPTY0004")) {
-                            throw new Saxon.Hej.trans.XPathException(e.Message, "FOQM0005");
-                        } else {
-                            throw;
-                        }
+                        throw e.replacingErrorCode("XPTY0004", "FOQM0005");
                     }
                     variablesMap = variablesMap.addEntry(qNameValue, value);
                 }

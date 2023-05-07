@@ -22,9 +22,7 @@ namespace Saxon.Eej.functions.qt4 {
             }
             Saxon.Hej.lib.StringCollator collator = config.getCollation(collationUri);
             if ((collator == null)) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("Unknown collation "+getRetainedStaticContext().getDefaultCollationName()));
-                e.setErrorCode("FOCH0002");
-                throw e;
+                throw new Saxon.Hej.trans.XPathException(("Unknown collation "+getRetainedStaticContext().getDefaultCollationName()), "FOCH0002");
             }
             Saxon.Hej.expr.sort.AtomicComparer comparer = new Saxon.Hej.expr.sort.GenericAtomicComparer(collator, context);
             if (getFunctionName().getLocalPart().Equals("lowest")) {
@@ -55,20 +53,14 @@ namespace Saxon.Eej.functions.qt4 {
                         try {
                             keyVal = new Saxon.Hej.value.DoubleValue(converter.stringToNumber(keyVal.getUnicodeStringValue()));
                         } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(("Failed to convert key to xs:double: "+e.Message), "FORG0001");
-                            de.setXPathContext(context);
-                            throw de;
+                            throw new Saxon.Hej.trans.XPathException(("Failed to convert key to xs:double: "+e.Message), "FORG0001").withXPathContext(context);
                         }
                     }
                     if (keyVal.isNaN()) {
                         continue ;
                     }
                     if (!(keyVal.getPrimitiveType().isOrdered(false))) {
-                        Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Type "+keyVal.getPrimitiveType())+" is not an ordered type"));
-                        de.setErrorCode("FORG0006");
-                        de.setIsTypeError(true);
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new Saxon.Hej.trans.XPathException((("Type "+keyVal.getPrimitiveType())+" is not an ordered type")).withErrorCode("FORG0006").asTypeError().withXPathContext(context);
                     }
                     if ((maxSoFar == null)) {
                         highestSoFar.Add(next);

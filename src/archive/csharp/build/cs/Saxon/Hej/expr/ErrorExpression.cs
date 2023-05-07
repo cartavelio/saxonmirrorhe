@@ -38,14 +38,10 @@ namespace Saxon.Hej.expr {
             return (EVALUATE_METHOD|ITERATE_METHOD);
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(exception.getMessage());
-            err.setLocation(exception.getLocation());
-            err.maybeSetLocation(getLocation());
+            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(exception.getMessage()).withLocation(exception.getLocation()).maybeWithLocation(getLocation()).maybeWithContext(context).asTypeErrorIf(exception.isTypeError());
             if ((exception.getErrorCode() != null)) {
                 err.setErrorCodeQName(exception.getErrorCode().GetStructuredQName());
             }
-            err.maybeSetContext(context);
-            err.setIsTypeError(exception.isTypeError());
             throw err;
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
@@ -96,14 +92,10 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.expr.ErrorExpression expr = (Saxon.Hej.expr.ErrorExpression)(getExpression());
                 Saxon.Hej.s9api.XmlProcessingError exception = expr.getException();
                 return context => {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(exception.getMessage());
-                    err.setLocation(exception.getLocation());
-                    err.maybeSetLocation(expr.getLocation());
+                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(exception.getMessage()).withLocation(exception.getLocation()).maybeWithLocation(expr.getLocation()).maybeWithContext(context).asTypeErrorIf(exception.isTypeError());
                     if ((exception.getErrorCode() != null)) {
                         err.setErrorCodeQName(exception.getErrorCode().GetStructuredQName());
                     }
-                    err.maybeSetContext(context);
-                    err.setIsTypeError(exception.isTypeError());
                     throw err;
                 } ;
             }

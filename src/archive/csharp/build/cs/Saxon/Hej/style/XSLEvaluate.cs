@@ -82,7 +82,7 @@ namespace Saxon.Hej.style {
                 try {
                     requiredType = makeSequenceType(asAtt);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "as");
+                    compileErrorInAttribute(e, "as");
                 }
             }
             if ((contextItemAtt == null)) {

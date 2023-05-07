@@ -78,11 +78,9 @@ namespace Saxon.Hej.serialize {
                     try {
                         Saxon.Hej.expr.instruct.ResultDocument.setSerializationProperty(properties, uri, lname, value, child.getAllNamespaces(), false, node.getConfiguration());
                     } catch (Saxon.Hej.trans.XPathException err) {
-                        if (("XQST0109".Equals(err.getErrorCodeLocalPart()) || "SEPM0016".Equals(err.getErrorCodeLocalPart()))) {
+                        if (err.hasErrorCode("XQST0109", "SEPM0016")) {
                             if (uri.isEmpty()) {
-                                Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(("Unknown serialization parameter "+Saxon.Hej.trans.Err.depict(child)), "SEPM0017");
-                                e2.setLocator(locator);
-                                throw e2;
+                                throw new Saxon.Hej.trans.XPathException(("Unknown serialization parameter "+Saxon.Hej.trans.Err.depict(child)), "SEPM0017", locator);
                             }
                         } else {
                             throw;
@@ -109,7 +107,7 @@ namespace Saxon.Hej.serialize {
         public Saxon.Hej.serialize.SerializationProperties getSerializationProperties() {
             Saxon.Hej.serialize.CharacterMapIndex index = new Saxon.Hej.serialize.CharacterMapIndex();
             if ((characterMap != null)) {
-                index.putCharacterMap(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "charMap"), characterMap);
+                index.putCharacterMap(Saxon.Hej.om.NamespaceUri.NULL.qName("charMap"), characterMap);
                 properties.setProperty(Saxon.Hej.lib.SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
             }
             return new Saxon.Hej.serialize.SerializationProperties(properties, index);

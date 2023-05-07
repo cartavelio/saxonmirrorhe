@@ -46,10 +46,7 @@ namespace Saxon.Hej.expr {
             }
             if ((((@base.getCardinality()&requiredCardinality)) == 0)) {
                 Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The "+role.getMessage())+" does not satisfy the cardinality constraints"), role.getErrorCode());
-                err.setLocation(getLocation());
-                err.setIsTypeError(role.isTypeError());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("The "+role.getMessage())+" does not satisfy the cardinality constraints"), role.getErrorCode()).withLocation(getLocation()).asTypeErrorIf(role.isTypeError());
             }
             if ((@base is Saxon.Hej.expr.ItemChecker)) {
                 Saxon.Hej.expr.ItemChecker checker = (Saxon.Hej.expr.ItemChecker)(@base);
@@ -240,8 +237,7 @@ namespace Saxon.Hej.expr {
                         try {
                             filter.finalCheck();
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            throw;
+                            throw e.maybeWithLocation(expr.getLocation());
                         }
                         return null;
                     } ;

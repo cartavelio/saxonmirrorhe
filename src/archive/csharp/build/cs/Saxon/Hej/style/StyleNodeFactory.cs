@@ -173,9 +173,9 @@ namespace Saxon.Hej.style {
               case Saxon.Hej.om.StandardNames.XSL_APPLY_TEMPLATES:
                 return new Saxon.Hej.style.XSLApplyTemplates();
               case Saxon.Hej.om.StandardNames.XSL_ARRAY:
-                return new Saxon.Hej.style.XSLArray();
+                return new Saxon.Eej.trans.XSLArray();
               case Saxon.Hej.om.StandardNames.XSL_ARRAY_MEMBER:
-                return new Saxon.Hej.style.XSLArrayMember();
+                return new Saxon.Eej.trans.XSLArrayMember();
               case Saxon.Hej.om.StandardNames.XSL_ASSERT:
                 return new Saxon.Hej.style.XSLAssert();
               case Saxon.Hej.om.StandardNames.XSL_ATTRIBUTE:

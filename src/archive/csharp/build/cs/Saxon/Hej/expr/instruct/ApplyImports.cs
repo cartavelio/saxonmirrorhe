@@ -43,11 +43,7 @@ namespace Saxon.Hej.expr.instruct {
                     Saxon.Hej.expr.instruct.ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
                     Saxon.Hej.trans.rules.Rule currentTemplateRule = context.getCurrentTemplateRule();
                     if ((currentTemplateRule == null)) {
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("There is no current template rule");
-                        e.setXPathContext(context);
-                        e.setErrorCode("XTDE0560");
-                        e.setLocation(loc);
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException("There is no current template rule").withXPathContext(context).withErrorCode("XTDE0560").withLocation(loc);
                     }
                     int min = currentTemplateRule.getMinImportPrecedence();
                     int max = (currentTemplateRule.getPrecedence()-1);

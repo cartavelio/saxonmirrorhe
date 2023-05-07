@@ -36,10 +36,7 @@ namespace Saxon.Hej.expr.instruct {
                 if ((validation == Saxon.Hej.lib.Validation.STRICT)) {
                     Saxon.Hej.type.SchemaDeclaration decl = config.getAttributeDeclaration(nodeName.getStructuredQName());
                     if ((decl == null)) {
-                        Saxon.Hej.trans.XPathException se = new Saxon.Hej.trans.XPathException(("Strict validation fails: there is no global attribute declaration for "+nodeName.getDisplayName()));
-                        se.setErrorCode("XTTE1510");
-                        se.setLocation(getLocation());
-                        throw se;
+                        throw new Saxon.Hej.trans.XPathException(("Strict validation fails: there is no global attribute declaration for "+nodeName.getDisplayName())).withErrorCode("XTTE1510").withLocation(getLocation());
                     }
                     schemaType = (Saxon.Hej.type.SimpleType)(decl.getType());
                     errorCode = "XTTE1510";
@@ -59,9 +56,7 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.str.UnicodeString value = ((Saxon.Hej.expr.Literal)(getSelect())).getGroundedValue().getUnicodeStringValue();
                 Saxon.Hej.type.ValidationFailure err = schemaType.validateContent(value, Saxon.Hej.expr.instruct.DummyNamespaceResolver.getInstance(), rules);
                 if ((err != null)) {
-                    Saxon.Hej.trans.XPathException se = new Saxon.Hej.trans.XPathException(((((("Attribute value "+Saxon.Hej.trans.Err.wrap(value, Saxon.Hej.trans.Err.VALUE))+" does not the match the required type ")+schemaType.getDescription())+". ")+err.getMessage()));
-                    se.setErrorCode(errorCode);
-                    throw se;
+                    throw new Saxon.Hej.trans.XPathException(((((("Attribute value "+Saxon.Hej.trans.Err.wrap(value, Saxon.Hej.trans.Err.VALUE))+" does not the match the required type ")+schemaType.getDescription())+". ")+err.getMessage())).withErrorCode(errorCode);
                 }
             }
             if ((getSelect() is Saxon.Hej.expr.StringLiteral)) {
@@ -101,10 +96,7 @@ namespace Saxon.Hej.expr.instruct {
                 return ;
             }
             if ((parentType is Saxon.Hej.type.SimpleType)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Attribute "+nodeName.getDisplayName())+" is not permitted in the content model of the simple type ")+parentType.getDescription()));
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                err.setErrorCode((getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027"));
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Attribute "+nodeName.getDisplayName())+" is not permitted in the content model of the simple type ")+parentType.getDescription())).asTypeError().withLocation(getLocation()).withErrorCode((getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027"));
                 throw err;
             }
             Saxon.Hej.type.SchemaType type;
@@ -114,17 +106,12 @@ namespace Saxon.Hej.expr.instruct {
                 throw new Saxon.Hej.trans.XPathException(e);
             }
             if ((type == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Attribute "+nodeName.getDisplayName())+" is not permitted in the content model of the complex type ")+parentType.getDescription()));
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                err.setErrorCode((getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027"));
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(((("Attribute "+nodeName.getDisplayName())+" is not permitted in the content model of the complex type ")+parentType.getDescription())).asTypeError().withLocation(getLocation()).withErrorCode((getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027"));
             }
             try {
                 getSelect().checkPermittedContents(type, true);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
+                throw e.maybeWithLocation(getLocation());
             }
         }
         public override Saxon.Hej.om.NodeInfo evaluateItem(Saxon.Hej.expr.XPathContext context) {

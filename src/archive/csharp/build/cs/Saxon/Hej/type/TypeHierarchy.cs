@@ -58,8 +58,7 @@ namespace Saxon.Hej.type {
                                         try {
                                             return ((/*1430*/Saxon.Hej.value.AtomicValue)((Saxon.Hej.type.SimpleType)(requiredItemType)).getTypedValue(item.getUnicodeStringValue(), null, rules).head());
                                         } catch (Saxon.Hej.type.ValidationException ve) {
-                                            ve.setErrorCode("XPTY0004");
-                                            throw;
+                                            throw ve.withErrorCode("XPTY0004");
                                         }
                                     } else {
                                         return item;

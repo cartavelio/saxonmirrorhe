@@ -270,9 +270,9 @@ namespace Saxon.Eej.ee.schema {
                 chameleonTransformer = new Saxon.Eej.ee.schema.sdoc.SchemaDocumentTransformer(config, "chameleon.xsl");
             }
             System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence> @params = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence>();
-            Saxon.Impl.Helpers.MapUtils.Put(@params, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
+            Saxon.Impl.Helpers.MapUtils.Put(@params, Saxon.Hej.om.NamespaceUri.NULL.qName("newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
             Saxon.Hej.expr.instruct.GlobalParameterSet parameterSet = new Saxon.Hej.expr.instruct.GlobalParameterSet();
-            parameterSet.put(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
+            parameterSet.put(Saxon.Hej.om.NamespaceUri.NULL.qName("newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
             Saxon.Hej.om.TreeInfo doc = chameleonTransformer.transform(this, pipelineConfiguration, referrer, input, parameterSet);
             return new Saxon.Eej.ee.schema.sdoc.SchemaDocument(doc);
         }
@@ -281,7 +281,7 @@ namespace Saxon.Eej.ee.schema {
                 overrideTransformer = new Saxon.Eej.ee.schema.sdoc.SchemaDocumentTransformer(config, "override.xsl");
             }
             Saxon.Hej.expr.instruct.GlobalParameterSet @params = new Saxon.Hej.expr.instruct.GlobalParameterSet();
-            @params.put(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "overrideElement"), referrer);
+            @params.put(Saxon.Hej.om.NamespaceUri.NULL.qName("overrideElement"), referrer);
             Saxon.Hej.om.TreeInfo doc = overrideTransformer.transform(this, pipelineConfiguration, referrer, input, @params);
             return new Saxon.Eej.ee.schema.sdoc.SchemaDocument(doc);
         }

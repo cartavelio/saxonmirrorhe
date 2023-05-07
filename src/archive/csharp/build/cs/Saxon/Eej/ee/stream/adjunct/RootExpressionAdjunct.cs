@@ -20,10 +20,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return Saxon.Eej.ee.stream.PostureAndSweep.CLIMBING_AND_MOTIONLESS;
         }
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Streaming is not supported for expression "+getExpression().toShortString()));
-            err.setErrorCode(Saxon.Hej.trans.SaxonErrorCode.SXST0060);
-            err.setLocation(getExpression().getLocation());
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(("Streaming is not supported for expression "+getExpression().toShortString())).withErrorCode(Saxon.Hej.trans.SaxonErrorCode.SXST0060).withLocation(getExpression().getLocation());
         }
     
     }

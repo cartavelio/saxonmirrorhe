@@ -66,11 +66,14 @@ namespace Saxon.Hej.functions.hof {
                 }
                 return fi;
             } catch (Saxon.Hej.trans.XPathException e) {
-                if ("XPST0017".Equals(e.getErrorCodeLocalPart())) {
+                if (e.hasErrorCode("XPST0017")) {
                     return null;
                 }
                 throw;
             }
+        }
+        public override int getSpecialProperties(Saxon.Hej.expr.Expression[] arguments) {
+            return (base.getSpecialProperties(arguments)|Saxon.Hej.expr.StaticProperty.HAS_SIDE_EFFECTS);
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.expr.XPathContext c = ((boundContext == null) ? context : boundContext);

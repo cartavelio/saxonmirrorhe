@@ -31,18 +31,10 @@ namespace Saxon.Hej.expr.instruct {
                 return b.saveGlobalVariableValue(this, val);
             }
             if (isRequiredParam()) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("No value supplied for required parameter $"+getVariableQName().getDisplayName()));
-                e.setXPathContext(context);
-                e.setLocator(this);
-                e.setErrorCode((getPackageData().isXSLT() ? "XTDE0050" : "XPDY0002"));
-                throw e;
+                throw new Saxon.Hej.trans.XPathException(("No value supplied for required parameter $"+getVariableQName().getDisplayName())).withXPathContext(context).withLocation(this).withErrorCode((getPackageData().isXSLT() ? "XTDE0050" : "XPDY0002"));
             } else {
                 if (isImplicitlyRequiredParam()) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("A value must be supplied for parameter $"+getVariableQName().getDisplayName())+" because there is no default value for the required type"));
-                    e.setXPathContext(context);
-                    e.setLocator(this);
-                    e.setErrorCode("XTDE0700");
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException((("A value must be supplied for parameter $"+getVariableQName().getDisplayName())+" because there is no default value for the required type")).withXPathContext(context).withLocation(this).withErrorCode("XTDE0700");
                 }
             }
             return actuallyEvaluate(context, target);

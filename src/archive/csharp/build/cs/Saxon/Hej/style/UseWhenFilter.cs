@@ -128,9 +128,7 @@ namespace Saxon.Hej.style {
                 request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                 Saxon.Ejavax.xml.transform.Source source = request.resolve(resolver, config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 if ((source == null)) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(((("Unable to resolve "+elemName.getDisplayName())+" stylesheet URI ")+href), "XTSE0165");
-                    e.setLocation(location);
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException(((("Unable to resolve "+elemName.getDisplayName())+" stylesheet URI ")+href), "XTSE0165").withLocation(location);
                 }
                 if ((source is Saxon.Hej.lib.EmptySource)) {
                     source = new Saxon.Ejavax.xml.transform.stream.StreamSource(new System.IO.StringReader("<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'/>"));
@@ -144,9 +142,8 @@ namespace Saxon.Hej.style {
                     Saxon.Impl.Helpers.MapUtils.Put(map, key, includedDoc);
                     return includedDoc;
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(location);
                     e.maybeSetErrorCode("XTSE0165");
-                    if ("XTSE0180".Equals(e.getErrorCodeLocalPart())) {
+                    if (e.hasErrorCode("XTSE0180")) {
                         if (isImport) {
                             e.setErrorCode("XTSE0210");
                         }
@@ -154,7 +151,7 @@ namespace Saxon.Hej.style {
                     if (!(e.hasBeenReported())) {
                         compilation.reportError(e);
                     }
-                    throw;
+                    throw e.maybeWithLocation(location);
                 }
             }
         }
@@ -261,7 +258,7 @@ namespace Saxon.Hej.style {
             bool isRequired = Saxon.Hej.style.StyleElement.isYes(requiredStr);
             Saxon.Hej.style.UseWhenStaticContext staticContext = new Saxon.Hej.style.UseWhenStaticContext(compilation, nsResolver);
             staticContext.setBaseURI(baseUri.ToString());
-            staticContext.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "as"), location));
+            staticContext.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), Saxon.Hej.om.NamespaceUri.NULL.qName("as"), location));
             Saxon.Hej.value.SequenceType requiredType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
             int languageLevel = compilation.getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT);
             if ((languageLevel == 30)) {
@@ -276,19 +273,19 @@ namespace Saxon.Hej.style {
             try {
                 varName = Saxon.Hej.om.StructuredQName.fromLexicalQName((nameStr), false, true, nsResolver);
             } catch (Saxon.Hej.trans.XPathException err) {
-                throw createXPathException(((("Invalid variable name:"+nameStr)+". ")+err.Message), err.getErrorCodeLocalPart(), location);
+                throw createXPathException(((("Invalid variable name:"+nameStr)+". ")+err.Message), err.getErrorCodeQName(), location);
             }
             bool isVariable = elemName.getLocalPart().Equals("variable");
             bool isParam = elemName.getLocalPart().Equals("param");
             bool isSupplied = (isParam && compilation.getParameters().containsKey(varName));
-            Saxon.Hej.tree.AttributeLocation attLoc = new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "select"), location);
+            Saxon.Hej.tree.AttributeLocation attLoc = new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), Saxon.Hej.om.NamespaceUri.NULL.qName("select"), location);
             if (isParam) {
                 if ((isRequired && !(isSupplied))) {
                     string selectStr = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "select");
                     if ((selectStr != null)) {
-                        throw createXPathException("Cannot supply a default value when required='yes'", "XTSE0010", attLoc);
+                        throw createXPathException("Cannot supply a default value when required='yes'", Saxon.Hej.om.NamespaceUri.ERR.qName("XTSE0010"), attLoc);
                     } else {
-                        throw createXPathException(("No value was supplied for the required static parameter $"+varName.getDisplayName()), "XTDE0050", location);
+                        throw createXPathException(("No value was supplied for the required static parameter $"+varName.getDisplayName()), Saxon.Hej.om.NamespaceUri.ERR.qName("XTDE0050"), location);
                     }
                 }
                 if (isSupplied) {
@@ -301,10 +298,10 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.om.GroundedValue value;
                 if ((selectStr == null)) {
                     if (isVariable) {
-                        throw createXPathException("The select attribute is required for a static global variable", "XTSE0010", location);
+                        throw createXPathException("The select attribute is required for a static global variable", Saxon.Hej.om.NamespaceUri.ERR.qName("XTSE0010"), location);
                     } else {
                         if (!(Saxon.Hej.value.Cardinality.allowsZero(requiredType.getCardinality()))) {
-                            throw createXPathException(("The parameter is implicitly required because it does not accept an "+"empty sequence, but no value has been supplied"), "XTDE0700", location);
+                            throw createXPathException(("The parameter is implicitly required because it does not accept an "+"empty sequence, but no value has been supplied"), Saxon.Hej.om.NamespaceUri.ERR.qName("XTDE0700"), location);
                         } else {
                             if ((asStr == null)) {
                                 value = Saxon.Hej.value.StringValue.EMPTY_STRING;
@@ -320,7 +317,7 @@ namespace Saxon.Hej.style {
                         Saxon.Hej.om.Sequence sequence = evaluateStatic(selectStr, location, staticContext);
                         value = sequence.materialize();
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        throw createXPathException(((("Error in "+elemName.getLocalPart())+" expression. ")+e.Message), e.getErrorCodeLocalPart(), attLoc);
+                        throw createXPathException(((("Error in "+elemName.getLocalPart())+" expression. ")+e.Message), e.getErrorCodeQName(), attLoc);
                     }
                 }
                 Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0, "XTDE0050");
@@ -330,7 +327,7 @@ namespace Saxon.Hej.style {
                 try {
                     compilation.declareStaticVariable(varName, value, precedence, isParam);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    throw createXPathException(e.Message, e.getErrorCodeLocalPart(), attLoc);
+                    throw createXPathException(e.Message, e.getErrorCodeQName(), attLoc);
                 }
             }
         }
@@ -416,9 +413,9 @@ namespace Saxon.Hej.style {
             ((Saxon.Hej.expr.XPathContextMajor)(dynamicContext)).openStackFrame(stackFrameMap);
             return expr.evaluateAsString(dynamicContext).ToString();
         }
-        private Saxon.Hej.trans.XPathException createXPathException(string message, string errorCode, Saxon.Hej.s9api.Location location) {
+        private Saxon.Hej.trans.XPathException createXPathException(string message, Saxon.Hej.om.StructuredQName errorCode, Saxon.Hej.s9api.Location location) {
             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-            err.setErrorCode(errorCode);
+            err.setErrorCodeQName(errorCode);
             err.setIsStaticError(true);
             err.setLocator(location.saveLocation());
             getPipelineConfiguration().getErrorReporter().report(new Saxon.Hej.trans.XmlProcessingException(err));

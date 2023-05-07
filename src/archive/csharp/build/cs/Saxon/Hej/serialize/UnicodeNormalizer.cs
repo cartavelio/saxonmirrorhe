@@ -19,9 +19,7 @@ namespace Saxon.Hej.serialize {
                 normForm = Saxon.Ejava.text.Normalizer.Form.NFKD;
                 break ;
               default:
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Unknown normalization form "+form));
-                err.setErrorCode("SESU0011");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Unknown normalization form "+form), "SESU0011");
             }
         }
         public Saxon.Ejava.text.Normalizer.Form getNormalizationForm() {

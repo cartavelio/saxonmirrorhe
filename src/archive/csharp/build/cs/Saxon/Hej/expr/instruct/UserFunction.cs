@@ -283,8 +283,7 @@ namespace Saxon.Hej.expr.instruct {
                     exp2 = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(exp2, resultType, role, visitor);
                 }
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                throw;
+                throw err.maybeWithLocation(getLocation());
             }
             if ((exp2 != exp)) {
                 setBody(exp2);
@@ -308,14 +307,9 @@ namespace Saxon.Hej.expr.instruct {
             try {
                 result = bodyEvaluator.evaluate(c2);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                err.maybeSetContext(c2);
-                throw;
+                throw err.maybeWithLocation(getLocation()).maybeWithContext(c2);
             } catch (Saxon.Hej.trans.UncheckedXPathException uxe) {
-                Saxon.Hej.trans.XPathException err = uxe.getXPathException();
-                err.maybeSetLocation(getLocation());
-                err.maybeSetContext(c2);
-                throw err;
+                throw uxe.getXPathException().maybeWithLocation(getLocation()).maybeWithContext(c2);
             } catch (System.Exception err2) {
                 string message = ((("Internal error evaluating function "+(((functionName == null) ? "(unnamed)" : functionName.getDisplayName())))+(((getLineNumber()>0) ? (" at line "+getLineNumber()) : "")))+(((getSystemId() != null) ? (" in module "+getSystemId()) : "")));
                 throw new System.Exception(message, err2);
@@ -335,8 +329,7 @@ namespace Saxon.Hej.expr.instruct {
             try {
                 /*Delegate.registerUpdates()*/getBody().makeElaborator().elaborateForUpdate()(context, pul);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                throw;
+                throw err.maybeWithLocation(getLocation()).maybeWithContext(context);
             }
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter presenter) {
@@ -408,16 +401,10 @@ namespace Saxon.Hej.expr.instruct {
             return false;
         }
         public bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot compare functions using deep-equal", "FOTY0015");
-            err.setIsTypeError(true);
-            err.setXPathContext(context);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Cannot compare functions using deep-equal", "FOTY0015").asTypeError().withXPathContext(context);
         }
         public bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot compare functions using deep-equal", "FOTY0015");
-            err.setIsTypeError(true);
-            err.setXPathContext(context);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException("Cannot compare functions using deep-equal", "FOTY0015").asTypeError().withXPathContext(context);
         }
         public Saxon.Hej.om.Item itemAt(int n) {
             return ((n == 0) ? this : null);

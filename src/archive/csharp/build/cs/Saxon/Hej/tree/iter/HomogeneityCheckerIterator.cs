@@ -15,10 +15,7 @@ namespace Saxon.Hej.tree.iter {
             @base.close();
         }
         private Saxon.Hej.trans.UncheckedXPathException reportMixedItems() {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot mix nodes and atomic values in the result of a path expression");
-            err.setErrorCode("XPTY0018");
-            err.setLocator(loc);
-            return new Saxon.Hej.trans.UncheckedXPathException(err);
+            return new Saxon.Hej.trans.UncheckedXPathException(new Saxon.Hej.trans.XPathException("Cannot mix nodes and atomic values in the result of a path expression").withErrorCode("XPTY0018").withLocation(loc));
         }
         public Saxon.Hej.om.Item next() {
             Saxon.Hej.om.Item item = @base.next();

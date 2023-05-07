@@ -205,10 +205,7 @@ namespace Saxon.Hej.trans {
         public void checkConsistency(Saxon.Hej.om.StructuredQName name) {
             for (int i = 0; (i<10); i++) {
                 if (inconsistent[i]) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Inconsistency in "+(((name == null) ? "unnamed decimal format. " : (("decimal format "+name.getDisplayName())+". "))))+"There are two inconsistent values for decimal-format property ")+propertyNames[i])+" at the same import precedence"));
-                    err.setErrorCode(errorCodes[ERR_TWO_VALUES_FOR_SAME_PROPERTY]);
-                    err.setIsStaticError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((((("Inconsistency in "+(((name == null) ? "unnamed decimal format. " : (("decimal format "+name.getDisplayName())+". "))))+"There are two inconsistent values for decimal-format property ")+propertyNames[i])+" at the same import precedence")).withErrorCode(errorCodes[ERR_TWO_VALUES_FOR_SAME_PROPERTY]).asStaticError();
                 }
             }
             Saxon.Hej.z.IntHashMap<string> map = new Saxon.Hej.z.IntHashMap<string>(20);
@@ -240,16 +237,12 @@ namespace Saxon.Hej.trans {
             int zero = getZeroDigit();
             for (int i = zero; (i<(zero+10)); i++) {
                 if ((map.get(i) != null)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Inconsistent properties in "+(((name == null) ? "unnamed decimal format. " : (("decimal format "+name.getDisplayName())+". "))))+"The same character is used as digit ")+((i-zero)))+" in the chosen digit family, and as the ")+map.get(i)));
-                    err.setErrorCode(errorCodes[ERR_SAME_CHAR_IN_TWO_ROLES]);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((((("Inconsistent properties in "+(((name == null) ? "unnamed decimal format. " : (("decimal format "+name.getDisplayName())+". "))))+"The same character is used as digit ")+((i-zero)))+" in the chosen digit family, and as the ")+map.get(i))).withErrorCode(errorCodes[ERR_SAME_CHAR_IN_TWO_ROLES]);
                 }
             }
         }
         private void duplicate(string role1, string role2, Saxon.Hej.om.StructuredQName name) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Inconsistent properties in "+(((name == null) ? "unnamed decimal format. " : (("decimal format "+name.getDisplayName())+". "))))+"The same character is used as the ")+role1)+" and as the ")+role2));
-            err.setErrorCode(errorCodes[ERR_SAME_CHAR_IN_TWO_ROLES]);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(((((("Inconsistent properties in "+(((name == null) ? "unnamed decimal format. " : (("decimal format "+name.getDisplayName())+". "))))+"The same character is used as the ")+role1)+" and as the ")+role2)).withErrorCode(errorCodes[ERR_SAME_CHAR_IN_TWO_ROLES]);
         }
         public static bool isValidZeroDigit(int zeroDigit) {
             return (Saxon.Ejava.util.Arrays.binarySearch(zeroDigits, zeroDigit)>=0);

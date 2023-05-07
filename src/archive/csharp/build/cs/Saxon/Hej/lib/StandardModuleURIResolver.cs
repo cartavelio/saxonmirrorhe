@@ -23,10 +23,7 @@ namespace Saxon.Hej.lib {
                 return new Saxon.Ejavax.xml.transform.stream.StreamSource[]{source};
             }
             if ((locations.Length == 0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot locate module for namespace "+moduleURI));
-                err.setErrorCode("XQST0059");
-                err.setIsStaticError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Cannot locate module for namespace "+moduleURI)).withErrorCode("XQST0059").asStaticError();
             }
             System.Collections.Generic.IList<Saxon.Ejavax.xml.transform.stream.StreamSource> moduleSources = new System.Collections.Generic.List<Saxon.Ejavax.xml.transform.stream.StreamSource>();
             foreach (string hint in locations) {
@@ -56,6 +53,9 @@ namespace Saxon.Hej.lib {
             return null;
         }
         private Saxon.Ejavax.xml.transform.stream.StreamSource toStreamSource(Saxon.Ejavax.xml.transform.Source src) {
+            if ((src is Saxon.Hej.lib.AugmentedSource)) {
+                src = ((Saxon.Hej.lib.AugmentedSource)(src)).getContainedSource();
+            }
             if ((src is Saxon.Ejavax.xml.transform.stream.StreamSource)) {
                 return (Saxon.Ejavax.xml.transform.stream.StreamSource)(src);
             } else {
@@ -74,10 +74,7 @@ namespace Saxon.Hej.lib {
                 Saxon.Ejavax.xml.transform.Source src = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 return ((src == null) ? null : toStreamSource(src));
             } catch (System.UriFormatException err) {
-                Saxon.Hej.trans.XPathException se = new Saxon.Hej.trans.XPathException(("Cannot resolve relative URI "+rr.relativeUri), err);
-                se.setErrorCode("XQST0059");
-                se.setIsStaticError(true);
-                throw se;
+                throw new Saxon.Hej.trans.XPathException(("Cannot resolve relative URI "+rr.relativeUri), err).withErrorCode("XQST0059").asStaticError();
             }
         }
     

@@ -45,7 +45,7 @@ namespace Saxon.Hej.pattern {
             this.recoverable = recoverable;
         }
         protected internal void handleDynamicError(Saxon.Hej.trans.XPathException ex, Saxon.Hej.expr.XPathContext context) {
-            if ("XTDE0640".Equals(ex.getErrorCodeLocalPart())) {
+            if (ex.hasErrorCode("XTDE0640")) {
                 throw ex;
             }
             if (!(isRecoverable())) {

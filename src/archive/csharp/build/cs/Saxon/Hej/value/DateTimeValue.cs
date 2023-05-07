@@ -88,9 +88,7 @@ namespace Saxon.Hej.value {
             int tz1 = date.getTimezoneInMinutes();
             int tz2 = time.getTimezoneInMinutes();
             if ((((tz1 != NO_TIMEZONE) && (tz2 != NO_TIMEZONE)) && (tz1 != tz2))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Supplied date and time are in different timezones");
-                err.setErrorCode("FORG0008");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Supplied date and time are in different timezones", "FORG0008");
             }
             Saxon.Hej.value.DateTimeValue.MutableDateTimeValue v = date.toDateTime().makeMutableCopy();
             v.hour = time.getHour();
@@ -586,19 +584,13 @@ namespace Saxon.Hej.value {
                     }
                     return new Saxon.Hej.value.DateTimeValue(y, (byte)(m), (byte)(d), hour, minute, second, nanosecond, hasNoYearZero, getTimezoneInMinutes(), Saxon.Hej.type.BuiltInAtomicType.DATE_TIME);
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("DateTime arithmetic is not supported on xs:duration, only on its subtypes");
-                    err.setErrorCode("XPTY0004");
-                    err.setIsTypeError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("DateTime arithmetic is not supported on xs:duration, only on its subtypes").withErrorCode("XPTY0004").asTypeError();
                 }
             }
         }
         public override Saxon.Hej.value.DayTimeDurationValue subtract(Saxon.Hej.value.CalendarValue other, Saxon.Hej.expr.XPathContext context) {
             if (!(((other is Saxon.Hej.value.DateTimeValue)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("First operand of '-' is a dateTime, but the second is not");
-                err.setErrorCode("XPTY0004");
-                err.setIsTypeError(true);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("First operand of '-' is a dateTime, but the second is not").withErrorCode("XPTY0004").asTypeError();
             }
             return base.subtract(other, context);
         }

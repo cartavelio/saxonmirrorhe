@@ -70,11 +70,7 @@ namespace Saxon.Hej.expr {
                     if (Saxon.Hej.value.Cardinality.allowsZero(getLhsExpression().getCardinality())) {
                         visitor.issueWarning(("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "+containerType), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("The left-hand operand of '?' must be a map or an array; the supplied expression is of type "+containerType), "XPTY0004");
-                        err.setLocation(getLocation());
-                        err.setIsTypeError(true);
-                        err.setFailingExpression(this);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("The left-hand operand of '?' must be a map or an array; "+"the supplied expression is of type ")+containerType), "XPTY0004").withLocation(getLocation()).asTypeError().withFailingExpression(this);
                     }
                 }
             }
@@ -92,10 +88,7 @@ namespace Saxon.Hej.expr {
                 if (!(tt.isExtensible())) {
                     string fieldName = ((Saxon.Hej.expr.StringLiteral)(getRhsExpression())).stringify();
                     if ((tt.getFieldType(fieldName) == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Field '"+fieldName)+"' is not defined in the record type"), "XPTY0004");
-                        err.setIsTypeError(true);
-                        err.setLocation(getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("Field '"+fieldName)+"' is not defined in the record type"), "XPTY0004").asTypeError().withLocation(getLocation());
                     }
                 }
             }
@@ -171,11 +164,7 @@ namespace Saxon.Hej.expr {
             }
         }
         protected internal static void mustBeArrayOrMap(Saxon.Hej.expr.Expression exp, Saxon.Hej.om.Item baseItem) {
-            Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((("The items on the LHS of the '?' operator must be maps or arrays; but value ("+baseItem.toShortString())+") was supplied"), "XPTY0004");
-            exception.setIsTypeError(true);
-            exception.setLocation(exp.getLocation());
-            exception.setFailingExpression(exp);
-            throw exception;
+            throw new Saxon.Hej.trans.XPathException((("The items on the LHS of the '?' operator must be maps or arrays; but value ("+baseItem.toShortString())+") was supplied"), "XPTY0004").asTypeError().withLocation(exp.getLocation()).withFailingExpression(exp);
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
             destination.startElement("lookup", this);
@@ -293,11 +282,7 @@ namespace Saxon.Hej.expr {
                                                 Saxon.Hej.om.GroundedValue member = ((Saxon.Hej.ma.arrays.ArrayItem)(baseItem)).get(subscript);
                                                 return member.iterate();
                                             } else {
-                                                Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((((("An item on the LHS of the '?' operator ("+expr.getLhsExpression().toShortString())+") is an array, but a value on the RHS of the operator (")+baseItem.toShortString())+") is not an integer"), "XPTY0004");
-                                                exception.setIsTypeError(true);
-                                                exception.setLocation(expr.getLocation());
-                                                exception.setFailingExpression(expr);
-                                                throw exception;
+                                                throw new Saxon.Hej.trans.XPathException((((("An item on the LHS of the '?' operator ("+expr.getLhsExpression().toShortString())+") is an array, but a value on the RHS of the operator (")+baseItem.toShortString())+") is not an integer"), "XPTY0004").asTypeError().withLocation(expr.getLocation()).withFailingExpression(expr);
                                             }
                                         } );
                                         Saxon.Hej.om.SequenceIterator rhsIter = rhsVal.iterate();
@@ -311,11 +296,7 @@ namespace Saxon.Hej.expr {
                                   case Saxon.Hej.om.Genre.EXTERNAL:
                                     {
                                         if (!(((rhsVal is Saxon.Hej.value.StringValue)))) {
-                                            Saxon.Hej.trans.XPathException exception = new Saxon.Hej.trans.XPathException((("An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator ("+baseItem.toShortString())+") is not a singleton string"), "XPTY0004");
-                                            exception.setIsTypeError(true);
-                                            exception.setLocation(expr.getLocation());
-                                            exception.setFailingExpression(expr);
-                                            throw exception;
+                                            throw new Saxon.Hej.trans.XPathException((("An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator ("+baseItem.toShortString())+") is not a singleton string"), "XPTY0004").asTypeError().withLocation(expr.getLocation()).withFailingExpression(expr);
                                         }
                                         string key = ((Saxon.Hej.value.StringValue)(rhsVal)).getStringValue();
                                         return context.getConfiguration().externalObjectAsMap((Saxon.Hej.value.ObjectValue<object>)(baseItem), key).get((Saxon.Hej.value.StringValue)(rhsVal)).iterate();

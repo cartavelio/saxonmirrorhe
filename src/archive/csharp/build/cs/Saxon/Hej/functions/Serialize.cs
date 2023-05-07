@@ -294,7 +294,7 @@ namespace Saxon.Hej.functions {
             }
             if (((seqVal = Saxon.Impl.Helpers.MapUtils.Get(map, "use-character-maps")) != null)) {
                 Saxon.Hej.serialize.CharacterMap characterMap = toCharacterMap(seqVal, context);
-                charMapIndex.putCharacterMap(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "charMap"), characterMap);
+                charMapIndex.putCharacterMap(Saxon.Hej.om.NamespaceUri.NULL.qName("charMap"), characterMap);
                 props.setProperty(Saxon.Hej.lib.SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
             }
             if (((seqVal = Saxon.Impl.Helpers.MapUtils.Get(map, "version")) != null)) {

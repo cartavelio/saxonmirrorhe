@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Xml.XPath;
 using Saxon.Ejava.io;
 using Saxon.Ejava.net;
+using Saxon.Hej;
 using Saxon.Hej.resource;
 using IOException = System.IO.IOException;
 
@@ -69,9 +70,9 @@ namespace Saxon.Impl.Overrides {
          * @return An InputStream for the resource content.
          * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
          */
-        public static Stream urlStream(URL url) {
+        public static Stream urlStream(Configuration config, String url) {
             try {
-                URLConnection conn = urlConnection(url);
+                URLConnection conn = urlConnection(new URL(url));
                 return conn.getInputStream();
             }
             catch (Exception e) {
@@ -91,8 +92,8 @@ namespace Saxon.Impl.Overrides {
          * @return A Reader for the resource content.
          * @throws IOException If more than MAX_REDIRECTS are occur or if a loop is detected.
          */
-        public static TextReader urlReader(URL url, string requestedEncoding) {
-            URLConnection conn = ResourceLoader.urlConnection(url);
+        public static TextReader urlReader(Configuration config, String url, string requestedEncoding) {
+            URLConnection conn = ResourceLoader.urlConnection(new URL(url));
             Stream inputStream = conn.getInputStream();
             string contentEncoding = conn.getContentEncoding();
             string resourceEncoding = null;
@@ -104,7 +105,7 @@ namespace Saxon.Impl.Overrides {
             bool isXmlMediaType = false;
 
             // The file:// URL scheme gives no useful information...
-            if ("file" != url.getProtocol()) {
+            if (!url.StartsWith("file:")) {
                 // Use the contentType from the HTTP header if available, and parse it
                 string contentType = conn.getContentType();
                 if (contentType != null) {

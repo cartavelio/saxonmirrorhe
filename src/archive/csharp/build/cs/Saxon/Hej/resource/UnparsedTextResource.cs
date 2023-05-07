@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.resource {
     public class UnparsedTextResource : Saxon.Hej.lib.Resource {
+        private readonly Saxon.Hej.Configuration config;
         private string contentType;
         private string encoding;
         private readonly string href;
         private string unparsedText = null;
-        public UnparsedTextResource(Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
+        private UnparsedTextResource(Saxon.Hej.expr.XPathContext context, Saxon.Hej.resource.AbstractResourceCollection.InputDetails details)  {
+            this.config = ((context != null) ? context.getConfiguration() : null);
             this.href = details.resourceUri;
             this.contentType = details.contentType;
             this.encoding = details.encoding;
@@ -29,13 +31,14 @@ namespace Saxon.Hej.resource {
             }
         }
         public UnparsedTextResource(string uri, string content)  {
+            this.config = null;
             this.href = uri;
             this.unparsedText = content;
         }
         private string makeString(byte[] bytes, string encoding) {
             return System.Text.Encoding.GetEncoding(encoding).GetString(bytes);
         }
-        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.UnparsedTextResource(details);
+        public readonly static Saxon.Hej.lib.ResourceFactory FACTORY = (context, details) => new Saxon.Hej.resource.UnparsedTextResource(context, details);
         public string getResourceURI() {
             return href;
         }
@@ -45,7 +48,7 @@ namespace Saxon.Hej.resource {
         public string getContent() {
             if ((unparsedText == null)) {
                 try {
-                    System.IO.Stream stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(new Saxon.Ejava.net.URL(href));
+                    System.IO.Stream stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(config, href);
                     string enc = encoding;
                     if ((enc == null)) {
                         stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);

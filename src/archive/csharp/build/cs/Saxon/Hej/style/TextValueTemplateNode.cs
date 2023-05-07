@@ -25,9 +25,8 @@ namespace Saxon.Hej.style {
             try {
                 contentExp = Saxon.Hej.style.AttributeValueTemplate.make(getUnicodeStringValue().ToString(), getStaticContext());
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.setLocation(this);
                 System.Diagnostics.Debug.Assert((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) is Saxon.Hej.style.StyleElement));
-                ((Saxon.Hej.style.StyleElement)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).compileError(e);
+                ((Saxon.Hej.style.StyleElement)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).compileError(e.withLocation(this));
                 contentExp = new Saxon.Hej.expr.StringLiteral(getStringValue());
             }
             contentExp = new Saxon.Hej.expr.instruct.ValueOf(contentExp, disable, false);

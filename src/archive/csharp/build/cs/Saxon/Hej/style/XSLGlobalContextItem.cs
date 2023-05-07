@@ -21,8 +21,7 @@ namespace Saxon.Hej.style {
             try {
                 top.getStylesheetPackage().setContextItemRequirements(req);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.setLocation(decl.getSourceElement());
-                throw;
+                throw e.withLocation(decl.getSourceElement());
             }
         }
     

@@ -24,10 +24,7 @@ namespace Saxon.Hej.expr {
             setSequence(getSequence().unordered(false, false));
             Saxon.Hej.value.SequenceType decl = getRequiredType();
             if ((decl.getCardinality() == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) {
-                Saxon.Hej.trans.XPathException errNotEmpty = new Saxon.Hej.trans.XPathException("Range variable will never satisfy the type empty-sequence()", "XPTY0004");
-                errNotEmpty.setIsTypeError(true);
-                errNotEmpty.setLocation(getLocation());
-                throw errNotEmpty;
+                throw new Saxon.Hej.trans.XPathException("Range variable will never satisfy the type empty-sequence()", "XPTY0004").asTypeError().withLocation(getLocation());
             }
             Saxon.Hej.value.SequenceType sequenceType = Saxon.Hej.value.SequenceType.makeSequenceType(decl.getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
             Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
@@ -37,8 +34,7 @@ namespace Saxon.Hej.expr {
             getActionOp().typeCheck(visitor, contextInfo);
             Saxon.Hej.trans.XPathException err = Saxon.Hej.expr.parser.TypeChecker.ebvError(getAction(), visitor.getConfiguration().getTypeHierarchy());
             if ((err != null)) {
-                err.setLocation(getLocation());
-                throw err;
+                throw err.withLocation(getLocation());
             }
             return this;
         }

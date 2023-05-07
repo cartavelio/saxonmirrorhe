@@ -456,7 +456,7 @@ namespace Saxon.Api {
         /// </remarks>
         public void ApplyTemplates(Stream input, Uri baseUri, IDestination destination) {
             StreamSource streamSource =
-                new (input, Uri.EscapeUriString(baseUri.ToString()));
+                new (input, baseUri.ToString());
             s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
@@ -503,7 +503,7 @@ namespace Saxon.Api {
         /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public void ApplyTemplates(TextReader input, Uri baseUri, IDestination destination) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
@@ -550,7 +550,7 @@ namespace Saxon.Api {
         /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public void Transform(Stream input, Uri baseUri, IDestination destination) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             s9Transformer.transform(streamSource, destination.UnderlyingDestination);
         }
 
@@ -573,7 +573,7 @@ namespace Saxon.Api {
         /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public XdmValue ApplyTemplates(Stream input, Uri baseUri) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             return s9Transformer.applyTemplates(streamSource);
         }
         
@@ -595,7 +595,7 @@ namespace Saxon.Api {
         /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public XdmValue ApplyTemplates(TextReader input, Uri baseUri) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             return s9Transformer.applyTemplates(streamSource);
         }
 

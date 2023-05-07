@@ -281,9 +281,7 @@ namespace Saxon.Hej.expr {
                         try {
                             return fn.call(context, Saxon.Hej.expr.StackFrame.EMPTY_ARRAY_OF_SEQUENCE).iterate();
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     } ;
                   case 1:
@@ -291,9 +289,7 @@ namespace Saxon.Hej.expr {
                         try {
                             return fn.call(context, new Saxon.Hej.om.Sequence[]{argumentEvaluators[0].evaluate(context)}).iterate();
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     } ;
                   case 2:
@@ -301,9 +297,7 @@ namespace Saxon.Hej.expr {
                         try {
                             return fn.call(context, new Saxon.Hej.om.Sequence[]{argumentEvaluators[0].evaluate(context), argumentEvaluators[1].evaluate(context)}).iterate();
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     } ;
                   default:
@@ -311,9 +305,7 @@ namespace Saxon.Hej.expr {
                         try {
                             return fn.call(context, evaluateArguments(context)).iterate();
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     } ;
                 }
@@ -341,10 +333,7 @@ namespace Saxon.Hej.expr {
                         try {
                             ((Saxon.Hej.functions.PushableFunction)(fn)).process(output, context, actualArgs);
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            e.maybeSetContext(context);
-                            e.maybeSetFailingExpression(expr);
-                            throw;
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithFailingExpression(expr).maybeWithContext(context);
                         }
                         return null;
                     } ;

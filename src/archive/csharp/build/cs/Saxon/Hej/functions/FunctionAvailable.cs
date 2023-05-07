@@ -52,9 +52,7 @@ namespace Saxon.Hej.functions {
                     qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(lexicalName, false, true, getRetainedStaticContext());
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.setErrorCode("XTDE1400");
-                e.setXPathContext(context);
-                throw;
+                throw e.withErrorCode("XTDE1400").withXPathContext(context);
             }
             Saxon.Hej.functions.FunctionLibrary lib = context.getController().getExecutable().getFunctionLibrary();
             Saxon.Hej.trans.SymbolicName.F sn = new Saxon.Hej.trans.SymbolicName.F(qName, arity);

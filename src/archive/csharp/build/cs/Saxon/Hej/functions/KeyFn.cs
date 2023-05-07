@@ -93,14 +93,13 @@ namespace Saxon.Hej.functions {
             try {
                 arg2 = argument2.head();
             } catch (Saxon.Hej.trans.XPathException e) {
-                string code = e.getErrorCodeLocalPart();
-                if (("XPDY0002".Equals(code) && (argument2 is Saxon.Hej.expr.RootExpression))) {
+                if ((e.hasErrorCode("XPDY0002") && (argument2 is Saxon.Hej.expr.RootExpression))) {
                     throw new Saxon.Hej.trans.XPathException("Cannot call the key() function when there is no context node", "XTDE1270", context);
                 } else {
-                    if ("XPDY0050".Equals(code)) {
+                    if (e.hasErrorCode("XPDY0050")) {
                         throw new Saxon.Hej.trans.XPathException((("In the key() function,"+" the node supplied in the third argument (or the context node if absent)")+" must be in a tree whose root is a document node"), "XTDE1270", context);
                     } else {
-                        if (("XPTY0020".Equals(code) || "XPTY0019".Equals(code))) {
+                        if (e.hasErrorCode("XPTY0020", "XPTY0019")) {
                             throw new Saxon.Hej.trans.XPathException("Cannot call the key() function when the context item is an atomic value", "XTDE1270", context);
                         }
                     }

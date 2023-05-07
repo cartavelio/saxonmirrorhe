@@ -41,9 +41,7 @@ namespace Saxon.Hej {
                 if (entry.Value.isRequiredParam()) {
                     Saxon.Hej.om.StructuredQName req = entry.Key;
                     if (((getCompileTimeParams().get(req) == null) && (((@params == null) || (@params.get(req) == null))))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("No value supplied for required parameter "+req.getDisplayName()));
-                        err.setErrorCode(((getHostLanguage() == Saxon.Api.HostLanguage.XQUERY) ? "XPDY0002" : "XTDE0050"));
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException(("No value supplied for required parameter "+req.getDisplayName())).withErrorCode(((getHostLanguage() == Saxon.Api.HostLanguage.XQUERY) ? "XPDY0002" : "XTDE0050"));
                     }
                 }
             }

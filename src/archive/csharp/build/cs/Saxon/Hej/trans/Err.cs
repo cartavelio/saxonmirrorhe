@@ -94,6 +94,9 @@ namespace Saxon.Hej.trans {
             }
         }
         public static string depict(Saxon.Hej.om.Item item) {
+            if ((item == null)) {
+                return "(*null*)";
+            }
             if ((item is Saxon.Hej.om.NodeInfo)) {
                 Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
                 switch (node.getNodeKind()) {

@@ -75,34 +75,24 @@ namespace Saxon.Eej.ee.update {
                     System.Collections.Generic.IList<Saxon.Hej.om.Item> content = new System.Collections.Generic.List<Saxon.Hej.om.Item>();
                     Saxon.Hej.om.NodeInfo target = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/targetEval(context));
                     if ((target == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Target of replace expression must not be empty", "XUDY0027");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Target of replace expression must not be empty", "XUDY0027").withLocation(expr.getLocation());
                     }
                     if (!(target.getTreeInfo().isMutable())) {
                         throw new Saxon.Hej.trans.XPathException("Attempting to update a non-updatable tree", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
                     }
                     int kind = target.getNodeKind();
                     if ((kind == Saxon.Hej.type.Type.NAMESPACE)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Target of replace expression must not be a namespace node", "XUTY0008");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Target of replace expression must not be a namespace node", "XUTY0008").withLocation(expr.getLocation());
                     }
                     if ((kind == Saxon.Hej.type.Type.DOCUMENT)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Target of replace expression must not be a document node", "XUTY0008");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Target of replace expression must not be a document node", "XUTY0008").withLocation(expr.getLocation());
                     }
                     Saxon.Hej.om.NodeInfo parent = target.getParent();
                     if ((parent == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Target node of replace expression has no parent", "XUDY0009");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Target node of replace expression has no parent", "XUDY0009").withLocation(expr.getLocation());
                     }
                     if (!(((parent is Saxon.Hej.om.MutableNodeInfo)))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Target node of replace expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("Target node of replace expression is not updatable", Saxon.Hej.trans.SaxonErrorCode.SXUP0081).withLocation(expr.getLocation());
                     }
                     if ((kind == Saxon.Hej.type.Type.ATTRIBUTE)) {
                         Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/replacementEval(context);
@@ -110,9 +100,7 @@ namespace Saxon.Eej.ee.update {
                         for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                             bool isAttribute = ((item is Saxon.Hej.om.NodeInfo) && (((Saxon.Hej.om.NodeInfo)(item)).getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE));
                             if (!(isAttribute)) {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The replacement nodes for an attribute must all be attributes", "XUTY0011");
-                                err.setLocation(expr.getLocation());
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException("The replacement nodes for an attribute must all be attributes", "XUTY0011").withLocation(expr.getLocation());
                             }
                             Saxon.Hej.om.NodeInfo att = (Saxon.Hej.om.NodeInfo)(item);
                             Saxon.Hej.type.SimpleType attributeType;
@@ -137,9 +125,7 @@ namespace Saxon.Eej.ee.update {
                         Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/replacementEval(context);
                         for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                             if (((item is Saxon.Hej.om.NodeInfo) && (((Saxon.Hej.om.NodeInfo)(item)).getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE))) {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("An attribute node cannot replace a node that is not itself an attribute", "XUTY0010");
-                                err.setLocation(expr.getLocation());
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException("An attribute node cannot replace a node that is not itself an attribute", "XUTY0010").withLocation(expr.getLocation());
                             } else {
                                 content.Add(item);
                             }
@@ -150,9 +136,7 @@ namespace Saxon.Eej.ee.update {
                                 action.setOriginator(expr);
                                 ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
                             } catch (Saxon.Hej.trans.XPathException e) {
-                                e.maybeSetLocation(expr.getLocation());
-                                e.maybeSetContext(context);
-                                throw;
+                                throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                             }
                         } else {
                             Saxon.Hej.@event.Builder builder = ((Saxon.Hej.om.MutableNodeInfo)(parent)).newBuilder();
@@ -189,9 +173,7 @@ namespace Saxon.Eej.ee.update {
                                 action.setOriginator(expr);
                                 ((Saxon.Eej.ee.update.PendingUpdateListImpl)(pul)).add(action);
                             } catch (Saxon.Hej.trans.XPathException e) {
-                                e.maybeSetLocation(expr.getLocation());
-                                e.maybeSetContext(context);
-                                throw;
+                                throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                             }
                         }
                     }

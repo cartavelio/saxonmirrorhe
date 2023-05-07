@@ -47,9 +47,7 @@ namespace Saxon.Eej.serialize {
                             emitter.setOutputProperties(props);
                             return emitter;
                         } else {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Unknown serialization method "+method));
-                            err.setErrorCode(Saxon.Hej.trans.SaxonErrorCode.SXCH0004);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(("Unknown serialization method "+method)).withErrorCode(Saxon.Hej.trans.SaxonErrorCode.SXCH0004);
                         }
                     }
                 }

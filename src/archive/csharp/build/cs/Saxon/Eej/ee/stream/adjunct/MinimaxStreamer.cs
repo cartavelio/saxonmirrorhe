@@ -40,10 +40,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                             value = new Saxon.Hej.value.DoubleValue(converter.stringToNumber(value.getUnicodeStringValue()));
                             foundDouble = true;
                         } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Failure converting "+Saxon.Hej.trans.Err.wrap(value.getUnicodeStringValue()))+" to a number"));
-                            de.setErrorCode("FORG0001");
-                            de.setXPathContext(getContext());
-                            dynamicError(de);
+                            dynamicError(new Saxon.Hej.trans.XPathException((("Failure converting "+Saxon.Hej.trans.Err.wrap(value.getUnicodeStringValue()))+" to a number")).withErrorCode("FORG0001").withXPathContext(getContext()));
                             return ;
                         }
                     } else {
@@ -63,10 +60,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
                         }
                     } else {
                         if (!(value.getPrimitiveType().isOrdered(false))) {
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Type "+value.getPrimitiveType())+" is not an ordered type"));
-                            de.setErrorCode("FORG0006");
+                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((("Type "+value.getPrimitiveType())+" is not an ordered type")).withErrorCode("FORG0006").withXPathContext(getContext());
                             de.setIsTypeError(true);
-                            de.setXPathContext(getContext());
                             dynamicError(de);
                             return ;
                         }
@@ -105,10 +100,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
                         } catch (Saxon.Hej.trans.XPathException err) {
                             dynamicError(err);
                         } catch (System.InvalidCastException err) {
-                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(((("Cannot compare "+min.getItemType())+" with ")+value.getItemType()));
-                            de.setErrorCode("FORG0006");
+                            Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(((("Cannot compare "+min.getItemType())+" with ")+value.getItemType())).withErrorCode("FORG0006").withXPathContext(getContext());
                             de.setIsTypeError(true);
-                            de.setXPathContext(getContext());
                             dynamicError(de);
                         }
                     }

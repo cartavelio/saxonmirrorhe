@@ -303,9 +303,7 @@ namespace Saxon.Hej.expr {
             try {
                 return Saxon.Hej.expr.parser.ExpressionTool.effectiveBooleanValue(iterate(context));
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetFailingExpression(this);
-                e.maybeSetContext(context);
-                throw;
+                throw e.maybeWithFailingExpression(this).maybeWithContext(context);
             }
         }
         public virtual Saxon.Hej.str.UnicodeString evaluateAsString(Saxon.Hej.expr.XPathContext context) {
@@ -333,14 +331,9 @@ namespace Saxon.Hej.expr {
                     }
                 }
             } catch (Saxon.Hej.trans.UncheckedXPathException unxe) {
-                Saxon.Hej.trans.XPathException e = unxe.getXPathException();
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw e;
+                throw unxe.getXPathException().maybeWithLocation(getLocation()).maybeWithContext(context);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw;
+                throw e.maybeWithLocation(getLocation()).maybeWithContext(context);
             }
         }
         public static void dispatchTailCall(Saxon.Hej.expr.instruct.TailCall tc) {
@@ -483,9 +476,7 @@ namespace Saxon.Hej.expr {
                 }
                 sub.checkForUpdatingSubexpressions();
                 if (sub.isUpdatingExpression()) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Updating expression appears in a context where it is not permitted", "XUST0001");
-                    err.setLocation(sub.getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("Updating expression appears in a context where it is not permitted", "XUST0001").withLocation(sub.getLocation());
                 }
             }
         }
@@ -546,17 +537,10 @@ namespace Saxon.Hej.expr {
             }
         }
         protected internal void dynamicError(string message, string code, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message, code, getLocation());
-            err.setXPathContext(context);
-            err.setFailingExpression(this);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(message, code, getLocation()).withXPathContext(context).withFailingExpression(this);
         }
         protected internal void typeError(string message, string errorCode, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message, errorCode, getLocation());
-            e.setIsTypeError(true);
-            e.setXPathContext(context);
-            e.setFailingExpression(this);
-            throw e;
+            throw new Saxon.Hej.trans.XPathException(message, errorCode, getLocation()).asTypeError().withXPathContext(context).withFailingExpression(this);
         }
         public string getTracingTag() {
             return getExpressionName();

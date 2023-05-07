@@ -29,9 +29,7 @@ namespace Saxon.Hej.functions {
         public override void supplyTypeInformation(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, Saxon.Hej.expr.Expression[] arguments) {
             base.supplyTypeInformation(visitor, contextInfo, arguments);
             if ((contextInfo.getItemType() == Saxon.Hej.type.ErrorType.getInstance())) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("The context item is absent at this point");
-                err.setErrorCode("XPDY0002");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("The context item is absent at this point", "XPDY0002");
             } else {
                 contextPossiblyUndefined = contextInfo.isPossiblyAbsent();
             }
@@ -47,10 +45,7 @@ namespace Saxon.Hej.functions {
             public override Saxon.Hej.value.Int64Value evaluateItem(Saxon.Hej.expr.XPathContext c) {
                 Saxon.Hej.om.FocusIterator currentIterator = c.getCurrentIterator();
                 if ((currentIterator == null)) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The context item is absent, so position() is undefined");
-                    e.setXPathContext(c);
-                    e.setErrorCode("XPDY0002");
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException("The context item is absent, so position() is undefined").withXPathContext(c).withErrorCode("XPDY0002");
                 }
                 return Saxon.Hej.value.Int64Value.makeIntegerValue(currentIterator.position());
             }
@@ -65,11 +60,7 @@ namespace Saxon.Hej.functions {
                         return context => {
                             Saxon.Hej.om.FocusIterator focus = context.getCurrentIterator();
                             if ((focus == null)) {
-                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The context item is absent, so position() is undefined");
-                                e.setXPathContext(context);
-                                e.setLocation(sfc.getLocation());
-                                e.setErrorCode("XPDY0002");
-                                throw e;
+                                throw new Saxon.Hej.trans.XPathException("The context item is absent, so position() is undefined").withXPathContext(context).withLocation(sfc.getLocation()).withErrorCode("XPDY0002");
                             }
                             return Saxon.Hej.value.Int64Value.makeIntegerValue(focus.position());
                         } ;
@@ -103,11 +94,7 @@ namespace Saxon.Hej.functions {
                         return context => {
                             Saxon.Hej.om.FocusIterator focus = context.getCurrentIterator();
                             if ((focus == null)) {
-                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The context item is absent, so last() is undefined");
-                                e.setXPathContext(context);
-                                e.setLocation(sfc.getLocation());
-                                e.setErrorCode("XPDY0002");
-                                throw e;
+                                throw new Saxon.Hej.trans.XPathException("The context item is absent, so last() is undefined").withXPathContext(context).withLocation(sfc.getLocation()).withErrorCode("XPDY0002");
                             }
                             return Saxon.Hej.value.Int64Value.makeIntegerValue(context.getLast());
                         } ;

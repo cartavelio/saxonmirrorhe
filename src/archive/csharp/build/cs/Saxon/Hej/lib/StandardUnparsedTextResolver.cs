@@ -18,16 +18,41 @@ namespace Saxon.Hej.lib {
             }
             Saxon.Hej.lib.JJ_ResourceRequest rr = new Saxon.Hej.lib.JJ_ResourceRequest();
             rr.uri = absoluteURI.ToString();
-            rr.nature = Saxon.Hej.lib.JJ_ResourceRequest.TEXT_NATURE;
+            rr.nature = ((encoding == null) ? Saxon.Hej.lib.JJ_ResourceRequest.BINARY_NATURE : Saxon.Hej.lib.JJ_ResourceRequest.TEXT_NATURE);
             rr.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
             Saxon.Ejavax.xml.transform.Source resolved = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
             if ((resolved == null)) {
                 throw new Saxon.Hej.trans.XPathException(("unparsed-text(): failed to resolve URI "+absoluteURI));
             }
+            if (((resolved is Saxon.Hej.lib.AugmentedSource) && (((Saxon.Hej.lib.AugmentedSource)(resolved)).getContainedSource() is Saxon.Ejavax.xml.transform.sax.SAXSource))) {
+                return getReaderFromSAXSource((Saxon.Ejavax.xml.transform.sax.SAXSource)(((Saxon.Hej.lib.AugmentedSource)(resolved)).getContainedSource()), encoding, config, debug);
+            }
             if ((resolved is Saxon.Ejavax.xml.transform.stream.StreamSource)) {
                 return getReaderFromStreamSource((Saxon.Ejavax.xml.transform.stream.StreamSource)(resolved), encoding, config, debug);
             } else {
                 throw new Saxon.Hej.trans.XPathException("Resolver for unparsed-text() returned non-StreamSource");
+            }
+        }
+        public static System.IO.TextReader getReaderFromSAXSource(Saxon.Ejavax.xml.transform.sax.SAXSource source, string encoding, Saxon.Hej.Configuration config, bool debug) {
+            throw new Saxon.Hej.trans.XPathException("SAXSources are not supported on .NET");
+        }
+        private static System.IO.TextReader detectEncoding(System.IO.Stream inputStream, string encoding, Saxon.Hej.Configuration config, bool debug) {
+            try {
+                if ((encoding == null)) {
+                    Saxon.Hej.lib.Logger err = config.getLogger();
+                    inputStream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(inputStream);
+                    encoding = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(inputStream, "utf-8", (debug ? err : null));
+                    if (debug) {
+                        err.info(("unparsed-text(): inferred encoding = "+encoding));
+                    }
+                }
+            } catch (System.IO.IOException e) {
+                encoding = "UTF-8";
+            }
+            try {
+                return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
+            } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
+                throw new Saxon.Hej.trans.XPathException(e).withErrorCode("FOUT1200");
             }
         }
         public static System.IO.TextReader getReaderFromStreamSource(Saxon.Ejavax.xml.transform.stream.StreamSource source, string encoding, Saxon.Hej.Configuration config, bool debug) {
@@ -40,12 +65,7 @@ namespace Saxon.Hej.lib {
                     string systemId = source.getSystemId();
                     if ((systemId != null)) {
                         try {
-                            if (systemId.StartsWith("classpath:")) {
-                                inputStream = openClasspathResource(config, systemId);
-                            } else {
-                                Saxon.Ejava.net.URL url = new Saxon.Ejava.net.URL(systemId);
-                                return Saxon.Impl.Overrides.ResourceLoader.urlReader(url, encoding);
-                            }
+                            return Saxon.Impl.Overrides.ResourceLoader.urlReader(config, systemId, encoding);
                         } catch (System.IO.IOException e) {
                             throw new Saxon.Hej.trans.XPathException(("unparsed-text(): cannot retrieve "+systemId), e);
                         }
@@ -72,21 +92,14 @@ namespace Saxon.Hej.lib {
                     }
                 }
                 if ((encoding != null)) {
-                    return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
-                }
-            }
-            try {
-                if ((encoding == null)) {
-                    inputStream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(inputStream);
-                    encoding = Saxon.Hej.resource.EncodingDetector.inferStreamEncoding(inputStream, "utf-8", (debug ? err : null));
-                    if (debug) {
-                        err.info(("unparsed-text(): inferred encoding = "+encoding));
+                    try {
+                        return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
+                    } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
+                        throw new Saxon.Hej.trans.XPathException(e);
                     }
                 }
-            } catch (System.IO.IOException e) {
-                encoding = "UTF-8";
             }
-            return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
+            return detectEncoding(inputStream, encoding, config, debug);
         }
         private static System.IO.Stream openClasspathResource(Saxon.Hej.Configuration config, string systemId) {
             throw new Saxon.Hej.trans.XPathException("classpath: URI scheme is not supported on .NET");

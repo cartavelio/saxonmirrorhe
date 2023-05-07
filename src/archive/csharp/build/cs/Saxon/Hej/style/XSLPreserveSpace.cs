@@ -122,8 +122,7 @@ namespace Saxon.Hej.style {
                     }
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(allocateLocation());
-                compileError(e);
+                compileError(e.maybeWithLocation(allocateLocation()));
             }
         }
     

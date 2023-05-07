@@ -82,11 +82,7 @@ namespace Saxon.Hej.expr {
                 return Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.FALSE, this);
             }
             if (t0.getUType().union(t1.getUType()).overlaps(Saxon.Hej.type.UType.EXTENSION)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot perform comparisons involving external objects");
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                err.setLocator(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("Cannot perform comparisons involving external objects").asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
             }
             Saxon.Hej.type.BuiltInAtomicType pt0 = (Saxon.Hej.type.BuiltInAtomicType)(t0.getPrimitiveItemType());
             Saxon.Hej.type.BuiltInAtomicType pt1 = (Saxon.Hej.type.BuiltInAtomicType)(t1.getPrimitiveItemType());
@@ -113,11 +109,7 @@ namespace Saxon.Hej.expr {
                             visitor.getStaticContext().issueWarning((((message+". The comparison can succeed only if ")+which)+" operand is empty, and in that case will always be false"), Saxon.Hej.trans.SaxonErrorCode.SXWN9025, getLocation());
                         }
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                        err.setErrorCode("XPTY0004");
-                        err.setIsTypeError(true);
-                        err.setLocator(getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException(message).withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
                     }
                 }
             }
@@ -495,9 +487,7 @@ namespace Saxon.Hej.expr {
                     }
                     return false;
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(loc);
-                    e.maybeSetContext(context);
-                    throw;
+                    throw e.maybeWithLocation(loc).maybeWithContext(context);
                 }
             }
             public virtual bool evaluateManyToMany(Saxon.Hej.om.SequenceIterator iter0, Saxon.Hej.om.SequenceIterator iter1, int singletonOperator, Saxon.Hej.expr.sort.AtomicComparer comparer, bool runTimeCheckNeeded, Saxon.Hej.expr.parser.RetainedStaticContext staticContext, Saxon.Hej.s9api.Location loc, Saxon.Hej.expr.XPathContext context) {
@@ -550,9 +540,7 @@ namespace Saxon.Hej.expr {
                         }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(loc);
-                    e.maybeSetContext(context);
-                    throw;
+                    throw e.maybeWithLocation(loc).maybeWithContext(context);
                 }
             }
         

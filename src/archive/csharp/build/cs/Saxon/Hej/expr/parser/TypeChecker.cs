@@ -59,10 +59,7 @@ namespace Saxon.Hej.expr.parser {
                                 }
                             }
                             Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("An atomic value is required for the "+role.getMessage())+", but the supplied type is ")+shortItemType)+", which cannot be atomized"), "FOTY0013", supplied.getLocation());
-                            err.setIsTypeError(true);
-                            err.setFailingExpression(supplied);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((((("An atomic value is required for the "+role.getMessage())+", but the supplied type is ")+shortItemType)+", which cannot be atomized"), "FOTY0013", supplied.getLocation()).asTypeError().withFailingExpression(supplied);
                         }
                         if ((exp.getRetainedStaticContext() == null)) {
                             exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
@@ -95,11 +92,7 @@ namespace Saxon.Hej.expr.parser {
                                 exp = cexp;
                             }
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetLocation(exp.getLocation());
-                            err.setFailingExpression(supplied);
-                            err.setErrorCode(roleSupplier().getErrorCode());
-                            err.setIsStaticError(true);
-                            throw;
+                            throw err.maybeWithLocation(exp.getLocation()).withFailingExpression(supplied).withErrorCode(roleSupplier().getErrorCode()).asStaticError();
                         }
                         itemTypeOK = true;
                         suppliedItemType = reqItemType;
@@ -123,9 +116,7 @@ namespace Saxon.Hej.expr.parser {
                             }
                             suppliedItemType = exp.getItemType();
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            err.maybeSetLocation(exp.getLocation());
-                            err.setIsStaticError(true);
-                            throw;
+                            throw err.maybeWithLocation(exp.getLocation()).asStaticError();
                         }
                     }
                     if ((reqItemType is Saxon.Hej.type.AtomicType)) {
@@ -140,9 +131,7 @@ namespace Saxon.Hej.expr.parser {
                             try {
                                 exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                             } catch (Saxon.Hej.trans.XPathException err) {
-                                err.maybeSetLocation(exp.getLocation());
-                                err.setIsStaticError(true);
-                                throw;
+                                throw err.maybeWithLocation(exp.getLocation()).asStaticError();
                             }
                             suppliedItemType = Saxon.Hej.type.BuiltInAtomicType.DOUBLE;
                             suppliedCard = -1;
@@ -157,10 +146,7 @@ namespace Saxon.Hej.expr.parser {
                                 try {
                                     exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                                 } catch (Saxon.Hej.trans.XPathException err) {
-                                    err.maybeSetLocation(exp.getLocation());
-                                    err.setFailingExpression(supplied);
-                                    err.setIsStaticError(true);
-                                    throw;
+                                    throw err.maybeWithLocation(exp.getLocation()).asStaticError().withFailingExpression(supplied);
                                 }
                                 suppliedItemType = Saxon.Hej.type.BuiltInAtomicType.FLOAT;
                                 suppliedCard = -1;
@@ -177,10 +163,7 @@ namespace Saxon.Hej.expr.parser {
                             try {
                                 exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                             } catch (Saxon.Hej.trans.XPathException err) {
-                                err.maybeSetLocation(exp.getLocation());
-                                err.setFailingExpression(supplied);
-                                err.setIsStaticError(true);
-                                throw;
+                                throw err.maybeWithLocation(exp.getLocation()).withFailingExpression(supplied).asStaticError();
                             }
                             suppliedItemType = Saxon.Hej.type.BuiltInAtomicType.STRING;
                             suppliedCard = -1;
@@ -197,10 +180,7 @@ namespace Saxon.Hej.expr.parser {
                                 try {
                                     exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                                 } catch (Saxon.Hej.trans.XPathException err) {
-                                    err.maybeSetLocation(exp.getLocation());
-                                    err.setFailingExpression(supplied);
-                                    err.setIsStaticError(true);
-                                    throw;
+                                    throw err.maybeWithLocation(exp.getLocation()).asStaticError().withFailingExpression(supplied);
                                 }
                                 suppliedItemType = reqItemType;
                             }
@@ -247,10 +227,7 @@ namespace Saxon.Hej.expr.parser {
             }
             if (((suppliedCard == Saxon.Hej.expr.StaticProperty.EMPTY) && ((((reqCard&Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) == 0)))) {
                 Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode(), supplied.getLocation());
-                err.setIsTypeError(role.isTypeError());
-                err.setFailingExpression(supplied);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode(), supplied.getLocation()).asTypeErrorIf(role.isTypeError()).withFailingExpression(supplied);
             }
             Saxon.Hej.type.Affinity relation = (itemTypeOK ? /*explicit enum*/ Saxon.Hej.type.Affinity.SUBSUMED_BY : th.relationship(suppliedItemType, reqItemType));
             if ((reqCard == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) {
@@ -266,10 +243,7 @@ namespace Saxon.Hej.expr.parser {
                     }
                 } else {
                     string msg = role.composeErrorMessage(reqItemType, supplied, th);
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, role.getErrorCode(), supplied.getLocation());
-                    err.setIsTypeError(role.isTypeError());
-                    err.setFailingExpression(supplied);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(msg, role.getErrorCode(), supplied.getLocation()).asTypeErrorIf(role.isTypeError()).withFailingExpression(supplied);
                 }
             }
             if (!((((relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SAME_TYPE) || (relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SUBSUMED_BY))))) {
@@ -402,30 +376,18 @@ namespace Saxon.Hej.expr.parser {
             for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 count++;
                 if (!(reqItemType.matches(item, context.getConfiguration().getTypeHierarchy()))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Required type is "+reqItemType)+"; supplied value has type ")+Saxon.Hej.type.UType.getUType(val.materialize())));
-                    err.setIsTypeError(true);
-                    err.setErrorCode("XPTY0004");
-                    return err;
+                    return new Saxon.Hej.trans.XPathException(((("Required type is "+reqItemType)+"; supplied value has type ")+Saxon.Hej.type.UType.getUType(val.materialize()))).asTypeError().withErrorCode("XPTY0004");
                 }
             }
             int reqCardinality = requiredType.getCardinality();
             if (((count == 0) && !(Saxon.Hej.value.Cardinality.allowsZero(reqCardinality)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Required type does not allow empty sequence, but supplied value is empty");
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                return err;
+                return new Saxon.Hej.trans.XPathException("Required type does not allow empty sequence, but supplied value is empty").asTypeError().withErrorCode("XPTY0004");
             }
             if (((count>1) && !(Saxon.Hej.value.Cardinality.allowsMany(reqCardinality)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Required type requires a singleton sequence; supplied value contains "+count)+" items"));
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                return err;
+                return new Saxon.Hej.trans.XPathException((("Required type requires a singleton sequence; supplied value contains "+count)+" items")).asTypeError().withErrorCode("XPTY0004");
             }
             if (((count>0) && (reqCardinality == Saxon.Hej.expr.StaticProperty.EMPTY))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Required type requires an empty sequence, but supplied value is non-empty");
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                return err;
+                return new Saxon.Hej.trans.XPathException("Required type requires an empty sequence, but supplied value is non-empty").asTypeError().withErrorCode("XPTY0004");
             }
             return null;
         }
@@ -435,10 +397,7 @@ namespace Saxon.Hej.expr.parser {
             }
             Saxon.Hej.type.ItemType t = exp.getItemType();
             if ((((((((th.relationship(t, Saxon.Hej.type.Type.NODE_TYPE) == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT) && (th.relationship(t, Saxon.Hej.type.BuiltInAtomicType.BOOLEAN) == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) && (th.relationship(t, Saxon.Hej.type.BuiltInAtomicType.STRING) == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) && (th.relationship(t, Saxon.Hej.type.BuiltInAtomicType.ANY_URI) == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) && (th.relationship(t, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) && (th.relationship(t, Saxon.Hej.type.NumericType.getInstance()) == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) && !(((t is Saxon.Hej.type.JavaExternalObjectType))))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Effective boolean value is defined only for sequences containing "+"booleans, strings, numbers, URIs, or nodes"));
-                err.setErrorCode("FORG0006");
-                err.setIsTypeError(true);
-                return err;
+                return new Saxon.Hej.trans.XPathException(("Effective boolean value is defined only for sequences containing "+"booleans, strings, numbers, URIs, or nodes")).withErrorCode("FORG0006").asTypeError();
             }
             return null;
         }

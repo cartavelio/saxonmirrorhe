@@ -84,9 +84,11 @@ namespace Saxon.Hej.s9api {
         }
         public void setXsltLanguageVersion(string version) {
             switch (version) {
+              case "3":
               case "3.0":
                 compilerInfo.setXsltVersion(30);
                 break ;
+              case "4":
               case "4.0":
                 compilerInfo.setXsltVersion(40);
                 break ;

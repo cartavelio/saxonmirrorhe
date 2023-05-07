@@ -37,11 +37,7 @@ namespace Saxon.Hej.expr.sort {
                         return ;
                     }
                 } catch (System.InvalidCastException e) {
-                    string message = "Grouping key values are of non-comparable types";
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                    err.setIsTypeError(true);
-                    err.setXPathContext(runningContext);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("Grouping key values are of non-comparable types").asTypeError().withXPathContext(runningContext);
                 }
             }
             nextItem = null;

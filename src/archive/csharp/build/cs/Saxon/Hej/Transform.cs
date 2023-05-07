@@ -141,7 +141,7 @@ namespace Saxon.Hej {
                     jit = false;
                     compiler.setJustInTimeCompilation(jit);
                     if (!("".Equals(value))) {
-                        explainOutputFileName = value;
+                        explainOutputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(value);
                     }
                 }
                 value = options.getOptionValue("export");
@@ -150,7 +150,7 @@ namespace Saxon.Hej {
                     jit = false;
                     compiler.setJustInTimeCompilation(jit);
                     if (!("".Equals(value))) {
-                        exportOutputFileName = value;
+                        exportOutputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(value);
                     }
                 }
                 value = options.getOptionValue("target");
@@ -208,7 +208,7 @@ namespace Saxon.Hej {
                 }
                 value = options.getOptionValue("o");
                 if ((value != null)) {
-                    outputFileName = value;
+                    outputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(value);
                 }
                 value = options.getOptionValue("nogo");
                 if ((value != null)) {

@@ -25,10 +25,7 @@ namespace Saxon.Hej.functions {
             try {
                 cal = Saxon.Hej.om.StructuredQName.fromLexicalQName((calendarVal), false, true, getRetainedStaticContext());
             } catch (Saxon.Hej.trans.XPathException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Invalid calendar name. "+e.Message));
-                err.setErrorCode("FOFD1340");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Invalid calendar name. "+e.Message)).withErrorCode("FOFD1340").withXPathContext(context);
             }
             if (cal.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
                 string calLocal = cal.getLocalPart();
@@ -37,10 +34,7 @@ namespace Saxon.Hej.functions {
                     if ((Saxon.Ejava.util.Arrays.binarySearch(knownCalendars, calLocal)>=0)) {
                         result = ("[Calendar: AD]"+result);
                     } else {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Unknown no-namespace calendar: "+calLocal));
-                        err.setErrorCode("FOFD1340");
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException(("Unknown no-namespace calendar: "+calLocal)).withErrorCode("FOFD1340").withXPathContext(context);
                     }
                 }
             } else {
@@ -80,10 +74,7 @@ namespace Saxon.Hej.functions {
                     if ((format[i] == ']')) {
                         i++;
                         if (((i == format.Length) || (format[i] != ']'))) {
-                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Closing ']' in date picture must be written as ']]'");
-                            e.setErrorCode("FOFD1340");
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new Saxon.Hej.trans.XPathException("Closing ']' in date picture must be written as ']]'").withErrorCode("FOFD1340").withXPathContext(context);
                         }
                     }
                     i++;
@@ -98,10 +89,7 @@ namespace Saxon.Hej.functions {
                 } else {
                     int close = ((i<format.Length) ? format.IndexOf("]", i) : -1);
                     if ((close == -1)) {
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Date format contains a '[' with no matching ']'");
-                        e.setErrorCode("FOFD1340");
-                        e.setXPathContext(context);
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException("Date format contains a '[' with no matching ']'").withErrorCode("FOFD1340").withXPathContext(context);
                     }
                     string componentFormat = format.Substring(i, close - i);
                     sb.append(formatComponent(value, Saxon.Hej.value.Whitespace.removeAllWhitespace(componentFormat), numberer, place, context));
@@ -119,10 +107,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.regex.ARegexIterator matcher = (Saxon.Hej.regex.ARegexIterator)(componentPattern.analyze(uSpecifier));
             Saxon.Hej.om.Item firstMatch = ((/*1430*/Saxon.Hej.value.StringValue)matcher.next());
             if ((((firstMatch == null) || (firstMatch.getUnicodeStringValue().length32() != uSpecifier.length32())) || !(matcher.isMatching()))) {
-                Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException((("Unrecognized date/time component ["+specifier)+']'));
-                error.setErrorCode("FOFD1340");
-                error.setXPathContext(context);
-                throw error;
+                throw new Saxon.Hej.trans.XPathException((("Unrecognized date/time component ["+specifier)+']')).withErrorCode("FOFD1340").withXPathContext(context);
             }
             Saxon.Hej.str.UnicodeString component = matcher.getRegexGroup(1);
             Saxon.Hej.str.UnicodeString format = matcher.getRegexGroup(2);
@@ -155,10 +140,7 @@ namespace Saxon.Hej.functions {
             switch (component.codePointAt(0)) {
               case 'Y':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a year component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a year component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int year = dtvalue.getYear();
                     if ((year<0)) {
@@ -168,60 +150,42 @@ namespace Saxon.Hej.functions {
                 }
               case 'M':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a month component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a month component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int month = dtvalue.getMonth();
                     return formatNumber(component, month, format, defaultFormat, numberer, context);
                 }
               case 'D':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a day component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a day component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int day = dtvalue.getDay();
                     return formatNumber(component, day, format, defaultFormat, numberer, context);
                 }
               case 'd':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a day component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain a day component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int day = Saxon.Hej.value.DateValue.getDayWithinYear(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, day, format, defaultFormat, numberer, context);
                 }
               case 'W':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): cannot obtain the week number from an xs:time value");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): cannot obtain the week number from an xs:time value").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int week = Saxon.Hej.value.DateValue.getWeekNumber(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, week, format, defaultFormat, numberer, context);
                 }
               case 'w':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): cannot obtain the week number from an xs:time value");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): cannot obtain the week number from an xs:time value").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int week = Saxon.Hej.value.DateValue.getWeekNumberWithinMonth(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, week, format, defaultFormat, numberer, context);
                 }
               case 'H':
                 if (ignoreTime) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain an hour component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain an hour component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     Saxon.Hej.value.Int64Value hour = (Saxon.Hej.value.Int64Value)(value.getComponent(Saxon.Hej.functions.AccessorFn.Component.HOURS));
                     System.Diagnostics.Debug.Assert((hour != null));
@@ -229,10 +193,7 @@ namespace Saxon.Hej.functions {
                 }
               case 'h':
                 if (ignoreTime) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain an hour component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain an hour component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     Saxon.Hej.value.Int64Value hour = (Saxon.Hej.value.Int64Value)(value.getComponent(Saxon.Hej.functions.AccessorFn.Component.HOURS));
                     System.Diagnostics.Debug.Assert((hour != null));
@@ -247,10 +208,7 @@ namespace Saxon.Hej.functions {
                 }
               case 'm':
                 if (ignoreTime) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain a minutes component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain a minutes component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     Saxon.Hej.value.Int64Value minutes = (Saxon.Hej.value.Int64Value)(value.getComponent(Saxon.Hej.functions.AccessorFn.Component.MINUTES));
                     System.Diagnostics.Debug.Assert((minutes != null));
@@ -258,10 +216,7 @@ namespace Saxon.Hej.functions {
                 }
               case 's':
                 if (ignoreTime) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain a seconds component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain a seconds component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     Saxon.Hej.value.IntegerValue seconds = (Saxon.Hej.value.IntegerValue)(value.getComponent(Saxon.Hej.functions.AccessorFn.Component.WHOLE_SECONDS));
                     System.Diagnostics.Debug.Assert((seconds != null));
@@ -269,10 +224,7 @@ namespace Saxon.Hej.functions {
                 }
               case 'f':
                 if (ignoreTime) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain a fractional seconds component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain a fractional seconds component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     Saxon.Hej.value.Int64Value micros = (Saxon.Hej.value.Int64Value)(value.getComponent(Saxon.Hej.functions.AccessorFn.Component.MICROSECONDS));
                     System.Diagnostics.Debug.Assert((micros != null));
@@ -297,20 +249,14 @@ namespace Saxon.Hej.functions {
                 return formatTimeZone(dtv, (char)(component.codePointAt(0)), format, country);
               case 'F':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain day-of-week component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain day-of-week component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int day = Saxon.Hej.value.DateValue.getDayOfWeek(dtvalue.getYear(), dtvalue.getMonth(), dtvalue.getDay());
                     return formatNumber(component, day, format, defaultFormat, numberer, context);
                 }
               case 'P':
                 if (ignoreTime) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain an am/pm component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-date(): an xs:date value does not contain an am/pm component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int minuteOfDay = ((dtvalue.getHour()*60)+dtvalue.getMinute());
                     return formatNumber(component, minuteOfDay, format, defaultFormat, numberer, context);
@@ -319,19 +265,13 @@ namespace Saxon.Hej.functions {
                 return Saxon.Hej.str.StringView.of(numberer.getCalendarName("AD")).tidy();
               case 'E':
                 if (ignoreDate) {
-                    Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain an AD/BC component");
-                    error.setErrorCode("FOFD1350");
-                    error.setXPathContext(context);
-                    throw error;
+                    throw new Saxon.Hej.trans.XPathException("In format-time(): an xs:time value does not contain an AD/BC component").withErrorCode("FOFD1350").withXPathContext(context);
                 } else {
                     int year = dtvalue.getYear();
                     return Saxon.Hej.str.StringView.of(numberer.getEraName(year)).tidy();
                 }
               default:
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Unknown format-date/time component specifier '"+format.substring(0, 1))+'\''));
-                e.setErrorCode("FOFD1340");
-                e.setXPathContext(context);
-                throw e;
+                throw new Saxon.Hej.trans.XPathException((("Unknown format-date/time component specifier '"+format.substring(0, 1))+'\'')).withErrorCode("FOFD1340").withXPathContext(context);
             }
         }
         private static readonly Saxon.Hej.regex.ARegularExpression widthPattern = Saxon.Hej.regex.ARegularExpression.compile(",(\\*|[0-9]+)(\\-(\\*|[0-9]+))?", "");
@@ -517,10 +457,7 @@ namespace Saxon.Hej.functions {
             try {
                 picGroupFormat = Saxon.Hej.functions.FormatInteger.getPicSeparators(primary);
             } catch (Saxon.Hej.trans.XPathException e) {
-                if ("FODF1310".Equals(e.getErrorCodeLocalPart())) {
-                    e.setErrorCode("FOFD1340");
-                }
-                throw;
+                throw e.replacingErrorCode("FODF1310", "FOFD1340");
             }
             Saxon.Hej.str.UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
             string formattedStr = numberer.format(value, adjustedPicture, picGroupFormat, letterValue, "", ordinal);
@@ -579,9 +516,7 @@ namespace Saxon.Hej.functions {
                 result[1] = max;
                 return result;
             } catch (Saxon.Ejava.lang.NumberFormatException err) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Invalid integer used as width in date/time picture");
-                e.setErrorCode("FOFD1340");
-                throw e;
+                throw new Saxon.Hej.trans.XPathException("Invalid integer used as width in date/time picture", "FOFD1340");
             }
         }
         private static Saxon.Hej.str.UnicodeString formatTimeZone(Saxon.Hej.value.DateTimeValue value, char component, Saxon.Hej.str.UnicodeString format, string country) {

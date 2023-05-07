@@ -427,17 +427,10 @@ namespace Saxon.Hej.expr.parser {
             }
         }
         public static void ebvError(string reason) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Effective boolean value is not defined for "+reason));
-            err.setErrorCode("FORG0006");
-            err.setIsTypeError(true);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(("Effective boolean value is not defined for "+reason)).withErrorCode("FORG0006").asTypeError();
         }
         public static void ebvError(string reason, Saxon.Hej.expr.Expression cause) {
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Effective boolean value is not defined for "+reason));
-            err.setErrorCode("FORG0006");
-            err.setIsTypeError(true);
-            err.setFailingExpression(cause);
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(("Effective boolean value is not defined for "+reason)).withErrorCode("FORG0006").asTypeError().withFailingExpression(cause);
         }
         public static bool dependsOnFocus(Saxon.Hej.expr.Expression exp) {
             return (((exp.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_FOCUS)) != 0);

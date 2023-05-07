@@ -141,26 +141,30 @@ namespace Saxon.Hej.om {
             if ((sequence is Saxon.Hej.om.Item)) {
                 return Saxon.Hej.type.Type.getItemType((Saxon.Hej.om.Item)(sequence), th);
             } else {
-                if ((sequence is Saxon.Hej.om.GroundedValue)) {
-                    try {
-                        Saxon.Hej.type.ItemType type = null;
-                        Saxon.Hej.om.SequenceIterator iter = sequence.iterate();
-                        for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
-                            if ((type == null)) {
-                                type = Saxon.Hej.type.Type.getItemType(item, th);
-                            } else {
-                                type = Saxon.Hej.type.Type.getCommonSuperType(type, Saxon.Hej.type.Type.getItemType(item, th), th);
+                if ((sequence is Saxon.Hej.value.IntegerRange)) {
+                    return Saxon.Hej.type.BuiltInAtomicType.INTEGER;
+                } else {
+                    if ((sequence is Saxon.Hej.om.GroundedValue)) {
+                        try {
+                            Saxon.Hej.type.ItemType type = null;
+                            Saxon.Hej.om.SequenceIterator iter = sequence.iterate();
+                            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                                if ((type == null)) {
+                                    type = Saxon.Hej.type.Type.getItemType(item, th);
+                                } else {
+                                    type = Saxon.Hej.type.Type.getCommonSuperType(type, Saxon.Hej.type.Type.getItemType(item, th), th);
+                                }
+                                if ((type == Saxon.Hej.type.AnyItemType.getInstance())) {
+                                    break ;
+                                }
                             }
-                            if ((type == Saxon.Hej.type.AnyItemType.getInstance())) {
-                                break ;
-                            }
+                            return ((type == null) ? Saxon.Hej.type.ErrorType.getInstance() : type);
+                        } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                            return Saxon.Hej.type.AnyItemType.getInstance();
                         }
-                        return ((type == null) ? Saxon.Hej.type.ErrorType.getInstance() : type);
-                    } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                    } else {
                         return Saxon.Hej.type.AnyItemType.getInstance();
                     }
-                } else {
-                    return Saxon.Hej.type.AnyItemType.getInstance();
                 }
             }
         }
@@ -214,9 +218,7 @@ namespace Saxon.Hej.om {
             try {
                 supply(value.iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((it => output.append(it, locationId, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES))));
             } catch (Saxon.Hej.trans.UncheckedXPathException e) {
-                Saxon.Hej.trans.XPathException xpe = e.getXPathException();
-                xpe.maybeSetLocation(locationId);
-                throw xpe;
+                throw e.getXPathException().maybeWithLocation(locationId);
             }
         }
         public static Saxon.Hej.om.Sequence[] makeSequenceArray(int length) {

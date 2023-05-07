@@ -28,10 +28,7 @@ namespace Saxon.Eej.xsltextn.style {
             try {
                 globalVariable = bindVariable(name);
                 if ((globalVariable == null)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Variable "+name.getDisplayName())+" has not been declared"));
-                    err.setErrorCode("XPST0008");
-                    err.setIsStaticError(true);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Variable "+name.getDisplayName())+" has not been declared")).withErrorCode("XPST0008").asStaticError();
                 }
                 globalVariable.registerReference(instruction);
             } catch (Saxon.Hej.trans.XPathException err) {

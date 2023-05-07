@@ -8,9 +8,7 @@ namespace Saxon.Hej.value {
             Saxon.Hej.str.UnicodeString s = Saxon.Hej.value.Whitespace.trim(@in);
             int len32 = s.length32();
             if ((((len32&1)) != 0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("A hexBinary value must contain an even number of characters");
-                err.setErrorCode("FORG0001");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("A hexBinary value must contain an even number of characters", "FORG0001");
             }
             binaryValue = new byte[(len32/2)];
             for (int i = 0; (i<binaryValue.Length); i++) {
@@ -38,9 +36,7 @@ namespace Saxon.Hej.value {
                 d = (d-6);
             }
             if ((d<0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Invalid hexadecimal digit '"+c)+"'"));
-                err.setErrorCode("FORG0001");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("Invalid hexadecimal digit '"+c)+"'"), "FORG0001");
             }
             return d;
         }

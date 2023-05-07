@@ -144,9 +144,7 @@ namespace Saxon.Hej.expr.instruct {
                     } else {
                         target = context.getTargetComponent(expr.bindingSlot);
                         if (target.isHiddenAbstractComponent()) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot expand an abstract attribute set ("+expr.targetName.getDisplayName())+") with no implementation"), "XTDE3052");
-                            err.setLocation(expr.getLocation());
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException((("Cannot expand an abstract attribute set ("+expr.targetName.getDisplayName())+") with no implementation"), "XTDE3052").withLocation(expr.getLocation());
                         }
                     }
                     if ((target == null)) {

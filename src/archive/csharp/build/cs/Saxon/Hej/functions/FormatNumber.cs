@@ -17,9 +17,7 @@ namespace Saxon.Hej.functions {
                         string lexicalName = ((Saxon.Hej.expr.StringLiteral)(arguments[2])).stringify();
                         decimalFormatName = Saxon.Hej.om.StructuredQName.fromLexicalQName(lexicalName, false, true, getRetainedStaticContext());
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Invalid decimal format name. "+e.Message));
-                        err.setErrorCode("FODF1280");
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException(("Invalid decimal format name. "+e.Message), "FODF1280");
                     }
                 }
                 if ((decimalFormatName == null)) {
@@ -38,9 +36,7 @@ namespace Saxon.Hej.functions {
             int[] picture4 = Saxon.Hej.str.StringTool.expand(Saxon.Hej.str.StringView.of(picture));
             Saxon.Hej.functions.FormatNumber.SubPicture[] pics = new Saxon.Hej.functions.FormatNumber.SubPicture[2];
             if ((picture4.Length == 0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("format-number() picture is zero-length");
-                err.setErrorCode("FODF1310");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("format-number() picture is zero-length", "FODF1310");
             }
             int sep = -1;
             for (int c = 0; (c<picture4.Length); c++) {
@@ -564,15 +560,11 @@ namespace Saxon.Hej.functions {
             try {
                 qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(lexicalName, false, true, getRetainedStaticContext());
             } catch (Saxon.Hej.trans.XPathException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Invalid decimal format name. "+e.Message));
-                err.setErrorCode("FODF1280");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Invalid decimal format name. "+e.Message), "FODF1280");
             }
             dfs = dfm.getNamedDecimalFormat(qName);
             if ((dfs == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("format-number function: decimal-format '"+lexicalName)+"' is not defined"));
-                err.setErrorCode("FODF1280");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((("format-number function: decimal-format '"+lexicalName)+"' is not defined"), "FODF1280");
             }
             return dfs;
         }

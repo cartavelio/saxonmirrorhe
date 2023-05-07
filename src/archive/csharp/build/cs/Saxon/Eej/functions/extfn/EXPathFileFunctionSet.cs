@@ -924,7 +924,7 @@ namespace Saxon.Eej.functions.extfn {
             }
         }
         private static void copyFile(Saxon.Ejava.io.File sourceFile, Saxon.Ejava.io.File destFile) {
-            System.IO.File.Copy(sourceFile.getPath(), destFile.getPath(), true);
+            Saxon.Ejava.io.File.copyFile(sourceFile, destFile);
         }
         private static void deleteTempFile(Saxon.Hej.expr.XPathContext context, Saxon.Ejava.io.File temp) {
             bool d = context.getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<bool>.EXPATH_FILE_DELETE_TEMPORARY_FILES);

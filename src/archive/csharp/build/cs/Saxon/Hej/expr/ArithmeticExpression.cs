@@ -63,10 +63,7 @@ namespace Saxon.Hej.expr {
                 }
             }
             if (itemType0.getUType().union(itemType1.getUType()).overlaps(Saxon.Hej.type.UType.EXTENSION)) {
-                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException("Arithmetic operators are not defined for external objects");
-                de.setLocation(getLocation());
-                de.setErrorCode("XPTY0004");
-                throw de;
+                throw new Saxon.Hej.trans.XPathException("Arithmetic operators are not defined for external objects").withLocation(getLocation()).withErrorCode("XPTY0004");
             }
             if ((getLhsExpression() != oldOp0)) {
                 adoptChildExpression(getLhsExpression());
@@ -90,11 +87,7 @@ namespace Saxon.Hej.expr {
             bool mustResolve = !(((((type0.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC) || type1.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC)) || type0.Equals(Saxon.Hej.type.NumericType.getInstance())) || type1.Equals(Saxon.Hej.type.NumericType.getInstance()))));
             calculator = Saxon.Hej.expr.Calculator.getCalculator(type0.getFingerprint(), type1.getFingerprint(), mapOpCode(@operator), mustResolve);
             if ((calculator == null)) {
-                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException((((("Arithmetic operator is not defined for arguments of types ("+type0.getDescription())+", ")+type1.getDescription())+")"));
-                de.setLocation(getLocation());
-                de.setIsTypeError(true);
-                de.setErrorCode("XPTY0004");
-                throw de;
+                throw new Saxon.Hej.trans.XPathException((((("Arithmetic operator is not defined for arguments of types ("+type0.getDescription())+", ")+type1.getDescription())+")")).withLocation(getLocation()).asTypeError().withErrorCode("XPTY0004");
             }
             if ((calculator is Saxon.Hej.expr.Calculator.DoubleOpDouble)) {
                 if (((getLhsExpression() is Saxon.Hej.expr.Literal) && !(type0.Equals(Saxon.Hej.type.BuiltInAtomicType.DOUBLE)))) {
@@ -272,9 +265,7 @@ namespace Saxon.Hej.expr {
                         try {
                             return calc.compute(v0, v1, context);
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetContext(context);
-                            e.maybeSetLocation(exp.getLocation());
-                            throw;
+                            throw e.maybeWithLocation(exp.getLocation()).maybeWithContext(context);
                         }
                     } ;
                 } else {
@@ -288,9 +279,7 @@ namespace Saxon.Hej.expr {
                             try {
                                 return calc.compute(v0, v1, context);
                             } catch (Saxon.Hej.trans.XPathException e) {
-                                e.maybeSetContext(context);
-                                e.maybeSetLocation(exp.getLocation());
-                                throw;
+                                throw e.maybeWithLocation(exp.getLocation()).maybeWithContext(context);
                             }
                         } ;
                     }

@@ -228,8 +228,7 @@ namespace Saxon.Hej.value {
             try {
                 return div(other);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(locator);
-                throw;
+                throw err.maybeWithLocation(locator);
             }
         }
         public abstract Saxon.Hej.value.IntegerValue mod(Saxon.Hej.value.IntegerValue other);
@@ -237,8 +236,7 @@ namespace Saxon.Hej.value {
             try {
                 return mod(other);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(locator);
-                throw;
+                throw err.maybeWithLocation(locator);
             }
         }
         public abstract Saxon.Hej.value.IntegerValue idiv(Saxon.Hej.value.IntegerValue other);
@@ -246,8 +244,7 @@ namespace Saxon.Hej.value {
             try {
                 return idiv(other);
             } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(locator);
-                throw;
+                throw err.maybeWithLocation(locator);
             }
         }
         public abstract System.Numerics.BigInteger asBigInteger();

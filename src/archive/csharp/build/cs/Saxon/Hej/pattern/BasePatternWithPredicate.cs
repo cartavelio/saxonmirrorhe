@@ -10,6 +10,9 @@ namespace Saxon.Hej.pattern {
         public BasePatternWithPredicate(Saxon.Hej.pattern.Pattern basePattern, Saxon.Hej.expr.Expression predicate)  {
             basePatternOp = new Saxon.Hej.expr.Operand(this, basePattern, Saxon.Hej.expr.OperandRole.ATOMIC_SEQUENCE);
             predicateOp = new Saxon.Hej.expr.Operand(this, predicate, Saxon.Hej.expr.OperandRole.FOCUS_CONTROLLED_ACTION);
+            if ((basePattern is Saxon.Hej.pattern.ItemTypePattern)) {
+                setPriority((basePattern.getDefaultPriority()-1e-12));
+            }
             adoptChildExpression(getBasePattern());
             adoptChildExpression(getPredicate());
         }

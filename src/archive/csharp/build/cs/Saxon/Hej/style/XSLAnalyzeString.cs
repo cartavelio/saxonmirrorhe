@@ -63,7 +63,7 @@ namespace Saxon.Hej.style {
                         issueWarning(w, Saxon.Hej.trans.SaxonErrorCode.SXWN9022);
                     }
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    if ("FORX0001".Equals(err.getErrorCodeLocalPart())) {
+                    if (err.hasErrorCode("FORX0001")) {
                         invalidFlags(("Error in regular expression flags: "+err.Message));
                     } else {
                         invalidRegex(("Error in regular expression: "+err.Message));

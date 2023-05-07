@@ -75,8 +75,7 @@ namespace Saxon.Hej.expr {
             try {
                 return eval(context => getMin().evaluateItem(context), context => getMax().evaluateItem(context), context => getValue().iterate(context), c);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
+                throw e.maybeWithLocation(getLocation()).maybeWithContext(c);
             }
         }
         public static bool eval(Saxon.Hej.expr.elab.ItemEvaluator minEval, Saxon.Hej.expr.elab.ItemEvaluator maxEval, Saxon.Hej.expr.elab.PullEvaluator valueEval, Saxon.Hej.expr.XPathContext c) {

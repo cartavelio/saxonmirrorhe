@@ -64,11 +64,7 @@ namespace Saxon.Hej.expr {
                         } else {
                             Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                             string message = role.composeErrorMessage(requiredItemType, operand, th);
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-                            err.setErrorCode(role.getErrorCode());
-                            err.setLocation(this.getLocation());
-                            err.setIsTypeError(role.isTypeError());
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(message).withErrorCode(role.getErrorCode()).withLocation(this.getLocation()).asTypeErrorIf(role.isTypeError());
                         }
                     }
                 }
@@ -111,10 +107,7 @@ namespace Saxon.Hej.expr {
                         Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                         string message = role.composeErrorMessage(requiredItemType, item, th);
                         string errorCode = role.getErrorCode();
-                        Saxon.Hej.trans.XPathException te = new Saxon.Hej.trans.XPathException(message, errorCode);
-                        te.setFailingExpression(baseExpr);
-                        te.setLocator(baseExpr.getLocation());
-                        te.setIsTypeError(!("XPDY0050".Equals(errorCode)));
+                        Saxon.Hej.trans.XPathException te = new Saxon.Hej.trans.XPathException(message, errorCode).withFailingExpression(baseExpr).withLocation(baseExpr.getLocation()).asTypeErrorIf(!("XPDY0050".Equals(errorCode)));
                         throw new Saxon.Hej.trans.UncheckedXPathException(te);
                     }
                 }

@@ -212,9 +212,7 @@ namespace Saxon.Hej.expr.instruct {
                             @out.close();
                             return builder.getCurrentRoot();
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            e.maybeSetContext(context);
-                            throw;
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     } ;
                 }

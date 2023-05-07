@@ -5,7 +5,7 @@ namespace Saxon.Hej.query {
     public class QueryReader {
         private QueryReader()  {
         }
-        public static string readSourceQuery(Saxon.Ejavax.xml.transform.stream.StreamSource ss, Saxon.Hej.z.IntPredicateProxy charChecker) {
+        public static string readSourceQuery(Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.stream.StreamSource ss, Saxon.Hej.z.IntPredicateProxy charChecker) {
             string queryText;
             if ((ss.getInputStream() != null)) {
                 System.IO.Stream @is = ss.getInputStream();
@@ -18,8 +18,7 @@ namespace Saxon.Hej.query {
                 } else {
                     if ((ss.getSystemId() != null)) {
                         try {
-                            Saxon.Ejava.net.URL url = new Saxon.Ejava.net.URL(ss.getSystemId());
-                            System.IO.Stream stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(url);
+                            System.IO.Stream stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(config, ss.getSystemId());
                             stream = Saxon.Hej.query.InputStreamMarker.ensureMarkSupported(stream);
                             string encoding = readEncoding(stream);
                             queryText = readInputStream(stream, encoding, charChecker);

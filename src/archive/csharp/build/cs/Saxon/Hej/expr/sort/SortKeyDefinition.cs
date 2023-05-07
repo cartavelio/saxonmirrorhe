@@ -249,9 +249,7 @@ namespace Saxon.Hej.expr.sort {
                     atomicComparer = ((context.getConfiguration().getXsdVersion() == Saxon.Hej.Configuration.XSD10) ? Saxon.Hej.expr.sort.NumericComparer.getInstance() : Saxon.Hej.expr.sort.NumericComparer11.getInstance());
                     break ;
                   default:
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("data-type on xsl:sort must be 'text' or 'number'");
-                    err.setErrorCode("XTDE0030");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("data-type on xsl:sort must be 'text' or 'number'", "XTDE0030");
                 }
             }
             if ((stable != null)) {
@@ -259,9 +257,7 @@ namespace Saxon.Hej.expr.sort {
                 string s = Saxon.Hej.value.Whitespace.trim(stableVal.getStringValue());
                 if ((((((s.Equals("yes") || s.Equals("no")) || s.Equals("true")) || s.Equals("false")) || s.Equals("1")) || s.Equals("0"))) {
                 } else {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Value of 'stable' on xsl:sort must be yes|no|true|false|1|0");
-                    err.setErrorCode("XTDE0030");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException("Value of 'stable' on xsl:sort must be yes|no|true|false|1|0", "XTDE0030");
                 }
             }
             switch (orderX) {
@@ -270,9 +266,7 @@ namespace Saxon.Hej.expr.sort {
               case "descending":
                 return new Saxon.Hej.expr.sort.DescendingComparer(atomicComparer);
               default:
-                Saxon.Hej.trans.XPathException err1 = new Saxon.Hej.trans.XPathException("order must be 'ascending' or 'descending'");
-                err1.setErrorCode("XTDE0030");
-                throw err1;
+                throw new Saxon.Hej.trans.XPathException("order must be 'ascending' or 'descending'", "XTDE0030");
             }
         }
         public void setFinalComparator(Saxon.Hej.expr.sort.AtomicComparer comp) {

@@ -52,18 +52,10 @@ namespace Saxon.Hej.expr.instruct {
                 if ((validation == Saxon.Hej.lib.Validation.STRICT)) {
                     Saxon.Hej.type.SchemaDeclaration decl = config.getElementDeclaration(fp);
                     if ((decl == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("There is no global element declaration for "+elementName.getStructuredQName().getEQName())+", so strict validation will fail"));
-                        err.setErrorCode((instr.isXSLT() ? "XTTE1512" : "XQDY0084"));
-                        err.setIsTypeError(true);
-                        err.setLocation(instr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("There is no global element declaration for "+elementName.getStructuredQName().getEQName())+", so strict validation will fail")).withErrorCode((instr.isXSLT() ? "XTTE1512" : "XQDY0084")).asTypeError().withLocation(instr.getLocation());
                     }
                     if (decl.isAbstract()) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The element declaration for "+elementName.getStructuredQName().getEQName())+" is abstract, so strict validation will fail"));
-                        err.setErrorCode((instr.isXSLT() ? "XTTE1512" : "XQDY0027"));
-                        err.setIsTypeError(true);
-                        err.setLocation(instr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("The element declaration for "+elementName.getStructuredQName().getEQName())+" is abstract, so strict validation will fail")).withErrorCode((instr.isXSLT() ? "XTTE1512" : "XQDY0084")).asTypeError().withLocation(instr.getLocation());
                     }
                     Saxon.Hej.type.SchemaType declaredType = decl.getType();
                     Saxon.Hej.type.SchemaType xsiType = instr.getXSIType(env);
@@ -78,9 +70,7 @@ namespace Saxon.Hej.expr.instruct {
                         try {
                             schemaType.analyzeContentExpression(content, Saxon.Hej.type.Type.ELEMENT);
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.setErrorCode((instr.isXSLT() ? "XTTE1510" : "XQDY0027"));
-                            e.setLocation(instr.getLocation());
-                            throw;
+                            throw e.withErrorCode((instr.isXSLT() ? "XTTE1510" : "XQDY0027")).withLocation(instr.getLocation());
                         }
                         if ((xsiType != null)) {
                             try {
@@ -107,9 +97,7 @@ namespace Saxon.Hej.expr.instruct {
                             try {
                                 schemaType.analyzeContentExpression(content, Saxon.Hej.type.Type.ELEMENT);
                             } catch (Saxon.Hej.trans.XPathException e) {
-                                e.setErrorCode((instr.isXSLT() ? "XTTE1515" : "XQDY0027"));
-                                e.setLocation(instr.getLocation());
-                                throw;
+                                throw e.withErrorCode((instr.isXSLT() ? "XTTE1515" : "XQDY0027")).withLocation(instr.getLocation());
                             }
                         }
                     } else {
@@ -125,9 +113,7 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     schemaType.analyzeContentExpression(content, Saxon.Hej.type.Type.ELEMENT);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.setErrorCode((instr.isXSLT() ? "XTTE1540" : "XQDY0027"));
-                    e.setLocation(instr.getLocation());
-                    throw;
+                    throw e.withErrorCode((instr.isXSLT() ? "XTTE1540" : "XQDY0027")).withLocation(instr.getLocation());
                 }
             }
             return itemType;
@@ -186,16 +172,10 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override void checkPermittedContents(Saxon.Hej.type.SchemaType parentType, bool whole) {
             if ((parentType is Saxon.Hej.type.SimpleType)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Element "+elementName.getDisplayName())+" is not permitted here: the containing element is of simple type ")+parentType.getDescription()));
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(((("Element "+elementName.getDisplayName())+" is not permitted here: the containing element is of simple type ")+parentType.getDescription())).asTypeError().withLocation(getLocation());
             } else {
                 if (((Saxon.Hej.type.ComplexType)(parentType)).isSimpleContent()) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Element "+elementName.getDisplayName())+" is not permitted here: the containing element has a complex type with simple content"));
-                    err.setIsTypeError(true);
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException((("Element "+elementName.getDisplayName())+" is not permitted here: the containing element has a complex type with simple content")).asTypeError().withLocation(getLocation());
                 }
             }
             if (whole) {
@@ -224,12 +204,11 @@ namespace Saxon.Hej.expr.instruct {
             try {
                 getContentExpression().checkPermittedContents(type, true);
             } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                throw;
+                throw e.maybeWithLocation(getLocation());
             }
         }
         public override Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails makeElementCreationDetails() {
-            return new Inner_ElementCreationDetails_125(this);
+            return new Inner_ElementCreationDetails_104(this);
         }
         public override void outputNamespaceNodes(Saxon.Hej.@event.Outputter @out, Saxon.Hej.om.NodeName nodeName, Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails details) {
             foreach (Saxon.Hej.om.NamespaceBinding ns in namespaceBindings) {
@@ -322,9 +301,7 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.expr.Expression.dispatchTailCall(tc);
                         @out.endElement();
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        e.maybeSetContext(context);
-                        throw;
+                        throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     }
                     return null;
                 } ;
@@ -332,9 +309,9 @@ namespace Saxon.Hej.expr.instruct {
         
         }
     
-        private class Inner_ElementCreationDetails_125 : Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails {
+        private class Inner_ElementCreationDetails_104 : Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails {
             private readonly FixedElement outerInstance;
-            public Inner_ElementCreationDetails_125(FixedElement outerInstance) {
+            public Inner_ElementCreationDetails_104(FixedElement outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.om.NodeName getNodeName(Saxon.Hej.expr.XPathContext context) {

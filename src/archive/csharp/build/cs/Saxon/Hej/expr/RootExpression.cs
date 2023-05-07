@@ -11,11 +11,7 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             Saxon.Hej.type.TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             if ((((contextInfo == null) || (contextInfo.getItemType() == null)) || contextInfo.getItemType().Equals(Saxon.Hej.type.ErrorType.getInstance()))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((noContextMessage()+": the context item is absent"));
-                err.setErrorCode("XPDY0002");
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((noContextMessage()+": the context item is absent")).withErrorCode("XPDY0002").asTypeError().withLocation(getLocation());
             } else {
                 if (((!(doneWarnings) && contextInfo.isParentless()) && (th.relationship(contextInfo.getItemType(), Saxon.Hej.pattern.NodeKindTest.DOCUMENT) == Saxon.Hej.type.Affinity.DISJOINT))) {
                     visitor.issueWarning((noContextMessage()+": the context item is parentless and is not a document node"), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
@@ -31,11 +27,7 @@ namespace Saxon.Hej.expr {
             }
             Saxon.Hej.type.Affinity relation = th.relationship(contextInfo.getItemType(), Saxon.Hej.pattern.AnyNodeTest.getInstance());
             if ((relation == Saxon.Hej.type.Affinity.DISJOINT)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((noContextMessage()+": the context item is not a node"));
-                err.setErrorCode("XPTY0020");
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((noContextMessage()+": the context item is not a node")).withErrorCode("XPTY0020").asTypeError().withLocation(getLocation());
             }
             return this;
         }

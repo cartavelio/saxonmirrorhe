@@ -160,9 +160,7 @@ namespace Saxon.Eej.ee.extfn {
                     expr = make(exprText, env, 0, Saxon.Hej.expr.parser.Token.EOF, null, inCatch);
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("Static error in XPath expression supplied to saxon:compile-XPath: "+e.Message)+". Expression: {")+exprText)+"}"));
-                err.setErrorCode("XTDE3160");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException((((("Static error in XPath expression supplied to saxon:compile-XPath: "+e.Message)+". Expression: {")+exprText)+"}")).withErrorCode("XTDE3160");
             }
             Saxon.Hej.expr.parser.ExpressionVisitor visitor = new Saxon.Hej.expr.parser.ExpressionVisitor(configuration);
             visitor.setStaticContext(env);

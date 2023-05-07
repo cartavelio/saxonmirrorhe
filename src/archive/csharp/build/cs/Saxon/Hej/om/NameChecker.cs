@@ -72,9 +72,7 @@ namespace Saxon.Hej.om {
                 }
                 return parts;
             } catch (Saxon.Hej.om.QNameException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(e.Message);
-                err.setErrorCode("FORG0001");
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(e.Message, "FORG0001");
             }
         }
         public static bool isValidNCName(Saxon.Hej.z.IntIterator codePoints) {

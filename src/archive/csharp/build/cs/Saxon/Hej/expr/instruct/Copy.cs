@@ -26,10 +26,7 @@ namespace Saxon.Hej.expr.instruct {
             typeCheckChildren(visitor, contextInfo);
             selectItemType = contextInfo.getItemType();
             if ((selectItemType == Saxon.Hej.type.ErrorType.getInstance())) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("No context item supplied for xsl:copy", "XTTE0945");
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("No context item supplied for xsl:copy", "XTTE0945").asTypeError().withLocation(getLocation());
             }
             if ((selectItemType is Saxon.Hej.pattern.NodeTest)) {
                 switch (selectItemType.getPrimitiveType()) {
@@ -294,11 +291,7 @@ namespace Saxon.Hej.expr.instruct {
                     Saxon.Hej.Controller controller = context.getController();
                     Saxon.Hej.om.Item item = context.getContextItem();
                     if ((item == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no context item for xsl:copy", "XTTE0945");
-                        err.setIsTypeError(true);
-                        err.setLocation(expr.getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("There is no context item for xsl:copy", "XTTE0945").asTypeError().withLocation(expr.getLocation()).withXPathContext(context);
                     }
                     if (!(((item is Saxon.Hej.om.NodeInfo)))) {
                         output.append(item, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
@@ -333,9 +326,7 @@ namespace Saxon.Hej.expr.instruct {
                             Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/contentPush(output, context));
                             output.endElement();
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            e.maybeSetContext(context);
-                            throw;
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                         return null;
                       case Saxon.Hej.type.Type.ATTRIBUTE:
@@ -345,8 +336,7 @@ namespace Saxon.Hej.expr.instruct {
                         try {
                             Saxon.Hej.expr.instruct.CopyOf.copyAttribute(source, (Saxon.Hej.type.SimpleType)(expr.getSchemaType()), expr.getValidationAction(), expr, output, context, false);
                         } catch (Saxon.Hej.@event.NoOpenStartTagException err) {
-                            err.setXPathContext(context);
-                            throw dynamicError(expr.getLocation(), err, context);
+                            throw dynamicError(expr.getLocation(), err.withXPathContext(context), context);
                         }
                         break ;
                       case Saxon.Hej.type.Type.TEXT:

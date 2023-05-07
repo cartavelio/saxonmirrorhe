@@ -122,17 +122,11 @@ namespace Saxon.Hej.expr {
                     int n = Saxon.Impl.Helpers.Utils.ParseInt(tok);
                     list.Add(n);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException((("Invalid start-at value: non-integer component {"+tok)+"}"));
-                    e.setErrorCode("XTDE0030");
-                    e.setLocation(getLocation());
-                    throw e;
+                    throw new Saxon.Hej.trans.XPathException((("Invalid start-at value: non-integer component {"+tok)+"}")).withErrorCode("XTDE0030").withLocation(getLocation());
                 }
             }
             if (list.Count==0) {
-                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("Invalid start-at value: no numeric components found");
-                e.setErrorCode("XTDE0030");
-                e.setLocation(getLocation());
-                throw e;
+                throw new Saxon.Hej.trans.XPathException("Invalid start-at value: no numeric components found").withErrorCode("XTDE0030").withLocation(getLocation());
             }
             return list;
         }
@@ -233,11 +227,7 @@ namespace Saxon.Hej.expr {
                                 vec.Add("NaN");
                             } else {
                                 vec.Add(val.getUnicodeStringValue());
-                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("Cannot convert supplied value to an integer. "+err.Message));
-                                e.setErrorCode("XTDE0980");
-                                e.setLocation(expr.getLocation());
-                                e.setXPathContext(context);
-                                throw e;
+                                throw new Saxon.Hej.trans.XPathException(("Cannot convert supplied value to an integer. "+err.Message)).withErrorCode("XTDE0980").withLocation(expr.getLocation()).withXPathContext(context);
                             }
                         }
                     }
@@ -253,11 +243,7 @@ namespace Saxon.Hej.expr {
                         try {
                             gpsize = Saxon.Impl.Helpers.Utils.ParseInt(g);
                         } catch (Saxon.Ejava.lang.NumberFormatException err) {
-                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("grouping-size must be numeric");
-                            e.setXPathContext(context);
-                            e.setErrorCode("XTDE0030");
-                            e.setLocation(expr.getLocation());
-                            throw e;
+                            throw new Saxon.Hej.trans.XPathException("grouping-size must be numeric").withXPathContext(context).withErrorCode("XTDE0030").withLocation(expr.getLocation());
                         }
                     }
                     if ((groupSeparatorEvaluator != null)) {
@@ -284,11 +270,7 @@ namespace Saxon.Hej.expr {
                     } else {
                         letterVal = /*Delegate.eval()*/letterValueEvaluator(context).ToString();
                         if (!((("alphabetic".Equals(letterVal) || "traditional".Equals(letterVal))))) {
-                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("letter-value must be \"traditional\" or \"alphabetic\"");
-                            e.setXPathContext(context);
-                            e.setErrorCode("XTDE0030");
-                            e.setLocation(expr.getLocation());
-                            throw e;
+                            throw new Saxon.Hej.trans.XPathException("letter-value must be \"traditional\" or \"alphabetic\"").withXPathContext(context).withErrorCode("XTDE0030").withLocation(expr.getLocation());
                         }
                     }
                     Saxon.Hej.expr.number.NumberFormatter nf;

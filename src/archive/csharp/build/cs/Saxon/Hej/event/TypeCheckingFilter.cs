@@ -119,9 +119,8 @@ namespace Saxon.Hej.@event {
         }
         public void finalCheck() {
             if (((count == 0) && !(Saxon.Hej.value.Cardinality.allowsZero(cardinality)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+roleDiagnostic.getMessage()));
                 string errorCode = roleDiagnostic.getErrorCode();
-                err.setErrorCode(errorCode);
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+roleDiagnostic.getMessage())).withErrorCode(errorCode);
                 if (!("XPDY0050".Equals(errorCode))) {
                     err.setIsTypeError(true);
                 }
@@ -186,32 +185,11 @@ namespace Saxon.Hej.@event {
                 message = roleDiagnostic.composeErrorMessage(itemType, item, typeHierarchy);
             }
             string errorCode = roleDiagnostic.getErrorCode();
-            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
-            err.setErrorCode(errorCode);
-            if (!("XPDY0050".Equals(errorCode))) {
-                err.setIsTypeError(true);
-            }
-            if ((locationId == null)) {
-                err.setLocation(locator);
-            } else {
-                err.setLocation(locationId.saveLocation());
-            }
-            throw err;
+            throw new Saxon.Hej.trans.XPathException(message, errorCode).asTypeErrorIf(!("XPDY0050".Equals(errorCode))).withLocation(((locationId == null) ? locator : locationId.saveLocation()));
         }
         private void checkAllowsMany(Saxon.Hej.s9api.Location locationId) {
             if (!(Saxon.Hej.value.Cardinality.allowsMany(cardinality))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("A sequence of more than one item is not allowed as the "+roleDiagnostic.getMessage()));
-                string errorCode = roleDiagnostic.getErrorCode();
-                err.setErrorCode(errorCode);
-                if (!("XPDY0050".Equals(errorCode))) {
-                    err.setIsTypeError(true);
-                }
-                if (((locationId == null) || (locationId == Saxon.Hej.expr.parser.Loc.NONE))) {
-                    err.setLocator(locator);
-                } else {
-                    err.setLocator(locationId);
-                }
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("A sequence of more than one item is not allowed as the "+roleDiagnostic.getMessage())).withErrorCode(roleDiagnostic.getErrorCode()).asTypeErrorIf(!("XPDY0050".Equals(roleDiagnostic.getErrorCode()))).withLocation((((locationId == null) || (locationId == Saxon.Hej.expr.parser.Loc.NONE)) ? locator : locationId));
             }
         }
     

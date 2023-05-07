@@ -259,9 +259,7 @@ namespace Saxon.Hej.expr.instruct {
                                 break ;
                             }
                         } catch (Saxon.Hej.trans.XPathException e) {
-                            e.maybeSetLocation(expr.operanda[i].getChildExpression().getLocation());
-                            e.maybeSetContext(context);
-                            throw;
+                            throw e.maybeWithLocation(expr.operanda[i].getChildExpression().getLocation()).maybeWithContext(context);
                         }
                     }
                     if (significantItemDetector.isEmpty()) {

@@ -12,10 +12,7 @@ namespace Saxon.Hej.functions {
                 }
             }
             if ((collection == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("No collection has been defined for href: "+(((absoluteURI == null) ? "" : absoluteURI))));
-                err.setErrorCode("FODC0002");
-                err.setXPathContext(context);
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("No collection has been defined for href: "+(((absoluteURI == null) ? "" : absoluteURI)))).withErrorCode("FODC0002").withXPathContext(context);
             }
             System.Collections.Generic.IEnumerator<string> sources = collection.getResourceURIs(context);
             System.Collections.Generic.IEnumerator<Saxon.Hej.value.AnyURIValue> uris = new Saxon.Impl.Overrides.MappingEnumerator<string,Saxon.Hej.value.AnyURIValue>(sources, s => new Saxon.Hej.value.AnyURIValue(s));

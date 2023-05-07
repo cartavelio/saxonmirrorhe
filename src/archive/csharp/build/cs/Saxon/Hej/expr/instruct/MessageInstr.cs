@@ -141,10 +141,7 @@ namespace Saxon.Hej.expr.instruct {
                         abort = true;
                         break ;
                       default:
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("The terminate attribute of xsl:message must be yes|true|1 or no|false|0");
-                        e.setXPathContext(context);
-                        e.setErrorCode("XTDE0030");
-                        throw e;
+                        throw new Saxon.Hej.trans.XPathException("The terminate attribute of xsl:message must be yes|true|1 or no|false|0").withXPathContext(context).withErrorCode("XTDE0030");
                     }
                     string code;
                     try {
@@ -170,7 +167,7 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/select(cco, context);
                         dispatchTailCall(tc);
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        cco.append(Saxon.Hej.value.StringValue.bmp(((((((("Error "+e.getErrorCodeLocalPart())+" while evaluating xsl:message at line ")+expr.getLocation().getLineNumber())+" of ")+expr.getLocation().getSystemId())+": ")+e.Message)));
+                        cco.append(Saxon.Hej.value.StringValue.bmp(((((((("Error "+e.showErrorCode())+" while evaluating xsl:message at line ")+expr.getLocation().getLineNumber())+" of ")+expr.getLocation().getSystemId())+": ")+e.Message)));
                     }
                     cco.endDocument();
                     cco.close();

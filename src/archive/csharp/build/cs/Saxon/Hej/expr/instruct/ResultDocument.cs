@@ -85,8 +85,7 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     Saxon.Hej.expr.instruct.DocumentInstr.checkContentSequence(visitor.getStaticContext(), contentOp, validationOptions);
                 } catch (Saxon.Hej.trans.XPathException err) {
-                    err.maybeSetLocation(getLocation());
-                    throw;
+                    throw err.maybeWithLocation(getLocation());
                 }
             }
             return this;
@@ -157,9 +156,7 @@ namespace Saxon.Hej.expr.instruct {
                 dispatchTailCall(tc);
             } catch (Saxon.Hej.trans.XPathException err) {
                 failed = true;
-                err.maybeSetContext(context);
-                err.maybeSetLocation(getLocation());
-                throw;
+                throw err.maybeWithLocation(getLocation()).maybeWithContext(context);
             } finally {
                 try {
                     @out.close();
@@ -214,9 +211,7 @@ namespace Saxon.Hej.expr.instruct {
                     @out = makeReceiver(hrefValue, getStaticBaseURIString(), context, resolver, serParams, resolveAgainstStaticBase);
                     traceDestination(context, @out);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    e.maybeSetContext(context);
-                    throw;
+                    throw e.maybeWithLocation(getLocation()).maybeWithContext(context);
                 }
             }
             @out.getPipelineConfiguration().setController(controller);
@@ -233,10 +228,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         private void checkNotTemporaryOutputState(Saxon.Hej.expr.XPathContext context) {
             if ((context.getTemporaryOutputState() != 0)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot execute xsl:result-document while evaluating xsl:"+context.getNamePool().getLocalName(context.getTemporaryOutputState())));
-                err.setErrorCode("XTDE1480");
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException(("Cannot execute xsl:result-document while evaluating xsl:"+context.getNamePool().getLocalName(context.getTemporaryOutputState()))).withErrorCode("XTDE1480").withLocation(getLocation());
             }
         }
         public static Saxon.Hej.@event.Receiver makeReceiver(string hrefValue, string baseURI, Saxon.Hej.expr.XPathContext context, Saxon.Hej.lib.ResultDocumentResolver resolver, Saxon.Hej.serialize.SerializationProperties @params, bool resolveAgainstStaticBase) {
@@ -295,18 +287,12 @@ namespace Saxon.Hej.expr.instruct {
             System.Diagnostics.Debug.Assert((controller != null));
             if ((uri != null)) {
                 if ((controller.getDocumentPool().find(uri) != null)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot write to a URI that has already been read: "+((uri.Equals(Saxon.Hej.Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri))));
-                    err.setXPathContext(context);
-                    err.setErrorCode("XTDE1500");
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("Cannot write to a URI that has already been read: "+((uri.Equals(Saxon.Hej.Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri)))).withXPathContext(context).withErrorCode("XTDE1500");
                 }
                 Saxon.Hej.om.DocumentKey documentKey = new Saxon.Hej.om.DocumentKey(uri);
                 lock (controller) {
                     if (!(controller.checkUniqueOutputDestination(documentKey))) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot write more than one result document to the same URI: "+((uri.Equals(Saxon.Hej.Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri))));
-                        err.setXPathContext(context);
-                        err.setErrorCode("XTDE1490");
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException(("Cannot write more than one result document to the same URI: "+((uri.Equals(Saxon.Hej.Controller.ANONYMOUS_PRINCIPAL_OUTPUT_URI) ? "(implicit output URI)" : uri)))).withXPathContext(context).withErrorCode("XTDE1490");
                     } else {
                         controller.addUnavailableOutputDestination(documentKey);
                     }
@@ -330,28 +316,17 @@ namespace Saxon.Hej.expr.instruct {
                     try {
                         parts = Saxon.Hej.om.NameChecker.getQNameParts(format);
                     } catch (Saxon.Hej.om.QNameException e) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The requested output format "+Saxon.Hej.trans.Err.wrap(format))+" is not a valid QName"));
-                        err.maybeSetLocation(getFormatExpression().getLocation());
-                        err.setErrorCode("XTDE1460");
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("The requested output format "+Saxon.Hej.trans.Err.wrap(format))+" is not a valid QName")).withErrorCode("XTDE1460").withXPathContext(context).withLocation(getFormatExpression().getLocation());
                     }
                     Saxon.Hej.om.NamespaceUri uri = nsResolver.getURIForPrefix(parts[0], false);
                     if ((uri == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The namespace prefix in the format name "+format)+" is undeclared"));
-                        err.maybeSetLocation(getFormatExpression().getLocation());
-                        err.setErrorCode("XTDE1460");
-                        err.setXPathContext(context);
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException((("The namespace prefix in the format name "+format)+" is undeclared")).withLocation(getFormatExpression().getLocation()).withErrorCode("XTDE1460").withXPathContext(context);
                     }
                     qName = new Saxon.Hej.om.StructuredQName(parts[0], uri, parts[1]);
                 }
                 computedGlobalProps = ((Saxon.Hej.style.StylesheetPackage)(getRetainedStaticContext().getPackageData())).getNamedOutputProperties(qName);
                 if ((computedGlobalProps == null)) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("There is no xsl:output format named "+format));
-                    err.setErrorCode("XTDE1460");
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(("There is no xsl:output format named "+format)).withErrorCode("XTDE1460").withXPathContext(context);
                 }
             }
             Saxon.Ejava.util.Properties computedLocalProps = new Saxon.Ejava.util.Properties(computedGlobalProps);
@@ -360,9 +335,7 @@ namespace Saxon.Hej.expr.instruct {
                 try {
                     setSerializationProperty(computedLocalProps, qName.getNamespaceUri(), qName.getLocalPart(), localProperties.getProperty(key), nsResolver, true, config);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    e.setErrorCode("XTDE0030");
-                    e.maybeSetLocation(getLocation());
-                    throw;
+                    throw e.withErrorCode("XTDE0030").maybeWithLocation(getLocation());
                 }
             }
             if (!(serializationAttributes.Count==0)) {
@@ -376,7 +349,7 @@ namespace Saxon.Hej.expr.instruct {
                         e.setErrorCode("XTDE0030");
                         e.maybeSetLocation(getLocation());
                         e.maybeSetContext(context);
-                        if ((Saxon.Hej.om.NamespaceUri.SAXON.Equals(e.getErrorCodeNamespace()) && "SXWN".Equals(e.getErrorCodeLocalPart().Substring(0, 4 - 0)))) {
+                        if ((e.getErrorCodeQName().hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && "SXWN".Equals(e.getErrorCodeQName().getLocalPart().Substring(0, 4 - 0)))) {
                             Saxon.Hej.trans.XmlProcessingException ee = new Saxon.Hej.trans.XmlProcessingException(e);
                             ee.setWarning(true);
                             controller.getErrorReporter().report(ee);
@@ -424,18 +397,12 @@ namespace Saxon.Hej.expr.instruct {
                                 parts = Saxon.Hej.om.NameChecker.getQNameParts(value);
                                 string prefix = parts[0];
                                 if (prefix.Length==0) {
-                                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name");
-                                    err.setErrorCode("SEPM0016");
-                                    err.setIsStaticError(true);
-                                    throw err;
+                                    throw new Saxon.Hej.trans.XPathException("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name").withErrorCode("SEPM0016").asStaticError();
                                 } else {
                                     if ((nsResolver != null)) {
                                         Saxon.Hej.om.NamespaceUri muri = nsResolver.getURIForPrefix(prefix, false);
                                         if ((muri == null)) {
-                                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Namespace prefix '"+prefix)+"' has not been declared"));
-                                            err.setErrorCode("SEPM0016");
-                                            err.setIsStaticError(true);
-                                            throw err;
+                                            throw new Saxon.Hej.trans.XPathException((("Namespace prefix '"+prefix)+"' has not been declared")).withErrorCode("SEPM0016").asStaticError();
                                         }
                                         details.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.METHOD, ((('{'+muri.ToString())+'}')+parts[1]));
                                     } else {
@@ -443,10 +410,7 @@ namespace Saxon.Hej.expr.instruct {
                                     }
                                 }
                             } catch (Saxon.Hej.om.QNameException e) {
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Invalid method name. "+e.Message));
-                                err.setErrorCode("SEPM0016");
-                                err.setIsStaticError(true);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(("Invalid method name. "+e.Message)).withErrorCode("SEPM0016").asStaticError();
                             }
                         }
                     }

@@ -80,9 +80,7 @@ namespace Saxon.Hej.functions {
         public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.expr.sort.GroupIterator gi = context.getCurrentGroupIterator();
             if ((gi == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no current group", "XTDE1061");
-                err.setLocation(getLocation());
-                throw err;
+                throw new Saxon.Hej.trans.XPathException("There is no current group", "XTDE1061").withLocation(getLocation());
             }
             return gi.currentGroup();
         }
@@ -104,9 +102,7 @@ namespace Saxon.Hej.functions {
                 return context => {
                     Saxon.Hej.expr.sort.GroupIterator gi = context.getCurrentGroupIterator();
                     if ((gi == null)) {
-                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no current group", "XTDE1061");
-                        err.setLocation(expr.getLocation());
-                        throw err;
+                        throw new Saxon.Hej.trans.XPathException("There is no current group", "XTDE1061").withLocation(expr.getLocation());
                     }
                     return gi.currentGroup().iterate();
                 } ;

@@ -89,11 +89,7 @@ namespace Saxon.Eej.ee.optim {
             }
             private bool compareOneToOne(Saxon.Hej.value.AtomicValue lhsValue, Saxon.Hej.value.AtomicValue rhsValue, Saxon.Hej.expr.sort.AtomicComparer comparer, bool needsRunTimeCheck, Saxon.Hej.s9api.Location loc, Saxon.Hej.expr.parser.RetainedStaticContext staticContext, Saxon.Hej.expr.XPathContext context) {
                 if ((needsRunTimeCheck && !(Saxon.Hej.type.UType.isGenerallyComparable(lhsValue.getUType(), rhsValue.getUType())))) {
-                    Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(((("Cannot compare "+Saxon.Hej.type.Type.displayTypeName(lhsValue))+" to ")+Saxon.Hej.type.Type.displayTypeName(rhsValue)));
-                    e2.setErrorCode("XPTY0004");
-                    e2.setLocation(loc);
-                    e2.setIsTypeError(true);
-                    throw e2;
+                    throw new Saxon.Hej.trans.XPathException(((("Cannot compare "+Saxon.Hej.type.Type.displayTypeName(lhsValue))+" to ")+Saxon.Hej.type.Type.displayTypeName(rhsValue))).withErrorCode("XPTY0004").withLocation(loc).asTypeError();
                 }
                 return compare(lhsValue, Saxon.Hej.expr.parser.Token.FEQ, rhsValue, comparer.provideContext(context), false, context, staticContext);
             }
@@ -171,9 +167,7 @@ namespace Saxon.Eej.ee.optim {
                             Saxon.Hej.type.ConversionResult result = untypedConverter.convertString(v1.getUnicodeStringValue());
                             if ((result is Saxon.Hej.type.ValidationFailure)) {
                                 string msg = ((("Failure converting untypedAtomic value to "+hashTableType)+" during comparison operation. ")+((Saxon.Hej.type.ValidationFailure)(result)).getMessage());
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, "FORG0001", context);
-                                err.setLocation(loc);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(msg, "FORG0001", context).withLocation(loc);
                             } else {
                                 v1 = (Saxon.Hej.value.AtomicValue)(result);
                             }
@@ -192,9 +186,7 @@ namespace Saxon.Eej.ee.optim {
                         } else {
                             if (((hashTableType != Saxon.Hej.type.UType.UNTYPED_ATOMIC) && !(Saxon.Hej.type.UType.isPossiblyComparable(t1, hashTableType, false)))) {
                                 string msg = ((("Cannot compare "+t1)+" to ")+hashTableType);
-                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, "XPTY0004", context);
-                                err.setLocation(loc);
-                                throw err;
+                                throw new Saxon.Hej.trans.XPathException(msg, "XPTY0004", context).withLocation(loc);
                             }
                         }
                         if ((ut1 != hashTableType)) {
@@ -209,20 +201,15 @@ namespace Saxon.Eej.ee.optim {
                                         Saxon.Hej.type.BuiltInAtomicType it2 = stray2.getPrimitiveType();
                                         Saxon.Hej.trans.XPathException err;
                                         if (it1.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                            err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of second operand ("+it2)+")"));
-                                            err.setErrorCode("FORG0001");
+                                            err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of second operand ("+it2)+")")).withErrorCode("FORG0001");
                                         } else {
                                             if (it2.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                                err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of first operand ("+it1)+")"));
-                                                err.setErrorCode("FORG0001");
+                                                err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of first operand ("+it1)+")")).withErrorCode("FORG0001");
                                             } else {
-                                                err = new Saxon.Hej.trans.XPathException(((("Cannot compare "+it1)+" to ")+it2));
-                                                err.setErrorCode("XPTY0004");
+                                                err = new Saxon.Hej.trans.XPathException(((("Cannot compare "+it1)+" to ")+it2)).withErrorCode("XPTY0004");
                                             }
                                         }
-                                        err.setXPathContext(context);
-                                        err.setLocation(loc);
-                                        throw err;
+                                        throw err.withXPathContext(context).withLocation(loc);
                                     }
                                 }
                             }
@@ -253,9 +240,7 @@ namespace Saxon.Eej.ee.optim {
                             Saxon.Hej.type.ConversionResult result = untypedConverter.convertString(v2.getUnicodeStringValue());
                             if ((result is Saxon.Hej.type.ValidationFailure)) {
                                 string msg = ((("Failure converting untypedAtomic value to "+hashTableType)+" during comparison operation. ")+((Saxon.Hej.type.ValidationFailure)(result)).getMessage());
-                                Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(msg, "FORG0001", context);
-                                de.setLocation(loc);
-                                throw de;
+                                throw new Saxon.Hej.trans.XPathException(msg, "FORG0001", context).withLocation(loc);
                             } else {
                                 v2 = (Saxon.Hej.value.AtomicValue)(result);
                             }
@@ -287,20 +272,15 @@ namespace Saxon.Eej.ee.optim {
                                         Saxon.Hej.type.BuiltInAtomicType it1 = stray1.getPrimitiveType();
                                         Saxon.Hej.trans.XPathException err;
                                         if (it1.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                            err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of second operand ("+it2)+")"));
-                                            err.setErrorCode("FORG0001");
+                                            err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of second operand ("+it2)+")")).withErrorCode("FORG0001");
                                         } else {
                                             if (it2.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                                err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of first operand ("+it1)+")"));
-                                                err.setErrorCode("FORG0001");
+                                                err = new Saxon.Hej.trans.XPathException((("Cannot convert untypedAtomic value to type of first operand ("+it1)+")")).withErrorCode("FORG0001");
                                             } else {
-                                                err = new Saxon.Hej.trans.XPathException(((("Cannot compare "+it1)+" to ")+it2));
-                                                err.setErrorCode("XPTY0004");
+                                                err = new Saxon.Hej.trans.XPathException(((("Cannot compare "+it1)+" to ")+it2)).withErrorCode("XPTY0004");
                                             }
                                         }
-                                        err.setXPathContext(context);
-                                        err.setLocation(loc);
-                                        throw err;
+                                        throw err.withXPathContext(context).withLocation(loc);
                                     }
                                 }
                             }

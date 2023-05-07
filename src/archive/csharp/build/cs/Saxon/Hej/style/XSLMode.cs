@@ -174,7 +174,7 @@ namespace Saxon.Hej.style {
                 try {
                     extraResultType = makeExtendedSequenceType(asAtt);
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    compileErrorInAttribute(e.Message, e.getErrorCodeLocalPart(), "saxon:as");
+                    compileErrorInAttribute(e, "saxon:as");
                     extraResultType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
                 }
                 mode.setDefaultResultType(extraResultType);

@@ -340,8 +340,7 @@ namespace Saxon.Hej.query {
                 try {
                     return @base.next();
                 } catch (Saxon.Hej.trans.UncheckedXPathException e1) {
-                    Saxon.Hej.trans.XPathException xe = e1.getXPathException();
-                    xe.maybeSetLocation(location);
+                    Saxon.Hej.trans.XPathException xe = e1.getXPathException().maybeWithLocation(location);
                     Saxon.Hej.trans.XmlProcessingException err = new Saxon.Hej.trans.XmlProcessingException(xe);
                     reporter.report(err);
                     xe.setHasBeenReported(true);
