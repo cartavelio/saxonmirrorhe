@@ -6,10 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
 using Saxon.Hej;
+using Saxon.Hej.expr.instruct;
 using Saxon.Hej.functions;
 using Saxon.Hej.om;
 using Saxon.Hej.type;
@@ -33,9 +35,9 @@ using XsltTransformer = Saxon.Api.XsltTransformer;
 
 namespace SaxonCS_NUnit {
     public class TestXslt30Transformer {
+        
         [Test]
         public void TestSimple() {
-            // Create a Processor instance.
             try {
                 Processor processor =  new();
                 //processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
@@ -69,7 +71,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
         }
-
+        
         [Test]
         public void TestXmlParserError() {
             Processor processor = new ();
@@ -2386,6 +2388,45 @@ namespace SaxonCS_NUnit {
             transf.ApplyTemplates(stream, ser);
             Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?>10:00", sw.ToString());
         }
+        
+
+        
+        [Test]
+        public void TestParallel() {
+            // Create one compiled stylesheet processing multiple source documents in parallel.
+            try {
+                Processor processor =  new();
+                //processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                processor.SetProperty(FeatureKeys.TIMING, "true");
+                // Create an executable for the stylesheet.
+                XsltExecutable exec = processor.NewXsltCompiler().Compile(
+                    new XmlTextReader(new Uri(ConfigTest.DataDirUri, "bills.xsl").ToString()));
+
+                IList<String> sources = new List<string>() {
+                    "<Bills><Bill No='10030' Name='John Doe'/></Bills>",
+                    "<Bills><Bill No='10031' Name='Jane Roe'/></Bills>",
+                    "<Bills><Bill No='10032' Name='Alan Poe'/></Bills>",
+                    "<Bills><Bill No='10033' Name='Mary Zoe'/></Bills>",
+                    "<Bills><Bill No='10034' Name='Dave Toe'/></Bills>",
+                    "<Bills><Bill No='10035' Name='Anne Coe'/></Bills>"
+                };
+
+                Parallel.ForEach(sources, source => {
+                    StringWriter sw = new();
+                    Xslt30Transformer trans = exec.Load30();
+                    trans.ApplyTemplates(new StringReader(source), processor.NewSerializer(sw));
+                    //Console.WriteLine(sw);
+                    Assert.That(sw.ToString().EndsWith("NewBill=\"1\"/></Bills>"));
+                });
+                
+                
+            }
+            catch (Exception e) {
+                //Console.WriteLine (e.printStackTrace());
+                Assert.Fail(e.Message);
+            }
+        }
+
         
         
     }
