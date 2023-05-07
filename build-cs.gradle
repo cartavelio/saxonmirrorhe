@@ -5,7 +5,11 @@ if (systemOs.isWindows()) {
 
 if (systemOs.isMacOsX()) {
   csplatform = "MacOS"
-  csrid = "osx-x64"
+  if (System.getProperty("os.arch") == "aarch64") {
+    csrid = "osx-arm64"
+  } else {
+    csrid = "osx-x64"
+  }
 }
 
 if (systemOs.isLinux()) {
