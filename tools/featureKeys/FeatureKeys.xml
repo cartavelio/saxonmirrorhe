@@ -1348,7 +1348,7 @@
         <featureCode>63</featureCode>
         <name>SOURCE_PARSER_CLASS</name>
         <type>Name of a class that implements either the <code>org.xml.sax.XMLReader</code> or
-                <code>javax.xml.parsers. SAXParserFactory</code> interface</type>
+                <code>javax.xml.parsers.SAXParserFactory</code> interface; or <code>"#DEFAULT"</code>.</type>
         <uri>http://saxon.sf.net/feature/sourceParserClass</uri>
         <editions>HE PE EE</editions>
         <platforms>J</platforms>
@@ -1361,7 +1361,9 @@
         <commandline for="TQV">-x:classname</commandline>
         <desc>
             <p>XML parser used for source documents.</p>
-            <p>The class will be instantiated. If it is an <code>XMLReader</code> it is used
+            <p>If the property is set to <code>"#DEFAULT"</code> then the JDK default
+                parser will be instantiated.</p>
+            <p>Otherwise, the requested class will be instantiated. If it is an <code>XMLReader</code> it is used
                 directly; if it is a <code>SAXParserFactory</code> it is used to instantiate an
                     <code>XMLReader</code>. The resulting <code>XMLReader</code> will be used to
                 parse source documents (that is, the principal source document plus any secondary
@@ -1591,7 +1593,7 @@
     <feature>
         <featureCode>72</featureCode>
         <name>STYLE_PARSER_CLASS</name>
-        <type>Name of a class implementing the <code>org.xml.sax.XMLReader</code> interface</type>
+        <type>Name of a class implementing the <code>org.xml.sax.XMLReader</code> interface; or <code>"#DEFAULT"</code>.</type>
         <uri>http://saxon.sf.net/feature/styleParserClass</uri>
         <editions>HE PE EE</editions>
         <platforms>J</platforms>
@@ -1605,7 +1607,9 @@
         <commandline for="TV">-y:classname</commandline>
         <desc>
             <p>XML parser used for stylesheets and schema documents.</p>
-            <p>The class will be instantiated. If it is an <code>XMLReader</code> it is used
+            <p>If the property is set to <code>"#DEFAULT"</code> then the JDK default
+            parser will be instantiated.</p>
+            <p>Otherwise, the requested class will be instantiated. If it is an <code>XMLReader</code> it is used
                 directly; if it is a <code>SAXParserFactory</code> it is used to instantiate an
                     <code>XMLReader</code>. The resulting <code>XMLReader</code> will be used to
                 parse stylesheet documents (that is, the principal stylesheet module plus any

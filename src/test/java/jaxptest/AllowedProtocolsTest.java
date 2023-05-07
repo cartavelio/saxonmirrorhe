@@ -276,7 +276,7 @@ public class AllowedProtocolsTest {
 
             TransformerFactoryImpl factory = new EnterpriseTransformerFactory();
             // Apache Xerces does not recognise ACCESS_EXTERNAL_DTD, so use the JDK parser
-            factory.setAttribute(FeatureKeys.SOURCE_PARSER_CLASS, "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
+            factory.setAttribute(FeatureKeys.SOURCE_PARSER_CLASS, "#DEFAULT"); // bug 6015
             factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, rule);
             factory.getConfiguration().setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, rule);
 
