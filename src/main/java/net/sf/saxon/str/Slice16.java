@@ -113,7 +113,7 @@ public class Slice16 extends UnicodeString {
      */
     @Override
     public long indexWhere(IntPredicate predicate, long from) {
-        for (int i = requireInt(from) + start; i < end; i++) {
+        for (int i = requireNonNegativeInt(from) + start; i < end; i++) {
             if (predicate.test(chars[i])) {
                 return i - start;
             }

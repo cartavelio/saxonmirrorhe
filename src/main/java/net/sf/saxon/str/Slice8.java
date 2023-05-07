@@ -112,12 +112,10 @@ public class Slice8 extends UnicodeString {
      * @param predicate condition that the codepoint must satisfy
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
      */
     @Override
     public long indexWhere(IntPredicate predicate, long from) {
-        for (int i = requireInt(from) + start; i < end; i++) {
+        for (int i = requireNonNegativeInt(from) + start; i < end; i++) {
             if (predicate.test(bytes[i] & 0xff)) {
                 return i - start;
             }

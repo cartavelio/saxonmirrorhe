@@ -11,6 +11,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.Objects;
+import java.util.function.IntPredicate;
 
 /**
  * An implementation of the UnicodeString interface that wraps an ordinary Java string.
@@ -91,6 +92,11 @@ public class StringView extends UnicodeString {
     @Override
     public long indexOf(int codePoint, long from) {
         return tidy().indexOf(codePoint, from);
+    }
+
+    @Override
+    public long indexWhere(IntPredicate predicate, long from) {
+        return tidy().indexWhere(predicate, from);
     }
 
     /**
