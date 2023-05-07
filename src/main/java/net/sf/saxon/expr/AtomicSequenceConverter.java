@@ -482,8 +482,15 @@ public class AtomicSequenceConverter extends UnaryExpression {
         destination.startElement("convert", this);
         destination.emitAttribute("from", AlphaCode.fromItemType(getBaseExpression().getItemType()));
         destination.emitAttribute("to", AlphaCode.fromItemType(requiredItemType));
+        String flags = "";
         if (converter instanceof Converter.PromoterToDouble || converter instanceof Converter.PromoterToFloat) {
-            destination.emitAttribute("flags", "p");
+            flags = "p";
+        }
+        if (converter instanceof Converter.DownCastingConverter) {
+            flags = "d";
+        }
+        if (!flags.isEmpty()) {
+            destination.emitAttribute("flags", flags);
         }
         if (getRoleSupplier() != null) {
             destination.emitAttribute("diag", getRoleSupplier().get().save());
