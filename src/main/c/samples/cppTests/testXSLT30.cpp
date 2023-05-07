@@ -2661,7 +2661,7 @@ int main(int argc, char* argv[]) {
 
 
     const char * cwd = nullptr;
-    if(argc > 0) {
+    if(argc > 1) {
 	cwd = argv[1];
     }
     int check =0;
@@ -2671,14 +2671,18 @@ int main(int argc, char* argv[]) {
 
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
 
-    char buff[FILENAME_MAX]; //create string buffer to hold path
-    GetCurrentDir( buff, FILENAME_MAX );
-    cout<<"CWD = "<< buff<<endl;
+
     if(cwd != nullptr) {
-   	 processor->setcwd(cwd);//"/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
+   	    processor->setcwd(cwd);
     } else {
+        char buff[FILENAME_MAX]; //create string buffer to hold path
+        GetCurrentDir( buff, FILENAME_MAX );
         processor->setcwd(buff);
+        cwd = (const char *)buff;
     }
+
+    cout<<"CWD = "<< cwd<<endl;
+
     if (processor->isSchemaAwareProcessor()) {
 
         std::cerr << "Processor is Schema Aware" << std::endl;
@@ -2880,12 +2884,7 @@ int main(int argc, char* argv[]) {
     fflush(stdout);
 
 
-    //set to the current working directory
-    if(cwd != nullptr) {
-        processor->setcwd(cwd);
-    } else {
-        processor->setcwd(buff);
-    }
+
     Xslt30Processor *trans2 = processor->newXslt30Processor();
 
     testApplyTemplatesString1(trans2, sresult);

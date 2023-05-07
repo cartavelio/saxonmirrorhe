@@ -410,7 +410,7 @@ int main(int argc, char* argv[])
 {
 
     const char * cwd = nullptr;
-    if(argc > 0) {
+    if(argc > 1) {
         cwd = argv[1];
     }
 
@@ -418,15 +418,17 @@ int main(int argc, char* argv[])
 
     cout<<"Test: XQueryProcessor with Saxon version="<<processor->version()<<endl<<endl;
 
-    char buff[FILENAME_MAX]; //create string buffer to hold path
-    GetCurrentDir( buff, FILENAME_MAX );
-    cout<<"CWD = "<< buff<<endl;
-    if(cwd != nullptr) {
-        processor->setcwd(cwd); //set to the current working directory
-    } else {
-        processor->setcwd(buff);
-        cwd = (const char *)buff;
-    }
+
+        if(cwd != nullptr) {
+       	 processor->setcwd(cwd);
+        } else {
+            char buff[FILENAME_MAX]; //create string buffer to hold path
+            GetCurrentDir( buff, FILENAME_MAX );
+            processor->setcwd(buff);
+            cwd = (const char *)buff;
+        }
+
+    cout<<"CWD = "<< cwd<<endl;
 
 
     XQueryProcessor * query = processor->newXQueryProcessor();
