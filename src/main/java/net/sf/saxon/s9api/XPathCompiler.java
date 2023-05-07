@@ -151,14 +151,14 @@ public class XPathCompiler {
     }
 
     /**
-     * Say whether an XPath 2.0, XPath 3.0 or XPath 3.1 processor is required.
+     * Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
      *
-     * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1.
+     * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
      *              <p>Setting the option to 1.0 requests an XPath 2.0 processor running in 1.0 compatibility mode;
      *              this is equivalent to setting the language version to 2.0 and backwards compatibility mode to true.
      *              Requesting "3.05" gives XPath 3.0 plus the extensions defined in the XSLT 3.0 specification
      *              (map types and map constructors).</p>
-     * @throws IllegalArgumentException if the version is not numerically equal to 1.0, 2.0, 3.0, 3.05, or 3.1.
+     * @throws IllegalArgumentException if the version is not numerically equal to 1.0, 2.0, 3.0, 3.05, 3.1, or 4.0.
      * @since 9.3
      */
 
@@ -186,9 +186,9 @@ public class XPathCompiler {
     }
 
     /**
-     * Ask whether an XPath 2.0, XPath 3.0 or XPath 3.1 processor is being used
+     * Ask whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is being used
      *
-     * @return version: "2.0", "3.0" or "3.1"
+     * @return version: "2.0", "3.0", "3.1" or "4.0"
      * @since 9.3
      */
 
