@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Numerics;
 using Saxon.Ejava.lang;
 using BigInt = System.Numerics.BigInteger;
@@ -14,6 +15,33 @@ namespace Saxon.Impl.Helpers {
         public static BigInt ValueOf(string s) {
             try {
                 return BigInteger.Parse(s);
+            }
+            catch (FormatException e) {
+                throw new NumberFormatException("Invalid integer " + s);
+            }
+        }
+        
+        public static BigInt ValueOf(string s, int radix) {
+            try {
+                if (radix == 10) {
+                    return ValueOf(s);
+                }
+                if (radix == 16) {
+                    return BigInteger.Parse(s, NumberStyles.HexNumber);
+                }
+
+                BigInt result = 0;
+                s = s.ToLower();
+                for (int i = 0; i < s.Length; i++) {
+                    int digit = "0123456789abcdefghijklmnopqrstuvwxyz".IndexOf(s[i]);
+                    if (digit < 0 || digit >= radix) {
+                        throw new NumberFormatException("Invalid digit '" + s[i] + "'");
+                    }
+
+                    result = result * radix + digit;
+                }
+
+                return result;
             }
             catch (FormatException e) {
                 throw new NumberFormatException("Invalid integer " + s);

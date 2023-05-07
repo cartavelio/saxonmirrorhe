@@ -41,12 +41,14 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.*;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -790,6 +792,10 @@ public class XPathParser {
                     return parseStringLiteral(true);
                 case Token.NUMBER:
                     return parseNumericLiteral(true);
+                case Token.HEX_INTEGER:
+                    return parseHexLiteral(true);
+                case Token.BINARY_INTEGER:
+                    return parseBinaryLiteral(true);
                 case Token.NAME:
                 case Token.PREFIX:
                 case Token.SUFFIX:
@@ -2333,6 +2339,8 @@ public class XPathParser {
             case Token.FUNCTION:
             case Token.STRING_LITERAL:
             case Token.NUMBER:
+            case Token.HEX_INTEGER:
+            case Token.BINARY_INTEGER:
             case Token.LPAR:
             case Token.DOLLAR:
             case Token.PRAGMA:
@@ -2670,6 +2678,10 @@ public class XPathParser {
 
             case Token.NUMBER:
                 return parseNumericLiteral(true);
+            case Token.HEX_INTEGER:
+                return parseHexLiteral(true);
+            case Token.BINARY_INTEGER:
+                return parseBinaryLiteral(true);
 
             case Token.FUNCTION:
                 return parseFunctionCall(null);
@@ -2862,6 +2874,62 @@ public class XPathParser {
         setLocation(lit, offset);
         //lit.setRetainedStaticContext(env.makeRetainedStaticContext());
         return traceable ? makeTracer(lit, null) : lit;
+    }
+
+    @CSharpReplaceException(from="java.lang.NumberFormatException", to="System.FormatException")
+    public Expression parseHexLiteral(boolean traceable) throws XPathException {
+        try {
+            int offset = t.currentTokenStartOffset;
+            IntegerValue val;
+            if (t.currentTokenValue.length() < 16) {
+                if (t.currentTokenValue.isEmpty()) {
+                    // Handled specially because .NET code otherwise crashes
+                    grumble("Empty hex literal");
+                }
+                long parsed = Long.parseLong(t.currentTokenValue, 16);
+                val = new Int64Value(parsed);
+            } else {
+                BigInteger big = new BigInteger(t.currentTokenValue, 16);
+                val = new BigIntegerValue(big);
+            }
+            nextToken();
+            Literal lit = Literal.makeLiteral(val);
+            setLocation(lit, offset);
+            return traceable ? makeTracer(lit, null) : lit;
+        } catch (NumberFormatException e) {
+            grumble("Invalid hex literal");
+            return null;
+        }
+    }
+
+    public Expression parseBinaryLiteral(boolean traceable) throws XPathException {
+        try {
+            int offset = t.currentTokenStartOffset;
+            IntegerValue val;
+            if (t.currentTokenValue.length() < 64) {
+                if (t.currentTokenValue.isEmpty()) {
+                    // Handled specially because .NET code otherwise crashes
+                    grumble("Empty binary literal");
+                }
+                long parsed = binaryStringToLong(t.currentTokenValue);
+                val = new Int64Value(parsed);
+            } else {
+                BigInteger big = new BigInteger(t.currentTokenValue, 2);
+                val = new BigIntegerValue(big);
+            }
+            nextToken();
+            Literal lit = Literal.makeLiteral(val);
+            setLocation(lit, offset);
+            return traceable ? makeTracer(lit, null) : lit;
+        } catch (NumberFormatException e) {
+            grumble("Invalid binary literal");
+            return null;
+        }
+    }
+
+    @CSharpReplaceBody(code="return Convert.ToInt64(input, 2);")
+    private long binaryStringToLong(String input) {
+        return Long.parseLong(input, 2);
     }
 
     protected Expression parseStringLiteral(boolean traceable) throws XPathException {
