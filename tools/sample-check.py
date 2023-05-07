@@ -30,12 +30,12 @@ def check_against_map(expect, output):
 def check_jaxpexamples(output):
     check_against_map(
         {"ParseOnly": ["", "Parsing complete"],
-         "Simple1": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "Simple1": [r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
          "Simple2": ["", "Output written to Simple2.out"],
-         "FromStream": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
-         "FromReader": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "FromStream": [r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
+         "FromReader": [r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
          "UseTemplatesObj": ["", "", r"-+ transform of data",
-                             r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+                             r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
          "UseTemplatesHandler": [r"^<\?xml.*[Uu][Tt][Ff]-8",
                                  r"<XXhtml>", r"^is here-->", r"\s*<XXhead>"],
          "SAXResult": ["setDocumentLocator", "startDocument", "startElement:"],
@@ -45,22 +45,25 @@ def check_jaxpexamples(output):
          "XMLFilterChain": ["setDocumentLocator", "startDocument", "startElement: , summary, summary"],
          "DOMsubtree": [r"^<\?xml.*[Uu][Tt][Ff]-8.*<BOOKS xmlns",
                         r"\s*<ITEM CAT=.MMP.>", r"\s*<TITLE>"],
-         "DOMtoDOM": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "DOMtoDOM": [r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
          "Param": ["", "Transform 1 and 2 use different transformers", "", "",
                    "----- Transform 1: set top-author parameter"],
          "TransformerReuse": ["", "Transform 1 and 2 use the same transformer", "", "",
                               "----- Transform 1: set top-author parameter"],
          "OutputProperties": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*\$14.78"],
-         "UseAssociated": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
-         "ContentHandlertoDOM": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "UseAssociated": [r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
+         "ContentHandlertoDOM": [r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
          "AsSerializer": [r"^<\?xml-stylesheet.*><BOOKLIST", "", r"\s*<BOOKS>"],
          "NewDOMSerializer": [r"^<\?xml.*[Uu][Tt][Ff]-8", r"^<x xmlns=.nsx\.uri./>"],
-         "UsingURIResolver": [r"^<!DOCTYPE HTML", r"^is here-->", r"\s*<head>"],
+         "UsingURIResolver": [r"^<!DOCTYPE HTML", r"^<html>", r"^is here-->", r"\s*<head>"],
          "done!": []
      }, output)
 
 
 def check(expect, title, lines):
+    #print(title)
+    #for line in lines:
+    #    print(line)
     if title in expect:
         for regex in expect[title]:
             line = lines[0]
@@ -129,7 +132,7 @@ def check_s9apiexamples_he(output):
          "TransformB": ["", "Output written to tour.html"],
          "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
          "TransformD": ["", "103"],
-         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"is here", r"^.*<head>"],
+         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"^<html>", r"is here", r"^.*<head>"],
          "TransformF": ["", r"^<\?xml", r"^.*<exists>false<"],
          "TransformG": ["", "BOOKLIST/BOOKS/ITEM/TITLE", "BOOKLIST/BOOKS/ITEM/AUTHOR"],
          "XPathA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
@@ -157,7 +160,7 @@ def check_s9apiexamples_pe(output):
          "TransformB": ["", "Output written to tour.html"],
          "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
          "TransformD": ["", "103"],
-         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"is here", r"^.*<head>"],
+         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"^<html>", r"is here", r"^.*<head>"],
          "TransformF": ["", r"^<\?xml", r"^.*<exists>false<"],
          "TransformG": ["", "BOOKLIST/BOOKS/ITEM/TITLE", "BOOKLIST/BOOKS/ITEM/AUTHOR"],
          "XPathA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
@@ -191,7 +194,7 @@ def check_s9apiexamples_ee(output):
          "TransformB": ["", "Output written to tour.html"],
          "TransformC": ["", "apple: true", "banana: false", "cherry: true"],
          "TransformD": ["", "103"],
-         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"is here", r"^.*<head>"],
+         "TransformE": ["", r"^<!DOCTYPE HTML.*", r"^<html>", r"is here", r"^.*<head>"],
          "TransformF": ["", r"^<\?xml", r"^.*<exists>false<"],
          "TransformG": ["", "BOOKLIST/BOOKS/ITEM/TITLE", "BOOKLIST/BOOKS/ITEM/AUTHOR"],
          "SchemaA": ["", "First schema validation succeeded.*", "Second schema validation failed.*",
@@ -218,7 +221,7 @@ def check_jdom2example(output):
         for line in samples.readlines():
             lines.append(line.rstrip())
 
-    expect = {"n/a": [r"^<!DOCTYPE HTML.*", r"^is here.*",
+    expect = {"n/a": [r"^<!DOCTYPE HTML.*", r"^<html>", r"^is here.*",
                       r"^.*<head>"]}
 
     lines = check(expect, "n/a", lines)
@@ -229,7 +232,7 @@ def check_pullexamples(output):
         {"Serialize the input to the output": ["", r"^<\?xml.*", r"<\?xml-stylesheet",
                                                "<BOOKLIST .*"],
          "Validate the input": ["", "Done."],
-         "Transform the input to the output": ["", "<!DOCTYPE HTML.*", "^is here", "^.*<head>"],
+         "Transform the input to the output": ["", "<!DOCTYPE HTML.*", r"^<html>", "^is here", "^.*<head>"],
          "Run XQuery against the input": ["", r"<\?xml.*", "<book>", ".*<author>"],
          "Remove PRICE elements from the input": ["", r"^<\?xml.*", r"<\?xml-stylesheet",
                                                   "<BOOKLIST.*", "^.*xsi:", "^\s*<BOOKS>",
