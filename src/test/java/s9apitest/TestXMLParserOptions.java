@@ -1,6 +1,8 @@
 package s9apitest;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import jaxptest.ConfigTest;
+import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
@@ -9,7 +11,10 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
@@ -63,6 +68,30 @@ public class TestXMLParserOptions {
                 //end
 
 
+    }
+
+    @Test
+    public void testDisableReadingExternalDtd() {
+        try {
+            EnterpriseConfiguration configuration = new EnterpriseConfiguration();
+            configuration.setConfigurationProperty(
+                    Feature.ENTITY_RESOLVER_CLASS, DtdSuppressionEntityResolver.class.getCanonicalName());
+            configuration.setConfigurationProperty(Feature.DTD_VALIDATION, false);
+            configuration.setValidation(false);
+            TransformerFactory streamingTransformerFactory =
+                    new SaxonTransformerFactory(configuration);
+            String xsl = "<foo xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xsl:version='3.0'/>";
+            String xml = "<?xml version=\"1.0\" standalone=\"no\" ?>\n" +
+                    "<!DOCTYPE doc SYSTEM 'nonexistent.dtd'><doc/>";
+            streamingTransformerFactory.setErrorListener(new StandardErrorListener());
+            Transformer strTransformer =
+                    streamingTransformerFactory.newTransformer(
+                            new StreamSource(new StringReader(xsl)));
+
+            strTransformer.transform(new StreamSource(new StringReader(xml)), new StreamResult(System.out));
+        } catch (Exception e) {
+            fail();
+        }
     }
 
     @Test
