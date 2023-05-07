@@ -341,12 +341,19 @@
         <p>From Saxon 12.2:</p>
         <ul>
             <li><p>The <code>fn:char()</code> function is implemented</p></li>
-            <li><p>The <code>array:members()</code> and <code>array:of()</code> functions are implemented (previously
-            <code>array:members()</code> was available but not fully documented)</p></li>
+            <li><p>The <code>array:members()</code> and <code>array:of()</code> functions are implemented (both were
+                previously available but not fully documented, and the detailed specification has changed).</p></li>
+            <li><p>The <code>array:of()</code> function is aligned with the latest 4.0 specification: it expects
+                a single argument whose value is a sequence of "value records" (maps with a single entry having the key "value").
+                The <code>fn:parcel</code> function remains available, though it is not in the 4.0 specification, and now
+                delivers "value records" in this format.</p></li>
             <li><p>The <code>array:build()</code> function is implemented (previously partly available but undocumented
             as <code>array:_from_sequence</code>)</p></li>
+            
             <li><p>The <code>map:get</code> and <code>array:get</code> functions support a third argument, defining
             the fallback action to be taken when no entry is found.</p></li>
+            <li><p>Numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>),
+            and underscores can be used as separators (<code>1_000_000</code>).</p></li>
         </ul>
         
       
