@@ -356,13 +356,19 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public int getXPathVersion() {
-        if (element.getEffectiveVersion() == 40
-                || element.getCompilation().getCompilerInfo().getXsltVersion() == 40
-                || (attributeName != null && attributeName.hasURI(NamespaceUri.SAXON))) {
+        if (element.getCompilation().getCompilerInfo().getXsltVersion() == 40 ||
+                getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)
+        ) {
             return 40;
-        } else {
-            return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
         }
+//        if ((element.getEffectiveVersion() == 40
+//                || element.getCompilation().getCompilerInfo().getXsltVersion() == 40
+//                || (attributeName != null && attributeName.hasURI(NamespaceUri.SAXON)))
+//            && element.getCompilation().getCompilerInfo().getXsltVersion() == 40) {
+//            return 40;
+//        } else {
+            return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
+//        }
     }
 
     /**
