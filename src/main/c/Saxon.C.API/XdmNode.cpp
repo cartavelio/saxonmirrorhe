@@ -163,13 +163,13 @@ return this;}
     }
 
     const char * XdmNode::toString(){
-        if(nodeToString != nullptr)
+        if(nodeToString != nullptr){
             allocFn fn = operator new;
             nodeToString = xdmNodeToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
-            if(str == nullptr) {
+            if(nodeToString == nullptr) {
                 throw SaxonApiException();
             }
-            return str;
+
         }
         return nodeToString;
         	
