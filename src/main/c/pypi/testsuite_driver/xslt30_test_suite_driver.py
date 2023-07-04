@@ -172,8 +172,8 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
                         dep = dependencies.item_at(i).get_node_value()
 
                         if not ensure_dependency_satisfied(dep, localEnvironments['default']):
-                            not_run += 1
-                            return "Not run"
+                            print("dependency failed at test set level XXXX")
+                            return
 
                 if test_cases is not None:
                     tcs_count = test_cases.size
@@ -472,9 +472,13 @@ def get_named_parameters(proc: PySaxonProcessor, xpath_proc: PyXPathProcessor, n
                 try:
                     value = xpath_proc.evaluate(select)
                     i += 1
+                    if value is None:
+                        if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+                            print("Error in get_named_parameters - value is None")
+                        continue
                 except PySaxonApiError as ex:
                     print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
-                    exit()
+                    continue
                 '''if as_i is not None:
                     valuei = proc.make_atomic_value(str(as_i), str(value))
                     if required:
@@ -647,7 +651,10 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         if initial_template is not None:
             init_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
                                                  False, False)
+            tunnel_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
+                                               False, True)
             environment.sheet.set_initial_template_parameters(False, init_params)
+            environment.sheet.set_initial_template_parameters(True, tunnel_params)
             if serialize_check is not None and str(serialize_check) == "yes":
                 outcome.serialized_result = environment.sheet.call_template_returning_string(
                     initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
