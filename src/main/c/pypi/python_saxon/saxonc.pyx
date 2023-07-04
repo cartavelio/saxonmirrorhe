@@ -4217,6 +4217,21 @@ cdef class PyXdmNode(PyXdmItem):
             return py_string_i
 
      @property
+     def local_name(self):
+        """
+        name(self)
+        Get the local name of the node, as a string
+        Returns:
+            str: the local name of the node. In the case of unnamed nodes (e.g. text and comment nodes) returns None
+        """
+        cdef const char* c_string = self.derivednptr.getLocalName()
+        if c_string == NULL:
+            return None
+        else:
+            py_string_i = make_py_str(c_string)
+            return py_string_i
+
+     @property
      def typed_value(self):
         """
         typed_value(self)
