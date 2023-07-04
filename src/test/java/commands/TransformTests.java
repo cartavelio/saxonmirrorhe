@@ -10,12 +10,9 @@ import net.sf.saxon.lib.SystemLogger;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -365,11 +362,11 @@ public class TransformTests {
     }
 
     @Test
-    public void testTimingProfile(@TempDir Path tempDir) {
+    public void testTimingProfile() {
         String[] args = {
                 "-ext:off",
-                "-TP:" + tempDir.resolve("profile.html").toString(),
-                "-o:" + tempDir.resolve("books.html").toString(),
+                "-TP:" + configTest.getDataDir() + "temp/profile.html",
+                "-o:" + configTest.getDataDir() + "temp/books.html",
                 "-s:" + configTest.getDataDir() + "books.xml",
                 "-xsl:" + configTest.getDataDir() + "books.xsl"
         };
@@ -463,19 +460,30 @@ public class TransformTests {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    public void testDirectory(@TempDir Path tempDir) {
+    public void testDirectory() {
+        if (!new File(configTest.getDataDir() + "sandpit/welch-ser/out").exists()) {
+            new File(configTest.getDataDir() + "sandpit/welch-ser/out").mkdir();
+        }
+        if (new File(configTest.getDataDir() + "sandpit/welch-ser/out/A.xsl.xml").exists()) {
+            new File(configTest.getDataDir() + "sandpit/welch-ser/out/A.xsl.xml").delete();
+        }
+        if (new File(configTest.getDataDir() + "sandpit/welch-ser/out/B.xsl.xml").exists()) {
+            new File(configTest.getDataDir() + "sandpit/welch-ser/out/B.xsl.xml").delete();
+        }
         String[] args = {
                 "-t",
-                "-o:" + tempDir.toString(),
+                "-o:" + configTest.getDataDir() + "sandpit/welch-ser/out",
                 "-s:" + configTest.getDataDir() + "welch-ser",
                 "-xsl:" + configTest.getDataDir() + "identity.xsl"
         };
         try {
             Transform.main(args);
-            assertTrue(Files.exists(tempDir.resolve("A.xsl.xml")), "A exists");
-            assertTrue(Files.exists(tempDir.resolve("B.xsl.xml")), "B exists");
+            assertTrue(new File(configTest.getDataDir() + "sandpit/welch-ser/out/A.xsl.xml").exists(), "A exists");
+            assertTrue(new File(configTest.getDataDir() + "sandpit/welch-ser/out/B.xsl.xml").exists(), "B exists");
         } catch (Exception e) {
             fail();
+        } finally {
+            new File(configTest.getDataDir() + "welch-ser/out").delete();
         }
     }
 
