@@ -970,7 +970,13 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
           SaxonProcessor::sxn_environ->thread, (void *)procRef,
           (char *)cwdXE.c_str(), (char *)filename);
     }
-
+    if(saxonMessageListenerRef == -2) {
+         exceptionFound = true;
+         throw SaxonApiException();
+    }
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr<<"C++: setSaveXslMessage saxonMessageListenerRef = "<<((long)saxonMessageListenerRef)<<std::endl;
+    }
   } else {
     if(saxonMessageListenerRef > 0) {
       j_handles_destroy(SaxonProcessor::sxn_environ->thread,
@@ -982,7 +988,9 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
 }
 
 XdmValue *XsltExecutable::getXslMessages() {
-
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr<<"C++: getXslMessages saxonMessageListenerRef = "<<((long)saxonMessageListenerRef)<<std::endl;
+    }
   if (saxonMessageListenerRef > 0) {
     allocFn fn = operator new;
     long long *results =
@@ -991,9 +999,9 @@ XdmValue *XsltExecutable::getXslMessages() {
 
     if (results != nullptr) {
       int sizex = results[0];
-#ifdef DEBUG
-      std::cerr<<"C++: getXslMessages size= "<<sizex<<std::endl;
-#endif
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr<<"C++: getXslMessages size= "<<sizex<<std::endl;
+      }
       XdmValue *value = new XdmValue();
       for (int i = 1; i <= sizex; i++) {
         XdmItem *item = nullptr;
