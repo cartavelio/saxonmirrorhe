@@ -672,7 +672,7 @@ protected:
     //jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
     std::string cwdV; /*!< current working directory */
     //std::string resources_dir; /*!< current Saxon resources directory */
-    std:string versionStr; /*!< The Saxon version string */
+    std::string versionStr; /*!< The Saxon version string */
     std::map<std::string, XdmValue *> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
     std::map<std::string, std::string> configProperties; /*!< map of properties used for the transformation as (string, string) pairs */
     bool licensei; /*!< indicates whether the Processor requires a Saxon that needs a license file (i.e. Saxon-EE) other a Saxon-HE Processor is created  */
