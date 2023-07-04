@@ -661,7 +661,7 @@ const char *SaxonProcessor::version() {
 
         allocFn fn = operator new;
 
-        versionStr = j_cpp_getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef, fn);
+        versionStr = j_cpp_getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef, (void *)fn);
 
     }
     return versionStr;
@@ -904,7 +904,7 @@ XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *s
 
 const char *SaxonProcessor::getStringValue(XdmItem *item) {
     allocFn fn = operator new;
-    const char *result = j_cpp_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue(), fn);
+    const char *result = j_cpp_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue(), (void *)fn);
 #ifdef DEBUG
     if(result == nullptr) {
         std::cerr<<"getStringValue of XdmItem is nullptr"<<std::endl;
