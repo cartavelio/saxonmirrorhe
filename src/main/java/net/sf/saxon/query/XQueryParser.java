@@ -1750,7 +1750,14 @@ public class XQueryParser extends XPathParser {
             t.setState(Tokenizer.DEFAULT_STATE);
             nextToken();
             Expression exp = parseExprSingle();
-            var.setBody(makeTracer(exp, varQName));
+            exp = makeTracer(exp, varQName);
+            if (allowXPath40Syntax && requiredType != SequenceType.ANY_SEQUENCE) {
+                TypeChecker checker = env.getConfiguration().getTypeChecker(false);
+                ExpressionVisitor visitor = ExpressionVisitor.make(env);
+                Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName, 0);
+                exp = checker.staticTypeCheck(exp, requiredType, role, visitor);
+            }
+            var.setBody(exp);
         } else if (t.currentToken == Token.NAME) {
             if ("external".equals(t.currentTokenValue)) {
                 GlobalParam par = new GlobalParam();
@@ -1767,7 +1774,14 @@ public class XQueryParser extends XPathParser {
                     t.setState(Tokenizer.DEFAULT_STATE);
                     nextToken();
                     Expression exp = parseExprSingle();
-                    var.setBody(makeTracer(exp, varQName));
+                    exp = makeTracer(exp, varQName);
+                    if (allowXPath40Syntax && requiredType != SequenceType.ANY_SEQUENCE) {
+                        TypeChecker checker = env.getConfiguration().getTypeChecker(false);
+                        ExpressionVisitor visitor = ExpressionVisitor.make(env);
+                        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName, 0);
+                        exp = checker.staticTypeCheck(exp, requiredType, role, visitor);
+                    }
+                    var.setBody(exp);
                 }
 
             } else {

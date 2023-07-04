@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  * types permit fields other than those listed to appear; non-extensible record types do not.
  * An extensible record type is denoted by record(... ,*).
  */
-public class RecordTest extends AnyFunctionType implements TupleType {
+public class RecordTest extends AnyFunctionType implements RecordType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final Set<String> optionalFields = new HashSet<>();
