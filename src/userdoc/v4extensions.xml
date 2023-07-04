@@ -796,6 +796,15 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
       whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
       
+      <kbd>array:slice (
+         $input as array(*),	
+         $start as xs:integer? := (),
+         $end   as xs:integer? := (),
+         $step  as xs:integer? := (),
+         ) as array(*)</kbd>
+      
+      <p>Same as <code>fn:slice</code>, but applied to an array.</p>     
+      
       <kbd>array:trunk(
          $array	as array(*)	
          ) as array(*)</kbd>
