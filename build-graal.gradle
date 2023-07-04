@@ -1281,6 +1281,10 @@ task pyenvEnvironment(
   }
 }
 
+project.task("all_python_test_suites") {
+  description "Runs all Python the test suites"
+}
+
 ["ee", "pe", "he"].each { edition ->
 
   task "pyenv_setup_saxon_${edition}c"(
@@ -1335,11 +1339,15 @@ task pyenvEnvironment(
     }    
   }
 
-  task "${edition}c_xslt30_test_suite"(
+  Task t = task "${edition}c_xslt30_test_suite"(
     dependsOn: ["pyenv_install_saxon_${edition}c"]
   ) {
     inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
     outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
+
+    doFirst {
+      mkdir("${buildDir}/test-results/${edition}c/xslt30/XT30/${DSTAMP}")
+    }
 
     doLast {
       copy {
@@ -1361,9 +1369,11 @@ task pyenvEnvironment(
     doLast {
       exec {
         workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-        commandLine "python3", "./xslt30_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}"
+        commandLine "python3", "./xslt30_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}/..",
+          "-o", "${buildDir}/test-results/${edition}c/xslt30/XT30/${DSTAMP}"
       }
     }
   }
+  tasks.findByName("all_python_test_suites").dependsOn t
 }
 
