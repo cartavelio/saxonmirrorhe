@@ -31,7 +31,7 @@ public class AlphaCodeTypeTest {
             IndependentContext ic = new IndependentContext(config);
             ic.declareNamespace("foo", NamespaceUri.of("http://foo.com/"));
             ic.setXPathLanguageLevel(31);
-            XPathParser parser = new XPathParser();
+            XPathParser parser = new XPathParser(ic);
             String[] testCases = new String[]{
                     "item()",
                     "item()*",
@@ -77,7 +77,7 @@ public class AlphaCodeTypeTest {
             IndependentContext ic = new IndependentContext(config);
             ic.declareNamespace("foo", NamespaceUri.of("http://foo.com/"));
             ic.setXPathLanguageLevel(31);
-            XPathParser parser = new XPathParser();
+            XPathParser parser = new XPathParser(ic);
             String[] testCases = new String[]{
                     "item()",
                     "item()*",
@@ -120,7 +120,7 @@ public class AlphaCodeTypeTest {
             Configuration config = new EnterpriseConfiguration();
             IndependentContext ic = new IndependentContext(config);
             ic.setXPathLanguageLevel(40);
-            XPathParser parser = new XPathParser();
+            XPathParser parser = new XPathParser(ic);
             parser.setParserExtension(new SaxonSyntaxExtension());
             String[] testCases = new String[]{
                     "record(x, y)",
