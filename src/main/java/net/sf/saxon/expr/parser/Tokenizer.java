@@ -283,6 +283,16 @@ public final class Tokenizer {
         }
     }
 
+    /**
+     * Return true if there is a thin arrow ("->") somewhere beyond the current position. This can be used
+     * to eliminate unnecessary lookahead
+     * @return true if a thin arrow is present. Of course, this might be a false positive.
+     */
+
+    public boolean thereMightBeAnArrowAhead() {
+        return input.indexOf("->", currentTokenStartOffset) >= 0 || input.indexOf("-＞", currentTokenStartOffset) >= 0;
+    }
+
     private void handleNextToken(int oldPrecedingToken) throws XPathException {
 
         switch (nextToken)
@@ -1371,6 +1381,28 @@ public final class Tokenizer {
                     (offset > 0 ? "..." : "") +
                             input.substring(offset, end));
         }
+    }
+
+    /**
+     * Checkpoint the state of this tokenizer so that unbounded lookahead is possible
+     * (or, restore the state of the tokenizer from a checkpoint)
+     * @param u When checkpointing, a Tokenizer used simply to hold the state so that
+     *          it can be restored later. This tokenizer is not capable of active
+     *          tokenizing because many of its variables are uninitialised. When restoring
+     *          from a checkpoint, the original tokenizer whose state is to be restored.
+     */
+    public void copyTo(Tokenizer u) {
+        u.currentToken = currentToken;
+        u.currentTokenValue = currentTokenValue;
+        u.precedingToken = precedingToken;
+        u.precedingTokenValue = precedingTokenValue;
+        u.nextToken = nextToken;
+        u.nextTokenValue = nextTokenValue;
+        u.inputOffset = inputOffset;
+        u.lineNumber = lineNumber;
+        u.nextLineNumber = nextLineNumber;
+        u.newlineOffsets = newlineOffsets == null ? null : new ArrayList<>(newlineOffsets);
+        u.state = state;
     }
 
     /**
