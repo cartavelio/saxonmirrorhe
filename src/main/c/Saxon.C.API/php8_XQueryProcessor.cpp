@@ -199,7 +199,11 @@ PHP_METHOD(XQueryProcessor, declareNamespace) {
         (xqueryProcessor_object *)((char *)pobj -
                                    XtOffsetOf(xqueryProcessor_object, std));
     xqueryProcessor = obj->xqueryProcessor;
-    xqueryProcessor->declareNamespace(prefix, ns);
+    try {
+        xqueryProcessor->declareNamespace(prefix, ns);
+    } catch (SaxonApiException &e) {
+          zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
   }
 }
 
