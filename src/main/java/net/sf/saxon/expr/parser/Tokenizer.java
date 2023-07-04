@@ -1105,8 +1105,6 @@ public final class Tokenizer {
                 return Token.AS;
             case "before":
                 return Token.BEFORE;
-            case "by":
-                return Token.BY;
             case "case":
                 return Token.CASE;
             case "default":

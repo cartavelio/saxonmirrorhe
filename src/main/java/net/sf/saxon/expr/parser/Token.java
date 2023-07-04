@@ -359,10 +359,7 @@ public abstract class Token {
      * "orElse" (Saxon extension)
      */
     public static final int OR_ELSE = 81;
-    /**
-     * "by"
-     */
-    public static final int BY = 82;
+
     /**
      * Thin arrow operator "-&gt;" (XQuery 4.0)
      */
@@ -708,7 +705,6 @@ public abstract class Token {
         tokens[THIN_ARROW] = "->";
         tokens[AND_ALSO] = "andAlso";
         tokens[OR_ELSE] = "orElse";
-        tokens[BY] = "by";
         tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
         tokens[STRING_LITERAL_BACKTICKED] = "``[<string>]``";
         tokens[BACKTICK] = "`";

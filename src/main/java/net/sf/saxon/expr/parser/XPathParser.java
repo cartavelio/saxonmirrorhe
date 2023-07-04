@@ -173,7 +173,6 @@ public class XPathParser {
         m.put(Token.PRECEDES, 6);
         m.put(Token.FOLLOWS, 6);
         m.put(Token.CONCAT, 7);
-        m.put(Token.BY, 8);
         m.put(Token.TO, 9);
         m.put(Token.PLUS, 10);
         m.put(Token.MINUS, 10);
@@ -1028,11 +1027,6 @@ public class XPathParser {
             case Token.PRECEDES:
             case Token.FOLLOWS:
                 return new IdentityComparison(lhs, operator, rhs);
-            case Token.BY:
-                if (!allowXPath40Syntax) {
-                    grumble("Range operator 'by' requires XPath 4.0 to be enabled");
-                }
-                return RangeExpression.makeSteppingExpression(lhs, rhs);
             case Token.TO:
                 return new RangeExpression(lhs, rhs);
             case Token.CONCAT: {

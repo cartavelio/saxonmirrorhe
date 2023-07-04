@@ -1450,6 +1450,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
          <p>The <code>xsl:matching-substring</code> and <code>xsl:non-matching-substring</code> elements within
          <code>xsl:analyze-string</code> may now take a <code>select</code> attribute in place of a contained
          sequence constructor. (Implemented from Saxon 12.3)</p>
+      </section>
    </section>
 
 
