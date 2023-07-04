@@ -129,7 +129,9 @@ public class CommandLineOptions {
 
     public void setActualOptions(/*@NotNull*/ String[] args) throws XPathException {
         for (String arg : args) {
-            if ("-".equals(arg)) {
+            if ("".equals(arg)) {
+                throw new XPathException("An empty string is not a valid command line option");
+            } else if ("-".equals(arg)) {
                 positionalOptions.add(arg);
 //            } else if (arg.equals("--?")) {
 //                System.err.println("Configuration features:" + featureKeys());
