@@ -19,7 +19,6 @@ import net.sf.saxon.s9api.*;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.security.KeyPair;
 import java.util.*;
 
 import org.graalvm.nativeimage.IsolateThread;
@@ -138,26 +137,74 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long compileFromFileAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
-        XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
+
+        if(xsl == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Stylesheet file is NULL");
+        }
+
+        if(outFilename == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Output file name is NULL");
+        }
+
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = CTypeConversion.toJavaString(ccwd);
         }
-        if(xsl == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XSL filename is NULL");
-        }
-        if(outFilename == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Output filename is NULL");
-        }
+
         Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(xsl), ResourceRequest.XSLT_NATURE);
-        compiler.setErrorList(SaxonCException.errorList);
-        XsltPackage pack = compiler.compilePackage(source);
+
+        XsltPackage pack = compilePackage(xslt30ProcessorRef, ccwd, source, processorDataAccumulatorRef);
         File file = resolveFile(processor, cwd, CTypeConversion.toJavaString(outFilename), ResourceRequest.XSLT_NATURE);
         pack.save(file);
         return SaxonCAPI.STATUS_OK;
 
     }
+
+
+    /**
+     * Compile package from source file and save resulting sef to file store.
+     *
+     * @param cwd         - current working directory
+     * @param xsl         - File name of the stylesheet
+     * @param outFilename - the file to which the compiled package should be saved
+     */
+    @CEntryPoint(name = "j_compileFromFileAndImport", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long compileFromFileAndImport(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        Processor processor = xslt30Processor.getProcessor();
+        String cwd = null;
+
+        if(xsl == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Stylesheet file is NULL");
+        }
+
+
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = CTypeConversion.toJavaString(ccwd);
+        }
+
+        Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(xsl), ResourceRequest.XSLT_NATURE);
+
+        XsltPackage pack = compilePackage(xslt30ProcessorRef, ccwd, source, processorDataAccumulatorRef);
+        ObjectHandle handle = SaxonCAPI.createHandle(pack);
+        return handle.rawValue();
+
+    }
+
+    private static XsltPackage compilePackage(ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, Source xslSource, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+        Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
+        Processor processor = xslt30Processor.getProcessor();
+        XsltCompiler compiler = processor.newXsltCompiler();
+        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+        String cwd = null;
+        compiler.setErrorList(SaxonCException.errorList);
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = CTypeConversion.toJavaString(ccwd);
+        }
+
+        return compiler.compilePackage(xslSource);
+    }
+
 
 
     /**
@@ -199,6 +246,13 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long compileFromStringAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cstr, CCharPointer cfilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
+        if(cstr == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Stylesheet string is null");
+        }
+
+        if(cfilename == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Output filename is null");
+        }
 
         String str = CTypeConversion.toJavaString(cstr);
         String filename = CTypeConversion.toJavaString(cfilename);
