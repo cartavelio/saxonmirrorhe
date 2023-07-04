@@ -59,6 +59,10 @@ bool XdmNode::isAtomic() {
          localName = nullptr;
        }
 
+       /*if(nodeToString != nullptr) {
+           nodeToString = nullptr;
+       } */
+
            /* if (children != nullptr) {
 
                 for (int p = 0; p < childCount; ++p) {
@@ -159,12 +163,15 @@ return this;}
     }
 
     const char * XdmNode::toString(){
-        allocFn fn = operator new;
-        const char * str = xdmNodeToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
-        if(str == nullptr) {
-            throw SaxonApiException();
+        if(nodeToString != nullptr)
+            allocFn fn = operator new;
+            nodeToString = xdmNodeToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
+            if(str == nullptr) {
+                throw SaxonApiException();
+            }
+            return str;
         }
-        return str;
+        return nodeToString;
         	
     }
 
@@ -201,7 +208,7 @@ return this;}
     
     const char* XdmNode::getAttributeValue(const char *str){
 
-	if(str == nullptr) { return nullptr;}
+	    if(str == nullptr) { return nullptr;}
         allocFn fn = operator new;
 		const char * stri = j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)str, (void *)fn);
 

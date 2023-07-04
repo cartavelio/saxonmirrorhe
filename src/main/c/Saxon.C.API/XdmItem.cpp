@@ -80,24 +80,18 @@ const char * XdmItem:: getStringValue(){
         }
         allocFn fn = operator new;
         stringValue = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
-        if(stringValue == nullptr) {
-            return nullptr;
-        }
-        return stringValue;
-
-    } else {
-        return stringValue;
     }
+    return stringValue;
+
 }
 
 
 const char * XdmItem::toString(){
-    allocFn fn = operator new;
-    const char * str = xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
-    if(str == nullptr) {
-        return nullptr;
+    if(itemToString != nullptr) {
+        allocFn fn = operator new;
+        itemToString = xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
     }
-    return str;
+    return itemToString;
 
 }
 
@@ -120,9 +114,11 @@ XdmItem::~XdmItem() {
     /*else {
          decrementRefCount();
      }*/
-    if(stringValue != nullptr) {
-        delete stringValue;
-    }
+    /* if(stringValue != nullptr) {
+        stringValue = nullptr;
+    } */
+
+
 }
 
 void XdmItem::incrementRefCount() {

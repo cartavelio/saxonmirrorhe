@@ -3734,6 +3734,9 @@ cdef class PyXdmValue:
      """A PyXdmValue represents a value in the XDM data model. A value is a sequence of zero or more items, each
      item being an atomic value, a node, or a function item. """
      cdef saxoncClasses.XdmValue *thisvptr      # hold a C++ instance which we're wrapping
+     py_string_value # hold the string value of the XdmItem
+     py_to_string # hold the string value of the XdmItem
+
      def __cinit__(self):
         """
         __cinit__(self)
@@ -3741,6 +3744,9 @@ cdef class PyXdmValue:
         """
         if type(self) is PyXdmValue:
             self.thisvptr = new saxoncClasses.XdmValue()
+            self.py_to_string = None
+            self.py_string_value = None
+
      def __dealloc__(self):
         if type(self) is PyXdmValue and self.thisvptr != NULL:
             if self.thisvptr.getRefCount() < 1:
@@ -3872,21 +3878,25 @@ cdef class PyXdmValue:
         __repr__(self)
         The string representation of PyXdmItem
         """
-        cdef const char* c_string = self.thisvptr.toString()
-        if c_string == NULL:
-            raise Warning('Empty string returned')
-        else:
-            py_string_i = make_py_str(c_string)
-            return py_string_i
+        if self.py_to_string is None:
+           cdef const char* c_string = self.thisvptr.toString()
+           if c_string == NULL:
+              raise Warning('Empty string returned')
+           else:
+               self.py_to_string = make_py_str(c_string)
+               saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return self.py_to_string
 
      def __str__(self):
         """
         __str__(self)
         The string representation of PyXdmItem
         """
-        cdef const char* c_string = self.thisvptr.toString()
-        py_string_i = make_py_str(c_string)
-        return py_string_i
+        if self.py_to_string is None:
+           cdef const char* c_string = self.thisvptr.toString()
+           self.py_to_string = make_py_str(c_string)
+           saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return self.py_to_string
 
      def __iter__(self):
         """
@@ -3922,6 +3932,9 @@ cdef class PyXdmItem(PyXdmValue):
      """The class PyXdmItem represents an item in a sequence, as defined by the XDM data model.
      An item is either an atomic value, a node, or a function item."""
      cdef saxoncClasses.XdmItem *derivedptr      # hold a C++ instance which we're wrapping
+     py_item_string_value # hold the string value of the XdmItem
+     py_item_to_string # hold the string value of the XdmItem
+
      def __cinit__(self):
         """
          cinit(self)
@@ -3929,6 +3942,9 @@ cdef class PyXdmItem(PyXdmValue):
         """
         if type(self) is PyXdmItem:
             self.derivedptr = self.thisvptr = new saxoncClasses.XdmItem()
+            self.py_item_string_value = None
+            self.py_item_to_string = None
+
      def __dealloc__(self):
         if type(self) is PyXdmItem and self.derivedptr != NULL:
             if self.derivedptr.getRefCount() < 1:
@@ -3945,9 +3961,11 @@ cdef class PyXdmItem(PyXdmValue):
         string_value(self)
         Property to get the string value of the PyXdmItem
         """
-        cdef const char* c_string = self.derivedptr.getStringValue()
-        py_string_i = make_py_str(c_string)
-        return py_string_i
+        if self.py_item_string_value is None:
+           cdef const char* c_string = self.derivedptr.getStringValue()
+           self.py_item_string_value = make_py_str(c_string)
+           saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return self.py_item_string_value
      
      def __repr__(self):
         cdef const char * c_string =  self.derivedptr.toString()
@@ -3956,9 +3974,10 @@ cdef class PyXdmItem(PyXdmValue):
         return py_string_i
 
      def __str__(self):
-        cdef const char * c_string = self.derivedptr.toString()
-        py_string_i = make_py_str(c_string)
-        return py_string_i
+        if self.py_item_to_string is None:
+           cdef const char * c_string = self.derivedptr.toString()
+           self.py_item_to_string = make_py_str(c_string)
+        return self.py_item_to_string
 
      @property
      def is_atomic(self):
@@ -4100,12 +4119,17 @@ cdef class PyXdmNode(PyXdmItem):
      its typed value.
      """
      cdef saxoncClasses.XdmNode *derivednptr      # hold a C++ instance which we're wrapping
+     py_node_string_value # hold the string value of the XdmNode
+     py_node_to_string # hold the string value of the XdmNode
+
      def __cinit__(self):
         """
          __cinit__(self)
          Constructor for PyXdmNode
         """
         self.derivednptr = self.derivedptr = self.thisvptr = NULL
+        self.py_node_string_value = None
+        self.py_node_to_string = None
 
      def __dealloc__(self):
         if type(self) is PyXdmNode and self.derivednptr != NULL:
@@ -4225,9 +4249,11 @@ cdef class PyXdmNode(PyXdmItem):
         Returns:
             str: The string value of this node
         """
-        cdef const char* c_string = self.derivednptr.getStringValue()
-        py_string_i = make_py_str(c_string)
-        return py_string_i
+        if self.py_node_string_value is None:
+           cdef const char* c_string = self.derivednptr.getStringValue()
+           self.py_node_string_value = make_py_str(c_string)
+           saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return self.py_node_string_value
 
      def __str__(self):
         """
@@ -4236,18 +4262,21 @@ cdef class PyXdmNode(PyXdmItem):
         Returns:
             str: String value of this node
         """
-        cdef const char* c_string = self.derivednptr.toString()
-        py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return py_string_i
+        if self.py_node_to_string is None:
+           cdef const char* c_string = self.derivednptr.toString()
+           self.py_node_to_string = make_py_str(c_string)
+           saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return self.py_node_to_string
 
      def __repr__(self):
         """
         ___repr__(self)
         """
-        cdef const char* c_string = self.derivednptr.toString()
-        py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        if self.py_node_to_string is None:
+           cdef const char* c_string = self.derivednptr.toString()
+           self.py_node_to_string = make_py_str(c_string)
+           saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return self.py_node_to_string
 
      def get_parent(self):
         """
@@ -4259,6 +4288,7 @@ cdef class PyXdmNode(PyXdmItem):
         cdef PyXdmNode val = PyXdmNode()
         val.derivednptr = val.derivedptr = val.thisvptr = self.derivednptr.getParent()
         return val
+
      def get_attribute_value(self, name):
         """
         get_attribute_value(self, name)
