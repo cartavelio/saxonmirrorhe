@@ -101,7 +101,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
      * @param thread - Graalvm runtime data structure for the thread
      * @param alloc - Allocator function to create C memory space passed from the C++ application
      * @param rdRef - reference to the SaxonCResultDocumentHandler object in the ObjectHandles pool
-     * @return pointer to the array of XdmNode objects in the C memory space
+     * @return pointer to the array of XdmNode objects in the C memory space or null if there are no result documents
      */
     @CEntryPoint(name = "j_getResultDocuments", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
     public static CLongPointer getResultDocuments(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle rdRef)  throws SaxonApiException {
@@ -113,7 +113,8 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
             results = rdHandler.getXdmResultDocuments();
         }
         if(results == null) {
-            throw new SaxonApiException("No result-documents found");
+            //throw new SaxonApiException("No result-documents found");
+            return WordFactory.nullPointer();
         }
         int len = results.length;
         long[] resultRefs = Arrays.stream(results).mapToLong(i -> {

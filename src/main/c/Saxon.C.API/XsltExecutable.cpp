@@ -231,10 +231,10 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
       delete[] results;
       j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                         (void *)resultUrisRef);
-    } else {
+    } /*else {
       exceptionFound = true;
       throw SaxonApiException();
-    }
+    } */
   }
 
   return resultDocumentMap;
