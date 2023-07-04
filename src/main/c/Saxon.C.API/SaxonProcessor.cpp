@@ -353,9 +353,9 @@ SaxonProcessor::~SaxonProcessor() {
     	j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 	    procRef = -1;
     }
-    if (versionStr != nullptr) {
-        delete versionStr;
-        versionStr = nullptr;
+    if (!versionStr.empty()) {
+
+        versionStr.clear();
     }
     //exceptionClear();
 }
@@ -657,14 +657,11 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
 
 const char *SaxonProcessor::version() {
 
-    if (versionStr == nullptr) {
-
-        allocFn fn = operator new;
-
-        versionStr = j_cpp_getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef, (void *)fn);
+    if (versionStr.empty()) {
+        versionStr = std::string(j_c_getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef));
 
     }
-    return versionStr;
+    return versionStr.c_str();
 }
 
 void SaxonProcessor::setcwd(const char *dir) {
