@@ -24,21 +24,20 @@ typedef enum eXdmNodeKind {
   UNKNOWN = 0
 } XDM_NODE_KIND;
 
-
 enum class EnumXdmAxis {
-ANCESTOR = 0,
-ANCESTOR_OR_SELF = 1,
-ATTRIBUTE = 2,
-CHILD = 3,
-DESCENDANT  = 4,
-DESCENDANT_OR_SELF = 5,
-FOLLOWING = 6,
-FOLLOWING_SIBLING = 7,
-NAMESPACE = 8,
-PARENT = 9,
-PRECEDING = 10,
-PRECEDING_SIBLING = 11,
-SELF = 12
+  ANCESTOR = 0,
+  ANCESTOR_OR_SELF = 1,
+  ATTRIBUTE = 2,
+  CHILD = 3,
+  DESCENDANT = 4,
+  DESCENDANT_OR_SELF = 5,
+  FOLLOWING = 6,
+  FOLLOWING_SIBLING = 7,
+  NAMESPACE = 8,
+  PARENT = 9,
+  PRECEDING = 10,
+  PRECEDING_SIBLING = 11,
+  SELF = 12
 };
 
 class XdmValue;
@@ -238,7 +237,6 @@ public:
    */
   XdmNode **getAttributeNodes(bool cache = false);
 
-
   //! Get array of nodes reachable from this node via a given axis.
   /**
          * @param EnumXdmAxis - axis identifies which axis is to be navigated.
@@ -247,18 +245,19 @@ public:
          * DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
          * FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10,
          * PRECEDING_SIBLING = 11, SELF = 12
-         * @return an array of nodes on the specified axis, starting from this node as the
-         *         context node. The nodes are returned in axis order, that is, in document order for a forwards
+         * @return an array of nodes on the specified axis, starting from this
+     node as the
+         *         context node. The nodes are returned in axis order, that is,
+     in document order for a forwards
          *         axis and in reverse document order for a reverse axis.
 
   */
   XdmNode **axisNodes(EnumXdmAxis);
 
-  EnumXdmAxis convertEnumXdmAxis(int n) {
-    return static_cast<EnumXdmAxis>(n);
-  }
+  EnumXdmAxis convertEnumXdmAxis(int n) { return static_cast<EnumXdmAxis>(n); }
 
-  //! Get the count of nodes in the nodeAxis array. Cached from the last call to nodeAxis
+  //! Get the count of nodes in the nodeAxis array. Cached from the last call to
+  //! nodeAxis
   int axisNodeCount();
 
   //! Get the underlying JNI Java object for the XdmNode
@@ -316,7 +315,7 @@ private:
                          called; */
   int childCount;     /*!< The number of of child nodes on the current node*/
   int axisCount;
-  XdmNode *parent;    /*!< Cached. The parent node of the current node.*/
+  XdmNode *parent;      /*!< Cached. The parent node of the current node.*/
   XdmValue *typedValue; /*!< Cached.  The typed value of this node, as defined
                            in XDM */
   XdmNode **attrValues; /*!< Cached attribute nodes when getAttributeNodes

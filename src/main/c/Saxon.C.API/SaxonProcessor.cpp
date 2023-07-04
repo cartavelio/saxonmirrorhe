@@ -513,10 +513,10 @@ int64_t SaxonProcessor::createParameterJArray(
 
   int size = parameters.size() + properties.size() + additions;
 
-if (getenv("SAXONC_DEBUG_FLAG")) {
-  std::cerr << "Properties size: " << properties.size() << std::endl;
-  std::cerr << "Parameter size: " << parameters.size() << std::endl;
-}
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "Properties size: " << properties.size() << std::endl;
+    std::cerr << "Parameter size: " << parameters.size() << std::endl;
+  }
   if (size > 0) {
     int64_t processorDataRef = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, size);

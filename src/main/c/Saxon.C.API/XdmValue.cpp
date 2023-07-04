@@ -193,13 +193,15 @@ int64_t XdmValue::getUnderlyingValue() {
     if (count == 0) {
       return -1;
     }
-     if (getenv("SAXONC_DEBUG_FLAG")) {
-        std::cerr << std::endl << "XdmValue-getUnderlyingValue cp0 size="<<values.size() << std::endl;
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << std::endl
+                << "XdmValue-getUnderlyingValue cp0 size=" << values.size()
+                << std::endl;
     }
 
-    if(count == 1) {
-        return values[0]->getUnderlyingValue();
-    } 
+    if (count == 1) {
+      return values[0]->getUnderlyingValue();
+    }
     jValues = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, count);
 

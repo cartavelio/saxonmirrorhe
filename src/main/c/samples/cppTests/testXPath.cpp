@@ -24,7 +24,7 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
     cout << "Number of items=" << result->size() << endl;
     cout << "String Value of result=" << messagei << endl;
     sresult->success++;
-   // delete result;
+    // delete result;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
@@ -36,36 +36,40 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
   delete input;
 }
 
-
-void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor, XPathProcessor *xpath,
-                  sResultCount *sresult) {
+void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
+                                         XPathProcessor *xpath,
+                                         sResultCount *sresult) {
 
   cout << endl << "Test testUnprefixedElementMatchingPolicy:" << endl;
   XdmNode *node = processor->parseXmlFromString(
       "<out xmlns:my='http://www.example.com/ns/various' "
       "xmlns:f='http://www.example.com/ns/various1' "
-      "xmlns='http://www.example.com'><f:person>text1</f:person><f:person>text2</"
+      "xmlns='http://www.example.com'><f:person>text1</"
+      "f:person><f:person>text2</"
       "f:person><person>wrong person selected</person></out>");
-    xpath->setContextItem((XdmItem *)node);
+  xpath->setContextItem((XdmItem *)node);
   try {
-    
-    XdmItem *result = xpath->evaluateSingle("//*:person[1]");
-    if( result == nullptr || strcmp(result->getStringValue(), "incorrect") == 0) {
-        if(result != nullptr) {
-            const char *resultStr = result->getStringValue();
-            cout << "Failed to find  //f:person[1] without prefix. See result found: "<<resultStr  << endl;
-            delete result;
-        } else {
-            cout << "Failed to find  //person[1]"  << endl;
-        }
-        sresult->failure++;
-        sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
 
-    }  else{
+    XdmItem *result = xpath->evaluateSingle("//*:person[1]");
+    if (result == nullptr ||
+        strcmp(result->getStringValue(), "incorrect") == 0) {
+      if (result != nullptr) {
         const char *resultStr = result->getStringValue();
-        cout << "String Value of result=" << resultStr << endl;
-        sresult->success++;
+        cout << "Failed to find  //f:person[1] without prefix. See result "
+                "found: "
+             << resultStr << endl;
         delete result;
+      } else {
+        cout << "Failed to find  //person[1]" << endl;
+      }
+      sresult->failure++;
+      sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+
+    } else {
+      const char *resultStr = result->getStringValue();
+      cout << "String Value of result=" << resultStr << endl;
+      sresult->success++;
+      delete result;
     }
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
@@ -77,10 +81,7 @@ void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor, XPathProcess
   xpath->clearProperties();
 
   delete node;
-
-
-      }
-
+}
 
 // test nodeAxis
 void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
@@ -108,20 +109,20 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
 
     cout << "namespace count=" << namespaceCount << endl;
     for (int i = 0; i < namespaceCount; i++) {
-      if(namespaces[i]->getNodeName() != nullptr){
+      if (namespaces[i]->getNodeName() != nullptr) {
         cout << "namespace name =" << (namespaces[i]->getNodeName()) << endl;
       }
       cout << "namespace value =" << (namespaces[i]->getStringValue()) << endl;
     }
-      delete child;
-      for(int i = 0; i < childCount; i++) {
-        delete children[i];
-      }
-      delete [] children;
-      for(int i = 0; i < namespaceCount; i++) {
-        delete namespaces[i];
-      }
-      delete [] namespaces;
+    delete child;
+    for (int i = 0; i < childCount; i++) {
+      delete children[i];
+    }
+    delete[] children;
+    for (int i = 0; i < namespaceCount; i++) {
+      delete namespaces[i];
+    }
+    delete[] namespaces;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
@@ -133,9 +134,7 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
 
   delete node;
   sresult->success++;
-
 }
-
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // more than one XdmItem.
@@ -466,16 +465,16 @@ int main() {
        << "Test: XPathProcessor with Saxon version=" << processor->version()
        << endl;
   testXPathSingle(processor, xpathProc, sresult);
-    cout << endl
-         << "============================================================="
-         << endl
-         << endl;
-         testUnprefixedElementMatchingPolicy(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl
        << endl;
-       testNodeAxis(processor, xpathProc, sresult);
+  testUnprefixedElementMatchingPolicy(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testNodeAxis(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl
@@ -638,8 +637,8 @@ int main() {
        << "============================================================="
        << endl
        << endl;
-  runTest("testMatches", "matches('abcdef', '^\\p{IsBasicLatin}+$')", "false", xpathProc,
-          sresult, document);
+  runTest("testMatches", "matches('abcdef', '^\\p{IsBasicLatin}+$')", "false",
+          xpathProc, sresult, document);
 
   cout << endl
        << "============================================================="
