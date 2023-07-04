@@ -795,12 +795,7 @@ public class LetExpression extends Assignation {
      */
 
     public static class LetExprElaborator extends PullElaborator {
-
-        private Expression finalAction;
-
-        private boolean repeatable(LetExpression let) {
-            return let.getNominalReferenceCount() > 1;
-        }
+        
 
         private SequenceEvaluator makeSequenceEvaluator(LetExpression let) {
             if (let.evaluator != null) {
@@ -808,30 +803,20 @@ public class LetExpression extends Assignation {
             }
             let.setEvaluator();
             return let.evaluator;
-//            SequenceEvaluator eval;
-//            if (let.needsEagerEvaluation) {
-//                eval = let.getSequence().makeElaborator().eagerly();
-//            } else {
-//                eval = new LearningSequenceEvaluator(
-//                        let.getSequence(),
-//                        let.getSequence().makeElaborator().lazily(repeatable(let)));
-//            }
-//            let.setEvaluator(eval);
-//            return eval;
         }
 
         /**
          * Return a function that evaluates the local variable in this let expression, and in all
          * immediately-nested let expressions. This is done to reduce Java stack usage and the number
          * of method/function calls
-         * <p>Calling this method also results in {@code finalAction} being set to the "return"
-         * expression that follows the nested local variables.</p>
          * @param start the initial let expression
+         * @param finalAction an output parameter; this is set to the the "return"
+         *        expression that follows the nested local variables.
          * @return a function to evaluate all the variables. This is returned as an {@code ItemEvaluator} for
          * convenience, but it is executed for its side-effects (setting variable values in the context
          * stack frame) and always returns null.
          */
-        private ItemEvaluator setAllVariables(LetExpression start) {
+        private ItemEvaluator setAllVariables(LetExpression start, List<Expression> finalAction) {
             List<LetExpression> setters = new ArrayList<>();
             setters.add(start);
             Expression next = start.getAction();
@@ -839,7 +824,7 @@ public class LetExpression extends Assignation {
                 setters.add((LetExpression)next);
                 next = ((LetExpression)next).getAction();
             }
-            finalAction = next;
+            finalAction.add(next);
             switch (setters.size()) {
                 // for a small number of local variables, unroll the loop
                 case 1: {
@@ -927,8 +912,9 @@ public class LetExpression extends Assignation {
         @Override
         public PullEvaluator elaborateForPull() {
             final LetExpression expr = (LetExpression) getExpression();
-            final ItemEvaluator setter = setAllVariables(expr);
-            final PullEvaluator actionPull = finalAction.makeElaborator().elaborateForPull();
+            final List<Expression> finalAction = new ArrayList<>(1);
+            final ItemEvaluator setter = setAllVariables(expr, finalAction);
+            final PullEvaluator actionPull = finalAction.get(0).makeElaborator().elaborateForPull();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
@@ -941,8 +927,9 @@ public class LetExpression extends Assignation {
         @Override
         public PushEvaluator elaborateForPush() {
             final LetExpression expr = (LetExpression) getExpression();
-            final ItemEvaluator setter = setAllVariables(expr);
-            final PushEvaluator actionPush = finalAction.makeElaborator().elaborateForPush();
+            final List<Expression> finalAction = new ArrayList<>(1);
+            final ItemEvaluator setter = setAllVariables(expr, finalAction);
+            final PushEvaluator actionPush = finalAction.get(0).makeElaborator().elaborateForPush();
             return (out, context) -> {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
@@ -955,8 +942,9 @@ public class LetExpression extends Assignation {
         @Override
         public ItemEvaluator elaborateForItem() {
             final LetExpression expr = (LetExpression) getExpression();
-            final ItemEvaluator setter = setAllVariables(expr);
-            final ItemEvaluator actionEval = finalAction.makeElaborator().elaborateForItem();
+            final List<Expression> finalAction = new ArrayList<>(1);
+            final ItemEvaluator setter = setAllVariables(expr, finalAction);
+            final ItemEvaluator actionEval = finalAction.get(0).makeElaborator().elaborateForItem();
             return context -> {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
@@ -969,8 +957,9 @@ public class LetExpression extends Assignation {
         @Override
         public UpdateEvaluator elaborateForUpdate() {
             final LetExpression expr = (LetExpression) getExpression();
-            final ItemEvaluator setter = setAllVariables(expr);
-            final UpdateEvaluator actionEval = finalAction.makeElaborator().elaborateForUpdate();
+            final List<Expression> finalAction = new ArrayList<>(1);
+            final ItemEvaluator setter = setAllVariables(expr, finalAction);
+            final UpdateEvaluator actionEval = finalAction.get(0).makeElaborator().elaborateForUpdate();
             return (context, pul) -> {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);

@@ -1748,14 +1748,14 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         return new FallbackElaborator();
     }
 
-    //public abstract Elaborator getElaborator();
-
     /**
      * Factory method to construct an {@code Elaborator} for this expression
-     * @return an elaborator for the expression
+     * @return an elaborator for the expression. We only create one elaborator
+     * for a given expression; it is reused for multiple evaluations of the expression,
+     * and in multiple threads.
      */
 
-    public final Elaborator makeElaborator() {
+    public final synchronized Elaborator makeElaborator() {
         if (elaborator == null) {
             Elaborator elab = getElaborator();
             elab.setExpression(this);

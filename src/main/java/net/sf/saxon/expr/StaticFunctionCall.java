@@ -277,6 +277,12 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
     private static class StaticFunctionCallElaborator extends FunctionCallElaborator {
 
         @Override
+        public void setExpression(Expression expr) {
+            super.setExpression(expr);
+            allocateArgumentEvaluators((FunctionCall) expr, true);
+        }
+
+        @Override
         public PullEvaluator elaborateForPull() {
             StaticFunctionCall expr = (StaticFunctionCall) getExpression();
             return context -> expr.call(context, evaluateArguments(context)).iterate();
