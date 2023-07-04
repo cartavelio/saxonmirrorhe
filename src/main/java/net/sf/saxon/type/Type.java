@@ -231,14 +231,22 @@ public abstract class Type {
                     return "document-node()";
                 case ELEMENT:
                     SchemaType annotation = node.getSchemaType();
-                    return "element(" +
-                            ((NodeInfo) item).getDisplayName() + ", " +
-                            annotation.getDisplayName() + ')';
+                    if (annotation.isAnonymousType()) {
+                        return "element(" + ((NodeInfo) item).getDisplayName() + ')';
+                    } else {
+                        return "element(" +
+                                ((NodeInfo) item).getDisplayName() + ", " +
+                                annotation.getDisplayName() + ')';
+                    }
                 case ATTRIBUTE:
                     SchemaType annotation2 = node.getSchemaType();
-                    return "attribute(" +
-                            ((NodeInfo) item).getDisplayName() + ", " +
-                            annotation2.getDisplayName() + ')';
+                    if (annotation2.isAnonymousType()) {
+                        return "attribute(" + ((NodeInfo) item).getDisplayName() + ')';
+                    } else {
+                        return "attribute(" +
+                                ((NodeInfo) item).getDisplayName() + ", " +
+                                annotation2.getDisplayName() + ')';
+                    }
                 case TEXT:
                     return "text()";
                 case COMMENT:
