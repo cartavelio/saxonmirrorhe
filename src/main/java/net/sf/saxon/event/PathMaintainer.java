@@ -40,14 +40,15 @@ public class PathMaintainer extends ProxyReceiver {
                              Location location, int properties)
             throws XPathException {
         // System.err.println("startElement " + nameCode);
-        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
-        HashMap<NodeName, Integer> counters = siblingCounters.peek();
 
+        HashMap<NodeName, Integer> counters = siblingCounters.peek();
         int preceding = counters.getOrDefault(elemName, 0);
         int index = preceding + 1;
         counters.put(elemName, index);
         path.push(new AbsolutePath.PathElement(Type.ELEMENT, elemName, index));
         siblingCounters.push(new HashMap<>());
+
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
     /**
@@ -59,41 +60,6 @@ public class PathMaintainer extends ProxyReceiver {
         nextReceiver.endElement();
         siblingCounters.pop();
         path.pop();
-    }
-
-    /**
-     * Get the path to the current location in the stream
-     *
-     * @param useURIs set to true if namespace URIs are to appear in the path;
-     *                false if prefixes are to be used instead. The prefix will be the one
-     *                that is used in the source document, and is potentially ambiguous.
-     * @return the path to the current location, as a string.
-     */
-
-    public String getPath(boolean useURIs) {
-        StringBuilder fsb = new StringBuilder(256);
-        for (AbsolutePath.PathElement pe : path) {
-            fsb.append('/');
-            if (useURIs) {
-                NamespaceUri uri = pe.getName().getNamespaceUri();
-                if (!uri.isEmpty()) {
-                    fsb.append('"');
-                    fsb.append(uri);
-                    fsb.append('"');
-                }
-            } else {
-                String prefix = pe.getName().getPrefix();
-                if (!prefix.isEmpty()) {
-                    fsb.append(prefix);
-                    fsb.append(':');
-                }
-            }
-            fsb.append(pe.getName().getLocalPart());
-            fsb.append('[');
-            fsb.append(pe.getIndex() + "");
-            fsb.append(']');
-        }
-        return fsb.toString();
     }
 
     @CSharpReplaceBody(code="return new Saxon.Hej.om.AbsolutePath(new List<Saxon.Hej.om.AbsolutePath.PathElement>(path.ToArray()));")
