@@ -3199,10 +3199,11 @@ public class XQueryParser extends XPathParser {
 
             Expression action = parseExprSingle();
             for (int i = 0; i < caseExpressions.size(); i++) {
-                EquivalenceComparison vc = new EquivalenceComparison(
+                SwitchCaseComparison vc = new SwitchCaseComparison(
                         new LocalVariableReference(outerLet),
                         Token.FEQ,
-                        caseExpressions.get(i));
+                        caseExpressions.get(i),
+                        allowXPath40Syntax);
                 if (i == 0) {
                     conditions.add(vc);
                     actions.add(action);
