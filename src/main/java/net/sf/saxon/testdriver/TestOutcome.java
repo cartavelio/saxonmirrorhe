@@ -7,6 +7,7 @@
 
 package net.sf.saxon.testdriver;
 
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
@@ -22,9 +23,8 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.serialize.AdaptiveEmitter;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -896,7 +896,6 @@ public class TestOutcome {
     }
 
     private boolean assertPermutation(XdmNode assertion, SingleResultDoc result, XPathCompiler assertXpc) throws SaxonApiException {
-        // TODO: extend this to handle nodes (if required)
         if (isException()) {
             return false;
         } else {
@@ -910,8 +909,7 @@ public class TestOutcome {
                 for (XdmItem item : s) {
                     expectedItems++;
                     if (!(item instanceof XdmAtomicValue)) {
-                        System.err.println("*** Test driver limitation: assert-permutation works only on atomic values");
-                        return false;
+                        return assertNonAtomicPermutation(s, result, assertXpc);
                     }
                     AtomicValue value = (AtomicValue) item.getUnderlyingValue();
                     AtomicMatchKey comparable = value.isNaN() ?
@@ -923,8 +921,7 @@ public class TestOutcome {
                 for (XdmItem item : getPrincipalResult()) {
                     actualItems++;
                     if (!(item instanceof XdmAtomicValue)) {
-                        System.err.println("*** Test driver limitation: assert-permutation works only on atomic values");
-                        return false;
+                        return assertNonAtomicPermutation(s, result, assertXpc);
                     }
                     AtomicValue value = (AtomicValue) item.getUnderlyingValue();
                     AtomicMatchKey comparable = value.isNaN() ?
@@ -941,6 +938,37 @@ public class TestOutcome {
             }
         }
     }
+
+    private boolean assertNonAtomicPermutation(XPathSelector expected, SingleResultDoc result, XPathCompiler assertXpc) throws SaxonApiException {
+        // For assert-permutation involving non-atomic values, we compare the adaptive-serialization representation of the items
+        try {
+            int expectedItems = 0;
+            PipelineConfiguration pipe = assertXpc.getProcessor().getUnderlyingConfiguration().makePipelineConfiguration();
+            HashSet<UnicodeString> expectedValues = new HashSet<>();
+            for (XdmItem item : expected) {
+                expectedItems++;
+                UnicodeBuilder writer = new UnicodeBuilder();
+                AdaptiveEmitter emitter = new AdaptiveEmitter(pipe, writer);
+                emitter.write(item.getUnderlyingValue());
+                expectedValues.add(writer.toUnicodeString());
+            }
+            int actualItems = 0;
+            for (XdmItem item : getPrincipalResult()) {
+                actualItems++;
+                UnicodeBuilder writer = new UnicodeBuilder();
+                AdaptiveEmitter emitter = new AdaptiveEmitter(pipe, writer);
+                emitter.write(item.getUnderlyingValue());
+                if (!expectedValues.contains(writer.toUnicodeString())) {
+                    return false;
+                }
+            }
+            return actualItems == expectedItems;
+        } catch (XPathException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     private boolean assertDeepEq(XdmNode assertion, SingleResultDoc result, XPathCompiler assertXpc) throws SaxonApiException {
         if (isException()) {
