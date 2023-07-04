@@ -3741,8 +3741,6 @@ cdef class PyXdmValue:
         __cinit__(self)
         Constructor for PyXdmValue
         """
-        self.py_to_string = None   # hold the string value of the XdmItem
-        self.py_string_value = None  # hold the string value of the XdmItem
         if type(self) is PyXdmValue:
             self.thisvptr = new saxoncClasses.XdmValue()
 
@@ -3879,14 +3877,13 @@ cdef class PyXdmValue:
         The string representation of PyXdmItem
         """
         cdef const char* c_string = NULL
-        if self.py_to_string is None:
-           c_string = self.thisvptr.toString()
-           if c_string == NULL:
-              raise Warning('Empty string returned')
-           else:
-               self.py_to_string = make_py_str(c_string)
-               saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return self.py_to_string
+        c_string = self.thisvptr.toString()
+        if c_string == NULL:
+            raise Warning('Empty string returned')
+        else:
+            py_to_string = make_py_str(c_string)
+            saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_to_string
 
      def __str__(self):
         """
@@ -3894,11 +3891,10 @@ cdef class PyXdmValue:
         The string representation of PyXdmItem
         """
         cdef const char* c_string = NULL
-        if self.py_to_string is None:
-           c_string = self.thisvptr.toString()
-           self.py_to_string = make_py_str(c_string)
-           saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return self.py_to_string
+        c_string = self.thisvptr.toString()
+        py_to_string = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_to_string
 
      def __iter__(self):
         """
