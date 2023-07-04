@@ -49,7 +49,7 @@ PHP_METHOD(XsltExecutable, __destruct) {
   }
 }
 
-/*
+
 PHP_METHOD(XsltExecutable, getXslMessages)
 {
     XsltExecutable *xsltExecutable;
@@ -88,7 +88,7 @@ XtOffsetOf(xdmValue_object, std));
     } else {
         RETURN_NULL();
     }
-    }    */
+    }
 
 PHP_METHOD(XsltExecutable, getResultDocuments) {
   XsltExecutable *xsltExecutable;
