@@ -327,7 +327,7 @@ public class SequenceTool {
                     case StandardNames.XS_BOOLEAN:
                         return ((BooleanValue) value).getBooleanValue() ? Boolean.TRUE : Boolean.FALSE;
                     case StandardNames.XS_DECIMAL:
-                        return ((BigDecimalValue) value).getDecimalValue();
+                        return ((DecimalValue) value).getDecimalValue();
                     case StandardNames.XS_INTEGER:
                         return ((NumericValue) value).longValue();
                     case StandardNames.XS_DOUBLE:

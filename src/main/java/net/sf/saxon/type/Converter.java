@@ -481,7 +481,7 @@ public abstract class Converter {
             if (input instanceof IntegerValue) {
                 return (IntegerValue)input;
             }
-            return BigIntegerValue.makeIntegerValue(((BigDecimalValue) input).getDecimalValue().toBigInteger());
+            return BigIntegerValue.makeIntegerValue(((DecimalValue) input).getDecimalValue().toBigInteger());
         }
     }
 

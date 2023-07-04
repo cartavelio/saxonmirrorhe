@@ -36,6 +36,7 @@ import net.sf.saxon.tree.linked.TextImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BigDecimalValue;
+import net.sf.saxon.value.DecimalValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
@@ -996,7 +997,7 @@ public abstract class StyleElement extends ElementImpl {
                 compileError("The version attribute must be a decimal literal", "XTSE0110");
             } else {
                 // Note this will normalize the decimal so that trailing spaces are not significant
-                version = ((BigDecimalValue) val).getDecimalValue().multiply(BigDecimal.TEN).intValue();
+                version = ((DecimalValue) val).getDecimalValue().multiply(BigDecimal.TEN).intValue();
                 if (version < 20 && version != 10) {
                     // XSLT 2.0 says use backwards compatible mode. XSLT 3.0 says we can raise an error.
                     // Both allow a warning
