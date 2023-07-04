@@ -248,18 +248,42 @@ public abstract class Pattern extends PseudoExpression {
 
     @Override
     public final boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        return matches(context.getContextItem(), context);
+        return matchesItem(context.getContextItem(), context);
     }
 
     /**
      * Determine whether this Pattern matches the given item. This is the main external interface
-     * for matching patterns: it sets current() to the node being tested
+     * for matching patterns: it calls the matches() method and handles any errors, by signalling
+     * a warning and returning false.
+     *
+     * @param item    The item to be tested against the Pattern
+     * @param context The dynamic context.
+     * @return true if the item matches the Pattern, false otherwise
+     * @throws XPathException if a non-recoverable error is found matching the pattern. Most
+     * errors however result in a warning and a return value of false.
+     */
+
+    public final boolean matchesItem(Item item, XPathContext context) throws XPathException {
+        try {
+            return matches(item, context);
+        } catch (XPathException.Circularity | XPathException.StackOverflow e) {
+            throw e;
+        } catch (XPathException ex) {
+            handleDynamicError(ex, context);
+            return false;
+        }
+    }
+
+
+    /**
+     * Determine whether this Pattern matches the given item. This should be called
+     * via {@code matchesItem()} to get the XSLT-defined error handling behaviour.
+     * <p>The method, where required, sets current() to the node being tested.</p>
      *
      * @param item    The item to be tested against the Pattern
      * @param context The dynamic context.
      * @return true if the node matches the Pattern, false otherwise
-     * @throws XPathException if an error occurs while matching the pattern (the caller will usually
-     *                        treat this the same as a false result)
+     * @throws XPathException if an error occurs while matching the pattern
      */
 
     public abstract boolean matches(Item item, XPathContext context) throws XPathException;
@@ -294,7 +318,7 @@ public abstract class Pattern extends PseudoExpression {
         NodeInfo doc = document.getRootNode();
         final UType uType = getUType();
         if (UType.DOCUMENT.subsumes(uType)) {
-            if (matches(doc, context)) {
+            if (matchesItem(doc, context)) {
                 return SingletonIterator.makeIterator(doc);
             } else {
                 return EmptyIterator.ofNodes();
@@ -304,13 +328,13 @@ public abstract class Pattern extends PseudoExpression {
             SequenceIterator allAttributes =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
-            return ItemMappingIterator.filter(allAttributes, item -> matches(item, context));
+            return ItemMappingIterator.filter(allAttributes, item -> matchesItem(item, context));
         } else if (UType.NAMESPACE.subsumes(uType)) {
             AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
             SequenceIterator allNamespaces =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateAxis(AxisInfo.NAMESPACE));
-            return ItemMappingIterator.filter(allNamespaces, item -> matches(item, context));
+            return ItemMappingIterator.filter(allNamespaces, item -> matchesItem(item, context));
 
         } else if (UType.CHILD_NODE_KINDS.subsumes(uType)) {
             NodeTest nodeTest;
@@ -320,7 +344,7 @@ public abstract class Pattern extends PseudoExpression {
                 nodeTest = new MultipleNodeKindTest(uType);
             }
             AxisIterator allChildren = doc.iterateAxis(AxisInfo.DESCENDANT, nodeTest);
-            return ItemMappingIterator.filter(allChildren, item -> matches(item, context));
+            return ItemMappingIterator.filter(allChildren, item -> matchesItem(item, context));
         } else {
             int axis = uType.subsumes(UType.DOCUMENT) ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
             AxisIterator allChildren = doc.iterateAxis(axis);
@@ -337,7 +361,7 @@ public abstract class Pattern extends PseudoExpression {
                         }
                         return mapper;
                     });
-            return ItemMappingIterator.filter(attributesOrSelf, item -> matches(item, context));
+            return ItemMappingIterator.filter(attributesOrSelf, item -> matchesItem(item, context));
 
         }
     }
@@ -529,7 +553,7 @@ public abstract class Pattern extends PseudoExpression {
         @Override
         public BooleanEvaluator elaborateForBoolean() {
             Pattern pat = (Pattern)getExpression();
-            return context -> pat.matches(context.getContextItem(), context);
+            return context -> pat.matchesItem(context.getContextItem(), context);
         }
     }
 

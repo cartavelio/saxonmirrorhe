@@ -215,10 +215,39 @@ public final class AncestorQualifiedPattern extends Pattern {
 
     @Override
     public boolean matchesBeneathAnchor(NodeInfo node, NodeInfo anchor, XPathContext context) throws XPathException {
+        // Whichever pattern we attempt to match first, don't pass on any error if the other pattern doesn't match.
+        // This suppresses warnings in cases where the user didn't expect a predicate to be evaluated.
+        // To clarify: if one pattern throws an error, then if the other pattern matches we throw the error;
+        // if the other pattern doesn't match, then we suppress the error and return false. This corresponds
+        // to the (new) behaviour when using multiple predicates or "and" in XPath.
+        // In addition, if we get an error by evaluating the predicate first, we change the strategy on the fly.
+        // See Saxon bugs 6040 and 5867.
         if (testUpperPatternFirst) {
-            return matchesUpperPattern(node, anchor, context) && basePattern.matches(node, context);
+            boolean ok;
+            try {
+                ok = matchesUpperPattern(node, anchor, context);
+            } catch (XPathException e) {
+                if (basePattern.matches(node, context)) {
+                    throw e;
+                } else {
+                    return false;
+                }
+            }
+            return ok && basePattern.matches(node, context);
         } else {
-            return basePattern.matchesBeneathAnchor(node, anchor, context) && matchesUpperPattern(node, anchor, context);
+            boolean ok;
+            try {
+                ok = basePattern.matchesBeneathAnchor(node, anchor, context);
+            } catch (XPathException e) {
+                // change the strategy for next time to avoid exceptions
+                testUpperPatternFirst = true;
+                if (upperPattern.matches(node, context)) {
+                    throw e;
+                } else {
+                    return false;
+                }
+            }
+            return ok && matchesUpperPattern(node, anchor, context);
         }
     }
 
