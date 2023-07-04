@@ -663,6 +663,14 @@ public final class Tokenizer {
                         nextToken = Token.FAT_ARROW;
                         return;
                     }
+                    if (languageLevel >= 40
+                            && inputOffset < inputLength - 1
+                            && input.charAt(inputOffset) == '!'
+                            && isGreaterThanChar(input.charAt(inputOffset+1))) {
+                        inputOffset+=2;
+                        nextToken = Token.MAPPING_ARROW;
+                        return;
+                    }
                     nextToken = Token.EQUALS;
                     return;
                 case '!':

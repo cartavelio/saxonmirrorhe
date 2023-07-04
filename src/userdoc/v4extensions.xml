@@ -991,6 +991,17 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code>
                is allowed.</p>
          </section>
+         
+         <section id="mapping-arrow" title="Mapping arrow operator">
+            <h1>Mapping arrow operator</h1>
+            
+            <p>The expression <code>LHS =!> f()</code> applies the function on the right-hand side to each item delivered
+               by the left-hand side individually. For example <code>(-2 to +2) =!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>.
+               The effect is similar to writing <code>(-2 to +2) ! abs(.)</code>, but the operator precedences make it
+               easier to construct a pipeline of operations without parentheses. The rules are similar to the XPath 3.1 arrow
+               operator <code>LHS => f()</code> except that the function is not applied to the value of the left-hand operand
+               as a whole, but to each item individually; it thus combines the functions of <code>=></code> and <code>!</code>,
+               which accounts for the choice of operator symbol.</p>
 
       </section>
          
@@ -1161,6 +1172,18 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
                <h1>Numeric Literals</h1>
                <p>Numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>),
                   and underscores can be used as separators (<code>1_000_000</code>).</p>
+            </section>
+            
+            <section id="non-ascii-operators" title="Non-ASCII operator symbols">
+               <h1>Non-ASCII operator symbols</h1>
+               <p>The non-ASCII characters <code>×</code> (xD7) and <code>÷</code> (xF7) can be
+                  used in place of <code>*</code> and <code>div</code> to represent the multiplication and division
+                  operators.</p> 
+               <p>The <code>＜</code> and <code>＞</code> characters (xFF1C and xFF1E) can be used
+                  in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than
+                  operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code>
+                  in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>,
+                  <code>&gt;&gt;</code>, <code>=&gt;</code>, and <code>-&gt;</code>.</p>
             </section>
             
          </section>
