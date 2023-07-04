@@ -208,7 +208,11 @@ public class Environment implements ResourceResolver {
         for (XdmNode prop : env.children("http://saxon.sf.net/", "property")) {
             String propName = prop.attribute("name");
             String propValue = prop.attribute("value");
-            environment.processor.setConfigurationProperty(propName, propValue);
+            try {
+                environment.processor.setConfigurationProperty(propName, propValue);
+            } catch (Exception e) {
+                System.err.println("Failed to set property " + propName + ": " + e.getMessage());
+            }
         }
 
         // QT3 - dependency as sibling of environment
