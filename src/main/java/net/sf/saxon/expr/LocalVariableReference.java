@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -202,7 +203,15 @@ public class LocalVariableReference extends VariableReference {
         public PullEvaluator elaborateForPull() {
             LocalVariableReference varRef = (LocalVariableReference)getExpression();
             int slot = varRef.getSlotNumber();
-            return context -> context.evaluateLocalVariable(slot).iterate();
+            return context -> {
+                try {
+                    return context.evaluateLocalVariable(slot).iterate();
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException()
+                            .maybeWithLocation(getExpression().getLocation())
+                            .maybeWithContext(context);
+                }
+            };
         }
 
         @Override
@@ -216,8 +225,13 @@ public class LocalVariableReference extends VariableReference {
                         out.append(it);
                     }
                     return null;
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException()
+                            .maybeWithLocation(getExpression().getLocation())
+                            .maybeWithContext(context);
                 } catch (XPathException e) {
-                    throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
+                    throw e.maybeWithLocation(getExpression().getLocation())
+                            .maybeWithContext(context);
                 }
             };
         }
@@ -229,8 +243,13 @@ public class LocalVariableReference extends VariableReference {
             return context -> {
                 try {
                     return context.evaluateLocalVariable(slot).head();
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException()
+                            .maybeWithLocation(getExpression().getLocation())
+                            .maybeWithContext(context);
                 } catch (XPathException e) {
-                    throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
+                    throw e.maybeWithLocation(getExpression().getLocation())
+                            .maybeWithContext(context);
                 }
             };
         }
