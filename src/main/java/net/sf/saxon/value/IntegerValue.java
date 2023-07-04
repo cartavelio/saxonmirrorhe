@@ -310,14 +310,19 @@ public abstract class IntegerValue extends DecimalValue {
                     } else if (c >= '0' && c <= '9') {
                         state = 2;
                     } else {
-                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: contains a character that is not a digit");
+                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE)
+                                                             + " to an integer: contains a character "
+                                                             + Err.depictCodepoint(c)
+                                                             + " that is not a digit");
                     }
                     break;
                 case 1:
                     if (c >= '0' && c <= '9') {
                         state = 2;
                     } else {
-                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: expected a digit, found " + c);
+                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) +
+                                                             " to an integer: expected a digit, found "
+                                                             + Err.depictCodepoint(c));
                     }
                     break;
                 case 2:
@@ -326,7 +331,9 @@ public abstract class IntegerValue extends DecimalValue {
                     } else if (Whitespace.isWhite(c)) {
                         state = 3;
                     } else {
-                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE) + " to an integer: expected a digit, found " + c);
+                        return new ValidationFailure("Cannot convert string " + Err.wrap(input, Err.VALUE)
+                                                             + " to an integer: expected a digit, found "
+                                                             + Err.depictCodepoint(c));
                     }
                     break;
                 case 3:
