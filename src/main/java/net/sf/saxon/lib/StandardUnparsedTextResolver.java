@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URL;
 
 /**
  * Default implementation of the UnparsedTextURIResolver, used if no other implementation
@@ -80,15 +81,11 @@ public class StandardUnparsedTextResolver
 
         ResourceRequest rr = new ResourceRequest();
         rr.uri = absoluteURI.toString();
-        rr.nature = encoding == null ? ResourceRequest.BINARY_NATURE : ResourceRequest.TEXT_NATURE;
+        rr.nature = ResourceRequest.TEXT_NATURE;
         rr.purpose = ResourceRequest.ANY_PURPOSE;
         Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
         if (resolved == null) {
             throw new XPathException("unparsed-text(): failed to resolve URI " + absoluteURI);
-        }
-
-        if (resolved instanceof SAXSource) {
-            return getReaderFromSAXSource((SAXSource) resolved, encoding, config, debug);
         }
 
         if (resolved instanceof AugmentedSource
@@ -103,7 +100,6 @@ public class StandardUnparsedTextResolver
         }
     }
 
-    @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"SAXSources are not supported on .NET\");")
     public static Reader getReaderFromSAXSource(SAXSource source, String encoding, Configuration config, boolean debug) throws XPathException {
         Logger err = config.getLogger();
         InputStream inputStream = null;
@@ -113,11 +109,6 @@ public class StandardUnparsedTextResolver
         }
 
         if (inputStream == null) {
-            Reader reader = source.getInputSource().getCharacterStream();
-            if (reader != null) {
-                return reader;
-            }
-
             String systemId = source.getSystemId();
             if (systemId != null) {
                 try {

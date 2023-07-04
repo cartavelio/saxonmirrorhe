@@ -42,7 +42,7 @@ public class UnparsedTextResource implements Resource {
      */
 
     private UnparsedTextResource(XPathContext context, AbstractResourceCollection.InputDetails details) throws XPathException {
-        this.config = context != null ? context.getConfiguration() : null;
+        this.config = context.getConfiguration();
         this.href = details.resourceUri;
         this.contentType = details.contentType;
         this.encoding = details.encoding;
@@ -77,9 +77,7 @@ public class UnparsedTextResource implements Resource {
         }
     }
 
-    // IntelliJ wants to simplify this to ...  FACTORY = UnparsedTextResource::new;
-    // but the CS transpiler doesn't do the right thing with that, so I'm leaving the 'long' form.
-    public final static ResourceFactory FACTORY = (context, details) -> new UnparsedTextResource(context, details);
+    public final static ResourceFactory FACTORY = UnparsedTextResource::new;
 
     @Override
     public String getResourceURI() {

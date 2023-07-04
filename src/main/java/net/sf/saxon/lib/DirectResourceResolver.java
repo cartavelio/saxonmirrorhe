@@ -10,16 +10,19 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.IDFilter;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * A <code>DirectResourceResolver</code> is a {@link ResourceResolver} that resolves requests
@@ -76,27 +79,17 @@ public class DirectResourceResolver implements ResourceResolver {
             request = request.copy();
             request.relativeUri = relativeURI.substring(0, hash);
             id = relativeURI.substring(hash + 1);
-        }
-
-        InputStream stream;
-        if (ResourceRequest.BINARY_NATURE.equals(request.nature)) {
-            // This path is used by the unparsed-text resolver when no encoding is supplied;
-            // it returns (where possible) a TypedStreamSource containing the binary input
-            // stream, together with the content type from the HTTP headers.
-            try {
-                return ResourceLoader.typedStreamSource(config, request.uri);
-            } catch (IOException e) {
-                throw new XPathException("Cannot read " + request.uri, e);
-            }
+            // System.err.println("StandardURIResolver, href=" + href + ", id=" + id);
         }
 
         Source ss;
+
+        InputStream stream;
         try {
             stream = ResourceLoader.urlStream(config, request.uri);
         } catch (IOException e) {
             stream = null; // Carry on, the XML parser might know what to do with it.
         }
-
         InputSource is = new InputSource(request.uri);
         is.setByteStream(stream);
         ss = new SAXSource(config.getStyleParser(), is);
