@@ -37,39 +37,44 @@
 
 
    <section id="debugging" title="Debugging">
+       
       <h1>Debugging</h1>
+       
+       <h2 class="subtitle">Exception handling</h2>
 
+       <p>From SaxonC 12.1, exceptions that are thrown from the underlying Java code are handled in the C++
+           API and re-thrown as a C++ exception called <a class="bodylink code"
+              href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonApiException.html">SaxonApiException</a>.
+          Likewise these exceptions are thrown in the Python API as <a class="bodylink code"
+              href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonApiError"
+              >PySaxonApiError</a>, and in the PHP API as a PHP exception called <code>SaxonApiException</code>.</p>
 
-      <p>Exceptions that are thrown from the underlying Java code are handled in the C++ API
-         and re-thrown as a C++ exception called <a
-                 href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonApiException.html"><code>SaxonApiException</code></a>. Likewise these exceptions are thrown in the Python API
-                     as <code>PySaxonApiError</code> and in the PHP extension as an PHP exception.</p>
-
-
-     <p>In the C++ API you can handle exceptions as follows:</p>
-      <samp><![CDATA[try {
+       <p>C++ Example: handling exceptions</p>
+       <samp><![CDATA[          try {
               xmlfile = sproc->parseXmlFromString("<xml><value>5</value></xml>");
-          } catch(SaxonApiException &e){
+          } catch (SaxonApiException &e) {
               const char * emessage = e.getMessage();
               if (emessage != nullptr) {
                   cerr <<"exampleTransformToFile error: "<< emessage << endl;
               }
-
               return;
-
           }]]></samp>
 
-      <p>In the Python API you can handle exceptions as follows:</p>
-
-      <samp><![CDATA[try:
+       <p>Python Example: handling exceptions</p>
+       <samp><![CDATA[          try:
               xdm_node = doc_builder.parse_xml(xml_file='example.xml')
               if xdm_node is not None:
                   print(xdm_node)
 
           except  PySaxonApiError as err:
               print("Error: ", err)]]></samp>
-      <p>If the program crashes we sometimes find it useful to run the program under the debugger tool <code>gdb</code> on the commandline for Linux and MacOS
-         which may give the insight to where the fault occurred.</p>
+       
+       <h2 class="subtitle">Debugging tools</h2>
+       
+       <p>If a program crashes, it is sometimes useful to run the program on the command line under the
+           debugger tool <code>gdb</code> for Linux and MacOS, and this may give insight to where the fault
+           occurred.</p>
+       
    </section>
 
 </article>

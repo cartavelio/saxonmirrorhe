@@ -36,10 +36,11 @@ provide any other feedback.</p>
     <h1>Installing on Linux</h1>
 
     <aside>In the following, [EDITION] means one of: HE, PE, EE; and [VERSION] is the
-    maintenance release version number (for instance 12.0). </aside>
-
-      <p>As a prerequisite SaxonC requires <code>GLIBC_2.32</code> as minimum. On some Debian stable releases  this version of the C library is not available.
-          Therefore installing the library package libc6 should resolve any compile issues.</p>
+      maintenance release version number (for instance 12.0). </aside>
+    
+    <p>As a prerequisite SaxonC requires <code>GLIBC_2.32</code> as minimum. Note that on some Debian stable
+      releases this version of the C library is not available: installing the library package
+      <code>libc6</code> should resolve any compile issues.</p>
 
     <ol>
       <li>
