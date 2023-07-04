@@ -636,21 +636,45 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             final SystemFunction fn = expr.getTargetFunction();
             switch (argumentEvaluators.length) {
                 case 0:
-                    return context -> fn.call(context,
-                                              StackFrame.EMPTY_ARRAY_OF_SEQUENCE).head();
+                    return context -> {
+                        try {
+                            return fn.call(context,
+                                           StackFrame.EMPTY_ARRAY_OF_SEQUENCE).head();
+                        } catch (XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+
+                    };
                 case 1:
-                    return context -> fn.call(context,
-                                              new Sequence[]{
-                                                      argumentEvaluators[0].evaluate(context)
-                                              }).head();
+                    return context -> {
+                        try {
+                            return fn.call(context, new Sequence[]{
+                                    argumentEvaluators[0].evaluate(context)
+                            }).head();
+                        } catch (XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+                    };
                 case 2:
-                    return context -> fn.call(context,
-                                              new Sequence[]{
-                                                      argumentEvaluators[0].evaluate(context),
-                                                      argumentEvaluators[1].evaluate(context)
-                                              }).head();
+                    return context -> {
+                        try {
+                            return fn.call(context,
+                                    new Sequence[]{
+                                            argumentEvaluators[0].evaluate(context),
+                                            argumentEvaluators[1].evaluate(context)
+                                    }).head();
+                        } catch (XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+                    };
                 default:
-                    return context -> fn.call(context, evaluateArguments(context)).head();
+                    return context -> {
+                        try {
+                            return fn.call(context, evaluateArguments(context)).head();
+                        } catch (XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+                    };
             }
         }
 
