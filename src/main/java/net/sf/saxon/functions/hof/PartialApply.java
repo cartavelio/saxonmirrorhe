@@ -8,14 +8,16 @@
 package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
-import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
@@ -107,14 +109,21 @@ public class PartialApply extends Expression {
         }
 
 
-        requiredFunctionType = SequenceType.makeSequenceType(
-                new SpecificFunctionType(argTypes,
-                        (baseType instanceof AnyFunctionType) ? ((AnyFunctionType) baseType).getResultType() : SequenceType.ANY_SEQUENCE),
-                        StaticProperty.EXACTLY_ONE);
+//        requiredFunctionType = SequenceType.makeSequenceType(
+//                new SpecificFunctionType(argTypes,
+//                        (baseType instanceof AnyFunctionType) ? ((AnyFunctionType) baseType).getResultType() : SequenceType.ANY_SEQUENCE),
+//                        StaticProperty.EXACTLY_ONE);
+//
+//        Supplier<RoleDiagnostic> role =
+//                () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", 0);
+//        setBaseExpression(tc.staticTypeCheck(getBaseExpression(), requiredFunctionType, role, visitor));
 
-        Supplier<RoleDiagnostic> role =
-                () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "saxon:call", 0);
-        setBaseExpression(tc.staticTypeCheck(getBaseExpression(), requiredFunctionType, role, visitor));
+        Supplier<RoleDiagnostic> role = () ->
+                new RoleDiagnostic(RoleDiagnostic.DYNAMIC_FUNCTION, getBaseExpression().toShortString(), 0);
+
+        setBaseExpression(tc.staticTypeCheck(
+                getBaseExpression(), SequenceType.SINGLE_FUNCTION, role, visitor));
+
         return this;
     }
 
@@ -339,6 +348,11 @@ public class PartialApply extends Expression {
             return context -> {
                 FunctionItem f = (FunctionItem) functionEval.eval(context);
                 assert f != null;
+                if (f.getArity() != len) {
+                    throw new XPathException(
+                            "The number of arguments supplied in the partial function application is " + len +
+                            ", but the arity of the function item is " + f.getArity(), "XPTY0004");
+                }
                 Sequence[] values = new Sequence[len];
                 for (int i = 0; i < boundArgumentsEvaluators.length; i++) {
                     if (boundArgumentsEvaluators[i] != null) {
