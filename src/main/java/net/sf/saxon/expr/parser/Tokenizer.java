@@ -284,7 +284,7 @@ public final class Tokenizer {
     }
 
     /**
-     * Return true if there is a thin arrow ("->") somewhere beyond the current position. This can be used
+     * Return true if there is a thin arrow ("-&gt;") somewhere beyond the current position. This can be used
      * to eliminate unnecessary lookahead
      * @return true if a thin arrow is present. Of course, this might be a false positive.
      */
