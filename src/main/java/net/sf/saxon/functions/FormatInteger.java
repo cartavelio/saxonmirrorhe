@@ -196,7 +196,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
             }
         }
         if (isDecimalDigitPattern || hasExplicitRadix) {
-            NumericGroupFormatter picGroupFormat = getPicSeparators(primary);
+            NumericGroupFormatter picGroupFormat = getPicSeparators(primary, hasExplicitRadix);
             UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
             String finalLetterValue = letterValue;
             return num -> {
@@ -229,11 +229,12 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      * it makes available as the getAdjustedPicture() property of the returned NumericGroupFormatter.
      *
      * @param picExpanded the formatting picture, after stripping off any modifiers
+     * @param hasExplicitRadix true if digits are indicated by X or x rather than a decimal digit
      * @return a NumericGroupFormatter that implements the formatting defined in the picture
      * @throws net.sf.saxon.trans.XPathException
      *          if the picture is invalid
      */
-    public static NumericGroupFormatter getPicSeparators(UnicodeString picExpanded) throws XPathException {
+    public static NumericGroupFormatter getPicSeparators(UnicodeString picExpanded, boolean hasExplicitRadix) throws XPathException {
 
         IntSet groupingPositions = new IntHashSet(5);
         List<Integer> separatorList = new ArrayList<>();
@@ -267,6 +268,9 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
 
                 case Character.UPPERCASE_LETTER:
                 case Character.LOWERCASE_LETTER:
+                    if (!hasExplicitRadix) {
+                        break;
+                    }
                     if (codePoint == 'x' || codePoint == 'X') {
                         if (zeroDigit == -1) {
                             zeroDigit = codePoint;
