@@ -3734,18 +3734,18 @@ cdef class PyXdmValue:
      """A PyXdmValue represents a value in the XDM data model. A value is a sequence of zero or more items, each
      item being an atomic value, a node, or a function item. """
      cdef saxoncClasses.XdmValue *thisvptr      # hold a C++ instance which we're wrapping
-     py_string_value # hold the string value of the XdmItem
-     py_to_string # hold the string value of the XdmItem
+
 
      def __cinit__(self):
         """
         __cinit__(self)
         Constructor for PyXdmValue
         """
+        self.py_to_string = None   # hold the string value of the XdmItem
+        self.py_string_value = None  # hold the string value of the XdmItem
         if type(self) is PyXdmValue:
             self.thisvptr = new saxoncClasses.XdmValue()
-            self.py_to_string = None
-            self.py_string_value = None
+
 
      def __dealloc__(self):
         if type(self) is PyXdmValue and self.thisvptr != NULL:
@@ -3934,18 +3934,17 @@ cdef class PyXdmItem(PyXdmValue):
      """The class PyXdmItem represents an item in a sequence, as defined by the XDM data model.
      An item is either an atomic value, a node, or a function item."""
      cdef saxoncClasses.XdmItem *derivedptr      # hold a C++ instance which we're wrapping
-     py_item_string_value # hold the string value of the XdmItem
-     py_item_to_string # hold the string value of the XdmItem
+
 
      def __cinit__(self):
         """
          cinit(self)
          Constructor for PyXdmItem
         """
+        self.py_item_string_value = None   # hold the string value of the XdmItem
+        self.py_item_to_string = None   # hold the string value of the XdmItem
         if type(self) is PyXdmItem:
             self.derivedptr = self.thisvptr = new saxoncClasses.XdmItem()
-            self.py_item_string_value = None
-            self.py_item_to_string = None
 
      def __dealloc__(self):
         if type(self) is PyXdmItem and self.derivedptr != NULL:
@@ -4125,8 +4124,6 @@ cdef class PyXdmNode(PyXdmItem):
      its typed value.
      """
      cdef saxoncClasses.XdmNode *derivednptr      # hold a C++ instance which we're wrapping
-     py_node_string_value # hold the string value of the XdmNode
-     py_node_to_string # hold the string value of the XdmNode
 
      def __cinit__(self):
         """
@@ -4134,8 +4131,8 @@ cdef class PyXdmNode(PyXdmItem):
          Constructor for PyXdmNode
         """
         self.derivednptr = self.derivedptr = self.thisvptr = NULL
-        self.py_node_string_value = None
-        self.py_node_to_string = None
+        self.py_node_string_value = None  # hold the string value of the XdmNode
+        self.py_node_to_string = None  # hold the string value of the XdmNode
 
      def __dealloc__(self):
         if type(self) is PyXdmNode and self.derivednptr != NULL:
