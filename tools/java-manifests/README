@@ -4,6 +4,12 @@ They're created by running
 
   jar vtf SAXON-VERSION.jar | cut -c37- | grep -v "\\$" | sort
 
+For example,
+
+   for f in *.list; do \
+     jar vtf ../../build/libs/`basename $f .list`-12.3.jar | cut -c37- | grep -v "\\$" | sort > $f; \
+   done
+
 * Using "cut" says we don't care about the file attributes (date,
   time, etc.)
 * Removing lines with $-signs says we don't care about the internal
@@ -16,3 +22,4 @@ build.
 
 This is to prevent us from accidentally publishing jars that are
 missing components.
+

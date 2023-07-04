@@ -8,6 +8,7 @@ com/saxonica/testdriver/QT3TestDriverEE.class
 com/saxonica/testdriver/QT3TestDriverPE.class
 com/saxonica/testdriver/XMarkBenchmark.class
 com/saxonica/testdriver/Xslt30TestSuiteDriverEE.class
+com/saxonica/testdriver/Xslt30TestSuiteDriverJS.class
 com/saxonica/testdriver/Xslt30TestSuiteDriverPE.class
 com/saxonica/testdriver/ee/
 com/saxonica/testdriver/ee/SchemaTestSuiteDriver.class
