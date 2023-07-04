@@ -837,10 +837,7 @@ cdef class PyDocumentBuilder:
        Args:
            val (PySchemaValidator): the schema validator to be used
         """
-       if val is None:
-           self.thisdbptr.setSchemaValidator(NULL)
-       else:
-           self.thisdbptr.setSchemaValidator(val.thissvptr)
+       self.thisdbptr.setSchemaValidator(val.thissvptr)
 
 
     def get_schema_validator(self):
@@ -2895,7 +2892,7 @@ cdef class PyXQueryProcessor:
                 the input; query_file (str) or query_text (str) can be used to supply the query;
                 lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
         Raises:
-            PySaxonApiError: Error if failure to run query
+            PySaxonApiError: Error if failure to run query file
             Exception: Error if invalid use of keywords
         """
         if len(kwds) == 0:
@@ -3088,7 +3085,7 @@ cdef class PyXPathProcessor:
             PyXdmItem: A single XDM item is returned. Returns None if the expression returns an empty sequence.
             If the expression returns a sequence of more than one item, any items after the first are ignored.
         Raises:
-            PySaxonApiError: Error if failure to evaluate XPath expression
+            PySaxonApiError: Error if evaluate_single fails
         """
         cdef PyXdmNode val = None
         cdef PyXdmAtomicValue aval = None
@@ -3171,9 +3168,9 @@ cdef class PyXPathProcessor:
      def set_language_version(self, value):
          """
          set_language_version(self, version)
-         Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
+         Say whether an XPath 2.0, XPath 3.0 or XPath 3.1 processor is required.
          Args:
-             value (str): One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
+             value (str): One of the values 1.0, 2.0, 3.0, 3.05, 3.1.
          """
          py_value_string = value.encode('UTF-8') if value is not None else None
          cdef char * c_value = py_value_string if value is not None else ""
@@ -3199,7 +3196,7 @@ cdef class PyXPathProcessor:
         Returns:
             boolean: The result is a boolean value.
         Raises:
-            PySaxonApiError: Error if failure to evaluate XPath expression
+            PySaxonApiError: Error if failure to execute effective_boolean_value
         """
         py_value_string = xpath_str.encode('UTF-8') if xpath_str is not None else None
         c_xpath = py_value_string if xpath_str is not None else ""
