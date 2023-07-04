@@ -391,6 +391,9 @@
             
         </ul>
         
+        <p>For 12.3, there have been changes to the keywords used for arguments to built-in functions,
+        tracking the draft specifications which have adjusted the keywords to give greater consistency.</p>
+        
       
         <h2>Dropped or Changed Extension Functions</h2>
         
