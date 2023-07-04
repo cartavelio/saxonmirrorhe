@@ -1841,21 +1841,23 @@ public class XPathParser {
                 case "tuple": // Retained as synonym for the time being
                     primaryType = parseRecordTest(this);
                     break;
-//                case "atomic":
-//                    // Allowed only in patterns, not in item types??
-//                    // TODO: not in spec, drop this
-//                    nextToken();
-//                    expect(Token.NAME);
-//                    StructuredQName typeName = getQNameParser().parse(
-//                            t.currentTokenValue, NamespaceUri.SCHEMA);
-//                    primaryType = getPlainType(typeName);
-//                    if (!(primaryType instanceof AtomicType)) {
-//                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
-//                    }
-//                    nextToken();
-//                    expect(Token.RPAR);
-//                    nextToken();
-//                    break;
+                case "atomic":
+                    // Allowed only in patterns, not in item types??
+                    // TODO: not in spec, drop this
+                    checkLanguageVersion40();
+                    warning("The pattern syntax atomic(typename) is likely to be dropped from the 4.0 specification. Use type(typename) instead.", SaxonErrorCode.SXWN9000);
+                    nextToken();
+                    expect(Token.NAME);
+                    StructuredQName typeName = getQNameParser().parse(
+                            t.currentTokenValue, NamespaceUri.SCHEMA);
+                    primaryType = getPlainType(typeName);
+                    if (!(primaryType instanceof AtomicType)) {
+                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                    }
+                    nextToken();
+                    expect(Token.RPAR);
+                    nextToken();
+                    break;
                 case "union":
                     primaryType = parseUnionType();
                     break;
