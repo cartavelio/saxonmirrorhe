@@ -8,10 +8,17 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.IntSet;
+import net.sf.saxon.z.IntSingletonSet;
 
 /**
  * The XPath 2.0 remove() function
@@ -51,12 +58,30 @@ public class Remove extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        NumericValue n = (NumericValue) arguments[1].head();
-        int pos = (int) n.longValue();
-        if (pos < 1) {
-            return arguments[0];
+        IntSet removePositions;
+        if (arguments[1] instanceof net.sf.saxon.value.AtomicValue) {
+            NumericValue n = (NumericValue) arguments[1].head();
+            int pos = (int) n.longValue();
+            if (pos < 1) {
+                return arguments[0];
+            }
+            removePositions = new IntSingletonSet(pos);
+        } else {
+            IntHashSet positions = new IntHashSet();
+            NumericValue n;
+            SequenceIterator iter = arguments[1].iterate();
+            while ((n = (NumericValue)iter.next()) != null) {
+                int pos = (int) n.longValue();
+                if (pos >= 1) {
+                    positions.add(pos);
+                }
+            }
+            if (positions.isEmpty()) {
+                return arguments[0];
+            }
+            removePositions = positions;
         }
-        return SequenceTool.toLazySequence(new RemoveIterator(arguments[0].iterate(), pos));
+        return SequenceTool.toLazySequence(new RemoveIterator(arguments[0].iterate(), removePositions));
     }
 
     /**
@@ -67,20 +92,20 @@ public class Remove extends SystemFunction {
     public static class RemoveIterator implements SequenceIterator, LastPositionFinder {
 
         SequenceIterator base;
-        int removePosition;
+        IntSet removePositions;
         int basePosition = 0;
         Item current = null;
 
-        public RemoveIterator(SequenceIterator base, int removePosition) {
+        public RemoveIterator(SequenceIterator base, IntSet removePosition) {
             this.base = base;
-            this.removePosition = removePosition;
+            this.removePositions = removePosition;
         }
 
         @Override
         public Item next() {
             current = base.next();
             basePosition++;
-            if (current != null && basePosition == removePosition) {
+            while (current != null && removePositions.contains(basePosition)) {
                 current = base.next();
                 basePosition++;
             }
@@ -115,11 +140,15 @@ public class Remove extends SystemFunction {
         @Override
         public int getLength() {
             int x = SequenceTool.getLength(base);
-            if (removePosition >= 1 && removePosition <= x) {
-                return x - 1;
-            } else {
-                return x;
+            int result = x;
+            IntIterator iter = removePositions.iterator();
+            while (iter.hasNext()) {
+                int i = iter.next();
+                if (i >= 1 && i <= x) {
+                    result--;
+                }
             }
+            return result;
         }
 
     }
