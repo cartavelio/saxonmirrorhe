@@ -1568,7 +1568,7 @@ namespace SaxonCS_NUnit {
                 Assert.That(sw.ToString().Contains("<xhtml:body xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:p>Lorem Ipsum</xhtml:p></xhtml:body>"));
             }
             catch (Exception e) {
-                //e.printStackTrace();
+                Console.WriteLine(e.StackTrace);
                 Assert.Fail(e.Message);
             }
         }

@@ -1101,7 +1101,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Validation errors not detected");
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(4, errors.Count, "No of errors"); // 3 validation errors plus one summary fatal error
+                Assert.AreEqual(3, errors.Count, "No of errors"); // 3 validation errors
                 //Assert.AreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
             }
             catch (Exception e) {

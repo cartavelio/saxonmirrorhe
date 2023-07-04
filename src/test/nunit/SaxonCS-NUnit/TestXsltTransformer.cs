@@ -452,7 +452,7 @@ namespace SaxonCS_NUnit {
 
 
         [Test]
-        public void testExtensionWithSchemaAccecss() {
+        public void testExtensionWithSchemaAccess() {
             
             try {
                 Processor proc = new(true);
