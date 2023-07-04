@@ -873,25 +873,30 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
          <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available (in various forms) since Saxon 9.8.</aside>
 
-         <h2>Thin arrow notation</h2>
+         <h2>Lambda notation</h2>
 
-         <p>For brevity, in an inline function declaration, the keyword <code>function</code> can be replaced
-            with the symbol <code>-></code>. For example, <code>function($a, $b){$a + $b}</code> can be written as
-               <code>->($a, $b){$a + $b}</code>. The syntax is borrowed from Raku (formerly Perl 6), and is reminiscent 
-               of lambda expressions in other languages:
-               <code>(a, b) -> {a + b}</code> in Java, <code>(a, b) => {a + b}</code> in C#.</p>
+         <p>New syntax, similar to lambda expresions in Java, C#, and Javascript, is available for 
+            anonymous inline functions. For example, <code>function($a, $b){$a + $b}</code> can be written as
+               <code>($a, $b)->{$a + $b}</code>.</p>
+         
+         <aside><p>This syntax is available from Saxon 12.3. The previous proposal <code>->($a, $b){$a + $b}</code>
+         remains available for the time being. The new form does not allow argument types and return types to
+         be declared.</p></aside>
 
-         <p>The concise syntax is helpful when writing simple callbacks, for example <code>fold-left($seq, 1, ->($x, $y){$x*$y})</code>
+         <p>The concise syntax is helpful when writing simple callbacks, for example <code>fold-left($seq, 1, ($x, $y)->{$x*$y})</code>
             to calculate the product of a sequence of numbers.</p>
+         
+         <p>The parentheses can be omitted around the argument list if there is exactly one argument. But note that whitespace
+         is needed between the variable name and the arrow (this is because names can include a hyphen).</p>
 
-         <p>Argument types and return types can be included in the same way as with the full <code>function</code> syntax,
+         <!--<p>Argument types and return types can be included in the same way as with the full <code>function</code> syntax,
             though the benefits of conciseness typically apply only when these are omitted.</p>
+-->
+         <p>A zero-arity function can be written as, for example, <code>()->{doc('abc.xml')//z}</code>.</p>
 
-         <p>A zero-arity function can be written as, for example, <code>->(){doc('abc.xml')//z}</code>.</p>
-
-         <h2>Context item functions</h2>
+         <h2>Focus functions</h2>
          <p>Simple inline functions taking a single argument can be simplified even further. For example,
-        the expression <code>->{@code}</code> represents a function that takes a single argument (presumably an element node),
+        the expression <code>function{@code}</code> represents a function that takes a single argument (presumably an element node),
         and returns a selected attribute of that node. A simple inline function takes a single argument with required type <code>item()</code>,
         and returns any sequence (type <code>item()*</code>). The function body is evaluated with a singleton focus based
         on the supplied argument value.</p>
@@ -899,14 +904,15 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>Simple inline functions are particularly convenient when providing functions as arguments to higher-order functions,
         many of which accept a single item as their one argument.
         For example, to sort employees in order of salary, you can write:</p>
-         <samp>sort(//employee, (), ->{@salary})</samp>
+         <samp>sort(//employee, (), function{@salary})</samp>
 
          <aside>Earlier Saxon releases experimented with the notations <code>.{@salary}</code> and <code>fn{@salary}</code>.
-          These forms have been dropped.</aside>
+            These forms have been dropped. The form <code>->{@salary}</code>, however, remains available for the time
+         being.</aside>
 
          <p>Simple inline functions can access externally-defined local variables in the usual way (that is, they have a closure).</p>
 
-         <p>The expression <code class="bold">->{EXPR}</code> is a syntactic shorthand for:</p>
+         <p>The expression <code class="bold">function{EXPR}</code> is a syntactic shorthand for:</p>
          <samp>function($x as item()) as item()* {$x!(EXPR)}</samp>
 
 
@@ -1199,6 +1205,13 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
             <p>returns <code>(2, 4, 6, 8, 10, 12)</code>.</p>
 
             <p>Note that the result of the expression is a sequence, not an array.</p>
+            
+            <p>XPath 4.0 allows multiple <code>let</code> clauses, or multipe <code>for</code> clauses
+               (but not a mixture) in an expression. For example:</p>
+            <ul>
+               <li><code>let $i := 2 let $j := 3 return $i + $j</code></li>
+               <li><code>for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></li>
+            </ul>
          </section>
 
          <section id="numeric-literals" title="Numeric Literals">
@@ -1547,7 +1560,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
          
          <p>Template rules in an enclosing mode can in principle be overridden in another stylesheet package
          (using <code>xsl:override</code>) but this has not yet been tested.</p>
-
+      </section>
       <section id="miscellaneous-xslt40" title="Miscellaneous extensions">
          <h1>Miscellaneous extensions</h1>
 
