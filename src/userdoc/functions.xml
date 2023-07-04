@@ -9612,12 +9612,16 @@ return saxon:serialize($x, <xsl:output method="xml"
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 11.</p>
+        <p>Available since Saxon 11. The function is likely to become superseded by the proposed XPath 4.0
+        function <code>fn:slice</code>, which has a slightly different specification. All the
+        functionality except for the use of negative positions (to count from the end) is already available
+        using the XPath 4.0 function <code>fn:items-at</code>, and other common use cases can be achieved
+        using, for example, <code>fn:foot</code> and <code>fn:trunk</code>.</p>
       </status>
       <saxon-edition>PE/EE 11</saxon-edition>
       <details>
         <div>
-          <p>For each integer <code>$i</code> in the value of <code>$positions</code>, the function returns:</p>
+          <p>For each integer <code>$i</code> in the value of <code>$positions</code>, in order, the function returns:</p>
           <ul>
             <li><code>$seq[$i]</code> if the integer is between 1 and the length of <code>$seq</code> (inclusive)</li>
             <li><code>$seq[count($seq)-$i+1]</code> if the integer is negative and its absolute value is
@@ -9631,8 +9635,6 @@ return saxon:serialize($x, <xsl:output method="xml"
             <li><code>saxon:slice(10 to 20, (5, 3, 1))</code> returns <code>(14, 12, 10)</code></li>
             <li><code>saxon:slice(10 to 20, -1)</code> returns <code>20</code></li>
             <li><code>saxon:slice(10 to 20, -3 to -1)</code> returns <code>(18, 19, 20)</code></li>
-            <li><code>saxon:slice(10 to 20, 1 by 3 to 7)</code> returns <code>(10, 13, 16)</code></li>
-            <li><code>saxon:slice(10 to 20, -1 by -1 to -4)</code> returns <code>(20, 19, 18, 17)</code></li>
             <li><code>saxon:slice(10 to 20, 0)</code> returns <code>()</code></li>
             <li><code>saxon:slice(10 to 20, -2 to +2)</code> returns <code>(19, 20, 10, 11)</code></li>
           </ul>
