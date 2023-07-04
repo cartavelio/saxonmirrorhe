@@ -10,7 +10,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_setConfigurationProperty, 0, 0, 2)
 // the first argument to this is if this is a reference
 // the second argument to this is the name
@@ -23,8 +22,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_parseXmlFromString, 0, 0, 1)
 // the second argument to this is the name
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
-
-
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_createAtomicValue, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
@@ -45,57 +42,53 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newXPathProcessor, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newDocumentBuilder,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newDocumentBuilder, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newXslt30Processor, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newXQueryProcessor,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newXQueryProcessor, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newSchemaValidator,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newSchemaValidator, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_setCatalog,  0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_setCatalog, 0, 0, 1)
 ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_clarkNameToEQName,  0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_clarkNameToEQName, 0, 0, 1)
 ZEND_ARG_INFO(0, clarkname)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_EQNameToClarkName,  0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_EQNameToClarkName, 0, 0, 1)
 ZEND_ARG_INFO(0, eqname)
 ZEND_END_ARG_INFO()
 
-//ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_registerPHPFunctions,   0, 0, 1??)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_version,  0, 0, 0)
+// ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_registerPHPFunctions,   0, 0, 1??)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_version, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_isSchemaAware,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_isSchemaAware, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_exceptionOccurred,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_exceptionOccurred, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_getErrorMessage,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_getErrorMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_exceptionClear,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_exceptionClear, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_release,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_release, 0, 0, 0)
 ZEND_END_ARG_INFO()
-
-
 
 //===============DocumentBuilder
 
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_setLineNumbering, 0, 0, 1)
 ZEND_ARG_INFO(0, num)
@@ -145,12 +138,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_docbuilder_getErrorCode, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
-
-
-
 //===================== XsltExecutable
-
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -202,7 +190,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setInitialMatchSelection, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setInitialMatchSelectionAsFile, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setInitialMatchSelectionAsFile, 0, 0,
+                       1)
 ZEND_ARG_INFO(0, file_name)
 ZEND_END_ARG_INFO()
 
@@ -300,11 +289,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_getResultDocuments, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
-
-
 //=============== Xslt30Processor
-
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -364,7 +349,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setRelocatable, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setFastCompilation, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -392,8 +376,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_getErrorMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
-
-
 
 //================== SchemaValidator
 
@@ -463,83 +445,85 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_getErrorMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
 //====================   XQueryProcessor
 
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_destruct,      0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
-// ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor,  getErrorCode,       0, 0, 0)
-//ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryContent,       0, 0, 1)
+// ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor,  getErrorCode, 0, 0,
+// 0)
+// ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryContent, 0, 0, 1)
 ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setStreaming,       0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setStreaming, 0, 0, 1)
 ZEND_ARG_INFO(0, item)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_isStreaming,       0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_isStreaming, 0, 0, 0)
 ZEND_ARG_INFO(0, item)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setContextItem,       0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setContextItem, 0, 0, 1)
 ZEND_ARG_INFO(0, item)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setContextItemFromFile,       0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setContextItemFromFile, 0,
+                       0, 1)
 ZEND_ARG_INFO(0, file_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setParameter,       0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setParameter, 0, 0, 2)
 ZEND_ARG_INFO(0, name)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setProperty,       0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setProperty, 0, 0, 2)
 ZEND_ARG_INFO(0, name)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_clearParameters,       0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_clearParameters, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_clearProperties,       0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_clearProperties, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_runQueryToValue,     0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_runQueryToValue, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_runQueryToString,       0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_runQueryToString, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_runQueryToFile,       0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_runQueryToFile, 0, 0, 1)
 ZEND_ARG_INFO(0, file_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryFile,       0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryFile, 0, 0, 1)
 ZEND_ARG_INFO(0, file_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryBaseURI,       0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryBaseURI, 0, 0, 1)
 ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_declareNamespace,       0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_declareNamespace, 0, 0, 2)
 ZEND_ARG_INFO(0, prefix)
 ZEND_ARG_INFO(0, namespacei)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_exceptionOccurred,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_exceptionOccurred, 0, 0,
+                       0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_exceptionClear,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_exceptionClear, 0, 0, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getErrorCode,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getErrorCode, 0, 0, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getErrorMessage,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getErrorMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setLanguageVersion,  0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setLanguageVersion, 0, 0,
+                       1)
 ZEND_END_ARG_INFO()
 
 //====================   XPathProcessor
@@ -577,8 +561,7 @@ ZEND_ARG_INFO(0, name)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setLanguageVersion,  0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setLanguageVersion, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
@@ -621,11 +604,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setBaseURI, 0, 0, 1)
 ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
-
-
 //======================= XdmValue
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmval_construct,  0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmval_construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmval_destruct, 0, 0, 0)
@@ -647,12 +628,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmval_addXdmItem, 0, 0, 1)
 ZEND_ARG_INFO(0, item)
 ZEND_END_ARG_INFO()
 
-
-
-
 //=======================  XdmItem
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmitem_construct,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmitem_construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmitem_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -668,8 +646,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmitem_getAtomicValue, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmitem_getNodeValue, 0, 0, 0)
 ZEND_END_ARG_INFO()
-
-
 
 //======================= XdmFunctionItem
 
@@ -695,10 +671,9 @@ ZEND_ARG_INFO(0, proc)
 ZEND_ARG_INFO(0, arguments)
 ZEND_END_ARG_INFO()
 
-
 //======================= XdmNode
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_construct,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -741,7 +716,7 @@ ZEND_END_ARG_INFO()
 
 //======================= XdmAtomicValue
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmatomic_construct,  0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmatomic_construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmatomic_destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -759,7 +734,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmatomic_getLongValue, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmatomic_getPrimitiveTypeName, 0, 0, 0)
 ZEND_END_ARG_INFO()
-
 
 //======================= XdmMap
 
@@ -791,7 +765,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmmap_keys, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
 //======================= XdmArray
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmarray_construct, 0, 0, 0)
@@ -816,16 +789,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmarray_concat, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-//ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmarray_values, 0, 0, 0)
-//ZEND_END_ARG_INFO()
+// ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmarray_values, 0, 0, 0)
+// ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmarray_getArity, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmarray_arrayLength, 0, 0, 0)
 ZEND_END_ARG_INFO()
-
-
-
-
-
