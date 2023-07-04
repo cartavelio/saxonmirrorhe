@@ -3747,7 +3747,7 @@ cdef class PyXdmValue:
                 del self.thisvptr
                 self.thisvptr = NULL
             else:
-                self.derivednptr.decrementRefCount()
+                self.thisvptr.decrementRefCount()
 
      def add_xdm_item(self, PyXdmItem value):
         """
@@ -3935,7 +3935,7 @@ cdef class PyXdmItem(PyXdmValue):
                 del self.derivedptr
                 self.derivedptr = self.thisvptr = NULL
             else:
-                self.derivednptr.decrementRefCount()
+                self.derivedptr.decrementRefCount()
 
         '''if type(self) is PyXdmItem:
             del self.derivedptr'''
@@ -4464,7 +4464,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
             if self.derivedfptr.getRefCount() < 1:
                 del self.derivedfptr
             else:
-                self.derivednptr.decrementRefCount()
+                self.derivedfptr.decrementRefCount()
 
 
      @property
@@ -4629,7 +4629,7 @@ cdef class PyXdmMap(PyXdmFunctionItem):
                 del self.derivedfptr
                 self.derivedmmptr = self.derivedfptr = self.derivedptr = self.thisvptr = NULL
             else:
-                self.derivednptr.decrementRefCount()
+                self.derivedfptr.decrementRefCount()
 
 
 
@@ -4935,7 +4935,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
             if self.derivedaaptr.getRefCount() < 1:
                 del self.derivedaaptr
             else:
-                self.derivednptr.decrementRefCount()
+                self.derivedaaptr.decrementRefCount()
 
 
 
