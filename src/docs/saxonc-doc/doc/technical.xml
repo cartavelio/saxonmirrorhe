@@ -47,7 +47,7 @@
               href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonApiException.html">SaxonApiException</a>.
           Likewise these exceptions are thrown in the Python API as <a class="bodylink code"
               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonApiError"
-              >PySaxonApiError</a>, and in the PHP API as a PHP exception called <code>SaxonApiException</code>.</p>
+              >PySaxonApiError</a>, and in the PHP API as a PHP exception.</p>
 
        <p>C++ Example: handling exceptions</p>
        <samp><![CDATA[          try {
