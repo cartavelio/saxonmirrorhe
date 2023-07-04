@@ -8,8 +8,8 @@
 package net.sf.saxon.resource;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.Resource;
 
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -113,6 +113,26 @@ public class ResourceLoader {
                 inputStream = new GZIPInputStream(inputStream);
             }
             return inputStream;
+        }
+    }
+
+    public static StreamSource typedStreamSource(Configuration config, String url) throws IOException {
+        if (config != null && url.startsWith("classpath:")) {
+            return new StreamSource(urlStream(config, url), url);
+        } else {
+            URLConnection conn = ResourceLoader.urlConnection(new URL(url));
+            InputStream inputStream = conn.getInputStream();
+            if ("gzip".equals(conn.getContentEncoding())) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
+            if (!inputStream.markSupported()) {
+                inputStream = new BufferedInputStream(inputStream);
+            }
+            TypedStreamSource tss = new TypedStreamSource();
+            tss.setInputStream(inputStream);
+            tss.setContentType(conn.getContentType());
+            tss.setSystemId(url);
+            return tss;
         }
     }
 
