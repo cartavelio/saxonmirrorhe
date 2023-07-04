@@ -22,6 +22,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trace.TraceCodeInjector;
 import net.sf.saxon.trace.XQueryTraceCodeInjector;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -87,6 +88,8 @@ public class StaticQueryContext {
     private Location moduleLocation;
     private OptimizerOptions optimizerOptions;
     private int languageVersion = 31;
+    private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
+            = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
 
 
 
@@ -176,6 +179,7 @@ public class StaticQueryContext {
         codeInjector = c.codeInjector;
         updating = c.updating;
         optimizerOptions = c.optimizerOptions;
+        unprefixedElementMatchingPolicy = c.unprefixedElementMatchingPolicy;
     }
 
 
@@ -200,6 +204,7 @@ public class StaticQueryContext {
         clearNamespaces();
         updating = false;
         optimizerOptions = config.getOptimizerOptions();
+        unprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
 
     }
 
@@ -842,6 +847,32 @@ public class StaticQueryContext {
     public NamespaceUri getDefaultElementNamespace() {
         return defaultElementNamespace;
     }
+
+    /**
+     * Get the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
+     * The value can be any of {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE} (the default),
+     * which uses the value of {@link #getDefaultElementNamespace()}, or {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE_OR_NONE},
+     * which matches both the namespace given in {@link #getDefaultElementNamespace()} and the null namespace,
+     * or {@link UnprefixedElementMatchingPolicy#ANY_NAMESPACE}, which matches any namespace (that is, it
+     * matches by local name only).
+     */
+
+    public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+        return unprefixedElementMatchingPolicy;
+    }
+
+    /**
+     * Set the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
+     * The value can be any of {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE} (the default),
+     * which uses the value of {@link #getDefaultElementNamespace()}, or {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE_OR_NONE},
+     * which matches both the namespace given in {@link #getDefaultElementNamespace()} and the null namespace,
+     * or {@link UnprefixedElementMatchingPolicy#ANY_NAMESPACE}, which matches any namespace (that is, it
+     * matches by local name only).
+     */
+    public void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy) {
+        this.unprefixedElementMatchingPolicy = unprefixedElementMatchingPolicy;
+    }
+
 
     /**
      * Declare a global variable. This has the same effect as including a global variable declaration

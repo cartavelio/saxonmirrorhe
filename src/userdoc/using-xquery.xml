@@ -218,6 +218,24 @@
          </tr>
          <tr>
             <td>
+               <p>-ns:(uri|##any|##html5)</p>
+            </td>
+            <td>
+               <p>Defines the handling of unprefixed element names appearing as name tests in path expressions.</p>
+               <ul>
+                  <li>
+                     Supplying a URI sets the default namespace for elements
+                     and types (effectively a default value for <code>declare default element namespace</code> — note that an
+                     explicit declaration in the Query prolog takes precedence).</li> 
+                  <li>The value <code>##any</code> declares that unprefixed names are treated as a test on the local
+                     name of the element only: they will match regardless of namespace.</li> 
+                  <li>The value <code>##html5</code>
+                     declares that an unprefixed element name will match either a name in the XHTML namespace, or a name
+                     in no namespace. This is useful when the source document is HTML or XHTML.</li></ul>
+            </td>
+         </tr>
+         <tr>
+            <td>
                <p>-now:yyyy-mm-ddThh:mm:ss+hh:mm</p>
             </td>
             <td>

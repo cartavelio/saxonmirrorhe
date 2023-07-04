@@ -408,6 +408,53 @@ public class XQueryCompiler {
         staticQueryContext.declareNamespace(prefix, NamespaceUri.of(uri));
     }
 
+
+    /**
+     * Get the policy for handling of unprefixed element names in path expressions and match patterns.
+     *
+     * @return the policy previously set using {@link #setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy)},
+     * or its default, which is {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE}.
+     * @since 12.3
+     */
+
+    public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+        return staticQueryContext.getUnprefixedElementMatchingPolicy();
+    }
+
+    /**
+     * Set the policy for handling of unprefixed element names in path expressions and match patterns.
+     * By default, such names are expanded using the default namespace for elements and types. The default policy
+     * is {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE},
+     * which causes such names to be expanded using the default namespace for elements and types.
+     *
+     * <p>Note that any setting other than the default causes the query to behave in a way that
+     * is not conformant with the W3C XQuery 3.1 specifications.</p>
+     *
+     * <p>The chosen policy affects:</p>
+     * <ul>
+     *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStep</code>
+     *     or <code>ReverseStep</code>) in an XPath expression within the stylesheet, other than an
+     *     axis step using the attribute or namespace axis</li>
+     *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStepP</code>
+     *     in a pattern within the stylesheet, other than an axis step using the attribute or namespace
+     *     axis</li>
+     * </ul>
+     *
+     * <p>It does not affect names appearing in other contexts (for example, names used in
+     * {@code xsl:strip-space/@elements}), and it does not affect name tests expressed in a form
+     * other than a simple NCName (for example tests of the form <code>Q{}local</code>, or
+     * <code>*:local</code>, or <code>element(local)</code>).</p>
+     *
+     * <p>It does not affect XPath expressions evaluated dynamically using <code>xsl:evaluate</code>.</p>
+     *
+     * @param unprefixedElementMatchingPolicy the policy for handling unprefixed elements.
+     */
+
+    public void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy) {
+        staticQueryContext.setUnprefixedElementMatchingPolicy(unprefixedElementMatchingPolicy);
+    }
+
+
     /**
      * Declare the default collation
      *
