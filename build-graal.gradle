@@ -1342,11 +1342,14 @@ project.task("all_python_test_suites") {
   Task t = task "${edition}c_xslt30_test_suite"(
     dependsOn: ["pyenv_install_saxon_${edition}c"]
   ) {
+    def output_path = "${buildDir}/test-results/${edition}c/${saxonVersion}/xslt30/${DSTAMP}";
+
     inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
     outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
+    outputs.files fileTree(dir: output_path)
 
     doFirst {
-      mkdir("${buildDir}/test-results/${edition}c/xslt30/XT30/${DSTAMP}")
+      mkdir(output_path)
     }
 
     doLast {
@@ -1371,7 +1374,7 @@ project.task("all_python_test_suites") {
       exec {
         workingDir "${buildDir}/c/${edition}c_testsuite_driver"
         commandLine "python3", "./xslt30_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}/..",
-          "-o", "${buildDir}/test-results/${edition}c/${saxonVersion}/xslt30/${DSTAMP}"
+          "-o", output_path
       }
     }
   }
