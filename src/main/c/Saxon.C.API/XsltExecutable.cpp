@@ -234,7 +234,7 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
                         throw SaxonApiException("getResultDocuments failed to create value");
                     }
                 }
-                delete results;
+                delete [] results;
                 j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)resultUrisRef);
             } else {
                 exceptionFound = true;
@@ -862,16 +862,16 @@ void XsltExecutable::setSaveXslMessage(bool create, const char * filename) {
 
         if (filename == nullptr) {
             std::string optionStr = "-:on";
-            //saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)optionStr.c_str());
+            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)optionStr.c_str());
 
-            //setProperty("m", "on");
+            setProperty("m", "on");
         } else {
-            //saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)filename);
+            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)filename);
 
         }
 
     } else {
-        //TODO remove saxonMessageListener from the objectHandle's pool
+         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)saxonMessageListenerRef);
         saxonMessageListenerRef = -1;
         setProperty("m", "off");
 
@@ -884,29 +884,30 @@ void XsltExecutable::setSaveXslMessage(bool create, const char * filename) {
 XdmValue * XsltExecutable::getXslMessages(){
 
     if(saxonMessageListenerRef > 0) {
-       /* static jmethodID getmessageID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(messageListenerClass,
-                                                                                                  "getXslMessages",
-                                                                                                  "()[Lnet/sf/saxon/s9api/XdmNode;");
-        if (!getmessageID) {
-            std::cerr << "Error: " << getDllname() << ".getXslMessages" << " not found\n"
-                      << std::endl;
-            SaxonProcessor::sxn_environ->env->ExceptionClear();
-        } else {
-            jobjectArray results = (jobjectArray) (
-                    SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonMessageListenerRef, getmessageID));
-            int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
+        allocFn fn = operator new;
+        long long * results = j_getXslMessages(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)saxonMessageListenerRef);
 
-            if (sizex > 0) {
-                XdmValue *value = new XdmValue();
+          if(results != nullptr) {
+                int sizex = results[0];
+                //std::cerr<<"getXslMessages cp0 size= "<<sizex<<std::endl;
+                XdmValue * value= new XdmValue();
+                for(int i = 1; i<= sizex; i++) {
+                    XdmItem * item = nullptr;
 
-                for (int p = 0; p < sizex; ++p) {
-                    jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
-                    value->addUnderlyingValue(resulti);
+                    item = SaxonProcessor::makeXdmItemFromRef(results[i]);
+                    if(value != nullptr ) {
+                        value->addXdmItem(item);
+                    } else {
+                        throw SaxonApiException("getXslMessages failed to create value");
+                    }
                 }
-                SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
+                delete [] results;
                 return value;
+
+            } else {
+                exceptionFound = true;
+                throw SaxonApiException();
             }
-        }*/
     }
     return nullptr;
 

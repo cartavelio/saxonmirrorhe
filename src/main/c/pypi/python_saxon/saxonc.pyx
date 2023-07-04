@@ -1643,6 +1643,17 @@ cdef class PyXsltExecutable:
 
          return p_dataMap
 
+     @property
+     def xsl_messages(self):
+        """
+        xsl_messages
+        Get the messages written using the xsl:message instruction. Return NULL if the user has not
+        enabled of capturing of xsl:messages via setSaveXslMessage
+
+
+        :return: value (PyXdmValue):
+        """
+
      def set_parameter(self, name, value):
         """
         set_parameter(self, name, value)

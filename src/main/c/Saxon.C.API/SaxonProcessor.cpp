@@ -419,7 +419,6 @@ void SaxonProcessor::applyConfigurationProperties() {
 
                           }  else if (typeRef == 4) {
                               value = new XdmValue();
-                              value = new XdmValue();
                               xdmItem =  new XdmMap(results);
                               value->addXdmItem(xdmItem);
 
@@ -453,6 +452,51 @@ void SaxonProcessor::applyConfigurationProperties() {
 
                    return nullptr;
     }
+
+
+      XdmItem * SaxonProcessor::makeXdmItemFromRef(int64_t results){
+                         if(results > 0) {
+                              int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
+                              XdmItem * xdmItem = nullptr;
+                              if(typeRef == -2) {
+
+                                  throw SaxonApiException();
+                              }
+                              if(typeRef == 1) {
+                                  xdmItem = new XdmAtomicValue(results);
+
+                              } else if(typeRef == 2) {
+                                  xdmItem = new XdmNode(results);
+
+                              }  else if (typeRef == 4) {
+                                  xdmItem =  new XdmMap(results);
+
+                              } else if (typeRef == 3) {
+                                  xdmItem =  new XdmArray(results);
+
+                              } else if (typeRef == 5) {
+                                  xdmItem =  new XdmFunctionItem(results);
+                              } else if (typeRef == 6) {
+                                  //Empty Sequence detected.
+                                  //TODO Maybe we should create an EmptySequence object
+                                  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
+                                  results = -1;
+                                  return nullptr;
+
+                              }else {
+                                  throw SaxonApiException("Internal Error: Cannot create XdmItem from reference");
+
+                              }
+
+
+                              return xdmItem;
+                          } else if(results == -2){
+                              throw SaxonApiException();
+                          }
+
+
+                       return nullptr;
+        }
 
 
 int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
