@@ -122,8 +122,11 @@ cdef char * make_c_str2(str_value, encoding='utf-8'):
 
 
 cdef str make_py_str(const char * c_value, encoding='utf-8'):
-    ustring = c_value.decode(encoding) if c_value is not NULL else None
-    return ustring
+    try:
+        ustring = c_value.decode(encoding) if c_value is not NULL else None
+        return ustring
+    except UnicodeError as ex:
+        raise PySaxonApiError(ex)
 
 cdef class PySaxonProcessor:
     """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.

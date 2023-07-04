@@ -7,14 +7,17 @@ import re
 class PyTestOutcome:
 
     processor: PySaxonProcessor
-    wrong_error: str
+    wrong_error = None
     result_documents: dict
     xsl_messages = None
+    serialized_result = None
+    base_uri = None
 
     def __init__(self):
         self.wrong_error = None
         self.result_documents = {}
         self.xsl_messages = None
+        self.serialized_result = None
 
     def capture_result_documents(self, rd : dict):
         self.result_documents = rd
@@ -50,7 +53,7 @@ class PyTestOutcome:
         tag = assertion.name.split("}")[1]
         assert_set.add(tag)
 
-        if "assert-empty" != tag and "error" != tag and "any-of" != tag and "all-of" != tag and result is None:
+        if "assert-empty" != tag and "error" != tag and "any-of" != tag and "all-of" != tag and result is None and self.serialized_result is None:
             print("Error Found = " + str(result_as_error))
             return False
         if os.getenv("SAXONC_DEBUG_FLAG") is not None:
@@ -87,6 +90,8 @@ class PyTestOutcome:
             return self.assert_serialization(assertion, result, catalog_xpc)
 
         elif "assert-message" == tag:
+            if self.xsl_messages is None:
+                return False
             catalog_xpc.set_context(xdm_item=assertion)
             sub_assertion = catalog_xpc.evaluate_single("*")
             for n in range(int(self.xsl_messages.size)):
@@ -103,11 +108,16 @@ class PyTestOutcome:
             sub_assertion = catalog_xpc.evaluate_single("*")
             '''print(result.item_at(0).get_node_value().base_uri)'''
             uri = assertion.get_attribute_value("uri")
-            uri = urllib.parse.urljoin(result.item_at(0).get_node_value().base_uri, uri)
-            if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+            base_urii = ""
+            if result is not None:
+                base_urii = result.item_at(0).get_node_value().base_uri
+            else:
+                base_urii = self.base_uri
+            uri = urllib.parse.urljoin(base_urii, uri)
+            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                 print("uri=" + uri)
             if self.result_documents:
-                if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+                if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                     print(list(self.result_documents.keys()))
                 doc = self.result_documents[uri]
                 ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result, assert_xpc, catalog_xpc, assert_set)
@@ -172,18 +182,17 @@ class PyTestOutcome:
         comparand = comparand.replace("\r\n", "\n")
         if comparand.endswith("\n"):
             comparand = comparand[0:-1]
-
+        result_str = ""
         if result is None:
-            return False
-        result_str = str(result)
-
-        if result_str is None:
-            return False
-
-
+            if self.serialized_result is not None:
+                result_str = self.serialized_result
+            else:
+                return False
+        else:
+            result_str = str(result)
 
         if method is None:
-            method =  "xml"
+            method = "xml"
 
         is_html = method == "html" or method == "xhtml"
 
@@ -234,8 +243,11 @@ class PyTestOutcome:
 
         result_str = ""
         if result is None:
-            return False
-        if isinstance(result, PyXdmItem):
+            if self.serialized_result is not None:
+                result_str = self.serialized_result
+            else:
+                return False
+        elif isinstance(result, PyXdmItem):
             result_str = result.string_value
         elif result.size == 1:
             result_str = str(result.item_at(0))
@@ -253,20 +265,25 @@ class PyTestOutcome:
         print(assertion_regex)
         print(assertion.children[0])
         print(flags_att_str)'''
-        if re.search(str(assertion.children[0]), str(result)) is not None:
+        if re.search(str(assertion.children[0]), result_str) is not None:
             return True
 
-        if re.search(assertion_regex, str(result)) is not None:
+        if re.search(assertion_regex, result_str) is not None:
             return True
+
+        assertion_regex = assertion_regex.replace("'", "''")
 
         xpath_str = "fn:matches('" + result_str + "', \'" + assertion_regex + "\','" + flags_att_str + "')"
-        '''print(xpath_str)
-        print('result = ' + result_str)'''
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            print("assert-serialization-matches = " + xpath_str)
+            print("assertion_regex = " + assertion_regex)
         oki = False
         try:
             oki = assert_xpc.effective_boolean_value(xpath_str)
             return oki
         except Exception as ex:
+            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                print("assert-serialization-matches failed")
             print(ex)
         return False
 
@@ -368,7 +385,7 @@ class PyTestOutcome:
 
 
         parser = etree.XMLParser(remove_blank_text=True)
-        if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print("====== assertion - assert-xml:=")
             print(comparand)
             print("====== result:=")
