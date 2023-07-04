@@ -1,18 +1,17 @@
 from saxoncee import *
 import os
 from Environment import Environment
-import sys
+import sys, getopt
 from os.path import isfile
 from datetime import datetime as date
 
-dir = "/Users/ond1/work/development/git/XSLT30"
-'''dir = os.getcwd()'''
-path = dir + "/xslt30-test/"
-catalog = path + "catalog.xml"
+path = None
+catalog = None
 saxon_version = ""
 
 driver_proc = PySaxonProcessor(license=True)
-driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation", "/Users/ond1/work/development/git/private/saxon-license.lic")
+driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                       "/Users/ond1/work/development/git/private/saxon-license.lic")
 driver_proc.set_cwd(os.getcwd())
 cat_builder = None
 
@@ -22,11 +21,9 @@ xpathProcForEnv = driver_proc.new_xpath_processor()
 
 xpathProcForCompareNodes = driver_proc.new_xpath_processor()
 
-xpathProcForCompareNodes.declare_namespace("fn","http://www.w3.org/2005/xpath-functions")
-
+xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
 
 schemaValidator = driver_proc.new_schema_validator()
-
 
 globalEnvironment = {}
 localEnvironment = {}
@@ -37,6 +34,7 @@ passVar = 0
 fail = 0
 error = 0
 not_run = 0
+
 run_test = None
 '''"streamable"'''
 run_test_case_name = None
@@ -352,11 +350,11 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         else:
             print('env_Ref = ' + env_ref)
             environment = environments[env_ref]'''
-    print("checkpoint 1")
+
     test_input = xpath_proc.evaluate_single("test")
-    print("checkpoint 2")
+
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
-    print("checkpoint 3")
+
     if stylesheet is not None:
         print('stylesheet found XXX')
         print(str(stylesheet))
@@ -366,10 +364,53 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
     return "Not run"
 
+def main(argv):
 
-saxon_version = driver_proc.version
+    global run_test
+    global run_test_case_name
+    global path
 
-print("W3 XSLT 3.0 Test Suite")
-print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
+    saxon_version = driver_proc.version
 
-process_catalog(catalog)
+    print("W3 XSLT 3.0 Test Suite")
+    print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
+
+    dir = None
+
+
+    if len(sys.argv) > 0:
+        dir = str(sys.argv[1])
+        print("Test suite directory = " + dir)
+
+        argvv = argv[1:]
+
+        try:
+            opts, args = getopt.getopt(argvv, "ht:s:")
+        except getopt.GetoptError:
+            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset -o <resultdir>')
+            sys.exit(2)
+
+        for opt, arg in opts:
+            if opt == '-h':
+                print('xslt30_test_suite_driver.py -t <testpattern -s <testset -o <resultdir>')
+                sys.exit()
+            elif opt in ("-t", "--testpattern"):
+                run_test_case_name = arg
+            elif opt in ("-s", "--testset"):
+                run_test = arg
+
+            print('Input file is ', run_test)
+
+
+    '''dir = os.getcwd()'''
+    path = dir + "/xslt30-test/"
+    catalog = path + "catalog.xml"
+
+
+
+
+    process_catalog(catalog)
+
+
+if __name__ == "__main__":
+   main(sys.argv[1:])
