@@ -916,6 +916,13 @@ public final class AxisExpression extends Expression {
                 return StaticProperty.EMPTY;
             }
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
+        } else if (axis == AxisInfo.CHILD && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
+            SchemaType contentType = originNodeType.getContentType();
+            if (contentType instanceof ComplexType) {
+                return ((ComplexType) contentType).getElementParticleCardinality(nodeTest.getFingerprint(), true);
+            } else {
+                return StaticProperty.EMPTY;
+            }
         } else if (axis == AxisInfo.DESCENDANT && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
