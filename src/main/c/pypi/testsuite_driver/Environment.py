@@ -10,8 +10,8 @@ class Environment:
     def __init__(self):
         ...
         self.proc = PySaxonProcessor(license=True)
-        '''self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
-                                               "/Users/ond1/work/development/git/private/saxon-license.lic")'''
+        self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                               "/Users/ond1/work/development/git/private/saxon-license.lic")
         self.lang = None
         self.proc.set_configuration_property('http://saxon.sf.net/feature/optimizationLevel', optimizer_flags)
 
@@ -21,8 +21,6 @@ class Environment:
         self.xquery_proc = self.proc.new_xquery_processor()
 
         self.xslt_proc = self.proc.new_xslt30_processor()
-
-        self.source_docs = {}
 
 
 
