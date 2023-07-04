@@ -59,6 +59,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   tunnel = other.tunnel;
   rawResultsFlag = other.rawResultsFlag;
   exceptionFound = other.exceptionFound;
+  saxonMessageListenerRef = other.saxonMessageListenerRef;
 
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
@@ -990,7 +991,9 @@ XdmValue *XsltExecutable::getXslMessages() {
 
     if (results != nullptr) {
       int sizex = results[0];
-      //std::cerr<<"getXslMessages cp0 size= "<<sizex<<std::endl;
+#ifdef DEBUG
+      std::cerr<<"C++: getXslMessages size= "<<sizex<<std::endl;
+#endif
       XdmValue *value = new XdmValue();
       for (int i = 1; i <= sizex; i++) {
         XdmItem *item = nullptr;

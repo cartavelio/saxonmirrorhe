@@ -45,13 +45,22 @@ public class SaxonCMessageListener implements MessageListener2 {
     public SaxonCMessageListener(Processor proc, String cwd, String mode) throws SaxonApiException {
         processor = proc;
         if (mode.equals("-:on")) {
+            if(SaxonCAPI.debug) {
+                System.err.println("SaxonCMessageListener mode = 1");
+            }
             this.mode = 1;
         } else if (mode.equals("-:off")) {
+            if(SaxonCAPI.debug) {
+                System.err.println("SaxonCMessageListener mode = 0");
+            }
             this.mode = 0;
         }  else {
             this.mode = 2;
             messageFilename = mode;
             sourceFile = SaxonCAPI.resolveFileToSource(processor, cwd, messageFilename, ResourceRequest.XML_NATURE);
+            if(SaxonCAPI.debug) {
+                System.err.println("SaxonCMessageListener mode = 2, filename = " + messageFilename + " resolved filename = " + sourceFile.getSystemId());
+            }
         }
     }
 
@@ -127,7 +136,9 @@ public class SaxonCMessageListener implements MessageListener2 {
     public static CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle messageListnerRef) {
         SaxonCMessageListener messageListener = SaxonCAPI.objectHandles.get(messageListnerRef);
         List<XdmNode> xslMessages = messageListener.xslMessages;
-
+        if(SaxonCAPI.debug) {
+            System.err.println("SaxonCMessageListener getXslMessage size = " + messageListener.xslMessages.size());
+        }
             long[] refs= xslMessages.stream().mapToLong( i ->{
                         ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
                         return objectHandle.rawValue();

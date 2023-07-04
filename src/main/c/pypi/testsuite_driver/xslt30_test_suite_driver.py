@@ -560,10 +560,10 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                 outcome.result_documents = sheet.get_result_documents()
                 outcome.xsl_messages = sheet.xsl_messages
             else:
-                print(sheet.xsl_messages)
                 result = sheet.apply_templates_returning_value(xdm_value=environment.context_item, base_output_uri=base_output_uri)
                 outcome.result_documents = sheet.get_result_documents()
                 outcome.xsl_messages = sheet.xsl_messages
+                print(sheet.xsl_messages)
             '''print('Result = ' + str(result))'''
 
 
