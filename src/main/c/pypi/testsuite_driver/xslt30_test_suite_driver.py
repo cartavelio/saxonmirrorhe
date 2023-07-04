@@ -349,8 +349,6 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
                 print(stylesheet_file)
                 environment.xslt_proc.set_cwd(base_uri)
                 environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=stylesheet_file)
-                if environment.sheet is not None:
-                    print("executable exists")
         except PySaxonApiError as ex:
             print(ex)
             print("**** failure while compiling environment-defined stylesheet " + stylesheet_file)
@@ -535,7 +533,9 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         print(start_memory)
         print("End memory:")
         print(process.memory_info().rss)
-        print(test_input_node)
+    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+        print(test_case_node)
+
     xpath_proc.set_context(xdm_item=test_input_node)
     '''Get config for XSLT Processor'''
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")

@@ -25,6 +25,20 @@ class PyTestOutcome:
         self.processor = proc
         tag = assertion.name
         success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
+
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None and "any-of" != tag and "all-of" != tag and "not" != tag:
+            if not success:
+                if result is not None:
+                    print("Assertion =" + str(assertion))
+                    print("=============================")
+                    print("Result =" + str(result))
+
+                if result_as_error:
+                    print("Assertion Error=" + str(assertion))
+                    print(self.wrong_error)
+                    print("=============================")
+                    print("Result =" + str(result_as_error))
+
         return success
 
     def test_assertion_error(self, assertion: PyXdmNode, result: PySaxonApiError, assert_xpc: PyXPathProcessor,
@@ -39,7 +53,8 @@ class PyTestOutcome:
         if "assert-empty" != tag and "error" != tag and "any-of" != tag and "all-of" != tag and result is None:
             print("Error Found = " + str(result_as_error))
             return False
-        print(assert_set)
+        if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+            print(assert_set)
         if "assert" == tag:
             return self.assert_xpath(assertion, result, assert_xpc, catalog_xpc)
         elif "assert-xml" == tag:
