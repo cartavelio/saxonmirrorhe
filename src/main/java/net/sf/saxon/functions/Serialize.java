@@ -58,6 +58,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
         op.addAllowedOption("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
         op.addAllowedOption("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
+        op.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("escape-uri-attributes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("html-version", SequenceType.SINGLE_DECIMAL); //decimal-param-type
         op.addAllowedOption("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
@@ -103,7 +104,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     private final String[] paramNames = new String[]{
         "allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "doctype-public", "doctype-system",
-        "encoding", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator",
+        "encoding", "escape-solidus", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator",
         "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone",
         "suppress-indentation", "undeclare-prefixes", "use-character-maps", "version"
     };
@@ -142,6 +143,7 @@ public class Serialize extends SystemFunction implements Callable {
         requiredTypes.put("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
         requiredTypes.put("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
         requiredTypes.put("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
+        requiredTypes.put("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         requiredTypes.put("escape-uri-attributes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         requiredTypes.put("html-version", SequenceType.SINGLE_DECIMAL); //decimal-param-type
         requiredTypes.put("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
@@ -382,6 +384,9 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get("encoding")) != null) {
             props.setProperty("encoding", seqVal.head().getStringValue());
+        }
+        if ((seqVal = map.get("escape-solidus")) != null) {
+            props.setProperty("escape-solidus", toYesNoTypeString(seqVal));
         }
         if ((seqVal = map.get("escape-uri-attributes")) != null) {
             props.setProperty("escape-uri-attributes", toYesNoTypeString(seqVal));

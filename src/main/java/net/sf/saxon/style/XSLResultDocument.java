@@ -52,6 +52,7 @@ public class XSLResultDocument extends StyleElement {
         fans.add("doctype-public");
         fans.add("doctype-system");
         fans.add("encoding");
+        fans.add("escape-solidus");
         fans.add("escape-uri-attributes");
         fans.add("html-version");
         fans.add("include-content-type");
@@ -146,6 +147,9 @@ public class XSLResultDocument extends StyleElement {
                 String val = value;
                 if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR) && !f.equals(SaxonOutputKeys.NEWLINE)) {
                     val = Whitespace.trim(value);
+                }
+                if (f.equals(SaxonOutputKeys.ESCAPE_SOLIDUS)) {
+                    requireXslt40Attribute(f);
                 }
                 Expression exp = makeAttributeValueTemplate(val, att);
                 serializationAttributes.put(name, exp);

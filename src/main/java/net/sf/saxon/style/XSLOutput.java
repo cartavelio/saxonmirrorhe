@@ -73,6 +73,9 @@ public class XSLOutput extends StyleElement {
                 serializationAttributes.put(f, val);
             } else if (XSLResultDocument.fans.contains(f) && !f.equals("output-version")) {
                 String val = value;
+                if (f.equals(SaxonOutputKeys.ESCAPE_SOLIDUS)) {
+                     requireXslt40Attribute(f);
+                }
                 if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR) && !f.equals(SaxonOutputKeys.NEWLINE)) {
                     val = Whitespace.trim(val);
                 }
