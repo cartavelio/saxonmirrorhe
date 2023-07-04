@@ -257,10 +257,7 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
   valuesi = new XdmNode *[axisCount];
   XdmNode *tempNode = nullptr;
   for (int p = 1; p < axisCount + 1; ++p) {
-    if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "axisNodes result[" << p << "]= " << (long)results[p]
-                << std::endl;
-    }
+
     tempNode = new XdmNode(this, results[p], UNKNOWN);
     // this->incrementRefCount();
     valuesi[p - 1] = tempNode;
@@ -305,8 +302,6 @@ XdmNode **XdmNode::getChildren(bool cached) {
     }
     children = new XdmNode *[childCount];
     for (int p = 0; p < childCount; ++p) {
-      // std::cerr<<"DEBUG C++ loop getChildren, cp1 child
-      // value="<<childNodes[p]<<std::endl;
       children[p] = new XdmNode(this, (int64_t)childNodes[p], UNKNOWN);
     }
     operator delete(childNodes);
