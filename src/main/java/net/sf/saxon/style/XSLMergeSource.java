@@ -11,8 +11,10 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.sort.MergeInstr;
+import net.sf.saxon.functions.Count;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -214,7 +216,11 @@ public class XSLMergeSource extends StyleElement {
         }
 
         if (sourceName == null) {
-            sourceName = "saxon-merge-source-" + hashCode();
+            try {
+                sourceName = "merge-source " + (Count.count(iterateAxis(AxisInfo.PRECEDING_SIBLING, NodeKindTest.ELEMENT)) + 1);
+            } catch (XPathException e) {
+                sourceName = "merge-source " + hashCode();
+            }
         }
 
         if (forEachItemAtt != null) {
