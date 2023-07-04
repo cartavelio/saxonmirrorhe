@@ -740,7 +740,7 @@ public final class Tokenizer {
                         nextToken = Token.LE;
                         return;
                     }
-                    if (inputOffset < inputLength && isLessThanChar(input.charAt(inputOffset))) {
+                    if (inputOffset < inputLength && c == input.charAt(inputOffset)) {
                         inputOffset++;
                         nextToken = Token.PRECEDES;
                         return;
@@ -770,7 +770,7 @@ public final class Tokenizer {
                         nextToken = Token.GE;
                         return;
                     }
-                    if (inputOffset < inputLength && isGreaterThanChar(input.charAt(inputOffset))) {
+                    if (inputOffset < inputLength && c == input.charAt(inputOffset)) {
                         inputOffset++;
                         nextToken = Token.FOLLOWS;
                         return;
