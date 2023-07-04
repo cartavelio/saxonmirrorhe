@@ -460,7 +460,7 @@ public class TestXQueryCompiler {
     public void testIssue2111() {
         try {
             final Configuration configuration = new Configuration();
-            configuration.setConfigurationProperty(Feature.XQUERY_VERSION, "1.0");
+            configuration.setConfigurationProperty(Feature.XQUERY_VERSION, "3.1");
             configuration.setModuleURIResolver((moduleURI, baseURI, locations) -> {
                 StringReader reader = new StringReader("module namespace x='x'; declare variable $x:x := 'x';");
                 StreamSource module = new StreamSource(reader);
