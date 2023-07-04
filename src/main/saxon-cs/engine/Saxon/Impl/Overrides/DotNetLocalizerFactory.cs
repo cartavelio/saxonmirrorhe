@@ -11,7 +11,7 @@ namespace Saxon.Impl.Overrides {
             this.config = config;
         }
         public override Numberer getNumberer(string language, string country) {
-            return new IcuNumberer(language??config.getDefaultLanguage(), country??config.getDefaultCountry());
+            return new LocalNumberer(language??config.getDefaultLanguage(), country??config.getDefaultCountry());
         }
     }
 }
