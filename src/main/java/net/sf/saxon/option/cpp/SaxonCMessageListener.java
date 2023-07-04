@@ -132,7 +132,7 @@ public class SaxonCMessageListener implements MessageListener2 {
                         ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
                         return objectHandle.rawValue();
                     }).toArray();
-            CLongPointer addr = SaxonCAPI.longArrayToNative(alloc,refs);
+            CLongPointer addr = SaxonCAPI.longArrayToNativeWithLength(alloc,refs);
             return addr;
         
     }
