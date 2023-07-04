@@ -130,7 +130,7 @@ public class SaxonCAPI {
         if (debug && licensei) {
             System.err.println("Flag is true to create SaxonProcessor with license");
         }
-        ObjectHandle handle = objectHandles.create(new Processor(licensei));
+        ObjectHandle handle = createHandle(new Processor(licensei));
         return handle.rawValue();
     }
 
@@ -360,7 +360,7 @@ public class SaxonCAPI {
         }
 
         //config.setHostLanguage(Configuration.XQUERY);
-        ObjectHandle handle = objectHandles.create(new Processor(config));
+        ObjectHandle handle = createHandle(new Processor(config));
         return handle.rawValue();
 
     }
