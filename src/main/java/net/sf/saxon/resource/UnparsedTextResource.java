@@ -42,7 +42,7 @@ public class UnparsedTextResource implements Resource {
      */
 
     private UnparsedTextResource(XPathContext context, AbstractResourceCollection.InputDetails details) throws XPathException {
-        this.config = context.getConfiguration();
+        this.config = context != null ? context.getConfiguration() : null;
         this.href = details.resourceUri;
         this.contentType = details.contentType;
         this.encoding = details.encoding;
