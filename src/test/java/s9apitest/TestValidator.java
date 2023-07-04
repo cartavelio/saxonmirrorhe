@@ -1987,5 +1987,57 @@ public class TestValidator {
         }
 
     }
+
+    @Test
+    public void testAttributePathInReport() {   // Bug 6085
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<PIM>\n"
+                + "    <category id=\"c-1\" title=\"Products\"/>\n"
+                + "    <category id=\"c-2\" title=\"Sub-Category\"/>\n"
+                + "    <category id=\"c-3\" title=\"\"/>\n"
+                + "    <category id=\"c-4\" title=\"\"/>\n"
+                + "    <extra>forty-two</extra>\n"
+                + "    <nonsense/>\n"
+                + "</PIM>";
+        String xsd = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
+                + "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n"
+                + "    <xs:element name=\"PIM\">\n"
+                + "        <xs:complexType>\n"
+                + "            <xs:sequence>\n"
+                + "                <xs:choice maxOccurs=\"unbounded\">\n"
+                + "                    <xs:element name=\"category\" type=\"categoryType\"/>\n"
+                + "                    <xs:element name=\"extra\" type=\"xs:integer\"/>\n"
+                + "                </xs:choice>\n"
+                + "            </xs:sequence>\n"
+                + "        </xs:complexType>\n"
+                + "    </xs:element>\n"
+                + "\n"
+                + "    <xs:complexType name=\"categoryType\">\n"
+                + "        <xs:attribute name=\"id\" type=\"xs:ID\" use=\"required\"/>\n"
+                + "        <xs:attribute name=\"title\" use=\"required\">\n"
+                + "            <xs:simpleType>\n"
+                + "                <xs:restriction base=\"xs:string\">\n"
+                + "                    <xs:minLength value=\"1\"/>\n"
+                + "                </xs:restriction>\n"
+                + "            </xs:simpleType>\n"
+                + "        </xs:attribute>\n"
+                + "    </xs:complexType>\n"
+                + "</xs:schema>";
+        StringWriter report = new StringWriter();
+        try {
+            Processor proc = new Processor(true);
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(new StringReader(xsd)));
+            SchemaValidator val = sm.newSchemaValidator();
+            val.setValidityReporting(proc.newSerializer(report));
+            val.validate(new StreamSource(new StringReader(xml)));
+            fail("Unexpected success");
+        } catch (SaxonApiException e) {
+            System.err.println(report);
+            assert (report.toString().contains("path=\"/Q{}PIM[1]/Q{}category[3]/@title\""));
+            assert (report.toString().contains("path=\"/Q{}PIM[1]/Q{}extra[1]\""));
+            assert (report.toString().contains("path=\"/Q{}PIM[1]/Q{}nonsense[1]\""));
+        }
+    }
 }
 
