@@ -1436,6 +1436,13 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
                   those parcels to form the new array.</p></li>
          </ul>
       </section>
+      
+      <section id="miscellaneous-xslt40" title="Miscellaneous extensions">
+         <h1>Miscellaneous extensions</h1>
+         
+         <p>The <code>xsl:matching-substring</code> and <code>xsl:non-matching-substring</code> elements within
+         <code>xsl:analyze-string</code> may now take a <code>select</code> attribute in place of a contained
+         sequence constructor. (Implemented from Saxon 12.3)</p>
    </section>
 
 

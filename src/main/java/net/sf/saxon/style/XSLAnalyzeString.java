@@ -31,8 +31,8 @@ public class XSLAnalyzeString extends StyleElement {
     /*@Nullable*/ private Expression select;
     private Expression regex;
     private Expression flags;
-    private StyleElement matching;
-    private StyleElement nonMatching;
+    private XSLMatchingSubstring matching;
+    private XSLMatchingSubstring nonMatching;
     private RegularExpression pattern;
 
     /**
@@ -160,12 +160,12 @@ public class XSLAnalyzeString extends StyleElement {
                     if (matching != null || nonMatching != null || foundFallback) {
                         compileError("xsl:matching-substring element must come first", "XTSE0010");
                     }
-                    matching = (StyleElement) curr;
+                    matching = (XSLMatchingSubstring) curr;
                 } else {
                     if (nonMatching != null || foundFallback) {
                         compileError("xsl:non-matching-substring cannot appear here", "XTSE0010");
                     }
-                    nonMatching = (StyleElement) curr;
+                    nonMatching = (XSLMatchingSubstring) curr;
                 }
             } else {
                 compileError("Only xsl:matching-substring and xsl:non-matching-substring are allowed here", "XTSE0010");
@@ -187,12 +187,18 @@ public class XSLAnalyzeString extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression matchingBlock = null;
         if (matching != null) {
-            matchingBlock = matching.compileSequenceConstructor(exec, decl, false);
+            matchingBlock = matching.getSelectExpression();
+            if (matchingBlock == null) {
+                matchingBlock = matching.compileSequenceConstructor(exec, decl, false);
+            }
         }
 
         Expression nonMatchingBlock = null;
         if (nonMatching != null) {
-            nonMatchingBlock = nonMatching.compileSequenceConstructor(exec, decl, false);
+            nonMatchingBlock = nonMatching.getSelectExpression();
+            if (nonMatchingBlock == null) {
+                nonMatchingBlock = nonMatching.compileSequenceConstructor(exec, decl, false);
+            }
         }
 
         try {
