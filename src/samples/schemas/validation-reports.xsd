@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" 
-  targetNamespace="http://saxon.sf.net/ns/validation" xmlns:saxon="http://saxon.sf.net/" xmlns:v="http://saxon.sf.net/ns/validation">
+  targetNamespace="http://saxon.sf.net/ns/validation" xmlns:v="http://saxon.sf.net/ns/validation">
   <xs:element name="validation-reports">
     <xs:complexType>
       <xs:sequence>
@@ -17,46 +17,90 @@
         <xs:element maxOccurs="unbounded" ref="v:error"/>
         <xs:element ref="v:meta-data" maxOccurs="1" minOccurs="1"/>
       </xs:sequence>
-      <xs:attribute name="system-id" use="required" type="xs:anyURI"/>
+      <xs:attribute name="system-id" use="required" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>The URI of the document being validated.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   <xs:element name="error">
+    <xs:annotation>
+      <xs:documentation>Information about a validation error. Although described as mixed
+      content, the actual structure is a text node containing a free-text error
+      message, followed by zero or more v:contributing-node elements containing
+      details of nodes whose content is relevant to the error.</xs:documentation>
+    </xs:annotation>
     <xs:complexType mixed="true">
-      <xs:attribute name="column" use="optional" type="xs:integer">
+      <xs:sequence>
+        <xs:element ref="v:contributing-node" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="v:location-atts"/>
+      <xs:attribute name="context-path" use="optional" type="xs:string" >
         <xs:annotation>
-          <xs:documentation>Defines the column number where the error occurs. 
-            This attribute and the path attribute are mutually exclusive.</xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
-      <xs:attribute name="path" use="optional" type="xs:anyURI">
-        <xs:annotation>
-          <xs:documentation>Defines the path where the error occurs if the column number is unavailable.
-            This attribute and the path attribute are mutually exclusive.</xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
-      <xs:attribute name="line" use="optional" type="xs:integer">
-        <xs:annotation>
-          <xs:documentation>Defines the line number location for the validation error if available.</xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
-      <xs:attribute name="context-path" use="optional" type="xs:anyURI" >
-        <xs:annotation>
-          <xs:documentation>Defines a hierarchic path giving the logical position in the instance 
-            document where the validation error was found</xs:documentation>
+          <xs:documentation>Defines a path to the validation root (the root of the subtree
+            being validated), used when a subtree is validated. The format is as in
+            the output of the fn:path function.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="xsd-part" use="optional" type="xs:string">
         <xs:annotation>
-          <xs:documentation>Defines the part number of the XSD schema specification containing 
+          <xs:documentation>Defines the part number of the W3C XSD specification containing 
             the constraint that has been violated</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="constraint" use="optional" type="xs:string">
         <xs:annotation>
-          <xs:documentation>Get the clause number of the rule that has been violated</xs:documentation>
+          <xs:documentation>The identifier of the rule that has been violated in the W3C XSD specification.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>      
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="location-atts">
+    <xs:annotation>
+      <xs:documentation>A collection of attributes identifying a location in the source document.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="column" use="optional" type="xs:integer">
+      <xs:annotation>
+        <xs:documentation>Defines the column number where the error was found.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="line" use="optional" type="xs:integer">
+      <xs:annotation>
+        <xs:documentation>Defines the line number where the error was found.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="path" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>Defines the path where the error was found, in the
+          same format as the output of the fn:path function.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="system-id" use="optional" type="xs:anyURI">
+      <xs:annotation>
+        <xs:documentation>The entity containing the error (omitted if this is the document entity).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>     
+  </xs:attributeGroup>
+  <xs:element name="contributing-node">
+    <xs:annotation>
+      <xs:documentation> This element is used for failing assertions, where the assertion on a
+        particular node A places conditions on descendant nodes D: for example <code>every $n in .//* satisfies self::x</code>.
+        With that kind of assertion, the nodes in <code>.//*</code> that do not satisfy the condition are reported
+        as "contributing nodes", although it is the root node A containing the assertion that is technically invalid.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attributeGroup ref="v:location-atts"/>
+      <xs:attribute name="type" use="optional" type="xs:string" >
+        <xs:annotation>
+          <xs:documentation>The type of node, for example text() or element(foo).</xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="system-id" use="optional" type="xs:anyURI"/>      
+      <xs:attribute name="content" use="optional" type="xs:string" >
+        <xs:annotation>
+          <xs:documentation>If the node is a text node of modest length, the content of the node.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   <xs:element name="meta-data">
@@ -76,7 +120,7 @@
     <xs:complexType>
       <xs:attribute name="name" use="required" type="xs:string">
         <xs:annotation>
-          <xs:documentation>Defines the Schema validation product</xs:documentation>
+          <xs:documentation>The name of the the schema validation product, for example SAXON-EE</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="vendor" use="optional" type="xs:string">
@@ -109,12 +153,12 @@
     <xs:complexType>
       <xs:attribute name="file" use="required" type="xs:anyURI">
         <xs:annotation>
-          <xs:documentation>Defines the name of the XSD schema used to validate the source document</xs:documentation>
+          <xs:documentation>The URI of the XSD schema used to validate the source document</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="xsd-version" use="required" type="xs:decimal">
         <xs:annotation>
-          <xs:documentation>Defines the XSD Schema version used to validate the source document</xs:documentation>
+          <xs:documentation>The XSD Schema version used to validate the source document (1.0 or 1.1)</xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
@@ -123,7 +167,7 @@
     <xs:complexType>
       <xs:attribute name="at" use="required" type="xs:dateTime">
         <xs:annotation>
-          <xs:documentation>Defines the date as to when the validation was run.</xs:documentation>
+          <xs:documentation>The date and time when the validation was run.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
