@@ -273,7 +273,24 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
     node = executable.apply_templates_returning_value(xdm_value=input_)
     assert node is not None
 
-def collection_test(saxonproc, data_dir):
+
+def testNodeAxis(saxonproc, data_dir):
+    node_ = saxonproc.parse_xml(xml_text="<out xmlns:my='http://www.example.com/ns/various' xmlns:f='http://www.example.com/ns/various1' xmlns='http://www.example.com'><person>text1</person><person>text2</person></out>")
+    child = node_.children[0]
+    assert child is not None
+    namespaces = child.axis_nodes(8)
+
+    assert len(namespaces) > 0
+
+    for ns in namespaces:
+        uri_str = ns.string_value
+        ns_prefix = ns.name
+
+        print("xmlns:" + ns_prefix + "='" + uri_str + "'")
+
+
+
+def testCollection(saxonproc, data_dir):
     xq = saxonproc.new_xquery_processor()
     print(getcwd())
     xq.set_query_base_uri(data_dir)
@@ -283,14 +300,14 @@ def collection_test(saxonproc, data_dir):
 
 
 
-def xquery_40_functions():
+def testXquery_40_functions():
     proc = PySaxonProcessor(license=True)
     proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
     xquery_processor = proc.new_xquery_processor()
     result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '4.0')
     assert "paragraph" in result
 
-def xquery_40_functions_error():
+def testXquery_40_functions_error():
     try:
         proc = PySaxonProcessor(license=True)
         proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
@@ -1032,7 +1049,7 @@ def test_node_list():
     personData = str(children)
     assert ('<person att1' in personData)
 
-def parse_xml_file1():
+def test_parse_xml_file1():
     sp = PySaxonProcessor()
 
     node = sp.parse_xml(xml_file_name='cat.xml')

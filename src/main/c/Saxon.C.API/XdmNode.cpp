@@ -241,10 +241,10 @@ int XdmNode::axisNodeCount() {
 
 }
 
-XdmNode **XdmNode::axisNodes(XDM_AXIS axis) {
+XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
        allocFn fn = operator new;
        long long *results = j_axisIterator(
-           SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value, static_cast<int>(axis));
+           SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value, int(axis));
        if(results == nullptr) {
         return nullptr;
        }

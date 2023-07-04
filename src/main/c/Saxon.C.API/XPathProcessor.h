@@ -20,6 +20,8 @@ class SaxonProcessor;
 class SaxonApiException;
 class XdmValue;
 class XdmItem;
+enum class UnprefixedElementMatchingPolicy;
+
 
 /*! An <code>XPathProcessor</code> represents a factory to compile, load and
  * execute XPath expressions. <p/>
@@ -90,7 +92,11 @@ public:
 
   /** Set the context item from file
    */
-  void setContextFile(const char *filename); // TODO: setContextItemFromFile
+  void setContextFile(const char *filename);
+
+  void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
+
+  UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
 
   //! Evaluate the XPath expression, returning the effective boolean value of
   //! the result.

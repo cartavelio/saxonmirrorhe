@@ -4427,9 +4427,9 @@ cdef class PyXdmNode(PyXdmItem):
                 nodes.append(val)
         return nodes
 
-     def node_axis(self, axis):
+     def axis_nodes(self, axis):
         """
-        node_axis(self, int axis)
+        axis_nodes(self, int axis)
         Get array of nodes reachable from this node via a given axis.
         Axis options are as follows: ANCESTOR = 0,
         ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
@@ -4445,7 +4445,7 @@ cdef class PyXdmNode(PyXdmItem):
         cdef saxoncClasses.XdmNode **n
         cdef int count, i
         cdef PyXdmNode val = None
-        n = self.derivednptr.axisNodes(axis)
+        n = self.derivednptr.axisNodes(self.derivednptr.convertEnumXdmAxis(axis))
         count = self.derivednptr.axisNodeCount()
         if count > 0:
             for i in range(count):

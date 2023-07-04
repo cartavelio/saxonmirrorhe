@@ -160,6 +160,20 @@ public class XdmUtils {
     }
 
 
+    public static UnprefixedElementMatchingPolicy fromIntegerToUnprefixedElementMatchingPolicy(int x) {
+        switch(x) {
+        case 0:
+            return UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
+        case 1:
+            return UnprefixedElementMatchingPolicy.ANY_NAMESPACE;
+        case 2:
+            return UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE;
+
+        }
+        return UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
+    }
+
+
     /**
          * convert EQName to ClarkName
          * @param thread - Graalvm runtime data structure for the thread

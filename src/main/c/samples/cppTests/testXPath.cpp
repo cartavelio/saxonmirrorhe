@@ -37,6 +37,51 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
 }
 
 
+void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor, XPathProcessor *xpath,
+                  sResultCount *sresult) {
+
+  cout << endl << "Test testUnprefixedElementMatchingPolicy:" << endl;
+  XdmNode *node = processor->parseXmlFromString(
+      "<out xmlns:my='http://www.example.com/ns/various' "
+      "xmlns:f='http://www.example.com/ns/various1' "
+      "xmlns='http://www.example.com'><f:person>text1</f:person><f:person>text2</"
+      "f:person><person>wrong person selected</person></out>");
+    xpath->setContextItem((XdmItem *)node);
+  try {
+    xpath->setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy::ANY_NAMESPACE);
+    XdmItem *result = xpath->evaluateSingle("//person[1]");
+    if( result == nullptr || strcmp(result->getStringValue(), "incorrect") == 0) {
+        if(result != nullptr) {
+            const char *resultStr = result->getStringValue();
+            cout << "Failed to find  //f:person[1] without prefix. See result found: "<<resultStr  << endl;
+            delete result;
+        } else {
+            cout << "Failed to find  //person[1]"  << endl;
+        }
+        sresult->failure++;
+        sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+
+    }  else{
+        const char *resultStr = result->getStringValue();
+        cout << "String Value of result=" << resultStr << endl;
+        sresult->success++;
+        delete result;
+    }
+  } catch (SaxonApiException &e) {
+    cout << "Error Message = " << e.what() << endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+  }
+
+  xpath->clearParameters();
+  xpath->clearProperties();
+  xpath->setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE);
+  delete node;
+
+
+      }
+
+
 // test nodeAxis
 void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
                   sResultCount *sresult) {
@@ -50,7 +95,7 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
 
   try {
     XdmNode *child = node->getChildren()[0];
-    XdmNode **children = child->axisNodes(3);
+    XdmNode **children = child->axisNodes(EnumXdmAxis::CHILD);
     int childCount = child->axisNodeCount();
     //     cout<< "node type="<<((node->getChildren()[0]_->toString())<<endl;
     cout << " child count = " << childCount << endl;
@@ -58,7 +103,7 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
       cout << "child-Node type = " << (children[i]->getType()) << endl;
       cout << "child node:" << (children[i]->toString()) << endl;
     }
-    XdmNode **namespaces = child->axisNodes(8);
+    XdmNode **namespaces = child->axisNodes(EnumXdmAxis::NAMESPACE);
     int namespaceCount = child->axisNodeCount();
 
     cout << "namespace count=" << namespaceCount << endl;
@@ -68,6 +113,15 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
       }
       cout << "namespace value =" << (namespaces[i]->getStringValue()) << endl;
     }
+      delete child;
+      for(int i = 0; i < childCount; i++) {
+        delete children[i];
+      }
+      delete [] children;
+      for(int i = 0; i < namespaceCount; i++) {
+        delete namespaces[i];
+      }
+      delete [] namespaces;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
@@ -76,9 +130,7 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
 
   xpath->clearParameters();
   xpath->clearProperties();
-  delete  [] child;
-  delete [] children;
-  delete [] namespaces;
+
   delete node;
   sresult->success++;
 
@@ -414,6 +466,11 @@ int main() {
        << "Test: XPathProcessor with Saxon version=" << processor->version()
        << endl;
   testXPathSingle(processor, xpathProc, sresult);
+    cout << endl
+         << "============================================================="
+         << endl
+         << endl;
+         testUnprefixedElementMatchingPolicy(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl

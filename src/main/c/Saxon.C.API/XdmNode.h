@@ -25,7 +25,7 @@ typedef enum eXdmNodeKind {
 } XDM_NODE_KIND;
 
 
-typedef enum eXdmAxis {
+enum class EnumXdmAxis {
 ANCESTOR = 0,
 ANCESTOR_OR_SELF = 1,
 ATTRIBUTE = 2,
@@ -39,7 +39,7 @@ PARENT = 9,
 PRECEDING = 10,
 PRECEDING_SIBLING = 11,
 SELF = 12
-} XDM_AXIS;
+};
 
 class XdmValue;
 
@@ -241,7 +241,7 @@ public:
 
   //! Get array of nodes reachable from this node via a given axis.
   /**
-         * @param axis identifies which axis is to be navigated.
+         * @param EnumXdmAxis - axis identifies which axis is to be navigated.
          * Axis options are as follows: ANCESTOR = 0,
          * ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
          * DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
@@ -252,7 +252,11 @@ public:
          *         axis and in reverse document order for a reverse axis.
 
   */
-  XdmNode **axisNodes(XDM_AXIS);
+  XdmNode **axisNodes(EnumXdmAxis);
+
+  EnumXdmAxis convertEnumXdmAxis(int n) {
+    return static_cast<EnumXdmAxis>(n);
+  }
 
   //! Get the count of nodes in the nodeAxis array. Cached from the last call to nodeAxis
   int axisNodeCount();
