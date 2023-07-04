@@ -199,8 +199,9 @@ cdef class PySaxonProcessor:
         """
         def __get__(self):
             cdef const char* c_string = self.thisptr.version()
-            ustring = make_py_str(c_string)
-            return ustring
+            py_string_i = make_py_str(c_string)
+            SaxonProcessor.deleteString(c_string)
+            return py_string_i
 
     @property
     def attach_current_thread(self):
@@ -217,8 +218,10 @@ cdef class PySaxonProcessor:
         Property represents the current working directory
         """
         cdef const char* c_string = self.thisptr.getcwd()
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
     def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
@@ -250,8 +253,9 @@ cdef class PySaxonProcessor:
         Property represents the resources directory
         """
         cdef const char* c_string = self.thisptr.getResourcesDirectory()
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
     def set_configuration_property(self, name, value):
         """
@@ -364,8 +368,9 @@ cdef class PySaxonProcessor:
         py_name_string = name.encode('utf-8') if name is not None else None
         c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.EQNameToClarkName(c_str_)
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
     def clark_name_to_eqname(self, name):
         """
@@ -383,8 +388,9 @@ cdef class PySaxonProcessor:
         py_name_string = name.encode('utf-8') if name is not None else None
         c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.clarkNameToEQName(c_str_)
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
 
     def make_string_value(self, value):
@@ -691,7 +697,10 @@ cdef class PySaxonProcessor:
         Returns:
             str: The string value of this XDM item
         """
-        return make_py_str(self.thisptr.getStringValue(item.derivedptr))
+        cdef const char * c_string = self.thisptr.getStringValue(item.derivedptr)
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
     def parse_xml(self, **kwds):
         """
@@ -864,7 +873,10 @@ cdef class PyDocumentBuilder:
        Returns:
            str: String value of the base URI to be used. This may be NULL if no value has been set.
        """
-       return make_py_str(self.thisdbptr.getBaseUri())
+       cdef const char * c_string = self.thisdbptr.getBaseUri()
+       py_string_i = make_py_str(c_string)
+       SaxonProcessor.deleteString(c_string)
+       return py_string_i
 
     def set_base_uri(self, base_uri):
        """
@@ -1236,7 +1248,9 @@ cdef class PyXslt30Processor:
 
         cdef const char* c_string
         c_string = self.thisxptr.transformFileToString(c_sourcefile, c_stylesheet)
-        return make_py_str(c_string)
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      def transform_to_file(self, **kwds):
         """
@@ -1846,10 +1860,14 @@ cdef class PyXsltExecutable:
             raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, base_output_uri)")
         if xdm_node is not None:
           c_string = self.thisxptr.transformToString(xdm_node.derivednptr)
-          return make_py_str(c_string)
+          py_string_i = make_py_str(c_string)
+          SaxonProcessor.deleteString(c_string)
+          return py_string_i
         else:
           c_string = self.thisxptr.transformFileToString(c_sourcefile)
-        return make_py_str(c_string)
+          py_string_i = make_py_str(c_string)
+          SaxonProcessor.deleteString(c_string)
+          return py_string_i
 
      def transform_to_file(self, **kwds):
         """
@@ -2174,7 +2192,9 @@ cdef class PyXsltExecutable:
                       valuear_ = value
                       self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef const char* c_string  = self.thisxptr.applyTemplatesReturningString()
-        return make_py_str(c_string)
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      def apply_templates_returning_file(self, **kwds):
         """
@@ -2353,7 +2373,9 @@ cdef class PyXsltExecutable:
             c_templateName = py_template_name_string
         
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
-        return make_py_str(c_string)
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
      
      def call_template_returning_file(self, str template_name=None, **kwds):
         """
@@ -2526,7 +2548,10 @@ cdef class PyXsltExecutable:
         cdef PyXdmNode nval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         cdef const char* c_string = self.thisxptr.callFunctionReturningString(c_functionName, argumentV, len(args))
-        return make_py_str(c_string)
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def call_function_returning_file(self, str function_name, list args, **kwds):
         """
         call_function_returning_file(self, str function_name, list args, **kwds)
@@ -2865,8 +2890,11 @@ cdef class PyXQueryProcessor:
         """
         cdef const char * c_string
         if len(kwds) == 0:
-          ustring = make_py_str(self.thisxqptr.runQueryToString())
-          return ustring
+            c_string = self.thisxqptr.runQueryToString()
+            py_string_i = make_py_str(c_string)
+            SaxonProcessor.deleteString(c_string)
+            return py_string_i
+
         if "lang" in kwds:
           py_lang_string = kwds["lang"]
           py_ta_string = py_lang_string.encode('UTF-8') if py_lang_string is not None else None
@@ -2882,8 +2910,10 @@ cdef class PyXQueryProcessor:
         elif "query_text" in kwds:
           self.set_query_content(kwds["query_text"])
 
-        ustring = make_py_str(self.thisxqptr.runQueryToString())
-        return ustring
+        c_string = self.thisxqptr.runQueryToString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      def run_query_to_file(self, ** kwds):
         """
@@ -3379,7 +3409,10 @@ cdef class PyXPathProcessor:
         Returns:
             str: The message of the exception. Returns None if the exception does not exist.
         """
-        return make_py_str(self.thisxpptr.getErrorMessage())
+        cdef const char * c_string = self.thisxpptr.getErrorMessage()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      @property
      def error_code(self):
@@ -3847,16 +3880,20 @@ cdef class PyXdmValue:
         if c_string == NULL:
             raise Warning('Empty string returned')
         else:
-            ustring = make_py_str(c_string)
-            return ustring
+            py_string_i = make_py_str(c_string)
+            SaxonProcessor.deleteString(c_string)
+            return py_string_i
+
      def __str__(self):
         """
         __str__(self)
         The string representation of PyXdmItem
         """
         cdef const char* c_string = self.thisvptr.toString()
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def __iter__(self):
         """
         __iter__(self)
@@ -3914,13 +3951,21 @@ cdef class PyXdmItem(PyXdmValue):
         Property to get the string value of the PyXdmItem
         """
         cdef const char* c_string = self.derivedptr.getStringValue()
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
      
      def __repr__(self):
-        return make_py_str(self.derivedptr.toString())
+        cdef const char * c_string =  self.derivedptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def __str__(self):
-        return make_py_str(self.derivedptr.toString())
+        cdef const char * c_string = self.derivedptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      @property
      def is_atomic(self):
@@ -4142,8 +4187,10 @@ cdef class PyXdmNode(PyXdmItem):
         if c_string == NULL:
             return None
         else:
-            ustring = make_py_str(c_string)
-            return ustring
+            py_string_i = make_py_str(c_string)
+            SaxonProcessor.deleteString(c_string)
+            return py_string_i
+
      @property
      def typed_value(self):
         """
@@ -4173,7 +4220,10 @@ cdef class PyXdmNode(PyXdmItem):
             str: String value of the base uri for this node. This may be NULL if the base URI is unknown,
                 including the case where the node has no parent.
         """
-        return make_py_str(self.derivednptr.getBaseUri())
+        cdef const char* c_string = self.derivednptr.getBaseUri()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      @property
      def string_value(self):
@@ -4184,8 +4234,10 @@ cdef class PyXdmNode(PyXdmItem):
             str: The string value of this node
         """
         cdef const char* c_string = self.derivednptr.getStringValue()
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def __str__(self):
         """
         __str__(self)
@@ -4194,15 +4246,18 @@ cdef class PyXdmNode(PyXdmItem):
             str: String value of this node
         """
         cdef const char* c_string = self.derivednptr.toString()
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def __repr__(self):
         """
         ___repr__(self)
         """
         cdef const char* c_string = self.derivednptr.toString()
-        ustring = make_py_str(c_string)
-        return ustring
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+
      def get_parent(self):
         """
         get_parent(self)
@@ -4224,9 +4279,10 @@ cdef class PyXdmNode(PyXdmItem):
         cdef char * c_name = py_value_string if name is not None else ""
 
         cdef const char* c_string = self.derivednptr.getAttributeValue(c_name)
-        ustring = make_py_str(c_string)
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
-        return ustring
      @property
      def attribute_count(self):
         """
@@ -4371,14 +4427,19 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         Returns:
             str: String value of this node
         """
-        ustring = make_py_str(self.derivedaptr.toString())
-        return ustring
+        cdef const char * c_string = self.derivedaptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def __repr__(self):
         """
         ___repr__(self)
         """
-        ustring = make_py_str(self.derivedaptr.toString())
-        return ustring
+        cdef const char * c_string = self.derivedaptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      def __hash__(self):
         return self.derivedaptr.getHashCode()
@@ -4422,8 +4483,10 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          Returns:
              str: The name of the function as an EQName
          """
-         ustring = make_py_str(self.derivedfptr.getName())
-         return ustring
+         cdef const char * c_string = self.derivedfptr.getName()
+         py_string_i = make_py_str(c_string)
+         SaxonProcessor.deleteString(c_string)
+         return py_string_i
 
      @property
      def arity(self):
@@ -4436,9 +4499,16 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          return self.derivedfptr.getArity()
 
      def __repr__(self):
-        return make_py_str(self.derivedfptr.toString())
+        cdef const char * c_string = self.derivedfptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def __str__(self):
-        return make_py_str(self.derivedfptr.toString())
+        cdef const char * c_string = self.derivedfptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      @property
      def string_value(self):
@@ -4448,8 +4518,11 @@ cdef class PyXdmFunctionItem(PyXdmItem):
         Returns:
             str: String value of the function item
         """
-        ustring = make_py_str(self.derivedfptr.getStringValue())
-        return ustring
+        cdef const char * c_string = self.derivedfptr.getStringValue()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
 
      def get_system_function(self, PySaxonProcessor proc, str name, arity):
          """
@@ -4569,9 +4642,17 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
 
      def __repr__(self):
-        return make_py_str(self.derivedmmptr.toString())
+        cdef const char * c_string = self.derivedmmptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
+
      def __str__(self):
-        return make_py_str(self.derivedmmptr.toString())
+        cdef const char * c_string = self.derivedmmptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      @property
      def map_size(self):
@@ -4782,8 +4863,10 @@ cdef class PyXdmMap(PyXdmFunctionItem):
         Returns:
             str: String value of the map item
         """
-        ustring = make_py_str(self.derivedmmptr.getStringValue())
-        return ustring
+        cdef const char * c_string = self.derivedmmptr.getStringValue()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      def values(self):
          """
@@ -4865,9 +4948,16 @@ cdef class PyXdmArray(PyXdmFunctionItem):
 
 
      def __repr__(self):
-        return make_py_str(self.derivedaaptr.toString())
+        cdef const char * c_string = self.derivedaaptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
+
      def __str__(self):
-        return make_py_str(self.derivedaaptr.toString())
+        cdef const char * c_string = self.derivedaaptr.toString()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      def __iter__(self):
         """
@@ -4895,8 +4985,10 @@ cdef class PyXdmArray(PyXdmFunctionItem):
         Returns:
             str: String value of the array item
         """
-        ustring = make_py_str(self.derivedaaptr.getStringValue())
-        return ustring
+        cdef const char * c_string = self.derivedaaptr.getStringValue()
+        py_string_i = make_py_str(c_string)
+        SaxonProcessor.deleteString(c_string)
+        return py_string_i
 
      def get(self, int n):
          """
