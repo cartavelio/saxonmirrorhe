@@ -69,8 +69,7 @@ XtOffsetOf(xsltExecutable_object, std)); xsltExecutable = obj->xsltExecutable;
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
-                //struct xdmValue_object* vobj = (struct xdmValue_object
-*)Z_OBJ_P(return_value); zend_object *vvobj =  Z_OBJ_P(return_value);
+                zend_object *vvobj =  Z_OBJ_P(return_value);
                 xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj -
 XtOffsetOf(xdmValue_object, std));
 
