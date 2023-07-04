@@ -2791,40 +2791,46 @@ public class XQueryParser extends XPathParser {
         expect(Token.IN);
         nextToken();
         clause.initSequence(flwor, parseExprSingle());
-        if (!isKeyword("start")) {
+        if (isKeyword("start")) {
+            t.setState(Tokenizer.BARE_NAME_STATE);
+            nextToken();
+            if (t.currentToken == Token.DOLLAR) {
+                LocalVariableBinding startItemVar = new LocalVariableBinding(readVariableName(), windowItemTypeMandatory);
+                clause.setVariableBinding(WindowClause.START_ITEM, startItemVar);
+                declareRangeVariable(startItemVar);
+            }
+            if (isKeyword("at")) {
+                nextToken();
+                LocalVariableBinding startPositionVar = new LocalVariableBinding(readVariableName(), SequenceType.SINGLE_INTEGER);
+                clause.setVariableBinding(WindowClause.START_ITEM_POSITION, startPositionVar);
+                declareRangeVariable(startPositionVar);
+            }
+            if (isKeyword("previous")) {
+                nextToken();
+                LocalVariableBinding startPreviousItemVar = new LocalVariableBinding(readVariableName(), windowItemTypeOptional);
+                clause.setVariableBinding(WindowClause.START_PREVIOUS_ITEM, startPreviousItemVar);
+                declareRangeVariable(startPreviousItemVar);
+            }
+            if (isKeyword("next")) {
+                nextToken();
+                LocalVariableBinding startNextItemVar = new LocalVariableBinding(readVariableName(), windowItemTypeOptional);
+                clause.setVariableBinding(WindowClause.START_NEXT_ITEM, startNextItemVar);
+                declareRangeVariable(startNextItemVar);
+            }
+            if (isKeyword("when")) {
+                t.setState(Tokenizer.DEFAULT_STATE);
+                nextToken();
+                clause.initStartCondition(flwor, parseExprSingle());
+            } else if (allowXPath40Syntax) {
+                clause.initStartCondition(flwor, Literal.makeLiteral(BooleanValue.TRUE, flwor));
+            } else {
+                grumble("Expected 'when' condition for window start, but found " + currentTokenDisplay());
+            }
+        } else if (allowXPath40Syntax) {
+            clause.initStartCondition(flwor, Literal.makeLiteral(BooleanValue.TRUE, flwor));
+        } else {
             grumble("in window clause, expected 'start', but found " + currentTokenDisplay());
         }
-        t.setState(Tokenizer.BARE_NAME_STATE);
-        nextToken();
-        if (t.currentToken == Token.DOLLAR) {
-            LocalVariableBinding startItemVar = new LocalVariableBinding(readVariableName(), windowItemTypeMandatory);
-            clause.setVariableBinding(WindowClause.START_ITEM, startItemVar);
-            declareRangeVariable(startItemVar);
-        }
-        if (isKeyword("at")) {
-            nextToken();
-            LocalVariableBinding startPositionVar = new LocalVariableBinding(readVariableName(), SequenceType.SINGLE_INTEGER);
-            clause.setVariableBinding(WindowClause.START_ITEM_POSITION, startPositionVar);
-            declareRangeVariable(startPositionVar);
-        }
-        if (isKeyword("previous")) {
-            nextToken();
-            LocalVariableBinding startPreviousItemVar = new LocalVariableBinding(readVariableName(), windowItemTypeOptional);
-            clause.setVariableBinding(WindowClause.START_PREVIOUS_ITEM, startPreviousItemVar);
-            declareRangeVariable(startPreviousItemVar);
-        }
-        if (isKeyword("next")) {
-            nextToken();
-            LocalVariableBinding startNextItemVar = new LocalVariableBinding(readVariableName(), windowItemTypeOptional);
-            clause.setVariableBinding(WindowClause.START_NEXT_ITEM, startNextItemVar);
-            declareRangeVariable(startNextItemVar);
-        }
-        if (!isKeyword("when")) {
-            grumble("Expected 'when' condition for window start, but found " + currentTokenDisplay());
-        }
-        t.setState(Tokenizer.DEFAULT_STATE);
-        nextToken();
-        clause.initStartCondition(flwor, parseExprSingle());
         if (isKeyword("only")) {
             clause.setIncludeUnclosedWindows(false);
             nextToken();
@@ -2856,12 +2862,15 @@ public class XQueryParser extends XPathParser {
                 clause.setVariableBinding(WindowClause.END_NEXT_ITEM, endNextItemVar);
                 declareRangeVariable(endNextItemVar);
             }
-            if (!isKeyword("when")) {
+            if (isKeyword("when")) {
+                t.setState(Tokenizer.DEFAULT_STATE);
+                nextToken();
+                clause.initEndCondition(flwor, parseExprSingle());
+            } else if (allowXPath40Syntax) {
+                clause.initEndCondition(flwor, Literal.makeLiteral(BooleanValue.TRUE, flwor));
+            } else {
                 grumble("Expected 'when' condition for window end, but found " + currentTokenDisplay());
             }
-            t.setState(Tokenizer.DEFAULT_STATE);
-            nextToken();
-            clause.initEndCondition(flwor, parseExprSingle());
         } else {
             // no "end" condition found
             if (clause.isSlidingWindow()) {
