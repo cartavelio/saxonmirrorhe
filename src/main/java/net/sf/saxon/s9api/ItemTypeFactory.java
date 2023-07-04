@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
@@ -47,7 +48,8 @@ public class ItemTypeFactory {
 
     /**
      * Parse an item type in XPath syntax.
-     * <p>Saxon extensions such as union types and tuple types are enabled.</p>
+     * <p>XPath 4.0 experimental extensions such as union types and record types are enabled if the processor
+     * option {@link Feature#XQUERY_VERSION} is set to "4.0".</p>
      * @param typeDesignation the lexical representation of the item type in XPath syntax, for example
      *                        <code>map(xs:string, node()*)</code>. The namespace prefix <code>xs</code>
      *                        is recognized; any other namespaced names should be written using <code>Q{uri}local</code>
@@ -60,8 +62,8 @@ public class ItemTypeFactory {
     public ItemType parseItemType(String typeDesignation) throws SaxonApiException {
         try {
             XPathParser parser = new XPathParser();
-            IndependentContext env = new IndependentContext();
-            env.setXPathLanguageLevel(40);
+            IndependentContext env = new IndependentContext(config);
+            env.setXPathLanguageLevel("4.0".equals(config.getConfigurationProperty(Feature.XQUERY_VERSION)) ? 40 : 31);
             env.declareNamespace("xs", NamespaceUri.SCHEMA);
             net.sf.saxon.value.SequenceType st = parser.parseSequenceType(typeDesignation, env);
             if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
@@ -115,9 +117,6 @@ public class ItemTypeFactory {
         switch (fp) {
             case StandardNames.XS_ANY_ATOMIC_TYPE:
                 return ItemType.ANY_ATOMIC_VALUE;
-
-//            case StandardNames.XS_NUMERIC:
-//                return ItemType.NUMERIC;
 
             case StandardNames.XS_STRING:
                 return ItemType.STRING;

@@ -5390,7 +5390,7 @@ public class Configuration implements SourceResolver, NotationSet {
             //#endif
 
             case FeatureCode.XQUERY_VERSION:
-                return "3.1";
+                return getDefaultStaticQueryContext().getLanguageVersion() == 40 ? "4.0" : "3.1";
 
             case FeatureCode.XPATH_VERSION_FOR_XSD:
                 return xpathVersionForXsd;
