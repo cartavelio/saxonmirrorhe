@@ -445,6 +445,10 @@ public class XPathParser {
             version = 30;
             allowXPath30XSLTExtensions = true;
         }
+        if (version == 40) {
+            getStaticContext().getConfiguration().checkLicensedFeature(
+                    Configuration.LicenseFeature.PROFESSIONAL_EDITION, "XPath 4.0 Syntax", -1);
+        }
         switch (language) {
             case XPATH:
                 if (!(version == 20 || version == 30 || version == 31 || version == 40)) {
@@ -855,7 +859,7 @@ public class XPathParser {
                 // Process ternary conditional
                 if (t.currentToken == Token.QMARK_QMARK) {
                     if (!allowXPath40Syntax) {
-                        grumble("Ternary conditionals (A ?? B !! C) require XPath 4.0 to be enabled");
+                        grumble("Ternary conditionals (A ?? B !! C) require XPath 4.0 to be enabled (also, note this syntax will be withdrawn)");
                     }
                     return parseTernaryExpression(e1);
                 }
@@ -1075,7 +1079,7 @@ public class XPathParser {
     }
 
     /**
-     * Saxon extension: A otherwise B, returns if (exists(A)) then A else B
+     * XPath 4.0 extension: A otherwise B, returns if (exists(A)) then A else B
      * @param lhs the A expression
      * @param rhs the B expression
      * @return a conditional expression with the correct semantics
