@@ -645,7 +645,7 @@ public:
     static void deleteString(const char * data){
         if(data != nullptr){
             //std::cerr<<"static method SaxonProcessor.deleteString - deleting string data"<<std::endl;
-            delete data;
+            delete [] data;
             data = nullptr;
 
         }
