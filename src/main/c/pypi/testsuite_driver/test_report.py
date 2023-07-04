@@ -20,7 +20,7 @@ class PyTestReport:
         global test_driver
         test_driver = td
         product = proc.version[0:9]
-        version = proc.version[10:13]
+        version = proc.version[10:14]
         current_time = now.strftime("%H:%M:%S")
         today = datetime.today()
         ET.register_namespace("", "http://www.w3.org/2012/11/xslt30-test-results")
