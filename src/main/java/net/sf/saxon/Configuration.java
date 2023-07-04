@@ -647,7 +647,9 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Assert that a PE license is required, and fail if none is available
      *
-     * @param featureName name of the required feature, to include in the error message
+     * @param featureName name of the required feature, to include in the error message. This can be
+     *                    any name (for example "XQuery Update"), it does not have to correspond
+     *                    with a particular property held in the license file.
      * @throws LicenseException if no license key is available
      */
 
@@ -659,11 +661,24 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Get the value of a named license feature
      *
-     * @param name the name of the feature
+     * @param name the name of the feature. This is one of the properties explicitly recorded in the
+     *             license file, for example "Licensor", "Licensee", "Email", "Issued", "Serial".
      * @return the value of the feature if present, or null otherwise
      */
 
     public String getLicenseFeature(String name) {
+        return null;
+    }
+
+    /**
+     * Get all license features, as a Properties object mapping feature names to feature values.
+     * @return a map containing all license features as name-value pairs. The names and values
+     * are those explicitly recorded in the license file, for example "Issued":"2022-11-25".
+     * If there is no license, the method returns null.
+     * @since 12.3
+     */
+
+    public Properties getLicenseFeatures() {
         return null;
     }
 

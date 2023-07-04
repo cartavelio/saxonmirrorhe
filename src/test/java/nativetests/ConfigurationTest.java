@@ -11,7 +11,10 @@ import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
 import org.junit.jupiter.api.Test;
 
+import java.util.Properties;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -47,6 +50,17 @@ public class ConfigurationTest {
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testLicenseProperties() {
+        Configuration config = new ProfessionalConfiguration();
+        Properties props = config.getLicenseFeatures();
+        assertEquals("Saxonica", props.getProperty("Licensor"));
+        assertNotNull(props.getProperty("Licensee"));
+        assertNotNull(props.getProperty("Email"));
+        assertNotNull(props.getProperty("Issued"));
+        assertNotNull(props.getProperty("Signature"));
     }
 
 
