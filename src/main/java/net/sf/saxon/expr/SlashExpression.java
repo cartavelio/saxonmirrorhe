@@ -579,7 +579,9 @@ public class SlashExpression extends BinaryExpression
      */
     @Override
     public Expression unordered(boolean retainAllNodes, boolean forStreaming) throws XPathException {
-        setStart(getStart().unordered(retainAllNodes, forStreaming));
+        if ((getStep().getDependencies() & (StaticProperty.DEPENDS_ON_POSITION | StaticProperty.DEPENDS_ON_LAST)) == 0) {
+            setStart(getStart().unordered(retainAllNodes, forStreaming));
+        }
         setStep(getStep().unordered(retainAllNodes, forStreaming));
         return this;
     }
