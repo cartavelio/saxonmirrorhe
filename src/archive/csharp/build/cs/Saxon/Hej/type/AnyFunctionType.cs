@@ -59,7 +59,7 @@ namespace Saxon.Hej.type {
                 return Saxon.Hej.type.Affinity.SUBSUMES;
             }
         }
-        public virtual Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
+        public virtual Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role, bool allow40) {
             return new Saxon.Hej.expr.ItemChecker(exp, this, role);
         }
         public virtual Saxon.Hej.value.SequenceType getResultType() {

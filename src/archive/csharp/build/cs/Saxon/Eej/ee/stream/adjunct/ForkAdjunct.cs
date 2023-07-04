@@ -11,7 +11,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             } else {
                 Saxon.Eej.ee.stream.PostureAndSweep eccentric = null;
                 foreach (Saxon.Hej.expr.Operand o in exp.operands()) {
-                    Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(o.getChildExpression(), contextInfo, reasons);
+                    Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(o.getChildExpression(), contextInfo, reasons);
                     if (((ps.getPosture() == Saxon.Eej.ee.stream.Posture.ROAMING) || (ps.getSweep() == Saxon.Eej.ee.stream.Sweep.FREE_RANGING))) {
                         return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
                     }
@@ -41,8 +41,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 actionInversions = new Saxon.Eej.ee.stream.Inversion[fork.getSize()];
                 int i = 0;
                 foreach (Saxon.Hej.expr.Operand o in fork.operands()) {
-                    if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
-                        actionInversions[i] = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(o.getChildExpression(), forGrouping);
+                    if ((Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                        actionInversions[i] = Saxon.Eej.ee.stream.Inversion.invertExpression(o.getChildExpression(), forGrouping);
                     } else {
                         actionInversions[i] = null;
                     }
@@ -68,9 +68,9 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     Saxon.Eej.ee.stream.adjunct.FeedToEventBuffer writer = new Saxon.Eej.ee.stream.adjunct.FeedToEventBuffer(getNextOutputter(), this, getContext());
                     writer.setPipelineConfiguration(getPipelineConfiguration());
                     writers[i] = writer;
-                    if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                    if ((Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                         Saxon.Eej.ee.stream.feed.ItemFeed feed = new Saxon.Eej.ee.stream.feed.DecomposingFeed(writer, getContext());
-                        if ((/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(o.getChildExpression()) != Saxon.Eej.ee.stream.Posture.GROUNDED)) {
+                        if ((Saxon.Eej.ee.stream.Streamability.getPosture(o.getChildExpression()) != Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                             feed = new Saxon.Eej.ee.stream.feed.CopyOfFeed(watchManager, feed, getContext());
                         }
                         watchManager.addWatch(actionInversions[i].getWatch(watchManager, feed, getContext()), true);

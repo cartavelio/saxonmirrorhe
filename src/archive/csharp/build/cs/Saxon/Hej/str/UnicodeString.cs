@@ -24,19 +24,7 @@ namespace Saxon.Hej.str {
             return indexOf(codePoint, 0);
         }
         public abstract long indexOf(int codePoint, long from);
-        public virtual long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
-            Saxon.Hej.z.IntIterator iter = codePoints();
-            from = System.Math.Max(from, 0);
-            long i = 0;
-            while (iter.hasNext()) {
-                int ch = iter.next();
-                if (((i>=from) && predicate(ch))) {
-                    return i;
-                }
-                i++;
-            }
-            return -1;
-        }
+        public abstract long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from);
         public virtual long indexOf(Saxon.Hej.str.UnicodeString other, long from) {
             if (((from<0) || (from>=length()))) {
                 return -1;

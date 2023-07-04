@@ -40,6 +40,9 @@ namespace Saxon.Hej.str {
         public override long indexOf(int codePoint, long from) {
             return tidy().indexOf(codePoint, from);
         }
+        public override long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
+            return tidy().indexWhere(predicate, from);
+        }
         public override int codePointAt(long index) {
             return tidy().codePointAt(index);
         }

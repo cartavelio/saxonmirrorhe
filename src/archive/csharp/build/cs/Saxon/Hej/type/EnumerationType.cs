@@ -164,7 +164,7 @@ namespace Saxon.Hej.type {
             return 0;
         }
         public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
-            return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
+            return Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     
         /* Expanding default method getGenre from interface AtomicType */

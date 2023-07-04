@@ -5,6 +5,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
     public class SelectionParser : Saxon.Hej.expr.parser.XPathParser {
         internal bool isFieldSubset;
         internal Saxon.Hej.expr.Expression optimizedExpression;
+        public SelectionParser(Saxon.Hej.expr.StaticContext env) : base (env) {
+        }
         public Saxon.Hej.pattern.Pattern parseSelector(string expression, Saxon.Hej.expr.StaticContext env, bool isField) {
             this.env = env;
             this.charChecker = env.getConfiguration().getValidCharacterChecker();
@@ -28,7 +30,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             exp = exp.simplify().typeCheck(visitor, env.getConfiguration().makeContextItemStaticInfo(Saxon.Hej.pattern.AnyNodeTest.getInstance(), true));
             optimizedExpression = exp;
             System.Collections.Generic.IList<string> reasonsForFailure = new System.Collections.Generic.List<string>();
-            Saxon.Hej.pattern.Pattern pattern = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(exp, env.getConfiguration(), reasonsForFailure);
+            Saxon.Hej.pattern.Pattern pattern = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(exp, env.getConfiguration(), reasonsForFailure);
             if (!(reasonsForFailure.Count==0)) {
                 throw new Saxon.Hej.trans.XPathException(reasonsForFailure[0]);
             }

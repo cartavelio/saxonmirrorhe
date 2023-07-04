@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 Saxon.Hej.expr.LocalBinding binding = (Saxon.Hej.expr.LocalBinding)(var.getBinding());
                 if (((binding is Saxon.Hej.expr.LetExpression) && (((Saxon.Hej.expr.LetExpression)(binding)).getSequence() is Saxon.Hej.expr.ContextItemExpression))) {
                     Saxon.Hej.expr.ContextItemExpression cie = (Saxon.Hej.expr.ContextItemExpression)(((Saxon.Hej.expr.LetExpression)(binding)).getSequence());
-                    if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(cie) == null) || (/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(cie) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
+                    if (((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(cie) == null) || (Saxon.Eej.ee.stream.Streamability.getPosture(cie) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                         return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.GROUNDED, Saxon.Eej.ee.stream.Sweep.MOTIONLESS);
                     }
                     Saxon.Hej.expr.Expression e = var;
@@ -25,7 +25,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                         }
                         e = parent;
                     }
-                    return /*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(cie);
+                    return Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(cie);
                 }
                 if ((binding is Saxon.Hej.expr.flwor.LocalVariableBinding)) {
                     Saxon.Hej.expr.Expression e = var;

@@ -124,6 +124,10 @@ namespace Saxon.Hej.expr {
             return new Saxon.Hej.expr.StaticFunctionCall.StaticFunctionCallElaborator();
         }
         private class StaticFunctionCallElaborator : Saxon.Hej.expr.FunctionCall.FunctionCallElaborator {
+            public override void setExpression(Saxon.Hej.expr.Expression expr) {
+                base.setExpression(expr);
+                allocateArgumentEvaluators((Saxon.Hej.expr.FunctionCall)(expr), true);
+            }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
                 Saxon.Hej.expr.StaticFunctionCall expr = (Saxon.Hej.expr.StaticFunctionCall)(getExpression());
                 return context => expr.call(context, evaluateArguments(context)).iterate();

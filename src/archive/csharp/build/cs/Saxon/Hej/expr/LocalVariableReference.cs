@@ -71,13 +71,19 @@ namespace Saxon.Hej.expr {
                 int slot = varRef.getSlotNumber();
                 return new Saxon.Hej.expr.elab.LocalVariableEvaluator(slot);
             }
-            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable, bool lazyEvaluationRequired) {
                 return eagerly();
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
                 Saxon.Hej.expr.LocalVariableReference varRef = (Saxon.Hej.expr.LocalVariableReference)(getExpression());
                 int slot = varRef.getSlotNumber();
-                return context => context.evaluateLocalVariable(slot).iterate();
+                return context => {
+                    try {
+                        return context.evaluateLocalVariable(slot).iterate();
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException().maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
+                    }
+                } ;
             }
             public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
                 Saxon.Hej.expr.LocalVariableReference varRef = (Saxon.Hej.expr.LocalVariableReference)(getExpression());
@@ -89,6 +95,8 @@ namespace Saxon.Hej.expr {
                             @out.append(it);
                         }
                         return null;
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException().maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                     }
@@ -100,6 +108,8 @@ namespace Saxon.Hej.expr {
                 return context => {
                     try {
                         return context.evaluateLocalVariable(slot).head();
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException().maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                     }

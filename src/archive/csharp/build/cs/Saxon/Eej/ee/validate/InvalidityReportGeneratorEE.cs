@@ -72,6 +72,7 @@ namespace Saxon.Eej.ee.validate {
                 if ((failure is Saxon.Hej.type.ValidationFailure)) {
                     System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo> offenders = ((Saxon.Hej.type.ValidationFailure)(failure)).getOffendingNodes();
                     foreach (Saxon.Hej.om.NodeInfo node in offenders) {
+                        error.text("\n          ");
                         error.element("contributing-node").attribute("type", Saxon.Hej.type.Type.displayTypeName(node)).attribute("content", (((node.getNodeKind() == Saxon.Hej.type.Type.TEXT) && (node.getUnicodeStringValue().estimatedLength()<200)) ? node.getStringValue() : null)).attribute("line", ifPositive(node.getLineNumber())).attribute("column", ifPositive(node.getColumnNumber())).attribute("path", Saxon.Hej.tree.util.Navigator.getPath(node)).attribute("system-id", (((node.getSystemId() != null) && !(node.getSystemId().Equals(systemId))) ? node.getSystemId() : null)).close();
                     }
                 }

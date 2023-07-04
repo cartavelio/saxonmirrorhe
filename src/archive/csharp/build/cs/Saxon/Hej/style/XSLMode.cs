@@ -35,8 +35,12 @@ namespace Saxon.Hej.style {
                 if (((other != null) && (other.getDeclaringPackage() != top.getStylesheetPackage()))) {
                     compileError(((("Mode "+name.getDisplayName())+" conflicts with a public named mode in package ")+other.getDeclaringPackage().getPackageName()), "XTSE3050");
                 }
+                if (((other != null) && ((((Saxon.Hej.trans.Mode)(other.getActor())).isEnclosingMode() || hasChildNodes())))) {
+                    compileError((("The mode name "+name.getDisplayName())+" identifies an enclosing mode so its name must be unique "), "XTSE4025");
+                }
             }
             mode = (Saxon.Hej.trans.SimpleMode)(top.getRuleManager().obtainMode(name, true));
+            mode.setEnclosingMode(hasChildNodes());
             if (name.Equals(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME)) {
                 top.getRuleManager().setUnnamedModeExplicit(true);
             } else {
@@ -227,7 +231,28 @@ namespace Saxon.Hej.style {
                     }
                 }
             }
-            checkEmpty();
+            if ((getCompilation().getCompilerInfo().getXsltVersion() != 40)) {
+                checkEmpty();
+            } else {
+                if (hasChildNodes()) {
+                    if ((getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name") == null)) {
+                        compileError(("A xsl:mode declaration with child xsl:template elements "+"must have a name attribute"), "XTSE4005");
+                    }
+                    string v = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "default-mode");
+                    if (((v != null) && !(getObjectName().Equals(makeQName(v, null, "default-mode"))))) {
+                        compileError(("A xsl:mode declaration with child xsl:template elements must not have "+"a default-mode attribute that differs from the mode name"), "XTSE4015");
+                    }
+                    foreach (Saxon.Hej.om.NodeInfo n in children()) {
+                        if (((n.getNodeKind() == Saxon.Hej.type.Type.ELEMENT) && !(((n is Saxon.Hej.style.XSLTemplate))))) {
+                            compileError("The only children permitted for xsl:mode are xsl;template elements");
+                        }
+                        v = n.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "default-mode");
+                        if (((v != null) && !(getObjectName().Equals(makeQName(v, null, "default-mode"))))) {
+                            compileError(("An xsl:template declaration within an enclosing xsl:mode must not have "+"a default-mode attribute that differs from the mode name"), "XTSE4015");
+                        }
+                    }
+                }
+            }
             checkTopLevel("XTSE0010", false);
         }
         public override void compileDeclaration(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
@@ -235,6 +260,11 @@ namespace Saxon.Hej.style {
             Saxon.Hej.expr.Component c = pack.getComponent(mode.getSymbolicName());
             if ((c == null)) {
                 throw new Saxon.Ejava.lang.AssertionError();
+            }
+            foreach (Saxon.Hej.om.NodeInfo t in children()) {
+                if ((t is Saxon.Hej.style.XSLTemplate)) {
+                    ((Saxon.Hej.style.XSLTemplate)(t)).compileDeclaration(compilation, decl);
+                }
             }
         }
         public Saxon.Hej.trans.SimpleMode getMode() {

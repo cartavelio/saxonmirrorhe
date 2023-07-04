@@ -57,14 +57,7 @@ namespace Saxon.Hej.pattern {
             Saxon.Hej.tree.iter.ManualIterator si = new Saxon.Hej.tree.iter.ManualIterator(item);
             c2.setCurrentIterator(si);
             c2.setCurrentOutputUri(null);
-            try {
-                return /*Delegate.eval()*/predicateEvaluator(c2);
-            } catch (Exception e) when (e is Saxon.Hej.trans.XPathException.Circularity || e is Saxon.Hej.trans.XPathException.StackOverflow) {
-                throw;
-            } catch (Saxon.Hej.trans.XPathException ex) {
-                handleDynamicError(ex, c2);
-                return false;
-            }
+            return /*Delegate.eval()*/predicateEvaluator(c2);
         }
         public override bool matchesBeneathAnchor(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.NodeInfo anchor, Saxon.Hej.expr.XPathContext context) {
             return (getBasePattern().matchesBeneathAnchor(node, anchor, context) && matchesPredicate(node, context));
@@ -105,8 +98,8 @@ namespace Saxon.Hej.pattern {
         public override bool isMotionless() {
             Saxon.Eej.ee.trans.ContextItemStaticInfoEE cio = (Saxon.Eej.ee.trans.ContextItemStaticInfoEE)(getConfiguration().makeContextItemStaticInfo(getItemType(), false));
             cio.setContextPostureStriding();
-            /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(getPredicate(), cio, new System.Collections.Generic.List<string>());
-            return (getBasePattern().isMotionless() && (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(getPredicate()) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS));
+            Saxon.Eej.ee.stream.Streamability.getStreamability(getPredicate(), cio, new System.Collections.Generic.List<string>());
+            return (getBasePattern().isMotionless() && (Saxon.Eej.ee.stream.Streamability.getSweep(getPredicate()) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS));
         }
         public override string reconstruct() {
             return (((getBasePattern()+"[")+getPredicate())+"]");

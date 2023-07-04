@@ -35,7 +35,7 @@ namespace Saxon.Hej.style {
                                     addStringComponent(components, avt, last, i0);
                                 }
                                 Saxon.Hej.expr.Expression exp;
-                                Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
+                                Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
                                 parser.setAllowAbsentExpression(true);
                                 exp = parser.parse(avt, (i0+1), Saxon.Hej.expr.parser.Token.RCURLY, env);
                                 exp.setRetainedStaticContext(env.makeRetainedStaticContext());

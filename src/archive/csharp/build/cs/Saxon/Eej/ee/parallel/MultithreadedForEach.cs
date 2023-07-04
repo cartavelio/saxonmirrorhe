@@ -58,15 +58,14 @@ namespace Saxon.Eej.ee.parallel {
             return new Saxon.Eej.ee.parallel.MultithreadedForEach.MultithreadedForEachElaborator();
         }
         public class MultithreadedForEachElaborator : Saxon.Hej.expr.elab.PullElaborator {
-            private Saxon.Hej.expr.elab.StringEvaluator threadsEvaluator;
-            private void makeThreadsEvaluator(Saxon.Eej.ee.parallel.MultithreadedForEach forEach) {
+            private Saxon.Hej.expr.elab.StringEvaluator makeThreadsEvaluator(Saxon.Eej.ee.parallel.MultithreadedForEach forEach) {
                 if ((forEach.threadsOp == null)) {
-                    threadsEvaluator = context => "1";
+                    return context => "1";
                 } else {
-                    threadsEvaluator = forEach.getThreads().makeElaborator().elaborateForString(true);
+                    return forEach.getThreads().makeElaborator().elaborateForString(true);
                 }
             }
-            private int evaluateThreads(Saxon.Eej.ee.parallel.MultithreadedForEach forEach, Saxon.Hej.expr.XPathContext context) {
+            private int evaluateThreads(Saxon.Eej.ee.parallel.MultithreadedForEach forEach, Saxon.Hej.expr.elab.StringEvaluator threadsEvaluator, Saxon.Hej.expr.XPathContext context) {
                 if ((forEach.threadsOp == null)) {
                     return 1;
                 } else {
@@ -84,9 +83,9 @@ namespace Saxon.Eej.ee.parallel {
                 Saxon.Eej.ee.parallel.MultithreadedForEach forEach = (Saxon.Eej.ee.parallel.MultithreadedForEach)(getExpression());
                 Saxon.Hej.expr.elab.PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
                 Saxon.Hej.expr.elab.PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
-                makeThreadsEvaluator(forEach);
+                Saxon.Hej.expr.elab.StringEvaluator threadsEvaluator = makeThreadsEvaluator(forEach);
                 return context => {
-                    int threads = evaluateThreads(forEach, context);
+                    int threads = evaluateThreads(forEach, threadsEvaluator, context);
                     Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
                     Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/select(context);
                     Saxon.Hej.om.FocusIterator fit = c2.getController().makeFocusTracker(iter, true);

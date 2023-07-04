@@ -43,17 +43,17 @@ namespace Saxon.Eej.ee.update {
                 Saxon.Hej.expr.parser.Tokenizer t = p.getTokenizer();
                 switch (t.currentToken) {
                   case Saxon.Hej.expr.parser.Token.COPY:
-                    return /*134*/Saxon.Eej.ee.update.UpdateParser.parseTransformExpression(p);
+                    return Saxon.Eej.ee.update.UpdateParser.parseTransformExpression(p);
                   case Saxon.Hej.expr.parser.Token.INSERT_NODE:
-                    return /*134*/Saxon.Eej.ee.update.UpdateParser.parseInsertExpression(p);
+                    return Saxon.Eej.ee.update.UpdateParser.parseInsertExpression(p);
                   case Saxon.Hej.expr.parser.Token.DELETE_NODE:
-                    return /*134*/Saxon.Eej.ee.update.UpdateParser.parseDeleteExpression(p);
+                    return Saxon.Eej.ee.update.UpdateParser.parseDeleteExpression(p);
                   case Saxon.Hej.expr.parser.Token.REPLACE_NODE:
-                    return /*134*/Saxon.Eej.ee.update.UpdateParser.parseReplaceNodeExpression(p);
+                    return Saxon.Eej.ee.update.UpdateParser.parseReplaceNodeExpression(p);
                   case Saxon.Hej.expr.parser.Token.REPLACE_VALUE:
-                    return /*134*/Saxon.Eej.ee.update.UpdateParser.parseReplaceValueExpression(p);
+                    return Saxon.Eej.ee.update.UpdateParser.parseReplaceValueExpression(p);
                   case Saxon.Hej.expr.parser.Token.RENAME_NODE:
-                    return /*134*/Saxon.Eej.ee.update.UpdateParser.parseRenameExpression(p);
+                    return Saxon.Eej.ee.update.UpdateParser.parseRenameExpression(p);
                   default:
                     break ;
                 }

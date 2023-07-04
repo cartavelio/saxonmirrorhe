@@ -55,9 +55,8 @@ namespace Saxon.Hej.functions.hof {
                     }
                 }
             }
-            requiredFunctionType = Saxon.Hej.value.SequenceType.makeSequenceType(new Saxon.Hej.type.SpecificFunctionType(argTypes, (((baseType is Saxon.Hej.type.AnyFunctionType)) ? ((Saxon.Hej.type.AnyFunctionType)(baseType)).getResultType() : Saxon.Hej.value.SequenceType.ANY_SEQUENCE)), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
-            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "saxon:call", 0);
-            setBaseExpression(tc.staticTypeCheck(getBaseExpression(), requiredFunctionType, role, visitor));
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.DYNAMIC_FUNCTION, getBaseExpression().toShortString(), 0);
+            setBaseExpression(tc.staticTypeCheck(getBaseExpression(), Saxon.Hej.value.SequenceType.SINGLE_FUNCTION, role, visitor));
             return this;
         }
         public override Saxon.Hej.type.ItemType getItemType() {
@@ -205,6 +204,9 @@ namespace Saxon.Hej.functions.hof {
                 return context => {
                     Saxon.Hej.om.FunctionItem f = (Saxon.Hej.om.FunctionItem)(/*Delegate.eval()*/functionEval(context));
                     System.Diagnostics.Debug.Assert((f != null));
+                    if ((f.getArity() != len)) {
+                        throw new Saxon.Hej.trans.XPathException(((("The number of arguments supplied in the partial function application is "+len)+", but the arity of the function item is ")+f.getArity()), "XPTY0004");
+                    }
                     Saxon.Hej.om.Sequence[] values = new Saxon.Hej.om.Sequence[len];
                     for (int i = 0; (i<boundArgumentsEvaluators.Length); i++) {
                         if ((boundArgumentsEvaluators[i] != null)) {

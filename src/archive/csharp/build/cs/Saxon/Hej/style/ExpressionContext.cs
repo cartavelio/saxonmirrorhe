@@ -20,6 +20,9 @@ namespace Saxon.Hej.style {
         public bool isSchemaAware() {
             return element.isSchemaAware();
         }
+        public Saxon.Hej.om.StructuredQName getAttributeName() {
+            return attributeName;
+        }
         public Saxon.Hej.expr.XPathContext makeEarlyEvaluationContext() {
             return new Saxon.Hej.expr.EarlyEvaluationContext(getConfiguration());
         }
@@ -65,7 +68,7 @@ namespace Saxon.Hej.style {
             return element.getCompilation().getCompilerInfo().getOptimizerOptions();
         }
         public virtual Saxon.Hej.expr.Expression bindVariable(Saxon.Hej.om.StructuredQName qName) {
-            Saxon.Hej.style.SourceBinding sourceBinding = element.bindVariable(qName);
+            Saxon.Hej.style.SourceBinding sourceBinding = element.bindVariable(qName, attributeName);
             if ((sourceBinding == null)) {
                 if ((qName.hasURI(Saxon.Hej.om.NamespaceUri.XSLT) && qName.getLocalPart().Equals("original"))) {
                     element.getXslOriginal(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
@@ -76,7 +79,7 @@ namespace Saxon.Hej.style {
                 if ((comp != null)) {
                     Saxon.Hej.om.SequenceTool.supply(element.iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR_OR_SELF), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((parent => {
                         if (((parent is Saxon.Hej.style.XSLGlobalVariable) && ((Saxon.Hej.style.XSLGlobalVariable)(parent)).getVariableQName().Equals(qName))) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Variable "+qName.getDisplayName())+" cannot be used within its own declaration"), "XPST0008");
+                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Variable $"+qName.getDisplayName())+" cannot be used within its own declaration"), "XPST0008");
                             err.setIsStaticError(true);
                             throw err;
                         }
@@ -98,7 +101,7 @@ namespace Saxon.Hej.style {
                         }
                     }
                 }
-                Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException((("Variable "+qName.getDisplayName())+" has not been declared (or its declaration is not in scope)"), "XPST0008");
+                Saxon.Hej.trans.XPathException error = new Saxon.Hej.trans.XPathException((("Variable $"+qName.getDisplayName())+" has not been declared (or its declaration is not in scope)"), "XPST0008");
                 error.setIsStaticError(true);
                 throw error;
             }

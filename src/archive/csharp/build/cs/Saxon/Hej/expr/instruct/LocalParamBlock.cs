@@ -53,10 +53,9 @@ namespace Saxon.Hej.expr.instruct {
             return new Saxon.Hej.expr.instruct.LocalParamBlock.LocalParamBlockElaborator();
         }
         public class LocalParamBlockElaborator : Saxon.Hej.expr.elab.PushElaborator {
-            internal Saxon.Hej.expr.elab.SequenceEvaluator[] paramEval;
             public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
                 Saxon.Hej.expr.instruct.LocalParamBlock expr = (Saxon.Hej.expr.instruct.LocalParamBlock)(getExpression());
-                paramEval = new Saxon.Hej.expr.elab.SequenceEvaluator[expr.operanda.Length];
+                Saxon.Hej.expr.elab.SequenceEvaluator[] paramEval = new Saxon.Hej.expr.elab.SequenceEvaluator[expr.operanda.Length];
                 for (int i = 0; (i<expr.operanda.Length); i++) {
                     paramEval[i] = expr.operanda[i].getChildExpression().makeElaborator().eagerly();
                 }

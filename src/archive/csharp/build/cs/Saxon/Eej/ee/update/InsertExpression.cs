@@ -59,7 +59,7 @@ namespace Saxon.Eej.ee.update {
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("insert", this);
-            @out.emitAttribute("position", /*134*/Saxon.Eej.ee.xtupdate.SaxonInsert.encodePosition(position));
+            @out.emitAttribute("position", Saxon.Eej.ee.xtupdate.SaxonInsert.encodePosition(position));
             @out.emitAttribute("constructionMode", (constructionMode+""));
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(2);
             if (inheritNamespaces) {

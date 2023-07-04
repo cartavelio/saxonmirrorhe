@@ -98,7 +98,7 @@ namespace Saxon.Eej.ee.schema {
         public override bool fixup(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             if ((getFixupStatus() == /*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.UNVALIDATED)) {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.VALIDATING);
-                Saxon.Hej.type.SchemaType decl = (Saxon.Hej.type.SchemaType)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(simpleTypeRef, compiler, false));
+                Saxon.Hej.type.SchemaType decl = (Saxon.Hej.type.SchemaType)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(simpleTypeRef, compiler, false));
                 if (((decl is Saxon.Eej.ee.schema.UserSchemaComponent) && (decl.getValidationStatus() != /*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID))) {
                     bool b = ((Saxon.Eej.ee.schema.UserSchemaComponent)(decl)).fixup(compiler);
                     if (!(b)) {
@@ -119,7 +119,7 @@ namespace Saxon.Eej.ee.schema {
                 return false;
             }
             bool result = true;
-            Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(simpleTypeRef, compiler, false));
+            Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(simpleTypeRef, compiler, false));
             if ((type == null)) {
                 return true;
             }

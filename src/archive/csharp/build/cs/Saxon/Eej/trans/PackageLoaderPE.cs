@@ -37,20 +37,6 @@ namespace Saxon.Eej.trans {
     Saxon.Hej.expr.Expression arg = loader.getFirstChildExpression(element);
     return new Saxon.Eej.xsltextn.instruct.DoInstr(arg);
 } );
-            Saxon.Impl.Helpers.MapUtils.Put(eMap, "forMember", (loader, element) => {
-    Saxon.Hej.expr.Expression select = loader.getFirstChildExpression(element);
-    int slot = loader.getIntegerAttribute(element, "slot");
-    Saxon.Hej.om.StructuredQName name = loader.getQNameAttribute(element, "var");
-    Saxon.Hej.expr.ForMemberExpression forEx = new Saxon.Hej.expr.ForMemberExpression();
-    forEx.setSequence(select);
-    forEx.setSlotNumber(slot);
-    forEx.setVariableQName(name);
-    loader.localBindings.Push(forEx);
-    Saxon.Hej.expr.Expression action = loader.getSecondChildExpression(element);
-    loader.localBindings.Pop();
-    forEx.setAction(action);
-    return forEx;
-} );
             Saxon.Impl.Helpers.MapUtils.Put(eMap, "while", (loader, element) => {
     loader.needsPELicense("saxon:while");
     Saxon.Hej.expr.Expression lhs = loader.getFirstChildExpression(element);

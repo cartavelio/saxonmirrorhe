@@ -13,6 +13,9 @@ namespace Saxon.Hej.str {
         public override long indexOf(int codePoint, long from) {
             return uncompress().indexOf(codePoint, from);
         }
+        public override long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
+            return uncompress().indexWhere(predicate, from);
+        }
         public override string ToString() {
             return uncompress().ToString();
         }

@@ -22,7 +22,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_SystemFunctionCall_2 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly ScalarSystemFunction outerInstance;
-            public Inner_SystemFunctionCall_2(ScalarSystemFunction outerInstance, ScalarSystemFunction arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_2(ScalarSystemFunction outerInstance, ScalarSystemFunction arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.value.AtomicValue evaluateItem(Saxon.Hej.expr.XPathContext context) {

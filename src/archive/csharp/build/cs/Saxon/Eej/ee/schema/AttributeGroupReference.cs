@@ -35,7 +35,7 @@ namespace Saxon.Eej.ee.schema {
             return target.getAttributeWildcard(compiler, stack);
         }
         public override bool fixup(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
-            Saxon.Eej.ee.schema.AttributeGroupDecl decl = (Saxon.Eej.ee.schema.AttributeGroupDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
+            Saxon.Eej.ee.schema.AttributeGroupDecl decl = (Saxon.Eej.ee.schema.AttributeGroupDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
             if ((decl == null)) {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                 return false;

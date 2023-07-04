@@ -60,7 +60,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         public Saxon.Hej.value.SequenceType makeSequenceType(string sequenceType, Saxon.Hej.expr.StaticContext env) {
             try {
-                Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser();
+                Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser(env);
                 return parser.parseSequenceType(sequenceType, env);
             } catch (Saxon.Hej.trans.XPathException err) {
                 error(err.Message);

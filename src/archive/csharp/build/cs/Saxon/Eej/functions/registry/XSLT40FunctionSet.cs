@@ -8,7 +8,7 @@ namespace Saxon.Eej.functions.registry {
             return THE_INSTANCE;
         }
         protected internal override Saxon.Hej.functions.registry.BuiltInFunctionSet correspondingXPathFunctionSet() {
-            return /*134*/Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance();
+            return Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance();
         }
         private XSLT40FunctionSet()  {
         }

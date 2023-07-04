@@ -39,7 +39,7 @@ namespace Saxon.Eej.ee.stream {
             Saxon.Impl.Helpers.MapUtils.Put(map, "saxon:ItemsFrom", () => new Saxon.Eej.ee.stream.adjunct.ItemsFromStreamer());
             Saxon.Impl.Helpers.MapUtils.Put(map, "saxon:ItemsAfter", () => new Saxon.Eej.ee.stream.adjunct.ItemsAfterStreamer());
         }
-        private static readonly System.Collections.Generic.IDictionary<string,Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct>> map = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.emptyAdjunctMap();
+        private static readonly System.Collections.Generic.IDictionary<string,Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct>> map = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.emptyAdjunctMap();
         public static Saxon.Eej.ee.stream.adjunct.StreamingAdjunct getStreamingAdjunct(string f) {
             if ((f == null)) {
                 return null;

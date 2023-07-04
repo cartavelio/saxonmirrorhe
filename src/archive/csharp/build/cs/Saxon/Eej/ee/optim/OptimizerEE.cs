@@ -446,7 +446,7 @@ namespace Saxon.Eej.ee.optim {
             }
         }
         public override Saxon.Hej.expr.Expression optimizeForExpressionForStreaming(Saxon.Hej.expr.ForExpression expr) {
-            Saxon.Hej.expr.Expression e2 = /*134*/Saxon.Eej.ee.stream.Streamability.rewriteForExpressionAsMappingExpression(expr);
+            Saxon.Hej.expr.Expression e2 = Saxon.Eej.ee.stream.Streamability.rewriteForExpressionAsMappingExpression(expr);
             if ((e2 != null)) {
                 return e2;
             } else {
@@ -454,7 +454,7 @@ namespace Saxon.Eej.ee.optim {
             }
         }
         public override Saxon.Hej.expr.Expression optimizeQuantifiedExpressionForStreaming(Saxon.Hej.expr.QuantifiedExpression expr) {
-            Saxon.Hej.expr.Expression rewrite = /*134*/Saxon.Eej.ee.stream.Streamability.rewriteQuantifiedExpressionAsFilterExpression(expr);
+            Saxon.Hej.expr.Expression rewrite = Saxon.Eej.ee.stream.Streamability.rewriteQuantifiedExpressionAsFilterExpression(expr);
             if ((rewrite != null)) {
                 return rewrite;
             } else {
@@ -875,7 +875,7 @@ namespace Saxon.Eej.ee.optim {
             return 0;
         }
         public override Saxon.Hej.om.GroundedValue makeIndexedValue(Saxon.Hej.om.SequenceIterator iter) {
-            return /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(iter);
+            return Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(iter);
         }
         public override void optimizeNodeSetPattern(Saxon.Hej.pattern.NodeSetPattern pattern) {
             Saxon.Hej.expr.Expression selection = pattern.getSelectionExpression();
@@ -893,7 +893,7 @@ namespace Saxon.Eej.ee.optim {
             } );
         }
         public override Saxon.Hej.om.Sequence evaluateStreamingArgument(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(expr);
+            Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(expr);
             if ((ps == null)) {
                 return base.evaluateStreamingArgument(expr, context);
             } else {
@@ -1300,7 +1300,7 @@ namespace Saxon.Eej.ee.optim {
                 return ;
             }
             System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-            Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(compiledFunction.getBody(), Saxon.Eej.ee.trans.ContextItemStaticInfoEE.ABSENT, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(compiledFunction.getBody(), Saxon.Eej.ee.trans.ContextItemStaticInfoEE.ABSENT, reasons);
             switch (ability.innerEnumValue) {
               case Saxon.Hej.trans.FunctionStreamability.InnerEnum.ABSORBING:
                 {

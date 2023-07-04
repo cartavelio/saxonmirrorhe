@@ -71,9 +71,9 @@ namespace Saxon.Eej.ee.extfn.js {
             }
             Saxon.Hej.expr.Expression e;
             if ((httpRequest == null)) {
-                e = /*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("schedule-action", 3).makeFunctionCall(wait, document, action);
+                e = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("schedule-action", 3).makeFunctionCall(wait, document, action);
             } else {
-                e = /*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("schedule-action", 4).makeFunctionCall(wait, document, action, httpRequest);
+                e = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("schedule-action", 4).makeFunctionCall(wait, document, action, httpRequest);
             }
             e.setRetainedStaticContext(makeRetainedStaticContext());
             return e;

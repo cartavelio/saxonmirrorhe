@@ -205,7 +205,7 @@ namespace Saxon.Hej.style {
         }
         private void checkInitialStreamability(Saxon.Hej.expr.Expression init) {
             if (accumulator.isDeclaredStreamable()) {
-                Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(init, Saxon.Eej.ee.trans.ContextItemStaticInfoEE.DEFAULT, null);
+                Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(init, Saxon.Eej.ee.trans.ContextItemStaticInfoEE.DEFAULT, null);
                 if ((ps.getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                     notStreamable(this, "The initial value expression for a streaming accumulator must be motionless");
                 }
@@ -221,7 +221,7 @@ namespace Saxon.Hej.style {
                 csi.setContextPostureStriding();
                 csi.setAccumulatorPhase((rule.isPostDescent() ? Saxon.Hej.functions.AccumulatorFn.Phase.AFTER : Saxon.Hej.functions.AccumulatorFn.Phase.BEFORE));
                 System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>(4);
-                Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(newValueExp, csi, reasons);
+                Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(newValueExp, csi, reasons);
                 if ((!(ps.Equals(Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)) && !(rule.isCapture()))) {
                     Saxon.Ejava.lang.StringBuilder message = new Saxon.Ejava.lang.StringBuilder(("The xsl:accumulator-rule/@select expression (or contained sequence constructor) "+"for a streaming accumulator must be grounded and motionless"));
                     foreach (string reason in reasons) {

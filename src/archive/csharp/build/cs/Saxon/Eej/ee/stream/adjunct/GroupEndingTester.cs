@@ -10,7 +10,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         }
         public override bool notifyItem() {
             bool startNew = foundEndingItem;
-            foundEndingItem = pattern.matches(getLocalContext().getContextItem(), getLocalContext());
+            foundEndingItem = pattern.matchesItem(getLocalContext().getContextItem(), getLocalContext());
             return startNew;
         }
     

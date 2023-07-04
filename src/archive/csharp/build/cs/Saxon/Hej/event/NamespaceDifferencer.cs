@@ -5,16 +5,17 @@ namespace Saxon.Hej.@event {
     public class NamespaceDifferencer : Saxon.Hej.@event.ProxyReceiver {
         private bool undeclareNamespaces = false;
         private readonly System.Collections.Generic.Stack<Saxon.Hej.om.NamespaceMap> namespaceStack = new System.Collections.Generic.Stack<Saxon.Hej.om.NamespaceMap>();
-        private Saxon.Hej.om.NodeName currentElement;
-        public NamespaceDifferencer(Saxon.Hej.@event.Receiver next, Saxon.Ejava.util.Properties details) : base (next) {
-            undeclareNamespaces = "yes".Equals(details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.UNDECLARE_PREFIXES));
+        public NamespaceDifferencer(Saxon.Hej.@event.Receiver next) : base (next) {
+            undeclareNamespaces = false;
             namespaceStack.Push(Saxon.Hej.om.NamespaceMap.emptyMap());
         }
+        public NamespaceDifferencer(Saxon.Hej.@event.Receiver next, Saxon.Ejava.util.Properties details) : this (next) {
+            undeclareNamespaces = "yes".Equals(details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.UNDECLARE_PREFIXES));
+        }
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
-            currentElement = elemName;
             Saxon.Hej.om.NamespaceMap parentMap = namespaceStack.Peek();
             namespaceStack.Push(namespaces);
-            Saxon.Hej.om.NamespaceMap delta = getDifferences(namespaces, parentMap, currentElement.hasURI(Saxon.Hej.om.NamespaceUri.NULL));
+            Saxon.Hej.om.NamespaceMap delta = getDifferences(namespaces, parentMap, elemName.hasURI(Saxon.Hej.om.NamespaceUri.NULL));
             nextReceiver.startElement(elemName, type, attributes, delta, location, properties);
         }
         public override void endElement() {

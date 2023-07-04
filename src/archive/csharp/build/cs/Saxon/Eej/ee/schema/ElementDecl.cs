@@ -272,7 +272,7 @@ namespace Saxon.Eej.ee.schema {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.VALIDATING);
                 if ((substitutionGroupOwners != null)) {
                     foreach (Saxon.Eej.ee.schema.ComponentReference headRef in substitutionGroupOwners) {
-                        Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(headRef, compiler, false));
+                        Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(headRef, compiler, false));
                         if ((decl == null)) {
                             setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                             substitutionGroupOwners = null;
@@ -284,7 +284,7 @@ namespace Saxon.Eej.ee.schema {
                 if (((typeReference != null) && !(typeReference.isDangling()))) {
                     Saxon.Hej.type.SchemaType type;
                     try {
-                        type = (Saxon.Hej.type.SchemaType)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(typeReference, compiler, false));
+                        type = (Saxon.Hej.type.SchemaType)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(typeReference, compiler, false));
                     } catch (Saxon.Hej.type.MissingComponentException e) {
                         type = null;
                     }
@@ -323,7 +323,7 @@ namespace Saxon.Eej.ee.schema {
                 typeReference.tryToResolve(compiler, false);
             } else {
                 if ((substitutionGroupOwners != null)) {
-                    Saxon.Eej.ee.schema.ElementDecl head = (Saxon.Eej.ee.schema.ElementDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(substitutionGroupOwners[0], compiler, false));
+                    Saxon.Eej.ee.schema.ElementDecl head = (Saxon.Eej.ee.schema.ElementDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(substitutionGroupOwners[0], compiler, false));
                     if ((head != null)) {
                         Saxon.Hej.type.SchemaType headType = head.getType();
                         typeReference = new Saxon.Eej.ee.schema.TypeReference(headType.getFingerprint(), getConfiguration(), this);
@@ -337,7 +337,7 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             if ((typeReference != null)) {
-                /*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(typeReference, compiler, false);
+                Saxon.Eej.ee.schema.PreparedSchema.validateReference(typeReference, compiler, false);
                 if (!(typeReference.isResolved())) {
                     setValidationStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                     return true;
@@ -372,7 +372,7 @@ namespace Saxon.Eej.ee.schema {
                 if (((substitutionGroupOwners != null) && checkFirstSubstitutionGroup)) {
                     foreach (Saxon.Eej.ee.schema.ComponentReference headRef in substitutionGroupOwners) {
                         if ((checkFirstSubstitutionGroup || !(first))) {
-                            Saxon.Eej.ee.schema.ElementDecl head = (Saxon.Eej.ee.schema.ElementDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(headRef, compiler, false));
+                            Saxon.Eej.ee.schema.ElementDecl head = (Saxon.Eej.ee.schema.ElementDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(headRef, compiler, false));
                             if ((head != null)) {
                                 Saxon.Hej.type.SchemaType headType = head.getType();
                                 try {
@@ -515,7 +515,7 @@ namespace Saxon.Eej.ee.schema {
         protected internal void fixupSubstitutionGroup(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             if ((substitutionGroupOwners != null)) {
                 foreach (Saxon.Eej.ee.schema.ComponentReference headRef in substitutionGroupOwners) {
-                    Saxon.Eej.ee.schema.ElementDecl head = (Saxon.Eej.ee.schema.ElementDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(headRef, compiler, false));
+                    Saxon.Eej.ee.schema.ElementDecl head = (Saxon.Eej.ee.schema.ElementDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(headRef, compiler, false));
                     if ((head == null)) {
                         string err = (((("Element "+Saxon.Hej.trans.Err.wrap(headRef.getTargetComponentName().getDisplayName(), Saxon.Hej.trans.Err.ELEMENT))+" is referenced as head of a substitution group for ")+Saxon.Hej.trans.Err.wrap(getDisplayName()))+", but is not declared in the schema");
                         compiler.warning(err, Saxon.Hej.trans.SaxonErrorCode.SXSD1003, this);

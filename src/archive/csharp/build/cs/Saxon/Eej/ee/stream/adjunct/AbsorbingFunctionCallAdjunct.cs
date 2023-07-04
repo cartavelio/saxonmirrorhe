@@ -14,19 +14,19 @@ namespace Saxon.Eej.ee.stream.adjunct {
             for (int i = 1; (i<operanda.Length); i++) {
                 operanda[i].setUsage(Saxon.Hej.expr.Operand.typeDeterminedUsage(target.getArgumentType(i).getPrimaryType()));
             }
-            Saxon.Eej.ee.stream.PostureAndSweep first = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getArg(0), contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep first = Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getArg(0), contextInfo, reasons);
             if ((first.getPosture() == Saxon.Eej.ee.stream.Posture.CRAWLING)) {
                 reasons.Add("The first argument to a function with streamability=absorbing must not have crawling posture");
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
             } else {
                 operanda[0].setUsage(Saxon.Hej.expr.OperandUsage.ABSORPTION);
-                return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, exp.operands(), contextInfo, reasons);
+                return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, exp.operands(), contextInfo, reasons);
             }
         }
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.UserFunctionCall instruction = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
             Saxon.Hej.expr.Expression select = instruction.getArg(0);
-            Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
+            Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
             if ((selection != null)) {
                 return (watchManager, @out, context) => {
                     Saxon.Eej.ee.stream.adjunct.AbsorbingFunctionCallAdjunct.AbsorbingFunctionCallAction action = new Saxon.Eej.ee.stream.adjunct.AbsorbingFunctionCallAdjunct.AbsorbingFunctionCallAction(getExpression(), @out, context);

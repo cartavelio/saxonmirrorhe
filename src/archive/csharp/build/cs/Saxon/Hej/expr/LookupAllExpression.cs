@@ -30,7 +30,7 @@ namespace Saxon.Hej.expr {
             getOperand().typeCheck(visitor, contextInfo);
             Saxon.Hej.type.ItemType containerType = getBaseExpression().getItemType();
             bool isArrayLookup = (containerType is Saxon.Hej.ma.arrays.ArrayItemType);
-            bool isMapLookup = ((containerType is Saxon.Hej.ma.map.MapType) || (containerType is Saxon.Hej.ma.map.TupleType));
+            bool isMapLookup = ((containerType is Saxon.Hej.ma.map.MapType) || (containerType is Saxon.Hej.ma.map.RecordType));
             if ((!(isArrayLookup) && !(isMapLookup))) {
                 if (((th.relationship(containerType, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE) == Saxon.Hej.type.Affinity.DISJOINT) && (th.relationship(containerType, Saxon.Hej.ma.arrays.ArrayItemType.getInstance()) == Saxon.Hej.type.Affinity.DISJOINT))) {
                     if (Saxon.Hej.value.Cardinality.allowsZero(getBaseExpression().getCardinality())) {

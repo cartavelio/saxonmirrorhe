@@ -24,7 +24,7 @@ namespace Saxon.Eej.ee.trans {
             addPrecondition(rule, preconditions, p);
             if ((pattern is Saxon.Hej.pattern.BasePatternWithPredicate)) {
                 Saxon.Hej.pattern.Pattern @base = ((Saxon.Hej.pattern.BasePatternWithPredicate)(pattern)).getBasePattern();
-                /*134*/Saxon.Eej.ee.trans.GeneralPatternOptimizer.getInstance().process(rule, @base, preconditions, characteristics);
+                Saxon.Eej.ee.trans.GeneralPatternOptimizer.getInstance().process(rule, @base, preconditions, characteristics);
             }
         }
     

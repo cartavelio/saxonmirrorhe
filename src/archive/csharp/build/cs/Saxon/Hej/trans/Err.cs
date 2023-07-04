@@ -121,6 +121,14 @@ namespace Saxon.Hej.trans {
                 return item.toShortString();
             }
         }
+        public static string depictCodepoint(int cp) {
+            string hexCode = ("#x"+Saxon.Impl.Helpers.Utils.intToHexString(cp));
+            if (((cp>=20) && (cp<Saxon.Hej.serialize.charcode.UTF16CharacterSet.SURROGATE1_MIN))) {
+                return (((("'"+(char)(cp))+"'(")+hexCode)+")");
+            } else {
+                return hexCode;
+            }
+        }
         public static string depictSequence(Saxon.Hej.om.Sequence seq) {
             if ((seq == null)) {
                 return "(*null*)";

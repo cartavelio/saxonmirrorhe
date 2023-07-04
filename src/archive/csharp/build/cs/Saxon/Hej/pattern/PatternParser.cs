@@ -4,6 +4,8 @@ using System.Linq;
 namespace Saxon.Hej.pattern {
     public class PatternParser : Saxon.Hej.expr.parser.XPathParser {
         internal int inPredicate = 0;
+        public PatternParser(Saxon.Hej.expr.StaticContext env) : base (env) {
+        }
         public Saxon.Hej.pattern.Pattern parsePattern(string pattern, Saxon.Hej.expr.StaticContext env) {
             this.env = env;
             charChecker = env.getConfiguration().getValidCharacterChecker();
@@ -120,7 +122,7 @@ namespace Saxon.Hej.pattern {
                         }
                     }
                     if (((exp is Saxon.Hej.expr.FilterExpression) && (((Saxon.Hej.expr.FilterExpression)(exp)).getBase() is Saxon.Hej.expr.ContextItemExpression))) {
-                        if ((allowXPath40Syntax && ((((pattern.StartsWith("tuple") || pattern.StartsWith("map")) || pattern.StartsWith("array")) || pattern.StartsWith("union"))))) {
+                        if ((allowXPath40Syntax && (((((pattern.StartsWith("record") || pattern.StartsWith("tuple")) || pattern.StartsWith("map")) || pattern.StartsWith("array")) || pattern.StartsWith("union"))))) {
                         } else {
                             grumble("A predicatePattern can appear only at the outermost level (parentheses not allowed)");
                         }
@@ -273,7 +275,9 @@ namespace Saxon.Hej.pattern {
             } else {
                 switch (t.currentToken) {
                   case Saxon.Hej.expr.parser.Token.DOLLAR:
-                    return parseVariableReference();
+                    int offset = t.currentTokenStartOffset;
+                    Saxon.Hej.om.StructuredQName variableName = parseVariableName();
+                    return resolveVariableReference(offset, variableName);
                   case Saxon.Hej.expr.parser.Token.STRING_LITERAL:
                     return parseStringLiteral(true);
                   case Saxon.Hej.expr.parser.Token.NUMBER:

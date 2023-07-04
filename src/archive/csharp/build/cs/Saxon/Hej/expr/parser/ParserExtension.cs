@@ -68,9 +68,6 @@ namespace Saxon.Hej.expr.parser {
         protected internal virtual Saxon.Hej.expr.Expression parseExtendedExprSingle(Saxon.Hej.expr.parser.XPathParser p) {
             return null;
         }
-        protected internal virtual Saxon.Hej.expr.Expression parseForMemberExpression(Saxon.Hej.expr.parser.XPathParser p) {
-            return null;
-        }
     
     }
 }

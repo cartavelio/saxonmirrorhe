@@ -21,7 +21,7 @@ namespace Saxon.Eej.ee.stream.watch {
         public ForEachGroupPartitionAction(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.instruct.ForEachGroup expression, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expression, result, context) {
             this.watchManager = watchManager;
             action = expression.getActionExpression();
-            actionIsConsuming = (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING);
+            actionIsConsuming = (Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING);
             populationContext = context.newMinorContext();
         }
         public void setInversion(Saxon.Eej.ee.stream.Inversion inversion) {
@@ -34,7 +34,7 @@ namespace Saxon.Eej.ee.stream.watch {
             base.open(terminator);
             makeBodyContext();
             populationContext.setCurrentIterator(new Saxon.Hej.tree.iter.ManualIterator());
-            boundaryTester = /*134*/Saxon.Eej.ee.stream.adjunct.ForEachGroupAdjunct.makeBoundaryTester((Saxon.Hej.expr.instruct.ForEachGroup)(getExpression()), populationContext);
+            boundaryTester = Saxon.Eej.ee.stream.adjunct.ForEachGroupAdjunct.makeBoundaryTester((Saxon.Hej.expr.instruct.ForEachGroup)(getExpression()), populationContext);
             closed = false;
         }
         protected internal void makeBodyContext() {

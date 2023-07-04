@@ -8,7 +8,7 @@ namespace Saxon.Hej.expr.elab {
         public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
             return new Saxon.Hej.expr.elab.EagerPullEvaluator(elaborateForPull());
         }
-        public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+        public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable, bool lazyEvaluationRequired) {
             Saxon.Hej.expr.Expression expr = getExpression();
             if (repeatable) {
                 return new Saxon.Hej.expr.elab.MemoClosureEvaluator(expr, elaborateForPull());

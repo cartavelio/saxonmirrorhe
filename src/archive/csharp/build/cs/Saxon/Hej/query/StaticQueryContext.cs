@@ -24,6 +24,7 @@ namespace Saxon.Hej.query {
         private Saxon.Hej.s9api.Location moduleLocation;
         private Saxon.Hej.expr.parser.OptimizerOptions optimizerOptions;
         private int languageVersion = 31;
+        private Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
         protected internal StaticQueryContext()  {
         }
         public StaticQueryContext(Saxon.Hej.Configuration config) : this (config, true) {
@@ -63,11 +64,11 @@ namespace Saxon.Hej.query {
             requiredContextItemType = c.requiredContextItemType;
             preserveSpace = c.preserveSpace;
             defaultEmptyLeast = c.defaultEmptyLeast;
-            moduleURIResolver = c.moduleURIResolver;
             errorReporter = c.errorReporter;
             codeInjector = c.codeInjector;
             updating = c.updating;
             optimizerOptions = c.optimizerOptions;
+            unprefixedElementMatchingPolicy = c.unprefixedElementMatchingPolicy;
         }
         public void reset() {
             userDeclaredNamespaces = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.NamespaceUri>(10);
@@ -83,6 +84,7 @@ namespace Saxon.Hej.query {
             clearNamespaces();
             updating = false;
             optimizerOptions = config.getOptimizerOptions();
+            unprefixedElementMatchingPolicy = Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
         }
         public void setConfiguration(Saxon.Hej.Configuration config) {
             if (((this.config != null) && (this.config != config))) {
@@ -124,6 +126,7 @@ namespace Saxon.Hej.query {
                 languageVersion = 31;
             } else {
                 if ((version == 40)) {
+                    config.checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION, "XQuery 4.0", -1);
                     languageVersion = 40;
                 } else {
                     throw new Saxon.Ejava.lang.IllegalArgumentException(("languageVersion = "+version));
@@ -182,7 +185,8 @@ namespace Saxon.Hej.query {
             return this.optimizerOptions;
         }
         public Saxon.Hej.query.XQueryExpression compileQuery(string query) {
-            Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", updating));
+            Saxon.Hej.query.QueryModule mainModule = new Saxon.Hej.query.QueryModule(this);
+            Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", updating, mainModule));
             if ((codeInjector != null)) {
                 qp.setCodeInjector(codeInjector);
             } else {
@@ -191,7 +195,6 @@ namespace Saxon.Hej.query {
                 }
             }
             qp.setStreaming(isStreaming());
-            Saxon.Hej.query.QueryModule mainModule = new Saxon.Hej.query.QueryModule(this);
             return qp.makeXQueryExpression(query, mainModule, config);
         }
         public Saxon.Hej.query.XQueryExpression compileQuery(System.IO.TextReader source) { lock(this) {
@@ -258,6 +261,9 @@ namespace Saxon.Hej.query {
             declareNamespace("xs", Saxon.Hej.om.NamespaceUri.SCHEMA);
             declareNamespace("xsi", Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE);
             declareNamespace("fn", Saxon.Hej.om.NamespaceUri.FN);
+            declareNamespace("math", Saxon.Hej.om.NamespaceUri.MATH);
+            declareNamespace("map", Saxon.Hej.om.NamespaceUri.MAP_FUNCTIONS);
+            declareNamespace("array", Saxon.Hej.om.NamespaceUri.ARRAY_FUNCTIONS);
             declareNamespace("local", Saxon.Hej.om.NamespaceUri.LOCAL);
             declareNamespace("err", Saxon.Hej.om.NamespaceUri.ERR);
             declareNamespace("saxon", Saxon.Hej.om.NamespaceUri.SAXON);
@@ -284,6 +290,12 @@ namespace Saxon.Hej.query {
         }
         public Saxon.Hej.om.NamespaceUri getDefaultElementNamespace() {
             return defaultElementNamespace;
+        }
+        public Saxon.Api.UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+            return unprefixedElementMatchingPolicy;
+        }
+        public void setUnprefixedElementMatchingPolicy(Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy) {
+            this.unprefixedElementMatchingPolicy = unprefixedElementMatchingPolicy;
         }
         public void declareGlobalVariable(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.value.SequenceType type, Saxon.Hej.om.GroundedValue value, bool external) {
             if (((value == null) && !(external))) {

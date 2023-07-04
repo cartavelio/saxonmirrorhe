@@ -311,7 +311,7 @@ namespace Saxon.Hej.trans {
     } else {
         if ((target is Saxon.Hej.expr.Literal)) {
             targetFn = (Saxon.Hej.om.FunctionItem)(((Saxon.Hej.expr.Literal)(target)).getGroundedValue());
-            coercedFn = new Saxon.Hej.functions.hof.CoercedFunction(targetFn, (Saxon.Hej.type.SpecificFunctionType)(type));
+            coercedFn = new Saxon.Hej.functions.hof.CoercedFunction(targetFn, (Saxon.Hej.type.SpecificFunctionType)(type), true);
         } else {
             throw new Saxon.Ejava.lang.AssertionError();
         }
@@ -724,7 +724,9 @@ namespace Saxon.Hej.trans {
     Saxon.Hej.type.SpecificFunctionType type = (Saxon.Hej.type.SpecificFunctionType)(loader.parseAlphaCode(element, "to").getPrimaryType());
     string diag = element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "diag");
     Saxon.Hej.expr.Expression arg = loader.getFirstChildExpression(element);
-    return new Saxon.Hej.functions.hof.FunctionSequenceCoercer(arg, type, () => Saxon.Hej.expr.parser.RoleDiagnostic.reconstruct(diag));
+    string flags = element.getAttributeValue("", "flags");
+    bool allow40 = ((flags != null) && flags.Contains("4"));
+    return new Saxon.Hej.functions.hof.FunctionSequenceCoercer(arg, type, () => Saxon.Hej.expr.parser.RoleDiagnostic.reconstruct(diag), allow40);
 } );
             Saxon.Impl.Helpers.MapUtils.Put(eMap, "fnRef", (loader, element) => {
     loader.needsPELicense("higher order functions");
@@ -1747,7 +1749,7 @@ namespace Saxon.Hej.trans {
             overriding = new Saxon.Hej.functions.ExecutableFunctionLibrary(config);
             underriding = new Saxon.Hej.functions.ExecutableFunctionLibrary(config);
             try {
-                parser = config.newExpressionParser("XP", false);
+                parser = config.newExpressionParser("XP", false, new Saxon.Hej.sxpath.IndependentContext(config));
                 Saxon.Hej.om.QNameParser qNameParser = new Saxon.Hej.om.QNameParser(null).withAcceptEQName(true);
                 parser.setQNameParser(qNameParser);
             } catch (Saxon.Hej.trans.XPathException e) {

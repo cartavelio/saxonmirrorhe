@@ -453,7 +453,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 }
             }
             if (autoClose) {
-                watch.open(/*134*/Saxon.Eej.ee.stream.watch.Terminator.getInstance());
+                watch.open(Saxon.Eej.ee.stream.watch.Terminator.getInstance());
             }
         }
         public void removeWatch(Saxon.Eej.ee.stream.watch.Watch watch) {

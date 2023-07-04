@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             foreach (Saxon.Hej.expr.Operand o in getExpression().operands()) {
                 list.Add(o);
             }
-            return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(getExpression(), list, contextInfo, reasons);
+            return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(getExpression(), list, contextInfo, reasons);
         }
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             return (watchManager, @out, context) => {

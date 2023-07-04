@@ -34,7 +34,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_SystemFunctionCall_20 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly AvailableSystemProperties outerInstance;
-            public Inner_SystemFunctionCall_20(AvailableSystemProperties outerInstance, AvailableSystemProperties arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_20(AvailableSystemProperties outerInstance, AvailableSystemProperties arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.expr.Expression preEvaluate(Saxon.Hej.expr.parser.ExpressionVisitor visitor) {

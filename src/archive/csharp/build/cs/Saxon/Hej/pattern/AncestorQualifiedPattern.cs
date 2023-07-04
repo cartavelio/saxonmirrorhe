@@ -76,9 +76,30 @@ namespace Saxon.Hej.pattern {
         }
         public override bool matchesBeneathAnchor(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.NodeInfo anchor, Saxon.Hej.expr.XPathContext context) {
             if (testUpperPatternFirst) {
-                return (matchesUpperPattern(node, anchor, context) && basePattern.matches(node, context));
+                bool ok;
+                try {
+                    ok = matchesUpperPattern(node, anchor, context);
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    if (basePattern.matches(node, context)) {
+                        throw;
+                    } else {
+                        return false;
+                    }
+                }
+                return (ok && basePattern.matches(node, context));
             } else {
-                return (basePattern.matchesBeneathAnchor(node, anchor, context) && matchesUpperPattern(node, anchor, context));
+                bool ok;
+                try {
+                    ok = basePattern.matchesBeneathAnchor(node, anchor, context);
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    testUpperPatternFirst = true;
+                    if (upperPattern.matches(node, context)) {
+                        throw;
+                    } else {
+                        return false;
+                    }
+                }
+                return (ok && matchesUpperPattern(node, anchor, context));
             }
         }
         private bool matchesUpperPattern(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.NodeInfo anchor, Saxon.Hej.expr.XPathContext context) {

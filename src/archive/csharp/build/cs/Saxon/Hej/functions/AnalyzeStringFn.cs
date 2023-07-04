@@ -52,7 +52,7 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.Configuration config = context.getConfiguration();
                 lock (config) {
                     if ((schemaAware && !(config.isSchemaAvailable(Saxon.Hej.om.NamespaceUri.FN)))) {
-                        config.addSchemaSource(/*134*/Saxon.Eej.ee.config.StandardSchemaResolver.fetchResource("xpath-functions.scm", config));
+                        config.addSchemaSource(Saxon.Eej.ee.config.StandardSchemaResolver.fetchResource("xpath-functions.scm", config));
                     }
                 }
                 init(context.getConfiguration(), schemaAware);

@@ -174,7 +174,7 @@ namespace Saxon.Hej.value {
                             if (((c>='0') && (c<='9'))) {
                                 state = 2;
                             } else {
-                                return new Saxon.Hej.type.ValidationFailure((("Cannot convert string "+Saxon.Hej.trans.Err.wrap(input, Saxon.Hej.trans.Err.VALUE))+" to an integer: contains a character that is not a digit"));
+                                return new Saxon.Hej.type.ValidationFailure((((("Cannot convert string "+Saxon.Hej.trans.Err.wrap(input, Saxon.Hej.trans.Err.VALUE))+" to an integer: contains a character ")+Saxon.Hej.trans.Err.depictCodepoint(c))+" that is not a digit"));
                             }
                         }
                     }
@@ -183,7 +183,7 @@ namespace Saxon.Hej.value {
                     if (((c>='0') && (c<='9'))) {
                         state = 2;
                     } else {
-                        return new Saxon.Hej.type.ValidationFailure(((("Cannot convert string "+Saxon.Hej.trans.Err.wrap(input, Saxon.Hej.trans.Err.VALUE))+" to an integer: expected a digit, found ")+c));
+                        return new Saxon.Hej.type.ValidationFailure(((("Cannot convert string "+Saxon.Hej.trans.Err.wrap(input, Saxon.Hej.trans.Err.VALUE))+" to an integer: expected a digit, found ")+Saxon.Hej.trans.Err.depictCodepoint(c)));
                     }
                     break ;
                   case 2:
@@ -193,7 +193,7 @@ namespace Saxon.Hej.value {
                         if (Saxon.Hej.value.Whitespace.isWhite(c)) {
                             state = 3;
                         } else {
-                            return new Saxon.Hej.type.ValidationFailure(((("Cannot convert string "+Saxon.Hej.trans.Err.wrap(input, Saxon.Hej.trans.Err.VALUE))+" to an integer: expected a digit, found ")+c));
+                            return new Saxon.Hej.type.ValidationFailure(((("Cannot convert string "+Saxon.Hej.trans.Err.wrap(input, Saxon.Hej.trans.Err.VALUE))+" to an integer: expected a digit, found ")+Saxon.Hej.trans.Err.depictCodepoint(c)));
                         }
                     }
                     break ;

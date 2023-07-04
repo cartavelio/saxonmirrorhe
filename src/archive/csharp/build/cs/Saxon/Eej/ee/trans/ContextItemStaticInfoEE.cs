@@ -28,7 +28,7 @@ namespace Saxon.Eej.ee.trans {
             if ((explicitPosture == Saxon.Eej.ee.stream.Posture.UNKNOWN)) {
                 Saxon.Hej.expr.Expression contextSetter = getContextSettingExpression();
                 if ((contextSetter != null)) {
-                    return /*134*/Saxon.Eej.ee.stream.Streamability.getPosture(contextSetter);
+                    return Saxon.Eej.ee.stream.Streamability.getPosture(contextSetter);
                 } else {
                     Saxon.Hej.expr.instruct.Actor actor = getContainer();
                     if ((actor is Saxon.Hej.expr.instruct.AttributeSet)) {

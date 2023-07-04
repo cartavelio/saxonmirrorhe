@@ -143,9 +143,13 @@ namespace Saxon.Hej.style {
                     return includedDoc;
                 } catch (Saxon.Hej.trans.XPathException e) {
                     e.maybeSetErrorCode("XTSE0165");
-                    if (e.hasErrorCode("XTSE0180")) {
-                        if (isImport) {
-                            e.setErrorCode("XTSE0210");
+                    if (e.hasErrorCode("SXXP0003")) {
+                        e.setErrorCode("XTSE0165");
+                    } else {
+                        if (e.hasErrorCode("XTSE0180")) {
+                            if (isImport) {
+                                e.setErrorCode("XTSE0210");
+                            }
                         }
                     }
                     if (!(e.hasBeenReported())) {
@@ -266,7 +270,7 @@ namespace Saxon.Hej.style {
             }
             staticContext.setXPathLanguageLevel(languageLevel);
             if ((asStr != null)) {
-                Saxon.Hej.expr.parser.XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false);
+                Saxon.Hej.expr.parser.XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false, staticContext);
                 requiredType = parser.parseSequenceType(asStr, staticContext);
             }
             Saxon.Hej.om.StructuredQName varName;
@@ -395,7 +399,7 @@ namespace Saxon.Hej.style {
                 if ((cr is Saxon.Hej.type.ValidationFailure)) {
                     throw new Saxon.Hej.trans.XPathException(("Invalid version number: "+version), "XTSE0110");
                 }
-                Saxon.Hej.value.BigDecimalValue d = (Saxon.Hej.value.BigDecimalValue)(cr.asAtomic());
+                Saxon.Hej.value.DecimalValue d = (Saxon.Hej.value.DecimalValue)(cr.asAtomic());
                 return ((int)(d.getDecimalValue()*(Singulink.Numerics.BigDecimal)10));
             } else {
                 return System.Int32.MinValue;

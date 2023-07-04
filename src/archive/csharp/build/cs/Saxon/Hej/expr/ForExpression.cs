@@ -18,7 +18,12 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.value.SequenceType decl = requiredType;
                 Saxon.Hej.value.SequenceType sequenceType = Saxon.Hej.value.SequenceType.makeSequenceType(decl.getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
                 Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, variableName.getDisplayName(), 0);
-                setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
+                if ((visitor.getStaticContext().getXPathVersion()<40)) {
+                    setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
+                } else {
+                    Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+                    setSequence(tc.staticTypeCheck(getSequence(), sequenceType, role, visitor));
+                }
                 Saxon.Hej.type.ItemType actualItemType = getSequence().getItemType();
                 refineTypeInformation(actualItemType, getRangeVariableCardinality(), null, getSequence().getSpecialProperties(), this);
             }

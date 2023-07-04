@@ -18,7 +18,7 @@ namespace Saxon.Eej.trans {
                 setSelectExpression(compileSequenceConstructor(exec, decl, false));
             }
             Saxon.Hej.expr.Expression result = Saxon.Hej.expr.Literal.makeEmptySequence();
-            Saxon.Hej.functions.SystemFunction arrayMem = /*134*/Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance().makeFunction("parcel", 1);
+            Saxon.Hej.functions.SystemFunction arrayMem = Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance().makeFunction("parcel", 1);
             result = arrayMem.makeFunctionCall(getSelectExpression());
             return result;
         }

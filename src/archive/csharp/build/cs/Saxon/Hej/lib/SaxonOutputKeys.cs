@@ -10,6 +10,7 @@ namespace Saxon.Hej.lib {
         public const string SAXON_HEX_BINARY_METHOD = "Q{http://saxon.sf.net/}hexBinary";
         public const string SAXON_XML_TO_JSON_METHOD = "Q{http://saxon.sf.net/}xml-to-json";
         public const string ALLOW_DUPLICATE_NAMES = "allow-duplicate-names";
+        public const string ESCAPE_SOLIDUS = "escape-solidus";
         public const string BUILD_TREE = "build-tree";
         public const string INDENT_SPACES = "{http://saxon.sf.net/}indent-spaces";
         public const string INTERNAL_DTD_SUBSET = "{http://saxon.sf.net/}internal-dtd-subset";
@@ -77,7 +78,7 @@ namespace Saxon.Hej.lib {
         public static bool isXhtmlHtmlVersion5(Saxon.Ejava.util.Properties properties) {
             string htmlVersion = properties.getProperty(Saxon.Hej.lib.SaxonOutputKeys.HTML_VERSION);
             try {
-                return ((htmlVersion != null) && ((Saxon.Hej.value.BigDecimalValue)(Saxon.Hej.value.BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())).getDecimalValue().Equals(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(5)));
+                return ((htmlVersion != null) && ((Saxon.Hej.value.DecimalValue)(Saxon.Hej.value.BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())).getDecimalValue().Equals(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(5)));
             } catch (Saxon.Hej.type.ValidationException e) {
                 return false;
             }
@@ -89,7 +90,7 @@ namespace Saxon.Hej.lib {
             }
             if ((htmlVersion != null)) {
                 try {
-                    return ((Saxon.Hej.value.BigDecimalValue)(Saxon.Hej.value.BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())).getDecimalValue().Equals(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(5));
+                    return ((Saxon.Hej.value.DecimalValue)(Saxon.Hej.value.BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())).getDecimalValue().Equals(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(5));
                 } catch (Saxon.Hej.type.ValidationException e) {
                     return false;
                 }

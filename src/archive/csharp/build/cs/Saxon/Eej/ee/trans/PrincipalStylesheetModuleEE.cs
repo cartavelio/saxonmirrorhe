@@ -38,7 +38,7 @@ namespace Saxon.Eej.ee.trans {
             if ((body != null)) {
                 Saxon.Eej.ee.trans.ContextItemStaticInfoEE info = (Saxon.Eej.ee.trans.ContextItemStaticInfoEE)(getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), true));
                 info.setContainer(aSet);
-                Saxon.Eej.ee.stream.PostureAndSweep s1 = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(body, info, reasons);
+                Saxon.Eej.ee.stream.PostureAndSweep s1 = Saxon.Eej.ee.stream.Streamability.getStreamability(body, info, reasons);
                 if ((s1.getPosture() != Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                     string message = (("Attribute set "+aSet.getObjectName().getDisplayName())+" is declared streamable but is not actually streamable. ");
                     foreach (string s in reasons) {

@@ -106,7 +106,7 @@ namespace Saxon.Eej.ee.optim {
             gvd.setVariableQName(varName);
             globalVariableManager.addGlobalVariable(gvd);
             Saxon.Hej.expr.GlobalVariableReference @ref = new Saxon.Hej.expr.GlobalVariableReference(gvd);
-            /*134*/Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(@ref, Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS);
+            Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(@ref, Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS);
             @ref.setRetainedStaticContext(visitor.getStaticContext().makeRetainedStaticContext());
             gvd.registerReference(@ref);
             gvd.typeCheck(visitor);

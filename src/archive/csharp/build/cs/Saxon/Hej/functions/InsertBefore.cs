@@ -67,7 +67,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_SystemFunctionCall_6 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly InsertBefore outerInstance;
-            public Inner_SystemFunctionCall_6(InsertBefore outerInstance, InsertBefore arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_6(InsertBefore outerInstance, InsertBefore arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.type.ItemType getItemType() {

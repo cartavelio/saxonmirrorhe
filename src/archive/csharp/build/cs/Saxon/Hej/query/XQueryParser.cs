@@ -26,12 +26,12 @@ namespace Saxon.Hej.query {
         readonly System.Collections.Generic.IList<Saxon.Hej.query.XQueryParser.Import> moduleImports = new System.Collections.Generic.List<Saxon.Hej.query.XQueryParser.Import>(5);
         private readonly System.Collections.Generic.ISet<Saxon.Hej.om.StructuredQName> outputPropertiesSeen = new System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName>(4);
         private Saxon.Ejava.util.Properties parameterDocProperties;
-        public XQueryParser()  {
+        public XQueryParser(Saxon.Hej.expr.StaticContext env) : base (env) {
             this.languageVersion = 31;
             setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XQUERY, languageVersion);
         }
         private Saxon.Hej.query.XQueryParser newParser() {
-            Saxon.Hej.query.XQueryParser qp = new Saxon.Hej.query.XQueryParser();
+            Saxon.Hej.query.XQueryParser qp = new Saxon.Hej.query.XQueryParser(env);
             qp.setLanguage(language, languageVersion);
             qp.setParserExtension(parserExtension);
             return qp;
@@ -1272,7 +1272,14 @@ namespace Saxon.Hej.query {
                 t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
                 nextToken();
                 Saxon.Hej.expr.Expression exp = parseExprSingle();
-                var.setBody(makeTracer(exp, varQName));
+                exp = makeTracer(exp, varQName);
+                if ((allowXPath40Syntax && (requiredType != Saxon.Hej.value.SequenceType.ANY_SEQUENCE))) {
+                    Saxon.Hej.expr.parser.TypeChecker checker = env.getConfiguration().getTypeChecker(false);
+                    Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(env);
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, varName, 0);
+                    exp = checker.staticTypeCheck(exp, requiredType, role, visitor);
+                }
+                var.setBody(exp);
             } else {
                 if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
                     if ("external".Equals(t.currentTokenValue)) {
@@ -1289,7 +1296,14 @@ namespace Saxon.Hej.query {
                             t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
                             nextToken();
                             Saxon.Hej.expr.Expression exp = parseExprSingle();
-                            var.setBody(makeTracer(exp, varQName));
+                            exp = makeTracer(exp, varQName);
+                            if ((allowXPath40Syntax && (requiredType != Saxon.Hej.value.SequenceType.ANY_SEQUENCE))) {
+                                Saxon.Hej.expr.parser.TypeChecker checker = env.getConfiguration().getTypeChecker(false);
+                                Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(env);
+                                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, varName, 0);
+                                exp = checker.staticTypeCheck(exp, requiredType, role, visitor);
+                            }
+                            var.setBody(exp);
                         }
                     } else {
                         grumble("Variable must either be initialized or be declared as external");
@@ -1712,7 +1726,7 @@ namespace Saxon.Hej.query {
                                                 System.Collections.Generic.IList<Saxon.Hej.query.XQueryParser.SortSpec> sortSpecList;
                                                 t.setState(Saxon.Hej.expr.parser.Tokenizer.BARE_NAME_STATE);
                                                 nextToken();
-                                                if (!((((t.currentToken == Saxon.Hej.expr.parser.Token.BY) || isKeyword("by"))))) {
+                                                if (!(isKeyword("by"))) {
                                                     grumble("'order' must be followed by 'by'");
                                                 }
                                                 t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
@@ -1790,7 +1804,7 @@ namespace Saxon.Hej.query {
             do {
                 nextToken();
                 int offset = t.currentTokenStartOffset;
-                Saxon.Hej.expr.flwor.ForClause clause = (forMember ? new Saxon.Hej.expr.flwor.ForMemberClause() : new Saxon.Hej.expr.flwor.ForClause());
+                Saxon.Hej.expr.flwor.ForClause clause = new Saxon.Hej.expr.flwor.ForClause();
                 clause.setRepeated((!(first) || containsLoopingClause(clauseList)));
                 if (first) {
                     first = false;
@@ -1800,7 +1814,11 @@ namespace Saxon.Hej.query {
                 expect(Saxon.Hej.expr.parser.Token.DOLLAR);
                 nextToken();
                 expect(Saxon.Hej.expr.parser.Token.NAME);
-                Saxon.Hej.om.StructuredQName varQName = makeStructuredQName(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
+                Saxon.Hej.om.StructuredQName explicitQName = makeStructuredQName(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
+                Saxon.Hej.om.StructuredQName iterationQName = explicitQName;
+                if (forMember) {
+                    iterationQName = new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("fm"+clause.GetHashCode()));
+                }
                 Saxon.Hej.value.SequenceType type = (forMember ? Saxon.Hej.value.SequenceType.ANY_SEQUENCE : Saxon.Hej.value.SequenceType.SINGLE_ITEM);
                 nextToken();
                 bool explicitType = false;
@@ -1829,7 +1847,7 @@ namespace Saxon.Hej.query {
                     warning("Occurrence indicator on singleton range variable has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9039);
                     type = Saxon.Hej.value.SequenceType.makeSequenceType(type.getPrimaryType(), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
                 }
-                Saxon.Hej.expr.flwor.LocalVariableBinding binding = new Saxon.Hej.expr.flwor.LocalVariableBinding(varQName, type);
+                Saxon.Hej.expr.flwor.LocalVariableBinding binding = new Saxon.Hej.expr.flwor.LocalVariableBinding(iterationQName, (forMember ? Saxon.Hej.value.SequenceType.ANY_SEQUENCE : type));
                 clause.setRangeVariable(binding);
                 if (isKeyword("at")) {
                     nextToken();
@@ -1837,7 +1855,7 @@ namespace Saxon.Hej.query {
                     nextToken();
                     expect(Saxon.Hej.expr.parser.Token.NAME);
                     Saxon.Hej.om.StructuredQName posQName = makeStructuredQName(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
-                    if ((!(scanOnly) && posQName.Equals(varQName))) {
+                    if ((!(scanOnly) && posQName.Equals(explicitQName))) {
                         grumble("The two variables declared in a single 'for' clause must have different names", "XQST0089");
                     }
                     Saxon.Hej.expr.flwor.LocalVariableBinding pos = new Saxon.Hej.expr.flwor.LocalVariableBinding(posQName, Saxon.Hej.value.SequenceType.SINGLE_INTEGER);
@@ -1846,13 +1864,27 @@ namespace Saxon.Hej.query {
                 }
                 expect(Saxon.Hej.expr.parser.Token.IN);
                 nextToken();
-                clause.initSequence(flwor, parseExprSingle());
-                declareRangeVariable(clause.getRangeVariable());
+                Saxon.Hej.expr.Expression collection = parseExprSingle();
+                if (forMember) {
+                    collection = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
+                }
+                clause.initSequence(flwor, collection);
+                declareRangeVariable(binding);
                 if ((clause.getPositionVariable() != null)) {
                     declareRangeVariable(clause.getPositionVariable());
                 }
                 if (allowingEmpty) {
                     checkForClauseAllowingEmpty(flwor, clause);
+                }
+                if (forMember) {
+                    Saxon.Hej.expr.flwor.LetClause letClause = new Saxon.Hej.expr.flwor.LetClause();
+                    Saxon.Hej.expr.flwor.LocalVariableBinding letBinding = new Saxon.Hej.expr.flwor.LocalVariableBinding(explicitQName, type);
+                    letClause.setRangeVariable(letBinding);
+                    Saxon.Hej.expr.LocalVariableReference tempRef = new Saxon.Hej.expr.LocalVariableReference(clause.getRangeVariable());
+                    Saxon.Hej.expr.LookupExpression lookup = new Saxon.Hej.expr.LookupExpression(tempRef, new Saxon.Hej.expr.StringLiteral("value"));
+                    letClause.initSequence(flwor, lookup);
+                    declareRangeVariable(letBinding);
+                    clauseList.Add(letClause);
                 }
             } while ((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA));
         }
@@ -2062,40 +2094,50 @@ namespace Saxon.Hej.query {
             expect(Saxon.Hej.expr.parser.Token.IN);
             nextToken();
             clause.initSequence(flwor, parseExprSingle());
-            if (!(isKeyword("start"))) {
-                grumble(("in window clause, expected 'start', but found "+currentTokenDisplay()));
-            }
-            t.setState(Saxon.Hej.expr.parser.Tokenizer.BARE_NAME_STATE);
-            nextToken();
-            if ((t.currentToken == Saxon.Hej.expr.parser.Token.DOLLAR)) {
-                Saxon.Hej.expr.flwor.LocalVariableBinding startItemVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), windowItemTypeMandatory);
-                clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_ITEM, startItemVar);
-                declareRangeVariable(startItemVar);
-            }
-            if (isKeyword("at")) {
+            if (isKeyword("start")) {
+                t.setState(Saxon.Hej.expr.parser.Tokenizer.BARE_NAME_STATE);
                 nextToken();
-                Saxon.Hej.expr.flwor.LocalVariableBinding startPositionVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), Saxon.Hej.value.SequenceType.SINGLE_INTEGER);
-                clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_ITEM_POSITION, startPositionVar);
-                declareRangeVariable(startPositionVar);
+                if ((t.currentToken == Saxon.Hej.expr.parser.Token.DOLLAR)) {
+                    Saxon.Hej.expr.flwor.LocalVariableBinding startItemVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), windowItemTypeMandatory);
+                    clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_ITEM, startItemVar);
+                    declareRangeVariable(startItemVar);
+                }
+                if (isKeyword("at")) {
+                    nextToken();
+                    Saxon.Hej.expr.flwor.LocalVariableBinding startPositionVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), Saxon.Hej.value.SequenceType.SINGLE_INTEGER);
+                    clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_ITEM_POSITION, startPositionVar);
+                    declareRangeVariable(startPositionVar);
+                }
+                if (isKeyword("previous")) {
+                    nextToken();
+                    Saxon.Hej.expr.flwor.LocalVariableBinding startPreviousItemVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), windowItemTypeOptional);
+                    clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_PREVIOUS_ITEM, startPreviousItemVar);
+                    declareRangeVariable(startPreviousItemVar);
+                }
+                if (isKeyword("next")) {
+                    nextToken();
+                    Saxon.Hej.expr.flwor.LocalVariableBinding startNextItemVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), windowItemTypeOptional);
+                    clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_NEXT_ITEM, startNextItemVar);
+                    declareRangeVariable(startNextItemVar);
+                }
+                if (isKeyword("when")) {
+                    t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
+                    nextToken();
+                    clause.initStartCondition(flwor, parseExprSingle());
+                } else {
+                    if (allowXPath40Syntax) {
+                        clause.initStartCondition(flwor, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE, flwor));
+                    } else {
+                        grumble(("Expected 'when' condition for window start, but found "+currentTokenDisplay()));
+                    }
+                }
+            } else {
+                if (allowXPath40Syntax) {
+                    clause.initStartCondition(flwor, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE, flwor));
+                } else {
+                    grumble(("in window clause, expected 'start', but found "+currentTokenDisplay()));
+                }
             }
-            if (isKeyword("previous")) {
-                nextToken();
-                Saxon.Hej.expr.flwor.LocalVariableBinding startPreviousItemVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), windowItemTypeOptional);
-                clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_PREVIOUS_ITEM, startPreviousItemVar);
-                declareRangeVariable(startPreviousItemVar);
-            }
-            if (isKeyword("next")) {
-                nextToken();
-                Saxon.Hej.expr.flwor.LocalVariableBinding startNextItemVar = new Saxon.Hej.expr.flwor.LocalVariableBinding(readVariableName(), windowItemTypeOptional);
-                clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.START_NEXT_ITEM, startNextItemVar);
-                declareRangeVariable(startNextItemVar);
-            }
-            if (!(isKeyword("when"))) {
-                grumble(("Expected 'when' condition for window start, but found "+currentTokenDisplay()));
-            }
-            t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
-            nextToken();
-            clause.initStartCondition(flwor, parseExprSingle());
             if (isKeyword("only")) {
                 clause.setIncludeUnclosedWindows(false);
                 nextToken();
@@ -2126,12 +2168,17 @@ namespace Saxon.Hej.query {
                     clause.setVariableBinding(Saxon.Hej.expr.flwor.WindowClause.END_NEXT_ITEM, endNextItemVar);
                     declareRangeVariable(endNextItemVar);
                 }
-                if (!(isKeyword("when"))) {
-                    grumble(("Expected 'when' condition for window end, but found "+currentTokenDisplay()));
+                if (isKeyword("when")) {
+                    t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
+                    nextToken();
+                    clause.initEndCondition(flwor, parseExprSingle());
+                } else {
+                    if (allowXPath40Syntax) {
+                        clause.initEndCondition(flwor, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE, flwor));
+                    } else {
+                        grumble(("Expected 'when' condition for window end, but found "+currentTokenDisplay()));
+                    }
                 }
-                t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
-                nextToken();
-                clause.initEndCondition(flwor, parseExprSingle());
             } else {
                 if (clause.isSlidingWindow()) {
                     grumble("A sliding window requires an end condition");
@@ -2236,7 +2283,13 @@ namespace Saxon.Hej.query {
             outerLet.setRequiredType(Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
             outerLet.setVariableQName(new Saxon.Hej.om.StructuredQName("zz", Saxon.Hej.om.NamespaceUri.SAXON, "zz_typeswitchVar"));
             outerLet.setSequence(operand);
-            while ((t.currentToken == Saxon.Hej.expr.parser.Token.CASE)) {
+            bool braced = false;
+            if ((t.currentToken == Saxon.Hej.expr.parser.Token.LCURLY)) {
+                checkLanguageVersion40();
+                braced = true;
+                nextToken();
+            }
+            while (((t.currentToken == Saxon.Hej.expr.parser.Token.CASE) || isKeyword("case"))) {
                 System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> typeList;
                 Saxon.Hej.expr.Expression action;
                 nextToken();
@@ -2299,6 +2352,11 @@ namespace Saxon.Hej.query {
                 lastAction = ife;
             }
             outerLet.setAction(lastAction);
+            if (braced) {
+                expect(Saxon.Hej.expr.parser.Token.RCURLY);
+                t.lookAhead();
+                nextToken();
+            }
             return makeTracer(outerLet, null);
         }
         private System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> parseSequenceTypeList() {
@@ -2335,6 +2393,15 @@ namespace Saxon.Hej.query {
             Saxon.Hej.expr.Expression operand = parseExpression();
             expect(Saxon.Hej.expr.parser.Token.RPAR);
             nextToken();
+            bool braced = false;
+            if ((t.currentToken == Saxon.Hej.expr.parser.Token.LCURLY)) {
+                checkLanguageVersion40();
+                braced = true;
+                nextToken();
+                if (isKeyword("case")) {
+                    t.currentToken = Saxon.Hej.expr.parser.Token.CASE;
+                }
+            }
             System.Collections.Generic.IList<Saxon.Hej.expr.Expression> conditions = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(10);
             System.Collections.Generic.IList<Saxon.Hej.expr.Expression> actions = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(10);
             Saxon.Hej.expr.LetExpression outerLet = makeLetExpression();
@@ -2353,7 +2420,7 @@ namespace Saxon.Hej.query {
                 nextToken();
                 Saxon.Hej.expr.Expression action = parseExprSingle();
                 for (int i = 0; (i<caseExpressions.Count); i++) {
-                    Saxon.Hej.expr.EquivalenceComparison vc = new Saxon.Hej.expr.EquivalenceComparison(new Saxon.Hej.expr.LocalVariableReference(outerLet), Saxon.Hej.expr.parser.Token.FEQ, caseExpressions[i]);
+                    Saxon.Hej.expr.SwitchCaseComparison vc = new Saxon.Hej.expr.SwitchCaseComparison(new Saxon.Hej.expr.LocalVariableReference(outerLet), Saxon.Hej.expr.parser.Token.FEQ, caseExpressions[i], allowXPath40Syntax);
                     if ((i == 0)) {
                         conditions.Add(vc);
                         actions.Add(action);
@@ -2372,6 +2439,11 @@ namespace Saxon.Hej.query {
             actions.Add(defaultExpr);
             Saxon.Hej.expr.instruct.Choose choice = new Saxon.Hej.expr.instruct.Choose(conditions.ToArray(), actions.ToArray());
             outerLet.setAction(choice);
+            if (braced) {
+                expect(Saxon.Hej.expr.parser.Token.RCURLY);
+                t.lookAhead();
+                nextToken();
+            }
             return makeTracer(outerLet, null);
         }
         protected internal override Saxon.Hej.expr.Expression parseValidateExpression() {
@@ -2517,8 +2589,8 @@ namespace Saxon.Hej.query {
                 nextToken();
                 return tag;
               case Saxon.Hej.expr.parser.Token.KEYWORD_CURLY:
-                string nodeKind = t.currentTokenValue;
-                switch (nodeKind) {
+                string keyword = t.currentTokenValue;
+                switch (keyword) {
                   case "validate":
                     grumble("A validate expression is not allowed within a path expression");
                     break ;
@@ -2550,7 +2622,7 @@ namespace Saxon.Hej.query {
                   case "namespace":
                     return parseNamespaceConstructor(offset);
                   default:
-                    grumble((("Unrecognized node constructor "+t.currentTokenValue)+"{}"));
+                    grumble((("Unrecognized keyword '"+t.currentTokenValue)+"' before {...} "));
                     break ;
                 }
                 break ;

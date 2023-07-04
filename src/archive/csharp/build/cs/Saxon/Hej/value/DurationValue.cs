@@ -87,13 +87,17 @@ namespace Saxon.Hej.value {
             if (!(tok.hasMoreTokens())) {
                 return badDuration("empty string", s);
             }
-            string part = (string)(tok.nextToken());
+            string part = tok.nextToken();
             if ("+".Equals(part)) {
                 return badDuration("+ sign not allowed in a duration", s);
             } else {
                 if ("-".Equals(part)) {
                     negative = true;
-                    part = (string)(tok.nextToken());
+                    if (tok.hasMoreTokens()) {
+                        part = tok.nextToken();
+                    } else {
+                        return badDuration("'-' on its own is not a valid duration", s);
+                    }
                 }
             }
             if (!("P".Equals(part))) {
@@ -101,13 +105,13 @@ namespace Saxon.Hej.value {
             }
             int state = 0;
             while (tok.hasMoreTokens()) {
-                part = (string)(tok.nextToken());
+                part = tok.nextToken();
                 if ("T".Equals(part)) {
                     state = 4;
                     if (!(tok.hasMoreTokens())) {
                         return badDuration("T must be followed by time components", s);
                     }
-                    part = (string)(tok.nextToken());
+                    part = tok.nextToken();
                 }
                 int value = simpleInteger(part);
                 if ((value<0)) {
@@ -120,7 +124,7 @@ namespace Saxon.Hej.value {
                 if (!(tok.hasMoreTokens())) {
                     return badDuration("missing unit letter at end", s);
                 }
-                char delim = ((string)(tok.nextToken()))[0];
+                char delim = tok.nextToken()[0];
                 switch (delim) {
                   case 'Y':
                     if ((state>0)) {
@@ -377,7 +381,7 @@ namespace Saxon.Hej.value {
                 Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(16);
                 string ms = ("000000000"+_nanoseconds);
                 ms = ms.Substring((ms.Length-9));
-                sb.append((((((_negative ? "-" : ""))+getSeconds())+'.')+ms));
+                sb.append((_negative ? "-" : "")).append(getSeconds()).append('.').append(ms);
                 return Saxon.Hej.value.BigDecimalValue.parse(sb.ToString());
               case Saxon.Hej.functions.AccessorFn.Component.WHOLE_SECONDS:
                 return Saxon.Hej.value.Int64Value.makeIntegerValue((_negative ? -(_seconds) : _seconds));

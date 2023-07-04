@@ -5,19 +5,26 @@ namespace Saxon.Hej.functions.hof {
     public class CoercedFunction : Saxon.Hej.functions.AbstractFunction {
         private Saxon.Hej.om.FunctionItem targetFunction;
         private readonly Saxon.Hej.type.SpecificFunctionType requiredType;
-        public CoercedFunction(Saxon.Hej.om.FunctionItem targetFunction, Saxon.Hej.type.SpecificFunctionType requiredType)  {
+        private readonly bool allowReducedArity;
+        public CoercedFunction(Saxon.Hej.om.FunctionItem targetFunction, Saxon.Hej.type.SpecificFunctionType requiredType, bool allowReducedArity)  {
             if ((targetFunction.getArity() != requiredType.getArity())) {
-                throw new Saxon.Hej.trans.XPathException(wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
+                if (((targetFunction.getArity()>requiredType.getArity()) || !(allowReducedArity))) {
+                    throw new Saxon.Hej.trans.XPathException(wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
+                }
             }
             this.targetFunction = targetFunction;
             this.requiredType = requiredType;
+            this.allowReducedArity = allowReducedArity;
         }
         public CoercedFunction(Saxon.Hej.type.SpecificFunctionType requiredType)  {
             this.requiredType = requiredType;
+            this.allowReducedArity = false;
         }
         public void setTargetFunction(Saxon.Hej.om.FunctionItem targetFunction) {
             if ((targetFunction.getArity() != requiredType.getArity())) {
-                throw new Saxon.Hej.trans.XPathException(wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
+                if (((targetFunction.getArity()>requiredType.getArity()) || !(allowReducedArity))) {
+                    throw new Saxon.Hej.trans.XPathException(wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
+                }
             }
             this.targetFunction = targetFunction;
         }
@@ -44,9 +51,10 @@ namespace Saxon.Hej.functions.hof {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
             Saxon.Hej.type.SpecificFunctionType req = requiredType;
             Saxon.Hej.value.SequenceType[] argTypes = targetFunction.getFunctionItemType().getArgumentTypes();
+            int suppliedArity = System.Math.Min(args.Length, argTypes.Length);
             Saxon.Hej.type.TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-            Saxon.Hej.om.Sequence[] targetArgs = new Saxon.Hej.om.Sequence[args.Length];
-            for (int i = 0; (i<args.Length); i++) {
+            Saxon.Hej.om.Sequence[] targetArgs = new Saxon.Hej.om.Sequence[suppliedArity];
+            for (int i = 0; (i<suppliedArity); i++) {
                 Saxon.Hej.om.GroundedValue gVal = args[i].materialize();
                 if (argTypes[i].matches(gVal, th)) {
                     targetArgs[i] = gVal;

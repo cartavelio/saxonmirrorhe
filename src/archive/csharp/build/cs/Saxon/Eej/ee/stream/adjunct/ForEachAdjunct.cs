@@ -50,7 +50,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     }
                 }
                 Saxon.Hej.expr.Expression tail = exp.getLastStep();
-                Saxon.Hej.pattern.Pattern tailPattern = /*134*/Saxon.Eej.ee.stream.Streamability.toStreamingPattern(tail, config);
+                Saxon.Hej.pattern.Pattern tailPattern = Saxon.Eej.ee.stream.Streamability.toStreamingPattern(tail, config);
                 if (((tailPattern is Saxon.Hej.pattern.AncestorQualifiedPattern) && (((Saxon.Hej.pattern.AncestorQualifiedPattern)(tailPattern)).getUpperPattern() is Saxon.Hej.pattern.AnchorPattern))) {
                     tailPattern = ((Saxon.Hej.pattern.AncestorQualifiedPattern)(tailPattern)).getBasePattern();
                 }
@@ -64,7 +64,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 } catch (Saxon.Hej.trans.XPathException e) {
                     return null;
                 }
-                Saxon.Hej.pattern.Pattern headPattern = /*134*/Saxon.Eej.ee.stream.Streamability.toStreamingPattern(head, config);
+                Saxon.Hej.pattern.Pattern headPattern = Saxon.Eej.ee.stream.Streamability.toStreamingPattern(head, config);
                 if (((headPattern == null) || (tailPattern == null))) {
                     return null;
                 }
@@ -80,8 +80,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
         protected internal Saxon.Eej.ee.stream.Inversion getActionInversion(bool forGrouping) {
             if ((actionInversion == null)) {
                 Saxon.Hej.expr.Expression action = ((Saxon.Hej.expr.ContextSwitchingExpression)(getExpression())).getActionExpression();
-                if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
-                    actionInversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
+                if ((Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                    actionInversion = Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
                 }
             }
             return actionInversion;
@@ -90,18 +90,18 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.Configuration config = getConfiguration();
             System.Collections.Generic.IList<string> failures = new System.Collections.Generic.List<string>();
             if (!(forGrouping)) {
-                Saxon.Hej.pattern.Pattern pattern = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(getExpression(), config, failures);
+                Saxon.Hej.pattern.Pattern pattern = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(getExpression(), config, failures);
                 if ((pattern != null)) {
                     return (watchManager, @out, context) => new Saxon.Eej.ee.stream.watch.Trigger(pattern, @out, context);
                 }
             }
             Saxon.Hej.expr.Expression select = ((Saxon.Hej.expr.ContextSwitchingExpression)(getExpression())).getSelectExpression();
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(select) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
+            if ((Saxon.Eej.ee.stream.Streamability.getPosture(select) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return null;
             }
             Saxon.Eej.ee.stream.Inversion actionInversion = getActionInversion(false);
-            Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, config, null);
-            Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, select);
+            Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, config, null);
+            Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, select);
             if ((selection != null)) {
                 return (watchManager, @out, context) => {
                     Saxon.Eej.ee.stream.watch.ForEachAction actor = new Saxon.Eej.ee.stream.watch.ForEachAction(watchManager, getExpression(), @out, context);
@@ -136,14 +136,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return actor;
         }
         public override Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
-            return /*134*/Saxon.Eej.ee.stream.adjunct.ForEachAdjunct.getStreamability((Saxon.Hej.expr.ContextSwitchingExpression)(getExpression()), contextInfo, reasons);
+            return Saxon.Eej.ee.stream.adjunct.ForEachAdjunct.getStreamability((Saxon.Hej.expr.ContextSwitchingExpression)(getExpression()), contextInfo, reasons);
         }
         public static Saxon.Eej.ee.stream.PostureAndSweep getStreamability(Saxon.Hej.expr.ContextSwitchingExpression expression, Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.Expression select = expression.getSelectExpression();
             Saxon.Hej.expr.Expression action = expression.getActionExpression();
-            Saxon.Eej.ee.stream.PostureAndSweep selectPS = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(select, contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep selectPS = Saxon.Eej.ee.stream.Streamability.getStreamability(select, contextInfo, reasons);
             if ((selectPS.getPosture() == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
-                return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules((Saxon.Hej.expr.Expression)(expression), ((Saxon.Hej.expr.Expression)(expression)).operands(), contextInfo, reasons);
+                return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules((Saxon.Hej.expr.Expression)(expression), ((Saxon.Hej.expr.Expression)(expression)).operands(), contextInfo, reasons);
             }
             if ((select is Saxon.Hej.expr.sort.SortExpression)) {
                 if ((reasons != null)) {
@@ -160,18 +160,18 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Eej.ee.trans.ContextItemStaticInfoEE info = new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(select.getItemType(), false, selectPS.getPosture());
             info.setContextSettingExpression(select);
             info.setStrictStreamabilityRules(contextInfo.isStrictStreamabilityRules());
-            Saxon.Eej.ee.stream.PostureAndSweep actionPS = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(action, info, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep actionPS = Saxon.Eej.ee.stream.Streamability.getStreamability(action, info, reasons);
             if (((!(((expression is Saxon.Hej.expr.SlashExpression))) && (selectPS.getPosture() == Saxon.Eej.ee.stream.Posture.CRAWLING)) && (actionPS.getSweep() == Saxon.Eej.ee.stream.Sweep.CONSUMING))) {
                 if ((reasons != null)) {
                     reasons.Add((("Expression "+((Saxon.Hej.expr.Expression)(expression)).toShortString())+" is not streamable because the select expression is crawling and the body is consuming"));
                 }
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
             }
-            Saxon.Eej.ee.stream.Sweep s = /*134*/Saxon.Eej.ee.stream.Streamability.wider(selectPS.getSweep(), actionPS.getSweep());
+            Saxon.Eej.ee.stream.Sweep s = Saxon.Eej.ee.stream.Streamability.wider(selectPS.getSweep(), actionPS.getSweep());
             Saxon.Eej.ee.stream.PostureAndSweep provisional = new Saxon.Eej.ee.stream.PostureAndSweep(((s == Saxon.Eej.ee.stream.Sweep.FREE_RANGING) ? Saxon.Eej.ee.stream.Posture.ROAMING : actionPS.getPosture()), s);
             if (((provisional.getPosture() == Saxon.Eej.ee.stream.Posture.ROAMING) && (expression is Saxon.Hej.expr.SlashExpression))) {
                 Saxon.Hej.expr.SlashExpression exp = (Saxon.Hej.expr.SlashExpression)(expression);
-                Saxon.Hej.pattern.Pattern p = /*134*/Saxon.Eej.ee.stream.Streamability.toStreamingPattern(exp, exp.getConfiguration());
+                Saxon.Hej.pattern.Pattern p = Saxon.Eej.ee.stream.Streamability.toStreamingPattern(exp, exp.getConfiguration());
                 if ((p != null)) {
                     return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.CRAWLING, Saxon.Eej.ee.stream.Sweep.CONSUMING);
                 }

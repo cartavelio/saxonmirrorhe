@@ -455,7 +455,7 @@ namespace Saxon.Hej.functions {
             }
             Saxon.Hej.expr.number.NumericGroupFormatter picGroupFormat;
             try {
-                picGroupFormat = Saxon.Hej.functions.FormatInteger.getPicSeparators(primary);
+                picGroupFormat = Saxon.Hej.functions.FormatInteger.getPicSeparators(primary, false);
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw e.replacingErrorCode("FODF1310", "FOFD1340");
             }

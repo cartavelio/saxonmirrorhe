@@ -36,7 +36,7 @@ namespace Saxon.Hej.expr {
             flattened = @ref.flattened;
             inLoop = @ref.inLoop;
             filtered = @ref.filtered;
-            /*134*/Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(this, /*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(@ref));
+            Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(this, Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(@ref));
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(@ref, this);
         }
         public void setStaticType(Saxon.Hej.value.SequenceType type, Saxon.Hej.om.GroundedValue value, int properties) {

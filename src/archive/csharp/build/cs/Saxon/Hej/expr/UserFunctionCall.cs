@@ -107,7 +107,7 @@ namespace Saxon.Hej.expr {
                             if (((arg is Saxon.Hej.expr.instruct.Block) && ((Saxon.Hej.expr.instruct.Block)(arg)).isCandidateForSharedAppend())) {
                                 argumentEvaluators[i] = new Saxon.Hej.expr.elab.SharedAppendEvaluator((Saxon.Hej.expr.instruct.Block)(arg));
                             } else {
-                                argumentEvaluators[i] = new Saxon.Hej.expr.elab.LearningEvaluator(arg, arg.makeElaborator().lazily(true));
+                                argumentEvaluators[i] = new Saxon.Hej.expr.elab.LearningEvaluator(arg, arg.makeElaborator().lazily(true, false));
                             }
                         }
                     }

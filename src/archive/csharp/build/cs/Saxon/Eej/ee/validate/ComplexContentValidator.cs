@@ -66,7 +66,7 @@ namespace Saxon.Eej.ee.validate {
                         return ;
                     } else {
                         if (state.isFinalState()) {
-                            state = /*134*/Saxon.Eej.ee.schema.fsa.SuffixState.getInstance();
+                            state = Saxon.Eej.ee.schema.fsa.SuffixState.getInstance();
                             childValidator = new Saxon.Eej.ee.validate.LaxValidator(getNextReceiver());
                             annotation = processWildcardTerm(openContentWildcard, elemName, location);
                             base.startElement(elemName, annotation, attributes, namespaces, location, properties);

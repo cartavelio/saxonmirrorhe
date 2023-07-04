@@ -9,7 +9,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     
         private class Inner_ExistenceFeed_1 : Saxon.Eej.ee.stream.feed.ExistenceFeed {
             private readonly CountStreamer outerInstance;
-            public Inner_ExistenceFeed_1(CountStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_ExistenceFeed_1(CountStreamer outerInstance, Saxon.Hej.expr.Expression arg1, Saxon.Eej.ee.stream.feed.ItemFeed arg2, Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
                 count = 0;
             }

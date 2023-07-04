@@ -15,9 +15,9 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 consumingCondition = -1;
                 int cond = 0;
                 foreach (Saxon.Hej.expr.Operand o in ((Saxon.Hej.expr.instruct.Choose)(getExpression())).conditions()) {
-                    if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                    if ((Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                         consumingCondition = cond;
-                        invertedCondition = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(o.getChildExpression(), false);
+                        invertedCondition = Saxon.Eej.ee.stream.Inversion.invertExpression(o.getChildExpression(), false);
                         break ;
                     }
                     cond++;
@@ -35,10 +35,10 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     for (int i = 0; (i<exp.size()); i++) {
                         if (/*Delegate.eval()*/booleanEvaluators[i](context)) {
                             Saxon.Hej.expr.Expression action = exp.getAction(i);
-                            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                            if ((Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                                 Saxon.Eej.ee.stream.Inversion actionInversion = actionInversions[i];
                                 if ((actionInversion == null)) {
-                                    actionInversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
+                                    actionInversion = Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
                                     actionInversions[i] = actionInversion;
                                 }
                                 return actionInversion.getWatch(watchManager, @out, context);

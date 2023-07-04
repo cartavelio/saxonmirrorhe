@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             for (int i = 1; (i<operanda.Length); i++) {
                 operanda[i].setUsage(Saxon.Hej.expr.Operand.typeDeterminedUsage(target.getArgumentType(i).getPrimaryType()));
             }
-            return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
+            return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
         }
         public override Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed resultFeed, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.UserFunctionCall exp = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
@@ -29,7 +29,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     
         private class Inner_ItemFeed_17 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly FilterFunctionCallAdjunct outerInstance;
-            public Inner_ItemFeed_17(FilterFunctionCallAdjunct outerInstance, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg1, /*AA*/Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.om.Sequence[] argValues, Saxon.Hej.expr.Component targetComponent, Saxon.Hej.expr.instruct.UserFunction target) : base(arg1, arg2) {
+            public Inner_ItemFeed_17(FilterFunctionCallAdjunct outerInstance, Saxon.Eej.ee.stream.feed.ItemFeed arg1, Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.om.Sequence[] argValues, Saxon.Hej.expr.Component targetComponent, Saxon.Hej.expr.instruct.UserFunction target) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
                 this.argValues = argValues;
                 this.targetComponent = targetComponent;

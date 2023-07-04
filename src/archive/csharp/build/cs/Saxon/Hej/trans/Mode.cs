@@ -16,6 +16,7 @@ namespace Saxon.Hej.trans {
         internal bool bindingSlotsAllocated = false;
         internal bool modeTracing = false;
         internal Saxon.Hej.value.SequenceType defaultResultType = null;
+        internal bool enclosingMode = false;
         private System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> accumulators;
         public Mode(Saxon.Hej.om.StructuredQName modeName)  {
             this.modeName = modeName;
@@ -64,6 +65,12 @@ namespace Saxon.Hej.trans {
             return getModeName();
         }
         public abstract bool isEmpty();
+        public void setEnclosingMode(bool enclosing) {
+            this.enclosingMode = enclosing;
+        }
+        public bool isEnclosingMode() {
+            return enclosingMode;
+        }
         public void setRecoveryPolicy(Saxon.Hej.trans.RecoveryPolicy policy) {
             recoveryPolicy = policy;
         }

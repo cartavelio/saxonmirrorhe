@@ -110,6 +110,7 @@ namespace Saxon.Eej.ee.validate {
                     }
                 }
                 Saxon.Hej.type.ValidationException ve = err.makeException();
+                ve.setHasBeenReported(true);
                 ve.setErrorObject(validationContext.getValidationErrorObject());
                 throw ve;
             }

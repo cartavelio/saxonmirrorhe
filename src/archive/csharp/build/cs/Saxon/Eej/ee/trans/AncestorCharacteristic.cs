@@ -15,11 +15,11 @@ namespace Saxon.Eej.ee.trans {
                 return Saxon.Hej.value.BooleanValue.FALSE;
             }
             if (isParent) {
-                return Saxon.Hej.value.BooleanValue.get(pattern.matches(((Saxon.Hej.om.NodeInfo)(item)).getParent(), context));
+                return Saxon.Hej.value.BooleanValue.get(pattern.matchesItem(((Saxon.Hej.om.NodeInfo)(item)).getParent(), context));
             } else {
                 Saxon.Hej.om.NodeInfo a = (Saxon.Hej.om.NodeInfo)(item);
                 while ((a != null)) {
-                    if (pattern.matches(a, context)) {
+                    if (pattern.matchesItem(a, context)) {
                         return Saxon.Hej.value.BooleanValue.TRUE;
                     }
                     a = a.getParent();

@@ -27,10 +27,10 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     }
                 }
                 Saxon.Hej.expr.Expression action = selected.getChildExpression();
-                if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                if ((Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                     Saxon.Eej.ee.stream.Inversion actionInversion = Saxon.Impl.Helpers.MapUtils.Get(actionInversions, selected);
                     if ((actionInversion == null)) {
-                        actionInversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
+                        actionInversion = Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
                         Saxon.Impl.Helpers.MapUtils.Put(actionInversions, selected, actionInversion);
                     }
                     return actionInversion.getWatch(watchManager, @out, context);

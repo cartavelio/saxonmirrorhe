@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream {
         }
         public void invert(bool isW3CStreamable) {
             try {
-                inversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(body, false);
+                inversion = Saxon.Eej.ee.stream.Inversion.invertExpression(body, false);
             } catch (Saxon.Hej.trans.XPathException e) {
                 string frag = (isW3CStreamable ? "although it is" : "and is not");
                 Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException(((("Component cannot be streamed, "+frag)+" guaranteed streamable according to W3C rules. ")+e.Message), Saxon.Hej.trans.SaxonErrorCode.SXST0062);

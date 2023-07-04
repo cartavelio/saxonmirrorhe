@@ -27,7 +27,7 @@ namespace Saxon.Hej.expr.sort {
             currentMembers.Add(current);
             nextItem = current;
             while ((nextItem != null)) {
-                if (pattern.matches(nextItem, runningContext)) {
+                if (pattern.matchesItem(nextItem, runningContext)) {
                     nextItem = population.next();
                     if ((nextItem != null)) {
                         break ;

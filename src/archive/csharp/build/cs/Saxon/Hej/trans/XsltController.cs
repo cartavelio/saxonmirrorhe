@@ -438,7 +438,7 @@ namespace Saxon.Hej.trans {
     
         private class Inner_ProxyReceiver_233 : Saxon.Hej.@event.ProxyReceiver {
             private readonly XsltController outerInstance;
-            public Inner_ProxyReceiver_233(XsltController outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Outputter finalResult) : base(arg1) {
+            public Inner_ProxyReceiver_233(XsltController outerInstance, Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Outputter finalResult) : base(arg1) {
                 this.outerInstance = outerInstance;
                 this.finalResult = finalResult;
             }

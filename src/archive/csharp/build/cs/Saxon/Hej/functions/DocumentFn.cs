@@ -362,7 +362,7 @@ namespace Saxon.Hej.functions {
             try {
                 Saxon.Hej.@event.Sender.send(source, @out, parseOptions);
             } catch (Saxon.Hej.trans.XPathException e) {
-                throw e.maybeWithLocation(locator).maybeWithErrorCode("FODC0002");
+                throw e.maybeWithLocation(locator).maybeWithErrorCode("FODC0002").replacingErrorCode("SXXP0003", "FODC0002");
             }
         }
         private static Saxon.Hej.om.NodeInfo getFragment(Saxon.Hej.om.TreeInfo doc, string fragmentId, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locator) {

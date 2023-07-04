@@ -84,7 +84,7 @@ namespace Saxon.Hej.type {
                     return input;
                 }
                 if ((input.getUType() != newType.getUType())) {
-                    return new Saxon.Hej.type.ValidationFailure(((("Cannot convert "+input.toShortString())+" to ")+newType.getDisplayName()));
+                    return new Saxon.Hej.type.ValidationFailure(((("Cannot convert "+input.toShortString())+" to ")+newType.getDisplayName()), errorCode);
                 }
                 Saxon.Hej.type.ValidationFailure f = newType.validate(input, lexicalForm, getConversionRules());
                 if ((f == null)) {
@@ -246,7 +246,7 @@ namespace Saxon.Hej.type {
                 if ((input is Saxon.Hej.value.IntegerValue)) {
                     return (Saxon.Hej.value.IntegerValue)(input);
                 }
-                return Saxon.Hej.value.BigIntegerValue.makeIntegerValue(((System.Numerics.BigInteger)((Saxon.Hej.value.BigDecimalValue)(input)).getDecimalValue()));
+                return Saxon.Hej.value.BigIntegerValue.makeIntegerValue(((System.Numerics.BigInteger)((Saxon.Hej.value.DecimalValue)(input)).getDecimalValue()));
             }
         
         }

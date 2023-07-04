@@ -232,7 +232,7 @@ namespace Saxon.Hej.expr.flwor {
             returnClauseOp.setChildExpression(getReturnClause().optimize(visitor, contextItemType));
             if ((clauses.Count == 1)) {
                 Saxon.Hej.expr.flwor.Clause c = clauses[0];
-                if (((c is Saxon.Hej.expr.flwor.LetClause) || ((((c is Saxon.Hej.expr.flwor.ForClause) && !(((c is Saxon.Hej.expr.flwor.ForMemberClause)))) && (((Saxon.Hej.expr.flwor.ForClause)(c)).getPositionVariable() == null))))) {
+                if (((c is Saxon.Hej.expr.flwor.LetClause) || (((c is Saxon.Hej.expr.flwor.ForClause) && (((Saxon.Hej.expr.flwor.ForClause)(c)).getPositionVariable() == null))))) {
                     return rewriteForOrLet(visitor, contextItemType);
                 }
             }
@@ -302,7 +302,7 @@ namespace Saxon.Hej.expr.flwor {
             }
             bool allForOrLetExpr = true;
             foreach (Saxon.Hej.expr.flwor.Clause c in clauses) {
-                if (((c is Saxon.Hej.expr.flwor.ForClause) && !(((c is Saxon.Hej.expr.flwor.ForMemberClause))))) {
+                if ((c is Saxon.Hej.expr.flwor.ForClause)) {
                     if ((((Saxon.Hej.expr.flwor.ForClause)(c)).getPositionVariable() != null)) {
                         allForOrLetExpr = false;
                         break ;

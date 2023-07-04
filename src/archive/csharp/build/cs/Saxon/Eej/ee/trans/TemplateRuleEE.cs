@@ -65,7 +65,7 @@ namespace Saxon.Eej.ee.trans {
             } else {
                 info.setContextPostureGrounded();
             }
-            Saxon.Eej.ee.stream.PostureAndSweep s = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(body, info, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep s = Saxon.Eej.ee.stream.Streamability.getStreamability(body, info, reasons);
             if ((s.getPosture() == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return true;
             } else {

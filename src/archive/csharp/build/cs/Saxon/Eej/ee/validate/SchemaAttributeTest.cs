@@ -30,16 +30,16 @@ namespace Saxon.Eej.ee.validate {
                     return false;
                 }
             }
-            return /*134*/Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, annotation, config.getTypeHierarchy());
+            return Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, annotation, config.getTypeHierarchy());
         }
         public override Saxon.Hej.z.IntPredicateProxy getMatcher(Saxon.Hej.tree.tiny.NodeVectorTree tree) {
             return Saxon.Hej.z.IntSetPredicate.ALWAYS_FALSE;
         }
         public override bool test(Saxon.Hej.om.NodeInfo node) {
             if (node.hasFingerprint()) {
-                return (((node.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && (node.getFingerprint() == declaration.getFingerprint())) && /*134*/Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()));
+                return (((node.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && (node.getFingerprint() == declaration.getFingerprint())) && Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()));
             } else {
-                return ((((node.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && node.getNamespaceUri().Equals(declaration.getTargetNamespace())) && node.getLocalPart().Equals(declaration.getName())) && /*134*/Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()));
+                return ((((node.getNodeKind() == Saxon.Hej.type.Type.ATTRIBUTE) && node.getNamespaceUri().Equals(declaration.getTargetNamespace())) && node.getLocalPart().Equals(declaration.getName())) && Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()));
             }
         }
         public override double getDefaultPriority() {
@@ -76,7 +76,7 @@ namespace Saxon.Eej.ee.validate {
             if (!(declaration.getComponentName().Equals(name))) {
                 return Saxon.Ejava.util.Optional<string>.of("The supplied attribute has the wrong name");
             }
-            if (!(/*134*/Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()))) {
+            if (!(Saxon.Eej.ee.validate.SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy()))) {
                 if ((node.getSchemaType() == Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
                     return Saxon.Ejava.util.Optional<string>.of("The supplied attribute has not been schema-validated");
                 } else {

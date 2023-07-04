@@ -67,7 +67,7 @@ namespace Saxon.Hej.style {
         }
         private Saxon.Hej.type.ItemType makeItemType(Saxon.Hej.expr.StaticContext env) {
             try {
-                Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false);
+                Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false, env);
                 Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(env.getNamespaceResolver()).withAcceptEQName(true).withErrorOnBadSyntax("XPST0003").withErrorOnUnresolvedPrefix("XPST0081");
                 parser.setQNameParser(qp);
                 string typeAtt = getAttributeValue("as");

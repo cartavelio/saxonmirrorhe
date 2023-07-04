@@ -195,7 +195,7 @@ namespace Saxon.Hej.functions.hof {
                     Saxon.Hej.functions.registry.FunctionDefinition fd = (Saxon.Hej.functions.registry.FunctionDefinition)(function);
                     Saxon.Hej.om.Sequence[] extendedArgs = Saxon.Ejava.util.Arrays.copyOf(args, fd.getNumberOfParameters());
                     for (int i = args.Length; (i<extendedArgs.Length); i++) {
-                        extendedArgs[i] = fd.getDefaultValueExpression(i).copy(new Saxon.Hej.expr.parser.RebindingMap()).makeElaborator().lazily(true).evaluate(context);
+                        extendedArgs[i] = fd.getDefaultValueExpression(i).copy(new Saxon.Hej.expr.parser.RebindingMap()).makeElaborator().lazily(true, false).evaluate(context);
                     }
                     args = extendedArgs;
                 }

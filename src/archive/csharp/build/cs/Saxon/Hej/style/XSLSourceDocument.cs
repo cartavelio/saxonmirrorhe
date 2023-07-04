@@ -129,7 +129,7 @@ namespace Saxon.Hej.style {
             }
             parseOptions = parseOptions.withApplicableAccumulators(accumulators);
             Saxon.Hej.expr.Expression action = compileSequenceConstructor(exec, decl, false);
-            if ((action == null)) {
+            if (((action == null) || Saxon.Hej.expr.Literal.isEmptySequence(action))) {
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
             }
             try {

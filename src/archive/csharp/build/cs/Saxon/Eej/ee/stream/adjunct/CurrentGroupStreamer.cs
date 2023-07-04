@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 }
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
             }
-            Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(feg.getSelectExpression(), contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(feg.getSelectExpression(), contextInfo, reasons);
             if ((ps.getPosture() == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS;
             } else {
@@ -27,7 +27,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
         }
         public override Saxon.Hej.pattern.Pattern toStreamingPattern(Saxon.Hej.Configuration config) {
-            return /*134*/Saxon.Eej.ee.stream.CurrentGroupPattern.getInstance();
+            return Saxon.Eej.ee.stream.CurrentGroupPattern.getInstance();
         }
     
     }

@@ -589,6 +589,11 @@ namespace Saxon.Hej.lib {
                     break ;
                   case Saxon.Ejavax.xml.transform.OutputKeys.ENCODING:
                     break ;
+                  case Saxon.Hej.lib.SaxonOutputKeys.ESCAPE_SOLIDUS:
+                    if ((value != null)) {
+                        value = checkYesOrNo(key, value);
+                    }
+                    break ;
                   case Saxon.Hej.lib.SaxonOutputKeys.HTML_VERSION:
                     if ((value != null)) {
                         checkDecimal(key, value);

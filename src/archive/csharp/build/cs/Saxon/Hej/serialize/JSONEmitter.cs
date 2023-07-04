@@ -18,6 +18,7 @@ namespace Saxon.Hej.serialize {
         private int level;
         private readonly System.Collections.Generic.Stack<bool> oneLinerStack = new System.Collections.Generic.Stack<bool>();
         private bool mustClose = true;
+        private bool escapeSolidus = true;
         private bool unfailing = false;
         public JSONEmitter(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.str.UnicodeWriter writer, Saxon.Ejava.util.Properties outputProperties)  {
             config = pipe.getConfiguration();
@@ -31,6 +32,9 @@ namespace Saxon.Hej.serialize {
             }
             if ("yes".Equals(details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.UNFAILING))) {
                 unfailing = true;
+            }
+            if ("no".Equals(details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.ESCAPE_SOLIDUS))) {
+                escapeSolidus = false;
             }
             string max = details.getProperty(Saxon.Hej.lib.SaxonOutputKeys.LINE_LENGTH);
             if ((max != null)) {
@@ -119,6 +123,12 @@ namespace Saxon.Hej.serialize {
                     }
                 }
             }
+        }
+        public void writeStringValue(string str) {
+            conditionalComma(false);
+            emit('"');
+            emit(escape(str));
+            emit('"');
         }
         public void startArray(bool oneLiner) {
             emitOpen('[', oneLiner);
@@ -212,7 +222,7 @@ namespace Saxon.Hej.serialize {
             if (normalize) {
                 cs = Saxon.Ejava.text.Normalizer.normalize(cs, normalizationForm);
             }
-            return Saxon.Hej.ma.json.JsonReceiver.escape(cs, false, c => (((c<31) || (((c>=127) && (c<=159)))) || !(characterSet.inCharset(c))));
+            return Saxon.Hej.ma.json.JsonReceiver.escape(cs, false, !(escapeSolidus), c => (((c<31) || (((c>=127) && (c<=159)))) || !(characterSet.inCharset(c))));
         }
         private void emit(string s) {
             System.Diagnostics.Debug.Assert((writer != null));

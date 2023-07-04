@@ -47,7 +47,7 @@ namespace Saxon.Hej.functions {
         }
     
         private class Inner_SystemFunctionCall_8 : Saxon.Hej.expr.SystemFunctionCall {
-            public Inner_SystemFunctionCall_8(/*AA*/Saxon.Hej.functions.SystemFunction arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2, Saxon.Hej.functions.SystemFunction sf) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_8(Saxon.Hej.functions.SystemFunction arg1, Saxon.Hej.expr.Expression[] arg2, Saxon.Hej.functions.SystemFunction sf) : base(arg1, arg2) {
                 this.sf = sf;
             }
             private Saxon.Hej.functions.SystemFunction sf;

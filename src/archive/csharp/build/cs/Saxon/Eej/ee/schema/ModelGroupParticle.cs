@@ -20,7 +20,7 @@ namespace Saxon.Eej.ee.schema {
             return ((getMinOccurs() == 0) || getGroup().isEmptiable());
         }
         public override bool fixup(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
-            Saxon.Hej.type.SchemaComponent decl = /*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false);
+            Saxon.Hej.type.SchemaComponent decl = Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false);
             if ((decl == null)) {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                 return false;
@@ -94,7 +94,7 @@ namespace Saxon.Eej.ee.schema {
               case Saxon.Hej.type.SchemaValidationStatus.UNVALIDATED:
                 break ;
             }
-            Saxon.Eej.ee.schema.ModelGroup decl = (Saxon.Eej.ee.schema.ModelGroup)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
+            Saxon.Eej.ee.schema.ModelGroup decl = (Saxon.Eej.ee.schema.ModelGroup)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
             if (isResolved()) {
                 bool result = decl.validate(compiler);
                 if (result) {

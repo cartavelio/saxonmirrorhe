@@ -3,17 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.functions.qt4 {
     public class BuildURI : Saxon.Eej.functions.qt4.URIFunctions {
-        public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
-            Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[2];
-            newArgs[0] = arguments[0];
-            if (((arguments.Length<2) || (arguments[1] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
-                newArgs[1] = Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.ma.map.DictionaryMap());
-            } else {
-                newArgs[1] = arguments[1];
-            }
-            setArity(2);
-            return base.makeFunctionCall(newArgs);
-        }
         public override Saxon.Hej.value.StringValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.ma.map.MapItem parts = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
             checkOptions(arguments);

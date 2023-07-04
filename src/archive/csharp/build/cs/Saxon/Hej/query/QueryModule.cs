@@ -43,6 +43,7 @@ namespace Saxon.Hej.query {
         private Saxon.Hej.s9api.Location moduleLocation;
         private Saxon.Hej.expr.parser.OptimizerOptions optimizerOptions;
         private int languageLevel;
+        private Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
         public QueryModule(Saxon.Hej.query.StaticQueryContext sqc)  {
             config = sqc.getConfiguration();
             moduleIsMainModule = true;
@@ -76,6 +77,7 @@ namespace Saxon.Hej.query {
                 moduleLocation = sqc.getModuleLocation();
             }
             optimizerOptions = sqc.getOptimizerOptions();
+            unprefixedElementMatchingPolicy = sqc.getUnprefixedElementMatchingPolicy();
         }
         public QueryModule(Saxon.Hej.Configuration config, Saxon.Hej.query.QueryModule importer)  {
             this.config = config;
@@ -138,7 +140,7 @@ namespace Saxon.Hej.query {
             module.setExecutable(executable);
             module.setModuleNamespace(namespaceURI);
             executable.addQueryLibraryModule(module);
-            Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", importer.isUpdating()));
+            Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", importer.isUpdating(), module));
             if ((importer.getCodeInjector() != null)) {
                 qp.setCodeInjector(importer.getCodeInjector());
             } else {
@@ -594,7 +596,13 @@ namespace Saxon.Hej.query {
             activeNamespaces.pop();
         }
         public Saxon.Hej.om.NamespaceResolver getLiveNamespaceResolver() {
-            return new Inner_NamespaceResolver_271(this);
+            return new Inner_NamespaceResolver_272(this);
+        }
+        public Saxon.Api.UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+            return unprefixedElementMatchingPolicy;
+        }
+        public void setUnprefixedElementMatchingPolicy(Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy) {
+            this.unprefixedElementMatchingPolicy = unprefixedElementMatchingPolicy;
         }
         public Saxon.Hej.om.NamespaceUri checkURIForPrefix(string prefix) {
             if ((activeNamespaces != null)) {
@@ -733,9 +741,9 @@ namespace Saxon.Hej.query {
         
         }
     
-        private class Inner_NamespaceResolver_271 : Saxon.Hej.om.NamespaceResolver {
+        private class Inner_NamespaceResolver_272 : Saxon.Hej.om.NamespaceResolver {
             private readonly QueryModule outerInstance;
-            public Inner_NamespaceResolver_271(QueryModule outerInstance) {
+            public Inner_NamespaceResolver_272(QueryModule outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
@@ -744,11 +752,6 @@ namespace Saxon.Hej.query {
             public System.Collections.Generic.IEnumerator<string> iteratePrefixes() {
                 return outerInstance.getNamespaceResolver().iteratePrefixes();
             }
-        }
-
-        /* Expanding default method getUnprefixedElementMatchingPolicy from interface StaticContext */
-        public virtual Saxon.Api.UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
-            return Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
         }
 
     }

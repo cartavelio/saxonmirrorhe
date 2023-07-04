@@ -359,7 +359,27 @@ namespace Saxon.Hej.style {
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             stackFrameMap = getConfiguration().makeSlotManager();
-            checkTopLevel("XTSE0010", true);
+            Saxon.Hej.style.StyleElement enclosingMode = null;
+            Saxon.Hej.tree.linked.NodeImpl parent = ((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent());
+            System.Diagnostics.Debug.Assert((parent != null));
+            if (((getCompilation().getCompilerInfo().getXsltVersion()>=40) && (parent.getFingerprint() == Saxon.Hej.om.StandardNames.XSL_MODE))) {
+                enclosingMode = (Saxon.Hej.style.StyleElement)(parent);
+            }
+            if ((enclosingMode == null)) {
+                checkTopLevel("XTSE0010", true);
+            } else {
+                if ((matchAtt == null)) {
+                    compileError("A template rule enclosed within xsl:mode must have a match attribute", "XTSE4010");
+                }
+                if ((modeAtt != null)) {
+                    compileError("A template rule enclosed within xsl:mode must not have a mode attribute", "XTSE4010");
+                }
+                if ((nameAtt != null)) {
+                    compileError("A template rule enclosed within xsl:mode must not have a name attribute", "XTSE4010");
+                }
+                modeNames = new Saxon.Hej.om.StructuredQName[1];
+                modeNames[0] = ((Saxon.Hej.style.XSLMode)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getObjectName();
+            }
             if ((match != null)) {
                 match = typeCheck("match", match);
                 if ((match.getItemType() is Saxon.Hej.type.ErrorType)) {
@@ -622,6 +642,9 @@ namespace Saxon.Hej.style {
                         if (!(ok)) {
                             return ;
                         }
+                        if ((mode.isEnclosingMode() && !((((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) is Saxon.Hej.style.XSLMode) && (mode == ((Saxon.Hej.style.XSLMode)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getMode())))))) {
+                            compileError(("An xsl:template rule must not refer to a mode that contains enclosed template rules "+"unless it is itself enclosed by that xsl:mode declaration"), "XTSE4020");
+                        }
                     }
                     Saxon.Hej.pattern.Pattern match1 = match.copy(new Saxon.Hej.expr.parser.RebindingMap());
                     string typed = mode.getActivePart().getPropertyValue("typed");
@@ -672,7 +695,7 @@ namespace Saxon.Hej.style {
                         Saxon.Impl.Helpers.MapUtils.Put(compiledTemplateRules, Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME, rule);
                         mgr.registerRule(match1, rule, mgr.getUnnamedMode(), module, prio, mgr.allocateSequenceNumber(), 0);
                         foreach (Saxon.Hej.trans.Mode m in mgr.getAllNamedModes()) {
-                            if ((m is Saxon.Hej.trans.SimpleMode)) {
+                            if (((m is Saxon.Hej.trans.SimpleMode) && !(m.isEnclosingMode()))) {
                                 Saxon.Hej.expr.instruct.TemplateRule ruleCopy = rule.copy();
                                 if (m.isDeclaredStreamable()) {
                                     ruleCopy.setDeclaredStreamable(true);

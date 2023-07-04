@@ -40,6 +40,10 @@ namespace Saxon.Eej.config {
             loadPrimaryLicense(config);
             return primaryLicense.getFeature(name);
         }
+        public Saxon.Ejava.util.Properties getLicenseFeatures(Saxon.Hej.Configuration config) {
+            loadPrimaryLicense(config);
+            return primaryLicense.getProperties();
+        }
         internal  /* REPLACING */ void loadPrimaryLicense(Saxon.Hej.Configuration config) {
             if ((DISABLED || (status == UNAVAILABLE))) {
                 throw new Saxon.Hej.trans.LicenseException("Saxon license disabled", Saxon.Hej.trans.LicenseException.NOT_FOUND);
@@ -270,6 +274,11 @@ namespace Saxon.Eej.config {
                 if ((features != null)) {
                     features.clear();
                 }
+            }
+            public Saxon.Ejava.util.Properties getProperties() {
+                Saxon.Ejava.util.Properties p = new Saxon.Ejava.util.Properties();
+                p.putAll(features);
+                return p;
             }
         
         }

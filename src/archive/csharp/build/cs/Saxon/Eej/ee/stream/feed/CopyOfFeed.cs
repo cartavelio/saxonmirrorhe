@@ -198,7 +198,7 @@ namespace Saxon.Eej.ee.stream.feed {
         
             private class Inner_ProxyOutputter_16 : Saxon.Hej.@event.ProxyOutputter {
                 private readonly PendingCopyAction outerInstance;
-                public Inner_ProxyOutputter_16(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+                public Inner_ProxyOutputter_16(PendingCopyAction outerInstance, Saxon.Hej.@event.Outputter arg1) : base(arg1) {
                     this.outerInstance = outerInstance;
                 }
                 public override void open() {
@@ -209,7 +209,7 @@ namespace Saxon.Eej.ee.stream.feed {
 
             private class Inner_ProxyReceiver_17 : Saxon.Hej.@event.ProxyReceiver {
                 private readonly PendingCopyAction outerInstance;
-                public Inner_ProxyReceiver_17(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
+                public Inner_ProxyReceiver_17(PendingCopyAction outerInstance, Saxon.Hej.@event.Receiver arg1) : base(arg1) {
                     this.outerInstance = outerInstance;
                 }
                 public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
@@ -322,7 +322,7 @@ namespace Saxon.Eej.ee.stream.feed {
     
         private class Inner_ProxyOutputter_16 : Saxon.Hej.@event.ProxyOutputter {
             private readonly PendingCopyAction outerInstance;
-            public Inner_ProxyOutputter_16(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+            public Inner_ProxyOutputter_16(PendingCopyAction outerInstance, Saxon.Hej.@event.Outputter arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override void open() {
@@ -333,7 +333,7 @@ namespace Saxon.Eej.ee.stream.feed {
 
         private class Inner_ProxyReceiver_17 : Saxon.Hej.@event.ProxyReceiver {
             private readonly PendingCopyAction outerInstance;
-            public Inner_ProxyReceiver_17(PendingCopyAction outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1) : base(arg1) {
+            public Inner_ProxyReceiver_17(PendingCopyAction outerInstance, Saxon.Hej.@event.Receiver arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {

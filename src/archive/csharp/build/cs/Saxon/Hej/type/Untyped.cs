@@ -152,8 +152,11 @@ namespace Saxon.Hej.type {
         public bool hasAssertions() {
             return false;
         }
+        public string getPreferredJsonLayout() {
+            return "mixed";
+        }
         public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
-            return /*134*/Saxon.Eej.ee.schema.UserComplexType.getComponentAsFunction(this);
+            return Saxon.Eej.ee.schema.UserComplexType.getComponentAsFunction(this);
         }
     }
 }

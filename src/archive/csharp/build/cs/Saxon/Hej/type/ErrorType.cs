@@ -193,7 +193,7 @@ namespace Saxon.Hej.type {
             return Saxon.Ejava.util.Optional<string>.of("Evaluation of the supplied expression will always fail");
         }
         public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
-            return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
+            return Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     
         /* Expanding default method getPrimitiveAtomicType from interface AtomicType */

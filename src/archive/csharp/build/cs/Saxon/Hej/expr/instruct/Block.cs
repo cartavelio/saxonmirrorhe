@@ -484,12 +484,12 @@ namespace Saxon.Hej.expr.instruct {
         }
         public delegate Saxon.Hej.ma.zeno.ZenoSequence ChainAction (Saxon.Hej.ma.zeno.ZenoSequence @in, Saxon.Hej.expr.XPathContext context);
         public class BlockElaborator : Saxon.Hej.expr.elab.PullElaborator {
-            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable, bool lazyEvaluationRequired) {
                 Saxon.Hej.expr.instruct.Block expr = (Saxon.Hej.expr.instruct.Block)(getExpression());
                 if (expr.isCandidateForSharedAppend()) {
                     return new Saxon.Hej.expr.elab.SharedAppendEvaluator(expr);
                 } else {
-                    return base.lazily(repeatable);
+                    return base.lazily(repeatable, lazyEvaluationRequired);
                 }
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {

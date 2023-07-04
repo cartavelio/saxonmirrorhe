@@ -30,7 +30,7 @@ namespace Saxon.Ejava.util.regex {
             // It seems that after a successful zero-length match, the method actually advances one character.
             // This implementation assumes that there are no calls after an unsuccessful match.
             
-            int start = latestMatch?.Index ?? 0;
+            int start = (latestMatch?.Index ?? 0) + (latestMatch?.Length ?? 0);
             if (latestMatch?.Length == 0) {
                 start++;
             }

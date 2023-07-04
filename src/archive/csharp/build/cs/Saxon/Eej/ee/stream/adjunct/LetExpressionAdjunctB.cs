@@ -5,7 +5,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     public class LetExpressionAdjunctB : Saxon.Eej.ee.stream.adjunct.TransmissionAdjunct {
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.Expression action = ((Saxon.Hej.expr.LetExpression)(getExpression())).getAction();
-            Saxon.Eej.ee.stream.Inversion ie = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
+            Saxon.Eej.ee.stream.Inversion ie = Saxon.Eej.ee.stream.Inversion.invertExpression(action, forGrouping);
             Saxon.Eej.ee.stream.Inversion route = ie.copy();
             Saxon.Eej.ee.stream.Inversion.PushAction letAction = new Saxon.Eej.ee.stream.Inversion.PushAction();
             letAction.feedMaker = new Saxon.Eej.ee.stream.feed.FeedMakerDelegate((watchManager, @out, context) => this.makeItemFeed(watchManager, @out, context));
@@ -20,7 +20,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     
         private class Inner_ItemFeed_12 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly LetExpressionAdjunctB outerInstance;
-            public Inner_ItemFeed_12(LetExpressionAdjunctB outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_ItemFeed_12(LetExpressionAdjunctB outerInstance, Saxon.Hej.expr.Expression arg1, Saxon.Eej.ee.stream.feed.ItemFeed arg2, Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
                 context = /*superMethod*/getContext();
             }

@@ -12,9 +12,9 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.expr.FilterExpression exp = (Saxon.Hej.expr.FilterExpression)(getExpression());
             Saxon.Hej.expr.Expression start = exp.getSelectExpression();
             Saxon.Hej.expr.Expression filter = exp.getActionExpression();
-            Saxon.Eej.ee.stream.PostureAndSweep startPS = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(start, contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep startPS = Saxon.Eej.ee.stream.Streamability.getStreamability(start, contextInfo, reasons);
             Saxon.Eej.ee.trans.ContextItemStaticInfoEE info = new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(start.getItemType(), false, startPS.getPosture());
-            Saxon.Eej.ee.stream.PostureAndSweep filterPS = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(filter, info, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep filterPS = Saxon.Eej.ee.stream.Streamability.getStreamability(filter, info, reasons);
             if ((filterPS.getSweep() == Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                 return startPS;
             } else {
@@ -29,11 +29,11 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
             Saxon.Hej.expr.Expression @base = exp.getSelectExpression();
             Saxon.Hej.expr.Expression filter = exp.getFilter();
-            Saxon.Eej.ee.stream.PostureAndSweep fs = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(filter, Saxon.Eej.ee.trans.ContextItemStaticInfoEE.DEFAULT, null);
+            Saxon.Eej.ee.stream.PostureAndSweep fs = Saxon.Eej.ee.stream.Streamability.getStreamability(filter, Saxon.Eej.ee.trans.ContextItemStaticInfoEE.DEFAULT, null);
             if ((fs.getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                 return null;
             }
-            Saxon.Hej.pattern.Pattern basePattern = /*134*/Saxon.Eej.ee.stream.Streamability.toStreamingPattern(@base, config);
+            Saxon.Hej.pattern.Pattern basePattern = Saxon.Eej.ee.stream.Streamability.toStreamingPattern(@base, config);
             if ((basePattern == null)) {
                 return null;
             }

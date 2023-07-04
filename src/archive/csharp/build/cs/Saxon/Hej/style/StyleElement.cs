@@ -395,15 +395,15 @@ namespace Saxon.Hej.style {
             return streamable;
         }
         public Saxon.Hej.value.SequenceType makeSequenceType(string sequenceType) {
-            Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false);
             getStaticContext();
+            Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false, staticContext);
             Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(staticContext.getNamespaceResolver()).withAcceptEQName((staticContext.getXPathVersion()>=30)).withErrorOnBadSyntax("XPST0003").withErrorOnUnresolvedPrefix("XPST0081");
             parser.setQNameParser(qp);
             return parser.parseSequenceType(sequenceType, staticContext);
         }
         internal Saxon.Hej.value.SequenceType makeExtendedSequenceType(string sequenceType) {
             Saxon.Hej.style.ExpressionContext env = getStaticContext(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "as"));
-            Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false);
+            Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false, env);
             Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(env.getNamespaceResolver()).withAcceptEQName(true).withErrorOnBadSyntax("XPST0003").withErrorOnUnresolvedPrefix("XPST0081");
             parser.setQNameParser(qp);
             return parser.parseExtendedSequenceType(sequenceType, env);
@@ -490,7 +490,7 @@ namespace Saxon.Hej.style {
                     version = 30;
                     compileError("The version attribute must be a decimal literal", "XTSE0110");
                 } else {
-                    version = ((int)(((Saxon.Hej.value.BigDecimalValue)(val)).getDecimalValue()*(Singulink.Numerics.BigDecimal)10));
+                    version = ((int)(((Saxon.Hej.value.DecimalValue)(val)).getDecimalValue()*(Singulink.Numerics.BigDecimal)10));
                     if (((version<20) && (version != 10))) {
                         issueWarning((("Unrecognized version "+val)+": treated as 1.0"), Saxon.Hej.trans.SaxonErrorCode.SXWN9020);
                         version = 10;
@@ -635,10 +635,14 @@ namespace Saxon.Hej.style {
                 processDefaultMode();
                 if ((defaultMode == null)) {
                     Saxon.Hej.om.NodeInfo p = ((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent());
-                    if ((p is Saxon.Hej.style.StyleElement)) {
-                        return defaultMode = ((Saxon.Hej.style.StyleElement)(p)).getDefaultMode();
+                    if ((p is Saxon.Hej.style.XSLMode)) {
+                        return defaultMode = ((Saxon.Hej.style.XSLMode)(p)).getObjectName();
                     } else {
-                        return defaultMode = Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME;
+                        if ((p is Saxon.Hej.style.StyleElement)) {
+                            return defaultMode = ((Saxon.Hej.style.StyleElement)(p)).getDefaultMode();
+                        } else {
+                            return defaultMode = Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME;
+                        }
                     }
                 }
             }
@@ -1350,22 +1354,22 @@ namespace Saxon.Hej.style {
         public virtual Saxon.Hej.style.SourceBinding getBindingInformation(Saxon.Hej.om.StructuredQName name) {
             return null;
         }
-        public Saxon.Hej.style.SourceBinding bindVariable(Saxon.Hej.om.StructuredQName qName) {
-            Saxon.Hej.style.SourceBinding decl = bindLocalVariable(qName);
+        public Saxon.Hej.style.SourceBinding bindVariable(Saxon.Hej.om.StructuredQName variableName, Saxon.Hej.om.StructuredQName attributeName) {
+            Saxon.Hej.style.SourceBinding decl = bindLocalVariable(variableName, attributeName);
             if ((decl != null)) {
                 return decl;
             }
-            Saxon.Hej.style.SourceBinding binding = getPrincipalStylesheetModule().getGlobalVariableBinding(qName);
+            Saxon.Hej.style.SourceBinding binding = getPrincipalStylesheetModule().getGlobalVariableBinding(variableName);
             if (((binding == null) || Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(binding.getSourceElement(), this))) {
                 return null;
             } else {
                 return binding;
             }
         }
-        public Saxon.Hej.style.SourceBinding bindLocalVariable(Saxon.Hej.om.StructuredQName qName) {
+        public Saxon.Hej.style.SourceBinding bindLocalVariable(Saxon.Hej.om.StructuredQName variableName, Saxon.Hej.om.StructuredQName attributeName) {
             Saxon.Hej.om.NodeInfo curr = this;
             Saxon.Hej.om.NodeInfo prev = this;
-            Saxon.Hej.style.SourceBinding @implicit = hasImplicitBinding(qName);
+            Saxon.Hej.style.SourceBinding @implicit = hasImplicitBinding(variableName, attributeName);
             if ((@implicit != null)) {
                 return @implicit;
             }
@@ -1379,7 +1383,7 @@ namespace Saxon.Hej.style {
                     while ((curr == null)) {
                         curr = prev.getParent();
                         if ((curr is Saxon.Hej.style.StyleElement)) {
-                            @implicit = ((Saxon.Hej.style.StyleElement)(curr)).hasImplicitBinding(qName);
+                            @implicit = ((Saxon.Hej.style.StyleElement)(curr)).hasImplicitBinding(variableName, null);
                             if ((@implicit != null)) {
                                 return @implicit;
                             }
@@ -1398,7 +1402,7 @@ namespace Saxon.Hej.style {
                         break ;
                     }
                     if ((curr is Saxon.Hej.style.XSLGeneralVariable)) {
-                        Saxon.Hej.style.SourceBinding sourceBinding = ((Saxon.Hej.style.XSLGeneralVariable)(curr)).getBindingInformation(qName);
+                        Saxon.Hej.style.SourceBinding sourceBinding = ((Saxon.Hej.style.XSLGeneralVariable)(curr)).getBindingInformation(variableName);
                         if ((sourceBinding != null)) {
                             return sourceBinding;
                         }
@@ -1410,7 +1414,7 @@ namespace Saxon.Hej.style {
         protected internal virtual bool seesAvuncularVariables() {
             return true;
         }
-        protected internal virtual Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName name) {
+        protected internal virtual Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName variableName, Saxon.Hej.om.StructuredQName attributeName) {
             return null;
         }
         public virtual Saxon.Hej.om.StructuredQName getObjectName() {

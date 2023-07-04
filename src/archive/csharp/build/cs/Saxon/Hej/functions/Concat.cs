@@ -48,7 +48,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_Optimized_7 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
             private readonly Concat outerInstance;
-            public Inner_Optimized_7(Concat outerInstance, Concat arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_Optimized_7(Concat outerInstance, Concat arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.str.UnicodeString evaluateAsString(Saxon.Hej.expr.XPathContext context) {

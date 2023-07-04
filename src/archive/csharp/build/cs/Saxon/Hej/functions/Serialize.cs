@@ -11,6 +11,7 @@ namespace Saxon.Hej.functions {
             Saxon.Impl.Helpers.MapUtils.Put(requiredTypes, "doctype-public", Saxon.Hej.value.SequenceType.SINGLE_STRING);
             Saxon.Impl.Helpers.MapUtils.Put(requiredTypes, "doctype-system", Saxon.Hej.value.SequenceType.SINGLE_STRING);
             Saxon.Impl.Helpers.MapUtils.Put(requiredTypes, "encoding", Saxon.Hej.value.SequenceType.SINGLE_STRING);
+            Saxon.Impl.Helpers.MapUtils.Put(requiredTypes, "escape-solidus", Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
             Saxon.Impl.Helpers.MapUtils.Put(requiredTypes, "escape-uri-attributes", Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
             Saxon.Impl.Helpers.MapUtils.Put(requiredTypes, "html-version", Saxon.Hej.value.SequenceType.SINGLE_DECIMAL);
             Saxon.Impl.Helpers.MapUtils.Put(requiredTypes, "include-content-type", Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
@@ -48,6 +49,7 @@ namespace Saxon.Hej.functions {
             op.addAllowedOption("doctype-public", Saxon.Hej.value.SequenceType.SINGLE_STRING);
             op.addAllowedOption("doctype-system", Saxon.Hej.value.SequenceType.SINGLE_STRING);
             op.addAllowedOption("encoding", Saxon.Hej.value.SequenceType.SINGLE_STRING);
+            op.addAllowedOption("escape-solidus", Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
             op.addAllowedOption("escape-uri-attributes", Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
             op.addAllowedOption("html-version", Saxon.Hej.value.SequenceType.SINGLE_DECIMAL);
             op.addAllowedOption("include-content-type", Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
@@ -80,7 +82,7 @@ namespace Saxon.Hej.functions {
         private static string sx(string s) {
             return ((("Q{"+Saxon.Hej.lib.NamespaceConstant.SAXON)+"}")+s);
         }
-        private readonly string[] paramNames = new string[]{"allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "doctype-public", "doctype-system", "encoding", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator", "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone", "suppress-indentation", "undeclare-prefixes", "use-character-maps", "version"};
+        private readonly string[] paramNames = new string[]{"allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "doctype-public", "doctype-system", "encoding", "escape-solidus", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator", "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone", "suppress-indentation", "undeclare-prefixes", "use-character-maps", "version"};
         private bool isParamName(string name) {
             foreach (string s in paramNames) {
                 if (s.Equals(name)) {
@@ -252,6 +254,9 @@ namespace Saxon.Hej.functions {
             }
             if (((seqVal = Saxon.Impl.Helpers.MapUtils.Get(map, "encoding")) != null)) {
                 props.setProperty("encoding", seqVal.head().getStringValue());
+            }
+            if (((seqVal = Saxon.Impl.Helpers.MapUtils.Get(map, "escape-solidus")) != null)) {
+                props.setProperty("escape-solidus", toYesNoTypeString(seqVal));
             }
             if (((seqVal = Saxon.Impl.Helpers.MapUtils.Get(map, "escape-uri-attributes")) != null)) {
                 props.setProperty("escape-uri-attributes", toYesNoTypeString(seqVal));

@@ -55,7 +55,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_SystemFunctionCall_4 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly DynamicContextAccessor outerInstance;
-            public Inner_SystemFunctionCall_4(DynamicContextAccessor outerInstance, DynamicContextAccessor arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_4(DynamicContextAccessor outerInstance, DynamicContextAccessor arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {

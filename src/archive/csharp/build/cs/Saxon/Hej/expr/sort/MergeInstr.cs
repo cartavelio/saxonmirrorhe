@@ -95,7 +95,7 @@ namespace Saxon.Hej.expr.sort {
             }
             public void prepareForStreaming() {
                 if (streamable) {
-                    /*134*/Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.checkStreamability(this, instruction.getConfiguration());
+                    Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.checkStreamability(this, instruction.getConfiguration());
                 }
             }
         
@@ -316,7 +316,7 @@ namespace Saxon.Hej.expr.sort {
             foreach (Saxon.Hej.expr.sort.MergeInstr.MergeSource ms in mergeSources) {
                 Saxon.Hej.om.SequenceIterator anchorsIter;
                 if ((ms.streamable && (ms.getForEachSource() != null))) {
-                    System.Collections.Generic.IList<Saxon.Hej.expr.ContextMappingIterator> msIters = /*134*/Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), context);
+                    System.Collections.Generic.IList<Saxon.Hej.expr.ContextMappingIterator> msIters = Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), context);
                     foreach (Saxon.Hej.expr.ContextMappingIterator iter in msIters) {
                         inputIterator = makeMergeIterator(inputIterator, comps, ms, iter);
                     }

@@ -27,7 +27,7 @@ namespace Saxon.Eej.ee.stream {
             if ((doc != null)) {
                 return doc;
             }
-            action = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(getBody(), false);
+            action = Saxon.Eej.ee.stream.Inversion.invertExpression(getBody(), false);
             return this;
         }
         public override void prepareForStreaming() {
@@ -44,10 +44,10 @@ namespace Saxon.Eej.ee.stream {
             } else {
                 Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo = new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(Saxon.Hej.type.AnyItemType.getInstance(), true, Saxon.Eej.ee.stream.Posture.STRIDING);
                 contextInfo.setStrictStreamabilityRules(strict);
-                Saxon.Eej.ee.stream.PostureAndSweep s = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(getBody(), contextInfo, reasons);
+                Saxon.Eej.ee.stream.PostureAndSweep s = Saxon.Eej.ee.stream.Streamability.getStreamability(getBody(), contextInfo, reasons);
                 streamable = (s.getPosture() == Saxon.Eej.ee.stream.Posture.GROUNDED);
                 if (!(streamable)) {
-                    if ((reasons.Count==0 && /*134*/Saxon.Eej.ee.stream.Streamability.isIncrementalPosture(s.getPosture()))) {
+                    if ((reasons.Count==0 && Saxon.Eej.ee.stream.Streamability.isIncrementalPosture(s.getPosture()))) {
                         reasons.Add("The instruction returns nodes from the streamed input document.");
                     }
                 }
@@ -118,7 +118,7 @@ namespace Saxon.Eej.ee.stream {
                 wm.setOutputter(output);
                 Saxon.Eej.ee.stream.AccumulatorRegistryEE am = (Saxon.Eej.ee.stream.AccumulatorRegistryEE)(getRetainedStaticContext().getPackageData().getAccumulatorRegistry());
                 if (((am != null) && (accumulators != null))) {
-                    /*134*/Saxon.Eej.ee.stream.AccumulatorRegistryEE.registerSelectedAccumulators(wm, accumulators);
+                    Saxon.Eej.ee.stream.AccumulatorRegistryEE.registerSelectedAccumulators(wm, accumulators);
                 }
                 Saxon.Hej.@event.Receiver stream = new Saxon.Eej.ee.stream.ContentDetector(wm);
                 if (((getPackageData() is Saxon.Hej.style.StylesheetPackage) && ((Saxon.Hej.style.StylesheetPackage)(getPackageData())).isStripsTypeAnnotations())) {

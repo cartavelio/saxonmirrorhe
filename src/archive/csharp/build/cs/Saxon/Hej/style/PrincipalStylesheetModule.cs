@@ -681,6 +681,13 @@ namespace Saxon.Hej.style {
                     if ((snode is Saxon.Hej.style.XSLTemplate)) {
                         ((Saxon.Hej.style.XSLTemplate)(snode)).register(decl);
                     }
+                    if ((snode is Saxon.Hej.style.XSLMode)) {
+                        foreach (Saxon.Hej.om.NodeInfo n in snode.children()) {
+                            if ((n is Saxon.Hej.style.XSLTemplate)) {
+                                ((Saxon.Hej.style.XSLTemplate)(n)).register(decl);
+                            }
+                        }
+                    }
                 }
                 if (Saxon.Hej.style.Compilation.TIMING) {
                     timer.report("register templates");

@@ -117,7 +117,11 @@ namespace Saxon.Hej.style {
                 }
             }
             if ((sourceName == null)) {
-                sourceName = ("saxon-merge-source-"+GetHashCode());
+                try {
+                    sourceName = ("merge-source "+((Saxon.Hej.functions.Count.count(iterateAxis(Saxon.Hej.om.AxisInfo.PRECEDING_SIBLING, Saxon.Hej.pattern.NodeKindTest.ELEMENT))+1)));
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    sourceName = ("merge-source "+GetHashCode());
+                }
             }
             if ((forEachItemAtt != null)) {
                 if ((forEachSourceAtt != null)) {

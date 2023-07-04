@@ -5,9 +5,6 @@ namespace Saxon.Eej.expr {
     public class XQueryParserExtensionPE : Saxon.Eej.expr.SaxonSyntaxExtension {
         public XQueryParserExtensionPE()  {
         }
-        protected internal bool isReservedInQuery(string uri) {
-            return Saxon.Hej.lib.NamespaceConstant.isReservedInQuery31(uri);
-        }
         public override void parseTypeAliasDeclaration(Saxon.Hej.query.XQueryParser p) {
             p.nextToken();
             p.expect(Saxon.Hej.expr.parser.Token.NAME);

@@ -315,13 +315,37 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.functions.SystemFunction fn = expr.getTargetFunction();
                 switch (argumentEvaluators.Length) {
                   case 0:
-                    return context => fn.call(context, Saxon.Hej.expr.StackFrame.EMPTY_ARRAY_OF_SEQUENCE).head();
+                    return context => {
+                        try {
+                            return fn.call(context, Saxon.Hej.expr.StackFrame.EMPTY_ARRAY_OF_SEQUENCE).head();
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+                    } ;
                   case 1:
-                    return context => fn.call(context, new Saxon.Hej.om.Sequence[]{argumentEvaluators[0].evaluate(context)}).head();
+                    return context => {
+                        try {
+                            return fn.call(context, new Saxon.Hej.om.Sequence[]{argumentEvaluators[0].evaluate(context)}).head();
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+                    } ;
                   case 2:
-                    return context => fn.call(context, new Saxon.Hej.om.Sequence[]{argumentEvaluators[0].evaluate(context), argumentEvaluators[1].evaluate(context)}).head();
+                    return context => {
+                        try {
+                            return fn.call(context, new Saxon.Hej.om.Sequence[]{argumentEvaluators[0].evaluate(context), argumentEvaluators[1].evaluate(context)}).head();
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+                    } ;
                   default:
-                    return context => fn.call(context, evaluateArguments(context)).head();
+                    return context => {
+                        try {
+                            return fn.call(context, evaluateArguments(context)).head();
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
+                        }
+                    } ;
                 }
             }
             public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {

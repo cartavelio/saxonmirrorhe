@@ -18,7 +18,7 @@ namespace Saxon.Eej.ee.trans {
             Saxon.Eej.ee.trans.Precondition.BooleanPrecondition p = new Saxon.Eej.ee.trans.Precondition.BooleanPrecondition(chic2);
             addPrecondition(rule, preconditions, p);
             Saxon.Hej.pattern.Pattern @base = ((Saxon.Hej.pattern.AncestorQualifiedPattern)(pattern)).getBasePattern();
-            /*134*/Saxon.Eej.ee.trans.GeneralPatternOptimizer.getInstance().process(rule, @base, preconditions, characteristics);
+            Saxon.Eej.ee.trans.GeneralPatternOptimizer.getInstance().process(rule, @base, preconditions, characteristics);
         }
     
     }

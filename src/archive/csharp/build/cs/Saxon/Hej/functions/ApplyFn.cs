@@ -6,12 +6,6 @@ namespace Saxon.Hej.functions {
         private string dynamicFunctionCall;
         public ApplyFn()  {
         }
-        public void setDynamicFunctionCall(string fnExpr) {
-            dynamicFunctionCall = fnExpr;
-        }
-        public bool isDynamicFunctionCall() {
-            return (dynamicFunctionCall != null);
-        }
         public override Saxon.Hej.type.ItemType getResultItemType(Saxon.Hej.expr.Expression[] args) {
             Saxon.Hej.type.ItemType fnType = args[0].getItemType();
             if ((fnType is Saxon.Hej.ma.map.MapType)) {
@@ -23,11 +17,7 @@ namespace Saxon.Hej.functions {
                     if ((fnType is Saxon.Hej.type.FunctionItemType)) {
                         return ((Saxon.Hej.type.FunctionItemType)(fnType)).getResultType().getPrimaryType();
                     } else {
-                        if ((fnType is Saxon.Hej.type.AnyFunctionType)) {
-                            return Saxon.Hej.type.AnyItemType.getInstance();
-                        } else {
-                            return Saxon.Hej.type.AnyItemType.getInstance();
-                        }
+                        return Saxon.Hej.type.AnyItemType.getInstance();
                     }
                 }
             }
@@ -66,10 +56,8 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.type.FunctionItemType fit = function.getFunctionItemType();
             Saxon.Hej.ma.arrays.ArrayItem args = (Saxon.Hej.ma.arrays.ArrayItem)(arguments[1].head());
             if ((function.getArity() != args.arrayLength())) {
-                string errorCode = (isDynamicFunctionCall() ? "XPTY0004" : "FOAP0001");
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Number of arguments required for dynamic call to "+function.getDescription())+" is ")+function.getArity())+"; number supplied = ")+args.arrayLength()), errorCode).withXPathContext(context);
-                err.setIsTypeError(isDynamicFunctionCall());
-                throw err;
+                string errorCode = "FOAP0001";
+                throw new Saxon.Hej.trans.XPathException(((((("Number of arguments required for dynamic call to "+function.getDescription())+" is ")+function.getArity())+"; number supplied = ")+args.arrayLength()), errorCode).withXPathContext(context);
             }
             Saxon.Hej.om.Sequence[] argArray = new Saxon.Hej.om.Sequence[args.arrayLength()];
             if ((fit == Saxon.Hej.type.AnyFunctionType.ANY_FUNCTION)) {
@@ -79,13 +67,8 @@ namespace Saxon.Hej.functions {
             } else {
                 for (int i = 0; (i<argArray.Length); i++) {
                     Saxon.Hej.value.SequenceType expected = fit.getArgumentTypes()[i];
-                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role;
-                    if (isDynamicFunctionCall()) {
-                        role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, dynamicFunctionCall.ToString(), 0);
-                    } else {
-                        int pos = i;
-                        role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "fn:apply", (pos+1));
-                    }
+                    int pos = i;
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "fn:apply", (pos+1));
                     Saxon.Hej.om.Sequence converted = th.applyFunctionConversionRules(args.get(i), expected, role, Saxon.Hej.expr.parser.Loc.NONE);
                     argArray[i] = converted.materialize();
                 }

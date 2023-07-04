@@ -5,10 +5,10 @@ namespace Saxon.Eej.ee.trans {
     public class GeneralPatternOptimizer : Saxon.Eej.ee.trans.PatternOptimizer {
 
         static GeneralPatternOptimizer() {
-            patternOptimizers.Add(/*134*/Saxon.Eej.ee.trans.EqualityPatternOptimizer.getInstance());
-            patternOptimizers.Add(/*134*/Saxon.Eej.ee.trans.ContainsTokenPatternOptimizer.getInstance());
-            patternOptimizers.Add(/*134*/Saxon.Eej.ee.trans.IntEqualityPatternOptimizer.getInstance());
-            patternOptimizers.Add(/*134*/Saxon.Eej.ee.trans.AncestorPatternOptimizer.getInstance());
+            patternOptimizers.Add(Saxon.Eej.ee.trans.EqualityPatternOptimizer.getInstance());
+            patternOptimizers.Add(Saxon.Eej.ee.trans.ContainsTokenPatternOptimizer.getInstance());
+            patternOptimizers.Add(Saxon.Eej.ee.trans.IntEqualityPatternOptimizer.getInstance());
+            patternOptimizers.Add(Saxon.Eej.ee.trans.AncestorPatternOptimizer.getInstance());
         }
         private static readonly System.Collections.Generic.IList<Saxon.Eej.ee.trans.PatternOptimizer> patternOptimizers = new System.Collections.Generic.List<Saxon.Eej.ee.trans.PatternOptimizer>();
         private static readonly Saxon.Eej.ee.trans.GeneralPatternOptimizer THE_INSTANCE = new Saxon.Eej.ee.trans.GeneralPatternOptimizer();

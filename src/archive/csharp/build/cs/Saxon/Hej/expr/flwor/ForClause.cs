@@ -37,7 +37,7 @@ namespace Saxon.Hej.expr.flwor {
         public Saxon.Hej.expr.Operand getSequenceOp() {
             return this.sequenceOp;
         }
-        protected internal virtual Saxon.Hej.om.SequenceIterator getIterator(Saxon.Hej.expr.XPathContext context) {
+        protected internal Saxon.Hej.om.SequenceIterator getIterator(Saxon.Hej.expr.XPathContext context) {
             if ((sequenceOperandEvaluator == null)) {
                 sequenceOperandEvaluator = getSequence().makeElaborator().elaborateForPull();
             }
@@ -77,7 +77,12 @@ namespace Saxon.Hej.expr.flwor {
             }
             Saxon.Hej.value.SequenceType sequenceType = Saxon.Hej.value.SequenceType.makeSequenceType(decl.getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
             Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
-            setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
+            if ((visitor.getStaticContext().getXPathVersion()<40)) {
+                setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
+            } else {
+                Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+                setSequence(tc.staticTypeCheck(getSequence(), sequenceType, role, visitor));
+            }
         }
         public override Saxon.Hej.expr.flwor.TuplePull getPullStream(Saxon.Hej.expr.flwor.TuplePull @base, Saxon.Hej.expr.XPathContext context) {
             if (allowsEmpty) {
@@ -93,7 +98,7 @@ namespace Saxon.Hej.expr.flwor {
                 return new Saxon.Hej.expr.flwor.ForClausePush(output, destination, this);
             }
         }
-        public virtual bool addPredicate(Saxon.Hej.expr.flwor.FLWORExpression flwor, Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType, Saxon.Hej.expr.Expression condition) {
+        public bool addPredicate(Saxon.Hej.expr.flwor.FLWORExpression flwor, Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType, Saxon.Hej.expr.Expression condition) {
             Saxon.Hej.Configuration config = getConfiguration();
             Saxon.Hej.expr.parser.Optimizer opt = visitor.obtainOptimizer();
             bool debug = config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.TRACE_OPTIMIZER_DECISIONS);

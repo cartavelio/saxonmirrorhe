@@ -168,7 +168,13 @@ namespace Saxon.Eej.config {
                 }
             }
             if (!(isLicenseFound())) {
-                loadLicense();
+                try {
+                    loadLicense();
+                } catch (System.Exception err) {
+                    int reason = ((err is Saxon.Hej.trans.LicenseException) ? ((Saxon.Hej.trans.LicenseException)(err)).getReason() : Saxon.Hej.trans.LicenseException.CANNOT_READ);
+                    string msg = ((err.Message+". A license is needed to use ")+name);
+                    throw new Saxon.Hej.trans.LicenseException(msg, reason);
+                }
             }
             reportIfMissingLicenseFeature(feature, name);
         }
@@ -209,7 +215,7 @@ namespace Saxon.Eej.config {
         }
         public override Saxon.Hej.functions.registry.BuiltInFunctionSet getVendorFunctionSet() {
             if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
-                return /*134*/Saxon.Eej.ee.extfn.VendorFunctionSetEE.getInstance();
+                return Saxon.Eej.ee.extfn.VendorFunctionSetEE.getInstance();
             } else {
                 return base.getVendorFunctionSet();
             }
@@ -296,7 +302,7 @@ namespace Saxon.Eej.config {
                 Saxon.Hej.@event.PipelineConfiguration pipe = makePipelineConfiguration();
                 pipe.setErrorReporter(((errorReporter == null) ? makeErrorReporter() : errorReporter));
                 pipe.setHostLanguage(Saxon.Api.HostLanguage.XML_SCHEMA);
-                Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(schemaSource, compiler, pipe, null);
+                Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc = Saxon.Eej.ee.schema.sdoc.SchemaReader.read(schemaSource, compiler, pipe, null);
                 if (schemadoc.isCompiledSchemaDocument()) {
                     try {
                         importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
@@ -366,7 +372,7 @@ namespace Saxon.Eej.config {
         private void addSchemaForXmlNamespace() { lock(this) {
             if ((getNamespaceStatus(Saxon.Hej.om.NamespaceUri.XML) == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
                 try {
-                    addSchema(/*134*/Saxon.Eej.ee.schema.sdoc.XMLNamespaceSchema.buildSchema(this));
+                    addSchema(Saxon.Eej.ee.schema.sdoc.XMLNamespaceSchema.buildSchema(this));
                 } catch (Saxon.Hej.type.SchemaException err) {
                     throw new Saxon.Ejava.lang.AssertionError(err);
                 }
@@ -376,7 +382,7 @@ namespace Saxon.Eej.config {
         private void addSchemaForXsiNamespace() { lock(this) {
             if ((getNamespaceStatus(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE) == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
                 try {
-                    addSchema(/*134*/Saxon.Eej.ee.schema.sdoc.XSINamespaceSchema.buildSchema(this));
+                    addSchema(Saxon.Eej.ee.schema.sdoc.XSINamespaceSchema.buildSchema(this));
                 } catch (Saxon.Hej.type.SchemaException err) {
                     throw new Saxon.Ejava.lang.AssertionError(err);
                 }
@@ -490,12 +496,12 @@ namespace Saxon.Eej.config {
         }
         public override void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType derived, Saxon.Hej.type.SchemaType @base, int block) {
             if (derived.isSimpleType()) {
-                string s = /*134*/Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK((Saxon.Hej.type.SimpleType)(derived), @base, block);
+                string s = Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK((Saxon.Hej.type.SimpleType)(derived), @base, block);
                 if ((s != null)) {
                     throw new Saxon.Hej.type.SchemaException(s);
                 }
             } else {
-                /*134*/Saxon.Eej.ee.schema.UserComplexType.checkTypeDerivation((Saxon.Hej.type.ComplexType)(derived), @base, block);
+                Saxon.Eej.ee.schema.UserComplexType.checkTypeDerivation((Saxon.Hej.type.ComplexType)(derived), @base, block);
             }
         }
         public override void prepareValidationReporting(Saxon.Hej.expr.XPathContext context, Saxon.Hej.lib.ParseOptions options) {
@@ -632,7 +638,7 @@ namespace Saxon.Eej.config {
             Saxon.Eej.ee.validate.ContentValidator contentValidator = null;
             if ((validation == Saxon.Hej.lib.Validation.BY_TYPE)) {
                 System.Collections.Generic.IList<Saxon.Hej.type.ValidationFailure> failures = new System.Collections.Generic.List<Saxon.Hej.type.ValidationFailure>(1);
-                contentValidator = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidatorForType(null, schemaType, pipe, destination, failures);
+                contentValidator = Saxon.Eej.ee.validate.ContentValidator.makeValidatorForType(null, schemaType, pipe, destination, failures);
                 if (!(failures.Count==0)) {
                     throw failures[0].makeException();
                 }
@@ -647,7 +653,7 @@ namespace Saxon.Eej.config {
                     Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(getElementDeclaration(elemName));
                     if (((decl == null) || !(decl.hasTypeAlternatives()))) {
                         System.Collections.Generic.IList<Saxon.Hej.type.ValidationFailure> failures = new System.Collections.Generic.List<Saxon.Hej.type.ValidationFailure>(1);
-                        contentValidator = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidator(decl, elemName, location, vc, schemaType, validation, pipe, destination, failures);
+                        contentValidator = Saxon.Eej.ee.validate.ContentValidator.makeValidator(decl, elemName, location, vc, schemaType, validation, pipe, destination, failures);
                         if (!(failures.Count==0)) {
                             throw failures[0].makeException();
                         }
@@ -731,12 +737,12 @@ namespace Saxon.Eej.config {
         public override Saxon.Hej.@event.Receiver getAnnotationStripper(Saxon.Hej.@event.Receiver destination) {
             return new Saxon.Eej.ee.validate.SkipValidator(destination);
         }
-        public override Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating) {
+        public override Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating, Saxon.Hej.expr.StaticContext env) {
             if ((updating && !(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)))) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException("XQuery Update requires a Saxon-EE license");
             }
             if ("XQ".Equals(language)) {
-                Saxon.Hej.query.XQueryParser parser = new Saxon.Hej.query.XQueryParser();
+                Saxon.Hej.query.XQueryParser parser = new Saxon.Hej.query.XQueryParser(env);
                 if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
                     parser.setParserExtension(new Saxon.Eej.ee.update.XQueryParserExtensionEE(updating));
                 } else {
@@ -746,7 +752,7 @@ namespace Saxon.Eej.config {
                 }
                 return parser;
             } else {
-                Saxon.Hej.expr.parser.XPathParser parser = base.newExpressionParser(language, updating);
+                Saxon.Hej.expr.parser.XPathParser parser = base.newExpressionParser(language, updating, env);
                 parser.setAccelerator(new Saxon.Eej.ee.optim.QuickXPathParser());
                 return parser;
             }
@@ -833,7 +839,7 @@ namespace Saxon.Eej.config {
             wm.setXPathContext(context);
             wm.setOutputter(@out);
             if ((am != null)) {
-                /*134*/Saxon.Eej.ee.stream.AccumulatorRegistryEE.registerSelectedAccumulators(wm, accumulators);
+                Saxon.Eej.ee.stream.AccumulatorRegistryEE.registerSelectedAccumulators(wm, accumulators);
             }
             Saxon.Eej.ee.stream.feed.DecomposingFeed feed = new Saxon.Eej.ee.stream.feed.DecomposingFeed(@out, context);
             Saxon.Eej.ee.stream.watch.ApplyTemplatesAction docWatch = new Saxon.Eej.ee.stream.watch.ApplyTemplatesAction(null, feed, context);
@@ -867,7 +873,7 @@ namespace Saxon.Eej.config {
             Saxon.Eej.ee.trans.ContextItemStaticInfoEE info = (Saxon.Eej.ee.trans.ContextItemStaticInfoEE)(makeContextItemStaticInfo(template.getMatch().getItemType(), false));
             info.setContextPostureStriding();
             System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-            Saxon.Eej.ee.stream.PostureAndSweep s = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(body, info, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep s = Saxon.Eej.ee.stream.Streamability.getStreamability(body, info, reasons);
             if ((s.getPosture() != Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 Saxon.Ejava.lang.StringBuilder message = new Saxon.Ejava.lang.StringBuilder("Template rule is not guaranteed-streamable");
                 foreach (string r in reasons) {
@@ -964,7 +970,7 @@ namespace Saxon.Eej.config {
         }
         public override Saxon.Hej.om.GroundedValue makeSequenceExtent(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
             if ((@ref == Saxon.Hej.expr.FilterExpression.FILTERED)) {
-                return /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(expression.iterate(context));
+                return Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(expression.iterate(context));
             } else {
                 return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
             }

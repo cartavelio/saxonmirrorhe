@@ -17,7 +17,7 @@ namespace Saxon.Eej.ee.stream {
         }
         public override void prepareForStreaming() {
             if (getDeclaredStreamability().isStreaming()) {
-                /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(getBody(), Saxon.Eej.ee.trans.ContextItemStaticInfoEE.ABSENT, new System.Collections.Generic.List<string>());
+                Saxon.Eej.ee.stream.Streamability.getStreamability(getBody(), Saxon.Eej.ee.trans.ContextItemStaticInfoEE.ABSENT, new System.Collections.Generic.List<string>());
                 makeInversion();
             }
         }

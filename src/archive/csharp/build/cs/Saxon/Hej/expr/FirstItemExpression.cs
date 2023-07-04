@@ -12,6 +12,9 @@ namespace Saxon.Hej.expr {
                 return new Saxon.Hej.expr.FirstItemExpression(@base);
             }
         }
+        protected internal override int computeCardinality() {
+            return (Saxon.Hej.value.Cardinality.allowsZero(getBaseExpression().getCardinality()) ? Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE : Saxon.Hej.expr.StaticProperty.ALLOWS_ONE);
+        }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.Expression e2 = new Saxon.Hej.expr.FirstItemExpression(getBaseExpression().copy(rebindings));
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, e2);

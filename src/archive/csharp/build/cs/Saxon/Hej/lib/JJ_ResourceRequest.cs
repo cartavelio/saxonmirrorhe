@@ -24,6 +24,7 @@ namespace Saxon.Hej.lib {
         public string purpose;
         public bool uriIsNamespace;
         public bool streamable;
+        public string requestedEncoding;
         public Saxon.Hej.lib.JJ_ResourceRequest copy() {
             Saxon.Hej.lib.JJ_ResourceRequest rr = new Saxon.Hej.lib.JJ_ResourceRequest();
             rr.relativeUri = relativeUri;
@@ -35,6 +36,7 @@ namespace Saxon.Hej.lib {
             rr.nature = nature;
             rr.entityName = entityName;
             rr.streamable = streamable;
+            rr.requestedEncoding = requestedEncoding;
             return rr;
         }
         public Saxon.Ejavax.xml.transform.Source resolve(params Saxon.Hej.lib.JJ_ResourceResolver[]  resolvers) {

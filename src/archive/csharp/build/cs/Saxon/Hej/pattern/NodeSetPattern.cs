@@ -42,8 +42,8 @@ namespace Saxon.Hej.pattern {
         }
         public override bool isMotionless() {
             Saxon.Hej.expr.Expression select = getSelectionExpression();
-            /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(select, new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(getItemType(), false, Saxon.Eej.ee.stream.Posture.STRIDING), null);
-            return (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(select) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS);
+            Saxon.Eej.ee.stream.Streamability.getStreamability(select, new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(getItemType(), false, Saxon.Eej.ee.stream.Posture.STRIDING), null);
+            return (Saxon.Eej.ee.stream.Streamability.getSweep(select) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS);
         }
         public override int allocateSlots(Saxon.Hej.expr.instruct.SlotManager slotManager, int nextFree) {
             return Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(getSelectionExpression(), nextFree, slotManager);

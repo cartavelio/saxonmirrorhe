@@ -9,7 +9,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             if ((select is Saxon.Hej.expr.CardinalityChecker)) {
                 select = ((Saxon.Hej.expr.CardinalityChecker)(select)).getBaseExpression();
             }
-            Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
+            Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
             if ((selection != null)) {
                 return (watchManager, @out, context) => {
                     Saxon.Eej.ee.stream.adjunct.XmlToJsonFnStreamer.ToJsonAction action = new Saxon.Eej.ee.stream.adjunct.XmlToJsonFnStreamer.ToJsonAction(getExpression(), @out, context);

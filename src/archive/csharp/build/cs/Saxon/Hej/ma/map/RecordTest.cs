@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.map {
-    public class RecordTest : Saxon.Hej.type.AnyFunctionType, Saxon.Hej.ma.map.TupleType {
+    public class RecordTest : Saxon.Hej.type.AnyFunctionType, Saxon.Hej.ma.map.RecordType {
         private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.value.SequenceType> fieldTypes = new System.Collections.Generic.Dictionary<string, Saxon.Hej.value.SequenceType>();
         private readonly System.Collections.Generic.ISet<string> optionalFields = new System.Collections.Generic.HashSet<string>();
         private bool extensible;
@@ -313,8 +313,8 @@ namespace Saxon.Hej.ma.map {
             }
             return Saxon.Ejava.util.Optional<string>.empty();
         }
-        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
-            return new Saxon.Hej.type.SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
+        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role, bool allow40) {
+            return new Saxon.Hej.type.SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
         }
     
     }

@@ -229,14 +229,14 @@ namespace Saxon.Hej.expr {
                 }
             }
             if ((@operator == Saxon.Hej.expr.parser.Token.EQUALS)) {
-                if (((getLhsExpression() is Saxon.Hej.expr.RangeExpression) && ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).isDefaultedStep())) {
+                if ((getLhsExpression() is Saxon.Hej.expr.RangeExpression)) {
                     Saxon.Hej.expr.Expression min = ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).getStartExpression();
                     Saxon.Hej.expr.Expression max = ((Saxon.Hej.expr.RangeExpression)(getLhsExpression())).getEndExpression();
                     Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getRhsExpression(), min, max);
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ir);
                     return ir;
                 }
-                if (((getRhsExpression() is Saxon.Hej.expr.RangeExpression) && ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).isDefaultedStep())) {
+                if ((getRhsExpression() is Saxon.Hej.expr.RangeExpression)) {
                     Saxon.Hej.expr.Expression min = ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).getStartExpression();
                     Saxon.Hej.expr.Expression max = ((Saxon.Hej.expr.RangeExpression)(getRhsExpression())).getEndExpression();
                     Saxon.Hej.expr.IntegerRangeTest ir = new Saxon.Hej.expr.IntegerRangeTest(getLhsExpression(), min, max);

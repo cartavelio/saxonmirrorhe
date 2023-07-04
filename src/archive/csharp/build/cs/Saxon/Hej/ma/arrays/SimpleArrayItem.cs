@@ -95,7 +95,7 @@ namespace Saxon.Hej.ma.arrays {
             return _members;
         }
         public override string toShortString() {
-            int size = getLength();
+            int size = getMembers().Count;
             if ((size == 0)) {
                 return "[]";
             } else {

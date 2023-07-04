@@ -88,7 +88,7 @@ namespace Saxon.Hej.expr {
                 int slot = varRef.getSlotNumber();
                 return new Saxon.Hej.expr.elab.LocalVariableEvaluator(slot);
             }
-            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable, bool lazyEvaluationRequired) {
                 return eagerly();
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {

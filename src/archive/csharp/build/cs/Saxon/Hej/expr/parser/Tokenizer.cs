@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.parser {
     public sealed class Tokenizer {
+        public const char FULL_WIDTH_LT = '＜';
+        public const char FULL_WIDTH_GT = '＞';
         public const char NUL = (char)(0);
         private int state = DEFAULT_STATE;
         public const int DEFAULT_STATE = 0;
@@ -80,7 +82,7 @@ namespace Saxon.Hej.expr.parser {
                 }
                 break ;
               case Saxon.Hej.expr.parser.Token.LT:
-                if ((isXQuery && followsOperator(precedingToken))) {
+                if (((isXQuery && followsOperator(precedingToken)) && !(currentTokenValue.Equals((""+FULL_WIDTH_LT))))) {
                     currentToken = Saxon.Hej.expr.parser.Token.TAG;
                 }
                 break ;
@@ -104,6 +106,9 @@ namespace Saxon.Hej.expr.parser {
                 }
                 handleNextToken(oldPrecedingToken);
             }
+        }
+        public bool thereMightBeAnArrowAhead() {
+            return ((input.IndexOf("->", currentTokenStartOffset)>=0) || (input.IndexOf("-＞", currentTokenStartOffset)>=0));
         }
         private void handleNextToken(int oldPrecedingToken) {
             switch (nextToken) {
@@ -396,7 +401,7 @@ namespace Saxon.Hej.expr.parser {
                     nextToken = Saxon.Hej.expr.parser.Token.PLUS;
                     return ;
                   case '-':
-                    if (((inputOffset<inputLength) && (input[inputOffset] == '>'))) {
+                    if (((inputOffset<inputLength) && isGreaterThanChar(input[inputOffset]))) {
                         inputOffset++;
                         nextToken = Saxon.Hej.expr.parser.Token.THIN_ARROW;
                         return ;
@@ -404,9 +409,14 @@ namespace Saxon.Hej.expr.parser {
                     nextToken = Saxon.Hej.expr.parser.Token.MINUS;
                     return ;
                   case '=':
-                    if (((inputOffset<inputLength) && (input[inputOffset] == '>'))) {
+                    if (((inputOffset<inputLength) && isGreaterThanChar(input[inputOffset]))) {
                         inputOffset++;
                         nextToken = Saxon.Hej.expr.parser.Token.FAT_ARROW;
+                        return ;
+                    }
+                    if (((((languageLevel>=40) && (inputOffset<(inputLength-1))) && (input[inputOffset] == '!')) && isGreaterThanChar(input[(inputOffset+1)]))) {
+                        inputOffset += 2;
+                        nextToken = Saxon.Hej.expr.parser.Token.MAPPING_ARROW;
                         return ;
                     }
                     nextToken = Saxon.Hej.expr.parser.Token.EQUALS;
@@ -435,11 +445,43 @@ namespace Saxon.Hej.expr.parser {
                     }
                     nextToken = Saxon.Hej.expr.parser.Token.STAR;
                     return ;
+                  case '×':
+                    if ((languageLevel>=40)) {
+                        nextToken = Saxon.Hej.expr.parser.Token.MATH_MULT;
+                        return ;
+                    } else {
+                        throw new Saxon.Hej.trans.XPathException("Multiply operator '×' is recognized only when XPath 4.0 is enabled");
+                    }
+                  case '÷':
+                    if ((languageLevel>=40)) {
+                        nextToken = Saxon.Hej.expr.parser.Token.MATH_DIVIDE;
+                        return ;
+                    } else {
+                        throw new Saxon.Hej.trans.XPathException("Divide operator '÷' is recognized only when XPath 4.0 is enabled");
+                    }
                   case ',':
                     nextToken = Saxon.Hej.expr.parser.Token.COMMA;
                     return ;
                   case '$':
                     nextToken = Saxon.Hej.expr.parser.Token.DOLLAR;
+                    return ;
+                  case FULL_WIDTH_LT:
+                  case '<':
+                    if (((c == FULL_WIDTH_LT) && (languageLevel<40))) {
+                        throw new Saxon.Hej.trans.XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
+                    }
+                    if (((inputOffset<inputLength) && (input[inputOffset] == '='))) {
+                        inputOffset++;
+                        nextToken = Saxon.Hej.expr.parser.Token.LE;
+                        return ;
+                    }
+                    if (((inputOffset<inputLength) && (c == input[inputOffset]))) {
+                        inputOffset++;
+                        nextToken = Saxon.Hej.expr.parser.Token.PRECEDES;
+                        return ;
+                    }
+                    nextToken = Saxon.Hej.expr.parser.Token.LT;
+                    nextTokenValue = (c+"");
                     return ;
                   case '|':
                     if (((inputOffset<inputLength) && (input[inputOffset] == '|'))) {
@@ -452,26 +494,17 @@ namespace Saxon.Hej.expr.parser {
                   case '#':
                     nextToken = Saxon.Hej.expr.parser.Token.HASH;
                     return ;
-                  case '<':
-                    if (((inputOffset<inputLength) && (input[inputOffset] == '='))) {
-                        inputOffset++;
-                        nextToken = Saxon.Hej.expr.parser.Token.LE;
-                        return ;
-                    }
-                    if (((inputOffset<inputLength) && (input[inputOffset] == '<'))) {
-                        inputOffset++;
-                        nextToken = Saxon.Hej.expr.parser.Token.PRECEDES;
-                        return ;
-                    }
-                    nextToken = Saxon.Hej.expr.parser.Token.LT;
-                    return ;
                   case '>':
+                  case FULL_WIDTH_GT:
+                    if (((c == FULL_WIDTH_GT) && (languageLevel<40))) {
+                        throw new Saxon.Hej.trans.XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
+                    }
                     if (((inputOffset<inputLength) && (input[inputOffset] == '='))) {
                         inputOffset++;
                         nextToken = Saxon.Hej.expr.parser.Token.GE;
                         return ;
                     }
-                    if (((inputOffset<inputLength) && (input[inputOffset] == '>'))) {
+                    if (((inputOffset<inputLength) && (c == input[inputOffset]))) {
                         inputOffset++;
                         nextToken = Saxon.Hej.expr.parser.Token.FOLLOWS;
                         return ;
@@ -802,8 +835,6 @@ namespace Saxon.Hej.expr.parser {
                 return Saxon.Hej.expr.parser.Token.AS;
               case "before":
                 return Saxon.Hej.expr.parser.Token.BEFORE;
-              case "by":
-                return Saxon.Hej.expr.parser.Token.BY;
               case "case":
                 return Saxon.Hej.expr.parser.Token.CASE;
               case "default":
@@ -866,6 +897,12 @@ namespace Saxon.Hej.expr.parser {
                 return Saxon.Hej.expr.parser.Token.UNKNOWN;
             }
         }
+        private bool isLessThanChar(char c) {
+            return ((c == '<') || (((languageLevel>=40) && (c == FULL_WIDTH_LT))));
+        }
+        private bool isGreaterThanChar(char c) {
+            return ((c == '>') || (((languageLevel>=40) && (c == FULL_WIDTH_GT))));
+        }
         private int getFunctionType(string s) {
             switch (s) {
               case "if":
@@ -916,6 +953,14 @@ namespace Saxon.Hej.expr.parser {
                 }
                 return c;
             } else {
+                inputOffset++;
+                return NUL;
+            }
+        }
+        public char peekChar() {
+            if ((inputOffset<inputLength)) {
+                return input[inputOffset];
+            } else {
                 return NUL;
             }
         }
@@ -934,7 +979,7 @@ namespace Saxon.Hej.expr.parser {
             newlineOffsets.Add(offset);
         }
         public void unreadChar() {
-            if ((inputOffset>=inputLength)) {
+            if ((inputOffset>inputLength)) {
                 return ;
             }
             if ((input[--inputOffset] == '\n')) {
@@ -962,6 +1007,23 @@ namespace Saxon.Hej.expr.parser {
                 }
                 return Saxon.Hej.value.Whitespace.collapseWhitespace(((((offset>0) ? "..." : ""))+input.Substring(offset, end - offset)));
             }
+        }
+        public void copyTo(Saxon.Hej.expr.parser.Tokenizer u) {
+            u.currentToken = currentToken;
+            u.currentTokenValue = currentTokenValue;
+            u.precedingToken = precedingToken;
+            u.precedingTokenValue = precedingTokenValue;
+            u.nextToken = nextToken;
+            u.nextTokenValue = nextTokenValue;
+            u.inputOffset = inputOffset;
+            u.lineNumber = lineNumber;
+            u.nextLineNumber = nextLineNumber;
+            if ((newlineOffsets == null)) {
+                u.newlineOffsets = null;
+            } else {
+                u.newlineOffsets = new System.Collections.Generic.List<int>(newlineOffsets);
+            }
+            u.state = state;
         }
         public int getLineNumber() {
             return lineNumber;

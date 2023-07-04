@@ -62,9 +62,7 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             typeCheckChildren(visitor, contextInfo);
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier0 = () => {
-                return new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "dynamic function call", 0);
-            } ;
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.DYNAMIC_FUNCTION, targetFunction.getChildExpression().toShortString(), 0);
             targetFunction.setChildExpression(tc.staticTypeCheck(targetFunction.getChildExpression(), Saxon.Hej.value.SequenceType.SINGLE_FUNCTION, roleSupplier0, visitor));
             if ((getArity() == 1)) {
                 Saxon.Hej.expr.Expression target = targetFunction.getChildExpression();
@@ -143,7 +141,7 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.expr.elab.SequenceEvaluator[] argEvaluators = new Saxon.Hej.expr.elab.SequenceEvaluator[expr.getArity()];
                 for (int i = 0; (i<argEvaluators.Length); i++) {
                     Saxon.Hej.expr.Expression arg = expr.suppliedArguments.getOperand(i).getChildExpression();
-                    argEvaluators[i] = new Saxon.Hej.expr.elab.LearningEvaluator(arg, arg.makeElaborator().lazily(true));
+                    argEvaluators[i] = new Saxon.Hej.expr.elab.LearningEvaluator(arg, arg.makeElaborator().lazily(true, false));
                 }
                 Saxon.Hej.expr.Expression body = expr.targetFunction.getChildExpression();
                 Saxon.Hej.expr.elab.ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();

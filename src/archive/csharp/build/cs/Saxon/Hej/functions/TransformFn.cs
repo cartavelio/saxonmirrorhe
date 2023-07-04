@@ -413,9 +413,7 @@ namespace Saxon.Hej.functions {
         }
         private Saxon.Hej.s9api.XsltExecutable reportCompileError(Saxon.Api.SaxonApiException e, System.Collections.Generic.IList<Saxon.Hej.s9api.XmlProcessingError> compileErrors) {
             foreach (Saxon.Hej.s9api.XmlProcessingError te in compileErrors) {
-                Saxon.Hej.trans.XPathException xe = Saxon.Hej.trans.XPathException.fromXmlProcessingError(te);
-                xe.maybeSetErrorCode("FOXT0002");
-                throw xe;
+                throw Saxon.Hej.trans.XPathException.fromXmlProcessingError(te).maybeWithErrorCode("FOXT0002").replacingErrorCode("SXXP0003", "FOXT0002");
             }
             if ((e.InnerException is Saxon.Hej.trans.XPathException)) {
                 throw (Saxon.Hej.trans.XPathException)(e.InnerException);
@@ -453,7 +451,7 @@ namespace Saxon.Hej.functions {
             checkTransformOptions(options, context, languageVersion);
             bool request40 = false;
             if ((Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version") != null)) {
-                Saxon.Hej.value.BigDecimalValue requestedVersion = ((Saxon.Hej.value.BigDecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head()));
+                Saxon.Hej.value.DecimalValue requestedVersion = ((Saxon.Hej.value.DecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head()));
                 if (((requestedVersion.getDoubleValue()*10)>languageVersion)) {
                     throw new Saxon.Hej.trans.XPathException("The transform option xslt-version is higher than the language version supported by the calling transformation", "FOXT0002");
                 }

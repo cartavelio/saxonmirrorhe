@@ -6,7 +6,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public override Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.sort.DocumentSorter exp = (Saxon.Hej.expr.sort.DocumentSorter)(getExpression());
             Saxon.Hej.expr.Expression @base = exp.getBaseExpression();
-            Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(@base, contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(@base, contextInfo, reasons);
             if (((ps.getSweep() == Saxon.Eej.ee.stream.Sweep.CONSUMING) && (ps.getPosture() == Saxon.Eej.ee.stream.Posture.CRAWLING))) {
                 Saxon.Hej.pattern.Pattern p = toStreamingPattern(getConfiguration());
                 if ((p == null)) {
@@ -36,18 +36,18 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return (("Expression "+((Saxon.Hej.expr.sort.DocumentSorter)(getExpression())).getBaseExpression().toShortString())+" requires sorting nodes into document order");
         }
         public override Saxon.Hej.pattern.Pattern toStreamingPattern(Saxon.Hej.Configuration config) {
-            return /*134*/Saxon.Eej.ee.stream.Streamability.toStreamingPattern(((Saxon.Hej.expr.sort.DocumentSorter)(getExpression())).getBaseExpression(), config);
+            return Saxon.Eej.ee.stream.Streamability.toStreamingPattern(((Saxon.Hej.expr.sort.DocumentSorter)(getExpression())).getBaseExpression(), config);
         }
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.Expression @base = ((Saxon.Hej.expr.sort.DocumentSorter)(getExpression())).getBaseExpression();
             if ((@base.getExtraProperty("scanningPattern") != null)) {
-                return /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), @base).getWatchMaker(false);
+                return Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), @base).getWatchMaker(false);
             } else {
                 return null;
             }
         }
         public override Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(((Saxon.Hej.expr.sort.DocumentSorter)(getExpression())).getBaseExpression()) == Saxon.Eej.ee.stream.Posture.STRIDING)) {
+            if ((Saxon.Eej.ee.stream.Streamability.getPosture(((Saxon.Hej.expr.sort.DocumentSorter)(getExpression())).getBaseExpression()) == Saxon.Eej.ee.stream.Posture.STRIDING)) {
                 return new Saxon.Eej.ee.stream.adjunct.DocumentSorterAdjunct.MixedPostureSorter(@out, context);
             } else {
                 return new Saxon.Eej.ee.stream.adjunct.DocumentSorterAdjunct.AncestorArrangingFeed(@out, context);

@@ -32,7 +32,7 @@ namespace Saxon.Eej.ee.extfn.js {
             }
             if ((@object == null)) {
                 try {
-                    @object = /*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
+                    @object = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
                 } catch (Saxon.Hej.trans.XPathException e) {
                     compileError(e);
                 }
@@ -46,7 +46,7 @@ namespace Saxon.Eej.ee.extfn.js {
             @object = typeCheck("object", @object);
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
-            Saxon.Hej.expr.Expression e = /*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("remove-property", 2).makeFunctionCall(name, @object);
+            Saxon.Hej.expr.Expression e = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("remove-property", 2).makeFunctionCall(name, @object);
             e.setRetainedStaticContext(makeRetainedStaticContext());
             return e;
         }

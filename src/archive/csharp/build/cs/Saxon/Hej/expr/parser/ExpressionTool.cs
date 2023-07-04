@@ -6,7 +6,7 @@ namespace Saxon.Hej.expr.parser {
         private ExpressionTool()  {
         }
         public static Saxon.Hej.expr.Expression make(string expression, Saxon.Hej.expr.StaticContext env, int start, int terminator, Saxon.Hej.expr.parser.CodeInjector codeInjector) {
-            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
+            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
             if ((codeInjector != null)) {
                 parser.setCodeInjector(codeInjector);
             }
@@ -69,7 +69,7 @@ namespace Saxon.Hej.expr.parser {
             return injector.inject(exp);
         }
         public static Saxon.Hej.om.GroundedValue eagerEvaluate(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.XPathContext context) {
-            return (Saxon.Hej.om.GroundedValue)(exp.makeElaborator().eagerly().evaluate(context));
+            return exp.makeElaborator().eagerly().evaluate(context).materialize();
         }
         public static int markTailFunctionCalls(Saxon.Hej.expr.Expression exp, Saxon.Hej.om.StructuredQName qName, int arity) {
             return exp.markTailFunctionCalls(qName, arity);

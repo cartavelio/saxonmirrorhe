@@ -12,6 +12,7 @@ namespace Saxon.Hej.style {
             fans.Add("doctype-public");
             fans.Add("doctype-system");
             fans.Add("encoding");
+            fans.Add("escape-solidus");
             fans.Add("escape-uri-attributes");
             fans.Add("html-version");
             fans.Add("include-content-type");
@@ -88,6 +89,9 @@ namespace Saxon.Hej.style {
                                         string val = value;
                                         if ((!(f.Equals(Saxon.Hej.lib.SaxonOutputKeys.ITEM_SEPARATOR)) && !(f.Equals(Saxon.Hej.lib.SaxonOutputKeys.NEWLINE)))) {
                                             val = Saxon.Hej.value.Whitespace.trim(value);
+                                        }
+                                        if (f.Equals(Saxon.Hej.lib.SaxonOutputKeys.ESCAPE_SOLIDUS)) {
+                                            requireXslt40Attribute(f);
                                         }
                                         Saxon.Hej.expr.Expression exp = makeAttributeValueTemplate(val, att);
                                         Saxon.Impl.Helpers.MapUtils.Put(serializationAttributes, name, exp);

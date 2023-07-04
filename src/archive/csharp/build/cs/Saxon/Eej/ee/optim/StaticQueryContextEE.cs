@@ -44,14 +44,14 @@ namespace Saxon.Eej.ee.optim {
                 Saxon.Hej.functions.FunctionLibraryList libList = new Saxon.Hej.functions.FunctionLibraryList();
                 libList.addFunctionLibrary(new Saxon.Hej.functions.ExecutableFunctionLibrary(config));
                 executable.setFunctionLibrary(libList);
-                Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", isUpdating()));
-                if ((getCodeInjector() != null)) {
-                    qp.setCodeInjector(getCodeInjector());
-                }
                 Saxon.Hej.query.QueryLibrary topModule = new Saxon.Eej.expr.QueryLibraryImpl(this);
                 executable.setTopLevelPackage(topModule.getPackageData());
                 topModule.setExecutable(executable);
                 topModule.setIsMainModule(false);
+                Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", isUpdating(), topModule));
+                if ((getCodeInjector() != null)) {
+                    qp.setCodeInjector(getCodeInjector());
+                }
                 qp.parseLibraryModule(query, topModule);
                 topModule.bindUnboundFunctionCalls();
                 topModule.bindUnboundVariables();

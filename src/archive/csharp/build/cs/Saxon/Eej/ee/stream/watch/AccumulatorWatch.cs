@@ -70,7 +70,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 Saxon.Hej.@event.SequenceCollector so = new Saxon.Hej.@event.SequenceCollector(getPipelineConfiguration());
                 Saxon.Hej.@event.ComplexContentOutputter cco = new Saxon.Hej.@event.ComplexContentOutputter(so);
                 Saxon.Eej.ee.stream.feed.ItemFeed feed = new Saxon.Eej.ee.stream.feed.DecomposingFeed(cco, context);
-                Saxon.Eej.ee.stream.watch.Watch snapshotWatch = /*134*/Saxon.Eej.ee.stream.feed.SnapshotFeed.getWatch(feed, Saxon.Hej.pattern.AnchorPattern.getInstance(), watchManager, context);
+                Saxon.Eej.ee.stream.watch.Watch snapshotWatch = Saxon.Eej.ee.stream.feed.SnapshotFeed.getWatch(feed, Saxon.Hej.pattern.AnchorPattern.getInstance(), watchManager, context);
                 watchManager.addWatch(snapshotWatch, true);
                 captureStack.Push(cco);
             }

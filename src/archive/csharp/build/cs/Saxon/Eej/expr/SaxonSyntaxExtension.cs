@@ -30,44 +30,6 @@ namespace Saxon.Eej.expr {
                 }
             }
         }
-        protected internal override Saxon.Hej.expr.Expression parseForMemberExpression(Saxon.Hej.expr.parser.XPathParser p) {
-            Saxon.Hej.expr.parser.Tokenizer t = p.getTokenizer();
-            p.checkSyntaxExtensions("'for member'");
-            int clauses = 0;
-            int @operator = t.currentToken;
-            Saxon.Hej.expr.ForMemberExpression first = null;
-            Saxon.Hej.expr.ForMemberExpression previous = null;
-            do {
-                int offset = t.currentTokenStartOffset;
-                p.nextToken();
-                p.expect(Saxon.Hej.expr.parser.Token.DOLLAR);
-                p.nextToken();
-                p.expect(Saxon.Hej.expr.parser.Token.NAME);
-                string var = t.currentTokenValue;
-                clauses++;
-                Saxon.Hej.expr.ForMemberExpression v = new Saxon.Hej.expr.ForMemberExpression();
-                p.setLocation(v, offset);
-                v.setVariableQName(p.makeStructuredQName(var, Saxon.Hej.om.NamespaceUri.NULL));
-                p.nextToken();
-                p.expect(Saxon.Hej.expr.parser.Token.IN);
-                p.nextToken();
-                v.setSequence(p.parseExprSingle());
-                p.declareRangeVariable(v);
-                if ((previous != null)) {
-                    previous.setAction(v);
-                } else {
-                    first = v;
-                }
-                previous = v;
-            } while ((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA));
-            p.expect(Saxon.Hej.expr.parser.Token.RETURN);
-            p.nextToken();
-            previous.setAction(p.parseExprSingle());
-            for (int i = 0; (i<clauses); i++) {
-                p.undeclareRangeVariable();
-            }
-            return p.makeTracer(first, first.getVariableQName());
-        }
     
     }
 }

@@ -6,7 +6,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         private readonly Saxon.Eej.ee.schema.SchemaCompiler compiler;
         private int depthOfHole = 0;
         private bool emptySchemaElement = false;
-        private readonly Saxon.Hej.value.BigDecimalValue thisVersion;
+        private readonly Saxon.Hej.value.DecimalValue thisVersion;
         private readonly bool isXSD11;
         private bool foundErrors;
         public VersionControlFilter(Saxon.Eej.ee.schema.SchemaCompiler compiler, Saxon.Hej.@event.Receiver next) : base (next) {
@@ -34,7 +34,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                             switch (localName) {
                               case "minVersion":
                                 {
-                                    Saxon.Hej.value.BigDecimalValue dv = parseDecimalValue(att.getValue());
+                                    Saxon.Hej.value.DecimalValue dv = parseDecimalValue(att.getValue());
                                     if ((thisVersion.compareTo(dv)<0)) {
                                         ignore = true;
                                         doneAttributes = true;
@@ -43,7 +43,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                                 }
                               case "maxVersion":
                                 {
-                                    Saxon.Hej.value.BigDecimalValue dv = parseDecimalValue(att.getValue());
+                                    Saxon.Hej.value.DecimalValue dv = parseDecimalValue(att.getValue());
                                     if ((thisVersion.compareTo(dv)>=0)) {
                                         ignore = true;
                                         doneAttributes = true;
@@ -141,8 +141,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 throw new Saxon.Hej.trans.XPathException("One or more errors were found in the content of schema versioning attributes");
             }
         }
-        private Saxon.Hej.value.BigDecimalValue parseDecimalValue(string value) {
-            return (Saxon.Hej.value.BigDecimalValue)(Saxon.Hej.value.BigDecimalValue.makeDecimalValue(value, true).asAtomic());
+        private Saxon.Hej.value.DecimalValue parseDecimalValue(string value) {
+            return (Saxon.Hej.value.DecimalValue)(Saxon.Hej.value.BigDecimalValue.makeDecimalValue(value, true).asAtomic());
         }
         private System.Collections.Generic.ISet<Saxon.Hej.om.StructuredQName> parseListOfQNames(string value, Saxon.Hej.om.NamespaceResolver resolver) {
             System.Collections.Generic.ISet<Saxon.Hej.om.StructuredQName> result = new System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName>(4);
@@ -156,7 +156,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         private bool isKnownFacetName(Saxon.Hej.om.StructuredQName name) {
             string localName = name.getLocalPart();
-            return (((name.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA) && /*134*/Saxon.Eej.ee.schema.Facet.isFacetName(localName, (isXSD11 ? Saxon.Hej.Configuration.XSD11 : Saxon.Hej.Configuration.XSD10)))) || ((name.hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && localName.Equals("preprocess"))));
+            return (((name.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA) && Saxon.Eej.ee.schema.Facet.isFacetName(localName, (isXSD11 ? Saxon.Hej.Configuration.XSD11 : Saxon.Hej.Configuration.XSD10)))) || ((name.hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && localName.Equals("preprocess"))));
         }
         private bool isAutomaticallyKnownTypeName(Saxon.Hej.om.StructuredQName name) {
             int fp = Saxon.Hej.om.StandardNames.getFingerprint(name.getNamespaceUri(), name.getLocalPart());

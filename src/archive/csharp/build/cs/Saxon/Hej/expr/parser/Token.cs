@@ -23,7 +23,9 @@ namespace Saxon.Hej.expr.parser {
             tokens[PLUS] = "+";
             tokens[MINUS] = "-";
             tokens[MULT] = "*";
+            tokens[MATH_MULT] = "×";
             tokens[DIV] = "div";
+            tokens[MATH_DIVIDE] = "÷";
             tokens[MOD] = "mod";
             tokens[IS] = "is";
             tokens[DOLLAR] = "$";
@@ -74,10 +76,10 @@ namespace Saxon.Hej.expr.parser {
             tokens[AS] = "as";
             tokens[COLON] = ":";
             tokens[FAT_ARROW] = "=>";
+            tokens[MAPPING_ARROW] = "=!>";
             tokens[THIN_ARROW] = "->";
             tokens[AND_ALSO] = "andAlso";
             tokens[OR_ELSE] = "orElse";
-            tokens[BY] = "by";
             tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
             tokens[STRING_LITERAL_BACKTICKED] = "``[<string>]``";
             tokens[BACKTICK] = "`";
@@ -233,8 +235,10 @@ namespace Saxon.Hej.expr.parser {
         public const int OTHERWISE = 79;
         public const int AND_ALSO = 80;
         public const int OR_ELSE = 81;
-        public const int BY = 82;
         public const int THIN_ARROW = 83;
+        public const int MATH_MULT = 84;
+        public const int MATH_DIVIDE = 85;
+        public const int MAPPING_ARROW = 86;
         public const int XQUERY_VERSION = 88;
         public const int XQUERY_ENCODING = 89;
         public const int DECLARE_NAMESPACE = 90;

@@ -430,8 +430,8 @@ namespace Saxon.Hej.functions {
                             formatInteger(value, sb);
                         }
                     } else {
-                        if ((value is Saxon.Hej.value.BigDecimalValue)) {
-                            formatDecimal(((Saxon.Hej.value.BigDecimalValue)(value)).getDecimalValue(), sb);
+                        if ((value is Saxon.Hej.value.DecimalValue)) {
+                            formatDecimal(((Saxon.Hej.value.DecimalValue)(value)).getDecimalValue(), sb);
                         }
                     }
                 }

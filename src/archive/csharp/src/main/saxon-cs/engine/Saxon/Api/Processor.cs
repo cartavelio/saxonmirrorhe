@@ -622,15 +622,21 @@ namespace Saxon.Api {
         /// <summary>
         /// Construct an XdmSequenceType object by parsing a sequence type definition in XPath syntax
         /// </summary>
+        /// <remarks>
+        /// Experimental XPath 4.0 syntax is accepted provided that the configuration feature XQUERY_VERSION
+        /// is set to "4.0"
+        /// </remarks>
         /// <param name="input">The input string, in XPath syntax (for example <c>array(xs:integer)*</c>). The only
         /// namespace prefix recognized is "xs", representing the XML Schema namespace.</param>
         /// <exception cref="SaxonApiException">If the syntax of the input is invalid, or if there are references
         /// to undeclared schema types</exception>
         public XdmSequenceType ParseSequenceType(string input) {
             try {
-                XPathParser parser = new ();
-                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
-                SequenceType st = parser.parseSequenceType(input, new IndependentContext(Implementation));
+                IndependentContext independentContext = new IndependentContext(Implementation);
+                XPathParser parser = new (independentContext);
+                int version = (string)GetProperty(Feature.XQUERY_VERSION) == "4.0" ? 40 : 31;
+                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, version);
+                SequenceType st = parser.parseSequenceType(input, independentContext);
                 return XdmSequenceType.FromSequenceType(st);
             }
             catch (XPathException e) {
@@ -640,17 +646,23 @@ namespace Saxon.Api {
         /// <summary>
         /// Construct an <c>XdmItemType</c> object by parsing an item type definition in XPath syntax
         /// </summary>
+        /// <remarks>
+        /// Experimental XPath 4.0 syntax is accepted provided that the configuration feature XQUERY_VERSION
+        /// is set to "4.0"
+        /// </remarks>
         /// <param name="input">The input string, in XPath syntax (for example <c>array(xs:integer)</c>). The only
         /// namespace prefix recognized is "xs", representing the XML Schema namespace.</param>
         /// <exception cref="SaxonApiException">If the syntax of the input is invalid, or if there are references
         /// to undeclared schema types</exception>
         public XdmItemType ParseItemType(string input) {
             try {
-                XPathParser parser = new ();
                 IndependentContext env = new IndependentContext(Implementation);
-                env.setXPathLanguageLevel(40);
+                XPathParser parser = new (env);
+                int version = (string)GetProperty(Feature.XQUERY_VERSION) == "4.0" ? 40 : 31;
+                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, version);
+                env.setXPathLanguageLevel(version);
                 env.declareNamespace("xs", NamespaceUri.SCHEMA);
-                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 40);
+                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, version);
                 SequenceType st = parser.parseSequenceType(input, env);
                 if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
                     throw new XPathException("Item type must not have an occurrence indicator", "XPST0003");

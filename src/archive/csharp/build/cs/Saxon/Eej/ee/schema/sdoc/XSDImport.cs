@@ -35,7 +35,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             if (targetNamespace.Equals(Saxon.Hej.om.NamespaceUri.XML)) {
                 if ((((schemaLocation == null) || schemaLocation.Equals("http://www.w3.org/2001/xml.xsd")) || schemaLocation.Equals("http://www.w3.org/2001/03/xml.xsd"))) {
                     if ((config.getNamespaceStatus(targetNamespace) != Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN)) {
-                        importedSchema = /*134*/Saxon.Eej.ee.schema.sdoc.XMLNamespaceSchema.buildSchema(config);
+                        importedSchema = Saxon.Eej.ee.schema.sdoc.XMLNamespaceSchema.buildSchema(config);
                         config.addSchema(importedSchema);
                     }
                     return ;
@@ -48,7 +48,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Ejavax.xml.transform.Source source = null;
             if ((schemaLocation != null)) {
                 try {
-                    source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, targetNamespace);
+                    source = Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, targetNamespace);
                 } catch (Saxon.Hej.type.SchemaException e) {
                     processSchemaException(schemaLocation, @namespace, e);
                     return ;
@@ -94,7 +94,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             if ((schemaLocation == null)) {
                 if (@namespace.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)) {
-                    importedSchema = /*134*/Saxon.Eej.ee.schema.sdoc.XSINamespaceSchema.buildSchema(config);
+                    importedSchema = Saxon.Eej.ee.schema.sdoc.XSINamespaceSchema.buildSchema(config);
                     config.addSchema(importedSchema);
                     return ;
                 } else {
@@ -134,7 +134,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             int errors;
             try {
                 Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                importee = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, null);
+                importee = Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, null);
                 Saxon.Eej.ee.schema.sdoc.XSDSchema s = importee.getXSDSchema();
                 errors = importee.getXSDSchema().getErrorCount();
                 importedSchema = s.getSchema();
@@ -160,7 +160,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         private void processSchemaException(string schemaLocation, string @namespace, Saxon.Hej.type.SchemaException e) {
             System.Exception cause = e.getException();
-            if (/*134*/Saxon.Eej.ee.schema.sdoc.XSDInclude.isFileNotFoundException(cause)) {
+            if (Saxon.Eej.ee.schema.sdoc.XSDInclude.isFileNotFoundException(cause)) {
                 warning((((((("Imported schema document "+schemaLocation)+" cannot be located: ")+cause.GetType().Name)+" (")+cause.Message)+")"));
             } else {
                 error(("Failed to process imported schema document: "+e.Message));

@@ -23,7 +23,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Eej.ee.schema.SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
             Saxon.Ejavax.xml.transform.Source source = null;
             try {
-                source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, null);
+                source = Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, null);
             } catch (Saxon.Hej.type.SchemaException e) {
                 handleSchemaException(schemaLocation, e);
             }
@@ -41,7 +41,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     return ;
                 }
                 try {
-                    Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, this);
+                    Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDoc = Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, this);
                     Saxon.Eej.ee.schema.sdoc.XSDSchema redefined = schemaDoc.getXSDSchema();
                     externalSchema = redefined.getSchema();
                     externalSchemaDocumentURI = redefined.getSystemId();
@@ -52,7 +52,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         private void handleSchemaException(string schemaLocation, Saxon.Hej.type.SchemaException e) {
             System.Exception cause = e.getException();
-            if (/*134*/Saxon.Eej.ee.schema.sdoc.XSDInclude.isFileNotFoundException(cause)) {
+            if (Saxon.Eej.ee.schema.sdoc.XSDInclude.isFileNotFoundException(cause)) {
                 warning(("Failed to locate redefined schema document "+schemaLocation));
                 externalSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), Saxon.Hej.om.NamespaceUri.NULL);
             } else {

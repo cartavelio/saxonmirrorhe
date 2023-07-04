@@ -76,7 +76,7 @@ namespace Saxon.Eej.ee.schema {
         public override int getElementParticleCardinality(int elementName) {
             Saxon.Eej.config.EnterpriseConfiguration config = getConfiguration();
             if (wildcard.matches(elementName, true, config, null)) {
-                return /*134*/Saxon.Eej.ee.schema.Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
+                return Saxon.Eej.ee.schema.Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
             }
             return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO;
         }

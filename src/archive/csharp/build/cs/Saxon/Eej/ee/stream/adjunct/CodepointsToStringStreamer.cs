@@ -9,7 +9,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     
         private class Inner_ItemFeed_1 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly CodepointsToStringStreamer outerInstance;
-            public Inner_ItemFeed_1(CodepointsToStringStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_ItemFeed_1(CodepointsToStringStreamer outerInstance, Saxon.Hej.expr.Expression arg1, Saxon.Eej.ee.stream.feed.ItemFeed arg2, Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
                 buffer = new Saxon.Ejava.lang.StringBuilder(64);
                 checker = /*superMethod*/getConfiguration().getValidCharacterChecker();

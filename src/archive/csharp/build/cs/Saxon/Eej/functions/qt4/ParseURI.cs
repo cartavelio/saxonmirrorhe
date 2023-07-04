@@ -3,17 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.functions.qt4 {
     public class ParseURI : Saxon.Eej.functions.qt4.URIFunctions {
-        public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
-            Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[2];
-            newArgs[0] = arguments[0];
-            if (((arguments.Length<2) || (arguments[1] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
-                newArgs[1] = Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.ma.map.DictionaryMap());
-            } else {
-                newArgs[1] = arguments[1];
-            }
-            setArity(2);
-            return base.makeFunctionCall(newArgs);
-        }
         public override Saxon.Hej.ma.map.MapItem call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             string uristr = arguments[0].head().getStringValue();
             Saxon.Hej.ma.map.MapItem map = new Saxon.Impl.DataModel.ImmMap();
@@ -34,10 +23,13 @@ namespace Saxon.Eej.functions.qt4 {
             } else {
                 query = null;
             }
+            string filepath = null;
             string scheme;
-            if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^[A-Za-z]:.*$")) {
+            if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^[A-Za-z][:|].*$")) {
                 scheme = "file";
+                uristr = ((uristr[0]+":")+uristr.Substring(2));
                 map = map.addEntry(SCHEME, new Saxon.Hej.value.StringValue(scheme));
+                filepath = uristr;
                 uristr = ("/"+uristr);
             } else {
                 if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^[A-Za-z]+:.*$")) {
@@ -46,7 +38,13 @@ namespace Saxon.Eej.functions.qt4 {
                     map = map.addEntry(SCHEME, new Saxon.Hej.value.StringValue(scheme));
                     uristr = uristr.Substring((pos+1));
                 } else {
-                    scheme = null;
+                    if ((uncPath && System.Text.RegularExpressions.Regex.IsMatch(uristr, "^//[^/].*$"))) {
+                        scheme = "file";
+                        map = map.addEntry(SCHEME, new Saxon.Hej.value.StringValue(scheme));
+                        filepath = uristr;
+                    } else {
+                        scheme = null;
+                    }
                 }
             }
             if (((scheme != null) && hierarchicalSchemes.Contains(scheme))) {
@@ -64,9 +62,10 @@ namespace Saxon.Eej.functions.qt4 {
                 }
             }
             string authority;
-            if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^//*[a-zA-Z]:.*$")) {
+            if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^//*[a-zA-Z][:|].*$")) {
                 authority = null;
-                uristr = System.Text.RegularExpressions.Regex.Replace(uristr, "^/+", "/");
+                uristr = System.Text.RegularExpressions.Regex.Replace(uristr, "^/+([a-zA-Z]).", "/$1:");
+                filepath = uristr.Substring(1);
             } else {
                 Saxon.Ejava.util.regex.Pattern pattern = Saxon.Ejava.util.regex.Pattern.compile("^(///*)([^/]+)(/.*)?$");
                 Saxon.Ejava.util.regex.Matcher matcher = pattern.matcher(uristr);
@@ -128,6 +127,9 @@ namespace Saxon.Eej.functions.qt4 {
                 map = map.addEntry(PORT, new Saxon.Hej.value.StringValue(port));
             }
             if (!("".Equals(uristr))) {
+                if (((filepath == null) && (((scheme == null) || "file".Equals(scheme))))) {
+                    filepath = uristr;
+                }
                 map = map.addEntry(PATH, new Saxon.Hej.value.StringValue(uristr));
                 System.Collections.Generic.List<Saxon.Hej.om.GroundedValue> pathSegments = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
                 pos = uristr.IndexOf(pathSeparator);
@@ -142,6 +144,10 @@ namespace Saxon.Eej.functions.qt4 {
                 }
                 pathSegments.Add(new Saxon.Hej.value.StringValue(decodeString(uristr)));
                 map = map.addEntry(PATH_SEGMENTS, new Saxon.Hej.ma.arrays.SimpleArrayItem(pathSegments));
+            }
+            if ((filepath != null)) {
+                filepath = decodeString(filepath);
+                map = map.addEntry(FILEPATH, new Saxon.Hej.value.StringValue(filepath));
             }
             if ((query != null)) {
                 System.Collections.Generic.List<Saxon.Hej.om.GroundedValue> querySegments = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();

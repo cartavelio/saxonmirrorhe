@@ -14,9 +14,9 @@ namespace Saxon.Hej.expr.parser {
             Saxon.Hej.Configuration config = env.getConfiguration();
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
             Saxon.Hej.expr.parser.ContextItemStaticInfo defaultContextInfo = config.getDefaultContextItemStaticInfo();
+            bool allow40 = (env.getXPathVersion()>=40);
             Saxon.Hej.type.ItemType reqItemType = req.getPrimaryType();
             int reqCard = req.getCardinality();
-            bool allowsMany = Saxon.Hej.value.Cardinality.allowsMany(reqCard);
             Saxon.Hej.type.ItemType suppliedItemType = null;
             int suppliedCard = -1;
             bool cardOK = (reqCard == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
@@ -41,7 +41,7 @@ namespace Saxon.Hej.expr.parser {
                     if ((!(suppliedItemType.isPlainType()) && !(((suppliedCard == Saxon.Hej.expr.StaticProperty.EMPTY))))) {
                         if (!(suppliedItemType.isAtomizable(th))) {
                             string shortItemType;
-                            if ((suppliedItemType is Saxon.Hej.ma.map.TupleType)) {
+                            if ((suppliedItemType is Saxon.Hej.ma.map.RecordType)) {
                                 shortItemType = "a tuple type";
                             } else {
                                 if ((suppliedItemType is Saxon.Hej.ma.map.MapType)) {
@@ -194,7 +194,7 @@ namespace Saxon.Hej.expr.parser {
                                 exp = new Saxon.Hej.expr.ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
                                 suppliedItemType = th.getGenericFunctionItemType();
                             }
-                            exp = makeFunctionSequenceCoercer(exp, (Saxon.Hej.type.FunctionItemType)(reqItemType), roleSupplier);
+                            exp = makeFunctionSequenceCoercer(exp, (Saxon.Hej.type.FunctionItemType)(reqItemType), roleSupplier, allow40);
                             itemTypeOK = true;
                         }
                     } else {
@@ -285,8 +285,8 @@ namespace Saxon.Hej.expr.parser {
         public virtual Saxon.Hej.expr.Expression processValueOf(Saxon.Hej.expr.Expression select, Saxon.Hej.Configuration config) {
             return select;
         }
-        private static Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.type.FunctionItemType reqItemType, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
-            return reqItemType.makeFunctionSequenceCoercer(exp, role);
+        private static Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.type.FunctionItemType reqItemType, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role, bool allow40) {
+            return reqItemType.makeFunctionSequenceCoercer(exp, role, allow40);
         }
         private Saxon.Hej.expr.Expression makeDownCaster(Saxon.Hej.expr.Expression exp, Saxon.Hej.type.AtomicType reqItemType, Saxon.Hej.Configuration config) {
             return Saxon.Hej.expr.AtomicSequenceConverter.makeDownCaster(exp, reqItemType, config);

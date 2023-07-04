@@ -127,7 +127,7 @@ namespace Saxon.Eej.ee.schema {
             }
         }
         public override bool fixup(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
-            /*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false);
+            Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false);
             setValidationStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.VALIDATED);
             return true;
         }

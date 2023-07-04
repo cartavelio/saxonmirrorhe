@@ -59,7 +59,7 @@ namespace Saxon.Hej.str {
             writer.Write(chars, (this.start+requireInt(start)), requireInt(len));
         }
         public override long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
-            for (int i = (requireInt(from)+start); (i<end); i++) {
+            for (int i = (requireNonNegativeInt(from)+start); (i<end); i++) {
                 if (predicate(chars[i])) {
                     return (i-start);
                 }

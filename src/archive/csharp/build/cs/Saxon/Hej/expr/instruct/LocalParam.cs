@@ -233,7 +233,7 @@ namespace Saxon.Hej.expr.instruct {
                         selectEvaluator = new Saxon.Hej.expr.elab.IndexedVariableEvaluator(pullEval);
                     } else {
                         Saxon.Hej.expr.Expression select = expr.getSelectExpression();
-                        selectEvaluator = new Saxon.Hej.expr.elab.LearningEvaluator(select, select.makeElaborator().lazily(true));
+                        selectEvaluator = new Saxon.Hej.expr.elab.LearningEvaluator(select, select.makeElaborator().lazily(true, false));
                     }
                 }
                 Saxon.Hej.expr.elab.SequenceEvaluator conversionEval = (((expr.getConversion() == null)) ? null : expr.getConversion().makeElaborator().eagerly());

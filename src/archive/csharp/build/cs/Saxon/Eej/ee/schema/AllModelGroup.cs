@@ -295,7 +295,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                     Saxon.Eej.ee.schema.ElementParticle baseParticle = baseParticleArray[counterIndex];
                     Saxon.Eej.ee.schema.ElementDecl baseElement = baseParticle.getDeclaration();
-                    string err = /*134*/Saxon.Eej.ee.schema.UserComplexType.elementParticleMatches(baseElement, derivedElement.getDeclaration(), compiler);
+                    string err = Saxon.Eej.ee.schema.UserComplexType.elementParticleMatches(baseElement, derivedElement.getDeclaration(), compiler);
                     if ((err != null)) {
                         return err;
                     }
@@ -320,7 +320,7 @@ namespace Saxon.Eej.ee.schema {
                                     if ((union == null)) {
                                         union = v;
                                     } else {
-                                        union = /*134*/Saxon.Eej.ee.schema.Wildcard.makeUnion(union, v, compiler.getNamePool());
+                                        union = Saxon.Eej.ee.schema.Wildcard.makeUnion(union, v, compiler.getNamePool());
                                     }
                                     if (union.isInexpressible()) {
                                         return "The union of the wildcards in the base type that match a wildcard in the derived type is inexpressible";

@@ -86,7 +86,7 @@ namespace Saxon.Eej.ee.validate {
                         System.Collections.Generic.IList<Saxon.Hej.type.ValidationFailure> failures = new System.Collections.Generic.List<Saxon.Hej.type.ValidationFailure>(1);
                         if ((xsiType != null)) {
                             if (((initialReceiver is Saxon.Eej.ee.validate.EmptyContentValidator) || (initialReceiver is Saxon.Eej.ee.validate.LaxValidator))) {
-                                initial = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidatorForType(null, xsiType, pipe, outputReceiver, failures);
+                                initial = Saxon.Eej.ee.validate.ContentValidator.makeValidatorForType(null, xsiType, pipe, outputReceiver, failures);
                             } else {
                                 if ((initialReceiver is Saxon.Eej.ee.validate.SimpleContentValidator)) {
                                     Saxon.Hej.type.SchemaType type = ((Saxon.Eej.ee.validate.SimpleContentValidator)(initialReceiver)).getSchemaType();
@@ -109,7 +109,7 @@ namespace Saxon.Eej.ee.validate {
                                         initial = (Saxon.Eej.ee.validate.ContentValidator)(getNextReceiver());
                                     } else {
                                         Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(getConfiguration().getElementDeclaration(fp));
-                                        initial = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location, getValidationContext(), xsiType, initialValidationMode, pipe, outputReceiver, failures);
+                                        initial = Saxon.Eej.ee.validate.ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location, getValidationContext(), xsiType, initialValidationMode, pipe, outputReceiver, failures);
                                     }
                                 }
                             }
@@ -118,10 +118,10 @@ namespace Saxon.Eej.ee.validate {
                                 initial = (Saxon.Eej.ee.validate.ContentValidator)(getNextReceiver());
                             } else {
                                 if ((initialType != null)) {
-                                    initial = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidatorForType(null, initialType, pipe, outputReceiver, failures);
+                                    initial = Saxon.Eej.ee.validate.ContentValidator.makeValidatorForType(null, initialType, pipe, outputReceiver, failures);
                                 } else {
                                     Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(getConfiguration().getElementDeclaration(fp));
-                                    initial = /*134*/Saxon.Eej.ee.validate.ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location, getValidationContext(), null, initialValidationMode, pipe, outputReceiver, failures);
+                                    initial = Saxon.Eej.ee.validate.ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location, getValidationContext(), null, initialValidationMode, pipe, outputReceiver, failures);
                                     if ((((decl != null) && !(decl.isNillable())) && (attributes.get(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE, "nil") != null))) {
                                         string message = "The element is not nillable, so xsi:nil must not be present";
                                         Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure(message);
@@ -248,7 +248,7 @@ namespace Saxon.Eej.ee.validate {
                         Saxon.Hej.Controller controller = getValidationContext().getController();
                         Saxon.Hej.expr.XPathContext context = controller.newXPathContext();
                         context.setCurrentIterator(new Saxon.Hej.tree.iter.ManualIterator(watchManager.getCurrentNode()));
-                        Saxon.Eej.ee.stream.Inversion inversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(a.getCondition().getInternalExpression(), false);
+                        Saxon.Eej.ee.stream.Inversion inversion = Saxon.Eej.ee.stream.Inversion.invertExpression(a.getCondition().getInternalExpression(), false);
                         Saxon.Eej.ee.stream.feed.ItemFeed assertionResultHandler = new Saxon.Eej.ee.validate.ValidationStack.AssertionResultHandler(this, a, elemName, context);
                         assertionResultHandler.setPipelineConfiguration(pipe);
                         Saxon.Eej.ee.stream.feed.ItemFeed booleanCapture = new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(watchManager, null, assertionResultHandler, context);

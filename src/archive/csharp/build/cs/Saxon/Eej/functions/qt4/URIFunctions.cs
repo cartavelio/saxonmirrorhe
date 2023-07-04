@@ -18,12 +18,14 @@ namespace Saxon.Eej.functions.qt4 {
         protected internal static readonly Saxon.Hej.value.AtomicValue QUERY_SEPARATOR = new Saxon.Hej.value.StringValue("query-separator");
         protected internal static readonly Saxon.Hej.value.AtomicValue ALLOW_DEPRECATED_FEATURES = new Saxon.Hej.value.StringValue("allow-deprecated-features");
         protected internal static readonly Saxon.Hej.value.AtomicValue OMIT_DEFAULT_PORTS = new Saxon.Hej.value.StringValue("omit-default-ports");
+        protected internal static readonly Saxon.Hej.value.AtomicValue UNC_PATH = new Saxon.Hej.value.StringValue("unc-path");
         protected internal static readonly Saxon.Hej.value.AtomicValue SCHEME = new Saxon.Hej.value.StringValue("scheme");
         protected internal static readonly Saxon.Hej.value.AtomicValue AUTHORITY = new Saxon.Hej.value.StringValue("authority");
         protected internal static readonly Saxon.Hej.value.AtomicValue USERINFO = new Saxon.Hej.value.StringValue("userinfo");
         protected internal static readonly Saxon.Hej.value.AtomicValue HOST = new Saxon.Hej.value.StringValue("host");
         protected internal static readonly Saxon.Hej.value.AtomicValue PORT = new Saxon.Hej.value.StringValue("port");
         protected internal static readonly Saxon.Hej.value.AtomicValue PATH = new Saxon.Hej.value.StringValue("path");
+        protected internal static readonly Saxon.Hej.value.AtomicValue FILEPATH = new Saxon.Hej.value.StringValue("filepath");
         protected internal static readonly Saxon.Hej.value.AtomicValue PATH_SEGMENTS = new Saxon.Hej.value.StringValue("path-segments");
         protected internal static readonly Saxon.Hej.value.AtomicValue QUERY_SEGMENTS = new Saxon.Hej.value.StringValue("query-segments");
         protected internal static readonly Saxon.Hej.value.AtomicValue QUERY = new Saxon.Hej.value.StringValue("query");
@@ -36,6 +38,18 @@ namespace Saxon.Eej.functions.qt4 {
         protected internal bool allowDeprecatedFeatures = false;
         protected internal bool omitDefaultPorts = false;
         protected internal bool hierarchical = true;
+        protected internal bool uncPath = false;
+        public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
+            Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[2];
+            newArgs[0] = arguments[0];
+            if (((arguments.Length<2) || (arguments[1] is Saxon.Hej.expr.DefaultedArgumentExpression))) {
+                newArgs[1] = Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.ma.map.DictionaryMap());
+            } else {
+                newArgs[1] = arguments[1];
+            }
+            setArity(2);
+            return base.makeFunctionCall(newArgs);
+        }
         protected internal void checkOptions(Saxon.Hej.om.Sequence[] arguments) {
             if ((getArity() == 2)) {
                 Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
@@ -47,6 +61,7 @@ namespace Saxon.Eej.functions.qt4 {
                 }
                 allowDeprecatedFeatures = ((options.get(ALLOW_DEPRECATED_FEATURES) != null) && options.get(ALLOW_DEPRECATED_FEATURES).effectiveBooleanValue());
                 omitDefaultPorts = ((options.get(OMIT_DEFAULT_PORTS) != null) && options.get(OMIT_DEFAULT_PORTS).effectiveBooleanValue());
+                uncPath = ((options.get(UNC_PATH) != null) && options.get(UNC_PATH).effectiveBooleanValue());
             }
         }
         protected internal string encodePathSegment(Saxon.Hej.om.GroundedValue value) {

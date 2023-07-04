@@ -547,7 +547,7 @@ namespace Saxon.Hej.type {
             return (((this == DURATION) || (this == DAY_TIME_DURATION)) || (this == YEAR_MONTH_DURATION));
         }
         public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
-            return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
+            return Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     
         /* Expanding default method getGenre from interface AtomicType */

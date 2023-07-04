@@ -25,6 +25,7 @@ namespace Saxon.Hej {
         private bool closeTraceDestination = false;
         private bool allowExit = true;
         protected internal string languageVersion = "3.1";
+        protected internal string nsOption;
         protected internal Saxon.Hej.Configuration getConfiguration() {
             return config;
         }
@@ -43,6 +44,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("init", Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME, "User-supplied code to initialize the Saxon configuration");
             options.addRecognizedOption("json", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Source file for primary JSON input");
             options.addRecognizedOption("l", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Maintain line numbers for source documents");
+            options.addRecognizedOption("ns", (Saxon.Hej.trans.CommandLineOptions.TYPE_STRING|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Default namespace for element names (URI, or ##any, or ##html5)");
             options.addRecognizedOption("now", (Saxon.Hej.trans.CommandLineOptions.TYPE_DATETIME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Run with specified current date/time");
             options.addRecognizedOption("o", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Use specified file for primary output");
             options.addRecognizedOption("opt", (Saxon.Hej.trans.CommandLineOptions.TYPE_STRING|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Enable/disable optimization options [-]cfgklmnsvwx");
@@ -136,6 +138,18 @@ namespace Saxon.Hej {
                         quit("Installed license does not allow schema-aware query", 2);
                     } else {
                         quit("Schema-aware query requires Saxon Enterprise Edition", 2);
+                    }
+                }
+                if ((nsOption != null)) {
+                    if (nsOption.Equals("##any")) {
+                        compiler.setUnprefixedElementMatchingPolicy(Saxon.Api.UnprefixedElementMatchingPolicy.AnyNamespace);
+                    } else {
+                        if (nsOption.Equals("##html5")) {
+                            compiler.declareNamespace("", Saxon.Hej.lib.NamespaceConstant.XHTML);
+                            compiler.setUnprefixedElementMatchingPolicy(Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespaceOrNone);
+                        } else {
+                            compiler.declareNamespace("", nsOption);
+                        }
                     }
                 }
                 if (explaining) {
@@ -312,6 +326,7 @@ namespace Saxon.Hej {
             moduleURIResolverClass = options.getOptionValue("mr");
             outputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("o"));
             streaming = "on".Equals(options.getOptionValue("stream"));
+            nsOption = options.getOptionValue("ns");
             string value = options.getOptionValue("p");
             if ("on".Equals(value)) {
                 config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.RECOGNIZE_URI_QUERY_PARAMETERS, true);

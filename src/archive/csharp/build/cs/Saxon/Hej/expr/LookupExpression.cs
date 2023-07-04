@@ -62,7 +62,7 @@ namespace Saxon.Hej.expr {
             getLhs().typeCheck(visitor, contextInfo);
             Saxon.Hej.type.ItemType containerType = getLhsExpression().getItemType();
             isArrayLookup = (containerType is Saxon.Hej.ma.arrays.ArrayItemType);
-            bool isTupleLookup = ((containerType is Saxon.Hej.ma.map.TupleType) || (originalType is Saxon.Hej.ma.map.TupleType));
+            bool isTupleLookup = ((containerType is Saxon.Hej.ma.map.RecordType) || (originalType is Saxon.Hej.ma.map.RecordType));
             isMapLookup = ((containerType is Saxon.Hej.ma.map.MapType) || isTupleLookup);
             isSingleContainer = (getLhsExpression().getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
             if ((!(isArrayLookup) && !(isMapLookup))) {
@@ -84,7 +84,7 @@ namespace Saxon.Hej.expr {
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role, visitor));
             isSingleEntry = (getRhsExpression().getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
             if ((isTupleLookup && (getRhsExpression() is Saxon.Hej.expr.StringLiteral))) {
-                Saxon.Hej.ma.map.TupleType tt = (Saxon.Hej.ma.map.TupleType)((((containerType is Saxon.Hej.ma.map.TupleType) ? containerType : originalType)));
+                Saxon.Hej.ma.map.RecordType tt = (Saxon.Hej.ma.map.RecordType)((((containerType is Saxon.Hej.ma.map.RecordType) ? containerType : originalType)));
                 if (!(tt.isExtensible())) {
                     string fieldName = ((Saxon.Hej.expr.StringLiteral)(getRhsExpression())).stringify();
                     if ((tt.getFieldType(fieldName) == null)) {

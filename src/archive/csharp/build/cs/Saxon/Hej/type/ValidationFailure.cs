@@ -23,6 +23,10 @@ namespace Saxon.Hej.type {
             this.message = message;
             setErrorCode("FORG0001");
         }
+        public ValidationFailure(string message, string errorCode)  {
+            this.message = message;
+            setErrorCode(errorCode);
+        }
         public static Saxon.Hej.type.ValidationFailure fromException(System.Exception exception) {
             if ((exception is Saxon.Hej.type.ValidationException)) {
                 return ((Saxon.Hej.type.ValidationException)(exception)).getValidationFailure();

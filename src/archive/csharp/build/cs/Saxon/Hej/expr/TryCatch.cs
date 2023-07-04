@@ -282,7 +282,11 @@ namespace Saxon.Hej.expr {
                 this.catchClauses = catchClauses;
             }
             private bool isCaught(Saxon.Hej.s9api.XmlProcessingError err) {
-                Saxon.Hej.om.StructuredQName code = err.getErrorCode().GetStructuredQName();
+                Saxon.Api.QName errorCode = err.getErrorCode();
+                if ((errorCode == null)) {
+                    return false;
+                }
+                Saxon.Hej.om.StructuredQName code = errorCode.GetStructuredQName();
                 foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in catchClauses) {
                     if (clause.nameTest.matches(code)) {
                         return true;

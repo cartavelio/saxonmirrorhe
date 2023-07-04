@@ -47,7 +47,7 @@ namespace Saxon.Eej.ee.schema {
             bool result = true;
             if ((getFixupStatus() == /*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.UNVALIDATED)) {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.VALIDATING);
-                Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
+                Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
                 if ((decl == null)) {
                     setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                     return false;
@@ -114,13 +114,13 @@ namespace Saxon.Eej.ee.schema {
         }
         public override int getElementParticleCardinality(int elementName) {
             if ((elementName == getTargetFingerprint())) {
-                return /*134*/Saxon.Eej.ee.schema.Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
+                return Saxon.Eej.ee.schema.Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
             }
             Saxon.Eej.ee.schema.ElementDecl decl = (Saxon.Eej.ee.schema.ElementDecl)(getTarget());
             System.Collections.Generic.ICollection<Saxon.Eej.ee.schema.ElementDecl> subsGroup = decl.getSubstitutionGroupMembers();
             foreach (Saxon.Eej.ee.schema.ElementDecl mem in subsGroup) {
                 if ((mem.getFingerprint() == elementName)) {
-                    return /*134*/Saxon.Eej.ee.schema.Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
+                    return Saxon.Eej.ee.schema.Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
                 }
             }
             return Saxon.Hej.expr.StaticProperty.EMPTY;

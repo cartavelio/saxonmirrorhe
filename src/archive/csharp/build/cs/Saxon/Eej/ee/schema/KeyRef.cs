@@ -53,7 +53,7 @@ namespace Saxon.Eej.ee.schema {
         public override bool fixup(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             if ((getFixupStatus() == /*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.UNVALIDATED)) {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.VALIDATING);
-                Saxon.Eej.ee.schema.IdentityConstraint key = (Saxon.Eej.ee.schema.IdentityConstraint)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
+                Saxon.Eej.ee.schema.IdentityConstraint key = (Saxon.Eej.ee.schema.IdentityConstraint)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(this, compiler, false));
                 if ((key == null)) {
                     setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                     return false;

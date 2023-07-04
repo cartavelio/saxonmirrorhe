@@ -20,7 +20,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.Configuration config = getConfiguration();
             System.Collections.Generic.IList<string> failures = new System.Collections.Generic.List<string>();
-            Saxon.Hej.pattern.Pattern pattern = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(getExpression(), config, failures);
+            Saxon.Hej.pattern.Pattern pattern = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(getExpression(), config, failures);
             if ((pattern != null)) {
                 return (watchManager, @out, context) => {
                     if (forGrouping) {
@@ -69,7 +69,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.STRIDING, Saxon.Eej.ee.stream.Sweep.CONSUMING);
                   case Saxon.Hej.om.AxisInfo.DESCENDANT:
                   case Saxon.Hej.om.AxisInfo.DESCENDANT_OR_SELF:
-                    if (/*134*/Saxon.Eej.ee.stream.Streamability.isChildlessNodeKind(test)) {
+                    if (Saxon.Eej.ee.stream.Streamability.isChildlessNodeKind(test)) {
                         return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.STRIDING, Saxon.Eej.ee.stream.Sweep.CONSUMING);
                     } else {
                         return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.CRAWLING, Saxon.Eej.ee.stream.Sweep.CONSUMING);
@@ -92,7 +92,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                   case Saxon.Hej.om.AxisInfo.CHILD:
                   case Saxon.Hej.om.AxisInfo.DESCENDANT:
                   case Saxon.Hej.om.AxisInfo.DESCENDANT_OR_SELF:
-                    if (/*134*/Saxon.Eej.ee.stream.Streamability.isChildlessNodeKind(test)) {
+                    if (Saxon.Eej.ee.stream.Streamability.isChildlessNodeKind(test)) {
                         return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.STRIDING, Saxon.Eej.ee.stream.Sweep.CONSUMING);
                     }
                     goto default;

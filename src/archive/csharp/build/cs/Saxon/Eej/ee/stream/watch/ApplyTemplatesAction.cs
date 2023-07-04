@@ -75,7 +75,7 @@ namespace Saxon.Eej.ee.stream.watch {
                   case Saxon.Hej.trans.rules.BuiltInRules.DEEP_COPY:
                     {
                         Saxon.Eej.ee.stream.feed.ItemFeed @out = new Saxon.Eej.ee.stream.feed.NoOpenOrCloseFeed(getResultFeed(), getContext());
-                        Saxon.Eej.ee.stream.watch.Watch copyWatch = /*134*/Saxon.Eej.ee.stream.feed.CopyOfFeed.getWatch(@out, Saxon.Hej.pattern.AnchorPattern.getInstance(), watchManager, getContext());
+                        Saxon.Eej.ee.stream.watch.Watch copyWatch = Saxon.Eej.ee.stream.feed.CopyOfFeed.getWatch(@out, Saxon.Hej.pattern.AnchorPattern.getInstance(), watchManager, getContext());
                         watchManager.addWatch(copyWatch, true);
                         return null;
                     }
@@ -138,7 +138,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 Saxon.Eej.ee.trans.TemplateRuleEE template = (Saxon.Eej.ee.trans.TemplateRuleEE)(rule.getAction());
                 template.initialize();
                 Saxon.Hej.expr.Expression body = template.getBody();
-                if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(body) != Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                if ((Saxon.Eej.ee.stream.Streamability.getSweep(body) != Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                     localContext.openStackFrame(template.getStackFrameMap());
                     localContext.setLocalParameters(actualParams);
                     localContext.setTunnelParameters(tunnelParams);

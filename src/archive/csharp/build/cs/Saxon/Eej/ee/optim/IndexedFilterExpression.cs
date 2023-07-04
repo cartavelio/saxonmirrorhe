@@ -160,7 +160,7 @@ namespace Saxon.Eej.ee.optim {
                             if ((@base is Saxon.Eej.ee.optim.SearchableValue)) {
                                 indexedValue = (Saxon.Eej.ee.optim.SearchableValue)(@base);
                             } else {
-                                indexedValue = /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(@base.iterate());
+                                indexedValue = Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(@base.iterate());
                                 Saxon.Hej.expr.Binding binding = ((Saxon.Hej.expr.VariableReference)(baseExp)).getBinding();
                                 if ((binding is Saxon.Hej.expr.LocalBinding)) {
                                     context.setLocalVariable(((Saxon.Hej.expr.LocalBinding)(binding)).getLocalSlotNumber(), indexedValue);
@@ -172,7 +172,7 @@ namespace Saxon.Eej.ee.optim {
                             }
                         }
                     } else {
-                        indexedValue = /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(/*Delegate.iterate()*/basePullEvaluator(context));
+                        indexedValue = Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(/*Delegate.iterate()*/basePullEvaluator(context));
                     }
                     if ((indexedValue.getLength() == 0)) {
                         return Saxon.Hej.tree.iter.EmptyIterator.getInstance();

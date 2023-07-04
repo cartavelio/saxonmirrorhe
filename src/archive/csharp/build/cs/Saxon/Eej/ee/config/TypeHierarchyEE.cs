@@ -5,9 +5,6 @@ namespace Saxon.Eej.ee.config {
     public class TypeHierarchyEE : Saxon.Hej.type.TypeHierarchy {
         public TypeHierarchyEE(Saxon.Hej.Configuration config) : base (config) {
         }
-        public override Saxon.Hej.type.ItemType getGenericFunctionItemType() {
-            return Saxon.Hej.type.AnyFunctionType.getInstance();
-        }
         protected internal override Saxon.Hej.type.Affinity computeContentRelationship(Saxon.Hej.type.ItemType t1, Saxon.Hej.type.ItemType t2, Saxon.Ejava.util.Optional<Saxon.Hej.z.IntSet> on1, Saxon.Ejava.util.Optional<Saxon.Hej.z.IntSet> on2) {
             Saxon.Hej.type.Affinity contentRelationship = /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT;
             bool nillable1 = true;

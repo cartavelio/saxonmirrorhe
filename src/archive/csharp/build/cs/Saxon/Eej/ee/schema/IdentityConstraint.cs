@@ -158,11 +158,11 @@ namespace Saxon.Eej.ee.schema {
                     return new Saxon.Hej.value.StringValue(kind);
                   case "selector":
                     Saxon.Eej.ee.schema.IdentitySelector selector = getSelector();
-                    return /*134*/Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(selector.getXPath(), selector.getNamespaceContext(), selector.getSchemaDocumentURI());
+                    return Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(selector.getXPath(), selector.getNamespaceContext(), selector.getSchemaDocumentURI());
                   case "fields":
                     System.Collections.Generic.IList<Saxon.Hej.om.Item> list = new System.Collections.Generic.List<Saxon.Hej.om.Item>();
                     foreach (Saxon.Eej.ee.schema.IdentityField field in getFields()) {
-                        list.Add(/*134*/Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(field.getXPath(), field.getNamespaceContext(), field.getSchemaDocumentURI()));
+                        list.Add(Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(field.getXPath(), field.getNamespaceContext(), field.getSchemaDocumentURI()));
                     }
                     return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(list);
                   case "referenced key":

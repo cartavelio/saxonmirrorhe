@@ -171,6 +171,9 @@ namespace Saxon.Eej.config {
         public override string getLicenseFeature(string name) {
             return verifier.getFeature(name, this);
         }
+        public override Saxon.Ejava.util.Properties getLicenseFeatures() {
+            return verifier.getLicenseFeatures(this);
+        }
         protected internal void loadLicense() {
             verifier.loadPrimaryLicense(this);
             if ((((Saxon.Ejava.lang.System.currentTimeMillis()%100) == 42) && "yes".Equals(verifier.getFeature("Evaluation", this)))) {
@@ -225,32 +228,32 @@ namespace Saxon.Eej.config {
             }
             return new Saxon.Eej.config.pe.StyleNodeFactoryPE(this, compilation);
         }
-        public override Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating) {
+        public override Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating, Saxon.Hej.expr.StaticContext env) {
             if (updating) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException("XQuery Update requires Saxon-EE");
             }
             if ("XQ".Equals(language)) {
-                Saxon.Hej.query.XQueryParser parser = new Saxon.Hej.query.XQueryParser();
+                Saxon.Hej.query.XQueryParser parser = new Saxon.Hej.query.XQueryParser(env);
                 if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                     parser.setParserExtension(new Saxon.Eej.expr.XQueryParserExtensionPE());
                 }
                 return parser;
             } else {
                 if ("XP".Equals(language)) {
-                    Saxon.Hej.expr.parser.XPathParser parser = base.newExpressionParser(language, updating);
+                    Saxon.Hej.expr.parser.XPathParser parser = base.newExpressionParser(language, updating, env);
                     if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                         parser.setParserExtension(new Saxon.Eej.expr.SaxonSyntaxExtension());
                     }
                     return parser;
                 } else {
                     if ("PATTERN".Equals(language)) {
-                        Saxon.Hej.pattern.PatternParser parser = new Saxon.Hej.pattern.PatternParser();
+                        Saxon.Hej.pattern.PatternParser parser = new Saxon.Hej.pattern.PatternParser(env);
                         if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                             parser.setParserExtension(new Saxon.Eej.expr.SaxonSyntaxExtension());
                         }
                         return parser;
                     } else {
-                        return base.newExpressionParser(language, updating);
+                        return base.newExpressionParser(language, updating, env);
                     }
                 }
             }
@@ -260,7 +263,7 @@ namespace Saxon.Eej.config {
                 return Saxon.Hej.functions.registry.XSLT30FunctionSet.getInstance();
             } else {
                 if ((version == 40)) {
-                    return /*134*/Saxon.Eej.functions.registry.XSLT40FunctionSet.getInstance();
+                    return Saxon.Eej.functions.registry.XSLT40FunctionSet.getInstance();
                 } else {
                     throw new Saxon.Ejava.lang.IllegalArgumentException((("Unsupported XSLT version "+version)+" (must be 30 or 40)"));
                 }
@@ -276,13 +279,13 @@ namespace Saxon.Eej.config {
               case 31:
                 return Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance();
               case 40:
-                return /*134*/Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance();
+                return Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance();
               default:
                 return Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance();
             }
         }
         public override Saxon.Hej.functions.registry.BuiltInFunctionSet getXQueryUpdateFunctionSet() {
-            return /*134*/Saxon.Eej.functions.registry.XQUpdate10FunctionSet.getInstance();
+            return Saxon.Eej.functions.registry.XQUpdate10FunctionSet.getInstance();
         }
         public override Saxon.Hej.functions.SystemFunction makeSystemFunction(string localName, int arity) {
             try {
@@ -334,7 +337,7 @@ namespace Saxon.Eej.config {
             return null;
         }
         public override Saxon.Hej.functions.registry.UseWhen30FunctionSet getUseWhenFunctionLibrary(int version) { lock(this) {
-            return /*134*/Saxon.Eej.functions.registry.UseWhen40FunctionSet.getInstance(version);
+            return Saxon.Eej.functions.registry.UseWhen40FunctionSet.getInstance(version);
         }}
         protected internal override Saxon.Hej.functions.FunctionLibraryList makeBuiltInExtensionLibraryList(int version) { lock(this) {
             Saxon.Hej.functions.FunctionLibraryList result = new Saxon.Hej.functions.FunctionLibraryList();
@@ -342,16 +345,16 @@ namespace Saxon.Eej.config {
             result.addFunctionLibrary(Saxon.Hej.functions.MathFunctionSet.getInstance());
             result.addFunctionLibrary(Saxon.Hej.ma.map.MapFunctionSet.getInstance(version));
             result.addFunctionLibrary(Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(version));
-            result.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.getInstance());
+            result.addFunctionLibrary(Saxon.Eej.functions.extfn.EXPathBinaryFunctionSet.getInstance());
             result.addFunctionLibrary(Saxon.Hej.functions.registry.ExsltCommonFunctionSet.getInstance());
             if (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_EXTERNAL_FUNCTIONS)) {
-                result.addFunctionLibrary(/*134*/Saxon.Eej.functions.extfn.EXPathFileFunctionSet.getInstance());
+                result.addFunctionLibrary(Saxon.Eej.functions.extfn.EXPathFileFunctionSet.getInstance());
             }
             return result;
         }}
         public override Saxon.Hej.functions.registry.BuiltInFunctionSet getVendorFunctionSet() {
             if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                return /*134*/Saxon.Eej.functions.extfn.VendorFunctionSetPE.getInstance();
+                return Saxon.Eej.functions.extfn.VendorFunctionSetPE.getInstance();
             } else {
                 return base.getVendorFunctionSet();
             }

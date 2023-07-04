@@ -125,7 +125,7 @@ namespace Saxon.Eej.xsltextn.instruct {
                 return (output, context) => {
                     Saxon.Hej.om.Item root;
                     Saxon.Hej.om.SequenceIterator rootIterator = /*Delegate.iterate()*/rootPull(context);
-                    Saxon.Hej.om.SequenceIterator mappedRootIterator = Saxon.Hej.expr.MappingIterator.map(rootIterator, item => Saxon.Hej.tree.iter.SingletonIterator.makeIterator(/*134*/Saxon.Eej.functions.extfn.WithPedigree.makeRootWithPedigree(item)));
+                    Saxon.Hej.om.SequenceIterator mappedRootIterator = Saxon.Hej.expr.MappingIterator.map(rootIterator, item => Saxon.Hej.tree.iter.SingletonIterator.makeIterator(Saxon.Eej.functions.extfn.WithPedigree.makeRootWithPedigree(item)));
                     Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
                     Saxon.Hej.om.FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
                     while (((root = trackingIterator.next()) != null)) {

@@ -113,10 +113,18 @@ namespace Saxon.Hej.type {
                     return "document-node()";
                   case ELEMENT:
                     Saxon.Hej.type.SchemaType annotation = node.getSchemaType();
-                    return (((("element("+((Saxon.Hej.om.NodeInfo)(item)).getDisplayName())+", ")+annotation.getDisplayName())+')');
+                    if (annotation.isAnonymousType()) {
+                        return (("element("+((Saxon.Hej.om.NodeInfo)(item)).getDisplayName())+')');
+                    } else {
+                        return (((("element("+((Saxon.Hej.om.NodeInfo)(item)).getDisplayName())+", ")+annotation.getDisplayName())+')');
+                    }
                   case ATTRIBUTE:
                     Saxon.Hej.type.SchemaType annotation2 = node.getSchemaType();
-                    return (((("attribute("+((Saxon.Hej.om.NodeInfo)(item)).getDisplayName())+", ")+annotation2.getDisplayName())+')');
+                    if (annotation2.isAnonymousType()) {
+                        return (("attribute("+((Saxon.Hej.om.NodeInfo)(item)).getDisplayName())+')');
+                    } else {
+                        return (((("attribute("+((Saxon.Hej.om.NodeInfo)(item)).getDisplayName())+", ")+annotation2.getDisplayName())+')');
+                    }
                   case TEXT:
                     return "text()";
                   case COMMENT:

@@ -26,7 +26,7 @@ namespace Saxon.Eej.xsltextn.style {
             Saxon.Hej.om.StructuredQName name = getSourceBinding().getVariableQName();
             Saxon.Hej.style.SourceBinding globalVariable;
             try {
-                globalVariable = bindVariable(name);
+                globalVariable = bindVariable(name, getNodeName().getStructuredQName());
                 if ((globalVariable == null)) {
                     throw new Saxon.Hej.trans.XPathException((("Variable "+name.getDisplayName())+" has not been declared")).withErrorCode("XPST0008").asStaticError();
                 }

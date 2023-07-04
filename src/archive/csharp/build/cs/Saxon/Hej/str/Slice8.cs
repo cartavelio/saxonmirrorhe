@@ -62,7 +62,7 @@ namespace Saxon.Hej.str {
             }
         }
         public override long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
-            for (int i = (requireInt(from)+start); (i<end); i++) {
+            for (int i = (requireNonNegativeInt(from)+start); (i<end); i++) {
                 if (predicate((bytes[i]&unchecked((int)0xff)))) {
                     return (i-start);
                 }

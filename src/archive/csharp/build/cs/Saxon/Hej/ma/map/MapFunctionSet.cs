@@ -15,6 +15,7 @@ namespace Saxon.Hej.ma.map {
             register("merge", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapMerge(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (STAR|INS), null));
             Saxon.Hej.type.SpecificFunctionType ON_DUPLICATES_CALLBACK_TYPE = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
             Saxon.Hej.value.SequenceType oneOnDuplicatesFunction = Saxon.Hej.value.SequenceType.makeSequenceType(ON_DUPLICATES_CALLBACK_TYPE, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
+            Saxon.Hej.ma.map.RecordTest KVP_TYPE = new Saxon.Hej.ma.map.RecordTest(Saxon.Ejava.util.Arrays.asList(new string[]{"key", "value"}), Saxon.Ejava.util.Arrays.asList(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ATOMIC, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}), new System.Collections.Generic.List<string>(), true);
             Saxon.Hej.functions.OptionsParameter mergeOptionDetails = new Saxon.Hej.functions.OptionsParameter();
             mergeOptionDetails.addAllowedOption("duplicates", Saxon.Hej.value.SequenceType.SINGLE_STRING, Saxon.Hej.value.StringValue.bmp("use-first"));
             mergeOptionDetails.setAllowedValues("duplicates", "FOJS0005", "use-first", "use-last", "combine", "reject", "unspecified", "use-any", "use-callback");
@@ -41,15 +42,19 @@ namespace Saxon.Hej.ma.map {
                 register("index", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapBuild(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, mapBuildKeyArg, ONE, null));
                 Saxon.Hej.expr.Expression identityFunction;
                 try {
-                    identityFunction = new Saxon.Hej.functions.hof.FunctionLiteral(/*134*/Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance().makeFunction("identity", 1));
+                    identityFunction = new Saxon.Hej.functions.hof.FunctionLiteral(Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance().makeFunction("identity", 1));
                 } catch (Saxon.Hej.trans.XPathException e) {
                     throw new Saxon.Ejava.lang.AssertionError(e);
                 }
                 Saxon.Hej.type.FunctionItemType opFnType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
                 Saxon.Hej.expr.Callable concatCallable = new Saxon.Hej.expr.CallableDelegate((cxt, args) => Saxon.Hej.value.SequenceExtent.from(new Saxon.Hej.functions.InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
                 register("build", 1, 4, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapBuild(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, mapBuildKeyArg, ONE, null).arg(2, mapBuildValueArg, ONE, null).arg(3, opFnType, ONE, null));
-                register("key-value-pairs", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapKeyValuePairs(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
+                Saxon.Hej.type.ItemType filterFunctionType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
+                register("keys", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapKeys(), Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, filterFunctionType, ONE, null));
+                register("pairs", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapPairs(), KVP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
                 register("entries", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapEntries(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
+                register("of", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapOf(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, KVP_TYPE, (STAR|INS), null));
+                register("of", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapOf(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (STAR|INS), null).arg(1, ON_DUPLICATES_CALLBACK_TYPE, (ONE|INS), null));
                 register("untyped-contains", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapUntypedContains(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null));
                 Saxon.Hej.type.SpecificFunctionType FILTER_TYPE = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ATOMIC, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
                 register("filter", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapFilter(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, FILTER_TYPE, (ONE|INS), null));
@@ -88,10 +93,10 @@ namespace Saxon.Hej.ma.map {
             internal string pendingWarning = null;
             public override void supplyTypeInformation(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType, Saxon.Hej.expr.Expression[] arguments) {
                 Saxon.Hej.type.ItemType it = arguments[0].getItemType();
-                if (((it is Saxon.Hej.ma.map.TupleType) && (arguments.Length == 2))) {
+                if (((it is Saxon.Hej.ma.map.RecordType) && (arguments.Length == 2))) {
                     if ((arguments[1] is Saxon.Hej.expr.StringLiteral)) {
                         string key = ((Saxon.Hej.expr.StringLiteral)(arguments[1])).stringify();
-                        if ((((Saxon.Hej.ma.map.TupleType)(it)).getFieldType(key) == null)) {
+                        if ((((Saxon.Hej.ma.map.RecordType)(it)).getFieldType(key) == null)) {
                             Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(((("Field "+key)+" is not defined for tuple type ")+it), "SXTT0001");
                             xe.setIsTypeError(true);
                             throw xe;
@@ -258,7 +263,7 @@ namespace Saxon.Hej.ma.map {
             }
         
         }
-        public class MapKeyValuePairs : Saxon.Hej.functions.SystemFunction {
+        public class MapPairs : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
                 Saxon.Hej.ma.zeno.ZenoSequence results = new Saxon.Hej.ma.zeno.ZenoSequence();
@@ -319,7 +324,19 @@ namespace Saxon.Hej.ma.map {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
                 System.Diagnostics.Debug.Assert((map != null));
-                return Saxon.Hej.om.SequenceTool.toLazySequence(map.keys());
+                if ((arguments.Length == 1)) {
+                    return Saxon.Hej.om.SequenceTool.toLazySequence(map.keys());
+                } else {
+                    Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
+                    Saxon.Hej.ma.zeno.ZenoSequence results = new Saxon.Hej.ma.zeno.ZenoSequence();
+                    foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
+                        Saxon.Hej.value.BooleanValue selected = (Saxon.Hej.value.BooleanValue)(fn.call(context, new Saxon.Hej.om.Sequence[]{pair.value}).head());
+                        if (selected.getBooleanValue()) {
+                            results = results.append(pair.key);
+                        }
+                    }
+                    return results;
+                }
             }
         
         }
@@ -542,6 +559,36 @@ namespace Saxon.Hej.ma.map {
                     options.initialPut(Saxon.Hej.value.StringValue.bmp("duplicates-error-code"), new Saxon.Hej.value.StringValue(duplicatesErrorCode));
                     Saxon.Hej.expr.Literal.exportValue(options, @out);
                 }
+            }
+        
+        }
+        public class MapOf : Saxon.Hej.functions.SystemFunction {
+            public override Saxon.Hej.ma.map.MapItem call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                Saxon.Hej.om.FunctionItem onDuplicates = null;
+                if ((arguments.Length>1)) {
+                    onDuplicates = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
+                }
+                Saxon.Hej.value.StringValue keyKey = new Saxon.Hej.value.StringValue("key");
+                Saxon.Hej.value.StringValue valueKey = new Saxon.Hej.value.StringValue("value");
+                Saxon.Hej.ma.map.MapItem result = new Saxon.Impl.DataModel.ImmMap();
+                Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                    Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(((Saxon.Hej.ma.map.MapItem)(item)).get(keyKey));
+                    Saxon.Hej.om.GroundedValue suppliedValue = ((Saxon.Hej.ma.map.MapItem)(item)).get(valueKey);
+                    Saxon.Hej.om.GroundedValue existingValue = result.get(key);
+                    if ((existingValue != null)) {
+                        if ((onDuplicates == null)) {
+                            Saxon.Hej.om.GroundedValue newValue = existingValue.concatenate(suppliedValue);
+                            result = result.addEntry(key, newValue);
+                        } else {
+                            Saxon.Hej.om.GroundedValue newValue = onDuplicates.call(context, new Saxon.Hej.om.Sequence[]{existingValue, suppliedValue}).materialize();
+                            result = result.addEntry(key, newValue);
+                        }
+                    } else {
+                        result = result.addEntry(key, suppliedValue);
+                    }
+                }
+                return result;
             }
         
         }

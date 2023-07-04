@@ -76,7 +76,7 @@ namespace Saxon.Eej.ee.trans {
             processRules(r => {
                 Saxon.Eej.ee.trans.TemplateRuleEE t = (Saxon.Eej.ee.trans.TemplateRuleEE)(r.getAction());
                 System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-                Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(t.getBody(), Saxon.Eej.ee.trans.ContextItemStaticInfoEE.DEFAULT, reasons);
+                Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(t.getBody(), Saxon.Eej.ee.trans.ContextItemStaticInfoEE.DEFAULT, reasons);
                 if (((ps.getSweep() == Saxon.Eej.ee.stream.Sweep.FREE_RANGING) || (ps.getPosture() == Saxon.Eej.ee.stream.Posture.ROAMING))) {
                     Saxon.Ejava.lang.StringBuilder message = new Saxon.Ejava.lang.StringBuilder((("Stylesheet packaging problem: reloaded template with match = "+t.getMatchPattern().toShortString())+" is not streamable. "));
                     foreach (string reason in reasons) {
@@ -91,7 +91,7 @@ namespace Saxon.Eej.ee.trans {
                 processRules(r => {
                     Saxon.Eej.ee.trans.TemplateRuleEE t = (Saxon.Eej.ee.trans.TemplateRuleEE)(r.getAction());
                     if ((t.getBody() != null)) {
-                        if ((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(t.getBody()) == null)) {
+                        if ((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(t.getBody()) == null)) {
                             if (!(t.isActuallyStreamable(new System.Collections.Generic.List<string>()))) {
                                 throw new Saxon.Hej.trans.XPathException("Template rule is not streamable", "XTSE3430", t);
                             }
@@ -106,7 +106,7 @@ namespace Saxon.Eej.ee.trans {
                 processRules(r => {
                     Saxon.Eej.ee.trans.TemplateRuleEE t = (Saxon.Eej.ee.trans.TemplateRuleEE)(r.getAction());
                     if ((t.getBody() != null)) {
-                        if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(t.getBody()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                        if ((Saxon.Eej.ee.stream.Streamability.getSweep(t.getBody()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                             t.makeInversion();
                         }
                     }
@@ -158,7 +158,7 @@ namespace Saxon.Eej.ee.trans {
         }
         private void computeCandidatePreconditions(Saxon.Eej.ee.trans.RuleEE rule, System.Collections.Generic.IDictionary<Saxon.Eej.ee.trans.Precondition,System.Collections.Generic.IList<Saxon.Eej.ee.trans.RuleEE>> preconditions, System.Collections.Generic.IDictionary<Saxon.Eej.ee.trans.Characteristic,Saxon.Eej.ee.trans.Characteristic> characteristics) {
             Saxon.Hej.pattern.Pattern pattern = rule.getPattern();
-            /*134*/Saxon.Eej.ee.trans.GeneralPatternOptimizer.getInstance().process(rule, pattern, preconditions, characteristics);
+            Saxon.Eej.ee.trans.GeneralPatternOptimizer.getInstance().process(rule, pattern, preconditions, characteristics);
         }
         private System.Collections.Generic.IDictionary<Saxon.Eej.ee.trans.Precondition,System.Collections.Generic.IList<Saxon.Eej.ee.trans.RuleEE>> filterPreconditions(Saxon.Hej.trans.rules.RuleChain chain, System.Collections.Generic.IDictionary<Saxon.Eej.ee.trans.Precondition,System.Collections.Generic.IList<Saxon.Eej.ee.trans.RuleEE>> candidates) {
             System.Collections.Generic.IDictionary<Saxon.Eej.ee.trans.Precondition,System.Collections.Generic.IList<Saxon.Eej.ee.trans.RuleEE>> result = new System.Collections.Generic.Dictionary<Saxon.Eej.ee.trans.Precondition, System.Collections.Generic.IList<Saxon.Eej.ee.trans.RuleEE>>();

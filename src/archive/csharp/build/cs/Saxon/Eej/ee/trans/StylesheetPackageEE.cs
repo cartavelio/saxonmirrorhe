@@ -45,7 +45,7 @@ namespace Saxon.Eej.ee.trans {
             presenter.close();
         }
         protected internal override void addIxslFunctionLibrary(Saxon.Hej.functions.FunctionLibraryList functionLibrary) {
-            functionLibrary.addFunctionLibrary(/*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance());
+            functionLibrary.addFunctionLibrary(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance());
             functionLibrary.addFunctionLibrary(new Saxon.Eej.ee.extfn.js.JSFunctionLibrary());
         }
         private void export(Saxon.Hej.trace.ExpressionPresenter presenter, bool topLevel) {

@@ -26,6 +26,7 @@ namespace Saxon.Hej.expr.parser {
         public const int FOR_MEMBER = 17;
         public const int MATCH_PATTERN = 19;
         public const int MISC = 20;
+        public const int DYNAMIC_FUNCTION = 21;
         public RoleDiagnostic(int kind, string operation, int operand)  {
             this.kind = kind;
             this.operation = operation;
@@ -109,6 +110,8 @@ namespace Saxon.Hej.expr.parser {
                 return (("'for member $"+name)+"' expression");
               case MATCH_PATTERN:
                 return "match pattern";
+              case DYNAMIC_FUNCTION:
+                return (("target of a dynamic function call {"+name)+"}");
               case MISC:
                 return operation;
               default:

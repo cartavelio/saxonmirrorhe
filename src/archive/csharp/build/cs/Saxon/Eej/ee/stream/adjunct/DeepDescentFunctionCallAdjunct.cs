@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             for (int i = 1; (i<operanda.Length); i++) {
                 operanda[i].setUsage(Saxon.Hej.expr.Operand.typeDeterminedUsage(target.getArgumentType(i).getPrimaryType()));
             }
-            Saxon.Eej.ee.stream.PostureAndSweep ps0 = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getArg(0), contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps0 = Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getArg(0), contextInfo, reasons);
             Saxon.Eej.ee.stream.Posture p0 = ps0.getPosture();
             if (((p0 != Saxon.Eej.ee.stream.Posture.STRIDING) && (p0 != Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                 reasons.Add("Posture of first argument to a deep-descent function must be striding or grounded");
@@ -22,7 +22,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
             for (int a = 1; (a<exp.getArity()); a++) {
                 Saxon.Hej.expr.Expression arg = exp.getArg(a);
-                if ((/*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(arg, contextInfo, reasons) != Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)) {
+                if ((Saxon.Eej.ee.stream.Streamability.getStreamability(arg, contextInfo, reasons) != Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)) {
                     reasons.Add("Posture of the second and subsequent arguments to a deep-descent function must (for now) be grounded and motionless");
                     return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
                 }
@@ -30,7 +30,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             if ((p0 == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.GROUNDED, ps0.getSweep());
             } else {
-                Saxon.Eej.ee.stream.PostureAndSweep bodyPS = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(target.getBody(), contextInfo, reasons);
+                Saxon.Eej.ee.stream.PostureAndSweep bodyPS = Saxon.Eej.ee.stream.Streamability.getStreamability(target.getBody(), contextInfo, reasons);
                 if ((bodyPS.getPosture() != Saxon.Eej.ee.stream.Posture.CRAWLING)) {
                     reasons.Add("The body of the deep-descent function must have crawling posture");
                     return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
@@ -54,7 +54,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.UserFunctionCall instruction = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
             Saxon.Hej.expr.Expression select = instruction.getArg(0);
-            Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
+            Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
             if ((selection != null)) {
                 return (watchManager, @out, context) => {
                     Saxon.Eej.ee.stream.adjunct.DeepDescentFunctionCallAdjunct.DeepDescentFunctionCallAction action = new Saxon.Eej.ee.stream.adjunct.DeepDescentFunctionCallAdjunct.DeepDescentFunctionCallAction(getExpression(), @out, context);

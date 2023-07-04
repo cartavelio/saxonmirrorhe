@@ -21,13 +21,13 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     snapshot = Saxon.Hej.functions.SystemFunction.makeCall("snapshot", rowSelect.getRetainedStaticContext(), mergeSource.getRowSelect());
                     mergeSource.setRowSelect(snapshot);
                 }
-                Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(rowSelect, info, reasons);
+                Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(rowSelect, info, reasons);
                 if ((ps.getPosture() != Saxon.Eej.ee.stream.Posture.STRIDING)) {
                     actuallyStreamable = false;
                     reasons.Add("The select expression for the merge source is not striding");
                 } else {
-                    /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(snapshot, info, reasons);
-                    mergeSource.invertedAction = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(snapshot, false);
+                    Saxon.Eej.ee.stream.Streamability.getStreamability(snapshot, info, reasons);
+                    mergeSource.invertedAction = Saxon.Eej.ee.stream.Inversion.invertExpression(snapshot, false);
                 }
             }
             if (!(actuallyStreamable)) {
@@ -55,15 +55,15 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public override Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.sort.MergeInstr instr = (Saxon.Hej.expr.sort.MergeInstr)(getExpression());
             foreach (Saxon.Hej.expr.sort.MergeInstr.MergeSource ms in instr.getMergeSources()) {
-                if (((ms.getForEachItem() != null) && !(/*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(ms.getForEachItem(), contextInfo, reasons).Equals(Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)))) {
+                if (((ms.getForEachItem() != null) && !(Saxon.Eej.ee.stream.Streamability.getStreamability(ms.getForEachItem(), contextInfo, reasons).Equals(Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)))) {
                     reasons.Add("The for-each-item expression, if present, must be grounded and motionless");
                     return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
                 }
-                if (((ms.getForEachSource() != null) && !(/*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(ms.getForEachSource(), contextInfo, reasons).Equals(Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)))) {
+                if (((ms.getForEachSource() != null) && !(Saxon.Eej.ee.stream.Streamability.getStreamability(ms.getForEachSource(), contextInfo, reasons).Equals(Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)))) {
                     reasons.Add("The for-each-source expression, if present, must be grounded and motionless");
                     return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
                 }
-                if ((((ms.getForEachItem() == null) && (ms.getForEachSource() == null)) && !(/*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(ms.getRowSelect(), contextInfo, reasons).Equals(Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)))) {
+                if ((((ms.getForEachItem() == null) && (ms.getForEachSource() == null)) && !(Saxon.Eej.ee.stream.Streamability.getStreamability(ms.getRowSelect(), contextInfo, reasons).Equals(Saxon.Eej.ee.stream.PostureAndSweep.GROUNDED_AND_MOTIONLESS)))) {
                     reasons.Add("If neither of the attributes for-each-item or for-each-source is present, the select expression must be grounded and motionless");
                     return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
                 }
@@ -112,7 +112,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 wm.setOutputter(output);
                 Saxon.Eej.ee.stream.AccumulatorRegistryEE am = (Saxon.Eej.ee.stream.AccumulatorRegistryEE)(pd.getAccumulatorRegistry());
                 if (((am != null) && (ms.accumulators != null))) {
-                    /*134*/Saxon.Eej.ee.stream.AccumulatorRegistryEE.registerSelectedAccumulators(wm, ms.accumulators);
+                    Saxon.Eej.ee.stream.AccumulatorRegistryEE.registerSelectedAccumulators(wm, ms.accumulators);
                 }
                 Saxon.Hej.@event.Receiver @out = wm;
                 if (((pd is Saxon.Hej.style.StylesheetPackage) && ((Saxon.Hej.style.StylesheetPackage)(pd)).isStripsTypeAnnotations())) {

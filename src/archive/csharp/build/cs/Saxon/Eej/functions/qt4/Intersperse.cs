@@ -23,7 +23,7 @@ namespace Saxon.Eej.functions.qt4 {
     
         private class Inner_SystemFunctionCall_9 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly Intersperse outerInstance;
-            public Inner_SystemFunctionCall_9(Intersperse outerInstance, Intersperse arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_9(Intersperse outerInstance, Intersperse arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.type.ItemType getItemType() {

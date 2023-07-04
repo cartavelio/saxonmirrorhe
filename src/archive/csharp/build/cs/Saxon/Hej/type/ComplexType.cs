@@ -24,6 +24,7 @@ namespace Saxon.Hej.type {
         int getDescendantElementCardinality(int elementFingerprint);
         bool containsElementWildcard();
         bool hasAssertions();
+        string getPreferredJsonLayout();
     
     }
 }

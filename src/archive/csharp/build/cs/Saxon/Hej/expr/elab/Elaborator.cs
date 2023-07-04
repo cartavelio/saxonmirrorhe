@@ -31,16 +31,20 @@ namespace Saxon.Hej.expr.elab {
                 }
             }
         }
-        public virtual Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+        public virtual Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable, bool lazyEvaluationRequired) {
             Saxon.Hej.expr.Expression expr = getExpression();
-            if (!(expr.supportsLazyEvaluation())) {
-                return eagerly();
+            if (lazyEvaluationRequired) {
+                return new Saxon.Hej.expr.elab.MemoClosureEvaluator(expr, elaborateForPull());
             } else {
-                if (repeatable) {
-                    return new Saxon.Hej.expr.elab.LearningEvaluator(expr, new Saxon.Hej.expr.elab.MemoClosureEvaluator(expr, elaborateForPull()));
+                if (!(expr.supportsLazyEvaluation())) {
+                    return eagerly();
                 } else {
-                    Saxon.Hej.expr.elab.PullEvaluator pullEvaluator = elaborateForPull();
-                    return new Saxon.Hej.expr.elab.LazyPullEvaluator(pullEvaluator);
+                    if (repeatable) {
+                        return new Saxon.Hej.expr.elab.LearningEvaluator(expr, new Saxon.Hej.expr.elab.MemoClosureEvaluator(expr, elaborateForPull()));
+                    } else {
+                        Saxon.Hej.expr.elab.PullEvaluator pullEvaluator = elaborateForPull();
+                        return new Saxon.Hej.expr.elab.LazyPullEvaluator(pullEvaluator);
+                    }
                 }
             }
         }
@@ -51,7 +55,10 @@ namespace Saxon.Hej.expr.elab {
         public abstract Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthWhenAbsent);
         public virtual Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthWhenAbsent) {
             Saxon.Hej.expr.elab.UnicodeStringEvaluator evaluator = elaborateForUnicodeString(zeroLengthWhenAbsent);
-            return context => /*Delegate.eval()*/evaluator(context).ToString();
+            return context => {
+                Saxon.Hej.str.UnicodeString u = /*Delegate.eval()*/evaluator(context);
+                return ((u == null) ? handleNullString(zeroLengthWhenAbsent) : u.ToString());
+            } ;
         }
         protected internal Saxon.Hej.str.UnicodeString handleNullUnicodeString(bool zeroLengthWhenAbsent) {
             return (zeroLengthWhenAbsent ? Saxon.Hej.str.EmptyUnicodeString.getInstance() : null);

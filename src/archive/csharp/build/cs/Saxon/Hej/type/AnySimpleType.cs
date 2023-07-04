@@ -121,7 +121,7 @@ namespace Saxon.Hej.type {
             return input;
         }
         public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
-            return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
+            return Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     }
 }

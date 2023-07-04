@@ -102,7 +102,7 @@ namespace Saxon.Eej.ee.schema {
                         Saxon.Eej.ee.schema.AttributeWildcard thisWild = attributes.getAttributeWildcard(compiler);
                         if ((baseWild != null)) {
                             if ((thisWild != null)) {
-                                Saxon.Eej.ee.schema.Wildcard union = /*134*/Saxon.Eej.ee.schema.Wildcard.makeUnion(thisWild.getWildcard(), baseWild.getWildcard(), getNamePool());
+                                Saxon.Eej.ee.schema.Wildcard union = Saxon.Eej.ee.schema.Wildcard.makeUnion(thisWild.getWildcard(), baseWild.getWildcard(), getNamePool());
                                 Saxon.Eej.ee.schema.AttributeWildcard newawc = (union.isInexpressible() ? thisWild : new Saxon.Eej.ee.schema.AttributeWildcard(union));
                                 extendedAttributes.setAnyAttribute(newawc);
                             } else {
@@ -397,7 +397,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                 }
                 if ((simpleContentTypeRef != null)) {
-                    Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(simpleContentTypeRef, compiler, false));
+                    Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(simpleContentTypeRef, compiler, false));
                     if ((type == null)) {
                         setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                         return false;
@@ -411,7 +411,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                 }
                 if ((getBaseTypeReference() != null)) {
-                    Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(getBaseTypeReference(), compiler, true));
+                    Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(getBaseTypeReference(), compiler, true));
                     if ((type == null)) {
                         setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                         return false;
@@ -445,7 +445,7 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             if ((getBaseTypeReference() != null)) {
-                /*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(getBaseTypeReference(), compiler, true);
+                Saxon.Eej.ee.schema.PreparedSchema.validateReference(getBaseTypeReference(), compiler, true);
                 if (!(getBaseTypeReference().isResolved())) {
                     setValidationStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                     return false;
@@ -502,7 +502,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                 }
             }
-            Saxon.Hej.type.SimpleType content = (Saxon.Hej.type.SimpleType)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(getSimpleContentTypeReference(), compiler, false));
+            Saxon.Hej.type.SimpleType content = (Saxon.Hej.type.SimpleType)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(getSimpleContentTypeReference(), compiler, false));
             if ((content is Saxon.Eej.ee.schema.sdoc.SimpleTypeDefinition)) {
                 Saxon.Hej.type.SchemaType type = compiler.getPreparedSchema().getSchemaType(content.getStructuredQName());
                 if ((type != null)) {
@@ -694,7 +694,7 @@ namespace Saxon.Eej.ee.schema {
                                 }
                             }
                             if ((openContentWildcard != null)) {
-                                openContentWildcard = /*134*/Saxon.Eej.ee.schema.Wildcard.makeUnion(openContentWildcard, baseOpenWildcard, getNamePool());
+                                openContentWildcard = Saxon.Eej.ee.schema.Wildcard.makeUnion(openContentWildcard, baseOpenWildcard, getNamePool());
                             }
                         }
                     }
@@ -815,7 +815,7 @@ namespace Saxon.Eej.ee.schema {
                             if (((thisContent == null) || (baseContent == null))) {
                                 reason = "Cannot establish the simple content type";
                             } else {
-                                reason = /*134*/Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(thisContent, baseContent, 0);
+                                reason = Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(thisContent, baseContent, 0);
                             }
                             if ((reason == null)) {
                                 OK = true;
@@ -987,14 +987,14 @@ namespace Saxon.Eej.ee.schema {
             Saxon.Eej.ee.schema.fsa.NonDeterminizedState finalState = new Saxon.Eej.ee.schema.fsa.NonDeterminizedState(machine);
             finalState.setFinalState(true);
             try {
-                Saxon.Eej.ee.schema.fsa.AutomatonState state = /*134*/Saxon.Eej.ee.schema.fsa.FiniteStateMachine.compileParticle(compiler, extended, finalState, this, machine);
+                Saxon.Eej.ee.schema.fsa.AutomatonState state = Saxon.Eej.ee.schema.fsa.FiniteStateMachine.compileParticle(compiler, extended, finalState, this, machine);
                 machine.setInitialState(state);
                 if (debug) {
                     Saxon.Hej.lib.Logger err = compiler.getConfiguration().getLogger();
                     err.info(("==== NFSA for complex type "+getDescription()));
                     machine.display(err);
                 }
-                machine = /*134*/Saxon.Eej.ee.schema.fsa.FiniteStateMachine.determinize(compiler, machine);
+                machine = Saxon.Eej.ee.schema.fsa.FiniteStateMachine.determinize(compiler, machine);
                 if (debug) {
                     Saxon.Hej.lib.Logger err = compiler.getConfiguration().getLogger();
                     err.info(("==== DFSA for complex type "+getDescription()));
@@ -1075,7 +1075,7 @@ namespace Saxon.Eej.ee.schema {
                         }
                         if (seq.isPointless(null)) {
                             System.Collections.Generic.IList<Saxon.Eej.ee.schema.Particle> contentModel = seq.getSimplifiedContentModel();
-                            if (contentModel.Count==0) {
+                            if ((contentModel.Count==0 && (((openContentWildcard == null) || !(openContentAppliesToEmpty))))) {
                                 extendedParticle = null;
                                 if ((variety == Saxon.Hej.type.ComplexVariety.ELEMENT_ONLY)) {
                                     variety = Saxon.Hej.type.ComplexVariety.EMPTY;
@@ -1551,7 +1551,7 @@ namespace Saxon.Eej.ee.schema {
             }
             sub.computeIsAllContent();
             if (isAllContent()) {
-                return /*134*/Saxon.Eej.ee.schema.AllModelGroup.allSubsumes(this, sub, compiler);
+                return Saxon.Eej.ee.schema.AllModelGroup.allSubsumes(this, sub, compiler);
             } else {
                 if (sub.isAllContent()) {
                     return subsumesAll(sub, compiler);
@@ -1586,7 +1586,7 @@ namespace Saxon.Eej.ee.schema {
             bool elementTypeOK = true;
             string reason = null;
             if (subType.isSimpleType()) {
-                reason = /*134*/Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK((Saxon.Hej.type.SimpleType)(subType), baseType, 0);
+                reason = Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK((Saxon.Hej.type.SimpleType)(subType), baseType, 0);
                 elementTypeOK = (reason == null);
             } else {
                 while (!(baseType.isSameType(subType))) {
@@ -1754,7 +1754,7 @@ namespace Saxon.Eej.ee.schema {
                                         continue ;
                                     } else {
                                         if (state.isFinalState()) {
-                                            state = /*134*/Saxon.Eej.ee.schema.fsa.SuffixState.getInstance();
+                                            state = Saxon.Eej.ee.schema.fsa.SuffixState.getInstance();
                                             continue ;
                                         }
                                     }
@@ -1846,7 +1846,7 @@ namespace Saxon.Eej.ee.schema {
                     throw new Saxon.Hej.type.SchemaException(((("The requested type "+derived.getDescription())+" is not validly derived from the declared type ")+@base.getDescription()));
                 }
             } else {
-                string err = /*134*/Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK((Saxon.Hej.type.SimpleType)(baseTypeOfD), @base, block);
+                string err = Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK((Saxon.Hej.type.SimpleType)(baseTypeOfD), @base, block);
                 if ((err != null)) {
                     throw new Saxon.Hej.type.SchemaException(((((("The requested type "+derived.getDescription())+" is not validly derived from the declared type ")+@base.getDescription())+". ")+err));
                 }
@@ -2120,6 +2120,51 @@ namespace Saxon.Eej.ee.schema {
                 }
             } );
             return new Saxon.Hej.functions.CallableFunction(1, callable, Saxon.Hej.type.SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
+        }
+        public string getPreferredJsonLayout() {
+            if (isSimpleContent()) {
+                return "simple-plus";
+            } else {
+                if (isEmptyContent()) {
+                    if (allowsAttributes()) {
+                        return "empty-plus";
+                    } else {
+                        return "empty";
+                    }
+                } else {
+                    if (isAllContent()) {
+                        return "record";
+                    } else {
+                        if (isMixedContent()) {
+                            return "mixed";
+                        } else {
+                            if (((containsElementWildcard() || (openContentMode == Saxon.Hej.type.OpenContentVariety.SUFFIX)) || (openContentMode == Saxon.Hej.type.OpenContentVariety.INTERLEAVE))) {
+                                return "sequence";
+                            } else {
+                                Saxon.Hej.z.IntHashSet children = new Saxon.Hej.z.IntHashSet();
+                                try {
+                                    gatherAllPermittedChildren(children, false);
+                                } catch (Saxon.Hej.type.SchemaException e) {
+                                    return "mixed";
+                                }
+                                if ((children.size() == 1)) {
+                                    Saxon.Hej.z.IntIterator iter = children.iterator();
+                                    iter.hasNext();
+                                    int fp = iter.next();
+                                    int card = getElementParticleCardinality(fp, true);
+                                    if (Saxon.Hej.value.Cardinality.allowsMany(card)) {
+                                        return ((((allowsAttributes() ? "list-plus" : "list"))+"/")+fp);
+                                    } else {
+                                        return "record";
+                                    }
+                                } else {
+                                    return "sequence";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     
     }

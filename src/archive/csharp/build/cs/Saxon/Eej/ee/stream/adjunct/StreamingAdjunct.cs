@@ -90,7 +90,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 } else {
                     if ((exp is Saxon.Hej.expr.LetExpression)) {
                         Saxon.Hej.expr.Expression action = ((Saxon.Hej.expr.LetExpression)(exp)).getAction();
-                        if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(action) != null) && (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING))) {
+                        if (((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(action) != null) && (Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING))) {
                             return new Saxon.Eej.ee.stream.adjunct.LetExpressionAdjunctB();
                         } else {
                             return new Saxon.Eej.ee.stream.adjunct.LetExpressionAdjunct();
@@ -102,7 +102,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                             if ((exp is Saxon.Hej.expr.SystemFunctionCall)) {
                                 Saxon.Hej.expr.SystemFunctionCall call = (Saxon.Hej.expr.SystemFunctionCall)(exp);
                                 string streamerName = call.getTargetFunction().getStreamerName();
-                                Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = /*134*/Saxon.Eej.ee.stream.StreamerMap.getStreamingAdjunct(streamerName);
+                                Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = Saxon.Eej.ee.stream.StreamerMap.getStreamingAdjunct(streamerName);
                                 if ((sa == null)) {
                                     if ((call.getTargetFunction() is Saxon.Hej.functions.ContextItemAccessorFunction)) {
                                         Saxon.Hej.expr.Expression e2 = ((Saxon.Hej.functions.ContextItemAccessorFunction)(call.getTargetFunction())).makeContextItemExplicit();
@@ -122,28 +122,28 @@ namespace Saxon.Eej.ee.stream.adjunct {
                                             return new Saxon.Eej.ee.stream.adjunct.FilterFunctionCallAdjunct();
                                         } else {
                                             if ((ability == Saxon.Hej.trans.FunctionStreamability.ABSORBING)) {
-                                                if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
+                                                if (((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                                                     return new Saxon.Eej.ee.stream.adjunct.StreamingAdjunct();
                                                 } else {
                                                     return new Saxon.Eej.ee.stream.adjunct.AbsorbingFunctionCallAdjunct();
                                                 }
                                             } else {
                                                 if ((ability == Saxon.Hej.trans.FunctionStreamability.SHALLOW_DESCENT)) {
-                                                    if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
+                                                    if (((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                                                         return new Saxon.Eej.ee.stream.adjunct.StreamingAdjunct();
                                                     } else {
                                                         return new Saxon.Eej.ee.stream.adjunct.ShallowDescentFunctionCallAdjunct();
                                                     }
                                                 } else {
                                                     if ((ability == Saxon.Hej.trans.FunctionStreamability.DEEP_DESCENT)) {
-                                                        if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
+                                                        if (((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                                                             return new Saxon.Eej.ee.stream.adjunct.StreamingAdjunct();
                                                         } else {
                                                             return new Saxon.Eej.ee.stream.adjunct.DeepDescentFunctionCallAdjunct();
                                                         }
                                                     } else {
                                                         if ((ability == Saxon.Hej.trans.FunctionStreamability.ASCENT)) {
-                                                            if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
+                                                            if (((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(ufc.getArg(0)) != null) && (Saxon.Eej.ee.stream.Streamability.getPosture(ufc.getArg(0)) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                                                                 return new Saxon.Eej.ee.stream.adjunct.StreamingAdjunct();
                                                             } else {
                                                                 return new Saxon.Eej.ee.stream.adjunct.AscentFunctionCallAdjunct();
@@ -193,14 +193,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public virtual Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.Expression exp = getExpression();
             System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> ops = exp.operands();
-            return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, ops, contextInfo, reasons);
+            return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, ops, contextInfo, reasons);
         }
         public static int findConsumingArg(Saxon.Hej.expr.Expression expression, int knownConsumingArg) {
             if ((knownConsumingArg == -1)) {
                 int i = 0;
                 int arg = 0;
                 foreach (Saxon.Hej.expr.Operand o in expression.operands()) {
-                    if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                    if ((Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                         arg = i;
                     }
                     i++;
@@ -217,7 +217,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return null;
         }
         public virtual Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
-            Saxon.Eej.ee.stream.Posture posture = /*134*/Saxon.Eej.ee.stream.Streamability.getPosture(getExpression());
+            Saxon.Eej.ee.stream.Posture posture = Saxon.Eej.ee.stream.Streamability.getPosture(getExpression());
             if (((posture == Saxon.Eej.ee.stream.Posture.STRIDING) || (posture == Saxon.Eej.ee.stream.Posture.CRAWLING))) {
                 throw new Saxon.Hej.trans.XPathException(("No watch implemented for "+getExpression().getExpressionName()), Saxon.Hej.trans.SaxonErrorCode.SXST0067, getExpression().getLocation());
             }
@@ -250,7 +250,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.expr.ConsumingOperand co = new Saxon.Hej.expr.ConsumingOperand(proxy);
             streamingOp.setChildExpression(co);
             co.getOperand().setOperandRole(new Saxon.Hej.expr.OperandRole(0, streamingOp.getUsage()));
-            /*134*/Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(co, /*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(proxy));
+            Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(co, Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(proxy));
             return new Saxon.Eej.ee.stream.feed.FeedMakerDelegate((watchManager, @out, context) => new Saxon.Eej.ee.stream.feed.BufferingFeed(getExpression(), @out, context));
         }
         public static string genId(Saxon.Hej.om.NodeInfo node) {
@@ -265,8 +265,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
             private Saxon.Eej.ee.stream.StreamInstr stream;
             public override Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
-                /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(/*extraParam*/stream.getHref(), /*localparam*/contextInfo, /*localparam*/reasons);
-                return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.GROUNDED, /*134*/Saxon.Eej.ee.stream.Streamability.getSweep(/*extraParam*/stream.getHref()));
+                Saxon.Eej.ee.stream.Streamability.getStreamability(/*extraParam*/stream.getHref(), /*localparam*/contextInfo, /*localparam*/reasons);
+                return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.GROUNDED, Saxon.Eej.ee.stream.Streamability.getSweep(/*extraParam*/stream.getHref()));
             }
         }
 

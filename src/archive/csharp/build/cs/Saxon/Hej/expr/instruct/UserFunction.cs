@@ -16,6 +16,7 @@ namespace Saxon.Hej.expr.instruct {
         private Saxon.Hej.value.SequenceType resultType;
         private Saxon.Hej.value.SequenceType declaredResultType;
         protected internal Saxon.Hej.expr.elab.SequenceEvaluator bodyEvaluator = null;
+        protected internal Saxon.Hej.expr.elab.PushEvaluator pushEvaluator = null;
         private bool updating = false;
         private int inlineable = -1;
         private int inliningCount = 0;
@@ -37,21 +38,26 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.om.StructuredQName name = getFunctionName();
             if (name.hasURI(Saxon.Hej.om.NamespaceUri.ANONYMOUS)) {
                 bool first = true;
-                Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder("function(");
-                foreach (Saxon.Hej.expr.instruct.UserFunctionParameter param in getParameterDefinitions()) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        sb.append(", ");
+                Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder("function");
+                if (((getParameterDefinitions().Length != 1) || !(getParameterDefinitions()[0].getVariableQName().getEQName().Equals(saxonDotEqName)))) {
+                    sb.append("(");
+                    foreach (Saxon.Hej.expr.instruct.UserFunctionParameter param in getParameterDefinitions()) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            sb.append(", ");
+                        }
+                        sb.append("$").append(param.getVariableQName().getDisplayName());
                     }
-                    sb.append("$").append(param.getVariableQName().getDisplayName());
+                    sb.append(")");
                 }
-                sb.append("){");
+                sb.append("{");
                 Saxon.Hej.expr.Expression body = getBody();
                 if ((body == null)) {
                     sb.append("...");
                 } else {
-                    sb.append(body.toShortString());
+                    string bodyText = body.toShortString().Replace("$saxon:dot!", "");
+                    sb.append(bodyText);
                 }
                 sb.append("}");
                 return sb.ToString();
@@ -59,6 +65,7 @@ namespace Saxon.Hej.expr.instruct {
                 return name.getDisplayName();
             }
         }
+        private static string saxonDotEqName = (("Q{"+Saxon.Hej.om.NamespaceUri.SAXON)+"}dot");
         public override string getTracingTag() {
             return "xsl:function";
         }
@@ -145,7 +152,7 @@ namespace Saxon.Hej.expr.instruct {
             if ((tailRecursive || (declaredStreamability != Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED))) {
                 bodyEvaluator = getBody().makeElaborator().eagerly();
             } else {
-                bodyEvaluator = getBody().makeElaborator().lazily(true);
+                bodyEvaluator = getBody().makeElaborator().lazily(true, false);
             }
         }
         public Saxon.Ejava.util.Optional<bool> isInlineable() {
@@ -298,8 +305,10 @@ namespace Saxon.Hej.expr.instruct {
             return c2;
         }
         public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] actualArgs) {
-            if ((bodyEvaluator == null)) {
-                computeEvaluationMode();
+            lock (this) {
+                if ((bodyEvaluator == null)) {
+                    computeEvaluationMode();
+                }
             }
             Saxon.Hej.expr.XPathContextMajor c2 = (Saxon.Hej.expr.XPathContextMajor)(context);
             c2.setStackFrame(getStackFrameMap(), actualArgs);
@@ -318,7 +327,12 @@ namespace Saxon.Hej.expr.instruct {
         }
         public void process(Saxon.Hej.expr.XPathContextMajor context, Saxon.Hej.om.Sequence[] actualArgs, Saxon.Hej.@event.Outputter output) {
             context.setStackFrame(getStackFrameMap(), actualArgs);
-            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/getBody().makeElaborator().elaborateForPush()(output, context);
+            lock (this) {
+                if ((pushEvaluator == null)) {
+                    pushEvaluator = getBody().makeElaborator().elaborateForPush();
+                }
+            }
+            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/pushEvaluator(output, context);
             Saxon.Hej.expr.Expression.dispatchTailCall(tc);
         }
         public Saxon.Hej.om.Sequence call(Saxon.Hej.om.Sequence[] actualArgs, Saxon.Hej.Controller controller) {

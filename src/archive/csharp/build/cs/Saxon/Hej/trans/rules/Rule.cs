@@ -140,7 +140,7 @@ namespace Saxon.Hej.trans.rules {
             }
         }
         public bool matches(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContextMajor context) {
-            return (alwaysMatches || pattern.matches(item, context));
+            return (alwaysMatches || pattern.matchesItem(item, context));
         }
     
     }

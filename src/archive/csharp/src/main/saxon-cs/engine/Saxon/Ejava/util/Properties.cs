@@ -38,9 +38,11 @@ namespace Saxon.Ejava.util {
             dict.Clear();
         }
 
-        // public Enumeration<string> propertyNames() {
-        //     throw new UnsupportedOperationException("not yet implemented");
-        // }
+        public void putAll(Properties existing) {
+            foreach (var kvp in existing.dict) {
+                dict.Add(kvp.Key, kvp.Value);
+            }
+        }
         
         public IEnumerable<string> stringPropertyNames() {
             return dict.Keys;

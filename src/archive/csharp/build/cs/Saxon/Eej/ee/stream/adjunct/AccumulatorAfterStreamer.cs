@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     
         private class Inner_ItemFeed_2 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly AccumulatorAfterStreamer outerInstance;
-            public Inner_ItemFeed_2(AccumulatorAfterStreamer outerInstance, /*AB*/Saxon.Hej.expr.Expression arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_ItemFeed_2(AccumulatorAfterStreamer outerInstance, Saxon.Hej.expr.Expression arg1, Saxon.Eej.ee.stream.feed.ItemFeed arg2, Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
             }
             public override void append(Saxon.Hej.om.Item item) {

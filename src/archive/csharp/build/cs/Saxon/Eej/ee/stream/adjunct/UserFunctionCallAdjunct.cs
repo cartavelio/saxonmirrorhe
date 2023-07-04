@@ -24,7 +24,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
               case Saxon.Hej.trans.FunctionStreamability.InnerEnum.ASCENT:
                 {
                     operanda[0].setUsage(Saxon.Hej.expr.OperandUsage.INSPECTION);
-                    Saxon.Eej.ee.stream.PostureAndSweep ps0 = /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
+                    Saxon.Eej.ee.stream.PostureAndSweep ps0 = Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
                     if (((ps0.getPosture() == Saxon.Eej.ee.stream.Posture.ROAMING) || (ps0.getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS))) {
                         return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
                     }
@@ -36,12 +36,12 @@ namespace Saxon.Eej.ee.stream.adjunct {
               case Saxon.Hej.trans.FunctionStreamability.InnerEnum.FILTER:
                 {
                     operanda[0].setUsage(Saxon.Hej.expr.OperandUsage.TRANSMISSION);
-                    return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
+                    return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
                 }
               case Saxon.Hej.trans.FunctionStreamability.InnerEnum.INSPECTION:
                 {
                     operanda[0].setUsage(Saxon.Hej.expr.OperandUsage.INSPECTION);
-                    return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
+                    return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, Saxon.Ejava.util.Arrays.asList(operanda), contextInfo, reasons);
                 }
               case Saxon.Hej.trans.FunctionStreamability.InnerEnum.SHALLOW_DESCENT:
                 throw new Saxon.Ejava.lang.AssertionError();

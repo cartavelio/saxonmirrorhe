@@ -50,7 +50,7 @@ namespace Saxon.Eej.ee.extfn.js {
             @object = typeCheck("object", @object);
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
-            Saxon.Hej.expr.Expression e = /*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("set-attribute", 3).makeFunctionCall(name, select, @object);
+            Saxon.Hej.expr.Expression e = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("set-attribute", 3).makeFunctionCall(name, select, @object);
             e.setRetainedStaticContext(makeRetainedStaticContext());
             return e;
         }

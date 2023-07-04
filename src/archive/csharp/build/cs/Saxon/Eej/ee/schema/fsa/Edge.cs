@@ -61,7 +61,7 @@ namespace Saxon.Eej.ee.schema.fsa {
                 bool elementTypeOK = true;
                 string reason = null;
                 if (subType.isSimpleType()) {
-                    reason = /*134*/Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(((Saxon.Hej.type.SimpleType)(subType)), baseType, 0);
+                    reason = Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(((Saxon.Hej.type.SimpleType)(subType)), baseType, 0);
                     elementTypeOK = ((reason == null));
                 } else {
                     while (!(baseType.isSameType(subType))) {
@@ -229,7 +229,7 @@ namespace Saxon.Eej.ee.schema.fsa {
                 return THE_INSTANCE;
             }
             public override Saxon.Eej.ee.schema.Term getTerm() {
-                return /*134*/Saxon.Eej.ee.schema.fsa.Edge.MaxOccursTerm.getInstance();
+                return Saxon.Eej.ee.schema.fsa.Edge.MaxOccursTerm.getInstance();
             }
         
         }

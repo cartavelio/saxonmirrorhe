@@ -106,7 +106,7 @@ namespace Saxon.Eej.ee.validate {
                     }
                 }
             }
-            Saxon.Eej.ee.validate.SelectorWatch.ValueEntry entry = /*134*/Saxon.Eej.ee.validate.SelectorWatch.ValueEntry.makeValueEntry(currentRow);
+            Saxon.Eej.ee.validate.SelectorWatch.ValueEntry entry = Saxon.Eej.ee.validate.SelectorWatch.ValueEntry.makeValueEntry(currentRow);
             if (table.ContainsKey(entry)) {
                 int flags = Saxon.Impl.Helpers.MapUtils.Get(table, entry);
                 if (isTarget) {

@@ -10,7 +10,7 @@ namespace Saxon.Eej.ee.stream {
                 return route;
             }
             route = new Saxon.Eej.ee.stream.Inversion();
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(exp) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+            if ((Saxon.Eej.ee.stream.Streamability.getSweep(exp) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                 Saxon.Eej.ee.stream.Inversion.PushAction action = makePushAction(exp, forGrouping);
                 route.append(action);
                 if ((action.watchMaker == null)) {
@@ -23,7 +23,7 @@ namespace Saxon.Eej.ee.stream {
                     throw err;
                 }
             } else {
-                if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(exp) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
+                if ((Saxon.Eej.ee.stream.Streamability.getSweep(exp) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                     if (route.getRoute().Count==0) {
                         Saxon.Eej.ee.stream.Inversion.PushAction action = new Saxon.Eej.ee.stream.Inversion.PushAction();
                         action.watchMaker = (watchManager, @out, context) => {
@@ -47,7 +47,7 @@ namespace Saxon.Eej.ee.stream {
             foreach (Saxon.Hej.expr.Operand info in parent.operands()) {
                 Saxon.Hej.expr.Expression child = info.getChildExpression();
                 if (info.hasSameFocus()) {
-                    Saxon.Eej.ee.stream.Sweep sweep = /*134*/Saxon.Eej.ee.stream.Streamability.getSweep(child);
+                    Saxon.Eej.ee.stream.Sweep sweep = Saxon.Eej.ee.stream.Streamability.getSweep(child);
                     if ((sweep == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                         if ((firstStreamingChild != null)) {
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((((("Expression "+parent.getExpressionName())+" has more than one subexpression that reads descendants. ")+"The first is ")+firstStreamingChild)+"; the second is ")+child), Saxon.Hej.trans.SaxonErrorCode.SXST0060);
@@ -87,10 +87,10 @@ namespace Saxon.Eej.ee.stream {
         }
         private static Saxon.Eej.ee.stream.Inversion.PushAction makePushAction(Saxon.Hej.expr.Expression exp, bool forGrouping) {
             Saxon.Hej.Configuration config = exp.getConfiguration();
-            Saxon.Hej.expr.Operand consumingChild = /*134*/Saxon.Eej.ee.stream.Streamability.getConsumingOperand(exp);
+            Saxon.Hej.expr.Operand consumingChild = Saxon.Eej.ee.stream.Streamability.getConsumingOperand(exp);
             Saxon.Eej.ee.stream.Inversion.PushAction action = new Saxon.Eej.ee.stream.Inversion.PushAction();
             action.expression = exp;
-            action.adjunct = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, exp);
+            action.adjunct = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, exp);
             action.watchMaker = action.adjunct.getWatchMaker(forGrouping);
             if ((action.watchMaker != null)) {
                 exp.setEvaluationMethod(Saxon.Hej.expr.Expression.WATCH_METHOD);
@@ -103,14 +103,14 @@ namespace Saxon.Eej.ee.stream {
                     return action;
                 } else {
                     System.Collections.Generic.IList<string> failures = new System.Collections.Generic.List<string>();
-                    Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(exp, config, failures);
+                    Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(exp, config, failures);
                     if ((selection != null)) {
                         if (!(forGrouping)) {
                             config.getLogger().warning((((("** Warning: implicit copy generated for "+exp.toShortString())+" at line ")+exp.getLocation().getLineNumber())+" **"));
                         }
                         bool matchWholeGroup = ((exp is Saxon.Hej.functions.CurrentGroupCall) && forGrouping);
                         action.watchMaker = (watchManager, @out, context) => {
-                            Saxon.Eej.ee.stream.watch.Trigger trigger = /*134*/Saxon.Eej.ee.stream.feed.CopyOfFeed.getWatch(@out, selection, watchManager, context);
+                            Saxon.Eej.ee.stream.watch.Trigger trigger = Saxon.Eej.ee.stream.feed.CopyOfFeed.getWatch(@out, selection, watchManager, context);
                             trigger.setMatchCurrentGroup(matchWholeGroup);
                             return trigger;
                         } ;

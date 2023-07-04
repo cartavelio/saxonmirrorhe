@@ -195,12 +195,12 @@ namespace Saxon.Hej.tree.util {
             Saxon.Hej.om.NodeInfo target = node;
             if (!(knownToMatch)) {
                 while (true) {
-                    if (count.matches(target, context)) {
+                    if (count.matchesItem(target, context)) {
                         if ((from == null)) {
                             break ;
                         } else {
                             Saxon.Hej.om.NodeInfo anc = target;
-                            while (!(from.matches(anc, context))) {
+                            while (!(from.matchesItem(anc, context))) {
                                 anc = anc.getParent();
                                 if ((anc == null)) {
                                     return 0;
@@ -209,7 +209,7 @@ namespace Saxon.Hej.tree.util {
                             break ;
                         }
                     } else {
-                        if (((from != null) && from.matches(target, context))) {
+                        if (((from != null) && from.matchesItem(target, context))) {
                             return 0;
                         } else {
                             target = target.getParent();
@@ -228,7 +228,7 @@ namespace Saxon.Hej.tree.util {
                 if ((p == null)) {
                     return i;
                 }
-                if ((alreadyChecked || count.matches(p, context))) {
+                if ((alreadyChecked || count.matchesItem(p, context))) {
                     i++;
                 }
             }
@@ -255,7 +255,7 @@ namespace Saxon.Hej.tree.util {
                 }
                 num = 1;
             } else {
-                if (count.matches(node, context)) {
+                if (count.matchesItem(node, context)) {
                     num = 1;
                 }
             }
@@ -269,7 +269,7 @@ namespace Saxon.Hej.tree.util {
                     filter = Saxon.Hej.pattern.AnyNodeTest.getInstance();
                 }
             }
-            if (((from != null) && from.matches(node, context))) {
+            if (((from != null) && from.matchesItem(node, context))) {
                 return num;
             }
             Saxon.Hej.om.SequenceIterator preceding = node.iterateAxis(Saxon.Hej.om.AxisInfo.PRECEDING_OR_ANCESTOR, filter);
@@ -278,14 +278,14 @@ namespace Saxon.Hej.tree.util {
                 if ((prev == null)) {
                     break ;
                 }
-                if (count.matches(prev, context)) {
+                if (count.matchesItem(prev, context)) {
                     if (((num == 1) && prev.Equals(memoNode))) {
                         num = (memoNumber+1);
                         break ;
                     }
                     num++;
                 }
-                if (((from != null) && from.matches(prev, context))) {
+                if (((from != null) && from.matchesItem(prev, context))) {
                     break ;
                 }
             }
@@ -308,11 +308,11 @@ namespace Saxon.Hej.tree.util {
             }
             Saxon.Hej.om.NodeInfo curr = node;
             while (true) {
-                if (count.matches(curr, context)) {
+                if (count.matchesItem(curr, context)) {
                     int num = getNumberSingle(curr, count, null, context);
                     v.Insert(0, (long)(num));
                 }
-                if (((from != null) && from.matches(curr, context))) {
+                if (((from != null) && from.matchesItem(curr, context))) {
                     break ;
                 }
                 curr = curr.getParent();

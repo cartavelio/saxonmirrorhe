@@ -48,7 +48,12 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             getSequenceOp().typeCheck(visitor, contextInfo);
             Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
-            setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), requiredType, role, visitor.getStaticContext()));
+            if ((visitor.getStaticContext().getXPathVersion() == 40)) {
+                Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+                setSequence(tc.staticTypeCheck(getSequence(), requiredType, role, visitor));
+            } else {
+                setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), requiredType, role, visitor.getStaticContext()));
+            }
             Saxon.Hej.type.ItemType actualItemType = getSequence().getItemType();
             refineTypeInformation(actualItemType, getSequence().getCardinality(), ((getSequence() is Saxon.Hej.expr.Literal) ? ((Saxon.Hej.expr.Literal)(getSequence())).getGroundedValue() : null), getSequence().getSpecialProperties(), this);
             getActionOp().typeCheck(visitor, contextInfo);
@@ -180,10 +185,10 @@ namespace Saxon.Hej.expr {
                     setEvaluator(getSequence().makeElaborator().eagerly());
                 } else {
                     if (needsLazyEvaluation) {
-                        setEvaluator(getSequence().makeElaborator().lazily((getNominalReferenceCount()>1)));
+                        setEvaluator(getSequence().makeElaborator().lazily((getNominalReferenceCount()>1), needsLazyEvaluation));
                     } else {
                         if ((evaluator == null)) {
-                            setEvaluator(new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily((getNominalReferenceCount()>1))));
+                            setEvaluator(new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily((getNominalReferenceCount()>1), false)));
                         }
                     }
                 }
@@ -248,7 +253,7 @@ namespace Saxon.Hej.expr {
                 if (needsEagerEvaluation) {
                     setEvaluator(getSequence().makeElaborator().eagerly());
                 } else {
-                    setEvaluator(new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily((getNominalReferenceCount()>1))));
+                    setEvaluator(new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily((getNominalReferenceCount()>1), false)));
                 }
             }
             try {
@@ -358,10 +363,6 @@ namespace Saxon.Hej.expr {
             return new Saxon.Hej.expr.LetExpression.LetExprElaborator();
         }
         public class LetExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
-            private Saxon.Hej.expr.Expression finalAction;
-            private bool repeatable(Saxon.Hej.expr.LetExpression let) {
-                return (let.getNominalReferenceCount()>1);
-            }
             private Saxon.Hej.expr.elab.SequenceEvaluator makeSequenceEvaluator(Saxon.Hej.expr.LetExpression let) {
                 if ((let.evaluator != null)) {
                     return let.evaluator;
@@ -369,7 +370,7 @@ namespace Saxon.Hej.expr {
                 let.setEvaluator();
                 return let.evaluator;
             }
-            private Saxon.Hej.expr.elab.ItemEvaluator setAllVariables(Saxon.Hej.expr.LetExpression start) {
+            private Saxon.Hej.expr.elab.ItemEvaluator setAllVariables(Saxon.Hej.expr.LetExpression start, System.Collections.Generic.IList<Saxon.Hej.expr.Expression> finalAction) {
                 System.Collections.Generic.IList<Saxon.Hej.expr.LetExpression> setters = new System.Collections.Generic.List<Saxon.Hej.expr.LetExpression>();
                 setters.Add(start);
                 Saxon.Hej.expr.Expression next = start.getAction();
@@ -377,7 +378,7 @@ namespace Saxon.Hej.expr {
                     setters.Add((Saxon.Hej.expr.LetExpression)(next));
                     next = ((Saxon.Hej.expr.LetExpression)(next)).getAction();
                 }
-                finalAction = next;
+                finalAction.Add(next);
                 switch (setters.Count) {
                   case 1:
                     {
@@ -453,6 +454,9 @@ namespace Saxon.Hej.expr {
             }
             public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
                 Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
+                if (expr.needsLazyEvaluation) {
+                    return lazily(true, true);
+                }
                 Saxon.Hej.expr.elab.SequenceEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
                 Saxon.Hej.expr.elab.SequenceEvaluator actionEval = expr.getAction().makeElaborator().eagerly();
                 int slot = expr.getLocalSlotNumber();
@@ -460,8 +464,9 @@ namespace Saxon.Hej.expr {
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
                 Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
-                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
-                Saxon.Hej.expr.elab.PullEvaluator actionPull = finalAction.makeElaborator().elaborateForPull();
+                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> finalAction = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(1);
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr, finalAction);
+                Saxon.Hej.expr.elab.PullEvaluator actionPull = finalAction[0].makeElaborator().elaborateForPull();
                 return context => {
                     int savedOutputState = context.getTemporaryOutputState();
                     context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
@@ -472,8 +477,9 @@ namespace Saxon.Hej.expr {
             }
             public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
                 Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
-                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
-                Saxon.Hej.expr.elab.PushEvaluator actionPush = finalAction.makeElaborator().elaborateForPush();
+                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> finalAction = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(1);
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr, finalAction);
+                Saxon.Hej.expr.elab.PushEvaluator actionPush = finalAction[0].makeElaborator().elaborateForPush();
                 return (@out, context) => {
                     int savedOutputState = context.getTemporaryOutputState();
                     context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
@@ -484,8 +490,9 @@ namespace Saxon.Hej.expr {
             }
             public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
                 Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
-                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
-                Saxon.Hej.expr.elab.ItemEvaluator actionEval = finalAction.makeElaborator().elaborateForItem();
+                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> finalAction = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(1);
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr, finalAction);
+                Saxon.Hej.expr.elab.ItemEvaluator actionEval = finalAction[0].makeElaborator().elaborateForItem();
                 return context => {
                     int savedOutputState = context.getTemporaryOutputState();
                     context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
@@ -496,8 +503,9 @@ namespace Saxon.Hej.expr {
             }
             public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
                 Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
-                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
-                Saxon.Hej.expr.elab.UpdateEvaluator actionEval = finalAction.makeElaborator().elaborateForUpdate();
+                System.Collections.Generic.IList<Saxon.Hej.expr.Expression> finalAction = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>(1);
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr, finalAction);
+                Saxon.Hej.expr.elab.UpdateEvaluator actionEval = finalAction[0].makeElaborator().elaborateForUpdate();
                 return (context, pul) => {
                     int savedOutputState = context.getTemporaryOutputState();
                     context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);

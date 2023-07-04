@@ -16,7 +16,7 @@ namespace Saxon.Eej.functions.qt4 {
                 if ((((range.getStep() == 1L) && (System.Math.Abs(range.getStart())<System.Int32.MaxValue)) && (System.Math.Abs(range.getEnd())<System.Int32.MaxValue))) {
                     int start = (int)(range.getStart());
                     if ((start>0)) {
-                        return new Saxon.Hej.om.LazySequence(Saxon.Hej.expr.SubsequenceIterator.make(arguments[0].iterate(), start, ((start-1)+(int)(range.getEnd()))));
+                        return new Saxon.Hej.om.LazySequence(Saxon.Hej.expr.SubsequenceIterator.make(arguments[0].iterate(), start, (int)(range.getEnd())));
                     }
                 }
             }

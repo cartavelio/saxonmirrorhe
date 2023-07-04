@@ -6,7 +6,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public override Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.Expression exp = getExpression();
             System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> ops = exp.operands();
-            Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, ops, contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, ops, contextInfo, reasons);
             if (((ps.getSweep() == Saxon.Eej.ee.stream.Sweep.CONSUMING) && (ps.getPosture() != Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                 Saxon.Hej.expr.Expression fn = ((Saxon.Hej.expr.SystemFunctionCall)(exp)).getArg(1);
                 if (checkPredicateFunction(fn, reasons)) {
@@ -35,7 +35,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     first.setFunctionStreamability(Saxon.Hej.trans.FunctionStreamability.INSPECTION);
                     first.setRequiredType(new Saxon.Hej.value.SequenceType(first.getRequiredType().getPrimaryType(), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE));
                     Saxon.Hej.expr.Expression body = uf.getBody();
-                    Saxon.Eej.ee.stream.PostureAndSweep bodyPS = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(body, Saxon.Eej.ee.trans.ContextItemStaticInfoEE.ABSENT, reasons);
+                    Saxon.Eej.ee.stream.PostureAndSweep bodyPS = Saxon.Eej.ee.stream.Streamability.getStreamability(body, Saxon.Eej.ee.trans.ContextItemStaticInfoEE.ABSENT, reasons);
                     if (((bodyPS.getPosture() != Saxon.Eej.ee.stream.Posture.GROUNDED) || (bodyPS.getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS))) {
                         reasons.Add("The body of the predicate function must be grounded and motionless");
                         return false;

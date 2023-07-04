@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(inst, cie);
                 list.Add(new Saxon.Hej.expr.Operand(inst, cie, Saxon.Hej.expr.OperandRole.NAVIGATE));
             }
-            return /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(inst, list, contextInfo, reasons);
+            return Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(inst, list, contextInfo, reasons);
         }
     
     }

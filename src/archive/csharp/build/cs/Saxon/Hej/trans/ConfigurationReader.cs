@@ -525,7 +525,7 @@ namespace Saxon.Hej.trans {
             }
             Saxon.Hej.sxpath.IndependentContext env = new Saxon.Hej.sxpath.IndependentContext(targetConfig);
             env.setNamespaceResolver(nsMap);
-            Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser();
+            Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser(env);
             Saxon.Hej.om.GroundedValue value = null;
             try {
                 Saxon.Hej.expr.Expression exp = parser.parse(select, 0, Saxon.Hej.expr.parser.Token.EOF, env);

@@ -28,7 +28,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "processContents");
             if ((attValue != null)) {
-                if (/*134*/Saxon.Eej.ee.schema.sdoc.XSDAny.isProcessName(attValue)) {
+                if (Saxon.Eej.ee.schema.sdoc.XSDAny.isProcessName(attValue)) {
                     wildcard.getWildcard().setProcessContents(attValue);
                 } else {
                     invalidAttributeValue("processContents", attValue, null);

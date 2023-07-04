@@ -35,7 +35,7 @@ namespace Saxon.Hej.ma.json {
         public string reEscape(string val) {
             string escaped;
             if (escape) {
-                escaped = Saxon.Hej.ma.json.JsonReceiver.escape(val, true, value => ((((((value>=0) && (value<=0x1F))) || (((value>=0x7F) && (value<=unchecked((int)0x9F))))) || !(charChecker.test(value))) || ((value == 0x5C))));
+                escaped = Saxon.Hej.ma.json.JsonReceiver.escape(val, true, true, value => ((((((value>=0) && (value<=0x1F))) || (((value>=0x7F) && (value<=unchecked((int)0x9F))))) || !(charChecker.test(value))) || ((value == 0x5C))));
             } else {
                 Saxon.Ejava.lang.StringBuilder buffer = new Saxon.Ejava.lang.StringBuilder(val);
                 handleInvalidCharacters(buffer);

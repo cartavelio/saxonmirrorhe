@@ -461,6 +461,10 @@ namespace Saxon.Eej.ee.schema {
                     if ((result && ((s is Saxon.Eej.ee.schema.sdoc.SimpleTypeDefinition)))) {
                         Saxon.Eej.ee.schema.UserSimpleType st = ((Saxon.Eej.ee.schema.sdoc.SimpleTypeDefinition)(s)).getWorkingType();
                         Saxon.Impl.Helpers.MapUtils.Put(typesByName, st.getTypeName(), st);
+                        Saxon.Eej.ee.schema.PreparedSchema superSchema = compiler.getConfiguration().getSuperSchema();
+                        if ((superSchema.getSchemaType(st.getTypeName()) == s)) {
+                            Saxon.Impl.Helpers.MapUtils.Put(superSchema.typesByName, st.getTypeName(), st);
+                        }
                     }
                 }
             }
@@ -481,7 +485,7 @@ namespace Saxon.Eej.ee.schema {
             if (@ref.isResolved()) {
                 return @ref.getTarget();
             } else {
-                string componentType = /*134*/Saxon.Eej.ee.schema.SymbolSpace.getSymbolSpaceName(@ref.getSymbolSpace());
+                string componentType = Saxon.Eej.ee.schema.SymbolSpace.getSymbolSpaceName(@ref.getSymbolSpace());
                 string reason = "has not been declared";
                 if (@ref.getTargetComponentName().hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                     reason = "is not defined in the XML Schema namespace";

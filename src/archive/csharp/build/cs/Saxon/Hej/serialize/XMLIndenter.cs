@@ -77,7 +77,7 @@ namespace Saxon.Hej.serialize {
                     len += (((name.getLocalPart().Length+att.getValue().Length)+4)+((prefix.Length==0 ? 4 : (prefix.Length+5))));
                 }
                 if ((len>getLineLength())) {
-                    int indent = ((((level-1))*getIndentation())+3);
+                    int indent = ((((level-1))*getIndentation())+2);
                     emitter.setIndentForNextAttribute(indent);
                 }
             }

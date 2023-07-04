@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return new Saxon.Eej.ee.stream.watch.Trigger(selection, makeItemFeed(watchManager, @out, context), context);
         }
         public override Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(getExpression()) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
+            if ((Saxon.Eej.ee.stream.Streamability.getPosture(getExpression()) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return new Saxon.Eej.ee.stream.adjunct.CurrentMergeGroupStreamer.GroupingFeed(@out, context);
             } else {
                 return @out;

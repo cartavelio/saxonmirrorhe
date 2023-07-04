@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             for (int i = 1; (i<operanda.getNumberOfOperands()); i++) {
                 operanda.getOperand(i).setUsage(Saxon.Hej.expr.Operand.typeDeterminedUsage(target.getArgumentType(i).getPrimaryType()));
             }
-            Saxon.Eej.ee.stream.PostureAndSweep ps0 = /*134*/Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, operanda, contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps0 = Saxon.Eej.ee.stream.Streamability.generalStreamabilityRules(exp, operanda, contextInfo, reasons);
             if ((ps0.getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                 reasons.Add("The sweep of the function is not motionless");
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;

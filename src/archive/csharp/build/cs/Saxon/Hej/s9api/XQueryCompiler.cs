@@ -108,6 +108,12 @@ namespace Saxon.Hej.s9api {
         public void declareNamespace(string prefix, string uri) {
             staticQueryContext.declareNamespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri));
         }
+        public Saxon.Api.UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
+            return staticQueryContext.getUnprefixedElementMatchingPolicy();
+        }
+        public void setUnprefixedElementMatchingPolicy(Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy) {
+            staticQueryContext.setUnprefixedElementMatchingPolicy(unprefixedElementMatchingPolicy);
+        }
         public void declareDefaultCollation(string uri) {
             staticQueryContext.declareDefaultCollation(uri);
         }

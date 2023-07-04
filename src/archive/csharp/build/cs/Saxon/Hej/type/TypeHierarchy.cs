@@ -133,7 +133,7 @@ namespace Saxon.Hej.type {
                 if ((requiredItemType == Saxon.Hej.type.AnyFunctionType.getInstance())) {
                     return iterator;
                 } else {
-                    Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer coercer = new Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer((Saxon.Hej.type.SpecificFunctionType)(requiredItemType), config, locator);
+                    Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer coercer = new Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer((Saxon.Hej.type.SpecificFunctionType)(requiredItemType), config, locator, false);
                     return new Saxon.Hej.expr.ItemMappingIterator(iterator, coercer, true);
                 }
             } else {
@@ -704,8 +704,8 @@ namespace Saxon.Hej.type {
                 throw new Saxon.Ejava.lang.IllegalArgumentException();
             }
         }
-        public virtual Saxon.Hej.type.ItemType getGenericFunctionItemType() {
-            return Saxon.Hej.type.AnyItemType.getInstance();
+        public Saxon.Hej.type.ItemType getGenericFunctionItemType() {
+            return Saxon.Hej.type.AnyFunctionType.getInstance();
         }
         private class ItemTypePair {
             internal Saxon.Hej.type.ItemType s;

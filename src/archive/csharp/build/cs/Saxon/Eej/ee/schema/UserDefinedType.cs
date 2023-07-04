@@ -110,7 +110,7 @@ namespace Saxon.Eej.ee.schema {
             finalProhibitions = finalValue;
         }
         public virtual void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType type, int block) {
-            /*134*/Saxon.Eej.ee.schema.UserComplexType.checkTypeDerivation((Saxon.Hej.type.ComplexType)(this), type, block);
+            Saxon.Eej.ee.schema.UserComplexType.checkTypeDerivation((Saxon.Hej.type.ComplexType)(this), type, block);
         }
         public void setContainingDeclaration(Saxon.Hej.om.StructuredQName declarationName, bool isElement) {
             containingDeclarationName = declarationName;

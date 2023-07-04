@@ -191,7 +191,7 @@ namespace Saxon.Hej.s9api {
 
         private class Inner_TreeReceiver_80 : Saxon.Hej.@event.TreeReceiver {
             private readonly AbstractXsltTransformer outerInstance;
-            public Inner_TreeReceiver_80(AbstractXsltTransformer outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.trans.XsltController controller, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.expr.instruct.GlobalParameterSet parameters) : base(arg1) {
+            public Inner_TreeReceiver_80(AbstractXsltTransformer outerInstance, Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.trans.XsltController controller, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.expr.instruct.GlobalParameterSet parameters) : base(arg1) {
                 this.outerInstance = outerInstance;
                 this.sourceTreeBuilder = sourceTreeBuilder;
                 this.controller = controller;

@@ -175,11 +175,6 @@ namespace Saxon.Hej.functions {
             }
         }
         public static Saxon.Hej.om.Sequence dynamicCall(Saxon.Hej.om.FunctionItem f, Saxon.Hej.expr.XPathContext context, params Saxon.Hej.om.Sequence[]  args) {
-            context = f.makeNewContext(context, null);
-            context.setCurrentOutputUri(null);
-            if ((context is Saxon.Hej.expr.XPathContextMajor)) {
-                ((Saxon.Hej.expr.XPathContextMajor)(context)).setCurrentRegexIterator(null);
-            }
             return f.call(context, args);
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {

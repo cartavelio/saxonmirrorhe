@@ -39,8 +39,8 @@ namespace Saxon.Hej.pattern {
         public override bool isMotionless() {
             Saxon.Eej.ee.trans.ContextItemStaticInfoEE cio = (Saxon.Eej.ee.trans.ContextItemStaticInfoEE)(getConfiguration().makeContextItemStaticInfo(getItemType(), false));
             cio.setContextPostureStriding();
-            /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(getPredicate(), cio, null);
-            return (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(getPredicate()) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS);
+            Saxon.Eej.ee.stream.Streamability.getStreamability(getPredicate(), cio, null);
+            return (Saxon.Eej.ee.stream.Streamability.getSweep(getPredicate()) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS);
         }
         public override bool matches(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context) {
             if ((predicateEvaluator == null)) {

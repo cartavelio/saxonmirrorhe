@@ -59,7 +59,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_SystemFunctionCall_5 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly NormalizeSpace_1 outerInstance;
-            public Inner_SystemFunctionCall_5(NormalizeSpace_1 outerInstance, NormalizeSpace_1 arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_5(NormalizeSpace_1 outerInstance, NormalizeSpace_1 arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext c) {

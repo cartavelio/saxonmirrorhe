@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.map {
-    public class SelfReferenceRecordTest : Saxon.Hej.type.AnyFunctionType, Saxon.Hej.ma.map.TupleType {
+    public class SelfReferenceRecordTest : Saxon.Hej.type.AnyFunctionType, Saxon.Hej.ma.map.RecordType {
         private readonly Saxon.Hej.ma.map.RecordTest containingType;
         public SelfReferenceRecordTest(Saxon.Hej.ma.map.RecordTest containingType)  {
             this.containingType = containingType;
@@ -61,8 +61,8 @@ namespace Saxon.Hej.ma.map {
         public override Saxon.Hej.type.Affinity relationship(Saxon.Hej.type.FunctionItemType other, Saxon.Hej.type.TypeHierarchy th) {
             return containingType.relationship(other, th);
         }
-        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
-            return new Saxon.Hej.type.SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
+        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role, bool allow40) {
+            return new Saxon.Hej.type.SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
         }
     
     }

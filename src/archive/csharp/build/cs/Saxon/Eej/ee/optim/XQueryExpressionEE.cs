@@ -49,7 +49,7 @@ namespace Saxon.Eej.ee.optim {
                     contextItemType = req.getRequiredItemType();
                 }
                 Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo = new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(contextItemType, false, Saxon.Eej.ee.stream.Posture.STRIDING);
-                Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(expression, contextInfo, reasons);
+                Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(expression, contextInfo, reasons);
                 if (((ps.getPosture() == Saxon.Eej.ee.stream.Posture.ROAMING) || (ps.getSweep() == Saxon.Eej.ee.stream.Sweep.FREE_RANGING))) {
                     Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(256);
                     fsb.append("Streaming is not possible. ");
@@ -59,7 +59,7 @@ namespace Saxon.Eej.ee.optim {
                     }
                     throw new Saxon.Hej.trans.XPathException(fsb.ToString(), "XTSE3430");
                 }
-                inversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(expression, false);
+                inversion = Saxon.Eej.ee.stream.Inversion.invertExpression(expression, false);
             }
             bool isUpdatingExpression = (mainModule.isUpdating() && expression.isUpdatingExpression());
             isUpdating = isUpdatingExpression;

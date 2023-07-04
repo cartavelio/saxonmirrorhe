@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 return getDefaultFeedMaker(consumingArg).makeItemFeed(watchManager, @out, context);
             }
             Saxon.Hej.expr.SystemFunctionCall call = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
-            Saxon.Eej.ee.stream.Posture posture = /*134*/Saxon.Eej.ee.stream.Streamability.getPosture(call.getArg(consumingArg));
+            Saxon.Eej.ee.stream.Posture posture = Saxon.Eej.ee.stream.Streamability.getPosture(call.getArg(consumingArg));
             if (((posture == Saxon.Eej.ee.stream.Posture.GROUNDED) || (posture == Saxon.Eej.ee.stream.Posture.CLIMBING))) {
                 return new Saxon.Eej.ee.stream.adjunct.DeepEqualStreamer.GroundedDeepEqualFeed(watchManager, call, @out, context, consumingArg);
             } else {

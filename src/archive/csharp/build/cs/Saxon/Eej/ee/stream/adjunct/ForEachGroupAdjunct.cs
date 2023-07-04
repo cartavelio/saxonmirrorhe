@@ -9,14 +9,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.expr.Expression action = exp.getActionExpression();
             Saxon.Hej.expr.Expression key = exp.getGroupingKey();
             int algorithm = exp.getAlgorithm();
-            Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(select, contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(select, contextInfo, reasons);
             if ((ps.getPosture() == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return base.computeStreamability(contextInfo, reasons);
             }
             Saxon.Eej.ee.trans.ContextItemStaticInfoEE info2 = new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(select.getItemType(), false, ps.getPosture());
             if ((algorithm == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY)) {
                 if (exp.isInFork()) {
-                    if ((/*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(key, info2, null).getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
+                    if ((Saxon.Eej.ee.stream.Streamability.getStreamability(key, info2, null).getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                         if ((reasons != null)) {
                             reasons.Add("The xsl:for-each-group/@group-by expression is not motionless");
                         }
@@ -30,7 +30,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 }
             }
             if ((algorithm == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ADJACENT)) {
-                if ((/*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(key, info2, null).getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
+                if ((Saxon.Eej.ee.stream.Streamability.getStreamability(key, info2, null).getSweep() != Saxon.Eej.ee.stream.Sweep.MOTIONLESS)) {
                     if ((reasons != null)) {
                         reasons.Add("The xsl:for-each-group/@group-adjacent expression is not motionless");
                     }
@@ -57,23 +57,23 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 }
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
             }
-            /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(action, info2, reasons);
-            if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(select) == Saxon.Eej.ee.stream.Posture.CRAWLING) && (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING))) {
+            Saxon.Eej.ee.stream.Streamability.getStreamability(action, info2, reasons);
+            if (((Saxon.Eej.ee.stream.Streamability.getPosture(select) == Saxon.Eej.ee.stream.Posture.CRAWLING) && (Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING))) {
                 if ((reasons != null)) {
                     reasons.Add("The xsl:for-each-group/@select expression has crawling posture (that is, it can select overlapping nodes)");
                 }
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
             }
-            return new Saxon.Eej.ee.stream.PostureAndSweep(/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(action), /*134*/Saxon.Eej.ee.stream.Streamability.wider(/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(select), /*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action)));
+            return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Streamability.getPosture(action), Saxon.Eej.ee.stream.Streamability.wider(Saxon.Eej.ee.stream.Streamability.getSweep(select), Saxon.Eej.ee.stream.Streamability.getSweep(action)));
         }
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.Configuration config = getConfiguration();
             Saxon.Hej.expr.Expression select = ((Saxon.Hej.expr.instruct.ForEachGroup)(getExpression())).getSelectExpression();
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(select) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
+            if ((Saxon.Eej.ee.stream.Streamability.getPosture(select) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return null;
             }
-            Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, config, null);
-            Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, select);
+            Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, config, null);
+            Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, select);
             Saxon.Eej.ee.stream.Inversion actionInversion = getActionInversion(true);
             if ((((Saxon.Hej.expr.instruct.ForEachGroup)(getExpression())).getAlgorithm() == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY)) {
                 return (watchManager, @out, context) => {
@@ -103,7 +103,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         }
         public override Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.instruct.ForEachGroup instruction = (Saxon.Hej.expr.instruct.ForEachGroup)(getExpression());
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(instruction.getSelectExpression()) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
+            if ((Saxon.Eej.ee.stream.Streamability.getPosture(instruction.getSelectExpression()) == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 if ((instruction.getAlgorithm() == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY)) {
                     return new Saxon.Eej.ee.stream.adjunct.ForEachGroupAdjunct.GroupedGroundedDistributedFeed(instruction, @out, context);
                 } else {

@@ -8,6 +8,8 @@ namespace Saxon.Hej.expr.number {
         public const int UPPER_CASE = 0;
         public const int LOWER_CASE = 1;
         public const int TITLE_CASE = 2;
+        public static int[] lowerCaseAlphabet = Saxon.Hej.str.StringTool.expand(new Saxon.Hej.str.Twine8("0123456789abcdefghijklmnopqrstuvwxyz"));
+        public static int[] upperCaseAlphabet = Saxon.Hej.str.StringTool.expand(new Saxon.Hej.str.Twine8("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
         public System.Globalization.CultureInfo defaultedLocale() {
             return null;
         }
@@ -27,6 +29,16 @@ namespace Saxon.Hej.expr.number {
             return format(number, picture, new Saxon.Hej.expr.number.RegularGroupFormatter(groupSize, groupSeparator, Saxon.Hej.str.EmptyUnicodeString.getInstance()), letterValue, cardinal, ordinal);
         }
         public string format(long number, Saxon.Hej.str.UnicodeString picture, Saxon.Hej.expr.number.NumericGroupFormatter numGroupFormatter, string letterValue, string cardinal, string ordinal) {
+            int[] digits = westernDigits;
+            if (((letterValue != null) && letterValue.StartsWith("x"))) {
+                int radix = Saxon.Impl.Helpers.Utils.ParseInt(letterValue.Substring(1));
+                digits = Saxon.Ejava.util.Arrays.copyOf(lowerCaseAlphabet, radix);
+            } else {
+                if (((letterValue != null) && letterValue.StartsWith("X"))) {
+                    int radix = Saxon.Impl.Helpers.Utils.ParseInt(letterValue.Substring(1));
+                    digits = Saxon.Ejava.util.Arrays.copyOf(upperCaseAlphabet, radix);
+                }
+            }
             if ((number<0)) {
                 return (""+number);
             }
@@ -36,11 +48,14 @@ namespace Saxon.Hej.expr.number {
             int pictureLength = picture.length32();
             Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(16);
             int formchar = picture.codePointAt(0);
+            if (((formchar == 'X') || (formchar == 'x'))) {
+                formchar = '0';
+            }
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(2);
             switch (formchar) {
               case '0':
               case '1':
-                sb.append(toRadical(number, westernDigits, pictureLength, numGroupFormatter));
+                sb.append(toRadical(number, digits, pictureLength, numGroupFormatter));
                 if (((ordinal != null) && !(ordinal.Length==0))) {
                     sb.append(ordinalSuffix(ordinal, number));
                 }
@@ -246,7 +261,7 @@ namespace Saxon.Hej.expr.number {
                 int digitValue = Saxon.Hej.expr.number.Alphanumeric.getDigitValue(formchar);
                 if ((digitValue>=0)) {
                     int zero = (formchar-digitValue);
-                    int[] digits = new int[10];
+                    digits = new int[10];
                     for (int z = 0; (z<=9); z++) {
                         digits[z] = (zero+z);
                     }

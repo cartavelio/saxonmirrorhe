@@ -355,7 +355,11 @@ namespace Saxon.Hej.expr {
                 if ((value.getLength() == 1)) {
                     return value.toShortString();
                 } else {
-                    return (((("("+value.head().toShortString())+", ...{")+value.getLength())+"})");
+                    if ((value.getLength() == 2)) {
+                        return (((("("+value.head().toShortString())+", ")+value.itemAt(1).toShortString())+")");
+                    } else {
+                        return (((((("("+value.head().toShortString())+", ")+value.itemAt(1).toShortString())+", ...{")+value.getLength())+"})");
+                    }
                 }
             }
         }
@@ -430,7 +434,7 @@ namespace Saxon.Hej.expr {
                 Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
                 return new Saxon.Hej.expr.elab.LiteralEvaluator(value);
             }
-            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable, bool lazyEvaluationRequired) {
                 return eagerly();
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {

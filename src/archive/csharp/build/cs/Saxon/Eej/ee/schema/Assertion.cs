@@ -159,7 +159,7 @@ namespace Saxon.Eej.ee.schema {
                   case "implementation":
                     return new Saxon.Hej.value.ObjectValue<Saxon.Eej.ee.schema.Assertion>(thisAssertion);
                   case "test":
-                    return /*134*/Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(conditionText, staticContext.getNamespaceResolver(), staticContext.getStaticBaseURI());
+                    return Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(conditionText, staticContext.getNamespaceResolver(), staticContext.getStaticBaseURI());
                   default:
                     return Saxon.Hej.value.EmptySequence.getInstance();
                 }

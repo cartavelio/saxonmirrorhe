@@ -25,7 +25,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
             }
             try {
-                facet = /*134*/Saxon.Eej.ee.schema.Facet.makeFacet(getLocalPart(), value, getSchema().getConfiguration(), makeNamespaceContext());
+                facet = Saxon.Eej.ee.schema.Facet.makeFacet(getLocalPart(), value, getSchema().getConfiguration(), makeNamespaceContext());
             } catch (Saxon.Hej.type.SchemaException err) {
                 error(err.Message);
                 return ;

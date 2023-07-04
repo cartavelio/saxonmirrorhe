@@ -45,9 +45,6 @@ namespace Saxon.Hej.expr {
         protected internal override int computeHashCode() {
             return (getBaseExpression().GetHashCode()^getSubscript().GetHashCode());
         }
-        protected internal override int computeCardinality() {
-            return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE;
-        }
         public override string getStreamerName() {
             return "SubscriptExpression";
         }

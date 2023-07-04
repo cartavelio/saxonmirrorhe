@@ -39,6 +39,9 @@ namespace Saxon.Hej.style {
                             } else {
                                 if ((Saxon.Hej.style.XSLResultDocument.fans.Contains(f) && !(f.Equals("output-version")))) {
                                     string val = value;
+                                    if (f.Equals(Saxon.Hej.lib.SaxonOutputKeys.ESCAPE_SOLIDUS)) {
+                                        requireXslt40Attribute(f);
+                                    }
                                     if ((!(f.Equals(Saxon.Hej.lib.SaxonOutputKeys.ITEM_SEPARATOR)) && !(f.Equals(Saxon.Hej.lib.SaxonOutputKeys.NEWLINE)))) {
                                         val = Saxon.Hej.value.Whitespace.trim(val);
                                     }

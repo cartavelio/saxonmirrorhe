@@ -30,7 +30,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_Optimized_3 : Saxon.Hej.expr.SystemFunctionCall.Optimized {
             private readonly EndsWith outerInstance;
-            public Inner_Optimized_3(EndsWith outerInstance, EndsWith arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_Optimized_3(EndsWith outerInstance, EndsWith arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {

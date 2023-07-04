@@ -29,15 +29,15 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
         }
         private static Saxon.Hej.pattern.Pattern makeStreamingPattern(Saxon.Hej.expr.Expression e, Saxon.Hej.Configuration config) {
-            if (((/*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(e) != null) && (/*134*/Saxon.Eej.ee.stream.Streamability.getPosture(e) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
+            if (((Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(e) != null) && (Saxon.Eej.ee.stream.Streamability.getPosture(e) == Saxon.Eej.ee.stream.Posture.GROUNDED))) {
                 return null;
             }
-            return /*134*/Saxon.Eej.ee.stream.Streamability.toStreamingPattern(e, config);
+            return Saxon.Eej.ee.stream.Streamability.toStreamingPattern(e, config);
         }
         public override Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.VennExpression exp = (Saxon.Hej.expr.VennExpression)(getExpression());
-            Saxon.Eej.ee.stream.PostureAndSweep ps0 = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getLhsExpression(), contextInfo, reasons);
-            Saxon.Eej.ee.stream.PostureAndSweep ps1 = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getRhsExpression(), contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps0 = Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getLhsExpression(), contextInfo, reasons);
+            Saxon.Eej.ee.stream.PostureAndSweep ps1 = Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getRhsExpression(), contextInfo, reasons);
             Saxon.Eej.ee.stream.Posture p0 = ps0.getPosture();
             Saxon.Eej.ee.stream.Posture p1 = ps1.getPosture();
             if (((ps0.getSweep() == Saxon.Eej.ee.stream.Sweep.FREE_RANGING) || (ps1.getSweep() == Saxon.Eej.ee.stream.Sweep.FREE_RANGING))) {
@@ -50,10 +50,10 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 return ps0;
             }
             if ((p0.Equals(Saxon.Eej.ee.stream.Posture.CLIMBING) && p1.Equals(Saxon.Eej.ee.stream.Posture.CLIMBING))) {
-                return new Saxon.Eej.ee.stream.PostureAndSweep(p0, /*134*/Saxon.Eej.ee.stream.Streamability.wider(ps0.getSweep(), ps1.getSweep()));
+                return new Saxon.Eej.ee.stream.PostureAndSweep(p0, Saxon.Eej.ee.stream.Streamability.wider(ps0.getSweep(), ps1.getSweep()));
             }
             if (((((p0 == Saxon.Eej.ee.stream.Posture.STRIDING) || (p0 == Saxon.Eej.ee.stream.Posture.CRAWLING))) && (((p1 == Saxon.Eej.ee.stream.Posture.STRIDING) || (p1 == Saxon.Eej.ee.stream.Posture.CRAWLING))))) {
-                return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.CRAWLING, /*134*/Saxon.Eej.ee.stream.Streamability.wider(ps0.getSweep(), ps1.getSweep()));
+                return new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.CRAWLING, Saxon.Eej.ee.stream.Streamability.wider(ps0.getSweep(), ps1.getSweep()));
             }
             if ((reasons != null)) {
                 reasons.Add((((((((("Operands of "+Saxon.Hej.expr.parser.Token.tokens[exp.getOperator()])+" expression on line ")+exp.getLocation().getLineNumber())+" have mixed posture (")+p0)+" | ")+p1)+")"));
@@ -62,13 +62,13 @@ namespace Saxon.Eej.ee.stream.adjunct {
         }
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.VennExpression exp = (Saxon.Hej.expr.VennExpression)(getExpression());
-            Saxon.Eej.ee.stream.Sweep s0 = /*134*/Saxon.Eej.ee.stream.Streamability.getSweep(exp.getLhsExpression());
-            Saxon.Eej.ee.stream.Sweep s1 = /*134*/Saxon.Eej.ee.stream.Streamability.getSweep(exp.getRhsExpression());
+            Saxon.Eej.ee.stream.Sweep s0 = Saxon.Eej.ee.stream.Streamability.getSweep(exp.getLhsExpression());
+            Saxon.Eej.ee.stream.Sweep s1 = Saxon.Eej.ee.stream.Streamability.getSweep(exp.getRhsExpression());
             bool bothConsuming = ((s0 == Saxon.Eej.ee.stream.Sweep.CONSUMING) && (s1 == Saxon.Eej.ee.stream.Sweep.CONSUMING));
             if (bothConsuming) {
                 if ((lhsInversion == null)) {
-                    lhsInversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getLhsExpression(), forGrouping);
-                    rhsInversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getRhsExpression(), forGrouping);
+                    lhsInversion = Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getLhsExpression(), forGrouping);
+                    rhsInversion = Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getRhsExpression(), forGrouping);
                 }
                 return (watchManager, @out, context) => new Saxon.Eej.ee.stream.watch.Trigger(Saxon.Hej.pattern.AnchorPattern.getInstance(), new Saxon.Eej.ee.stream.adjunct.VennExpressionAdjunct.VennTwoWayFeed(exp, this, @out, context, watchManager), context);
             } else {
@@ -344,14 +344,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
         }
         public override Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.VennExpression exp = (Saxon.Hej.expr.VennExpression)(getExpression());
-            Saxon.Eej.ee.stream.Sweep s0 = /*134*/Saxon.Eej.ee.stream.Streamability.getSweep(exp.getLhsExpression());
-            Saxon.Eej.ee.stream.Sweep s1 = /*134*/Saxon.Eej.ee.stream.Streamability.getSweep(exp.getRhsExpression());
+            Saxon.Eej.ee.stream.Sweep s0 = Saxon.Eej.ee.stream.Streamability.getSweep(exp.getLhsExpression());
+            Saxon.Eej.ee.stream.Sweep s1 = Saxon.Eej.ee.stream.Streamability.getSweep(exp.getRhsExpression());
             bool bothConsuming = ((s0 == Saxon.Eej.ee.stream.Sweep.CONSUMING) && (s1 == Saxon.Eej.ee.stream.Sweep.CONSUMING));
             bool a0consuming = (s0 == Saxon.Eej.ee.stream.Sweep.CONSUMING);
             if (bothConsuming) {
                 if ((lhsInversion == null)) {
-                    lhsInversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getLhsExpression(), false);
-                    rhsInversion = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getRhsExpression(), false);
+                    lhsInversion = Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getLhsExpression(), false);
+                    rhsInversion = Saxon.Eej.ee.stream.Inversion.invertExpression(exp.getRhsExpression(), false);
                 }
                 return new Saxon.Eej.ee.stream.adjunct.VennExpressionAdjunct.VennTwoWayFeed(exp, this, @out, context, watchManager);
             }

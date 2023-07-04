@@ -11,7 +11,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     
         private class Inner_FeedToEventBuffer_1 : Saxon.Eej.ee.stream.adjunct.FeedToEventBuffer {
             private readonly OnNonEmptyAdjunct outerInstance;
-            public Inner_FeedToEventBuffer_1(OnNonEmptyAdjunct outerInstance, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg1, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg2, /*AA*/Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
+            public Inner_FeedToEventBuffer_1(OnNonEmptyAdjunct outerInstance, Saxon.Eej.ee.stream.feed.ItemFeed arg1, Saxon.Eej.ee.stream.feed.ItemFeed arg2, Saxon.Hej.expr.XPathContext arg3) : base(arg1, arg2, arg3) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ void open(Saxon.Eej.ee.stream.watch.Terminator terminator) {

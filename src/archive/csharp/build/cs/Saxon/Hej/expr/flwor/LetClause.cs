@@ -11,7 +11,7 @@ namespace Saxon.Hej.expr.flwor {
         }
         public Saxon.Hej.expr.elab.SequenceEvaluator getEvaluator() {
             if ((variableEvaluator == null)) {
-                variableEvaluator = new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily(true));
+                variableEvaluator = new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily(true, false));
             }
             return variableEvaluator;
         }
@@ -59,7 +59,12 @@ namespace Saxon.Hej.expr.flwor {
         }
         public override void typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
-            setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), rangeVariable.getRequiredType(), role, visitor.getStaticContext()));
+            if ((visitor.getStaticContext().getXPathVersion()<40)) {
+                setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), rangeVariable.getRequiredType(), role, visitor.getStaticContext()));
+            } else {
+                Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+                setSequence(tc.staticTypeCheck(getSequence(), rangeVariable.getRequiredType(), role, visitor));
+            }
         }
         public override void gatherVariableReferences(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.Binding binding, System.Collections.Generic.IList<Saxon.Hej.expr.VariableReference> references) {
             Saxon.Hej.expr.parser.ExpressionTool.gatherVariableReferences(getSequence(), binding, references);

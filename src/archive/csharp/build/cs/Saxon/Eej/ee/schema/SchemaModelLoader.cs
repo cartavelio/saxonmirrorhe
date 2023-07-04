@@ -366,7 +366,7 @@ namespace Saxon.Eej.ee.schema {
                 env.setXPathLanguageLevel(20);
                 Saxon.Hej.pattern.Pattern selector;
                 try {
-                    selector = new Saxon.Eej.ee.schema.sdoc.SelectionParser().parseSelector(xpath, env, isField);
+                    selector = new Saxon.Eej.ee.schema.sdoc.SelectionParser(env).parseSelector(xpath, env, isField);
                 } catch (Saxon.Hej.trans.XPathException err) {
                     throw new Saxon.Hej.type.SchemaException(err);
                 }
@@ -535,7 +535,7 @@ namespace Saxon.Eej.ee.schema {
         private class SimpleTypeHandler : Saxon.Eej.ee.schema.SchemaModelLoader.SCMNodeHandler {
             private Saxon.Eej.ee.schema.UserSimpleType simpleType;
             public override Saxon.Eej.ee.schema.SchemaModelLoader.SCMNodeHandler handleChildElement(string localName) {
-                if ((/*134*/Saxon.Eej.ee.schema.Facet.isFacetName(localName, loader.config.getXsdVersion()) || localName.Equals("assert"))) {
+                if ((Saxon.Eej.ee.schema.Facet.isFacetName(localName, loader.config.getXsdVersion()) || localName.Equals("assert"))) {
                     return new Saxon.Eej.ee.schema.SchemaModelLoader.FacetHandler(simpleType);
                 } else {
                     if (localName.Equals("preprocess")) {
@@ -749,7 +749,7 @@ namespace Saxon.Eej.ee.schema {
                     if (namespaceSensitive) {
                         resolver = Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver);
                     }
-                    Saxon.Eej.ee.schema.Facet facet = /*134*/Saxon.Eej.ee.schema.Facet.makeFacet(localName, value, loader.config, resolver);
+                    Saxon.Eej.ee.schema.Facet facet = Saxon.Eej.ee.schema.Facet.makeFacet(localName, value, loader.config, resolver);
                     string @fixed = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "fixed");
                     if ((@fixed != null)) {
                         facet.setFixed(toBoolean(@fixed));

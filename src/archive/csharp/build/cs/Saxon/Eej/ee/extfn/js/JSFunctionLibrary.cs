@@ -10,8 +10,8 @@ namespace Saxon.Eej.ee.extfn.js {
             Saxon.Hej.om.StructuredQName fName = functionName.getComponentName();
             if (Saxon.Hej.om.NamespaceUri.GLOBAL_JS.Equals(fName.getNamespaceUri())) {
                 try {
-                    Saxon.Hej.expr.Expression windowCall = /*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
-                    Saxon.Hej.expr.Expression callCall = /*134*/Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("call", 3).makeFunctionCall(windowCall, new Saxon.Hej.expr.StringLiteral(fName.getLocalPart()), new Saxon.Hej.ma.arrays.SquareArrayConstructor(Saxon.Ejava.util.Arrays.asList(staticArgs)));
+                    Saxon.Hej.expr.Expression windowCall = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
+                    Saxon.Hej.expr.Expression callCall = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("call", 3).makeFunctionCall(windowCall, new Saxon.Hej.expr.StringLiteral(fName.getLocalPart()), new Saxon.Hej.ma.arrays.SquareArrayConstructor(Saxon.Ejava.util.Arrays.asList(staticArgs)));
                     callCall.setRetainedStaticContext(env.makeRetainedStaticContext());
                     return callCall;
                 } catch (Saxon.Hej.trans.XPathException e) {

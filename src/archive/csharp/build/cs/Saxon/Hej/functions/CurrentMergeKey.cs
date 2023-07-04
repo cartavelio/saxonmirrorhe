@@ -26,7 +26,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_SystemFunctionCall_3 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly CurrentMergeKey outerInstance;
-            public Inner_SystemFunctionCall_3(CurrentMergeKey outerInstance, CurrentMergeKey arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_3(CurrentMergeKey outerInstance, CurrentMergeKey arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.expr.Expression getScopingExpression() {

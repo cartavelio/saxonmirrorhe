@@ -28,7 +28,7 @@ namespace Saxon.Eej.ee.xtupdate {
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             getConfiguration().checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT, "saxon:modify", getPackageData().getLocalLicenseId());
             select = typeCheck("select", select);
-            /*134*/Saxon.Eej.ee.xtupdate.SaxonUpdate.checkContainment(this);
+            Saxon.Eej.ee.xtupdate.SaxonUpdate.checkContainment(this);
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             return new Saxon.Eej.ee.update.DeleteExpression(select);

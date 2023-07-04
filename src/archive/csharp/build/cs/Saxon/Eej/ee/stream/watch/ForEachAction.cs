@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.stream.watch {
         public ForEachAction(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression expression, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expression, result, context) {
             this.watchManager = watchManager;
             action = ((Saxon.Hej.expr.ContextSwitchingExpression)(expression)).getActionExpression();
-            actionIsConsuming = (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING);
+            actionIsConsuming = (Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING);
             if (((actionPuller == null) && !(actionIsConsuming))) {
                 actionPuller = action.makeElaborator().elaborateForPull();
             }
@@ -73,12 +73,12 @@ namespace Saxon.Eej.ee.stream.watch {
                 Saxon.Eej.ee.stream.watch.Watch watch = inversion.getWatch(watchManager, thisFeed, cxt);
                 if (watch.matchesNode((Saxon.Eej.ee.stream.om.FleetingParentNode)(it), cxt)) {
                     startSelectedNode((Saxon.Eej.ee.stream.om.FleetingNode)(it));
-                    watch.open(/*134*/Saxon.Eej.ee.stream.watch.Terminator.getInstance());
+                    watch.open(Saxon.Eej.ee.stream.watch.Terminator.getInstance());
                     watch.processItem(it);
                     watch.close();
                     endSelectedParentNode(Saxon.Hej.expr.parser.Loc.NONE);
                 } else {
-                    watch.open(/*134*/Saxon.Eej.ee.stream.watch.Terminator.getInstance());
+                    watch.open(Saxon.Eej.ee.stream.watch.Terminator.getInstance());
                     getWatchManager().addWatch(watch, true);
                 }
             } else {

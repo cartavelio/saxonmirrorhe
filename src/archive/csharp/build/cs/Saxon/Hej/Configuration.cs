@@ -253,6 +253,9 @@ namespace Saxon.Hej {
         public virtual string getLicenseFeature(string name) {
             return null;
         }
+        public virtual Saxon.Ejava.util.Properties getLicenseFeatures() {
+            return null;
+        }
         public virtual void displayLicenseMessage() {
         }
         public virtual int registerLocalLicense(string dmk) {
@@ -985,19 +988,19 @@ namespace Saxon.Hej {
         public virtual Saxon.Hej.@event.Receiver getAnnotationStripper(Saxon.Hej.@event.Receiver destination) {
             return destination;
         }
-        public virtual Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating) {
+        public virtual Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating, Saxon.Hej.expr.StaticContext env) {
             if ("XQ".Equals(language)) {
                 if (updating) {
                     throw new Saxon.Hej.trans.XPathException("XQuery Update is supported only in Saxon-EE");
                 } else {
-                    return new Saxon.Hej.query.XQueryParser();
+                    return new Saxon.Hej.query.XQueryParser(env);
                 }
             } else {
                 if ("XP".Equals(language)) {
-                    return new Saxon.Hej.expr.parser.XPathParser();
+                    return new Saxon.Hej.expr.parser.XPathParser(env);
                 } else {
                     if ("PATTERN".Equals(language)) {
-                        return new Saxon.Hej.pattern.PatternParser();
+                        return new Saxon.Hej.pattern.PatternParser(env);
                     } else {
                         throw new Saxon.Hej.trans.XPathException(("Unknown expression language "+language));
                     }
@@ -1151,7 +1154,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_441(this, source, config);
+                return new Inner_ActiveSource_442(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1530,8 +1533,8 @@ namespace Saxon.Hej {
                         getDefaultStaticQueryContext().setPreserveNamespaces(requireBoolean(name, value));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE:
-                        Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser();
                         Saxon.Hej.sxpath.IndependentContext env = new Saxon.Hej.sxpath.IndependentContext(this);
+                        Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser(env);
                         env.setXPathLanguageLevel(31);
                         try {
                             Saxon.Hej.value.SequenceType type = parser.parseSequenceType(value.ToString(), env);
@@ -1851,7 +1854,7 @@ namespace Saxon.Hej {
               case Saxon.Hej.lib.FeatureCode.XQUERY_SCHEMA_AWARE:
                 return getDefaultStaticQueryContext().isSchemaAware();
               case Saxon.Hej.lib.FeatureCode.XQUERY_VERSION:
-                return "3.1";
+                return ((getDefaultStaticQueryContext().getLanguageVersion() == 40) ? "4.0" : "3.1");
               case Saxon.Hej.lib.FeatureCode.XPATH_VERSION_FOR_XSD:
                 return xpathVersionForXsd;
               case Saxon.Hej.lib.FeatureCode.XPATH_VERSION_FOR_XSLT:
@@ -1921,9 +1924,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_441 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_442 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_441(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_442(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;

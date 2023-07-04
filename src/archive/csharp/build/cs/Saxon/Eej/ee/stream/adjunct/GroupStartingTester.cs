@@ -9,7 +9,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             pattern = (Saxon.Hej.pattern.Pattern)(expression.getGroupingKey());
         }
         public override bool notifyItem() {
-            return ((pos++ == 0) || pattern.matches(getLocalContext().getContextItem(), getLocalContext()));
+            return ((pos++ == 0) || pattern.matchesItem(getLocalContext().getContextItem(), getLocalContext()));
         }
     
     }

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions {
     public class FormatInteger : Saxon.Hej.functions.SystemFunction, Saxon.Hej.functions.StatefulSystemFunction {
-        private static readonly Saxon.Hej.regex.RegularExpression badHashPattern = Saxon.Hej.regex.ARegularExpression.compile("((\\d+|\\w+)#+.*)|(#+[^\\d]+)", "");
+        private static readonly Saxon.Hej.regex.RegularExpression badDecimalHashPattern = Saxon.Hej.regex.ARegularExpression.compile("(([\\dXx]+|\\w+)#+.*)|(#+[^\\dXx]+)", "");
         private static readonly Saxon.Hej.regex.RegularExpression modifierPattern = Saxon.Hej.regex.ARegularExpression.compile("([co](\\(.*\\))?)?[at]?", "");
         private static readonly Saxon.Hej.regex.RegularExpression decimalDigitPattern = Saxon.Hej.regex.ARegularExpression.compile("^((\\p{Nd}|#|[^\\p{N}\\p{L}])+?)$", "");
+        private static readonly Saxon.Hej.regex.RegularExpression nonDecimalDigitPattern = Saxon.Hej.regex.ARegularExpression.compile("^(([Xx#]|[^\\p{N}\\p{L}])+?)$", "");
         public const string preface = "In the picture string for format-integer, ";
         private System.Func<Saxon.Hej.value.IntegerValue,string> formatter = null;
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
@@ -22,7 +23,8 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.Configuration config = visitor.getConfiguration();
             string language = ((arguments.Length == 3) ? ((Saxon.Hej.expr.StringLiteral)(arguments[2])).getGroundedValue().getStringValue() : config.getDefaultLanguage());
             Saxon.Hej.lib.Numberer numb = config.makeNumberer(language, null);
-            formatter = makeFormatter(numb, ((Saxon.Hej.expr.StringLiteral)(arguments[1])).getGroundedValue().getStringValue());
+            bool allow40 = (visitor.getStaticContext().getPackageData().getHostLanguageVersion()>=40);
+            formatter = makeFormatter(numb, ((Saxon.Hej.expr.StringLiteral)(arguments[1])).getGroundedValue().getStringValue(), allow40);
             return base.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
         }
         public override Saxon.Hej.value.StringValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
@@ -30,6 +32,7 @@ namespace Saxon.Hej.functions {
         }
         private Saxon.Hej.value.StringValue formatInteger(Saxon.Hej.value.IntegerValue num, Saxon.Hej.value.StringValue picture, Saxon.Hej.value.StringValue language, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.Configuration config = context.getConfiguration();
+            bool allow40 = (getRetainedStaticContext().getPackageData().getHostLanguageVersion()>=40);
             if ((num == null)) {
                 return Saxon.Hej.value.StringValue.EMPTY_STRING;
             }
@@ -42,7 +45,7 @@ namespace Saxon.Hej.functions {
                     languageVal = config.getDefaultLanguage();
                 }
                 Saxon.Hej.lib.Numberer numb = config.makeNumberer(languageVal, null);
-                localFormatter = makeFormatter(numb, picture.getStringValue());
+                localFormatter = makeFormatter(numb, picture.getStringValue(), allow40);
             }
             try {
                 return new Saxon.Hej.value.StringValue(localFormatter(num));
@@ -50,9 +53,17 @@ namespace Saxon.Hej.functions {
                 throw e.getXPathException();
             }
         }
-        private System.Func<Saxon.Hej.value.IntegerValue,string> makeFormatter(Saxon.Hej.lib.Numberer numb, string pic) {
+        private System.Func<Saxon.Hej.value.IntegerValue,string> makeFormatter(Saxon.Hej.lib.Numberer numb, string pic, bool allow40) {
             if (pic.Length==0) {
                 throw new Saxon.Hej.trans.XPathException((preface+"the picture cannot be empty"), "FODF1310");
+            }
+            bool hasExplicitRadix = false;
+            int radix = 10;
+            if ((allow40 && System.Text.RegularExpressions.Regex.IsMatch(pic, "^([2-9]|[12][0-9]|3[0-6])\\^.*[xX].*$"))) {
+                int hat = pic.IndexOf('^');
+                radix = Saxon.Impl.Helpers.Utils.ParseInt(pic.Substring(0, hat - 0));
+                hasExplicitRadix = true;
+                pic = pic.Substring((hat+1));
             }
             string primaryToken;
             string modifier;
@@ -83,22 +94,30 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.str.UnicodeString primary = Saxon.Hej.str.StringView.tidy(primaryToken);
             Saxon.Hej.regex.charclass.Categories.Category isDecimalDigit = Saxon.Hej.regex.charclass.Categories.getCategory("Nd");
             bool isDecimalDigitPattern = false;
-            Saxon.Hej.z.IntIterator iter = primary.codePoints();
-            while (iter.hasNext()) {
-                if (isDecimalDigit.test(iter.next())) {
-                    isDecimalDigitPattern = true;
-                    break ;
+            if (hasExplicitRadix) {
+                if (!(nonDecimalDigitPattern.matches(primary))) {
+                    throw new Saxon.Hej.trans.XPathException(((((preface+"the primary format token with radix ")+radix)+" does not ")+"meet the rules for a non-decimal digit pattern"), "FODF1310");
                 }
-            }
-            if (isDecimalDigitPattern) {
-                if (!(decimalDigitPattern.matches(primary))) {
+                letterValue = ((((primary.indexOf('X')>=0) ? "X" : "x"))+radix);
+            } else {
+                Saxon.Hej.z.IntIterator iter = primary.codePoints();
+                while (iter.hasNext()) {
+                    if (isDecimalDigit.test(iter.next())) {
+                        isDecimalDigitPattern = true;
+                        break ;
+                    }
+                }
+                if ((isDecimalDigitPattern && !(decimalDigitPattern.matches(primary)))) {
                     throw new Saxon.Hej.trans.XPathException(((preface+"the primary format token contains a decimal digit but does not ")+"meet the rules for a decimal digit pattern"), "FODF1310");
                 }
-                Saxon.Hej.expr.number.NumericGroupFormatter picGroupFormat = getPicSeparators(primary);
+            }
+            if ((isDecimalDigitPattern || hasExplicitRadix)) {
+                Saxon.Hej.expr.number.NumericGroupFormatter picGroupFormat = getPicSeparators(primary, hasExplicitRadix);
                 Saxon.Hej.str.UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
+                string finalLetterValue = letterValue;
                 return num => {
                     try {
-                        string s = numb.format(num.abs().longValue(), adjustedPicture, picGroupFormat, letterValue, "", ordinalValue);
+                        string s = numb.format(num.abs().longValue(), adjustedPicture, picGroupFormat, finalLetterValue, "", ordinalValue);
                         return ((num.signum()<0) ? (("-"+s)) : s);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw new Saxon.Hej.trans.UncheckedXPathException(e);
@@ -106,9 +125,10 @@ namespace Saxon.Hej.functions {
                 } ;
             } else {
                 Saxon.Hej.str.UnicodeString token = Saxon.Hej.str.StringView.tidy(primaryToken);
+                string finalLetterValue = letterValue;
                 return num => {
                     try {
-                        string s = numb.format(num.abs().longValue(), token, null, letterValue, cardinalValue, ordinalValue);
+                        string s = numb.format(num.abs().longValue(), token, null, finalLetterValue, cardinalValue, ordinalValue);
                         return ((num.signum()<0) ? (("-"+s)) : s);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw new Saxon.Hej.trans.UncheckedXPathException(e);
@@ -116,7 +136,7 @@ namespace Saxon.Hej.functions {
                 } ;
             }
         }
-        public static Saxon.Hej.expr.number.NumericGroupFormatter getPicSeparators(Saxon.Hej.str.UnicodeString picExpanded) {
+        public static Saxon.Hej.expr.number.NumericGroupFormatter getPicSeparators(Saxon.Hej.str.UnicodeString picExpanded, bool hasExplicitRadix) {
             Saxon.Hej.z.IntSet groupingPositions = new Saxon.Hej.z.IntHashSet(5);
             System.Collections.Generic.IList<int> separatorList = new System.Collections.Generic.List<int>();
             int groupingPosition = 0;
@@ -124,7 +144,7 @@ namespace Saxon.Hej.functions {
             int lastGroupingPos = 0;
             bool regularCheck = true;
             int zeroDigit = -1;
-            if (badHashPattern.matches(picExpanded)) {
+            if (badDecimalHashPattern.matches(picExpanded)) {
                 throw new Saxon.Hej.trans.XPathException((preface+"the picture is not valid (it uses '#' where disallowed)"), "FODF1310");
             }
             for (long i = (picExpanded.length()-1); (i>=0); i--) {
@@ -140,10 +160,26 @@ namespace Saxon.Hej.functions {
                     }
                     groupingPosition++;
                     break ;
-                  case System.Globalization.UnicodeCategory.LetterNumber:
-                  case System.Globalization.UnicodeCategory.OtherNumber:
                   case System.Globalization.UnicodeCategory.UppercaseLetter:
                   case System.Globalization.UnicodeCategory.LowercaseLetter:
+                    if (!(hasExplicitRadix)) {
+                        break ;
+                    }
+                    if (((codePoint == 'x') || (codePoint == 'X'))) {
+                        if ((zeroDigit == -1)) {
+                            zeroDigit = codePoint;
+                        } else {
+                            if ((zeroDigit != codePoint)) {
+                                throw new Saxon.Hej.trans.XPathException((preface+"the picture mixes upper-case and lower-case non-decimal digits"), "FODF1310");
+                            }
+                        }
+                    } else {
+                        throw new Saxon.Hej.trans.XPathException((preface+"non-decimal digits must be indicated by 'x' or 'X'"), "FODF1310");
+                    }
+                    groupingPosition++;
+                    break ;
+                  case System.Globalization.UnicodeCategory.LetterNumber:
+                  case System.Globalization.UnicodeCategory.OtherNumber:
                   case System.Globalization.UnicodeCategory.ModifierLetter:
                   case System.Globalization.UnicodeCategory.OtherLetter:
                     break ;

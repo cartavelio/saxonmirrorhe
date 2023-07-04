@@ -211,7 +211,7 @@ namespace Saxon.Eej.ee.validate {
                 } else {
                     Saxon.Hej.Controller controller = validationContext.getController();
                     Saxon.Hej.sxpath.XPathDynamicContext context = exp.createDynamicContext(controller, element);
-                    /*134*/Saxon.Eej.ee.schema.Assertion.setDocumentsAndCollections(controller.getConfiguration(), context);
+                    Saxon.Eej.ee.schema.Assertion.setDocumentsAndCollections(controller.getConfiguration(), context);
                     Saxon.Hej.type.ValidationParams actualParams = startTagBuffer.getPipelineConfiguration().getParseOptions().getValidationParams();
                     System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.sxpath.XPathVariable> declaredParams = alt.getParameters();
                     Saxon.Hej.type.ValidationParams.setValidationParams(declaredParams, actualParams, context);

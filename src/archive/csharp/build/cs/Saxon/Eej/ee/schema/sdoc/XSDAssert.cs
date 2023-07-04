@@ -89,7 +89,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 } else {
                     Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo = new Saxon.Eej.ee.trans.ContextItemStaticInfoEE(Saxon.Hej.pattern.NodeKindTest.ELEMENT, false, Saxon.Eej.ee.stream.Posture.STRIDING);
                     System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-                    Saxon.Eej.ee.stream.PostureAndSweep ps = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(condition.getInternalExpression(), contextInfo, reasons);
+                    Saxon.Eej.ee.stream.PostureAndSweep ps = Saxon.Eej.ee.stream.Streamability.getStreamability(condition.getInternalExpression(), contextInfo, reasons);
                     if ((ps.getSweep() == Saxon.Eej.ee.stream.Sweep.FREE_RANGING)) {
                         Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder("Assertion {").append(xpath).append("} is not streamable. ");
                         foreach (string r in reasons) {

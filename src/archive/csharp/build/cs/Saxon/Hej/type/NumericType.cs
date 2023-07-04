@@ -184,13 +184,13 @@ namespace Saxon.Hej.type {
             return "xs:numeric";
         }
         public void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType @base, int block) {
-            string s = /*134*/Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(this, @base, block);
+            string s = Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(this, @base, block);
             if ((s != null)) {
                 throw new Saxon.Hej.type.SchemaException(s);
             }
         }
         public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
-            return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
+            return Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     
     }

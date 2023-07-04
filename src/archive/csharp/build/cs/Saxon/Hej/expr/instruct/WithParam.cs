@@ -74,7 +74,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         private void makeEvaluator() {
             Saxon.Hej.expr.Expression select = selectOp.getChildExpression();
-            evaluator = new Saxon.Hej.expr.elab.LearningEvaluator(select, select.makeElaborator().lazily(true));
+            evaluator = new Saxon.Hej.expr.elab.LearningEvaluator(select, select.makeElaborator().lazily(true, false));
         }
         public static Saxon.Hej.expr.instruct.WithParam[] copy(Saxon.Hej.expr.Expression parent, Saxon.Hej.expr.instruct.WithParam[] @params, Saxon.Hej.expr.parser.RebindingMap rebindings) {
             if ((@params == null)) {

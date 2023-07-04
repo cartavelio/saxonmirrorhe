@@ -23,7 +23,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             string documentBase = getBaseURI();
             Saxon.Eej.ee.schema.SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
-            Saxon.Ejavax.xml.transform.Source source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, null);
+            Saxon.Ejavax.xml.transform.Source source = Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(documentBase, schemaLocation, compiler, null);
             if (((source == null) || (source.getSystemId() == null))) {
                 throw new Saxon.Hej.type.SchemaException("The xsl:override/@schemaLocation resolves to a source with no known system ID");
             }
@@ -45,7 +45,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             try {
                 Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
+                Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDoc = Saxon.Eej.ee.schema.sdoc.SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
                 originalSchemaDocument = schemaDoc;
                 originalSchema = schemaDoc.getXSDSchema().getSchema();
                 Saxon.Hej.om.NamespaceUri originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();

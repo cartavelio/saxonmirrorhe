@@ -39,7 +39,7 @@ namespace Saxon.Eej.ee.stream.feed {
             Saxon.Hej.om.Sequence[] args = Saxon.Hej.om.SequenceTool.makeSequenceArray(arguments.Length);
             int i = 0;
             foreach (Saxon.Hej.expr.Expression exp in arguments) {
-                if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(exp) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                if ((Saxon.Eej.ee.stream.Streamability.getSweep(exp) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                     args[i++] = ((item == null) ? Saxon.Hej.value.EmptySequence.getInstance() : item);
                 } else {
                     args[i++] = new Saxon.Hej.om.LazySequence(exp.iterate(getContext()));

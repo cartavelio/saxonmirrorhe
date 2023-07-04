@@ -5,7 +5,7 @@ namespace Saxon.Hej.functions.registry {
     public class ParamKeywords {
 
         static ParamKeywords() {
-            Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "append", "array|add");
+            Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "append", "array|member");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "build", "input|action");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "empty", "array");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "exists", "array");
@@ -35,6 +35,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "subarray", "array|start|length");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "tail", "array");
             Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "trunk", "array");
+            Saxon.Impl.Helpers.MapUtils.Put(arrayParamNames, "values", "array");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "QName", "uri|qname");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "abs", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "adjust-date-to-timezone", "value|timezone");
@@ -90,7 +91,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "escape-html-uri", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "exactly-one", "input");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "exists", "input");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "expanded-QName", "qname");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "expanded-QName", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "false", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "filter", "input|predicate");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "floor", "value");
@@ -135,7 +136,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "iterate-while", "input|predicate|action");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "json", "input|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "json-doc", "href|options");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "json-to-xml", "json|options");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "json-to-xml", "value|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "lang", "language|node");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "last", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "load-xquery-module", "module-uri|options");
@@ -154,7 +155,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "months-from-duration", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "name", "node");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "namespace-uri", "node");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "namespace-uri-for-prefix", "prefix|element");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "namespace-uri-for-prefix", "value|element");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "namespace-uri-from-QName", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "nilled", "node");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "node-name", "node");
@@ -167,12 +168,14 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "outermost", "nodes");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parcel", "input");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-ietf-date", "value");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-json", "json|options");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-integer", "value|radix");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-json", "value|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-html", "html|options");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-QName", "eqname");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-QName", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-uri", "uri|options");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-xml", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parse-xml-fragment", "value");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "partition", "input|break-when");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "parts", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "path", "node");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "position", "");
@@ -181,8 +184,8 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "remove", "input|positions");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "replace", "value|pattern|replacement|flags|action");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "replicate", "input|count");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "resolve-QName", "qname|element");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "resolve-uri", "relative|base");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "resolve-QName", "value|element");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "resolve-uri", "href|base");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "reverse", "input");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "root", "node");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "round", "value|precision");
@@ -198,7 +201,7 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "starts-with", "value|substring|collation");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "starts-with-sequence", "input|subsequence|compare");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "static-base-uri", "");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "string", "item");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "string", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "string-join", "values|separator");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "string-length", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "string-to-codepoints", "value");
@@ -212,8 +215,9 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "timezone-from-dateTime", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "timezone-from-time", "value");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "tokenize", "value|pattern|flags");
-            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "trace", "value|label");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "trace", "input|label");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "transform", "options");
+            Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "transitive-closure", "step|min|max");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "translate", "value|replace|with");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "true", "");
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "trunk", "input");
@@ -230,14 +234,16 @@ namespace Saxon.Hej.functions.registry {
             Saxon.Impl.Helpers.MapUtils.Put(fnParamNames, "zero-or-one", "input");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "build", "input|key|value|combine");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "contains", "map|key");
+            Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "entries", "map");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "entry", "key|value");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "filter", "map|predicate");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "find", "input|key");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "for-each", "map|action");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "get", "map|key|fallback");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "group-by", "input|key");
-            Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "keys", "map");
+            Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "keys", "map|predicate");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "merge", "maps|options");
+            Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "of", "pairs|combine");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "put", "map|key|value");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "remove", "map|keys");
             Saxon.Impl.Helpers.MapUtils.Put(mapParamNames, "replace", "map|key|action");

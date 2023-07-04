@@ -29,7 +29,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             Saxon.Ejavax.xml.transform.Source source = null;
             try {
-                source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(getBaseURI(), schemaLocation, compiler, null);
+                source = Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(getBaseURI(), schemaLocation, compiler, null);
             } catch (Saxon.Hej.type.SchemaException e) {
                 handleSchemaException(schemaLocation, e);
             }
@@ -43,7 +43,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
                 try {
                     Saxon.Hej.@event.PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                    Saxon.Eej.ee.schema.sdoc.SchemaDocument inc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, this);
+                    Saxon.Eej.ee.schema.sdoc.SchemaDocument inc = Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, compiler, pipe, this);
                     Saxon.Eej.ee.schema.sdoc.XSDSchema includedXSDSchema = inc.getXSDSchema();
                     includedXSDSchema.setReferrer(this);
                     includedSchema = includedXSDSchema.getSchema();

@@ -260,7 +260,7 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.instruct.ApplyTemplates expr = (Saxon.Hej.expr.instruct.ApplyTemplates)(getExpression());
                 Saxon.Hej.expr.elab.UnicodeStringEvaluator sep = ((expr.separatorOp == null) ? null : expr.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true));
                 if (expr.useTailRecursion()) {
-                    Saxon.Hej.expr.elab.SequenceEvaluator select = expr.getSelect().makeElaborator().lazily(false);
+                    Saxon.Hej.expr.elab.SequenceEvaluator select = expr.getSelect().makeElaborator().lazily(false, false);
                     return (output, context) => {
                         Saxon.Hej.expr.Component.M targetMode = expr.getTargetMode(context);
                         Saxon.Hej.om.NodeInfo separator = null;

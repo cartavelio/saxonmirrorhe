@@ -83,7 +83,7 @@ namespace Saxon.Hej.expr {
             public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
                 return this;
             }
-            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable, bool lazyEvaluationRequired) {
                 return this;
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {

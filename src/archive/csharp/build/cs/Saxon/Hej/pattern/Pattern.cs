@@ -7,7 +7,7 @@ namespace Saxon.Hej.pattern {
         private bool recoverable = true;
         private string originalText;
         public static Saxon.Hej.pattern.Pattern make(string pattern, Saxon.Hej.expr.StaticContext env, Saxon.Hej.expr.PackageData packageData) {
-            Saxon.Hej.pattern.PatternParser parser = (Saxon.Hej.pattern.PatternParser)(env.getConfiguration().newExpressionParser("PATTERN", false));
+            Saxon.Hej.pattern.PatternParser parser = (Saxon.Hej.pattern.PatternParser)(env.getConfiguration().newExpressionParser("PATTERN", false, env));
             Saxon.Hej.pattern.Pattern pat = parser.parsePattern(pattern, env);
             pat.setRetainedStaticContext(env.makeRetainedStaticContext());
             pat = pat.simplify();
@@ -70,7 +70,17 @@ namespace Saxon.Hej.pattern {
             return true;
         }
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
-            return matches(context.getContextItem(), context);
+            return matchesItem(context.getContextItem(), context);
+        }
+        public bool matchesItem(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context) {
+            try {
+                return matches(item, context);
+            } catch (Exception e) when (e is Saxon.Hej.trans.XPathException.Circularity || e is Saxon.Hej.trans.XPathException.StackOverflow) {
+                throw;
+            } catch (Saxon.Hej.trans.XPathException ex) {
+                handleDynamicError(ex, context);
+                return false;
+            }
         }
         public abstract bool matches(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context);
         public virtual bool matchesBeneathAnchor(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.NodeInfo anchor, Saxon.Hej.expr.XPathContext context) {
@@ -80,7 +90,7 @@ namespace Saxon.Hej.pattern {
             Saxon.Hej.om.NodeInfo doc = document.getRootNode();
             Saxon.Hej.type.UType uType = getUType();
             if (Saxon.Hej.type.UType.DOCUMENT.subsumes(uType)) {
-                if (matches(doc, context)) {
+                if (matchesItem(doc, context)) {
                     return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(doc);
                 } else {
                     return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
@@ -89,12 +99,12 @@ namespace Saxon.Hej.pattern {
                 if (Saxon.Hej.type.UType.ATTRIBUTE.subsumes(uType)) {
                     Saxon.Hej.tree.iter.AxisIterator allElements = doc.iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, Saxon.Hej.pattern.NodeKindTest.ELEMENT);
                     Saxon.Hej.om.SequenceIterator allAttributes = Saxon.Hej.expr.MappingIterator.map(allElements, item => ((Saxon.Hej.om.NodeInfo)(item)).iterateAxis(Saxon.Hej.om.AxisInfo.ATTRIBUTE));
-                    return Saxon.Hej.expr.ItemMappingIterator.filter(allAttributes, item => matches(item, context));
+                    return Saxon.Hej.expr.ItemMappingIterator.filter(allAttributes, item => matchesItem(item, context));
                 } else {
                     if (Saxon.Hej.type.UType.NAMESPACE.subsumes(uType)) {
                         Saxon.Hej.tree.iter.AxisIterator allElements = doc.iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, Saxon.Hej.pattern.NodeKindTest.ELEMENT);
                         Saxon.Hej.om.SequenceIterator allNamespaces = Saxon.Hej.expr.MappingIterator.map(allElements, item => ((Saxon.Hej.om.NodeInfo)(item)).iterateAxis(Saxon.Hej.om.AxisInfo.NAMESPACE));
-                        return Saxon.Hej.expr.ItemMappingIterator.filter(allNamespaces, item => matches(item, context));
+                        return Saxon.Hej.expr.ItemMappingIterator.filter(allNamespaces, item => matchesItem(item, context));
                     } else {
                         if (Saxon.Hej.type.UType.CHILD_NODE_KINDS.subsumes(uType)) {
                             Saxon.Hej.pattern.NodeTest nodeTest;
@@ -104,7 +114,7 @@ namespace Saxon.Hej.pattern {
                                 nodeTest = new Saxon.Hej.pattern.MultipleNodeKindTest(uType);
                             }
                             Saxon.Hej.tree.iter.AxisIterator allChildren = doc.iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, nodeTest);
-                            return Saxon.Hej.expr.ItemMappingIterator.filter(allChildren, item => matches(item, context));
+                            return Saxon.Hej.expr.ItemMappingIterator.filter(allChildren, item => matchesItem(item, context));
                         } else {
                             int axis = (uType.subsumes(Saxon.Hej.type.UType.DOCUMENT) ? Saxon.Hej.om.AxisInfo.DESCENDANT_OR_SELF : Saxon.Hej.om.AxisInfo.DESCENDANT);
                             Saxon.Hej.tree.iter.AxisIterator allChildren = doc.iterateAxis(axis);
@@ -118,7 +128,7 @@ namespace Saxon.Hej.pattern {
                                 }
                                 return mapper;
                             } );
-                            return Saxon.Hej.expr.ItemMappingIterator.filter(attributesOrSelf, item => matches(item, context));
+                            return Saxon.Hej.expr.ItemMappingIterator.filter(attributesOrSelf, item => matchesItem(item, context));
                         }
                     }
                 }
@@ -171,7 +181,7 @@ namespace Saxon.Hej.pattern {
         private class PatternElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
             public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
                 Saxon.Hej.pattern.Pattern pat = (Saxon.Hej.pattern.Pattern)(getExpression());
-                return context => pat.matches(context.getContextItem(), context);
+                return context => pat.matchesItem(context.getContextItem(), context);
             }
         
         }

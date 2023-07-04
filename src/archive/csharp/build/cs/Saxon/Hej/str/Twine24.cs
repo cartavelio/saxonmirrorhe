@@ -162,7 +162,7 @@ namespace Saxon.Hej.str {
             Saxon.Ejava.lang.System.arraycopy(bytes, 0, target, offset, bytes.Length);
         }
         public override long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
-            for (int i = requireInt(from); (i<length()); i++) {
+            for (int i = requireNonNegativeInt(from); (i<length()); i++) {
                 int offset = (i*3);
                 int cp = ((((((bytes[offset]<<16)|(((bytes[(offset+1)]&unchecked((int)0xff)))<<8)))|((bytes[(offset+2)]&unchecked((int)0xff)))))&unchecked((int)0xffffff));
                 if (predicate(cp)) {

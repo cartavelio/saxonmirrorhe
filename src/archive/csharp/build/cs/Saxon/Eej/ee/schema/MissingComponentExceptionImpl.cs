@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.schema {
         }
         public override  /* REPLACING public */ string getMessage() {
             try {
-                string space = /*134*/Saxon.Eej.ee.schema.SymbolSpace.getSymbolSpaceName(reference.getSymbolSpace());
+                string space = Saxon.Eej.ee.schema.SymbolSpace.getSymbolSpaceName(reference.getSymbolSpace());
                 string component = reference.getTargetComponentName().getEQName();
                 string module = reference.getSystemId();
                 if (module.EndsWith("override.xsl")) {

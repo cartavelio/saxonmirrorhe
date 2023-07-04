@@ -98,19 +98,32 @@ namespace Saxon.Hej.expr {
                         return new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, name, pos);
                     } ;
                     Saxon.Hej.expr.Expression arg = getArg(i);
-                    if (((arg is Saxon.Hej.expr.DefaultedArgumentExpression) && (fd != null))) {
-                        if ((i<fd.getMinimumArity())) {
-                            throw new Saxon.Hej.trans.XPathException(((("No value supplied for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
-                        }
-                        if ((arg is Saxon.Hej.expr.DefaultedArgumentExpression.DefaultCollationArgument)) {
-                            arg = new Saxon.Hej.expr.StringLiteral(visitor.getStaticContext().getDefaultCollationName());
-                        } else {
-                            Saxon.Hej.expr.Expression defaultValue = fd.getDefaultValueExpression(i);
-                            if ((defaultValue == null)) {
-                                throw new Saxon.Hej.trans.XPathException(((("No value or default available for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
+                    if ((arg is Saxon.Hej.expr.DefaultedArgumentExpression)) {
+                        if ((fd != null)) {
+                            if ((i<fd.getMinimumArity())) {
+                                throw new Saxon.Hej.trans.XPathException(((("No value supplied for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
                             }
-                            arg = defaultValue.copy(new Saxon.Hej.expr.parser.RebindingMap());
-                            adoptChildExpression(arg);
+                            if ((arg is Saxon.Hej.expr.DefaultedArgumentExpression.DefaultCollationArgument)) {
+                                arg = new Saxon.Hej.expr.StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+                            } else {
+                                Saxon.Hej.expr.Expression defaultValue = fd.getDefaultValueExpression(i);
+                                if ((defaultValue == null)) {
+                                    throw new Saxon.Hej.trans.XPathException(((("No value or default available for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
+                                }
+                                arg = defaultValue.copy(new Saxon.Hej.expr.parser.RebindingMap());
+                                adoptChildExpression(arg);
+                            }
+                        } else {
+                            if ((target is Saxon.Hej.functions.SystemFunction)) {
+                                Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry details = ((Saxon.Hej.functions.SystemFunction)(target)).getDetails();
+                                if ((i<details.getMinimumArity())) {
+                                    throw new Saxon.Hej.trans.XPathException(((("No value supplied for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
+                                }
+                                arg = new Saxon.Hej.expr.Literal(Saxon.Hej.value.EmptySequence.getInstance());
+                                adoptChildExpression(arg);
+                            } else {
+                                throw new Saxon.Ejava.lang.UnsupportedOperationException();
+                            }
                         }
                     }
                     if (((arg != null) && !(((arg is Saxon.Hej.expr.DefaultedArgumentExpression))))) {
@@ -284,15 +297,11 @@ namespace Saxon.Hej.expr {
         }
         public abstract class FunctionCallElaborator : Saxon.Hej.expr.elab.PullElaborator {
             protected internal Saxon.Hej.expr.elab.SequenceEvaluator[] argumentEvaluators;
-            public override void setExpression(Saxon.Hej.expr.Expression expr) {
-                base.setExpression(expr);
-                allocateArgumentEvaluators((Saxon.Hej.expr.FunctionCall)(expr), true);
-            }
             protected internal void allocateArgumentEvaluators(Saxon.Hej.expr.FunctionCall expr, bool allowRepeatedUse) {
                 int arity = expr.getArity();
                 argumentEvaluators = new Saxon.Hej.expr.elab.SequenceEvaluator[arity];
                 for (int i = 0; (i<arity); i++) {
-                    argumentEvaluators[i] = expr.getArg(i).makeElaborator().lazily(allowRepeatedUse);
+                    argumentEvaluators[i] = expr.getArg(i).makeElaborator().lazily(allowRepeatedUse, false);
                 }
             }
             protected internal Saxon.Hej.om.Sequence[] evaluateArguments(Saxon.Hej.expr.XPathContext context) {

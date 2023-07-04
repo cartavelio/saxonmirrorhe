@@ -287,7 +287,7 @@ namespace Saxon.Hej.expr {
     
         private class Inner_Converter_7 : Saxon.Hej.type.Converter {
             private readonly AtomicSequenceConverter outerInstance;
-            public Inner_Converter_7(AtomicSequenceConverter outerInstance, /*AA*/Saxon.Hej.lib.ConversionRules arg1) : base(arg1) {
+            public Inner_Converter_7(AtomicSequenceConverter outerInstance, Saxon.Hej.lib.ConversionRules arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override  /* REPLACING public */ Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {

@@ -92,11 +92,11 @@ namespace Saxon.Eej.ee.schema {
             return schemaURIResolver;
         }
         public Saxon.Hej.om.NamespaceUri readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, Saxon.Hej.om.NamespaceUri expected) {
-            Saxon.Ejavax.xml.transform.Source source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(baseURI, schemaLocation, this, expected);
+            Saxon.Ejavax.xml.transform.Source source = Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(baseURI, schemaLocation, this, expected);
             if ((source == null)) {
                 throw new Saxon.Hej.type.SchemaException(("No schema could be loaded at location "+schemaLocation));
             }
-            Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, this, pipe, null);
+            Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc = Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, this, pipe, null);
             if (schemadoc.isCompiledSchemaDocument()) {
                 try {
                     getConfiguration().importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
@@ -134,7 +134,7 @@ namespace Saxon.Eej.ee.schema {
             if ((preparedSchema == null)) {
                 preparedSchema = ps;
             } else {
-                preparedSchema = /*134*/Saxon.Eej.ee.schema.PreparedSchema.merge(preparedSchema, ps);
+                preparedSchema = Saxon.Eej.ee.schema.PreparedSchema.merge(preparedSchema, ps);
             }
         }
         public void readMultipleSchemas(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, System.Collections.Generic.IList<string> schemaLocations, Saxon.Hej.om.NamespaceUri expected) {
@@ -143,7 +143,7 @@ namespace Saxon.Eej.ee.schema {
             foreach (string schemaLocation in schemaLocations) {
                 locations[loc++] = schemaLocation;
             }
-            Saxon.Ejavax.xml.transform.Source[] sources = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSources(baseURI, locations, this, expected);
+            Saxon.Ejavax.xml.transform.Source[] sources = Saxon.Eej.ee.schema.sdoc.SchemaReader.getSources(baseURI, locations, this, expected);
             if ((sources.Length == 0)) {
                 return ;
             }
@@ -157,7 +157,7 @@ namespace Saxon.Eej.ee.schema {
                     if ((source == null)) {
                         throw new Saxon.Hej.type.SchemaException(("Unable to load schema at "+schemaLocations[i]));
                     }
-                    schemadoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, this, pipe, null);
+                    schemadoc = Saxon.Eej.ee.schema.sdoc.SchemaReader.read(source, this, pipe, null);
                     if (schemadoc.isCompiledSchemaDocument()) {
                         throw new Saxon.Hej.type.SchemaException("Only source schema documents (not SCM compiled schemas) are accepted here");
                     }
@@ -166,7 +166,7 @@ namespace Saxon.Eej.ee.schema {
                     if ((mergedSchema == null)) {
                         mergedSchema = ps;
                     } else {
-                        mergedSchema = /*134*/Saxon.Eej.ee.schema.PreparedSchema.merge(mergedSchema, ps);
+                        mergedSchema = Saxon.Eej.ee.schema.PreparedSchema.merge(mergedSchema, ps);
                     }
                     Saxon.Hej.om.NamespaceUri targetNamespace = schemadoc.getTargetNamespace();
                     if (((expected != null) && !(expected.Equals(targetNamespace)))) {
@@ -200,7 +200,7 @@ namespace Saxon.Eej.ee.schema {
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
             pipe.setErrorReporter(listener);
             pipe.setHostLanguage(Saxon.Api.HostLanguage.XML_SCHEMA);
-            Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.read(root.asActiveSource(), this, pipe, null);
+            Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc = Saxon.Eej.ee.schema.sdoc.SchemaReader.read(root.asActiveSource(), this, pipe, null);
             return processSchemaDocument(schemadoc, null, expected);
         }
         public void compile() {
@@ -300,7 +300,7 @@ namespace Saxon.Eej.ee.schema {
             foreach (Saxon.Eej.ee.schema.UserComplexType[] pair in scheduledForAutomatonCheck) {
                 Saxon.Eej.ee.schema.UserComplexType sub = pair[1];
                 Saxon.Eej.ee.schema.UserComplexType @base = pair[0];
-                string subsumeError = /*134*/Saxon.Eej.ee.schema.fsa.FiniteStateMachine.subsumesMachine(@base.getFiniteStateMachine(), sub.getFiniteStateMachine(), this);
+                string subsumeError = Saxon.Eej.ee.schema.fsa.FiniteStateMachine.subsumesMachine(@base.getFiniteStateMachine(), sub.getFiniteStateMachine(), this);
                 if ((subsumeError != null)) {
                     string message;
                     if (subsumeError.StartsWith("?")) {

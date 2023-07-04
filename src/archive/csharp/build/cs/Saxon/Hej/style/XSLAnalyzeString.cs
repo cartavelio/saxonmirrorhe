@@ -6,8 +6,8 @@ namespace Saxon.Hej.style {
         private Saxon.Hej.expr.Expression select;
         private Saxon.Hej.expr.Expression regex;
         private Saxon.Hej.expr.Expression flags;
-        private Saxon.Hej.style.StyleElement matching;
-        private Saxon.Hej.style.StyleElement nonMatching;
+        private Saxon.Hej.style.XSLMatchingSubstring matching;
+        private Saxon.Hej.style.XSLMatchingSubstring nonMatching;
         private Saxon.Hej.regex.RegularExpression pattern;
         public override bool isInstruction() {
             return true;
@@ -98,12 +98,12 @@ namespace Saxon.Hej.style {
                             if ((((matching != null) || (nonMatching != null)) || foundFallback)) {
                                 compileError("xsl:matching-substring element must come first", "XTSE0010");
                             }
-                            matching = (Saxon.Hej.style.StyleElement)(curr);
+                            matching = (Saxon.Hej.style.XSLMatchingSubstring)(curr);
                         } else {
                             if (((nonMatching != null) || foundFallback)) {
                                 compileError("xsl:non-matching-substring cannot appear here", "XTSE0010");
                             }
-                            nonMatching = (Saxon.Hej.style.StyleElement)(curr);
+                            nonMatching = (Saxon.Hej.style.XSLMatchingSubstring)(curr);
                         }
                     } else {
                         compileError("Only xsl:matching-substring and xsl:non-matching-substring are allowed here", "XTSE0010");
@@ -120,11 +120,17 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.expr.Expression matchingBlock = null;
             if ((matching != null)) {
-                matchingBlock = matching.compileSequenceConstructor(exec, decl, false);
+                matchingBlock = matching.getSelectExpression();
+                if ((matchingBlock == null)) {
+                    matchingBlock = matching.compileSequenceConstructor(exec, decl, false);
+                }
             }
             Saxon.Hej.expr.Expression nonMatchingBlock = null;
             if ((nonMatching != null)) {
-                nonMatchingBlock = nonMatching.compileSequenceConstructor(exec, decl, false);
+                nonMatchingBlock = nonMatching.getSelectExpression();
+                if ((nonMatchingBlock == null)) {
+                    nonMatchingBlock = nonMatching.compileSequenceConstructor(exec, decl, false);
+                }
             }
             try {
                 return new Saxon.Hej.expr.instruct.AnalyzeString(select, regex, flags, ((matchingBlock == null) ? null : matchingBlock.simplify()), ((nonMatchingBlock == null) ? null : nonMatchingBlock.simplify()), pattern);

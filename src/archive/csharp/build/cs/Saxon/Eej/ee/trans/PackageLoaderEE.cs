@@ -50,7 +50,7 @@ namespace Saxon.Eej.ee.trans {
 } );
             Saxon.Impl.Helpers.MapUtils.Put(eMap, "insert", (loader, element) => {
     int constructionMode = loader.getIntegerAttribute(element, "constructionMode");
-    int position = /*134*/Saxon.Eej.ee.xtupdate.SaxonInsert.interpretPosition(element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "position"));
+    int position = Saxon.Eej.ee.xtupdate.SaxonInsert.interpretPosition(element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "position"));
     string flags = element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "flags");
     Saxon.Hej.expr.Expression source = loader.getFirstChildExpression(element);
     Saxon.Hej.expr.Expression target = loader.getSecondChildExpression(element);

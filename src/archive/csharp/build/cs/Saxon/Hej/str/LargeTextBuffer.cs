@@ -6,6 +6,7 @@ namespace Saxon.Hej.str {
         private const int BITS = 16;
         private const int SEGLEN = (1<<BITS);
         private const int MASK = (SEGLEN-1);
+        private readonly static int MAX_SEGMENTS = (1<<((31-BITS)));
         private readonly static Saxon.Hej.str.LargeTextBuffer.Segment EMPTY_SEGMENT = new Saxon.Hej.str.LargeTextBuffer.Segment8(new byte[]{});
         private readonly System.Collections.Generic.IList<Saxon.Hej.str.LargeTextBuffer.Segment> completeSegments;
         private Saxon.Hej.str.LargeTextBuffer.Segment lastSegment;
@@ -112,6 +113,9 @@ namespace Saxon.Hej.str {
             this.initialSize = System.Math.Max(initialSize, 65536);
         }
         private void addSegment(Saxon.Hej.str.LargeTextBuffer.Segment segment) {
+            if ((completeSegments.Count == MAX_SEGMENTS)) {
+                throw new Saxon.Ejava.lang.IllegalStateException("TinyTree capacity exceeded: more than 2^31 characters of text data");
+            }
             completeSegments.Add(segment);
         }
         private Saxon.Hej.str.LargeTextBuffer.Segment getSegment(int n) {

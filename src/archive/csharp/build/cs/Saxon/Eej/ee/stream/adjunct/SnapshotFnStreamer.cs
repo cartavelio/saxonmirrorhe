@@ -8,7 +8,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         }
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.Expression select = ((Saxon.Hej.expr.SystemFunctionCall)(getExpression())).getArg(0);
-            Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
+            Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
             if ((selection != null)) {
                 return (watchManager, @out, context) => {
                     Saxon.Eej.ee.stream.feed.SnapshotFeed actor = new Saxon.Eej.ee.stream.feed.SnapshotFeed(watchManager, @out, context);

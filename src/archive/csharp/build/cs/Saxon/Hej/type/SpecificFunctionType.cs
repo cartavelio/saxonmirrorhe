@@ -285,8 +285,8 @@ namespace Saxon.Hej.type {
             }
             return Saxon.Ejava.util.Optional<string>.empty();
         }
-        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
-            return new Saxon.Hej.functions.hof.FunctionSequenceCoercer(exp, this, role);
+        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role, bool allow40) {
+            return new Saxon.Hej.functions.hof.FunctionSequenceCoercer(exp, this, role, allow40);
         }
     
     }

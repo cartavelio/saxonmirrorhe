@@ -78,7 +78,7 @@ namespace Saxon.Eej.ee.schema {
                     if ((wat == null)) {
                         wat = gat;
                     } else {
-                        wat = /*134*/Saxon.Eej.ee.schema.Wildcard.makeIntersection(wat, gat, getConfiguration().getNamePool());
+                        wat = Saxon.Eej.ee.schema.Wildcard.makeIntersection(wat, gat, getConfiguration().getNamePool());
                     }
                 }
             }
@@ -117,7 +117,7 @@ namespace Saxon.Eej.ee.schema {
             if ((getFixupStatus() == /*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.UNVALIDATED)) {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.VALIDATING);
                 foreach (Saxon.Eej.ee.schema.AttributeUse use in attributes) {
-                    Saxon.Eej.ee.schema.AttributeDecl decl = (Saxon.Eej.ee.schema.AttributeDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(use, compiler, false));
+                    Saxon.Eej.ee.schema.AttributeDecl decl = (Saxon.Eej.ee.schema.AttributeDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(use, compiler, false));
                     if ((decl == null)) {
                         setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                         continue ;
@@ -128,7 +128,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                 }
                 foreach (Saxon.Eej.ee.schema.AttributeGroupReference @ref in references) {
-                    Saxon.Eej.ee.schema.AttributeGroupDecl decl = (Saxon.Eej.ee.schema.AttributeGroupDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(@ref, compiler, false));
+                    Saxon.Eej.ee.schema.AttributeGroupDecl decl = (Saxon.Eej.ee.schema.AttributeGroupDecl)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(@ref, compiler, false));
                     if ((decl == null)) {
                         @ref.setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                         setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
@@ -265,7 +265,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                     Saxon.Eej.ee.schema.AttributeDecl decl = (Saxon.Eej.ee.schema.AttributeDecl)(att.getTarget());
                     Saxon.Eej.ee.schema.AttributeDecl baseDecl = (Saxon.Eej.ee.schema.AttributeDecl)(baseAtt.getTarget());
-                    string reason = /*134*/Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(decl.getSimpleType(), baseDecl.getSimpleType(), 0);
+                    string reason = Saxon.Eej.ee.schema.UserSimpleType.isTypeDerivationOK(decl.getSimpleType(), baseDecl.getSimpleType(), 0);
                     if ((reason != null)) {
                         compiler.error(((("Invalid restriction: attribute "+Saxon.Hej.trans.Err.wrap(att.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE))+" is inconsistent with the base type. ")+reason), this);
                         result = false;

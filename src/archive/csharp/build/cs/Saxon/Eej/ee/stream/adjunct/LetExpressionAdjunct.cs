@@ -5,8 +5,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
     public class LetExpressionAdjunct : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct {
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.Expression select = ((Saxon.Hej.expr.LetExpression)(getExpression())).getSequence();
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(select) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
-                Saxon.Eej.ee.stream.Inversion ie = /*134*/Saxon.Eej.ee.stream.Inversion.invertExpression(select, forGrouping);
+            if ((Saxon.Eej.ee.stream.Streamability.getSweep(select) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                Saxon.Eej.ee.stream.Inversion ie = Saxon.Eej.ee.stream.Inversion.invertExpression(select, forGrouping);
                 Saxon.Eej.ee.stream.Inversion route = ie.copy();
                 Saxon.Eej.ee.stream.Inversion.PushAction letAction = new Saxon.Eej.ee.stream.Inversion.PushAction();
                 letAction.feedMaker = new Saxon.Eej.ee.stream.adjunct.LetExpressionAdjunct.FeedMakerForConsumingSelect(((Saxon.Hej.expr.LetExpression)(getExpression())));
@@ -15,7 +15,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 route.prepend(letAction);
                 return route.getWatch /* instance method reference */;
             } else {
-                Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), getExpression());
+                Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), getExpression());
                 return sa.getWatchMaker(forGrouping);
             }
         }

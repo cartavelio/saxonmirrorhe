@@ -4,8 +4,8 @@ using System.Linq;
 namespace Saxon.Eej.ee.stream.adjunct {
     public abstract class TransmissionAdjunct : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct, Saxon.Eej.ee.stream.feed.FeedMaker {
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
-            Saxon.Eej.ee.stream.Posture posture = /*134*/Saxon.Eej.ee.stream.Streamability.getPosture(getExpression());
-            if (/*134*/Saxon.Eej.ee.stream.Streamability.isIncrementalPosture(posture)) {
+            Saxon.Eej.ee.stream.Posture posture = Saxon.Eej.ee.stream.Streamability.getPosture(getExpression());
+            if (Saxon.Eej.ee.stream.Streamability.isIncrementalPosture(posture)) {
                 return (watchManager, @out, context) => makeTransmissionFlow(watchManager, getExpression(), @out, context);
             } else {
                 return null;
@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
         public virtual Saxon.Eej.ee.stream.watch.Trigger makeTransmissionFlow(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.Expression select = null;
             foreach (Saxon.Hej.expr.Operand o in exp.operands()) {
-                if (((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING) && o.hasSameFocus())) {
+                if (((Saxon.Eej.ee.stream.Streamability.getSweep(o.getChildExpression()) == Saxon.Eej.ee.stream.Sweep.CONSUMING) && o.hasSameFocus())) {
                     select = o.getChildExpression();
                     break ;
                 }
@@ -47,13 +47,13 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 throw new Saxon.Hej.trans.XPathException(("No transmission watch for "+exp.toShortString()), Saxon.Hej.trans.SaxonErrorCode.SXST0067, exp.getLocation());
             }
             if (((select != null) && (selection == null))) {
-                selection = /*134*/Saxon.Eej.ee.stream.Streamability.toStreamingPattern(select, context.getConfiguration());
+                selection = Saxon.Eej.ee.stream.Streamability.toStreamingPattern(select, context.getConfiguration());
             }
             Saxon.Eej.ee.stream.feed.ItemFeed fw = makeItemFeed(watchManager, @out, context);
             if ((selection != null)) {
                 return new Saxon.Eej.ee.stream.watch.Trigger(selection, fw, context);
             } else {
-                Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), select);
+                Saxon.Eej.ee.stream.adjunct.StreamingAdjunct sa = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(getConfiguration(), select);
                 if ((sa is Saxon.Eej.ee.stream.adjunct.TransmissionAdjunct)) {
                     return ((Saxon.Eej.ee.stream.adjunct.TransmissionAdjunct)(sa)).makeTransmissionFlow(watchManager, select, fw, context);
                 }

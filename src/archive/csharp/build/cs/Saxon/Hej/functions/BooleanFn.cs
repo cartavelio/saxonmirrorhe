@@ -75,7 +75,7 @@ namespace Saxon.Hej.functions {
     
         private class Inner_SystemFunctionCall_32 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly BooleanFn outerInstance;
-            public Inner_SystemFunctionCall_32(BooleanFn outerInstance, BooleanFn arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_32(BooleanFn outerInstance, BooleanFn arg1, Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {

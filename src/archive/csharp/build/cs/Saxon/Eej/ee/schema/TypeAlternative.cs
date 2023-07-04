@@ -55,7 +55,7 @@ namespace Saxon.Eej.ee.schema {
             return (Saxon.Hej.type.SchemaType)(typeReference.getTarget());
         }
         public override bool fixup(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
-            Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(typeReference, compiler, false));
+            Saxon.Hej.type.SchemaType type = (Saxon.Hej.type.SchemaType)(Saxon.Eej.ee.schema.PreparedSchema.validateReference(typeReference, compiler, false));
             if ((type == null)) {
                 setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                 return false;
@@ -81,7 +81,7 @@ namespace Saxon.Eej.ee.schema {
                   case "implementation":
                     return new Saxon.Hej.value.ObjectValue<Saxon.Eej.ee.schema.TypeAlternative>(thisTypeAlternative);
                   case "test":
-                    return /*134*/Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(conditionText, namespaceContext, baseURI);
+                    return Saxon.Eej.ee.schema.SchemaStructure.makeXPathExpressionPropertyRecord(conditionText, namespaceContext, baseURI);
                   case "type definition":
                     return getTypeReference().getTarget().getComponentAsFunction();
                   default:

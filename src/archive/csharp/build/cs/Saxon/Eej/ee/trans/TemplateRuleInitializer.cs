@@ -41,7 +41,7 @@ namespace Saxon.Eej.ee.trans {
                             }
                             throw new Saxon.Hej.trans.XPathException(message.ToString(), "XTSE3430", rule);
                         }
-                        if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(rule.getBody()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+                        if ((Saxon.Eej.ee.stream.Streamability.getSweep(rule.getBody()) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                             ((Saxon.Eej.ee.trans.TemplateRuleEE)(rule)).makeInversion();
                         }
                     }

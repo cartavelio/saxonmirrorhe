@@ -45,16 +45,16 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.pattern.Pattern selector;
             Saxon.Hej.expr.Expression exp;
             try {
-                exp = new Saxon.Hej.expr.parser.XPathParser().parse(xpath, 0, Saxon.Hej.expr.parser.Token.EOF, env);
+                exp = new Saxon.Hej.expr.parser.XPathParser(env).parse(xpath, 0, Saxon.Hej.expr.parser.Token.EOF, env);
                 bool allowExtensions = getXSDSchema().getAllowedExtensions().Contains("id-xpath-syntax");
                 if (allowExtensions) {
                     System.Collections.Generic.IList<string> reasonsForFailure = new System.Collections.Generic.List<string>();
-                    selector = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(exp, getConfiguration(), reasonsForFailure);
+                    selector = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(exp, getConfiguration(), reasonsForFailure);
                     if (!(reasonsForFailure.Count==0)) {
                         throw new Saxon.Hej.trans.XPathException(reasonsForFailure[0]);
                     }
                 } else {
-                    Saxon.Eej.ee.schema.sdoc.SelectionParser selectionParser = new Saxon.Eej.ee.schema.sdoc.SelectionParser();
+                    Saxon.Eej.ee.schema.sdoc.SelectionParser selectionParser = new Saxon.Eej.ee.schema.sdoc.SelectionParser(env);
                     selector = selectionParser.parseSelector(xpath, env, isField);
                     exp = selectionParser.getOptimizedExpression();
                 }

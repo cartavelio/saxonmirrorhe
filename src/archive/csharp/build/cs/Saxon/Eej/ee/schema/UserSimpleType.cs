@@ -260,7 +260,7 @@ namespace Saxon.Eej.ee.schema {
                     }
                 } else {
                     try {
-                        /*134*/Saxon.Eej.ee.schema.UserComplexType.checkTypeDerivation((Saxon.Hej.type.ComplexType)(actualBase), b, derivation);
+                        Saxon.Eej.ee.schema.UserComplexType.checkTypeDerivation((Saxon.Hej.type.ComplexType)(actualBase), b, derivation);
                         return null;
                     } catch (Saxon.Hej.type.SchemaException err) {
                         reason = err.Message;

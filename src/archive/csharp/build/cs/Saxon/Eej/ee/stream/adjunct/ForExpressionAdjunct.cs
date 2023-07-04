@@ -5,7 +5,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     public class ForExpressionAdjunct : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct, Saxon.Eej.ee.stream.feed.FeedMaker {
         public override Saxon.Eej.ee.stream.PostureAndSweep computeStreamability(Saxon.Eej.ee.trans.ContextItemStaticInfoEE contextInfo, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.ForExpression exp = (Saxon.Hej.expr.ForExpression)(getExpression());
-            Saxon.Eej.ee.stream.Posture p = /*134*/Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getSequence(), contextInfo, reasons).getPosture();
+            Saxon.Eej.ee.stream.Posture p = Saxon.Eej.ee.stream.Streamability.getStreamability(exp.getSequence(), contextInfo, reasons).getPosture();
             if ((p == Saxon.Eej.ee.stream.Posture.GROUNDED)) {
                 return base.computeStreamability(contextInfo, reasons);
             } else {

@@ -668,7 +668,7 @@ namespace Saxon.Hej.expr {
         public virtual Saxon.Hej.expr.elab.Elaborator getElaborator() {
             return new Saxon.Hej.expr.elab.FallbackElaborator();
         }
-        public Saxon.Hej.expr.elab.Elaborator makeElaborator() {
+        public Saxon.Hej.expr.elab.Elaborator makeElaborator() { lock(this) {
             if ((elaborator == null)) {
                 Saxon.Hej.expr.elab.Elaborator elab = getElaborator();
                 elab.setExpression(this);
@@ -676,7 +676,7 @@ namespace Saxon.Hej.expr {
             } else {
                 return elaborator;
             }
-        }
+        }}
     
         /* Expanding default method gatherProperties from interface Traceable */
         public virtual void gatherProperties(Saxon.Ejava.util.function.BiConsumer<string,System.Object> consumer) {

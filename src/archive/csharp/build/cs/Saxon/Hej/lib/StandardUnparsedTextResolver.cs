@@ -24,6 +24,9 @@ namespace Saxon.Hej.lib {
             if ((resolved == null)) {
                 throw new Saxon.Hej.trans.XPathException(("unparsed-text(): failed to resolve URI "+absoluteURI));
             }
+            if ((resolved is Saxon.Ejavax.xml.transform.sax.SAXSource)) {
+                return getReaderFromSAXSource((Saxon.Ejavax.xml.transform.sax.SAXSource)(resolved), encoding, config, debug);
+            }
             if (((resolved is Saxon.Hej.lib.AugmentedSource) && (((Saxon.Hej.lib.AugmentedSource)(resolved)).getContainedSource() is Saxon.Ejavax.xml.transform.sax.SAXSource))) {
                 return getReaderFromSAXSource((Saxon.Ejavax.xml.transform.sax.SAXSource)(((Saxon.Hej.lib.AugmentedSource)(resolved)).getContainedSource()), encoding, config, debug);
             }

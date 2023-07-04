@@ -233,7 +233,7 @@ namespace Saxon.Eej.ee.stream {
             if ((expr is Saxon.Hej.expr.instruct.Instruction)) {
                 return null;
             }
-            Saxon.Eej.ee.stream.adjunct.StreamingAdjunct adj = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, expr);
+            Saxon.Eej.ee.stream.adjunct.StreamingAdjunct adj = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(config, expr);
             Saxon.Hej.pattern.Pattern pat = adj.toStreamingPattern(config);
             if ((pat != null)) {
                 pat.setRecoverable(false);
@@ -257,7 +257,7 @@ namespace Saxon.Eej.ee.stream {
                         Saxon.Eej.ee.stream.Sweep sweep = computeAccumulatorAfterSweep((Saxon.Hej.expr.SystemFunctionCall)(exp), contextInfo, reasons);
                         postureAndSweep = new Saxon.Eej.ee.stream.PostureAndSweep(Saxon.Eej.ee.stream.Posture.GROUNDED, sweep);
                     } else {
-                        Saxon.Eej.ee.stream.adjunct.StreamingAdjunct adjunct = /*134*/Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(exp.getConfiguration(), exp);
+                        Saxon.Eej.ee.stream.adjunct.StreamingAdjunct adjunct = Saxon.Eej.ee.stream.adjunct.StreamingAdjunct.makeStreamingAdjunct(exp.getConfiguration(), exp);
                         postureAndSweep = adjunct.computeStreamability(contextInfo, reasons);
                     }
                 }

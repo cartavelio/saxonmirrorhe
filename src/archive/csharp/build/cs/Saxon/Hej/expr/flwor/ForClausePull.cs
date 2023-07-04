@@ -30,7 +30,7 @@ namespace Saxon.Hej.expr.flwor {
                 }
             }
         }
-        protected internal virtual Saxon.Hej.om.GroundedValue variableValue(Saxon.Hej.om.Item item) {
+        protected internal Saxon.Hej.om.GroundedValue variableValue(Saxon.Hej.om.Item item) {
             return item;
         }
         public override void close() {

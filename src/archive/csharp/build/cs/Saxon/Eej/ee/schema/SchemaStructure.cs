@@ -129,7 +129,7 @@ namespace Saxon.Eej.ee.schema {
             return new Saxon.Hej.functions.CallableFunction(1, callable, Saxon.Hej.type.SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
         }
         public bool hasSameLocation(Saxon.Eej.ee.schema.SchemaStructure other) {
-            if (!(/*134*/Saxon.Eej.ee.schema.UserDefinedType.isSameURI(this.getSystemId(), other.getSystemId()))) {
+            if (!(Saxon.Eej.ee.schema.UserDefinedType.isSameURI(this.getSystemId(), other.getSystemId()))) {
                 return false;
             }
             if (((this.getLineNumber()>=0) && (other.getLineNumber()>=0))) {

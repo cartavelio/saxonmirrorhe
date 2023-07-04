@@ -5,9 +5,9 @@ namespace Saxon.Eej.ee.stream.adjunct {
     public class EmptyTextNodeRemoverAdjunct : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct, Saxon.Eej.ee.stream.feed.FeedMaker {
         public override Saxon.Eej.ee.stream.watch.WatchMaker getWatchMaker(bool forGrouping) {
             Saxon.Hej.expr.EmptyTextNodeRemover scc = (Saxon.Hej.expr.EmptyTextNodeRemover)(getExpression());
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(scc) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
+            if ((Saxon.Eej.ee.stream.Streamability.getSweep(scc) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                 Saxon.Hej.expr.Expression select = scc.getBaseExpression();
-                Saxon.Hej.pattern.Pattern selection = /*134*/Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
+                Saxon.Hej.pattern.Pattern selection = Saxon.Eej.ee.stream.StreamingPatternMaker.makeStreamingPattern(select, getConfiguration(), null);
                 if ((selection != null)) {
                     return (watchManager, @out, context) => {
                         Saxon.Eej.ee.stream.feed.SimpleContentFeed action = new Saxon.Eej.ee.stream.feed.SimpleContentFeed(@out);

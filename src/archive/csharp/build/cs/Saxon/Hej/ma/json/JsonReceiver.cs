@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.json {
     public class JsonReceiver : Saxon.Hej.@event.Receiver {
-        private Saxon.Hej.expr.XPathContext context;
+        private readonly Saxon.Hej.expr.XPathContext context;
         private Saxon.Hej.@event.PipelineConfiguration pipe;
         private Saxon.Hej.str.UniStringConsumer output;
         private readonly Saxon.Ejava.lang.StringBuilder textBuffer = new Saxon.Ejava.lang.StringBuilder(128);
@@ -111,7 +111,7 @@ namespace Saxon.Hej.ma.json {
                         throw new Saxon.Hej.trans.XPathException((("xml-to-json: Value of escaped-key attribute '"+Saxon.Hej.trans.Err.wrap(escapedKey))+"' is not a valid xs:boolean"), ERR_INPUT);
                     }
                 }
-                key = ((alreadyEscaped ? handleEscapedString(key) : escape(key, false, isControlChar)));
+                key = ((alreadyEscaped ? handleEscapedString(key) : escape(key, false, false, isControlChar)));
                 string normalizedKey = (alreadyEscaped ? unescape(key) : key);
                 bool added = keyChecker.Peek().Add(normalizedKey);
                 if (!(added)) {
@@ -196,7 +196,7 @@ namespace Saxon.Hej.ma.json {
                             throw new Saxon.Hej.trans.XPathException(("xml-to-json: Invalid number: "+textBuffer), ERR_INPUT);
                         }
                     } else {
-                        Saxon.Hej.om.Sequence result = Saxon.Hej.functions.SystemFunction.dynamicCall(numberFormatter, context, new Saxon.Hej.om.Sequence[]{new Saxon.Hej.value.StringValue(uContent)});
+                        Saxon.Hej.om.Sequence result = Saxon.Hej.functions.SystemFunction.dynamicCall(numberFormatter, context, new Saxon.Hej.value.StringValue(uContent));
                         output.accept(((Saxon.Hej.value.StringValue)(result)).getUnicodeStringValue());
                     }
                 } else {
@@ -205,7 +205,7 @@ namespace Saxon.Hej.ma.json {
                         if (escaped) {
                             output.accept(Saxon.Hej.str.StringView.of(handleEscapedString(content)));
                         } else {
-                            output.accept(Saxon.Hej.str.StringView.of(escape(content, false, isControlChar)));
+                            output.accept(Saxon.Hej.str.StringView.of(escape(content, false, false, isControlChar)));
                         }
                         output.accept(Saxon.Hej.str.BMPString.of("\""));
                     } else {
@@ -273,13 +273,13 @@ namespace Saxon.Hej.ma.json {
             }
             return @out.ToString();
         }
-        public static string escape(string @in, bool forXml, Saxon.Ejava.util.function.IntPredicate hexEscapes) {
+        public static string escape(string @in, bool retainQuot, bool retainSlash, Saxon.Ejava.util.function.IntPredicate hexEscapes) {
             Saxon.Ejava.lang.StringBuilder @out = new Saxon.Ejava.lang.StringBuilder(@in.Length);
             for (int i = 0; (i<@in.Length); i++) {
                 int c = @in[i];
                 switch (c) {
                   case '"':
-                    @out.append((forXml ? "\"" : "\\\""));
+                    @out.append((retainQuot ? "\"" : "\\\""));
                     break ;
                   case '\b':
                     @out.append("\\b");
@@ -297,7 +297,7 @@ namespace Saxon.Hej.ma.json {
                     @out.append("\\t");
                     break ;
                   case '/':
-                    @out.append((forXml ? "/" : "\\/"));
+                    @out.append((retainSlash ? "/" : "\\/"));
                     break ;
                   case '\\':
                     @out.append("\\\\");
@@ -321,7 +321,7 @@ namespace Saxon.Hej.ma.json {
             }
             return hex;
         }
-        private Saxon.Ejava.util.function.IntPredicate isControlChar = c => ((c<31) || (((c>=127) && (c<=159))));
+        private readonly static Saxon.Ejava.util.function.IntPredicate isControlChar = c => ((c<31) || (((c>=127) && (c<=159))));
         public void characters(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
             if ((!((stack.Count==0)) && !(Saxon.Hej.value.Whitespace.isAllWhite(chars)))) {
                 Saxon.Hej.om.NodeName element = stack.Peek();

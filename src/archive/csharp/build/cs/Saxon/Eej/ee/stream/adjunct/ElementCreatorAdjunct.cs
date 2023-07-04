@@ -5,7 +5,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
     public class ElementCreatorAdjunct : Saxon.Eej.ee.stream.adjunct.ParentConstructorAdjunct, Saxon.Eej.ee.stream.feed.FeedMaker {
         public override Saxon.Eej.ee.stream.feed.FeedMaker getFeedMaker(int arg) {
             Saxon.Hej.expr.instruct.ElementCreator exp = (Saxon.Hej.expr.instruct.ElementCreator)(getExpression());
-            if ((/*134*/Saxon.Eej.ee.stream.Streamability.getConsumingOperand(exp).getChildExpression() == exp.getContentExpression())) {
+            if ((Saxon.Eej.ee.stream.Streamability.getConsumingOperand(exp).getChildExpression() == exp.getContentExpression())) {
                 return this;
             } else {
                 return getDefaultFeedMaker(arg);

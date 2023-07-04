@@ -117,6 +117,9 @@ namespace Saxon.Hej.sxpath {
             return defaultFunctionNamespace;
         }
         public void setXPathLanguageLevel(int level) {
+            if ((level == 40)) {
+                config.checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION, "XPath 4.0", -1);
+            }
             xpathLanguageLevel = level;
             if ((packageData.getHostLanguageVersion() != level)) {
                 packageData.setHostLanguage(packageData.getHostLanguage(), level);
