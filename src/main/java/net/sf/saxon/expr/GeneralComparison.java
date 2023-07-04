@@ -477,7 +477,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
             // First a variable range...
 
-            if (getLhsExpression() instanceof RangeExpression && ((RangeExpression)getLhsExpression()).isDefaultedStep()) {
+            if (getLhsExpression() instanceof RangeExpression) {
                 Expression min = ((RangeExpression) getLhsExpression()).getStartExpression();
                 Expression max = ((RangeExpression) getLhsExpression()).getEndExpression();
                 IntegerRangeTest ir = new IntegerRangeTest(getRhsExpression(), min, max);
@@ -485,7 +485,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 return ir;
             }
 
-            if (getRhsExpression() instanceof RangeExpression && ((RangeExpression) getRhsExpression()).isDefaultedStep()) {
+            if (getRhsExpression() instanceof RangeExpression) {
                 Expression min = ((RangeExpression) getRhsExpression()).getStartExpression();
                 Expression max = ((RangeExpression) getRhsExpression()).getEndExpression();
                 IntegerRangeTest ir = new IntegerRangeTest(getLhsExpression(), min, max);
