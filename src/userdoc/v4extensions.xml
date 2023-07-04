@@ -671,6 +671,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       whose key is the string <code>"value"</code> and whose value is the wrapped sequence. Parcels are
       useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
       array as a parcel.</p>
+      
+      <p>
+         <em>Likely to be dropped.</em>
+      </p>
 
       <kbd>fn:parse-html($input as xs:string) as document-node</kbd>
 
@@ -851,12 +855,16 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          applying the predicate to the corresponding value returns true.</p>
       
 
-      <kbd>map:key-value-pairs($map as map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
+      <kbd>map:pairs($map as map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
 
       <p>Accepts a map as input, and turns it into a sequence of maps representing the key-value pairs contained in the map.
          Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>. This differs from
       <code>map:entries</code> in that each entry in the input map is turned into a map with two entries, named "key"
       and "value", rather than a singleton map with one entry.</p>
+      
+      <p>
+         <em>Previously named <code>map:key-value-pairs</code>.</em>
+      </p>
 
 
 
