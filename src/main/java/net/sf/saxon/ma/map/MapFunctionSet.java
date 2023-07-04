@@ -30,16 +30,12 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in the map
  * namespace in XPath 3.1
  */
-
-// TODO: separate out new 4.0 functions
 
 public class MapFunctionSet extends BuiltInFunctionSet {
 
@@ -75,6 +71,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         SequenceType oneOnDuplicatesFunction = SequenceType.makeSequenceType(
                 ON_DUPLICATES_CALLBACK_TYPE, StaticProperty.EXACTLY_ONE);
+
+        RecordTest KVP_TYPE = new RecordTest(
+                Arrays.asList(new String[]{"key", "value"}),
+                Arrays.asList(new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE}),
+                Collections.emptyList(),
+                true);
 
         OptionsParameter mergeOptionDetails = new OptionsParameter();
         mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
@@ -177,13 +179,18 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             ;
 
 
-
-
-            register("key-value-pairs", 1, e -> e.populate(MapKeyValuePairs::new, MapType.ANY_MAP_TYPE, STAR, 0)
+            register("key-value-pairs", 1, e -> e.populate(MapKeyValuePairs::new, KVP_TYPE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("entries", 1, e -> e.populate(MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
+            register("of", 1, e -> e.populate(MapOf::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, KVP_TYPE, STAR | INS, null));
+
+            register("of", 2, e -> e.populate(MapOf::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null)
+                    .arg(1, ON_DUPLICATES_CALLBACK_TYPE, ONE | INS, null));
 
             register("untyped-contains", 2, e -> e.populate(MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
@@ -886,6 +893,45 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
+     * Implementation of the function map:of() =&gt; Map
+     */
+    public static class MapOf extends SystemFunction {
+
+
+        @Override
+        public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            FunctionItem onDuplicates = null;
+            if (arguments.length > 1) {
+                onDuplicates = (FunctionItem) arguments[1].head();
+            }
+
+            StringValue keyKey = new StringValue("key");
+            StringValue valueKey = new StringValue("value");
+            MapItem result = new HashTrieMap();
+            SequenceIterator iter = arguments[0].iterate();
+            for (Item item; (item = iter.next()) != null; ) {
+                AtomicValue key = (AtomicValue) ((MapItem) item).get(keyKey);
+                GroundedValue suppliedValue = ((MapItem) item).get(valueKey);
+                GroundedValue existingValue = result.get(key);
+                if (existingValue != null) {
+                    if (onDuplicates == null) {
+                        GroundedValue newValue = existingValue.concatenate(suppliedValue);
+                        result = result.addEntry(key, newValue);
+                    } else {
+                        GroundedValue newValue =
+                                onDuplicates.call(context, new Sequence[]{existingValue, suppliedValue}).materialize();
+                        result = result.addEntry(key, newValue);
+                    }
+                } else {
+                    result = result.addEntry(key, suppliedValue);
+                }
+            }
+            return result;
+        }
+    }
+
+
+   /**
      * Implementation of the extension function map:put() =&gt; Map
      */
 
