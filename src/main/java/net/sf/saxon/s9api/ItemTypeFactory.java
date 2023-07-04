@@ -61,8 +61,8 @@ public class ItemTypeFactory {
 
     public ItemType parseItemType(String typeDesignation) throws SaxonApiException {
         try {
-            XPathParser parser = new XPathParser();
             IndependentContext env = new IndependentContext(config);
+            XPathParser parser = new XPathParser(env);
             env.setXPathLanguageLevel("4.0".equals(config.getConfigurationProperty(Feature.XQUERY_VERSION)) ? 40 : 31);
             env.declareNamespace("xs", NamespaceUri.SCHEMA);
             net.sf.saxon.value.SequenceType st = parser.parseSequenceType(typeDesignation, env);

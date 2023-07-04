@@ -557,14 +557,14 @@ public class StaticQueryContext {
 
     /*@NotNull*/
     public XQueryExpression compileQuery(/*@NotNull*/ String query) throws XPathException {
-        XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", updating);
+        QueryModule mainModule = new QueryModule(this);
+        XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", updating, mainModule);
         if (codeInjector != null) {
             qp.setCodeInjector(codeInjector);
         } else if (config.isCompileWithTracing()) {
             qp.setCodeInjector(new TraceCodeInjector());
         }
         qp.setStreaming(isStreaming());
-        QueryModule mainModule = new QueryModule(this);
         return qp.makeXQueryExpression(query, mainModule, config);
     }
 

@@ -245,7 +245,7 @@ public class QueryModule implements StaticContext {
 
         executable.addQueryLibraryModule(module);
         XQueryParser qp = (XQueryParser) config.newExpressionParser(
-                "XQ", importer.isUpdating());
+                "XQ", importer.isUpdating(), module);
         if (importer.getCodeInjector() != null) {
             qp.setCodeInjector(importer.getCodeInjector());
         } else if (config.isCompileWithTracing()) {

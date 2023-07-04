@@ -141,7 +141,8 @@ public class XPathParser {
      * Create an expression parser
      */
 
-    public XPathParser() {
+    public XPathParser(StaticContext env) {
+        this.env = env;
     }
 
     /**

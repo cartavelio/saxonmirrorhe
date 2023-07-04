@@ -33,6 +33,10 @@ public class PatternParser extends XPathParser {
 
     int inPredicate = 0;
 
+    public PatternParser(StaticContext env) {
+        super(env);
+    }
+
     /**
      * Parse a string representing an XSLT pattern
      *

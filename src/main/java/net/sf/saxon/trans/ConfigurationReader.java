@@ -640,7 +640,7 @@ public class ConfigurationReader implements Receiver {
         }
         IndependentContext env = new IndependentContext(targetConfig);
         env.setNamespaceResolver(nsMap);
-        XPathParser parser = new XPathParser();
+        XPathParser parser = new XPathParser(env);
         GroundedValue value = null;
         try {
             Expression exp = parser.parse(select, 0, Token.EOF, env);
