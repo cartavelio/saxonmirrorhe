@@ -1793,13 +1793,12 @@ cdef class PyXsltExecutable:
         if parameters is not None:
                 parametersDict = parameters
         for (key, value) in parameters.items():
-                if isinstance(value, PyXdmAtomicValue):
-                        value_ = value
+                if isinstance(value, PyXdmAtomicValue) or isinstance(value, PyXdmNode) or isinstance(value, PyXdmMap) or isinstance(value, PyXdmArray) or isinstance(value, PyXdmFunctionItem) or isinstance(value, PyXdmItem) or isinstance(value, PyXdmValue):
                         key_str = key.encode('UTF-8')
                         value_.derivedptr.incrementRefCount()
-                        c_params[key_str] = <saxoncClasses.XdmValue *> value_.derivedaptr
+                        c_params[key_str] = <saxoncClasses.XdmValue *> value.thisvptr
                 else:
-                        raise Exception("Initial template parameters can only be of type PyXdmValue")
+                        raise Exception("Initial template parameters can only be of type PyXdmValue or its sub-types")
         if len(parameters) > 0:
             self.thisxptr.setInitialTemplateParameters(c_params, c_tunnel)
 
