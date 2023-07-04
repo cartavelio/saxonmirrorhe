@@ -45,6 +45,12 @@
       <i>For details of how to set up collation URIs for use in XQuery, see <a class="bodylink"
          href="/localization/sorting-and-collations">Sorting and collations</a>.</i>
    </p>
+   
+   <p>As required by the XQuery 3.1 specification, Saxon predeclares the namespaces for prefixes <code>xml</code>,
+   <code>xs</code>, <code>xsi</code>, <code>fn</code>, and <code>local</code>. As permitted
+   (but not required) by XQuery 3.1, Saxon also predeclares prefixes <code>err</code> and <code>saxon</code>.
+   From Saxon 12.3, it further predeclares <code>math</code>, <code>map</code>, and <code>array</code>.</p>
+   
    <section id="commandline" title="From the command line">
       <h1>XQuery from the command line</h1>
 

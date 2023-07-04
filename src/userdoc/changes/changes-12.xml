@@ -103,6 +103,12 @@
         
   
     </category>
+    
+    <category name="xquery31">
+        <p>From 12.3, the <code>math</code>, <code>map</code>, and <code>array</code> prefixes are predeclared in XQuery.
+        This is permitted but not required by the XQuery 3.1 specification; it is likely to be required in XQuery 4.0.
+        Queries that explitly declare these namespaces do not need to be changed.</p>
+    </category>
 
     <category name="JAXP" class="javaonly">
         
@@ -288,7 +294,7 @@
             to generate SEF files for different versions of SaxonJS. The option <code>-target:JS</code> is equivalent
             to <code>-target:JS2</code> for the time being; the option <code>-target:JS3</code> is for future use.</p>
         
-       
+        <p>From </p>
         
     </category>
     
