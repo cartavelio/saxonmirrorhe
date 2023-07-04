@@ -217,25 +217,29 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         if (!tok.hasMoreTokens()) {
             return badDuration("empty string", s);
         }
-        String part = (String) tok.nextToken();
+        String part = tok.nextToken();
         if ("+".equals(part)) {
             return badDuration("+ sign not allowed in a duration", s);
         } else if ("-".equals(part)) {
             negative = true;
-            part = (String) tok.nextToken();
+            if (tok.hasMoreTokens()) {
+                part = tok.nextToken();
+            } else {
+                return badDuration("'-' on its own is not a valid duration", s);
+            }
         }
         if (!"P".equals(part)) {
             return badDuration("missing 'P'", s);
         }
         int state = 0;
         while (tok.hasMoreTokens()) {
-            part = (String) tok.nextToken();
+            part = tok.nextToken();
             if ("T".equals(part)) {
                 state = 4;
                 if (!tok.hasMoreTokens()) {
                     return badDuration("T must be followed by time components", s);
                 }
-                part = (String) tok.nextToken();
+                part = tok.nextToken();
             }
             int value = simpleInteger(part);
             if (value < 0) {
@@ -248,7 +252,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             if (!tok.hasMoreTokens()) {
                 return badDuration("missing unit letter at end", s);
             }
-            char delim = ((String) tok.nextToken()).charAt(0);
+            char delim = tok.nextToken().charAt(0);
             switch (delim) {
                 case 'Y':
                     if (state > 0) {
@@ -655,7 +659,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                 StringBuilder sb = new StringBuilder(16);
                 String ms = "000000000" + _nanoseconds;
                 ms = ms.substring(ms.length() - 9);
-                sb.append((_negative ? "-" : "") + getSeconds() + '.' + ms);
+                sb.append(_negative ? "-" : "").append(getSeconds()).append('.').append(ms);
                 return BigDecimalValue.parse(sb.toString());
             case WHOLE_SECONDS:
                 return Int64Value.makeIntegerValue(_negative ? -_seconds : _seconds);
@@ -885,6 +889,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                 } else if (min0 > max1) {
                     return +1;
                 } else {
+                    //noinspection ComparatorMethodParameterNotUsed
                     return SequenceTool.INDETERMINATE_ORDERING;
                 }
             }
