@@ -3941,8 +3941,6 @@ cdef class PyXdmItem(PyXdmValue):
          cinit(self)
          Constructor for PyXdmItem
         """
-        self.py_item_string_value = None   # hold the string value of the XdmItem
-        self.py_item_to_string = None   # hold the string value of the XdmItem
         if type(self) is PyXdmItem:
             self.derivedptr = self.thisvptr = new saxoncClasses.XdmItem()
 
@@ -3963,26 +3961,23 @@ cdef class PyXdmItem(PyXdmValue):
         Property to get the string value of the PyXdmItem
         """
         cdef const char* c_string = NULL
-        if self.py_item_string_value is None:
-           c_string = self.derivedptr.getStringValue()
-           self.py_item_string_value = make_py_str(c_string)
-           saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return self.py_item_string_value
+        c_string = self.derivedptr.getStringValue()
+        py_item_string_value = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_item_string_value
      
      def __repr__(self):
-        cdef const char* c_string = NULL
-        if self.py_item_to_string is None:
-            c_string =  self.derivedptr.toString()
-            self.py_item_to_string = make_py_str(c_string)
-            saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return self.py_item_to_string
+        c_string =  self.derivedptr.toString()
+        py_item_to_string = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_item_to_string
 
      def __str__(self):
         cdef const char* c_string = NULL
-        if self.py_item_to_string is None:
-           c_string = self.derivedptr.toString()
-           self.py_item_to_string = make_py_str(c_string)
-        return self.py_item_to_string
+        c_string = self.derivedptr.toString()
+        py_item_to_string = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_item_to_string
 
      @property
      def is_atomic(self):
@@ -4131,8 +4126,6 @@ cdef class PyXdmNode(PyXdmItem):
          Constructor for PyXdmNode
         """
         self.derivednptr = self.derivedptr = self.thisvptr = NULL
-        self.py_node_string_value = None  # hold the string value of the XdmNode
-        self.py_node_to_string = None  # hold the string value of the XdmNode
 
      def __dealloc__(self):
         if type(self) is PyXdmNode and self.derivednptr != NULL:
@@ -4253,11 +4246,10 @@ cdef class PyXdmNode(PyXdmItem):
             str: The string value of this node
         """
         cdef const char* c_string = NULL
-        if self.py_node_string_value is None:
-           c_string = self.derivednptr.getStringValue()
-           self.py_node_string_value = make_py_str(c_string)
-           saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return self.py_node_string_value
+        c_string = self.derivednptr.getStringValue()
+        py_node_string_value = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_node_string_value
 
      def __str__(self):
         """
@@ -4267,22 +4259,20 @@ cdef class PyXdmNode(PyXdmItem):
             str: String value of this node
         """
         cdef const char* c_string = NULL
-        if self.py_node_to_string is None:
-           c_string = self.derivednptr.toString()
-           self.py_node_to_string = make_py_str(c_string)
-           saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return self.py_node_to_string
+        c_string = self.derivednptr.toString()
+        py_node_to_string = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_node_to_string
 
      def __repr__(self):
         """
         ___repr__(self)
         """
         cdef const char* c_string = NULL
-        if self.py_node_to_string is None:
-           c_string = self.derivednptr.toString()
-           self.py_node_to_string = make_py_str(c_string)
-           saxoncClasses.SaxonProcessor.deleteString(c_string)
-        return self.py_node_to_string
+        c_string = self.derivednptr.toString()
+        py_node_to_string = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        return py_node_to_string
 
      def get_parent(self):
         """

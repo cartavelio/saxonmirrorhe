@@ -137,9 +137,9 @@ XdmValue::~XdmValue() {
 
 	xdmSize = 0;
 
-    if(toStringValue != nullptr) {
+    /*if(toStringValue != nullptr) {
         toStringValue = nullptr;
-    }
+    }  */
 
 }
 
