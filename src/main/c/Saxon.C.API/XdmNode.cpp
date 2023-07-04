@@ -203,7 +203,7 @@ return this;}
 
 	if(str == nullptr) { return nullptr;}
         allocFn fn = operator new;
-		const char * stri = j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)str, fn);
+		const char * stri = j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)str, (void *)fn);
 
 		return stri;
 
