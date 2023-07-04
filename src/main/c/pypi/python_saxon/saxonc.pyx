@@ -1653,6 +1653,17 @@ cdef class PyXsltExecutable:
 
         :return: value (PyXdmValue):
         """
+        cdef saxoncClasses.XdmValue * xdmValue = NULL
+        cdef PyXdmValue val = None
+        xdmValue = self.thisxptr.getXslMessages()
+        if xdmValue is NULL:
+            return None
+        else:
+            val = PyXdmValue()
+            val.thisvptr = xdmValue
+            xdmValue.incrementRefCount()
+            return val
+
 
      def set_parameter(self, name, value):
         """
@@ -1806,7 +1817,10 @@ cdef class PyXsltExecutable:
         '''make_c_str(file_name)'''
         py_string_string = file_name.encode('utf-8') if file_name is not None else None
         c_file_name = py_string_string if file_name is not None else ""
-        self.thisxptr.setSaveXslMessage(show, c_file_name)
+        if file_name is None:
+            self.thisxptr.setSaveXslMessage(show, NULL)
+        else:
+            self.thisxptr.setSaveXslMessage(show, c_file_name)
 
      def export_stylesheet(self, str file_name):
         """
@@ -2027,6 +2041,7 @@ cdef class PyXsltExecutable:
         else:
             val = PyXdmValue()
             val.thisvptr = xdmValue
+            xdmValue.incrementRefCount()
             return val
 
 
@@ -3369,7 +3384,7 @@ cdef class PyXPathProcessor:
        """
        py_uri_string = base_uri.encode('UTF-8') if base_uri is not None else None
        cdef char * c_uri = py_uri_string if base_uri is not None else ""
-       self.thisxpptr.setBaseUri(c_uri)
+       self.thisxpptr.setBaseURI(c_uri)
 
      def set_caching(self, is_caching):
          """

@@ -8,12 +8,12 @@ class PyTestOutcome:
     processor: PySaxonProcessor
     wrong_error: str
     result_documents: dict
-    xsl_messages: str
+    xsl_messages = None
 
     def __init__(self):
         self.wrong_error = None
         self.result_documents = {}
-        self.xsl_messages = ""
+        self.xsl_messages = None
 
     def capture_result_documents(self, rd : dict):
         self.result_documents = rd
@@ -69,9 +69,7 @@ class PyTestOutcome:
         elif "assert-message" == tag:
             catalog_xpc.set_context(xdm_item=assertion)
             sub_assertion = catalog_xpc.evaluate_single("*")
-            print("message file=" + self.xsl_messages)
-            f = open(self.xsl_messages, "r")
-            print(f.read())
+            print(self.xsl_messages)
             exit()
             return not self.test_assertion2(sub_assertion.get_node_value(), result, result_as_error, assert_xpc,
                                             catalog_xpc, assert_set)

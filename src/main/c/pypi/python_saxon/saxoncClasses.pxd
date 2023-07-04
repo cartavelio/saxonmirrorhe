@@ -312,10 +312,10 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void clearProperties()
 
         # Get the messages written using the <code>xsl:message</code> instruction
-        void setSaveXslMessage(bool show, const char* filename)
+        void setSaveXslMessage(bool show, const char* filename)  except +raise_py_error
 
         # Get the messages written using the xsl:message instruction
-        #XdmValue * getXslMessages()
+        XdmValue * getXslMessages()  except +raise_py_error
 
         # Perform a one shot transformation. The result is stored in the supplied outputfile.
         void transformFileToFile(const char* sourcefile, const char* outputfile)  except +raise_py_error
@@ -584,6 +584,8 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
         int getNodeKind()
 
         const char * getNodeName()
+
+        const char * getLocalName();
 
         XdmValue * getTypedValue()
 
