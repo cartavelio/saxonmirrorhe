@@ -88,6 +88,15 @@ public class ExpressionContext implements StaticContext {
     }
 
     /**
+     * Get the name of the attribute containing the expression being parsed
+     * @return the attribute name
+     */
+
+    public StructuredQName getAttributeName() {
+        return attributeName;
+    }
+
+    /**
      * Construct a dynamic context for early evaluation of constant subexpressions
      */
 
@@ -225,7 +234,7 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public Expression bindVariable(StructuredQName qName) throws XPathException {
-        SourceBinding sourceBinding = element.bindVariable(qName);
+        SourceBinding sourceBinding = element.bindVariable(qName, attributeName);
         if (sourceBinding == null) {
             if (qName.hasURI(NamespaceUri.XSLT) && qName.getLocalPart().equals("original")) {
                 element.getXslOriginal(StandardNames.XSL_VARIABLE);
@@ -238,7 +247,7 @@ public class ExpressionContext implements StaticContext {
                 // See tests variable-0118 and variable-0120
                 SequenceTool.supply(element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF), (ItemConsumer<? super Item>) parent -> {
                     if (parent instanceof XSLGlobalVariable && ((XSLGlobalVariable) parent).getVariableQName().equals(qName)) {
-                        XPathException err = new XPathException("Variable " + qName.getDisplayName() +
+                        XPathException err = new XPathException("Variable $" + qName.getDisplayName() +
                                                                         " cannot be used within its own declaration", "XPST0008");
                         err.setIsStaticError(true);
                         throw err;
@@ -265,7 +274,7 @@ public class ExpressionContext implements StaticContext {
                 }
             }
 
-            XPathException error = new XPathException("Variable " + qName.getDisplayName() +
+            XPathException error = new XPathException("Variable $" + qName.getDisplayName() +
                                                             " has not been declared (or its declaration is not in scope)", "XPST0008");
             error.setIsStaticError(true);
             throw error;
