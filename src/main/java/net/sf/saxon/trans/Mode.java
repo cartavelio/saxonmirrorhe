@@ -62,6 +62,7 @@ public abstract class Mode extends Actor {
     boolean bindingSlotsAllocated = false;
     boolean modeTracing = false;
     SequenceType defaultResultType = null;
+    boolean enclosingMode = false;
 
     private Set<? extends Accumulator> accumulators;
 
@@ -204,6 +205,24 @@ public abstract class Mode extends Actor {
      */
 
     public abstract boolean isEmpty();
+
+    /**
+     * Say whether this is an enclosing mode (4.0 feature)
+     * @param enclosing true if this is an enclosing mode
+     */
+
+    public void setEnclosingMode(boolean enclosing) {
+        this.enclosingMode = enclosing;
+    }
+
+    /**
+     * Ask whether this is an enclosing mode (4.0 feature)
+     * @return true if this is an enclosing mode
+     */
+
+    public boolean isEnclosingMode() {
+        return enclosingMode;
+    }
 
     /**
      * Set the policy for handling recoverable errors. Note that for some errors the decision can be

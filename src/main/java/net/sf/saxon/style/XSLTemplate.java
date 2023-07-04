@@ -23,6 +23,7 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
@@ -531,7 +532,29 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         stackFrameMap = getConfiguration().makeSlotManager();
-        checkTopLevel("XTSE0010", true);
+
+        StyleElement enclosingMode = null;
+        NodeImpl parent = getParent();
+        assert parent != null;
+        if (getCompilation().getCompilerInfo().getXsltVersion() >= 40
+                && parent.getFingerprint() == StandardNames.XSL_MODE) {
+            enclosingMode = (StyleElement) parent;
+        }
+        if (enclosingMode == null) {
+            checkTopLevel("XTSE0010", true);
+        } else {
+            if (matchAtt == null) {
+                compileError("A template rule enclosed within xsl:mode must have a match attribute", "XTSE4010");
+            }
+            if (modeAtt != null) {
+                compileError("A template rule enclosed within xsl:mode must not have a mode attribute", "XTSE4010");
+            }
+            if (nameAtt != null) {
+                compileError("A template rule enclosed within xsl:mode must not have a name attribute", "XTSE4010");
+            }
+            modeNames = new StructuredQName[1];
+            modeNames[0] = ((XSLMode)getParent()).getObjectName();
+        }
 
         // the check for duplicates is now done in the buildIndexes() method of XSLStylesheet
         if (match != null) {
@@ -866,6 +889,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     if (!ok) {
                         return;
                     }
+                    if (mode.isEnclosingMode() && !(getParent() instanceof XSLMode && mode == ((XSLMode)getParent()).getMode())) {
+                        compileError("An xsl:template rule must not refer to a mode that contains enclosed template rules "
+                                             + "unless it is itself enclosed by that xsl:mode declaration", "XTSE4020");
+                    }
                 }
                 Pattern match1 = match.copy(new RebindingMap());
                 String typed = mode.getActivePart().getPropertyValue("typed");
@@ -929,7 +956,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     compiledTemplateRules.put(Mode.UNNAMED_MODE_NAME, rule);
                     mgr.registerRule(match1, rule, mgr.getUnnamedMode(), module, prio, mgr.allocateSequenceNumber(), 0);
                     for (Mode m : mgr.getAllNamedModes()) {
-                        if (m instanceof SimpleMode) {
+                        if (m instanceof SimpleMode && !m.isEnclosingMode()) {
                             TemplateRule ruleCopy = rule.copy();
                             if (m.isDeclaredStreamable()) {
                                 ruleCopy.setDeclaredStreamable(true);
