@@ -22,6 +22,8 @@ class Environment:
 
         self.xslt_proc = self.proc.new_xslt30_processor()
 
+        self.source_docs = {}
+
 
 
 
