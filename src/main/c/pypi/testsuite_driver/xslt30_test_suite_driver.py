@@ -1,6 +1,7 @@
 import urllib.parse
 
-from saxonc@@edition@@ import *
+'''from saxonc@@edition@@ import *'''
+from saxoncee import *
 import os
 import psutil
 from Environment import Environment
@@ -63,7 +64,7 @@ debug = False
 
 run_test = None
 '''"streamable"'''
-run_test_case_name = 'match-240a'
+run_test_case_name = None
 '''result-document-0206'''
 run_assertion = None
 '''serialization-matches'''
@@ -443,32 +444,32 @@ def get_named_parameters(proc: PySaxonProcessor, xpath_proc: PyXPathProcessor, n
             static_test  = "[@static]"
 
         param_elements = xpath_proc.evaluate("param"+static_test)
+        if param_elements is not None:
+            for i in range(param_elements.size):
 
-        for i in range(param_elements.size):
+                param_i = param_elements.item_at(i).get_node_value()
 
-            param_i = param_elements.item_at(i).get_node_value()
+                name = param_i.get_attribute_value("name")
+                select = param_i.get_attribute_value("select")
+                tunnelled = param_i.get_attribute_value("tunnel")
+                as_i = param_i.get_attribute_value("as")
 
-            name = param_i.get_attribute_value("name")
-            select = param_i.get_attribute_value("select")
-            tunnelled = param_i.get_attribute_value("tunnel")
-            as_i = param_i.get_attribute_value("as")
-
-            required = tunnel == (tunnelled is not None and tunnelled == "yes")
-            value = None
-            if name is None:
-                print("*** No name for parameter " + str(j) + " in initial-template")
-                raise PySaxonApiError("*** No name for parameter " + str(j) + " in initial-template")
-            try:
-                value = xpath_proc.evaluate(select)
-                i += 1
-            except PySaxonApiError as ex:
-                print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
-                exit()
-            if as_i is not None:
-                valuei = proc.make_atomic_value(str(as_i), str(value))
-                if required:
-                    params[name] = valuei
-            elif required:
+                required = tunnel == (tunnelled is not None and tunnelled == "yes")
+                value = None
+                if name is None:
+                    print("*** No name for parameter " + str(j) + " in initial-template")
+                    raise PySaxonApiError("*** No name for parameter " + str(j) + " in initial-template")
+                try:
+                    value = xpath_proc.evaluate(select)
+                    i += 1
+                except PySaxonApiError as ex:
+                    print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
+                    exit()
+                '''if as_i is not None:
+                    valuei = proc.make_atomic_value(str(as_i), str(value))
+                    if required:
+                        params[name] = valuei
+                elif required:'''
                 params[name] = value
 
         return params
@@ -525,13 +526,13 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     xpath_proc.set_context(xdm_item=test_case_node)
     assertion = xpath_proc.evaluate_single("result/*[1]").get_node_value()
 
-    print(test_case_node)
+    '''print(test_case_node)'''
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print("Start memory:")
         print(start_memory)
         print("End memory:")
         print(process.memory_info().rss)
-    '''print(test_input_node)'''
+        print(test_input_node)
     xpath_proc.set_context(xdm_item=test_input_node)
     '''Get config for XSLT Processor'''
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
@@ -663,7 +664,6 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     except PySaxonApiError as ex:
         print(ex)
         errorResult = ex
-        exit()
 
     assert_xpc = environment.proc.new_xpath_processor()
     assert_xpc.set_property("sa", "true")

@@ -197,9 +197,9 @@ int64_t XdmValue::getUnderlyingValue() {
         std::cerr << std::endl << "XdmValue-getUnderlyingValue cp0 size="<<values.size() << std::endl;
     }
 
-    /*if(count == 1) {
+    if(count == 1) {
         return values[0]->getUnderlyingValue();
-    }  */
+    } 
     jValues = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, count);
 
