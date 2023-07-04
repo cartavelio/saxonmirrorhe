@@ -202,8 +202,8 @@ return this;}
     const char* XdmNode::getAttributeValue(const char *str){
 
 	if(str == nullptr) { return nullptr;}
-
-		const char * stri = j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)str);
+        allocFn fn = operator new;
+		const char * stri = j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)str, fn);
 
 		return stri;
 
