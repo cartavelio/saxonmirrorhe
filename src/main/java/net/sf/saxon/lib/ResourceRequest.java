@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 
 public class ResourceRequest {
     public static final String TEXT_NATURE = "https://www.iana.org/assignments/media-types/text/plain";
-    public static final String BINARY_NATURE = "https://www.iana.org/assignments/media-types/application/binary";
     public static final String XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";
     public static final String XSLT_NATURE = NamespaceConstant.XSLT;
     public static final String XSD_NATURE = NamespaceConstant.SCHEMA;

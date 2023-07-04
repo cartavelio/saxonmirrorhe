@@ -20,6 +20,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -82,21 +83,17 @@ public class DirectResourceResolver implements ResourceResolver {
             // System.err.println("StandardURIResolver, href=" + href + ", id=" + id);
         }
 
-        Source ss;
-
-        InputStream stream;
+        Source ss = null;
         try {
-            stream = ResourceLoader.urlStream(config, request.uri);
-        } catch (IOException e) {
-            stream = null; // Carry on, the XML parser might know what to do with it.
-        }
-        InputSource is = new InputSource(request.uri);
-        is.setByteStream(stream);
-        ss = new SAXSource(config.getStyleParser(), is);
-        if (stream != null) {
+            Reader reader = ResourceLoader.urlReader(config, request.uri, request.requestedEncoding);
+            ss = new StreamSource(reader);
             // We created the stream, so we must close it after use
             ss = AugmentedSource.makeAugmentedSource(ss);
             ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
+        } catch (IOException e) {
+            // Carry on, the XML parser might know what to do with it.
+            InputSource is = new InputSource(request.uri);
+            ss = new SAXSource(config.getStyleParser(), is);
         }
 
         if (id != null) {
@@ -107,9 +104,6 @@ public class DirectResourceResolver implements ResourceResolver {
         }
 
         return ss;
-
     }
-
-
 }
 
