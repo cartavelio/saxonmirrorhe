@@ -293,7 +293,8 @@ task build_transpiler(
   outputs.files fileTree(dir: "${buildDir}/transpiler")
   source("${projectDir}/tools/transpiler/src/ToXml.java")
   source("${projectDir}/tools/transpiler/src/XmlPrinterMHK.java")
-  classpath = configurations.transpiler
+  classpath = configurations.transpiler \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
   destinationDirectory = new File("${buildDir}/transpiler")
   doFirst {
     mkdir("build")
@@ -307,7 +308,8 @@ task eecs_transpile_to_xml(
 ) {
   inputs.files fileTree(dir: "${buildDir}/src/eecs")
   outputs.files fileTree(dir: "${buildDir}/ee_xmlout")
-  classpath = configurations.transpiler
+  classpath = configurations.transpiler \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
   mainClass = "ToXml"
   args "-j:${buildDir}/src/eecs",
     "-repo:${projectDir}",
@@ -363,7 +365,8 @@ task eecs_generateCSharp(
   inputs.file "${buildDir}/ee_refined-digest.xml"
   inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
   outputs.files fileTree(dir: "${buildDir}/cs")
-  classpath = configurations.transpiler
+  classpath = configurations.transpiler \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
   mainClass = "ToXml"
   args "-cs:${buildDir}/cs",
     "-repo:${projectDir}",
