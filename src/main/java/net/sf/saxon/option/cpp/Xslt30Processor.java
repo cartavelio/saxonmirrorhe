@@ -19,6 +19,7 @@ import net.sf.saxon.s9api.*;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.security.KeyPair;
 import java.util.*;
 
 import org.graalvm.nativeimage.IsolateThread;
@@ -1398,6 +1399,23 @@ public class Xslt30Processor extends SaxonCAPI {
         }
 
         if (!initialTemplateParameters.isEmpty()) {
+            if (SaxonCAPI.debug) {
+               for(Map.Entry<QName, XdmValue> entry : initialTemplateParameters.entrySet()) {
+
+                 if(entry.getKey() != null) {
+                     System.err.println("DEBUG: key = "+ entry.getKey());
+                 } else {
+                     System.err.println("DEBUG: initialTemplateParameter Found null key");
+
+                 }
+                   if(entry.getValue() != null) {
+                       System.err.println("DEBUG: key = "+ entry.getValue().toString());
+                   } else {
+                       System.err.println("DEBUG: initialTemplateParameter Found null value");
+
+                   }
+               }
+            }
             transformer.setInitialTemplateParameters(initialTemplateParameters, tunnel);
         }
 
