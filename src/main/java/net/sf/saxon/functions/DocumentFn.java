@@ -638,7 +638,9 @@ public class DocumentFn extends SystemFunction implements Callable {
         try {
             Sender.send(source, out, parseOptions);
         } catch (XPathException e) {
-            throw e.maybeWithLocation(locator).maybeWithErrorCode("FODC0002");
+            throw e.maybeWithLocation(locator)
+                    .maybeWithErrorCode("FODC0002")
+                    .replacingErrorCode("SXXP0003", "FODC0002");
         }
     }
 

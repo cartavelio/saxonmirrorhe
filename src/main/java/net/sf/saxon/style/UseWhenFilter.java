@@ -275,7 +275,9 @@ public class UseWhenFilter extends ProxyReceiver {
                 return includedDoc;
             } catch (XPathException e) {
                 e.maybeSetErrorCode("XTSE0165");
-                if (e.hasErrorCode("XTSE0180")) {
+                if (e.hasErrorCode("SXXP0003")) {
+                    e.setErrorCode("XTSE0165");
+                } else if (e.hasErrorCode("XTSE0180")) {
                     if (isImport) {
                         e.setErrorCode("XTSE0210");
                     }
