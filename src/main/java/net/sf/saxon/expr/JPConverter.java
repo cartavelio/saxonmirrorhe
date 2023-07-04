@@ -208,7 +208,7 @@ public abstract class JPConverter {
                 if (converter != null) {
                     return converter;
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 config.deregisterExternalObjectModel(model);
             }
         }
