@@ -1417,6 +1417,28 @@ public class XdmUtils {
     }
 
 
+
+
+    @CEntryPoint(name = "j_axisIterator")
+    public static CLongPointer axisIterator(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef, int axisNum) throws SaxonApiException {
+        int num = 0;
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+        XdmSequenceIterator iter = XdmSequenceIterator.ofNodes(node.getUnderlyingNode().iterateAxis(axisNum));
+  
+        long[] childRefs = null;
+        if(iter.hasNext()) {
+            childRefs = iter.stream().mapToLong(i -> {
+                ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
+                return objectHandle.rawValue();
+            }).toArray();
+        }else {
+            return WordFactory.nullPointer();
+        }
+        CLongPointer addr = SaxonCAPI.longArrayToNativeWithLength(alloc, childRefs);
+        return addr;
+    }
+
+
     /**
      * Set the base URI of a document loaded using this <code>DocumentBuilder</code>.
      * <p>This is used for resolving any relative URIs appearing

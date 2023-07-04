@@ -2,18 +2,19 @@ from saxoncee import *
 import os
 from lxml import etree
 import urllib.parse
+import re
 
 class PyTestOutcome:
 
     processor: PySaxonProcessor
     wrong_error: str
     result_documents: dict
-    xsl_messagesi = None
+    xsl_messages = None
 
     def __init__(self):
         self.wrong_error = None
         self.result_documents = {}
-        self.xsl_messagesi = None
+        self.xsl_messages = None
 
     def capture_result_documents(self, rd : dict):
         self.result_documents = rd
@@ -35,10 +36,6 @@ class PyTestOutcome:
         tag = assertion.name.split("}")[1]
         assert_set.add(tag)
 
-        if "assert-result-document" == tag:
-            print(assertion)
-
-
         if "error" != tag and "any-of" != tag and "all-of" != tag and result is None:
             print("Error Found = " + str(result_as_error))
             return False
@@ -54,7 +51,6 @@ class PyTestOutcome:
         elif "assert-true" == tag:
             return result.size == 1 and result.item_at(0).is_atomic and result.item_at(0).get_atomic_value().primitive_type_name
         elif "error" == tag:
-
             return self.compare_expected_error(assertion, result_as_error, assert_xpc, catalog_xpc)
 
         elif "not" == tag:
@@ -66,13 +62,20 @@ class PyTestOutcome:
 
             return self.assert_string_value(assertion, result)
 
+        elif "serialization-matches" == tag:
+            return self.assert_serialization_matches(assertion, result, assert_xpc)
+
+        elif "assert-serialization-error" == tag:
+            return self.assert_serialization_error(assertion, result_as_error, assert_xpc)
+
         elif "assert-message" == tag:
             catalog_xpc.set_context(xdm_item=assertion)
             sub_assertion = catalog_xpc.evaluate_single("*")
-            print(self.xsl_messagesi)
-            exit()
-            return not self.test_assertion2(sub_assertion.get_node_value(), result, result_as_error, assert_xpc,
-                                            catalog_xpc, assert_set)
+            for n in range(int(self.xsl_messages.size)):
+                item = self.xsl_messages.item_at(n)
+                if self.test_assertion2(sub_assertion.get_node_value(), item, result_as_error, assert_xpc,
+                                     catalog_xpc, assert_set):
+                    return True
 
             return False
 
@@ -80,14 +83,14 @@ class PyTestOutcome:
         elif "assert-result-document" == tag:
             catalog_xpc.set_context(xdm_item=assertion)
             sub_assertion = catalog_xpc.evaluate_single("*")
-            print(result.item_at(0).get_node_value().base_uri)
+            '''print(result.item_at(0).get_node_value().base_uri)'''
             uri = assertion.get_attribute_value("uri")
             uri = urllib.parse.urljoin(result.item_at(0).get_node_value().base_uri, uri)
             print("uri=" + uri)
             if self.result_documents:
                 print(list(self.result_documents.keys()))
                 doc = self.result_documents[uri]
-                ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result_as_error, assert_xpc, catalog_xpc, assert_set)
+                ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result, assert_xpc, catalog_xpc, assert_set)
                 if not ok:
                     print("**** Assertion failed for result-document " + uri)
 
@@ -97,6 +100,7 @@ class PyTestOutcome:
         elif "all-of" == tag:
             catalog_xpc.set_context(xdm_item=assertion)
             children = catalog_xpc.evaluate("*")
+
             for i in range(children.size):
                 child = children.item_at(i)
                 if not self.test_assertion(child.get_node_value(), result, result_as_error, self.processor, assert_xpc, catalog_xpc, assert_set):
@@ -118,6 +122,53 @@ class PyTestOutcome:
 
         return False
 
+
+    def assert_serialization_error(self, assertion: PyXdmNode, result: PySaxonApiError, assert_xpc: PyXPathProcessor):
+        if result is None:
+            print("Error in PytestOutCome PySaxonApiError should not be None")
+            return False
+        code = assertion.get_attribute_value("code")
+        resulti = code in str(result)
+        if resulti == False:
+            self.wrong_error = str(result)
+        return resulti
+    def assert_serialization_matches(self, assertion: PyXdmNode, result: PyXdmValue, assert_xpc: PyXPathProcessor):
+        flags_att_str = ""
+        flags_att = assertion.get_attribute_value('flag')
+        if flags_att is not None:
+            flags_att_str =flags_att
+
+        result_str = ""
+        if isinstance(result, PyXdmItem):
+            result_str = result.string_value
+        elif result.size == 1:
+            result_str = str(result.item_at(0))
+        else:
+            for x in range(result.size):
+                itemi = result.item_at(x)
+                result_str += str(itemi)
+
+        flags_att_str = flags_att_str.replace("!", "")
+
+        assertion_regex = assertion.string_value
+        assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
+        print(result_str)
+        print(assertion_regex)
+        print(flags_att_str)
+
+        if re.search(assertion_regex, str(result)) is not None:
+            print("FOUND MATCH XXXXX")
+
+        xpath_str = "fn:matches('" + result_str + "', \'" + assertion_regex + "\','" + flags_att_str + "')"
+        print(xpath_str)
+        print('result = ' + result_str)
+        oki = False
+        try:
+            oki = assert_xpc.effective_boolean_value(xpath_str)
+            return oki
+        except Exception as ex:
+            print(ex)
+        return False
 
     def assert_string_value(self, assertion: PyXdmNode, result: PyXdmValue):
 
@@ -142,22 +193,29 @@ class PyTestOutcome:
 
 
     def assert_xpath(self, assertion: PyXdmNode, result: PyXdmValue, assert_xpc: PyXPathProcessor, catalog_xpc: PyXPathProcessor):
-        catalog_xpc.set_context(xdm_item=assertion)
-        namespaceValues = catalog_xpc.evaluate("for $i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to ($i - 1))][name() = name((//namespace::*)[$i])], (//namespace::*)[$i]))) then (//namespace::*)[$i] else ()")
+        '''catalog_xpc.set_context(xdm_item=assertion)'''
+        xml_str = str(assertion)
+        new_assertion = self.processor.parse_xml(xml_text=xml_str)
+        temp_xpath_proc = self.processor.new_xpath_processor()
+        temp_xpath_proc.set_context(xdm_item=new_assertion)
+        namespaceValues = temp_xpath_proc.evaluate("for $i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to ($i - 1))][name() = name((//namespace::*)[$i])], (//namespace::*)[$i]))) then (//namespace::*)[$i] else ()")
         if namespaceValues != None and namespaceValues.size > 0:
+            '''print("values = " + str(namespaceValues))
+            print("================")'''
             ns_size = namespaceValues.size
             for x in range(ns_size):
                 itemx = namespaceValues.item_at(x)
+                '''print("namespace node=" + str(itemx.get_node_value().string_value))'''
                 if itemx is not None and isinstance(itemx, PyXdmNode):
                     itemn = itemx.get_node_value()
                     ns_name = itemn.name
                     ns_value = itemn.get_node_value()
                     if ns_name is not None and ns_value is not None:
-                        print("Namespace=" + ns_name + " = " + str(ns_value))
-                        assert_xpc.declare_namespace(ns_name, str(ns_value))
+                        '''print("Namespace=" + ns_name + " = " + str(ns_value))'''
+                        assert_xpc.declare_namespace(ns_name, str(itemn.get_node_value().string_value))
             assert_xpc.declare_variable("result")
-            print("Testing " + assertion.string_value)
-            print(result)
+            '''print("Testing " + assertion.string_value)
+            print(result)'''
             assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
             assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
             assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
@@ -168,10 +226,13 @@ class PyTestOutcome:
             assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
             assert_xpc.set_parameter("result", result)
             assert_xpc.set_context(xdm_item=result.item_at(0))
-            b = assert_xpc.effective_boolean_value(assertion.string_value)
-            if not b:
-                print("XPath assertion " + assertion.string_value + " failed")
-            return b
+            try:
+                b = assert_xpc.effective_boolean_value(assertion.string_value)
+                '''if not b:
+                    print("XPath assertion " + assertion.string_value + " failed")'''
+                return b
+            except Exception as ex:
+                print(ex)
         return False
 
     def elements_equal(self, e1, e2):
@@ -225,8 +286,8 @@ class PyTestOutcome:
         assert_xpc.set_parameter("result", result)
         try:
             item = assert_xpc.evaluate_single("$result eq " + assertion.string_value)
-            print(result)
-            print(item)
+            '''print(result)
+            print(item)'''
             return item is not None and item.get_atomic_value().boolean_value
 
         except PySaxonApiError as ex:

@@ -9,13 +9,13 @@
 XdmNode::XdmNode(int64_t obj)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
       childCount(-1), children(nullptr), parent(nullptr), typedValue(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN),
+      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), axisCount(0),
       nodeToString(nullptr) {}
 
 XdmNode::XdmNode(XdmNode *p, int64_t obj, XDM_NODE_KIND kind)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
       childCount(-1), children(nullptr), parent(p), typedValue(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(kind),
+      attrValues(nullptr), attrCount(-1), nodeKind(kind), axisCount(0),
       nodeToString(nullptr) {}
 
 XdmNode::XdmNode(const XdmNode &other) {
@@ -29,6 +29,7 @@ XdmNode::XdmNode(const XdmNode &other) {
   attrCount = other.attrCount;
   nodeKind = other.nodeKind;
   nodeToString = other.nodeToString;
+  axisCount = other.axisCount;
 }
 
 bool XdmNode::isAtomic() { return false; }
@@ -233,6 +234,34 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
     }
     return attrValuesi;
   }
+}
+
+int XdmNode::axisNodeCount() {
+
+
+}
+
+XdmNode **XdmNode::nodeAxis(int axis) {
+       allocFn fn = operator new;
+       long long *results = j_axisIterator(
+           SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value, axis);
+
+       axisCount = results[0];
+       if (axisCount == 0) {
+         return nullptr;
+       }
+       XdmNode **valuesi = nullptr;
+
+       valuesi = new XdmNode *[axisCount];
+       XdmNode *tempNode = nullptr;
+       for (int p = 1; p <= axisCount; ++p) {
+         tempNode = new XdmNode(this, results[p], ATTRIBUTE);
+         // this->incrementRefCount();
+         valuesi[p-1] = tempNode;
+       }
+
+       return valuesi;
+
 }
 
 int XdmNode::getAttributeCount() {

@@ -599,6 +599,10 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         XdmNode** getAttributeNodes()
 
+        int axisNodeCount()
+
+        XdmNode **nodeAxis(int axis)
+
         XdmNode** getChildren()
 
         int getChildCount()

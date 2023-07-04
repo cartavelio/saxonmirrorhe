@@ -4383,6 +4383,35 @@ cdef class PyXdmNode(PyXdmItem):
                 val.derivednptr.incrementRefCount()
                 nodes.append(val)
         return nodes
+
+     def node_axis(self, axis):
+        """
+        node_axis(self, int axis)
+        Get array of nodes reachable from this node via a given axis.
+        Axis options are as follows: ANCESTOR = 0,
+        ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
+        DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
+        FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10,
+        PRECEDING_SIBLING = 11, SELF = 12
+        Args:
+            axis (int): The axis identifies which axis is to be navigated.
+        Returns:
+            list[PyXdmNode]: List of PyXdmNode objects
+        """
+        cdef list nodes = []
+        cdef saxoncClasses.XdmNode **n
+        cdef int count, i
+        cdef PyXdmNode val = None
+        n = self.derivednptr.nodeAxis(axis)
+        count = self.derivednptr.axisNodeCount()
+        if count > 0:
+            for i in range(count):
+                val = PyXdmNode()
+                val.derivednptr = val.derivedptr = val.thisvptr = n[i]
+                val.derivednptr.incrementRefCount()
+                nodes.append(val)
+        return nodes
+
      @property
      def children(self):
         """
