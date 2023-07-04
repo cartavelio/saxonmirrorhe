@@ -656,11 +656,8 @@ task all_saxonc_releases() {
   //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def graalEdition = "graal_ce_home"
 
-  def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-v${saxonVersion}"
-  if (systemOs.isMacOsX()) {
-    def arch = System.getProperty("os.arch") 
-    saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-${arch}-v${saxonVersion}"
-  }
+  def arch = System.getProperty("os.arch") 
+  def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-${arch}-v${saxonVersion}"
   def saxoncReleaseDir = "${buildDir}/releases/${saxoncReleaseName}"
 
   task "setup_${edition}c_release"(
