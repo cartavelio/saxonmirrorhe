@@ -237,25 +237,33 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
 }
 
 int XdmNode::axisNodeCount() {
-
+    return axisCount;
 
 }
 
-XdmNode **XdmNode::nodeAxis(int axis) {
+XdmNode **XdmNode::axisNodes(int axis) {
        allocFn fn = operator new;
        long long *results = j_axisIterator(
            SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value, axis);
-
+       if(results == nullptr) {
+        return nullptr;
+       }
        axisCount = results[0];
        if (axisCount == 0) {
          return nullptr;
+       }
+       if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr<<"axisNodes count="<<axisCount<<std::endl;
        }
        XdmNode **valuesi = nullptr;
 
        valuesi = new XdmNode *[axisCount];
        XdmNode *tempNode = nullptr;
-       for (int p = 1; p <= axisCount; ++p) {
-         tempNode = new XdmNode(this, results[p], ATTRIBUTE);
+       for (int p = 1; p < axisCount+1; ++p) {
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+               std::cerr<<"axisNodes result["<<p<<"]= "<<(long)results[p]<<std::endl;
+              }
+         tempNode = new XdmNode(this, results[p], UNKNOWN);
          // this->incrementRefCount();
          valuesi[p-1] = tempNode;
        }

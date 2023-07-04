@@ -24,7 +24,7 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
     cout << "Number of items=" << result->size() << endl;
     cout << "String Value of result=" << messagei << endl;
     sresult->success++;
-    delete result;
+   // delete result;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
@@ -34,6 +34,41 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
   xpath->clearParameters();
   xpath->clearProperties();
   delete input;
+}
+
+
+// test nodeAxis
+void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
+                     sResultCount *sresult) {
+
+  cout << endl << "Test testNodeAxis:" << endl;
+  XdmNode *node =
+      processor->parseXmlFromString("<out xmlns:my='http://www.example.com/ns/various' xmlns:f='http://www.example.com/ns/various1' xmlns='http://www.example.com'><person>text1</person><person>text2</person></out>");
+
+
+  try {
+     XdmNode ** children = node->axisNodes(3);
+     int childCount = node->axisNodeCount();
+     cout<< "node type="<<node->getType()<<endl;
+     cout<<" child count = "<<childCount<<endl;
+     for(int i =0;i < childCount; i++) {
+     cout<<"child-Node type = "<<(children[i]->getType())<<endl;
+        cout<< "child node:" << (children[i]->getStringValue())<<endl;
+     }
+     cout<<"cp0"<<endl;
+     cout<< "node name="<< node->getNodeName()<<endl;
+     XdmNode ** namespaces = node->axisNodes(8);
+     int namespaceCount = node->axisNodeCount();
+     cout<<"namespace count="<<namespaceCount<<endl;
+  } catch (SaxonApiException &e) {
+    cout << "Error Message = " << e.what() << endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testXPathSingle");
+  }
+
+  xpath->clearParameters();
+  xpath->clearProperties();
+
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
@@ -369,6 +404,11 @@ int main() {
        << "============================================================="
        << endl
        << endl;
+       testNodeAxis(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
   testXPathValues(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
@@ -521,6 +561,13 @@ int main() {
        << endl
        << endl;
   runTest("testQFlag", "matches('quid', 'quod', 'q')", "false", xpathProc,
+          sresult, document);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  runTest("testMatches", "matches('abcdef', '^\\p{IsBasicLatin}+$')", "false", xpathProc,
           sresult, document);
 
   cout << endl

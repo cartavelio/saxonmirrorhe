@@ -235,7 +235,7 @@ public:
          *         axis and in reverse document order for a reverse axis.
 
   */
-  XdmNode **nodeAxis(int axis);
+  XdmNode **axisNodes(int axis);
 
   //! Get the count of nodes in the nodeAxis array. Cached from the last call to nodeAxis
   int axisNodeCount();

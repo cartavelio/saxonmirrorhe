@@ -4402,7 +4402,7 @@ cdef class PyXdmNode(PyXdmItem):
         cdef saxoncClasses.XdmNode **n
         cdef int count, i
         cdef PyXdmNode val = None
-        n = self.derivednptr.nodeAxis(axis)
+        n = self.derivednptr.axisNodes(axis)
         count = self.derivednptr.axisNodeCount()
         if count > 0:
             for i in range(count):

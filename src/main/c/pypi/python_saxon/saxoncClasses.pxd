@@ -601,7 +601,7 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         int axisNodeCount()
 
-        XdmNode **nodeAxis(int axis)
+        XdmNode **axisNodes(int axis)
 
         XdmNode** getChildren()
 
