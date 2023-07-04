@@ -268,6 +268,11 @@
         
        <p>From Saxon 12.2, with HTML5 serialization, if indentation is on, a newline is added after
        the <code>DOCTYPE</code> declaration.</p>
+        
+        <p>From Saxon 12.3, a new serialization parameter <code>escape-solidus</code> is available. The XSLT and XQuery
+        syntax for this requires 4.0 to be available, but it can be used in API calls and from the command line 
+        without enabling 4.0. The default is <code>yes</code>; if the parameter is set to <code>no</code>,
+        the JSON serialization method outputs <code>"/"</code> as <code>"/"</code>, not as <code>"\/"</code>.</p>
  
     </category>
     
