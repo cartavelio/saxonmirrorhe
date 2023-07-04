@@ -177,7 +177,9 @@ public class XPathParser {
         m.put(Token.PLUS, 10);
         m.put(Token.MINUS, 10);
         m.put(Token.MULT, 11);
+        m.put(Token.MATH_MULT, 11);
         m.put(Token.DIV, 11);
+        m.put(Token.MATH_DIVIDE, 11);
         m.put(Token.IDIV, 11);
         m.put(Token.MOD, 11);
         m.put(Token.OTHERWISE, 12);
@@ -1055,6 +1057,10 @@ public class XPathParser {
             case Token.IDIV:
             case Token.MOD:
                 return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, operator, rhs);
+            case Token.MATH_MULT:
+                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, Token.MULT, rhs);
+            case Token.MATH_DIVIDE:
+                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, Token.DIV, rhs);
             case Token.OTHERWISE:
                 return makeOtherwiseExpression(lhs, rhs);
             case Token.UNION:
