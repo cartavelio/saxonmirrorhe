@@ -3984,7 +3984,7 @@ cdef class PyXdmItem(PyXdmValue):
           raise Exception("The PyXdmItem is not a PyXdmNode therefore cannot be sub-classed to a PyXdmNode")
         val = PyXdmNode()
         val.derivednptr = val.derivedptr = <saxoncClasses.XdmNode*> self.derivedptr
-        '''val.derivednptr.incrementRefCount()'''
+        val.derivednptr.incrementRefCount()
         return val
 
      def get_map_value(self):
@@ -3999,7 +3999,7 @@ cdef class PyXdmItem(PyXdmValue):
           raise Exception("The PyXdmItem is not a PyXdmMap therefore cannot be sub-classed to a PyXdmMap")
         val = PyXdmMap()
         val.derivedmmptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmMap*> self.derivedptr
-        '''val.derivednptr.incrementRefCount()'''
+        val.derivednptr.incrementRefCount()
         return val
 
      def get_function_value(self):
@@ -4014,7 +4014,7 @@ cdef class PyXdmItem(PyXdmValue):
           raise Exception("The PyXdmItem is not a PyXdmFunctionItem therefore cannot be sub-classed to a PyXdmFunctionItem")
         val = PyXdmFunctionItem()
         val.derivedfptr = val.derivedptr = <saxoncClasses.XdmFunctionItem*> self.derivedptr
-        '''val.derivednptr.incrementRefCount()'''
+        val.derivednptr.incrementRefCount()
         return val
 
      def get_array_value(self):
@@ -4029,7 +4029,7 @@ cdef class PyXdmItem(PyXdmValue):
           raise Exception("The PyXdmItem is not a PyXdmArray therefore cannot be sub-classed to a PyXdmArray")
         val = PyXdmArray()
         val.derivedaaptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmArray*> self.derivedptr
-        '''val.derivednptr.incrementRefCount()'''
+        val.derivednptr.incrementRefCount()
         return val
 
      @property

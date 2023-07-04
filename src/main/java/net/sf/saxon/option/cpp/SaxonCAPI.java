@@ -32,6 +32,7 @@ import net.sf.saxon.value.*;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.ObjectHandles;
+import org.graalvm.nativeimage.VMRuntime;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.function.CFunctionPointer;
 import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
@@ -228,6 +229,19 @@ public class SaxonCAPI {
             }
         } else if (SaxonCAPI.debug) {
             System.err.println("ObjectHandle not destroyed: Null found");
+        }
+    }
+
+    @CEntryPoint(name = "j_createHeapDum")
+    public static void createHeapDump(IsolateThread thread, int live) {
+        try {
+            File file = File.createTempFile("SVMHeapDump-", ".hprof");
+            VMRuntime.dumpHeap(file.getAbsolutePath(), CTypeConversion.toBoolean(live));
+            System.out.println("  Heap dump created " + file.getAbsolutePath() + ", size: " + file.length());
+        } catch (UnsupportedOperationException unsupported) {
+            System.out.println("  Heap dump creation failed." + unsupported.getMessage());
+        } catch (IOException ioe) {
+            System.out.println("IO went wrong: " + ioe.getMessage());
         }
     }
 
