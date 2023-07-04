@@ -141,9 +141,14 @@ public class LetClause extends Clause {
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
-        setSequence(TypeChecker.strictTypeCheck(
-                getSequence(), rangeVariable.getRequiredType(), role, visitor.getStaticContext()));
-        //variableEvaluator = Elaborator.makeElaborator(getSequence()).lazily(true);
+        if (visitor.getStaticContext().getXPathVersion() < 40) {
+            setSequence(TypeChecker.strictTypeCheck(
+                    getSequence(), rangeVariable.getRequiredType(), role, visitor.getStaticContext()));
+        } else {
+            TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+            setSequence(tc.staticTypeCheck(
+                    getSequence(), rangeVariable.getRequiredType(), role, visitor));
+        }
     }
 
     @Override

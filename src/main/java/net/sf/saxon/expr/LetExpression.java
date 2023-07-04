@@ -151,9 +151,13 @@ public class LetExpression extends Assignation {
 
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
-        //role.setSourceLocator(this);
-        setSequence(TypeChecker.strictTypeCheck(
-                getSequence(), requiredType, role, visitor.getStaticContext()));
+        if (visitor.getStaticContext().getXPathVersion() == 40) {
+            TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+            setSequence(tc.staticTypeCheck(getSequence(), requiredType, role, visitor));
+        } else {
+            setSequence(TypeChecker.strictTypeCheck(
+                    getSequence(), requiredType, role, visitor.getStaticContext()));
+        }
         final ItemType actualItemType = getSequence().getItemType();
 
         refineTypeInformation(actualItemType,
