@@ -1388,7 +1388,7 @@ public class XPathParser {
                 previous.setAction(v);
             }
             previous = v;
-        } while (t.currentToken == Token.COMMA);
+        } while (t.currentToken == Token.COMMA || (allowXPath40Syntax && t.currentToken == operator));
 
         // process the "return" expression (called the "action")
         expect(Token.RETURN);
