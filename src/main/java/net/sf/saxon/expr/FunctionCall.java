@@ -11,6 +11,8 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -18,6 +20,7 @@ import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.JavaExternalObjectType;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Collections;
@@ -239,27 +242,45 @@ public abstract class FunctionCall extends Expression {
                 // Substitute default value expression for an argument marked for replacement. This is necessary
                 // because the default value expression was not necessarily available when the function call
                 // was first parsed, in the case where it is a forwards reference
-                if (arg instanceof DefaultedArgumentExpression && fd != null) {
-                    if (i < fd.getMinimumArity()) {
-                        // This argument cannot be omitted
-                        throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
-                                                         " parameter of function " +
-                                                         (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
-                                                 "XPST0141");
-                    }
-                    if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
-                        arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
-                    } else {
-                        Expression defaultValue = fd.getDefaultValueExpression(i);
-                        if (defaultValue == null) {
-                            // This only happens if there's an error in the function definition
-                            throw new XPathException("No value or default available for " + RoleDiagnostic.ordinal(i + 1) +
+                if (arg instanceof DefaultedArgumentExpression) {
+                    if (fd != null) {
+                        // A user-defined function with default argument values
+                        if (i < fd.getMinimumArity()) {
+                            // This argument cannot be omitted
+                            throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
                                                              " parameter of function " +
                                                              (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
                                                      "XPST0141");
                         }
-                        arg = defaultValue.copy(new RebindingMap());
+                        if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
+                            arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
+                        } else {
+                            Expression defaultValue = fd.getDefaultValueExpression(i);
+                            if (defaultValue == null) {
+                                // This only happens if there's an error in the function definition
+                                throw new XPathException("No value or default available for " + RoleDiagnostic.ordinal(i + 1) +
+                                                                 " parameter of function " +
+                                                                 (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
+                                                         "XPST0141");
+                            }
+                            arg = defaultValue.copy(new RebindingMap());
+                            adoptChildExpression(arg);
+                        }
+                    } else if (target instanceof net.sf.saxon.functions.SystemFunction) {
+                        // A system function with default argument values
+                        BuiltInFunctionSet.Entry details = ((SystemFunction)target).getDetails();
+                        if (i < details.getMinimumArity()) {
+                            // This argument cannot be omitted
+                            throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
+                                                             " parameter of function " +
+                                                             (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
+                                                     "XPST0141");
+                        }
+                        // For the moment, assume a default value of ()
+                        arg = new Literal(EmptySequence.getInstance());
                         adoptChildExpression(arg);
+                    } else {
+                        throw new UnsupportedOperationException();
                     }
                 }
                 if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {
