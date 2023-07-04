@@ -53,6 +53,7 @@ public class JSONEmitter {
     private int level;
     private final Stack<Boolean> oneLinerStack = new Stack<>();
     private boolean mustClose = true;
+    private boolean escapeSolidus = true;
 
     private boolean unfailing = false;
 
@@ -75,6 +76,9 @@ public class JSONEmitter {
         }
         if ("yes".equals(details.getProperty(SaxonOutputKeys.UNFAILING))) {
             unfailing = true;
+        }
+        if ("no".equals(details.getProperty(SaxonOutputKeys.ESCAPE_SOLIDUS))) {
+            escapeSolidus = false;
         }
         String max = details.getProperty(SaxonOutputKeys.LINE_LENGTH);
         if (max != null) {
@@ -205,6 +209,21 @@ public class JSONEmitter {
     }
 
     /**
+     * Append a singleton string value to the output
+     *
+     * @param string the string value to be appended
+     * @throws XPathException if the operation fails
+     */
+
+    public void writeStringValue(String string) throws XPathException {
+        conditionalComma(false);
+        emit('"');
+        emit(escape(string));
+        emit('"');
+    }
+
+
+    /**
      * Output the start of an array. This call must be followed by the members of the
      * array, followed by a call on {@link #endArray()}.
      * @param oneLiner True if the caller thinks the value should be output without extra newlines
@@ -327,7 +346,7 @@ public class JSONEmitter {
         if (normalize) {
             cs = Normalizer.normalize(cs, normalizationForm);
         }
-        return JsonReceiver.escape(cs, false,
+        return JsonReceiver.escape(cs, false, !escapeSolidus,
                                    c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c));
     }
 
