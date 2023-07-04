@@ -3,6 +3,7 @@ package modeltests;
 import jaxptest.ConfigTest;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
@@ -148,7 +149,7 @@ public abstract class ObjectModelTests {
         try {
             Processor proc = new Processor(true);
             XdmNode doc = buildExternalDocument(proc, "books-sql.xsl");
-            XdmFunctionItem genId = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "generate-id"), 1);
+            XdmFunctionItem genId = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceUri.FN, "generate-id"), 1);
             Map<String, XdmNode> idMap = new HashMap<>();
             doc.select(descendant()).forEach(node -> {
                 try {
@@ -316,7 +317,7 @@ public abstract class ObjectModelTests {
             XQueryEvaluator eval = exec.load();
             eval.setContextItem(source);
             eval.run(dest);
-            XdmFunctionItem deepEq = XdmFunctionItem.getSystemFunction(proc,new QName(NamespaceConstant.FN, "deep-equal"), 2);
+            XdmFunctionItem deepEq = XdmFunctionItem.getSystemFunction(proc,new QName(NamespaceUri.FN, "deep-equal"), 2);
             XdmValue comparison = deepEq.call(proc, source, dest.getXdmNode());
             assertTrue(((XdmAtomicValue)comparison).getBooleanValue());
         } catch (Exception e) {
@@ -329,7 +330,7 @@ public abstract class ObjectModelTests {
         try {
             Processor proc = new Processor(true);
             XdmNode doc = buildExternalDocument(proc, "books-with-dtd.xml");
-            XdmFunctionItem id = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceConstant.FN, "id"), 2);
+            XdmFunctionItem id = XdmFunctionItem.getSystemFunction(proc, new QName(NamespaceUri.FN, "id"), 2);
             XdmValue val = id.call(proc, new XdmAtomicValue("MMP"), doc);
             assertTrue(val instanceof XdmNode);
             assertEquals("Mass-market Paperback", ((XdmNode)val).attribute("DESC"));

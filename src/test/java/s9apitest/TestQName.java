@@ -48,6 +48,14 @@ public class TestQName {
         assertEquals("local", q.getLocalName());
     }
 
+    @Test
+    public void testQName2a() {
+        QName q = new QName(NamespaceUri.of("http://some/uri"), "prefix:local");
+        assertEquals("prefix", q.getPrefix());
+        assertEquals(NamespaceUri.of("http://some/uri"), q.getNamespaceUri());
+        assertEquals("local", q.getLocalName());
+    }
+
     /**
      * Test 2-arg constructor
      */

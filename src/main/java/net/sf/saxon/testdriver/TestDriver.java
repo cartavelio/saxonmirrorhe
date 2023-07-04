@@ -384,13 +384,13 @@ public abstract class TestDriver {
 
         XdmNode exceptionsDoc = null;
         DocumentBuilder exceptBuilder = driverProc.newDocumentBuilder();
-        QName testSet = new QName("", "test-set");
-        QName testCase = new QName("", "test-case");
-        QName run = new QName("", "run");
-        QName edition = new QName("", "edition");
-        QName platform = new QName("", "platform");
-        QName compiler = new QName("", "compiler");
-        QName relocate = new QName("", "relocatable");
+        QName testSet = new QName("test-set");
+        QName testCase = new QName("test-case");
+        QName run = new QName("run");
+        QName edition = new QName("edition");
+        QName platform = new QName("platform");
+        QName compiler = new QName("compiler");
+        QName relocate = new QName("relocatable");
         String saxonEdition = driverProc.getSaxonEdition();
         try {
             String suppliedName = getNameOfExceptionsFile();
@@ -402,7 +402,7 @@ public abstract class TestDriver {
             }
             System.err.println("Loading exceptions file " + exceptionsFile.getAbsolutePath());
             exceptionsDoc = exceptBuilder.build(exceptionsFile);
-            XdmSequenceIterator<XdmNode> iter = exceptionsDoc.axisIterator(Axis.DESCENDANT, new QName("", "exception"));
+            XdmSequenceIterator<XdmNode> iter = exceptionsDoc.axisIterator(Axis.DESCENDANT, new QName("exception"));
             while (iter.hasNext()) {
                 XdmNode entry = iter.next();
                 String testName = entry.getAttributeValue(testCase);

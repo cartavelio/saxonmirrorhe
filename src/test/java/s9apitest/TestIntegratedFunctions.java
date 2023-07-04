@@ -1025,8 +1025,8 @@ public class TestIntegratedFunctions {
             Xslt30Transformer xslt30Transformer = processor.newXsltCompiler().compile(new StreamSource(new StringReader(xslt))).load30();
             XdmDestination out = new XdmDestination();
             xslt30Transformer.callTemplate(null, out);
-            assertTrue(out.getXdmNode().getOutermostElement().getAttributeValue(new QName("", "sqrt2")).startsWith("1.4142"));
-            assertEquals(out.getXdmNode().getOutermostElement().getAttributeValue(new QName("", "sqrtEmpty")), "");
+            assertTrue(out.getXdmNode().getOutermostElement().getAttributeValue(new QName("sqrt2")).startsWith("1.4142"));
+            assertEquals(out.getXdmNode().getOutermostElement().getAttributeValue(new QName("sqrtEmpty")), "");
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
