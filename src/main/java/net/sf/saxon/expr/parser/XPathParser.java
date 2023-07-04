@@ -2632,6 +2632,14 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAR);
             return parseDynamicFunctionCall(var, lhs);
+        } else if (token == Token.NODEKIND && t.currentTokenValue.equals("function")) {
+            Expression fn = parseInlineFunction(AnnotationList.EMPTY);
+            expect(Token.LPAR);
+            return parseDynamicFunctionCall(fn, lhs);
+        } else if (token == Token.KEYWORD_CURLY && t.currentTokenValue.equals("function")) {
+            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
+            expect(Token.LPAR);
+            return parseDynamicFunctionCall(fn, lhs);
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '=>'");
             return null;
@@ -2671,8 +2679,16 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAR);
             rhs = parseDynamicFunctionCall(var, varRef);
+        } else if (token == Token.NODEKIND && t.currentTokenValue.equals("function")) {
+            Expression fn = parseInlineFunction(AnnotationList.EMPTY);
+            expect(Token.LPAR);
+            rhs = parseDynamicFunctionCall(fn, varRef);
+        } else if (token == Token.KEYWORD_CURLY && t.currentTokenValue.equals("function")) {
+            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
+            expect(Token.LPAR);
+            rhs = parseDynamicFunctionCall(fn, varRef);
         } else {
-            grumble("Unexpected " + Token.tokens[token] + " after '=>'");
+            grumble("Unexpected " + Token.tokens[token] + " after '=!>'");
             return null;
         }
         forExpr.setAction(rhs);

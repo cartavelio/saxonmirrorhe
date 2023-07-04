@@ -50,6 +50,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
 
     @CSharpSimpleEnum
     public enum Determinism {DETERMINISTIC, PROACTIVE, ELIDABLE}
+
     private final static int MAX_INLININGS = 100;
 
     private StructuredQName functionName;  // null for an anonymous function
@@ -113,28 +114,36 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         StructuredQName name = getFunctionName();
         if (name.hasURI(NamespaceUri.ANONYMOUS)) {
             boolean first = true;
-             StringBuilder sb = new StringBuilder("function(");
-             for (UserFunctionParameter param : getParameterDefinitions()) {
-                 if (first) {
-                     first = false;
-                 } else {
-                     sb.append(", ");
-                 }
-                 sb.append("$").append(param.getVariableQName().getDisplayName());
-             }
-             sb.append("){");
-             Expression body = getBody();
-             if (body == null) {
-                 sb.append("...");
-             } else {
-                 sb.append(body.toShortString());
-             }
-             sb.append("}");
-             return sb.toString();
+            StringBuilder sb = new StringBuilder("function");
+            if (getParameterDefinitions().length != 1 ||
+                    !getParameterDefinitions()[0].getVariableQName().getEQName().equals(saxonDotEqName)) {
+                sb.append("(");
+                for (UserFunctionParameter param : getParameterDefinitions()) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append("$").append(param.getVariableQName().getDisplayName());
+                }
+                sb.append(")");
+            }
+            sb.append("{");
+            Expression body = getBody();
+            if (body == null) {
+                sb.append("...");
+            } else {
+                String bodyText = body.toShortString().replace("$saxon:dot!", "");
+                sb.append(bodyText);
+            }
+            sb.append("}");
+            return sb.toString();
         } else {
             return name.getDisplayName();
         }
     }
+
+    private static String saxonDotEqName = "Q{" + NamespaceUri.SAXON + "}dot";
 
     @Override
     public String getTracingTag() {
@@ -263,6 +272,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
 
     /**
      * Get the annotations defined on this function
+     *
      * @return the list of annotations defined on this function
      */
 
@@ -400,6 +410,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
 
     /**
      * Get the minumum arity of this function, that is, the number of mandatory parameters
+     *
      * @return the minimum arity
      */
 
@@ -469,7 +480,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     public boolean isUpdating() {
         return updating;
     }
-    
+
     /**
      * Set the declared streamability (XSLT 3.0 attribute)
      *
@@ -596,7 +607,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     public void typeCheck(ExpressionVisitor visitor) throws XPathException {
         Expression exp = getBody();
         if (exp instanceof ValueOf
-                && ((ValueOf)exp).getSelect().getItemType().isAtomicType()
+                && ((ValueOf) exp).getSelect().getItemType().isAtomicType()
                 && declaredResultType.getPrimaryType().isAtomicType()
                 && declaredResultType.getPrimaryType() != BuiltInAtomicType.STRING) {
             visitor.getStaticContext().issueWarning(
@@ -907,7 +918,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     @Override
     public GroundedValue subsequence(int start, int length) {
         //noinspection RedundantCast
-        return start <= 0 && (start + length) > 0 ? (GroundedValue)this : (GroundedValue)EmptySequence.getInstance();
+        return start <= 0 && (start + length) > 0 ? (GroundedValue) this : (GroundedValue) EmptySequence.getInstance();
     }
 
     /**
@@ -1037,7 +1048,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
      */
     @Override
     public int getPositionOfParameter(StructuredQName name) {
-        for (int i=0; i<parameterDefinitions.length; i++) {
+        for (int i = 0; i < parameterDefinitions.length; i++) {
             if (parameterDefinitions[i].getVariableQName().equals(name)) {
                 return i;
             }
