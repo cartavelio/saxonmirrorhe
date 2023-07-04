@@ -340,7 +340,15 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 SaxonProcessor::~SaxonProcessor() {
     //SaxonProcessor::attachCurrentThread();
     clearConfigurationProperties();
+            if(getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"~SaxonProcessor destructor:"<<" proc ref="<<((long)procRef)<<std::endl;
+
+            }
     if(procRef != -1) {
+            if(getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"~SaxonProcessor destructor called with destroy:"<<" ob ref="<<(this)<<std::endl;
+
+            }
     	//SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
     	j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 	    procRef = -1;

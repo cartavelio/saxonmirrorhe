@@ -41,6 +41,10 @@ bool XdmNode::isAtomic() {
     }
 
     XdmNode::~XdmNode() {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr<<"~XdmNode destructor called:"<<refCount<<" ob ref="<<(this)<<std::endl;
+
+        }
        // if(getRefCount() <= 1) {
        if(baseURI != nullptr) {
         delete baseURI;

@@ -171,13 +171,17 @@ void XdmValue::addUnderlyingValue(int64_t val) {
 
 void XdmValue::incrementRefCount() {
 		refCount++;
-		//std::cerr<<"refCount-inc-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+		if(getenv("SAXONC_DEBUG_FLAG")) {
+		    std::cerr<<"refCount-inc-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+		}
 	}
 
 void XdmValue::decrementRefCount() {
 		if (refCount > 0)
 			refCount--;
-		//std::cerr<<"refCount-dec-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+		    std::cerr<<"refCount-dec-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+		}
 	}
 
 

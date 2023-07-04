@@ -192,7 +192,8 @@ task buildCWrappers (
           "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
           "--enable-url-protocols=https",
           "--enable-url-protocols=http",
-          "--shared"
+          "--shared",
+          "-R:MaxHeapSize=1000000"
       }
     }
   }

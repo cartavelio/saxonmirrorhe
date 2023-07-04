@@ -160,6 +160,10 @@ public:
      * This method is used for internal memory management.
      */
 	int getRefCount() {
+			if(getenv("SAXONC_DEBUG_FLAG")) {
+			    std::cerr<<"getRefCount-xdmVal="<<refCount<<" ob ref="<<(this)<<std::endl;
+
+            }
 		return refCount;
 	}
 
