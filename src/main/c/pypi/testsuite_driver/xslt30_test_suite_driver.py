@@ -48,7 +48,7 @@ xpathProcForCompareNodes = driver_proc.new_xpath_processor()
 
 xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
 
-schemaValidator = driver_proc.new_schema_validator()
+schemaValidator = None
 test_report = PyTestReport()
 
 globalEnvironments = {}
@@ -83,8 +83,17 @@ def process_catalog(path: str, catalogi):
     global saxon_version
     global results_path
     global test_case_found
+    global schemaValidator
     cat_builder = driver_proc.new_document_builder()
     xpc = driver_proc.new_xpath_processor()
+    if os.getenv("SAXON_LICENSE_DIR")  is not None:
+        driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                       os.getenv("SAXON_LICENSE_DIR" + "/saxon-license.lic"))
+    try:
+        schemaValidator = driver_proc.new_schema_validator()
+    except PySaxonApiError as ex:
+        print("*** Failed to create PySchemaValidator :" + str(ex))
+
     '''xpc.set_lanaguage("3.1")'''
     if os.path.exists(catalogi):
         '''catalog_node = cat_builder.parse_xml(xml_file_name=catalogi)'''
@@ -300,15 +309,22 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
 
     '''load the requested schema documents'''
 
-    schema_validator = environment.proc.new_schema_validator()
+    schema_validator = None
+
+    try:
+        schema_validator = environment.proc.new_schema_validator()
+        schema_validator.set_cwd(base_uri)
+    except PySaxonApiError as ex:
+        print("*** Failed to create PySchemaValidator :" + str(ex))
+
     ''' PyXdmNode.base_uri returns file:// - this will cause problems with resolving later.'''
     '''Create bug issue to remove the file:// internally TODO create bug issue '''
 
-    schema_validator.set_cwd(base_uri)
+
 
     schemas = xpc.evaluate("schema")
     validate_sources = False
-    if schemas is not None:
+    if schemas is not None and schema_validator is not None:
         print("schema found count=" + str(schemas.size))
         for i in range(schemas.size):
             schema = schemas.item_at(i).get_node_value()
@@ -366,7 +382,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
     boolean validateSources = loadSchemaDocuments(driver, xpc, env, environment, manager)'''
 
     '''load the requested source documents'''
-
+    
     load_source_documents(xpc, env, environment, builder, schemaValidator, validate_sources)
     return environment
 
@@ -392,9 +408,12 @@ def load_source_documents(xpc: PyXPathProcessor, env: PyXdmNode, environment: En
                 builder.set_schema_validator(None) 
                 TODO this is a bug cannot set validator to None'''
             else:
-                schema_validatori = environment.proc.new_schema_validator()
-                schema_validatori.set_lax(validation == "lax")
-                builder.set_schema_validator(schema_validatori)
+                try:
+                    schema_validatori = environment.proc.new_schema_validator()
+                    schema_validatori.set_lax(validation == "lax")
+                    builder.set_schema_validator(schema_validatori)
+                except PySaxonApiError as ex:
+                    print("*** Failed to create PySchemaValidator :" + str(ex))
             href = source.get_attribute_value("file")
             select = source.get_attribute_value("select")
             xinc = source.get_attribute_value("xinclude")
@@ -779,6 +798,7 @@ def main(argv):
     global run_test_case_name
     global path
     global results_path
+    global schemaValidator
 
     saxon_version = driver_proc.version
 

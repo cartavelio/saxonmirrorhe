@@ -56,7 +56,7 @@ class PyTestOutcome:
         if "assert-empty" != tag and "error" != tag and "any-of" != tag and "all-of" != tag and result is None and self.serialized_result is None:
             print("Error Found = " + str(result_as_error))
             return False
-        if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print(assert_set)
         if "assert" == tag:
             return self.assert_xpath(assertion, result, assert_xpc, catalog_xpc)

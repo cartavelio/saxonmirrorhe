@@ -197,6 +197,7 @@ public class Xslt30Processor extends SaxonCAPI {
         XsltCompiler compiler = processor.newXsltCompiler();
         setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
         String cwd = null;
+
         compiler.setErrorList(SaxonCException.errorList);
         if (ccwd != WordFactory.nullPointer()) {
             cwd = CTypeConversion.toJavaString(ccwd);

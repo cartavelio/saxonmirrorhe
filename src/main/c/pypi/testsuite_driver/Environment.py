@@ -1,4 +1,5 @@
 from saxoncee import *
+import os
 
 optimizer_flags = '-'
 
@@ -12,6 +13,10 @@ class Environment:
         self.proc = PySaxonProcessor(license=True)
         '''self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
                                                "/Users/ond1/work/development/git/private/saxon-license.lic")'''
+        if os.getenv("SAXON_LICENSE_DIR") is not None:
+            self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                                   os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
+
         self.lang = None
         self.proc.set_configuration_property('http://saxon.sf.net/feature/optimizationLevel', optimizer_flags)
 
