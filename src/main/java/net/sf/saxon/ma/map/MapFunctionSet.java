@@ -185,7 +185,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
 
-            register("key-value-pairs", 1, e -> e.populate(MapKeyValuePairs::new, KVP_TYPE, STAR, 0)
+            register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("entries", 1, e -> e.populate(MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
@@ -514,9 +514,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the proposed 4.0 function map:key-value-pairs(Map) =&gt; record(key, value*
+     * Implementation of the proposed 4.0 function map:pairs(Map) =&gt; record(key, value)*
      */
-    public static class MapKeyValuePairs extends SystemFunction {
+    public static class MapPairs extends SystemFunction {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
