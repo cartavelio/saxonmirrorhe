@@ -235,6 +235,66 @@ Keywords-fn-some-1
       <reason>Try/Catch binding a map of error information - not yet implemented</reason>
    </exception>
    
+   <exception test-set="app-spec-examples" 
+      test-case="
+      fo-test-fn-replace-009
+      fo-test-fn-replace-010
+      fo-test-fn-replace-011
+      fo-test-fn-replace-012
+      fo-test-fn-replace-013
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="
+      fo-test-map-values-001
+      fo-test-map-values-002
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-json-001
+      fo-test-fn-json-002
+      fo-test-fn-json-003
+      fo-test-fn-json-004
+      fo-test-fn-json-005
+      fo-test-fn-json-006
+      fo-test-fn-json-007
+      fo-test-fn-json-008
+      fo-test-fn-json-009
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Implementation is ahead of the spec</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-array-partition-001
+      fo-test-array-partition-002
+      fo-test-array-partition-003
+      fo-test-array-partition-004
+      fo-test-array-partition-005
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Function has been dropped from spec</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-array-values-001
+      fo-test-array-values-002
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
  
    
 

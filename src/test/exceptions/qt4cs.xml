@@ -22,6 +22,12 @@
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
    
+   <exception test-set="fn-distinct-values" 
+      test-case="fn-distinct-values-1a" run="false" report="n/a">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
+   </exception>
+   
    <exception test-set="fn-resolve-uri" 
       test-case="fn-resolve-uri-36 fn-resolve-uri-37" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-29"/>
@@ -124,8 +130,14 @@
    </exception>
    
    <exception test-set="fn-format-integer" 
-      test-case="format-integer-032 format-integer-032-fr format-integer-032-it
-      format-integer-065 format-integer-066" 
+      test-case="
+         format-integer-032 
+         format-integer-032-fr 
+         format-integer-032-it
+         format-integer-065 
+         format-integer-066 
+         format-integer-076
+         format-integer-077"     
       run="false" report="not supported">
       <created by="Michael Kay" on="2021-12-07"/>
       <reason>SaxonCS doesn't format "numbers as words" for languages other than English.</reason>
@@ -228,19 +240,44 @@
       <reason>Generated test case contains incorrect syntax</reason>
    </exception>
    
-   <!--<exception test-set="misc-HtmlTestSuite" test-case="
+   <exception test-set="misc-HtmlTestSuite" test-case="
+      html-test-0011
+      html-test-0033
+      html-test-0061
+      html-test-0081
+      html-test-0186
+      html-test-0189
+      html-test-0190
+      html-test-0191
+      html-test-0211
+      html-test-0395
+      html-test-0443
+      html-test-0467
+      html-test-0519
+      html-test-0611
+      html-test-0638
+      html-test-0758
+      html-test-0965
+      html-test-0966
+      html-test-1018
+      html-test-1024
       html-test-1050
       html-test-1054
+      html-test-1101
       html-test-1147
+      html-test-1167
       html-test-1216
       html-test-1238
       html-test-1258
-      html-test-1294
-      html-test-1296
+      html-test-1357
+      html-test-1358
+      html-test-1362
+      html-test-1363
+      html-test-1368
       " run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Wrong results from validator.nu? Needs checking.</reason>
-   </exception>-->
+      <created by="Michael Kay" on="2023-06-29"/>
+      <reason>Wrong results from AngleSharp? Needs checking.</reason>
+   </exception>
    
    <exception test-set="fn-format-number" test-case="
       numberformat-40-87 numberformat-40-88
@@ -254,15 +291,73 @@
       <reason>Bug 6104</reason>
    </exception>
    
-   <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
-      try-catch-map2
-      try-catch-map3
-      try-catch-map4
-      try-catch-map5
-      try-catch-map6
-      try-catch-map7" run="false" report="n/a">
+   
+   
+   <exception test-set="app-spec-examples" 
+              test-case="
+                  fo-test-fn-replace-009
+                  fo-test-fn-replace-010
+                  fo-test-fn-replace-011
+                  fo-test-fn-replace-012
+                  fo-test-fn-replace-013
+              " 
+              run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Try/Catch binding a map of error information - not yet implemented</reason>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+               test-case="
+                     fo-test-map-values-001
+                     fo-test-map-values-002
+               " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-json-001
+      fo-test-fn-json-002
+      fo-test-fn-json-003
+      fo-test-fn-json-004
+      fo-test-fn-json-005
+      fo-test-fn-json-006
+      fo-test-fn-json-007
+      fo-test-fn-json-008
+      fo-test-fn-json-009
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Implementation is ahead of the spec</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-array-partition-001
+      fo-test-array-partition-002
+      fo-test-array-partition-003
+      fo-test-array-partition-004
+      fo-test-array-partition-005
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Function has been dropped from spec</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-array-values-001
+                 fo-test-array-values-002
+      " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
    </exception>
    
  
