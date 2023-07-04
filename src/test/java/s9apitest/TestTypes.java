@@ -1,6 +1,7 @@
 package s9apitest;
 
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -258,6 +259,7 @@ public class TestTypes {
     public void testParseRecordType() {
         try {
             Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.XQUERY_VERSION, "4.0");
             ItemTypeFactory itf = new ItemTypeFactory(p);
             ItemType it1 = itf.parseItemType("record(x as xs:double, y as xs:double)");
             ItemType it2 = itf.parseItemType("record(x as xs:double, y as xs:double, *)");
@@ -281,6 +283,7 @@ public class TestTypes {
     public void testParseUnionType() {
         try {
             Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.XQUERY_VERSION, "4.0");
             ItemTypeFactory itf = new ItemTypeFactory(p);
             ItemType it1 = itf.parseItemType("union(xs:double, xs:string)");
             assertTrue(it1.matches(new XdmAtomicValue(1.23)));
@@ -298,6 +301,7 @@ public class TestTypes {
     public void testParseError() {
         try {
             Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.XQUERY_VERSION, "4.0");
             ItemTypeFactory itf = new ItemTypeFactory(p);
             ItemType it1 = itf.parseItemType("onion(xs:double, xs:string)");
             fail("Error not detected");
