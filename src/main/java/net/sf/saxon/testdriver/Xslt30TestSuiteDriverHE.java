@@ -1334,6 +1334,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                             });
                         }
                         return true;
+                    case "xslt40-not-yet-agreed":
+                        // General policy for the time being, we will run such tests unless they're in the exceptions list.
+                        return !inverse;
                     default:
                         System.err.println("*** Unknown feature in HE: " + value);
                         return env.processor.getSaxonEdition().equals("HE") ? false : null;
