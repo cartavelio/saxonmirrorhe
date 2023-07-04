@@ -4,7 +4,6 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.serialize.HTMLURIEscaper;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
@@ -179,7 +178,7 @@ public class Playground extends PerformanceTestCase {
     @Tag("performance")
     public void testStringJoin() {
 
-        List<UnicodeString> result = new ArrayList<>();
+        //List<UnicodeString> result = new ArrayList<>();
 
         measure(new Measurable() {
             @Override
@@ -189,7 +188,7 @@ public class Playground extends PerformanceTestCase {
                     String uri = "http://my.example.uri/path/" + (char) (i);
                     qb.append(uri);
                 }
-                result.add(qb.toUnicodeString());
+                //result.add(qb.toUnicodeString());
             }
 
             @Override
