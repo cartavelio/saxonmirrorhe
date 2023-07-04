@@ -30,7 +30,7 @@ public class ParamKeywords {
 
     static {
 
-        arrayParamNames.put("append", "array|add");
+        arrayParamNames.put("append", "array|member");
         arrayParamNames.put("build", "input|action");
         arrayParamNames.put("empty", "array");
         arrayParamNames.put("exists", "array");
@@ -60,6 +60,7 @@ public class ParamKeywords {
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
         arrayParamNames.put("trunk", "array");
+        arrayParamNames.put("values", "array");
         fnParamNames.put("QName", "uri|qname");
         fnParamNames.put("abs", "value");
         fnParamNames.put("adjust-date-to-timezone", "value|timezone");
@@ -115,7 +116,7 @@ public class ParamKeywords {
         fnParamNames.put("escape-html-uri", "value");
         fnParamNames.put("exactly-one", "input");
         fnParamNames.put("exists", "input");
-        fnParamNames.put("expanded-QName", "qname");
+        fnParamNames.put("expanded-QName", "value");
         fnParamNames.put("false", "");
         fnParamNames.put("filter", "input|predicate");
         fnParamNames.put("floor", "value");
@@ -160,7 +161,7 @@ public class ParamKeywords {
         fnParamNames.put("iterate-while", "input|predicate|action");
         fnParamNames.put("json", "input|options");
         fnParamNames.put("json-doc", "href|options");
-        fnParamNames.put("json-to-xml", "json|options");
+        fnParamNames.put("json-to-xml", "value|options");
         fnParamNames.put("lang", "language|node");
         fnParamNames.put("last", "");
         fnParamNames.put("load-xquery-module", "module-uri|options");
@@ -179,7 +180,7 @@ public class ParamKeywords {
         fnParamNames.put("months-from-duration", "value");
         fnParamNames.put("name", "node");
         fnParamNames.put("namespace-uri", "node");
-        fnParamNames.put("namespace-uri-for-prefix", "prefix|element");
+        fnParamNames.put("namespace-uri-for-prefix", "value|element");
         fnParamNames.put("namespace-uri-from-QName", "value");
         fnParamNames.put("nilled", "node");
         fnParamNames.put("node-name", "node");
@@ -192,12 +193,14 @@ public class ParamKeywords {
         fnParamNames.put("outermost", "nodes");
         fnParamNames.put("parcel", "input");
         fnParamNames.put("parse-ietf-date", "value");
-        fnParamNames.put("parse-json", "json|options");
+        fnParamNames.put("parse-integer", "value|radix");
+        fnParamNames.put("parse-json", "value|options");
         fnParamNames.put("parse-html", "html|options");
-        fnParamNames.put("parse-QName", "eqname");
+        fnParamNames.put("parse-QName", "value");
         fnParamNames.put("parse-uri", "uri|options");
         fnParamNames.put("parse-xml", "value");
         fnParamNames.put("parse-xml-fragment", "value");
+        fnParamNames.put("partition", "input|break-when");
         fnParamNames.put("parts", "");
         fnParamNames.put("path", "node");
         fnParamNames.put("position", "");
@@ -206,8 +209,8 @@ public class ParamKeywords {
         fnParamNames.put("remove", "input|positions");
         fnParamNames.put("replace", "value|pattern|replacement|flags|action");
         fnParamNames.put("replicate", "input|count");
-        fnParamNames.put("resolve-QName", "qname|element");
-        fnParamNames.put("resolve-uri", "relative|base");
+        fnParamNames.put("resolve-QName", "value|element");
+        fnParamNames.put("resolve-uri", "href|base");
         fnParamNames.put("reverse", "input");
         fnParamNames.put("root", "node");
         fnParamNames.put("round", "value|precision");
@@ -223,7 +226,7 @@ public class ParamKeywords {
         fnParamNames.put("starts-with", "value|substring|collation");
         fnParamNames.put("starts-with-sequence", "input|subsequence|compare");
         fnParamNames.put("static-base-uri", "");
-        fnParamNames.put("string", "item");
+        fnParamNames.put("string", "value");
         fnParamNames.put("string-join", "values|separator");
         fnParamNames.put("string-length", "value");
         fnParamNames.put("string-to-codepoints", "value");
@@ -237,7 +240,7 @@ public class ParamKeywords {
         fnParamNames.put("timezone-from-dateTime", "value");
         fnParamNames.put("timezone-from-time", "value");
         fnParamNames.put("tokenize", "value|pattern|flags");
-        fnParamNames.put("trace", "value|label");
+        fnParamNames.put("trace", "input|label");
         fnParamNames.put("transform", "options");
         fnParamNames.put("transitive-closure", "step|min|max");
         fnParamNames.put("translate", "value|replace|with");
@@ -256,6 +259,7 @@ public class ParamKeywords {
         fnParamNames.put("zero-or-one", "input");
         mapParamNames.put("build", "input|key|value|combine");
         mapParamNames.put("contains", "map|key");
+        mapParamNames.put("entries", "map");
         mapParamNames.put("entry", "key|value");
         mapParamNames.put("filter", "map|predicate");
         mapParamNames.put("find", "input|key");
@@ -264,6 +268,7 @@ public class ParamKeywords {
         mapParamNames.put("group-by", "input|key");
         mapParamNames.put("keys", "map|predicate");
         mapParamNames.put("merge", "maps|options");
+        mapParamNames.put("of", "pairs|combine");
         mapParamNames.put("put", "map|key|value");
         mapParamNames.put("remove", "map|keys");
         mapParamNames.put("replace", "map|key|action");
