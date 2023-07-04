@@ -303,7 +303,7 @@ int main(int argc, char* argv[])
     sResultCount *sresult = new sResultCount();
     cout<<"Test: SchemaValidator with Saxon version="<<processor->version()<<endl<<endl;
 
-    const char * cwd = nullptr;
+    char * cwd = nullptr;
     if(argc > 1) {
         cwd = argv[1];
     }
