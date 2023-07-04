@@ -40,26 +40,7 @@ public class ApplyFn extends SystemFunction  {
 
     public ApplyFn() {
     }
-
-    /**
-     * Say that this call to fn:apply was originally written as a dynamic function call
-     * @param fnExpr string representation of the expression used as the dynamic call
-     */
-
-    public void setDynamicFunctionCall(String fnExpr) {
-        dynamicFunctionCall = fnExpr;
-    }
-
-    /**
-     * Ask whether this call to fn:apply was originally written as a dynamic function call
-     *
-     * @return true if it was originally a dynamic function call
-     */
-
-    public boolean isDynamicFunctionCall() {
-        return dynamicFunctionCall != null;
-    }
-
+    
     /**
      * Get the return type, given knowledge of the actual arguments
      *
@@ -76,8 +57,6 @@ public class ApplyFn extends SystemFunction  {
             return ((ArrayItemType) fnType).getMemberType().getPrimaryType();
         } else if (fnType instanceof FunctionItemType) {
             return ((FunctionItemType) fnType).getResultType().getPrimaryType();
-        } else if (fnType instanceof AnyFunctionType) {
-            return AnyItemType.getInstance();
         } else {
             return AnyItemType.getInstance();
         }
@@ -139,13 +118,11 @@ public class ApplyFn extends SystemFunction  {
         ArrayItem args = (ArrayItem) arguments[1].head();
 
         if (function.getArity() != args.arrayLength()) {
-            String errorCode = isDynamicFunctionCall() ? "XPTY0004" : "FOAP0001";
-            XPathException err = new XPathException(
+            String errorCode = "FOAP0001";
+            throw new XPathException(
                     "Number of arguments required for dynamic call to " + function.getDescription() + " is " + function.getArity() +
                             "; number supplied = " + args.arrayLength(), errorCode)
                     .withXPathContext(context);
-            err.setIsTypeError(isDynamicFunctionCall());
-            throw err;
         }
 
         Sequence[] argArray = new Sequence[args.arrayLength()];
@@ -156,13 +133,8 @@ public class ApplyFn extends SystemFunction  {
         } else {
             for (int i = 0; i < argArray.length; i++) {
                 SequenceType expected = fit.getArgumentTypes()[i];
-                Supplier<RoleDiagnostic> role;
-                if (isDynamicFunctionCall()) {
-                    role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, dynamicFunctionCall.toString(), 0);
-                } else {
-                    final int pos = i;
-                    role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", pos + 1);
-                }
+                final int pos = i;
+                Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", pos + 1);
                 Sequence converted = th.applyFunctionConversionRules(
                         args.get(i), expected, role, Loc.NONE);
                 argArray[i] = converted.materialize();
