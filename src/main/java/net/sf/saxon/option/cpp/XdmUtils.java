@@ -1258,7 +1258,11 @@ public class XdmUtils {
             System.err.println("EQName= " + eqname);
             System.err.println("Java-Call Att-name=" + name.getClarkName() + " Value=" + node.getAttributeValue(name));
         }
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, node.getAttributeValue(name));
+        String attValue = node.getAttributeValue(name);
+        if(attValue == null) {
+            return WordFactory.nullPointer();
+        }
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, attValue);
         return a;
     }
 

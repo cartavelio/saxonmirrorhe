@@ -181,10 +181,10 @@ cdef class PySaxonProcessor:
       """enter method for use with the keyword 'with' context
       Deprecated. This may be removed in a later release. """
       return self
-    
+
     def __exit__(self, exception_type, exception_value, traceback):
         """Deprecated. This method no longer does anything, and may be removed in a later release. """
-        
+
         ''' if self.thisptr is not NULL:
           del self.thisptr
           self.thisptr = NULL        
@@ -274,14 +274,14 @@ cdef class PySaxonProcessor:
         py_value_string = value.encode('UTF-8') if value is not None else None
         c_value_str_ = py_value_string if value is not None else ""
         self.thisptr.setConfigurationProperty(c_str_, c_value_str_)
-        
+
     def clear_configuration_properties(self):
         """
         clear_configuration_properties(self)
         Clear the configuration properties in use by the processor
         """
         self.thisptr.clearConfigurationProperties()
-        
+
     @property
     def is_schema_aware(self):
         """
@@ -600,7 +600,7 @@ cdef class PySaxonProcessor:
             i +=1
 
 
-                
+
 
         if len_ == 0:
             return None
@@ -668,7 +668,7 @@ cdef class PySaxonProcessor:
         if newMap_.derivedmmptr == NULL:
             return None
         return newMap_
-        
+
 
     def set_catalog(self, str file_name):
         """
@@ -728,6 +728,7 @@ cdef class PySaxonProcessor:
               raise Exception("Error converting XML text")
           val = PyXdmNode()
           val.derivednptr =  val.derivedptr = val.thisvptr =self.thisptr.parseXmlFromString(c_xml_string, NULL)
+          val.derivednptr.incrementRefCount()
           if val.derivednptr == NULL:
               return None
           return val
@@ -741,6 +742,7 @@ cdef class PySaxonProcessor:
           c_xml_string = py_value_string if py_value is not None else ""
           val = PyXdmNode()
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisptr.parseXmlFromFile(c_xml_string, NULL)
+          val.derivednptr.incrementRefCount()
           if val.derivednptr is NULL:
               return None
           return val
@@ -750,6 +752,7 @@ cdef class PySaxonProcessor:
           c_xml_string = py_uri_string if py_value is not None else ""
           val = PyXdmNode()
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisptr.parseXmlFromUri(c_xml_string, NULL)
+          val.derivednptr.incrementRefCount()
           if val.derivednptr is NULL:
               return None
           return val
@@ -912,6 +915,7 @@ cdef class PyDocumentBuilder:
           c_xml_string = py_xml_text_string if py_value is not None else ""
           val = PyXdmNode()
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromString(c_xml_string)
+          val.derivednptr.incrementRefCount()
           return val
         elif "xml_file_name" in kwds:
           py_value = kwds["xml_file_name"]
@@ -921,6 +925,7 @@ cdef class PyDocumentBuilder:
           c_xml_string = py_filename_string if py_value is not None else ""
           val = PyXdmNode()
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromFile(c_xml_string)
+          val.derivednptr.incrementRefCount()
           return val
         elif "xml_uri" in kwds:
           py_value = kwds["xml_uri"]
@@ -928,6 +933,7 @@ cdef class PyDocumentBuilder:
           c_xml_string = py_uri_string if py_value is not None else ""
           val = PyXdmNode()
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromUri(c_xml_string)
+          val.derivednptr.incrementRefCount()
           return val
         else:
            raise Exception(py_error_message)
@@ -1240,7 +1246,7 @@ cdef class PyXslt30Processor:
             py_string_string = py_value1.encode('utf-8') if py_value1 is not None else None
             c_stylesheet = py_string_string if py_value1 is not None else ""
             '''make_c_str(py_value)'''
-            
+
 
         cdef const char* c_string
         c_string = self.thisxptr.transformFileToString(c_sourcefile, c_stylesheet)
@@ -1557,7 +1563,7 @@ cdef class PyXsltExecutable:
                     self.thisxptr.setInitialMatchSelection(<saxoncClasses.XdmValue *> avalue_.derivedaptr)
                 else:
                     raise Exception("Supplied value is not of the right type")
-         
+
      def set_output_file(self, output_file):
         """
         set_output_file(self, output_file)
@@ -1634,7 +1640,7 @@ cdef class PyXsltExecutable:
              key_str = make_py_str(dereference(it).first.c_str())
              p_dataMap[key_str] =  nval
              postincrement(it)
-             
+
          return p_dataMap
 
      def set_parameter(self, name, value):
@@ -1935,7 +1941,7 @@ cdef class PyXsltExecutable:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Raises:
             PySaxonApiError: Error raised in the event of a dynamic error
-                        
+
         Example:
             xslt30_proc = saxon_proc.new_xslt30_processor()
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
@@ -1968,7 +1974,7 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         cdef PyXdmNode node_ = None
-        
+
         if "xdm_node" in kwds:
             py_value = kwds["xdm_node"]
             if(isinstance(py_value, PyXdmNode)):
@@ -2012,7 +2018,7 @@ cdef class PyXsltExecutable:
             val.thisvptr = xdmValue
             return val
 
-         
+
      def apply_templates_returning_value(self, **kwds):
         """
         apply_templates_returning_value(self, **kwds)
@@ -2367,12 +2373,12 @@ cdef class PyXsltExecutable:
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
         if template_name is not None:
             c_templateName = py_template_name_string
-        
+
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
-     
+
      def call_template_returning_file(self, str template_name=None, **kwds):
         """
         call_template_returning_file(self, str template_name, **kwds)
@@ -2433,7 +2439,7 @@ cdef class PyXsltExecutable:
             1) result = executable.call_function_returning_value("{http://localhost/example}func", [])
             2) executable.set_global_context_item(file_name="cat.xml")\r
                result = executable.call_function_returning_value("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
-            
+
         """
         cdef const char * c_functionName = NULL
         cdef PyXdmValue value_ = None
@@ -2582,7 +2588,7 @@ cdef class PyXsltExecutable:
             if key == "output_file":
               py_output_string = value.encode('UTF-8') if value is not None else None
               c_outputfile = py_output_string if value is not None else ""
-          
+
         cdef int _len = len(args)
         """ TODO handle memory when finished with XdmValues """
         cdef saxoncClasses.XdmValue ** argumentV = self.thisxptr.createXdmValueArray(_len)
@@ -2716,7 +2722,7 @@ cdef class PyXQueryProcessor:
                true if the streaming option has been set.
          """
          return self.thisxqptr.isStreaming()
-         
+
      def set_output_file(self, output_file):
         """
         set_output_file(self, output_file)
@@ -3893,7 +3899,6 @@ cdef class PyXdmValue:
         cdef const char* c_string = NULL
         c_string = self.thisvptr.toString()
         py_to_string = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_to_string
 
      def __iter__(self):
@@ -3959,20 +3964,17 @@ cdef class PyXdmItem(PyXdmValue):
         cdef const char* c_string = NULL
         c_string = self.derivedptr.getStringValue()
         py_item_string_value = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_item_string_value
-     
+
      def __repr__(self):
         c_string =  self.derivedptr.toString()
         py_item_to_string = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_item_to_string
 
      def __str__(self):
         cdef const char* c_string = NULL
         c_string = self.derivedptr.toString()
         py_item_to_string = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_item_to_string
 
      @property
@@ -4244,7 +4246,6 @@ cdef class PyXdmNode(PyXdmItem):
         cdef const char* c_string = NULL
         c_string = self.derivednptr.getStringValue()
         py_node_string_value = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_node_string_value
 
      def __str__(self):
@@ -4257,7 +4258,6 @@ cdef class PyXdmNode(PyXdmItem):
         cdef const char* c_string = NULL
         c_string = self.derivednptr.toString()
         py_node_to_string = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_node_to_string
 
      def __repr__(self):
@@ -4267,7 +4267,6 @@ cdef class PyXdmNode(PyXdmItem):
         cdef const char* c_string = NULL
         c_string = self.derivednptr.toString()
         py_node_to_string = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_node_to_string
 
      def get_parent(self):
@@ -4295,6 +4294,10 @@ cdef class PyXdmNode(PyXdmItem):
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
+
+     """@property
+     def ref_count(self):
+        return self.derivednptr.getRefCount()"""
 
      @property
      def attribute_count(self):

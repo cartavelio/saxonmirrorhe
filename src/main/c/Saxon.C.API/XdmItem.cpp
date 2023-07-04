@@ -90,7 +90,7 @@ const char * XdmItem:: getStringValue(){
 
 
 const char * XdmItem::toString(){
-    if(itemToString != nullptr) {
+    if(itemToString == nullptr) {
         allocFn fn = operator new;
         itemToString = xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
     }
@@ -117,9 +117,15 @@ XdmItem::~XdmItem() {
     /*else {
          decrementRefCount();
      }*/
-    /* if(stringValue != nullptr) {
+    if(stringValue != nullptr) {
+        delete [] stringValue;
         stringValue = nullptr;
-    } */
+    }
+
+    if(itemToString != nullptr) {
+        delete [] itemToString;
+        itemToString = nullptr;
+    }
 
 
 }

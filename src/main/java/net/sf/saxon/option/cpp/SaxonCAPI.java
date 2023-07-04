@@ -223,6 +223,9 @@ public class SaxonCAPI {
     @CEntryPoint(name = "j_handles_destroy")
     public static void destroy(IsolateThread thread, ObjectHandle handle) {
         if (handle != WordFactory.nullPointer()) {
+            if (debug) {
+                System.err.println("destroy method Class to be deleted= " + ((Object) objectHandles.get(handle)).getClass().getName());
+            }
             objectHandles.destroy(handle);
             if (debug) {
                 objHandlesCreated--;
@@ -987,6 +990,7 @@ public class SaxonCAPI {
                 System.err.println("XdmNode: " + System.identityHashCode(doc));
             }
         }
+        
         ObjectHandle handle = createHandle(doc);
 
         return handle.rawValue();

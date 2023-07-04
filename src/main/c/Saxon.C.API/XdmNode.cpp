@@ -6,7 +6,7 @@
 #define new new(__FILE__, __LINE__)
 #endif
 
-XdmNode::XdmNode(int64_t obj): XdmItem(obj), baseURI(nullptr), nodeName(nullptr),localName(nullptr), childCount(-1), children(nullptr),parent(nullptr), typedValue(nullptr), attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN){
+XdmNode::XdmNode(int64_t obj): XdmItem(obj), baseURI(nullptr), nodeName(nullptr),localName(nullptr), childCount(-1), children(nullptr),parent(nullptr), typedValue(nullptr), attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), nodeToString(nullptr){
 
 }
 
@@ -60,9 +60,10 @@ bool XdmNode::isAtomic() {
          localName = nullptr;
        }
 
-       /*if(nodeToString != nullptr) {
+       if(nodeToString != nullptr) {
+           delete [] nodeToString;
            nodeToString = nullptr;
-       } */
+       }
 
            /* if (children != nullptr) {
 
@@ -164,7 +165,7 @@ return this;}
     }
 
     const char * XdmNode::toString(){
-        if(nodeToString != nullptr){
+        if(nodeToString == nullptr){
             allocFn fn = operator new;
             nodeToString = xdmNodeToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
             if(nodeToString == nullptr) {
