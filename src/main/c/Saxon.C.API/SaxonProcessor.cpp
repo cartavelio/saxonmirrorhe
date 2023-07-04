@@ -353,8 +353,9 @@ SaxonProcessor::~SaxonProcessor() {
     	j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 	    procRef = -1;
     }
-    if (!versionStr.empty()) {
-        versionStr.clear();
+    if (versionStr != nullptr) {
+        delete versionStr;
+        versionStr = nullptr;
     }
     //exceptionClear();
 }
@@ -656,14 +657,14 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
 
 const char *SaxonProcessor::version() {
 
-    if (versionStr.empty()) {
+    if (versionStr == nullptr) {
 
-        char * resultStr = getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+        allocFn fn = operator new;
 
-        versionStr += resultStr;
+        versionStr = j_cpp_getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef, fn);
 
     }
-    return versionStr.c_str();
+    return versionStr;
 }
 
 void SaxonProcessor::setcwd(const char *dir) {
@@ -902,7 +903,8 @@ XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *s
     }
 
 const char *SaxonProcessor::getStringValue(XdmItem *item) {
-    const char *result = j_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue());
+    allocFn fn = operator new;
+    const char *result = j_cpp_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue(), fn);
 #ifdef DEBUG
     if(result == nullptr) {
         std::cerr<<"getStringValue of XdmItem is nullptr"<<std::endl;

@@ -6,7 +6,7 @@
  */
 const char * version(sxnc_environment *environi, sxnc_processor* proc) {
 
-    return getProductVersion(environi->thread, (void *)proc->value);
+    return j_c_getProductVersion(environi->thread, (void *)proc->value);
 }
 
 
@@ -15,7 +15,7 @@ const char * version(sxnc_environment *environi, sxnc_processor* proc) {
  */
 const char * getProductVariantAndVersion(sxnc_environment * environi, sxnc_processor* proc) {
 
-    return getProductVersion(environi->thread, (void *)proc->value);
+    return j_c_getProductVersion(environi->thread, (void *)proc->value);
 }
 
 void initSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_parameter **param, sxnc_property ** prop, int cap, int propCap){

@@ -423,7 +423,7 @@ public class SaxonCAPI {
             }
         }
     };   */
-    @CEntryPoint(name = "getProductVersion")
+    @CEntryPoint(name = "j_c_getProductVersion")
     public static CCharPointer getProductVersion(IsolateThread thread, ObjectHandle processorRef) {
         if (processorRef == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
@@ -431,6 +431,17 @@ public class SaxonCAPI {
         Processor processor = objectHandles.get(processorRef);
         final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(processor.getUnderlyingConfiguration().getProductTitle());
         return holder.get();
+    }
+
+    @CEntryPoint(name = "j_cpp_getProductVersion")
+    public static CCharPointer getProductVersion(IsolateThread thread, ObjectHandle processorRef, SaxonCAPI.AllocatorCCharFn alloc) {
+        if (processorRef == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
+        Processor processor = objectHandles.get(processorRef);
+        String title = processor.getUnderlyingConfiguration().getProductTitle();
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, title);
+        return a;
     }
 
     /* @CEntryPoint(name = "j_testProg")
@@ -1050,13 +1061,28 @@ public class SaxonCAPI {
      *
      * @param thread
      * @param xdmvalueRef
-     * @return C Pointer to the string value in the C memory space
+     * @return C Pointer to the string value in the Java memory space
      */
     @CEntryPoint(name = "j_getStringValue")
     public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef) {
         XdmValue value = objectHandles.get(xdmvalueRef);
         final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(value.toString());
         return holder.get();
+    }
+
+
+    /**
+     * Utility method to get the String value from the XdmValue representation
+     *
+     * @param thread
+     * @param xdmvalueRef
+     * @return C Pointer to the string value in the C++ memory space
+     */
+    @CEntryPoint(name = "j_cpp_getStringValue")
+    public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef, SaxonCAPI.AllocatorCCharFn alloc) {
+        XdmValue value = objectHandles.get(xdmvalueRef);
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, value.toString());
+        return a;
     }
 
 

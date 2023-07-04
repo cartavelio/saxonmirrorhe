@@ -117,8 +117,8 @@ public class XdmUtils {
             return WordFactory.nullPointer();
         }
         XdmValue item = SaxonCAPI.objectHandles.get(value);
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
-        return holder.get();
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.toString());
+        return a;
     }
 
     /**
