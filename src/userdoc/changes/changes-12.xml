@@ -340,7 +340,7 @@
         
         <p>From Saxon 12.2:</p>
         <ul>
-            <li><p>The <code>fn:char()</code> function is implemented.</p></li>
+            <li><p>The <code>fn:char()</code> function is implemented</p></li>
             <li><p>The <code>array:members()</code> and <code>array:of()</code> functions are implemented (both were
                 previously available but not fully documented, and the detailed specification has changed).</p></li>
             <li><p>The <code>array:of()</code> function is aligned with the latest 4.0 specification: it expects
@@ -348,19 +348,13 @@
                 The <code>fn:parcel</code> function remains available, though it is not in the 4.0 specification, and now
                 delivers "value records" in this format.</p></li>
             <li><p>The <code>array:build()</code> function is implemented (previously partly available but undocumented
-            as <code>array:_from_sequence</code>).</p></li>
+            as <code>array:_from_sequence</code>)</p></li>
             
-            <li><p>The <code>map:get()</code> and <code>array:get()</code> functions support a third argument, defining
+            <li><p>The <code>map:get</code> and <code>array:get</code> functions support a third argument, defining
             the fallback action to be taken when no entry is found.</p></li>
+            <li><p>Numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>),
+            and underscores can be used as separators (<code>1_000_000</code>).</p></li>
         </ul>
-        
-        <p>From Saxon 12.3:</p>
-        <ul>
-            <li><p>The <code>fn:parse-integer()</code> function is implemented. This allows parsing of integers
-            in bases other than 10, for example <code>parse-integer('ffff', 16)</code> returns 65535.</p></li>
-            <li><p>The <code>fn:format-integer()</code> function has been extended to allow output in bases
-            other than 10, for example <code>fn:format-integer(65534, '16^XXXX_XXXX')</code> outputs
-            <code>0000_FFFE</code>.</p></li>
         
       
         <h2>Dropped or Changed Extension Functions</h2>
@@ -406,10 +400,6 @@
             <li><code>if ($condition) {&lt;x>It's true&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code></li>
             <li><code>if ($condition) {&lt;x>It's true&lt;/x>} else if ($polite) {&lt;x>He mis-spoke&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code></li>
         </ol>
-        
-        <p>From 12.2, numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary
-            (<code>0b101010</code>), and underscores can be used as separators (<code>1_000_000</code>).</p>
-        
         
         <h2>XQuery 4.0 extensions</h2>
         
@@ -476,11 +466,9 @@
         
         <p>From 12.2 the syntax for type patterns changes so that <code>match="type(T)"</code> may specify any 
             item type as <code>T</code> (including, for example, an atomic type name: <code>match="type(xs:integer)"</code>).
-            The syntax <code>match="atomic(T)"</code> is dropped from the draft specification, and
-            <code>match="type(T)"</code> should be used instead. For now Saxon still allows <code>match="atomic(T)"</code>
-            but will produce a warning; it will be removed in a future Saxon release. The priority rules for type patterns are not yet fully 
+        The syntax <code>match="atomic(T)"</code> is dropped. The priority rules for type patterns are not yet fully 
         aligned with the evolving specification: matching of atomic types works correctly according to the type hierarchy,
-        but if union types and/or record types are used in match patterns (for example <code>match="record(lat, long)"</code>)
+        but if union types and/or record types are used in match patterns (for example <code>match="record(lat, long)"</code>
         they should be disambiguated using explicit priorities.</p>
         
         <aside>Our general policy on implementation of new features in the draft 4.0 specifications is that
