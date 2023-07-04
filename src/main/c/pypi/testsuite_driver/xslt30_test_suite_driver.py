@@ -99,7 +99,7 @@ def process_catalog(path: str, catalogi):
         '''catalog_node = cat_builder.parse_xml(xml_file_name=catalogi)'''
         catalog_node = driver_proc.parse_xml(xml_file_name=catalogi)
 
-        test_report.write_result_file_preamble(driver_proc, [])
+        test_report.write_result_file_preamble(driver_proc, "xslt30", [])
 
         if run_test is None:
             create_global_environment(catalog_node, xpc)
