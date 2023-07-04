@@ -12,11 +12,19 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * Interface implemented by expressions that deliver the result as a single string (specifically,
- * as an instance of {@link UnicodeString})
+ * A StringEvaluator is a function that typically encapsulates the logic for
+ * evaluating an expression that returns a string, in the form of a {@link UnicodeString}
  */
 @FunctionalInterface
 public interface UnicodeStringEvaluator {
+
+    /**
+     * Evaluate the encapsulated expression
+     *
+     * @param context the evaluation context
+     * @return the result, as a {@link UnicodeString}; or null to represent an empty sequence
+     * @throws XPathException if a dynamic error occurs
+     */
 
     UnicodeString eval(XPathContext context) throws XPathException;
 }
