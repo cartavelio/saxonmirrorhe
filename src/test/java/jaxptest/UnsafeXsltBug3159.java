@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadFactory;
 /**
  * // bug 3159
  */
-public class UnsafeXslt implements Runnable {
+public class UnsafeXsltBug3159 implements Runnable {
 
     private static final String xsl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             + "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:html=\"http://www.w3.org/1999/xhtml\">\n"
@@ -47,7 +47,7 @@ public class UnsafeXslt implements Runnable {
         factory.setURIResolver(new URIResolver() {
             @Override
             public Source resolve(String href, String base) throws TransformerException {
-                final InputStream input = UnsafeXslt.class.getResourceAsStream(href);
+                final InputStream input = UnsafeXsltBug3159.class.getResourceAsStream(href);
                 if (input == null) {
                     throw new TransformerException("Unable to find '" + href + "' in '" + base + "'.");
                 }
@@ -76,7 +76,7 @@ public class UnsafeXslt implements Runnable {
         final ThreadFactory threadFactory = Executors.defaultThreadFactory();
         final Thread[] threads = new Thread[threadSize];
         for (int i = 0; i < threadSize; ++i) {
-            threads[i] = threadFactory.newThread(new UnsafeXslt(latch));
+            threads[i] = threadFactory.newThread(new UnsafeXsltBug3159(latch));
         }
         for (int i = 0; i < threadSize; ++i) {
             threads[i].start();
@@ -88,7 +88,7 @@ public class UnsafeXslt implements Runnable {
 
     private final CountDownLatch latch;
 
-    public UnsafeXslt(final CountDownLatch latch) {
+    public UnsafeXsltBug3159(final CountDownLatch latch) {
         this.latch = latch;
     }
 
