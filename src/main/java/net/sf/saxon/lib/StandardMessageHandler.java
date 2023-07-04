@@ -37,11 +37,22 @@ public class StandardMessageHandler implements Consumer<Message> {
 
     public StandardMessageHandler(Configuration config) {
         this.config = config;
+        serializationProperties = getSerializationProperties();
+    }
+
+    /**
+     * Get the serialization properties to be used. This is a public method so that
+     * it can be overridden in a user-written subclass.
+     * @return the serialization properties. By default the properties returned
+     * are method="yes", indent="yes", omit-xml-declaration="yes".
+     */
+
+    public SerializationProperties getSerializationProperties() {
         Properties props = new Properties();
         props.setProperty(OutputKeys.METHOD, "xml");
         props.setProperty(OutputKeys.INDENT, "yes");
         props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        serializationProperties = new SerializationProperties(props);
+        return new SerializationProperties(props);
     }
 
     /**
