@@ -833,7 +833,7 @@ namespace TestDriver {
                 }
 
                 XPathCompiler assertXpc = env.processor.NewXPathCompiler();
-                assertXpc.XPathLanguageVersion = "3.1";
+                assertXpc.XPathLanguageVersion = "4.0";
                 assertXpc.SchemaAware = testIsSchemaAware;
                 assertXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
