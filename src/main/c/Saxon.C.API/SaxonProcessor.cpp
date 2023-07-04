@@ -784,6 +784,11 @@ void SaxonProcessor::clearConfigurationProperties() {
 }
 
 
+void SaxonProcessor::createHeapDump(bool live){
+       j_createHeapDump(sxn_environ->thread, (int)live);
+}
+
+
 void SaxonProcessor::release() {
     if (SaxonProcessor::jvmCreatedCPP != 0) {
         SaxonProcessor::jvmCreatedCPP = 0;

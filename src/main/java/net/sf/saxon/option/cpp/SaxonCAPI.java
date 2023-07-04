@@ -127,6 +127,7 @@ public class SaxonCAPI {
         String debugFlag  = System.getenv("SAXONC_DEBUG_FLAG");
         if(debugFlag != null && debugFlag.equals("true")) {
             SaxonCAPI.debug = true;
+            //com.oracle.svm.core.SubstrateGCOptions.VerboseGC.update(true);
         }
         if (debug && licensei) {
             System.err.println("Flag is true to create SaxonProcessor with license");
@@ -232,7 +233,7 @@ public class SaxonCAPI {
         }
     }
 
-    @CEntryPoint(name = "j_createHeapDum")
+    @CEntryPoint(name = "j_createHeapDump")
     public static void createHeapDump(IsolateThread thread, int live) {
         try {
             File file = File.createTempFile("SVMHeapDump-", ".hprof");

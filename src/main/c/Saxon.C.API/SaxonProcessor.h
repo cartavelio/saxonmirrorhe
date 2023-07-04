@@ -643,6 +643,9 @@ public:
 
 
 
+    void createHeapDump(bool live);
+
+
 /**
  * Get info on objects allocated and still in memory
  */
