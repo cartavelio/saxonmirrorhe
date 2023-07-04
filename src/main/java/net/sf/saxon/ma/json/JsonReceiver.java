@@ -36,7 +36,7 @@ import java.util.function.IntPredicate;
 
 
 public class JsonReceiver implements Receiver {
-    private XPathContext context;
+    private final XPathContext context;
     private PipelineConfiguration pipe;
     private UniStringConsumer output;
     private final StringBuilder textBuffer = new StringBuilder(128);
@@ -283,7 +283,7 @@ public class JsonReceiver implements Receiver {
                 }
             } else {
                 Sequence result = SystemFunction.dynamicCall(
-                        numberFormatter, context, new Sequence[]{new StringValue(uContent)});
+                        numberFormatter, context, new StringValue(uContent));
                 output.accept(((StringValue)result).getUnicodeStringValue());
             }
 
@@ -359,7 +359,8 @@ public class JsonReceiver implements Receiver {
      * Escape a string using backslash escape sequences as defined in JSON
      *
      * @param in         the input string
-     * @param forXml     true if the output is for the json-to-xml function
+     * @param retainQuot true if the quotation marks should not be escaped
+     * @param retainSlash true if solidus (forwards slash) should not be escaped
      * @param hexEscapes a predicate identifying characters that should be output as hex escapes using \ u XXXX notation.
      * @return the escaped string
      * @throws XPathException if the input contains invalid escape sequences
@@ -415,7 +416,7 @@ public class JsonReceiver implements Receiver {
         return hex;
     }
 
-    private IntPredicate isControlChar = c -> c < 31 || (c >= 127 && c <= 159);
+    private final static IntPredicate isControlChar = c -> c < 31 || (c >= 127 && c <= 159);
 
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
