@@ -1950,15 +1950,12 @@ public class PackageLoaderHE implements IPackageLoader {
             ItemType fromType = loader.parseAlphaCodeForItemType(element, "from");
             ItemType toType = loader.parseAlphaCodeForItemType(element, "to");
             AtomicSequenceConverter asc = new AtomicSequenceConverter(body, (PlainType) toType);
-            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
-            if ("p".equals(flags)) {
+            if ("p".equals(element.getAttributeValue(NamespaceUri.NULL,"flags"))) {
                 if (toType.equals(BuiltInAtomicType.DOUBLE)) {
                     asc.setConverter(new Converter.PromoterToDouble());
                 } else {
                     asc.setConverter(new Converter.PromoterToFloat());
                 }
-            } else if ("d".equals(flags)) {   // Bug 5968
-                asc.setConverter(new Converter.DownCastingConverter((AtomicType)toType, loader.config.getConversionRules()));
             } else {
                 Converter c = asc.allocateConverter(loader.config, false, fromType);
                 asc.setConverter(c);
