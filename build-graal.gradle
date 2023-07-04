@@ -910,6 +910,10 @@ task all_saxonc_releases() {
                      + 'archs = ["AMD64"]\n'
                      + 'skip = ["*-win32", "cp36*", "cp37*", "pp*", "cp*musl*"]\n')
     libpath = "libs\\\\win\\\\"
+  } else {
+    lastLinePatch = ('[tool.cibuildwheel]\n'
+                     + 'build = "*"\n'
+                     + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n')
   }
 
   task "setup_${edition}c_pypi"(
