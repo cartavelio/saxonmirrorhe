@@ -550,7 +550,7 @@ task dotnetRelease(
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
         '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
-        '-p:SelfContained=true', '-p:PublishSingleFile=true',
+        '-p:SelfContained=true', '-p:PublishSingleFile=false',
         "-p:Version=${csver}", "-p:PackageVersion=${csver}",
         "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
     }
@@ -622,9 +622,9 @@ task dotnetPublish(
   inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   outputs.files fileTree(dir: "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish")
 
-  def singleFile="true"
+  def singleFile="false"
   if (systemOs.isMacOsX()) {
-    singleFile="true"
+    singleFile="false"
   }
 
   doLast {
