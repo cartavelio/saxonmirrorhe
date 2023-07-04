@@ -909,6 +909,10 @@ public class TestOutcome {
                 XPathContext context = s.getUnderlyingXPathContext().getXPathContextObject();
                 for (XdmItem item : s) {
                     expectedItems++;
+                    if (!(item instanceof XdmAtomicValue)) {
+                        System.err.println("*** Test driver limitation: assert-permutation works only on atomic values");
+                        return false;
+                    }
                     AtomicValue value = (AtomicValue) item.getUnderlyingValue();
                     AtomicMatchKey comparable = value.isNaN() ?
                             AtomicSortComparer.COLLATION_KEY_NaN :
@@ -918,6 +922,10 @@ public class TestOutcome {
                 int actualItems = 0;
                 for (XdmItem item : getPrincipalResult()) {
                     actualItems++;
+                    if (!(item instanceof XdmAtomicValue)) {
+                        System.err.println("*** Test driver limitation: assert-permutation works only on atomic values");
+                        return false;
+                    }
                     AtomicValue value = (AtomicValue) item.getUnderlyingValue();
                     AtomicMatchKey comparable = value.isNaN() ?
                             AtomicSortComparer.COLLATION_KEY_NaN :
