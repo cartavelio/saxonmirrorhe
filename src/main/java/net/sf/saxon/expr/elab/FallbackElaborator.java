@@ -32,7 +32,7 @@ public class FallbackElaborator extends Elaborator {
 
 
     @Override
-    public SequenceEvaluator lazily(boolean repeatable) {
+    public SequenceEvaluator lazily(boolean repeatable, boolean lazyEvaluationRequired) {
         Expression expr = getExpression();
         if (repeatable) {
             return new MemoClosureEvaluator(expr, elaborateForPull());

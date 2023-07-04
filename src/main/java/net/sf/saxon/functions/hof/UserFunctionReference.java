@@ -481,7 +481,7 @@ public class UserFunctionReference extends Expression
                 Sequence[] extendedArgs = Arrays.copyOf(args, fd.getNumberOfParameters());
                 for (int i=args.length; i<extendedArgs.length; i++) {
                     extendedArgs[i] = fd.getDefaultValueExpression(i).copy(new RebindingMap())
-                            .makeElaborator().lazily(true).evaluate(context);
+                            .makeElaborator().lazily(true, false).evaluate(context);
                 }
                 args = extendedArgs;
             }

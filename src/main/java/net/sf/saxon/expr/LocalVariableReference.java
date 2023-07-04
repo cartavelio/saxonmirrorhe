@@ -194,7 +194,7 @@ public class LocalVariableReference extends VariableReference {
         }
 
         @Override
-        public SequenceEvaluator lazily(boolean repeatable) {
+        public SequenceEvaluator lazily(boolean repeatable, boolean lazyEvaluationRequired) {
             return eagerly();
         }
 

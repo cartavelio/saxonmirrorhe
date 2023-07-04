@@ -397,11 +397,11 @@ public class LetExpression extends Assignation {
         } else if (needsEagerEvaluation || !getSequence().supportsLazyEvaluation()) {
             setEvaluator(getSequence().makeElaborator().eagerly());
         } else if (needsLazyEvaluation) {
-            setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1));
+            setEvaluator(getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1, needsLazyEvaluation));
         } else if (evaluator == null) {
             setEvaluator(new LearningEvaluator(
                     getSequence(),
-                    getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1)));
+                    getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1, false)));
         }
     }
 
@@ -561,7 +561,7 @@ public class LetExpression extends Assignation {
                 setEvaluator(getSequence().makeElaborator().eagerly());
             } else {
                 setEvaluator(new LearningEvaluator(
-                        getSequence(), getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1)));
+                        getSequence(), getSequence().makeElaborator().lazily(getNominalReferenceCount() > 1, false)));
             }
         }
         try {
@@ -915,6 +915,9 @@ public class LetExpression extends Assignation {
         @Override
         public SequenceEvaluator eagerly() {
             final LetExpression expr = (LetExpression) getExpression();
+            if (expr.needsLazyEvaluation) {
+                return lazily(true, true);
+            }
             final SequenceEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
             final SequenceEvaluator actionEval = expr.getAction().makeElaborator().eagerly();
             final int slot = expr.getLocalSlotNumber();

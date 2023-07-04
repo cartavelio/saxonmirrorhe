@@ -311,7 +311,7 @@ public class DynamicFunctionCall extends Expression {
             SequenceEvaluator[] argEvaluators = new SequenceEvaluator[expr.getArity()];
             for (int i=0; i<argEvaluators.length; i++) {
                 Expression arg = expr.suppliedArguments.getOperand(i).getChildExpression();
-                argEvaluators[i] = new LearningEvaluator(arg, arg.makeElaborator().lazily(true));
+                argEvaluators[i] = new LearningEvaluator(arg, arg.makeElaborator().lazily(true, false));
             }
             Expression body = expr.targetFunction.getChildExpression();
             ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();

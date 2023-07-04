@@ -201,7 +201,7 @@ public class GlobalVariableReference extends VariableReference implements Compon
         }
 
         @Override
-        public SequenceEvaluator lazily(boolean repeatable) {
+        public SequenceEvaluator lazily(boolean repeatable, boolean lazyEvaluationRequired) {
             return this;
         }
 
