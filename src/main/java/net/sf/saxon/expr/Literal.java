@@ -664,8 +664,12 @@ public class Literal extends Expression {
             return "()";
         } else if (value.getLength() == 1) {
             return value.toShortString();
+        } else if (value.getLength() == 2) {
+            return "(" + value.head().toShortString() + ", " + value.itemAt(1).toShortString() + ")";
         } else {
-            return "(" + value.head().toShortString() + ", ...{" + value.getLength() + "})";
+            return "(" + value.head().toShortString()
+                    + ", " + value.itemAt(1).toShortString()
+                    + ", ...{" + value.getLength() + "})";
         }
     }
 
