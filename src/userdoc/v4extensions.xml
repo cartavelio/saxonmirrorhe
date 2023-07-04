@@ -835,12 +835,19 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>Accepts a map as input, and returns a new map containing those entries from the original map that satisfy the predicate function.</p>
 
+      <kbd>map:keys($map as map(*), $predicate as function(xs:anyAtomicType, item()*) as xs:boolean := true#0) as xs:atomicValue*</kbd>
+      
+      <p>The second argument is new in 2.0; if supplied,<code> map:keys</code> returns the keys from entries in the map where
+         applying the predicate to the corresponding value returns true.</p>
+      
+
       <kbd>map:key-value-pairs($map as map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
 
       <p>Accepts a map as input, and turns it into a sequence of maps representing the key-value pairs contained in the map.
          Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>. This differs from
       <code>map:entries</code> in that each entry in the input map is turned into a map with two entries, named "key"
       and "value", rather than a singleton map with one entry.</p>
+
 
 
 
@@ -997,6 +1004,18 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code>
                is allowed.</p>
       </section>
+      
+      <section id="arity-reduction" title="Arity reduction">
+         <h1>Arity reduction</h1>
+         
+         <p>The function coercion rules are extended to allow a supplied function item to have lower arity
+            than that implied by the signature of the required type. For example, <code>map:for-each</code> expects a function with
+            arguments, which are set respectively to the key and the value of an entry in the map. But if you are only interested in the key,
+            you can supply a function of arity 1, and your function will be called omitting the second argument. Similarly,
+            for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code>
+            which has arity zero: this has the effect that the predicate will always be true.</p>
+         
+         <p>This feature is implemented from Saxon 12.3.</p>
 
       <section id="mapping-arrow" title="Mapping arrow operator">
          <h1>Mapping arrow operator</h1>

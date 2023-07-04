@@ -525,9 +525,9 @@ public class RecordTest extends AnyFunctionType implements TupleType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
             throws XPathException {
-        return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
+        return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
     }
 
 }

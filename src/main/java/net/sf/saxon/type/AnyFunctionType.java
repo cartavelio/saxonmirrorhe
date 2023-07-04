@@ -242,12 +242,13 @@ public class AnyFunctionType implements FunctionItemType {
      *
      * @param exp     the expression that delivers the supplied sequence of function items (the ones in need of coercion)
      * @param role    information for use in diagnostics
+     * @param allow40
      * @return the sequence of coerced functions, each on a function that calls the corresponding original function
      * after checking the parameters
      */
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
             throws XPathException {
         return new ItemChecker(exp, this, role);
     }

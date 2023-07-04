@@ -176,8 +176,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(1, mapBuildKeyArg, ONE, null)
                     .arg(2, mapBuildValueArg, ONE, null)
                     .arg(3, opFnType, ONE, null));
-            ;
 
+            ItemType filterFunctionType = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                    SequenceType.SINGLE_BOOLEAN);
+
+            register("keys", 2, e -> e.populate(MapKeys::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, filterFunctionType, ONE, null));
 
             register("key-value-pairs", 1, e -> e.populate(MapKeyValuePairs::new, KVP_TYPE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
@@ -595,7 +601,19 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             assert map != null;
-            return SequenceTool.toLazySequence(map.keys());
+            if (arguments.length == 1) {
+                return SequenceTool.toLazySequence(map.keys());
+            } else {
+                FunctionItem fn = (FunctionItem) arguments[1].head();
+                ZenoSequence results = new ZenoSequence();
+                for (KeyValuePair pair : map.keyValuePairs()) {
+                    BooleanValue selected = (BooleanValue)fn.call(context, new Sequence[]{pair.value}).head();
+                    if (selected.getBooleanValue()) {
+                        results = results.append(pair.key);
+                    }
+                }
+                return results;
+            }
         }
     }
 
