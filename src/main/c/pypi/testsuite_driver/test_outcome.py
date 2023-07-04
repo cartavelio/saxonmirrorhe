@@ -1,14 +1,23 @@
 from saxoncee import *
 import os
 from lxml import etree
+import urllib.parse
 
 class PyTestOutcome:
 
     processor: PySaxonProcessor
     wrong_error: str
+    result_documents: dict
+    xsl_messages: str
 
     def __init__(self):
         self.wrong_error = None
+        self.result_documents = {}
+        self.xsl_messages = ""
+
+    def capture_result_documents(self, rd : dict):
+        self.result_documents = rd
+
 
     def test_assertion(self, assertion: PyXdmNode, result, result_as_error, proc: PySaxonProcessor, assert_xpc: PyXPathProcessor,
                        catalog_xpc: PyXPathProcessor, assert_set: set):
@@ -30,8 +39,8 @@ class PyTestOutcome:
             print(assertion)
 
 
-        if "error" != tag and result is None:
-            print(result_as_error)
+        if "error" != tag and "any-of" != tag and "all-of" != tag and result is None:
+            print("Error Found = " + str(result_as_error))
             return False
         print(assert_set)
         if "assert" == tag:
@@ -47,13 +56,45 @@ class PyTestOutcome:
         elif "error" == tag:
 
             return self.compare_expected_error(assertion, result_as_error, assert_xpc, catalog_xpc)
+
+        elif "not" == tag:
+            catalog_xpc.set_context(xdm_item=assertion)
+            sub_assertion = catalog_xpc.evaluate_single("*")
+            return not self.test_assertion2(sub_assertion.get_node_value(), result, result_as_error, assert_xpc, catalog_xpc, assert_set)
+
+        elif "assert-string-value" == tag:
+
+            return self.assert_string_value(assertion, result)
+
+        elif "assert-message" == tag:
+            catalog_xpc.set_context(xdm_item=assertion)
+            sub_assertion = catalog_xpc.evaluate_single("*")
+            print("message file=" + self.xsl_messages)
+            f = open(self.xsl_messages, "r")
+            print(f.read())
+            exit()
+            return not self.test_assertion2(sub_assertion.get_node_value(), result, result_as_error, assert_xpc,
+                                            catalog_xpc, assert_set)
+
+            return False
+
+
         elif "assert-result-document" == tag:
             catalog_xpc.set_context(xdm_item=assertion)
             sub_assertion = catalog_xpc.evaluate_single("*")
-            print(result.base_uri)
+            print(result.item_at(0).get_node_value().base_uri)
             uri = assertion.get_attribute_value("uri")
-            print("assertion uri=" + uri)
-            exit()
+            uri = urllib.parse.urljoin(result.item_at(0).get_node_value().base_uri, uri)
+            print("uri=" + uri)
+            if self.result_documents:
+                print(list(self.result_documents.keys()))
+                doc = self.result_documents[uri]
+                ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result_as_error, assert_xpc, catalog_xpc, assert_set)
+                if not ok:
+                    print("**** Assertion failed for result-document " + uri)
+
+                return ok
+
             return False
         elif "all-of" == tag:
             catalog_xpc.set_context(xdm_item=assertion)
@@ -78,6 +119,18 @@ class PyTestOutcome:
             return partial_success
 
         return False
+
+
+    def assert_string_value(self, assertion: PyXdmNode, result: PyXdmValue):
+
+        assertion_string = assertion.string_value
+        result_string = ""
+        if result.size == 1:
+            result_string = result.item_at(0).string_value
+
+        return result_string == assertion_string
+
+
 
     def compare_expected_error(self, assertion: PyXdmNode, result: PySaxonApiError, assert_xpc: PyXPathProcessor, catalog_xpc: PyXPathProcessor):
         if result is None:
@@ -170,10 +223,11 @@ class PyTestOutcome:
 
     def assert_eq(self, assertion: PyXdmNode, result: PyXdmValue, assert_xpc: PyXPathProcessor, catalog_xpc: PyXPathProcessor):
 
-        assert_xpc.declare_variable("{}result")
-        assert_xpc.set_parameter("{}result", result)
+        assert_xpc.declare_variable("result")
+        assert_xpc.set_parameter("result", result)
         try:
             item = assert_xpc.evaluate_single("$result eq " + assertion.string_value)
+            print(result)
             print(item)
             return item is not None and item.get_atomic_value().boolean_value
 

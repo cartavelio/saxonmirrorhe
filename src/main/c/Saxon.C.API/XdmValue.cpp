@@ -153,7 +153,7 @@ void XdmValue::addXdmItem(XdmItem* val) {
             jValues = -1;
         }
         if(toStringValue != nullptr) {
-            delete toStringValue;
+            delete [] toStringValue;
             toStringValue = nullptr;
         }
 

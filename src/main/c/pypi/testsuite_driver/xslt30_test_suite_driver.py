@@ -1,3 +1,5 @@
+import urllib.parse
+
 from saxoncee import *
 import os
 import psutil
@@ -5,6 +7,7 @@ from Environment import Environment
 from test_outcome import PyTestOutcome
 from test_report import PyTestReport
 import sys, getopt
+from os.path import abspath
 from os.path import isfile
 from datetime import datetime as date
 
@@ -58,7 +61,7 @@ debug = False
 
 run_test = None
 '''"streamable"'''
-run_test_case_name = 'current-output-uri-004'
+run_test_case_name = 'avt-0701'
 '''result-document-0206'''
 run_assertion = None
 '''serialization-matches'''
@@ -431,6 +434,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     global failures
     global not_run
     global test_report
+    global path
 
     xpath_proc.set_context(xdm_item=test_case_node)
     test_name = test_case_node.get_attribute_value("name")
@@ -486,12 +490,27 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     xpath_proc.set_context(xdm_item=test_input_node)
     '''Get config for XSLT Processor'''
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
+    output_uri = xpath_proc.evaluate_single("string(output/@file)")
+    base_output_uri = ""
+    if path is not None:
+        base_output_uri = "file:/" + abspath(str(path) + "results/output.xml")
+        print(base_output_uri)
+
+    if output_uri is not None:
+        print(base_output_uri)
+        print(str(output_uri.item_at(0).get_atomic_value().string_value))
+        base_output_uri = urllib.parse.urljoin(base_output_uri, str(output_uri.item_at(0).get_atomic_value().string_value))
+
+        print(base_output_uri)
+
+
     initial_mode = xpath_proc.evaluate_single("initial-mode")
     initial_template = xpath_proc.evaluate_single("initial-template")
     initial_function = xpath_proc.evaluate_single("initial-function")
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print(test_case_node.base_uri)
     print(test_case_node)
+
     if initial_function is not None:
         print(initial_function)
         exit()
@@ -522,8 +541,14 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         environment.xslt_proc.set_jit_compilation(False)
         errorResult = None
         result = None
+        result_documents = {}
+        outcome = PyTestOutcome()
+
         try:
             sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name)
+            sheet.set_capture_result_documents(True)
+            sheet.set_save_xsl_message(False, "file:/" + abspath(str(path) + "results/xsl-messages.txt"))
+            outcome.xsl_messages = "file:/" + abspath(str(path) + "results/xsl-messages.txt")
             if os.getenv("SAXONC_DEBUG_FLAG") is not None:
                 print('stylesheet found XXX')
             if environment.context_item is not None:
@@ -532,9 +557,11 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             if initial_mode_name is not None:
                 sheet.set_initial_mode(initial_mode_name)
             if initial_template is not None:
-                result = sheet.call_template_returning_value(initial_template.get_node_value().get_attribute_value("name"))
+                result = sheet.call_template_returning_value(initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
+                outcome.result_documents = sheet.get_result_documents()
             else:
-                result = sheet.apply_templates_returning_value(xdm_value=environment.context_item)
+                result = sheet.apply_templates_returning_value(xdm_value=environment.context_item, base_output_uri=base_output_uri)
+                outcome.result_documents = sheet.get_result_documents()
             '''print('Result = ' + str(result))'''
 
 
@@ -543,7 +570,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         except PySaxonApiError as ex:
             errorResult = ex
 
-        outcome = PyTestOutcome()
+
         assert_xpc = environment.proc.new_xpath_processor()
         assert_xpc.set_property("sa", "true")
         assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
