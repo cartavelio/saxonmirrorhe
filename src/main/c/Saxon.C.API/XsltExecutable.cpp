@@ -1021,10 +1021,7 @@ XdmValue *XsltExecutable::getXslMessages() {
       delete[] results;
       return value;
 
-    } else {
-      exceptionFound = true;
-      throw SaxonApiException();
-    }
+    } 
   }
   return nullptr;
 }

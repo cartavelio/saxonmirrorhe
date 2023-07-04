@@ -139,6 +139,9 @@ public class SaxonCMessageListener implements MessageListener2 {
         if(SaxonCAPI.debug) {
             System.err.println("SaxonCMessageListener getXslMessage size = " + messageListener.xslMessages.size());
         }
+        if( messageListener.xslMessages.size() == 0 ) {
+            return WordFactory.nullPointer();
+        }
             long[] refs= xslMessages.stream().mapToLong( i ->{
                         ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
                         return objectHandle.rawValue();
