@@ -60,10 +60,9 @@ public class SAXDestination extends AbstractDestination {
     /*@NotNull*/
     @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) {
-        ContentHandlerProxy chp = new ContentHandlerProxy();
-        chp.setUnderlyingContentHandler(contentHandler);
-        chp.setPipelineConfiguration(pipe);
-        return params.makeSequenceNormalizer(chp);
+        Receiver r = ContentHandlerProxy.makeInstance(contentHandler, params.getProperties());
+        r.setPipelineConfiguration(pipe);
+        return params.makeSequenceNormalizer(r);
     }
 
     /**

@@ -439,10 +439,9 @@ public class SerializerFactory {
             }
 //#if CSHARP == false
         } else if (result instanceof SAXResult) {
-            ContentHandlerProxy proxy = newContentHandlerProxy();
-            proxy.setUnderlyingContentHandler(((SAXResult) result).getHandler());
-            proxy.setPipelineConfiguration(pipe);
+            ContentHandlerProxy proxy = new ContentHandlerProxy(((SAXResult) result).getHandler());
             proxy.setOutputProperties(props);
+            proxy.setPipelineConfiguration(pipe);
             if ("yes".equals(props.getProperty(SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR))) {
                 if (config.isCompileWithTracing() && pipe.getController() != null) {
                     pipe.getController().addTraceListener(proxy.getTraceListener());
@@ -451,8 +450,8 @@ public class SerializerFactory {
                             "Cannot use saxon:supply-source-locator unless tracing was enabled at compile time", SaxonErrorCode.SXSE0002);
                 }
             }
-            //proxy.open();
-            return makeSequenceNormalizer(proxy, props);
+            NamespaceDifferencer delta = new NamespaceDifferencer(proxy, props);
+            return makeSequenceNormalizer(delta, props);
         } else if (result instanceof StAXResult) {
             StAXResultHandler handler = new StAXResultHandlerImpl();
             Receiver r = handler.getReceiver(result, props);
@@ -787,18 +786,6 @@ public class SerializerFactory {
         }
         return out;
     }
-
-    //#if CSHARP==false
-    /**
-     * Create a ContentHandlerProxy. This method exists so that it can be overridden in a subclass.
-     *
-     * @return the newly created ContentHandlerProxy.
-     */
-
-    protected ContentHandlerProxy newContentHandlerProxy() {
-        return new ContentHandlerProxy();
-    }
-    //#endif
     
     /**
      * Create an UncommittedSerializer. This method exists so that it can be overridden in a subclass.

@@ -40,18 +40,28 @@ public class NamespaceDifferencer extends ProxyReceiver {
 
     private boolean undeclareNamespaces = false;
     private final Stack<NamespaceMap> namespaceStack = new Stack<>();
-    private NodeName currentElement;
 
     /**
-     * Create a NamespaceDeclarer
+     * Create a NamespaceDifferencer
+     *
+     * @param next the Receiver to which events will be passed after namespace reduction
+     */
+
+    public NamespaceDifferencer(Receiver next) {
+        super(next);
+        undeclareNamespaces = false;
+        namespaceStack.push(NamespaceMap.emptyMap());
+    }
+
+    /**
+     * Create a NamespaceDifferencer
      *
      * @param next the Receiver to which events will be passed after namespace reduction
      */
 
     public NamespaceDifferencer(Receiver next, Properties details) {
-        super(next);
+        this(next);
         undeclareNamespaces = "yes".equals(details.getProperty(SaxonOutputKeys.UNDECLARE_PREFIXES));
-        namespaceStack.push(NamespaceMap.emptyMap());
     }
     
     /**
@@ -64,10 +74,9 @@ public class NamespaceDifferencer extends ProxyReceiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties)
             throws XPathException {
-        currentElement = elemName;
         NamespaceMap parentMap = namespaceStack.peek();
         namespaceStack.push(namespaces);
-        NamespaceMap delta = getDifferences(namespaces, parentMap, currentElement.hasURI(NamespaceUri.NULL));
+        NamespaceMap delta = getDifferences(namespaces, parentMap, elemName.hasURI(NamespaceUri.NULL));
         nextReceiver.startElement(elemName, type, attributes, delta, location, properties);
 
     }
