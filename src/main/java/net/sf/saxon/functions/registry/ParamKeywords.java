@@ -261,7 +261,7 @@ public class ParamKeywords {
         mapParamNames.put("for-each", "map|action");
         mapParamNames.put("get", "map|key|fallback");
         mapParamNames.put("group-by", "input|key");
-        mapParamNames.put("keys", "map");
+        mapParamNames.put("keys", "map|predicate");
         mapParamNames.put("merge", "maps|options");
         mapParamNames.put("put", "map|key|value");
         mapParamNames.put("remove", "map|keys");
