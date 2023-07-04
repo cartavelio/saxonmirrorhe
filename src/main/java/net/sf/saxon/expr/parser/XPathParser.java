@@ -38,8 +38,6 @@ import net.sf.saxon.str.StringTool;
 import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.SourceBinding;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.sxpath.IndependentContext;
-import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -719,9 +717,11 @@ public class XPathParser {
         this.env = env;
         language = ParsedLanguage.EXTENDED_ITEM_TYPE;
         t = new Tokenizer();
-        t.languageLevel = languageVersion = 40;
+        t.languageLevel = languageVersion = env.getXPathVersion();
         allowSaxonExtensions = t.allowSaxonExtensions = true;
-        allowXPath30Syntax = allowXPath31Syntax = allowXPath40Syntax = true;
+        allowXPath30Syntax = languageVersion >= 30;
+        allowXPath31Syntax = languageVersion >= 31;
+        allowXPath40Syntax = languageVersion >= 40;
         try {
             t.tokenize(input, 0, -1);
         } catch (XPathException err) {
@@ -1841,23 +1841,21 @@ public class XPathParser {
                 case "tuple": // Retained as synonym for the time being
                     primaryType = parseRecordTest(this);
                     break;
-                case "atomic":
-                    // Allowed only in patterns, not in item types??
-                    // TODO: not in spec, drop this
-                    checkLanguageVersion40();
-                    warning("The pattern syntax atomic(typename) is likely to be dropped from the 4.0 specification. Use type(typename) instead.", SaxonErrorCode.SXWN9000);
-                    nextToken();
-                    expect(Token.NAME);
-                    StructuredQName typeName = getQNameParser().parse(
-                            t.currentTokenValue, NamespaceUri.SCHEMA);
-                    primaryType = getPlainType(typeName);
-                    if (!(primaryType instanceof AtomicType)) {
-                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
-                    }
-                    nextToken();
-                    expect(Token.RPAR);
-                    nextToken();
-                    break;
+//                case "atomic":
+//                    // Allowed only in patterns, not in item types??
+//                    // TODO: not in spec, drop this
+//                    nextToken();
+//                    expect(Token.NAME);
+//                    StructuredQName typeName = getQNameParser().parse(
+//                            t.currentTokenValue, NamespaceUri.SCHEMA);
+//                    primaryType = getPlainType(typeName);
+//                    if (!(primaryType instanceof AtomicType)) {
+//                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+//                    }
+//                    nextToken();
+//                    expect(Token.RPAR);
+//                    nextToken();
+//                    break;
                 case "union":
                     primaryType = parseUnionType();
                     break;
@@ -4531,11 +4529,6 @@ public class XPathParser {
         if (b2 != null) {
             return b2;
         }
-        // It's not an in-scope range variable. If this is a free-standing XPath expression, it might be
-        // a parameter declared in the static context
-        if (env instanceof IndependentContext && !inlineFunctionStack.isEmpty()) {
-            b2 = findXPathParameter(qName, inlineFunctionStack, env);
-        }
         // It's not an in-scope range variable. If we're in XSLT, it might be an XSLT-defined local variable
         if (env instanceof ExpressionContext && !inlineFunctionStack.isEmpty()) {
             b2 = findOuterXSLTVariable(qName, inlineFunctionStack, env);
@@ -4584,47 +4577,6 @@ public class XPathParser {
             LocalBinding b3 = bindParametersInNestedFunctions(qName, inlineFunctionStack, s);
             if (b3 != null) {
                 return b3;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Look for a declaration of a variable used inside an inline function, but declared as part of
-     * the static context of a free-standing XPath expression
-     *
-     * @param qName               the name of the variable
-     * @param inlineFunctionStack the stack of inline functions that we are within
-     * @return a binding to the innermost declaration of the variable
-     */
-
-    private static LocalBinding findXPathParameter(
-            StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
-        if (env instanceof IndependentContext) {
-            XPathVariable var = ((IndependentContext) env).getExternalVariable(qName);
-            if (var != null) {
-                InlineFunctionDetails details = inlineFunctionStack.get(0);
-                LocalBinding innermostBinding;
-                boolean found = false;
-                for (int p = 0; p < details.outerVariablesUsed.size(); p++) {
-                    if (details.outerVariablesUsed.get(p).getVariableQName().equals(qName)) {
-                        // the inner function already uses the outer variable
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    // Need to add an implicit parameter to the inner function
-                    details.outerVariablesUsed.add(var);
-                    UserFunctionParameter ufp = new UserFunctionParameter();
-                    ufp.setVariableQName(qName);
-                    ufp.setRequiredType(var.getRequiredType());
-                    details.implicitParams.add(ufp);
-                }
-                // Now do the same for all inner inline functions, but this time binding to the
-                // relevant parameter of the next containing function
-                innermostBinding = bindParametersInNestedFunctions(qName, inlineFunctionStack, 0);
-                return innermostBinding;
             }
         }
         return null;
