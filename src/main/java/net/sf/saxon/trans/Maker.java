@@ -10,7 +10,7 @@ package net.sf.saxon.trans;
 /**
  * Interface representing a factory class for instances of a specific type.
  *
- * <p>Similar to {@link java.util.function.Supplier<T>}, except that the {@link #make()}
+ * <p>Similar to {@link java.util.function.Supplier}<code>&lt;T&gt;</code>, except that the {@link #make()}
  * method can throw a checked exception.</p>
  */
 public interface Maker<T> {
