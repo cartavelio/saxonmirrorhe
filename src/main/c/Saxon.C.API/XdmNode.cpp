@@ -10,7 +10,7 @@ XdmNode::XdmNode(int64_t obj): XdmItem(obj), baseURI(nullptr), nodeName(nullptr)
 
 }
 
-XdmNode::XdmNode(XdmNode * p, int64_t obj, XDM_NODE_KIND kind): XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),  childCount(-1), children(nullptr), parent(p), typedValue(nullptr), attrValues(nullptr),  attrCount(-1), nodeKind(kind){
+XdmNode::XdmNode(XdmNode * p, int64_t obj, XDM_NODE_KIND kind): XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),  childCount(-1), children(nullptr), parent(p), typedValue(nullptr), attrValues(nullptr),  attrCount(-1), nodeKind(kind), nodeToString(nullptr){
 
 }
 
@@ -25,6 +25,7 @@ XdmNode::XdmNode(const XdmNode &other) {
     typedValue = other.typedValue;
     attrCount = other.attrCount;
     nodeKind = other.nodeKind;
+    nodeToString = other.nodeToString;
 }
 
 bool XdmNode::isAtomic() {

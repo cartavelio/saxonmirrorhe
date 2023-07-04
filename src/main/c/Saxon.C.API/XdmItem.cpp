@@ -5,6 +5,7 @@
 XdmItem::XdmItem(): XdmValue(){
     value = -1;
     stringValue = nullptr;
+    itemToString = nullptr;
 }
 
 XdmItem::XdmItem(const XdmItem &other): XdmValue(other){
@@ -13,6 +14,7 @@ XdmItem::XdmItem(const XdmItem &other): XdmValue(other){
     refCount = other.refCount;
     stringValue = other.stringValue;
     stringValue = other.stringValue;
+    itemToString = other.itemToString;
 }
 
 
@@ -21,6 +23,7 @@ XdmItem::XdmItem(int64_t objRef){
     xdmSize =1;
     refCount =0;
     stringValue = nullptr;
+    itemToString = nullptr;
 }
 
 bool XdmItem::isAtomic(){
