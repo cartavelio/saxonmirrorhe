@@ -1832,7 +1832,7 @@ cdef class PyXsltExecutable:
                 elif isinstance(value, PyXdmValue):
                         value_ = value
                         key_str = key.encode('UTF-8')
-                        value_.derivedptr.incrementRefCount()
+                        value_.thisvptr.incrementRefCount()
                         c_params[key_str] = value_.thisvptr
                 else:
                         raise Exception("Initial template parameters can only be of type PyXdmValue or its sub-types")
