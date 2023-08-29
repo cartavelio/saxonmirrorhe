@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Liimited.
+// Copyright (c) 2022 - 2023 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -490,9 +490,9 @@ public:
   void transformToFile(XdmNode *source = nullptr);
 
   /**
-   * Get the messages written using the xsl:message instruction
-   * Return NULL if the user has not enabled of capturing of xsl:messages via
-   * setSaveXslMessage
+   * Get the messages written using the xsl:message instruction.
+   * Returns null if the user has not enabled capturing of xsl:messages via
+   * setSaveXslMessage()
    * @return XdmValue - the sequence of xsl:messages as an XdmValue
    */
   XdmValue *getXslMessages();

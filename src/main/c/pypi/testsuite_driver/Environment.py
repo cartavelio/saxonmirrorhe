@@ -3,6 +3,65 @@ import os
 
 optimizer_flags = '-'
 
+
+class Spec:
+
+
+    def __init__(self, v, fn, sspn, sav):
+        self.version = v
+        self.full_name = fn
+        self.short_spec_name = sspn
+        self.spec_and_version = sav
+    @staticmethod
+    def XP20():
+        return Spec("2.0", "XPath2.0", "XP", "XP20")
+
+    @staticmethod
+    def XP30():
+        return Spec("3.0", "XPath3.0", "XP", "XP30")
+
+    @staticmethod
+    def XP31():
+        return Spec("3.1", "XPath3.1", "XP", "XP31")
+
+    @staticmethod
+    def XP40():
+        return Spec("4.0", "XPath4.0", "XP", "XP40")
+
+    @staticmethod
+    def XQ10():
+        return Spec("1.0", "XQuery1.0", "XQ", "XQ10")
+
+    @staticmethod
+    def XQ30():
+        return Spec("3.0", "XQuery3.0", "XQ", "XQ30")
+
+    @staticmethod
+    def XQ31():
+        return Spec("3.1", "XQuery3.1", "XQ", "XQ31")
+
+    @staticmethod
+    def XQ40():
+        return Spec("4.0", "XQuery4.0", "XQ", "XQ40")
+
+    @staticmethod
+    def XT10():
+        return Spec("1.0", "XSLT1.0", "XT", "XT10")
+
+    @staticmethod
+    def XT20():
+        return Spec("2.0", "XSLT2.0", "XT", "XT20")
+
+    @staticmethod
+    def XT30():
+        return Spec("3.0", "XSLT3.0", "XT", "XT30")
+
+    @staticmethod
+    def XT40():
+        return Spec("4.0", "XSLT4.0", "XT", "XT40")
+
+
+
 class Environment:
 
 
