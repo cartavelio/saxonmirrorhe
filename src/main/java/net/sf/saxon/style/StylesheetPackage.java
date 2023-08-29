@@ -35,6 +35,7 @@ import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.*;
 
+import static net.sf.saxon.trans.Visibility.HIDDEN;
 import static net.sf.saxon.trans.Visibility.PRIVATE;
 
 /**
@@ -704,7 +705,7 @@ public class StylesheetPackage extends PackageData {
                 }
             }
 
-            if (newC.getActor() instanceof Mode && overrides.contains(name)) {
+            if (newC.getActor() instanceof Mode && overrides.contains(name) && !newC.getVisibility().equals(HIDDEN)) {
                 addCompletionAction(() -> {
                     trace("Doing mode completion for " + newC.getActor().getSymbolicName());
                     List<ComponentBinding> oldBindings = newC.getBaseComponent().getComponentBindings();
