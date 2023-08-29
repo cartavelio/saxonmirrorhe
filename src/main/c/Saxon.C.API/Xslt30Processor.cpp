@@ -68,7 +68,7 @@ Xslt30Processor::~Xslt30Processor() {
   }
   cwdXT.erase();
   exceptionClear();
-  if(importPackageValue ! -1) {
+  if(importPackageValue != -1) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)importPackageValue);
     importPackageValue = -1;
