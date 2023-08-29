@@ -8,12 +8,12 @@
 package net.sf.saxon.expr;
 
 
-import net.sf.saxon.expr.elab.*;
-import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
@@ -26,7 +26,6 @@ import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -908,7 +907,9 @@ public class Literal extends Expression {
                 boolean ebv = value.effectiveBooleanValue();
                 return context -> ebv;
             } catch (XPathException e) {
-                throw new UncheckedXPathException(e);
+                return context -> {
+                    throw e;
+                };
             }
         }
 
@@ -919,7 +920,9 @@ public class Literal extends Expression {
                 UnicodeString str = value.getUnicodeStringValue();
                 return context -> str;
             } catch (XPathException e) {
-                throw new UncheckedXPathException(e);
+                return context -> {
+                    throw e;
+                };
             }
         }
 
@@ -930,7 +933,9 @@ public class Literal extends Expression {
                 String str = value.getStringValue();
                 return context -> str;
             } catch (XPathException e) {
-                throw new UncheckedXPathException(e);
+                return context -> {
+                    throw e;
+                };
             }
         }
 
