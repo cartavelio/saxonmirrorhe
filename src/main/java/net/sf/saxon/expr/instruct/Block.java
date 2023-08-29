@@ -83,7 +83,7 @@ public class Block extends Instruction {
      * @return the number of child subexpressions
      */
 
-    private int size() {
+    public int size() {
         return operanda.length;
     }
 
