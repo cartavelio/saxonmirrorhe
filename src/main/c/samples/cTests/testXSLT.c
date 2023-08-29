@@ -35,15 +35,6 @@ int main() {
 
   initSaxonc(&environi, &processor, &parameters, &properties, parCap, parCap);
 
-  /* graal_isolate_t *isolate = NULL;
-graal_isolatethread_t *thread = NULL;
-
-if (graal_create_isolate(NULL, &isolate, &thread) != 0) {
- fprintf(stderr, "initialization error\n");
- return 1;
-}*/
-
-  // environi  =  (sxnc_environment *)malloc(sizeof(sxnc_environment));
   create_graalvm_isolate(environi);
 
   int checkProc = c_createSaxonProcessor(environi, processor, 0);

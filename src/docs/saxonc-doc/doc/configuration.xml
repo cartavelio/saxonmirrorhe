@@ -13,9 +13,9 @@
 
    <h2 class="subtitle">Setting properties on the SaxonProcessor</h2>
 
-   <p>In the SaxonC API in C++, PHP and Python, these configuration features can be set at a global
+   <p>In the SaxonC API in C/C++, PHP and Python, these configuration features can be set at a global
       level when the <code>SaxonProcessor</code> is created, using the
-         <code>setConfigurationProperty()</code> method. For example:</p>
+         <code>setConfigurationProperty()</code> method. For example in C++:</p>
 
    <samp><![CDATA[saxonProcessor->setConfigurationProperty("xsdversion", "1.1");
 
