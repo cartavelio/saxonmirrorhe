@@ -311,6 +311,10 @@ XdmNode **XdmNode::getChildren(bool cached) {
 
 XdmNode *XdmNode::getChild(int i, bool cached) {
 
+  if( i < 0) {
+    return nullptr;
+  }
+
   if (cached) {
 
     if (children == nullptr) {
@@ -328,6 +332,12 @@ XdmNode *XdmNode::getChild(int i, bool cached) {
 
     int64_t childRef =
         j_getChild(SaxonProcessor::sxn_environ->thread, (void *)value, i);
+
+    if(childRef == -1) {
+        return nullptr;
+    }
+
+        std::cout<<" i = "<<i<<" childRef = "<<((int)childRef)<<std::endl;
 
     child = new XdmNode(this, childRef, UNKNOWN);
 

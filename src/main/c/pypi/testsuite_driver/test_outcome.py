@@ -146,6 +146,12 @@ class PyTestOutcome:
                     return False
             return True
 
+        elif "assert-type" == tag:
+            assert_xpc.declare_variable("result")
+            assert_xpc.set_parameter("result", result)
+            valuei = assert_xpc.evaluate_single("$result instance of " + assertion.string_value)
+            return valuei.get_atomic_value().boolean_value
+
         elif "any-of" == tag:
             partial_success = False
             catalog_xpc.set_context(xdm_item=assertion)
