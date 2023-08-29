@@ -159,15 +159,19 @@ public class ResourceLoader {
 
     }
 
-    public static BufferedReader getReaderFromStream(InputStream inputStream, String resourceEncoding) {
-        Objects.requireNonNull(inputStream);
-        Objects.requireNonNull(resourceEncoding);
-        Charset charset2 = Charset.forName(resourceEncoding);
-        // ensure that encoding errors are not recovered
-        CharsetDecoder decoder = charset2.newDecoder()
-                .onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT);
-        return new BufferedReader(new InputStreamReader(inputStream, decoder));
+    public static BufferedReader getReaderFromStream(InputStream inputStream, String resourceEncoding) throws UnsupportedEncodingException {
+        try {
+            Objects.requireNonNull(inputStream);
+            Objects.requireNonNull(resourceEncoding);
+            Charset charset2 = Charset.forName(resourceEncoding);
+            // ensure that encoding errors are not recovered
+            CharsetDecoder decoder = charset2.newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT);
+            return new BufferedReader(new InputStreamReader(inputStream, decoder));
+        } catch (Exception e) {
+            throw new UnsupportedEncodingException("Unable to get reader with encoding: " + resourceEncoding);
+        }
     }
 
 
