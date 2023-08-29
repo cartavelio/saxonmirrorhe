@@ -45,11 +45,23 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
     private Properties outputProperties;
     private String itemSeparator = "\n";
     private boolean started = false;
+    private boolean mustClose = true;
 
     public AdaptiveEmitter(PipelineConfiguration pipe, UnicodeWriter writer)  {
         super(pipe);
         this.writer = writer;
     }
+
+
+    /**
+     * Say whether the output must be closed on completion
+     *
+     * @param mustClose true if the output must be closed
+     */
+    public void setMustClose(boolean mustClose) {
+        this.mustClose = mustClose;
+    }
+
 
     public void setOutputProperties(Properties props) {
         outputProperties = props;
@@ -327,7 +339,11 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         super.close();
         if (writer != null) {
             try {
-                writer.close();
+                if (mustClose) {
+                    writer.close();
+                } else {
+                    writer.flush();
+                }
             } catch (IOException e) {
                 throw new XPathException(e);
             }

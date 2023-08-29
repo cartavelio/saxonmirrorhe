@@ -54,12 +54,23 @@ public class JSONEmitter {
     private final Stack<Boolean> oneLinerStack = new Stack<>();
 
     private boolean unfailing = false;
+    private boolean mustClose = true;
 
     public JSONEmitter(PipelineConfiguration pipe, UnicodeWriter writer, Properties outputProperties)  {
         config = pipe.getConfiguration();
         setOutputProperties(outputProperties);
         this.writer = writer;
     }
+
+    /**
+     * Say whether the output must be closed on completion
+     *
+     * @param mustClose true if the output must be closed
+     */
+    public void setMustClose(boolean mustClose) {
+        this.mustClose = mustClose;
+    }
+
 
     /**
      * Set output properties
@@ -352,9 +363,13 @@ public class JSONEmitter {
         }
         if (writer != null) {
             try {
-                writer.close();
+                if (mustClose) {
+                    writer.close();
+                } else {
+                    writer.flush();
+                }
             } catch (IOException e) {
-                // no action
+                throw new XPathException(e);
             }
         }
     }
