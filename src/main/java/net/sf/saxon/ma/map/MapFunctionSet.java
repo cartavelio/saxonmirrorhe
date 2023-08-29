@@ -191,6 +191,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
 
+            register("pair", 2, e -> e.populate(MapPair::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | INS, null)
+                    .arg(1, AnyItemType.getInstance(), STAR | INS, null));
+
             register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_INEXTENSIBLE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
@@ -516,6 +520,22 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 results = results.append(entry);
             }
             return results;
+        }
+    }
+
+    /**
+     * Implementation of the proposed 4.0 function map:pair(key, value) =&gt; record(key, value)
+     */
+    public static class MapPair extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            AtomicValue key = (AtomicValue) arguments[0].head();
+            GroundedValue value = arguments[1].materialize();
+            DictionaryMap map = new DictionaryMap(2);
+            map.initialPut("key", key);
+            map.initialPut("value", value);
+            return map;
         }
     }
 
