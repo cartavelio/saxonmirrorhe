@@ -154,9 +154,7 @@ public:
   /**
    * The result is is saved to file
    *
-   * @param infilename - The file name of the source document
-   * @param ofilename - The file name of where result will be stored
-   * @param query - The query as string representation.
+
    * @throws SaxonApiException
    */
   void executeQueryToFile(const char *infilename, const char *ofilename,

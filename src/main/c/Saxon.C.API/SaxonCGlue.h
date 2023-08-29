@@ -138,6 +138,9 @@ int create_graalvm_isolate(sxnc_environment *env);
 
 int attach_graalvm_thread(sxnc_environment *env);
 
+/*
+ * Closes down the Graalvm environment used by SaxonC
+ */
 int detach_graalvm_thread(sxnc_environment *env);
 
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
