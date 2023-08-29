@@ -29,10 +29,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -625,5 +622,93 @@ public class TestSerializer {
 //        }
 //    }
 
+    @Test
+    public void testBug5866() {
+        try {
+            Processor processor = new Processor(false);
+
+            String xsltXmlOutput = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
+                    "  version=\"3.0\"\n" +
+                    "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                    "  exclude-result-prefixes=\"#all\"\n" +
+                    "  expand-text=\"yes\">\n" +
+                    "\n" +
+                    "  <xsl:output method=\"xml\" indent=\"yes\"/>\n" +
+                    "\n" +
+                    "  <xsl:template match=\"/\" name=\"xsl:initial-template\">\n" +
+                    "    <test>Run at {current-dateTime()} with {system-property('xsl:product-name')} {system-property('xsl:product-version')}</test>\n" +
+                    "    <xsl:comment>Run at {current-dateTime()} with {system-property('xsl:product-name')} {system-property('xsl:product-version')}</xsl:comment>\n" +
+                    "  </xsl:template>\n" +
+                    "  \n" +
+                    "</xsl:stylesheet>";
+
+            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+            XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltXmlOutput)));
+            Xslt30Transformer xslt30Transformer = xsltExecutable.load30();
+            FileOutputStream stream = new FileOutputStream("xml-fragment-result.xml");
+            xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
+            xslt30Transformer = xsltExecutable.load30();
+            xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
+            stream.close();
+
+            String xsltJsonOutput = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
+                    "  version=\"3.0\"\n" +
+                    "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                    "  exclude-result-prefixes=\"#all\"\n" +
+                    "  expand-text=\"yes\">\n" +
+                    "  \n" +
+                    "  <xsl:output method=\"json\" indent=\"yes\"/>\n" +
+                    "\n" +
+                    "  <xsl:template match=\"/\" name=\"xsl:initial-template\">\n" +
+                    "    <xsl:sequence\n" +
+                    "      select=\"map { 'tested-at' : current-dateTime(), 'with' : system-property('xsl:product-name') || ' ' || system-property('xsl:product-version') }\"/>\n" +
+                    "  </xsl:template>\n" +
+                    "  \n" +
+                    "</xsl:stylesheet>";
+
+            xsltCompiler = processor.newXsltCompiler();
+            xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltJsonOutput)));
+            xslt30Transformer = xsltExecutable.load30();
+            stream = new FileOutputStream("JsonResults.json");
+            FilterOutputStream fos = new FilterOutputStream(stream) {
+                @Override
+                public void close() throws IOException {
+                    super.close();
+                }
+            };
+            xslt30Transformer.callTemplate(null, processor.newSerializer(fos));
+
+            xslt30Transformer = xsltExecutable.load30();
+            xslt30Transformer.callTemplate(null, processor.newSerializer(fos));
+            fos.close();
+
+            String xsltAdaptiveOutput = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
+                    "  version=\"3.0\"\n" +
+                    "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
+                    "  exclude-result-prefixes=\"#all\"\n" +
+                    "  expand-text=\"yes\">\n" +
+                    "  \n" +
+                    "  <xsl:output method=\"adaptive\" indent=\"yes\"/>\n" +
+                    "\n" +
+                    "  <xsl:template match=\"/\" name=\"xsl:initial-template\">\n" +
+                    "    <xsl:sequence\n" +
+                    "      select=\"map { 'tested-at' : current-dateTime(), 'with' : system-property('xsl:product-name') || ' ' || system-property('xsl:product-version') }\"/>\n" +
+                    "  </xsl:template>\n" +
+                    "  \n" +
+                    "</xsl:stylesheet>";
+
+            xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltAdaptiveOutput)));
+            xslt30Transformer = xsltExecutable.load30();
+            stream = new FileOutputStream("AdaptiveResults.txt");
+            xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
+            xslt30Transformer = xsltExecutable.load30();
+            xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
+            stream.close();
+        } catch (SaxonApiException e) {
+            fail();
+        } catch (IOException e) {
+            fail();
+        }
+    }
 
 }
