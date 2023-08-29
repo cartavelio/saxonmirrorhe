@@ -37,7 +37,7 @@
           <data-type name="expression"/>
         </attribute>
         <attribute name="composite" required="no">
-          <desc>If this attribute is present with the
+          <desc>Implemented since Saxon 11. If this attribute is present with the
           value "yes", then the contained sequence constructor must deliver a sequence of <i>parcels</i> 
           (items of type <code>record(value, *)</code>) and each parcel becomes one member of the constructed
           array. If the attribute is absent or has the value "no", then the sequence returned by the
