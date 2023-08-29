@@ -13,6 +13,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
@@ -41,7 +42,7 @@ import java.util.List;
  */
 public abstract class PJConverter {
 
-    private static final HashMap<Class, SequenceType> jpmap = new HashMap<>();
+    private static final HashMap<Class<?>, SequenceType> jpmap = new HashMap<>();
 
     static {
         jpmap.put(boolean.class, SequenceType.SINGLE_BOOLEAN);
@@ -66,6 +67,7 @@ public abstract class PJConverter {
         jpmap.put(URL.class, SequenceType.OPTIONAL_ANY_URI);
         jpmap.put(BigInteger.class, SequenceType.OPTIONAL_INTEGER);
         jpmap.put(BigDecimal.class, SequenceType.OPTIONAL_DECIMAL);
+        jpmap.put(UnicodeString.class, SequenceType.OPTIONAL_STRING);
 
         jpmap.put(StringValue.class, SequenceType.OPTIONAL_STRING);
         jpmap.put(BooleanValue.class, SequenceType.OPTIONAL_BOOLEAN);
@@ -107,9 +109,9 @@ public abstract class PJConverter {
      * @return the nearest equivalent XPath SequenceType
      */
 
-    public static SequenceType getEquivalentSequenceType(Class javaClass) {
+    public static SequenceType getEquivalentSequenceType(Class<?> javaClass) {
         if (javaClass.isArray()) {
-            Class memberClass = javaClass.getComponentType();
+            Class<?> memberClass = javaClass.getComponentType();
             if (memberClass == byte.class) {
                 // special-case byte[] which maps to xs:unsignedByte* - see bugs 3525, 3818
                 return SequenceType.makeSequenceType(BuiltInAtomicType.UNSIGNED_BYTE, StaticProperty.ALLOWS_ZERO_OR_MORE);
@@ -252,6 +254,8 @@ public abstract class PJConverter {
                         return Identity.INSTANCE;
                     } else if (targetClass == char.class || targetClass == Character.class) {
                         return StringItemToChar.INSTANCE;
+                    } else if (targetClass == UnicodeString.class) {
+                        return StringItemToUnicodeString.INSTANCE;
                     } else {
                         throw cannotConvert(itemType, targetClass, config);
                     }
@@ -817,6 +821,18 @@ public abstract class PJConverter {
         public String convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
             Item first = value.head();
             return first == null ? null : first.getStringValue();
+        }
+
+    }
+
+    public static class StringItemToUnicodeString extends PJConverter {
+
+        public static final StringItemToUnicodeString INSTANCE = new StringItemToUnicodeString();
+
+        @Override
+        public UnicodeString convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
+            Item first = value.head();
+            return first == null ? null : first.getUnicodeStringValue();
         }
 
     }
