@@ -2067,11 +2067,11 @@ public class XPathParser {
             SequenceType valueType = parseSequenceType();
             expect(Token.RPAR);
             nextToken();
-            if (!(keyType instanceof AtomicType)) {
+            if (!(keyType instanceof PlainType)) {
                 grumble("Key type of a map must be atomic");
                 return null;
             }
-            return new MapType((AtomicType) keyType, valueType);
+            return new MapType((PlainType) keyType, valueType);
         }
     }
 
