@@ -157,11 +157,11 @@ public class SingletonClosure extends Closure implements Sequence {
 
     @Override
     @CSharpModifiers(code = {"public", "override"})
-    public GroundedValue materialize() {
+    public GroundedValue materialize() throws XPathException {
         try {
             return SequenceTool.itemOrEmpty(asItem());
-        } catch (XPathException e) {
-            throw new UncheckedXPathException(e);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
     }
 

@@ -53,12 +53,16 @@ public interface Sequence {
      * any rate, it guarantees that the entire sequence can be read without any
      * possibility of XPath dynamic errors arising.
      * @return a {@link GroundedValue} containing the same items as this Sequence
-     * @throws UncheckedXPathException if evaluating the contents of the sequence fails with
+     * @throws XPathException if evaluating the contents of the sequence (lazily) fails with
      * a dynamic error.
      */
 
-    default GroundedValue materialize() {
-        return SequenceTool.toGroundedValue(iterate());
+    default GroundedValue materialize() throws XPathException {
+        try {
+            return SequenceTool.toGroundedValue(iterate());
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
     /**

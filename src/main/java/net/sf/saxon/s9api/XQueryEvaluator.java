@@ -186,7 +186,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
         try {
             context.setParameter(name.getStructuredQName(),
                                  value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
-        } catch (UncheckedXPathException e) {
+        } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }

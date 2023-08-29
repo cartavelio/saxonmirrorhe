@@ -13,9 +13,11 @@ import net.sf.saxon.event.SequenceNormalizerWithSpaceSeparator;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeSource;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.SerializationProperties;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
@@ -250,7 +252,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
         try {
             parameters.put(name.getStructuredQName(),
                     value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
-        } catch (UncheckedXPathException e) {
+        } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }

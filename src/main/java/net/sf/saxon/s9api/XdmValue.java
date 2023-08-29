@@ -143,7 +143,7 @@ public class XdmValue implements Iterable<XdmItem> {
         GroundedValue gv;
         try {
             gv = value.materialize();
-        } catch (UncheckedXPathException e) {
+        } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
         if (gv.getLength() == 0) {
