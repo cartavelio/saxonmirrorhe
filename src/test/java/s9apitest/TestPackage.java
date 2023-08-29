@@ -268,6 +268,7 @@ public class TestPackage {
         try {
             Processor processor1 = new Processor(true);
             XsltCompiler compiler = processor1.newXsltCompiler();
+            compiler.setJustInTimeCompilation(false);
             XsltExecutable top = compiler.compile(
                     new StreamSource(new File(configTest.getDataDir() + "bills.xsl")));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
