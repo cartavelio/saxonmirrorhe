@@ -83,11 +83,11 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      */
 
     public void setMatchPattern(Pattern pattern) {
-//        if (matchPattern != pattern) {
-//            for (Rule r : rules) {
-//                r.setPattern(pattern);
-//            }
-//        }
+        if (matchPattern != pattern) {
+            for (Rule r : rules) {
+                r.setPattern(pattern);
+            }
+        }
         matchPattern = pattern;
 
     }
