@@ -1185,66 +1185,6 @@ public class XPathParser {
         }
 
     }
-//
-//    /**
-//     * Parse a for-member expression (Saxon extension):
-//     * for member $x in expr return expr
-//     *
-//     * @return the resulting subexpression
-//     * @throws XPathException if any error is encountered
-//     */
-//
-//    protected Expression parseForMemberExpression(XPathParser p) throws XPathException {
-//        Tokenizer t = p.getTokenizer();
-//        p.checkLanguageVersion40();
-//        int clauses = 0;
-//        int operator = t.currentToken;
-//        ForMemberExpression first = null;
-//        ForMemberExpression previous = null;
-//        do {
-//            int offset = t.currentTokenStartOffset;
-//            p.nextToken();
-//            p.expect(Token.DOLLAR);
-//            p.nextToken();
-//            p.expect(Token.NAME);
-//            String var = t.currentTokenValue;
-//            clauses++;
-//
-//            // declare the range variable
-//            ForMemberExpression v = new ForMemberExpression();
-//            p.setLocation(v, offset);
-//
-//            v.setVariableQName(p.makeStructuredQName(var, ""));
-//            p.nextToken();
-//
-//            // process the "in" clause
-//            p.expect(Token.IN);
-//            p.nextToken();
-//            v.setSequence(p.parseExprSingle());
-//            p.declareRangeVariable(v);
-//            if (previous != null) {
-//                previous.setAction(v);
-//            } else {
-//                first = v;
-//            }
-//            previous = v;
-//
-//        } while (t.currentToken == Token.COMMA);
-//
-//        // process the "return" expression (called the "action")
-//        p.expect(Token.RETURN);
-//        p.nextToken();
-//        previous.setAction(p.parseExprSingle());
-//
-//
-//        // undeclare all the range variables
-//
-//        for (int i = 0; i < clauses; i++) {
-//            p.undeclareRangeVariable();
-//        }
-//        return p.makeTracer(first, first.getVariableQName());
-//
-//    }
 
     /**
      * Parse a Typeswitch Expression.
@@ -1854,11 +1794,18 @@ public class XPathParser {
                     nextToken();
                     primaryType = AnyItemType.getInstance();
                     break;
-                case "function":
+                case "function": {
                     checkLanguageVersion30();
                     AnnotationList annotations = AnnotationList.EMPTY;
                     primaryType = parseFunctionItemType(annotations);
                     break;
+                }
+                case "fn": {
+                    checkLanguageVersion40();
+                    AnnotationList annotations = AnnotationList.EMPTY;
+                    primaryType = parseFunctionItemType(annotations);
+                    break;
+                }
                 case "map":
                     primaryType = parseMapItemType();
                     break;
@@ -3733,6 +3680,7 @@ public class XPathParser {
 
     public List<NodeTest> parseNameTestUnion(int nodeKind) throws XPathException {
         List<NodeTest> tests = new ArrayList<>();
+        boolean matchesAll = false;
         while (true) {
             String tokv = t.currentTokenValue;
             switch (t.currentToken) {
@@ -3761,7 +3709,7 @@ public class XPathParser {
                 case Token.STAR:
                 case Token.MULT:
                     nextToken();
-                    tests.add(NodeKindTest.makeNodeKindTest(nodeKind));
+                    matchesAll = true;
                     break;
 
                 default:
@@ -3775,6 +3723,11 @@ public class XPathParser {
                 break;
             }
         };
+        if (matchesAll) {
+            // If there's a "*" in the list, then anything else gets swallowed
+            tests.clear();
+            tests.add(NodeKindTest.makeNodeKindTest(nodeKind));
+        }
         return tests;
     }
 
@@ -4383,7 +4336,7 @@ public class XPathParser {
         try {
             functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
             if (functionName.getPrefix().equals("")) {
-                if (XPathParser.isReservedFunctionName31(functionName.getLocalPart())) {
+                if (XPathParser.isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
                     grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is reserved in XPath 3.1");
                 }
             }
@@ -4935,15 +4888,21 @@ public class XPathParser {
             "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"
     };
 
+    private final static String[] reservedFunctionNames40 = new String[]{
+            "attribute", "comment", "document-node", "element", "empty-sequence", "fn", "function", "if", "item",
+            "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"
+    };
+
     /**
-     * Check whether a function name is reserved in XPath 3.1 (when unprefixed)
+     * Check whether a function name is reserved in XPath 3.1 or 4.0 (when unprefixed)
      *
      * @param name the function name (the local-name as a string)
+     * @param version set to 31 for XPath 3.1, 40 for XPath 4.0
      * @return true if the function name is reserved
      */
 
-    public static boolean isReservedFunctionName31(String name) {
-        int x = Arrays.binarySearch(reservedFunctionNames31, name);
+    public static boolean isReservedFunctionName(String name, int version) {
+        int x = Arrays.binarySearch(version>=40 ? reservedFunctionNames40 : reservedFunctionNames31, name);
         return x >= 0;
     }
 
