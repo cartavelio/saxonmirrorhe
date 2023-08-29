@@ -1,0 +1,8 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+   elementFormDefault="qualified" 
+   targetNamespace="http://www.w3.org/1999/xlink">
+   
+   <!-- experimenting with a file that falsely claims to be the XLink schema -->
+   
+       <xs:simpleType name='date'><xs:restriction base='xs:date'/></xs:simpleType>
+</xs:schema>
