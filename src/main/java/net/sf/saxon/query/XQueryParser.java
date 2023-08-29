@@ -4044,7 +4044,7 @@ public class XQueryParser extends XPathParser {
                         break;
 
                     default:
-                        grumble("Unrecognized name test");
+                        grumble("Unrecognized name test in catch clause at " + Token.tokens[t.currentToken]);
                         return null;
                 }
             }
@@ -4078,7 +4078,6 @@ public class XQueryParser extends XPathParser {
 
         return tryCatch;
     }
-
 
     /**
      * Parse a computed namespace constructor of the form

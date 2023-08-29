@@ -7,6 +7,7 @@
 
 package net.sf.saxon.pattern;
 
+import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
@@ -105,6 +106,18 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
     }
 
     /**
+     * Test whether the QNameTest matches a given fingerprint
+     *
+     * @param namePool
+     * @param fp       the fingerprint of the QName to be matched
+     * @return true if the name matches, false if not
+     */
+    @Override
+    public boolean matchesFingerprint(NamePool namePool, int fp) {
+        return true;
+    }
+
+    /**
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
@@ -128,20 +141,6 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
     @Override
     public String exportQNameTest() {
         return "*";
-    }
-
-    /**
-     * Generate Javascript code to test if a name matches the test.
-     *
-     * @return JS code as a string. The generated code will be used
-     * as the body of a JS function in which the argument name "q" is an
-     * XdmQName object holding the name. The XdmQName object has properties
-     * uri and local.
-     * @param targetVersion The version of SaxonJS being targeted
-     */
-    @Override
-    public String generateJavaScriptNameTest(int targetVersion) {
-        return "true";
     }
 
 

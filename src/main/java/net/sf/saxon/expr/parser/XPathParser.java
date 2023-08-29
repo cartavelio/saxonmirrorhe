@@ -920,7 +920,7 @@ public class XPathParser {
                 case Token.CASTABLE_AS:
                     nextToken();
                     CastingTarget at;
-                    if (languageVersion >= 40 && t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("union")) {
+                    if (allowXPath40Syntax && t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("union")) {
                         // Saxon 9.8 / XPath 4.0 proposed extension
                         at = (CastingTarget)parseItemType();
                     } else {
@@ -3513,45 +3513,38 @@ public class XPathParser {
     private NodeTest parseKindTest() throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         String typeName = t.currentTokenValue;
-        boolean schemaDeclaration = typeName.startsWith("schema-");
-        int primaryType = getSystemType(typeName);
-        int fp = -1;
         boolean empty = false;
         nextToken();
         if (t.currentToken == Token.RPAR) {
-            if (schemaDeclaration) {
-                grumble("schema-element() and schema-attribute() require a name to be supplied");
-                return null;
-            }
             empty = true;
             nextToken();
         }
-        switch (primaryType) {
-            case Type.ITEM:
+        switch (typeName) {
+            case "item":
                 grumble("item() is not allowed in a path expression");
                 return null;
-            case Type.NODE:
+            case "node":
                 if (empty) {
                     return AnyNodeTest.getInstance();
                 } else {
                     grumble("Expected ')': no arguments are allowed in node()");
                     return null;
                 }
-            case Type.TEXT:
+            case "text":
                 if (empty) {
                     return NodeKindTest.TEXT;
                 } else {
                     grumble("Expected ')': no arguments are allowed in text()");
                     return null;
                 }
-            case Type.COMMENT:
+            case "comment":
                 if (empty) {
                     return NodeKindTest.COMMENT;
                 } else {
                     grumble("Expected ')': no arguments are allowed in comment()");
                     return null;
                 }
-            case Type.NAMESPACE:
+            case "namespace-node":
                 if (empty) {
                     if (!isNamespaceTestAllowed()) {
                         grumble("namespace-node() test is not allowed in XPath 2.0/XQuery 1.0");
@@ -3569,26 +3562,20 @@ public class XPathParser {
                         return null;
                     }
                 }
-            case Type.DOCUMENT:
+            case "document-node":
                 if (empty) {
                     return NodeKindTest.DOCUMENT;
                 } else {
-                    int innerType;
-                    try {
-                        innerType = getSystemType(t.currentTokenValue);
-                    } catch (XPathException err) {
-                        innerType = Type.ITEM;
-                    }
-                    if (innerType != Type.ELEMENT) {
-                        grumble("Argument to document-node() must be an element type descriptor");
-                        return null;
+                    if (!(t.currentTokenValue.equals("element") || t.currentTokenValue.equals("schema-element"))) {
+                        grumble("Argument to document-node() must be element(...) or schema-element(...)");
                     }
                     NodeTest inner = parseKindTest();
                     expect(Token.RPAR);
                     nextToken();
                     return new DocumentNodeTest(inner);
                 }
-            case Type.PROCESSING_INSTRUCTION:
+            case "processing-instruction":
+                int fp = -1;
                 if (empty) {
                     return NodeKindTest.PROCESSING_INSTRUCTION;
                 } else if (t.currentToken == Token.STRING_LITERAL) {
@@ -3618,154 +3605,116 @@ public class XPathParser {
                 nextToken();
                 return new NameTest(Type.PROCESSING_INSTRUCTION, fp, pool);
 
-            case Type.ATTRIBUTE:
+            case "schema-attribute":
+                if (empty) {
+                    grumble(typeName + "schema-attribute() requires a name to be supplied");
+                    return null;
+                } else if (t.currentToken == Token.NAME) {
+                    String name = t.currentTokenValue;
+                    fp = makeFingerprint(name, false);
+                    nextToken();
+                    expect(Token.RPAR);
+                    nextToken();
+                    if (!env.isImportedSchema(pool.getURI(fp))) {
+                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
+                    }
+                    SchemaDeclaration decl = env.getConfiguration().getAttributeDeclaration(fp);
+                    if (decl == null) {
+                        grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
+                        return null;
+                    } else {
+                        return decl.makeSchemaNodeTest();
+                    }
+                }
+                break;
+            case "schema-element":
+                if (empty) {
+                    grumble(typeName + "schema-element() requires a name to be supplied");
+                    return null;
+                } else if (t.currentToken == Token.NAME) {
+                    String name = t.currentTokenValue;
+                    fp = makeFingerprint(name, true);
+                    nextToken();
+                    expect(Token.RPAR);
+                    nextToken();
+                    if (!env.isImportedSchema(pool.getURI(fp))) {
+                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
+                    }
+                    SchemaDeclaration decl = env.getConfiguration().getElementDeclaration(fp);
+                    if (decl == null) {
+                        grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
+                        return null;
+                    } else {
+                        return decl.makeSchemaNodeTest();
+                    }
+                }
+                break;
+
+            case "attribute":
                 // drop through
 
-            case Type.ELEMENT:
-                String nodeName = "";
-                NodeTest nodeTest = null;
+            case "element":
+                boolean isElementTest = typeName.equals("element");
+                int nodeKind = isElementTest ? Type.ELEMENT : Type.ATTRIBUTE;
+                NodeTest nodeTest;
                 if (empty) {
-                    return NodeKindTest.makeNodeKindTest(primaryType);
-                } else if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
-                    // allow for both representations of "*" to be safe
-                    if (schemaDeclaration) {
-                        grumble("schema-element() and schema-attribute() must specify an actual name, not '*'");
-                        return null;
-                    }
-                    nodeTest = NodeKindTest.makeNodeKindTest(primaryType);
-                    nextToken();
-                } else if (t.currentToken == Token.NAME) {
-                    nodeName = t.currentTokenValue;
-                    fp = makeFingerprint(t.currentTokenValue, primaryType == Type.ELEMENT);
-                    nextToken();
-                } else if ((t.currentToken == Token.PREFIX || t.currentToken == Token.SUFFIX) && allowXPath40Syntax) {
-                    nodeTest = parseNodeTest((short)primaryType);
+                    return isElementTest ? NodeKindTest.ELEMENT : NodeKindTest.ATTRIBUTE;
+                }
+                List<NodeTest> tests = parseNameTestUnion(nodeKind);
+                if (tests.size() == 1) {
+                    nodeTest = tests.get(0);
                 } else {
-                    grumble("Unexpected " + Token.tokens[t.currentToken] + " after '(' in SequenceType");
+                    if (!allowXPath40Syntax) {
+                        grumble("NameTestUnion syntax requires 4.0 to be enabled");
+                    }
+                    nodeTest = NameTestUnion.withTests(tests);
                 }
-                NamespaceUri suri = null;
-                if (fp != -1) {
-                    suri = pool.getURI(fp);
-                }
-
                 if (t.currentToken == Token.RPAR) {
                     nextToken();
-                    if (fp == -1) {
-                        // element(*) or attribute(*)
-                        return nodeTest;
-                    } else {
-                        if (primaryType == Type.ATTRIBUTE) {
-                            // attribute(N) or schema-attribute(N)
-                            if (schemaDeclaration) {
-                                // schema-attribute(N)
-                                SchemaDeclaration attributeDecl =
-                                        env.getConfiguration().getAttributeDeclaration(fp & 0xfffff);
-                                if (!env.isImportedSchema(suri)) {
-                                    grumble("No schema has been imported for namespace '" + suri + '\'', "XPST0008");
-                                }
-                                if (attributeDecl == null) {
-                                    grumble("There is no declaration for attribute @" + nodeName + " in an imported schema", "XPST0008");
-                                    return null;
-                                } else {
-                                    return attributeDecl.makeSchemaNodeTest();
-                                }
-                            } else {
-                                return new NameTest(Type.ATTRIBUTE, fp, pool);
-                            }
-                        } else {
-                            // element(N) or schema-element(N)
-                            if (schemaDeclaration) {
-                                // schema-element(N)
-                                if (!env.isImportedSchema(suri)) {
-                                    grumble("No schema has been imported for namespace '" + suri + '\'', "XPST0008");
-                                }
-                                SchemaDeclaration elementDecl =
-                                        env.getConfiguration().getElementDeclaration(fp & 0xfffff);
-                                if (elementDecl == null) {
-                                    grumble("There is no declaration for element <" + nodeName + "> in an imported schema", "XPST0008");
-                                    return null;
-                                } else {
-                                    return elementDecl.makeSchemaNodeTest();
-                                }
-                            } else {
-                                return makeNameTest(Type.ELEMENT, nodeName, true);
-                            }
-                        }
-                    }
+                    return nodeTest;
                 } else if (t.currentToken == Token.COMMA) {
-                    if (schemaDeclaration) {
-                        grumble("schema-element() and schema-attribute() must have one argument only");
-                        return null;
-                    }
                     nextToken();
                     NodeTest result;
-                    if (t.currentToken == Token.STAR) {
-                        grumble("'*' is no longer permitted as the second argument of element() and attribute()");
-                        return null;
-                    } else if (t.currentToken == Token.NAME) {
-                        SchemaType schemaType;
+                    if (t.currentToken == Token.NAME) {
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
-                        assert contentType != null;
                         NamespaceUri uri = contentType.getNamespaceUri();
 
-                        if (uri.equals(NamespaceUri.SCHEMA)) {
-                            schemaType = env.getConfiguration().getSchemaType(contentType);
-                        } else {
-                            if (!env.isImportedSchema(uri)) {
-                                grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
-                            }
-                            schemaType = env.getConfiguration().getSchemaType(contentType);
+                        if (!(uri.equals(NamespaceUri.SCHEMA) || env.isImportedSchema(uri))) {
+                            grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
                         }
+                        SchemaType schemaType = env.getConfiguration().getSchemaType(contentType);
                         if (schemaType == null) {
                             grumble("Unknown type name " + contentType.getEQName(), "XPST0008");
                             return null;
                         }
-                        if (primaryType == Type.ATTRIBUTE && schemaType.isComplexType()) {
+                        if (nodeKind == Type.ATTRIBUTE && schemaType.isComplexType()) {
                             warning("An attribute cannot have a complex type", SaxonErrorCode.SXWN9041);
                         }
-                        ContentTypeTest typeTest = new ContentTypeTest(primaryType, schemaType, env.getConfiguration(), false);
-                        if (fp == -1 && (nodeTest == null || nodeTest instanceof NodeKindTest)) {
-                            // this represents element(*,T) or attribute(*,T)
-                            result = typeTest;
-                            if (primaryType == Type.ATTRIBUTE) {
-                                nextToken();
-                            } else {
-                                // assert (primaryType == Type.ELEMENT);
-                                nextToken();
-                                if (t.currentToken == Token.QMARK) {
-                                    typeTest.setNillable(true);
-                                    nextToken();
-                                }
+                        nextToken();
+                        boolean nillable = false;
+                        if (t.currentToken == Token.QMARK) {
+                            nillable = true;
+                            if (nodeKind == Type.ATTRIBUTE) {
+                                grumble("attribute() tests must not be nillable");
                             }
+                            nextToken();
+                        }
+                        if (schemaType == AnyType.getInstance() ||
+                                (nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
+                            result = nodeTest;
                         } else {
-                            if (primaryType == Type.ATTRIBUTE) {
-                                if (nodeTest == null) {
-                                    nodeTest = new NameTest(Type.ATTRIBUTE, fp, pool);
-                                }
-                                if (schemaType == AnyType.getInstance() || schemaType == AnySimpleType.getInstance()) {
-                                    result = nodeTest;
-                                } else {
-                                    result = new CombinedNodeTest(nodeTest, Token.INTERSECT, typeTest);
-                                }
-                                nextToken();
+                            NodeTest typeTest = new ContentTypeTest(nodeKind, schemaType, env.getConfiguration(), nillable);
+                            if (nodeTest instanceof NodeKindTest) {
+                                // this represents element(*,T) or attribute(*,T)
+                                result = typeTest;
                             } else {
-                                // assert (primaryType == Type.ELEMENT);
-                                if (nodeTest == null) {
-                                    nodeTest = new NameTest(Type.ELEMENT, fp, pool);
-                                }
                                 result = new CombinedNodeTest(nodeTest, Token.INTERSECT, typeTest);
-                                nextToken();
-                                if (t.currentToken == Token.QMARK) {
-                                    typeTest.setNillable(true);
-                                    nextToken();
-                                }
                             }
                         }
                     } else {
                         grumble("Unexpected " + Token.tokens[t.currentToken] + " after ',' in SequenceType");
                         return null;
                     }
-
                     expect(Token.RPAR);
                     nextToken();
                     return result;
@@ -3775,9 +3724,58 @@ public class XPathParser {
                 return null;
             default:
                 // can't happen!
-                grumble("Unknown node kind");
+                grumble("Unknown node kind " + typeName);
                 return null;
         }
+        return null;
+    }
+
+
+    public List<NodeTest> parseNameTestUnion(int nodeKind) throws XPathException {
+        List<NodeTest> tests = new ArrayList<>();
+        while (true) {
+            String tokv = t.currentTokenValue;
+            switch (t.currentToken) {
+                case Token.NAME:
+                    nextToken();
+                    tests.add(makeNameTest(nodeKind, tokv, true));
+                    break;
+
+                case Token.PREFIX:
+                    nextToken();
+                    tests.add(makeNamespaceTest(nodeKind, tokv));
+                    break;
+
+                case Token.SUFFIX:
+                    nextToken();
+                    tokv = t.currentTokenValue;
+                    if (t.currentToken == Token.NAME) {
+                        // OK
+                    } else {
+                        grumble("Expected name after '*:'");
+                    }
+                    nextToken();
+                    tests.add(makeLocalNameTest(nodeKind, tokv));
+                    break;
+
+                case Token.STAR:
+                case Token.MULT:
+                    nextToken();
+                    tests.add(NodeKindTest.makeNodeKindTest(nodeKind));
+                    break;
+
+                default:
+                    grumble("Unrecognized name test at " + Token.tokens[t.currentToken]);
+                    return null;
+            }
+            if (t.currentToken == Token.UNION && !t.currentTokenValue.equals("union")) {
+                // must be "|" not "union"!
+                nextToken();
+            } else {
+                break;
+            }
+        };
+        return tests;
     }
 
     /**
@@ -3788,43 +3786,6 @@ public class XPathParser {
 
     protected boolean isNamespaceTestAllowed() {
         return allowXPath30Syntax;
-    }
-
-    /**
-     * Get a system type - that is, one whose name is a keyword rather than a QName. This includes the node
-     * kinds such as element and attribute, and the generic types node() and item()
-     *
-     * @param name the name of the system type, for example "element" or "comment"
-     * @return the integer constant denoting the type, for example {@link Type#ITEM} or {@link Type#ELEMENT}
-     * @throws XPathException if the name is not recognized
-     */
-    private int getSystemType(String name) throws XPathException {
-        if ("item".equals(name)) {
-            return Type.ITEM;
-        } else if ("document-node".equals(name)) {
-            return Type.DOCUMENT;
-        } else if ("element".equals(name)) {
-            return Type.ELEMENT;
-        } else if ("schema-element".equals(name)) {
-            return Type.ELEMENT;
-        } else if ("attribute".equals(name)) {
-            return Type.ATTRIBUTE;
-        } else if ("schema-attribute".equals(name)) {
-            return Type.ATTRIBUTE;
-        } else if ("text".equals(name)) {
-            return Type.TEXT;
-        } else if ("comment".equals(name)) {
-            return Type.COMMENT;
-        } else if ("processing-instruction".equals(name)) {
-            return Type.PROCESSING_INSTRUCTION;
-        } else if ("namespace-node".equals(name)) {
-            return Type.NAMESPACE;
-        } else if ("node".equals(name)) {
-            return Type.NODE;
-        } else {
-            grumble("Unknown type " + name);
-            return -1;
-        }
     }
 
     /**
@@ -5165,7 +5126,7 @@ public class XPathParser {
     /**
      * Make a NameTest, using the static context for namespace resolution
      *
-     * @param nodeType   the type of node required (identified by a constant in
+     * @param nodeKind   the type of node required (identified by a constant in
      *                   class Type)
      * @param qname      the lexical QName of the required node; alternatively,
      *                   a QName in Clark notation ({uri}local)
@@ -5177,11 +5138,11 @@ public class XPathParser {
      */
 
     /*@NotNull*/
-    public NodeTest makeNameTest(short nodeType, /*@NotNull*/ String qname, boolean useDefault)
+    public NodeTest makeNameTest(int nodeKind, /*@NotNull*/ String qname, boolean useDefault)
             throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         NamespaceUri defaultNS = NamespaceUri.NULL;
-        if (useDefault && nodeType == Type.ELEMENT && !qname.startsWith("Q{") && !qname.contains(":")) {
+        if (useDefault && nodeKind == Type.ELEMENT && !qname.startsWith("Q{") && !qname.contains(":")) {
             UnprefixedElementMatchingPolicy policy = env.getUnprefixedElementMatchingPolicy();
             switch (policy) {
                 case DEFAULT_NAMESPACE:
@@ -5191,35 +5152,35 @@ public class XPathParser {
                     defaultNS = env.getDefaultElementNamespace();
                     StructuredQName q = makeStructuredQName(qname, defaultNS);
                     int fp1 = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
-                    NameTest test1 = new NameTest(nodeType, fp1, pool);
+                    NameTest test1 = new NameTest(nodeKind, fp1, pool);
                     int fp2 = pool.allocateFingerprint(NamespaceUri.NULL, q.getLocalPart());
-                    NameTest test2 = new NameTest(nodeType, fp2, pool);
+                    NameTest test2 = new NameTest(nodeKind, fp2, pool);
                     return new CombinedNodeTest(test1, Token.UNION, test2);
                 case ANY_NAMESPACE:
                     if (!NameChecker.isValidNCName(StringTool.codePoints(qname))) {
                         grumble("Invalid name '" + qname + "'");
                     }
-                    return new LocalNameTest(pool, nodeType, qname);
+                    return new LocalNameTest(pool, nodeKind, qname);
             }
         }
         StructuredQName qName = makeStructuredQName(qname, defaultNS);
         int fp = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
-        return new NameTest(nodeType, fp, pool);
+        return new NameTest(nodeKind, fp, pool);
     }
 
-    public QNameTest makeQNameTest(short nodeType, String qname)
+    public QNameTest makeQNameTest(int nodeKind, String qname)
             throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         StructuredQName q = makeStructuredQName(qname, NamespaceUri.NULL);
         assert q != null;
         int fp = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
-        return new NameTest(nodeType, fp, pool);
+        return new NameTest(nodeKind, fp, pool);
     }
 
     /**
      * Make a NamespaceTest (name:*)
      *
-     * @param nodeType integer code identifying the type of node required
+     * @param nodeKind integer code identifying the type of node required
      * @param prefix   the namespace prefix
      * @return the NamespaceTest, a pattern that matches all nodes in this
      * namespace
@@ -5227,20 +5188,20 @@ public class XPathParser {
      */
 
     /*@NotNull*/
-    public NamespaceTest makeNamespaceTest(short nodeType, String prefix)
+    public NamespaceTest makeNamespaceTest(int nodeKind, String prefix)
             throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         if (scanOnly) {
             // return an arbitrary namespace if we're only doing a syntax check
-            return new NamespaceTest(pool, nodeType, NamespaceUri.SAXON);
+            return new NamespaceTest(pool, nodeKind, NamespaceUri.SAXON);
         }
         if (prefix.startsWith("Q{")) {
             String uri = prefix.substring(2, prefix.length() - 2);
-            return new NamespaceTest(pool, nodeType, NamespaceUri.of(uri));
+            return new NamespaceTest(pool, nodeKind, NamespaceUri.of(uri));
         }
         try {
             StructuredQName sq = qNameParser.parse(prefix + ":dummy", NamespaceUri.NULL);
-            return new NamespaceTest(pool, nodeType, sq.getNamespaceUri());
+            return new NamespaceTest(pool, nodeKind, sq.getNamespaceUri());
         } catch (XPathException err) {
             grumble(err.getMessage(), err.getErrorCodeQName());
             return null;
@@ -5250,7 +5211,7 @@ public class XPathParser {
     /**
      * Make a LocalNameTest (*:name)
      *
-     * @param nodeType  the kind of node to be matched
+     * @param nodeKind  the kind of node to be matched
      * @param localName the requred local name
      * @return a LocalNameTest, a pattern which matches all nodes of a given
      * local name, regardless of namespace
@@ -5258,12 +5219,12 @@ public class XPathParser {
      */
 
     /*@NotNull*/
-    public LocalNameTest makeLocalNameTest(short nodeType, String localName)
+    public LocalNameTest makeLocalNameTest(int nodeKind, String localName)
             throws XPathException {
         if (!NameChecker.isValidNCName(StringTool.codePoints(localName))) {
             grumble("Local name [" + localName + "] contains invalid characters");
         }
-        return new LocalNameTest(env.getConfiguration().getNamePool(), nodeType, localName);
+        return new LocalNameTest(env.getConfiguration().getNamePool(), nodeKind, localName);
     }
 
     /**

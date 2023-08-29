@@ -288,11 +288,6 @@ public class TryCatch extends Expression {
         for (CatchClause clause : catchClauses) {
             out.startElement("catch");
             out.emitAttribute("errors", clause.nameTest.exportQNameTest());
-//            out.emitAttribute("err", clause.nameTest.toString());
-//            if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
-//                int targetVersion = ((ExpressionPresenter.ExportOptions) out.getOptions()).targetVersion;
-//                out.emitAttribute("test", clause.nameTest.generateJavaScriptNameTest(targetVersion));
-//            }
             clause.catchOp.getChildExpression().export(out);
             out.endElement();
         }

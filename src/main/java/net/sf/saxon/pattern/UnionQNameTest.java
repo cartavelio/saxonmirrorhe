@@ -7,6 +7,7 @@
 
 package net.sf.saxon.pattern;
 
+import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 
 import java.util.ArrayList;
@@ -34,6 +35,23 @@ public class UnionQNameTest implements QNameTest {
     public boolean matches(StructuredQName qname) {
         for (QNameTest test : tests) {
             if (test.matches(qname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test whether the QNameTest matches a given fingerprint
+     *
+     * @param namePool the name pool
+     * @param fp       the fingerprint of the QName to be matched
+     * @return true if the name matches, false if not
+     */
+    @Override
+    public boolean matchesFingerprint(NamePool namePool, int fp) {
+        for (QNameTest test : tests) {
+            if (test.matchesFingerprint(namePool, fp)) {
                 return true;
             }
         }
@@ -81,29 +99,5 @@ public class UnionQNameTest implements QNameTest {
         return builder.toString();
     }
 
-    /**
-     * Generate Javascript code to test if a name matches the test.
-     *
-     * @return JS code as a string. The generated code will be used
-     * as the body of a JS function in which the argument name "q" is an
-     * XdmQName object holding the name. The XdmQName object has properties
-     * uri and local.
-     * @param targetVersion the version of SaxonJS being targeted
-     */
-    @Override
-    public String generateJavaScriptNameTest(int targetVersion) {
-        StringBuilder fsb = new StringBuilder(256);
-        boolean started = false;
-        for (QNameTest qt : tests) {
-            if (started) {
-                fsb.append("||");
-            } else {
-                started = true;
-            }
-            String test = qt.generateJavaScriptNameTest(targetVersion);
-            fsb.append("(" + test + ")");
-        }
-        return fsb.toString();
-    }
 }
 

@@ -23,7 +23,7 @@ import java.util.Optional;
 /**
  * NodeTest is an interface that enables a test of whether a node matches particular
  * conditions. ContentTypeTest tests for an element or attribute node with a particular
- * type annotation.
+ * type annotation, regardless of the node name.
  */
 
 public class ContentTypeTest extends NodeTest {

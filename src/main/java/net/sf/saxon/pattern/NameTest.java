@@ -8,7 +8,6 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntPredicateLambda;
@@ -204,6 +203,18 @@ public class NameTest extends NodeTest implements QNameTest {
     }
 
     /**
+     * Test whether the QNameTest matches a given fingerprint
+     *
+     * @param namePool the name pool
+     * @param fp       the fingerprint of the QName to be matched
+     * @return true if the name matches, false if not
+     */
+    @Override
+    public boolean matchesFingerprint(NamePool namePool, int fp) {
+        return fp == fingerprint;
+    }
+
+    /**
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
@@ -325,21 +336,6 @@ public class NameTest extends NodeTest implements QNameTest {
     @Override
     public String exportQNameTest() {
         return getMatchingNodeName().getEQName();
-    }
-
-    /**
-     * Generate Javascript code to test if a name matches the test.
-     *
-     * @return JS code as a string. The generated code will be used
-     * as the body of a JS function in which the argument name "q" is an
-     * XdmQName object holding the name. The XdmQName object has properties
-     * uri and local.
-     * @param targetVersion the version of SaxonJS being targeted
-     */
-    @Override
-    public String generateJavaScriptNameTest(int targetVersion) {
-        computeUriAndLocal();
-        return "q.uri==='" + ExpressionPresenter.jsEscape(uri.toString()) + "'&&q.local==='" + localName + "'";
     }
 
     /**

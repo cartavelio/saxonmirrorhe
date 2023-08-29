@@ -7,6 +7,7 @@
 
 package net.sf.saxon.pattern;
 
+import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 
 /**
@@ -32,6 +33,16 @@ public interface QNameTest {
     boolean matches(StructuredQName qname);
 
     /**
+     * Test whether the QNameTest matches a given fingerprint
+     *
+     * @param namePool the name pool
+     * @param fp       the fingerprint of the QName to be matched
+     * @return true if the name matches, false if not
+     */
+
+    boolean matchesFingerprint(NamePool namePool, int fp);
+
+    /**
      * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
      * @return a string representation of the QNameTest, suitable for use in export files. The format is
      * a sequence of alternatives, space-separated, where each alternative is one of '*',
@@ -39,16 +50,5 @@ public interface QNameTest {
      */
 
     String exportQNameTest();
-
-    /**
-     * Generate Javascript code to test if a name matches the test.
-     * @return JS code as a string. The generated code will be used
-     * as the body of a JS function in which the argument name "q" is an
-     * XdmQName object holding the name. The XdmQName object has properties
-     * uri and local.
-     * @param targetVersion The version of SaxonJS being targeted
-     */
-
-    String generateJavaScriptNameTest(int targetVersion);
 
 }
