@@ -1166,21 +1166,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             }
         }
 
-        // get an iterator over the base nodes
-
-        SequenceIterator baseIter = getBase().iterate(context);
-
-        // quick exit for an empty sequence
-
-        if (baseIter instanceof EmptyIterator) {
-            return baseIter;
-        }
-
-        if (filterIsPositional && !filterIsSingletonBoolean) {
-            return new FilterIterator(baseIter, getFilter(), context);
-        } else {
-            return new FilterIterator.NonNumeric(baseIter, getFilter(), context);
-        }
+        PullEvaluator puller = makeElaborator().elaborateForPull();
+        return puller.iterate(context);
 
     }
 
