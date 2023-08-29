@@ -25,6 +25,10 @@ import java.util.List;
 public class XSLExpose extends XSLAcceptExpose {
 
     protected void checkCompatibility(SymbolicName name, Visibility declared, Visibility exposed) {
+        if (exposed == Visibility.ABSTRACT && declared != Visibility.ABSTRACT) {
+            compileError("The " + name + " cannot be exposed as " + Err.describeVisibility(exposed)
+                                 + " because it is not originally declared as abstract", "XTSE3025");
+        }
         if (!isCompatible(declared, exposed)) {
             String code =  "XTSE3010";
             compileError("The " + name + " is declared as " + Err.describeVisibility(declared)
