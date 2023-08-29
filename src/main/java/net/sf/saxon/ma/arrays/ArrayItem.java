@@ -8,6 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionSerialNumberAllocator;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.type.TypeHierarchy;
@@ -18,6 +19,18 @@ import net.sf.saxon.z.IntSet;
  * Interface supported by different implementations of an XDM array item
  */
 public abstract class ArrayItem implements Function {
+
+
+    private final long serialNumber;
+
+    public ArrayItem() {
+        serialNumber = FunctionSerialNumberAllocator.serial.incrementAndGet();
+    }
+
+    public long getSerialNumber() {
+        return serialNumber;
+    }
+
 
     /**
      * Ask whether this function item is an array

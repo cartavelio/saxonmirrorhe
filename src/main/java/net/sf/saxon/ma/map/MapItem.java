@@ -33,6 +33,18 @@ import net.sf.saxon.value.SequenceType;
  */
 public abstract class MapItem implements Function {
 
+
+    private final long serialNumber;
+
+    public MapItem() {
+        serialNumber = FunctionSerialNumberAllocator.serial.incrementAndGet();
+    }
+
+    public long getSerialNumber() {
+        return serialNumber;
+    }
+
+
     /**
      * Get an entry from the Map
      * @param key     the value of the key

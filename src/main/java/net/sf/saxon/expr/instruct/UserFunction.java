@@ -67,14 +67,20 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     private int refCount = 0;
 
 
+    private final long serialNumber;
+
+
     /**
      * Create a user-defined function (the body must be added later)
      */
 
     public UserFunction() {
+        serialNumber = FunctionSerialNumberAllocator.serial.incrementAndGet();
     }
 
-
+    public long getSerialNumber() {
+        return serialNumber;
+    }
     /**
      * Set the function name
      *

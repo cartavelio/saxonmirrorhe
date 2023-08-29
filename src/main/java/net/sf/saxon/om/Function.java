@@ -168,6 +168,15 @@ public interface Function extends Item, Callable, GroundedValue {
     default Genre getGenre() {
         return Genre.FUNCTION;
     }
-    
+
+    /**
+     * Allocate a unique serial number.
+     * <p>Introduced on the 11.x branch for bug #5887, so that function items, arrays, and maps can be used
+     * as keys for memo functions. This is not needed for 12.x, which uses a different design.</p>
+     */
+
+    long getSerialNumber();
+
+
 }
 

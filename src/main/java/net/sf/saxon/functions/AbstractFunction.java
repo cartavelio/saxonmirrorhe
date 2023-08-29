@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionSerialNumberAllocator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -27,6 +28,18 @@ import java.util.Arrays;
  * Abstract superclass (and factory class) for implementations of Function
  */
 public abstract class AbstractFunction implements Function {
+
+
+    private final long serialNumber;
+
+    public AbstractFunction() {
+        serialNumber = FunctionSerialNumberAllocator.serial.incrementAndGet();
+    }
+
+    public long getSerialNumber() {
+        return serialNumber;
+    }
+
 
     /**
      * Get the roles of the arguments, for the purposes of streaming
