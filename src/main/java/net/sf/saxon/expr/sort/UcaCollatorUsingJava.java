@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr.sort;
 
+import com.saxonica.config.ICULibrary;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
@@ -40,6 +42,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
     private RuleBasedCollator uca;
     private Strength strengthLevel;
     private Properties properties;
+    private Configuration config;
 
 
     private static final String[] keywords = {"fallback", "lang", "version", "strength",
@@ -49,14 +52,17 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
 
     /**
      * Create a collation from a given collation URI
-     * @param uri the collation URI, in the format defined in the W3C <i>Functions and Operators</i>
-     *            specification
+     *
+     * @param uri    the collation URI, in the format defined in the W3C <i>Functions and Operators</i>
+     *               specification
+     * @param config the Saxon Configuration (used for diagnostics)
      * @throws XPathException if the collation URI does not conform to the W3C rules, or if it
-     * requires features that Saxon-HE does not support
+     *                        requires features that Saxon-HE does not support
      */
 
-    public UcaCollatorUsingJava(String uri) throws XPathException {
+    public UcaCollatorUsingJava(String uri, Configuration config) throws XPathException {
         this.uri = uri;
+        this.config = config;
         uca = (RuleBasedCollator) RuleBasedCollator.getInstance();
         setProps(parseProps(uri));
     }
@@ -75,7 +81,7 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
     }
 
     private void error(String field, String allowed, String requested) throws XPathException {
-        error("value of " + field + " must be " + allowed + ", requested was:" + requested);
+        error("value of " + field + " must be " + allowed + ", requested value was:" + requested);
     }
 
     private void error(String message) throws XPathException {
@@ -133,7 +139,13 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
                 case "yes":
                     break;
                 case "no":
-                    error("fallback=no is not supported in Saxon-HE");
+                    if (config.getEditionCode().equals("HE")) {
+                        error("fallback=no is not supported in Saxon-HE");
+                    } else if (!ICULibrary.isICUCollatorAvailable()) {
+                        error("fallback=no is not available because ICU4J is not available");
+                    } else {
+                        error("fallback=no is not available with JDK-based collations");
+                    }
                     break;
                 default:
                     error("fallback", "yes|no");
