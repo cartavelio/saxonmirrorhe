@@ -18,6 +18,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -46,13 +47,17 @@ public class TailExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        getOperand().optimize(visitor, contextInfo);
-        if (getBaseExpression() instanceof Literal) {
-            GroundedValue value =
-                    SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()));
-            return Literal.makeLiteral(value, this);
+        try {
+            getOperand().optimize(visitor, contextInfo);
+            if (getBaseExpression() instanceof Literal) {
+                GroundedValue value =
+                        SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()));
+                return Literal.makeLiteral(value, this);
+            }
+            return this;
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
-        return this;
     }
 
     /**

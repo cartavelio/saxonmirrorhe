@@ -13,6 +13,7 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.functions.Number_1;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.value.AtomicValue;
@@ -216,11 +217,15 @@ public class XPathExpressionImpl implements XPathExpression {
                 }
                 throw new XPathExpressionException("Expression result is not a node");
             } else if (qName.equals(XPathConstants.NODESET)) {
-                context.openStackFrame(stackFrameMap);
-                SequenceIterator iter = expression.iterate(context);
-                GroundedValue extent = SequenceTool.toGroundedValue(iter);
-                PJConverter pj = PJConverter.allocateNodeListCreator(config, node);
-                return pj.convert(extent, Object.class, context);
+                try {
+                    context.openStackFrame(stackFrameMap);
+                    SequenceIterator iter = expression.iterate(context);
+                    GroundedValue extent = SequenceTool.toGroundedValue(iter);
+                    PJConverter pj = PJConverter.allocateNodeListCreator(config, node);
+                    return pj.convert(extent, Object.class, context);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             } else {
                 throw new IllegalArgumentException("qName: Unknown type for expected result");
             }

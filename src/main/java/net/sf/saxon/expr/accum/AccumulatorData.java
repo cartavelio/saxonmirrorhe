@@ -15,6 +15,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -58,23 +59,27 @@ public class AccumulatorData implements IAccumulatorData {
 
     public void buildIndex(NodeInfo doc, XPathContext context) throws XPathException {
         //System.err.println("Building accData " + this);
-        if (building) {
-            throw new XPathException("Accumulator " + accumulator.getAccumulatorName().getDisplayName() +
-                " requires access to its own value", "XTDE3400");
+        try {
+            if (building) {
+                throw new XPathException("Accumulator " + accumulator.getAccumulatorName().getDisplayName() +
+                    " requires access to its own value", "XTDE3400");
+            }
+            building = true;
+            Expression initialValue = accumulator.getInitialValueExpression();
+            XPathContextMajor c2 = context.newContext();
+            SlotManager sf = accumulator.getSlotManagerForInitialValueExpression();
+            Sequence[] slots = new Sequence[sf.getNumberOfVariables()];
+            c2.setStackFrame(sf, slots);
+            c2.setCurrentIterator(new ManualIterator(doc));
+            Sequence val = SequenceTool.toGroundedValue(initialValue.iterate(c2));
+            values.add(new DataPoint(new Visit(doc, false), val));
+            val = visit(doc, val, c2);
+            values.add(new DataPoint(new Visit(doc, true), val));
+            ((ArrayList<DataPoint>) values).trimToSize();
+            building = false;
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
-        building = true;
-        Expression initialValue = accumulator.getInitialValueExpression();
-        XPathContextMajor c2 = context.newContext();
-        SlotManager sf = accumulator.getSlotManagerForInitialValueExpression();
-        Sequence[] slots = new Sequence[sf.getNumberOfVariables()];
-        c2.setStackFrame(sf, slots);
-        c2.setCurrentIterator(new ManualIterator(doc));
-        Sequence val = SequenceTool.toGroundedValue(initialValue.iterate(c2));
-        values.add(new DataPoint(new Visit(doc, false), val));
-        val = visit(doc, val, c2);
-        values.add(new DataPoint(new Visit(doc, true), val));
-        ((ArrayList<DataPoint>) values).trimToSize();
-        building = false;
         //diagnosticPrint();
     }
 

@@ -577,6 +577,8 @@ public class XPathCompiler {
             return new XPathExecutable(cexp, processor, ic);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
+        } catch (UncheckedXPathException e) {
+            throw new SaxonApiException(e);
         }
     }
 

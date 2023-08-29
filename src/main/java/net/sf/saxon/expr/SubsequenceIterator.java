@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
@@ -75,9 +76,13 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
         } else if (max == Integer.MAX_VALUE) {
             return TailIterator.make(base, min);
         } else if (base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded() && min > 4) {
-            GroundedValue value = SequenceTool.toGroundedValue(base);
-            value = value.subsequence(min - 1, max - min + 1);
-            return value.iterate();
+            try {
+                GroundedValue value = SequenceTool.toGroundedValue(base);
+                value = value.subsequence(min - 1, max - min + 1);
+                return value.iterate();
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         } else {
             return new SubsequenceIterator(base, min, max);
         }

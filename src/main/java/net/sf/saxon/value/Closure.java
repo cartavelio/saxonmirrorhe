@@ -90,7 +90,11 @@ public abstract class Closure implements Sequence, ContextOriginator {
                     if (local[i] instanceof Closure) {
                         int cdepth = ((Closure) local[i]).depth;
                         if (cdepth >= 10) {
-                            local[i] = SequenceTool.toGroundedValue(local[i].iterate());
+                            try {
+                                local[i] = SequenceTool.toGroundedValue(local[i].iterate());
+                            } catch (UncheckedXPathException e) {
+                                throw e.getXPathException();
+                            }
                         } else if (cdepth + 1 > depth) {
                             depth = cdepth + 1;
                         }

@@ -18,6 +18,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -310,7 +311,12 @@ public class ComponentTracer extends Instruction {
                     TraceListener listener = controller.getTraceListener();
                     listener.enter(expr.component, expr.properties, context);
                     SequenceIterator result = baseEval.iterate(context);
-                    GroundedValue extent = SequenceTool.toGroundedValue(result);
+                    GroundedValue extent;
+                    try {
+                        extent = SequenceTool.toGroundedValue(result);
+                    } catch (UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                     listener.leave(expr.component);
                     return extent.iterate();
                 } else {
