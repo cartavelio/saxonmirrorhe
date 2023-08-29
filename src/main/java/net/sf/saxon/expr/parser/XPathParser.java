@@ -3101,6 +3101,9 @@ public class XPathParser {
             empty = true;
             nextToken();
         }
+        if (schemaDeclaration) {
+            expect(Token.NAME);
+        }
         switch (primaryType) {
             case Type.ITEM:
                 grumble("item() is not allowed in a path expression");
