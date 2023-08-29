@@ -80,6 +80,13 @@ class PyTestOutcome:
 
             return self.assert_string_value(assertion, result)
 
+        elif "assert-deep-eq" == tag:
+            assert_xpc.declare_variable("result")
+            assert_xpc.set_parameter("result", result)
+            s = assert_xpc.evaluate("deep-equal($result , (" + assertion.string_value + "))")
+            ok = s.item_at(0).is_atomic and s.item_at(0).get_atomic_value().boolean_value
+            return ok
+
         elif "serialization-matches" == tag:
             return self.assert_serialization_matches(assertion, result, assert_xpc)
 
@@ -151,6 +158,12 @@ class PyTestOutcome:
             assert_xpc.set_parameter("result", result)
             valuei = assert_xpc.evaluate_single("$result instance of " + assertion.string_value)
             return valuei.get_atomic_value().boolean_value
+
+        elif "assert-false" == tag:
+            return result.size == 1 and result.item_at(0).is_atomic and result.item_at(0).get_atomic_value().boolean_value == False
+
+        elif "assert-true" == tag:
+            return result.size == 1 and result.item_at(0).is_atomic and result.item_at(0).get_atomic_value().boolean_value == True
 
         elif "any-of" == tag:
             partial_success = False
@@ -308,9 +321,15 @@ class PyTestOutcome:
 
         assertion_string = assertion.string_value
         result_string = ""
+        result_string2 = ""
         if result.size == 1:
             result_string = result.item_at(0).string_value
             result_string = result_string.strip().replace("\r\n", "\n").replace("\n", "")
+        else:
+            first = True
+            for x in range(result.size):
+                itemx = result.item_at(x)
+                result_string = result_string + " " + itemx.string_value
 
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print("assert_string_value, result = " + result_string)
