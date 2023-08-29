@@ -152,8 +152,7 @@ namespace TestDriver {
                     Console.WriteLine(usage);
                 }
             }
-
-            int total = 39700;
+            
             int passed = 0;
             int failed = 0;
 
@@ -489,7 +488,7 @@ namespace TestDriver {
                         }
                     }
                 }
-                feedback("Passed " + passed + " failed " + failed + " total " + total, true);
+                feedback("Passed " + passed + " failed " + failed + " total " + (passed+failed), true);
                 foreach (string testDetails in failingTests)
                 {
                     feedback("Failed " + testDetails, true);
