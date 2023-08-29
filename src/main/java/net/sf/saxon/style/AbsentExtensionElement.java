@@ -73,7 +73,7 @@ public class AbsentExtensionElement extends StyleElement {
             compileError(validationError);
         }
 
-        if (getEffectiveVersion() >= 40) {
+        if (getEffectiveVersion() >= 40 && !isInXsltNamespace()) {
             PrincipalStylesheetModule pack = getPrincipalStylesheetModule();
             NamedTemplate template = pack.getNamedTemplate(getNodeName().getStructuredQName());
             if (template != null) {
