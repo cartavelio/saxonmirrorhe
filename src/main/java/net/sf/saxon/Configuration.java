@@ -3332,6 +3332,9 @@ public class Configuration implements SourceResolver, NotationSet {
     public XMLReader makeParser(String className)
             throws TransformerFactoryConfigurationError {
         try {
+            if (className.equals("#DEFAULT")) {
+                return Version.platform.loadParserForXmlFragments();
+            }
             Object obj = dynamicLoader.getInstance(className, null);
             if (obj instanceof XMLReader) {
                 return (XMLReader) obj;
