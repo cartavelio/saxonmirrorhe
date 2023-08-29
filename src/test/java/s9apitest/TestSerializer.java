@@ -623,7 +623,7 @@ public class TestSerializer {
 //    }
 
     @Test
-    public void testBug5866() {
+    public void testBug5886() {
         try {
             Processor processor = new Processor(false);
 
@@ -705,8 +705,10 @@ public class TestSerializer {
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
             stream.close();
         } catch (SaxonApiException e) {
+            e.printStackTrace();
             fail();
         } catch (IOException e) {
+            e.printStackTrace();
             fail();
         }
     }

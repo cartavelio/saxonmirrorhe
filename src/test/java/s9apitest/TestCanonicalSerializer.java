@@ -84,7 +84,7 @@ public class TestCanonicalSerializer {
     public void testCanonicalization2() {
         File dir = new File (configTest.getDataDir() + "collection");
         for (File file : dir.listFiles()) {
-            if (!file.isDirectory() && !file.getName().endsWith("atrs15.xml")) {
+            if (!file.isDirectory() && !file.getName().endsWith("atrs15.xml") && ! file.getName().startsWith(".DS_Store")) {
                 System.err.println("Processing " + file);
                 compareCanonical(file);
             }

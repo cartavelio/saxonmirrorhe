@@ -648,6 +648,7 @@ public class TestReflexion {
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
+            comp.setJustInTimeCompilation(false);
             XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             exec.export(out);
@@ -660,8 +661,8 @@ public class TestReflexion {
             trans.callTemplate(new QName("main"), trans.newSerializer(sw));
             assertTrue(sw.toString().endsWith("URL: http://www.example.com/file"));
         } catch (SaxonApiException e) {
-            fail();
             e.printStackTrace();
+            fail();
         }
 
     }
