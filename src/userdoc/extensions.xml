@@ -33,9 +33,6 @@
     the same thing.</aside>
 
 
-  <p>For details of additional extensions available in XQuery only, see <a class="bodylink"
-      href="/using-xquery/extensions">XQuery extensions</a>.</p>
-
   <p>For details of extensions to XML Schema 1.1 used for schema processing, see <a class="bodylink"
       href="/schema-processing/extensions11">XML Schema 1.1 extensions</a>.</p>
 
@@ -1099,5 +1096,249 @@ declare option saxon:output "saxon:indent-spaces=3";
   </section>
 
   <xi:include href="extensions/instructions.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  
+  <section id="xquery-syntax" title="XQuery syntax extensions">
+    <h1>XQuery syntax extensions</h1>
+    
+    <p>Some XQuery-specific syntax extensions are available. To enable use of Saxon extensions, the Saxon
+      namespace should be declared by writing <code>declare namespace saxon="http://saxon.sf.net/";</code> in
+      the Query prolog.</p>
+    
+    <p>The Saxon-supplied syntax extensions are described on the following pages:</p>
+    <nav>
+      <ul/>
+    </nav>
+    
+    <section id="output" title="The saxon:output option declaration">
+      <h1>The <code>saxon:output</code> option declaration</h1>
+      
+      <aside>Available in all Saxon editions, but use of Saxon-specific serialization parameters requires
+        Saxon-PE or Saxon-EE.</aside>
+      
+      <aside>
+        From XQuery 3.0, standard serialization parameters can be set using
+        <code>declare option output:XXXX</code>. Saxon-specific option declarations
+        are still needed for Saxon-specific serialization parameters such as
+        <code>saxon:double-space</code>.
+      </aside>
+      
+      <p>Saxon provides an option declaration to set serialization parameters. This takes the form
+        shown in the following example:</p>
+      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+declare option saxon:output "method=html";
+declare option saxon:output "saxon:indent-spaces=1";
+]]></samp>
+      
+      <p>All the standard serialization parameters described in the <a
+        href="http://www.w3.org/TR/xslt-xquery-serialization-31/" class="bodylink">W3C
+        Serialization specification</a> are available:</p>
+      <ul>
+        <li>
+          <p>allow-duplicate-names</p>
+        </li>
+        <li>
+          <p>build-tree</p>
+        </li>
+        <li>
+          <p>byte-order-mark</p>
+        </li>
+        <li>
+          <p>cdata-section-elements</p>
+        </li>
+        <li>
+          <p>doctype-public</p>
+        </li>
+        <li>
+          <p>doctype-system</p>
+        </li>
+        <li>
+          <p>encoding</p>
+        </li>
+        <li>
+          <p>escape-uri-attributes</p>
+        </li>
+        <li>
+          <p>html-version</p>
+        </li>
+        <li>
+          <p>include-content-type</p>
+        </li>
+        <li>
+          <p>indent</p>
+        </li>
+        <li>
+          <p>item-separator</p>
+        </li>
+        <li>
+          <p>json-node-output-method</p>
+        </li>
+        <li>
+          <p>media-type</p>
+        </li>
+        <li>
+          <p>method</p>
+        </li>
+        <li>
+          <p>normalization-form</p>
+        </li>
+        <li>
+          <p>omit-xml-declaration</p>
+        </li>
+        <li>
+          <p>standalone</p>
+        </li>
+        <li>
+          <p>suppress-indentation</p>
+        </li>
+        <li>
+          <p>undeclare-prefixes</p>
+        </li>
+        <li>
+          <p>use-character-maps</p>
+        </li>
+        <li>
+          <p>version</p>
+        </li>
+      </ul>
+      
+      <p>In addition some Saxon-specific serialization parameters are available: see <a
+        class="bodylink" href="/extensions/output-extras">Additional serialization
+        parameters</a>.</p>
+    </section>
+    
+    <section id="memo-function" title="The saxon:memo-function option declaration">
+      <h1>The <code>saxon:memo-function</code> option declaration</h1>
+      
+      <aside>Requires Saxon-PE or Saxon-EE.</aside>
+      
+      <p>Saxon provides an option declaration to treat the immediately following function as a
+        memo-function. This takes the form shown in the following example:</p>
+      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+declare option saxon:memo-function "true";
+declare function local:factorial($n as xs:integer) as xs:integer {
+  local:factorial($n - 1) * n
+};
+]]></samp>
+      
+      <p>Alternatively:</p>
+      
+      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+declare %saxon:memo-function function local:factorial($n as xs:integer) as xs:integer {
+  local:factorial($n - 1) * n
+};
+]]></samp>
+      
+      <p>A memo function remembers the results of previous calls, so if it is called twice with the
+        same arguments, it will not repeat the computation, but return the previous result.</p>
+      
+      <p>The allowed values of the option are "true" and "false" (the default is false), and any
+        other value is ignored with a warning.</p>
+    </section>
+    
+    <section id="validate-type" title="The saxon:validate-type pragma">
+      <h1>The <code>saxon:validate-type</code> pragma</h1>
+      
+      <aside>Requires Saxon-EE.</aside>
+      
+      <aside>
+        This extension is largely obsolescent: since version 9.3, Saxon implements the XQuery
+        3.0 syntax for validation by type. The extension does serve one remaining purpose, which
+        is to allow attributes to be validated. (The standard syntax requires an element or
+        document node.)
+      </aside>
+      
+      <p>Saxon-EE provides a pragma (a language extension) to allow constructed elements to be
+        validated against a schema-defined global type definition. The standard
+        <code>validate</code> expression allows validation only against a global element
+        declaration, but some schemas (an example is FpML) provide very few global elements, and
+        instead rely heavily on locally-declared elements having a global type. This makes it
+        impossible to construct fragments of an FpML document in a way that takes advantage of
+        static and dynamic type checking.</p>
+      
+      <p>The extension takes the form:</p>
+      <samp><![CDATA[(# saxon:validate-type my:personType #) { expr }
+]]></samp>
+      
+      <p>Conceptually, it makes a copy of the result of evaluating <code>expr</code> and validates
+        it against the named schema type, causing the copied nodes to acquire type annotations
+        based on the validation process. The effect is the same as that of the <code>type</code>
+        attribute in XSLT instructions such as <code>xsl:element</code> and
+        <code>xsl:copy-of</code>. The schema type (shown in the above example as
+        <code>myPersonType</code>) may be a simple type or a complex type defined in an imported
+        schema, or a built-in type; it is written as a QName, using the default namespace for
+        elements and types if it is unprefixed.</p>
+      
+      <p>Note that XQuery processors other than Saxon will typically ignore this pragma, and return
+        the value of <code>expr</code> unchanged. Such processors will report type-checking
+        failures if the value is used in a context where the required type is <code>element(*,
+          type-name)</code>.</p>
+      
+      <p>You can use a different namespace prefix in place of <code>saxon</code>, but it must be
+        bound using a namespace declaration to the namespace
+        <code>"http://saxon.sf.net/"</code>.</p>
+      
+      <p>Here is a complete example:</p>
+      <samp><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
+declare namespace saxon="http://saxon.sf.net/";
+import schema namespace fpml = "http://www.fpml.org/2005/FpML-4-2" at "....";
+
+declare function time:getCurrentHourMinuteTime() as element(*, fpml:HourMinuteTime) {
+    let $time = string(current-time())
+    return
+        (# saxon:validate-type fpml:HourMinuteTime #) {
+            <time>{substring($time, 1, 5)}:00</time>
+        }
+};        
+]]></samp>
+      
+      <p>Saxon ignores any pragmas in a namespace other than the Saxon namespace; it rejects any
+        pragmas whose QName is ill-formed, as well as pragmas in the Saxon namespace whose local
+        name is not recognized.</p>
+      
+      <p>The construct also allows validation of attributes against a simple type definition, for
+        example:</p>
+      <samp><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
+declare namespace saxon="http://saxon.sf.net/";
+import schema namespace fpml = "http://www.fpml.org/2005/FpML-4-2" at "....";
+
+declare function time:getCurrentHourMinuteTime() as attribute(*, fpml:HourMinuteTime) {
+    let $time = string(current-time())
+    return (# saxon:validate-type fpml:HourMinuteTime #) {
+       attribute time {concat(substring($time, 1, 5), ':00')}
+    }
+};        
+]]></samp>
+    </section>
+    
+    <section id="trace" title="FLWOR expression trace clause">
+      <h1>FLWOR expression <code>trace</code> clause</h1>
+      
+      <aside>Available in all Saxon editions.</aside>
+      
+      <p>From Saxon 11.2, a new clause is introduced for FLWOR expressions, to assist diagnostics. It has the syntax:</p>
+      
+      <samp>TraceClause ::= "trace" Expr</samp>
+      
+      <p>and can be used anywhere in a FLWOR expression to display selected information about the current tuple stream.</p>
+      
+      <p>For example,</p>
+      
+      <samp><![CDATA[for $item in //items
+trace "item: " || $item/@id
+let $price := $item/cost + $item/markup
+trace "selling-price: " || $price
+return "€" + $price]]></samp>
+      
+      <p>Output is displayed in the same way as for the <a class="bodylink code"
+        href="/functions/fn/trace">fn:trace()</a> function. It is sent to the current <code>Logger</code>,
+        and for each item in the trace output, a line is output in the format <code>FLWOR&lt;- n/m type: message</code>
+        where n is the sequence number of the tuple, m is the position of the item within one evaluation of the expression,
+        type is the type of item displayed, and message is a representation of the item. The arrow symbol "&lt;-" is used
+        when the FLWOR expression is evaluated in pull mode, and is replaced by "->" when evaluated in push mode; the distinction
+        is only of interest when doing internal diagnosis.</p>
+    </section>
+    
+    
+  </section>
 
 </article>

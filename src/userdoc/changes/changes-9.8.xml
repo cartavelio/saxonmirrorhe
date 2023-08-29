@@ -501,6 +501,11 @@
             into an array of non-empty sequences, splitting the sequence immediately before|after any item for which the specified function
             returns true.</p> Similarly saxon:group-by(sequence, function), saxon:group-adjacent(sequence, function).-->
         
+        <h2>XQuery Syntax Extensions</h2>
+        
+        <p>Since support for XQuery 1.0 is now dropped, the option declaration <code>saxon:allow-cycles</code>
+            syntax extension becomes redundant and is now ignored.</p>
+        
         
 
     </category>
