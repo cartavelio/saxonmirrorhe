@@ -1,6 +1,6 @@
 import urllib.parse
 
-from saxonc@@edition@@ import *
+from saxoncee import *
 import os
 import psutil
 from Environment import Environment, Spec
@@ -51,7 +51,7 @@ xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-f
 schemaValidator = None
 test_report = PyTestReport()
 
-spec : Spec
+spec: Spec
 
 globalEnvironments = {}
 localEnvironments = {}
@@ -81,27 +81,27 @@ def process_spec(spec_str: str):
     if spec_str == "XP20":
         return Spec.XP20()
     elif spec_str == "XP30":
-        return Spec.XP30
+        return Spec.XP30()
     elif spec_str == "XP31":
-        return Spec.XP31
+        return Spec.XP31()
         
     elif spec_str == "XP40":
-        return Spec.XP40
+        return Spec.XP40()
                 
     elif spec_str == "XQ10":
-        return Spec.XQ10
+        return Spec.XQ10()
         
     elif spec_str == "XQ30":
-        return Spec.XQ30
+        return Spec.XQ30()
 
     elif spec_str == "XQ31":
-        return Spec.XQ31
+        return Spec.XQ31()
 
     elif spec_str == "XQ40":
-        return Spec.XQ40
+        return Spec.XQ40()
 
     elif spec_str == "XT30":
-        return Spec.XT30
+        return Spec.XT30()
     else:
         raise Exception("The specific language must be one of the following: XP20, XP30, XP31, XP40, XQ10, XQ30, XQ31, XQ40, XT30")
 
@@ -560,7 +560,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     test_name = test_case_node.get_attribute_value("name")
     dependencies = xpath_proc.evaluate("dependencies/*")
     env_node = xpath_proc.evaluate_single("environment")
-    test_input_node = xpath_proc.evaluate_single("test")
+    test_queries = xpath_proc.evaluate("test")
 
     spec_att = 'XSLT10+'
     if dependencies is not None:
@@ -614,11 +614,9 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
         print(test_case_node)
 
-    xpath_proc.set_context(xdm_item=test_input_node)
+
     environment.xpath_proc.set_backwards_compatible(False)
     '''Get config for XSLT Processor'''
-    test_queries = xpath_proc.evaluate_single("test")
-
 
 
     '''base_output_uri = ""
@@ -630,49 +628,16 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         base_output_uri = urllib.parse.urljoin(base_output_uri,
                                                str(output_uri.item_at(0).get_atomic_value().string_value))'''
 
-
-    test_query_children = test_queries.get_node_value().axis_node(8)
-
-
-
-
-
-
-    initial_mode = xpath_proc.evaluate_single("initial-mode")
-    initial_template = xpath_proc.evaluate_single("initial-template")
-    initial_function = xpath_proc.evaluate_single("initial-function")
-
-    global_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
+    print(test_queries)
+    '''global_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
                                       False, False)
 
     static_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
                                          True, False)
-
+    '''
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print(test_case_node.base_uri)
     '''print(test_case_node)'''
-
-
-    initial_match_selection = None
-    initial_mode_name = None
-    if initial_mode is not None:
-        initial_mode_name = initial_mode.get_node_value().get_attribute_value("name")
-        select = initial_mode.get_node_value().get_attribute_value("select")
-        if select is not None:
-            '''print(select)'''
-            environment.xpath_proc.clear_properties()
-            environment.xpath_proc.set_cwd(initial_mode.get_node_value().base_uri)
-            try:
-                initial_match_selection = environment.xpath_proc.evaluate(select)
-            except PySaxonApiError as ex:
-                errorResult = ex
-
-                '''TODO this is not currently working  - try set base-uri on XPathProcessor'''
-                test_report.write_test_case_element(str(test_name), "fail", str(ex))
-                failures += 1
-                return
-
-
 
 
     errorResult = None
@@ -680,8 +645,9 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     result_documents = {}
     outcome = PyTestOutcome()
 
-
-    for test_query in test_query_children:
+    pos = 0
+    for test_query in test_queries.item_at(pos):
+        pos += 1
         xpath_proc.set_context(xdm_item=test_query)
         exp = None
         try:
@@ -869,68 +835,68 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     not_run += 1
 
 
-if __name__ == "__main__":
-    def main(argv):
-        global run_test
-        global run_test_case_name
-        global path
-        global results_path
-        global schemaValidator
-        global host_lang
-        global spec
 
-        saxon_version = driver_proc.version
+def main(argv):
+    global run_test
+    global run_test_case_name
+    global path
+    global results_path
+    global schemaValidator
+    global host_lang
+    global spec
 
-        print("W3 QT3 Test Suite")
-        print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
+    saxon_version = driver_proc.version
 
-        diri = None
+    print("W3 QT3 Test Suite")
+    print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
 
-        if len(sys.argv) > 1:
-            diri = ""
-            try:
-                diri = str(sys.argv[1])
-            except TypeError as ex:
-                print("Error test suite directory missing")
-                print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir>')
-                sys.exit(2)
+    diri = None
 
-            print("Test suite directory = " + diri)
-
-            argvv = sys.argv[1:]
-
-            try:
-                opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
-            except getopt.GetoptError:
-                print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -lang <processor language>')
-                sys.exit(2)
-
-            for opt, arg in opts:
-                if opt == '-h':
-                    print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
-                    sys.exit()
-                elif opt in ("-t", "--testpattern"):
-                    run_test_case_name = arg
-                elif opt in ("-s", "--testset"):
-                    run_test = arg
-                    print('Test set= ', run_test)
-
-                elif opt in ("-o", "--resultdir"):
-                    results_path = arg
-
-                elif opt in ("-l", "--lang"):
-                    host_lang = arg
-                    spec = process_spec(arg)
-
-        '''dir = os.getcwd()'''
-        if spec is None:
-            print("lang option not given")
+    if len(sys.argv) > 1:
+        diri = ""
+        try:
+            diri = str(sys.argv[1])
+        except TypeError as ex:
+            print("Error test suite directory missing")
+            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir>')
             sys.exit(2)
 
-        path = diri + "/"
-        catalog = path + "catalog.xml"
+        print("Test suite directory = " + diri)
 
-        process_catalog(path, catalog)
+        argvv = argv[1:]
+
+        try:
+            opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
+        except getopt.GetoptError:
+            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -lang <processor language>')
+            sys.exit(2)
+        print(opts)
+        print(args)
+        for opt, arg in opts:
+            if opt == '-h':
+                print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
+                sys.exit()
+            elif opt in ("-t", "--testpattern"):
+                run_test_case_name = arg
+            elif opt in ("-s", "--testset"):
+                run_test = arg
+                print('Test set= ', run_test)
+            elif opt in ("-o", "--resultdir"):
+                results_path = arg
+
+            elif opt in ("-l", "--lang"):
+                host_lang = arg
+                spec = process_spec(arg)
+
+    '''dir = os.getcwd()'''
+    if spec is None:
+        print("lang option not given")
+        sys.exit(2)
+
+    path = diri + "/"
+    catalog = path + "catalog.xml"
+
+    process_catalog(path, catalog)
 
 
 if __name__ == "__main__":
