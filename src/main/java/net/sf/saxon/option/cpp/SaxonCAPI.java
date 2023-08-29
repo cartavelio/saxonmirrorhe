@@ -563,42 +563,48 @@ public class SaxonCAPI {
                     validationMode = Validation.LAX;
                 }
                 config.setParseOptions(config.getParseOptions().withDTDValidationMode(validationMode));
-            } else if (name.equals("expand")) {
-                config.setParseOptions(config.getParseOptions().withExpandAttributeDefaults("on".equals(value)));
-            } else if (name.equals("opt")) {
-                config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, value);
+            } else {
+                boolean b = "on".equals(value) || "true".equals(value) || "1".equals(value);
+                if (name.equals("expand")) {
+                    config.setParseOptions(config.getParseOptions().withExpandAttributeDefaults(b));
+                } else if (name.equals("opt")) {
+                    config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, value);
 
-            } else if (name.equals("outval")) {
+                } else if (name.equals("outval")) {
 
-                Boolean isRecover = "recover".equals(value);
-                config.setConfigurationProperty(Feature.VALIDATION_WARNINGS, isRecover);
-                config.setConfigurationProperty(Feature.VALIDATION_COMMENTS, isRecover);
+                    Boolean isRecover = "recover".equals(value);
+                    config.setConfigurationProperty(Feature.VALIDATION_WARNINGS, isRecover);
+                    config.setConfigurationProperty(Feature.VALIDATION_COMMENTS, isRecover);
 
 
-            } else if (name.equals("strip")) {
+                } else if (name.equals("strip")) {
 
-                config.setConfigurationProperty(Feature.STRIP_WHITESPACE, value);
-            } else if (name.equals("val")) {
-                if ("strict".equals(value)) {
-                    processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.STRICT);
-                } else if ("lax".equals(value)) {
-                    processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.LAX);
+                    config.setConfigurationProperty(Feature.STRIP_WHITESPACE, value);
+                } else if (name.equals("val")) {
+                    if ("strict".equals(value)) {
+                        processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.STRICT);
+                    } else if ("lax".equals(value)) {
+                        processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.LAX);
+                    }
+
+                } else if (name.equals("xsdversion")) {
+                    processor.setConfigurationProperty(Feature.XSD_VERSION, value);
+
+                } else if (name.equals("xmlversion")) {
+
+                    processor.setConfigurationProperty(Feature.XML_VERSION, value);
+
+                } else {
+                    boolean value1 = b;
+                    if (name.equals("xi")) {
+                        processor.setConfigurationProperty(Feature.XINCLUDE, value1);
+
+                    } else if (name.equals("xsiloc")) {
+                        processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, value1);
+                    } else if (name.startsWith("http://saxon.sf.net/feature/")) {
+                        processor.setConfigurationProperty(name, value);
+                    }
                 }
-
-            } else if (name.equals("xsdversion")) {
-                processor.setConfigurationProperty(Feature.XSD_VERSION, value);
-
-            } else if (name.equals("xmlversion")) {
-
-                processor.setConfigurationProperty(Feature.XML_VERSION, value);
-
-            } else if (name.equals("xi")) {
-                processor.setConfigurationProperty(Feature.XINCLUDE, "on".equals(value));
-
-            } else if (name.equals("xsiloc")) {
-                processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, "on".equals(value));
-            } else if (name.startsWith("http://saxon.sf.net/feature/")) {
-                processor.setConfigurationProperty(name, value);
             }
         }
 

@@ -1,0 +1,2013 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article id="sourcedocs" title="Handling XML documents">
+  <h1>Handling XML documents in SaxonC</h1>
+
+
+  <p>This section discusses the various options in SaxonC for handling XML documents.
+    These might form the input or output of a query or stylesheet, or they might be
+  used directly by application code written (say) in C/C++, Python or PHP.</p>
+
+  <p>See the topics below for further information:</p>
+
+  <nav>
+    <ul/>
+  </nav>
+
+
+  <section id="resources-and-uris" title="Resources and URIs">
+    <h1>Resources and URIs</h1>
+    
+    <p>All external resources used in transformations and queries are identified using URIs.
+      These resources include:</p>
+    
+    <ul>
+      <li>XML documents used as the primary input to a query or transformation, or
+        accessed using a function such as <a class="bodylink code" href="https://www.saxonica.com/documentation12/index.html#!functions/fn/doc" target="_blank">doc()</a> or
+        <a class="bodylink code" href="https://www.saxonica.com/documentation12/index.html#!functions/functions/fn/document" target="_blank">document()</a>, or an instruction such as <a
+          class="bodylink code" href="https://www.saxonica.com/documentation12/index.html#!xsl-elements/source-document" target="_blank">xsl:source-document</a> or
+        <a class="bodylink code" href="https://www.saxonica.com/documentation12/index.html#!xsl-elements/merge-source" target="_blank">xsl:merge-source</a>.</li>
+      <li>JSON documents used as the primary input to a query or transformation,
+        or accessed using the <a class="bodylink code" href="https://www.saxonica.com/documentation12/index.html#!functions/fn/json-doc" target="_blank">json-doc()</a>
+        function.</li>
+      <li>Text files accessed using the <a class="bodylink code"
+        href="/functions/fn/unparsed-text">unparsed-text()</a> function.</li>
+      <li>Source XSLT stylesheet modules, and compiled XSLT packages made available as SEF files.</li>
+      <li>Source XSD schema documents, and compiled schemas made available as SCM files.</li>
+      <li>Source XQuery queries (main modules and library modules).</li>
+      <li>Binary resources accessed using the <a class="bodylink code"
+        href="/functions/saxon/read-binary-resource">saxon:read-binary-resource()</a> function.</li>
+    </ul>
+    
+    <p>This section describes how URIs referring to XML documents (and in some cases, non-XML resources)
+    are handled within Saxon.</p>
+    
+    
+    <nav>
+      <ul/>
+    </nav>
+    
+    
+    <section id="command-line" title="Source documents on the command line">
+      <h1>Source documents on the command line</h1>
+      
+      
+      <p>When Saxon (either XSLT or XQuery) is invoked from the command line, the primary source will
+        normally be an XML document, and is supplied using the <code>-s</code> option (for example,
+        <code>-s:books.xml</code>). Normally this will be XML 1.0: for XML 1.1, see <a class="bodylink"
+          href="/sourcedocs/xml-parsing/xml11">XML 1.1</a>.
+      </p>
+      
+      <p>If the primary source is JSON, use the <code>-json</code> option (for example,
+      <code>-json:books.json</code>).</p>
+      
+      <p>The command line argument is assumed to be a filename (interpreted relative to the current
+      directory) unless (a) it starts with <code>file:</code>, <code>http:</code>, or <code>https:</code>,
+      or (b) the <code>-u</code> option is supplied. If either of these conditions is true, it is
+      interpreted as a URI, and is handled as described in <a href="../resolving-uris" class="bodylink">Resolving URIs</a>.
+      The current working directory is used as the base URI for resolving the location of the stylesheet or query unless otherwise
+      specified: this affects the interpretation of relative URIs contained within the stylesheet or
+      query.</p>
+      
+    </section>
+  
+  <section id="resolving-uris" title="Resolving URIs">
+    <h1>Resolving URIs</h1>
+       
+    <p>Saxon adopts a uniform approach to resolving and dereferencing these URIs.</p>
+    
+    <aside><p>Technically, <em>resolving</em> a URI is the process of expanding a relative
+      to an absolute URI, for example resolving the relative reference <code>feature-matrix-11.xml</code>
+      against a base URI such as <code>http://www.saxonica.com/products/</code> to give the 
+      absolute URI <code>http://www.saxonica.com/products/feature-matrix-11.xml</code>.
+      The process of fetching an XML document using this absolute URI is properly
+      refered to as <em>dereferencing</em>; however, it is often called <em>resolving</em>,
+      and since this term is used in many APIs, it is impossible to avoid it.</p>
+      <p>Where we need to avoid ambiguity, we call the first process <em>absolutization</em>
+      and the second <em>dereferencing</em>.</p>
+    </aside>
+    
+    
+    
+    <p>The general approach is as follows:</p>
+    
+    <ul>
+      <li><p>The supplied URI reference is first made absolute by resolving against a 
+        suitable base URI.</p></li>
+      <li><p>The resulting absolute URI is dereferenced by a 3-step process:</p>
+        <ol>
+          <li><p>Firstly, the user can use the<code>SaxonProcessor.setcwd()</code> which acts as the base URI. Alternatively the user can set on the
+            <code>Xslt30Processor.setcwd()</code>, <code>XsltExecutable.setBaseOutputURI()</code> or the
+          <code>XQueryProcessor.setQueryBaseURI()</code>.</p></li>
+          <li><p>Secondly, the default resolver at this level is designed
+          to invoke a third-party library called the <em>catalog resolver</em>, which looks
+          up known URIs in an XML-based catalog. By default there is a single built-in catalog 
+          containing local copies of popular W3C-defined resources such as the DTDs for XHTML and
+          SVG. Additional catalog files can be registered using an API (<code>SaxonProcessor.setCatalog()</code>
+            in C++ and PHP, <code>PySaxonProcessor.set_catalog()</code> in Python),
+            or from the command line, or from the Saxon configuration file. </p></li>
+          <li>If the URI has still not been resolved, it is then dereferenced using standard
+          mechanisms provided by the platform: for example, <code>http</code> URIs are dereferenced
+          using the Java <code>HTTP</code> library, and <code>file</code> URIs using
+          the Java file I/O libraries supplied by Graalvm.</li>
+        </ol>
+      
+      </li>
+    </ul>
+    
+    <p>URIs used within an XML document to refer to external entities (including the DTD) are
+      a little different since they are generally handled by the XML parser, and not by Saxon itself.
+      Nevertheless, Saxon attempts to offer an integrated approach. For more information on this, 
+      see <a href="../resolving-entities" class="bodylink">Resolving entities</a>.</p>
+    
+    <p>URIs for result documents produced using the <code>xsl:result-document</code> instruction
+    are handled internally, but it is possible to handle how the secondary documents are returned using the
+      <code>XsltExecutable.setCaptureResultDocuments()</code> and the method <code>XsltExecutable.getResultDocuments()</code>.
+      For more information on how this works in the C++, PHP and Python APIs, see <a class="bodylink"
+        href="/using-xsl/stylesheet-output/secondary-output">Secondary output</a>.</p>
+  </section>
+    
+    <section id="xml-catalogs" title="Using XML catalogs">
+      <h1>Using XML catalogs</h1>
+      
+      
+      <p>XML catalogs (<a
+        href="https://xmlcatalogs.org/"
+        class="bodylink">defined by OASIS</a>) provide a way to avoid hard-coding the locations of
+        XML documents and other resources in your application. Instead, the application refers to the
+        resource using a conventional system identifier (URI) or public identifier, and a local
+        catalog is used to map the system and public identifiers to an actual location.</p>
+      
+        <p>When
+using Saxon from the command line, it is possible to specify a catalog to be used using
+          the option <code>-&#xfeff;catalog:<i>files</i></code>. Here <code><i>files</i></code> is the catalog
+          file to be searched, or a list of filenames separated by semicolons. This catalog will be used
+          to locate DTDs and external entities required by the XML parser, XSLT stylesheet modules
+          requested using <code>xsl:import</code> and <code>xsl:include</code>, documents requested
+          using the <code>document()</code> and <code>doc()</code> functions, and also schema documents,
+          however they are referenced.</p>
+      
+        <p>Similarly, when using the C++, Python ot PHP APIs, catalog files can be nominated:</p>
+      
+        <ul>
+          <li class="javaonly">From C++, use the method <code>SaxonProcessor.setCatalog()</code> with the
+            filename. Similarly for PHP.</li>
+          <li>From Python, use the method <code>PySaxonProcessor.set_catalog()</code> with the filenames.</li>
+        </ul>
+        
+        <p>
+          The catalog is used for all kinds of external resources, including XML documents,
+            JSON documents, query modules, unparsed text files, and schema modules (but
+            not collations or collections). The kind of resource required is generally identified
+          by the <code>nature</code> parameter, following the principles of the 
+            <a class="bodylink" href="http://www.rddl.org/natures/">RDDL specification</a>.
+          The values used are listed in constants in class <code
+            java="net.sf.saxon.lib.ResourceRequest">ResourceRequest</code> on Java (or <code
+              cs="Saxon.Api.ResourceRequest">ResourceRequest</code> on C#).
+        </p>
+      
+        <p>Catalog-based resolution is performed using a third-party library:</p>
+      
+        <ul>
+          <li>For SaxonC, project <code>xmlresolver/xmlresolver</code> on GitHub.</li>
+        </ul>
+      
+      <aside>The library is open source product developed and maintained by Norm Tovey-Walsh,
+        a member of the Saxonica team, for the benefit of the XML community.</aside>
+        
+        <p>See the documentation for the relevant library for options on how the catalog resolver
+        can be configured, for example using system properties or a properties file. Remember
+        that such settings are typically global (they may affect more than one Saxon Configuration).</p>
+
+        <p>Note: Saxon configures the resolver with an explicitly
+        empty list of catalog files and does not use catalog files
+        configured with properties or property files. This is a
+        compromise for backwards compatibility because, historically,
+        Saxon only used a catalog resolver if an explicit
+        <code>-catalog</code> option was specified on the command
+        line. If Saxon configured the resolver to use the global configuration, then
+        it would always attempt to load <code>./catalog.xml</code> as a catalog
+        file and that could change the behavior of existing applications.
+        You must use the <code>-catalog</code> option or settings
+        local to the Saxon <code>Configuration</code> to specify the catalogs
+        used by Saxon.</p>
+        
+        <p>Here is an example of a very simple catalog file. The <code>publicId</code> and
+          <code>systemId</code> attributes give the public or system identifier as used in the source
+          document; the <code>uri</code> attribute gives the location (in this case a relative location)
+          where the actual resource will be found.</p>
+        
+        
+        
+        <samp><![CDATA[<?xml version="1.0"?>
+<catalog  xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">  
+   <group  prefer="public"  xml:base="file:///usr/share/xml/" >  
+
+      <public 
+         publicId="-//OASIS//DTD DocBook XML V4.5//EN"  
+         uri="docbook45/docbookx.dtd"/>
+
+      <system
+         systemId="http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"  
+         uri="docbook45/docbookx.dtd"/>
+
+   </group>
+</catalog>]]></samp>
+        
+        <p>There are many tutorials for XML catalogs available on the web, including some that have
+          information specific to Saxon, but take care that it is relevant to the current release.
+          Significant changes have been made in SaxonC 11.1.</p>
+        
+      
+    </section>
+    
+    <section id="resolving-entities" title="Resolving entities">
+      <h1>Resolving entities</h1>
+      <p>XML documents may contain references to external entities, including general entities,
+      DTDs, and parameter entities. Typically these references include a system identifier (URI)
+      and/or a public ID. It is the responsibility of the XML parser to resolve these references,
+      but the process can be influenced using Saxon interfaces.</p>
+      
+      <div >
+      <p>Internally applications use a SAX parser such as Xerces. SaxonC instantiates a SAX
+        parser, it constructs an <code>EntityResolver</code> that invokes the configuration-level
+        <code>ResourceResolver</code>, which has the capability to resolve entity references
+        using catalogs (as well as supporting the <code>classpath</code> and <code>data</code>
+        URI schemes).       
+      </p>
+      </div>
+
+      <p>Many XML users are concerned about security vulnerabilities in the area of external 
+        entity references. If source documents containing untrusted entity references are accepted,
+      it is possible for these to access files in local filestore that might contain sensitive
+      data. It is good practice to configure an XML parser to avoid these risks.</p>
+
+      <p>Generalizing this mechanism, Saxon also provides a configuration property
+        <a href="https://www.saxonica.com/documentation12/index.html#!configuration/config-features@ALLOWED_PROTOCOLS">ALLOWED_PROTOCOLS</a>,
+        which is enforced by the default configuration-level <code>ResourceResolver</code>.</p>
+  </section>
+    <section id="w3c-dtds" title="References to W3C DTDs">
+    <h1>References to W3C DTDs</h1>
+
+
+
+    <p>For some years, W3C has taken steps to reduce the burden of meeting requests for
+      commonly-referenced documents such as the DTD for XHTML. The W3C web server routinely
+      adds an artificial 30-second time delay for such requests. In response to this, Saxon included
+      copies of these documents within the issued JAR file, and recognized requests for these
+      documents, satisfying the request using the local copy.</p>
+      
+      <p>This mechanism has changed in Saxon 11.1: these copies are now held by the third-party
+      open source catalog-based resolver, which Saxon invokes by default.</p>
+
+
+    <p>The resources recognized by the catalog-based resolver, at
+      the time of writing, are:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <td>
+            <p>Public ID</p>
+          </td>
+          <td>
+            <p>System ID</p>
+          </td>
+          <td>
+            <p>Saxon resource name</p>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES Latin 1 for XHTML//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent</p>
+          </td>
+          <td>
+            <p>w3c/xhtml-lat1.ent</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES Symbols for XHTML//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent</p>
+          </td>
+          <td>
+            <p>w3c/xhtml-symbol.ent</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES Special for XHTML//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent</p>
+          </td>
+          <td>
+            <p>w3c/xhtml-special.ent</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XHTML 1.0 Transitional//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xhtml10/xhtml1-transitional.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XHTML 1.0 Strict//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xhtml10/xhtml1-strict.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XHTML 1.0 Frameset//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xhtml10/xhtml1-frameset.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XHTML Basic 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xhtml10/xhtml-basic10.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XHTML 1.1//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml11.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml11.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XHTML Basic 1.1//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-basic11.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-basic11.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Access Element 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-access-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-access-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Access Attribute Qnames 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-access-qname-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-access-qname-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Java Applets 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-applet-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-applet-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Base Architecture 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-arch-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-arch-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Common Attributes 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-attribs-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-attribs-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Base Element 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-base-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-base-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Basic Forms 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-basic-form-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-basic-form-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Basic Tables 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-basic-table-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-basic-table-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Basic 1.0 Document Model 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-basic10-model-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-basic10-model-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Basic 1.1 Document Model 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-basic11-model-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-basic11-model-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML BDO Element 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-bdo-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-bdo-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Block Phrasal 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-blkphras-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-blkphras-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Block Presentation 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-blkpres-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-blkpres-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Block Structural 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-blkstruct-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-blkstruct-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Character Entities 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-charent-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-charent-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Client-side Image Maps 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-csismap-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-csismap-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Datatypes 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-datatypes-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-datatypes-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Editing Markup 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-edit-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-edit-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Intrinsic Events 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-events-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-events-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Forms 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-form-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-form-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Frames 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-frames-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-frames-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Modular Framework 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-framework-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-framework-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML HyperAttributes 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-hyperAttributes-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-hyperAttributes-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Hypertext 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-hypertext-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-hypertext-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Inline Frame Element 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-iframe-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-iframe-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Images 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-image-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-image-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Inline Phrasal 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-inlphras-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-inlphras-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Inline Presentation 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-inlpres-1.mod</p>
+          </td>
+          <td>
+            <p>xhtml11/xhtml-inlpres-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Inline Structural 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-inlstruct-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-inlstruct-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Inline Style 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-inlstyle-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-inlstyle-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Inputmode 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-inputmode-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-inputmode-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Legacy Markup 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-legacy-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-legacy-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Legacy Redeclarations 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-legacy-redecl-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-legacy-redecl-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Link Element 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-link-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-link-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Lists 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-list-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-list-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Metainformation 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-meta-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-meta-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Metainformation 2.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-meta-2.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-meta-2.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML MetaAttributes 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-metaAttributes-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-metaAttributes-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Name Identifier 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-nameident-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-nameident-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//NOTATIONS XHTML Notations 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-notations-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-notations-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Embedded Object 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-object-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-object-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Param Element 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-param-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-param-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Presentation 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-pres-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-pres-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML-Print 1.0 Document Model 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-print10-model-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-print10-model-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Qualified Names 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-qname-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-qname-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML+RDFa Document Model 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-rdfa-model-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-rdfa-model-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML RDFa Attribute Qnames 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-rdfa-qname-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-rdfa-qname-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Role Attribute 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-role-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-role-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML Role Attribute Qnames 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-role-qname-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-role-qname-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Ruby 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/ruby/xhtml-ruby-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-ruby-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Scripting 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-script-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-script-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Server-side Image Maps 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-ssismap-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-ssismap-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Document Structure 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-struct-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-struct-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XHTML Style Sheets 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-style-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-style-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Tables 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-table-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-table-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Target 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-target-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-target-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ELEMENTS XHTML Text 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml-text-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml-text-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//ENTITIES XHTML 1.1 Document Model 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/MarkUp/DTD/xhtml11-model-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/xhtml11/xhtml11-model-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//MathML 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/Math/DTD/mathml1/mathml.dtd</p>
+          </td>
+          <td>
+            <p>w3c/mathml/mathml1/mathml.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD MathML 2.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/Math/DTD/mathml2/mathml2.dtd</p>
+          </td>
+          <td>
+            <p>w3c/mathml/mathml2/mathml2.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD MathML 3.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/Math/DTD/mathml3/mathml3.dtd</p>
+          </td>
+          <td>
+            <p>w3c/mathml/mathml3/mathml3.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD SVG 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd</p>
+          </td>
+          <td>
+            <p>w3c/svg10/svg10.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD SVG 1.1//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd</p>
+          </td>
+          <td>
+            <p>w3c/svg11/svg11.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD SVG 1.1 Tiny//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd</p>
+          </td>
+          <td>
+            <p>w3c/svg11/svg11-tiny.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD SVG 1.1 Basic//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-basic.dtd</p>
+          </td>
+          <td>
+            <p>w3c/svg11/svg11-basic.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//XML-DEV//ENTITIES RDDL Document Model 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.rddl.org/xhtml-rddl-model-1.mod</p>
+          </td>
+          <td>
+            <p>w3c/rddl/xhtml-rddl-model-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//XML-DEV//DTD XHTML RDDL 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.rddl.org/rddl-xhtml.dtd</p>
+          </td>
+          <td>
+            <p>w3c/rddl/rddl-xhtml.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//XML-DEV//ENTITIES RDDL QName Module 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.rddl.org/rddl-qname-1.mod</p>
+          </td>
+          <td>
+            <p>rddl/rddl-qname-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//XML-DEV//ENTITIES RDDL Resource Module 1.0//EN</p>
+          </td>
+          <td>
+            <p>http://www.rddl.org/rddl-resource-1.mod</p>
+          </td>
+          <td>
+            <p>rddl/rddl-resource-1.mod</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD Specification V2.10//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/2002/xmlspec/dtd/2.10/xmlspec.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xmlspec/xmlspec.dtd</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <p>-//W3C//DTD XMLSCHEMA 200102//EN</p>
+          </td>
+          <td>
+            <p>http://www.w3.org/2001/XMLSchema.dtd</p>
+          </td>
+          <td>
+            <p>w3c/xmlschema/XMLSchema.dtd</p>
+          </td>
+        </tr>
+
+
+      </tbody>
+    </table>
+      
+  </section>
+  </section>
+
+
+  
+  
+
+    <section id="xml-parsing" title="XML parsing">
+      <h1>XML parsing</h1>
+      
+      <p>This section provides further information on how XML parsing is controlled
+      within SaxonC.</p>
+      
+      <nav>
+        <ul/>
+      </nav>
+ 
+  <section id="builder-api" title="Building a source document from lexical XML">
+    <h1>Building a source document from lexical XML</h1>
+
+    <p>The conversion of lexical XML to a tree in memory is called <i>parsing</i>, and is performed
+    by a software component called an <i>XML Parser</i>. Saxon does not include its own XML parser,
+    rather it provides interfaces that invoke XML parsers supplied by third parties. SaxonC
+      includes a built-in XML parser.</p>
+
+    <p>A source document can be built using the <a
+        href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html">DocumentBuilder</a> class in C++, which is created using
+      the factory method <code>newDocumentBuilder</code> (<code>new_document_builder()</code> in Python and <code>newDocumentBuilder</code> in PHP) on the <a
+              href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html">SaxonProcessor</a> object (For Python:
+      <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"><code>PySaxonProcessor</code></a>
+      and for PHP: <a href="http://localhost:8000/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor"><code>Saxon\SaxonProcessor</code></a>). There are a varity of options for document
+      building available as methods on the <code>DocumentBuilder</code>, for example options to
+      perform schema or DTD validation, to strip whitespace, to expand XInclude directives, and also
+      to choose the tree implementation model to be used.</p>
+
+    <p>For simple parsing of the XML document it is possible to do this directly on the <code>SaxonProcessor</code> without creating a <code>DocumentBuilder</code> in the C++ interface.</p>
+    
+    <p >On C++ and similarly on Python and PHP, the different ways of supplying input to the <code>DocumentBuilder</code>
+      are represented as string XML and filename of the XML document. For example:</p>
+      
+    <div>
+    <ul>
+      <li>XML represented as lexical string:
+        <samp><![CDATA[
+      DocumentBuilder * builder = proc->newDocumentBuilder();
+      XdmNode *d = builder->parseXmlFromString("<doc/>");
+         ]]></samp></li>
+      <li>XMl represented in a file: <samp><![CDATA[
+            DocumentBuilder * builder = proc->newDocumentBuilder();
+            XdmNode *d = builder->parseXmlFromFile(dir+"books.xml"");
+               ]]></samp></li>
+      <li>Parsing directly using SaxonProcessor:  <samp><![CDATA[
+                  SaxonProcessor proc = new SaxonProcessor();
+                  XdmNode *inn = proc->parseXmlFromString("<z/>");
+                     ]]></samp></li>
+      <li>Python example of parsing a XML document for a file name:
+        <samp><![CDATA[
+                builder = saxonproc.new_document_builder()
+                node = builder.parse_xml(xml_file_name='books.xml')
+                             ]]></samp>
+      </li>
+      <li>PHP example fof parsing XML from a lexical string:
+
+        <samp><![CDATA[$xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value of out</b></doc>");]]></samp>
+      </li>
+    </ul>
+    </div>
+
+    
+
+    <p>All the documents processed in a single transformation or query must be loaded using the same
+        <code>Configuration</code>. However, it is only
+      possible to copy a document from one <code>Configuration</code> into another one by serializing the object and parsing it again. </p>
+  </section>
+  
+  
+  <section id="controlling-parsing" title="Controlling parsing of source documents">
+    <h1>Controlling parsing of source documents</h1>
+
+
+    <p>Saxon does not include its own XML parser. By default:</p>
+
+    <ul>
+      <li>
+        <p>SaxonC uses the default SAX parser provided as part of the JDK. With
+          the Oracle JDK, this is a variant of the Apache Xerces parser customized by Oracle.</p>
+      </li>
+
+    </ul>
+
+    <p>An error reported by the XML parser is generally fatal. It is not possible to process
+      ill-formed XML.</p>
+
+
+    <p>By default, SaxonC invokes the parser in non-validating mode (that is, without requested DTD
+      validation). Note however, that the parser still needs to read the DTD if one is present,
+      because it may contain entity definitions that need to be expanded. DTD validation can be
+      requested using <code>-dtd:on</code> on the command line, or equivalent API or configuration
+      options.</p>
+
+
+    <p>SaxonC never asks the XML parser to perform schema validation. If schema validation is
+      required it should be requested using the command line options <code>-val:strict</code> or
+        <code>-val:lax</code>, or their API equivalents. SaxonC will then use its own schema
+      processor to validate the document as it emerges from the XML parser. Schema processing is
+      done in parallel with parsing, by use of a SAX-like pipeline.</p>
+
+
+
+
+
+  </section>
+  <section id="xml11" title="XML 1.1">
+    <h1>XML 1.1</h1>
+
+
+    <p>XML 1.1 (with XML Namespaces 1.1) originally extended XML 1.0 in three ways:</p>
+    <ul>
+      <li>
+        <p>the set of valid characters is increased</p>
+      </li>
+      <li>
+        <p>the set of characters allowed in XML Names is increased</p>
+      </li>
+      <li>
+        <p>namespace undeclarations are permitted</p>
+      </li>
+    </ul>
+
+    <p>The second change has subsequently been retrofitted to XML 1.0 Fifth Edition (XML 1.0e5).
+      Saxon now uses the XML 1.1 and XML 1.0e5 rules unconditionally for all validation of XML
+      names.</p>
+    
+    <aside>XML 1.1 has not been a great success; many parsers including the Microsoft
+      <code>System.Xml.XmlReader</code> parser do not support it. XML 1.0 therefore
+      gives better interoperability. Very few applications really need the extra features
+      in XML 1.1.</aside>
+    
+    
+    <h2 class="subtitle">XML 1.1 input documents</h2>
+
+    <p>SaxonC is capable of working with XML 1.1 input documents, provided that the XML
+      parser supports XML 1.1.</p>
+    
+    
+    <ul>
+      <li ><p>On SaxonC, the built-in XML parser and the commonly-used Apache Xerces both
+      support XML 1.1</p></li>
+    </ul>
+    
+    <h2 class="subtitle">Configuration</h2>
+    
+    <p>If you want to use Saxon with XML
+      1.1, you should set the option <code>-xmlversion:1.1</code> on the Saxon command line, or 
+      set the configuration option <a class="feature" href="XML_VERSION"/>.
+      <!--call
+      the method <a class="javalink" href="net.sf.saxon.Configuration#setXMLVersion"
+        >configuration.setXMLVersion(Configuration.XML11)</a> or, in the case of XSLT,
+      <code>transformerFactory.setAttribute(FeatureKeys.XML_VERSION, "1.1")</code>--></p>
+    
+    <p>This configuration setting affects:</p>
+    <ul>
+      <li>
+        <p>the characters considered valid in the source of an XQuery query</p>
+      </li>
+      <li>
+        <p>the characters considered valid in the result of the functions
+          <code>codepoints-to-string()</code> and <code>unparsed-text()</code></p>
+      </li>
+      <li>
+        <p>the characters considered valid in the result of certain Saxon extension functions</p>
+      </li>
+      <li>
+        <p>the way in which line endings in XQuery queries are normalized</p>
+      </li>
+      <li>
+        <p>the default version used by the serializer (with output method XML)</p>
+      </li>
+    </ul>
+    
+    <p>Note that if you use the default setting of "1.0", then supplying an XML 1.1 source document
+      as input may cause undefined errors.</p>
+    
+    <p>It is advisable to use an XML parser that supports XML 1.1 when the configuration is set to
+      "1.1", and an XML parser that does not support XML 1.1 when the configuration is set to "1.0".
+      However, Saxon does not enforce this.</p>
+    
+    <h2 class="subtitle">Data model</h2>
+    
+    <p>In the XDM data model for representation of XML documents, it is possible to have namespaces that are
+    in scope for a parent element, but not in scope for its children. This is supported by the native Saxon tree. It
+    is possible to create such trees using XSLT or XQuery, but they will never be produced by an XML 1.0 parser.
+    Such trees can be serialized either as XML 1.0 or XML 1.1: if XML 1.0 is chosen, the namespace undeclarations
+    used to indicate absent namespace bindings will simply be omitted from the output.</p>
+    
+    <p>The choice of XML 1.0 or 1.1 also affects the set of characters permitted in strings, and in XML text and attribute nodes.
+    Many (but not all) mechanisms for constructing strings check that if the configuration is set to XML 1.0,
+    only permitted XML 1.0 characters may appear. </p>
+    
+    <h2 class="subtitle">Serialization</h2>
+    
+    <p>The serialization property <code>version="1.0 | 1.1"</code> may be set on the <code>xsl:output</code>
+    and <code>xsl:result-document</code> elements, and on various APIs. The default depends on the setting
+    in the Saxon <code>Configuration</code>.</p>
+    
+    <p>You can set the configuration to allow XML 1.1, but still serialize result documents as XML
+      1.0 by specifying the output property <code>version="1.0"</code>. In this case SaxonC will
+      check while serializing the document that it conforms to the XML 1.0 constraints (note that
+      this check can be expensive). These checks are not performed if the configuration default is
+      set to XML 1.0.</p>
+
+    <p>If you want the serializer to output namespace undeclarations, use the output property
+        <code>undeclare-namespaces="yes"</code> as well as <code>version="1.1"</code>.</p>
+    
+    <p>It is not possible to serialize an XDM document as XML 1.0
+    if it contains text or attribute nodes using characters that XML 1.0 disallows.</p>
+    
+    
+  </section>
+ 
+  <section id="beyond-parsing" title="Beyond parsing">
+    <h1>Beyond parsing</h1>
+    
+    <p>This section describes various operations that can be performed while parsing a document.
+    These apply whether the result of parsing is streamed (see <a href="/streaming" class="bodylink">Streaming</a>),
+    or whether it is directed to a tree builder (see <a href="/sourcedocs/tree-models" class="bodylink">Tree models</a>).</p>
+
+    <p>Saxon processes parsed input through a pipeline of processes that is highly configurable. The
+    design concept follows the SAX push model.
+    This section describes some of the options that can be configured on the input pipeline.</p>
+    <nav>
+      <ul/>
+    </nav>
+
+    <section id="XInclude" title="XInclude processing">
+      <h1>XInclude processing</h1>
+      
+      <div>
+        <p>If you are using Xerces as your XML parser, you can have Xerces expand any XInclude
+          directives.</p>
+        
+        <p>The <code>-xi</code> option on the command line causes XInclude processing to be applied to
+          most input XML documents. This includes source documents and schema documents
+          listed on the command line, and also those loaded indirectly for example by calls on the
+          <code>doc()</code> function or by mechanisms such as <code>xs:include</code> and
+          <code>xs:import</code>. It does not, however, affect the parsing of XSLT stylesheet modules.</p>
+        
+        <p>From the C++, Python and PHP APIs, the equivalent is to call the method <code>setConfigurationProperty()</code> with the property
+          string "xi" and value as "on", "true" or "1" to enable XInclude
+          and any other value string to disable XInclude.
+          (For Python the method is <code>set_configuration_property</code>). For example in C++:</p>
+
+          <samp><![CDATA[SaxonProcessor * proc = new SaxonProcessor();
+          proc->setConfigurationProperty("xi", "true");
+          ...]]></samp>
+
+        <p>It is also possible use the set the configuration property string "http://saxon.sf.net/feature/xinclude-aware" with the value "true", see: <a href="https://www.saxonica.com/documentation12/index.html#!configuration/config-features">config features</a>.</p>
+        
+        <p>When the <code>doc()</code> or <code>document()</code> or <code>collection()</code> function is
+          called from an XPath expression, XInclude processing can be enabled by including
+          <code>xinclude=yes</code> among the query parameters in the URI.</p>
+        
+        <p>It is possible to request XInclude processing for the documents in a collection by including
+          the query parameter <code>xinclude=yes</code> in the collection URI. Similarly, for a document
+          read using the <code>doc()</code> or <code>document()</code> functions, XInclude processing can
+          be requested using <code>xinclude=yes</code> in the document URI -- but only if the
+          <code>StandardURIResolver</code> is used, and the feature is enabled by calling
+          <code>Configuration.setParameterizedURIResolver()</code> or by setting <code>-p:on</code>
+          on the <code>Query</code> or <code>Transform</code> command lines.</p>
+        
+        <p>The <a class="bodylink code" href="https://www.saxonica.com/documentation12/index.html#!xsl-elements/source-document">xsl:source-document</a>
+          instruction can enable XInclude processing using
+          the extension attribute <code>saxon:xinclude="yes"</code>.</p>
+        
+        <p>It is also possible to switch on XInclude processing (for all documents) by setting the
+          system property:</p>
+        <samp><![CDATA[-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=
+    org.apache.xerces.parsers.XIncludeParserConfiguration
+]]></samp>
+
+      </div>
+
+      <p>For further information on using XInclude, see <a
+        href="http://www.sagehill.net/docbookxsl/Xinclude.html" class="bodylink"
+        >http://www.sagehill.net/docbookxsl/Xinclude.html</a>.</p>
+    </section>
+    
+    <section id="validation" title="Schema validation">
+      <h1>Schema validation</h1>
+      
+      
+      <p>With SaxonC-EE, source documents may be validated against a schema. Not only does this perform
+        a check that the document is valid, it also adds type information to each element and
+        attribute node in the document to identify the schema type against which it was validated. It
+        may also expand the source document by adding default values of elements and attributes.</p>
+      
+      <p>If the option <code>-val:strict</code> is specified on the command line for
+        <code>query</code> or <code>transform</code>, then the principal
+        source document to the query or transformation is schema-validated, as is every document
+        loaded using the <code>doc()</code> or <code>document()</code> function. Saxon will look among
+        all the loaded schemas for an element declaration that matches the outermost element of the
+        document, and will then check that the document is valid against that element declaration,
+        reporting a fatal error if it is not. The loaded schemas include schemas imported statically
+        into the query or stylesheet using <code>import schema</code> or
+        <code>xsl:import-schema</code>, schemas referenced in the <code>xsi:schemaLocation</code> or
+        <code>xsi:noNamespaceSchemaLocation</code> attributes of the source document itself.</p>
+      
+      <p>As an alternative to <code>-val:strict</code>, the option <code>-val:lax</code> may be
+        specified. This validates the document if and only if an element declaration can be found. If
+        there is no declaration of the outermost element in any loaded schema, then it is left as an
+        untyped document.</p>
+      
+      <p>When documents are built using the <a
+        href="https://www.saxonica.com/saxon-c/doc/html/classDocumentBuilder.html">DocumentBuilder</a> in the C++ interface, or the
+        <a href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a> in the PHP
+        interface, or the <a href="https://www.saxonica.com/saxon-c/doc/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a> in the Python interface,
+        validation may be controlled by setting the appropriate options on the
+        <code>DocumentBuilder</code>.</p>
+
+      
+      <p>Saxon's standard <code>URIResolver</code> uses this technique if it has been enabled (for
+        example by using <code>-p</code> on the command line). With this option, any URI containing
+        the query parameter <code>?validation=strict</code> (for example,
+        <code>doc('source.xml?validation=strict')</code>) causes strict validation to be requested for that
+        document, while <code>?validation=lax</code> requests lax validation, and <code>?validation=strip</code>
+        requests no validation.</p>
+      
+      <p>XSLT 3.0 provides a standard way of requesting validation for individual source documents,
+        using the <code>validation</code> and <code>type</code> attributes of the <a class="bodylink
+          code" href="https://www.saxonica.com/documentation12/index.html#!xsl-elements/source-document">xsl:source-document</a> instruction.</p>
+      
+    </section>
+    <section id="whitespace" title="Whitespace stripping">
+      <h1>Whitespace stripping</h1>
+      
+      
+      <p>A number of factors combine to determine whether whitespace-only text nodes in the source
+        document are visible to the user-written XSLT or XQuery code.</p>
+      
+      <p>By default, if there is a DTD or schema, then <i>ignorable whitespace</i> is stripped from
+        any source document loaded from a <code>lexical string</code> or <code>XdmNode</code>.
+        Ignorable whitespace is defined as the whitespace that appears separating the child elements
+        in elements declared to have element-only content. This whitespace is removed regardless of
+        any <code>xml:space</code> attributes in the source document.</p>
+      
+      <p>It is possible to change this default behavior in several ways.</p>
+      <ul>
+        <li>
+          <p>From the <code>query</code> or <code>transform</code> command
+            line, options are available: <code>-strip:all</code> strips all whitespace text nodes,
+            <code>-strip:none</code> strips no whitespace text nodes, and
+            <code>-strip:ignorable</code> strips ignorable whitespace text nodes only (this is the
+            default).</p>
+        </li>
+        <li>
+          <p>If the <code>-p</code> option is used on the command line, then query parameters are
+            recognized in the URI passed to the <code>document()</code> or <code>doc()</code>
+            function. The parameter <code>strip-space=yes</code> strips all whitespace text nodes,
+            <code>strip-space=no</code> strips no whitespace text nodes, and
+            <code>strip-space=ignorable</code> strips ignorable whitespace text nodes only. This
+            overrides anything specified on the command line.</p>
+        </li>
+      </ul>
+
+      
+      <p>This whitespace stripping is additional (and prior) to any stripping carried out as a result
+        of the <code>xsl:strip-space</code> declaration in the stylesheet.</p>
+      
+      <p>Saxon never modifies a supplied tree <i>in situ</i>: if a tree is supplied as input, and the stylesheet
+        requests space stripping, then a virtual tree is created and whitespace is stripped on the fly as
+        it is navigated. This is expensive (it can add 25% to processing time); it is therefore best to
+        supply lexical XML as input to a transformation, so
+        that Saxon can strip unwanted whitespace while the tree is being parsed and built.
+      </p>
+    </section>
+    
+    <section id="projection" title="Document projection">
+      <h1>Document projection</h1>
+      
+      <aside>Document projection is available only in SaxonC-EE.</aside>
+      
+      
+      <p>Document Projection is a mechanism that analyzes a query to determine what parts of a
+        document it can potentially access, and then while building a tree to represent the document,
+        leaves out those parts of the tree that cannot make any difference to the result of the
+        query.</p>
+      
+      <p>Document projection can be enabled as an option on the XQuery command line interface: set
+        <code>-projection:on</code>. It is only used if requested. The command line option affects
+        both the primary source document supplied on the command line, and any calls on the
+        <code>doc()</code> function within the body of the query that use a literal string argument
+        for the document URI.</p>
+      
+      <p>For feedback on the impact of document projection in terms of reducing the size of the source
+        document in memory, use the <code>-t</code> option on the command line, which shows for each
+        document loaded how many nodes from the input document were retained and how many
+        discarded.</p>
+      
+      <!-- <p class="javaonly">From the s9api API, document projection can be invoked as an option on the <a
+        class="javalink" href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</a>. The call
+        <code>setDocumentProjectionQuery()</code> supplies as its argument a compiled query (an
+        <code>XQueryExecutable</code>), and the document built by the document builder is then
+        projected to retain only the parts of the document that are accessed by this query, when it
+        operates on this document as the initial context item. For example, if the supplied query is
+        <code>count(//ITEM)</code>, then only the <code>ITEM</code> elements will be retained.</p> -->
+      
+      <!-- <p>It is also possible to request that a query should perform document projection on documents
+        that it reads using the <code>doc()</code> function, provided this has a string-literal
+        argument. This can be requested using the option <code>setAllowDocumentProjection(true)</code>
+        on the <code>XQueryExpression</code> object. This is not available directly in the s9api
+        interface, but the <code>XQueryExpression</code> is reachable from the
+        <code>XQueryExecutable</code> using the accessor method
+        <code>getUnderlyingCompiledQuery()</code>.</p>
+      <aside>It is best to avoid supplying a query that actually returns nodes from the document
+        supplied as the context item, since the analysis cannot know what the invoker of the query
+        will want to do with these nodes. For example, the query
+        <code>&lt;out&gt;{//ITEM}&lt;/out&gt;</code> works better than <code>//ITEM</code>, since it
+        is clear that all descendants of the <code>ITEM</code> elements must be retained, but not
+        their ancestors. If the supplied query selects nodes from the input document, then Saxon
+        assumes that the application will need access to the entire subtree rooted at these nodes, but
+        that it will not attempt to navigate upwards or outwards from these nodes. On the other hand,
+        nodes that are atomized (for example in a filter) will be retained without their descendants,
+        except as needed to compute the filter.</aside>
+      
+      <p>The more complex the query, the less likely it is that Saxon will be able to analyze it to
+        determine the subset of the document required. If precise analysis is not possible, document
+        projection has no effect. Currently Saxon makes no attempt to analyze accesses made within
+        user-defined functions. Also, of course, Saxon cannot analyze the expectations of external
+        (Java) functions called from the query.</p>
+      
+      <p>Document projection is supported only for XQuery, and it works only when a document
+        is parsed and loaded for the purpose of executing a single query. It is possible, however, to
+        use the mechanism to create a manual filter for source documents if the required subset of the
+        document is known. To achieve this, create a query that selects the required parts of the
+        document supplied as the context item, and compile it to a s9api
+        <code>XQueryExecutable</code>. The query does not have to do anything useful: the only
+        requirement is that the result of the query on the subset document must be the same as the
+        result on the original document. Then supply this <code>XQueryExecutable</code> to the s9api
+        <code>DocumentBuilder</code> used to build the document.</p>
+      
+      <p>Of course, when document projection is used manually like this then it is entirely a user
+        responsibility to ensure that the selected part of the document contains all the nodes
+        required.</p>  -->
+    </section>
+    
+    
+  </section>  
+  <section id="tree-models" title="XML tree models">
+      <h1>XML tree models</h1>
+      
+      <p>The W3C specifications for XSLT, XQuery, and XPath model an XML document as a tree.
+      This data model is known as XDM, and the nodes of an XDM tree are known as XDM nodes.</p>
+      
+      <aside>The XDM model for nodes is superficially similar to the DOM model and the ElementTree module in Python, familiar to
+      many C++, PHP, Python or Java programmers. But there are differences in detail: the most
+      obvious is the representation of namespaces.</aside>
+      
+      <p>In Saxon, all XDM nodes are represented internally using the interface 
+        <a href="https://www.saxonica.com/documentation12/index.html#!xpath-api/nodeinfo" class="bodylink">NodeInfo</a>, which is not exposed
+        in the public SaxonC APIs. Saxon provides a number
+      of implementations of the <code>NodeInfo</code> interface, including implementations 
+        that wrap third-party tree models.</p>
+    
+    <aside>In principle it is possible for third parties to provide additional implementations
+    of the <code>NodeInfo</code> interface. However, this is a complex undertaking.</aside>
+    
+    <p>In this section:</p>
+    
+    <nav><ul/></nav>
+      
+      <section id="choosingmodel" title="Choosing a tree model">
+        <h1>Choosing a tree model</h1>
+        
+        
+        <p>SaxonC provides the following implementations of the internal tree data structure (or tree model).
+          The tree model can be chosen by an option on the command line (<code>-tree:tiny</code> for the
+          tiny tree, <code>-tree:linked</code> for the linked tree). There is also a variant of the tiny
+          tree called a "condensed tiny tree" which saves space (at the expense of build time) by
+          recognizing text nodes and attribute nodes whose values appear more than once in the input
+          document.</p>
+        
+        <p>
+          <i>The "linked tree" is the only model to support in-situ updates, so if you are using XQuery
+            Update you must choose this model.</i>
+        </p>
+        
+        <p>Generally speaking, the tiny tree model is both faster to build and faster to navigate. It
+          also uses less space.</p>
+        
+        <p>The tiny tree model gives most benefit when you are processing a large document. It uses a
+          lot less memory, so it can prevent thrashing when the size of document is such that the linked
+          tree doesn't fit in real memory. Use the "condensed" variant if you need to save memory, and
+          if your source data contains many text or attribute nodes with repeated values.</p>
+        
+        <p>Saxon also offers the option <code>-tree:condensed</code>. This delivers a TinyTree with
+          additional compression. Specifically, when a document contains multiple text nodes or
+          attribute nodes with the same string value, the condensed tree will "common up" the storage
+          for these nodes. This option gives a further reduction in memory usage, at the cost of slower
+          tree construction.</p>
+        
+        <p>The linked tree is used internally to represent stylesheet and schema modules because of the
+          programming convenience it offers: it allows element nodes on the tree to be represented by
+          custom classes for each kind of element. The linked tree is also needed when you want to use
+          XQuery Update, because unlike the tiny tree, it is mutable.</p>
+        
+        <p>
+          <i>If in doubt, stick with the default.</i>
+        </p>
+      </section>
+    
+
+    </section>
+    </section>
+
+  <section id="collections" title="Collections">
+    <h1>Collections</h1>
+
+    <p>Saxon implements the <a class="bodylink code" href="/functions/fn/collection"
+        >collection()</a> and <a class="bodylink code" href="/functions/fn/uri-collection"
+        >uri-collection()</a> functions. This section describes how
+      the standard (default) collection finder behaves.</p>
+    
+    <p>In XSLT 3.0 and XQuery 3.1, collections can contain resources other than XML documents: for
+    example, JSON documents, plain text documents, and binary files.</p>
+    
+    <p>In this section:</p>
+    
+    <nav><ul/></nav>
+    
+    <section id="collection-uris" title="Collection URIs">
+      <h1>Collection URIs</h1>
+
+      <!-- <p>The default collection can be registered with the Java <code
+        java="net.sf.saxon.s9api.Processor">Processor</code> or C# <code cs="Saxon.Api.Processor">Processor</code>
+        (or with its underlying <code java="net.sf.saxon.Configuration">Configuration</code>) by setting the
+        configuration feature <a class="feature" href="DEFAULT_COLLECTION"/>. The value takes the form of a
+        collection URI. When the <a class="bodylink code" href="/functions/fn/collection">collection()</a>
+        function is called with no arguments, this is exactly the same as supplying this default collection
+        URI. If no default collection URI has been registered, an empty collection is returned.</p>  -->
+
+    <p>The standard collection finder supports four different kinds of collection: registered collections,
+      catalog-based collections, directory-based collections, and zip-based collections:</p>
+
+
+
+    <p>Saxon by default recognizes four kinds of resource: XML documents,
+      JSON documents, unparsed text documents, and binary files. The standard collection resolver
+      attempts to identify which kind of resource to use based on the content type (media type),
+      which in turn may be inferred from HTTP headers, from sniffing the initial bytes of the
+      content, or from file extensions.</p>
+
+    <p>In the case of directory-based and ZIP-based collections, query parameters may be added to
+      the collection URI to further control how it is to be processed.</p>
+    
+    <aside><p>Saxon cannot assume that the nodes returned by the <code>collection()</code> function
+    are in document order. It is therefore best to avoid expressions like <code>collection()/doc/section</code>
+    which force the collection to be sorted (and therefore force all the nodes in the collection to
+    be in memory at the same time). To iterate over a collection, it's better to use constructs that
+    don't sort into document order: for example <code>collection() ! doc/section</code>,
+    or <code>xsl:for-each</code>, or <code>for $x in collection() return ...</code>.</p>
+    
+      <p>See also <a class="bodylink code"
+        href="/functions/saxon/discard-document">saxon:discard-document()</a>.</p></aside>
+    </section>
+    <section id="collection-catalogs" title="Collection catalogs">
+    <h1>Defining a collection using a collection catalog</h1>
+
+    <p>If the collection URI identifies a file, Saxon treats this as a collection catalog. This is a file
+      in XML format that lists the documents comprising the collection. Here is an example of such a
+      catalog file:</p>
+    <samp><![CDATA[<collection stable="true">
+  <doc href="dir/contents.json"/>
+  <doc href="dir/chap1.xml"/>
+  <doc href="dir/chap2.xml"/>
+  <doc href="dir/chap3.xml"/>
+  <doc href="dir/chap4.xml"/>
+  <doc href="dir/index.json"/>
+</collection>]]></samp>
+
+    <p>The <code>stable</code> attribute indicates whether the collection is stable or not. The
+      default value is <code>true</code>. If a collection is stable, then the URIs listed in the
+      <code>doc</code> elements are treated like URIs passed to the <code>doc()</code> function.
+      Each URI is first looked up in the document pool to see if it is already loaded; if it is,
+      then the corresponding value is returned (a document node in the case of XML resources). 
+      Otherwise the URI is passed to the registered
+      <code>URIResolver</code>, and the resulting document is added to the document pool. The
+      effect of this process is firstly, that two calls on the <code>collection()</code> function
+      passing the same collection URI will return the same nodes each time, and secondly, that these
+      results are consistent with the results of the <code>doc()</code> function: if the
+      <code>document-uri()</code> of a node returned by the <code>collection()</code> function is
+      passed to the <code>doc()</code> function, the original node will be returned. If
+      <code>stable="false"</code> is specified, however, the URI is dereferenced directly, and the
+      document is not added to the document pool, which means that a subsequent retrieval of the
+      same document will not return the same node.</p>
+    </section>
+    <section id="collection-directories" title="Directories as collections"> 
+
+      <h1>Directories as collections</h1>
+
+    <p>If the URI passed to the <code>collection()</code> function (still assuming a default
+        <code>CollectionFinder</code>) identifies a directory, then the contents of the
+      directory are returned. Such a URI may have a number of query parameters, written in the form
+        <code>file:///a/b/c/d?keyword=value;keyword=value;...</code>. The recognized keywords and
+      their values are as follows:</p>
+    <table>
+      <thead class="params">
+        <tr>
+          <td>
+            <p> keyword </p>
+          </td>
+          <td>
+            <p> values </p>
+          </td>
+          <td>
+            <p> effect </p>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="keyword">
+            <p> recurse </p>
+          </td>
+          <td>
+            <p>
+              <span class="value">yes | no</span> (default <span class="value">no</span>) </p>
+          </td>
+          <td>
+            <p> Determines whether subdirectories are searched recursively. </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> strip-space </p>
+          </td>
+          <td>
+            <p class="value"> yes | ignorable | no </p>
+          </td>
+          <td>
+            <p> Determines whether whitespace text nodes are to be stripped. The default depends on
+              the <a class="javalink" href="net.sf.saxon.Configuration">Configuration</a> settings.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> validation </p>
+          </td>
+          <td>
+            <p class="value"> strip | preserve | lax | strict </p>
+          </td>
+          <td>
+            <p> Determines whether and how schema validation is applied to each document. The
+              default depends on the <a class="javalink" href="net.sf.saxon.Configuration"
+                >Configuration</a> settings. </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> select </p>
+          </td>
+          <td>
+            <p> file name pattern ("glob")</p>
+          </td>
+          <td>
+            <p> Determines which files are selected (see below). </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> match </p>
+          </td>
+          <td>
+            <p> regular expression</p>
+          </td>
+          <td>
+            <p> Determines which files are selected (see below). </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> content-type </p>
+          </td>
+          <td>
+            <p> media type (for example <code>application/xml</code> or <code>text/plain</code>)</p>
+          </td>
+          <td>
+            <p> Determines how the resource is processed. For example if the media type is 
+            <code>application/xml</code> then it will be parsed as XML and returned as a document node;
+            if it is <code>text/plain</code> then it is returned as an atomic value of type
+            <code>xs:string</code>; if it is <code>application/binary</code> then it is returned
+            as an atomic value of type <code>xs:base64Binary</code>.</p>
+            <p>If this parameter is absent, then the <code
+              java="net.sf.saxon.lib.CollectionFinder">CollectionFinder</code> attempts to discern the
+            content type first by looking at the file extension, and then, if necessary, by
+            examining the initial bytes of the content itself.</p>
+            <p>The set of content types that are recognized, and their mapping to implementations of the
+            class <code java="net.sf.saxon.lib.ResourceFactory">ResourceFactory</code>, is defined in the 
+            <code java="net.sf.saxon.Configuration">Configuration</code>, and can be changed using the
+            method <code>Configuration.registerMediaType()</code>. The set of file extensions that are
+              recognized, and their mapping to media types, is also held in the <code>Configuration</code>, and can be changed using the
+              method <code>Configuration.registerFileExtension()</code>.</p>
+            <p>Available from Saxon 10.1.</p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> metadata </p>
+          </td>
+          <td>
+            <p class="value"> yes | no</p>
+          </td>
+          <td>
+            <p> If set to yes, the item returned by the <code>collection()</code> function will be a
+              map containing properties of the selected resource as well as its content. The keys of
+              the map will be strings. Two entries with names "name" and "fetch" will always be
+              available.</p>
+            <p>The value of the "fetch" entry is a function that can be called to retrieve the
+              content (it returns the same item that would have been returned with the default
+              setting of <code>metadata=no</code>: for example a node representing an XML document,
+              or a map representing the content of a JSON file). This allows you to decide which
+              items in the collection to fetch based on their properties, for example:</p>
+
+            <p>
+              <code>for $m in collection('/data/folder?metadata=yes') return if
+                ($m?content-type='application/xml') then $m?fetch() else ()</code>
+            </p>
+
+            <p>Failures in parsing a resource can be trapped by using try/catch around the call on
+              the <code>fetch</code> function.</p>
+            <p>Other entries in the returned map represent properties of the file obtained from the
+              operating system: for example <code>last-modified</code>, <code>can-execute</code>,
+                <code>length</code>, or <code>is-hidden</code>.</p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> on-error </p>
+          </td>
+          <td>
+            <p class="value"> fail | warning | ignore </p>
+          </td>
+          <td>
+            <p> Determines the action to be taken if one of the files cannot be successfully parsed.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> parser </p>
+          </td>
+          <td>
+            <p> Java class name </p>
+          </td>
+          <td>
+            <p> Class name of the Java <code>XMLReader</code> to be used. For example, John Cowan's
+                <code>TagSoup</code> parser may be selected by specifying
+                <code>parser=org.ccil.cowan.tagsoup.Parser</code> (this parses arbitrary ill-formed
+              HTML and presents it to Saxon as well-formed XML). </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> xinclude </p>
+          </td>
+          <td>
+            <p class="value"> yes | no </p>
+          </td>
+          <td>
+            <p> Determines whether XInclude processing should be applied to the selected documents.
+              This overrides any setting in the <a class="javalink"
+                href="net.sf.saxon.Configuration">Configuration</a> (or any command line option).
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="keyword">
+            <p> stable </p>
+          </td>
+          <td>
+            <p class="value"> yes | no </p>
+          </td>
+          <td>
+            <p> Determines whether the collection is to be stable. </p>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <p>The pattern used in the <code>select</code> parameter can use glob-like syntax, for example
+        <code>*.xml</code> selects all files with extension "xml". More generally, the pattern is
+      converted to a regular expression by prepending "<code>^</code>", appending "<code>$</code>",
+      replacing "<code>.</code>" by "<code>\.</code>", "<code>*</code>" by
+      "<code>.*</code>", and "<code>?</code>" by
+      "<code>.?</code>", and it is then used to match the file names appearing in the directory
+      using the Java regular expression rules. So, for example, you can write
+        <code>?select=*.(xml|xhtml)</code> to match files with either of these two file extensions.
+      Note however, that special characters used in the URL (that is, characters such as backslash 
+      and curly braces that are not allowed in the query part of a URI) must be escaped using 
+      the %HH convention. For example,
+      vertical bar needs to be written as <code>%7C</code>. This escaping can be achieved using the
+        <code>encode-for-uri()</code> function.</p>
+    
+    <p>As an alternative to the <code>select</code> parameter, the <code>match</code> parameter
+    can be used. This accepts a standard XPath 3.1 regular expression as its value. For example,
+    <code>.+\.xml</code> selects all files with extension "xml". Again, characters that are not allowed
+    in the query part of a URI, such as backslash, curly braces, and vertical bar, must be escaped
+    using the %HH convention, which can be achieved using the encode-for-uri() function.</p>
+
+    <p> A collection read in this way is not stable by default. (Stability can be expensive, and is
+      rarely required, so the default setting is recommended.) Making a collection stable has the
+      effect that the entire result of the <code>collection()</code> function is retained in a cache
+      for the duration of the query or transformation, and any further calls on
+        <code>collection()</code> with the same absolute URI return this saved collection retrieved
+      from this cache. </p>
+
+    </section>
+    <section id="ZIP-collections" title="ZIP collections" class="javaonly">
+    <h1>ZIP and JAR files as collections</h1>
+    <p>If the collection URI identifies a ZIP or JAR file then it is processed in exactly the same
+      way as a directory. URI query parameters can be used in the same way, and have much the same
+      effect.</p>
+
+    <p>A URI is recognized as a ZIP or JAR file URI if any of the following conditions applies:</p>
+    
+    <ul>
+      <li>The standard collection finder is used and either (a) the URI uses the (non-standard)
+        "jar" URI scheme, or (b) the collection URI ends with <code>.zip</code>, <code>.jar</code>,
+        or <code>.docx</code>;</li>
+      <li>A custom collection finder is used and the method <code>isJarfileURI(collectionURI)</code>
+        returns true;</li>
+      <li>A regular expression is supplied as the value of the configuration property
+        <a class="feature" href="ZIP_URI_PATTERN"/>, and the collection URI matches this regular expression.</li>
+    </ul>
+    
+    <p>The value of the <code>recurse</code> option is ignored in this case, and
+        <code>recurse=yes</code> is assumed.</p>
+
+    <p>The option <code>metadata=yes</code> is available for ZIP-based collections as well as for
+      directory-based collections. The set of properties returned in the resulting map is slightly
+      different, for example it includes any <code>comment</code> field associated with the ZIP file
+      entry. Note that no items are returned in respect of directory nodes within the ZIP file; only
+      leaf nodes are represented.</p>
+</section>
+  
+  </section>
+</article>
