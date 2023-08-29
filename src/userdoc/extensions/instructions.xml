@@ -679,63 +679,6 @@
     </saxon-element>
   </section>
   
-  <section id="for-each-member" title="saxon:for-each-member">
-    <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
-      <name namespace="http://saxon.sf.net/">for-each-member</name>
-      <element-syntax name="for-each-member">
-        <in-category name="instruction"/>
-        <attribute name="select" required="yes">
-          <desc>An XPath expression that must evaluate to an array.</desc>
-          <data-type name="expression"/>
-        </attribute>
-        <attribute name="bind-to" required="yes">
-          <desc>The name of a variable that will be bound to each member of the array in turn; the variable is in scope
-          within the contained sequence constructor.</desc>
-          <data-type name="QName"/>
-        </attribute>
-        <model name="sequence-constructor"/>
-        <allowed-parents>
-          <parent-category name="sequence-constructor"/>
-        </allowed-parents>
-      </element-syntax>
-      <description>
-        <p>The <code>saxon:for-each-member</code> instruction is used to iterate over the  members of an array.</p>       
-      </description>
-      <details>
-        <p>The instruction evaluates the <code>select</code> expression, which must return a single array.</p>
-        <p>The sequence constructor contained by the instruction is executed once for each member of the array. A member
-        of an array can be any sequence (not necessarily a single item). The variable named in the <code>bind-to</code>
-        attribute is in scope within the sequence constructor, and is bound, on each iteration, to the array member
-        being processed.</p>
-        <p>The result of the instruction is the sequence-concatenation of the results of the repeated iterations,
-        respecting the original order of members in the array.</p>
-        <p>The context item, position, and size are not changed within the instruction; references to <code>.</code>,
-        <code>position()</code>, or <code>last()</code> may therefore not have the expected effect.</p>
-        <aside>If the members of the array are all singleton items (which will generally be the case when the array
-        is produced by parsing JSON, unless there are <code>null</code> entries), then the instruction 
-          <code>&lt;xsl:for-each select="$ARRAY?*></code>
-          can be used. The <code>saxon:for-each-member</code> instruction is needed when processing 
-          arrays whose members are not singleton items.</aside>
-        <aside>Internally, the instruction compiles into the same code as the <code>for member $M in A return X</code>
-          expression (see <a class="bodylink"
-            href="/v4extensions/other-xpath-extensions/for-member-expression">For-member expressions</a>).</aside>
-        <p>Example:</p>
-        <samp><![CDATA[<xsl:variable name="emp-array" select="parse-json('employees.json')"/>
-<saxon:for-each-member select="array:sort($emp-array, function($e){$e?ssn})" bind-to="emp">
-  <employee ssn="{$emp?ssn}">
-     <firstName>{$emp?first}</firstName>
-     <lastName>{$emp?last}</lastName>
-  </employee>
-</saxon:for-each-member>  
-]]></samp>
-      </details>
-      <saxon-edition>PE/EE 10</saxon-edition>
-      <see-also name="array" type="extensions" subtype="instructions" namespace="saxon"/>
-      <see-also name="array-member" type="extensions" subtype="instructions" namespace="saxon"/>
-      <see-also name="array-member" type="functions" namespace="saxon"/>
-    </saxon-element>
-  </section>
-  
 
   <section id="import-query" title="saxon:import-query">
     <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
