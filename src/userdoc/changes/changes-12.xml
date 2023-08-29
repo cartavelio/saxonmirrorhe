@@ -399,6 +399,12 @@
         <p>For 12.3, there have been changes to the keywords used for arguments to built-in functions,
         tracking the draft specifications which have adjusted the keywords to give greater consistency.</p>
         
+        <p>From Saxon 12.4:</p>
+        <ul>
+            <li><p>Functions that accept a collation argument now allow it to be set to an empty sequence,
+            which has the same effect as omitting the argument.</p></li>
+        </ul>
+        
       
         <h2>Dropped or Changed Extension Functions</h2>
         
