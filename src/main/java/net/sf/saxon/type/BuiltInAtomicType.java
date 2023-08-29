@@ -961,7 +961,6 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
                     // This check added in 9.3. The XSLT spec says that this check should not be performed during
                     // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
                     if (!rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName())) {
-                        System.err.println(rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName()));
                         return new ValidationFailure("Notation {" + nv.getNamespaceURI() + "}" +
                                 nv.getLocalName() + " is not declared in the schema");
                     }
