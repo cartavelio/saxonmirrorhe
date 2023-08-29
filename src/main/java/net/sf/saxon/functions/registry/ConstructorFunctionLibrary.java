@@ -130,10 +130,30 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         final String localName = functionName.getComponentName().getLocalPart();
         boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);
         if (builtInNamespace) {
-            // it's a constructor function: treat it as shorthand for a cast expression
-            if (functionName.getArity() != 1) {
+            int languageVersion = env.getXPathVersion();
+            if (languageVersion >= 40 && arguments.length == 0) {
+                SymbolicName.F f1 = new SymbolicName.F(functionName.getComponentName(), 1);
+                return bind(f1, new Expression[]{new ContextItemExpression()}, keywords, env, reasons);
+            } else if (functionName.getArity() != 1) {
                 reasons.add("A constructor function must have exactly one argument");
                 return null;
+            }
+            if (keywords != null && !keywords.isEmpty()) {
+                if (keywords.size() != 1) {
+                    reasons.add("The keyword for the sole argument of a constructor function is 'value'");
+                    return null;
+                }
+                for (Map.Entry<StructuredQName, Integer> kw : keywords.entrySet()) {
+                    if (kw.getKey().getEQName().equals("Q{}value")) {
+                        if (kw.getValue() != 0) {
+                            reasons.add("The 'value' keyword in a constructor function call must be the first and only argument");
+                            return null;
+                        }
+                    } else {
+                        reasons.add("The argument keyword '" + kw.getKey().getEQName() + " is not allowed in a constructor function call");
+                        return null;
+                    }
+                }
             }
             SimpleType type = Type.getBuiltInSimpleType(uri, localName);
             if (type != null) {
