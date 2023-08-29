@@ -40,7 +40,6 @@ public class PathMaintainer extends ProxyReceiver {
                              Location location, int properties)
             throws XPathException {
         // System.err.println("startElement " + nameCode);
-        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
         HashMap<NodeName, Integer> counters = siblingCounters.peek();
 
         int preceding = counters.getOrDefault(elemName, 0);
@@ -48,6 +47,9 @@ public class PathMaintainer extends ProxyReceiver {
         counters.put(elemName, index);
         path.push(new AbsolutePath.PathElement(Type.ELEMENT, elemName, index));
         siblingCounters.push(new HashMap<>());
+
+        nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
+
     }
 
     /**
