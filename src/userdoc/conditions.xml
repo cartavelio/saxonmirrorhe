@@ -75,19 +75,21 @@
   who do, it is published in two forms:</p>
   
   <ul>
-    <li><p>Saxonica's open-source Subversion repository at 
-      <a href="http://dev.saxonica.com/" class="bodylink">dev.saxonica.com</a> contains
+    <li><p>Saxonica's open-source Git repository at 
+      <a href="https://saxonica.plan.io/projects/saxonmirrorhe/repository"
+        class="bodylink">https://saxonica.plan.io/projects/saxonmirrorhe/repository</a> contains
     the source code in the form required by the MPL license, that is, "the form of the work preferred
     for making modifications". This form of the code includes preprocessor directives used to identify
     variations between the code for different Saxon editions, and it therefore cannot be compiled until
     the preprocessor has been run. The repository includes gradle build files that invoke this preprocessing.
     The build files are complex and have many dependencies. Many users will therefore find it easier
     to build from the preprocessed source published on GitHub.</p></li>
-    <li><p>For every release, a ZIP file containing Saxon-HE source is published in the Saxonica
-      Saxon-HE repository on GitHub. A typical file name is <code>saxon-source-12.0.zip</code>. This is the source
-    code after preprocessing to extract the code needed for building SaxonJ-HE, and it is possible to compile
-    it simply by dropping it into the source directory structure for an IDE such as Eclipse or IntelliJ, 
-    provided all the required third-party libraries are present on the classpath.</p></li>
+    <li><p>For every release, a ZIP file containing Saxon-HE source is published in the <a class="bodylink"
+      href="https://github.com/Saxonica/Saxon-HE/">Saxonica Saxon-HE GitHub repository</a>. A typical file
+      name is <code>saxon-source-12.0.zip</code>. This is the source
+      code after preprocessing to extract the code needed for building SaxonJ-HE, and it is possible to compile
+      it simply by dropping it into the source directory structure for an IDE such as Eclipse or IntelliJ, 
+      provided all the required third-party libraries are present on the classpath.</p></li>
   </ul>
   
   <p>Saxonica does not actively solicit contributions to the code from external developers. We will accept
