@@ -71,6 +71,7 @@ public class FocusTrackingIterator
     public Item next() {
         curr = base.next();
         if (curr == null) {
+            last = pos;
             pos = -1;
         } else {
             pos++;
