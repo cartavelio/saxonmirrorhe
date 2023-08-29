@@ -579,7 +579,7 @@ public class TransformFn extends SystemFunction implements Callable {
         int languageVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         checkTransformOptions(options, context, languageVersion);
         if (options.get("xslt-version") != null) {
-            double targetVersion = ((BigDecimalValue) options.get("xslt-version").head()).getDoubleValue();
+            double targetVersion = ((DecimalValue) options.get("xslt-version").head()).getDoubleValue();
             if (targetVersion * 10 > languageVersion) {
                 throw new XPathException("The transform option xslt-version is higher than the language version supported by this processor", "FOXT0002");
             }
