@@ -106,6 +106,7 @@ public class ParamKeywords {
         fnParamNames.put("doc", "href");
         fnParamNames.put("doc-available", "href");
         fnParamNames.put("document-uri", "node");
+        fnParamNames.put("duplicate-values", "values|collation");
         fnParamNames.put("element-with-id", "values|node");
         fnParamNames.put("empty", "input");
         fnParamNames.put("encode-for-uri", "value");
