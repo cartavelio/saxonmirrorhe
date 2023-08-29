@@ -236,6 +236,7 @@ public final class SingletonAtomizer extends UnaryExpression {
                 } else {
                     String message = e.getMessage() + ". Failed while atomizing the " + roleDiagnostic.getMessage();
                     XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                    e2.setErrorCodeQName(e.getErrorCodeQName());
                     e2.setXPathContext(context);
                     e2.maybeSetLocation(getLocation());
                     throw e2;
