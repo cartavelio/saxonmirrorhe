@@ -20,6 +20,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
@@ -117,9 +118,13 @@ public class Trace extends SystemFunction implements Traceable {
         Controller controller = context.getController();
         String label = arguments.length == 1 ? "*" : arguments[1].head().getStringValue();
         if (controller.isTracing()) {
-            Sequence value = SequenceTool.toGroundedValue(arguments[0].iterate());
-            notifyListener(label, value, context);
-            return value;
+            try {
+                Sequence value = SequenceTool.toGroundedValue(arguments[0].iterate());
+                notifyListener(label, value, context);
+                return value;
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         } else {
             Logger out = controller.getTraceFunctionDestination();
             if (out == null) {

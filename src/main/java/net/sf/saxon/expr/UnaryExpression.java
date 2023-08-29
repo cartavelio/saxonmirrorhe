@@ -71,10 +71,14 @@ public abstract class UnaryExpression extends Expression {
         // if the operand value is known, pre-evaluate the expression
         try {
             if (getBaseExpression() instanceof Literal) {
-                Expression e2 = Literal.makeLiteral(
-                        SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
-                ExpressionTool.copyLocationInfo(this, e2);
-                return e2;
+                try {
+                    Expression e2 = Literal.makeLiteral(
+                            SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
+                    ExpressionTool.copyLocationInfo(this, e2);
+                    return e2;
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             //return (Value)ExpressionTool.eagerEvaluate(this, env.makeEarlyEvaluationContext());
         } catch (Exception err) {

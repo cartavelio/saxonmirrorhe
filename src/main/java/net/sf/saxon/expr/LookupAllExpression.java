@@ -125,7 +125,11 @@ public class LookupAllExpression extends UnaryExpression {
         }
 
         if (getBaseExpression() instanceof Literal) {
-            return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+            try {
+                return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         return this;

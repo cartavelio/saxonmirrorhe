@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -98,20 +99,24 @@ public final class TailCallLoop extends UnaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        final XPathContextMajor cm = (XPathContextMajor) context;
-        while (true) {
-            SequenceIterator iter = getBaseExpression().iterate(cm);
-            GroundedValue extent = SequenceTool.toGroundedValue(iter);
-            TailCallInfo tail = cm.getTailCallInfo();
-            if (tail == null) {
-                return extent.iterate();
-            } else {
-                UserFunction target = establishTargetFunction(tail, cm);
-                if (target != containingFunction) {
-                    return tailCallDifferentFunction(target, cm).iterate();
+        try {
+            final XPathContextMajor cm = (XPathContextMajor) context;
+            while (true) {
+                SequenceIterator iter = getBaseExpression().iterate(cm);
+                GroundedValue extent = SequenceTool.toGroundedValue(iter);
+                TailCallInfo tail = cm.getTailCallInfo();
+                if (tail == null) {
+                    return extent.iterate();
+                } else {
+                    UserFunction target = establishTargetFunction(tail, cm);
+                    if (target != containingFunction) {
+                        return tailCallDifferentFunction(target, cm).iterate();
+                    }
+                    // otherwise, loop round to execute the tail call
                 }
-                // otherwise, loop round to execute the tail call
             }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
     }
 

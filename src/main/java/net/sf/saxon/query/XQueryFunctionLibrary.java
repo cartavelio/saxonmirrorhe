@@ -17,6 +17,7 @@ import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -193,7 +194,11 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             }
             Sequence[] args = new Sequence[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                args[i] = SequenceTool.toGroundedValue(arguments[i].iterate());
+                try {
+                    args[i] = SequenceTool.toGroundedValue(arguments[i].iterate());
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             return function.call(context.newCleanContext(), args);
         }

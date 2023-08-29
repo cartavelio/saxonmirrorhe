@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.value.NumericValue;
@@ -165,8 +166,12 @@ public class SubscriptExpression extends SingleItemFilter {
                 MemoSequence mem = ((MemoSequence.ProgressiveIterator)iter).getMemoSequence();
                 item = mem.itemAt(intindex - 1);
             } else if (iter instanceof GroundedIterator && ((GroundedIterator)iter).isActuallyGrounded()) {
-                GroundedValue value = SequenceTool.toGroundedValue(iter);
-                item = value.itemAt(intindex - 1);
+                try {
+                    GroundedValue value = SequenceTool.toGroundedValue(iter);
+                    item = value.itemAt(intindex - 1);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             } else {
                 SequenceIterator tail = TailIterator.make(iter, intindex);
                 item = tail.next();

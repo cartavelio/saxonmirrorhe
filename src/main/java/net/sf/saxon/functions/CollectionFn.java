@@ -278,7 +278,11 @@ public class CollectionFn extends SystemFunction implements Callable {
         if (collection.isStable(context) || context.getConfiguration().getBooleanProperty(Feature.STABLE_COLLECTION_URI)) {
             Controller controller = context.getController();
             DocumentPool docPool = controller.getDocumentPool();
-            cachedCollection = SequenceTool.toGroundedValue(result);
+            try {
+                cachedCollection = SequenceTool.toGroundedValue(result);
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
             SequenceIterator iter = cachedCollection.iterate();
             Item item;
             while ((item = iter.next()) != null) {

@@ -687,7 +687,11 @@ public class UseWhenFilter extends ProxyReceiver {
         ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);
         XPathContext dynamicContext = makeDynamicContext(staticContext);
         ((XPathContextMajor) dynamicContext).openStackFrame(stackFrameMap);
-        return SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
+        try {
+            return SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
 

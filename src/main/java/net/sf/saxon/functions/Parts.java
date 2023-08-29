@@ -19,6 +19,7 @@ import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -79,8 +80,12 @@ public class Parts extends SystemFunction implements Callable {
         if (details == null) {
             details = new HashMap<>();
         }
-        for (Map.Entry<String, ComponentDetails> component : details.entrySet()) {
-            result.initialPut(component.getKey(), SequenceTool.toGroundedValue(component.getValue().supplier.apply(subject)));
+        try {
+            for (Map.Entry<String, ComponentDetails> component : details.entrySet()) {
+                result.initialPut(component.getKey(), SequenceTool.toGroundedValue(component.getValue().supplier.apply(subject)));
+            }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
         result.initialPut("value", subject);
         return result;

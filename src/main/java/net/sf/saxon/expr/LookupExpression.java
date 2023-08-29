@@ -18,6 +18,7 @@ import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.ma.map.TupleType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
@@ -335,7 +336,12 @@ public class LookupExpression extends BinaryExpression {
                 });
             } else {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
+                GroundedValue rhs;
+                try {
+                    rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
                 return MappingIterator.map(baseIterator, baseItem ->
                     MappingIterator.map(rhs.iterate(), index -> {
                         ArrayItem array = (ArrayItem) baseItem;
@@ -357,7 +363,12 @@ public class LookupExpression extends BinaryExpression {
                 );
             } else {
                 SequenceIterator baseIterator = getLhsExpression().iterate(context);
-                GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
+                GroundedValue rhs;
+                try {
+                    rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
                 return MappingIterator.map(baseIterator, baseItem ->
                         MappingIterator.map(rhs.iterate(), index ->
                             optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
@@ -367,7 +378,12 @@ public class LookupExpression extends BinaryExpression {
 
         } else {
             SequenceIterator baseIterator = getLhsExpression().iterate(context);
-            GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
+            GroundedValue rhs;
+            try {
+                rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
             MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
                 switch(baseItem.getGenre()) {
                     case ARRAY: {

@@ -13,6 +13,7 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.AnyFunctionType;
@@ -298,7 +299,11 @@ public class PartialApply extends Expression {
             if (boundArgumentsOp[i] == null) {
                 values[i] = null;
             } else {
-                values[i] = SequenceTool.toGroundedValue(boundArgumentsOp[i].getChildExpression().iterate(context));
+                try {
+                    values[i] = SequenceTool.toGroundedValue(boundArgumentsOp[i].getChildExpression().iterate(context));
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
         }
         return new CurriedFunction(f, values);

@@ -14,6 +14,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.*;
@@ -546,7 +547,11 @@ public abstract class PJConverter {
 
         @Override
         public Object convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
-            return SequenceTool.toGroundedValue(value.iterate());
+            try {
+                return SequenceTool.toGroundedValue(value.iterate());
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
     }

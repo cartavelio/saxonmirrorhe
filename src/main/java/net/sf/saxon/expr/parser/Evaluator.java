@@ -453,7 +453,11 @@ public abstract class Evaluator {
             Sequence base = Variable.INSTANCE.evaluate(vr, context);
             if (base instanceof net.sf.saxon.value.MemoClosure) {
                 SequenceIterator it = base.iterate();
-                base = SequenceTool.toGroundedValue(it);
+                try {
+                    base = SequenceTool.toGroundedValue(it);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             if (base instanceof IntegerRange) {
                 long step = ((IntegerRange) base).getStep();
