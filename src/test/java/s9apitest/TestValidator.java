@@ -1850,5 +1850,88 @@ public class TestValidator {
         }
     }
 
+    @Test
+    public void testKeyCardinalityInference() {   // Bug 6033
+        // Should not produce any warnings
+        String xsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<xs:schema\n"
+                + "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
+                + "  xmlns=\"http://erehwon.org/xsd/foo\"\n"
+                + "  xmlns:t=\"http://erehwon.org/xsd/foo\"\n"
+                + "  targetNamespace=\"http://erehwon.org/xsd/foo\"\n"
+                + "  elementFormDefault=\"qualified\"\n"
+                + "  attributeFormDefault=\"unqualified\">\n"
+                + "\n"
+                + "  <xs:element name=\"Docu\"\n"
+                + "              type=\"DocuType\">\n"
+                + "    <xs:key name=\"MassUnitKey\">\n"
+                + "      <xs:selector\n"
+                + "        xpath=\"t:FileUnits/t:MassUnit\"/>\n"
+                + "      <xs:field xpath=\"t:UnitName\"/>\n"
+                + "    </xs:key>\n"
+                + "    <xs:key name=\"LinearUnitKey\">\n"
+                + "      <xs:selector\n"
+                + "        xpath=\"t:FileUnits/t:LinearUnit\n"
+                + "\t     | t:FileUnits/t:PMILinearUnit\"/>\n"
+                + "      <xs:field xpath=\"t:UnitName\"/>\n"
+                + "    </xs:key>\n"
+                + "  </xs:element>\n"
+                + "\n"
+                + "  <xs:complexType name=\"DocuType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element ref=\"FileUnits\"\n"
+                + "                  minOccurs=\"0\">\n"
+                + "      </xs:element>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:complexType name=\"UnitsType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element name=\"LinearUnit\"\n"
+                + "                  type=\"LinearUnitType\"\n"
+                + "                  minOccurs=\"0\"\n"
+                + "                  maxOccurs=\"unbounded\"/>\n"
+                + "      <xs:element name=\"MassUnit\"\n"
+                + "                  type=\"MassUnitType\"\n"
+                + "                  minOccurs=\"0\"\n"
+                + "                  maxOccurs=\"unbounded\"/>\n"
+                + "      <xs:element name=\"PMILinearUnit\"\n"
+                + "                  type=\"LinearUnitType\"\n"
+                + "                  minOccurs=\"0\"/>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:complexType name=\"LinearUnitType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element name=\"UnitName\"\n"
+                + "                  type=\"xs:token\"/>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:complexType name=\"MassUnitType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element name=\"UnitName\"\n"
+                + "                  type=\"xs:token\"/>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:element name=\"FileUnits\"\n"
+                + "              type=\"UnitsType\">\n"
+                + "  </xs:element>\n"
+                + "\n"
+                + "\n"
+                + "</xs:schema>\n";
+
+        Processor proc = new Processor(true);
+        SchemaManager sm = proc.getSchemaManager();
+        sm.setErrorReporter(error -> fail(error.getMessage()));
+        try {
+            sm.load(new StreamSource(new StringReader(xsd)));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+
+    }
+
 }
 

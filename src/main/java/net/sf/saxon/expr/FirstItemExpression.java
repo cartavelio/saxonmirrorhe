@@ -16,6 +16,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.Cardinality;
 
 
 /**
@@ -49,6 +50,20 @@ public final class FirstItemExpression extends SingleItemFilter {
             return new FirstItemExpression(base);
         }
     }
+
+
+    /**
+     * Get the static cardinality: this implementation is appropriate for [1] and [last()] which will always
+     * return something if the input is non-empty
+     */
+
+    @Override
+    protected int computeCardinality() {
+        return Cardinality.allowsZero(getBaseExpression().getCardinality())
+                ? StaticProperty.ALLOWS_ZERO_OR_ONE
+                : StaticProperty.ALLOWS_ONE;
+    }
+
 
     /**
      * Copy an expression. This makes a deep copy.
