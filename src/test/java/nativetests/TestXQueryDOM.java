@@ -2,6 +2,7 @@ package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.dom.DOMNodeWrapper;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.dom.DocumentWrapper;
@@ -19,11 +20,17 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -147,6 +154,26 @@ public class TestXQueryDOM {
             }
         }
         return foundUndeclaration;
+    }
+
+    @Test
+    public void testBug5951() {
+        try {
+            DOMResult result = new DOMResult();
+            Configuration config = new Configuration();
+            XQueryExpression expression = config.newStaticQueryContext().compileQuery(
+                    "declare namespace b = 'test';<b:book><title/></b:book>");
+            expression.run(new DynamicQueryContext(config), result, new Properties());
+
+            Document doc = (Document) result.getNode();
+            StringWriter sw = new StringWriter();
+            Transformer transformer = new TransformerFactoryImpl().newTransformer();
+            transformer.transform(new DOMSource(doc), new StreamResult(sw));
+            assertTrue(sw.toString().contains("<b:book xmlns:b=\"test\"><title/></b:book>"));
+            System.out.println(sw);
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 
 }
