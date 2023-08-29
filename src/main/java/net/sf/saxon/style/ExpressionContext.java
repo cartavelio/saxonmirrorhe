@@ -86,6 +86,10 @@ public class ExpressionContext implements StaticContext {
         return element.isSchemaAware();
     }
 
+    public StructuredQName getAttributeName() {
+        return attributeName;
+    }
+
     /**
      * Construct a dynamic context for early evaluation of constant subexpressions
      */
@@ -224,7 +228,7 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public Expression bindVariable(StructuredQName qName) throws XPathException {
-        SourceBinding sourceBinding = element.bindVariable(qName);
+        SourceBinding sourceBinding = element.bindVariable(qName, attributeName);
         if (sourceBinding == null) {
             if (qName.hasURI(NamespaceConstant.XSLT) && qName.getLocalPart().equals("original")) {
                 element.getXslOriginal(StandardNames.XSL_VARIABLE);

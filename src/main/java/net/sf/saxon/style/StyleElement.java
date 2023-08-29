@@ -2571,21 +2571,22 @@ public abstract class StyleElement extends ElementImpl {
      * Bind a variable used in this element to the compiled form of the XSLVariable element in which it is
      * declared
      *
-     * @param qName The name of the variable
+     * @param variableName  The name of the variable
+     * @param attributeName the name of the attribute containing the expression we are parsing
      * @return the XSLVariableDeclaration (that is, an xsl:variable or xsl:param instruction) for the variable,
      * or null if no declaration of the variable can be found
      */
 
-    public SourceBinding bindVariable(StructuredQName qName) {
+    public SourceBinding bindVariable(StructuredQName variableName, StructuredQName attributeName) {
 
-        SourceBinding decl = bindLocalVariable(qName);
+        SourceBinding decl = bindLocalVariable(variableName, attributeName);
         if (decl != null) {
             return decl;
         }
 
         // Now check for a global variable
         // we rely on the search following the order of decreasing import precedence.
-        SourceBinding binding = getPrincipalStylesheetModule().getGlobalVariableBinding(qName);
+        SourceBinding binding = getPrincipalStylesheetModule().getGlobalVariableBinding(variableName);
         if (binding == null || Navigator.isAncestorOrSelf(binding.getSourceElement(), this)) {
             // test case variable-0118
             return null;
@@ -2603,11 +2604,11 @@ public abstract class StyleElement extends ElementImpl {
      * or null if no local declaration of the variable can be found
      */
 
-    public SourceBinding bindLocalVariable(StructuredQName qName) {
+    public SourceBinding bindLocalVariable(StructuredQName qName, StructuredQName attributeName) {
         NodeInfo curr = this;
         NodeInfo prev = this;
 
-        SourceBinding implicit = hasImplicitBinding(qName);
+        SourceBinding implicit = hasImplicitBinding(qName, attributeName);
         if (implicit != null) {
             return implicit;
         }
@@ -2624,7 +2625,7 @@ public abstract class StyleElement extends ElementImpl {
                 while (curr == null) {
                     curr = prev.getParent();
                     if (curr instanceof StyleElement) {
-                        implicit = ((StyleElement) curr).hasImplicitBinding(qName);
+                        implicit = ((StyleElement) curr).hasImplicitBinding(qName, null);
                         if (implicit != null) {
                             return implicit;
                         }
@@ -2667,12 +2668,14 @@ public abstract class StyleElement extends ElementImpl {
 
     /**
      * Ask whether this particular element implicitly binds a given variable (used for xsl:accumulator-rule)
-     * @param name the name of the variable
+     *
+     * @param name          the name of the variable
+     * @param attributeName  the name of the XSLT attribute containing the variable reference
      * @return a {@code SourceBinding} object representing the binding of this variable if it
      * exists; otherwise null;
      */
 
-    protected SourceBinding hasImplicitBinding(StructuredQName name) {
+    protected SourceBinding hasImplicitBinding(StructuredQName name, StructuredQName attributeName) {
         return null;
     }
 

@@ -130,8 +130,9 @@ public class XSLAccumulatorRule extends StyleElement {
     }
 
     @Override
-    protected SourceBinding hasImplicitBinding(StructuredQName name) {
-        if (name.getLocalPart().equals("value") && name.hasURI("")) {
+    protected SourceBinding hasImplicitBinding(StructuredQName name, StructuredQName attributeName) {
+        if (name.getLocalPart().equals("value") && name.hasURI("")
+                && (attributeName == null || (attributeName.getLocalPart().equals("select") && attributeName.hasURI("")))) {
             SourceBinding sb = new SourceBinding(this);
             sb.setVariableQName(new StructuredQName("", "", "value"));
             assert getParent() != null;
