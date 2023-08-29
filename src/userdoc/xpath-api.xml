@@ -163,12 +163,13 @@
       XPath expression returns an <code>xs:dateTime</code> value or a map or array derived from a JSON query. For these reasons, use of
       the JAXP API is discouraged.</p>
       
-      <p>The native Saxon APIs for Java and C# both have classes that represent the XDM data model more accurately. The
+      <p>The native Saxon APIs for Java, C++ and C# both have classes that represent the XDM data model more accurately. The
       Java and C# implementations are essentially identical in structure so a single description will suffice for both.</p>
       
       <p>Values returned by XPath expressions are represented as instances of the
          class <code java="net.sf.saxon.s9api.XdmValue">XdmValue</code> (<code
-            cs="Saxon.Api.XdmValue">XdmValue</code> in C#).
+                 cs="Saxon.Api.XdmValue">XdmValue</code> in C# and in SaxonC see: <a href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html"><code>XdmValue</code></a> for C++,
+         <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue"><code>PyXdmValue</code></a>).
          The <code>XdmValue</code> class is also used to supply parameters to stylesheets and transformations,
          and to return the results of XSLT or XQuery evaluation.</p>
       
@@ -184,6 +185,17 @@
       XdmExternalObject (an item that encapsulates a Java or .NET object)   
    XdmEmptySequence (a sequence containing no items)      
 ]]></samp>
+
+      <div class="conly"><p>For SaxonC the subclasses of <code>XdmValue</code> directly reflect the XDM model:</p><samp><![CDATA[XdmValue (any sequence)
+         XdmItem (any single item, that is, a sequence of length one)
+            XdmNode (any node)
+            XdmAtomicValue (any atomic value)
+            XdmFunctionItem (a function item)
+               XdmMap (a map)
+               XdmArray (an array)
+      ]]></samp>
+         <!-- TODO add XdmEmptySequence (a sequence containing no items) to SaxonC -->
+      </div>
       
       <p>These objects are generally immutable: at any rate, the API offers no methods to modify them. (It is possible
          to subvert this, for example by having an <code>XdmNode</code> that wraps a DOM node, and then modifying the DOM node: this
@@ -197,6 +209,14 @@
          <li class="csonly"><p>In C#, an <code>XdmAtomicValue</code> can be constructed directly from a C# <code>bool</code>, <code>string</code>, <code>long</code>, 
             <code>decimal</code>, or <code>DateTime</code> (inter alia), and methods such as <code>AsBoolean()</code>
             and <code>AsDouble()</code> are available to convert in the other direction.</p></li>
+
+                  <li class="conly"><p>In C++, an <code>XdmAtomicValue</code> can be constructed directly from a C++ <code>bool</code>, <code>std::string</code>, char pointer array, <code>long</code>,
+                     <code>double</code>, float or <code>int</code>, and methods such as <code>getBooleanValue()</code>
+                     and <code>getStringValue()</code> are available to convert in the other direction. Similar for PHP.</p></li>
+                  <li class="conly"><p>In Python, an <code>PyXdmAtomicValue</code> can be constructed directly from a Python <code>bool</code>, <code>str</code>, <code>long</code>,
+                     <code>float</code>, and methods such as <code>double_value</code>
+                     and <code>integer_value</code> are available to convert in the other direction.</p></li>
+
       </ul>
          
       
