@@ -72,7 +72,7 @@ public class SaxonCAPI {
     protected long exceptionCheck = -1;
 
 
-    public static ObjectHandles objectHandles = null;//ObjectHandles.create();
+    public static ObjectHandles objectHandles = ObjectHandles.create();
 
     public static int objHandlesCreated = 0;
 
