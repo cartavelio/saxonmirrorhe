@@ -134,7 +134,7 @@ public abstract class Assignation extends Expression implements LocalBinding {
      */
     @Override
     public int computeDependencies() {
-        int d = super.computeDependencies();
+        int d = super.computeDependencies() | StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES;;
         // Unset the DEPENDS_ON_LOCAL_VARIABLES bit if the only dependencies are to
         // variables declared within the expression itself (typically, the variable
         // bound by this Assignation)

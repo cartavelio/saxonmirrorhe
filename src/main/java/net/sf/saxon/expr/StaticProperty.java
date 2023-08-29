@@ -95,6 +95,12 @@ public abstract class StaticProperty {
     public static final int DEPENDS_ON_STATIC_CONTEXT = 1 << 11;
 
     /**
+     * Bit setting: Expression binds (and typically references) its own range variables
+     */
+
+    public static final int DEPENDS_ON_OWN_RANGE_VARIABLES = 1 << 12;
+
+    /**
      * Combination of bits representing dependencies on the XSLT context
      */
 
@@ -312,6 +318,7 @@ public abstract class StaticProperty {
                     DEPENDS_ON_ASSIGNABLE_GLOBALS |
                     DEPENDS_ON_RUNTIME_ENVIRONMENT |
                     DEPENDS_ON_STATIC_CONTEXT |
+                    DEPENDS_ON_OWN_RANGE_VARIABLES |
                     HAS_SIDE_EFFECTS;
 
     /**
