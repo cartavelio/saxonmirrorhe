@@ -2,6 +2,7 @@ package s9apitest;
 
 import jaxptest.ConfigTest;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
@@ -804,6 +805,39 @@ public class TestReflexion {
             fail();
         }
     }
+
+
+    @Test
+    public void testPublicStaticField() {
+        try {
+            Processor proc = new Processor(true);
+            XPathCompiler compiler = proc.newXPathCompiler();
+            XPathExecutable exp = compiler.compile(
+                    "Q{java:net.sf.saxon.lib.NamespaceConstant}SAXON()");
+            XdmValue result = exp.load().evaluateSingle();
+            assertEquals(((XdmAtomicValue) result).getStringValue(), NamespaceConstant.SAXON);
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testPublicInstanceField() {
+        try {
+            Processor proc = new Processor(true);
+            XPathCompiler compiler = proc.newXPathCompiler();
+            XPathExecutable exp = compiler.compile(
+                    "Q{java:net.sf.saxon.style.PackageVersion}new('1.2.3-alpha') "
+                            + "=> Q{java:net.sf.saxon.style.PackageVersion}suffix()");
+            XdmValue result = exp.load().evaluateSingle();
+            assertEquals(((XdmAtomicValue) result).getStringValue(), "alpha");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
 
 }
 
