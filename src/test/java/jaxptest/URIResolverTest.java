@@ -310,9 +310,9 @@ public class URIResolverTest {
                 SAXBuilder builder = new SAXBuilder();
                 File file;
                 if (href.endsWith("inc1/inc1.xsl")) {
-                    file = new File("/Users/mike/GitHub/saxon2020/src/test/testdata/trax/xsl/inc1/inc1.xsl");
+                    file = new File("src/test/testdata/trax/xsl/inc1/inc1.xsl");
                 } else if (href.endsWith("inc2/inc2.xsl")) {
-                    file = new File("/Users/mike/GitHub/saxon2020/src/test/testdata/trax/xsl/inc1/inc2/inc2.xsl");
+                    file = new File("src/test/testdata/trax/xsl/inc1/inc2/inc2.xsl");
                 } else {
                     throw new XPathException("Unknown file " + href);
                 }
