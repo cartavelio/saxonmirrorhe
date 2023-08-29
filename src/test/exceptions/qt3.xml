@@ -34,7 +34,7 @@
     <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
   </exception>
   
-  <exception test-set="fo-spec-examples" test-case="
+  <exception test-set="app-spec-examples" test-case="
     fo-test-fn-id-001
     fo-test-fn-id-002
     fo-test-fn-element-with-id-001
