@@ -165,7 +165,7 @@ public class XMLIndenter extends ProxyReceiver {
                         + 4 + (prefix.isEmpty() ? 4 : prefix.length() + 5);
             }
             if (len > getLineLength()) {
-                int indent = (level - 1) * getIndentation() + 3;
+                int indent = (level - 1) * getIndentation() + 2;
                 emitter.setIndentForNextAttribute(indent);
             }
         }
