@@ -421,11 +421,7 @@ namespace TestDriver {
             XPathCompiler xpath = driverProc.NewXPathCompiler();
             string testCaseName = testCase.GetAttributeValue(new QName("name"));
             string testSetName = testCase.Parent.GetAttributeValue(new QName("name"));
-
-            if (testSetName != "fn-doc") {
-                return;
-            }
-
+            
             XdmNode resultElement = testCase.Select(Child("result")).FirstOrDefault();
             ;
             bool needSerializedResult = resultElement.Select(Descendant("assert-serialization-error")).Any()
