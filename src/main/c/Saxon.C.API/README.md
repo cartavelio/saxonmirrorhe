@@ -15,6 +15,10 @@ The following classes provide a subset of the XDM model: XdmValue,
 XdmItem, XdmAtomicValue, XdmNode, XdmFunctionItem, XdmArray, and
 XdmMap.
 
+The main classes in the SaxonC C API are as follows:
+
+SaxonCGlue.h, SaxonCProcessor.h, SaxonCXPath.h
+
 For further information about using SaxonC, see the
 [SaxonC 12 Documentation](https://www.saxonica.com/saxon-c/documentation12/index.html),
 or [SaxonC web page](https://www.saxonica.com/saxon-c/index.xml).
