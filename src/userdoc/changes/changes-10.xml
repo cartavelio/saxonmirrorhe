@@ -829,18 +829,24 @@
         <!--<p>TODO: document this somewhere....</p>-->
         
         
-        <h2>XSD extensions</h2>
+        
+ 
+
+    
+    </category>
+    
+    <category name="xsd-extensions">
         
         <p>The <a class="bodylink code" href="/schema-processing/extensions11/saxon.flags">saxon:flags</a> attribute of the
             <code>xs:pattern</code> facet was implemented in Saxon 9.9 but not
-        documented or tested; it has now been made official. It allows flags for regular expression matching to be specified,
-        following the rules for XPath functions such as <code>matches()</code>.</p>
+            documented or tested; it has now been made official. It allows flags for regular expression matching to be specified,
+            following the rules for XPath functions such as <code>matches()</code>.</p>
         
         <p>A new attribute <a href="/schema-processing/extensions11/saxon.separator" class="bodylink
             code">xs:list/@saxon:separator</a> is available for list types. The attribute holds
-        a regular expression that is used to tokenize the supplied value, according to the rules of the XPath <code>tokenize()</code>
-        function. For example with <code>&lt;xs:list saxon:separator=","/></code>, a list of integers in an attribute can now be
-        comma-separated rather than space-separated.</p>
+            a regular expression that is used to tokenize the supplied value, according to the rules of the XPath <code>tokenize()</code>
+            function. For example with <code>&lt;xs:list saxon:separator=","/></code>, a list of integers in an attribute can now be
+            comma-separated rather than space-separated.</p>
         
         <p>A new constraining facet <a href="/schema-processing/extensions11/distinct" class="bodylink code">saxon:distinct</a> is
             available for list types; if present (with the value "true"), the list must not contain
@@ -858,18 +864,11 @@
             constraint must not only have unique values, they must also be correctly ordered. If the attribute is present on at
             least one field of a uniqueness constraint, then it defaults to <code>saxon:order="ascending"</code> on any fields
             where it is not specified. 
-        Not only does this provide another kind of integrity constraint that is quite hard to express using assertions, it also provides
-        much more efficient checking of uniqueness constraints in the case where it is known that the data is correctly sorted.
-        This validation check can be usefully applied to a document that is to form the input of the <code>xsl:merge</code> instruction
-        in XSLT 3.0.</p>
+            Not only does this provide another kind of integrity constraint that is quite hard to express using assertions, it also provides
+            much more efficient checking of uniqueness constraints in the case where it is known that the data is correctly sorted.
+            This validation check can be usefully applied to a document that is to form the input of the <code>xsl:merge</code> instruction
+            in XSLT 3.0.</p>
         
-       
-        
-
-        
- 
-
-    
     </category>
     
     <!--<category name="sql">
