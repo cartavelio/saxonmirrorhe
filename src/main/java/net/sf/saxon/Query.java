@@ -244,7 +244,6 @@ public class Query {
      * that support the same command line interface
      *
      * @param args    the command-line arguments
-     * @param command name of the class, to be used in error messages
      */
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
