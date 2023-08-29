@@ -93,7 +93,6 @@ public class XSLApplyTemplates extends StyleElement {
                     break;
                 default:
                     modeName = makeQName(modeAttribute, null, "mode");
-                    getContainingPackage().getRuleManager().registerModeName(modeName);
                     break;
             }
         }

@@ -56,6 +56,7 @@ public class Compilation {
     private List<VersionedPackageName> usingPackages = new ArrayList<>();
     private GlobalParameterSet suppliedParameters;
     private boolean fallbackToNonStreaming = false;
+    private Set<StructuredQName> referencedModes = new HashSet<>();
     public Timer timer = null;
 
     private static class ValueAndPrecedence {
@@ -83,6 +84,7 @@ public class Compilation {
         schemaAware = info.isSchemaAware();
         preScan = info.isJustInTimeCompilation();
         suppliedParameters = compilerInfo.getParameters();
+        referencedModes.add(Mode.UNNAMED_MODE_NAME);
 
         qNameParser = new QNameParser(null)
                 .withAcceptEQName(true)
@@ -758,6 +760,16 @@ public class Compilation {
 
     public void setFallbackToNonStreaming(boolean fallbackToNonStreaming) {
         this.fallbackToNonStreaming = fallbackToNonStreaming;
+    }
+
+    /**
+     * Get all mode names referenced anywhere in the stylesheet (including the unnamed mode).
+     * This list is built up during the static use-when phase of processing. It is used to expand
+     * {@code mode="#all"} appearing on {@code xsl:template}.
+     * @return the set of all mode names used.
+     */
+    public Set<StructuredQName> getAllKnownModeNames() {
+        return referencedModes;
     }
 
 
