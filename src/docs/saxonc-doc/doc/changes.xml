@@ -113,6 +113,7 @@
             <li>SaxonC Python API now supports for the subscript operator (i.e. square brackets []) on PyXdmValue and PyXdmNode objects. For example, given a node object n and
                integer i, n[i] returns the ith child node at n or None if ith item does not exist. Also, operator like n[i][j] gives the child node of n[i].
                For a PyXdmValue object, n[i] gives the ith item in the sequence.</li>
+            <li>Added ICU localization support to SaxonCEE and SaxonCPE.</li>
          </ul>
       </category>
       

@@ -23,7 +23,6 @@
 
    <p>The following limitations apply to the 12 release:</p>
    <ul>
-      <li>ICU localization is currently not supported.</li>
       <li>The XQuery Update feature is not supported.</li>
       <li>Host language extension functions are currently not supported.</li>
    </ul>

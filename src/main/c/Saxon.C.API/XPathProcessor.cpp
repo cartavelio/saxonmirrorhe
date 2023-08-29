@@ -21,6 +21,7 @@ XPathProcessor::XPathProcessor() {
 
 XPathProcessor::XPathProcessor(SaxonProcessor *p, std::string curr) {
   proc = p;
+  xp_baseURI = nullptr;
   // SaxonProcessor::attachCurrentThread();
 
   /*cppClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -64,6 +65,7 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
   proc = other.proc; // TODO check thread safety
 
   cppXP = other.cppXP;
+  xp_baseURI = other.xp_baseURI;
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
   while (paramIter != other.parameters.end()) {
@@ -88,6 +90,9 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
 XPathProcessor::~XPathProcessor() {
   clearProperties();
   clearParameters();
+  if(xp_baseURI != nullptr) {
+    delete [] xp_baseURI;
+  }
   if (cppXP > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXP);
   }
@@ -276,8 +281,22 @@ void XPathProcessor::importSchemaNamespace(const char *uri) {
 #endif
 
 void XPathProcessor::setBaseURI(const char *uriStr) {
-  j_xp_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP,
+
+  if (uriStr != nullptr) {
+    j_xp_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP,
                   (char *)uriStr);
+    delete [] xp_baseURI;
+    xp_baseURI = nullptr;
+  }
+}
+
+
+const char * XPathProcessor::getBaseURI() {
+    if (xp_baseURI == nullptr) {
+        allocFn fn = operator new;
+        xp_baseURI = j_xp_getBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (void *)fn);
+    }
+    return xp_baseURI;
 }
 
 bool XPathProcessor::effectiveBooleanValue(const char *xpathStr) {
