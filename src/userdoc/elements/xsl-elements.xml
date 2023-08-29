@@ -3774,7 +3774,7 @@
                     normalization form (or no normalization) is required.</attribute>
                 <attribute name="omit-xml-declaration" use="optional">For XML output this controls
                     whether an XML declaration should be output; the default is
-                    <code>no</code>.</attribute>
+                    <code>no</code> (that is, an XML declaration will be output by default).</attribute>
                 <attribute name="parameter-document" use="optional">New in XSLT 3.0. Not implemented
                     in Saxon 9.7. Allows serialization to be configured in an external
                     document.</attribute>
