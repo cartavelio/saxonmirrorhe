@@ -34,6 +34,7 @@ public class ConfigTest {
     private String TEMP_DIR = null;
     private String BUGS_DIR = null;
     private String XMARK_DIR = null;
+    private String QT4_TESTS_DIR = null;
 
     public ConfigTest() {
         // The directories above used to be static final, but that had the nasty consequence
@@ -69,6 +70,18 @@ public class ConfigTest {
             XMARK_DIR = junitXMarkDirectory();
         }
         return XMARK_DIR;
+    }
+
+    public String getQt4TestsDir() {
+        if (QT4_TESTS_DIR == null) {
+            QT4_TESTS_DIR = qt4TestsDirectory();
+        }
+        return QT4_TESTS_DIR;
+    }
+
+    public String getQt4SpecsDir() {
+        String testDir = getQt4TestsDir();
+        return testDir.replace("qt4tests", "qtspecs");
     }
 
     private static String junitDataDirectory() {
@@ -167,6 +180,26 @@ public class ConfigTest {
                 Properties p = System.getProperties();
                 throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
             }
+        } else {
+            dir = new File(env);
+            if (!dir.exists() || !dir.isDirectory()) {
+                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
+            }
+        }
+        String path = dir.getAbsolutePath().replace("\\", "/");
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        return path;
+    }
+
+    private static String qt4TestsDirectory() {
+        File dir = null;
+        String envar = "W3C_QT4_TEST_SUITE_DIR";
+        String env = System.getenv(envar);
+        if (env == null) {
+            // Assume the current directory is the root of the project
+            throw new RuntimeException("Environment variable W3C_QT4_TEST_SUITE_DIR is not set");
         } else {
             dir = new File(env);
             if (!dir.exists() || !dir.isDirectory()) {

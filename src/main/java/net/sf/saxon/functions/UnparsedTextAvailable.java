@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -32,7 +33,13 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
         if (hrefVal == null) {
             return BooleanValue.FALSE;
         }
-        String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
+        String encoding;
+        if (getArity() == 2) {
+            Item enc = arguments[1].head();
+            encoding = enc == null ? null : enc.getStringValue();
+        } else {
+            encoding = null;
+        }
         return BooleanValue.get(
                 evalUnparsedTextAvailable(hrefVal, encoding, context));
     }

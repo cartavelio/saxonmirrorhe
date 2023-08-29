@@ -118,7 +118,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("current-date", 0, e -> e.populate(() -> new DynamicContextAccessor.CurrentDate(), BuiltInAtomicType.DATE, ONE, LATE));
 
-        register("current-dateTime", 0, e -> e.populate(() -> new DynamicContextAccessor.CurrentDateTime(), BuiltInAtomicType.DATE_TIME, ONE, LATE));
+        register("current-dateTime", 0, e -> e.populate(() -> new DynamicContextAccessor.CurrentDateTime(), BuiltInAtomicType.DATE_TIME_STAMP, ONE, LATE));
 
         register("current-time", 0, e -> e.populate(() -> new DynamicContextAccessor.CurrentTime(), BuiltInAtomicType.TIME, ONE, LATE));
 
@@ -412,8 +412,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("replace", 4, e -> e.populate(Replace::new, BuiltInAtomicType.STRING,
-                 ONE, 0)
+        register("replace", 4, e -> e.populate(Replace::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null)

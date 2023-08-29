@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StandardURIChecker;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -46,16 +47,18 @@ public class ResolveURI extends SystemFunction {
         }
         String relative = arg0.getStringValue();
         String base;
+        Item baseArg = null;
         if (getArity() == 2) {
-            //noinspection ConstantConditions
-            base = arguments[1].head().getStringValue();
+            baseArg = arguments[1].head();
+        }
+        if (baseArg != null) {
+            base = baseArg.getStringValue();
         } else {
             base = getStaticBaseUriString();
             if (base == null) {
                 throw new XPathException("Base URI in static context of resolve-uri() is unknown", "FONS0005", context);
             }
         }
-
         return resolve(base, relative, context);
     }
 

@@ -67,6 +67,9 @@ public class Subsequence_3 extends SystemFunction implements Callable {
             SequenceIterator seq, NumericValue startVal, NumericValue lengthVal, XPathContext context)
             throws XPathException {
 
+        if (lengthVal == null) {
+            return Subsequence_2.subSequence(seq, startVal);
+        }
         if (startVal instanceof Int64Value && lengthVal instanceof Int64Value) {
             // Fast path where the second and third arguments evaluate to integers
             long lstart = startVal.longValue();

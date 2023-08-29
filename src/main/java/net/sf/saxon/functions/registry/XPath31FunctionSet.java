@@ -17,6 +17,7 @@ import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -50,11 +51,11 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType ft;
 
         register("collation-key", 1, e -> e.populate( CollationKeyFn::new, BuiltInAtomicType.BASE64_BINARY,
-                 OPT, DCOLL)
+                 ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("collation-key", 2, e -> e.populate( CollatingFunctionFree::new, BuiltInAtomicType.BASE64_BINARY,
-                 OPT, DCOLL)
+                 ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
@@ -87,7 +88,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                  ONE, CITEM | LATE));
 
         register("has-children", 1, e -> e.populate( HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
-                 OPT, 0)
+                 ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT | INS, null));
 
         register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
@@ -138,7 +139,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(ParseJsonFn.OPTION_DETAILS));
 
-        register("parse-xml", 1, e -> e.populate( ParseXml::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeTest(NodeKindTest.ELEMENT), OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
         register("random-number-generator", 0, e -> e.populate( RandomNumberGenerator::new, RandomNumberGenerator.RETURN_TYPE, ONE, LATE));

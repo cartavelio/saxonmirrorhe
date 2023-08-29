@@ -115,7 +115,13 @@ public class Trace extends SystemFunction implements Traceable {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Controller controller = context.getController();
-        String label = arguments.length == 1 ? "*" : arguments[1].head().getStringValue();
+        String label = "*";
+        if (arguments.length > 1) {
+            Item labelArg = arguments[1].head();
+            if (labelArg != null) {
+                label = labelArg.getStringValue();
+            }
+        }
         if (controller.isTracing()) {
             Sequence value = arguments[0].materialize();
             notifyListener(label, value, context);

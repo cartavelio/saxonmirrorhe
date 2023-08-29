@@ -1090,7 +1090,7 @@ public class AlphaCode {
                     }
                 }
             } else if (primary instanceof MapType) {
-                AtomicType keyType = ((MapType) primary).getKeyType();
+                PlainType keyType = ((MapType) primary).getKeyType();
                 if (keyType != BuiltInAtomicType.ANY_ATOMIC) {
                     result.keyType = makeTree(keyType);
                 }

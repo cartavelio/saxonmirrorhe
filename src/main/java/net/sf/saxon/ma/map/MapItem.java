@@ -119,7 +119,7 @@ public abstract class MapItem implements FunctionItem {
      * @param th the type hierarchy cache for the configuration
      * @return true if the map conforms to the required type
      */
-    abstract public boolean conforms(AtomicType keyType, SequenceType valueType, TypeHierarchy th);
+    abstract public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th);
 
     /**
      * Get the type of the map. This method is used largely for diagnostics, to report

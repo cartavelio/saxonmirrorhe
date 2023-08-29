@@ -15,6 +15,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.Whitespace;
 
 
 /**
@@ -50,6 +51,9 @@ public class Tokenize_3 extends RegexFunction {
             return EmptySequence.getInstance();
         }
         RegularExpression re = getRegularExpression(arguments);
+        if (re == null) {
+            return SequenceTool.toLazySequence(new Whitespace.Tokenizer(input));
+        }
         return SequenceTool.toLazySequence(re.tokenize(input));
     }
 }
