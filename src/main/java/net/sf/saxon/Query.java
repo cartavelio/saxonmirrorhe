@@ -248,7 +248,7 @@ public class Query {
      */
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void doQuery(String[] args, String command) {
+    public void doQuery(String[] args) {
 
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
@@ -505,6 +505,18 @@ public class Query {
             quit("Fatal error during query: " + err2.getClass().getName() + ": " +
                          (err2.getMessage() == null ? " (no message)" : err2.getMessage()), 2);
         }
+    }
+
+    /**
+     * Support method for main program. This support method can also be invoked from subclasses
+     * that support the same command line interface
+     *
+     * @param args    the command-line arguments
+     * @param command not used, retained for backwards compatibility
+     */
+
+    public void doQuery(String[] args, String command) {
+        doQuery(args);
     }
 
     @CSharpModifiers(code={"internal", "static"})
