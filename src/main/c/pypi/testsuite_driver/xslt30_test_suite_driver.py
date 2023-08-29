@@ -191,7 +191,7 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
                     '''print(test_set_file)
                     print("Test cases count = " + str(tcs_count))'''
                     result = "NA"
-                    test_report.start_test_set_element(child0)
+                    test_report.start_test_set_element(child0, None)
 
                     for x, test_case in enumerate(test_cases):
                         if test_case.is_node:
@@ -270,6 +270,7 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
 def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, environments_i: dict,
                         default_environment: Environment):
     environment = Environment()
+    environment.createProcessors()
     xpc.set_context(xdm_item=env)
     name = env.get_attribute_value("name")
     if name is not None:
@@ -457,6 +458,7 @@ def create_global_environment(catalog: PyXdmNode, xpath_proc: PyXPathProcessor):
 def create_local_environments(test_set_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     localEnvironments.clear()
     environmenti = Environment()
+    environmenti.createProcessors()
     localEnvironments.update({"default": environmenti})
 
 
@@ -552,6 +554,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
     else:
         environment = Environment()
+        environment.createProcessors()
 
     xpath_proc.set_context(xdm_item=test_case_node)
     assertion = xpath_proc.evaluate_single("result/*[1]").get_node_value()
