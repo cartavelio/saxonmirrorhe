@@ -177,7 +177,7 @@ public class DOMSender {
         }
 
         namespaces.push(inScopeNamespaces);
-        outputElement(startNode, true);
+        outputElement(startNode);
         namespaces.pop();
     }
 
@@ -233,7 +233,7 @@ public class DOMSender {
                         NamespaceMap parentNamespaces = namespaces.peek();
                         NamespaceMap childNamespaces = parentNamespaces.applyDifferences(gatherNamespaces(element));
                         namespaces.push(childNamespaces);
-                        outputElement(element, !childNamespaces.isEmpty());
+                        outputElement(element);
                         namespaces.pop();
                         break;
                     case Node.ATTRIBUTE_NODE:        // have already dealt with attributes
@@ -290,7 +290,7 @@ public class DOMSender {
      * @throws XPathException if a dynamic error occurs
      */
 
-    private void outputElement(Element element, boolean hasNamespaceDeclarations) throws XPathException {
+    private void outputElement(Element element) throws XPathException {
         NodeName name = getNodeName(element.getTagName(), true);
         final Location loc = new Loc(systemId, -1, -1);
 
@@ -302,7 +302,7 @@ public class DOMSender {
                 Attr att = (Attr) atts.item(a2);
                 int props = att.isId() ? ReceiverOption.IS_ID : ReceiverOption.NONE;
                 String attname = att.getName();
-                if (hasNamespaceDeclarations && attname.startsWith("xmlns") && ((attname.length()==5 || attname.charAt(5) == ':'))) {
+                if (attname.startsWith("xmlns") && ((attname.length()==5 || attname.charAt(5) == ':'))) {
                     // do nothing: namespace declarations have already been processed
                 } else {
                     //System.err.println("Processing attribute " + attname);
