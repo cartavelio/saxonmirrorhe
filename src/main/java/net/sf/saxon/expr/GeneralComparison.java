@@ -302,18 +302,22 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                     e1 = new CastExpression(getRhsExpression(), BuiltInAtomicType.STRING, Cardinality.allowsZero(c1));
                     adoptChildExpression(e1);
                 } else if (NumericType.isNumericType(t1)) {
-                    Expression vun = makeCompareUntypedToNumeric(getLhsExpression(), getRhsExpression(), singletonOperator);
-                    return vun.typeCheck(visitor, contextInfo);
+                    setAtomicComparer(new UntypedNumericComparer());
+                    return this;
+//                    Expression vun = makeCompareUntypedToNumeric(getLhsExpression(), getRhsExpression(), singletonOperator);
+//                    return vun.typeCheck(visitor, contextInfo);
                 } else {
                     e0 = new CastExpression(getLhsExpression(), pt1, Cardinality.allowsZero(c0));
                     adoptChildExpression(e0);
                 }
             } else if (t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
                 if (NumericType.isNumericType(t0)) {
+                    setAtomicComparer(new UntypedNumericComparer());
+                    return this;
 //                    e1 = new CastExpression(getRhsExpression(), BuiltInAtomicType.DOUBLE, false);
 //                    adoptChildExpression(e1);
-                    Expression vun = makeCompareUntypedToNumeric(getRhsExpression(), getLhsExpression(), Token.inverse(singletonOperator));
-                    return vun.typeCheck(visitor, contextInfo);
+//                    Expression vun = makeCompareUntypedToNumeric(getRhsExpression(), getLhsExpression(), Token.inverse(singletonOperator));
+//                    return vun.typeCheck(visitor, contextInfo);
                 } else {
                     e1 = new CastExpression(getRhsExpression(), pt0, Cardinality.allowsZero(c1));
                     adoptChildExpression(e1);
