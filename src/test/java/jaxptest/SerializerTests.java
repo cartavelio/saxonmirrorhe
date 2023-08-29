@@ -190,16 +190,9 @@ public class SerializerTests {
         }
     }
 
-    @Disabled
+    @Test
     public void testIllegalUri() {
-        // 20 January 2023, norm disabled this test. It doesn't *test* anything useful.
-        // It creates a file named ".\\config\\testIllegalUriOutput.xml", but that doesn't
-        // prove anything except whether Java will create that file. The file
-        // creation is outside the transformation. Also, it claims to be testing
-        // illegal URIs but is expected to pass?
-        //
-        // Finally, the business with user.dir that was in here was totally not working.
-
+        // It's unclear to ndw how platform-specific this test might be.
         try {
             String stylesheet =
                     "<?xml version=\"1.0\"?> \n" +
@@ -216,13 +209,14 @@ public class SerializerTests {
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Transformer trans = templates.newTransformer();
             StreamSource input = new StreamSource(new StringReader(stylesheet));
-            String s = "build/temp/.\\config\\testIllegalUriOutput.xml";
+            String s = configTest.getTempDir() + ".\\config\\testIllegalUriOutput.xml";
             StreamResult result = new StreamResult(new File(s));
             trans.transform(input, result);
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
+
 
     @Test
     public void testExtensionAttribute() {
