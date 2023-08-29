@@ -45,7 +45,6 @@ namespace Saxon.Callbacks {
                     output.open();
                     output.append(((Saxon.Hej.om.NodeInfo) node.Unwrap()));
                     output.close();
-                    writer.writeCodePoint(10);
                 }
                 catch (Exception e) when (e is Saxon.Hej.trans.XPathException || e is System.IO.IOException) {
                 }
