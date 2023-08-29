@@ -213,6 +213,7 @@ class SaxonTestSuite {
         }
       }
 
+      workingDir directory
       mainClass = options['class']
       args testargs
       ignoreExitValue = true
@@ -358,6 +359,7 @@ class SaxonTestSuite {
         }
       }
 
+      workingDir directory
       mainClass = options['class']
       args testargs
       ignoreExitValue true
@@ -495,6 +497,7 @@ class SaxonTestSuite {
         }
       }
 
+      workingDir directory
       commandLine testargs
       ignoreExitValue = true
     }
@@ -634,6 +637,7 @@ class SaxonTestSuite {
         }
       }
 
+      workingDir directory
       commandLine testargs
       ignoreExitValue true
     }
