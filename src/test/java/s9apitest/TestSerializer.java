@@ -645,7 +645,7 @@ public class TestSerializer {
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
             XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltXmlOutput)));
             Xslt30Transformer xslt30Transformer = xsltExecutable.load30();
-            FileOutputStream stream = new FileOutputStream("xml-fragment-result.xml");
+            FileOutputStream stream = new FileOutputStream(configTest.getTempDir() + "xml-fragment-result.xml");
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
             xslt30Transformer = xsltExecutable.load30();
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
@@ -669,7 +669,7 @@ public class TestSerializer {
             xsltCompiler = processor.newXsltCompiler();
             xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltJsonOutput)));
             xslt30Transformer = xsltExecutable.load30();
-            stream = new FileOutputStream("JsonResults.json");
+            stream = new FileOutputStream(configTest.getTempDir() + "JsonResults.json");
             FilterOutputStream fos = new FilterOutputStream(stream) {
                 @Override
                 public void close() throws IOException {
@@ -699,7 +699,7 @@ public class TestSerializer {
 
             xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltAdaptiveOutput)));
             xslt30Transformer = xsltExecutable.load30();
-            stream = new FileOutputStream("AdaptiveResults.txt");
+            stream = new FileOutputStream(configTest.getTempDir() + "AdaptiveResults.txt");
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
             xslt30Transformer = xsltExecutable.load30();
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));

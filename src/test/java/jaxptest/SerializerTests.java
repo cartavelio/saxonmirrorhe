@@ -191,13 +191,7 @@ public class SerializerTests {
 
     @Test
     public void testIllegalUri() {
-        // Run this test in the temp directory so that the output file isn't
-        // a problem. It's unclear to ndw how platform-specific this test
-        // might be.
-        String cwd = System.getProperty("user.dir");
-        String temp = configTest.getDataDir() + "temp";
-        System.setProperty("user.dir", temp);
-
+        // It's unclear to ndw how platform-specific this test might be.
         try {
             String stylesheet =
                     "<?xml version=\"1.0\"?> \n" +
@@ -214,11 +208,9 @@ public class SerializerTests {
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Transformer trans = templates.newTransformer();
             StreamSource input = new StreamSource(new StringReader(stylesheet));
-            String s = ".\\config\\testIllegalUriOutput.xml";
+            String s = configTest.getTempDir() + ".\\config\\testIllegalUriOutput.xml";
             StreamResult result = new StreamResult(new File(s));
             trans.transform(input, result);
-
-            System.setProperty("user.dir", cwd);
         } catch (Exception e) {
             fail(e.getMessage());
         }
