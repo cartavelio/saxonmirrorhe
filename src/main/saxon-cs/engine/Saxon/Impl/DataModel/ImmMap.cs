@@ -161,7 +161,7 @@ namespace Saxon.Impl.DataModel {
          * @param th        the type hierarchy cache for the configuration
          * @return true if the map conforms to the required type
          */
-        public override bool conforms(AtomicType requiredKeyType, SequenceType requiredValueType, TypeHierarchy th) {
+        public override bool conforms(PlainType requiredKeyType, SequenceType requiredValueType, TypeHierarchy th) {
             if (isEmpty()) {
                 return true;
             }
