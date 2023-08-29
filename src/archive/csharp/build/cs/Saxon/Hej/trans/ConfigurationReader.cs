@@ -532,6 +532,8 @@ namespace Saxon.Hej.trans {
                 value = Saxon.Hej.om.SequenceTool.toGroundedValue(exp.iterate(env.makeEarlyEvaluationContext()));
             } catch (Saxon.Hej.trans.XPathException e) {
                 error(e);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                error(e.getXPathException());
             }
             if ((currentPackage.staticParams == null)) {
                 currentPackage.staticParams = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.om.GroundedValue>();

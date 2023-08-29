@@ -168,10 +168,14 @@ namespace Saxon.Hej.ma.map {
         }
         public class MapEntry : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
-                System.Diagnostics.Debug.Assert((key != null));
-                Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[1].iterate());
-                return new Saxon.Hej.ma.map.SingleEntryMap(key, value);
+                try {
+                    Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
+                    System.Diagnostics.Debug.Assert((key != null));
+                    Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[1].iterate());
+                    return new Saxon.Hej.ma.map.SingleEntryMap(key, value);
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             public override Saxon.Hej.type.ItemType getResultItemType(Saxon.Hej.expr.Expression[] args) {
                 Saxon.Hej.type.PlainType ku = args[0].getItemType().getAtomizedItemType();
@@ -306,130 +310,134 @@ namespace Saxon.Hej.ma.map {
                 }
             }
             public override Saxon.Hej.ma.map.MapItem call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                string duplicates = this.duplicates;
-                string duplicatesErrorCode = this.duplicatesErrorCode;
-                bool allStringKeys = this.allStringKeys;
-                bool treatAsFinal = this.treatAsFinal;
-                Saxon.Hej.om.Function onDuplicates = this.onDuplicates;
-                if ((arguments.Length>1)) {
-                    Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
-                    System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, context);
-                    duplicates = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, "duplicates"))).getStringValue();
-                    duplicatesErrorCode = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, errorCodeKey))).getStringValue();
-                    treatAsFinal = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(values, finalKey))).getBooleanValue();
-                    allStringKeys = "string".Equals(((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, keyTypeKey))).getStringValue());
-                    onDuplicates = (Saxon.Hej.om.Function)(Saxon.Impl.Helpers.MapUtils.Get(values, onDuplicatesKey));
-                    if ((onDuplicates != null)) {
-                        duplicates = "use-callback";
-                    }
-                }
-                if ((treatAsFinal && allStringKeys)) {
-                    Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
-                    Saxon.Hej.ma.map.DictionaryMap baseMap = new Saxon.Hej.ma.map.DictionaryMap();
-                    Saxon.Hej.ma.map.MapItem next;
-                    switch (duplicates) {
-                      case "unspecified":
-                      case "use-any":
-                      case "use-last":
-                        while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
-                            foreach (Saxon.Hej.ma.map.KeyValuePair pair in next.keyValuePairs()) {
-                                if (!(((pair.key is Saxon.Hej.value.StringValue)))) {
-                                    throw new Saxon.Hej.trans.XPathException((("The keys in this map must all be strings (found "+pair.key.getItemType())+")"));
-                                }
-                                baseMap.initialPut(pair.key.getStringValue(), pair.value);
-                            }
+                try {
+                    string duplicates = this.duplicates;
+                    string duplicatesErrorCode = this.duplicatesErrorCode;
+                    bool allStringKeys = this.allStringKeys;
+                    bool treatAsFinal = this.treatAsFinal;
+                    Saxon.Hej.om.Function onDuplicates = this.onDuplicates;
+                    if ((arguments.Length>1)) {
+                        Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
+                        System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, context);
+                        duplicates = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, "duplicates"))).getStringValue();
+                        duplicatesErrorCode = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, errorCodeKey))).getStringValue();
+                        treatAsFinal = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(values, finalKey))).getBooleanValue();
+                        allStringKeys = "string".Equals(((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, keyTypeKey))).getStringValue());
+                        onDuplicates = (Saxon.Hej.om.Function)(Saxon.Impl.Helpers.MapUtils.Get(values, onDuplicatesKey));
+                        if ((onDuplicates != null)) {
+                            duplicates = "use-callback";
                         }
-                        return baseMap;
-                      default:
-                        while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
-                            foreach (Saxon.Hej.ma.map.KeyValuePair pair in next.keyValuePairs()) {
-                                if (!(((pair.key is Saxon.Hej.value.StringValue)))) {
-                                    throw new Saxon.Hej.trans.XPathException((("The keys in this map must all be strings (found "+pair.key.getItemType())+")"));
-                                }
-                                Saxon.Hej.om.Sequence existing = baseMap.get(pair.key);
-                                if ((existing != null)) {
-                                    switch (duplicates) {
-                                      case "use-first":
-                                        break ;
-                                      case "combine":
-                                        Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-                                        Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
-                                        baseMap.initialPut(pair.key.getStringValue(), combinedValue);
-                                        break ;
-                                      case "use-callback":
-                                        Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[]{existing, pair.value};
-                                        Saxon.Hej.om.Sequence combined = onDuplicates.call(context, args);
-                                        baseMap.initialPut(pair.key.getStringValue(), combined.materialize());
-                                        break ;
-                                      default:
-                                        throw new Saxon.Hej.trans.XPathException(("Duplicate key in constructed map: "+Saxon.Hej.trans.Err.wrap(pair.key.getStringValue())), duplicatesErrorCode);
+                    }
+                    if ((treatAsFinal && allStringKeys)) {
+                        Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
+                        Saxon.Hej.ma.map.DictionaryMap baseMap = new Saxon.Hej.ma.map.DictionaryMap();
+                        Saxon.Hej.ma.map.MapItem next;
+                        switch (duplicates) {
+                          case "unspecified":
+                          case "use-any":
+                          case "use-last":
+                            while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
+                                foreach (Saxon.Hej.ma.map.KeyValuePair pair in next.keyValuePairs()) {
+                                    if (!(((pair.key is Saxon.Hej.value.StringValue)))) {
+                                        throw new Saxon.Hej.trans.XPathException((("The keys in this map must all be strings (found "+pair.key.getItemType())+")"));
                                     }
-                                } else {
                                     baseMap.initialPut(pair.key.getStringValue(), pair.value);
                                 }
                             }
-                        }
-                        return baseMap;
-                    }
-                } else {
-                    Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
-                    Saxon.Hej.ma.map.MapItem baseMap = (Saxon.Hej.ma.map.MapItem)(iter.next());
-                    if ((baseMap == null)) {
-                        return new Saxon.Impl.DataModel.ImmMap();
-                    } else {
-                        Saxon.Hej.ma.map.MapItem next;
-                        while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
-                            bool inverse = (next.size()>baseMap.size());
-                            Saxon.Hej.ma.map.MapItem larger = (inverse ? next : baseMap);
-                            Saxon.Hej.ma.map.MapItem smaller = (inverse ? baseMap : next);
-                            string dup = (inverse ? invertDuplicates(duplicates) : duplicates);
-                            foreach (Saxon.Hej.ma.map.KeyValuePair pair in smaller.keyValuePairs()) {
-                                Saxon.Hej.om.Sequence existing = larger.get(pair.key);
-                                if ((existing != null)) {
-                                    switch (dup) {
-                                      case "use-first":
-                                      case "unspecified":
-                                      case "use-any":
-                                        break ;
-                                      case "use-last":
-                                        larger = larger.addEntry(pair.key, pair.value);
-                                        break ;
-                                      case "combine":
-                                        {
+                            return baseMap;
+                          default:
+                            while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
+                                foreach (Saxon.Hej.ma.map.KeyValuePair pair in next.keyValuePairs()) {
+                                    if (!(((pair.key is Saxon.Hej.value.StringValue)))) {
+                                        throw new Saxon.Hej.trans.XPathException((("The keys in this map must all be strings (found "+pair.key.getItemType())+")"));
+                                    }
+                                    Saxon.Hej.om.Sequence existing = baseMap.get(pair.key);
+                                    if ((existing != null)) {
+                                        switch (duplicates) {
+                                          case "use-first":
+                                            break ;
+                                          case "combine":
                                             Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
                                             Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
-                                            larger = larger.addEntry(pair.key, combinedValue);
+                                            baseMap.initialPut(pair.key.getStringValue(), combinedValue);
                                             break ;
-                                        }
-                                      case "combine-reverse":
-                                        {
-                                            Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(existing.iterate(), pair.value.iterate(), 1);
-                                            Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
-                                            larger = larger.addEntry(pair.key, combinedValue);
+                                          case "use-callback":
+                                            Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[]{existing, pair.value};
+                                            Saxon.Hej.om.Sequence combined = onDuplicates.call(context, args);
+                                            baseMap.initialPut(pair.key.getStringValue(), combined.materialize());
                                             break ;
+                                          default:
+                                            throw new Saxon.Hej.trans.XPathException(("Duplicate key in constructed map: "+Saxon.Hej.trans.Err.wrap(pair.key.getStringValue())), duplicatesErrorCode);
                                         }
-                                      case "use-callback":
-                                        System.Diagnostics.Debug.Assert((onDuplicates != null));
-                                        Saxon.Hej.om.Sequence[] args;
-                                        if (inverse) {
-                                            args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{pair.value, existing} : new Saxon.Hej.om.Sequence[]{pair.value, existing, pair.key});
-                                        } else {
-                                            args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{existing, pair.value} : new Saxon.Hej.om.Sequence[]{existing, pair.value, pair.key});
-                                        }
-                                        Saxon.Hej.om.Sequence combined = onDuplicates.call(context, args);
-                                        larger = larger.addEntry(pair.key, combined.materialize());
-                                        break ;
-                                      default:
-                                        throw new Saxon.Hej.trans.XPathException(("Duplicate key in constructed map: "+Saxon.Hej.trans.Err.wrap(pair.key.getStringValue())), duplicatesErrorCode);
+                                    } else {
+                                        baseMap.initialPut(pair.key.getStringValue(), pair.value);
                                     }
-                                } else {
-                                    larger = larger.addEntry(pair.key, pair.value);
                                 }
                             }
-                            baseMap = larger;
+                            return baseMap;
                         }
-                        return baseMap;
+                    } else {
+                        Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
+                        Saxon.Hej.ma.map.MapItem baseMap = (Saxon.Hej.ma.map.MapItem)(iter.next());
+                        if ((baseMap == null)) {
+                            return new Saxon.Impl.DataModel.ImmMap();
+                        } else {
+                            Saxon.Hej.ma.map.MapItem next;
+                            while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
+                                bool inverse = (next.size()>baseMap.size());
+                                Saxon.Hej.ma.map.MapItem larger = (inverse ? next : baseMap);
+                                Saxon.Hej.ma.map.MapItem smaller = (inverse ? baseMap : next);
+                                string dup = (inverse ? invertDuplicates(duplicates) : duplicates);
+                                foreach (Saxon.Hej.ma.map.KeyValuePair pair in smaller.keyValuePairs()) {
+                                    Saxon.Hej.om.Sequence existing = larger.get(pair.key);
+                                    if ((existing != null)) {
+                                        switch (dup) {
+                                          case "use-first":
+                                          case "unspecified":
+                                          case "use-any":
+                                            break ;
+                                          case "use-last":
+                                            larger = larger.addEntry(pair.key, pair.value);
+                                            break ;
+                                          case "combine":
+                                            {
+                                                Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
+                                                Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
+                                                larger = larger.addEntry(pair.key, combinedValue);
+                                                break ;
+                                            }
+                                          case "combine-reverse":
+                                            {
+                                                Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(existing.iterate(), pair.value.iterate(), 1);
+                                                Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
+                                                larger = larger.addEntry(pair.key, combinedValue);
+                                                break ;
+                                            }
+                                          case "use-callback":
+                                            System.Diagnostics.Debug.Assert((onDuplicates != null));
+                                            Saxon.Hej.om.Sequence[] args;
+                                            if (inverse) {
+                                                args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{pair.value, existing} : new Saxon.Hej.om.Sequence[]{pair.value, existing, pair.key});
+                                            } else {
+                                                args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{existing, pair.value} : new Saxon.Hej.om.Sequence[]{existing, pair.value, pair.key});
+                                            }
+                                            Saxon.Hej.om.Sequence combined = onDuplicates.call(context, args);
+                                            larger = larger.addEntry(pair.key, combined.materialize());
+                                            break ;
+                                          default:
+                                            throw new Saxon.Hej.trans.XPathException(("Duplicate key in constructed map: "+Saxon.Hej.trans.Err.wrap(pair.key.getStringValue())), duplicatesErrorCode);
+                                        }
+                                    } else {
+                                        larger = larger.addEntry(pair.key, pair.value);
+                                    }
+                                }
+                                baseMap = larger;
+                            }
+                            return baseMap;
+                        }
                     }
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
                 }
             }
             private string invertDuplicates(string duplicates) {

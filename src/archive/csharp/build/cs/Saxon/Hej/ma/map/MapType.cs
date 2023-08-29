@@ -8,10 +8,10 @@ namespace Saxon.Hej.ma.map {
         public static readonly Saxon.Hej.value.SequenceType OPTIONAL_MAP_ITEM = Saxon.Hej.value.SequenceType.makeSequenceType(ANY_MAP_TYPE, Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE);
         public static readonly Saxon.Hej.value.SequenceType SINGLE_MAP_ITEM = Saxon.Hej.value.SequenceType.makeSequenceType(ANY_MAP_TYPE, Saxon.Hej.expr.StaticProperty.ALLOWS_ONE);
         public static readonly Saxon.Hej.value.SequenceType SEQUENCE_OF_MAPS = Saxon.Hej.value.SequenceType.makeSequenceType(ANY_MAP_TYPE, Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
-        private readonly Saxon.Hej.type.AtomicType keyType;
+        private readonly Saxon.Hej.type.PlainType keyType;
         private readonly Saxon.Hej.value.SequenceType valueType;
         private readonly bool mustBeEmpty;
-        public MapType(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType)  {
+        public MapType(Saxon.Hej.type.PlainType keyType, Saxon.Hej.value.SequenceType valueType)  {
             this.keyType = keyType;
             this.valueType = valueType;
             this.mustBeEmpty = false;
@@ -24,7 +24,7 @@ namespace Saxon.Hej.ma.map {
         public override  /* REPLACING public */ Saxon.Hej.om.Genre getGenre() {
             return Saxon.Hej.om.Genre.MAP;
         }
-        public Saxon.Hej.type.AtomicType getKeyType() {
+        public Saxon.Hej.type.PlainType getKeyType() {
             return keyType;
         }
         public Saxon.Hej.value.SequenceType getValueType() {

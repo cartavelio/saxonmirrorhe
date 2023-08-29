@@ -765,7 +765,7 @@ namespace Saxon.Hej.type {
                                                                 }
                                                             } else {
                                                                 if ((primary is Saxon.Hej.ma.map.MapType)) {
-                                                                    Saxon.Hej.type.AtomicType keyType = ((Saxon.Hej.ma.map.MapType)(primary)).getKeyType();
+                                                                    Saxon.Hej.type.PlainType keyType = ((Saxon.Hej.ma.map.MapType)(primary)).getKeyType();
                                                                     if ((keyType != Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC)) {
                                                                         result.keyType = makeTree(keyType);
                                                                     }

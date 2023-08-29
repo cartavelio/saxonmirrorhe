@@ -168,6 +168,7 @@ namespace Saxon.Hej.pattern {
             Saxon.Hej.pattern.AncestorQualifiedPattern n = new Saxon.Hej.pattern.AncestorQualifiedPattern(basePattern.copy(rebindings), upperPattern.copy(rebindings), upwardsAxis);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, n);
             n.setOriginalText(getOriginalText());
+            n.testUpperPatternFirst = testUpperPatternFirst;
             return n;
         }
     

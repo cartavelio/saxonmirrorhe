@@ -36,9 +36,13 @@ namespace Saxon.Hej.expr {
                     return Saxon.Hej.expr.TailIterator.make(@base, min);
                 } else {
                     if ((((@base is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(@base)).isActuallyGrounded()) && (min>4))) {
-                        Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(@base);
-                        value = value.subsequence((min-1), ((max-min)+1));
-                        return value.iterate();
+                        try {
+                            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(@base);
+                            value = value.subsequence((min-1), ((max-min)+1));
+                            return value.iterate();
+                        } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
                     } else {
                         return new Saxon.Hej.expr.SubsequenceIterator(@base, min, max);
                     }

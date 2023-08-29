@@ -157,6 +157,9 @@ namespace Saxon.Hej.lib {
                             uWriter = expandedResult.obtainUnicodeWriter();
                         }
                         Saxon.Hej.serialize.JSONEmitter je = new Saxon.Hej.serialize.JSONEmitter(pipe, uWriter, props);
+                        if ((expandedResult != null)) {
+                            je.setMustClose(expandedResult.isMustCloseAfterUse());
+                        }
                         Saxon.Hej.serialize.JSONSerializer js = new Saxon.Hej.serialize.JSONSerializer(pipe, je, props);
                         string sortOrder = props.getProperty(Saxon.Hej.lib.SaxonOutputKeys.PROPERTY_ORDER);
                         if ((sortOrder != null)) {
@@ -173,6 +176,9 @@ namespace Saxon.Hej.lib {
                             uWriter = expandedResult.obtainUnicodeWriter();
                         }
                         Saxon.Hej.serialize.AdaptiveEmitter je = new Saxon.Hej.serialize.AdaptiveEmitter(pipe, uWriter);
+                        if ((expandedResult != null)) {
+                            je.setMustClose(expandedResult.isMustCloseAfterUse());
+                        }
                         je.setOutputProperties(props);
                         Saxon.Hej.serialize.CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                         Saxon.Hej.@event.ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);

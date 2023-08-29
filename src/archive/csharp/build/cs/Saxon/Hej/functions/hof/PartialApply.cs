@@ -187,7 +187,11 @@ namespace Saxon.Hej.functions.hof {
                 if ((boundArgumentsOp[i] == null)) {
                     values[i] = null;
                 } else {
-                    values[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(boundArgumentsOp[i].getChildExpression().iterate(context));
+                    try {
+                        values[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(boundArgumentsOp[i].getChildExpression().iterate(context));
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 }
             }
             return new Saxon.Hej.functions.hof.CurriedFunction(f, values);

@@ -21,15 +21,19 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.expr.Component targetComponent = exp.getTargetComponent(context);
             Saxon.Hej.expr.instruct.UserFunction target = exp.getTargetFunction(context);
             Saxon.Hej.om.Sequence[] argValues = Saxon.Hej.om.SequenceTool.makeSequenceArray(target.getArity());
-            for (int i = 1; (i<argValues.Length); i++) {
-                argValues[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(exp.getArg(i).iterate(context));
+            try {
+                for (int i = 1; (i<argValues.Length); i++) {
+                    argValues[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(exp.getArg(i).iterate(context));
+                }
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
-            return new Inner_ItemFeed_17(this, resultFeed, context, argValues, targetComponent, target);
+            return new Inner_ItemFeed_18(this, resultFeed, context, argValues, targetComponent, target);
         }
     
-        private class Inner_ItemFeed_17 : Saxon.Eej.ee.stream.feed.ItemFeed {
+        private class Inner_ItemFeed_18 : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly FilterFunctionCallAdjunct outerInstance;
-            public Inner_ItemFeed_17(FilterFunctionCallAdjunct outerInstance, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg1, /*AA*/Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.om.Sequence[] argValues, Saxon.Hej.expr.Component targetComponent, Saxon.Hej.expr.instruct.UserFunction target) : base(arg1, arg2) {
+            public Inner_ItemFeed_18(FilterFunctionCallAdjunct outerInstance, /*AA*/Saxon.Eej.ee.stream.feed.ItemFeed arg1, /*AA*/Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.om.Sequence[] argValues, Saxon.Hej.expr.Component targetComponent, Saxon.Hej.expr.instruct.UserFunction target) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
                 this.argValues = argValues;
                 this.targetComponent = targetComponent;

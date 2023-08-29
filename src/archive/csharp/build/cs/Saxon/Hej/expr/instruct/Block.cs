@@ -23,7 +23,7 @@ namespace Saxon.Hej.expr.instruct {
         private void setChild(int n, Saxon.Hej.expr.Expression child) {
             operanda[n].setChildExpression(child);
         }
-        private int size() {
+        public int size() {
             return operanda.Length;
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {

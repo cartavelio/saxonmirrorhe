@@ -228,6 +228,8 @@ namespace Saxon.Hej.s9api {
                 return new Saxon.Hej.s9api.XPathExecutable(cexp, processor, ic);
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw new Saxon.Api.SaxonApiException(e);
             }
         }
         public Saxon.Api.XdmValue evaluate(string expression, Saxon.Api.XdmItem contextItem) {

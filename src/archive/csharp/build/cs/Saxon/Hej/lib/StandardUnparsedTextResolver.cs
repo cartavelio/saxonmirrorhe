@@ -71,7 +71,11 @@ namespace Saxon.Hej.lib {
                         }
                     }
                 }
-                return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
+                try {
+                    return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
+                } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
+                    throw new Saxon.Hej.trans.XPathException(e);
+                }
             }
             try {
                 if ((encoding == null)) {
@@ -84,7 +88,11 @@ namespace Saxon.Hej.lib {
             } catch (System.IO.IOException e) {
                 encoding = "UTF-8";
             }
-            return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
+            try {
+                return Saxon.Impl.Overrides.ResourceLoader.getReaderFromStream(inputStream, encoding);
+            } catch (Saxon.Ejava.io.UnsupportedEncodingException e) {
+                throw new Saxon.Hej.trans.XPathException(e);
+            }
         }
         private static System.IO.Stream openClasspathResource(Saxon.Hej.Configuration config, string systemId) {
             throw new Saxon.Hej.trans.XPathException("classpath: URI scheme is not supported on .NET");

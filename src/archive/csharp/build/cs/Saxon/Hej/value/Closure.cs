@@ -24,7 +24,11 @@ namespace Saxon.Hej.value {
                         if ((local[i] is Saxon.Hej.value.Closure)) {
                             int cdepth = ((Saxon.Hej.value.Closure)(local[i])).depth;
                             if ((cdepth>=10)) {
-                                local[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(local[i].iterate());
+                                try {
+                                    local[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(local[i].iterate());
+                                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
                             } else {
                                 if (((cdepth+1)>depth)) {
                                     depth = (cdepth+1);
@@ -33,6 +37,13 @@ namespace Saxon.Hej.value {
                         }
                         savedStackFrame[i] = local[i];
                     }
+                    savedXPathContext.setStackFrame(stackFrameMap, savedStackFrame);
+                }
+            } else {
+                if ((((expression.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES)) != 0)) {
+                    Saxon.Hej.expr.StackFrame localStackFrame = context.getStackFrame();
+                    Saxon.Hej.expr.instruct.SlotManager stackFrameMap = localStackFrame.getStackFrameMap();
+                    Saxon.Hej.om.Sequence[] savedStackFrame = new Saxon.Hej.om.Sequence[stackFrameMap.getNumberOfVariables()];
                     savedXPathContext.setStackFrame(stackFrameMap, savedStackFrame);
                 }
             }

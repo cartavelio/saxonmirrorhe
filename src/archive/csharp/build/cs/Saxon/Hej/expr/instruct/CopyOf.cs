@@ -225,6 +225,19 @@ namespace Saxon.Hej.expr.instruct {
             if (getSelect().getItemType().isPlainType()) {
                 return getSelect();
             }
+            if ((getSelect() is Saxon.Hej.expr.instruct.Block)) {
+                Saxon.Hej.expr.instruct.Block b1 = (Saxon.Hej.expr.instruct.Block)(getSelect());
+                Saxon.Hej.expr.Expression[] splitCopy = new Saxon.Hej.expr.Expression[b1.size()];
+                for (int i = 0; (i<splitCopy.Length); i++) {
+                    Saxon.Hej.expr.Expression exp = b1.getOperanda()[i].getChildExpression().copy(new Saxon.Hej.expr.parser.RebindingMap());
+                    if (exp.getItemType().isPlainType()) {
+                        splitCopy[i] = exp;
+                    } else {
+                        splitCopy[i] = new Saxon.Hej.expr.instruct.CopyOf(exp, copyNamespaces, validation, schemaType, rejectDuplicateAttributes);
+                    }
+                }
+                return new Saxon.Hej.expr.instruct.Block(splitCopy);
+            }
             return this;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {

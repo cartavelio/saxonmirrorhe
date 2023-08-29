@@ -173,7 +173,7 @@ namespace Saxon.Hej.style {
             }
             if (Saxon.Hej.lib.NamespaceConstant.isReserved(qName.getURI())) {
                 if (qName.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
-                    if ((qName.getLocalPart().Equals("initial-template") && (((this is Saxon.Hej.style.XSLTemplate) || (this is Saxon.Hej.style.XSLCallTemplate))))) {
+                    if ((qName.getLocalPart().Equals("initial-template") && ((((this is Saxon.Hej.style.XSLTemplate) || (this is Saxon.Hej.style.XSLCallTemplate)) || (this is Saxon.Hej.style.XSLAcceptExpose))))) {
                         return qName;
                     }
                     if (qName.getLocalPart().Equals("original")) {
@@ -1384,33 +1384,36 @@ namespace Saxon.Hej.style {
         public virtual Saxon.Hej.style.SourceBinding getBindingInformation(Saxon.Hej.om.StructuredQName name) {
             return null;
         }
-        public Saxon.Hej.style.SourceBinding bindVariable(Saxon.Hej.om.StructuredQName qName) {
-            Saxon.Hej.style.SourceBinding decl = bindLocalVariable(qName);
+        public Saxon.Hej.style.SourceBinding bindVariable(Saxon.Hej.om.StructuredQName variableName, Saxon.Hej.om.StructuredQName attributeName) {
+            Saxon.Hej.style.SourceBinding decl = bindLocalVariable(variableName, attributeName);
             if ((decl != null)) {
                 return decl;
             }
-            Saxon.Hej.style.SourceBinding binding = getPrincipalStylesheetModule().getGlobalVariableBinding(qName);
+            Saxon.Hej.style.SourceBinding binding = getPrincipalStylesheetModule().getGlobalVariableBinding(variableName);
             if (((binding == null) || Saxon.Hej.tree.util.Navigator.isAncestorOrSelf(binding.getSourceElement(), this))) {
                 return null;
             } else {
                 return binding;
             }
         }
-        public Saxon.Hej.style.SourceBinding bindLocalVariable(Saxon.Hej.om.StructuredQName qName) {
+        public Saxon.Hej.style.SourceBinding bindLocalVariable(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.om.StructuredQName attributeName) {
             Saxon.Hej.om.NodeInfo curr = this;
             Saxon.Hej.om.NodeInfo prev = this;
-            Saxon.Hej.style.SourceBinding @implicit = hasImplicitBinding(qName);
+            Saxon.Hej.style.SourceBinding @implicit = hasImplicitBinding(qName, attributeName);
             if ((@implicit != null)) {
                 return @implicit;
             }
             if (!(isTopLevel())) {
+                while (((curr is Saxon.Hej.style.StyleElement) && !(((Saxon.Hej.style.StyleElement)(curr)).seesAvuncularVariables()))) {
+                    curr = curr.getParent();
+                }
                 Saxon.Hej.tree.iter.AxisIterator preceding = curr.iterateAxis(Saxon.Hej.om.AxisInfo.PRECEDING_SIBLING);
                 while (true) {
                     curr = ((/*1430*/Saxon.Hej.om.NodeInfo)preceding.next());
                     while ((curr == null)) {
                         curr = prev.getParent();
                         if ((curr is Saxon.Hej.style.StyleElement)) {
-                            @implicit = ((Saxon.Hej.style.StyleElement)(curr)).hasImplicitBinding(qName);
+                            @implicit = ((Saxon.Hej.style.StyleElement)(curr)).hasImplicitBinding(qName, null);
                             if ((@implicit != null)) {
                                 return @implicit;
                             }
@@ -1441,7 +1444,7 @@ namespace Saxon.Hej.style {
         protected internal virtual bool seesAvuncularVariables() {
             return true;
         }
-        protected internal virtual Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName name) {
+        protected internal virtual Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName name, Saxon.Hej.om.StructuredQName attributeName) {
             return null;
         }
         public virtual Saxon.Hej.om.StructuredQName getObjectName() {

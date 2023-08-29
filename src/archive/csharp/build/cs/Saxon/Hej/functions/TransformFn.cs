@@ -451,7 +451,7 @@ namespace Saxon.Hej.functions {
             int languageVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             checkTransformOptions(options, context, languageVersion);
             if ((Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version") != null)) {
-                double targetVersion = ((Saxon.Hej.value.BigDecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head())).getDoubleValue();
+                double targetVersion = ((Saxon.Hej.value.DecimalValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "xslt-version").head())).getDoubleValue();
                 if (((targetVersion*10)>languageVersion)) {
                     throw new Saxon.Hej.trans.XPathException("The transform option xslt-version is higher than the language version supported by this processor", "FOXT0002");
                 }

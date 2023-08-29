@@ -11,8 +11,12 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             getOperand().optimize(visitor, contextInfo);
             if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
-                Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()));
-                return Saxon.Hej.expr.Literal.makeLiteral(value, this);
+                try {
+                    Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()));
+                    return Saxon.Hej.expr.Literal.makeLiteral(value, this);
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             return this;
         }

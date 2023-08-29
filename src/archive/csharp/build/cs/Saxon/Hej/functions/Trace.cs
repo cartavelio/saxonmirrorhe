@@ -59,9 +59,13 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.Controller controller = context.getController();
             string label = ((arguments.Length == 1) ? "*" : arguments[1].head().getStringValue());
             if (controller.isTracing()) {
-                Saxon.Hej.om.Sequence value = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[0].iterate());
-                notifyListener(label, value, context);
-                return value;
+                try {
+                    Saxon.Hej.om.Sequence value = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[0].iterate());
+                    notifyListener(label, value, context);
+                    return value;
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             } else {
                 Saxon.Hej.lib.Logger @out = controller.getTraceFunctionDestination();
                 if ((@out == null)) {

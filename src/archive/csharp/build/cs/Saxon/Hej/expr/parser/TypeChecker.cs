@@ -87,8 +87,12 @@ namespace Saxon.Hej.expr.parser {
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                         try {
                             if ((exp is Saxon.Hej.expr.Literal)) {
-                                exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
-                                Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(cexp, exp);
+                                try {
+                                    exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
+                                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(cexp, exp);
+                                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
                             } else {
                                 exp = cexp;
                             }
@@ -114,8 +118,12 @@ namespace Saxon.Hej.expr.parser {
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, conversion);
                         try {
                             if ((exp is Saxon.Hej.expr.Literal)) {
-                                exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
-                                Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(supplied, exp);
+                                try {
+                                    exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
+                                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(supplied, exp);
+                                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
                             } else {
                                 exp = conversion;
                             }

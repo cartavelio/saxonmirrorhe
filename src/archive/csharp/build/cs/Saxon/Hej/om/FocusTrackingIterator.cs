@@ -20,6 +20,7 @@ namespace Saxon.Hej.om {
         public virtual Saxon.Hej.om.Item next() {
             curr = @base.next();
             if ((curr == null)) {
+                last = pos;
                 pos = -1;
             } else {
                 pos++;

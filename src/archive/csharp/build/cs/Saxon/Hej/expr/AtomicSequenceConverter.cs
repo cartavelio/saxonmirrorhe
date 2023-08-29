@@ -83,8 +83,12 @@ namespace Saxon.Hej.expr {
                     allocateConverterStatically(config, true);
                 }
                 if ((converter != null)) {
-                    Saxon.Hej.om.GroundedValue val = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(new Saxon.Hej.expr.EarlyEvaluationContext(config)));
-                    return Saxon.Hej.expr.Literal.makeLiteral(val, operand);
+                    try {
+                        Saxon.Hej.om.GroundedValue val = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(new Saxon.Hej.expr.EarlyEvaluationContext(config)));
+                        return Saxon.Hej.expr.Literal.makeLiteral(val, operand);
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 }
             }
             return this;

@@ -84,7 +84,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("xsiloc", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Load schemas named in xsi:schemaLocation (default on)");
             options.addRecognizedOption("?", Saxon.Hej.trans.CommandLineOptions.VALUE_PROHIBITED, "Display command line help text");
         }
-        protected internal void doQuery(string[] args, string command) {
+        public void doQuery(string[] args) {
             Saxon.Hej.trans.CommandLineOptions options = new Saxon.Hej.trans.CommandLineOptions();
             setPermittedOptions(options);
             try {
@@ -298,6 +298,9 @@ namespace Saxon.Hej {
                 quit(((("Fatal error during query: "+err2.GetType().Name)+": ")+(((err2.Message == null) ? " (no message)" : err2.Message))), 2);
             }
         }
+        public void doQuery(string[] args, string command) {
+            doQuery(args);
+        }
         internal static  /* REPLACING static */ Saxon.Api.XdmValue parseJson(Saxon.Hej.s9api.Processor processor, System.IO.TextReader jsonReader) {
             return new Saxon.Api.JsonBuilder(processor.getUnderlyingConfiguration()).ParseJson(jsonReader);
         }
@@ -307,10 +310,10 @@ namespace Saxon.Hej {
             options.applyToConfiguration(processor);
             allowExit = !("off".Equals(options.getOptionValue("quit")));
             backup = "on".Equals(options.getOptionValue("backup"));
-            explainOutputFileName = options.getOptionValue("explain");
+            explainOutputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("explain"));
             explaining = (explainOutputFileName != null);
             moduleURIResolverClass = options.getOptionValue("mr");
-            outputFileName = options.getOptionValue("o");
+            outputFileName = Saxon.Hej.trans.CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("o"));
             streaming = "on".Equals(options.getOptionValue("stream"));
             string value = options.getOptionValue("p");
             if ("on".Equals(value)) {
@@ -480,7 +483,7 @@ namespace Saxon.Hej {
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
                 request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
-                sourceInput = request.resolve(config.getResourceResolver());
+                sourceInput = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
             } else {
                 if (sourceFileName.Equals("-")) {
                     string sysId = Saxon.Hej.trans.CommandLineOptions.getCurrentWorkingDirectory().OriginalString;
@@ -541,8 +544,9 @@ namespace Saxon.Hej {
                                 }
                                 try {
                                     string queryText = Saxon.Hej.query.QueryReader.readSourceQuery((Saxon.Ejavax.xml.transform.stream.StreamSource)(sources[0]), config.getValidCharacterChecker());
+                                    compiler.setBaseURI(new System.Uri(sources[0].getSystemId(), System.UriKind.RelativeOrAbsolute));
                                     exp = compiler.compile(queryText);
-                                } catch (Saxon.Hej.trans.XPathException e) {
+                                } catch (Exception e) when (e is Saxon.Hej.trans.XPathException || e is System.UriFormatException) {
                                     throw new Saxon.Api.SaxonApiException(e);
                                 }
                                 break ;

@@ -16,6 +16,7 @@ namespace Saxon.Hej.om {
         string getDescription();
         void export(Saxon.Hej.trace.ExpressionPresenter @out);
         bool isTrustedResultType();
+        long getSerialNumber();
     
     }
 }

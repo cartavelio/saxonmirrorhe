@@ -9,13 +9,13 @@ namespace Saxon.Hej.@event {
             siblingCounters.Push(new System.Collections.Generic.Dictionary<Saxon.Hej.om.NodeName, int>());
         }
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
-            nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
             System.Collections.Generic.Dictionary<Saxon.Hej.om.NodeName,int> counters = siblingCounters.Peek();
             int preceding = Saxon.Impl.Helpers.MapUtils.GetOrDefault(counters, elemName, 0);
             int index = (preceding+1);
             Saxon.Impl.Helpers.MapUtils.Put(counters, elemName, index);
             path.Push(new Saxon.Hej.om.AbsolutePath.PathElement(Saxon.Hej.type.Type.ELEMENT, elemName, index));
             siblingCounters.Push(new System.Collections.Generic.Dictionary<Saxon.Hej.om.NodeName, int>());
+            nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
         }
         public override void endElement() {
             nextReceiver.endElement();

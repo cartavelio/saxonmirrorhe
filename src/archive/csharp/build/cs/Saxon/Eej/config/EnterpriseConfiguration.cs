@@ -556,6 +556,7 @@ namespace Saxon.Eej.config {
                 }
                 vc.setController(pipe.getController());
                 vc.setValidationParams(@params);
+                pipe.setComponent("com.saxonica.ee.validate.ValidationContext", vc);
                 if (validationOptions.isCheckEntityReferences()) {
                     Saxon.Eej.ee.validate.EntityValidator ev = new Saxon.Eej.ee.validate.EntityValidator(destination);
                     ev.setValidationContext(vc);
@@ -1013,10 +1014,14 @@ namespace Saxon.Eej.config {
             }
         }
         public override Saxon.Hej.om.GroundedValue makeSequenceExtent(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
-            if ((@ref == Saxon.Hej.expr.FilterExpression.FILTERED)) {
-                return /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(expression.iterate(context));
-            } else {
-                return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+            try {
+                if ((@ref == Saxon.Hej.expr.FilterExpression.FILTERED)) {
+                    return /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(expression.iterate(context));
+                } else {
+                    return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+                }
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
         }
         public override void declareBuiltInExtensionElementNamespaces() {

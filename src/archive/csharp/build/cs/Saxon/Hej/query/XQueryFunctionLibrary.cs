@@ -73,7 +73,11 @@ namespace Saxon.Hej.query {
                 }
                 Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[arguments.Length];
                 for (int i = 0; (i<arguments.Length); i++) {
-                    args[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[i].iterate());
+                    try {
+                        args[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[i].iterate());
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 }
                 return function.call(context.newCleanContext(), args);
             }

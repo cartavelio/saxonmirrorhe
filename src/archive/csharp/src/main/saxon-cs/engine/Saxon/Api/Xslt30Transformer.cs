@@ -450,7 +450,7 @@ namespace Saxon.Api {
         /// </remarks>
         public void ApplyTemplates(Stream input, Uri baseUri, IDestination destination) {
             StreamSource streamSource =
-                new (input, Uri.EscapeUriString(baseUri.ToString()));
+                new (input, baseUri.ToString());
             s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
@@ -491,7 +491,7 @@ namespace Saxon.Api {
         /// If the initial mode is declared streamable, this will perform a streamed transformation.
         /// </remarks>
         public void ApplyTemplates(TextReader input, Uri baseUri, IDestination destination) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
@@ -528,7 +528,7 @@ namespace Saxon.Api {
         /// (the parameters set in the serializer take precedence).</param>
         /// <remarks>since 9.9.1.5</remarks>
         public void Transform(Stream input, Uri baseUri, IDestination destination) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             s9Transformer.transform(streamSource, destination.UnderlyingDestination);
         }
 
@@ -548,7 +548,7 @@ namespace Saxon.Api {
         /// If the initial mode is declared streamable, this will perform a streamed transformation.
         /// </remarks>
         public XdmValue ApplyTemplates(Stream input, Uri baseUri) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             return s9Transformer.applyTemplates(streamSource);
         }
         
@@ -567,7 +567,7 @@ namespace Saxon.Api {
         /// If the initial mode is declared streamable, this will perform a streamed transformation.
         /// </remarks>
         public XdmValue ApplyTemplates(TextReader input, Uri baseUri) {
-            StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
+            StreamSource streamSource = new (input, baseUri.ToString());
             return s9Transformer.applyTemplates(streamSource);
         }
 

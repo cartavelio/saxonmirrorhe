@@ -18,10 +18,14 @@ namespace Saxon.Hej.serialize {
         private int level;
         private readonly System.Collections.Generic.Stack<bool> oneLinerStack = new System.Collections.Generic.Stack<bool>();
         private bool unfailing = false;
+        private bool mustClose = true;
         public JSONEmitter(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.str.UnicodeWriter writer, Saxon.Ejava.util.Properties outputProperties)  {
             config = pipe.getConfiguration();
             setOutputProperties(outputProperties);
             this.writer = writer;
+        }
+        public void setMustClose(bool mustClose) {
+            this.mustClose = mustClose;
         }
         public void setOutputProperties(Saxon.Ejava.util.Properties details) {
             this.outputProperties = details;
@@ -232,8 +236,13 @@ namespace Saxon.Hej.serialize {
             }
             if ((writer != null)) {
                 try {
-                    writer.close();
+                    if (mustClose) {
+                        writer.close();
+                    } else {
+                        writer.flush();
+                    }
                 } catch (System.IO.IOException e) {
+                    throw new Saxon.Hej.trans.XPathException(e);
                 }
             }
         }

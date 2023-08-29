@@ -1345,11 +1345,11 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.value.SequenceType valueType = parseSequenceType();
                 expect(Saxon.Hej.expr.parser.Token.RPAR);
                 nextToken();
-                if (!(((keyType is Saxon.Hej.type.AtomicType)))) {
+                if (!(((keyType is Saxon.Hej.type.PlainType)))) {
                     grumble("Key type of a map must be atomic");
                     return null;
                 }
-                return new Saxon.Hej.ma.map.MapType((Saxon.Hej.type.AtomicType)(keyType), valueType);
+                return new Saxon.Hej.ma.map.MapType((Saxon.Hej.type.PlainType)(keyType), valueType);
             }
         }
         protected internal Saxon.Hej.type.ItemType parseArrayItemType() {
@@ -2075,6 +2075,9 @@ namespace Saxon.Hej.expr.parser {
                 }
                 empty = true;
                 nextToken();
+            }
+            if (schemaDeclaration) {
+                expect(Saxon.Hej.expr.parser.Token.NAME);
             }
             switch (primaryType) {
               case Saxon.Hej.type.Type.ITEM:
@@ -2888,8 +2891,12 @@ namespace Saxon.Hej.expr.parser {
             if ((b2 != null)) {
                 return b2;
             }
-            if (((env is Saxon.Hej.style.ExpressionContext) && !(inlineFunctionStack.isEmpty()))) {
-                b2 = findOuterXSLTVariable(qName, inlineFunctionStack, env);
+            if (((env is Saxon.Hej.sxpath.IndependentContext) && !(inlineFunctionStack.isEmpty()))) {
+                b2 = findXPathParameter(qName, inlineFunctionStack, env);
+            } else {
+                if (((env is Saxon.Hej.style.ExpressionContext) && !(inlineFunctionStack.isEmpty()))) {
+                    b2 = findOuterXSLTVariable(qName, inlineFunctionStack, env);
+                }
             }
             return b2;
         }
@@ -2929,8 +2936,35 @@ namespace Saxon.Hej.expr.parser {
             }
             return null;
         }
+        private static Saxon.Hej.expr.LocalBinding findXPathParameter(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.tree.util.IndexedStack<Saxon.Hej.expr.parser.XPathParser.InlineFunctionDetails> inlineFunctionStack, Saxon.Hej.expr.StaticContext env) {
+            if ((env is Saxon.Hej.sxpath.IndependentContext)) {
+                Saxon.Hej.sxpath.XPathVariable var = ((Saxon.Hej.sxpath.IndependentContext)(env)).getExternalVariable(qName);
+                if ((var != null)) {
+                    Saxon.Hej.expr.parser.XPathParser.InlineFunctionDetails details = inlineFunctionStack.get(0);
+                    Saxon.Hej.expr.LocalBinding innermostBinding;
+                    bool found = false;
+                    for (int p = 0; (p<details.outerVariablesUsed.Count); p++) {
+                        if (details.outerVariablesUsed[p].getVariableQName().Equals(qName)) {
+                            found = true;
+                            break ;
+                        }
+                    }
+                    if (!(found)) {
+                        details.outerVariablesUsed.Add(var);
+                        Saxon.Hej.expr.instruct.UserFunctionParameter ufp = new Saxon.Hej.expr.instruct.UserFunctionParameter();
+                        ufp.setVariableQName(qName);
+                        ufp.setRequiredType(var.getRequiredType());
+                        details.implicitParams.Add(ufp);
+                    }
+                    innermostBinding = bindParametersInNestedFunctions(qName, inlineFunctionStack, 0);
+                    return innermostBinding;
+                }
+            }
+            return null;
+        }
         private static Saxon.Hej.expr.LocalBinding findOuterXSLTVariable(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.tree.util.IndexedStack<Saxon.Hej.expr.parser.XPathParser.InlineFunctionDetails> inlineFunctionStack, Saxon.Hej.expr.StaticContext env) {
-            Saxon.Hej.style.SourceBinding decl = ((Saxon.Hej.style.ExpressionContext)(env)).getStyleElement().bindLocalVariable(qName);
+            Saxon.Hej.om.StructuredQName attName = ((Saxon.Hej.style.ExpressionContext)(env)).getAttributeName();
+            Saxon.Hej.style.SourceBinding decl = ((Saxon.Hej.style.ExpressionContext)(env)).getStyleElement().bindLocalVariable(qName, attName);
             if ((decl != null)) {
                 Saxon.Hej.expr.parser.XPathParser.InlineFunctionDetails details = inlineFunctionStack.get(0);
                 Saxon.Hej.expr.LocalBinding innermostBinding;

@@ -17,11 +17,15 @@ namespace Saxon.Hej.expr {
                     return ((Saxon.Hej.tree.iter.ArrayIterator)(@base)).makeSliceIterator(start, System.Int32.MaxValue);
                 } else {
                     if (((@base is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(@base)).isActuallyGrounded())) {
-                        Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(@base);
-                        if ((start>value.getLength())) {
-                            return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
-                        } else {
-                            return new Saxon.Hej.expr.ValueTailIterator(value, (start-1));
+                        try {
+                            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(@base);
+                            if ((start>value.getLength())) {
+                                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                            } else {
+                                return new Saxon.Hej.expr.ValueTailIterator(value, (start-1));
+                            }
+                        } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                            throw e.getXPathException();
                         }
                     } else {
                         for (int i = 0; (i<(start-1)); i++) {

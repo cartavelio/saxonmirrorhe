@@ -91,9 +91,13 @@ namespace Saxon.Hej.ma.arrays {
             }
         }
         private static Saxon.Hej.om.GroundedValue atomize(Saxon.Hej.om.Sequence input) {
-            Saxon.Hej.om.SequenceIterator iterator = input.iterate();
-            Saxon.Hej.om.SequenceIterator mapper = Saxon.Hej.expr.Atomizer.getAtomizingIterator(iterator, false);
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(mapper);
+            try {
+                Saxon.Hej.om.SequenceIterator iterator = input.iterate();
+                Saxon.Hej.om.SequenceIterator mapper = Saxon.Hej.expr.Atomizer.getAtomizingIterator(iterator, false);
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(mapper);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
     
     }

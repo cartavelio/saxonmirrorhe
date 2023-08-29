@@ -356,7 +356,7 @@ namespace Saxon.Hej.om {
         public const int XML_LANG = (XML+3);
         public const int XML_ID = (XML+4);
         public const int XML_LANG_TYPE = (XML+5);
-        public const int XML_SPACE_TYPE = 6;
+        public const int XML_SPACE_TYPE = (XML+6);
         public static readonly Saxon.Hej.om.NodeName XML_ID_NAME = new Saxon.Hej.om.FingerprintedQName("xml", Saxon.Hej.lib.NamespaceConstant.XML, "id", XML_ID);
         public const int XS_STRING = (XS+1);
         public const int XS_BOOLEAN = (XS+2);

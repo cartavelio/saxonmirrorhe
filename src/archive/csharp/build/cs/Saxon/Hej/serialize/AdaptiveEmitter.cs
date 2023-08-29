@@ -8,8 +8,12 @@ namespace Saxon.Hej.serialize {
         private Saxon.Ejava.util.Properties outputProperties;
         private string itemSeparator = "\n";
         private bool started = false;
+        private bool mustClose = true;
         public AdaptiveEmitter(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.str.UnicodeWriter writer) : base (pipe) {
             this.writer = writer;
+        }
+        public void setMustClose(bool mustClose) {
+            this.mustClose = mustClose;
         }
         public void setOutputProperties(Saxon.Ejava.util.Properties props) {
             outputProperties = props;
@@ -261,7 +265,11 @@ namespace Saxon.Hej.serialize {
             base.close();
             if ((writer != null)) {
                 try {
-                    writer.close();
+                    if (mustClose) {
+                        writer.close();
+                    } else {
+                        writer.flush();
+                    }
                 } catch (System.IO.IOException e) {
                     throw new Saxon.Hej.trans.XPathException(e);
                 }

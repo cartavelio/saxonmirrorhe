@@ -94,7 +94,7 @@ namespace Saxon.Api {
         /// function if the document contains links to other documents in the form of relative URIs.</param>
         public void SetInputStream(Stream input, Uri baseUri) {
             StreamSource streamSource = new StreamSource(input,
-                Uri.EscapeUriString(baseUri.ToString()));
+                baseUri.ToString());
             s9Transformer.setSource(streamSource);
         }
 

@@ -25,8 +25,12 @@ namespace Saxon.Eej.xsltextn.instruct {
             return Saxon.Hej.om.StandardNames.SAXON_DO;
         }
         public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(getActionExpr().iterate(context));
-            return null;
+            try {
+                Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(getActionExpr().iterate(context));
+                return null;
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("do", this);

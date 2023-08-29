@@ -24,19 +24,23 @@ namespace Saxon.Hej.expr {
             throw new Saxon.Ejava.lang.UnsupportedOperationException("TailCallLoop.copy()");
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.XPathContextMajor cm = (Saxon.Hej.expr.XPathContextMajor)(context);
-            while (true) {
-                Saxon.Hej.om.SequenceIterator iter = getBaseExpression().iterate(cm);
-                Saxon.Hej.om.GroundedValue extent = Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
-                Saxon.Hej.expr.TailCallLoop.TailCallInfo tail = cm.getTailCallInfo();
-                if ((tail == null)) {
-                    return extent.iterate();
-                } else {
-                    Saxon.Hej.expr.instruct.UserFunction target = establishTargetFunction(tail, cm);
-                    if ((target != containingFunction)) {
-                        return tailCallDifferentFunction(target, cm).iterate();
+            try {
+                Saxon.Hej.expr.XPathContextMajor cm = (Saxon.Hej.expr.XPathContextMajor)(context);
+                while (true) {
+                    Saxon.Hej.om.SequenceIterator iter = getBaseExpression().iterate(cm);
+                    Saxon.Hej.om.GroundedValue extent = Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
+                    Saxon.Hej.expr.TailCallLoop.TailCallInfo tail = cm.getTailCallInfo();
+                    if ((tail == null)) {
+                        return extent.iterate();
+                    } else {
+                        Saxon.Hej.expr.instruct.UserFunction target = establishTargetFunction(tail, cm);
+                        if ((target != containingFunction)) {
+                            return tailCallDifferentFunction(target, cm).iterate();
+                        }
                     }
                 }
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {

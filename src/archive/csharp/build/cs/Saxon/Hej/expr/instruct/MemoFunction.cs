@@ -42,7 +42,7 @@ namespace Saxon.Hej.expr.instruct {
                                 sb.append(Saxon.Hej.type.Type.displayTypeName(item)).append('/').append(item.getUnicodeStringValue());
                             } else {
                                 if ((item is Saxon.Hej.om.Function)) {
-                                    sb.append(item.GetType().Name).append("@").append((""+Saxon.Ejava.lang.System.identityHashCode(item)));
+                                    sb.append(item.GetType().Name).append("@").append(((Saxon.Hej.om.Function)(item)).getSerialNumber());
                                 }
                             }
                         }

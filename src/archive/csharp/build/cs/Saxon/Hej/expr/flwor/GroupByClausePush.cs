@@ -40,15 +40,19 @@ namespace Saxon.Hej.expr.flwor {
             }
         }
         protected internal static void checkGroupingValues(Saxon.Hej.om.Sequence[] groupingValues) {
-            for (int i = 0; (i<groupingValues.Length); i++) {
-                Saxon.Hej.om.Sequence v = groupingValues[i];
-                if (!((((v is Saxon.Hej.value.EmptySequence) || (v is Saxon.Hej.value.AtomicValue))))) {
-                    v = Saxon.Hej.om.SequenceTool.toGroundedValue(Saxon.Hej.expr.Atomizer.getAtomizingIterator(v.iterate(), false));
-                    if ((Saxon.Hej.om.SequenceTool.getLength(v)>1)) {
-                        throw new Saxon.Hej.trans.XPathException("Grouping key value cannot be a sequence of more than one item", "XPTY0004");
+            try {
+                for (int i = 0; (i<groupingValues.Length); i++) {
+                    Saxon.Hej.om.Sequence v = groupingValues[i];
+                    if (!((((v is Saxon.Hej.value.EmptySequence) || (v is Saxon.Hej.value.AtomicValue))))) {
+                        v = Saxon.Hej.om.SequenceTool.toGroundedValue(Saxon.Hej.expr.Atomizer.getAtomizingIterator(v.iterate(), false));
+                        if ((Saxon.Hej.om.SequenceTool.getLength(v)>1)) {
+                            throw new Saxon.Hej.trans.XPathException("Grouping key value cannot be a sequence of more than one item", "XPTY0004");
+                        }
+                        groupingValues[i] = v;
                     }
-                    groupingValues[i] = v;
                 }
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
         }
         public override void close() {

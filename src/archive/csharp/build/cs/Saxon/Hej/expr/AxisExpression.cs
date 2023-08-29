@@ -583,22 +583,31 @@ namespace Saxon.Hej.expr {
                 }
                 return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE;
             } else {
-                if ((((axis == Saxon.Hej.om.AxisInfo.DESCENDANT) && (nodeTest is Saxon.Hej.pattern.NameTest)) && (nodeTest.getPrimitiveType() == Saxon.Hej.type.Type.ELEMENT))) {
+                if ((((axis == Saxon.Hej.om.AxisInfo.CHILD) && (nodeTest is Saxon.Hej.pattern.NameTest)) && (nodeTest.getPrimitiveType() == Saxon.Hej.type.Type.ELEMENT))) {
                     Saxon.Hej.type.SchemaType contentType = originNodeType.getContentType();
                     if ((contentType is Saxon.Hej.type.ComplexType)) {
-                        try {
-                            return ((Saxon.Hej.type.ComplexType)(contentType)).getDescendantElementCardinality(nodeTest.getFingerprint());
-                        } catch (Saxon.Hej.type.SchemaException err) {
-                            return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
-                        }
+                        return ((Saxon.Hej.type.ComplexType)(contentType)).getElementParticleCardinality(nodeTest.getFingerprint(), true);
                     } else {
                         return Saxon.Hej.expr.StaticProperty.EMPTY;
                     }
                 } else {
-                    if ((axis == Saxon.Hej.om.AxisInfo.SELF)) {
-                        return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE;
+                    if ((((axis == Saxon.Hej.om.AxisInfo.DESCENDANT) && (nodeTest is Saxon.Hej.pattern.NameTest)) && (nodeTest.getPrimitiveType() == Saxon.Hej.type.Type.ELEMENT))) {
+                        Saxon.Hej.type.SchemaType contentType = originNodeType.getContentType();
+                        if ((contentType is Saxon.Hej.type.ComplexType)) {
+                            try {
+                                return ((Saxon.Hej.type.ComplexType)(contentType)).getDescendantElementCardinality(nodeTest.getFingerprint());
+                            } catch (Saxon.Hej.type.SchemaException err) {
+                                return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
+                            }
+                        } else {
+                            return Saxon.Hej.expr.StaticProperty.EMPTY;
+                        }
                     } else {
-                        return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
+                        if ((axis == Saxon.Hej.om.AxisInfo.SELF)) {
+                            return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE;
+                        } else {
+                            return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
+                        }
                     }
                 }
             }

@@ -17,7 +17,7 @@ using JXsltCompiler = Saxon.Hej.s9api.XsltCompiler;
 
 namespace Saxon.Api {
     /// <summary>
-    /// An <c>XsltCompiler</c> object allows XSLT 3.0 stylesheets to be compiled.
+    /// An <c>XsltCompiler</c> object allows XSLT stylesheets to be compiled.
     /// The compiler holds information that represents the static context
     /// for the compilation.
     /// </summary>
@@ -163,12 +163,10 @@ namespace Saxon.Api {
 
         /// <summary>
         /// The <c>XsltLanguageVersion</c> property determines the version of the XSLT language specification
-        /// implemented by the compiler. In this Saxon release the value is always "3.0".
+        /// implemented by the compiler. In this Saxon release the values "3.0" and "4.0" are recognized.
+        /// The default is "3.0". Set the value to "4.0" to enable support for experimental features defined in
+        /// the XSLT 4.0 proposal (which is likely to change before it stabilizes).
         /// </summary>
-        /// <remarks>
-        /// <para>Getting this property always returns "3.0".</para>
-        /// <para>Setting this property has no effect.</para>
-        /// </remarks>
 
         public string XsltLanguageVersion {
             get => jXsltCompiler.getXsltLanguageVersion();
@@ -239,7 +237,7 @@ namespace Saxon.Api {
         public XsltExecutable Compile(Stream input) {
             StreamSource ss = new StreamSource(input);
             if (baseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                ss.setSystemId(baseUri.ToString());
             }
 
             XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(ss));
@@ -318,11 +316,11 @@ namespace Saxon.Api {
 
             StreamSource ss = new StreamSource(input);
             if (theBaseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(theBaseUri));
+                ss.setSystemId(theBaseUri);
             }
             else {
                 if (baseUri != null) {
-                    ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                    ss.setSystemId(baseUri.ToString());
                 }
             }
 
@@ -356,7 +354,7 @@ namespace Saxon.Api {
         public XsltPackage CompilePackage(Stream input) {
             StreamSource ss = new (input);
             if (baseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                ss.setSystemId(baseUri.ToString());
             }
             return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
         }
@@ -570,7 +568,7 @@ namespace Saxon.Api {
         public XsltExecutable Compile(TextReader input) {
             StreamSource ss = new StreamSource(input);
             if (baseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
+                ss.setSystemId(baseUri.ToString());
             }
 
             XsltExecutable executable = new(jXsltCompiler.compile(ss)) {
@@ -686,7 +684,7 @@ namespace Saxon.Api {
                     throw new ArgumentNullException("BaseUri");
                 }
 
-                baseu = Uri.EscapeUriString(baseUri.ToString());
+                baseu = baseUri.ToString();
                 pp.setBaseURI(baseu);
             }
 

@@ -126,8 +126,12 @@ namespace Saxon.Hej.functions {
             if ((details == null)) {
                 details = new System.Collections.Generic.Dictionary<string, Saxon.Hej.functions.Parts.ComponentDetails>();
             }
-            foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.functions.Parts.ComponentDetails> component in details) {
-                result.initialPut(component.Key, Saxon.Hej.om.SequenceTool.toGroundedValue(component.Value.supplier(subject)));
+            try {
+                foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.functions.Parts.ComponentDetails> component in details) {
+                    result.initialPut(component.Key, Saxon.Hej.om.SequenceTool.toGroundedValue(component.Value.supplier(subject)));
+                }
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
             result.initialPut("value", subject);
             return result;

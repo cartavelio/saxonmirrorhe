@@ -24,9 +24,11 @@ namespace Saxon.Eej.xsltextn.instruct {
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             typeCheckChildren(visitor, contextInfo);
-            Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
-            selectOp.setChildExpression(tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
+            if ((binding.getRequiredType() != null)) {
+                Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
+                selectOp.setChildExpression(tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
+            }
             return this;
         }
         public override int getIntrinsicDependencies() {
@@ -42,14 +44,18 @@ namespace Saxon.Eej.xsltextn.instruct {
             return Saxon.Hej.om.StandardNames.SAXON_ASSIGN;
         }
         public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            if ((binding == null)) {
-                throw new Saxon.Ejava.lang.IllegalStateException("saxon:assign binding has not been fixed up");
+            try {
+                if ((binding == null)) {
+                    throw new Saxon.Ejava.lang.IllegalStateException("saxon:assign binding has not been fixed up");
+                }
+                Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(getSelectExpr().iterate(context));
+                Saxon.Hej.Controller controller = context.getController();
+                System.Diagnostics.Debug.Assert((controller != null));
+                controller.getBindery(getPackageData()).setGlobalVariable(binding, value);
+                return null;
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
-            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(getSelectExpr().iterate(context));
-            Saxon.Hej.Controller controller = context.getController();
-            System.Diagnostics.Debug.Assert((controller != null));
-            controller.getBindery(getPackageData()).setGlobalVariable(binding, value);
-            return null;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             if ("JS".Equals(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions())).target)) {

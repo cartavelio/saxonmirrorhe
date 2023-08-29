@@ -299,7 +299,9 @@ namespace Saxon.Hej.expr {
             return k;
         }
         public override Saxon.Hej.expr.Expression unordered(bool retainAllNodes, bool forStreaming) {
-            setStart(getStart().unordered(retainAllNodes, forStreaming));
+            if ((((getStep().getDependencies()&((Saxon.Hej.expr.StaticProperty.DEPENDS_ON_POSITION|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LAST)))) == 0)) {
+                setStart(getStart().unordered(retainAllNodes, forStreaming));
+            }
             setStep(getStep().unordered(retainAllNodes, forStreaming));
             return this;
         }

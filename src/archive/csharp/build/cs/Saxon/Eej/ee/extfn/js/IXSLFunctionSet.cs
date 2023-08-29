@@ -59,21 +59,25 @@ namespace Saxon.Eej.ee.extfn.js {
                 return base.makeFunctionCall(copiedArgs);
             }
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                Saxon.Hej.value.IntegerValue wait = (Saxon.Hej.value.IntegerValue)(arguments[0].head());
-                Saxon.Hej.value.StringValue documents = (Saxon.Hej.value.StringValue)(arguments[1].head());
-                Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.Expression> wrappedActionObject = (Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.Expression>)(arguments[2].head());
-                Saxon.Hej.expr.Expression action = wrappedActionObject.getObject();
-                if ((documents != null)) {
-                    Saxon.Hej.tree.iter.AtomicIterator tokenIter = new Saxon.Hej.value.Whitespace.Tokenizer(documents.getUnicodeStringValue());
-                    string baseURI = getRetainedStaticContext().getStaticBaseUriString();
-                    Saxon.Hej.expr.PackageData pd = getRetainedStaticContext().getPackageData();
-                    Saxon.Hej.lib.ParseOptions options = context.getConfiguration().getParseOptions();
-                    Saxon.Hej.expr.ItemMappingFunction mapper = Saxon.Hej.expr.ItemMapper.of(token => Saxon.Hej.functions.DocumentFn.makeDoc(token.getStringValue(), baseURI, pd, options, context, location, false));
-                    Saxon.Hej.om.SequenceIterator mapped = context.getConfiguration().getMultithreadedItemMappingIterator(tokenIter, mapper);
-                    Saxon.Hej.om.SequenceTool.toGroundedValue(mapped);
-                    return new Saxon.Hej.om.LazySequence(action.iterate(context));
-                } else {
-                    return Saxon.Hej.value.EmptySequence.getInstance();
+                try {
+                    Saxon.Hej.value.IntegerValue wait = (Saxon.Hej.value.IntegerValue)(arguments[0].head());
+                    Saxon.Hej.value.StringValue documents = (Saxon.Hej.value.StringValue)(arguments[1].head());
+                    Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.Expression> wrappedActionObject = (Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.Expression>)(arguments[2].head());
+                    Saxon.Hej.expr.Expression action = wrappedActionObject.getObject();
+                    if ((documents != null)) {
+                        Saxon.Hej.tree.iter.AtomicIterator tokenIter = new Saxon.Hej.value.Whitespace.Tokenizer(documents.getUnicodeStringValue());
+                        string baseURI = getRetainedStaticContext().getStaticBaseUriString();
+                        Saxon.Hej.expr.PackageData pd = getRetainedStaticContext().getPackageData();
+                        Saxon.Hej.lib.ParseOptions options = context.getConfiguration().getParseOptions();
+                        Saxon.Hej.expr.ItemMappingFunction mapper = Saxon.Hej.expr.ItemMapper.of(token => Saxon.Hej.functions.DocumentFn.makeDoc(token.getStringValue(), baseURI, pd, options, context, location, false));
+                        Saxon.Hej.om.SequenceIterator mapped = context.getConfiguration().getMultithreadedItemMappingIterator(tokenIter, mapper);
+                        Saxon.Hej.om.SequenceTool.toGroundedValue(mapped);
+                        return new Saxon.Hej.om.LazySequence(action.iterate(context));
+                    } else {
+                        return Saxon.Hej.value.EmptySequence.getInstance();
+                    }
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
                 }
             }
         

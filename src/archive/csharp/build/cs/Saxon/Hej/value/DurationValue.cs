@@ -97,7 +97,11 @@ namespace Saxon.Hej.value {
             } else {
                 if ("-".Equals(part)) {
                     negative = true;
-                    part = (string)(tok.nextToken());
+                    if (tok.hasMoreTokens()) {
+                        part = (string)(tok.nextToken());
+                    } else {
+                        return badDuration("'-' on its own not allowed as a duration", s);
+                    }
                 }
             }
             if (!("P".Equals(part))) {

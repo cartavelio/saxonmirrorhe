@@ -427,8 +427,8 @@ namespace Saxon.Hej.type {
                                                 return /*explicit enum*/ Saxon.Hej.type.Affinity.SUBSUMED_BY;
                                             }
                                         }
-                                        Saxon.Hej.type.AtomicType k1 = ((Saxon.Hej.ma.map.MapType)(t1)).getKeyType();
-                                        Saxon.Hej.type.AtomicType k2 = ((Saxon.Hej.ma.map.MapType)(t2)).getKeyType();
+                                        Saxon.Hej.type.PlainType k1 = ((Saxon.Hej.ma.map.MapType)(t1)).getKeyType();
+                                        Saxon.Hej.type.PlainType k2 = ((Saxon.Hej.ma.map.MapType)(t2)).getKeyType();
                                         Saxon.Hej.value.SequenceType v1 = ((Saxon.Hej.ma.map.MapType)(t1)).getValueType();
                                         Saxon.Hej.value.SequenceType v2 = ((Saxon.Hej.ma.map.MapType)(t2)).getValueType();
                                         Saxon.Hej.type.Affinity keyRel = relationship(k1, k2);

@@ -45,7 +45,11 @@ namespace Saxon.Hej.expr {
                 }
             }
             if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
-                return new Saxon.Hej.expr.Literal(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+                try {
+                    return new Saxon.Hej.expr.Literal(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             return this;
         }
@@ -89,7 +93,7 @@ namespace Saxon.Hej.expr {
             return ("LookupAll".GetHashCode()^getBaseExpression().GetHashCode());
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            return new Inner_SequenceIterator_53(this, context);
+            return new Inner_SequenceIterator_54(this, context);
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
             destination.startElement("lookupAll", this);
@@ -103,9 +107,9 @@ namespace Saxon.Hej.expr {
             return (getBaseExpression().toShortString()+"?*");
         }
     
-        private class Inner_SequenceIterator_53 : Saxon.Hej.om.SequenceIterator {
+        private class Inner_SequenceIterator_54 : Saxon.Hej.om.SequenceIterator {
             private readonly LookupAllExpression outerInstance;
-            public Inner_SequenceIterator_53(LookupAllExpression outerInstance, Saxon.Hej.expr.XPathContext context) {
+            public Inner_SequenceIterator_54(LookupAllExpression outerInstance, Saxon.Hej.expr.XPathContext context) {
                 this.outerInstance = outerInstance;
                 this.context = context;
                 level0 = /*guess*/outerInstance.getBaseExpression().iterate(/*extraParam*/context);

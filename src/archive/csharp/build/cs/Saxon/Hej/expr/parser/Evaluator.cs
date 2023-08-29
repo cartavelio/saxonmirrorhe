@@ -239,7 +239,11 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.om.Sequence @base = Saxon.Hej.expr.parser.Evaluator.Variable.INSTANCE.evaluate(vr, context);
                 if ((@base is Saxon.Hej.value.MemoClosure)) {
                     Saxon.Hej.om.SequenceIterator it = @base.iterate();
-                    @base = Saxon.Hej.om.SequenceTool.toGroundedValue(it);
+                    try {
+                        @base = Saxon.Hej.om.SequenceTool.toGroundedValue(it);
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 }
                 if ((@base is Saxon.Hej.value.IntegerRange)) {
                     long step = ((Saxon.Hej.value.IntegerRange)(@base)).getStep();

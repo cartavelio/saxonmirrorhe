@@ -570,6 +570,13 @@ namespace Saxon.Hej {
         public System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> getFocusTrackerFactory(bool multithreaded) {
             return ((multithreaded && (multiThreadedFocusTrackerFactory != null)) ? multiThreadedFocusTrackerFactory : focusTrackerFactory);
         }
+        public Saxon.Hej.om.FocusIterator makeFocusTracker(Saxon.Hej.om.SequenceIterator iter, bool multithreaded) {
+            if ((iter is Saxon.Hej.om.FocusIterator)) {
+                return (Saxon.Hej.om.FocusIterator)(iter);
+            } else {
+                return getFocusTrackerFactory(multithreaded)(iter);
+            }
+        }
         public void setFocusTrackerFactory(System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> focusTrackerFactory) {
             this.focusTrackerFactory = focusTrackerFactory;
         }

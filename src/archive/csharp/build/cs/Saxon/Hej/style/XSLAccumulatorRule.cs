@@ -95,8 +95,8 @@ namespace Saxon.Hej.style {
         public void setSelect(Saxon.Hej.expr.Expression select) {
             this.select = select;
         }
-        protected internal override Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName name) {
-            if ((name.getLocalPart().Equals("value") && name.hasURI(""))) {
+        protected internal override Saxon.Hej.style.SourceBinding hasImplicitBinding(Saxon.Hej.om.StructuredQName name, Saxon.Hej.om.StructuredQName attributeName) {
+            if (((name.getLocalPart().Equals("value") && name.hasURI("")) && (((attributeName == null) || ((attributeName.getLocalPart().Equals("select") && attributeName.hasURI(""))))))) {
                 Saxon.Hej.style.SourceBinding sb = new Saxon.Hej.style.SourceBinding(this);
                 sb.setVariableQName(new Saxon.Hej.om.StructuredQName("", "", "value"));
                 System.Diagnostics.Debug.Assert((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) != null));

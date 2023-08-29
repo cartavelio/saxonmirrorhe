@@ -474,7 +474,11 @@ namespace Saxon.Hej.style {
             Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);
             Saxon.Hej.expr.XPathContext dynamicContext = makeDynamicContext(staticContext);
             ((Saxon.Hej.expr.XPathContextMajor)(dynamicContext)).openStackFrame(stackFrameMap);
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
     
     }

@@ -50,7 +50,7 @@ namespace Saxon.Hej.ma.map {
         public override Saxon.Hej.ma.map.MapItem remove(Saxon.Hej.value.AtomicValue key) {
             return toHashTrieMap().remove(key);
         }
-        public override bool conforms(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
+        public override bool conforms(Saxon.Hej.type.PlainType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
             if (isEmpty()) {
                 return true;
             }

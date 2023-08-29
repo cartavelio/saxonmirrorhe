@@ -47,7 +47,7 @@ namespace Saxon.Hej.expr {
             return slotNumber;
         }
         public override int computeDependencies() {
-            int d = base.computeDependencies();
+            int d = (base.computeDependencies()|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_OWN_RANGE_VARIABLES);
             if (!(Saxon.Hej.expr.parser.ExpressionTool.containsLocalVariableReference(this))) {
                 d &= ~(Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LOCAL_VARIABLES);
             }

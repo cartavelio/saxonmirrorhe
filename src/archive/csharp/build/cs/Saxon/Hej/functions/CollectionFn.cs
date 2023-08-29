@@ -149,7 +149,11 @@ namespace Saxon.Hej.functions {
             if ((collection.isStable(context) || context.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.STABLE_COLLECTION_URI))) {
                 Saxon.Hej.Controller controller = context.getController();
                 Saxon.Hej.om.DocumentPool docPool = controller.getDocumentPool();
-                cachedCollection = Saxon.Hej.om.SequenceTool.toGroundedValue(result);
+                try {
+                    cachedCollection = Saxon.Hej.om.SequenceTool.toGroundedValue(result);
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
                 Saxon.Hej.om.SequenceIterator iter = cachedCollection.iterate();
                 Saxon.Hej.om.Item item;
                 while (((item = iter.next()) != null)) {

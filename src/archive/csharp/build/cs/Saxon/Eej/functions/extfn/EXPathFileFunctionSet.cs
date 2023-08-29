@@ -559,7 +559,7 @@ namespace Saxon.Eej.functions.extfn {
                 return new Saxon.Hej.value.AnyURIValue(escapeCS(uri.ToString()));
             }
             private static string escapeCS(string s) {
-                return System.Uri.EscapeUriString(s);
+                return System.Uri.EscapeDataString(s);
             }
         
         }

@@ -26,9 +26,13 @@ namespace Saxon.Hej.expr {
             operand.typeCheck(visitor, contextInfo);
             try {
                 if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
-                    Saxon.Hej.expr.Expression e2 = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
-                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, e2);
-                    return e2;
+                    try {
+                        Saxon.Hej.expr.Expression e2 = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
+                        Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, e2);
+                        return e2;
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 }
             } catch (System.Exception err) {
             }

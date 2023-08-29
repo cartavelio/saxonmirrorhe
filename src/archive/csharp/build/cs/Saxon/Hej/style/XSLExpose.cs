@@ -4,6 +4,9 @@ using System.Linq;
 namespace Saxon.Hej.style {
     public class XSLExpose : Saxon.Hej.style.XSLAcceptExpose {
         protected internal void checkCompatibility(Saxon.Hej.trans.SymbolicName name, Saxon.Hej.trans.Visibility declared, Saxon.Hej.trans.Visibility exposed) {
+            if (((exposed == Saxon.Hej.trans.Visibility.ABSTRACT) && (declared != Saxon.Hej.trans.Visibility.ABSTRACT))) {
+                compileError((((("The "+name)+" cannot be exposed as ")+Saxon.Hej.trans.Err.describeVisibility(exposed))+" because it is not originally declared as abstract"), "XTSE3025");
+            }
             if (!(isCompatible(declared, exposed))) {
                 string code = "XTSE3010";
                 compileError(((((("The "+name)+" is declared as ")+Saxon.Hej.trans.Err.describeVisibility(declared))+" and cannot be exposed as ")+Saxon.Hej.trans.Err.describeVisibility(exposed)), code);

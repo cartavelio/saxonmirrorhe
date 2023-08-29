@@ -24,7 +24,12 @@ namespace Saxon.Hej.expr.instruct {
         private Saxon.Hej.trans.FunctionStreamability declaredStreamability = Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED;
         private Saxon.Hej.expr.instruct.UserFunction.Determinism determinism = Saxon.Hej.expr.instruct.UserFunction.Determinism.PROACTIVE;
         private int refCount = 0;
+        private readonly long serialNumber;
         public UserFunction()  {
+            serialNumber = Saxon.Hej.om.FunctionSerialNumberAllocator.serial.incrementAndGet();
+        }
+        public long getSerialNumber() {
+            return serialNumber;
         }
         public void setFunctionName(Saxon.Hej.om.StructuredQName name) {
             functionName = name;
@@ -430,14 +435,44 @@ namespace Saxon.Hej.expr.instruct {
         public virtual void prepareForStreaming() {
         }
     
-        /* Expanding default method materialize from interface Sequence */
-        public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+        /* Expanding default method getStringValue from interface Item */
+        public virtual string getStringValue() {
+            return getUnicodeStringValue().ToString();
         }
 
-        /* Expanding default method toShortString from interface Item */
+        /* Expanding default method toShortString from interface GroundedValue */
         public virtual string toShortString() {
-            return ToString();
+            return Saxon.Hej.trans.Err.depictSequence(this).ToString();
+        }
+
+        /* Expanding default method iterate from interface Item */
+        public virtual Saxon.Hej.om.SequenceIterator iterate() {
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
+        }
+
+        /* Expanding default method isStreamed from interface Item */
+        public virtual bool isStreamed() {
+            return false;
+        }
+
+        /* Expanding default method isSequenceVariadic from interface Function */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method getGenre from interface Function */
+        public virtual Saxon.Hej.om.Genre getGenre() {
+            return Saxon.Hej.om.Genre.FUNCTION;
+        }
+
+        /* Expanding default method materialize from interface GroundedValue */
+        public virtual Saxon.Hej.om.GroundedValue materialize() {
+            return this;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Expanding default method asIterable from interface GroundedValue */
@@ -458,36 +493,6 @@ namespace Saxon.Hej.expr.instruct {
                 chain = chain.addAll(val.asIterable());
             }
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
-        /* Expanding default method getGenre from interface Function */
-        public virtual Saxon.Hej.om.Genre getGenre() {
-            return Saxon.Hej.om.Genre.FUNCTION;
-        }
-
-        /* Expanding default method getStringValue from interface Item */
-        public virtual string getStringValue() {
-            return getUnicodeStringValue().ToString();
-        }
-
-        /* Expanding default method iterate from interface Item */
-        public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
-        }
-
-        /* Expanding default method isStreamed from interface Item */
-        public virtual bool isStreamed() {
-            return false;
         }
 
     }

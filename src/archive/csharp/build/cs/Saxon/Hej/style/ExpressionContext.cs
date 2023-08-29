@@ -20,6 +20,9 @@ namespace Saxon.Hej.style {
         public bool isSchemaAware() {
             return element.isSchemaAware();
         }
+        public Saxon.Hej.om.StructuredQName getAttributeName() {
+            return attributeName;
+        }
         public Saxon.Hej.expr.XPathContext makeEarlyEvaluationContext() {
             return new Saxon.Hej.expr.EarlyEvaluationContext(getConfiguration());
         }
@@ -65,7 +68,7 @@ namespace Saxon.Hej.style {
             return element.getCompilation().getCompilerInfo().getOptimizerOptions();
         }
         public virtual Saxon.Hej.expr.Expression bindVariable(Saxon.Hej.om.StructuredQName qName) {
-            Saxon.Hej.style.SourceBinding sourceBinding = element.bindVariable(qName);
+            Saxon.Hej.style.SourceBinding sourceBinding = element.bindVariable(qName, attributeName);
             if ((sourceBinding == null)) {
                 if ((qName.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT) && qName.getLocalPart().Equals("original"))) {
                     element.getXslOriginal(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
@@ -148,7 +151,7 @@ namespace Saxon.Hej.style {
             return element.xPath10ModeIsEnabled();
         }
         public int getXPathVersion() {
-            if ((((element.getEffectiveVersion() == 40) || (element.getCompilation().getCompilerInfo().getXsltVersion() == 40)) || (((attributeName != null) && attributeName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON))))) {
+            if (((getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS) || (element.getCompilation().getCompilerInfo().getXsltVersion() == 40)) || (((attributeName != null) && attributeName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON))))) {
                 return 40;
             } else {
                 return getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT);

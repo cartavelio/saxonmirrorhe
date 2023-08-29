@@ -1075,7 +1075,7 @@ namespace Saxon.Eej.ee.schema {
                         }
                         if (seq.isPointless(null)) {
                             System.Collections.Generic.IList<Saxon.Eej.ee.schema.Particle> contentModel = seq.getSimplifiedContentModel();
-                            if (contentModel.Count==0) {
+                            if ((contentModel.Count==0 && (((openContentWildcard == null) || !(openContentAppliesToEmpty))))) {
                                 extendedParticle = null;
                                 if ((variety == Saxon.Hej.type.ComplexVariety.ELEMENT_ONLY)) {
                                     variety = Saxon.Hej.type.ComplexVariety.EMPTY;

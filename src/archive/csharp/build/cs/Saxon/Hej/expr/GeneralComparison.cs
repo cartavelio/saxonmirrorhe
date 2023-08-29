@@ -131,8 +131,8 @@ namespace Saxon.Hej.expr {
                         adoptChildExpression(e1);
                     } else {
                         if (Saxon.Hej.type.NumericType.isNumericType(t1)) {
-                            Saxon.Hej.expr.Expression vun = makeCompareUntypedToNumeric(getLhsExpression(), getRhsExpression(), singletonOperator);
-                            return vun.typeCheck(visitor, contextInfo);
+                            setAtomicComparer(new Saxon.Hej.expr.sort.UntypedNumericComparer());
+                            return this;
                         } else {
                             e0 = new Saxon.Hej.expr.CastExpression(getLhsExpression(), pt1, Saxon.Hej.value.Cardinality.allowsZero(c0));
                             adoptChildExpression(e0);
@@ -141,8 +141,8 @@ namespace Saxon.Hej.expr {
                 } else {
                     if (t1.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) {
                         if (Saxon.Hej.type.NumericType.isNumericType(t0)) {
-                            Saxon.Hej.expr.Expression vun = makeCompareUntypedToNumeric(getRhsExpression(), getLhsExpression(), Saxon.Hej.expr.parser.Token.inverse(singletonOperator));
-                            return vun.typeCheck(visitor, contextInfo);
+                            setAtomicComparer(new Saxon.Hej.expr.sort.UntypedNumericComparer());
+                            return this;
                         } else {
                             e1 = new Saxon.Hej.expr.CastExpression(getRhsExpression(), pt0, Saxon.Hej.value.Cardinality.allowsZero(c1));
                             adoptChildExpression(e1);

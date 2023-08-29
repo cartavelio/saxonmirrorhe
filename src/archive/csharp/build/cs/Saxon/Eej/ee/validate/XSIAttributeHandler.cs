@@ -30,6 +30,7 @@ namespace Saxon.Eej.ee.validate {
             }
             Saxon.Hej.om.AttributeMap attMap2 = attributes;
             if (hasXsiAttributes) {
+                string xsiTypeValue = null;
                 System.Collections.Generic.IList<Saxon.Hej.om.AttributeInfo> list = new System.Collections.Generic.List<Saxon.Hej.om.AttributeInfo>(attributes.size());
                 foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                     Saxon.Hej.om.NodeName attName = att.getNodeName();
@@ -52,7 +53,7 @@ namespace Saxon.Eej.ee.validate {
                             } else {
                                 if ((fp == Saxon.Hej.om.StandardNames.XSI_TYPE)) {
                                     attType = Saxon.Hej.type.BuiltInAtomicType.QNAME;
-                                    xsiType = processXsiType(value, namespaces);
+                                    xsiTypeValue = value;
                                 } else {
                                     if ((fp == Saxon.Hej.om.StandardNames.XSI_NIL)) {
                                         attType = Saxon.Hej.type.BuiltInAtomicType.BOOLEAN;
@@ -65,6 +66,9 @@ namespace Saxon.Eej.ee.validate {
                     } else {
                         list.Add(att);
                     }
+                }
+                if ((xsiTypeValue != null)) {
+                    xsiType = processXsiType(xsiTypeValue, namespaces);
                 }
                 attMap2 = Saxon.Hej.om.SequenceTool.attributeMapFromList(list);
             }

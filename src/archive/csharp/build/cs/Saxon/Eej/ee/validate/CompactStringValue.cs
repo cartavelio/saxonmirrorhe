@@ -58,9 +58,14 @@ namespace Saxon.Eej.ee.validate {
             return new string(value);
         }
     
-        /* Expanding default method materialize from interface Sequence */
+        /* Expanding default method materialize from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            return this;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Expanding default method toShortString from interface GroundedValue */
@@ -86,11 +91,6 @@ namespace Saxon.Eej.ee.validate {
                 chain = chain.addAll(val.asIterable());
             }
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
         }
 
     }

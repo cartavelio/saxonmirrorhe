@@ -1017,18 +1017,26 @@ namespace Saxon.Hej {
             return xqe;
         }
         public virtual Saxon.Hej.om.Sequence makeClosure(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
-            if (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.EAGER_EVALUATION)) {
-                Saxon.Hej.om.SequenceIterator iter = expression.iterate(context);
-                return Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
+            try {
+                if (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.EAGER_EVALUATION)) {
+                    Saxon.Hej.om.SequenceIterator iter = expression.iterate(context);
+                    return Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
+                }
+                Saxon.Hej.value.Closure closure = ((@ref>1) ? new Saxon.Hej.value.MemoClosure() : new Saxon.Hej.value.Closure());
+                closure.setExpression(expression);
+                closure.setSavedXPathContext(context.newContext());
+                closure.saveContext(expression, context);
+                return closure;
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
-            Saxon.Hej.value.Closure closure = ((@ref>1) ? new Saxon.Hej.value.MemoClosure() : new Saxon.Hej.value.Closure());
-            closure.setExpression(expression);
-            closure.setSavedXPathContext(context.newContext());
-            closure.saveContext(expression, context);
-            return closure;
         }
         public virtual Saxon.Hej.om.GroundedValue makeSequenceExtent(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
         public virtual Saxon.Hej.style.StyleNodeFactory makeStyleNodeFactory(Saxon.Hej.style.Compilation compilation) {
             return new Saxon.Hej.style.StyleNodeFactory(this, compilation);
@@ -1109,7 +1117,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_430(this, source, config);
+                return new Inner_ActiveSource_432(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1875,9 +1883,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_430 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_432 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_430(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_432(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;

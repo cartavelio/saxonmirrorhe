@@ -64,7 +64,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             string blockVal = atts.getValue("", "block");
             if ((blockVal == null)) {
-                complexType.setFinalProhibitions(getXSDSchema().getBlockDefault());
+                complexType.setBlock(getXSDSchema().getBlockDefault());
             } else {
                 int f = parseFinalOrBlock("block", blockVal, (Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION));
                 complexType.setBlock(f);

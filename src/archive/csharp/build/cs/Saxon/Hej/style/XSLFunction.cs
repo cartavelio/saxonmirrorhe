@@ -268,6 +268,12 @@ namespace Saxon.Hej.style {
             if (((arity == 0) && (streamability != Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED))) {
                 compileError("A function with no arguments must have streamability=unclassified", "XTSE3155");
             }
+            if ((arity == 1)) {
+                Saxon.Hej.type.SchemaType type = getConfiguration().getSchemaType(getObjectName());
+                if ((type is Saxon.Hej.type.PlainType)) {
+                    compileError("Stylesheet function clashes with constructor function for an imported atomic type", "XTSE0770");
+                }
+            }
         }
         public override void compileDeclaration(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.expr.Expression exp = compileSequenceConstructor(compilation, decl, false);

@@ -16,7 +16,11 @@ namespace Saxon.Hej.om {
                 return Saxon.Hej.value.EmptySequence.getInstance();
             } else {
                 if (((iterator is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(iterator)).isActuallyGrounded())) {
-                    return toGroundedValue(iterator);
+                    try {
+                        return toGroundedValue(iterator);
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 } else {
                     return new Saxon.Hej.om.MemoSequence(iterator);
                 }
