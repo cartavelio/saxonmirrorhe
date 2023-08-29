@@ -228,7 +228,12 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             return badDuration("+ sign not allowed in a duration", s);
         } else if ("-".equals(part)) {
             negative = true;
-            part = (String) tok.nextToken();
+            if (tok.hasMoreTokens()) {
+                part = (String) tok.nextToken();
+            } else {
+                return badDuration("'-' on its own not allowed as a duration", s);
+            }
+
         }
         if (!"P".equals(part)) {
             return badDuration("missing 'P'", s);
