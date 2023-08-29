@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.event.ContentHandlerProxy;
+import net.sf.saxon.event.NamespaceDifferencer;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -63,7 +64,8 @@ public class SAXDestination extends AbstractDestination {
         ContentHandlerProxy chp = new ContentHandlerProxy();
         chp.setUnderlyingContentHandler(contentHandler);
         chp.setPipelineConfiguration(pipe);
-        return params.makeSequenceNormalizer(chp);
+        NamespaceDifferencer delta = new NamespaceDifferencer(chp, params.getProperties());
+        return params.makeSequenceNormalizer(delta);
     }
 
     /**
