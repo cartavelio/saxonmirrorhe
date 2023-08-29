@@ -96,6 +96,11 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
         }
     }
 
+    @Override
+    public Durability getDurability() {
+        return underlyingTree.getDurability();
+    }
+
     /**
      * Get the list of unparsed entities defined in this document
      *

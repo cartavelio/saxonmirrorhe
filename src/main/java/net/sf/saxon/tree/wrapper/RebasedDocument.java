@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.wrapper;
 
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
@@ -79,6 +80,11 @@ public class RebasedDocument extends GenericTreeInfo {
     @CSharpModifiers(code = {"public", "override"})
     public boolean isTyped() {
         return underlyingTree.isTyped();
+    }
+
+    @Override
+    public Durability getDurability() {
+        return underlyingTree.getDurability();
     }
 
     /**

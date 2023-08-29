@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.wrapper;
 
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
@@ -41,6 +42,11 @@ public class TypeStrippedDocument extends GenericTreeInfo {
 
     public TypeStrippedNode wrap(NodeInfo node) {
         return TypeStrippedNode.makeWrapper(node, this, null);
+    }
+
+    @Override
+    public Durability getDurability() {
+        return underlyingTree.getDurability();
     }
 
     /**
