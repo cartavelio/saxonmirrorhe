@@ -48,8 +48,6 @@ public class NamedTemplate extends Actor implements TraceableComponent {
     // which is responsible for any type checking that's needed.
 
     private StructuredQName templateName;
-    private boolean _hasRequiredParams;
-    private boolean bodyIsTailCallReturner;
     private SequenceType requiredType;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
     private boolean mayOmitContextItem = true;
@@ -148,26 +146,6 @@ public class NamedTemplate extends Actor implements TraceableComponent {
     @Override
     public StructuredQName getObjectName() {
         return templateName;
-    }
-
-    /**
-     * Set whether this template has one or more required parameters
-     *
-     * @param has true if the template has at least one required parameter
-     */
-
-    public void setHasRequiredParams(boolean has) {
-        _hasRequiredParams = has;
-    }
-
-    /**
-     * Ask whether this template has one or more required parameters
-     *
-     * @return true if this template has at least one required parameter
-     */
-
-    public boolean hasRequiredParams() {
-        return _hasRequiredParams;
     }
 
     /**

@@ -141,10 +141,10 @@ public class SimpleMode extends Mode {
                 case "streamable":
                     boolean streamable = "yes".equals(value);
                     setStreamable(streamable);
-                    if (streamable) {
-                        Mode omniMode = manager.obtainMode(Mode.OMNI_MODE, true);
-                        omniMode.setStreamable(true);
-                    }
+//                    if (streamable) {
+//                        Mode omniMode = manager.obtainMode(Mode.OMNI_MODE, true);
+//                        omniMode.setStreamable(true);
+//                    }
                     break;
                 case "typed":
                     mustBeTyped = "yes".equals(value) || "strict".equals(value) || "lax".equals(value);
@@ -226,27 +226,6 @@ public class SimpleMode extends Mode {
         return isUnnamedMode() ?
                 "the unnamed mode" :
                 "mode " + modeName.getDisplayName();
-    }
-
-    /**
-     * Construct a new Mode, copying the contents of an existing Mode
-     *
-     * @param from the existing mode.
-     * @param to   the name of the new mode to be created
-     */
-
-    public static void copyRules(final SimpleMode from, final SimpleMode to) {
-        try {
-            from.processRules(r -> {
-                Rule r2 = r.copy(false);
-                to.addRule(r2.getPattern(), r2);
-            });
-        } catch (XPathException e) {
-            throw new AssertionError(e);
-        }
-
-        to.mostRecentRule = from.mostRecentRule;
-        to.mostRecentModuleHash = from.mostRecentModuleHash;
     }
 
     /**
@@ -573,12 +552,9 @@ public class SimpleMode extends Mode {
 
         int nodeKind;
 
-        if(node instanceof TinyElementImpl)
-        {
+        if (node instanceof TinyElementImpl) {
             nodeKind = Type.ELEMENT;
-        }
-        else
-        {
+        } else {
             nodeKind = node.getNodeKind();
         }
 

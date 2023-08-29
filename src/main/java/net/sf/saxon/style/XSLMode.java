@@ -93,6 +93,8 @@ public class XSLMode extends StyleElement {
     @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
         StructuredQName name = getObjectName();
+        boolean enclosing = hasChildNodes();
+        top.getRuleManager().registerModeName(name);
         SymbolicName sName = new SymbolicName(StandardNames.XSL_MODE, name);
         HashMap<SymbolicName, Component> componentIndex = top.getStylesheetPackage().getComponentIndex();
         // see if there is already a named mode with this precedence
@@ -110,7 +112,7 @@ public class XSLMode extends StyleElement {
             }
         }
         mode = (SimpleMode)top.getRuleManager().obtainMode(name, true);
-        mode.setEnclosingMode(hasChildNodes());
+        mode.setEnclosingMode(enclosing);
         if (name.equals(Mode.UNNAMED_MODE_NAME)) {
             top.getRuleManager().setUnnamedModeExplicit(true);
         } else if (mode.getDeclaringComponent().getDeclaringPackage() != getContainingPackage()) {

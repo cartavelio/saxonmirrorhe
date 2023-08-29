@@ -43,7 +43,7 @@ import java.util.function.Predicate;
 
 public abstract class Mode extends Actor {
 
-    public static final StructuredQName OMNI_MODE =
+    public static final StructuredQName OMNI_MODE_NAME =
             new StructuredQName("saxon", NamespaceUri.SAXON, "_omniMode");
     public static final StructuredQName UNNAMED_MODE_NAME =
             new StructuredQName("xsl", NamespaceUri.XSLT, "unnamed");

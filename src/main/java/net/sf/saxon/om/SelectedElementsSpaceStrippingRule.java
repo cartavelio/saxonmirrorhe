@@ -97,8 +97,6 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
         int minImportPrecedence = module.getMinImportPrecedence();
 
         NodeTestPattern pattern = new NodeTestPattern(test);
-        //pattern.setSystemId(module.getRootElement().getSystemId());
-        //pattern.setLineNumber(lineNumber);
         addRule(pattern, action, precedence, minImportPrecedence);
     }
 

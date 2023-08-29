@@ -64,7 +64,7 @@ public class XSLOverride extends StyleElement {
                             }
                             StructuredQName[] modeNames = decl.getModeNames();
                             for (StructuredQName modeName : modeNames) {
-                                if (modeName.equals(Mode.OMNI_MODE)) {
+                                if (modeName.equals(Mode.OMNI_MODE_NAME)) {
                                     ((StyleElement) curr).compileError(
                                         "An overriding template rule must not specify mode=\"#all\"", "XTSE3440");
                                 } else if (modeName.equals(Mode.UNNAMED_MODE_NAME)) {
