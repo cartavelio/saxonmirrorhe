@@ -17,8 +17,10 @@ public class TimingCodeInjector extends TraceCodeInjector {
 
     @Override
     public void process(TraceableComponent component) {
-        ComponentTracer trace = new ComponentTracer(component);
-        component.setBody(trace);
+        if (!(component.getBody() instanceof ComponentTracer)) {
+            ComponentTracer trace = new ComponentTracer(component);
+            component.setBody(trace);
+        }
     }
 
 }
