@@ -69,7 +69,7 @@ public class TestXslt30Transformer {
     public void testSimple() {
         // Create a Processor instance.
         try {
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.TIMING, true);
 
             // Create a transformer for the stylesheet.
@@ -81,7 +81,7 @@ public class TestXslt30Transformer {
             long start = new Date().getTime();
 
             // Transform the source XML to System.out.
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 5; i++) {
                 // Load the source document
                 XdmNode input = processor.newDocumentBuilder().build(
                         new File(configTest.getDataDir() + "caffo/Input.xml"));

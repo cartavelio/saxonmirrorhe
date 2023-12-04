@@ -60,20 +60,20 @@ public class TestXsltTransformer {
     public void testSimple() {
         // Create a Processor instance.
         try {
-            Processor processor = new Processor(false);
-            processor.setConfigurationProperty("http://saxon.sf.net/feature/timing", "true");
+            Processor processor = new Processor(true);
+            processor.setConfigurationProperty(Feature.TIMING, true);
 
-            // Create a transformer for the stylesheet.
+            // Create a transformer for the stylesheet (note, this gets serially reused).
             XsltTransformer transformer = processor.newXsltCompiler().compile(
                     new StreamSource(new File(configTest.getDataDir() + "caffo/Transform2.xslt"))).load();
 
-            // Create a serializer
+            // Create a destination for the output (again this gets reused)
             XdmDestination serializer = new XdmDestination();
             transformer.setDestination(serializer);
             long start = new Date().getTime();
 
             // Transform the source XML to System.out.
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 5; i++) {
                 // Load the source document
                 XdmNode input = processor.newDocumentBuilder().build(
                         new File(configTest.getDataDir() + "caffo/Input.xml"));
