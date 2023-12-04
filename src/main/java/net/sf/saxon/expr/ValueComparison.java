@@ -213,7 +213,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         needsRuntimeCheck =
                 p0.equals(BuiltInAtomicType.ANY_ATOMIC) || p1.equals(BuiltInAtomicType.ANY_ATOMIC);
 
-        if (!needsRuntimeCheck && !Type.isPossiblyComparable(p0, p1, Token.isOrderedOperator(operator))) {
+        if (!needsRuntimeCheck && !Type.isPossiblyComparable(p0, p1, visitor.getStaticContext().getXPathVersion())) {
             boolean opt0 = Cardinality.allowsZero(getLhsExpression().getCardinality());
             boolean opt1 = Cardinality.allowsZero(getRhsExpression().getCardinality());
             if (opt0 || opt1) {
@@ -535,7 +535,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                         operandType(expr.getLhsExpression()),
                         operandType(expr.getRhsExpression()),
                         defaultCollation,
-                        operator, true);
+                        operator, true, expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion());
 
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
@@ -599,7 +599,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 t1 = BuiltInAtomicType.ANY_ATOMIC;
             }
             final GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
-                    (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true);
+                    (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true,
+                    expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion());
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
             final boolean nullable1 = Cardinality.allowsZero(card1);

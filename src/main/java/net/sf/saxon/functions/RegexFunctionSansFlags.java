@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
@@ -22,11 +23,12 @@ import net.sf.saxon.value.StringValue;
 public class RegexFunctionSansFlags extends SystemFunction {
 
     private SystemFunction addFlagsArgument() {
-        Configuration config = getRetainedStaticContext().getConfiguration();
+        RetainedStaticContext rsc = getRetainedStaticContext();
+        Configuration config = rsc.getConfiguration();
         SystemFunction fixed = config.makeSystemFunction(
-            getFunctionName().getLocalPart(), getArity() + 1);
+            getFunctionName().getLocalPart(), getArity() + 1, rsc.getPackageData().getHostLanguageVersion());
 
-        fixed.setRetainedStaticContext(getRetainedStaticContext());
+        fixed.setRetainedStaticContext(rsc);
         return fixed;
     }
 

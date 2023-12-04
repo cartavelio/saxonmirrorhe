@@ -200,6 +200,9 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
 
     @Override
     public int compareTo(XPathComparable o) {
+        if (o instanceof Base64BinaryValue) {
+            o = new HexBinaryValue(((Base64BinaryValue) o).getBinaryValue());
+        }
         if (o instanceof HexBinaryValue) {
             byte[] other = ((HexBinaryValue)o).binaryValue;
             int len0 = binaryValue.length;
@@ -214,7 +217,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
             }
             return Integer.signum(len0 - len1);
         } else {
-            throw new ClassCastException("Cannot compare xs:hexBinary to " + o.toString());
+            throw new ClassCastException("Cannot compare xs:hexBinary to " + o.getClass());
         }
     }
 }

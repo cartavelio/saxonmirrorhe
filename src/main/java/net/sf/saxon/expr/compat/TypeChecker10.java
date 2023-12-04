@@ -70,7 +70,7 @@ public class TypeChecker10 extends TypeChecker {
         if (req.getPrimaryType().equals(BuiltInAtomicType.STRING) &&
                 !Cardinality.allowsMany(req.getCardinality()) &&
                 !th.isSubType(supplied.getItemType(), BuiltInAtomicType.STRING)) {
-            final RetainedStaticContext rsc = new RetainedStaticContext(config);
+            final RetainedStaticContext rsc = supplied.getRetainedStaticContext();
             Expression fn = SystemFunction.makeCall("string", rsc, supplied);
             try {
                 return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
@@ -83,7 +83,7 @@ public class TypeChecker10 extends TypeChecker {
         if (reqItemType.equals(NumericType.getInstance()) || reqItemType.equals(BuiltInAtomicType.DOUBLE) &&
                 !Cardinality.allowsMany(req.getCardinality()) &&
                 !th.isSubType(supplied.getItemType(), BuiltInAtomicType.DOUBLE)) {
-            final RetainedStaticContext rsc = new RetainedStaticContext(config);
+            final RetainedStaticContext rsc = supplied.getRetainedStaticContext();
             Expression fn = SystemFunction.makeCall("number", rsc, supplied);
             try {
                 return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());

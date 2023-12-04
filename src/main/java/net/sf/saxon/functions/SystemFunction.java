@@ -70,7 +70,7 @@ public abstract class SystemFunction extends AbstractFunction {
 
     public static SystemFunction makeFunction(String name, RetainedStaticContext rsc, int arity) {
         Objects.requireNonNull(rsc);
-        SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity);
+        SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity, rsc.getPackageData().getHostLanguageVersion());
         if (fn == null) {
             throw new IllegalArgumentException(name + "#" + arity);
         }
@@ -274,7 +274,7 @@ public abstract class SystemFunction extends AbstractFunction {
             usages = details.usage;
         }
         try {
-            for (int i = 0; i < usages.length; i++) {
+            for (int i = 0; i < roles.length; i++) {
                 roles[i] = new OperandRole(0, usages[i], getRequiredType(i));
             }
         } catch (ArrayIndexOutOfBoundsException e) {

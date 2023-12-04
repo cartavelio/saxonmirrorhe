@@ -525,8 +525,9 @@
         member $b in $B return ...</code>. Previously the second <code>member</code> was not needed, it was assumed to
         apply to subsequent clauses.</p>
         
-        <p>From 12.4, the XQuery syntax for declaring a type alias is <code>declare item-type XX as record(a,b)</code>
-            rather than <code>declare type XX = record(a,b)</code>.</p>
+        <p>From 12.4, the atomic types <code>xs:hexBinary</code> and <code>xs:base64Binary</code> are mutually
+        comparable.</p>
+        
         
         
         
@@ -560,6 +561,8 @@
         <p>From 12.4, the XQuery syntax for declaring named item types is changed to match the syntax in the
         draft specification (`declare item-type my:type as union(x, y);` in place of 
         `declare type my:type = union(x, y)`.</p>
+
+        
         
         <h2>XSLT 4.0 extensions</h2>
         

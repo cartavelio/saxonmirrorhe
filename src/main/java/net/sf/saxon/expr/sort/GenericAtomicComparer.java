@@ -166,16 +166,19 @@ public class GenericAtomicComparer implements AtomicComparer {
      * purposes. Numeric types are promoted to xs:double, while xs:anyURI and xs:untypedAtomic
      * are promoted to xs:string
      * @param type the input type
+     * @param version the XPath language version
      * @return the fingerprint of the type after promotion
      */
 
-    private static int applyPromotion(BuiltInAtomicType type) {
+    private static int applyPromotion(BuiltInAtomicType type, int version) {
         if (type.isPrimitiveNumeric()) {
             return StandardNames.XS_DOUBLE;
         }
         int fp = type.getFingerprint();
         if (fp == StandardNames.XS_UNTYPED_ATOMIC || fp == StandardNames.XS_ANY_URI) {
             return StandardNames.XS_STRING;
+        } else if (fp == StandardNames.XS_HEX_BINARY && version >= 40) {
+            return StandardNames.XS_BASE64_BINARY;
         } else {
             return fp;
         }
@@ -197,10 +200,10 @@ public class GenericAtomicComparer implements AtomicComparer {
     public static AtomicComparisonFunction makeAtomicComparisonFunction(
             BuiltInAtomicType type0, BuiltInAtomicType type1,
             StringCollator collator, int operator,
-            boolean allowRecursion) {
+            boolean allowRecursion, int version) {
 
-        int fp0 = applyPromotion(type0);
-        int fp1 = applyPromotion(type1);
+        int fp0 = applyPromotion(type0, version);
+        int fp1 = applyPromotion(type1, version);
 
         if (fp0 == fp1) {
             switch (fp0) {
@@ -283,7 +286,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                 synchronized(firstTimeFunction) {
                     if (firstTimeFunction[0] == null) {
                         AtomicComparisonFunction comparisonFunction =
-                                makeAtomicComparisonFunction(at, bt, collator, operator, false);
+                                makeAtomicComparisonFunction(at, bt, collator, operator, false, version);
                         firstTimeFunction[0] = comparisonFunction;
                         firstTimeTypes[0] = at;
                         firstTimeTypes[1] = bt;
@@ -293,7 +296,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                             return firstTimeFunction[0].compare(a, b, context);
                         } else {
                             AtomicComparisonFunction comparisonFunction =
-                                    makeAtomicComparisonFunction(at, bt, collator, operator, false);
+                                    makeAtomicComparisonFunction(at, bt, collator, operator, false, version);
                             return comparisonFunction.compare(a, b, context);
                         }
                     }

@@ -1434,9 +1434,9 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return the function
      */
 
-    public SystemFunction makeSystemFunction(String localName, int arity) {
+    public SystemFunction makeSystemFunction(String localName, int arity, int xpathVersion) {
         try {
-            return getXSLTFunctionSet(30).makeFunction(localName, arity);
+            return getXSLTFunctionSet(xpathVersion == 31 ? 30 : xpathVersion).makeFunction(localName, arity);
         } catch (XPathException e) {
             return null;
         }

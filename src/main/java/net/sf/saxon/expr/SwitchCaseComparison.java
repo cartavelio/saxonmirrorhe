@@ -129,7 +129,7 @@ public class SwitchCaseComparison extends BinaryExpression implements Comparison
         } else {
             if (Type.isGuaranteedComparable(pt0, pt1, false)) {
                 knownToBeComparable = true;
-            } else if (!Type.isPossiblyComparable(pt0, pt1, false)) {
+            } else if (!Type.isPossiblyComparable(pt0, pt1, visitor.getStaticContext().getXPathVersion())) {
                 env.issueWarning("Cannot compare " + t0 + " to " + t1, SaxonErrorCode.SXWN9025, getLocation());
                 // This is not an error in a switch statement, but it means the branch will never be chosen
             }

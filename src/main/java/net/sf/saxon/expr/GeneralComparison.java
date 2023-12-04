@@ -266,7 +266,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 t1.equals(BuiltInAtomicType.ANY_ATOMIC) || t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
             // then no static type checking is possible
         } else {
-            if (!Type.isPossiblyComparable(pt0, pt1, Token.isOrderedOperator(singletonOperator))) {
+            if (!Type.isPossiblyComparable(pt0, pt1, visitor.getStaticContext().getXPathVersion())) {
                 String message = "In {" + toShortString() + "}: cannot compare " + t0 + " to " + t1;
                 if (Cardinality.allowsZero(c0) || Cardinality.allowsZero(c1)) {
                     if (!doneWarnings) { // avoid duplicate warnings

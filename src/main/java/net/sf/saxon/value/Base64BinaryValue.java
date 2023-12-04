@@ -335,6 +335,9 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, XP
 
     @Override
     public int compareTo(XPathComparable o) {
+        if (o instanceof HexBinaryValue) {
+            o = new Base64BinaryValue(((HexBinaryValue)o).getBinaryValue());
+        }
         if (o instanceof Base64BinaryValue) {
             byte[] other = ((Base64BinaryValue) o).binaryValue;
             int len0 = binaryValue.length;
@@ -349,7 +352,7 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, XP
             }
             return Integer.signum(len0 - len1);
         } else {
-            throw new ClassCastException("Cannot compare xs:base64Binary to " + o.toString());
+            throw new ClassCastException("Cannot compare xs:base64Binary to " + o.getClass());
         }
     }
 }
