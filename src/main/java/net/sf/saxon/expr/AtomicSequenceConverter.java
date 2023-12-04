@@ -483,7 +483,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
         destination.emitAttribute("from", AlphaCode.fromItemType(getBaseExpression().getItemType()));
         destination.emitAttribute("to", AlphaCode.fromItemType(requiredItemType));
         String flags = "";
-        if (converter instanceof Converter.PromoterToDouble || converter instanceof Converter.PromoterToFloat) {
+        if (converter.isPromoter()) {
             flags = "p";
         }
         if (converter instanceof Converter.DownCastingConverter) {

@@ -1959,12 +1959,10 @@ public class PackageLoaderHE implements IPackageLoader {
             ItemType toType = loader.parseAlphaCodeForItemType(element, "to");
             AtomicSequenceConverter asc = new AtomicSequenceConverter(body, (PlainType) toType);
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            boolean allow40 = loader.topLevelPackage.getHostLanguageVersion() >= 40;
             if ("p".equals(flags)) {
-                if (toType.equals(BuiltInAtomicType.DOUBLE)) {
-                    asc.setConverter(new Converter.PromoterToDouble());
-                } else {
-                    asc.setConverter(new Converter.PromoterToFloat());
-                }
+                Converter promoter = TypeChecker.makePromotingConverter(allow40, toType.getPrimitiveType(), loader.config.getConversionRules());
+                asc.setConverter(promoter);
             } else if ("d".equals(flags)) {   // Bug 5968
                 asc.setConverter(new Converter.DownCastingConverter((AtomicType)toType, loader.config.getConversionRules()));
             } else {
