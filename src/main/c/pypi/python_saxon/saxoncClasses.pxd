@@ -440,8 +440,6 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setBaseURI(const char * uriStr)
 
-        const char * getBaseURI()
-
         XdmValue * evaluate(const char * xpathStr)  except +raise_py_error
    
         XdmItem * evaluateSingle(const char * xpathStr)  except +raise_py_error
@@ -598,8 +596,6 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
         const char* getBaseUri()
 
         XdmNode* getParent()
-
-        XdmNode *getChild(int i, bool cache);
 
         const char* getAttributeValue(const char *str)
 

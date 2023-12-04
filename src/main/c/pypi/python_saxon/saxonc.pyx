@@ -1065,7 +1065,7 @@ cdef class PyXslt30Processor:
          cdef char * c_package_file_name
          if package_file_name is not None and len(package_file_name) > 0:
              py_ta_string = package_file_name.encode('UTF-8') if package_file_name is not None else None
-             c_package_file_name = py_ta_string if py_ta_string is not None else ""
+             c_package_file_name = py_ta_string if py_lang_string is not None else ""
              self.thisxptr.importPackage(c_package_file_name)
 
 
@@ -3299,7 +3299,7 @@ cdef class PyXPathProcessor:
          """
          py_value_string = value.encode('UTF-8') if value is not None else None
          cdef char * c_value = py_value_string if value is not None else ""
-         self.thisxpptr.setLanguageVersion(c_value)
+         self.thisxqptr.setLanguageVersion(c_value)
 
 
      def set_cwd(self, cwd):
@@ -3449,22 +3449,6 @@ cdef class PyXPathProcessor:
        py_uri_string = base_uri.encode('UTF-8') if base_uri is not None else None
        cdef char * c_uri = py_uri_string if base_uri is not None else ""
        self.thisxpptr.setBaseURI(c_uri)
-
-     @property
-     def base_uri(self):
-       """
-       get_base_uri(self)
-       Get the static base URI for XPath expressions compiled using this XPathCompiler.
-       The base URI is part of the static context, and is used to resolve any relative URIs appearing within an XPath
-       expression, for example a relative URI passed as an argument to the doc() function. If no
-       static base URI is supplied, then the current working directory is used.
-       Returns:
-           str: the base output URI as a string representation of the URI
-       """
-       cdef const char* c_string = NULL
-       c_string = self.thisxpptr.getBaseURI()
-       py_base_uri_string_value = make_py_str(c_string)
-       return py_base_uri_string_value
 
      def set_caching(self, is_caching):
          """
@@ -4011,20 +3995,6 @@ cdef class PyXdmValue:
             '''saxoncClasses.SaxonProcessor.deleteString(c_string)'''
         return py_to_string
 
-
-     def __getitem__(self, index):
-         """
-         __getitem__(self)
-         Implement the built-in subscript operator (i.e. square brackets []) to return the ith item in the sequence
-
-         Returns:
-            PyXdmItem: The item at the specified index. This could be a PyXdmItem or any of its subclasses:
-            PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmMap or PyXdmArray.
-            If the item does not exist returns None.
-         """
-         return self.item_at(index)
-
-
      def __str__(self):
         """
         __str__(self)
@@ -4282,9 +4252,10 @@ cdef class PyXdmNode(PyXdmItem):
      def node_kind(self):
         """
         node_kind(self)
-        Node kind property. 
-        There are seven kinds of node: documents=9, elements = 1, attributes =2, text=3, comments = 8, processing-instructions = 7,
-        and namespaces=13.
+        Node kind property. This will be a value such as net.sf.saxon.type.Type#ELEMENT or
+        net.sf.saxon.type.Type#ATTRIBUTE.
+        There are seven kinds of node: documents, elements, attributes, text, comments, processing-instructions,
+        and namespaces.
         Returns:
             int: an integer identifying the kind of node. These integer values are the same as those used in the DOM
         """
@@ -4408,37 +4379,6 @@ cdef class PyXdmNode(PyXdmItem):
         py_node_to_string = make_py_str(c_string)
         return py_node_to_string
 
-     def __getitem__(self, index):
-        """
-        __getitem__(self)
-        Implement the built-in subscript operator (i.e. square brackets []) to return the ith child node of the current node
-
-        Returns:
-            PyXdmNode: The child node at the specified index.
-            If the child node at the index does not exist returns None.
-        """
-        cdef PyXdmNode val = None
-        cdef bool cache = False
-        cdef saxoncClasses.XdmNode * node = NULL
-        node =  self.derivednptr.getChild(index, cache)
-        if node == NULL:
-            return None
-        else :
-            val = PyXdmNode()
-            val.derivednptr = val.derivedptr = val.thisvptr = node
-            node.incrementRefCount()
-            return val
-
-     def __len__(self):
-        """
-        __len__(self)
-        Implement the built-in function len() to return the count of child nodes from this current node.
-
-        Returns:
-            int: The count of child nodes
-        """
-        return self.derivednptr.getChildCount()
-
      def __repr__(self):
         """
         ___repr__(self)
@@ -4451,20 +4391,13 @@ cdef class PyXdmNode(PyXdmItem):
      def get_parent(self):
         """
         get_parent(self)
-        Get the current node's parent. If it does not exist return None.
+        Get the current node's parent
         Returns:
-            PyXdmNode: The parent node as a PyXdmNode object, or otherwise None
+            PyXdmNode: The parent node as a PyXdmNode object
         """
-        cdef PyXdmNode val = None
-        cdef saxoncClasses.XdmNode * node = NULL
-        node = self.derivednptr.getParent()
-        if node == NULL:
-            return None
-        else :
-            val = PyXdmNode()
-            val.derivednptr = val.derivedptr = val.thisvptr = node
-            node.incrementRefCount()
-            return val
+        cdef PyXdmNode val = PyXdmNode()
+        val.derivednptr = val.derivedptr = val.thisvptr = self.derivednptr.getParent()
+        return val
 
      def get_attribute_value(self, name):
         """
@@ -4477,8 +4410,6 @@ cdef class PyXdmNode(PyXdmItem):
         cdef char * c_name = py_value_string if name is not None else ""
 
         cdef const char* c_string = self.derivednptr.getAttributeValue(c_name)
-        if c_string == NULL:
-            return None
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
