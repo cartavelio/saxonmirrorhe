@@ -94,6 +94,10 @@ public class OnDemandFunctionSet implements FunctionLibrary {
                            List<String> reasons) throws XPathException {
         boolean match = load(functionName, reasons);
         if (match) {
+            if (keywords != null && !keywords.isEmpty()) {
+                reasons.add("Calls to Saxon SQL functions cannot use keyword arguments");
+                return null;
+            }
             return library.bind(functionName, staticArgs, null, env, reasons);
         } else {
             return null;

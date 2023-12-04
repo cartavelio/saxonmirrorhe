@@ -72,6 +72,10 @@ public class IntegratedFunctionLibrary implements FunctionLibrary {
         if (defn == null) {
             return null;
         }
+        if (keywords != null && !keywords.isEmpty()) {
+            reasons.add("Calls to external Java functions cannot use keyword arguments");
+            return null;
+        }
         return makeFunctionCall(defn, staticArgs);
     }
 

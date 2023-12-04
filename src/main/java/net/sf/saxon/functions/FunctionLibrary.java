@@ -29,6 +29,12 @@ import java.util.Map;
 
 public interface FunctionLibrary {
 
+    /**
+     * Supply details of the configuration in use.
+     * @param config the configuration. The default implementation does nothing (many function libraries
+     *               do not need to know any configuration details)
+     */
+
     default void setConfiguration(Configuration config) {}
 
     /**
