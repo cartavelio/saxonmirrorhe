@@ -7,10 +7,13 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.QName;
@@ -38,6 +41,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
     private boolean _hasBeenReported = false;
     private HostLanguage hostLanguage = HostLanguage.UNKNOWN;
     private boolean _isStaticError;
+    private Expression failingExpression;
 
     /**
      * Create an XmlProcessingIncident
@@ -218,6 +222,14 @@ public class XmlProcessingIncident implements XmlProcessingError {
     @Override
     public String getModuleUri() {
         return getLocation().getSystemId();
+    }
+
+    public Expression getFailingExpression() {
+        return failingExpression;
+    }
+
+    public void setFailingExpression(Expression expr) {
+        this.failingExpression = expr;
     }
 
     @Override

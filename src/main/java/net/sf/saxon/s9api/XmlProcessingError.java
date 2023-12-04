@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ErrorReporter;
 
 /**
@@ -73,6 +74,13 @@ public interface XmlProcessingError  {
      default String getModuleUri() {
          return getLocation().getSystemId();
      }
+
+    /**
+     * Get the Expression that failed, if known
+     * @return the failing expression, or null
+     */
+
+    Expression getFailingExpression();
 
     /**
      * Ask whether this error is being reported as a warning condition.
