@@ -1,6 +1,5 @@
 using Saxon.Hej;
 using Saxon.Hej.lib;
-using Saxon.Localize;
 
 namespace Saxon.Impl.Overrides {
     public class DotNetLocalizerFactory : LocalizerFactory {
