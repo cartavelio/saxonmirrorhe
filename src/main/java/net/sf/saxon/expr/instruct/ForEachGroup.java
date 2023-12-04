@@ -746,7 +746,7 @@ public class ForEachGroup extends Instruction
             case GROUP_ENDING:
                 return "ending";
             case GROUP_BREAKING_WHEN:
-                return "breaking";
+                return "splitting";
             default:
                 return "** unknown algorithm **";
         }
