@@ -16,11 +16,13 @@
         
     </category>
     
-    <!--<category name="documentation">
+    <category name="documentation">
         
+        <p>From 12.4, this documentation has been updated to provide more details relevant for the
+            C/C++, PHP and Python platforms where this differs to Saxon on the Java and C# platforms.</p>
  
         
-    </category>-->
+    </category>
     
     <!--<category name="xslt30">
 
