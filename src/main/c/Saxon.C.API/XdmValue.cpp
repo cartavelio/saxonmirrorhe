@@ -85,6 +85,9 @@ XdmValue::XdmValue(int64_t val, bool arr) {
   for (int p = 1; p <= xdmSizei; ++p) {
     typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                  (void *)results[p]);
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "C++ XdmValue - typeRef= " << typeRef << std::endl;
+    }
     if (typeRef == -2) {
       std::cerr << "Exception thrown while creating XdmValue from array"
                 << std::endl;
@@ -94,16 +97,16 @@ XdmValue::XdmValue(int64_t val, bool arr) {
 
       addXdmItem(new XdmAtomicValue(results[p]));
 
-    } else if (typeRef == 2) {
+    } else if (typeRef == XDM_NODE) {
 
       addXdmItem(new XdmNode(results[p]));
 
-    } else if (typeRef == 3) {
+    } else if (typeRef == XDM_ARRAY) {
       addXdmItem(new XdmArray(results[p]));
-    } else if (typeRef == 4) {
+    } else if (typeRef == XDM_MAP) {
       addXdmItem(new XdmMap(results[p]));
 
-    } else if (typeRef == 5) {
+    } else if (typeRef == XDM_FUNCTION_ITEM) {
       addXdmItem(new XdmFunctionItem(results[p]));
     } else {
       std::cerr << "Error creating XdmValue from array" << std::endl;
