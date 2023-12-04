@@ -112,7 +112,7 @@ public interface UnionType extends ItemType, CastingTarget {
             String message = "This is a union type, and the supplied value "
                     + Err.depict(item)
                     + " of type "
-                    + ((AtomicValue) item).getItemType().getDisplayName()
+                    + ((AtomicValue) item).getItemType().getDescription()
                     + " does not match any of its member types";
             return Optional.of(message);
         } else {
