@@ -25,7 +25,9 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 /**
- * A function item representing a constructor function for an atomic type
+ * A function item representing a constructor function for an atomic type.
+ *
+ * <p>Note: this will never by an anonymous type.</p>
  */
 
 public class AtomicConstructorFunction extends AbstractFunction {
@@ -58,9 +60,9 @@ public class AtomicConstructorFunction extends AbstractFunction {
     }
 
     /**
-     * Get the name of the function, or null if it is anonymous
+     * Get the name of the function.
      *
-     * @return the function name, or null for an anonymous inline function
+     * @return the function name. Atomic constructor functions are never anonymous.
      */
     @Override
     public StructuredQName getFunctionName() {

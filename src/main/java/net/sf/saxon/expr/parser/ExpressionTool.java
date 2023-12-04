@@ -693,7 +693,7 @@ public class ExpressionTool {
                     return (n.compareTo(0) != 0) && !n.isNaN();
                 } else {
                     iterator.close();
-                    ebvError("a sequence starting with an atomic value of type " + ((AtomicValue) first).getItemType().getTypeName().getDisplayName());
+                    ebvError("a sequence starting with an atomic value of type " + ((AtomicValue) first).getItemType().getDescription());
                     return false;
                 }
             }

@@ -60,5 +60,6 @@ public interface PlainType extends ItemType, HyperType {
      */
     @Override
     AtomicType getPrimitiveItemType();
+
 }
 

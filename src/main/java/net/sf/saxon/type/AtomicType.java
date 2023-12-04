@@ -10,6 +10,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -123,7 +124,8 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget {
      * Get the name of this type as a StructuredQName, unless the type is anonymous, in which case
      * return null
      *
-     * @return the name of the atomic type, or null if the type is anonymous.
+     * @return the name of the atomic type. For an anonymous type, return a constructed name in the
+     * namespace {@link NamespaceUri#ANONYMOUS}.
      */
 
     @Override
