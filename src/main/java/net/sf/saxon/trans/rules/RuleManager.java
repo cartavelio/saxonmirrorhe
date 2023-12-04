@@ -19,6 +19,8 @@ import net.sf.saxon.trans.*;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <B>RuleManager</B> maintains a set of template rules, one set for each mode
@@ -29,6 +31,7 @@ public final class RuleManager {
     private final StylesheetPackage stylesheetPackage;
     private final Configuration config;
     private final SimpleMode unnamedMode;           // template rules with default mode
+    private final Set<StructuredQName> modeNames = new HashSet<>();
     private final HashMap<StructuredQName, Mode> modes;
     // tables of rules for non-default modes
     //private SimpleMode omniMode = null;       //template rules that specify mode="all"
@@ -53,6 +56,7 @@ public final class RuleManager {
         c.setVisibility(Visibility.PRIVATE, VisibilityProvenance.DEFAULTED);
         this.stylesheetPackage.addComponent(c);
         this.modes = new HashMap<>(5);
+        registerModeName(Mode.UNNAMED_MODE_NAME);
     }
 
     /**
@@ -136,6 +140,10 @@ public final class RuleManager {
         }
         if (modeName.equals(Mode.OMNI_MODE_NAME)) {
             throw new IllegalArgumentException("#all is not a real mode");
+//            if (omniMode == null) {
+//                omniMode = config.makeMode(modeName, compilerInfo);
+//            }
+//            return omniMode;
         }
 
         Mode m = modes.get(modeName);
@@ -149,9 +157,21 @@ public final class RuleManager {
         return m;
     }
 
+    public void registerModeName(StructuredQName name) {
+        modeNames.add(name);
+    }
+
+    public Set<StructuredQName> getAllModeNames() {
+        return modeNames;
+    }
+
     public void registerMode(Mode mode) {
         modes.put(mode.getModeName(), mode);
     }
+
+//    public boolean existsOmniMode() {
+//        return omniMode != null;
+//    }
 
     public int allocateSequenceNumber() {
         return nextSequenceNumber++;
