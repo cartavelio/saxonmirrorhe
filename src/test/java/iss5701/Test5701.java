@@ -1,5 +1,6 @@
 package iss5701;
 
+import jaxptest.ConfigTest;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -9,11 +10,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class Test5701 {
+    private final ConfigTest config = new ConfigTest();
     @Test
     public void testTransformXsl() {
         Processor processor = new Processor(false);
@@ -22,12 +26,12 @@ public class Test5701 {
         try {
             RawDestination result = new RawDestination();
             XsltCompiler compiler = processor.newXsltCompiler();
-            InputStream stylef = new FileInputStream(new File("src/test/java/iss5701/driver.xsl"));
+            InputStream stylef = Files.newInputStream(new File("src/test/java/iss5701/driver.xsl").toPath());
             XsltExecutable exec = compiler.compile(new SAXSource(new InputSource(stylef)));
             XsltTransformer transformer = exec.load();
             transformer.setDestination(result);
 
-            InputStream docf = new FileInputStream(new File("src/test/java/iss5701/input.xml"));
+            InputStream docf = Files.newInputStream(new File("src/test/java/iss5701/input.xml").toPath());
             transformer.setSource(new SAXSource(new InputSource(docf)));
 
             transformer.transform();
@@ -46,10 +50,10 @@ public class Test5701 {
 
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
-            InputStream stylef = new FileInputStream("src/test/java/iss5701/style.xsl");
+            InputStream stylef = Files.newInputStream(Paths.get("src/test/java/iss5701/style.xsl"));
             compiler.setJustInTimeCompilation(false);
             XsltExecutable exec = compiler.compile(new SAXSource(new InputSource(stylef)));
-            exec.export(new FileOutputStream("src/test/java/iss5701/style12.sef.xml"));
+            exec.export(Files.newOutputStream(Paths.get(config.getTempDir() + "style12.sef.xml")));
         } catch (Exception ex) {
             ex.printStackTrace();
             fail();
