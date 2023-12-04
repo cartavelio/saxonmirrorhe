@@ -29,13 +29,13 @@ import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
-
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.*;
 
+import static net.sf.saxon.trans.Visibility.HIDDEN;
 import static net.sf.saxon.trans.Visibility.PRIVATE;
 
 /**
@@ -643,7 +643,7 @@ public class StylesheetPackage extends PackageData {
             Visibility newV = Visibility.UNDEFINED;
 
             if (overrides.contains(name) && !(oldC.getActor() instanceof Mode)) {
-                newV = Visibility.HIDDEN;
+                newV = HIDDEN;
             } else {
                 Visibility acceptedVisibility = explicitAcceptedVisibility(name, acceptors);
                 if (acceptedVisibility != Visibility.UNDEFINED) {
@@ -666,7 +666,7 @@ public class StylesheetPackage extends PackageData {
                     if (oldV == Visibility.PUBLIC || oldV == Visibility.FINAL) {
                         newV = Visibility.PRIVATE;
                     } else {
-                        newV = Visibility.HIDDEN;
+                        newV = HIDDEN;
                     }
                 }
             }
@@ -687,7 +687,7 @@ public class StylesheetPackage extends PackageData {
                     abstractComponents.remove(name);
                 }
             }
-            if (newC.getVisibility() == Visibility.HIDDEN) {
+            if (newC.getVisibility() == HIDDEN) {
                 hiddenComponents.add(newC);
             } else if (componentIndex.get(name) != null) {
                 if (!(oldC.getActor() instanceof Mode)) {
@@ -705,11 +705,12 @@ public class StylesheetPackage extends PackageData {
                 }
             }
 
-            if (newC.getActor() instanceof Mode && overrides.contains(name)) {
+            if (newC.getActor() instanceof Mode && overrides.contains(name) && !newC.getVisibility().equals(HIDDEN)) {
                 addCompletionAction(() -> {
                     trace("Doing mode completion for " + newC.getActor().getSymbolicName());
                     List<ComponentBinding> oldBindings = newC.getBaseComponent().getComponentBindings();
                     List<ComponentBinding> newBindings = newC.getComponentBindings();
+                    assert newBindings.size() == oldBindings.size();
                     for (int i=0; i<oldBindings.size(); i++) {
                         SymbolicName name12 = oldBindings.get(i).getSymbolicName();
                         Component target;
@@ -747,7 +748,7 @@ public class StylesheetPackage extends PackageData {
 
             trace(oldC.getActor().getSymbolicName() + " (HIDDEN, declared in " + oldC.getDeclaringPackage().getPackageName() + ") becomes HIDDEN");
 
-            final Component newC = Component.makeComponent(oldC.getActor(), Visibility.HIDDEN, VisibilityProvenance.DERIVED, this, oldC.getDeclaringPackage());
+            final Component newC = Component.makeComponent(oldC.getActor(), HIDDEN, VisibilityProvenance.DERIVED, this, oldC.getDeclaringPackage());
             correspondence.put(oldC, newC);
             newC.setBaseComponent(oldC);
 
