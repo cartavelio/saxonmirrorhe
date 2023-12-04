@@ -841,7 +841,7 @@ public class StylesheetPackage extends PackageData {
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
         functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(hostLanguageVersion));
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(this, true));
-        functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(hostLanguageVersion));
+        functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(hostLanguageVersion==40 ? 40 : 31));
         functionLibrary.addFunctionLibrary(new ConstructorFunctionLibrary(config));
         if ("JS".equals(getTargetEdition())) {
             addIxslFunctionLibrary(functionLibrary);
