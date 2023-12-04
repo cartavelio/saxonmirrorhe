@@ -149,6 +149,14 @@ XdmValue::~XdmValue() {
 void XdmValue::addXdmItem(XdmItem *val) {
 
   if (val != nullptr) {
+    if(values == nullptr){
+      values_cap = 1;
+      values = new XdmItem*[values_cap];
+      relinquished_values = new char[values_cap];
+      relinquished_values[0] = 0;
+    }
+
+
     if(xdmSize == values_cap) {
         //resizing values pointer array
         XdmItem ** newValues = new XdmItem*[values_cap*2];
