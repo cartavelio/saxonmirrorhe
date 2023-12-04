@@ -138,8 +138,8 @@ public class ParserExtension {
      * @throws XPathException if parsing fails
      */
 
-    public void parseTypeAliasDeclaration(XQueryParser p) throws XPathException {
-        needExtension(p, "Type alias declarations");
+    public void parseItemTypeDeclaration(XQueryParser p) throws XPathException {
+        needExtension(p, "Item type declarations");
     }
 
     /**

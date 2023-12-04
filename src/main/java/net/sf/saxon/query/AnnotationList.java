@@ -49,7 +49,7 @@ public class AnnotationList implements Iterable<Annotation> {
      * Check an annotation list for internal consistency (e.g. rules that %public and %private cannot coexist)
      * @param config the Saxon configuration
      * @param where the context where the list appears: one of "DF" (declare function), "DV" (declare variable),
-     *              "IF" (inline function declaration), "FT" (function test)
+     *              "IF" (inline function declaration), "FT" (function test), "DI" (declare item-type)
      * @throws XPathException if the annotation list is not internally consistent
      */
 
