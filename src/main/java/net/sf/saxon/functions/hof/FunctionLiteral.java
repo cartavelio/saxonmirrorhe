@@ -53,9 +53,6 @@ public class FunctionLiteral extends Literal {
 
     /**
      * Simplify an expression
-     *
-     *
-     *
      * @return for a Value, this always returns the value unchanged
      */
 
@@ -114,7 +111,7 @@ public class FunctionLiteral extends Literal {
 
     @Override
     protected int computeSpecialProperties() {
-        return StaticProperty.NO_NODES_NEWLY_CREATED;
+        return StaticProperty.NO_NODES_NEWLY_CREATED | StaticProperty.COMPUTED_FUNCTION;
     }
 
     /**

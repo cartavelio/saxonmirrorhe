@@ -302,6 +302,13 @@ public abstract class StaticProperty {
 
     public static final int ALL_NODES_UNTYPED = 1 << 27;
 
+    /**
+     * Expression property: this bit indicates that the result of an expression will
+     * be a function other than a map or array
+     */
+
+    public static final int COMPUTED_FUNCTION = 1 << 28;
+
 
     /**
      * Mask to select all the dependency bits
