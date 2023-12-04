@@ -2,43 +2,69 @@
 <article id="samples" title="SaxonC samples">
    <h1>SaxonC samples</h1>
 
+    <p>SaxonC's interfaces are custom-designed interface for all XML processing. The APIs
+         are useful when you want to write your own applications in C/C++, Python or PHP programming languages that invoke Saxon XSLT
+         transforms, XQuery, and evaluate XPath expressions (for more information see <a
+             class="bodylink" href="/using-xsl">Using XSLT</a>, <a class="bodylink" href="/using-xquery"
+             >Using XQuery</a>, <a class="bodylink" href="/using-xpath"
+             >Evaluating XPath expressions</a> and <a class="bodylink" href="/using-schema-processor"
+                          >Using XML Schema (XSD)</a> respectively).</p>
+
    <p>This section of the documentation describes some example code in C/C++, PHP and Python to help
-      get started using SaxonC. A number of samples and unit test code for C/C++ and PHP can be
+      get started using SaxonC. A number of samples, test suite drivers (for W3C test suite) written in PHP and Python and
+       unit test code for C/C++ and PHP can be
       found in the <code>samples</code> directory of the SaxonC installation. Samples and unit
       tests for Python can be found in the <code>pypi</code> directory.</p>
+
+    <p>The <a href="https://github.com/Saxonica/saxonc-resources" target="_blank">SaxonC resources GitHub repository</a> contains all
+        the samples, unit tests and test drivers released in the products for C/C++, Python and PHP.</p>
 
    <nav>
       <ul/>
    </nav>
 
-   <section id="samples_c" title="C/C++ samples">
-      <h1>C/C++ samples</h1>
+    <section id="samples_c" title="C Samples">
+          <h1>C samples</h1>
 
-      <h2 class="subtitle">C programming</h2>
+        <p>The <code>samples/cTests</code> directory in the SaxonC download contains C code samples
+            for running XSLT, XQuery and XPath, along with the build and run scripts. These
+           tests provide various examples of the use of the SaxonC C API. For a step by step guide of building your own C application
+        see <a class="bodylink" href="/using-xsl/embedding-c">Using XSLT from C application</a>, <a class="bodylink" href="/using-xquery/api-query-c"
+                     >Using XQuery from C</a> and <a class="bodylink" href="/using-xpath/api-xpath-c"
+                     >Evaluating XPath expressions from C</a>, respectively</p>
 
-      <p>The <code>samples/cTests</code> directory in the SaxonC download contains the test
-         harnesses for XSLT, XQuery and XPath in C code, along with the build and run scripts. These
-         tests provide various examples of the use of the SaxonC API.</p>
+        <p>To build SaxonC on C, the following files are required: <code>SaxonCGlue.c</code>,
+              <code>SaxonXProcessor.c</code> and <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code> then
+            compile the sample test code by running the build script <code>build64-linux.sh</code> file for linux, <code>build64-mac.sh</code> for
+            MacOS and <code>build64-windows.bat</code> on Windows. This script builds the test harness executables, using a command similar to the
+           following:</p>
 
-      <p>To build SaxonC on C, the following files are required: <code>SaxonCGlue.c</code>,
-            <code>SaxonXProcessor.c</code> and <code>SaxonCXPath.c</code>. To compile the sample
-         test code in C execute the <code>build.sh</code> file in the <code>samples/cTests</code>
-         directory. This script builds the test harness executables, using a command similar to the
-         following:</p>
+        <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c ../SaxonCProcessor.c
+           ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl -lc</kbd>
 
-      <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c ../SaxonCProcessor.c
-         ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl -lc $1</kbd>
+         <p>The C samples are available here: <a href="https://gist.github.com/ond1/b7c6e43638620e981639fefe6b7d5015">testXSLT.c</a>,
+             <a href="https://gist.github.com/ond1/6b0bc58e2846223fce5b84dd82e1c14d">testXQuery.c</a> and
+             <a href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34">testXPath.c</a></p>
 
-      <p>To run the executables from the command line, use a command such as:</p>
+        <p>To run the executables from the command line, use a command such as:</p>
 
-      <kbd>./testXSLT</kbd>
+        <kbd>./testXSLT</kbd>
+         <kbd>./testXPath</kbd>
+         <kbd>./testXQuery</kbd>
 
+    </section>
 
-      <h2 class="subtitle">C++ programming</h2>
+   <section id="samples_cpp" title="C++ samples">
+      <h1>C++ samples</h1>
 
-      <p>The <code>samples/cppTests</code> directory in the SaxonC download contains the test
-         harnesses for XSLT, XQuery, XPath and Schema Validation in C++ code, along with the build
-         and run scripts. These tests provide various examples of the use of the SaxonC API.</p>
+      <p>The <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"><code>samples/cppTests</code></a> directory in the SaxonC download contains C++ code samples
+          for running XSLT, XQuery, XPath and Schema Validation, along with the build
+         and run scripts. These tests provide various examples of the use of the SaxonC C++ API. The following sections
+      provide a helpful step by step guide to build your own C++ application:
+          <a class="bodylink" href="/using-xsl/embedding-cpp">Using XSLT from C++</a>, <a class="bodylink" href="/using-xquery/api-query-cpp"
+                       >Using XQuery from C++</a>, <a class="bodylink" href="/using-xpath/api-xpath-cpp"
+                       >Evaluating XPath expressions from C++</a> and <a class="bodylink" href="/using-schema-processor/validation-cpp-api"
+                                    >Using XML Schema (XSD) from C++</a>, respectively</p>
 
       <p>To build SaxonC on C++, the following files are required: <code>SaxonCGlue.c</code>,
             <code>SaxonCXPath.c</code>, <code>XdmValue.cpp</code>, <code>XdmItem.cpp</code>,
@@ -47,15 +73,14 @@
             <code>SaxonProcessor.cpp</code>, <code>Xslt30Processor.cpp</code>,
             <code>XsltExecutable.cpp</code>, <code>XQueryProcessor.cpp</code>,
             <code>XPathProcessor.cpp</code> and <code>SchemaValidator.cpp</code>. To compile the
-         sample test code in C++ execute the <code>build64-[PLATFORM].sh</code> file in the
-            <code>samples/cTests</code> directory for Linux and Mac OS, or the
-            <code>buildCPPSaxon[EDITION].bat</code> file for Windows. These build files build the
+         samples in C++ execute the
+          <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests" target="_blank"><code>build64-[PLATFORM].sh</code></a>
+          file in the <code>samples/cppTests</code> directory for Linux and Mac OS, or the
+            <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"><code>buildCPPSaxon[EDITION].bat</code></a> file for Windows. These build files build the
          test harness executables, using a command similar to the following:</p>
 
-      <kbd>g++ -m64 -I../../Saxon.C.API/graalvm bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o
-         bin/XQueryProcessor.o bin/XsltExecutable.o bin/SchemaValidator.o  bin/Xslt30Processor.o
-         bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmNode.o bin/XdmFunctionItem.o bin/XdmArray.o bin/XdmMap.o
-         bin/XdmAtomicValue.o bin/SchemaValidator.o testXSLT.cpp -o testXSLT -ldl -lc -lsaxon-eec-12.1</kbd>
+  
+       
 
       <p>The executables created for Linux and Mac OS can be run from the command line using the
          following commands:</p>
@@ -75,27 +100,9 @@
 
       <h3 class="subtitle">Example code</h3>
 
-      <p>C++ Example 1: basic XSLT transformation</p>
+     <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a stylesheet parameter - Here we use the new feature rich <code>XsltExecutable</code> API</p>
 
-      <samp><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
-Xslt30Processor * xslt = processor->newXslt30Transformer();
-const char * result = xslt->transformFileToString("cat.xml","test.xsl")<<endl;
-if(result != nullptr) {
-  cout<<"Test output: "<<result<<endl;
-  delete result;
-  
-} else {
-   if(trans->exceptionOccurred()) {
-      cerr<<"Expected failure = "<<trans->getErrorMessage()<<endl;
-   }
-      trans->exceptionClear();
-      processor->release();
-}
-  ]]></samp>
-
-     <p>C++ Example 2: XSLT 3.0 transformation supplying the value for a stylesheet parameter - Here we use the new feature rich <code>XsltExecutable</code> API</p>
-
-      <samp><![CDATA[SaxonProcessor * processor = new Saxon\SaxonProcessor(false);
+      <samp><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 
 XdmAtomicValue * value =processor->makeStringValue("Hello to you");
@@ -126,7 +133,26 @@ delete result;
 delete value;
   ]]></samp>
 
-      <p>C++ Example 3: using the <code>Xslt30Processor</code></p>
+
+       <p>C++ Example 2: basic XSLT transformation where we compile and execute on the <code>Xslt30Processor</code></p>
+
+       <samp><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
+ Xslt30Processor * xslt = processor->newXslt30Transformer();
+ const char * result = xslt->transformFileToString("cat.xml","test.xsl")<<endl;
+ if(result != nullptr) {
+   cout<<"Test output: "<<result<<endl;
+   delete result;
+
+ } else {
+    if(trans->exceptionOccurred()) {
+       cerr<<"Expected failure = "<<trans->getErrorMessage()<<endl;
+    }
+       trans->exceptionClear();
+       processor->release();
+ }
+   ]]></samp>
+
+      <p>C++ Example 3: using the <code>Xslt30Processor</code> and the <code>XsltExecutable</code></p>
 
       <samp><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
@@ -235,7 +261,7 @@ queryProc->runQueryToString();
    <section id="samples_python" title="Python samples">
       <h1>Python samples</h1>
 
-      <p>The <code>pypi</code> directory in the SaxonC download includes the
+       <p>The <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"><code>pypi</code> directory</a> in the SaxonC download includes the
          unit test files <code>test_saxonc.py</code> and <code>test_saxon_schema.py</code>, which
          contain a collection of Python unit test cases to be run with the pytest framework. The
          pyunit tests can be run with the following command:</p>
