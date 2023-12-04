@@ -96,7 +96,11 @@ public final class GlobalParam extends GlobalVariable {
 
     @Override
     public GroundedValue evaluateVariable(XPathContext context) throws XPathException {
-        return evaluateVariable(context, null);
+        Component target = context.getCurrentComponent();  // Bug #6236
+        if (target == null) {
+            target = getDeclaringComponent();
+        }
+        return evaluateVariable(context, target);
     }
 
     @Override

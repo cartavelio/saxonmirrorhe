@@ -676,7 +676,11 @@ public class GlobalVariable extends Actor
         if (v != null) {
             return v;
         } else {
-            return actuallyEvaluate(context, null);
+            Component target = context.getCurrentComponent();  // Bug #6236
+            if (target == null) {
+                target = getDeclaringComponent();
+            }
+            return actuallyEvaluate(context, target);
         }
     }
 
