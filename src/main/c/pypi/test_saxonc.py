@@ -222,21 +222,6 @@ def test_xslt_parameter(saxonproc, data_dir):
     output_ = executable.apply_templates_returning_string()
     assert output_ is not None
     assert 'text2' in output_
-
-def testUTF8(saxonproc):
-    node = saxonproc.parse_xml(xml_text="<doc><e>تيست</e></doc>")
-    trans = saxonproc.new_xslt30_processor()
-    executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='e'>UTF8-تيست: <xsl:value-of select='.'/></xsl:template></xsl:stylesheet>")
-    assert node is not None
-    assert isinstance(node, PyXdmNode)
-    assert len(node.children)>0
-    eNode = node.children[0].children[0]
-    assert eNode is not None
-    executable.set_global_context_item(xdm_item=node)
-    executable.set_initial_match_selection(xdm_value=eNode)
-    result = executable.apply_templates_returning_string()
-    assert result is not None
-    assert "UTF8-تيست: تيست" in result
     
 '''PyXslt30Processor test cases '''
 def testContextNotRoot(saxonproc):

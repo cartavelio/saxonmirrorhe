@@ -3450,6 +3450,22 @@ cdef class PyXPathProcessor:
        cdef char * c_uri = py_uri_string if base_uri is not None else ""
        self.thisxpptr.setBaseURI(c_uri)
 
+     @property
+     def base_uri(self):
+       """
+       get_base_uri(self)
+       Get the static base URI for XPath expressions compiled using this XPathCompiler.
+       The base URI is part of the static context, and is used to resolve any relative URIs appearing within an XPath
+       expression, for example a relative URI passed as an argument to the doc() function. If no
+       static base URI is supplied, then the current working directory is used.
+       Returns:
+           str: the base output URI as a string representation of the URI
+       """
+       cdef const char* c_string = NULL
+       c_string = self.thisxpptr.getBaseURI()
+       py_base_uri_string_value = make_py_str(c_string)
+       return py_base_uri_string_value
+
      def set_caching(self, is_caching):
          """
          set_caching(self, is_caching)
