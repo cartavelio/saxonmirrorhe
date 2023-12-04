@@ -320,13 +320,12 @@ public class TraceExpression extends Instruction {
         @Override
         public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
             TraceExpression expr = (TraceExpression) getExpression();
-            StringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForString(false);
+            StringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForString(zeroLengthWhenAbsent);
             return context -> {
                 Controller controller = context.getController();
                 assert controller != null;
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
-
                     listener.enter(expr, expr.properties, context);
                     String result = baseEval.eval(context);
                     listener.leave(expr);
