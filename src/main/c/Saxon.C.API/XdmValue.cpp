@@ -31,10 +31,11 @@ const char *XdmValue::toString() {
   if (count == 0) {
     return nullptr;
   }
-  if (toStringValue == nullptr) {
+  char *toStringValuei = nullptr;
+  //if (toStringValue == nullptr) {
     allocFn fn = operator new;
     if (count == 1) {
-      toStringValue =
+      toStringValuei =
           xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
                           (void *)(values[0]->getUnderlyingValue()));
     } else {
@@ -42,11 +43,11 @@ const char *XdmValue::toString() {
         jValues = getUnderlyingValue();
       }
 
-      toStringValue = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread,
+      toStringValuei = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread,
                                             (void *)fn, (void *)jValues);
     }
-  }
-  return toStringValue;
+  //}
+  return toStringValuei;
 }
 
 int XdmValue::size() { return xdmSize; }

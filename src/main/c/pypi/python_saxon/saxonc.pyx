@@ -4260,6 +4260,7 @@ cdef class PyXdmValue:
         cdef const char* c_string = NULL
         c_string = self.thisvptr.toString()
         py_to_string = make_py_str(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_to_string
 
      def __iter__(self):
@@ -5027,14 +5028,18 @@ cdef class PyXdmFunctionItem(PyXdmItem):
 
      def __repr__(self):
         cdef const char * c_string = self.derivedfptr.toString()
-        py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        try:
+            py_string_i = make_py_str(c_string)
+        finally:
+            saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
      def __str__(self):
         cdef const char * c_string = self.derivedfptr.toString()
-        py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        try:
+            py_string_i = make_py_str(c_string)
+        finally:
+            saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
      @property
