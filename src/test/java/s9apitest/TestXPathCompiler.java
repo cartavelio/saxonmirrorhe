@@ -56,6 +56,22 @@ public class TestXPathCompiler {
         }
     }
 
+    @Test
+    public void testErrorReporterNotCalledOnErrors() {
+        final int[] errorCount = {0};
+        try {
+            Processor p = new Processor(false);
+            XPathCompiler c = p.newXPathCompiler();
+            XPathExecutable e = c.compile("doc('unavailable.xml')");
+            XPathSelector s = e.load();
+            s.setErrorReporter(err -> errorCount[0]++);
+            assertEquals(0, errorCount[0]);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+
     /**
      * Test using declared variables
      */
