@@ -604,10 +604,9 @@ PHP_METHOD(SaxonProcessor, setCatalogFiles) {
     }
     ZEND_HASH_FOREACH_END();
 
-
-
     if (catalogFiles != nullptr) {
       saxonProcessor->setCatalogFiles(catalogFiles, argument_length);
+      delete [] catalogFiles;
     }
   }
 }

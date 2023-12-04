@@ -43,8 +43,13 @@ PHP_METHOD(XsltExecutable, __destruct) {
       XdmValue *value = itr->second;
       if (value != nullptr) {
         value->decrementRefCount();
+        if(value->getRefCount() < 1) {
+            delete value;
+        }
       }
     }
+    xsltExecutable->clearParameters();
+    xsltExecutable->clearProperties();
     delete xsltExecutable;
   }
 }
@@ -919,7 +924,7 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelection) {
           XdmValue *value = ooth->xdmValue;
           if (value != nullptr) {
             xsltExecutable->setInitialMatchSelection(value);
-            value->incrementRefCount();
+            //value->incrementRefCount(); - no longer required because we get the underlying reference
           }
         }
       } else if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -935,7 +940,7 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelection) {
           if (value != nullptr) {
             XdmValue *valueX = (XdmValue *)value;
             xsltExecutable->setInitialMatchSelection(valueX);
-            valueX->incrementRefCount();
+            //valueX->incrementRefCount(); - no longer required because we get the underlying reference
           } else {
 
             php_error(E_WARNING, "XdmNode - seInitialMatchSelection - ERROR");
@@ -951,7 +956,7 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelection) {
           XdmAtomicValue *value = ooth->xdmAtomicValue;
           if (value != nullptr) {
             xsltExecutable->setInitialMatchSelection((XdmValue *)value);
-            value->incrementRefCount();
+            //value->incrementRefCount(); - no longer required because we get the underlying reference
           }
         }
       } else {
