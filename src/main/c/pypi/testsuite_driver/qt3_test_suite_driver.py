@@ -870,7 +870,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
 
 if __name__ == "__main__":
-    def main(sys.argv[1:]):
+    def main(argv):
         global run_test
         global run_test_case_name
         global path
