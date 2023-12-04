@@ -1395,14 +1395,15 @@ project.task("all_python_test_suites") {
       doLast {
         exec {
           workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-          if (${testsuite} == "xslt30") {
+          if (testsuite == "xslt30") {
             commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}/..",
                     "-o", output_path
-          } else if (${testsuite} == "qt3") {
+          } else if (testsuite == "qt3") {
             commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cQT3TestSuiteDir}/..",
-                    "-o", output_path
+                    "-o", output_path, "-l", "XP30"
+          } else {
+            throw new GradleException("Unexpected test suite: ${testsuite}")
           }
-
         }
       }
     }
