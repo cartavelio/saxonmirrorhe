@@ -35,7 +35,7 @@ import java.util.List;
 
 public class XPathFunctionCall extends FunctionCall implements Callable {
 
-    private StructuredQName name;
+    private final StructuredQName name;
     private final XPathFunction function;
 
     /**
@@ -45,6 +45,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      */
 
     public XPathFunctionCall(StructuredQName name, XPathFunction function) {
+        this.name = name;
         this.function = function;
     }
 
