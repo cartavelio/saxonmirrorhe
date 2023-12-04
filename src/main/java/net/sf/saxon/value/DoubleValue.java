@@ -222,7 +222,8 @@ public final class DoubleValue extends NumericValue {
      */
 
     public static UnicodeString doubleToString(double value) {
-        return FloatingPointConverter.convertDouble(value, false);
+        double d = Math.abs(value);
+        return FloatingPointConverter.convertDouble(value, d >= 1000000 || d < 0.000001);
     }
 
 

@@ -464,7 +464,7 @@ public class FloatingPointConverter {
      */
 
     //@CSharpReplaceBody(code = "return net.sf.saxon.str.BMPString.of(d.ToString(System.Globalization.CultureInfo.InvariantCulture));") // for now...
-    public static UnicodeString convertDouble(double d, boolean forceExponential) {
+    public static UnicodeString convertDouble(double d, boolean useExponential) {
         UnicodeBuilder s = new UnicodeBuilder(32);
         if (d == Double.NEGATIVE_INFINITY) {
             s.appendLatin(NEGATIVE_INFINITY);
@@ -477,7 +477,7 @@ public class FloatingPointConverter {
                 s.append('-');
             }
             s.append('0');
-            if (forceExponential) {
+            if (useExponential) {
                 s.append(".0E0");
             }
         } else if (d == Double.MAX_VALUE) {
@@ -502,7 +502,7 @@ public class FloatingPointConverter {
                 s.append(Double.toString(d));
                 return s.toUnicodeString();
             }
-            if (forceExponential || (d >= 1000000 || d < 0.000001)) {
+            if (useExponential) {
                 fppfppExponential(s, exp, fraction, 52);
             } else {
                 if (d <= 0.01) {
