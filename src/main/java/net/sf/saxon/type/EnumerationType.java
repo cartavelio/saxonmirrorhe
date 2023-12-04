@@ -448,7 +448,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public String getDisplayName() {
-        return null;
+        return getTypeName().getDisplayName();
     }
 
     /**
