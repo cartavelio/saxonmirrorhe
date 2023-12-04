@@ -574,7 +574,6 @@ com/saxonica/functions/extfn/XQueryFn.class
 com/saxonica/functions/qt4/
 com/saxonica/functions/qt4/AllDifferent.class
 com/saxonica/functions/qt4/AllEqual.class
-com/saxonica/functions/qt4/AllFn.class
 com/saxonica/functions/qt4/BuildURI.class
 com/saxonica/functions/qt4/CharFn.class
 com/saxonica/functions/qt4/CharactersFn.class
@@ -2177,7 +2176,6 @@ net/sf/saxon/trans/rules/RuleSetWithWarnings.class
 net/sf/saxon/trans/rules/RuleTarget.class
 net/sf/saxon/trans/rules/ShallowCopyAllRuleSet.class
 net/sf/saxon/trans/rules/ShallowCopyRuleSet.class
-net/sf/saxon/trans/rules/ShallowSkipAllRuleSet.class
 net/sf/saxon/trans/rules/ShallowSkipRuleSet.class
 net/sf/saxon/trans/rules/TextOnlyCopyRuleSet.class
 net/sf/saxon/transpile/
