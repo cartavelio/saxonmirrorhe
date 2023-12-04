@@ -2242,7 +2242,7 @@
             you will find support in the <code>Xslt30Processor</code> class. In this class, packages may
             be made available for use by other packages being compiled, in the same or in a different
             <code>Xslt30Processor</code>. See also
-            <a class="bodylink" href="../using-xsl/compiling/caching">Caching compiled stylesheets</a>.</p>
+            <a class="bodylink" href="../caching">Caching compiled stylesheets</a>.</p>
 
          <!---<p class="conly">There is no object corresponding to <code>XsltPackage</code> in the SaxonC API. But
                      a package can be exported as an stylesheet export file (SEF) which can then we imported again (see
