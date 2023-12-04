@@ -2860,6 +2860,7 @@ public class Configuration implements SourceResolver, NotationSet {
             return parser;
         }
 
+        //XMLReader parser;
         if (getSourceParserClass() != null) {
             parser = makeParser(getSourceParserClass());
         } else {
@@ -2880,13 +2881,13 @@ public class Configuration implements SourceResolver, NotationSet {
         } catch (XPathException err) {
             throw new TransformerFactoryConfigurationError(err);
         }
-        if (isValidation()) {
+        //if (isValidation()) {
             try {
-                parser.setFeature("http://xml.org/sax/features/validation", true);
+                parser.setFeature("http://xml.org/sax/features/validation", isValidation());
             } catch (SAXException err) {
                 throw new TransformerFactoryConfigurationError("The XML parser does not support validation");
             }
-        }
+        //}
 
         return parser;
     }
