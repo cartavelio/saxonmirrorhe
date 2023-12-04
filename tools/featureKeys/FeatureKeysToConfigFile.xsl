@@ -36,6 +36,7 @@
     <xsl:param name="platform" as="xs:string" select="'J'"/><!-- J|CS -->
     <xsl:param name="include-obsolete" as="xs:boolean" select="false()"/>
     <xsl:param name="license-file-location" as="xs:string" select="''"/>
+    <xsl:param name="debug" as="xs:boolean" select="false()"/>
     
     <xsl:output method="xml" indent="yes"/>
     
@@ -55,12 +56,15 @@
     <xsl:template match="*" mode="process-base">
         <xsl:variable name="this-element-in-config" select="." as="element()"/>
         <xsl:variable name="element-name" select="local-name()" as="xs:string"/>
-        <xsl:message expand-text="yes">processing element: {$element-name}</xsl:message>
         <xsl:variable name="additional-doc" select="doc('AdditionalFeatures.xml')"/>
-        <xsl:message expand-text="yes">additional-doc: {exists($additional-doc)}</xsl:message>
         <xsl:variable name="reference-doc"
             select="$additional-doc//config-element[@name eq $element-name]/@src-doc"/>
-        <xsl:message expand-text="yes">reference-doc: {$reference-doc}</xsl:message>
+        <xsl:if test="$debug">
+            <xsl:message expand-text="yes">processing element: {$element-name}</xsl:message>
+            <xsl:message expand-text="yes">additional-doc: {exists($additional-doc)}</xsl:message>
+            <xsl:message expand-text="yes">reference-doc: {$reference-doc}</xsl:message>
+        </xsl:if>
+        
         
         <xsl:variable name="src-doc" select="doc($reference-doc)" as="document-node()?"/>
         
@@ -76,13 +80,15 @@
         </xsl:variable>
         
         <xsl:variable name="features-of-config-el" as="element(feature)*"
-            select="$src-doc//configfile[tokenize(string(.),'/')[1] eq $element-name]/parent::node()"/>
+            select="$src-doc//configfile[tokenize(string(.),'/')[1] eq
+            $element-name]/parent::element(feature)"/>
         
-        <xsl:copy>
-            <xsl:for-each select="fc:sort-by-config-name($features-of-config-el)">
-                <xsl:variable name="option-name" select="tokenize(configfile[1], $separator)[2]"/>
-                
-                <!--
+        <xsl:if test="not(($element-name eq 'extensionElement') and $edition eq 'HE')">
+            <xsl:copy>
+                <xsl:for-each select="fc:sort-by-config-name($features-of-config-el)">
+                    <xsl:variable name="option-name" select="tokenize(configfile[1], $separator)[2]"/>
+                    
+                    <!--
                     Include features labelled "obsolete" if and only if requested with
                     $include-obsolete.
                     
@@ -91,54 +97,69 @@
                     
                     Only include options relevant for the specified edition and platform.
                 -->
-                
-                <xsl:if test="not(exists(obsolete) and not($include-obsolete)) and not(additional) and ($edition =
-                    tokenize(string(editions))) and (not(platforms) or $platform = tokenize(string(platforms)))">
-                    <xsl:message expand-text="yes">processing {$option-name}</xsl:message>
-                    <xsl:choose>
-                        <xsl:when test="$element-name eq 'resources'">
-                            <xsl:element name="{$option-name}" namespace="http://saxon.sf.net/ns/configuration">
-                                <xsl:variable name="element-in-base" select="$this-element-in-config/*[local-name() eq $option-name]"/>
-                                <xsl:message expand-text="yes">{$element-name}/{$option-name} = '{string($element-in-base)}'</xsl:message>
-                                <xsl:choose>
-                                    <xsl:when test="exists($element-in-base)">
-                                        <xsl:value-of select="$element-in-base"/>
-                                    </xsl:when>
-                                    <xsl:otherwise></xsl:otherwise>
-                                </xsl:choose>
-                            </xsl:element>
-                        </xsl:when>
-                        <xsl:when test="$element-name eq 'package' and $option-name eq
-                            'exportLocation' and exists($this-element-in-config/*:withParam)">
-                            <!-- Since package/withParam and package/@exportLocation are mutually exclusive -->
-                        </xsl:when>
-                        <xsl:when test="$element-name eq 'collation' and
-                            (exists($this-element-in-config/@class) 
-                            and not($option-name = ('uri', 'class'))) or ($option-name eq 'class'
-                            and empty($this-element-in-config/@class))">
-                            <!-- Only include the @uri and @class collation attributes when @class
+                    
+                    <xsl:if test="not(exists(obsolete) and not($include-obsolete)) and not(additional) and ($edition =
+                        tokenize(string(editions))) and (not(platforms) or $platform = tokenize(string(platforms)))">
+                        <xsl:if test="$debug">
+                            <xsl:message expand-text="yes">processing {$option-name}</xsl:message>
+                        </xsl:if>
+                        <xsl:choose>
+                            <xsl:when test="$element-name eq 'resources'">
+                                <xsl:element name="{$option-name}" namespace="http://saxon.sf.net/ns/configuration">
+                                    <xsl:variable name="element-in-base" select="$this-element-in-config/*[local-name() eq $option-name]"/>
+                                    <xsl:if test="$debug">
+                                        <xsl:message expand-text="yes">{$element-name}/{$option-name} = '{string($element-in-base)}'</xsl:message>
+                                    </xsl:if>
+                                    <xsl:choose>
+                                        <xsl:when test="$option-name eq 'externalObjectModel' and
+                                            $edition eq 'HE'">
+                                            <!-- The supplied sample value is not available for HE -->
+                                        </xsl:when>
+                                        <xsl:when test="exists($element-in-base)">
+                                            <xsl:value-of select="$element-in-base"/>
+                                        </xsl:when>
+                                        <xsl:otherwise></xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:element>
+                            </xsl:when>
+                            <xsl:when test="$element-name eq 'package' and $option-name eq
+                                'exportLocation' and exists($this-element-in-config/*:withParam)">
+                                <!-- Since package/withParam and package/@exportLocation are mutually exclusive -->
+                            </xsl:when>
+                            <xsl:when test="$element-name eq 'collation' and
+                                (exists($this-element-in-config/@class) 
+                                and not($option-name = ('uri', 'class'))) or ($option-name eq 'class'
+                                and empty($this-element-in-config/@class))">
+                                <!-- Only include the @uri and @class collation attributes when @class
                                 is supplied; but include all others otherwise.
                                 Note that the base configuration file has collation elements which do
                                 and do not supply @class.
                             -->
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:attribute name="{$option-name}">
-                                <xsl:variable name="attribute-in-base" select="$this-element-in-config/@*[local-name() eq $option-name]"/>
-                                <xsl:message expand-text="yes">{$element-name}/@{$option-name} = '{string($attribute-in-base)}'</xsl:message>
-                                <xsl:choose>
-                                    <xsl:when test="exists($attribute-in-base)">
-                                        <xsl:value-of select="$attribute-in-base"/>
-                                    </xsl:when>
-                                    <xsl:otherwise></xsl:otherwise>
-                                </xsl:choose>
-                            </xsl:attribute>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </xsl:if>
-            </xsl:for-each>
-            <xsl:apply-templates mode="process-base"/>
-        </xsl:copy>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:attribute name="{$option-name}">
+                                    <xsl:variable name="attribute-in-base" select="$this-element-in-config/@*[local-name() eq $option-name]"/>
+                                    <xsl:if test="$debug">
+                                        <xsl:message expand-text="yes">{$element-name}/@{$option-name} = '{string($attribute-in-base)}'</xsl:message>
+                                    </xsl:if>
+                                    <xsl:choose>
+                                        <xsl:when test="exists($attribute-in-base)">
+                                            <xsl:value-of select="$attribute-in-base"/>
+                                        </xsl:when>
+                                        <xsl:otherwise></xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:attribute>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:if>
+                </xsl:for-each>
+                <xsl:apply-templates mode="process-base"/>
+            </xsl:copy>
+        </xsl:if>
+        
+    </xsl:template>
+    
+    <xsl:template match="*:resources/*[local-name() ne 'fileExtension']" mode="process-base">
     </xsl:template>
     
     <xsl:template match="*">
