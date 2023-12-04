@@ -28,7 +28,7 @@ public class ItemCheckingIterator
 
 
     /**
-     * Construct an ItemCheckingIterator that will apply a specified DummyItemMappingFunction to
+     * Construct an ItemCheckingIterator that will apply a specified Function to
      * each Item returned by the base iterator.
      *
      * @param base   the base iterator
