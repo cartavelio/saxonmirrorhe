@@ -40,7 +40,7 @@ import java.util.*;
  */
 public class XsltProcessor extends SaxonCAPI {
 
-    //private XsltExecutable executable = null;
+    //private XsltExecutable executable = null;                               transformToString
     private final List<XdmNode> xslMessages = new ArrayList<XdmNode>();
     private final Set<File> packagesToLoad = new HashSet<File>();
 
@@ -673,7 +673,7 @@ public class XsltProcessor extends SaxonCAPI {
      * @throws SaxonApiException  if error occurs in the transformation or if the processor object is null
      */
     @CEntryPoint(name = "c_xsltApplyStylesheet", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer transformToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static CCharPointer transformToString1(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         String sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
