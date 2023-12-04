@@ -337,6 +337,11 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
     try {
       XdmValue *result = xsltExecutable->callFunctionReturningValue(
           functionName, arguments, argument_length);
+      for (int i = 0; i< argument_length;i++) {
+        delete argument[i];
+      }
+      delete [] argument_length;
+
       if (result != nullptr) {
         result->incrementRefCount();
         if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
@@ -354,6 +359,10 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
         }
       }
     } catch (SaxonApiException &e) {
+      for (int i = 0; i< argument_length;i++) {
+        delete argument[i];
+      }
+      delete [] argument_length;
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
   }
@@ -807,7 +816,7 @@ PHP_METHOD(XsltExecutable, setInitialTemplateParameters) {
   zval *arguments_zval;
   zval *val;
   long num_key;
-  XdmValue **arguments;
+  //XdmValue **arguments;
   int argument_length = 0;
   zend_string *key;
 
@@ -831,7 +840,7 @@ PHP_METHOD(XsltExecutable, setInitialTemplateParameters) {
   arr_hash = Z_ARRVAL_P(arguments_zval);
   argument_length = zend_hash_num_elements(arr_hash);
 
-  arguments = new XdmValue *[argument_length];
+  //arguments = new XdmValue *[argument_length];
   std::map<std::string, XdmValue *> parameters;
   if (xsltExecutable != nullptr) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {

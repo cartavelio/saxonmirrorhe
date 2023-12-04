@@ -39,11 +39,10 @@ cppClass,
                                             (void *)p->procRef);
 
   if (cppXP == SXN_UNSET) {
+    throw SaxonApiException("Error: Failed to create the XPathProcessor internal object");
 
-    std::cerr << "Error: Failed to create the XPathProcessor internal object"
-              << std::endl;
-
-    return;
+  } else if(cppXP == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
 
 #ifdef DEBUG

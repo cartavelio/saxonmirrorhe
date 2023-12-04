@@ -85,6 +85,15 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   }
 }
 
+void XsltExecutable::deleteXdmValueArray(XdmValue **arr, int len) {
+    if(arr != nullptr && len > 0) {
+        for (int i = 0; i < len; i++) {
+            delete arr[i];
+        }
+        delete[] arr;
+    }
+}
+
 bool XsltExecutable::exceptionOccurred() { return exceptionFound; }
 
 void XsltExecutable::setGlobalContextItem(XdmItem *value) {
