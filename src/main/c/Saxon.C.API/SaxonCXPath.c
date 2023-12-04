@@ -28,13 +28,6 @@ saxoncClass, MID_xdmValueo, type, str)); if(resultObj) { return resultObj;
   return -1;
 }
 
-/**
- * A Constructor. Create a XdmValue based on the target type. Conversion is
- * applied if possible
- * @param type - specify target type of the value as the local name of the xsd
- * built in type. For example 'gYearMonth'
- * @param val - Value to convert
- */
 sxnc_value *xdmValue(sxnc_environment *environi, const char *type,
                      const char *str) {
 
