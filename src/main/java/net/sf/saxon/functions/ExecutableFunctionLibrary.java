@@ -26,7 +26,8 @@ import java.util.Map;
  * run-time. Normally functions are bound at compile-time; however there are various situations in which
  * the information is needed dynamically, for example (a) to support the XSLT function-available() call
  * (in the pathological case where the argument is not known statically), (b) to allow functions to be
- * called from saxon:evaluate(), (c) to allow functions to be called from a debugging breakpoint.
+ * called from saxon:evaluate(), (c) to allow function-lookup(), (d) to allow functions to be called
+ * from a debugging breakpoint.
  */
 
 public class ExecutableFunctionLibrary implements FunctionLibrary {

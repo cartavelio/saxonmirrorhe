@@ -368,5 +368,21 @@ public class DynamicFunctionCall extends Expression {
         }
         
     }
+
+    /**
+     * Produce a short string identifying the expression for use in error messages
+     *
+     * @return a short string, sufficient to identify the expression
+     */
+    @Override
+    public String toShortString() {
+        StringBuilder sb = new StringBuilder(targetFunction.getChildExpression().toShortString())
+                .append('(');
+        for (Operand op : suppliedArguments) {
+            sb.append(op.getChildExpression().toShortString()).append(',');
+        }
+        sb.setCharAt(sb.length()-1, ')');
+        return sb.toString();
+    }
 }
 

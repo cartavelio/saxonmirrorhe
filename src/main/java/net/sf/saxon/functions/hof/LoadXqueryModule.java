@@ -168,6 +168,8 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         XQueryExpression xqe = new XQueryExpression(new ContextItemExpression(), main, false);
         DynamicQueryContext dqc = new DynamicQueryContext(context.getConfiguration());
 
+        XQueryParser.createRunTimeFunctionLibrary(main, config, main.getExecutable());
+
         // Get the external variables and set parameters on DynamicQueryContext dqc
         if (variablesOption != null) {
             MapItem extVariables = (MapItem) variablesOption.head();
