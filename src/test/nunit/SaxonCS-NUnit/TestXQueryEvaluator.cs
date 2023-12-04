@@ -212,11 +212,10 @@ namespace SaxonCS_NUnit {
         public void testXdmDestinationSpaceSeparator() {
             separatorTest("#absent", "<!--start-->1 2 3<!--end-->");
         }
-
-
+        
         /**
-     * Test writing a text node only to an XdmDestination
-     */
+        * Test writing a text node only to an XdmDestination
+        */
         [Test]
         public void testXdmDestinationTextNodeOnly() {
             try {
@@ -298,6 +297,23 @@ namespace SaxonCS_NUnit {
             }
         }
 
+        [Test]
+        public void testErrorReporter() {
+            int errorCount = 0;
+            try {
+                Processor p = new();
+                XQueryCompiler c = p.NewXQueryCompiler();
+                XQueryEvaluator eval = c.Compile("doc('unavailable.xml')").Load();
+                eval.ErrorReporter = error => errorCount++;
+                RawDestination dest = new ();
+                eval.Run(dest);
+                XdmValue result = dest.XdmValue;
+                Assert.Fail("Unexpected success");
+            }
+            catch (SaxonApiException e) {
+                Assert.AreEqual(errorCount, 1);
+            }
+        }
 
         [Test]
         public void testRawDestinationAtomic() {
