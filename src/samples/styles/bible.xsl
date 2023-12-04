@@ -11,14 +11,14 @@
 <xsl:output name="chapter" method="html"/>
 
 <xsl:template match="tstmt">
-    <xsl:result-document href="file:///{$dir}/index.html" format="index">
+    <xsl:result-document href="file://{$dir}/index.html" format="index">
         <html><frameset rows="15%,*">
             <noframes>You need a browser that allows frames</noframes>
             <frame src="titlepage.html" />
             <frame src="index2.html" />
         </frameset></html>
     </xsl:result-document>
-    <xsl:result-document href="file:///{$dir}/index2.html" format="index">
+    <xsl:result-document href="file://{$dir}/index2.html" format="index">
         <html><frameset cols="16%,14%,*">
             <noframes>You need a browser that allows frames</noframes>
             <frame src="books.html" />
@@ -26,7 +26,7 @@
             <frame src="chap1.1.html" name="content" />
         </frameset></html>
     </xsl:result-document>
-    <xsl:result-document href="file:///{$dir}/titlepage.html" format="index">
+    <xsl:result-document href="file://{$dir}/titlepage.html" format="index">
         <html><body bgcolor="#008080" text="#ffffff" link="#00ffff" vlink="#00cccc">
         <font face="sans-serif">
             <xsl:apply-templates/>
@@ -40,7 +40,7 @@
 </xsl:template>
 
 <xsl:template match="coverpg">
-    <xsl:result-document href="file:///{$dir}/coverpage.html" format="book">
+    <xsl:result-document href="file://{$dir}/coverpage.html" format="book">
         <html><body bgcolor="#00eeee"><center>
             <xsl:apply-templates/>
         <hr/>This HTML Rendition produced from John Bosak's XML source by
@@ -71,7 +71,7 @@
 </xsl:template>
 
 <xsl:template match="preface">
-    <xsl:result-document href="file:///{$dir}/preface.html" format="chapter">
+    <xsl:result-document href="file://{$dir}/preface.html" format="chapter">
         <html><body bgcolor="#00eeee"><center>
             <xsl:apply-templates/>
         </center><hr/></body></html>
@@ -91,7 +91,7 @@
 </xsl:template>
 
 <xsl:template match="bookcoll">
-    <xsl:result-document href="file:///{$dir}/books.html" format="book">
+    <xsl:result-document href="file://{$dir}/books.html" format="book">
         <html><body bgcolor="#00c0c0">
         <font face="sans-serif" size="2">
         <script language="JavaScript">
@@ -109,7 +109,7 @@
 
 <xsl:template match="book">
     <xsl:variable name="booknr"><xsl:number count="book"/></xsl:variable>
-    <xsl:result-document href="file:///{$dir}/book{$booknr}.html" format="book">
+    <xsl:result-document href="file://{$dir}/book{$booknr}.html" format="book">
         <html><body bgcolor="#00FFFF"><font face="sans-serif" size="2">
             <xsl:apply-templates>
                 <xsl:with-param name="booknr" select="$booknr"/>
@@ -131,7 +131,7 @@
     <xsl:param name="booknr"/>
     <xsl:variable name="chapnr"><xsl:number count="chapter"/></xsl:variable>
     <xsl:variable name="chapfile" select="concat('chap', $booknr, '.', $chapnr, '.html')"/> 
-    <xsl:result-document href="file:///{$dir}/{$chapfile}" format="chapter">
+    <xsl:result-document href="file://{$dir}/{$chapfile}" format="chapter">
         <html><head><title>
         <xsl:value-of select="ancestor::book/bktshort"/>
         </title></head>
