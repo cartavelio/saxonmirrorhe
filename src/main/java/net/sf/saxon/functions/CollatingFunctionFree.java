@@ -95,11 +95,10 @@ public class CollatingFunctionFree extends SystemFunction {
      */
 
     public CollatingFunctionFixed bindCollation(String collationName) throws XPathException {
-        RetainedStaticContext rsc = getRetainedStaticContext();
-        Configuration config = rsc.getConfiguration();
-        CollatingFunctionFixed fixed = (CollatingFunctionFixed)config.makeSystemFunction(
-                getFunctionName().getLocalPart(), getArity()-1, rsc.getPackageData().getHostLanguageVersion());
-        fixed.setRetainedStaticContext(rsc);
+        Configuration config = getRetainedStaticContext().getConfiguration();
+        CollatingFunctionFixed fixed = (CollatingFunctionFixed)config.makeSystemFunction40(
+                getFunctionName().getLocalPart(), getArity()-1);
+        fixed.setRetainedStaticContext(getRetainedStaticContext());
         fixed.setCollationName(collationName);
         return fixed;
     }
