@@ -241,7 +241,7 @@ public class PatternParser extends XPathParser {
         Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
-        } else if (allowXPath40Syntax && t.currentToken == Token.NODEKIND &&
+        } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA &&
                 (t.currentTokenValue.equals("record")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
             //ItemType type = parserExtension.parseExtendedItemType(this);
             ItemType type = parseItemType();
@@ -255,7 +255,7 @@ public class PatternParser extends XPathParser {
                 expr = parsePredicate(expr).toPattern(env.getConfiguration());
             }
             return expr;
-        } else if (allowXPath40Syntax && t.currentToken == Token.NODEKIND &&
+        } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA &&
                 (t.currentTokenValue.equals("atomic"))) {
             nextToken();
             expect(Token.NAME);
@@ -327,7 +327,7 @@ public class PatternParser extends XPathParser {
                         grumble("In an XSLT pattern, a function call is allowed only as the first step in a path");
                     }
                     return super.parseBasicStep(firstInPattern);
-                case Token.NODEKIND:
+                case Token.KEYWORD_LBRA:
                     switch (t.currentTokenValue) {
                         case "type":
                         case "tuple":
