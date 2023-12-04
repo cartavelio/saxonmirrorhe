@@ -5108,7 +5108,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
            if isinstance(args[x], PyXdmValue):
              ivalue_ = args[x]
              argumentV[x] = ivalue_.thisvptr
-             value_.thisvptr.incrementRefCount()
+             ivalue_.thisvptr.incrementRefCount()
            else:
              raise Exception("Argument value at position ",x," is not a PyXdmValue")
          '''c_functionName = make_c_str(function_name)'''
