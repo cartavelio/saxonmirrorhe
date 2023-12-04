@@ -407,7 +407,6 @@
     errorListener="net.sf.saxon.lib.StandardErrorListener"
     expandAttributeDefaults="true"
     ignoreSAXSourceParser="false"
-    lazyConstructionMode="false"
     lineNumbering="true"
     markDefaultedAttributes="true"
     optimizationLevel="10"
@@ -496,7 +495,7 @@
     implicitSchemaImports="false"
     multipleSchemaImports="false"
     occurrenceLimits="100,250"
-    schemaUriResolver="com.saxonica.config.ee.StandardSchemaResolver"
+    schemaUriResolver=""
     useXsiSchemaLocation="false"
     version="1.1"
   />

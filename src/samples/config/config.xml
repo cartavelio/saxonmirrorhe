@@ -29,7 +29,6 @@
           optimizationLevel="10"
           traceOptimizerDecisions="false"
           collationUriResolver="net.sf.saxon.lib.StandardCollationURIResolver"
-          lazyConstructionMode="false"
           preEvaluateDoc="false"
           serializerFactory=""
           errorListener="net.sf.saxon.lib.StandardErrorListener"
