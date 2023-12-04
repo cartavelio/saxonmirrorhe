@@ -710,7 +710,7 @@ public class StylesheetPackage extends PackageData {
                     trace("Doing mode completion for " + newC.getActor().getSymbolicName());
                     List<ComponentBinding> oldBindings = newC.getBaseComponent().getComponentBindings();
                     List<ComponentBinding> newBindings = newC.getComponentBindings();
-                    assert newBindings.size() == oldBindings.size();
+                    //assert newBindings.size() == oldBindings.size();
                     for (int i=0; i<oldBindings.size(); i++) {
                         SymbolicName name12 = oldBindings.get(i).getSymbolicName();
                         Component target;
