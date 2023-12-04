@@ -30,35 +30,35 @@ XdmValue *XdmFunctionItem::getXdmValueSubClass(int64_t results) {
       // TODO handle exception = new SaxonApiException();
       return nullptr;
     }
-    if (typeRef == 1) {
+    if (typeRef == XDM_ATOMIC_VALUE) {
       value = new XdmValue();
       xdmItem = new XdmAtomicValue(results);
       value->addXdmItem(xdmItem);
 
-    } else if (typeRef == 2) {
+    } else if (typeRef == XDM_NODE) {
       value = new XdmValue();
       xdmItem = new XdmNode(results);
       value->addXdmItem(xdmItem);
 
-    } else if (typeRef == 4) {
+    } else if (typeRef == XDM_MAP) {
       value = new XdmValue();
       xdmItem = new XdmMap(results);
       value->addXdmItem(xdmItem);
 
-    } else if (typeRef == 3) {
+    } else if (typeRef == XDM_ARRAY) {
       value = new XdmValue();
       xdmItem = new XdmArray(results);
       value->addXdmItem(xdmItem);
 
-    } else if (typeRef == 5) {
+    } else if (typeRef == XDM_FUNCTION_ITEM) {
       value = new XdmValue();
       xdmItem = new XdmFunctionItem(results);
       value->addXdmItem(xdmItem);
-    } else if (typeRef == 6) {
+    } else if (typeRef == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
       j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
-      results = -1;
+      results = SXN_UNSET;
       return nullptr;
 
     } else {
@@ -66,8 +66,8 @@ XdmValue *XdmFunctionItem::getXdmValueSubClass(int64_t results) {
     }
 
     return value;
-  } else if (results == -2) {
-    // TODO exception = new SaxonApiException();
+  } else if (results == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
 
   return nullptr;
@@ -125,20 +125,20 @@ XdmValue *XdmFunctionItem::call(SaxonProcessor *processor, XdmValue **arguments,
 
   int64_t argumentJArrayRef =
       SaxonProcessor::createJArray(arguments, argument_length);
-  if (argumentJArrayRef == -1 && argument_length > 0) {
+  if (argumentJArrayRef == SXN_UNSET && argument_length > 0) {
     throw SaxonApiException("Error in XdmFunctionItem.call when converting "
                             "arguments -   nullptr arguments found.\"");
   }
   int64_t results = j_xdmFunctionItem_call(
       SaxonProcessor::sxn_environ->thread, (void *)processor->procRef,
       (void *)value,
-      (argumentJArrayRef == -1 ? (void *)nullptr : (void *)argumentJArrayRef));
-  if (argumentJArrayRef != -1) {
+      (argumentJArrayRef == SXN_UNSET ? (void *)nullptr : (void *)argumentJArrayRef));
+  if (argumentJArrayRef != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)argumentJArrayRef);
     argumentJArrayRef = -1;
   }
-  if (results == -2) {
+  if (results ==SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return getXdmValueSubClass(results);

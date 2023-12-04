@@ -53,6 +53,9 @@ static const bool true = 1;
 #endif
 #endif
 
+static const int SXN_EXCEPTION = -2;
+static const int SXN_UNSET = -1;
+
 /*!    \file  SaxonCGlue.h
 *   \brief This C header file contains a number of factory functions for running SaxonC C/C++ APIs, including GraalVM create and destroy functions.
 */
