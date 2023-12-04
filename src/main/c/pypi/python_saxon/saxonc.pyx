@@ -740,7 +740,7 @@ cdef class PySaxonProcessor:
         '''make_c_str(file_name)'''
 
         cdef int _len = len(file_names)
-        cdef char ** catalog_files_array = <char**>malloc(_len * sizeof(char*))
+        cdef const char ** catalog_files_array = <const char**>malloc(_len * sizeof(char*))
         for x in range(_len):
             file_name = file_names[x]
             c_filename_string = NULL
@@ -751,7 +751,7 @@ cdef class PySaxonProcessor:
             else:
                 raise Exception("Found None catalog file")
 
-        self.thisptr.setCatalogFiles(c_filename_string, _len)
+        self.thisptr.setCatalogFiles(catalog_files_array, _len)
         free(catalog_files_array)
 
 
