@@ -3,19 +3,11 @@
   <h1>Handling XML documents in SaxonC</h1>
 
 
-  <p>The general discussion of handling XML document you can find in the main <a href="https://www.saxonica.com/documentation12/index.html#!sourcedocs">Saxon documentation</a>
+  <p>The general discussion of handling XML document you can find in the main <a href="https://www.saxonica.com/documentation12/index.html#!sourcedocs">Saxon documentation</a>.
     However, the section on `building a source document from lexical XML` is substantially different in SaxonC, for the C/C++, Python or PHP APIs.
-  Hence, we discuss it here in the SaxonC documentation: </p>
+  Therefore, we discuss it here in the SaxonC documentation: </p>
 
 
-  <nav>
-    <ul/>
-  </nav>
-
-
-
-
-  <section id="builder-api" title="Building a source document from lexical XML">
     <h1>Building a source document from lexical XML</h1>
 
     <p>The conversion of lexical XML to a tree in memory is called <i>parsing</i>, and is performed
@@ -71,7 +63,7 @@
     <p>All the documents processed in a single transformation or query must be loaded using the same
         <code>Configuration</code>. However, it is only
       possible to copy a document from one <code>Configuration</code> into another one by serializing the object and parsing it again. </p>
-  </section>
+
 
 
   
