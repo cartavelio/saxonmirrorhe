@@ -69,11 +69,6 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
                         Exclude="../../src/main/resources/**/.DS_Store">
         <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
       </EmbeddedResource>
-      <!-- This is a bit of trail-and-error; we need to move the SEF file to
-           a location where Version.platform.locateResource() will find it. -->
-      <EmbeddedResource Include="resources/sef/function-library.sef.xml">
-         <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('../../src/main/resources/net/sf/saxon/data/sef/function-library.sef.xml'))</LogicalName>
-      </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
