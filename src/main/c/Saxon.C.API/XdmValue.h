@@ -189,7 +189,7 @@ protected:
     values_cap = 1;
     values = new XdmItem*[values_cap];
     relinquished_values = new char[values_cap];
-    memset(relinquished_values, 0, sizeof((char *) + relinquished_values));
+    relinquished_values[0] = 0;
   }
 
   char *valueType; /*!< Cached. The type of the XdmValue */
