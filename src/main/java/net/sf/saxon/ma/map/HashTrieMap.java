@@ -179,7 +179,7 @@ public class HashTrieMap extends MapItem {
      * @return true if the map conforms to the required type
      */
     @Override
-    public boolean conforms(AtomicType requiredKeyType, SequenceType requiredValueType, TypeHierarchy th) {
+    public boolean conforms(PlainType requiredKeyType, SequenceType requiredValueType, TypeHierarchy th) {
         if (isEmpty()) {
             return true;
         }

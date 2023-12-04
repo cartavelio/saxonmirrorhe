@@ -1,147 +1,164 @@
 package internaltests;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.extfn.ExperimentalSequenceTypeMarshaller;
-import com.saxonica.ee.extfn.ExperimentalXPathCompiler;
-import com.saxonica.expr.SaxonSyntaxExtension;
+import com.saxonica.functions.registry.XPath40FunctionSet;
+import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.functions.MathFunctionSet;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.ma.arrays.ArrayFunctionSet;
+import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.sxpath.IndependentContext;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AlphaCode;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
- *  Test round-trip conversion between sequence types and alpha-codes
+ *  Test that all functions in the QT4 function catalog have been implemented with the correct
+ *  function signatures
  */
-public class AlphaCodeTypeTest {
+public class SignatureTest {
+
+    // Function arguments where Saxon knowingly declares the type differently from the language spec.
+    // Format is prefix:local#arg where arg is the 1-based argument number (not the arity!)
+    private final static Set<String> argExceptions = setOf(
+            "fn:namespace-uri-for-prefix#1",
+            "fn:subsequence#2",
+            "fn:subsequence#3",
+            "fn:substring#2",
+            "fn:substring#3",
+            "math:pow#2"
+    );
+
+    private final static Set<String> resultExceptions = setOf(
+            "fn:analyze-string",
+            "fn:in-scope-namespaces"
+    );
+
+    private static Set<String> setOf(String... str) {
+       Set<String> result = new HashSet<>();
+       Collections.addAll(result, str);
+       return result;
+    }
 
     @Test
-    public void testSequenceTypesJS() {
+    public void testFunctionSignatures() {
+        File catalog = new File(new ConfigTest().getQt4SpecsDir()
+                                        + "specifications/xpath-functions-40/src/function-catalog.xml");
+        int failures = 0;
         try {
-            Configuration config = new EnterpriseConfiguration();
-            IndependentContext ic = new IndependentContext(config);
-            ic.declareNamespace("foo", NamespaceUri.of("http://foo.com/"));
-            ic.setXPathLanguageLevel(31);
-            XPathParser parser = new XPathParser(ic);
-            String[] testCases = new String[]{
-                    "item()",
-                    "item()*",
-                    "xs:anyAtomicType?",
-                    "xs:string*",
-                    "xs:integer+",
-                    "node()",
-                    "element(foo)",
-                    "element(foo:bar)",
-                    "xs:numeric*",
-                    "xs:dayTimeDuration",
-                    "map(*)",
-                    "map(xs:string, node()*)",
-                    "array(*)",
-                    "array(array(xs:integer*))",
-                    "empty-sequence()",
-                    "function(*)",
-                    "function(xs:int, xs:int) as xs:date",
-                    "function(xs:int) as (function() as xs:date*)*",
-                    "document-node(element(foo, xs:integer))?"
+            Processor proc = new Processor(true);
+            Configuration config = proc.getUnderlyingConfiguration();
+            TypeHierarchy th = config.getTypeHierarchy();
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode catalogDoc = builder.build(catalog);
+            for (XdmNode proto : catalogDoc.select(Steps.descendant("proto")).asListOfNodes()) {
+                String localName = proto.getAttributeValue(new QName("name"));
+                XdmNode fnNode = proto.getParent().getParent();
+                String prefix = fnNode.getAttributeValue(new QName("prefix"));
+                if (prefix == null) {
+                    prefix = "fn";
+                }
+                //System.err.println("Processing " + prefix + ":" + localName);
+                BuiltInFunctionSet functionSet = null;
+
+                if (prefix.equals("fn")) {
+                    functionSet = XPath40FunctionSet.getInstance();
+                } else if (prefix.equals("math")) {
+                    functionSet = MathFunctionSet.getInstance();
+                } else if (prefix.equals("map")) {
+                    functionSet = MapFunctionSet.getInstance(40);
+                } else if (prefix.equals("array")) {
+                    functionSet = ArrayFunctionSet.getInstance(40);
+                } else {
+                    continue;
+                }
+                List<XdmNode> args = proto.select(Steps.child("arg")).asListOfNodes();
+                BuiltInFunctionSet.Entry entry = functionSet.getFunctionDetails(localName, args.size());
+                if (entry == null) {
+                    failures += failure("No entry found for " + prefix + ":" + localName + "#" + args.size());
+                    continue;
+                }
+                entry = entry.populator.apply(entry);
+                String returnTypeAtt = proto.getAttributeValue(new QName("return-type"));
+                if (returnTypeAtt == null) {
+                    // TODO: process record types
+                    returnTypeAtt = "none";
+                }
+                if (!returnTypeAtt.equals("none")) {
+                    SequenceType requiredReturnType = parseType(config, returnTypeAtt);
+                    SequenceType actualReturnType = new SequenceType(entry.itemType, entry.cardinality);
+                    if (!requiredReturnType.isSameType(actualReturnType, th)) {
+                        String fnKey = prefix + ":" + localName;
+                        if (!resultExceptions.contains(fnKey)) {
+                            failures += failure("Wrong return type for " + prefix + ":" + localName + "#" + args.size());
+                        }
+                    }
+                }
+                if (!localName.equals("concat")) {
+                    for (int i = 0; i < args.size(); i++) {
+                        XdmNode argNode = args.get(i);
+                        if (argNode == null) {
+                            failures += failure("No entry for argument " + (i + 1) + " of " + prefix + ":" +localName + "#" + args.size());
+                            continue;
+                        }
+                        final String argType = argNode.getAttributeValue(new QName("type"));
+                        if (argType != null) {
+                            // TODO: process record types
+                            SequenceType requiredArgType = parseType(config, argType);
+                            SequenceType actualArgType = entry.paramTypes[i];
+                            if (!requiredArgType.isSameType(actualArgType, th)) {
+                                String argKey = prefix + ":" + localName + "#" + (i+1);
+                                if (!argExceptions.contains(argKey)) {
+                                    failures += failure("Wrong type for argument " + (i + 1)
+                                                                + " of " + prefix + ":" + localName + "#" + args.size());
+                                }
+                            }
+                        }
+                    }
+                }
             };
-            for (String s : testCases) {
-                SequenceType t = parser.parseSequenceType(s, ic);
-                MapItem map = ExperimentalXPathCompiler.makeMap(t);
-                String json = Err.depict(map).toString();
-                String lex = ExperimentalSequenceTypeMarshaller.unmarshal(map).getStringValue();
-                MapItem map2 = AlphaCode.toXdmMap(lex);
-                String json2 = Err.depict(map2).toString();
-                String lex2 = ExperimentalSequenceTypeMarshaller.unmarshal(map2).getStringValue();
-                assertEquals(lex, lex2, s);
-                //System.out.println(s + " => " + json + " => " + lex + " => " + json2 + " => " + lex2);
-            }
-        } catch (XPathException e) {
-            fail();
+            assertEquals(0, failures);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
         }
 
     }
 
-    @Test
-    public void testSequenceTypes() {
-        try {
-            Configuration config = new EnterpriseConfiguration();
-            IndependentContext ic = new IndependentContext(config);
-            ic.declareNamespace("foo", NamespaceUri.of("http://foo.com/"));
-            ic.setXPathLanguageLevel(31);
-            XPathParser parser = new XPathParser(ic);
-            String[] testCases = new String[]{
-                    "item()",
-                    "item()*",
-                    "xs:anyAtomicType?",
-                    "xs:string*",
-                    "xs:integer+",
-                    "node()",
-                    "element(foo)",
-                    "element(foo:bar)",
-                    "xs:numeric*",
-                    "xs:dayTimeDuration",
-                    "map(*)",
-                    "map(xs:string, node()*)",
-                    "array(*)",
-                    "array(array(xs:integer*))",
-                    "empty-sequence()",
-                    "function(*)",
-                    "function(xs:int, xs:int) as xs:date",
-                    "function(xs:int) as (function() as xs:date*)*",
-                    "document-node(element(foo, xs:integer))?"
-            };
-            for (String s : testCases) {
-                System.err.println("Processing " + s);
-                SequenceType t = parser.parseSequenceType(s, ic);
-                String alpha = AlphaCode.fromSequenceType(t);
-                SequenceType t2 = AlphaCode.toSequenceType(alpha, config);
-                assertEquals(t, t2);
-                String alpha2 = AlphaCode.fromSequenceType(t2);
-                assertEquals(alpha, alpha2); // ?? component order may differ?
-            }
-        } catch (XPathException e) {
-            fail();
-        }
-
+    private int failure(String cause) {
+        System.err.println(cause);
+        return 1;
     }
 
-    @Test
-    public void testRecordTypes() {
+    private SequenceType parseType(Configuration config, String typeDesignation) {
         try {
-            Configuration config = new EnterpriseConfiguration();
-            IndependentContext ic = new IndependentContext(config);
-            ic.setXPathLanguageLevel(40);
-            XPathParser parser = new XPathParser(ic);
-            parser.setParserExtension(new SaxonSyntaxExtension());
-            String[] testCases = new String[]{
-                    "record(x, y)",
-                    "record(x, y, *)",
-                    "record('date of birth'?, 'date of death'?, 'married?'?, *)",
-                    "record(x as xs:int, y as xs:string)*",
-                    "record(x, y as xs:string*, *)",
-                    "record(xxx?, yyy?)+",
-                    "record(xxx? as xs:boolean?, yyy? as xs:QName?, *)"
-            };
-            for (String s : testCases) {
-                SequenceType t = parser.parseSequenceType(s, ic);
-                String alpha = AlphaCode.fromSequenceType(t);
-                SequenceType t2 = AlphaCode.toSequenceType(alpha, config);
-                assertEquals(t, t2);
-                String alpha2 = AlphaCode.fromSequenceType(t2);
-                assertEquals(alpha, alpha2); // ?? component order may differ?
-            }
+            IndependentContext env = new IndependentContext(config);
+            env.setXPathLanguageLevel(40);
+            env.declareNamespace("xs", NamespaceUri.SCHEMA);
+            env.declareNamespace("fn", NamespaceUri.FN);
+            XPathParser parser = new XPathParser(env);
+            return parser.parseSequenceType(typeDesignation, env);
         } catch (XPathException e) {
-            fail();
+            e.printStackTrace();
+            System.err.println("Unknown type " + typeDesignation);
+            //fail("Unknown type " + typeDesignation);
+            return SequenceType.ANY_SEQUENCE;
         }
-
     }
+
+
 }

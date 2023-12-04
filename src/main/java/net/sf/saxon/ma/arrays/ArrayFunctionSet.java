@@ -57,14 +57,14 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
 
         //#if EE==true || PE==true
-        register("build", 1, e -> e.populate(ArrayBuild::new, AnyItemType.getInstance(), STAR, 0)
+        register("build", 1, e -> e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | NAV, null));
 
         ItemType buildFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ANY_SEQUENCE);
 
-        register("build", 2, e -> e.populate(ArrayBuild::new, AnyItemType.getInstance(), STAR, 0)
+        register("build", 2, e -> e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | NAV, null)
                 .arg(1, buildFunctionType, ONE | INS, null));
         //#endif
@@ -99,11 +99,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, e -> e.populate( ArrayForEach::new, AnyItemType.getInstance(), STAR, 0)
+        register("for-each", 2, e -> e.populate( ArrayForEach::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, forEachFunctionType, ONE | INS, null));
 
-        register("for-each-pair", 3, e -> e.populate( ArrayForEachPair::new, AnyItemType.getInstance(), STAR, 0)
+        register("for-each-pair", 3, e -> e.populate( ArrayForEachPair::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(2, foldFunctionType, ONE | INS, null));
@@ -117,7 +117,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         register("insert-before", 3, e -> e.populate( ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null)
+                .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
                 .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
 
         register("join", 1, e -> e.populate( ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
@@ -125,7 +125,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         register("put", 3, e -> e.populate( ArrayPut::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, STAR | INS, null)
+                .arg(1, BuiltInAtomicType.INTEGER, ONE | INS, null)
                 .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
 
         register("remove", 2, e -> e.populate( ArrayRemove::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
@@ -161,7 +161,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("subarray", 3, e -> e.populate( ArraySubarray::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                .arg(2, BuiltInAtomicType.INTEGER, ONE | ABS, null));
+                .arg(2, BuiltInAtomicType.INTEGER, (version>=40 ? OPT : ONE) | ABS, null));
 
 
 
@@ -202,8 +202,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE | INS, null));
 
-            register("slice", 1, 4, e -> e.populate(ArraySlice::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, AnyItemType.getInstance(), STAR, null)
+            register("slice", 1, 4, e -> e.populate(ArraySlice::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null)
                     .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
                     .arg(2, BuiltInAtomicType.INTEGER, OPT, null)
                     .arg(3, BuiltInAtomicType.INTEGER, OPT, null));
@@ -211,7 +211,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("replace", 3, e -> e.populate(ArrayReplace::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                    .arg(2, forEachFunctionType, OPT, null));
+                    .arg(2, forEachFunctionType, ONE, null));
 
             register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
@@ -687,13 +687,16 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             int length;
             if (arguments.length == 3) {
                 IntegerValue len = (IntegerValue) arguments[2].head();
-                int signum = len.signum();
-                if (signum < 0) {
-                    throw new XPathException("Specified length of subarray is less than zero", "FOAY0002");
+                if (len == null) {
+                    length = array.arrayLength() - start + 1;
+                } else {
+                    int signum = len.signum();
+                    if (signum < 0) {
+                        throw new XPathException("Specified length of subarray is less than zero", "FOAY0002");
+                    }
+                    length = signum == 0 ? 0 : checkSubscript(len, array.arrayLength());
                 }
-                length = signum == 0 ? 0 : checkSubscript(len, array.arrayLength());
-            }
-            else {
+            } else {
                 length = array.arrayLength() - start + 1;
             }
             if (start < 1) {
