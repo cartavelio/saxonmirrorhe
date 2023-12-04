@@ -262,6 +262,7 @@
       <xs:attribute name="doctype-public" use="optional" type="xs:string"/>
       <xs:attribute name="doctype-system" use="optional" type="xs:anyURI"/>
       <xs:attribute name="encoding" use="optional" type="xs:string"/>
+      <xs:attribute name="escape-solidus" use="optional" type="c:yesOrNoType"/>
       <xs:attribute name="escape-uri-attributes" use="optional" type="c:yesOrNoType"/>
       <xs:attribute name="html-version" use="optional" type="xs:decimal"/>
       <xs:attribute name="include-content-type" use="optional" type="c:yesOrNoType"/>
