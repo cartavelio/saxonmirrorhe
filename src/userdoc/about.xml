@@ -108,7 +108,7 @@
       </nav>
       
       <p class="conly">For information on getting started with SaxonC, please see <a class="bodylink"
-         href="https://www.saxonica.com/saxon-c/documentation12/#!about/gettingstarted">Getting started</a> in
+         href="https://www.saxonica.com/saxon-c/documentation12/#!starting">Getting started</a> in
          the SaxonC documentation.</p>
 
       <section id="gettingstartedjava" title="Getting started with SaxonJ" class="javaonly">
@@ -1118,7 +1118,7 @@ any version number.</p>
       
       <p>Details about installing SaxonC and the PHP and Python extensions, on Linux, Mac OS and Windows, is
          contained in the <a class="bodylink"
-            href="https://www.saxonica.com/saxon-c/documentation/index.html#!starting">Getting started</a>
+            href="https://www.saxonica.com/saxon-c/documentation12/#!starting">Getting started</a>
          section of the SaxonC documentation.</p>
       
    </section>
