@@ -25,6 +25,7 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
     cout << "String Value of result=" << messagei << endl;
     sresult->success++;
     operator delete ((char *)messagei);
+    delete result;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
@@ -71,6 +72,7 @@ void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
       cout << "String Value of result=" << resultStr << endl;
       sresult->success++;
       delete result;
+      operator delete ((char *) resultStr);
     }
     }
   } catch (SaxonApiException &e) {
@@ -97,14 +99,18 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
       "person></out>");
 
   try {
-    XdmNode *child = node->getChildren()[0];
+    int childCountA = node->getChildCount();
+    XdmNode ** childrenA = node->getChildren();
+    XdmNode *child = childrenA[0];
     XdmNode **children = child->axisNodes(EnumXdmAxis::CHILD);
     int childCount = child->axisNodeCount();
     //     cout<< "node type="<<((node->getChildren()[0]_->toString())<<endl;
     cout << " child count = " << childCount << endl;
     for (int i = 0; i < childCount; i++) {
       cout << "child-Node type = " << (children[i]->getType()) << endl;
-      cout << "child node:" << (children[i]->toString()) << endl;
+      const char * childStr = children[i]->toString();
+      cout << "child node:" << (childStr) << endl;
+      operator delete ((char *)childStr);
     }
     XdmNode **namespaces = child->axisNodes(EnumXdmAxis::NAMESPACE);
     int namespaceCount = child->axisNodeCount();
@@ -118,7 +124,6 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
       cout << "namespace value =" << (namespaceStr) << endl;
       operator delete ((char *) namespaceStr);
     }
-    delete child;
     for (int i = 0; i < childCount; i++) {
       delete children[i];
     }
@@ -126,6 +131,10 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
     for (int i = 0; i < namespaceCount; i++) {
       delete namespaces[i];
     }
+    for (int i = 0; i < childCountA; i++) {
+      delete childrenA[i];
+    }
+    delete [] childrenA;
     delete[] namespaces;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
@@ -207,6 +216,7 @@ void testXPathValues(SaxonProcessor *processor, XPathProcessor *xpath,
         const char * itemiStr =  itemi->getStringValue();
         cout << "Item at " << i << " =" << itemiStr << endl;
         operator delete ((char *) itemiStr);
+        delete itemi;
       }
       delete resultValues;
       if (!nullFound) {
@@ -250,7 +260,8 @@ void testXPathAttrValues(SaxonProcessor *processor, XPathProcessor *xpath,
 
     xpath->setContextItem((XdmItem *)input);
     XdmItem *result = xpath->evaluateSingle("(//person)[1]");
-
+      delete input;
+      input = nullptr;
     if (result == nullptr) {
       printf("result is null \n");
     } else {
@@ -259,6 +270,7 @@ void testXPathAttrValues(SaxonProcessor *processor, XPathProcessor *xpath,
       const char *attrVal = nodeValue->getAttributeValue("attr1");
       if (attrVal != nullptr) {
         cout << "Attribute value= " << attrVal << endl;
+        operator delete ((char *)attrVal);
       }
 
       XdmNode **attrNodes = nodeValue->getAttributeNodes();
@@ -277,10 +289,17 @@ void testXPathAttrValues(SaxonProcessor *processor, XPathProcessor *xpath,
       XdmNode *parent1 = parent->getParent();
       if (parent1 != nullptr) {
         cout << "Name of parent= " << parent1->getNodeName() << endl;
+        delete parent1;
       }
       sresult->success++;
-      // TODO test if attr value is not there
+      int attrSize = nodeValue->getAttributeCount();
+      for(int i = 0 ; i < attrSize; i ++){
+        delete attrNodes[i];
+      }
+      delete [] attrNodes;
+      delete result;
     }
+
   } catch (SaxonApiException &e) {
 
     const char *message = e.getMessage();
@@ -315,6 +334,7 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
         operator delete ((char *)resultStr);
       }
     }
+    delete resultValues;
   } catch (SaxonApiException &e) {
 
     const char *message = e.getMessage();
@@ -329,8 +349,8 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
 // morethan one XdmItem.
 void testXPathOnFile(SaxonProcessor *processor, XPathProcessor *xpath,
                      sResultCount *sresult) {
-  cout << endl << "Test testXPath with file source:" << endl;
-  xpath->clearParameters(true);
+  cout << endl << "testXPathOnFile: Test testXPath with file source:" << endl;
+  xpath->clearParameters();
   xpath->clearProperties();
   xpath->setContextFile("../data/cat.xml");
 
@@ -353,6 +373,7 @@ void testXPathOnFile(SaxonProcessor *processor, XPathProcessor *xpath,
         const char * itemiStr =  itemi->getStringValue();
         cout << "Item at " << i << " =" << itemiStr << endl;
         operator delete ((char *)itemiStr);
+        delete itemi;
       }
     }
     delete resultValues;
@@ -379,12 +400,7 @@ void testXPathOnFile2(XPathProcessor *xpath, sResultCount *sresult) {
 
     if (result == nullptr) {
       printf("result is null \n");
-      SaxonApiException *exception = xpath->getException();
-      if (exception != nullptr) {
-        const char *message = xpath->getErrorMessage();
-        cout << "Error Message = " << message << endl;
-        xpath->exceptionClear();
-      }
+
       sresult->failure++;
       sresult->failureList.push_back("testXPathOnFile2");
       return;
@@ -701,6 +717,7 @@ int main() {
   delete processor;
 
   processor->release();
+  delete SaxonProcessor::sxn_environ;
   delete sresult;
 
 #ifdef MEM_DEBUG
