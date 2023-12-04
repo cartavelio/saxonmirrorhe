@@ -1446,7 +1446,8 @@ any version number.</p>
 
 
       <p>Saxon has been under development since 1998. Throughout that time the development
-      has been led by Michael Kay.</p>
+      has been led by Michael Kay; by 2023 the team had grown to five developers (Michael Kay plus
+      O'Neil Delpratt, Debbie Lockett, Norm Walsh, and Matt Patterson, in order of first appearance).</p>
 
       <p>Saxon was originally written to support an internal project in ICL (now part of <a
             href="http://www.fujitsu.com" class="bodylink">Fujitsu</a>), and ICL continued to
@@ -1491,11 +1492,10 @@ any version number.</p>
          SaxonJS, written in pure Javascript, which was released in February 2017.</p>
       
       <p>SaxonC was first released (as a beta) in November 2013, and new releases have appeared regularly since.
-      SaxonC uses the Excelsior JET technology to compile the Java source code "ahead of time" into executable
-      machine code for the target hardware architecture; the Java code is augmented with an API layer providing
-      call interfaces from C, C++, PHP, and Python. Although the company that produced Excelsior JET is now defunct,
-      the technology still works, and we are completing current work in progress using JET while at the same time
-      starting to explore alternative ways forward for the future.</p>
+      SaxonC originally used the Excelsior JET technology to compile the Java source code "ahead of time" into executable
+      machine code for the target hardware architecture; the Java code was augmented with an API layer providing
+      call interfaces from C, C++, PHP, and Python. When the company that produced Excelsior JET became defunct,
+      development switched to using the GraalVM ahead-of-time Java compiler from Oracle.</p>
 
       <p>The name Saxon was chosen because originally it was a layer on top of SAX. Also, it
          originally used the Ælfred parser (among others); those who study English history will know
