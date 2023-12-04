@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
@@ -81,7 +82,7 @@ public class JsonToXMLFn extends SystemFunction {
     protected Item eval(String input, MapItem options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         int flags = 0;
-        Map<String, Sequence> checkedOptions = null;
+        Map<String, GroundedValue> checkedOptions = null;
         if (options != null) {
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
             flags = JsonParser.getFlags(checkedOptions, true, context.getController().getExecutable().isSchemaAware());

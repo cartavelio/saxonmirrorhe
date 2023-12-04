@@ -11,8 +11,8 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -58,7 +58,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      */
     @Override
     protected Item eval(String input, MapItem options, XPathContext context) throws XPathException {
-        Map<String, Sequence> checkedOptions = null;
+        Map<String, GroundedValue> checkedOptions = null;
         if (options != null) {
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
         }
@@ -75,7 +75,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @throws XPathException if the syntax of the input is incorrect
      */
 
-    public static Item parse(String input, Map<String, Sequence> options, XPathContext context) throws XPathException {
+    public static Item parse(String input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         int flags = 0;
         if (options != null) {

@@ -9,10 +9,7 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
@@ -100,7 +97,7 @@ public class JsonParser {
      * @throws XPathException if any options are invalid
      */
 
-    public static int getFlags(Map<String, Sequence> options, boolean allowValidate, boolean isSchemaAware) throws XPathException {
+    public static int getFlags(Map<String, GroundedValue> options, boolean allowValidate, boolean isSchemaAware) throws XPathException {
         int flags = 0;
         BooleanValue debug = (BooleanValue) options.get("debug");
         if (debug != null && debug.getBooleanValue()) {
@@ -675,7 +672,7 @@ public class JsonParser {
     }
 
 
-    public void setNumberParser(Map<String, Sequence> options, XPathContext context) throws XPathException {
+    public void setNumberParser(Map<String, GroundedValue> options, XPathContext context) throws XPathException {
         Sequence val = options.get("number-parser");
         if (val != null) {
             Item fn = val.head();

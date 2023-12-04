@@ -35,7 +35,7 @@ namespace Saxon.Api {
                 Saxon.Hej.expr.XPathContext context = new Saxon.Hej.Controller(config).newXPathContext();
                 Saxon.Hej.z.IntPredicateProxy checker = Saxon.Hej.z.IntSetPredicate.ALWAYS_TRUE;
                 Saxon.Hej.str.UnicodeString content = Saxon.Hej.functions.UnparsedTextFunction.readFile(checker, jsonReader);
-                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.Sequence>();
+                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>();
                 Saxon.Impl.Helpers.MapUtils.Put(options, "liberal", Saxon.Hej.value.BooleanValue.get(Liberal));
                 Saxon.Impl.Helpers.MapUtils.Put(options, "escape", Saxon.Hej.value.BooleanValue.TRUE);
                 Saxon.Hej.om.Item result = Saxon.Hej.ma.json.ParseJsonFn.parse(content.ToString(), options, context);
