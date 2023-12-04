@@ -138,6 +138,15 @@ public class AbsolutePath {
         return systemId;
     }
 
+    /**
+     * Get the path as a list of {@link PathElement} objects
+     * @return a list of PathElements giving the names and positions of ancestor elements
+     * of the invalid element, starting at the root.
+     */
+
+    public List<PathElement> getPathElements() {
+        return path;
+    }
 
     /**
      * Inner class representing one step in the path
