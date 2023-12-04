@@ -53,19 +53,16 @@ public:
    */
   void setBaseOutputURI(const char *baseURI);
 
-  //! Supply the context item to be used when evaluating global variables and parameters.
+  //! Set the source document from an XdmNode for the transformation.
   /**
-   * Set the source document from an XdmNode for the transformation.
-   * @param value - the item to be used as the context item within the initializers of global variables and parameters. Given as a pointer to the XdmItem
+   * @param value - The source to the stylesheet as a pointer to the XdmNode
    * object.
    */
 
   void setGlobalContextItem(XdmItem *value);
 
   /**
-   * Supply the context item to be used when evaluating global variables and parameters.
    * Set the source from file for the transformation.
-   * @param filename - the item to be used as the context item within the initializers of global variables and parameters.
    */
   void setGlobalContextFromFile(const char *filename);
 

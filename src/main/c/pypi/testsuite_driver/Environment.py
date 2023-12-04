@@ -6,13 +6,12 @@ optimizer_flags = '-'
 
 class Spec:
 
+
     def __init__(self, v, fn, sspn, sav):
         self.version = v
         self.full_name = fn
         self.short_spec_name = sspn
         self.spec_and_version = sav
-
-
     @staticmethod
     def XP20():
         return Spec("2.0", "XPath2.0", "XP", "XP20")
@@ -80,34 +79,17 @@ class Environment:
         self.lang = None
         self.proc.set_configuration_property('http://saxon.sf.net/feature/optimizationLevel', optimizer_flags)
 
+        self.xpath_proc = self.proc.new_xpath_processor()
         self.base_uri = ""
         self.spec = None
-        '''self.xquery_proc = self.proc.new_xquery_processor()
-        self.xpath_proc = self.proc.new_xpath_processor()
-        self.xslt_proc = self.proc.new_xslt30_processor()'''
-        self.xquery_proc = None
-        self.xpath_proc = None
-        self.xslt_proc = None
+        self.xquery_proc = self.proc.new_xquery_processor()
+
+        self.xslt_proc = self.proc.new_xslt30_processor()
         self.sheet = None
 
         self.context_item = None
 
         self.source_docs = {}
-        self.param_decimal_declarations = None
-
-        self.param_declarations = None
-
-        self.params = {}
-
-        self.reset_actions = []
-        self.usable = True
-
-    def create_processors(self):
-        self.xpath_proc = self.proc.new_xpath_processor()
-        self.xquery_proc = self.proc.new_xquery_processor()
-        self.xslt_proc = self.proc.new_xslt30_processor()
-
-
 
 
 
