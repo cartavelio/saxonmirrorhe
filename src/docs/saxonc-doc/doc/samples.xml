@@ -147,7 +147,7 @@
      <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a stylesheet parameter, and using the
        new feature rich <code>XsltExecutable</code> API</p>
 
-      <samp><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
+      <pre><code class="language-clike"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 
 XdmAtomicValue * value =processor->makeStringValue("Hello to you");
@@ -176,12 +176,12 @@ executable->clearProperties();
 delete executable;
 delete result;
 delete value;
-  ]]></samp>
+  ]]></code></pre>
 
 
        <p>C++ Example 2: basic XSLT transformation where we compile and execute the transform in one go on the <code>Xslt30Processor</code></p>
 
-       <samp><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
+       <pre><code class="language-clike"><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 const char * result = xslt->transformFileToString("cat.xml","test.xsl")<<endl;
 if(result != nullptr) {
@@ -195,11 +195,11 @@ if(result != nullptr) {
       trans->exceptionClear();
       processor->release();
 }
-  ]]></samp>
+  ]]></code></pre>
 
      <p>C++ Example 3: XSLT transformation using the <code>Xslt30Processor</code> and <code>XsltExecutable</code></p>
 
-      <samp><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
+      <pre><code class="language-clike"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 xslt->setInitialMatchSelectionAsFile("cat.xml");
 XsltExecutable * executable = xslt->compileFromFile("test.xsl");
@@ -227,37 +227,37 @@ xslt->clearParameters(true);
 xslt->clearProperties();
 delete executable;
 delete executable2;
-  ]]></samp>
+  ]]></code></pre>
 
 
       <p>C++ Example 4: basic XQuery processing</p>
 
-      <samp><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
+      <pre><code class="language-clike"><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
 XsltProcessor * xslt = processor->newXQueryProcessor();
 queryProc->setProperty("s", "cat.xml");
 queryProc->setProperty("q", "family.xq");
 queryProc->runQueryToString();
-  ]]></samp>
+  ]]></code></pre>
      
      <p>C++ Example 5: parsing XML represented as a lexical string</p>
      
-     <samp><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+     <pre><code class="language-clike"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromString("<doc/>");
-  ]]></samp>
+  ]]></code></pre>
      
      <p>C++ Example 6: parsing XML from a file</p>
      
-     <samp><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+     <pre><code class="language-clike"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromFile(dir+"books.xml"");
-  ]]></samp>
+  ]]></code></pre>
      
      <p>C++ Example 7: parsing XML directly using SaxonProcessor</p>
      
-     <samp><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+     <pre><code class="language-clike"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 XdmNode *input = proc->parseXmlFromString("<z/>");
-  ]]></samp>
+  ]]></code></pre>
      
      <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
 
@@ -311,7 +311,7 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
       <h3 class="subtitle">Example code</h3>
 
       <p>Example using the new XSLT 3.0 API:</p>
-      <samp><![CDATA[<?php
+      <pre><code class="language-php"><![CDATA[<?php
   $saxonProc = new Saxon\SaxonProcessor();
   $transformer = $saxonProc->newXslt30Processor();
   $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0'" .
@@ -320,14 +320,14 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
       "</xsl:stylesheet>");
   $root = $executable->callTemplateReturningValue("go");
   $node = $root->getHead()->getNodeValue();
-?>]]></samp>
+?>]]></code></pre>
 
   
 
       <p>The following example shows how to debug if something unexpected is happening. It is also
          very useful to examine the apache <code>error.log</code> file:</p>
 
-      <samp><![CDATA[<?php
+      <pre><code class="language-php"><![CDATA[<?php
   $xmlfile = "xml/foo.xml";
   $xslFile = "xsl/foo.xsl";
   $proc = new Saxon\SaxonProcessor();
@@ -346,12 +346,12 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
   echo $result;
   $xsltProc->clearParameters();
   $xsltProc->clearProperties();
-?>]]></samp>
+?>]]></code></pre>
      
      <p>Example of parsing XML represented as a lexical string:</p>
      
-     <samp><![CDATA[  $xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value</b></doc>");
-]]></samp>
+     <pre><code class="language-php"><![CDATA[  $xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value</b></doc>");
+]]></code></pre>
    </section>
 
    <section id="samples_python" title="Python samples">
@@ -413,7 +413,7 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
 
       <p>Example 1: Python script using the SaxonC-HE API with a simple stylesheet test.xsl:</p>
 
-     <samp><![CDATA[from saxonche import *
+     <pre><code class="language-python"><![CDATA[from saxonche import *
 
 with PySaxonProcessor(license=False) as proc:
 
@@ -446,11 +446,11 @@ with PySaxonProcessor(license=False) as proc:
   item = xp.evaluate_single('//person[1]')
   if isinstance(item,saxonc.PyXdmNode):
     print(item.string_value)
-    ]]></samp>
+    ]]></code></pre>
      
      <p>Example 2: Python script using PyXsltExecutable (with SaxonC-HE):</p>
      
-     <samp><![CDATA[from saxonche import *
+     <pre><code class="language-python"><![CDATA[from saxonche import *
 
 with PySaxonProcessor(license=False) as proc:
 
@@ -466,13 +466,13 @@ with PySaxonProcessor(license=False) as proc:
   executable.set_parameter("param2",xdm_atomic_value)
   result = executable.apply_templates_returning_string()
   print(result)
-    ]]></samp>
+    ]]></code></pre>
      
      <p>Example 3: Parsing XML from a file:</p>
      
-     <samp><![CDATA[  builder = saxonproc.new_document_builder()
+     <pre><code class="language-python"><![CDATA[  builder = saxonproc.new_document_builder()
   node = builder.parse_xml(xml_file_name='books.xml')
-  ]]></samp>
+  ]]></code></pre>
      
      <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
      

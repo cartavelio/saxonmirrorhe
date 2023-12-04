@@ -238,6 +238,8 @@
                     <xsl:with-param name="index" select="1"/>
                 </xsl:call-template>
                 
+                <xsl:sequence select="ixsl:call(ixsl:window(), 'Prism.highlightAll', [])[current-date() lt xs:date('2000-01-01')]"/>
+                
             </xsl:otherwise>
             
         </xsl:choose>
