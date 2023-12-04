@@ -244,14 +244,18 @@ queryProc->runQueryToString();
            <kbd>pytest test_saxonc.py</kbd>
 
 
-      <p>You will also find the Test driver for running the W3C test suites for XSLT 3.0 against SaxonC (see the directory <code>testsuite_driver</code>).
-         The test suite itself is on GitHub: repositories w3c/xslt30-test. The test suite driver can be run as follows:</p>
+     <p>In the <code>pypi/testsuite_driver</code> directory, you will also find the test driver for running
+       the W3C test suite for XSLT 3.0 against SaxonC. The test suite itself is on GitHub: repository
+       <code>w3c/xslt30-test</code>. The test suite driver can be run as follows:</p>
 
       <kbd>cd testsuite_driver</kbd>
       <kbd>python3 xslt30_test_suite_driver.py [TEST SUITE DIR] -o [RESULTS OUTPUT DIR]</kbd>
 
-      <p>See other possible options for the test suite driver for running individual test case or  test set:<br/>
-         <code>python xslt30_test_suite_driver.py -t &lt;test-case> -s &lt;testset> -o &lt;resultdir></code></p>
+      <p>The test driver also provides options for running individual test cases or test sets:</p>
+     <kbd>python3 xslt30_test_suite_driver.py -t &lt;test-case> -s &lt;testset> -o &lt;resultdir></kbd>
+     
+     
+     <h3 class="subtitle">Example code</h3>
 
       <p>To help get started with SaxonC and Python, the <code>pypi/samples</code>
          directory also includes some python example scripts: <code>saxon_example.py</code>,
