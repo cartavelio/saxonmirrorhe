@@ -106,13 +106,13 @@ enum class UnprefixedElementMatchingPolicy {
    * <code>[xsl:]xpath-default-namespace</code> attribute, or programmatically
    * using {@link XsltCompiler#setDefaultElementNamespace(String)}
    */
-  DEFAULT_NAMESPACE,
+  DEFAULT_NAMESPACE = 0,
   /**
    * Under this policy, unprefixed element names match on the local part only;
    * an element with this local name is matched regardless of its namespace
    * (that is, it can have any namespace, or none)
    */
-  ANY_NAMESPACE,
+  ANY_NAMESPACE = 1,
   /**
    * Under this policy, unprefixed element names match provided that (a) the
    * local part of the name matches, and (b) the namespace part of the name is
@@ -130,7 +130,7 @@ enum class UnprefixedElementMatchingPolicy {
    * allows use of unprefixed names both when matching elements in the XHTML
    * namespace and when matching no-namespace elements</p>
    */
-  DEFAULT_NAMESPACE_OR_NONE
+  DEFAULT_NAMESPACE_OR_NONE = 2
 };
 
 

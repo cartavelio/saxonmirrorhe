@@ -299,8 +299,6 @@ PHP_METHOD(Xslt30Processor, compileFromString) {
   } else if (ZEND_NUM_ARGS() == 2 && zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &stylesheetStr, &len1, &encodingStr, &len2) ==
         FAILURE) {
       RETURN_NULL();
-   } else {
-     WRONG_PARAM_COUNT;
    }
 
   zend_object *pobj = Z_OBJ_P(getThis());
