@@ -180,8 +180,8 @@ public class TypeChecker {
 
             // rule 3: type promotion (combined with untypedAtomic conversion)
 
-            if (reqItemType instanceof BuiltInAtomicType && !itemTypeOK) {
-                int rt = reqItemType.getPrimitiveType();
+            if (reqItemType instanceof BuiltInAtomicType && ((BuiltInAtomicType) reqItemType).isPrimitiveType() && !itemTypeOK) {
+                int rt = ((BuiltInAtomicType) reqItemType).getFingerprint();
                 ConversionRules rules = config.getConversionRules();
                 Expression promoted = null;
                 Converter converter = makePromotingConverter(allow40, rt, rules);
