@@ -320,8 +320,8 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
   procRef = createSaxonProcessorWithConfigurationFile(
       (SaxonProcessor::sxn_environ->thread), (char *)configFile);
   if (procRef == SXN_EXCEPTION) {
-    throw SaxonApiException(
-        "Failed to create SaxonProcessor object - with configuration file");
+    throw SaxonApiException();
+        //"Failed to create SaxonProcessor object - with configuration file");
   }
 
 #ifdef DEBUG

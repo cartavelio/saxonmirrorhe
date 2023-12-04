@@ -145,7 +145,6 @@ def process_catalog(path: str, catalogi):
             print("<b>Test sets: " + str(xml.size) + "<b/> See <a href='#results'> Results here </a>")
 
             for i in range(xml.size):
-                value = xml.item_at(i)
                 if value is not None and value.is_node:
                     node = value.get_node_value()
                     if node is not None:
@@ -913,6 +912,7 @@ def main(argv):
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
 
     diri = None
+    spec = None
 
     if len(sys.argv) > 1:
         diri = ""
