@@ -39,7 +39,7 @@ public class SaxonCMessageListener implements MessageListener2 {
      * @param proc - Saxon Processor object
      * @param cwd - Current working directory
      * @param mode -  option for switching on/off/filename xsl:message
-     * @throws SaxonApiException
+     * @throws SaxonApiException if cannot resolve file to source
      */
     public SaxonCMessageListener(Processor proc, String cwd, String mode) throws SaxonApiException {
         processor = proc;
@@ -71,7 +71,7 @@ public class SaxonCMessageListener implements MessageListener2 {
      * @param ccwd  - Current working directory
      * @param c_mode - option for switching on/off/filename xsl:message
      * @return  - long value to the created SaxonCMessageListener object in the ObjectHandles pool
-     * @throws SaxonApiException
+     * @throws SaxonApiException failure in the Message listener
      */
     @CEntryPoint(name = "createSaxonCMessageListener", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
     public static long createSaxonCMessageListener(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer c_mode) throws SaxonApiException {
@@ -130,7 +130,6 @@ public class SaxonCMessageListener implements MessageListener2 {
      * @param messageListnerRef - reference to the SaxonCMessageListener object in the ObjectHandles pool
      * @return pointer to the array of XdmNode objects in the C memory space
      */
-
     @CEntryPoint(name = "j_getXslMessages")
     public static CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle messageListnerRef) {
         SaxonCMessageListener messageListener = SaxonCAPI.objectHandles.get(messageListnerRef);

@@ -26,20 +26,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * * This class is to use with SaxonC on C++
+ * * This class is to use with SaxonC on C++ for XPath queries to be compiled and executed
  */
 public class XPathProcessor extends SaxonCAPI {
 
     private XPathCompiler compiler = null;
     //private XPathSelector selector = null;
     //private XdmItem contextItem = null;
-                                                                   
+
+    /**
+     * XPathProcessor default constructor
+     */
     public XPathProcessor() {
         super();
         compiler = processor.newXPathCompiler();
         compiler.setAllowUndeclaredVariables(true);
     }
 
+    /**
+     * XPathProcessor constructor
+     * @param l - license flag
+     */
     public XPathProcessor(boolean l) {
         super(l);
         compiler = processor.newXPathCompiler();
@@ -53,6 +60,10 @@ public class XPathProcessor extends SaxonCAPI {
 //#endif
     }
 
+    /**
+     * XPathProcessor constructor with the Processor object
+     * @param proc   - the Processor object
+     */
     public XPathProcessor(Processor proc) {
         super(proc);
         compiler = processor.newXPathCompiler();
@@ -67,9 +78,9 @@ public class XPathProcessor extends SaxonCAPI {
     }
 
     /**
-     * Create XPathProcessor and add to the ObjectHandle's pool
-     * @param thread
-     * @return
+     * Create XPathProcessor and add to the ObjectHandle's pool. creates a HE XPath processor
+     * @param thread  - Graalvm runtime data structure for a thread
+     * @return long value referencing the XPathProcessor object in the ObjectHandles pool
      */
     @CEntryPoint(name = "createXPathProcessor")
     public static long createXPathProcessor(IsolateThread thread) {
@@ -77,6 +88,12 @@ public class XPathProcessor extends SaxonCAPI {
             return handle.rawValue();
     }
 
+    /**
+     * Create XPathProcessor and add to the ObjectHandle's pool with reference to a Processor
+     * @param thread  - Graalvm runtime data structure for a thread
+     * @param processorRef  - long value referencing the Processor object in the ObjectHandles pool.
+     * @return  long value referencing the XPathProcessor object in the ObjectHandles pool
+     */
     @CEntryPoint(name = "createXPathProcessorWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXPathProcessor(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
@@ -87,6 +104,11 @@ public class XPathProcessor extends SaxonCAPI {
             return handle.rawValue();
     }
 
+    /**
+     * create new XPathProcessor object
+     * @param proc - processor
+     * @return XPathProcessor object
+     */
     public static XPathProcessor newInstance(Processor proc) {
         return new XPathProcessor(proc);
     }
@@ -125,7 +147,7 @@ public class XPathProcessor extends SaxonCAPI {
     /**
      * Declare a variable as part of the static context for XPath expressions compiled using this
      * {@code XPathCompiler}. It is an error for the XPath expression to refer to a variable unless it has been
-     * declared, unless the method {@link #setAllowUndeclaredVariables(boolean)} has been called to permit
+     * declared, unless the method setAllowUndeclaredVariables has been called to permit
      * undeclared variables. This method declares the existence of the variable, but it does not
      * bind any value to the variable; that is done later, when the XPath expression is evaluated.
      * The variable is allowed to have any type (that is, the required type is <code>item()*</code>).
@@ -154,7 +176,7 @@ public class XPathProcessor extends SaxonCAPI {
      * the set of declarations and definitions made available to the XPath expression is empty). The schema
      * document for the specified namespace may be loaded before or after this method is called.</p>
      * <p>This method does not bind a prefix to the namespace. That must be done separately, using the
-     * {@link #declareNamespace(String, String)} method.</p>
+     * declareNamespace method via the C++ API.</p>
      *
      * @param thread - Graalvm runtime data structure for the thread
      * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
@@ -477,10 +499,13 @@ public class XPathProcessor extends SaxonCAPI {
      * In addition we can supply the source, stylesheet and output file names.
      * We can also supply values to xsl:param and xsl:variables required in the stylesheet.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
+     * @param api        - The SaxonCAPI object
      *  @param cwd       - current working directory
      * @param processor - required to use the same processor as for the compiled stylesheet
      * @param selector  - compiled and loaded XPath expression ready for execution.
-     * @param map
+     * @param map       - The map of properties to apply on the XPath processor
+     * @param parameters  - map of parameters to apply on the XPath processor
+     * @throws SaxonApiException if error in apply XPath property
      */
     public static void applyXPathProperties(SaxonCAPI api, String cwd, Processor processor, XPathSelector selector, Map<String, Object> map, Map<QName, XdmValue> parameters) throws SaxonApiException {
         if (!map.isEmpty()) {
