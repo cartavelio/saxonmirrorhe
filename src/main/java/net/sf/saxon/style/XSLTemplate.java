@@ -19,7 +19,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -57,16 +57,20 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     // A compiled named template exists if the template has a name
     private NamedTemplate compiledNamedTemplate;
     // A set of compiled template rules exists if the template has a match pattern: one TemplateRule for each mode
-    private final List<TemplateRule> compiledTemplateRules = new ArrayList<>();
+    private final Map<StructuredQName, TemplateRule> compiledTemplateRules = new HashMap<>();
     private SequenceType requiredType = SequenceType.ANY_SEQUENCE;
     private boolean declaresRequiredType = false;
+    private boolean hasRequiredParams = false;
+    private boolean isTailRecursive = false;
     private Visibility visibility = Visibility.PRIVATE;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
     private boolean mayOmitContextItem = true;
+    //private boolean maySupplyContextItem = true;
     private boolean absentFocus = false;
     private boolean jitCompilationDone = false;
     private boolean explaining;
-    private List<Pattern> subPatterns;
+    //private Expression body;
+
     /**
      * Get the corresponding NamedTemplate object that results from the compilation of this
      * StylesheetComponent
@@ -75,6 +79,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     public NamedTemplate getActor() {
         return compiledNamedTemplate;
     }
+
+//    public Expression getBody() {
+//        return body;
+//    }
 
     @Override
     public void setCompilation(Compilation compilation) {
@@ -199,7 +207,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     @Override
     public void checkCompatibility(Component component) {
         NamedTemplate other = (NamedTemplate) component.getActor();
-        if (!Objects.equals(getSymbolicName(), other.getSymbolicName())) {
+        if (!getSymbolicName().equals(other.getSymbolicName())) {
             throw new IllegalArgumentException();
         }
 
@@ -320,6 +328,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 if (matchAtt == null) {
                     compileError("The mode attribute must be absent if the match attribute is absent", "XTSE0500");
                 }
+                getModeNames();
             }
         } catch (XPathException err) {
             XPathException e2 = err.replacingErrorCode("XTSE0020", "XTSE0550");
@@ -411,7 +420,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
     @Override
     public void processAllAttributes() throws XPathException {
-        // With JIT compilation enabled, we don't process the attributes of descendant elements
+//        String mode = getAttributeValue("mode");
+//        mode = mode == null ? "" : Whitespace.trim(mode);
         if (!isDeferredCompilation(getCompilation())) {
             super.processAllAttributes();      //TODO - sort out the duplicated code. This repeats the code below
         } else {
@@ -430,7 +440,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * If #default is present explicitly or implicitly, it is replaced by the default mode, taken
      * from the in-scope default-modes attribute, which defaults to #unnamed. The unnamed mode
      * is represented by {@link Mode#UNNAMED_MODE_NAME}. The token #all translates to
-     * {@link Mode#OMNI_MODE_NAME}.
+     * {@link Mode#OMNI_MODE}.
      * @throws XPathException if the attribute is invalid.
      */
 
@@ -461,7 +471,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     mname = Mode.UNNAMED_MODE_NAME;
                 } else if ("#all".equals(s)) {
                     allModes = true;
-                    mname = Mode.OMNI_MODE_NAME;
+                    mname = Mode.OMNI_MODE;
                 } else {
                     mname = makeQName(s, "XTSE0550", "mode");
                 }
@@ -491,7 +501,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         Set<Mode> modes = new HashSet<>(names.length);
         RuleManager mgr = getPrincipalStylesheetModule().getRuleManager();
         for (StructuredQName name : names) {
-            if (name.equals(Mode.OMNI_MODE_NAME)) {
+            if (name.equals(Mode.OMNI_MODE)) {
                 modes.add(mgr.getUnnamedMode());
                 modes.addAll(mgr.getAllNamedModes());
             } else {
@@ -510,9 +520,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * @throws XPathException if the mode attribute is found to be invalid
      */
 
-    public boolean appliesToAllModes() throws XPathException {
+    public boolean isOmniMode() throws XPathException {
         for (StructuredQName name : getModeNames()) {
-            if (name.equals(Mode.OMNI_MODE_NAME)) {
+            if (name.equals(Mode.OMNI_MODE)) {
                 return true;
             }
         }
@@ -554,9 +564,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             }
             if (getPrincipalStylesheetModule().isDeclaredModes()) {
                 RuleManager manager = getPrincipalStylesheetModule().getRuleManager();
-                StructuredQName[] modes = getModeNames();
-                if (modes != null) {
-                    for (StructuredQName name : modes) {
+                if (modeNames != null) {
+                    for (StructuredQName name : modeNames) {
                         if (name.equals(Mode.UNNAMED_MODE_NAME) && !manager.isUnnamedModeExplicit()) {
                             compileError("The unnamed mode has not been declared in an xsl:mode declaration", "XTSE3085");
                         }
@@ -575,11 +584,17 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             }
         }
 
+        // See if there are any required parameters.
         boolean hasContent = false;
-        for (NodeInfo child : children(StyleElement.class::isInstance)) {
-            if (!(child.getFingerprint() == StandardNames.XSL_CONTEXT_ITEM || child.getFingerprint() == StandardNames.XSL_PARAM)) {
+        for (NodeInfo param : children(StyleElement.class::isInstance)) {
+            if (param.getFingerprint() == StandardNames.XSL_CONTEXT_ITEM) {
+                // no action
+            } else if (param instanceof XSLLocalParam) {
+                if (((XSLLocalParam) param).isRequiredParam()) {
+                    hasRequiredParams = true;
+                }
+            } else {
                 hasContent = true;
-                break;
             }
         }
 
@@ -587,43 +602,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             compileError("A template with visibility='abstract' must have no body");
         }
 
-        // If the pattern is a union pattern and there is no priority specified, split into
-        // multiple template rules so each can be given its own priority.
-        if (match != null) {
-            subPatterns = new ArrayList<>(2);
-            if (prioritySpecified) {
-                subPatterns.add(match);
-            } else {
-                gatherSubPatterns(match, subPatterns);
-            }
-        }
-
-    }
-
-    /**
-     * Split UnionPatterns into their component patterns
-     * @param match the pattern, possibly a union pattern
-     * @param subPatterns output parameter to hold the list of subpatterns after splitting
-     */
-    private void gatherSubPatterns(Pattern match, List<Pattern> subPatterns) {
-        if (match instanceof UnionPattern) {
-            UnionPattern up = (UnionPattern) match;
-            gatherSubPatterns(up.getLHS(), subPatterns);
-            gatherSubPatterns(up.getRHS(), subPatterns);
-        } else if (match instanceof NodeTestPattern &&
-                match.getItemType() instanceof CombinedNodeTest &&
-                ((CombinedNodeTest) match.getItemType()).getOperator() == Token.UNION) {
-            CombinedNodeTest cnt = (CombinedNodeTest) match.getItemType();
-            NodeTest[] nt = cnt.getComponentNodeTests();
-            final NodeTestPattern nt0 = new NodeTestPattern(nt[0]);
-            subPatterns.add(nt0);
-            ExpressionTool.copyLocationInfo(match, nt0);
-            final NodeTestPattern nt1 = new NodeTestPattern(nt[1]);
-            ExpressionTool.copyLocationInfo(match, nt1);
-            subPatterns.add(nt1);
-        } else {
-            subPatterns.add(match);
-        }
     }
 
     @Override
@@ -647,6 +625,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             }
             top.indexNamedTemplate(decl);
         }
+
     }
 
     /**
@@ -671,7 +650,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             return;
         }
         if (compilation.getCompilerInfo().getOptimizerOptions().isSet(OptimizerOptions.TAIL_CALLS)) {
-            markTailCalls();
+            isTailRecursive = markTailCalls();
         }
         Expression body = compileSequenceConstructor(compilation, decl, true);
         body.restoreParentPointers();
@@ -684,11 +663,11 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             checkStrictStreamability(body);
         }
         if (getTemplateName() != null) {
-            compileNamedTemplate(body);
+            compileNamedTemplate(compilation, body, decl);
         }
         if (match != null) {
             //System.err.println("Rules compiled - " + ++eager);
-            compileTemplateRule(compilation, body);
+            compileTemplateRule(compilation, body, decl);
         }
     }
 
@@ -696,7 +675,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         getConfiguration().checkStrictStreamability(this, body);
     }
 
-    private void compileNamedTemplate(Expression body)  {
+    private void compileNamedTemplate(Compilation compilation, Expression body, ComponentDeclaration decl) throws XPathException {
         RetainedStaticContext rsc = body.getRetainedStaticContext();
         compiledNamedTemplate.setPackageData(rsc.getPackageData());
         compiledNamedTemplate.setBody(body);
@@ -704,6 +683,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         compiledNamedTemplate.setSystemId(getSystemId());
         compiledNamedTemplate.setLineNumber(getLineNumber());
         compiledNamedTemplate.setColumnNumber(getColumnNumber());
+        compiledNamedTemplate.setHasRequiredParams(hasRequiredParams);
         compiledNamedTemplate.setRequiredType(requiredType);
         compiledNamedTemplate.setContextItemRequirements(requiredContextItemType, mayOmitContextItem, absentFocus);
         compiledNamedTemplate.setRetainedStaticContext(rsc);
@@ -765,7 +745,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         return body;
     }
 
-    public void compileTemplateRule(Compilation compilation, Expression body) {
+    public void compileTemplateRule(Compilation compilation, Expression body, ComponentDeclaration decl) {
 
         Configuration config = getConfiguration();
 
@@ -785,29 +765,50 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         body = refineTemplateBody(body, cisi);
 
         boolean first = true;
-        for (TemplateRule rule : compiledTemplateRules) {
-            if (first) {
-                //rule.setMatchPattern(match);
-                rule.setBody(body);
-                if (compilation.getCompilerInfo().getCodeInjector() != null) {
-                    compilation.getCompilerInfo().getCodeInjector().process(rule);
-                    body = rule.getBody();
-                }
-                first = false;
-            } else {
-                if (rule.getBody() == null) {
-                    body = body.copy(new RebindingMap());
+        for (Map.Entry<StructuredQName, TemplateRule> kvp : compiledTemplateRules.entrySet()) {
+            if (!kvp.getKey().equals(Mode.OMNI_MODE)) {
+                TemplateRule rule = kvp.getValue();
+                if (first) {
+                    rule.setMatchPattern(match);
+                    rule.setBody(body);
+                    if (compilation.getCompilerInfo().getCodeInjector() != null) {
+                        compilation.getCompilerInfo().getCodeInjector().process(rule);
+                        body = rule.getBody();
+                    }
+                    first = false;
                 } else {
-                    body = rule.getBody();
+                    if (rule.getBody() == null) {
+                        body = body.copy(new RebindingMap());
+                    } else {
+                        body = rule.getBody();
+                    }
                 }
+                setCompiledTemplateRuleProperties(rule, body);
+                rule.updateSlaveCopies();
             }
-            setCompiledTemplateRuleProperties(rule, body);
         }
+        // following code needed only for diagnostics
+        //body.verifyParentPointers();
     }
 
-    private void createSkeletonTemplate(Compilation compilation, ComponentDeclaration decl) {
-        for (TemplateRule templateRule : compiledTemplateRules) {
-            templateRule.prepareInitializer(compilation, decl);
+    private void createSkeletonTemplate(Compilation compilation, ComponentDeclaration decl) throws XPathException {
+        StructuredQName[] modes = modeNames;
+        if (isOmniMode()) {
+            List<StructuredQName> all = new ArrayList<>();
+            all.add(Mode.UNNAMED_MODE_NAME);
+            RuleManager mgr = getCompilation().getPrincipalStylesheetModule().getRuleManager();
+            for (Mode m : mgr.getAllNamedModes()) {
+                all.add(m.getModeName());
+            }
+            modes = all.toArray(new StructuredQName[0]);
+        }
+        for (StructuredQName modeName : modes) {
+            TemplateRule templateRule = compiledTemplateRules.get(modeName);
+            if (templateRule == null) {
+                templateRule = getConfiguration().makeTemplateRule();
+            }
+            templateRule.prepareInitializer(compilation, decl, modeName);
+            compiledTemplateRules.put(modeName, templateRule);
             RetainedStaticContext rsc = makeRetainedStaticContext();
             templateRule.setPackageData(rsc.getPackageData());
             setCompiledTemplateRuleProperties(templateRule, null);
@@ -815,12 +816,13 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     }
 
     private void setCompiledTemplateRuleProperties(TemplateRule templateRule, Expression body) {
-        //templateRule.setMatchPattern(match);
+        templateRule.setMatchPattern(match);
         templateRule.setBody(body);
         templateRule.setStackFrameMap(stackFrameMap);
         templateRule.setSystemId(getSystemId());
         templateRule.setLineNumber(getLineNumber());
         templateRule.setColumnNumber(getColumnNumber());
+        templateRule.setHasRequiredParams(hasRequiredParams);
         templateRule.setRequiredType(requiredType);
         templateRule.setContextItemRequirements(requiredContextItemType, absentFocus);
     }
@@ -872,72 +874,98 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             StylesheetModule module = declaration.getModule();
             RuleManager mgr = getCompilation().getPrincipalStylesheetModule().getRuleManager();
             ExpressionVisitor visitor = ExpressionVisitor.make(getStaticContext());
-            Iterable<StructuredQName> modeNames = Arrays.asList(getModeNames());
-            if (appliesToAllModes()) {
-                modeNames = getCompilation().getAllKnownModeNames();
-            }
-            for (StructuredQName modeName : modeNames) {
-                Mode mode = mgr.obtainMode(modeName, true);
-                if (appliesToAllModes() && mode.isEnclosingMode()) {
-                    continue;
+            for (StructuredQName modeName : getModeNames()) {
+                Mode mode = mgr.obtainMode(modeName, false);
+                if (mode == null) {
+                    if (mgr.existsOmniMode()) {
+                        Mode omniMode = mgr.obtainMode(Mode.OMNI_MODE, true);
+                        mode = mgr.obtainMode(modeName, true);
+                        SimpleMode.copyRules(omniMode.getActivePart(), mode.getActivePart());
+                    } else {
+                        mode = mgr.obtainMode(modeName, true);
+                    }
+                } else {
+                    boolean ok = getPrincipalStylesheetModule().checkAcceptableModeForPackage(this, mode);
+                    if (!ok) {
+                        return;
+                    }
+                    if (mode.isEnclosingMode() && !(getParent() instanceof XSLMode && mode == ((XSLMode)getParent()).getMode())) {
+                        compileError("An xsl:template rule must not refer to a mode that contains enclosed template rules "
+                                             + "unless it is itself enclosed by that xsl:mode declaration", "XTSE4020");
+                    }
                 }
-                boolean ok = getPrincipalStylesheetModule().checkAcceptableModeForPackage(this, mode);
-                if (!ok) {
-                    return;
+                Pattern match1 = match.copy(new RebindingMap());
+                String typed = mode.getActivePart().getPropertyValue("typed");
+                if ("strict".equals(typed) || "lax".equals(typed)) {
+                    Pattern match2;
+                    try {
+                        match2 = match1.convertToTypedPattern(typed);
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(this);
+                    }
+                    if (match2 != match1) {
+                        ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
+                        ExpressionTool.copyLocationInfo(match, match2);
+                        match2.setOriginalText(match.toString());
+                        match2 = match2.typeCheck(visitor, info);
+                        match1 = match2;
+                    }
+                    if (modeNames.length == 1) {
+                        // If this is the only mode for the template, then we can use this enhanced match pattern
+                        // for subsequent type-checking of the template body.
+                        // TODO: we can now do this for all modes...
+                        // TODO: but we need to take account of mode=#all, where modeNames.length==1
+                        match = match2;
+                    }
                 }
-                if (mode.isEnclosingMode() && !(getParent() instanceof XSLMode && mode == ((XSLMode)getParent()).getMode())) {
-                    compileError("An xsl:template rule must not refer to a mode that contains enclosed template rules "
-                                         + "unless it is itself enclosed by that xsl:mode declaration", "XTSE4020");
+                TemplateRule rule = compiledTemplateRules.get(modeName);
+                if (rule == null) {
+                    rule = getConfiguration().makeTemplateRule();
+                    compiledTemplateRules.put(modeName, rule);
                 }
-                int part = 0;
-                int seq = mgr.allocateSequenceNumber();
-                for (Pattern subPattern : subPatterns) {
-                    Pattern match1 = subPattern.copy(new RebindingMap());
-                    String typed = mode.getActivePart().getPropertyValue("typed");
-                    if ("strict".equals(typed) || "lax".equals(typed)) {
-                        Pattern match2;
-                        try {
-                            match2 = match1.convertToTypedPattern(typed);
-                        } catch (XPathException e) {
-                            throw e.maybeWithLocation(this);
-                        }
-                        if (match2 != match1) {
-                            ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
-                            ExpressionTool.copyLocationInfo(match, match2);
-                            match2.setOriginalText(match.toString());
-                            match2 = match2.typeCheck(visitor, info);
-                            match1 = match2;
+
+                double prio = prioritySpecified ? priority : Double.NaN;
+                mgr.registerRule(match1, rule, mode, module, prio, mgr.allocateSequenceNumber(), 0);
+
+                if (mode.isDeclaredStreamable()) {
+                    rule.setDeclaredStreamable(true);
+                    if (!match1.isMotionless()) {
+                        boolean fallback = getConfiguration().getBooleanProperty(Feature.STREAMING_FALLBACK);
+                        String message = "Template rule is declared streamable but the match pattern is not motionless";
+                        if (fallback) {
+                            message += "\n  * Falling back to non-streaming implementation";
+                            getStaticContext().issueWarning(message, SaxonErrorCode.SXWN9024, this);
+                            rule.setDeclaredStreamable(false);
+                            getCompilation().setFallbackToNonStreaming(true);
+                        } else {
+                            throw new XPathException(message, "XTSE3430", this);
                         }
                     }
-                    TemplateRule rule = getConfiguration().makeTemplateRule();
-                    rule.setMode(mode);
-                    rule.setMatchPattern(match1);
-                    compiledTemplateRules.add(rule);
+                }
 
+                if (mode.getDefaultResultType() != null && !declaresRequiredType) {
+                    rule.setRequiredType(mode.getDefaultResultType());
+                }
 
-                    double prio = prioritySpecified ? priority : Double.NaN;
-                    mgr.registerRule(match1, rule, mode, module, prio, seq, part++);
+                // if adding a rule to the omniMode (mode='all') add it to all
+                // the other modes as well. For all but the first, it needs to
+                // be copied because the external component bindings might
+                // differ from one mode to another.
 
-                    if (mode.isDeclaredStreamable()) {
-                        rule.setDeclaredStreamable(true);
-                        if (!match1.isMotionless()) {
-                            boolean fallback = getConfiguration().getBooleanProperty(Feature.STREAMING_FALLBACK);
-                            String message = "Template rule is declared streamable but the match pattern is not motionless";
-                            if (fallback) {
-                                message += "\n  * Falling back to non-streaming implementation";
-                                getStaticContext().issueWarning(message, SaxonErrorCode.SXWN9024, this);
-                                rule.setDeclaredStreamable(false);
-                                getCompilation().setFallbackToNonStreaming(true);
-                            } else {
-                                throw new XPathException(message, "XTSE3430", this);
+                if (mode.getModeName().equals(Mode.OMNI_MODE)) {
+                    compiledTemplateRules.put(Mode.UNNAMED_MODE_NAME, rule);
+                    mgr.registerRule(match1, rule, mgr.getUnnamedMode(), module, prio, mgr.allocateSequenceNumber(), 0);
+                    for (Mode m : mgr.getAllNamedModes()) {
+                        if (m instanceof SimpleMode && !m.isEnclosingMode()) {
+                            TemplateRule ruleCopy = rule.copy();
+                            if (m.isDeclaredStreamable()) {
+                                ruleCopy.setDeclaredStreamable(true);
                             }
+                            compiledTemplateRules.put(m.getModeName(), ruleCopy);
+                            mgr.registerRule(match1.copy(new RebindingMap()),
+                                             ruleCopy, m, module, prio, mgr.allocateSequenceNumber(), 0);
                         }
                     }
-
-                    if (mode.getDefaultResultType() != null && !declaresRequiredType) {
-                        rule.setRequiredType(mode.getDefaultResultType());
-                    }
-
                 }
             }
         }
@@ -949,23 +977,40 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
     public void allocatePatternSlotNumbers() {
         if (match != null) {
-            for (TemplateRule templateRule : compiledTemplateRules) {
-                // In the case of a union pattern, allocate slots separately for each branch
-                Pattern match = templateRule.getMatchPattern();
-                // first slot in pattern is reserved for current()
-                int nextFree = 0;
-                if ((match.getDependencies() & StaticProperty.DEPENDS_ON_CURRENT_ITEM) != 0) {
-                    nextFree = 1;
-                }
-                //System.err.println("Allocate slots to " + match + " -- " + System.identityHashCode(match) + " in " + templateRule);
-                int slots = match.allocateSlots(getSlotManager(), nextFree);
-                // if the pattern calls user-defined functions, allocate at least one slot,
-                // to force a new context to be created for evaluating patterns (bug 3706)
-                if (slots == 0 && ((match.getDependencies() & StaticProperty.DEPENDS_ON_USER_FUNCTIONS) != 0)) {
-                    slots = 1;
-                }
-                if (slots > 0) {
-                    templateRule.getMode().getActivePart().allocatePatternSlots(slots);
+            for (TemplateRule templateRule : compiledTemplateRules.values()) {
+                for (Rule r : templateRule.getRules()) {
+                    // In the case of a union pattern, allocate slots separately for each branch
+                    Pattern match = r.getPattern();
+                    // first slot in pattern is reserved for current()
+                    int nextFree = 0;
+                    if ((match.getDependencies() & StaticProperty.DEPENDS_ON_CURRENT_ITEM) != 0) {
+                        nextFree = 1;
+                    }
+                    int slots = match.allocateSlots(getSlotManager(), nextFree);
+                    // if the pattern calls user-defined functions, allocate at least one slot,
+                    // to force a new context to be created for evaluating patterns (bug 3706)
+                    if (slots == 0 && ((match.getDependencies() & StaticProperty.DEPENDS_ON_USER_FUNCTIONS) != 0)) {
+                        slots = 1;
+                    }
+                    if (slots > 0) {
+                        RuleManager mgr = getCompilation().getPrincipalStylesheetModule().getRuleManager();
+                        boolean appliesToAll = false;
+                        for (StructuredQName nc : modeNames) {
+                            if (nc.equals(Mode.OMNI_MODE)) {
+                                appliesToAll = true;
+                                break;
+                            }
+                            Mode mode = mgr.obtainMode(nc, true);
+                            mode.getActivePart().allocatePatternSlots(slots);
+                        }
+                        if (appliesToAll) {
+                            for (Mode m : mgr.getAllNamedModes()) {
+                                m.getActivePart().allocatePatternSlots(slots);
+                            }
+                            mgr.getUnnamedMode().getActivePart().allocatePatternSlots(slots);
+                        }
+                    }
+
                 }
             }
         }
@@ -1008,10 +1053,11 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             cisi.setContextPostureStriding();
             ExpressionVisitor visitor = makeExpressionVisitor();
 
-            for (TemplateRule compiledTemplateRule : compiledTemplateRules) {
-                if (compiledTemplateRule.getMode().getModeName().equals(Mode.OMNI_MODE_NAME)) {
+            for (Map.Entry<StructuredQName, TemplateRule> entry : compiledTemplateRules.entrySet()) {
+                if (!entry.getKey().equals(Mode.OMNI_MODE)) {
+                    TemplateRule compiledTemplateRule = entry.getValue();
                     compiledTemplateRule.getMatchPattern().resetLocalStaticProperties();
-                    Pattern m2 = compiledTemplateRule.getMatchPattern().optimize(visitor, cisi);
+                    Pattern m2 = compiledTemplateRule.getMatchPattern().optimize(visitor,cisi);
                     compiledTemplateRule.setMatchPattern(m2);
                 }
             }
@@ -1019,8 +1065,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             if (!isDeferredCompilation(getCompilation())) {
                 Optimizer opt = getConfiguration().obtainOptimizer();
                 try {
-                    for (TemplateRule compiledTemplateRule : compiledTemplateRules) {
-                        if (!compiledTemplateRule.getMode().getModeName().equals(Mode.OMNI_MODE_NAME)) {
+                    for (Map.Entry<StructuredQName, TemplateRule> entry : compiledTemplateRules.entrySet()) {
+                        if (!entry.getKey().equals(Mode.OMNI_MODE)) {
+                            TemplateRule compiledTemplateRule = entry.getValue();
 
                             Expression templateRuleBody = compiledTemplateRule.getBody();
                             visitor.setOptimizeForStreaming(compiledTemplateRule.isDeclaredStreamable());
@@ -1034,6 +1081,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                                 ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), mayOmitContextItem);
                                 info.setContextPostureStriding();
                                 Pattern m2 = match.optimize(visitor, info);
+                                if (compiledTemplateRules.size() > 1) {
+                                    m2 = m2.copy(new RebindingMap());
+                                }
                                 if (m2 != match) {
                                     r.setPattern(m2);
                                 }
@@ -1110,8 +1160,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         return match;
     }
 
-//    public Map<StructuredQName, TemplateRule> getTemplateRulesByMode() {
-//        return compiledTemplateRules;
-//    }
+    public Map<StructuredQName, TemplateRule> getTemplateRulesByMode() {
+        return compiledTemplateRules;
+    }
 }
 
