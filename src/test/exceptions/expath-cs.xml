@@ -6,4 +6,9 @@
       <reason>Function not supported in Saxon-CS</reason>
    </exception>
 
+   <exception test-set="expath-archive" run="false" report="Not supported">
+      <created by="Norman Walsh" on="2023-11-24"/>
+      <reason>Feature not supported in Saxon-CS</reason>
+   </exception>
+
 </exceptions>
