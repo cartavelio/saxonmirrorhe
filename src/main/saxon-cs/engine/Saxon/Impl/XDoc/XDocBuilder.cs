@@ -10,6 +10,13 @@ namespace Saxon.Impl.XDoc {
         private XContainer _currentNode;
         private XDocument _document;
 
+        public XDocBuilder() {
+        }
+
+        public XDocBuilder(XDocument doc) {
+            this._document = doc;
+        }
+
         public void setPipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration pipe) {
             this.pipe = pipe;
         }
