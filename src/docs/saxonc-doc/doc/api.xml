@@ -137,7 +137,7 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classschemavalidator.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_schemavalidator">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator"
@@ -154,12 +154,6 @@
          href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html">SaxonCProcessor.h</a>, 
       <a class="bodylink"
          href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCXPath_8h.html">SaxonCXPath.h</a>.</p>
-   
-   <p>For further information about these APIs see the following sections:</p>
-   
-   <nav>
-      <ul/>
-   </nav>
 
 
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
@@ -3154,15 +3148,15 @@
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
-               >SaxonCProcessor.h</a>  - consists of functions to compile and execute XSLT 3.0 stylesheets and XQuery 3.1 queries.
+               >SaxonCProcessor.h</a>
          </li>
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCXPath_8h.html"
-               >SaxonCXPath.h</a> - consists of functions to compile and evaluate XPath 3.1 expressions.
+               >SaxonCXPath.h</a>
          </li>
       </ul>
-
+      
    </section>
 
 
