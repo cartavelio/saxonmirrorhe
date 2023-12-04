@@ -6,12 +6,8 @@ using System.IO;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Collections;
-using System.Net;
 using System.Text;
-using System.Xml.Linq;
 using Saxon.Api.Support;
-using Saxon.Ejavax.xml.transform.stream;
-using Saxon.Hej.functions;
 
 
 namespace SaxonCS_NUnit {

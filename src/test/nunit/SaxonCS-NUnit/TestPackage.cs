@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
 using System.IO;
-using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
-using System.Xml;
 
 namespace SaxonCS_NUnit {
     class TestPackage {

@@ -11,8 +11,6 @@ using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
 using Saxon.Hej;
-using Saxon.Hej.expr.instruct;
-using Saxon.Hej.functions;
 using Saxon.Hej.om;
 using Saxon.Hej.type;
 using Saxon.Hej.value;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
@@ -15,19 +14,14 @@ using Saxon.Hej.om;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
-using Error = Saxon.Api.Error;
-using Location = Saxon.Api.Location;
 using Processor = Saxon.Api.Processor;
 using RawDestination = Saxon.Api.RawDestination;
 using SchemaManager = Saxon.Api.SchemaManager;
-using SchemaValidator = Saxon.Api.SchemaValidator;
 using Serializer = Saxon.Api.Serializer;
 using XdmDestination = Saxon.Api.XdmDestination;
 using XdmNodeKind = Saxon.Api.XdmNodeKind;
-using Xslt30Transformer = Saxon.Api.Xslt30Transformer;
 using XsltCompiler = Saxon.Api.XsltCompiler;
 using XsltExecutable = Saxon.Api.XsltExecutable;
-using XsltPackage = Saxon.Api.XsltPackage;
 using XsltTransformer = Saxon.Api.XsltTransformer;
 
 

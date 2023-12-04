@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Saxon.Api;
-using Saxon.Impl.Overrides;
 using NamespaceConstant = Saxon.Api.NamespaceConstant;
 
 namespace SaxonCS_NUnit {

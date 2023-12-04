@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Saxon.Api;
 using Saxon.Ejava.net;
-using Saxon.Hej;
 using Exception = System.Exception;
 
 namespace SaxonCS_NUnit {

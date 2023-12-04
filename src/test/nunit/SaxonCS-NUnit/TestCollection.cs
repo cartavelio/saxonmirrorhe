@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Diagnostics;

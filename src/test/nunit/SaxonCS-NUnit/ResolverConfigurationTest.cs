@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Xml;
 using NUnit.Framework;
 using Org.XmlResolver.Features;
@@ -8,7 +7,6 @@ using Saxon.Callbacks;
 using Saxon.Eej.config;
 using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
-using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
 using Saxon.Hej.lib;
 using Exception = Saxon.Ejava.lang.Exception;
