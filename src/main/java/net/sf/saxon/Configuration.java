@@ -1396,7 +1396,7 @@ public class Configuration implements SourceResolver, NotationSet {
     public BuiltInFunctionSet getXSLTFunctionSet(int version) {
         if (version == 20) {
             return XPath20FunctionSet.getInstance();
-        } else if (version == 30 || version == 31) {
+        } else if (version == 30 || version == 31 || version == 305) {
             return XSLT30FunctionSet.getInstance();
         } else if (version == 40) {
             throw new IllegalArgumentException("XSLT 4.0 requires Saxon-PE or higher");
