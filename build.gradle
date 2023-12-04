@@ -79,7 +79,7 @@ ext {
                      : (systemOs.isWindows()
                         ? "windows"
                         : "unknown")))
-  systemOsArch = System.getProperty("os.arch") 
+  systemOsArch = System.getProperty("os.arch") == "amd64" ? "x86_64" : System.getProperty("os.arch")
   icu4jJar = null
   tagsoupJar = null
   mailJar = null
