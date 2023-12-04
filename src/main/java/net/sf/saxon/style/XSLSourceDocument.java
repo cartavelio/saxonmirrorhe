@@ -200,7 +200,7 @@ public class XSLSourceDocument extends StyleElement {
             action = action.typeCheck(visitor, config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT, false));
 
             return config.makeStreamInstruction(
-                        href, action, streaming, parseOptions, null, allocateLocation(),
+                        href, action, streaming, parseOptions, null, saveLocation(),
                         makeRetainedStaticContext());
 
         } catch (XPathException err) {

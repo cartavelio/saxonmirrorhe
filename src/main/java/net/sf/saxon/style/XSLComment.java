@@ -57,7 +57,7 @@ public final class XSLComment extends XSLLeafNodeConstructor {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Comment inst = new Comment();
         compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));
-        return inst;
+        return inst.withLocation(saveLocation());
     }
 
 }

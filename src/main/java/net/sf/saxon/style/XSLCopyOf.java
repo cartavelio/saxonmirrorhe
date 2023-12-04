@@ -125,6 +125,7 @@ public final class XSLCopyOf extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) {
         CopyOf inst = new CopyOf(select, copyNamespaces, validation, schemaType, false);
         inst.setCopyAccumulators(copyAccumulators);
+        inst.setLocation(saveLocation());
         //inst.setCopyLineNumbers(exec.getConfiguration().isLineNumbering());
         inst.setSchemaAware(exec.isSchemaAware());
         return inst;

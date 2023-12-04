@@ -185,6 +185,7 @@ public class XSLCopy extends StyleElement {
                 schemaType,
                 validationAction);
 
+        inst.setLocation(saveLocation());
         inst.setContentExpression(content);
 
         if (selectSpecified) {

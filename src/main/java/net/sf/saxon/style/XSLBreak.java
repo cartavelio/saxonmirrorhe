@@ -83,7 +83,7 @@ public class XSLBreak extends XSLBreakOrContinue {
             val = compileSequenceConstructor(exec, decl, false);
         }
 
-        Expression brake = new BreakInstr();
+        Expression brake = new BreakInstr().withLocation(saveLocation());
         brake.setRetainedStaticContext(makeRetainedStaticContext());
         return Block.makeBlock(val, brake);
     }

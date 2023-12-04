@@ -48,7 +48,7 @@ public class XSLProcessingInstruction extends XSLLeafNodeConstructor {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         ProcessingInstruction inst = new ProcessingInstruction(name);
         compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));
-        return inst;
+        return inst.withLocation(saveLocation());
     }
 
 }

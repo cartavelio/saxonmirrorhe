@@ -1129,6 +1129,11 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         location = id;
     }
 
+    public Expression withLocation(Location id) {
+        setLocation(id);
+        return this;
+    }
+
     /**
      * Get the location of the expression
      *

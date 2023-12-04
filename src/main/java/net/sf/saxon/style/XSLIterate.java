@@ -153,7 +153,8 @@ public class XSLIterate extends StyleElement {
         }
         try {
             action = action.simplify();
-            return new IterateInstr(select, paramBlock, action, finallyExp);
+            return new IterateInstr(select, paramBlock, action, finallyExp)
+                    .withLocation(saveLocation());
         } catch (XPathException err) {
             compileError(err);
             return null;

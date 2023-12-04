@@ -189,7 +189,6 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
 
     @Override
     public Instruction compile(Compilation compilation, ComponentDeclaration decl) throws XPathException {
-        NamespaceResolver nsContext = null;
 
         // deal specially with the case where the attribute name is known statically
 
@@ -218,7 +217,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                         validationAction,
                         schemaType);
                 instruction.setInstruction(true);
-                instruction.setLocation(allocateLocation());
+                instruction.setLocation(saveLocation());
                 compileContent(compilation, decl, instruction, separator);
                 return instruction;
             } else if (namespace instanceof StringLiteral) {
@@ -252,15 +251,9 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 nodeName.obtainFingerprint(getNamePool());
                 FixedAttribute fixedAtt = new FixedAttribute(nodeName, validationAction, schemaType);
                 fixedAtt.setInstruction(true);
+                fixedAtt.setLocation(saveLocation());
                 compileContent(compilation, decl, fixedAtt, separator);
                 return fixedAtt;
-            }
-        } else {
-            // if the namespace URI must be deduced at run-time from the attribute name
-            // prefix, we need to save the namespace context of the instruction
-
-            if (namespace == null) {
-                nsContext = getAllNamespaces();
             }
         }
 
@@ -270,7 +263,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 schemaType,
                 false);
         inst.setInstruction(true);
-        inst.setLocation(allocateLocation());
+        inst.setLocation(saveLocation());
         compileContent(compilation, decl, inst, separator);
         return inst;
     }
