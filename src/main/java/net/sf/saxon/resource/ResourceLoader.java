@@ -64,7 +64,7 @@ public class ResourceLoader {
                 if (status == HttpURLConnection.HTTP_MOVED_PERM
                         || status == HttpURLConnection.HTTP_MOVED_TEMP) {
                     String location = conn.getHeaderField("Location");
-                    url = new URL(location);
+                    url = new URL(url, location);
                     cookies = conn.getHeaderField("Set-Cookie");
 
                     if (visited.contains(location)) {
