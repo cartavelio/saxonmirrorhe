@@ -1785,8 +1785,8 @@ public class XPathParser {
         } else if (t.currentToken == Token.NAME) {
             primaryType = getPlainType(t.currentTokenValue);
             nextToken();
-        } else if (t.currentToken == Token.NODEKIND) {
-            // Which includes things such as "map" and "array"...
+        } else if (t.currentToken == Token.NODEKIND || t.currentToken == Token.FUNCTION) {
+            // Which includes things such as "map" and "array"
             switch (t.currentTokenValue) {
                 case "item":
                     nextToken();
