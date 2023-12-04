@@ -2443,6 +2443,52 @@ public class TestXslt30Transformer {
         }
    }
 
+    @Test
+    public void testXslMessageTermination() {
+        int[] warnings = {0};
+        int[] errors = {0};
+        int[] fatals = {0};
+        try {
+            String TRANSFORM_DOC = ""
+                    + "<xsl:transform version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" >"
+                    + "   <xsl:template match=\"/\">"
+                    + "      <xsl:message terminate='yes'>TERMIN-ATED</xsl:message>"
+                    + "      <xsl:variable name=\"emptySeq\" select=\"nothing\" />"
+                    + "      <xsl:sequence select=\"upper-case($emptySeq/text()) || lower-case($emptySeq/text()) = 'foo'\" />"
+                    + "   </xsl:template>"
+                    + "</xsl:transform>";
+
+            Processor processor = new Processor(false);
+            try (StringReader xsltIn = new StringReader(TRANSFORM_DOC); StringReader xmlIn = new StringReader("<doc/>");) {
+                StringWriter sw = new StringWriter();
+                Xslt30Transformer transformer = processor.newXsltCompiler().compile(new StreamSource(xsltIn)).load30();
+                transformer.setErrorListener(new ErrorListener() {
+                    @Override
+                    public void warning(TransformerException exception) throws TransformerException {
+                        warnings[0]++;
+                    }
+
+                    @Override
+                    public void error(TransformerException exception) throws TransformerException {
+                        errors[0]++;
+                    }
+
+                    @Override
+                    public void fatalError(TransformerException exception) throws TransformerException {
+                        fatals[0]++;
+                    }
+                });
+                transformer.applyTemplates(new StreamSource(xmlIn), processor.newSerializer(sw));
+                fail("unexpected success");
+            }
+
+        } catch (SaxonApiException e) {
+            assertEquals(0, warnings[0]);
+            assertEquals(0, errors[0]);
+            assertEquals(1, fatals[0]);
+        }
+    }
+
 
 }
 
