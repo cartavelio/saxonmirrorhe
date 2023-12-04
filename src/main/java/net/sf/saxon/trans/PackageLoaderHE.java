@@ -1140,22 +1140,10 @@ public class PackageLoaderHE implements IPackageLoader {
                 }
             }
             if (nsAtt == null) {
-                nsAtt = Navigator.getInheritedAttributeValue(element, NamespaceUri.NULL,"ns");
+                nsAtt = Navigator.getInheritedAttributeValue(element, NamespaceUri.NULL, "ns");
             }
             if (nsAtt != null && !nsAtt.isEmpty()) {
-                String[] namespaces = nsAtt.split(" ");
-                for (String ns : namespaces) {
-                    int eq = ns.indexOf('=');
-                    if (eq < 0) {
-                        throw new IllegalStateException("ns=" + nsAtt);
-                    }
-                    String prefix = ns.substring(0, eq);
-                    String uri = ns.substring(eq + 1);
-                    if (uri.equals("~")) {
-                        uri = NamespaceConstant.getUriForConventionalPrefix(prefix);
-                    }
-                    rsc.declareNamespace(prefix, NamespaceUri.of(uri));
-                }
+                rsc.setNamespaces(fromExportedNamespaces(nsAtt));
             }
             if (defaultElementNS == null) {
                 defaultElementNS = Navigator.getInheritedAttributeValue(element, NamespaceUri.NULL, "defaultElementNS");
@@ -1168,6 +1156,26 @@ public class PackageLoaderHE implements IPackageLoader {
         } else {
             return contextStack.peek();
         }
+    }
+
+    public static NamespaceMap fromExportedNamespaces(String nsAtt) {
+        NamespaceMap map = NamespaceMap.emptyMap();
+        if (nsAtt != null) {
+            String[] namespaces = nsAtt.split(" ");
+            for (String ns : namespaces) {
+                int eq = ns.indexOf('=');
+                if (eq < 0) {
+                    throw new IllegalStateException("ns=" + nsAtt);
+                }
+                String prefix = ns.substring(0, eq);
+                String uri = ns.substring(eq + 1);
+                if (uri.equals("~")) {
+                    uri = NamespaceConstant.getUriForConventionalPrefix(prefix);
+                }
+                map = map.put(prefix, NamespaceUri.of(uri));
+            }
+        }
+        return map;
     }
 
     private Pattern getFirstChildPattern(NodeInfo parent) throws XPathException {
