@@ -125,7 +125,7 @@
                   been carried out.</p>
             </td>
          </tr>
-         <tr class="javaonly">
+         <tr>
             <td>
                <p>-ext:(on|off)</p>
             </td>
@@ -136,20 +136,6 @@
                   when loading an untrusted schema, perhaps from a remote site using an
                   <code>http://</code> URL; it ensures that the schema cannot call arbitrary
                   Java methods and thereby gain privileged access to resources on your machine. </p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>-init:initializer</p>
-            </td>
-            <td>
-               <p>The value identifies user-supplied code that is called during the initialization process, 
-                  and may be used to set any options required on the Saxon configuration.</p>
-               <p class="javaonly">For SaxonJ, the value is the name of a user-supplied class that implements the interface <a
-                  class="javalink" href="net.sf.saxon.lib.Initializer">Initializer</a>. The class must be on the classpath.</p>
-               <p class="csonly">For SaxonCS, the value is the filename of a user-written assembly that contains an implementation
-                  of the interface <code>Saxon.Api.IProcessorInitializer</code>. For details see <a class="bodylink"
-                     href="/saxon-cs/callbacks">Callbacks</a>.</p>
             </td>
          </tr>
          <tr>
@@ -179,7 +165,7 @@
                   still cause the evaluation order to be not as expected.) </p>
             </td>
          </tr>
-         <tr class="javaonly">
+         <tr>
             <td>
                <p>-quit:(on|off)</p>
             </td>
@@ -191,27 +177,7 @@
                   invoked from another Java application such as Ant. </p>
             </td>
          </tr>
-         <tr class="javaonly">
-            <td>
-               <p>-r:classname</p>
-            </td>
-            <td>
-               <p>Use the specified <code>URIResolver</code> to process the URIs of all schema
-                  documents and source documents. The <code>URIResolver</code> is a user-defined
-                  class, that implements the <code>URIResolver</code> interface defined in JAXP,
-                  whose function is to take a URI supplied as a string, and return a SAX
-                     <code>InputSource</code>. It is invoked to process URIs found in
-                     <code>xs:include</code> and <code>xs:import</code>
-                  <code>schemaLocation</code> attributes of schema documents, the URIs found in
-                     <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code>
-                  attributes in the source document, and (if <code>-u</code> is also specified) to
-                  process the URI of the source file provided on the command line. Specifying
-                     <code>-r:org.apache.xml.resolver.tools.CatalogResolver</code> selects the
-                  Apache XML resolver (part of the Apache Commons project, which must be on the
-                  classpath) and enables URIs to be resolved via a catalog, allowing references to
-                  external websites to be redirected to local copies.</p>
-            </td>
-         </tr>
+
          <tr>
             <td>
                 <p>-report:filename</p>
@@ -322,22 +288,7 @@
                   against, or if they have an <code>xsi:type</code> attribute.</p>
             </td>
          </tr>
-         <tr class="javaonly">
-            <td>
-               <p>-x:classname</p>
-            </td>
-            <td>
-               <p>Requests use of the specified SAX parser for parsing the source file. The
-                  classname must be the fully-qualified name of a Java class that implements the
-                     <code>org.xml.sax.XMLReader</code> interface. In the absence of this argument,
-                  the standard JAXP facilities are used to locate an XML parser. Note that the XML
-                  parser performs the raw XML parsing only; Saxon always does the schema validation
-                  itself. Selecting <code>-x:org.apache.xml.resolver.tools.ResolvingXMLReader</code>
-                  selects a parser configured to use the Apache entity resolver, so that DTD and
-                  other external references in source documents are resolved via a catalog. The
-                  parser (part of the Apache Commons project) must be on the classpath.</p>
-            </td>
-         </tr>
+
          <tr class="javaonly">
             <td>
                <p>-xi:(on|off)</p>
@@ -347,7 +298,7 @@
                   This relies on XInclude support in the XML parser.</p>
             </td>
          </tr>
-         <tr class="javaonly">
+         <tr>
             <td>
                <p>-xmlversion:(1.0|1.1)</p>
             </td>
@@ -399,18 +350,7 @@
                   available. If set to <code>off</code>, these attributes are ignored.</p>
             </td>
          </tr>
-         <tr class="javaonly">
-            <td>
-               <p>-y:classname</p>
-            </td>
-            <td>
-               <p>Use the specified SAX parser for schema documents. The supplied classname
-                  must be the fully-qualified class name of a Java class that implements the
-                  <code>org.xml.sax.XMLReader</code> or
-                  <code>javax.xml.parsers.SAXParserFactory</code> interface, and it must be
-                  instantiable using a zero-argument public constructor.</p>
-            </td>
-         </tr>
+
          <tr>
             <td>
                <p>--<i>feature</i>:value</p>
@@ -453,7 +393,7 @@
 
       <p>Parameters on the command line can be used to supply values for any
             <code>saxon:param</code> declarations in the schema. See <a class="bodylink"
-            href="../extensions11/parameterizing-schemas">Parameterizing schemas</a> for details. The format of
+            href="https://www.saxonica.com/documentation/index.html#!schema-processing/extensions11/parameterizing-schemas">Parameterizing schemas</a> for details. The format of
          parameters is the same as for the XSLT and XQuery command lines: <code>name=value</code> to
          supply a simple value; <code>+name=filename</code> to supply the contents of an XML
          document as the parameter value; or <code>?name=expression</code> to supply the result of
@@ -461,59 +401,44 @@
       
    </section>
   
-   <section id="validation-api" title="Validation from Java" class="javaonly">
-         <h1>Validation from Java</h1>
+   <section id="validation-cpp-api" title="Validation from C++" >
+         <h1>Validation from C++</h1>
 
 
-      <p>Schema validation can be controlled either using the standard JAXP Java interface, or using
-         Saxon's own <strong>s9api</strong> interface. The two approaches are described in the
-         following sections. The main advantage of using JAXP is that it is portable; the main
-         advantage of s9api is that it is better integrated across the range of Saxon XML processing
-         interfaces.</p>
-      <nav>
-         <ul/>
-      </nav>
+      <p>Schema validation can be controlled using SaxonC's own C++ interface. The SaxonC C++ API is integrated across the range of Saxon XML processing
+         interfaces and provides the internal interface upon which the Python and PHP APIs are built.</p>
       
+         <h1>Validation using C++</h1>
 
-      <section id="schema-s9api" title="Validation using s9api" class="javaonly">
-         <h1>Validation using s9api</h1>
-
-
-         <p>The s9api interface allows schemas to be loaded into a <a class="javalink"
-               href="net.sf.saxon.s9api.Processor">Processor</a>, and then to be used for validating
+         <p>The C++ interface allows schemas to be loaded into a <a
+               href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html">SchemaValidator</a>, and then to be used for validating
             instances, or for schema-aware XSLT and XQuery processing.</p>
 
          <p>The main steps are:</p>
          <ol>
             <li>
                <p>Create a <code
-                  java="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</code> and call
-                  its <code java="net.sf.saxon.s9api.Processor#getSchemaManager">getSchemaManager()</code>
-                  method to get a <code java="net.sf.saxon.s9api.SchemaManager"
-                     >SchemaManager</code>.</p>
+                       java="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html">SaxonProcessor</code> with the boolean argument
+                  <code>true</code> and call the method <code>newSchemaValidator()</code>
+                  to create a new <a href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html">SchemaValidator</a>.</p>
             </li>
             <li>
-               <p>If required, set options on the <code>SchemaManager</code> to control the way in
-                  which schema documents will be loaded.</p>
+               <p>If required, set options on the <code>SchemaValidator</code> to control the way in
+                  which schema documents will be loaded, invoked and performed. For example the source document, current working directory and parameters can be set
+                  in advance.</p>
             </li>
             <li>
-               <p>Load a schema document by calling the <code
-                  java="net.sf.saxon.s9api.SchemaManager#load">load()</code> method, which takes a
-                  JAXP Source object as its argument. The resulting schema document is available to
-                  all applications run within the containing <code>Processor</code>.</p>
+               <p>register and load a schema document by calling either of the methods <code>registerSchemaFromString()</code>, <code>registerSchemaFromNode</code> and
+                  <code>registerSchemaFromFile</code>, which registers a schema from lexical string, from XdmNode object or from file, respectively. For the
+               <code>registerSchemaFromFile</code> the file on disk can may be either a schema document in source XSD format, or a compiled schema in Saxon-defined
+                  SCM format (as produced using the method exportSchema).</p>
             </li>
             <li>
-               <p>To validate an instance document, call the <code
-                  java="net.sf.saxon.s9api.SchemaManager#newSchemaValidator">newSchemaValidator()</code>
-                  method on the <code>SchemaManager</code> object. This returns a <code
-                     java="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</code>.</p>
+               <p>To validate an instance document, call the <code>validate()</code> or <code>validateToNode()</code>
+                  method on the <code>SchemaValidator</code> object.</p>
             </li>
-            <li>
-               <p>Set options on the <code>SchemaValidator</code> to control the way in which a
-                  particular validation episode is performed, and then invoke its <code
-                     java="net.sf.saxon.s9api.SchemaValidator#validate">validate()</code> method to
-                  validate an instance document.</p>
-            </li>
+            <li><p>Validation errors are returned to the standard error listener. It is also possible to call the method <code>getValidationReport()</code>
+               to return a validator report as a <code>XdmNode</code> object.</p></li>
          </ol>
 
          <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
@@ -521,341 +446,142 @@
             namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
             no attempt to load multiple schemas for the same namespace and check them for
             consistency. This behaviour can be changed using the configuration option <a
-               class="javalink" href="net.sf.saxon.lib.Feature#MULTIPLE_SCHEMA_IMPORTS"
+               href="https://www.saxonica.com/documentation12/index.html#!javadoc/net.sf.saxon.lib/Feature@MULTIPLE_SCHEMA_IMPORTS"
                >MULTIPLE_SCHEMA_IMPORTS</a>.</p>
 
-         <p>Although the API is defined in such a way that a <a class="javalink"
-               href="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</a> is created for a
-            particular <a class="javalink" href="net.sf.saxon.s9api.SchemaManager"
-            >SchemaManager</a>, in the Saxon implementation the schema components that are available
+         <p>Although the API is defined in such a way that a <a
+               href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html">SchemaValidator</a> is created for a
+            particular schema, in the Saxon implementation the schema components that are available
             to the validator are not only the components within that schema, but all the components
-            that form part of any schema registered with the <code>Processor</code> (or indeed, with
-            the underlying <a class="javalink" href="net.sf.saxon.Configuration"
-            >Configuration</a>).</p>
+            that form part of any schema registered with the <code>SaxonProcessor</code>.</p>
 
-         <p>The <a class="javalink" href="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</a>
-            implements the <a class="javalink" href="net.sf.saxon.s9api.Destination">Destination</a>
-            interface, which means it can be used to receive input from any process that writes to a
-               <code>Destination</code>, for example an XSLT transformation or an XQuery query. The
-            result of validation can also be sent to any <code>Destination</code>, for example an
-            XSLT transformer.</p>
-         
-      </section>
+         <p>The <code>SchemaValidator</code>
+            can be used with the <code>DocumentBuilder</code> class to parse and validate XML documents.</p>
 
-      <section id="schema-jaxp" title="Validation using JAXP" class="javaonly">
-         <h1>Schema validation using JAXP</h1>
-
-
-         <p>Applications can invoke schema processing using the APIs provided in JAXP 1.3. This
-            makes Saxon interchangeable with other schema processors implementing this interface.
-            There is full information on these APIs in the Java documentation. The two main
-            mechanisms are the <code>Validator</code> class, and the <code>ValidatorHandler</code>
-            class. Sample applications using these interfaces are provided in the
-               <code>samples/java</code> directory of the <code>saxon-resources</code> download (see
-             <code>SchemaValidatorExample.java</code> and <code>SchemaValidatorHandlerExample.java</code>).
-            Saxon also supplies the class <a class="javalink"
-               href="com.saxonica.ee.jaxp.ValidatingReader"
-               >com.saxonica.ee.jaxp.ValidatingReader</a>, which implements the SAX2
-               <code>XMLReader</code> interface, allowing it to be used as a schema-validating XML
-            parser.</p>
-
-         <p>The main steps are:</p>
-         <ol>
-            <li>
-               <p>Create a <code>SchemaFactory</code>, by calling
-                     <code>SchemaFactory.newInstance()</code> with the argument
-                     <code>"http://www.w3.org/2001/XMLSchema"</code>, and with the Java system
-                  properties set up to ensure that Saxon is loaded as the chosen schema processor.
-                  Saxon will normally be loaded as the default schema processor if Saxon-EE is
-                  present on the classpath, but to make absolutely sure, set the system property
-                     <code>javax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema</code>
-                  to the value <a class="javalink" href="com.saxonica.ee.jaxp.SchemaFactoryImpl"
-                     >com.saxonica.ee.jaxp.SchemaFactoryImpl</a>. Note that if you set this property
-                  using a property file, colons in the property name must be escaped as
-                     "<code>\:</code>".</p>
-            </li>
-            <li>
-               <p>Process a schema document by calling one of the several <code>newSchema()</code>
-                  methods on the returned <code>SchemaFactory</code>.</p>
-            </li>
-            <li>
-               <p>Create either a <code>Validator</code> or a <code>ValidatorHandler</code> from
-                  this returned <code>Schema</code>.</p>
-            </li>
-            <li>
-               <p>Use the <code>Validator</code> or <code>ValidatorHandler</code> to process one or
-                  more source documents.</p>
-            </li>
-         </ol>
-
-
-
-         <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
-            attributes within the source documents will be loaded as necessary. A target namespace
-            is ignored if there is already a loaded schema for that namespace; Saxon makes no
-            attempt to load multiple schemas for the same namespace and check them for
-            consistency.</p>
-
-         <p>Although the API is defined in such a way that a <code>Validator</code> or
-               <code>ValidatorHandler</code> is created for a particular <code>Schema</code>, in the
-            Saxon implementation the schema components that are available to the validator are not
-            only the components within that schema, but all the components that form part of any
-            schema registered with the <a class="javalink" href="net.sf.saxon.Configuration"
-               >Configuration</a>.</p>
-
-         <p>Another way to control validation from a Java application is to run a JAXP identity
-            transformation, having first set the option to perform schema validation. The following
-            code (from the sample application <code>QuickValidator.java</code>) illustrates
-            this:</p>
-         <samp><![CDATA[try {
-    System.setProperty(
-            "javax.xml.transform.TransformerFactory",
-            "com.saxonica.config.EnterpriseTransformerFactory");
-    TransformerFactory factory = 
-            TransformerFactory.newInstance();
-    factory.setAttribute(Feature.SCHEMA_VALIDATION.name, 
-            new Integer(Validation.STRICT));
-    factory.setAttribute(Feature.VALIDATION_WARNINGS.name, 
-            Boolean.TRUE);
-    Transformer trans = factory.newTransformer();
-    StreamSource source = 
-            new StreamSource(new File(args[0]).toURI().toString());
-    SAXResult sink = 
-            new SAXResult(new DefaultHandler());
-    trans.transform(source, sink);
-} catch (TransformerException err) {
-    System.err.println("Validation failed");
-}
-]]></samp>
-
-         <p>If you set an <code>ErrorListener</code> on the <code>TransformerFactory</code>, then
-            you can control the way that error messages are output.</p>
-
-         <p>If you want to validate against a schema without hard-coding the URI of the schema into
-            the source document, you can do this by pre-loading the schema into the
-               <code>TransformerFactory</code>. This extended example (again from the sample
-            application <code>QuickValidator.java</code>) illustrates this:</p>
-         <samp><![CDATA[try {
-    System.setProperty(
-            "javax.xml.transform.TransformerFactory",
-            "com.saxonica.config.EnterpriseTransformerFactory");
-    TransformerFactory factory = 
-            TransformerFactory.newInstance();
-    factory.setAttribute(Feature.SCHEMA_VALIDATION.name, 
-            new Integer(Validation.STRICT));
-    factory.setAttribute(Feature.VALIDATION_WARNINGS.name, 
-            Boolean.TRUE);
-    if (args.length > 1) {
-        StreamSource schema = 
-                new StreamSource(new File(args[1]).toURI().toString());
-        ((EnterpriseTransformerFactory)factory).addSchema(schema);
-    }
-    Transformer trans = factory.newTransformer();
-    StreamSource source = 
-            new StreamSource(new File(args[0]).toURI().toString());
-    SAXResult sink = 
-            new SAXResult(new DefaultHandler());
-    trans.transform(source, sink);
-} catch (TransformerException err) {
-    System.err.println("Validation failed");
-}
-]]></samp>
-
-         <p>You can preload as many schemas as you like using the <code>addSchema()</code> method.
-            Such schemas are parsed, validated, and compiled once, and can be used as often as you
-            like for validating multiple source documents. You cannot unload a schema once it has
-            been loaded. If you want to remove or replace a schema, start afresh with a new
-               <code>TransformerFactory</code>.</p>
-
-         <p>Behind the scenes, the <code>TransformerFactory</code> uses a <code>Configuration</code>
-            object to hold all the configuration information. The basic Saxon product (Saxon-HE and
-            Saxon-PE) uses the class <a class="javalink" href="net.sf.saxon.TransformerFactoryImpl"
-               >net.sf.saxon.TransformerFactoryImpl</a> for the <code>TransformerFactory</code>, and
-               <a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a>
-            for the underlying configuration information. The schema-aware product (Saxon-EE)
-            subclasses these with <a class="javalink"
-               href="com.saxonica.config.EnterpriseTransformerFactory"
-               >com.saxonica.config.EnterpriseTransformerFactory</a> and <a class="javalink"
-               href="com.saxonica.config.EnterpriseConfiguration"
-               >com.saxonica.config.EnterpriseConfiguration</a> respectively. You can get hold of
-            the <code>Configuration</code> object by casting the <code>TransformerFactory</code> to
-            a Saxon <code>TransformerFactorImpl</code> and calling the
-               <code>getConfiguration()</code> method. This gives you more precise control, for
-            example it allows you to retrieve the <code>Schema</code> object containing the schema
-            components for a given target namespace, and to inspect the compiled schema to establish
-            its properties. See the JavaDoc documentation for further details.</p>
-
-         <aside>
-            Saxon currently implements its own API for access to the schema components. This API
-               should be regarded as subject to change.
-         </aside>
-
-         <p>The programming approach outlined above, of using an identity transformer, is suitable
-            for a wide class of applications. For example, it enables you to insert a validation
-            step into a SAX-based pipeline. However, for finer control, there are lower-level
-            interfaces available in Saxon that you can also use. See for example the JavaDoc for the
-               <a class="javalink" href="com.saxonica.config.EnterpriseConfiguration"
-               >EnterpriseConfiguration</a> class, which includes methods such as
-               <code>getElementValidator()</code>. This constructs a <a class="javalink"
-               href="net.sf.saxon.event.Receiver">Receiver</a> which acts as a validating XML event
-            filter. This can be inserted into a pipeline of <code>Receiver</code>s. Saxon also
-            provides classes to bridge between SAX events and <code>Receiver</code> events: <a
-               class="javalink" href="net.sf.saxon.event.ReceivingContentHandler"
-               >ReceivingContentHandler</a> and <a class="javalink"
-               href="net.sf.saxon.event.ContentHandlerProxy">ContentHandlerProxy</a>
-            respectively.</p>
-         
-      </section>
    </section>
    
-   <section id="schema-dotnet" title="Validation from C#" class="csonly">
-         <h1>Validation from C#</h1>
+   <section id="schema-python-api" title="Validation from Python">
+         <h1>Validation from Python</h1>
          
          
-         <p>The Saxon.Api interface allows schemas to be loaded into a <a class="cslink"
-            href="Saxon.Api.Processor">Processor</a>, and then to be used for validating
-            instances, or for schema-aware XSLT and XQuery processing.</p>
-         
-         <p>The main steps are:</p>
-         <ol>
-            <li>
-               <p>Create a <code cs="Saxon.Api.Processor">Processor</code> and use its <code
-                  cs="Saxon.Api.Processor#SchemaManager">Processor.SchemaManager</code>
-                  property to get a <code cs="Saxon.Api.SchemaManager">SchemaManager</code>.</p>
-            </li>
-            <li>
-               <p>If required, set options on the <code>SchemaManager</code> to control the way in 
-                  which schema documents will be loaded.</p>
-            </li>
-            <li>
-               <p>Load a schema document by calling one of the <code
-                  cs="Saxon.Api.SchemaManager#Compile">Compile()</code> methods, which allow the input
-                  to be supplied in a variety of forms (for example, a <code>Stream</code>, a <code>TextReader</code>,
-                  or a <code>Uri</code>). The resulting schema is available to
-                  all applications run within the containing <code>Processor</code>.</p>
-            </li>
-            <li>
-               <p>To validate an instance document, call the <code
-                  cs="Saxon.Api.SchemaManager#NewSchemaValidator">NewSchemaValidator()</code> 
-                  method on the <code>SchemaManager</code> object. This
-                  returns a <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code>.</p>
-            </li>
-            <li>
-               <p>Set options on the <code>SchemaValidator</code> to control the way in which a
-                  particular validation episode is performed, and then invoke one of its <code
-                     cs="Saxon.Api.SchemaValidator#Validate">Validate()</code> methods to
-                  validate an instance document.</p>
-            </li>
-         </ol>
-         
-         <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
-            attributes within the source documents will be loaded as necessary, unless the 
-            <code cs="Saxon.Api.SchemaValidator#UseXsiSchemaLocation">SchemaValidator.UseXsiSchemaLocation</code>
-            property is set to false. By default a target
-            namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
-            no attempt to load multiple schemas for the same namespace and check them for
-            consistency. This behavior can be changed using the configuration option <a
-               class="feature" href="MULTIPLE_SCHEMA_IMPORTS"/>.</p>
-        
-         <p>Although the API is defined in such a way that a <code
-            cs="Saxon.Api.SchemaValidator">SchemaValidator</code> is created for a particular <code
-               cs="Saxon.Api.SchemaManager">SchemaManager</code>, in the Saxon implementation the
-            schema components that are available to the validator are not only the components within
-            that schema, but all the components that form part of any schema registered with the
-            <code>Processor</code> (or indeed, with the underlying <a class="javalink"
-               href="net.sf.saxon.Configuration">Configuration</a>).</p>
+      <p>Schema validation can be controlled using SaxonC's own Python interface. To use XML Schema validation you will need to install saxoncee.</p>
+
+            <h1>Validation using Python</h1>
+
+            <p>The Python interface allows schemas to be loaded into a <a
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator">PySchemaValidator</a>, and then to be used for validating
+               instances, or for schema-aware XSLT and XQuery processing.</p>
+
+            <p>The main steps are:</p>
+            <ol>
+               <li>
+                  <p>Create a <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor">PySaxonProcessor</a> with the boolean argument
+                     <code>true</code> and call the method <code>new_schema_validator()</code>
+                     to create a new <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator">PySchemaValidator</a>.</p>
+               </li>
+               <li>
+                  <p>If required, set options on the <code>PySchemaValidator</code> to control the way in
+                     which schema documents will be loaded, invoked and performed. For example the source document, current working
+                     directory and parameters can be set in advance.</p>
+               </li>
+               <li>
+                  <p>register and load a schema document by calling either of the methods <code>register_schema_from_string()</code>,
+                     <code>register_schema_from_node</code> and
+                     <code>register_schema_from_file</code>, which registers a schema from lexical string, from XdmNode object or from file, respectively. For the
+                  <code>registerS_schema_from_file()</code> the file on disk can may be either a schema document in source XSD format, or a compiled schema in Saxon-defined
+                     SCM format (as produced using the method exportSchema).</p>
+               </li>
+               <li>
+                  <p>To validate an instance document, call the <code>validate()</code> or <code>validate_to_node()</code>
+                     method on the <code>PySchemaValidator</code> object.</p>
+               </li>
+               <li><p>Validation errors are returned to the standard error listener. It is also possible to call the class property <code>validation_report</code>
+                  to return a validator report as a <code>PyXdmNode</code> object.</p></li>
+            </ol>
+
+            <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
+               attributes within the source documents will be loaded as necessary. By default a target
+               namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
+               no attempt to load multiple schemas for the same namespace and check them for
+               consistency. This behaviour can be changed using the configuration option <a
+                  href="https://www.saxonica.com/documentation12/index.html#!javadoc/net.sf.saxon.lib/Feature@MULTIPLE_SCHEMA_IMPORTS"
+                  >MULTIPLE_SCHEMA_IMPORTS</a>.</p>
+
+            <p>Although the API is defined in such a way that a <a
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator">PySchemaValidator</a> is created for a
+               particular schema, in the Saxon implementation the schema components that are available
+               to the validator are not only the components within that schema, but all the components
+               that form part of any schema registered with the <code>SaxonProcessor</code>.</p>
+
+            <p>The <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator">PySchemaValidator</a>
+               can be used with the <code>PyDocumentBuilder</code> class to parse and validate XML documents.</p>
          
          
       
    </section>
-   
-   
-   <section id="validation-from-ant" title="Validation from Ant" class="javaonly">
-      <h1>Validation from Ant</h1>
+
+   <section id="validation-php-api" title="Validation from PHP" >
+         <h1>Validation from PHP</h1>
 
 
-      <p>It is possible to use the Saxon schema validator using the standard Ant tasks
-            <code>xmlvalidate</code> and <code>schemavalidate</code>. To use Saxon rather than
-         Xerces as the validation engine, specify the attribute
-            <code>classname="com.saxonica.ee.jaxp.ValidatingReader"</code>, and make sure Saxon-EE
-         is on the classpath.</p>
+      <p>Schema validation can be controlled using SaxonC's own PHP interface. The SaxonC PHP API is integrated across the range of Saxon XML processing
+         interfaces.</p>
 
-      <p>The schema to be used for validation can be specified using the
-            <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code>
-         attributes in the instance document, or (in the case of the <code>schemavalidate</code>
-         task) using the <code>schemavalidate/schema</code> child element or the
-            <code>schemavalidate/@noNamespaceFile</code> or
-            <code>schemavalidate/@noNamespaceURL</code> attributes.</p>
+         <h1>Validation using PHP</h1>
 
-      <p>The attributes <code>lenient</code> and <code>fullchecking</code> have no effect.</p>
+         <p>The PHP interface allows schemas to be loaded into a <a
+               href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_schemavalidator">SchemaValidator</a> in the
+            Saxon PHP namespace, and then to be used for validating
+            instances, or for schema-aware XSLT and XQuery processing.</p>
 
-      <p>The child element <code>schemavalidate/attribute</code> can be used to set options. Any
-         option defined by the constants in class <a class="javalink"
-            href="net.sf.saxon.lib.Feature">net.sf.saxon.lib.Feature</a> can be specified,
-         provided the required value is expressible as a string (for boolean values, use "true" and
-         "false"). Saxon also recognizes some property names defined by the Apache Xerces product,
-         for compatibility.</p>
+         <p>The main steps are:</p>
+         <ol>
+            <li>
+               <p>Create a <code
+                       java="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor">SaxonProcessor</code> with the boolean argument
+                  <code>true</code> and call the method <code>newSchemaValidator()</code>
+                  to create a new <a href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_schemavalidator">SchemaValidator</a>.</p>
+            </li>
+            <li>
+               <p>If required, set options on the <code>SchemaValidator</code> to control the way in
+                  which schema documents will be loaded, invoked and performed. For example the source document, current working directory and parameters can be set
+                  in advance.</p>
+            </li>
+            <li>
+               <p>register and load a schema document by calling either of the methods <code>registerSchemaFromString()</code>, <code>registerSchemaFromNode</code> and
+                  <code>registerSchemaFromFile</code>, which registers a schema from lexical string, from XdmNode object or from file, respectively. For the
+               <code>registerSchemaFromFile</code> the file on disk can may be either a schema document in source XSD format, or a compiled schema in Saxon-defined
+                  SCM format (as produced using the method exportSchema).</p>
+            </li>
+            <li>
+               <p>To validate an instance document, call the <code>validate()</code> or <code>validateToNode()</code>
+                  method on the <code>SchemaValidator</code> object.</p>
+            </li>
+            <li><p>Validation errors are returned to the standard error listener. It is also possible to call the method <code>getValidationReport()</code>
+               to return a validator report as a <code>XdmNode</code> object.</p></li>
+         </ol>
 
-      <p>Properties of particular interest include the following:</p>
-      <table>
-         <tr>
-            <td>
-               <p>
-                  <strong>Name</strong>
-               </p>
-            </td>
-            <td>
-               <p>
-                  <strong>Value</strong>
-               </p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>http://saxon.sf.net/feature/licenseFileLocation</p>
-            </td>
-            <td>
-               <p>The filename where the Saxon-EE license file is found.</p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>http://saxon.sf.net/feature/schemaURIResolverClass</p>
-            </td>
-            <td>
-               <p>Class used to resolve URIs of schema documents.</p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>http://saxon.sf.net/feature/schema-validation-mode</p>
-            </td>
-            <td>
-               <p>
-                  <code>strict</code> or <code>lax</code>: determines whether validation fails if no
-                  element declaration can be found for the top-level element.</p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>http://saxon.sf.net/feature/standardErrorOutputFile</p>
-            </td>
-            <td>
-               <p>Log file to capture validation errors.</p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>http://saxon.sf.net/feature/xsd-version</p>
-            </td>
-            <td>
-               <p>
-                  <code>1.0</code> or <code>1.1</code> depending on the version of the XML Schema
-                  (XSD) Recommendation to be supported. Default is <code>1.1</code>. </p>
-            </td>
-         </tr>
-      </table>
+         <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
+            attributes within the source documents will be loaded as necessary. By default a target
+            namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
+            no attempt to load multiple schemas for the same namespace and check them for
+            consistency. This behaviour can be changed using the configuration option <a
+               href="https://www.saxonica.com/documentation12/index.html#!javadoc/net.sf.saxon.lib/Feature@MULTIPLE_SCHEMA_IMPORTS"
+               >MULTIPLE_SCHEMA_IMPORTS</a>.</p>
+
+         <p>Although the API is defined in such a way that a <a
+               href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_schemavalidator">SchemaValidator</a> is created for a
+            particular schema, in the Saxon implementation the schema components that are available
+            to the validator are not only the components within that schema, but all the components
+            that form part of any schema registered with the <code>SaxonProcessor</code>.</p>
+
+         <p>The <a href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_schemavalidator">SchemaValidator</a>
+            can be used with the <code>DocumentBuilder</code> class to parse and validate XML documents.</p>
+
    </section>
+   
+   
+   
    <section id="schema-aware-qt" title="Schema-aware queries and transformations">
       <h1>Schema-aware queries and transformations</h1>
       <p>Schema-awareness, in both XSLT and XQuery, has three effects:</p>
@@ -881,13 +607,9 @@
          <li><p>Using <code>xsi:schemaLocation</code> (or
             <code>xsi:noNamespaceSchemaLocation</code>) attributes within the source documents.</p></li>
          <li><p>Using the <code>-xsd</code> option on the command line.</p></li>
-         <li><p>Loading a schema into the configuration using the Java API (see
-            <a class="bodylink" href="/schema-processing/validation-api">Validation from Java</a>)  
-            or the C# API (see <a class="bodylink" href="/schema-processing/schema-dotnet">Validation from
-               C#</a>).</p></li>
       </ul>
      
-      <p>Although you can load multiple schema documents into a single <code java="net.sf.saxon.Configuration">Configuration</code>, they
+      <p>Although you can load multiple schema documents into a single <code>Configuration</code>, they
       are assembled into a single schema (that is, a collection of schema definitions) which must be internally 
       consistent. For example, you cannot have
       two different definitions of the same type. This creates limitations: if you want to write a transformation
@@ -918,7 +640,7 @@
 
 
       <p>To run a schema-aware transformation or query from the command line, use appropriate options on the 
-         <code>Transform</code> or <code>Query</code> command
+         <code>transform</code> or <code>query</code> command
          (see <a class="bodylink" href="/using-xsl/commandline">XSLT from the command line</a> and <a class="bodylink"
             href="/using-xquery/commandline">XQuery from the command line</a> respectively), for example
             <code>-val:strict</code> to request strict validation of the source document, or
@@ -949,71 +671,13 @@
 
       
    </section>
-   <section id="satransformapi" title="From Java and C#">
 
-      <h1>Schema-aware XSLT and XQuery from Java and C#</h1>
-      
-      <p>If a query or stylesheet is schema-aware, it will typically expect the principal
-      input document to be schema-validated. There are a number of ways this can be achieved:</p>
-      
-      <ul>
-         <li><p>The equivalent of the <code>-val</code> command-line option is to set 
-            the configuration property <a class="feature" href="SCHEMA_VALIDATION"/>.</p>
-            <p>This option switches validation on for all source documents used by any transformation
-               within this <code>Configuration</code>. Setting the value to <code>lax</code>, which performs
-               validation only if a schema is available, is sometimes appropriate, 
-               but for most applications of any complexity 
-               the value <code>strict</code> tends to result in spurious failures, resulting from attempts to 
-               validate documents for which no schema exists.</p>
-         
-         </li>
-         <li><p>The source document can be parsed and built into a tree before the query or transformation
-         starts, typically by using a <code>DocumentBuilder</code> set to perform schema validation, or
-         by using a <code>SchemaValidator</code> with its destination set to an <code>XdmDestination</code>.</p>
-         <p>Note: building the document this way means that whitespace stripping will not be under the 
-         control of <code>xsl:strip-space</code> and <code>xsl:preserve-space</code> declarations in the
-         stylesheet.</p></li>
-         <li class="javaonly"><p>For any method that expects a <code>Source</code> as input (for example,
-         the <code>transform()</code> method in an XSLT transformer), it is possible to supply an
-            instance of the class <a
-               class="javalink" href="net.sf.saxon.lib.AugmentedSource">AugmentedSource</a> object. An
-            <code>AugmentedSource</code> is a wrapper around a normal JAXP <code>Source</code>
-            object, in which additional properties can be set: for example, a property to request
-            validation of the document. The <code>AugmentedSource</code> itself implements the JAXP
-            <code>Source</code> interface, so it can be used anywhere that an ordinary
-            <code>Source</code> object can be used, notably as the first argument to the
-            <code>transform</code> method of the <code>Transformer</code>, and as the return value
-            from a user-written <code>URIResolver</code>.</p></li>
-         <li><p>If the standard Saxon <code>URIResolver</code> is used, and recognition of query parameters
-            is enabled, it is also possible to control validation for each source document by means of
-            query parameters in the document URI. For example,
-            <code>document('source.xml?validation=strict')</code> requests the loading of the file
-            <code>source.xml</code> with strict validation.</p></li>
-      </ul>
-
-
-      <p>The configuration property <a class="feature" href="VALIDATION_WARNINGS"/> 
-         has the same effect as the <code>-outval:recover</code> option
-         on the command line: validation errors encountered when processing the final result tree
-         are reported to the <code>ErrorListener</code> as warnings, not as fatal errors.</p>
-
-  
-
-      <p>If you are validating the result tree, and you want your application to have access to the
-         type annotations in the validated tree, then you supply an <code>XdmDestination</code>
-      as the destination for the query or transformation results. From this you can extract the
-      <code>XdmNode</code> representing the root of the tree, and thence navigate to other nodes
-      in the tree. To get the actual type annotation you need to drop into lower-level Saxon
-      interfaces, by obtaining the underlying <code>NodeInfo</code> object and calling its
-      <code>getSchemaType()</code> method.</p>
-   
-   </section>
    </section>
    <section id="scm" title="Exporting schema component models">
       <h1>Exporting schema component models</h1>
       
       
-      <p>Saxon provides the ability to export or import a compiled schema. The export format is an
+      <p>SaxonC provides the ability to export or import a compiled schema. The export format is an
          XML file, known as an <strong>SCM file</strong> (for schema component model). Using SCM files has three benefits:</p>
       
       <ul>
@@ -1031,10 +695,7 @@
          Alternatively, an SCM file can be generated programmatically:</p>
       
       <ul>
-         <li class="javaonly">From Java, use the <code>exportComponents()</code> method of the <a class="javalink"
-            href="net.sf.saxon.s9api.SchemaManager">net.sf.saxon.s9api.SchemaManager</a> class.</li>
-         <li class="csonly">From C#, use the <code>ExportComponents()</code> method of the <a class="cslink"
-            href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a> class.</li>
+         <li>From the C++, Python and PHP APIs, use the <code>exportSchema()</code> method of the <code>SchemaValidator</code> class.</li>
       </ul>
       <p>The export is unselective: it will output an SCM file containing all the schema
          components that have been loaded into the <code>Configuration</code>, other than built-in
@@ -1044,12 +705,9 @@
          to be supplied, for example:</p>
       
       <ul>
-         <li><p>The <code>-xsd</code> option of the command-line <code>Validate</code> command</p></li>
-         <li class="javaonly"><p>The <code>load()</code> method of <a class="javalink"
-            href="net.sf.saxon.s9api.SchemaManager">net.sf.saxon.s9api.SchemaManager</a>.</p></li>
-         <li class="csonly"><p>The <code>Compile()</code> method of <a class="cslink"
-            href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a>.</p></li>
-         <li class="javaonly"><p>The JAXP <code>SchemaFactory.newSchema()</code> method.</p></li>
+         <li><p>The <code>-xsd</code> option of the command-line <code>validate</code> command</p></li>
+         <li class="javaonly"><p>The <code>registerSchemaFromFile()</code> method of <code>SchemaValidator</code>.</p></li>
+         
          <li><p>The <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes in
             an instance document (the SCM file contains components for multiple namespaces, and it should only
             be loaded once).</p></li>
@@ -1076,7 +734,7 @@
       
       <p>If the configuration used to generate an SCM file is licensed with a <i>developer master key</i>,
          then any exported SCM file will include an embedded license allowing it to be loaded and used for validation
-         on a Saxon-EE configuration that does not have its own license. An SCM file containing an embedded license
+         on a SaxonC-EE configuration that does not have its own license. An SCM file containing an embedded license
          is protected from modification by checksums and digital signatures.</p>
       
       <p>The structure of an SCM file is defined in the schema <code>scmschema.xsd</code> which is
@@ -1096,16 +754,16 @@
       <h1>XML Schema 1.1</h1>
 
 
-      <p>From release 9.5, Saxon-EE includes full support for the XML Schema 1.1 specification,
+      <p>From release 1.0, SaxonC-EE includes full support for the XML Schema 1.1 specification,
          which is a W3C Recommendation. The main changes between XSD 1.0 and XSD 1.1 are listed in
          the following pages (see <a class="bodylink" href="/conformance/schema11">XML Schema 1.1
             conformance</a> for further information).</p>
 
-      <p>From Saxon 9.8, use of XML Schema 1.1 features is enabled by default. To disable use of XML
+      <p>From SaxonC 1.1, use of XML Schema 1.1 features is enabled by default. To disable use of XML
          Schema 1.1 features, set the command line flag <code>-xsdversion:1.0</code> or the
          configuration property <a class="feature" href="XSD_VERSION"/>.</p>
       
-      <p>From Saxon 10, selecting XSD 1.0 does not disable all XSD 1.1 features. For example:</p>
+      <p>From SaxonC 11.1, selecting XSD 1.0 does not disable all XSD 1.1 features. For example:</p>
       <ul>
          <li><p>The value <code>+INF</code> representing positive infinity is accepted as a legal <code>xs:double</code>
          value whether or not XSD 1.1 is enabled.</p></li>
@@ -1134,7 +792,7 @@
          <p>will cause a run-time validation error if an instance document is validated in which the
             relevant condition does not hold.</p>
 
-         <p>Saxon allows any XPath 2.0 expression to be used in the <code>test</code> attribute.
+         <p>SaxonC allows any XPath 2.0 expression to be used in the <code>test</code> attribute.
             This includes expressions that call Java or .NET extension functions. Support for XPath 3.0 or 3.1
             can be configured using the configuration property <a class="feature" href="XPATH_VERSION_FOR_XSD"/>.</p>
 
@@ -1496,7 +1154,7 @@
        <h1>saxon:streamable - streamable assertions</h1>
        
        
-       <p>Saxon (from 10.1) allows the attribute <code>&lt;xs:assert saxon:streamable="true"&gt;</code>
+       <p>SaxonC (from 11.1) allows the attribute <code>&lt;xs:assert saxon:streamable="true"&gt;</code>
          to request that assertions be implemented using streaming.</p>
        
        <p>This is useful to reduce memory requirements when validating large source documents, 
@@ -1928,7 +1586,7 @@
          title="Using XPath 3.1 in assertions">
          <h1>Using XPath 3.1 in assertions</h1>
          
-         <p>From Saxon 9.9 the XPath version used can be configured using the configuration 
+         <p>From SaxonC 1.2 the XPath version used can be configured using the configuration
             property <a class="feature" href="XPATH_VERSION_FOR_XSD"/>.</p>
          
          <p>If the attribute <code>saxon:extensions="any-xpath-version"</code> is present on the <code>xs:schema</code>
