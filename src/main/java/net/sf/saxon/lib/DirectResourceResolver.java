@@ -8,8 +8,6 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.FilterFactory;
-import net.sf.saxon.event.IDFilter;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
@@ -61,22 +59,22 @@ public class DirectResourceResolver implements ResourceResolver {
             }
         }
 
-        String relativeURI = request.relativeUri;
-        if (relativeURI == null) {
-            relativeURI = request.uri;
-        }
-        String id = null;
+//        String relativeURI = request.relativeUri;
+//        if (relativeURI == null) {
+//            relativeURI = request.uri;
+//        }
+//        String id = null;
 
         // Extract any fragment identifier. Note, this code is no longer used to
         // resolve fragment identifiers in URI references passed to the document()
         // function: the code of the document() function handles these itself.
 
-        int hash = relativeURI.indexOf('#');
-        if (hash >= 0) {
-            request = request.copy();
-            request.relativeUri = relativeURI.substring(0, hash);
-            id = relativeURI.substring(hash + 1);
-        }
+//        int hash = relativeURI.indexOf('#');
+//        if (hash >= 0) {
+//            request = request.copy();
+//            request.relativeUri = relativeURI.substring(0, hash);
+//            id = relativeURI.substring(hash + 1);
+//        }
 
         InputStream stream;
         if (ResourceRequest.BINARY_NATURE.equals(request.nature)) {
@@ -106,12 +104,12 @@ public class DirectResourceResolver implements ResourceResolver {
             ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
         }
 
-        if (id != null) {
-            final String idFinal = id;
-            FilterFactory factory = next -> new IDFilter(next, idFinal);
-            ss = AugmentedSource.makeAugmentedSource(ss);
-            ((AugmentedSource) ss).addFilter(factory);
-        }
+//        if (id != null) {
+//            final String idFinal = id;
+//            FilterFactory factory = next -> new IDFilter(next, idFinal);
+//            ss = AugmentedSource.makeAugmentedSource(ss);
+//            ((AugmentedSource) ss).addFilter(factory);
+//        }
 
         return ss;
 

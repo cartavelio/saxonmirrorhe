@@ -94,6 +94,29 @@ public class LiteralResultElement extends StyleElement {
         return false;
     }
 
+    @Override
+    public void processStandardAttributes(NamespaceUri namespace) {
+        int processorVersion = getCompilation().getCompilerInfo().getXsltVersion();
+        if (getParent() instanceof DocumentImpl && processorVersion >= 40) {
+            if (getAttributeValue(namespace, "version") == null) {
+                version = processorVersion;
+            } else {
+                processVersionAttribute(namespace);
+            }
+            if (version >= 40 && getAttributeValue(namespace, "expand-text") == null) {
+                expandText = true;
+            } else {
+                processExpandTextAttribute(namespace);
+            }
+            processExtensionElementAttribute(namespace);
+            processExcludedNamespaces(namespace);
+            processDefaultXPathNamespaceAttribute(namespace);
+            processDefaultValidationAttribute(namespace);
+        } else {
+            super.processStandardAttributes(namespace);
+        }
+    }
+
     /**
      * Process the attribute list
      */
@@ -384,8 +407,9 @@ public class LiteralResultElement extends StyleElement {
         // the implementation grafts the LRE node onto a containing xsl:template and
         // xsl:stylesheet
 
+        int processorVersion = getCompilation().getCompilerInfo().getXsltVersion();
         StyleNodeFactory nodeFactory = getCompilation().getStyleNodeFactory(topLevel);
-        if (!isInScopeNamespace(NamespaceUri.XSLT)) {
+        if (!isInScopeNamespace(NamespaceUri.XSLT) && processorVersion < 40) {
             String message;
             if (getLocalPart().equals("stylesheet") || getLocalPart().equals("transform")) {
                 message = "Namespace for stylesheet element should be " + NamespaceConstant.XSLT;
@@ -402,11 +426,11 @@ public class LiteralResultElement extends StyleElement {
 
         }
 
-        // check there is an xsl:version attribute (it's mandatory), and copy
+        // check there is an xsl:version attribute (it's mandatory until 4.0), and copy
         // it to the new xsl:stylesheet element
 
         String version = getAttributeValue(NamespaceUri.XSLT, "version");
-        if (version == null) {
+        if (version == null && processorVersion < 40) {
             XPathException err = new XPathException("Simplified stylesheet: xsl:version attribute is missing")
                     .withErrorCode("XTSE0150")
                     .asStaticError()
@@ -431,8 +455,11 @@ public class LiteralResultElement extends StyleElement {
             NamespaceMap map = getAllNamespaces().put("xsl", NamespaceUri.XSLT);
             AttributeMap atts = EmptyAttributeMap.getInstance();
             atts = atts.put(new AttributeInfo(
-                    new NoNamespaceName("version"), BuiltInAtomicType.UNTYPED_ATOMIC, version, loc, ReceiverOption.NONE));
-
+                    new NoNamespaceName("version"), BuiltInAtomicType.UNTYPED_ATOMIC, version==null ? "4.0" : version, loc, ReceiverOption.NONE));
+            if (processorVersion >= 40 && getAttributeValue(NamespaceUri.XSLT, "expand-text") == null) {
+                atts = atts.put(new AttributeInfo(
+                        new NoNamespaceName("expand-text"), BuiltInAtomicType.UNTYPED_ATOMIC, "yes", loc, ReceiverOption.NONE));
+            }
             int st = StandardNames.XSL_STYLESHEET;
             builder.startElement(new CodedName(st, "xsl", getNamePool()), Untyped.getInstance(),
                                  atts, map, loc, ReceiverOption.NONE);

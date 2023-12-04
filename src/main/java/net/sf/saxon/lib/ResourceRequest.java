@@ -7,6 +7,8 @@
 
 package net.sf.saxon.lib;
 
+import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.event.IDFilter;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
@@ -131,6 +133,27 @@ public class ResourceRequest {
      */
 
     public Source resolve(ResourceResolver... resolvers) throws XPathException {
+
+        String requestedUri = relativeUri;
+        if (requestedUri == null) {
+            requestedUri = uri;
+        }
+        String id = null;
+
+        // Extract any fragment identifier. Note, this code is no longer used to
+        // resolve fragment identifiers in URI references passed to the document()
+        // function: the code of the document() function handles these itself.
+
+        ResourceRequest adjustedRequest = this;
+        int hash = requestedUri.indexOf('#');
+        if (hash >= 0) {
+            adjustedRequest = copy();
+            adjustedRequest.relativeUri = requestedUri.substring(0, hash);
+            id = requestedUri.substring(hash + 1);
+        }
+
+
+        Source resolvedSource = null;
         for (ResourceResolver resolver : resolvers) {
             if (resolver != null) {
                 Source s = null;
@@ -148,11 +171,20 @@ public class ResourceRequest {
                     }
                 }
                 if (s != null) {
-                    return s;
+                    resolvedSource = s;
+                    break;
                 }
             }
         }
-        return null;
+        if (resolvedSource != null) {
+            if (id != null) {
+                final String idFinal = id;
+                FilterFactory factory = next -> new IDFilter(next, idFinal);
+                resolvedSource = AugmentedSource.makeAugmentedSource(resolvedSource);
+                ((AugmentedSource) resolvedSource).addFilter(factory);
+            }
+        }
+        return resolvedSource;
     }
 
 
