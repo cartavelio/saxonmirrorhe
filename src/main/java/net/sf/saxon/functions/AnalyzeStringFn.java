@@ -89,7 +89,7 @@ public class AnalyzeStringFn extends RegexFunction {
         } else {
             input = inputItem.getUnicodeStringValue();
         }
-        RegularExpression re = getRegularExpression(arguments);
+        RegularExpression re = getRegularExpression(arguments, 1, 2);
         RegexIterator iter = re.analyze(input);
 
         //#if EE==true

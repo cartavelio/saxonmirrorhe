@@ -15,7 +15,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Glue class to interface the Jakarta regex engine to Saxon
@@ -174,7 +174,7 @@ public class ARegularExpression implements RegularExpression {
      * @throws net.sf.saxon.trans.XPathException if the replacement string is invalid
      */
     @Override
-    public UnicodeString replaceWith(UnicodeString input, Function<UnicodeString, UnicodeString> replacer) throws XPathException {
+    public UnicodeString replaceWith(UnicodeString input, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacer) throws XPathException {
         REMatcher matcher = new REMatcher(regex);
         try {
             return matcher.replaceWith(input.tidy(), replacer);
