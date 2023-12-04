@@ -116,7 +116,7 @@ public class Categories {
         // See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
         // The idea here is that the initialization occurs the first time getInstance() is called,
         // and it is automatically synchronized by virtue of the Java class loading rules.
-        static final Categories INSTANCE = new Categories();
+        public static final Categories INSTANCE = new Categories();
     }
 
     private static Categories getInstance() {
