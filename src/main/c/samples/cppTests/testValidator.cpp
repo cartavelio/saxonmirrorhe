@@ -189,10 +189,10 @@ void testValidator4(sResultCount *sresult) {
        << endl;
 
   try {
-    val->registerSchemaFromFile("../data/family-ext.xsd");
+    val->registerSchemaFromFile("data/family-ext.xsd");
 
-    val->registerSchemaFromFile("../data/family.xsd");
-    val->validate("../data/family.xml");
+    val->registerSchemaFromFile("data/family.xsd");
+    val->validate("data/family.xml");
     cout << endl << "Doc1 is OK" << endl;
     sresult->success++;
   } catch (SaxonApiException &e) {
@@ -225,9 +225,9 @@ void testValidator4a(sResultCount *sresult) {
        << endl;
 
   try {
-    val->registerSchemaFromFile("../data/family-ext.xsd");
-    val->registerSchemaFromFile("../data/family.xsd");
-    XdmNode *node = val->validateToNode("../data/family.xml");
+    val->registerSchemaFromFile("data/family-ext.xsd");
+    val->registerSchemaFromFile("data/family.xsd");
+    XdmNode *node = val->validateToNode("data/family.xml");
 
     const char *valueStr = node->toString();
     if (valueStr != nullptr) {
