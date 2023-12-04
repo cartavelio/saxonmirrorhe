@@ -361,7 +361,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "defaultCollation", FeatureCode.DEFAULT_COLLATION, "JN");
         applyProperty(props, "defaultCollection", FeatureCode.DEFAULT_COLLECTION, "JN");
         applyProperty(props, "defaultRegexEngine", FeatureCode.DEFAULT_REGEX_ENGINE, "J");
-        applyProperty(props, "displayByteCode", FeatureCode.DISPLAY_BYTE_CODE, "J");
+        applyProperty(props, "displayByteCode", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "dtdValidation", FeatureCode.DTD_VALIDATION, "JN");
         applyProperty(props, "dtdValidationRecoverable", FeatureCode.DTD_VALIDATION_RECOVERABLE, "J");
         applyProperty(props, "eagerEvaluation", FeatureCode.EAGER_EVALUATION, "JN");
@@ -374,12 +374,11 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "lazyConstructionMode", OBSOLETE_PROPERTY, "JN");
         applyProperty(props, "lineNumbering", FeatureCode.LINE_NUMBERING, "JN");
         applyProperty(props, "markDefaultedAttributes", FeatureCode.MARK_DEFAULTED_ATTRIBUTES, "J");
-        applyProperty(props, "maxCompiledClasses", FeatureCode.MAX_COMPILED_CLASSES, "J");
+        applyProperty(props, "maxCompiledClasses", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "monitorHotSpotByteCode", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "optimizationLevel", FeatureCode.OPTIMIZATION_LEVEL, "JN");
         applyProperty(props, "parser", FeatureCode.SOURCE_PARSER_CLASS, "J");
         applyProperty(props, "preEvaluateDoc", FeatureCode.PRE_EVALUATE_DOC_FUNCTION, "JN");
-        applyProperty(props, "preferJaxpParser", OBSOLETE_PROPERTY, "N");
         applyProperty(props, "recognizeUriQueryParameters", FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS, "JN");
         applyProperty(props, "regexBacktrackingLimit", FeatureCode.REGEX_BACKTRACKING_LIMIT, "JN");
         applyProperty(props, "resourceResolver", FeatureCode.RESOURCE_RESOLVER_CLASS, "J");
@@ -398,7 +397,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "suppressXPathWarnings", FeatureCode.SUPPRESS_XPATH_WARNINGS, "JN");
         applyProperty(props, "suppressXsltNamespaceCheck", FeatureCode.SUPPRESS_XSLT_NAMESPACE_CHECK, "JN");
         applyProperty(props, "thresholdForFunctionInlining", FeatureCode.THRESHOLD_FOR_FUNCTION_INLINING, "JN");
-        applyProperty(props, "thresholdForHotspotByteCode", FeatureCode.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, "J");
+        applyProperty(props, "thresholdForHotspotByteCode", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "timing", FeatureCode.TIMING, "JN");
         applyProperty(props, "traceExternalFunctions", FeatureCode.TRACE_EXTERNAL_FUNCTIONS, "JN");
         applyProperty(props, "traceListener", FeatureCode.TRACE_LISTENER_CLASS, "J");
@@ -734,7 +733,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "enableAssertions", FeatureCode.XSLT_ENABLE_ASSERTIONS, "JN");
         applyProperty(props, "initialMode", FeatureCode.XSLT_INITIAL_MODE, "JN");
         applyProperty(props, "initialTemplate", FeatureCode.XSLT_INITIAL_TEMPLATE, "JN");
-        applyProperty(props, "messageEmitter", FeatureCode.MESSAGE_EMITTER_CLASS, "J");
+        applyProperty(props, "messageEmitter", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "outputUriResolver", FeatureCode.OUTPUT_URI_RESOLVER_CLASS, "J");
         applyProperty(props, "recoveryPolicy", OBSOLETE_PROPERTY, "JN");
         applyProperty(props, "resultDocumentThreads", FeatureCode.RESULT_DOCUMENT_THREADS, "JN");

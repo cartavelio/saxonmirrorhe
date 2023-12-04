@@ -303,6 +303,7 @@
         <uri>http://saxon.sf.net/feature/debugByteCode</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <configfile>global/@debugByteCode</configfile>
         <configfiledesc>
             <p>Obsolete and ignored from Saxon 12.0.</p>
@@ -318,6 +319,7 @@
         <uri>http://saxon.sf.net/feature/debugByteCodeDir</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <configfile>global/@debugByteCodeDirectory</configfile>
         <configfiledesc>
             <p>Obsolete and ignored from Saxon 12.0.</p>
@@ -473,6 +475,7 @@
         <uri>http://saxon.sf.net/feature/displayByteCode</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <configfile>global/@displayByteCode</configfile>
         <configfiledesc>
             <p>Obsolete and ignored from Saxon 12.0.</p>
@@ -697,6 +700,7 @@
         <uri>http://saxon.sf.net/feature/generateByteCode</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <commandline for="TQ">--generateByteCode:(on|off)</commandline>
         <configfile>global/@generateByteCode</configfile>
         <configfiledesc>
@@ -765,18 +769,13 @@
         <uri>http://saxon.sf.net/feature/lazyConstructionMode</uri>
         <editions>HE PE EE</editions>
         <platforms>J</platforms>
+        <obsolete>9.8</obsolete>
         <configfile>global/@lazyConstructionMode</configfile>
         <configfiledesc>
-            <p>If true, causes temporary trees to be constructed lazily.</p>
+            <p>Obsolete and ignored from Saxon 9.8.</p>
         </configfiledesc>
         <desc>
-            <p><code>LAZY_CONSTRUCTION_MODE</code> determines whether temporary trees are
-                constructed lazily. The default setting is false; there are a few situations (but
-                not many) where setting this to true can give a performance benefit (especially a
-                memory saving).</p>
-            <p>The option is most likely to be effective when executing XQuery in "pull" mode, that
-                is, when the client calls the query processor to deliver the result as a stream of
-                nodes, rather than running the query and piping the results into a serializer.</p>
+            <p>Obsolete and ignored from Saxon 9.8.</p>
         </desc>
     </feature>
     <feature>
@@ -859,6 +858,7 @@
         <uri>http://saxon.sf.net/feature/maxCompiledClasses</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <configfile>global/@maxCompiledClasses</configfile>
         <configfiledesc>
             <p>Obsolete and ignored from Saxon 12.0.</p>
@@ -874,6 +874,7 @@
         <uri>http://saxon.sf.net/feature/messageEmitterClass</uri>
         <editions>HE PE EE</editions>
         <platforms>J</platforms>
+        <obsolete>11.1</obsolete>
         <configfile>xslt/@messageEmitter</configfile>
         <configfiledesc>
             <p>From Saxon 11.1, this option has no effect.</p>
@@ -925,6 +926,7 @@
         <uri>http://saxon.sf.net/feature/monitorHotSpotByteCode</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <commandline>-TB</commandline>
         <configfile>global/@monitorHotSpotByteCode</configfile>
         <configfiledesc>
@@ -1175,11 +1177,12 @@
         <uri>http://saxon.sf.net/feature/recoveryPolicy</uri>
         <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
+        <obsolete>10.0</obsolete>
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
         <desc>
             <p>At one time this property controlled how recoverable errors were handled
             (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-            specification, so the property is now deprecated.</p>
+            specification, so the property is deprecated from Saxon 10.0.</p>
         </desc>
     </feature>
     <feature>
@@ -1189,17 +1192,19 @@
         <uri>http://saxon.sf.net/feature/recoveryPolicyName</uri>
         <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
+        <obsolete>10.0</obsolete>
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
         <configfile>xslt/@recoveryPolicy</configfile>
         <configfiledesc>
             <p>Previously used to indicate how XSLT recoverable errors were handled, but since the
-                XSLT 3.0 specification has eliminated these, the property is now deprecated.</p>
+                XSLT 3.0 specification has eliminated these, the property is deprecated from Saxon
+                10.0.</p>
         </configfiledesc>
         <typedesc>recoverWithWarnings|recoverSilently| doNotRecover</typedesc>
         <desc>
             <p>At one time this property controlled how recoverable errors were handled
                 (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-                specification, so the property is now deprecated.</p>
+                specification, so the property is deprecated from Saxon 10.0.</p>
         </desc>
     </feature>
     <feature>
@@ -1677,6 +1682,7 @@
         <uri>http://saxon.sf.net/feature/thresholdForCompilingTypes</uri>
         <editions>HE PE EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <configfile>xsd/@thresholdForCompilingTypes</configfile>
         <configfiledesc>
             <p>Obsolete and ignored from Saxon 12.0.</p>
@@ -2050,6 +2056,7 @@
         <uri>http://saxon.sf.net/feature/version-warning</uri>
         <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
+        <obsolete>9.8</obsolete>
         <configfile>xslt/@versionWarning</configfile>
         <configfiledesc>
             <p>False suppresses the warning produced when the XSLT processor version is not the same
@@ -2760,6 +2767,7 @@
         <uri>http://saxon.sf.net/feature/thresholdForHotspotByteCode</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
+        <obsolete>12.0</obsolete>
         <configfile>global/@thresholdForHotspotByteCode</configfile>
         <configfiledesc>
             <p>Obsolete and ignored from Saxon 12.0.</p>
