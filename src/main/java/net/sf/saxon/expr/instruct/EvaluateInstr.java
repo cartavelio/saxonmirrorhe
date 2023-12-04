@@ -523,6 +523,9 @@ public final class EvaluateInstr extends Expression {
                     // Expression needs to be compiled. First create the static context...
 
                     int version = instr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+//                    if (version == 30) {
+//                        version = 31;
+//                    }
                     MapItem options = (optionsEval == null ? new HashTrieMap() : (MapItem) optionsEval.eval(context));
 
                     IndependentContext env = new IndependentContext(config);
@@ -546,7 +549,7 @@ public final class EvaluateInstr extends Expression {
                     for (FunctionLibrary lib : libraryList0.getLibraryList()) {
                         if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceUri.FN)) {
                             // Exclude XSLT-defined functions
-                            libraryList1.addFunctionLibrary(config.getXPathFunctionSet(version));
+                            libraryList1.addFunctionLibrary(config.getXPathFunctionSet(version == 40 ? 40 : 31));   // see bug 6221
                         } else if (lib instanceof StylesheetFunctionLibrary || lib instanceof ExecutableFunctionLibrary) {
                             libraryList1.addFunctionLibrary(new PublicStylesheetFunctionLibrary(lib));
                         } else {

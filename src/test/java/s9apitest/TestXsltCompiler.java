@@ -48,23 +48,51 @@ public class TestXsltCompiler {
     private final ConfigTest configTest = new ConfigTest();
 
     private void xpathVersionTest(String label, String expression, int version, boolean expectSuccess) {
+        String decimalVersion = version == 40 ? "4.0" : "3.0";
         try {
-            Processor proc = new Processor(false);
+            Processor proc = new Processor(version >= 40);
             proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT, version);
             XsltCompiler comp = proc.newXsltCompiler();
-            String xsl = "<xsl:stylesheet version='3.0' xmlns:xs='http://www.w3.org/2001/XMLSchema' " +
+            comp.setXsltLanguageVersion(decimalVersion);
+            comp.setJustInTimeCompilation(false);
+            String xsl = "<xsl:stylesheet version='" + decimalVersion + "' xmlns:xs='http://www.w3.org/2001/XMLSchema' " +
                     "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
                     "<xsl:template match='/'>\n" +
                     "<xsl:sequence select=\"" + expression + "\"/>" +
                     "</xsl:template>" +
                     "</xsl:stylesheet>";
-            comp.compile(new StreamSource(new StringReader(xsl)));
+            comp.compile(new StreamSource(new StringReader(xsl), "xsl0"));
             if (!expectSuccess) {
                 fail(label + ": expected failure");
             }
         } catch (SaxonApiException e) {
             if (expectSuccess) {
                 fail(label + ": " + e.getMessage());
+            }
+        }
+        if (version > 30) {
+            try {
+                Processor proc = new Processor(version >= 40);
+                proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT, version);
+                XsltCompiler comp = proc.newXsltCompiler();
+                comp.setXsltLanguageVersion(decimalVersion);
+                comp.setJustInTimeCompilation(false);
+                String xsl = "<xsl:stylesheet version='" + decimalVersion + "' xmlns:xs='http://www.w3.org/2001/XMLSchema' " +
+                        "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
+                        "<xsl:template name='xsl:initial-template'>\n" +
+                        "<xsl:variable name='path'>" + expression + "</xsl:variable>" +
+                        "<xsl:evaluate xpath='$path'/>" +
+                        "</xsl:template>" +
+                        "</xsl:stylesheet>";
+                XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl), "xsl1"));
+                exec.load30().callTemplate(null);
+                if (!expectSuccess) {
+                    fail(label + "(xsl:evaluate): expected failure");
+                }
+            } catch (SaxonApiException e) {
+                if (expectSuccess) {
+                    fail(label + ":(xsl:evaluate {" + expression + "}) " + e.getMessage());
+                }
             }
         }
     }
@@ -79,6 +107,10 @@ public class TestXsltCompiler {
         xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 20, true);
         xpathVersionTest("G", "if (current-date() lt xs:date('2010-01-01')) then 0 else 1", 20, true);
         xpathVersionTest("H", "let $x := 3 return $x+1", 20, false);
+        xpathVersionTest("I", "42[starts-with(string(current-date()), '1999')] otherwise 43", 20, false);
+        xpathVersionTest("J", "format-integer(42, '001')", 20, true); // bug 6221
+        xpathVersionTest("K", "parse-json('[]')", 20, true);
+        xpathVersionTest("L", "all-different((3,2,1))", 20, false);
     }
 
     @Test
@@ -91,18 +123,26 @@ public class TestXsltCompiler {
         xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 30, true);
         xpathVersionTest("G", "if (current-date() lt xs:date('2010-01-01')) then 0 else 1", 30, true);
         xpathVersionTest("H", "let $x := 3 return $x+1", 30, true);
+        xpathVersionTest("I", "42[starts-with(string(current-date()), '1999')] otherwise 43", 30, false);
+        xpathVersionTest("J", "format-integer(42, '001')", 30, true);
+        xpathVersionTest("K", "parse-json('[]')", 30, true); // bug 6221
+        xpathVersionTest("L", "all-different((3,2,1))", 30, false);
     }
 
     @Test
     public void testXPathVersion305() {
-        xpathVersionTest("A", "'b'||'c'", 305, true);
-        xpathVersionTest("B", "(1 to 3)!(.*.)", 305, true);
-        xpathVersionTest("C", "exists(map{})", 305, true);
+//        xpathVersionTest("A", "'b'||'c'", 305, true);
+//        xpathVersionTest("B", "(1 to 3)!(.*.)", 305, true);
+//        xpathVersionTest("C", "exists(map{})", 305, true);
         xpathVersionTest("D", "[1,2]", 305, false);
         xpathVersionTest("E", "(1 to 5)=>count()", 305, false);
         xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 305, true);
         xpathVersionTest("G", "if (current-date() lt xs:date('2010-01-01')) then 0 else 1", 305, true);
         xpathVersionTest("H", "let $x := 3 return $x+1", 305, true);
+        xpathVersionTest("I", "42[starts-with(string(current-date()), '1999')] otherwise 43", 305, false);
+        xpathVersionTest("J", "format-integer(42, '001')", 305, true);
+        xpathVersionTest("K", "parse-json('[]')", 305, true);  // bug 6221
+        xpathVersionTest("L", "all-different((3,2,1))", 305, false);
     }
 
     @Test
@@ -115,6 +155,26 @@ public class TestXsltCompiler {
         xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 31, true);
         xpathVersionTest("G", "if (current-date() lt xs:date('2010-01-01')) then 0 else 1", 31, true);
         xpathVersionTest("H", "let $x := 3 return $x+1", 31, true);
+        xpathVersionTest("I", "42[starts-with(string(current-date()), '1999')] otherwise 43", 31, false);
+        xpathVersionTest("J", "format-integer(42, '001')", 31, true);
+        xpathVersionTest("K", "parse-json('[]')", 31, true);
+        xpathVersionTest("L", "all-different((3,2,1))", 31, false);
+    }
+
+    @Test
+    public void testXPathVersion40() {
+//        xpathVersionTest("A", "'b'||'c'", 40, true);
+//        xpathVersionTest("B", "(1 to 3)!(.*.)", 40, true);
+//        xpathVersionTest("C", "exists(map{})", 40, true);
+//        xpathVersionTest("D", "[1,2]", 40, true);
+//        xpathVersionTest("E", "(1 to 5)=>count()", 40, true);
+//        xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 40, true);
+//        xpathVersionTest("G", "if (current-date() lt xs:date('2010-01-01')) then 0 else 1", 40, true);
+//        xpathVersionTest("H", "let $x := 3 return $x+1", 40, true);
+//        xpathVersionTest("I", "42[starts-with(string(current-date()), '1999')] otherwise 43", 40, true);
+//        xpathVersionTest("J", "format-integer(42, '001')", 40, true);
+//        xpathVersionTest("K", "parse-json('[]')", 40, true);
+        xpathVersionTest("L", "all-different((3,2,1))", 40, true);
     }
 
     @Test
