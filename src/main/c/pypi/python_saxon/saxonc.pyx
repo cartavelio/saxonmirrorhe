@@ -4224,7 +4224,7 @@ cdef class PyXdmValue:
             raise Warning('Empty string returned')
         else:
             py_to_string = make_py_str(c_string)
-            '''saxoncClasses.SaxonProcessor.deleteString(c_string)'''
+            saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_to_string
 
 
@@ -4945,7 +4945,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         """
         cdef const char * c_string = self.derivedaptr.toString()
         py_string_i = make_py_str(c_string)
-        '''saxoncClasses.SaxonProcessor.deleteString(c_string)'''
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
      def __repr__(self):
@@ -5017,13 +5017,13 @@ cdef class PyXdmFunctionItem(PyXdmItem):
      def __repr__(self):
         cdef const char * c_string = self.derivedfptr.toString()
         py_string_i = make_py_str(c_string)
-        '''saxoncClasses.SaxonProcessor.deleteString(c_string)'''
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
      def __str__(self):
         cdef const char * c_string = self.derivedfptr.toString()
         py_string_i = make_py_str(c_string)
-        '''saxoncClasses.SaxonProcessor.deleteString(c_string)'''
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
      @property
@@ -5478,7 +5478,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
      def __str__(self):
         cdef const char * c_string = self.derivedaaptr.toString()
         py_string_i = make_py_str(c_string)
-        '''saxoncClasses.SaxonProcessor.deleteString(c_string)'''
+        saxoncClasses.SaxonProcessor.deleteString(c_string)
         return py_string_i
 
      def __iter__(self):
