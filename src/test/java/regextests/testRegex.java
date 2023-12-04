@@ -11,8 +11,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
@@ -103,9 +109,9 @@ public class testRegex {
             Processor p = new Processor(true);
             XPathCompiler c = p.newXPathCompiler();
             XdmItem result = c.evaluateSingle("matches(' ', '^\\x20$', ';j')", null);
-            Assertions.assertTrue(((XdmAtomicValue)result).getBooleanValue());
+            assertTrue(((XdmAtomicValue)result).getBooleanValue());
             result = c.evaluateSingle("matches('Z ', '^z\\x20$', 'i;j')", null);
-            Assertions.assertTrue(((XdmAtomicValue) result).getBooleanValue());
+            assertTrue(((XdmAtomicValue) result).getBooleanValue());
         } catch (SaxonApiException e) {
             Assertions.fail();
         }
@@ -136,6 +142,46 @@ public class testRegex {
             Assertions.assertEquals("1986/3/20$", result.getStringValue());
         } catch (SaxonApiException e) {
             Assertions.fail(e);
+        }
+    }
+
+    @Test
+    public void testParallelResourceInitialization() {   // Bug 6225/6226
+        try {
+            Processor proc = new Processor(true);
+            final XPathCompiler xpath = proc.newXPathCompiler();
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            for (int i = 0; i < 300; i++) {
+                executor.execute(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            XPathExecutable exec1 = xpath.compile("matches(., 'banana', 'i')");
+                            XPathExecutable exec2 = xpath.compile("matches(., '\\p{Lu}+')");
+                            XPathExecutable exec3 = xpath.compile("matches(., '\\p{IsLatin1}+')");
+                            XPathSelector s1 = exec1.load();
+                            s1.setContextItem(new XdmAtomicValue("Banana"));
+                            assertTrue(s1.effectiveBooleanValue());
+                            XPathSelector s2 = exec2.load();
+                            s2.setContextItem(new XdmAtomicValue("BANANA"));
+                            assertTrue(s2.effectiveBooleanValue());
+                            XPathSelector s3 = exec2.load();
+                            s3.setContextItem(new XdmAtomicValue("BAÑANA"));
+                            assertTrue(s3.effectiveBooleanValue());
+                        } catch (Throwable ex) {
+                            System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
+                            ex.printStackTrace();
+                            fail();
+                        }
+                    }
+                });
+            }
+            executor.shutdown();
+            executor.awaitTermination(300, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
     }
 

@@ -28,7 +28,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
- * This class holds data about the case-variants of Unicode characters. The data is automatically
+ * This singleton class holds data about the case-variants of Unicode characters. The data is held
+ * in the resource file {@code casevariants.xml}, which is read on first use; the file has been automatically
  * generated from the Unicode database.
  */
 public class CaseVariants {
@@ -36,14 +37,25 @@ public class CaseVariants {
     // Use one hashmap for characters with a single case variant, another for characters with multiple
     // case variants, to reduce the number of objects that need to be allocated
 
-    private static IntToIntMap monoVariants = null;
-    private static IntHashMap<int[]> polyVariants = null;
+    private final IntToIntMap monoVariants = new IntToIntHashMap(2500);
+    private final IntHashMap<int[]> polyVariants = new IntHashMap<>(100);
 
+    private CaseVariants() {
+        build();
+    }
 
-    static void build() {
+    private static class Holder {
+        // See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+        // The idea here is that the initialization occurs the first time getInstance() is called,
+        // and it is automatically synchronized by virtue of the Java class loading rules.
+        static final CaseVariants INSTANCE = new CaseVariants();
+    }
 
-        monoVariants = new IntToIntHashMap(2500);
-        polyVariants = new IntHashMap<>(100);
+    private static CaseVariants getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private void build() {
 
         InputStream in = Version.platform.locateResource("casevariants.xml", new ArrayList<>());
         if (in == null) {
@@ -51,10 +63,9 @@ public class CaseVariants {
         }
 
         Configuration config = new Configuration();
-        ParseOptions options = new ParseOptions()
-                .withSchemaValidationMode(Validation.SKIP)
-                .withDTDValidationMode(Validation.SKIP)
-                .withPleaseCloseAfterUse(true);
+        ParseOptions options = new ParseOptions();
+        options = options.withSchemaValidationMode(Validation.SKIP);
+        options = options.withDTDValidationMode(Validation.SKIP);
         NodeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "casevariants.xml"), options).getRootNode();
@@ -62,19 +73,18 @@ public class CaseVariants {
             throw new RuntimeException("Failed to build casevariants.xml", e);
         }
 
-        AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT,
-                                            new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
+        AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
         while (true) {
             NodeInfo item = iter.next();
             if (item == null) {
                 break;
             }
-            String code = item.getAttributeValue(NamespaceUri.NULL, "n");
+            String code = item.getAttributeValue("", "n");
             int icode = Integer.parseInt(code, 16);
-            String variants = item.getAttributeValue(NamespaceUri.NULL, "v");
+            String variants = item.getAttributeValue("", "v");
             String[] vhex = variants.split(",");
             int[] vint = new int[vhex.length];
-            for (int i=0; i<vhex.length; i++) {
+            for (int i = 0; i < vhex.length; i++) {
                 vint[i] = Integer.parseInt(vhex[i], 16);
             }
             if (vhex.length == 1) {
@@ -92,15 +102,14 @@ public class CaseVariants {
      * @return the case variants of the character, excluding the character itself
      */
 
-    public synchronized static int[] getCaseVariants(int code) {
-        if (monoVariants == null) {
-            build();
-        }
+    public static int[] getCaseVariants(int code) {
+        CaseVariants variants = getInstance();
+        IntToIntMap monoVariants = variants.monoVariants;
         int mono = monoVariants.get(code);
         if (mono != monoVariants.getDefaultValue()) {
             return new int[]{mono};
         } else {
-            int[] result = polyVariants.get(code);
+            int[] result = variants.polyVariants.get(code);
             if (result == null) {
                 return IntArraySet.EMPTY_INT_ARRAY;
             } else {

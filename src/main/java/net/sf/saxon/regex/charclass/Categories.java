@@ -31,10 +31,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Data for Regular expression character categories. The data is in an XML file derived from the Unicode
+ * Singleton class holding data for Regular expression character categories.
+ * <p>The data is read from an XML file derived from the Unicode
  * database (In Saxon 9.6, this is based on Unicode 6.2.0). Since Saxon 9.4,
  * we no longer make use of Java's support for character categories since there are too many differences
- * from Unicode.
+ * from Unicode.</p>
+ * <p>Some commonly used categories are hard-coded and made available as static constants.</p>
  */
 public class Categories {
 
@@ -104,11 +106,24 @@ public class Categories {
     }
 
 
-    private static HashMap<String, Category> CATEGORIES = null;
+    private final HashMap<String, Category> CATEGORIES = new HashMap<>(30);
 
-    static void build() {
+    private Categories() {
+        build();
+    }
 
-        CATEGORIES = new HashMap<>(30);
+    private static class Holder {
+        // See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+        // The idea here is that the initialization occurs the first time getInstance() is called,
+        // and it is automatically synchronized by virtue of the Java class loading rules.
+        static final Categories INSTANCE = new Categories();
+    }
+
+    private static Categories getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private void build() {
 
         InputStream in = Version.platform.locateResource("categories.xml", new ArrayList<>());
         if (in == null) {
@@ -142,7 +157,7 @@ public class Categories {
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));
             }
             CATEGORIES.put(cat, new Category(cat, new IntSetPredicate(irs)));
-        };
+        }
 
         String c = "CLMNPSZ";
         for (int i = 0; i < c.length(); i++) {
@@ -195,10 +210,7 @@ public class Categories {
      */
 
     public synchronized static Category getCategory(String cat) {
-        if (CATEGORIES == null) {
-            build();
-        }
-        return CATEGORIES.get(cat);
+        return getInstance().CATEGORIES.get(cat);
     }
 
 

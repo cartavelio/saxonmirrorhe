@@ -27,23 +27,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class provides knowledge of the names and contents of Unicode character blocks,
- * as referenced using the \p{IsXXXXX} construct in a regular expression. The underlying
+ * This singleton class provides knowledge of the names and contents of Unicode character blocks,
+ * as referenced using the <code>\p{IsXXXXX}</code> construct in a regular expression. The underlying
  * data is in an XML resource file UnicodeBlocks.xml
  */
 public class UnicodeBlocks {
 
-    private static Map<String, IntSet> blocks = null;
+    private final Map<String, IntSet> blocks = new HashMap<>(250);
+
+    private UnicodeBlocks() {
+        build();
+    }
+
+    private static class Holder {
+        // See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+        // The idea here is that the initialization occurs the first time getInstance() is called,
+        // and it is automatically synchronized by virtue of the Java class loading rules.
+        static final UnicodeBlocks INSTANCE = new UnicodeBlocks();
+    }
+
+    private static UnicodeBlocks getInstance() {
+        return Holder.INSTANCE;
+    }
 
     public static IntSet getBlock(String name) throws RESyntaxException {
-        if (blocks == null) {
-            readBlocks(new Configuration());
-        }
-        IntSet cc = blocks.get(name);
+        UnicodeBlocks instance = getInstance();
+        IntSet cc = instance.blocks.get(name);
         if (cc != null) {
             return cc;
         }
-        cc = blocks.get(normalizeBlockName(name));
+        cc = instance.blocks.get(normalizeBlockName(name));
         return cc;
     }
 
@@ -67,13 +80,13 @@ public class UnicodeBlocks {
         return fsb.toString();
     }
 
-    private synchronized static void readBlocks(Configuration config) throws RESyntaxException {
-        blocks = new HashMap<>(250);
+    private void build() throws RESyntaxException {
         InputStream in = Version.platform.locateResource("unicodeBlocks.xml", new ArrayList<>());
         if (in == null) {
             throw new RESyntaxException("Unable to read unicodeBlocks.xml file");
         }
 
+        Configuration config = new Configuration();
         ParseOptions options = new ParseOptions()
                 .withSchemaValidationMode(Validation.SKIP)
                 .withDTDValidationMode(Validation.SKIP)
