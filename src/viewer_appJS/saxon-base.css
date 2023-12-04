@@ -108,6 +108,9 @@ a.bodylink{
     font-weight:normal;
     text-decoration:none;
 }
+a.code{
+    font-family:monospace;
+}
 
 /*/\* used for main page headings *\/
 h1,
