@@ -238,6 +238,7 @@ PHP_METHOD(XPathProcessor, importSchemaNamespace) {
 
 PHP_METHOD(XPathProcessor, setUnprefixedElementMatchingPolicy) {
   long policy;
+  XPathProcessor *xpathProcessor;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &policy) == FAILURE) {
     RETURN_NULL();
   }
@@ -247,7 +248,7 @@ PHP_METHOD(XPathProcessor, setUnprefixedElementMatchingPolicy) {
                                 XtOffsetOf(xpathProcessor_object, std));
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr) {
-    xpathProcessor->setUnprefixedElementMatchingPolicy(policy);
+    xpathProcessor->setUnprefixedElementMatchingPolicy(xpathProcessor->convertEnumPolicy((int)policy));
   }
 }
 
@@ -600,8 +601,8 @@ zend_function_entry XPathProcessor_methods[] = {
                                    ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor, setContextFile, arginfo_saxonc_xpath_setContextFile,ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor, effectiveBooleanValue,arginfo_saxonc_xpath_effectiveBooleanValue,ZEND_ACC_PUBLIC)
-        PHP_ME(XPathProcessor, setUnprefixedElementMatchingPolicy,arginfo_saxonc_xpath_setUnprefixedElementMatchingPolicy,ZEND_ACC_PUBLIC)
-
+        PHP_ME(XPathProcessor, setUnprefixedElementMatchingPolicy,
+        arginfo_saxonc_xpath_setUnprefixedElementMatchingPolicy,ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor, evaluate, arginfo_saxonc_xpath_evaluate, ZEND_ACC_PUBLIC)
         PHP_ME(XPathProcessor, evaluateSingle, arginfo_saxonc_xpath_evaluateSingle, ZEND_ACC_PUBLIC)
                 PHP_ME(XPathProcessor, setParameter,
