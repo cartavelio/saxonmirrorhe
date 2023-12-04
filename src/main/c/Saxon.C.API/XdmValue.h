@@ -186,9 +186,9 @@ protected:
     valueType = nullptr;
     xdmSize = 0;
     toStringValue = nullptr;
-    values_cap = 1;
-    values = null;
-    relinquished_values = null;
+    values_cap = 0;
+    values = nullptr;
+    relinquished_values = nullptr;
     //relinquished_values[0] = 0;
   }
 
