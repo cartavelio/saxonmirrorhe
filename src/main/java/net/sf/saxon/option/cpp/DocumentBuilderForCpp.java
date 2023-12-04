@@ -19,7 +19,6 @@ import org.graalvm.word.WordFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 public class DocumentBuilderForCpp extends SaxonCAPI {
 
@@ -41,7 +40,7 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
             if(c_baseUri != WordFactory.nullPointer()) {
                 try {
-                    String baseUri = CTypeConversion.toJavaString(c_baseUri);
+                    String baseUri = SaxonCAPI.toJavaString(c_baseUri, WordFactory.nullPointer());
                     String userDir = System.getProperty("user.dir");
                     char separatorChar = '/';
                     if (File.separatorChar != '/') {

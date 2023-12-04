@@ -61,7 +61,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         DocumentBuilder * newDocumentBuilder() except +raise_py_error
 
-        XdmAtomicValue * makeStringValue(const char* str1)
+        XdmAtomicValue * makeStringValue(const char* str1, const char* encoding)
 
         XdmAtomicValue * makeIntegerValue(int i)
 
@@ -103,11 +103,17 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         const char * getStringValue(XdmItem * item)
 
-        XdmNode * parseXmlFromString(const char* source, SchemaValidator * validator) except +raise_py_error
+        XdmNode * parseXmlFromString(const char* source, const char* encoding, SchemaValidator * validator) except +raise_py_error
+
+        XdmNode * parseXmlFromString(const char* source) except +raise_py_error
 
         XdmNode * parseXmlFromFile(const char* source, SchemaValidator * validator)  except +raise_py_error
 
         XdmNode * parseXmlFromUri(const char* source, SchemaValidator * validator)   except +raise_py_error
+
+        XdmValue * parseJsonFromString(const char* source, const char* encoding) except +raise_py_error
+
+        XdmValue * parseJsonFromFile(const char* source)  except +raise_py_error
 
         bool isSchemaAwareProcessor()
 
@@ -138,7 +144,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         const char * getBaseUri()
 
-        XdmNode* parseXmlFromString(const char * content) except +raise_py_error
+        XdmNode* parseXmlFromString(const char * content, const char * encoding) except +raise_py_error
 
         XdmNode* parseXmlFromFile(const char * filename)  except +raise_py_error
 
@@ -203,13 +209,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         XsltExecutable * compileFromFile(const char* stylesheet)  except +raise_py_error
 
         # compile a stylesheet received as a string.
-        XsltExecutable * compileFromString(const char* stylesheet)   except +raise_py_error
+        XsltExecutable * compileFromString(const char* stylesheet, const char * encoding)   except +raise_py_error
 
         # Get the stylesheet associated via the xml-stylesheet processing instruction
         XsltExecutable * compileFromAssociatedFile(const char* sourceFile)    except +raise_py_error
 
         # Compile a stylesheet received as a string and save to an exported file (SEF).
-        void compileFromStringAndSave(const char* stylesheet, const char* filename)  except +raise_py_error
+        void compileFromStringAndSave(const char* stylesheet, const char* filename, const char * encoding)  except +raise_py_error
 
         # Compile a stylesheet received as a file and save to an exported file (SEF).
         void compileFromFileAndSave(const char* xslFilename, const char* filename)  except +raise_py_error

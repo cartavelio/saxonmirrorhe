@@ -583,6 +583,90 @@ PHP_METHOD(SaxonProcessor, setcwd) {
   }
 }
 
+
+PHP_METHOD(SaxonProcessor, parseJsonFromString) {
+  SaxonProcessor *saxonProcessor;
+  char *source;
+  size_t len1;
+
+  if (ZEND_NUM_ARGS() == 1 &&
+      zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
+    RETURN_NULL();
+  } 
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  saxonProcessor_object *obj =
+      (saxonProcessor_object *)((char *)pobj -
+                                XtOffsetOf(saxonProcessor_object, std));
+  assert(obj != nullptr);
+  saxonProcessor = obj->saxonProcessor;
+  if (saxonProcessor != nullptr) {
+
+    XdmNode *node = saxonProcessor->parseJsonFromString(source);
+    if (node != nullptr) {
+      if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+        RETURN_NULL();
+      } else {
+        node->incrementRefCount();
+        zend_object *vobj = Z_OBJ_P(return_value);
+        xdmNode_object *xdmNObj =
+            (xdmNode_object *)((char *)vobj - XtOffsetOf(xdmNode_object, std));
+        assert(xdmNObj != nullptr);
+
+        xdmNObj->xdmNode = node;
+      }
+    } else {
+      if (obj->saxonProcessor->exceptionOccurred()) {
+        // TODO throw exception
+      }
+    }
+  } else {
+    RETURN_NULL();
+  }
+}
+
+PHP_METHOD(SaxonProcessor, parseJsonFromFile) {
+  SaxonProcessor *saxonProcessor;
+  char *source;
+  size_t len1;
+
+  if (ZEND_NUM_ARGS() == 1 &&
+      zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  saxonProcessor_object *obj =
+      (saxonProcessor_object *)((char *)pobj -
+                                XtOffsetOf(saxonProcessor_object, std));
+  assert(obj != nullptr);
+  saxonProcessor = obj->saxonProcessor;
+  if (saxonProcessor != nullptr) {
+
+    XdmNode *node = saxonProcessor->parseXmlFromFile(source);
+    if (node != nullptr) {
+
+      if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+        RETURN_NULL();
+      } else {
+
+        zend_object *vvobj = Z_OBJ_P(return_value);
+        xdmNode_object *vobj =
+            (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+
+        assert(vobj != nullptr);
+        node->incrementRefCount();
+        vobj->xdmNode = node;
+        return;
+      }
+    } else {
+    }
+  }
+  RETURN_NULL();
+}
+
+
+
 PHP_METHOD(SaxonProcessor, parseXmlFromString) {
   SaxonProcessor *saxonProcessor;
   SchemaValidator *validator = nullptr;

@@ -28,6 +28,26 @@ import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.word.WordFactory;
 
+class Encoding {
+    private String encoding;
+
+    public Encoding(String e) {
+        this.encoding = e;
+    }
+
+    public Encoding() {
+        this.encoding = null;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+};
+
 
 /**
  * * This class is to use with SaxonC on C++
@@ -148,13 +168,13 @@ public class Xslt30Processor extends SaxonCAPI {
         }
 
         if (ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
-        Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(xsl), ResourceRequest.XSLT_NATURE);
+        Source source = resolveFileToSource(processor, cwd, SaxonCAPI.toJavaString(xsl, WordFactory.nullPointer()), ResourceRequest.XSLT_NATURE);
 
         XsltPackage pack = compilePackage(xslt30ProcessorRef, ccwd, source, processorDataAccumulatorRef);
-        File file = resolveFile(processor, cwd, CTypeConversion.toJavaString(outFilename), ResourceRequest.XSLT_NATURE);
+        File file = resolveFile(processor, cwd, SaxonCAPI.toJavaString(outFilename, WordFactory.nullPointer()), ResourceRequest.XSLT_NATURE);
         pack.save(file);
         return SaxonCAPI.STATUS_OK;
 
@@ -180,10 +200,10 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
         if (ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
-        Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(xsl), ResourceRequest.XSLT_NATURE);
+        Source source = resolveFileToSource(processor, cwd, SaxonCAPI.toJavaString(xsl, WordFactory.nullPointer()), ResourceRequest.XSLT_NATURE);
 
         XsltPackage pack = compilePackage(xslt30ProcessorRef, ccwd, source, processorDataAccumulatorRef);
         ObjectHandle handle = SaxonCAPI.createHandle(pack);
@@ -197,10 +217,10 @@ public class Xslt30Processor extends SaxonCAPI {
         XsltCompiler compiler = processor.newXsltCompiler();
         String cwd = null;
         if (ccwd.isNonNull()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
-        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
 
 
         compiler.setErrorList(SaxonCException.errorList);
@@ -221,13 +241,13 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long save(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer filename) throws SaxonApiException {
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
+            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         if(filename == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
         XsltExecutable executable = objectHandles.get(executableRef);
-        File file = SaxonCAPI.resolveFile(executable.getProcessor(), cwd, CTypeConversion.toJavaString(filename), null);
+        File file = SaxonCAPI.resolveFile(executable.getProcessor(), cwd, SaxonCAPI.toJavaString(filename, WordFactory.nullPointer()), null);
         FileOutputStream stream = null;
         try {
             stream = new FileOutputStream(file);
@@ -258,18 +278,22 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("Output filename is null");
         }
 
-        String str = CTypeConversion.toJavaString(cstr);
-        String filename = CTypeConversion.toJavaString(cfilename);
+
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
+            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
+
+        XsltCompiler compiler = processor.newXsltCompiler();
+        Encoding encoding = new Encoding();
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, encoding);
+
+        String str = SaxonCAPI.toJavaString2(cstr, encoding.getEncoding());
+        String filename = SaxonCAPI.toJavaString(cfilename, WordFactory.nullPointer());
         if (processor == null || str == null || filename == null) {
             throw new SaxonApiException("Stylesheet string or output filename is null");
-
         }
-        XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+
         compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = null;
         try {
@@ -304,10 +328,10 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
+            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
         XdmNode node = objectHandles.get(xdmNodeRef);
         if (node == null) {
             SaxonApiException ex = new SaxonApiException("Failed to create Stylesheet from XdoNode");
@@ -316,7 +340,7 @@ public class Xslt30Processor extends SaxonCAPI {
         compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = compiler.compilePackage(node.asSource());
 
-        String filename = CTypeConversion.toJavaString(cfilename);
+        String filename = SaxonCAPI.toJavaString(cfilename, WordFactory.nullPointer());
 
         if(pack != null) {
             File file = resolveFile(processor, cwd, filename, ResourceRequest.XSLT_NATURE);
@@ -337,9 +361,9 @@ public class Xslt30Processor extends SaxonCAPI {
             XsltCompiler compiler = processor.newXsltCompiler();
             String cwd = null;
             if(ccwd != WordFactory.nullPointer()) {
-                cwd =   CTypeConversion.toJavaString(ccwd);
+                cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
             }
-            setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+            setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
             boolean jit = CTypeConversion.toBoolean(cjit);
             if (jit) {
                 compiler.setJustInTimeCompilation(jit);
@@ -352,7 +376,7 @@ public class Xslt30Processor extends SaxonCAPI {
             /*if (packagesToLoad.size() > 0) {
                 compilePackages(compiler);
             } TODO */
-            Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(filename), ResourceRequest.XML_NATURE);
+            Source source = resolveFileToSource(processor, cwd, SaxonCAPI.toJavaString(filename, WordFactory.nullPointer()), ResourceRequest.XML_NATURE);
 
             //compiler.setErrorListener(errorListener);
             compiler.setSchemaAware(xslt30Processor.schemaAware);
@@ -384,10 +408,10 @@ public class Xslt30Processor extends SaxonCAPI {
         XsltCompiler compiler = processor.newXsltCompiler();
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
+            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
-        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
         boolean jit = CTypeConversion.toBoolean(cjit);
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
@@ -397,7 +421,7 @@ public class Xslt30Processor extends SaxonCAPI {
         if(cfilename == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
-        Source source = resolveFileToSource(processor, cwd, CTypeConversion.toJavaString(cfilename), ResourceRequest.XSLT_NATURE);
+        Source source = resolveFileToSource(processor, cwd, SaxonCAPI.toJavaString(cfilename, WordFactory.nullPointer()), ResourceRequest.XSLT_NATURE);
 
         //compiler.setErrorListener(errorListener);
         compiler.setSchemaAware(xslt30Processor.schemaAware);
@@ -429,9 +453,12 @@ public class Xslt30Processor extends SaxonCAPI {
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
+            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+
+        Encoding encoding = new Encoding();
+
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, encoding);
 
         boolean jit = CTypeConversion.toBoolean(cjit);
         if (jit) {
@@ -442,7 +469,7 @@ public class Xslt30Processor extends SaxonCAPI {
         if(stylesheet == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
-        StringReader reader = new StringReader(CTypeConversion.toJavaString(stylesheet));
+        StringReader reader = new StringReader(SaxonCAPI.toJavaString2(stylesheet, encoding.getEncoding()));
         compiler.setSchemaAware(xslt30Processor.schemaAware);
         source = new StreamSource(reader);
         if (cwd != null && cwd.length() > 0) {
@@ -477,10 +504,10 @@ public class Xslt30Processor extends SaxonCAPI {
 
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
+            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
-        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
         boolean jit = CTypeConversion.toBoolean(cjit);
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
@@ -503,7 +530,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    private static void setStaticParametersFromArray(XsltCompiler compiler, String cwd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    private static void setStaticParametersFromArray(XsltCompiler compiler, String cwd, ObjectHandle processorDataAccumulatorRef, Encoding encoding) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;
         Processor processor = compiler.getProcessor();
         if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
@@ -567,6 +594,9 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
+                } else if(sparams[i].equals("!input-encoding")) {
+                    String value = (String)values[i];
+                    encoding.setEncoding(value);
                 }
             }
 
@@ -628,7 +658,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
-        String cwd= CTypeConversion.toJavaString(ccwd);
+        String cwd= SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
         } catch(Exception ex) {
@@ -755,8 +785,8 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
-        String outFilename = CTypeConversion.toJavaString(coutFilename);
-        String cwd = CTypeConversion.toJavaString(ccwd);
+        String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
+        String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         if (outFilename != null) {
             if (debug) {
                 System.err.println("DEBUG: XSLT30TransformerForCpp param: " + outFilename);
@@ -825,8 +855,8 @@ public class Xslt30Processor extends SaxonCAPI {
     @CEntryPoint(name = "j_applyTemplatesReturningString", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer applyTemplatesReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable = objectHandles.get(executableRef);
         Object sourceObji = objectHandles.get(sourceObjRef);
@@ -887,6 +917,15 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
+        String charsetFlag  = System.getenv("SAXONC_DEBUG_CHARSET_FLAG");
+        if(charsetFlag != null && charsetFlag.equals("true")) {
+            String charsetStr = serializer.getOutputProperty(Serializer.Property.ENCODING);
+            if(charsetStr != null) {
+                System.err.println("Charset used by the serializer = " + charsetStr);
+            } else {
+                System.err.println("JAVA DEBUG: Charset in the serializer is null");
+            }
+        }
         CCharPointer a = SaxonCAPI.stringToNative(alloc, bStream);
         return a;
     }
@@ -915,10 +954,10 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long callFunctionReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, CCharPointer coutFilename , ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String cFuncName = CTypeConversion.toJavaString(ccFuncName);
-        String outFilename = CTypeConversion.toJavaString(coutFilename);
+        String cFuncName = SaxonCAPI.toJavaString(ccFuncName, WordFactory.nullPointer());
+        String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
         XsltExecutable executable = objectHandles.get(executableRef);
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
@@ -965,9 +1004,9 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long callFunctionReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String cFuncName = CTypeConversion.toJavaString(ccFuncName);
+        String cFuncName = SaxonCAPI.toJavaString(ccFuncName, WordFactory.nullPointer());
         XsltExecutable executable = objectHandles.get(executableRef);
         
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
@@ -998,7 +1037,7 @@ public class Xslt30Processor extends SaxonCAPI {
     public static CCharPointer callFunctionReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable;
         if(executableRef != WordFactory.nullPointer()) {
@@ -1006,7 +1045,7 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
-        String cFuncName = CTypeConversion.toJavaString(ccFuncName);
+        String cFuncName = SaxonCAPI.toJavaString(ccFuncName, WordFactory.nullPointer());
 
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
@@ -1037,7 +1076,7 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long callTemplateReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef,  CCharPointer ctemplateName, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable;
         if(executableRef != WordFactory.nullPointer()) {
@@ -1048,10 +1087,10 @@ public class Xslt30Processor extends SaxonCAPI {
         String templateName = null;
         QName qname = null;
         if(ctemplateName != WordFactory.nullPointer()) {
-            templateName = CTypeConversion.toJavaString(ctemplateName);
+            templateName = SaxonCAPI.toJavaString(ctemplateName, WordFactory.nullPointer());
             qname = QName.fromClarkName(templateName);
         }
-        String outFilename = CTypeConversion.toJavaString(coutFilename);
+        String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
 
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
@@ -1082,7 +1121,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable;
         if(executableRef != WordFactory.nullPointer()) {
@@ -1098,7 +1137,7 @@ public class Xslt30Processor extends SaxonCAPI {
         QName qname = null;
 
         if (cclarkName != WordFactory.nullPointer()) {
-            String clarkName = CTypeConversion.toJavaString(cclarkName);
+            String clarkName = SaxonCAPI.toJavaString(cclarkName, WordFactory.nullPointer());
             qname = QName.fromClarkName(clarkName);
         }
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
@@ -1167,12 +1206,12 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         QName qname = null;
         if(cclarkName != WordFactory.nullPointer()) {
-            qname = QName.fromClarkName(CTypeConversion.toJavaString(cclarkName));
+            qname = QName.fromClarkName(SaxonCAPI.toJavaString(cclarkName, WordFactory.nullPointer()));
         }
 
         if(SaxonCAPI.debug) {
@@ -1243,19 +1282,19 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         String stylesheet = null;
         if(cstylesheet != WordFactory.nullPointer()) {
-            stylesheet = CTypeConversion.toJavaString(cstylesheet);
+            stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
         }
         String sourceFilename = null;
         if(csourceFilename != WordFactory.nullPointer()) {
-            sourceFilename = CTypeConversion.toJavaString(csourceFilename);
+            sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
         }
         String outFilename = null;
         if(coutFilename != WordFactory.nullPointer()) {
-            outFilename = CTypeConversion.toJavaString(coutFilename);
+            outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
         }
 
 
@@ -1534,18 +1573,18 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
 
         String stylesheet = null;
         if(cstylesheet != WordFactory.nullPointer()) {
-            stylesheet = CTypeConversion.toJavaString(cstylesheet);
+            stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
         }
 
         String sourceFile =  null;
         if(csourceFile != WordFactory.nullPointer()) {
-            sourceFile = CTypeConversion.toJavaString(csourceFile);
+            sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
         }
 
 
@@ -1660,18 +1699,18 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         String cwd = null;
         if(ccwd !=WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
 
         String stylesheet = null;
         if(cstylesheet != WordFactory.nullPointer()) {
-            stylesheet = CTypeConversion.toJavaString(cstylesheet);
+            stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
         }
 
         String sourceFile =  null;
         if(csourceFile != WordFactory.nullPointer()) {
-            sourceFile = CTypeConversion.toJavaString(csourceFile);
+            sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
         }
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();

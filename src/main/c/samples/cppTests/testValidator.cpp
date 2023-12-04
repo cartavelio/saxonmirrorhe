@@ -22,11 +22,11 @@ void testValidator1(SaxonProcessor *processor, SchemaValidator *val,
       "type='xs:string'/><xs:element name='b' "
       "type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = "
       "3'/></xs:complexType></xs:element></xs:schema>";
-
+  XdmNode *input = nullptr;
   try {
     val->registerSchemaFromString(sch1);
 
-    XdmNode *input = processor->parseXmlFromString(invalid_xml.c_str());
+    input = processor->parseXmlFromString(invalid_xml.c_str());
     val->setSourceNode(input);
     val->validate();
     sresult->failure++;
@@ -38,6 +38,11 @@ void testValidator1(SaxonProcessor *processor, SchemaValidator *val,
     }
     sresult->success++;
   }
+  if (input != nullptr) {
+    delete input;
+    input = nullptr;
+  }
+
 }
 
 void testValidatorInParseXml(SaxonProcessor *processor, SchemaValidator *val,
@@ -56,11 +61,11 @@ void testValidatorInParseXml(SaxonProcessor *processor, SchemaValidator *val,
       "type='xs:string'/><xs:element name='b' "
       "type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = "
       "3'/></xs:complexType></xs:element></xs:schema>";
-
+  XdmNode *input = nullptr;
   try {
     val->registerSchemaFromString(sch1);
 
-    XdmNode *input = processor->parseXmlFromString(invalid_xml.c_str(), val);
+    input = processor->parseXmlFromString(invalid_xml.c_str(), val, nullptr);
     // val->setSourceNode(input);
     // val->validate();
     sresult->failure++;
@@ -72,6 +77,11 @@ void testValidatorInParseXml(SaxonProcessor *processor, SchemaValidator *val,
     }
     sresult->success++;
   }
+  if (input != nullptr) {
+    delete input;
+    input = nullptr;
+  }
+
 }
 
 void testValidator2(sResultCount *sresult) {
@@ -114,7 +124,7 @@ void testValidator2(sResultCount *sresult) {
     val->registerSchemaFromString(sch1);
 
     val->validate();
-    delete val;
+
     cout << endl << "Doc is valid!" << endl;
     sresult->failure++;
     sresult->failureList.push_back("testValidator2");
@@ -126,6 +136,11 @@ void testValidator2(sResultCount *sresult) {
     }
     sresult->success++;
   }
+  if (input != nullptr) {
+    delete input;
+    input = nullptr;
+  }
+  delete val;
 }
 
 void testValidator3(SaxonProcessor *processor, SchemaValidator *val,
@@ -222,6 +237,7 @@ void testValidator4a(sResultCount *sresult) {
       cout << endl << "Error: Doc reported as valid!" << endl;
     }
     sresult->success++;
+    delete node;
   } catch (SaxonApiException &e) {
     cout << endl << "Error: Doc reported as invalid!" << endl;
     const char *message = e.getMessage();
@@ -262,8 +278,8 @@ void testValidator5(SaxonProcessor *processor, SchemaValidator *val,
                 "xmlns='http://myexample/family'><Parent>John</"
                 "Parent><Child1>Alice</Child1></request>";
   try {
-    XdmNode *input = processor->parseXmlFromString(doc1.c_str());
 
+    XdmNode *input = processor->parseXmlFromString(doc1.c_str());
     val->setProperty("xsdversion", "1.1");
     val->setParameter("node", (XdmValue *)input);
 
@@ -275,6 +291,8 @@ void testValidator5(SaxonProcessor *processor, SchemaValidator *val,
     val->validate();
     sresult->failure++;
     sresult->failureList.push_back("testValidator5");
+
+    delete input;
 
   } catch (SaxonApiException &e) {
     cout << endl << "Error: Doc reported as invalid!" << endl;
@@ -300,6 +318,7 @@ void testValidator5(SaxonProcessor *processor, SchemaValidator *val,
       sresult->failure++;
       sresult->failureList.push_back("testValidator5");
     }
+    delete node;
   }
 }
 
@@ -332,6 +351,7 @@ void testValidator6(SaxonProcessor *processor, SchemaValidator *val,
     val->exportSchema("exportedSchema.scm");
     cout << endl << "No errors found" << endl;
     sresult->success++;
+    delete input;
   } catch (SaxonApiException &e) {
     cout << endl << "Error: Validation error found " << endl;
     const char *message = e.getMessage();

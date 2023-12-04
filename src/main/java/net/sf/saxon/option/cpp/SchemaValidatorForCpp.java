@@ -20,7 +20,6 @@ import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -192,12 +191,12 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         SchemaValidatorForCpp.setProperties(processor, params, values);
         String cwd = null;
         if (ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         String xsd = null;
         if(cxsd != WordFactory.nullPointer()) {
-            xsd = CTypeConversion.toJavaString(cxsd);
+            xsd = SaxonCAPI.toJavaString(cxsd, WordFactory.nullPointer());
         }
 
         if (xsd == null) {
@@ -241,11 +240,11 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         SchemaValidatorForCpp.setProperties(processor, params, values);
         String xsd = null;
         if(cxsd != WordFactory.nullPointer()) {
-            xsd = CTypeConversion.toJavaString(cxsd);
+            xsd = SaxonCAPI.toJavaString(cxsd, WordFactory.nullPointer());
         }
         String systemId = null;
         if (csystemId != WordFactory.nullPointer()) {
-            systemId = CTypeConversion.toJavaString(csystemId);
+            systemId = SaxonCAPI.toJavaString(csystemId, WordFactory.nullPointer());
         }
 
         if (xsd == null) {
@@ -323,9 +322,9 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     public static long exportSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer coutputfile) throws SaxonApiException {
         String cwd = null;
         if (ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        String outputfile = CTypeConversion.toJavaString(coutputfile);
+        String outputfile = SaxonCAPI.toJavaString(coutputfile, WordFactory.nullPointer());
 
 
         Processor processor = null;
@@ -410,11 +409,11 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         String cwd = null;
         Serializer serializer = null;
         if (c_outfilename != WordFactory.nullPointer()) {
-            outfilename = CTypeConversion.toJavaString(c_outfilename);
+            outfilename = SaxonCAPI.toJavaString(c_outfilename, WordFactory.nullPointer());
         }
 
         if (ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         if (outfilename != null) {
@@ -429,7 +428,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         source = schemaValidatorForCpp.getSource();
         String sourceFilename = null;
         if (csourceFilename != WordFactory.nullPointer()) {
-            sourceFilename = CTypeConversion.toJavaString(csourceFilename);
+            sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
         }
 
         if (source == null && sourceFilename != null && !sourceFilename.isEmpty()) {
@@ -480,7 +479,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         String sourceFilename = null;
@@ -492,7 +491,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         Source source = schemaValidatorForCpp.getSource();
 
         if (csourceFilename != WordFactory.nullPointer()) {
-            sourceFilename = CTypeConversion.toJavaString(csourceFilename);
+            sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
         }
 
         if (source == null && sourceFilename != null && !sourceFilename.isEmpty()) {

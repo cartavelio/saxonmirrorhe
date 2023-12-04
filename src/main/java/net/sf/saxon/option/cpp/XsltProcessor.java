@@ -23,6 +23,7 @@ import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
@@ -317,10 +318,10 @@ public class XsltProcessor extends SaxonCAPI {
      */
     @CEntryPoint(name = "c_xsltSaveResultToFile",exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
-        String cwd = CTypeConversion.toJavaString(ccwd);
-        String sourceFilename = CTypeConversion.toJavaString(csourceFilename);
-        String stylesheet = CTypeConversion.toJavaString(cstylesheet);
-        String outFilename = CTypeConversion.toJavaString(coutFilename);
+        String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        String sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
+        String stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
+        String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
 
         Processor processor = objectHandles.get(processorRef);
 
@@ -667,9 +668,9 @@ public class XsltProcessor extends SaxonCAPI {
     @CEntryPoint(name = "c_xsltApplyStylesheet", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer transformToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        String cwd = CTypeConversion.toJavaString(ccwd);
-        String sourceFile = CTypeConversion.toJavaString(csourceFile);
-        String stylesheet = CTypeConversion.toJavaString(cstylesheet);
+        String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        String sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
+        String stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
 
         Processor processor = objectHandles.get(processorRef);
         ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);

@@ -303,7 +303,7 @@ public class XQueryEngine extends SaxonCAPI {
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
         Serializer serializer = processor.newSerializer(bStream);
@@ -330,7 +330,7 @@ public class XQueryEngine extends SaxonCAPI {
             Processor processor = SaxonCAPI.objectHandles.get(processorRef);
             String cwd = null;
             if(ccwd != WordFactory.nullPointer()) {
-                cwd = CTypeConversion.toJavaString(ccwd);
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
             }
             ByteArrayOutputStream bStream = new ByteArrayOutputStream();
             Serializer serializer = processor.newSerializer(bStream);
@@ -362,7 +362,7 @@ public class XQueryEngine extends SaxonCAPI {
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, null);
         XdmValue value = eval.evaluate();
@@ -384,12 +384,12 @@ public class XQueryEngine extends SaxonCAPI {
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = CTypeConversion.toJavaString(ccwd);
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         String outFilename = null;
 
         if(c_outFilename != WordFactory.nullPointer()) {
-            outFilename = CTypeConversion.toJavaString(c_outFilename);
+            outFilename = SaxonCAPI.toJavaString(c_outFilename, WordFactory.nullPointer());
         }
 
         Serializer serializer = null;
