@@ -1009,7 +1009,7 @@ namespace SaxonCS_NUnit {
                 Assert.AreEqual(output, input);
             }
             catch (Exception e) {
-                //e.printStackTrace();
+                Console.Error.WriteLine(e.StackTrace);
                 Assert.Fail();
             }
 
