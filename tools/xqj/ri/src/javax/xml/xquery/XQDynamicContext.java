@@ -3,9 +3,12 @@
  */
 
 package javax.xml.xquery;
+
 import org.w3c.dom.Node;
 
 import javax.xml.namespace.QName;
+import java.io.InputStream;
+import java.io.Reader;
 
 /**  
  * <code>XQDynamicContext</code> provides access to the dynamic context as defined in
