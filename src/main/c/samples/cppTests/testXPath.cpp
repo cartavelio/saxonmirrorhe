@@ -8,7 +8,7 @@
 using namespace std;
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
-// more than one XdmItem.
+// morethan one XdmItem.
 void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
                      sResultCount *sresult) {
 
