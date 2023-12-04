@@ -20,7 +20,7 @@ public class Loc implements Location {
 
     private final String systemId;
     private final int lineNumber;
-    private int columnNumber = -1;
+    private final int columnNumber;
 
     public static Loc NONE = new Loc(null, -1, -1);
 
@@ -36,19 +36,6 @@ public class Loc implements Location {
         columnNumber = loc.getColumnNumber();
     }
 
-    //#if CSHARP==false
-    /**
-     * Create an ExpressionLocation, taking the data from a supplied SAX Locator
-     *
-     * @param loc the SAX Locator
-     * @return the ExpressionLocation
-     */
-
-    public static Loc makeFromSax(org.xml.sax.Locator loc) {
-        return new Loc(loc.getSystemId(), loc.getLineNumber(), loc.getColumnNumber());
-    }
-    //#endif
-
     /**
      * Create an ExpressionLocation corresponding to a given module, line number, and column number
      *
@@ -58,6 +45,8 @@ public class Loc implements Location {
      */
 
     public Loc(String systemId, int lineNumber, int columnNumber) {
+        assert lineNumber != 0;
+        assert columnNumber != 0;
         this.systemId = systemId;
         this.lineNumber = lineNumber;
         this.columnNumber = columnNumber;
@@ -109,7 +98,7 @@ public class Loc implements Location {
     }
 
     /**
-     * Get an immutable copy of this Location object. By default Location objects may be mutable, so they
+     * Get an immutable copy of this Location object. By default, Location objects may be mutable, so they
      * should not be saved for later use. The result of this operation holds the same location information,
      * but in an immutable form.
      */
