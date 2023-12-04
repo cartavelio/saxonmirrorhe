@@ -52,6 +52,8 @@ public class PackageData {
         this.config = config;
         targetEdition = config.getEditionCode();
         globalSlotManager = config.makeSlotManager();
+        hostLanguage = HostLanguage.XPATH;
+        hostLanguageVersion = 31;
     }
 
     /**
