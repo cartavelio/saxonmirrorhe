@@ -80,17 +80,29 @@ class Environment:
         self.lang = None
         self.proc.set_configuration_property('http://saxon.sf.net/feature/optimizationLevel', optimizer_flags)
 
-        self.xpath_proc = self.proc.new_xpath_processor()
         self.base_uri = ""
         self.spec = None
-        self.xquery_proc = self.proc.new_xquery_processor()
-
-        self.xslt_proc = self.proc.new_xslt30_processor()
+        '''self.xquery_proc = self.proc.new_xquery_processor()
+        self.xpath_proc = self.proc.new_xpath_processor()
+        self.xslt_proc = self.proc.new_xslt30_processor()'''
+        self.xquery_proc = None
+        self.xpath_proc = None
+        self.xslt_proc = None
         self.sheet = None
 
         self.context_item = None
 
         self.source_docs = {}
+        self.param_decimal_declarations = []
+
+        self.reset_actions = []
+
+    def create_processors(self):
+        self.xpath_proc = self.proc.new_xpath_processor()
+        self.xquery_proc = self.proc.new_xquery_processor()
+        self.xslt_proc = self.proc.new_xslt30_processor()
+
+
 
 
 
