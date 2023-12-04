@@ -4443,9 +4443,7 @@ public class Configuration implements SourceResolver, NotationSet {
             } else if (code == FeatureCode.ALLOW_SYNTAX_EXTENSIONS) {
                 boolean b = requireBoolean(name, value);
                 defaultXsltCompilerInfo.setXsltVersion(b ? 40 : 30);
-                if (defaultStaticQueryContext != null) {
-                    defaultStaticQueryContext.setLanguageVersion(b ? 40 : 30);
-                }
+                getDefaultStaticQueryContext().setLanguageVersion(b ? 40 : 30);
             }
             internalSetBooleanProperty(code, name, value);
         } else if (stringFeatures.contains(code)) {

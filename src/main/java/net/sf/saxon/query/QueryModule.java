@@ -209,7 +209,7 @@ public class QueryModule implements StaticContext {
             codeInjector = sqc.getCodeInjector();
             optimizerOptions = sqc.getOptimizerOptions();
         }
-        initializeFunctionLibraries(sqc);
+        //initializeFunctionLibraries();
     }
 
     /**
@@ -271,11 +271,10 @@ public class QueryModule implements StaticContext {
 
     /**
      * Reset function libraries
-     *
-     * @param sqc The static query context set up by the caller
      */
 
-    private void initializeFunctionLibraries(/*@Nullable*/ StaticQueryContext sqc) {
+    public void initializeFunctionLibraries() {
+        StaticQueryContext sqc = userQueryContext;
         Configuration config = getConfiguration();
         if (isTopLevelModule()) {
             globalFunctionLibrary = new XQueryFunctionLibrary(config);

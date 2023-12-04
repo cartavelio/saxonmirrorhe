@@ -130,6 +130,7 @@ public class StaticQueryContext {
         this.config = config;
         this.namePool = config.getNamePool();
         this.errorReporter = config.makeErrorReporter();
+        this.languageVersion = config.getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) ? 40 : 31;
         if (initialize) {
             copyFrom(config.getDefaultStaticQueryContext());
         } else {
