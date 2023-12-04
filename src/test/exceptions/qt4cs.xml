@@ -35,24 +35,7 @@
    </exception>
 
    
-   <exception test-set="fn-replace" test-case="  
-      fn-replace-100
-      fn-replace-101
-      fn-replace-102
-      fn-replace-103
-      fn-replace-104
-      fn-replace-105
-      fn-replace-106
-      fn-replace-107
-      fn-replace-108
-      fn-replace-109
-      fn-replace-110
-      fn-replace-111
-      fn-replace-112
-      fn-replace-113" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Spec for fn:replace#4 not yet agreed and not implemented</reason>
-   </exception>
+  
    
    <exception test-set="fn-tokenize" test-case="  
       fn-tokenize-40-001
@@ -61,17 +44,7 @@
       <reason>Tokenize#2 does not currently allow second argument to be an empty sequence</reason>
    </exception>
    
-   <exception test-set="fn-remove" test-case="  
-      fn-remove-40-001
-      fn-remove-40-002
-      fn-remove-40-003
-      fn-remove-40-004
-      fn-remove-40-005
-      fn-remove-40-006
-      fn-remove-40-008" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-01-17"/>
-      <reason>Remove does not currently allow second argument to be a sequence</reason>
-   </exception>
+ 
    
 
    <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
@@ -293,18 +266,7 @@
    
    
    
-   <exception test-set="app-spec-examples" 
-              test-case="
-                  fo-test-fn-replace-009
-                  fo-test-fn-replace-010
-                  fo-test-fn-replace-011
-                  fo-test-fn-replace-012
-                  fo-test-fn-replace-013
-              " 
-              run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>
+   
    
    <exception test-set="app-spec-examples" 
                test-case="

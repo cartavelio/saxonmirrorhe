@@ -8445,7 +8445,8 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 10.</p>
+        <p>Available since Saxon 10. In 12.4 the function becomes obsolescent, since the functionality
+        has been absorbed into the standard 4.0 <code>fn:replace</code> function.</p>
       </status>
       <saxon-edition>PE/EE 10</saxon-edition>
       <details>
@@ -8478,8 +8479,9 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
           
           <p>The regular expression must not be one that matches a zero-length string.</p>
           
-          <p>Note: the callback function does not have access to matching groups within the
-          matched substring, only to the matched substring as a whole.</p>
+          <p>Note: the callback function does not have access to captured groups within the
+          matched substring, only to the matched substring as a whole. For access to captured
+          groups, use the 4.0 version of <code>fn:replace</code>.</p>
         </div>
       </details>
       
