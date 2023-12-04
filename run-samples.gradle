@@ -93,6 +93,53 @@ task run_config_samples(
   run_config_samples.dependsOn t
 }
 
+["config"].each {configFile ->
+  Task t = task "run_with_${configFile}"(
+          type: JavaExec,
+          dependsOn: ["copy_samples", "eejJar", "eejJarSql"],
+          description: "Run a transform using the ${configFile}.xml sample configuration file"
+  ) {
+    inputs.files "${buildDir}/saxon-resources/samples/config/${configFile}.xml"
+    workingDir = "${buildDir}/saxon-resources/samples"
+
+    classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
+        + files("${buildDir}/libs/saxon-ee-sql-${saxonVersion}.jar")
+
+    mainClass = "net.sf.saxon.Transform"
+    args "-t",
+            "-config:${buildDir}/saxon-resources/samples/config/${configFile}.xml",
+            "-s:data/books.xml",
+            "-xsl:styles/books.xsl",
+            "-o:${buildDir}/samples/results/cmd/booksWith${configFile}.html"
+
+  }
+  run_config_samples.dependsOn t
+}
+
+["config-HE"].each {configFile ->
+  Task t = task "run_with_${configFile}"(
+          type: JavaExec,
+          dependsOn: ["copy_samples", "hejJar"],
+          description: "Run a transform using the ${configFile}.xml sample configuration file"
+  ) {
+    inputs.files "${buildDir}/saxon-resources/samples/config/${configFile}.xml"
+    workingDir = "${buildDir}/saxon-resources/samples"
+
+    classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
+
+    mainClass = "net.sf.saxon.Transform"
+    args "-t",
+            "-config:${buildDir}/saxon-resources/samples/config/${configFile}.xml",
+            "-s:data/books.xml",
+            "-xsl:styles/books.xsl",
+            "-o:${buildDir}/samples/results/cmd/booksWith${configFile}.html"
+
+  }
+  run_config_samples.dependsOn t
+}
+
 def booksTests = ["ee": ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2", "Validate"],
                   "pe": ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2"],
                   "he": ["Transform_1", "Transform_2", "Transform_3", "Query_1"]]
