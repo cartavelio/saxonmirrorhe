@@ -241,6 +241,7 @@ public:
    * of a zero-length string (and potentially other strings, in future)
    *
    * @param str the String value. NULL is taken as equivalent to "".
+   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
    * @return the corresponding StringValue
    */
   XdmAtomicValue *makeStringValue(std::string str, const char* encoding = nullptr);
@@ -251,7 +252,8 @@ public:
    *
    * of a zero-length string (and potentially other strings, in future)
    *
-   * @param str the char pointer array. nullptr is taken as equivalent to "".
+   * @param str - the char pointer array. nullptr is taken as equivalent to "".
+   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
    * @return the corresponding StringValue
    */
   XdmAtomicValue *makeStringValue(const char *str, const char* encoding = nullptr);

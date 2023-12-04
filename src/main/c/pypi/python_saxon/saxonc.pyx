@@ -448,6 +448,7 @@ cdef class PySaxonProcessor:
         of a zero-length string (and potentially other strings, in future)
         Args:
             value (str): the String value. NULL is taken as equivalent to "".
+            encoding (str): the encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmAtomicValue: The corresponding XDM string value
         """
@@ -689,6 +690,7 @@ cdef class PySaxonProcessor:
         Make a PyXdmMap from a dict type whose entries are key-value pairs of type (str, PyXdmValue).
         Args:
             dataMap (dict): Dictionary of (str, PyXdmValue) pairs
+            encoding (str): the encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmMap: The corresponding value
         """
@@ -803,7 +805,8 @@ cdef class PySaxonProcessor:
         parse_xml(self, **kwds)
         Parse a source XML document supplied as a lexical representation, source file or uri, and return it as an XDM node
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri)
+            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri).
+            Also accept the keyword 'encoding' (str) to specify the encoding of the xml_text string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmNode: The XDM node representation of the XML document
         Raises:
@@ -874,7 +877,9 @@ cdef class PySaxonProcessor:
         parse_xml(self, **kwds)
         Parse a source JSON document supplied as a lexical representation, source file or uri, and return it as an XDM value
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (json_file_name|json_text)
+            **kwds: Possible keyword arguments: must be one of the following (json_file_name|json_text).
+            Also accept the keyword 'encoding' (str) to specify the encoding of the json_text string. If not specified then the platform default encoding is used.
+
         Returns:
             PyXdmValue: The XDM value representation of the JSON document
         Raises:
@@ -1059,15 +1064,16 @@ cdef class PyDocumentBuilder:
         parse_xml(self, **kwds)
         Parse a source document supplied as a lexical representation, source file or uri, and return it as XDM node
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri)
+            **kwds: Possible keyword arguments: must be one of the following (xml_file_name|xml_text|xml_uri).
+            Also accept the keyword 'encoding' (str) to specify the encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmNode: The XDM node representation of the XML document
         Raises:
             Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
             PySaxonApiError: Error if failure to parse XML file or XML text
         """
-        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
-        if len(kwds) != 1:
+        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri) and also accept 'encoding'"
+        if len(kwds) > 2:
           raise Exception(py_error_message)
         cdef PyXdmNode val = None
         cdef py_value = None
@@ -1169,6 +1175,7 @@ cdef class PyXslt30Processor:
             name (str): the name of the stylesheet parameter, as a string. For a namespaced parameter use
                 clark notation {uri}local
             value (PyXdmValue): the value of the stylesheet parameter, or NULL to clear a previously set value
+            encoding (str): To specify the encoding of the name string. If not specified then the platform default encoding is used.
         """
         cdef const char * c_str = NULL
         '''make_c_str(name)'''
@@ -1262,6 +1269,8 @@ cdef class PyXslt30Processor:
                 The following additional keywords can be used with `save`: target (str) which sets the target edition
                 under which the compiled stylesheet will be executed; and relocate (bool) which says whether the
                 compiled stylesheet can be deployed to a different location, with a different base URI.
+                Also accept the keyword 'encoding' (str) to specify the encoding of the stylesheet_text string.
+                If not specified then the platform default encoding is used.
         Returns:
             PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
             and thread-safe; it may be used to run multiple transformations, in series or concurrently.
@@ -3991,7 +4000,8 @@ cdef class PySchemaValidator:
         Args:
             name (str): The name of the property
             value (str): The value of the property
-            encoding (str): The encoding of the name argument. Argument can be omitted or None
+            encoding (str): The encoding of the name argument. Argument can be omitted or None.
+             If not specified then the platform default encoding is used.
         Example:
             PySchemaValidator: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
             'o': output file name,\r
