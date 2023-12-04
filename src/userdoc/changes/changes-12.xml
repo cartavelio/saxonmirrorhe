@@ -526,7 +526,8 @@
         apply to subsequent clauses.</p>
         
         <p>From 12.4, the atomic types <code>xs:hexBinary</code> and <code>xs:base64Binary</code> are mutually
-        comparable.</p>
+        comparable; and promotion on function calls and variable binding now ensures that either type can be supplied
+        where the other is required.</p>
         
         
         
