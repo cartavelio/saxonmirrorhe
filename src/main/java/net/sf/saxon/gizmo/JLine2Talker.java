@@ -42,7 +42,7 @@ public class JLine2Talker implements Talker {
         console = new ConsoleReader(System.in, System.out);
         console.setExpandEvents(false);
         console.setHistoryEnabled(true);
-        ((CandidateListCompletionHandler)console.getCompletionHandler()).setPrintSpaceAfterFullCompletion(false); // bug 5253
+        //((CandidateListCompletionHandler)console.getCompletionHandler()).setPrintSpaceAfterFullCompletion(false); // bug 5253
     }
 
     /**
