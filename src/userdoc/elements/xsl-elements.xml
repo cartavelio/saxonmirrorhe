@@ -603,10 +603,10 @@
                 <p>With <code>composite="yes"</code>, the array members can conveniently be constructed
                     using the <a class="bodylink code" href="../array-member">xsl:array-member</a>
                     instruction. In fact, the following constructions are all equivalent:</p>
-                <samp>&lt;xsl:array-member select="1 to 3"/></samp>
-                <samp>&lt;xsl:sequence select="parcel(1 to 3)"/></samp>
-                <samp>&lt;xsl:sequence select="map{'value': 1 to 3}"/></samp>
-                <samp>&lt;xsl:map key="'value'" select="1 to 3"/></samp>
+                <pre><code class="language-xml">&lt;xsl:array-member select="1 to 3"/></code></pre>
+                <pre><code class="language-xml">&lt;xsl:sequence select="parcel(1 to 3)"/></code></pre>
+                <pre><code class="language-xml">&lt;xsl:sequence select="map{'value': 1 to 3}"/></code></pre>
+                <pre><code class="language-xml">&lt;xsl:map key="'value'" select="1 to 3"/></code></pre>
                 <p>A type error occurs if <code>composite="yes"</code> is used and there are items in the sequence that
                 do not match the item type <code>record(value, *)</code> (that is, a map having an entry whose key is the 
                     string "value"). Any other entries in the map are ignored.</p>
@@ -686,8 +686,8 @@
                     <p> The following code tests whether the value of <code>$x</code> is
                         non-negative, and if not, fails with an error message:</p>
 
-                    <samp><![CDATA[<xsl:assert test="$x &gt; 0">Argument $x must be greater than zero</xsl:assert>
-]]></samp>
+                    <pre><code class="language-xml"><![CDATA[<xsl:assert test="$x &gt; 0">Argument $x must be greater than zero</xsl:assert>
+]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>
@@ -772,12 +772,12 @@
                 <example>
                     <p>The following code creates a <code>&lt;FONT&gt;</code> element with several
                         attributes:</p>
-                    <samp><![CDATA[<xsl:element name="FONT">
+                    <pre><code class="language-xml"><![CDATA[<xsl:element name="FONT">
     <xsl:attribute name="SIZE">4</xsl:attribute>
     <xsl:attribute name="FACE">Courier New</xsl:attribute>
     Some output text
 </xsl:element>
-]]></samp>
+]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -1085,13 +1085,13 @@
             <examples>
                 <example>
                     <p>
-                        <samp><![CDATA[<xsl:choose>
+                        <pre><code class="language-xml"><![CDATA[<xsl:choose>
     <xsl:when test="@cat='F'">Fiction</xsl:when>
     <xsl:when test="@cat='C'">Crime</xsl:when>
     <xsl:when test="@cat='R'">Reference</xsl:when>
     <xsl:otherwise>General</xsl:otherwise>
 </xsl:choose>
-]]></samp>
+]]></code></pre>
                     </p>
                 </example>
             </examples>
@@ -1155,14 +1155,14 @@
             <examples>
                 <example>
                     <p>The text below inserts some JavaScript into a generated HTML document:</p>
-                    <samp><![CDATA[<script language="JavaScript">
+                    <pre><code class="language-xml"><![CDATA[<script language="JavaScript">
     <xsl:comment>
         function bk(n) {
             parent.frames['content'].location="chap" + n + ".1.html";
         }
     //</xsl:comment>
 </script>
-]]></samp>
+]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -1241,13 +1241,13 @@
                 <example>
                     <p>A template that copies the input element to the output, together with all its
                         child elements, character content, and attributes:</p>
-                    <samp><![CDATA[<xsl:template match="*|text()|@*">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="*|text()|@*">
     <xsl:copy>
         <xsl:apply-templates select="@*"/>
         <xsl:apply-templates/>
     </xsl:copy>
 </xsl:template>
-]]></samp>
+]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -1470,15 +1470,15 @@
                 <example>
                     <p>The following code creates a <code>&lt;FONT&gt;</code> element with several
                         attributes:</p>
-                    <samp><![CDATA[<xsl:element name="FONT">
+                    <pre><code class="language-xml"><![CDATA[<xsl:element name="FONT">
     <xsl:attribute name="SIZE">4</xsl:attribute>
     <xsl:attribute name="FACE">Courier New</xsl:attribute>
     Some output text
-</xsl:element>]]></samp>
+</xsl:element>]]></code></pre>
                     <p>This example is equivalent to the simpler literal result element:</p>
-                    <samp><![CDATA[<FONT SIZE="4" FACE="Courier New">
+                    <pre><code class="language-xml"><![CDATA[<FONT SIZE="4" FACE="Courier New">
     Some output text
-</FONT>]]></samp>
+</FONT>]]></code></pre>
                 </example>
  
             </examples>
@@ -1560,11 +1560,11 @@
                     <p>Sorting product elements according to a sort key supplied (in the form of an
                         XPath expression) as a parameter to the stylesheet:</p>
 
-                    <samp><![CDATA[<xsl:apply-templates select="product">
+                    <pre><code class="language-xml"><![CDATA[<xsl:apply-templates select="product">
     <xsl:sort>
         <xsl:evaluate xpath="$product-sort-key"/>
     </xsl:sort>
-</xsl:apply-templates>]]></samp>
+</xsl:apply-templates>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>
@@ -1709,7 +1709,7 @@
             </details>
             <examples>
                 <example>
-                    <samp><![CDATA[<xsl:template match="BOOKLIST">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="BOOKLIST">
     <TABLE>
     <xsl:for-each select="BOOK">
         <TR>
@@ -1719,14 +1719,14 @@
         </TR>        
     </xsl:for-each>
     </TABLE>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
                 </example>
                 <example>
                     <p>Sorting with <code>xsl:for-each</code>. This example shows a template for a
                             <code>&lt;BOOKLIST&gt;</code> element which processes all the child
                             <code>&lt;BOOK&gt;</code> elements in order of their child
                             <code>&lt;AUTHOR&gt;</code> elements.</p>
-                    <samp><![CDATA[<xsl:template match="BOOKLIST">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="BOOKLIST">
     <h2>
         <xsl:for-each select="BOOK">
             <xsl:sort select="AUTHOR"/>
@@ -1735,7 +1735,7 @@
             <hr/>
         </xsl:for-each>            
     </h2>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -1981,23 +1981,23 @@
                     <p>The following example is not tail-recursive, because the recursive call is
                         within an arithmetic expression: the multiplication takes place on return
                         from the recursive call.</p>
-                    <samp><![CDATA[<xsl:function name="my:factorial" as="xs:integer">
+                    <pre><code class="language-xml"><![CDATA[<xsl:function name="my:factorial" as="xs:integer">
     <xsl:param name="number" as="xs:integer"/> 
     <xsl:sequence 
          select="if ($number=0) then 1 else $number * my:factorial($number-1)"/>
-</xsl:function>]]></samp>
+</xsl:function>]]></code></pre>
                 </example>
                 <example>
                     <p>The previous example can be recast in tail-recursive form by adding an extra
                         parameter (which should be set to 1 on the initial call):</p>
-                    <samp><![CDATA[<xsl:function name="x:factorial">
+                    <pre><code class="language-xml"><![CDATA[<xsl:function name="x:factorial">
     <xsl:param name="acc" as="xs:integer?"/>
     <xsl:param name="n" as="xs:integer"/>
     <xsl:sequence as="xs:integer" 
          select="if ($n = 1) 
                  then $acc
                  else x:factorial($acc*$n, $n - 1)" />
-</xsl:function>]]></samp>
+</xsl:function>]]></code></pre>
                     <p>The call <code>x:factorial(1, 5)</code> returns 120.</p>
                 </example>
             </examples>
@@ -2103,17 +2103,17 @@
                 <example>
                     <p>To include a hyperlink in the output only if the current element has a
                             <code>preface</code> attribute:</p>
-                    <samp><![CDATA[<xsl:if test="@preface">
+                    <pre><code class="language-xml"><![CDATA[<xsl:if test="@preface">
     <a href="preface.html">Preface</a>
-</xsl:if>]]></samp>
+</xsl:if>]]></code></pre>
                 </example>
                 <example>
                     <p>A function that performs head-tail recursion, using Saxon's extended syntax:</p>
-                    <samp><![CDATA[<xsl:function name="f:product" as="xs:double">
+                    <pre><code class="language-xml"><![CDATA[<xsl:function name="f:product" as="xs:double">
     <xsl:param name="input" as="xs:double*"/>
     <xsl:if test="empty($input)" then="1" else="head($input) * f:product(tail($input))"/>
 </xsl:function>  
-         ]]></samp>
+         ]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -2292,11 +2292,11 @@
             <examples>
                 <example>
                     <p>Declare and use a named item type as a synonym for a record type:</p>
-                    <samp><![CDATA[<xsl:item-type name="complex" as="record(r as xs:double, i as xs:double)"/>
+                    <pre><code class="language-xml"><![CDATA[<xsl:item-type name="complex" as="record(r as xs:double, i as xs:double)"/>
 <xsl:param name="location" select="0.00" as="type(complex)"/>
 <xsl:variable name="location-real-part" select="$location?r" as="xs:double"/>
 <xsl:variable name="location-imaginary-part" select="$location?i" as="xs:double"/>
-]]></samp>
+]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt40</in-spec>
@@ -2378,7 +2378,7 @@
             <examples>
                 <example>
                     <p>Computes the running balance of a sequence of financial transactions:</p>
-                    <samp><![CDATA[<xsl:iterate select="transactions/transaction">
+                    <pre><code class="language-xml"><![CDATA[<xsl:iterate select="transactions/transaction">
     <xsl:param name="balance" select="0.00" as="xs:decimal"/>
     <xsl:variable name="newBalance" 
          select="$balance + xs:decimal(@value)"/>
@@ -2386,12 +2386,12 @@
     <xsl:next-iteration>
         <xsl:with-param name="balance" select="$newBalance"/>
     </xsl:next-iteration>
-</xsl:iterate>]]></samp>
+</xsl:iterate>]]></code></pre>
                 </example>
                 <example>
                     <p>Copies the input sequence up to the first <code>&lt;br&gt;</code>
                         element:</p>
-                    <samp><![CDATA[<xsl:iterate select="*">
+                    <pre><code class="language-xml"><![CDATA[<xsl:iterate select="*">
     <xsl:choose>
         <xsl:when test="self::br">
             <xsl:break/>
@@ -2400,7 +2400,7 @@
             <xsl:copy-of select="."/>
         </xsl:otherwise>
     </xsl:choose>  
-</xsl:iterate>]]></samp>
+</xsl:iterate>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>
@@ -2539,7 +2539,7 @@
             <examples>
                 <example>
                     <p>
-                        <samp><![CDATA[<xsl:variable name="week" as="map(xs:string, xs:string)">
+                        <pre><code class="language-xml"><![CDATA[<xsl:variable name="week" as="map(xs:string, xs:string)">
     <xsl:map>
         <xsl:map-entry key="'Mo'" select="'Monday'"/>
         <xsl:map-entry key="'Tu'" select="'Tuesday'"/>
@@ -2550,7 +2550,7 @@
         <xsl:map-entry key="'Su'" select="'Sunday'"/>
     </xsl:map>
 </xsl:variable>
-]]></samp>
+]]></code></pre>
                     </p>
                 </example>
                 
@@ -2558,14 +2558,14 @@
                     <p>This XSLT 4.0 example creates a map in which the value for a given product code is the total of the
                     sales for that product across multiple outlets.</p>
                     <p>
-                        <samp><![CDATA[<xsl:variable name="total-sales-by-sku" as="map(xs:string, xs:decimal)">
+                        <pre><code class="language-xml"><![CDATA[<xsl:variable name="total-sales-by-sku" as="map(xs:string, xs:decimal)">
     <xsl:map on-duplicates="->($old, $new){$old + $new}">
         <xsl:for-each select="//outlet/product">
             <xsl:map-entry key="@sku" select="xs:decimal(@sales)"/>
         </xsl:for-each>
     </xsl:map>
 </xsl:variable>
-]]></samp>
+]]></code></pre>
                     </p>
                 </example>
             </examples>
@@ -2674,19 +2674,19 @@
                     <p>Merges a homogenous collection of log files, each already sorted by
                         timestamp:</p>
 
-                    <samp><![CDATA[<xsl:merge>
+                    <pre><code class="language-xml"><![CDATA[<xsl:merge>
     <xsl:merge-source for-each-item="collection('log-collection')" select="events/event"/>
         <xsl:merge-key select="@timestamp" order="ascending"/>
     </xsl:merge-source>
     <xsl:merge-action>
         <xsl:sequence select="current-merge-group()"/>
     </xsl:merge-action>
-</xsl:merge>]]></samp>
+</xsl:merge>]]></code></pre>
                 </example>
                 <example>
                     <p>Merges two log files with different internal structure:</p>
 
-                    <samp><![CDATA[<xsl:merge>
+                    <pre><code class="language-xml"><![CDATA[<xsl:merge>
     <xsl:merge-source select="doc('log1.xml')/transactions/transaction"/>
         <xsl:merge-key select="xs:dateTime(@date, @time)" order="ascending"/>
     </xsl:merge-source>
@@ -2696,7 +2696,7 @@
     <xsl:merge-action>
         <xsl:apply-templates select="current-merge-group()"/>
     </xsl:merge-action>
-</xsl:merge>]]></samp>
+</xsl:merge>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>
@@ -2916,7 +2916,7 @@
                 <p>From Saxon 9.5 the new feature of <i>text value templates</i> is implemented,
                     which is particularly useful with <code>xsl:message</code>. For example: </p>
 
-                <samp><![CDATA[<xsl:message expand-text="yes">Id: {@id} Age: {@age} Status: {@status}</xsl:message>]]></samp>
+                <pre><code class="language-xml"><![CDATA[<xsl:message expand-text="yes">Id: {@id} Age: {@age} Status: {@status}</xsl:message>]]></code></pre>
 
                 <p>The attribute <code>expand-text="yes"</code> can appear on any ancestor element
                     to enable the feature.</p>
@@ -3075,7 +3075,7 @@
                         output elements that are to be associated with the XSLT namespace. It
                         assumes that both namespaces <code>xsl</code> and <code>outxsl</code> have
                         been declared and are in scope.</p>
-                    <samp><![CDATA[<xsl:namespace-alias stylesheet-prefix="outxsl" result-prefix="xsl"/>]]></samp>
+                    <pre><code class="language-xml"><![CDATA[<xsl:namespace-alias stylesheet-prefix="outxsl" result-prefix="xsl"/>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -3468,11 +3468,11 @@
                         preceded by a composite number formed from the sequential number of the
                         containing <code>&lt;H1&gt;</code> element and the number of the containing
                             <code>&lt;H2&gt;</code> element.</p>
-                    <samp><![CDATA[<xsl:template match="H2/TITLE">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="H2/TITLE">
     <xsl:number count="H1">.<xsl:number count="H2">
     <xsl:text> </xsl:text>
     <xsl:apply-templates/>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -3560,18 +3560,18 @@
                     <p>The following code generates substitute text when there is no content,
                         however it is not guaranteed-streamable because it processes child
                             <code>item-for-sale</code> elements more than once:</p>
-                    <samp><![CDATA[<xsl:apply-templates select="item-for-sale"/>
+                    <pre><code class="language-xml"><![CDATA[<xsl:apply-templates select="item-for-sale"/>
 <xsl:if test="empty(item-for-sale)">
     <p>There are no items for sale.</p>
-</xsl:if>]]></samp>
+</xsl:if>]]></code></pre>
                     <p>To make this streamable, it can be rewritten using the
                             <code>xsl:on-empty</code> instruction:</p>
-                    <samp><![CDATA[<xsl:sequence>
+                    <pre><code class="language-xml"><![CDATA[<xsl:sequence>
     <xsl:apply-templates select="item-for-sale"/>
     <xsl:on-empty>
         <p>There are no items for sale.</p>
     </xsl:on-empty>
-</xsl:sequence>]]></samp>
+</xsl:sequence>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>
@@ -3608,16 +3608,16 @@
                     <p>The following code generates a header and footer only if there is content,
                         however it is not guaranteed-streamable because it processes child
                             <code>item-for-sale</code> elements more than once:</p>
-                    <samp><![CDATA[<xsl:if test="exists(item-for-sale)">
+                    <pre><code class="language-xml"><![CDATA[<xsl:if test="exists(item-for-sale)">
     <h1>Items for Sale</h1>
 </xsl:if>  
 <xsl:apply-templates select="item-for-sale"/>
 <xsl:if test="exists(item-for-sale)">
     <p>Total value: {accumulator-after('total-value')}</p>
-</xsl:if>]]></samp>
+</xsl:if>]]></code></pre>
                     <p>To make this streamable, it can be rewritten using the
                             <code>xsl:on-non-empty</code> instruction:</p>
-                    <samp><![CDATA[<xsl:sequence>
+                    <pre><code class="language-xml"><![CDATA[<xsl:sequence>
     <xsl:on-non-empty>
         <h1>Items for Sale</h1>
     </xsl:on-non-empty>  
@@ -3625,7 +3625,7 @@
     <xsl:on-non-empty>
         <p>Total value: {accumulator-after('total-value')}</p>
     </xsl:on-non-empty>  
-</xsl:sequence>]]></samp>
+</xsl:sequence>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>
@@ -4080,10 +4080,10 @@
             </details>
             <examples>
                 <example>
-                    <samp><![CDATA[<xsl:perform-sort select="//BOOK">
+                    <pre><code class="language-xml"><![CDATA[<xsl:perform-sort select="//BOOK">
     <xsl:sort select="author/last-name"/>
     <xsl:sort select="author/first-name"/>
-</xsl:perform-sort>]]></samp>
+</xsl:perform-sort>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt20</in-spec>
@@ -4141,7 +4141,7 @@
             </details>
             <examples>
                 <example>
-                    <samp><![CDATA[<xsl:processing-instruction name="submit-invoice">version="1.0"</xsl:processing-instruction>]]></samp>
+                    <pre><code class="language-xml"><![CDATA[<xsl:processing-instruction name="submit-invoice">version="1.0"</xsl:processing-instruction>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -4315,14 +4315,14 @@
                             <code>preface.html</code> (prefixed by a constant that supplies the
                         directory name). Output then reverts to the previous destination, where an
                         HTML hyperlink to the newly created file is inserted.</p>
-                    <samp><![CDATA[<xsl:template match="preface">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="preface">
     <xsl:result-document href="{$dir}/preface.html" method="html">
         <html><body bgcolor="#00eeee"><center>
             <xsl:apply-templates/>
         </center><hr/></body></html>
     </xsl:result-document>
     <a href="{$dir}/preface.html">Preface</a>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt20</in-spec>
@@ -4404,29 +4404,29 @@
                 <example>
                     <p>Returning a result from a function:</p>
 
-                    <samp><![CDATA[<xsl:function name="f:increment" as="xs:integer">
+                    <pre><code class="language-xml"><![CDATA[<xsl:function name="f:increment" as="xs:integer">
     <xsl:param name="in" as="xs:integer"/>
     <xsl:sequence select="$in + 1"/>    
-</xsl:function>]]></samp>
+</xsl:function>]]></code></pre>
                 </example>
                 <example>
                     <p>Copying atomic values into a tree:</p>
-                    <samp><![CDATA[<e>
+                    <pre><code class="language-xml"><![CDATA[<e>
     <xsl:sequence select="1 to 5"/>
     <br/>
     <xsl:sequence select="6 to 10"/>    
-</e>]]></samp>
+</e>]]></code></pre>
 
                     <p>This produces the output <code>&lt;e&gt;1 2 3 4 5&lt;br/&gt;6 7 8 9
                             10&lt;/e&gt;</code>.</p>
                 </example>
                 <example>
                     <p>Constructing a sequence-valued variable:</p>
-                    <samp><![CDATA[<xsl:variable name="seq" as="xs:integer *">
+                    <pre><code class="language-xml"><![CDATA[<xsl:variable name="seq" as="xs:integer *">
     <xsl:for-each select="1 to 5">>
        <xsl:sequence select=". * ."/>
     </xsl:for-each/>    
-</xsl:variable>]]></samp>
+</xsl:variable>]]></code></pre>
 
                     <p>This produces the sequence <code>(1, 4, 9, 16, 25)</code> as the value of the
                         variable.</p>
@@ -4434,11 +4434,11 @@
                 <example>
                     <p>Creating a variable whose value is a sequence of three parentless
                         attributes:</p>
-                    <samp><![CDATA[<xsl:variable name="seq" as="attribute() *">
+                    <pre><code class="language-xml"><![CDATA[<xsl:variable name="seq" as="attribute() *">
     <xsl:attribute name="a">10</xsl:attribute>
     <xsl:attribute name="b">20</xsl:attribute>
     <xsl:attribute name="a">30</xsl:attribute>
-</xsl:variable>]]></samp>
+</xsl:variable>]]></code></pre>
                     <p>It is quite legitimate to have two attributes in the sequence with the same
                         name; there is no conflict until an attempt is made to add them both to the
                         same element. The attributes can be added to an element by using
@@ -4516,21 +4516,21 @@
                             <code>&lt;BOOK&gt;</code> elements in order of their child
                             <code>&lt;AUTHOR&gt;</code> elements; books with the same author are in
                         descending order of the <code>DATE</code> attribute.</p>
-                    <samp><![CDATA[<xsl:template match="BOOKLIST">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="BOOKLIST">
     <h2>
         <xsl:apply-templates select="BOOK">
             <xsl:sort select="AUTHOR"/>
             <xsl:sort select="@DATE" order="descending" lang="GregorianDate"/>
         </xsl:apply-templates>            
     </h2>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
                 </example>
                 <example>
                     <p>Sorting with <code>xsl:for-each</code>. This example also shows a template
                         for a <code>&lt;BOOKLIST&gt;</code> element which processes all the child
                             <code>&lt;BOOK&gt;</code> elements in order of their child
                             <code>&lt;AUTHOR&gt;</code> elements.</p>
-                    <samp><![CDATA[<xsl:template match="BOOKLIST">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="BOOKLIST">
     <h2>
         <xsl:for-each select="BOOK">
             <xsl:sort select="AUTHOR"/>
@@ -4539,20 +4539,20 @@
             <hr/>
         </xsl:for-each>            
     </h2>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
                 </example>
                 <example>
                     <p>Sorting with <code>xsl:for-each</code> using Unicode Collation Algorithm.
                             <code>&lt;BOOK&gt;</code> elements are processed in order of their child
                             <code>&lt;TITLE&gt;</code> elements, sorted as if they were in French
                         dictionary order (where accents are compared in a reverse direction).</p>
-                    <samp><![CDATA[<xsl:for-each select="BOOK">
+                    <pre><code class="language-xml"><![CDATA[<xsl:for-each select="BOOK">
     <xsl:sort select="TITLE" 
          collation="http://www.w3.org/2013/collation/UCA?lang=fr;strength=tertiary;backwards=yes"/>
     <p>AUTHOR: <xsl:value-of select="AUTHOR"></p>
     <p>TITLE: <xsl:value-of select="TITLE"></p>
     <hr/>
-</xsl:for-each>]]></samp>
+</xsl:for-each>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -4666,10 +4666,10 @@
                 <example>
                     <p>A simple example:</p>
                     
-                    <samp><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">
+                    <pre><code class="language-xml"><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">
     <out><xsl:value-of select="sum(*/transaction/value)"/></out>
 </xsl:source-document>
-]]></samp>
+]]></code></pre>
                 </example>
                 <example>
                     <p>See further <a href="http://www.w3.org/TR/xslt-30/#stream-examples"
@@ -4836,13 +4836,13 @@
             <examples>
                 <example>
                     <p>
-                        <samp><![CDATA[<xsl:switch select="@cat">
+                        <pre><code class="language-xml"><![CDATA[<xsl:switch select="@cat">
     <xsl:when test="'F'">Fiction</xsl:when>
     <xsl:when test="'C'">Crime</xsl:when>
     <xsl:when test="'R', 'L'" select="my:f(@cat)"/>
     <xsl:otherwise>General</xsl:otherwise>
 </xsl:switch>
-]]></samp>
+]]></code></pre>
                     </p>
                 </example>
             </examples>
@@ -5054,11 +5054,11 @@
                     <p>A simple XSLT template for a particular element. This example causes all
                             <code>&lt;ptitle&gt;</code> elements in the source document to be output
                         as HTML <code>&lt;h2&gt;</code> elements.</p>
-                    <samp><![CDATA[<xsl:template match="ptitle">
+                    <pre><code class="language-xml"><![CDATA[<xsl:template match="ptitle">
     <h2>
         <xsl:apply-templates/>
     </h2>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
 
                 </example>
             </examples>
@@ -5199,15 +5199,15 @@
                     <p>The following example shows how to recover from an error in evaluating an
                         XPath expression (in this case, divide-by-zero):</p>
 
-                    <samp><![CDATA[<xsl:try select="salary div length-of-service">
+                    <pre><code class="language-xml"><![CDATA[<xsl:try select="salary div length-of-service">
     <xsl:catch errors="err:FAOR0001" select="()"/>
-</xsl:try>]]></samp>
+</xsl:try>]]></code></pre>
                 </example>
                 <example>
                     <p>The following example shows how to recover from an error in evaluating a
                         sequence of XSLT instructions (in this case, a validation error):</p>
 
-                    <samp><![CDATA[<xsl:try>
+                    <pre><code class="language-xml"><![CDATA[<xsl:try>
     <xsl:copy-of select="$result" validation="strict"/>
     <xsl:catch>
         <xsl:message>Warning: validation of result document failed:
@@ -5217,7 +5217,7 @@
         <xsl:sequence select="$result"/>
     </xsl:catch>
 </xsl:try>               
-]]></samp>
+]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>
@@ -5482,14 +5482,14 @@
             </attributes>
             <examples>
                 <example>
-                    <samp><![CDATA[<xsl:variable name="title">A really exciting document</xsl:variable>
+                    <pre><code class="language-xml"><![CDATA[<xsl:variable name="title">A really exciting document</xsl:variable>
 <xsl:variable name="backcolor" expr="'#FFFFCC'" />
 <xsl:template match="/*">
     <HTML><TITLE><xsl:value-of select="$title"/></TITLE>
     <BODY BGCOLOR='{$backcolor}'>
     ...]]><br/><![CDATA[
     </BODY></HTML>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt10</in-spec>
@@ -5575,18 +5575,18 @@
                     <p>The following code generates a wrapper element for a non-empty sequence,
                         however it is not guaranteed-streamable because it processes child
                             <code>event</code> elements more than once:</p>
-                    <samp><![CDATA[<xsl:if test="exists(event)">
+                    <pre><code class="language-xml"><![CDATA[<xsl:if test="exists(event)">
     <events>
         <xsl:copy-of select="event"/>
     </events>
-</xsl:if>]]></samp>
+</xsl:if>]]></code></pre>
                     <p>To make this streamable, it can be rewritten using the
                             <code>xsl:where-populated</code> instruction:</p>
-                    <samp><![CDATA[<xsl:where-populated>
+                    <pre><code class="language-xml"><![CDATA[<xsl:where-populated>
     <events>
         <xsl:copy-of select="event"/>
     </events>
-</xsl:where-populated>]]></samp>
+</xsl:where-populated>]]></code></pre>
                 </example>
             </examples>
             <in-spec>xslt30</in-spec>

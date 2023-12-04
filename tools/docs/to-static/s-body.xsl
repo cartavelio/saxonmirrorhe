@@ -75,6 +75,12 @@
                <xsl:apply-templates/>
           </img>
      </xsl:template>
+     
+     <xsl:template match="pre[code]" mode="secondary">
+          <samp>
+               <xsl:apply-templates select="code/node()" mode="secondary"/>
+          </samp>
+     </xsl:template>
 
      <xsl:template match="a[@class = 'apilink']" mode="secondary">
           <xsl:param name="hash-path" tunnel="yes" required="no" as="xs:string" select="''"/>

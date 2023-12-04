@@ -104,7 +104,7 @@
             extension function with the s9api <a class="javalink" href="net.sf.saxon.s9api.Processor"
               >Processor</a>, and then invokes it from an XPath expression:</p>
           
-          <samp><![CDATA[  Processor proc = new Processor(false);
+          <pre><code class="language-java"><![CDATA[  Processor proc = new Processor(false);
   ExtensionFunction sqrt = new ExtensionFunction() {
       public QName getName() {
           return new QName("http://math.com/", "sqrt");
@@ -137,7 +137,7 @@
   XPathSelector ev = exp.load();
   ev.setVariable(new QName("arg"), new XdmAtomicValue(2.0));
   XdmValue val = ev.evaluate();
-  String result = val.toString();]]></samp>
+  String result = val.toString();]]></code></pre>
           
           <p>Full details of the interface are defined in the Javadoc for class <a class="javalink"
             href="net.sf.saxon.s9api.ExtensionFunction">ExtensionFunction</a>.</p>
@@ -184,7 +184,7 @@
         integer arguments and performs a "shift left" operation, shifting the first argument by the
         number of bit-positions indicated in the second argument:</p>
             
-      <samp><![CDATA[class ShiftLeft extends ExtensionFunctionDefinition {
+      <pre><code class="language-java"><![CDATA[class ShiftLeft extends ExtensionFunctionDefinition {
     @Override
     public StructuredQName getFunctionQName() {
         return new StructuredQName("eg", "http://example.com/saxon-extension", "shift-left");
@@ -213,16 +213,16 @@
             }
         };
     }
-}]]></samp>
+}]]></code></pre>
 
       <p>The extension must be registered with the configuration:</p>
 
-      <samp><![CDATA[configuration.registerExtensionFunction(new ShiftLeft())]]></samp>
+      <pre><code class="language-java"><![CDATA[configuration.registerExtensionFunction(new ShiftLeft())]]></code></pre>
 
       <p>and it can then be called like this:</p>
 
-      <samp><![CDATA[declare namespace eg="http://example.com/saxon-extension";
-for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
+      <pre><code class="language-xquery"><![CDATA[declare namespace eg="http://example.com/saxon-extension";
+for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
 
       <p>The methods that must be implemented (or that may be implemented) by an integrated
         extension function are listed in the table below. Further details are in the Javadoc.</p>
@@ -870,17 +870,17 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
       <p><strong>Static methods</strong> can be called directly.</p>
 
       <p>For example (in XSLT):</p>
-      <samp><![CDATA[<xsl:value-of select="math:sqrt($arg)" 
-    xmlns:math="java:java.lang.Math"/>]]></samp>
+      <pre><code class="language-xml"><![CDATA[<xsl:value-of select="math:sqrt($arg)" 
+    xmlns:math="java:java.lang.Math"/>]]></code></pre>
 
       <p>This will invoke the static method <code>java.lang.Math#sqrt()</code>, applying it to the
         value of the variable <code>$arg</code>, and copying the value of the square root of
           <code>$arg</code> to the result tree.</p>
 
       <p>Similarly (in XQuery):</p>
-      <samp><![CDATA[<a xmlns:double="java:java.lang.Double"> 
+      <pre><code class="language-xquery"><![CDATA[<a xmlns:double="java:java.lang.Double"> 
     { double:MAX_VALUE() } 
-</a>]]></samp>
+</a>]]></code></pre>
 
       <p>This will output the value of the static field <code>java.lang.Double#MAX_VALUE</code>. (In
         practice, it is better to declare the namespace in the query prolog, because it will then
@@ -896,7 +896,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
 
       <p>The following example shows a function that obtains the line number of the context node
         (this is actually a built-in Saxon extension):</p>
-      <samp><![CDATA[/**
+      <pre><code class="language-java"><![CDATA[/**
 * Return the line number of the context node.
 */
 public static int lineNumber(XPathContext c) {
@@ -906,17 +906,17 @@ public static int lineNumber(XPathContext c) {
     } else {
         return -1;
     }
-}]]></samp>
+}]]></code></pre>
 
       <p>If this method appears in class <code>com.example.code.NodeData</code>, then it can be
         accessed using the following code in XSLT:</p>
-      <samp><![CDATA[<xsl:value-of select="nd:line-number()" 
-    xmlns:nd="java:com.example.code.NodeData"/>]]></samp>
+      <pre><code class="language-xml"><![CDATA[<xsl:value-of select="nd:line-number()" 
+    xmlns:nd="java:com.example.code.NodeData"/>]]></code></pre>
 
       <p>or the following in XQuery:</p>
-      <samp><![CDATA[<line xmlns:nd="java:com.example.code.NodeData">
+      <pre><code class="language-xquery"><![CDATA[<line xmlns:nd="java:com.example.code.NodeData">
     { nd:line-number() }
-</line>]]></samp>
+</line>]]></code></pre>
       
     </section>
 
@@ -1013,7 +1013,7 @@ public static int lineNumber(XPathContext c) {
 
       <p>For example, the following XSLT stylesheet prints the date and time. (From XSLT 2.0, of
         course, this no longer requires extension functions, but the example is still valid.)</p>
-      <samp><![CDATA[<xsl:stylesheet
+      <pre><code class="language-xml"><![CDATA[<xsl:stylesheet
   version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:date="java:java.util.Date">
@@ -1028,12 +1028,12 @@ public static int lineNumber(XPathContext c) {
 </xsl:template>
 
 </xsl:stylesheet>
-]]></samp>
+]]></code></pre>
 
       <p>The equivalent in XQuery is:</p>
-      <samp><![CDATA[declare namespace date="java:java.util.Date";
+      <pre><code class="language-xquery"><![CDATA[declare namespace date="java:java.util.Date";
 <p>{date:to-string(date:new())}</p>
-]]></samp>
+]]></code></pre>
         </li>
       </ol>
 
@@ -1058,8 +1058,8 @@ public static int lineNumber(XPathContext c) {
         the implementation classes for XDM values. For example, the following gets the current
         Julian instant as a decimal number:</p>
 
-      <samp><![CDATA[<xsl:value-of select="d:toJulianInstant(current-dateTime())"
-    xmlns:d="java:net.sf.saxon.value.DateTimeValue"/>]]></samp>
+      <pre><code class="language-xml"><![CDATA[<xsl:value-of select="d:toJulianInstant(current-dateTime())"
+    xmlns:d="java:net.sf.saxon.value.DateTimeValue"/>]]></code></pre>
 
       <p>This will only work if the value of the expression (<code>current-dateTime()</code> in this
         example) is implemented internally as an instance of the class defined in the namespace used
@@ -1808,7 +1808,7 @@ public static int lineNumber(XPathContext c) {
         
         <p>A simple extension function can be registered in SaxonCS by calling the method</p>
         
-        <samp>processor.RegisterExtensionFunction(QName, XdmItemType, Func&lt;XdmValue[], XdmValue&gt;)</samp>
+        <pre><code class="language-cs">processor.RegisterExtensionFunction(QName, XdmItemType, Func&lt;XdmValue[], XdmValue&gt;)</code></pre>
       
       <p>The first argument is the name of the function, for example <code>new QName("urn:math", "sqrt")</code>.</p>
       
@@ -1819,10 +1819,10 @@ public static int lineNumber(XPathContext c) {
           implementation of the function, which can conveniently be supplied as a simple lambda expression.
           For example, a square-root function might be:</p>
       
-      <samp><![CDATA[proc.RegisterExtensionFunction(
+      <pre><code class="language-cs"><![CDATA[proc.RegisterExtensionFunction(
     new QName("urn:math", "sqrt"), 
     proc.ParseItemType("function(xs:double) as xs:double"), 
-    val => new XdmAtomicValue(Math.sqrt((XdmAtomicValue)val[0][0].AsDouble()))]]></samp>
+    val => new XdmAtomicValue(Math.sqrt((XdmAtomicValue)val[0][0].AsDouble()))]]></code></pre>
         
         <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>, or as <code>m:sqrt(2)</code>
           if the namespace prefix <code>m</code> has been bound to the URI <code>urn:math</code>.</p>
@@ -1852,7 +1852,7 @@ public static int lineNumber(XPathContext c) {
           to calculate square roots, registers this extension function with the 
           <a class="cslink" href="Saxon.Api.Processor">Processor</a>, and then invokes it from an XPath expression:</p>
         
-        <samp><![CDATA[public class Sqrt : ExtensionFunctionDefinition {
+        <pre><code class="language-cs"><![CDATA[public class Sqrt : ExtensionFunctionDefinition {
             
     public override QName FunctionName => new QName("http://math.com/", "sqrt");
                 
@@ -1896,7 +1896,7 @@ proc.RegisterExtensionFunction(new Sqrt());
 XPathCompiler xpc = proc.NewXPathCompiler();
 xpc.DeclareNamespace("mf", "http://math.com/");
 XdmItem result = xpc.EvaluateSingle("mf:sqrt(2)", null);
-Console.WriteLine("Square root of 2 is " + result);]]></samp>
+Console.WriteLine("Square root of 2 is " + result);]]></code></pre>
  
         <aside>This example does not take advantage of the full power of the interface, for example the ability to pick up details
         of the static context (such as the static base URI or the default collation), or the dynamic context (such as the context item).</aside>

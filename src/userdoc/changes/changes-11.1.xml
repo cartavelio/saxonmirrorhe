@@ -75,11 +75,11 @@
         
         <p>For example,</p>
         
-        <samp><![CDATA[for $item in //items
+        <pre><code class="language-xquery"><![CDATA[for $item in //items
 trace "item: " || $item/@id
 let $price := $item/cost + $item/markup
 trace "selling-price: " || $price
-return "€" + $price]]></samp>
+return "€" + $price]]></code></pre>
         
         <p>Output is displayed in the same way as for the <code>fn:trace()</code> function. It is sent to the current <code>Logger</code>,
             and for each item in the trace output, a line is output in the format <code>FLWOR&lt;- n/m type: message</code>

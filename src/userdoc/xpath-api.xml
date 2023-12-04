@@ -379,9 +379,9 @@
 
          <p>An application using the JAXP 1.3 XPath API starts by instantiating a factory class.
             To use Saxon as your XPath engine, call:</p>
-         <samp><![CDATA[XPathFactory xpathFactory = new net.sf.saxon.xpath.XPathFactoryImpl();
+         <pre><code class="language-java"><![CDATA[XPathFactory xpathFactory = new net.sf.saxon.xpath.XPathFactoryImpl();
 XPath xpath = xpathFactory.newXPath();
-]]></samp>
+]]></code></pre>
 
  
          <p>If you want to use Saxon as your XPath implementation, you must instantiate the class <a
@@ -711,7 +711,7 @@ XPath xpath = xpathFactory.newXPath();
                
                <p>For example:</p>
                
-               <samp><![CDATA[   int cap = 10;
+               <pre><code class="language-clike"><![CDATA[   int cap = 10;
    sxnc_parameter *parameters;
    int parLen = 0, parCap;
    parCap = cap;
@@ -721,45 +721,45 @@ XPath xpath = xpathFactory.newXPath();
    sxnc_environment *environ;
    sxnc_processor *processor;
 
-   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></samp>
+   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></code></pre>
             </li>
             <li>
                <p>Next set up the GraalVM environment to create and initialize a new independent VM instance,
                   using the <code>create_graalvm_isolate()</code> function. This is required by the SaxonC
                   processors.</p>
-               <samp><![CDATA[   sxnc_environment *environ;
-   create_graalvm_isolate(environi);]]></samp>
+               <pre><code class="language-clike"><![CDATA[   sxnc_environment *environ;
+   create_graalvm_isolate(environi);]]></code></pre>
             </li>
             <li>
                <p>Use the <code>c_createSaxonProcessor()</code> function to create a SaxonC processor, which
                   is used to create the XPath processor. The last argument is used to specify whether the
                   processor is to be run with license enabled (i.e. for Saxon-EE and Saxon-PE) or off - set
                   using values '1' and '0' respectively.</p>
-               <samp><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
+               <pre><code class="language-clike"><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></code></pre>
             </li>
             <li>
                <p>Use the <code>c_createXPathProcessor()</code> function to create an XPath processor, which
                   is used to evaluate XPath expressions.</p>
-               <samp><![CDATA[   sxnc_xpath *xpathProc = (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
-   int checkProc = c_createXPathProcessor(environi, processor, xpathProc);]]></samp>
+               <pre><code class="language-clike"><![CDATA[   sxnc_xpath *xpathProc = (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
+   int checkProc = c_createXPathProcessor(environi, processor, xpathProc);]]></code></pre>
             </li>
             <li>
                <p>Supply properties for the expression using the <code>setProperty()</code> function.</p>
                <p>For example, set the source document as follows:</p>
-               <samp><![CDATA[   setProperty(&properties, &propLen, &propCap, "s", "../data/people.xml");]]></samp>
+               <pre><code class="language-clike"><![CDATA[   setProperty(&properties, &propLen, &propCap, "s", "../data/people.xml");]]></code></pre>
             </li>
             <li>
                <p>You can now evaluate an XPath expression, using the <code>evaluate()</code>,
                   <code>evaluateSingle()</code> or <code>effectiveBooleanValue()</code> functions. For
                   example, you could evaluate an XPath expression using:</p>
-               <samp><![CDATA[   sxnc_value *result = evaluate(environ, xpathProc, cwd, "/out/person",
-      parameters, properties, 0, propLen);]]]></samp>
+               <pre><code class="language-clike"><![CDATA[   sxnc_value *result = evaluate(environ, xpathProc, cwd, "/out/person",
+      parameters, properties, 0, propLen);]]></code></pre>
             </li>
             <li>
                <p>At the end of the program it is necessary to deallocate the memory created for the Saxon
                   processor, parameters and properties; and cleanly release resources created by GraalVM.</p>
-               <samp><![CDATA[   graal_tear_down(environi->thread);
-   freeSaxonc(&environi, &processor, &parameters, &properties);]]></samp>
+               <pre><code class="language-clike"><![CDATA[   graal_tear_down(environi->thread);
+   freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             </li>
          </ol>
          

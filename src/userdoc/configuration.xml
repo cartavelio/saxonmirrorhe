@@ -341,7 +341,7 @@
          <p>Additional configuration options can be specified using the <code>attribute</code> child of the <code>factory</code> element, for example the
             following task was used as part of the pipeline for publishing this documentation:</p>
 
-         <samp><![CDATA[  <xslt in="${userdoc.dir}/src/function-data.xml"
+         <pre><code class="language-xml"><![CDATA[  <xslt in="${userdoc.dir}/src/function-data.xml"
         style="${userdoc.dir}/style/preprocess-functions.xsl"
         out="${userdoc.dir}/src/functions.xml"
         classpath="e:/saxon/eej/saxon-ee-10.0.jar;e:/saxon/eej/saxon-licenses">
@@ -350,7 +350,7 @@
             <attribute name="http://saxon.sf.net/feature/schema-validation-mode" value="strict"/>
             <attribute name="http://saxon.sf.net/feature/xsd-version" value="1.1"/>
         </factory>
-  </xslt>]]></samp>
+  </xslt>]]></code></pre>
          <p>Many of the options available as configuration parameters (for example 
             <a class="feature" href="XSLT_INITIAL_TEMPLATE"/>) were provided explicitly with Ant in mind. 
             The provision of these parameters makes the customized version
@@ -384,7 +384,7 @@
          its default value, and it is probably good practice to only include those parameters that you need to specify explicitly. Some of the example values
          used in this sample will not work unless you have files with the relevant names at particular locations, or unless you have classes with particular
          names available on your classpath; if such entries cause problems, you can always delete them.</p>
-      <samp><![CDATA[<configuration xmlns="http://saxon.sf.net/ns/configuration"
+      <pre><code class="language-xml"><![CDATA[<configuration xmlns="http://saxon.sf.net/ns/configuration"
                edition="EE"
                licenseFileLocation="saxon-license.lic"
                label="Some label">
@@ -529,7 +529,7 @@
     <collation uri="http://example.com/french" lang="fr" ignore-case="yes"/>
   </collations>  
 </configuration>
-]]></samp>
+]]></code></pre>
       <p>The <code>configuration</code> element takes three possible attributes:</p>
       <ul>
          <li>

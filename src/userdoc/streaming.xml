@@ -364,10 +364,10 @@
         subtrees containing the parts of the document that need to be processed. This can be
         achieved using XSLT 3.0 syntax like this:</p>
 
-      <samp><![CDATA[<xsl:source-document streamable="yes" href="employees.xml">
+      <pre><code class="language-xml"><![CDATA[<xsl:source-document streamable="yes" href="employees.xml">
   <xsl:apply-templates select="*/employee/copy-of(.)"/>  
 </xsl:source-document>
-]]></samp>
+]]></code></pre>
 
       <p>The code that processes an individual <code>employee</code> element does not need to be
         streamable; it can use any XSLT constructs. The only constraint is that it cannot navigate
@@ -380,19 +380,19 @@
         a pre-built tree (under Java, this means a <code>StreamSource</code> or
           <code>SAXSource</code>). For example:</p>
 
-      <samp><![CDATA[<xsl:mode streamable="yes"/>
+      <pre><code class="language-xml"><![CDATA[<xsl:mode streamable="yes"/>
 <xsl:template match="/">
   <xsl:apply-templates select="*/employee/copy-of(.)"/>  
 </xsl:template>
-]]></samp>
+]]></code></pre>
 
       <p>The same effect can be achieved in XQuery if the document is supplied as the initial
         context item, again in the form of a streamed input source. Although the functions
           <code>copy-of()</code> and <code>snapshot()</code> are defined in the XSLT 3.0
         specification, Saxon also makes them available in XQuery, allowing for example:</p>
 
-      <samp><![CDATA[*/employee ! copy-of(.)/(name, address)
-]]></samp>
+      <pre><code class="language-xquery"><![CDATA[*/employee ! copy-of(.)/(name, address)
+]]></code></pre>
 
       <p>In XQuery there is no need for the query itself to indicate that streamed execution is
         required; rather this can be requested from the command line using the option
@@ -414,39 +414,39 @@
       <p>
         <strong>XSLT example (named document)</strong>
       </p>
-      <samp><![CDATA[<xsl:template name="main">
+      <pre><code class="language-xml"><![CDATA[<xsl:template name="main">
   <footnotes>
     <xsl:source-document streamable="yes" href="thesis.xml">
       <xsl:copy-of select=".//footnote[@type='endnote'])"/>
     </xsl:source-document>  
   </footnotes>
 </xsl:template>
-]]></samp>
+]]></code></pre>
 
       <p>
         <strong>XQuery example (named document)</strong>
       </p>
-      <samp><![CDATA[  <footnotes>{
+      <pre><code class="language-xquery"><![CDATA[  <footnotes>{
      saxon:stream(doc('thesis.xml')//footnote[@type='endnote']) 
   }</footnotes>
-]]></samp>
+]]></code></pre>
 
       <p>
         <strong>XSLT example (principal input document)</strong>
       </p>
-      <samp><![CDATA[<xsl:mode streamable="yes"/>
+      <pre><code class="language-xml"><![CDATA[<xsl:mode streamable="yes"/>
 <xsl:template match="/">
   <footnotes>
     <xsl:copy-of select=".//footnote[@type='endnote'])"/>
   </footnotes>
 </xsl:template>
-]]></samp>
+]]></code></pre>
 
       <p>
         <strong>XQuery example (principal input document)</strong>
       </p>
-      <samp><![CDATA[  <footnotes>{.//footnote[@type='endnote']}</footnotes>
-]]></samp>
+      <pre><code class="language-xquery"><![CDATA[  <footnotes>{.//footnote[@type='endnote']}</footnotes>
+]]></code></pre>
 
 
       <p>These examples work because the predicate (the expression in square brackets) is
@@ -455,8 +455,8 @@
         necessary to make a copy of each footnote and then test the copy. The last example then
         becomes:</p>
 
-      <samp><![CDATA[  <footnotes>{.//footnote/copy-of(.)[type='endnote']}</footnotes>
-]]></samp>
+      <pre><code class="language-xquery"><![CDATA[  <footnotes>{.//footnote/copy-of(.)[type='endnote']}</footnotes>
+]]></code></pre>
     </section>
 
 
@@ -471,9 +471,9 @@
         streaming facility in many cases allows the source document to be read only partially. For
         example, the following query will return true as soon as it finds a transaction with a
         negative value, and will then immediately stop processing the input file:</p>
-      <samp><![CDATA[some $t in saxon:stream(doc('big-transaction-file.xml')//transaction)
+      <pre><code class="language-xquery"><![CDATA[some $t in saxon:stream(doc('big-transaction-file.xml')//transaction)
 satisfies number($t/@value) lt 0
-]]></samp>
+]]></code></pre>
 
       <p>This facility is particularly useful for extracting data that appears near the start of a
         large file. It does mean, however, that well-formedness or validity errors appearing later
@@ -482,7 +482,7 @@ satisfies number($t/@value) lt 0
       <p>To exit early from reading a streamed document using pure XSLT 3.0 constructs, use <a
           href="/xsl-elements/iterate" class="bodylink code">xsl:iterate</a> like this:</p>
 
-      <samp><![CDATA[<xsl:variable name="contains-debit" as="xs:boolean">
+      <pre><code class="language-xml"><![CDATA[<xsl:variable name="contains-debit" as="xs:boolean">
   <xsl:source-document streamable="yes" href="big-transaction-file.xml">
     <xsl:iterate select=".//transaction">
       <xsl:on-completion select="false()"/>
@@ -492,7 +492,7 @@ satisfies number($t/@value) lt 0
     </xsl:iterate>
   </xsl:source-document>
 </xsl:variable>
-]]></samp>
+]]></code></pre>
 
     </section>
 
@@ -513,7 +513,7 @@ satisfies number($t/@value) lt 0
       <p>The following example takes a sequence of <code>&lt;transaction&gt;</code> elements in an
         input document, each one containing the value of a debit or credit from an account. As
         output it copies the transaction elements, adding a current balance.</p>
-      <samp><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">          
+      <pre><code class="language-xml"><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">          
   <xsl:iterate select="account/transaction">
     <xsl:param name="balance" as="xs:decimal" select="0.00"/>
     <xsl:variable name="new-balance" as="xs:decimal" select="$balance + xs:decimal(@value)"/>
@@ -524,11 +524,11 @@ satisfies number($t/@value) lt 0
       <xsl:with-param name="balance" select="$new-balance"/>
     </xsl:next-iteration>
   </xsl:iterate>
-</xsl:source-document>  ]]></samp>
+</xsl:source-document>  ]]></code></pre>
 
       <p>The following example is similar: this time it copies the account number (contained in a
         separate element at the start of the file) into each transaction element:</p>
-      <samp><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">           
+      <pre><code class="language-xml"><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">           
   <xsl:iterate select="account/(account-number|transaction)">
     <xsl:param name="accountNr"/>
     <xsl:choose>
@@ -544,12 +544,12 @@ satisfies number($t/@value) lt 0
       </xsl:otherwise>
     </xsl:choose>
   </xsl:iterate>
-</xsl:source-document>  ]]></samp>
+</xsl:source-document>  ]]></code></pre>
 
       <p>Here is a more complex example, one that groups adjacent transaction elements having the
         same date attribute. The two loop parameters are the current grouping key and the current
         date. The contents of a group are accumulated in a variable until the date changes.</p>
-      <samp><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">           
+      <pre><code class="language-xml"><![CDATA[<xsl:source-document streamable="yes" href="transactions.xml">           
   <xsl:iterate select="account/transaction">
     <xsl:param name="group" as="element(transaction)*" select="()"/>
     <xsl:param name="currentDate" as="xs:date?" select="()"/>
@@ -576,7 +576,7 @@ satisfies number($t/@value) lt 0
       </final-daily-transactions>
     </xsl:on-completion>        
   </xsl:iterate>
-</xsl:source-document>  ]]></samp>
+</xsl:source-document>  ]]></code></pre>
 
       <p>Note that when an <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a>
         loop is terminated using <a class="bodylink code" href="/xsl-elements/break">xsl:break</a>,
@@ -619,7 +619,7 @@ satisfies number($t/@value) lt 0
 
       <p>Here is an example of streamed merging of two log files:</p>
 
-      <samp><![CDATA[<xsl:merge>
+      <pre><code class="language-xml"><![CDATA[<xsl:merge>
   <xsl:merge-source streamable="yes"
        for-each-source="'log-file-1.xml'" select="events/event">
     <xsl:merge-key select="xs:dateTime(@timestamp)"/>
@@ -633,7 +633,7 @@ satisfies number($t/@value) lt 0
       <xsl:copy-of select="current-merge-group()" />
     </group>
   </xsl:merge-action>
-</xsl:merge>]]></samp>
+</xsl:merge>]]></code></pre>
     </section>
 
 
@@ -653,7 +653,7 @@ satisfies number($t/@value) lt 0
         the rules for streamability. A mode is declared to be streamable using the top-level
         stylesheet declaration:</p>
 
-      <samp><![CDATA[<xsl:mode name="s" streamable="yes"/>]]></samp>
+      <pre><code class="language-xml"><![CDATA[<xsl:mode name="s" streamable="yes"/>]]></code></pre>
 
       <p>The <code>name</code> attribute is optional; if omitted, the declaration applies to the
         default (unnamed) mode.</p>
@@ -671,13 +671,13 @@ satisfies number($t/@value) lt 0
 
       <p>Streamed processing of a secondary document is initiated using the instruction:</p>
 
-      <samp><![CDATA[<xsl:source-document streamable="yes" href="abc.xml">
+      <pre><code class="language-xml"><![CDATA[<xsl:source-document streamable="yes" href="abc.xml">
   <xsl:apply-templates mode="s"/>
-</xsl:source-document>]]></samp>
+</xsl:source-document>]]></code></pre>
 
       <p>Saxon will also recognize an instruction of the form:</p>
 
-      <samp><![CDATA[<xsl:apply-templates select="doc('abc.xml')" mode="s"/>]]></samp>
+      <pre><code class="language-xml"><![CDATA[<xsl:apply-templates select="doc('abc.xml')" mode="s"/>]]></code></pre>
 
       <p>Here the <code>select</code> attribute must contain a simple call on the <a
           class="bodylink code" href="/functions/fn/doc">doc()</a> or <a class="bodylink code"

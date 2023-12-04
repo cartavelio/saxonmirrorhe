@@ -231,6 +231,8 @@
                 
                 <xsl:call-template name="platform-info"/>
                 
+                <xsl:sequence select="ixsl:call(ixsl:window(), 'Prism.highlightAll', [])[current-date() lt xs:date('2000-01-01')]"/>
+                
             </xsl:otherwise>
             
         </xsl:choose>

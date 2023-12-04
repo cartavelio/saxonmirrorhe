@@ -253,7 +253,8 @@
             <code java="net.sf.saxon.tree.iter.GroundedIterator">GroundedIterator</code> and <code
                 java="net.sf.saxon.expr.LastPositionFinder">LastPositionFinder</code>. For example:</p>
         
-        <samp>if (iter instanceof LookaheadIterator and ((LookaheadIterator)iter).supportsHasNext() and ((LookaheadIterator)iter).hasNext())...</samp>
+        <pre><code class="language-java">if (iter instanceof LookaheadIterator and ((LookaheadIterator)iter).supportsHasNext() and
+            ((LookaheadIterator)iter).hasNext())...</code></pre>
 
         <h2>NodeInfo</h2>
 
@@ -296,7 +297,7 @@
             progress messages (as well as <code>&lt;xsl:message&gt;</code> output) to a supplied
             <code>java.util.logging.Logger</code>. This can be achieved using a call such as:</p>
         
-        <samp>configuration.setLogger(new SystemLogger(Logger.getAnonymousLogger()))</samp>
+        <pre><code class="language-java">configuration.setLogger(new SystemLogger(Logger.getAnonymousLogger()))</code></pre>
         
  
     </category>

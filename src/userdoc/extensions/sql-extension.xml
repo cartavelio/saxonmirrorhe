@@ -134,13 +134,13 @@
                   specifically a value of type "external object", which can be referred to using the
                   type <code>java:java.sql.Connection</code>. Typically the value will be assigned
                   to a variable using the construct:</p>
-               <samp><![CDATA[<xsl:variable  name="connection" 
+               <pre><code class="language-xml"><![CDATA[<xsl:variable  name="connection" 
                as="java:java.sql.Connection" 
                xmlns:java="http://saxon.sf.net/java-type">
   <sql:connect database="jdbc:odbc:testdb" 
                xsl:extension-element-prefixes="sql"/>
 </xsl:variable>
-]]></samp>
+]]></code></pre>
 
                <p>This can be a global variable or a local variable; if local, it can be passed to
                   other templates as a parameter in the normal way. The connection is used on
@@ -433,7 +433,7 @@
             "Category" (see below).</p>
 
          <p>Here is the stylesheet:</p>
-         <samp><![CDATA[<xsl:stylesheet
+         <pre><code class="language-xml"><![CDATA[<xsl:stylesheet
 	xmlns:sql="http://saxon.sf.net/sql"
  	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
 	xmlns:saxon="http://saxon.sf.net/"
@@ -502,7 +502,7 @@
 </xsl:template>
 
 </xsl:stylesheet>	
-]]></samp>
+]]></code></pre>
 
          <h2 class="subtitle">Running the example using Microsoft Access</h2>
 
@@ -545,9 +545,9 @@
                <p>Register the database as a JDBC data source (same as 2. above). However, change
                   the <code>xsl:param</code> elements with attribute names "driver" and "database"
                   as follows (we assume machine is localhost):</p>
-               <samp><![CDATA[<xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/>
+               <pre><code class="language-xml"><![CDATA[<xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/>
 <xsl:param name="database" select="'jdbc:mysql://localhost:3306/Book'"/>   
-]]></samp>
+]]></code></pre>
             </li>
             <li>
                <p>Download the MySQL connector jar file, if missing.</p>
@@ -571,14 +571,14 @@
                      </kbd>
                      <p>where the configuration file <code>data/config.xml</code> includes the
                         following entry:</p>
-                     <samp><![CDATA[<configuration xmlns="http://saxon.sf.net/ns/configuration"
+                     <pre><code class="language-xml"><![CDATA[<configuration xmlns="http://saxon.sf.net/ns/configuration"
                edition="EE">                
   <xslt>
     <extensionElement namespace="http://saxon.sf.net/sql" 
                       factory="net.sf.saxon.option.sql.SQLElementFactory"/>
   </xslt>
 </configuration>
-]]></samp>
+]]></code></pre>
                   </li>
                </ul>
             </li>

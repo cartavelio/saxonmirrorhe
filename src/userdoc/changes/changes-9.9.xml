@@ -377,11 +377,11 @@
         (typically but not necessarily another TinyTree). These are referred to as "grafted" nodes. They arise when a tree is constructed
         by copying parts of another tree. For example, given:</p>
         
-            <samp><![CDATA[<xsl:variable name="sorted">
+            <pre><code class="language-xml"><![CDATA[<xsl:variable name="sorted">
    <temp>
      <xsl:copy-of select="sort(//employee, function($e){number($e!salary)})"/>
    </temp>
-</xsl:variable>]]></samp>
+</xsl:variable>]]></code></pre>
             
         <p>a new tree will be constructed that consists largely of grafted nodes containing references to the <code>employee</code>
         elements in the original unsorted input tree. This saves the cost in time and space of copying the employee subtrees from
@@ -576,9 +576,9 @@
             have been introduced to provide an XSLT equivalent of the XQuery Update
             capability. For example, you can delete selected attributes using the construct:</p>
         
-        <samp><![CDATA[<saxon:update select="//chapter[1]">
+        <pre><code class="language-xml"><![CDATA[<saxon:update select="//chapter[1]">
     <saxon:delete select=".//para[@deleted='yes']"/>
-</saxon:update>]]></samp>
+</saxon:update>]]></code></pre>
         
         <p>The outermost instruction is <a class="bodylink code"
             href="/extensions/instructions/update">saxon:update</a>. This has a <code>select</code> attribute to
@@ -634,13 +634,13 @@
        
         <p>For example if a type alias has been declared:</p>
         
-        <samp>&lt;saxon:type-alias name="cx:complex" type="tuple(r: xs:double, i: xs:double)"/></samp>
+        <pre><code class="language-xml">&lt;saxon:type-alias name="cx:complex" type="tuple(r: xs:double, i: xs:double)"/></code></pre>
         
         <p>Then it can be used in a match pattern to match instances of the type, with or without predicates:</p>
         
-        <samp>&lt;xsl:template match="~cx:complex[?i=0]">{?r}&lt;/xsl:template></samp>
+        <pre><code class="language-xml">&lt;xsl:template match="~cx:complex[?i=0]">{?r}&lt;/xsl:template></code></pre>
         
-        <samp>&lt;xsl:template match="~cx:complex">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></samp>
+        <pre><code class="language-xml">&lt;xsl:template match="~cx:complex">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
         
         <p>The construct <code>~T</code> at the start of a pattern can be regarded as an abbreviation for
         <code>.[. instance of ~T]</code>.</p>

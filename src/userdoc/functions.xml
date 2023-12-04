@@ -6595,14 +6595,14 @@
           
           <p>For example, if the function is declared as:</p>
           
-          <samp><![CDATA[declare namespace a="http://a.com/";
-declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
+          <pre><code class="language-xquery"><![CDATA[declare namespace a="http://a.com/";
+declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></code></pre>
           
           <p>then the function call <code>saxon:function-annotations(local:f#0)</code> returns
             a sequence containing a single map of the form:</p>
           
-          <samp><![CDATA[map{"name": QName("http://a.com/", "colour"),
-    "params": ("blue", 3)}]]></samp>
+          <pre><code class="language-xquery"><![CDATA[map{"name": QName("http://a.com/", "colour"),
+    "params": ("blue", 3)}]]></code></pre>
           
           <p>Function annotations are retained (as required by the W3C specification) when a function is 
           coerced as a result of type-checking. Annotations are also retained when functions are partially applied.</p>
@@ -6934,7 +6934,7 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
               <code>map:size()</code>.</p>
 
           <p>For example, consider a source document of the form:</p>
-          <samp><![CDATA[<doc> 
+          <pre><code class="language-xml"><![CDATA[<doc> 
     <town name="Amherst" state="NH"/> 
     <town name="Amherst" state="MA"/> 
     <town name="Auburn" state="MA"/> 
@@ -6946,33 +6946,32 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
     <town name="Bristol" state="NH"/> 
     <town name="Bristol" state="VT"/>
     <town name="Cambridge" state="ME"/> 
-</doc>]]></samp>
+</doc>]]></code></pre>
 
           <p>and suppose there is a requirement to find <code>&lt;town&gt;</code> elements
             efficiently given the abbreviation for the <code>state</code>. You can do this by first
             setting up an indexed sequence. In XQuery you can write:</p>
-          <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
+          <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
 declare namespace java="http://saxon.sf.net/java-type"; 
-declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/@state});]]></samp>
+declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/@state});]]></code></pre>
 
           <p>This could be a local variable (declared in a <code>let</code> clause) rather than a
             global variable. The XSLT equivalent is:</p>
-          <samp><![CDATA[<xsl:variable name="indexedTowns" select="saxon:index(//town, 
-      function($t){$t/@state})" as="map(*)"/>]]></samp>
+          <pre><code class="language-xml"><![CDATA[<xsl:variable name="indexedTowns" select="saxon:index(//town, 
+      function($t){$t/@state})" as="map(*)"/>]]></code></pre>
 
           <p>You can then find all the towns in New Hampshire using the expression:</p>
-          <samp>map:get($indexedTowns, "NH")</samp>
+          <pre><code class="language-xquery">map:get($indexedTowns, "NH")</code></pre>
 
           <p>Indexed sequences were introduced primarily for use in XQuery, where they provide
             functionality equivalent to the standard <code>xsl:key</code> mechanism in XSLT. From
             Saxon 9.5 the data structure used for an indexed sequence is a map, and with the
             introduction of maps the function could now be implemented simply as:</p>
 
-          <samp><![CDATA[declare function saxon:index($seq as item()*, $f as function(item()) as xs:anyAtomicValue) { 
+          <pre><code class="language-xquery"><![CDATA[declare function saxon:index($seq as item()*, $f as function(item()) as xs:anyAtomicValue) { 
     map:merge( for $item in $seq for $key in $f($item) group by $key
                  return map:entry($key, $item) ) 
-};]]>
-          </samp>
+};]]></code></pre>
 
           <p>For further information about maps see <a class="bodylink"
               href="/expressions/xpath30maps">Maps in XPath</a>.</p>
@@ -7107,7 +7106,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           </p>
 
           <p>The following example will return true:</p>
-          <samp>saxon:is-whole-number(12e0)</samp>
+          <pre><code class="language-xquery">saxon:is-whole-number(12e0)</code></pre>
         </div>
       </details>
     </function>
@@ -7309,7 +7308,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           <p>To use this function, it is first necessary to declare a key as a range key, which can
             be done using a declaration such as:</p>
 
-          <samp><![CDATA[<xsl:key name="k" match="transaction" use="@date" saxon:range-key="yes"/>]]></samp>
+          <pre><code class="language-xml"><![CDATA[<xsl:key name="k" match="transaction" use="@date" saxon:range-key="yes"/>]]></code></pre>
 
           <p>The effect of this declaration is that Saxon builds the index underpinning the key
             using a Java <code>TreeMap</code> rather than a <code>HashMap</code>, making ordered
@@ -7337,7 +7336,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             determine if the map is empty, and so on. The maps for several documents can be combined
             into a single map using a construct such as:</p>
 
-          <samp><![CDATA[map:merge(collection('dir?select="*.xml')!saxon:key-map('k', ., (), ()))]]></samp>
+          <pre><code class="language-xml"><![CDATA[map:merge(collection('dir?select="*.xml')!saxon:key-map('k', ., (), ()))]]></code></pre>
 
           <p>Note however that the resulting map will not be sorted.</p>
         </div>
@@ -7379,7 +7378,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             an empty sequence.</p>
 
           <p>Example:</p>
-          <samp><![CDATA[format-dateTime(saxon:last-modified(resolve-uri('lookup.xml', static-base-uri()))]]></samp>
+          <pre><code class="language-xml"><![CDATA[format-dateTime(saxon:last-modified(resolve-uri('lookup.xml', static-base-uri()))]]></code></pre>
           
           <p>This function differs from the EXPath function <code>file:last-modified</code> in that it takes
           a URI rather than a filename as input, and may work for resources other than files: for example,
@@ -7425,7 +7424,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             true.</p>
 
           <p>For example:</p>
-          <samp><![CDATA[saxon:leading(following-sibling::*, function($x){exists($x/self::para}))]]></samp>
+          <pre><code class="language-xml"><![CDATA[saxon:leading(following-sibling::*, function($x){exists($x/self::para}))]]></code></pre>
 
           <p>where the supplied function tests whether the supplied item is a
               <code>&lt;para&gt;</code> element.</p>
@@ -8109,9 +8108,9 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           </p>
           
           <p>For more complex use cases, the function can be called explicitly. For example, this query:</p>
-          <samp><![CDATA[declare namespace StreamSource = "java:javax.xml.transform.stream.StreamSource";
+          <pre><code class="language-xquery"><![CDATA[declare namespace StreamSource = "java:javax.xml.transform.stream.StreamSource";
 declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
-StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
+StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></code></pre>
           
           <p>produces:</p>
           
@@ -8444,7 +8443,7 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
             the containing array.</p>
           <p>If the supplied argument has no pedigree information, the result is an empty sequence.</p>
           <p>For example, given the input:</p>
-          <samp><![CDATA[let $M :=
+          <pre><code class="language-xquery"><![CDATA[let $M :=
   map{ 
     "roman": map{
                "min":1,
@@ -8462,11 +8461,11 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
 let $augmentedMap := $M => saxon:with-pedigree()
 let $romanCodes := $augmentedMap?roman?codes
 return ....  
-]]></samp>
+]]></code></pre>
           <p>Then <code>($romanCodes => saxon:pedigree())?container?max</code> returns 10.</p>
           <p>The function is particularly useful when using <code>xsl:apply-templates</code> to process JSON structures
             recursively. For example, it becomes possible to write a template rule such as:</p>
-          <samp>&lt;xsl:template match=".[saxon:pedigree(.)?key='roman']"></samp>
+          <pre><code class="language-xml">&lt;xsl:template match=".[saxon:pedigree(.)?key='roman']"></code></pre>
           <p>Which matches a map (or array) whose key value in its parent map is "roman".</p>
           <p>See also the <a class="bodylink code"
             href="/extensions/instructions/deep-update">saxon:deep-update</a> extension
@@ -8555,12 +8554,12 @@ return ....
           <p>The compiled stylesheet can be used repeatedly with different inputs.</p>
 
           <p>Here is an example of how to use the function from XQuery:</p>
-          <samp><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
+          <pre><code class="language-xquery"><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
             
 <out>{ 
 let $q1 := "declare variable $x external; declare variable $y external; <z>{$x + $y + .}</z&>" 
     return saxon:query(saxon:compile-query($q1), 4, (<x>3</x>, <y>2</y>)) 
-}</out>]]></samp>
+}</out>]]></code></pre>
 
           <p>The result of the query is a sequence containing the single integer 9.</p>
         </div>
@@ -8642,12 +8641,11 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
               upper-case#1)</code> returns <code>"Registration: ABC123"</code>.</p></li>
             <li><p><code>replace-with("Part 2 Chapter 5", "[0-9]+",
               function($in){string(number($in)+1)}</code> returns <code>"Part 3 Chapter 6"</code>.</p></li>
-            <li><samp>saxon:replace-with('ALPHA_x002F_OMEGA', '_x[0-9A-F]{4}_',
-              function($s) {$s => substring(3, 4)
-              => bin:hex()
-              => bin:unpack-unsigned-integer(0,2)
-              => codepoints-to-string()})
-            </samp>
+            <li><pre><code class="language-xquery"><![CDATA[saxon:replace-with('ALPHA_x002F_OMEGA', '_x[0-9A-F]{4}_',
+  function($s) {$s => substring(3, 4)
+  => bin:hex()
+  => bin:unpack-unsigned-integer(0,2)
+  => codepoints-to-string()})]]></code></pre>
               <p>outputs <code>ALPHA/OMEGA</code> (this handles a convention sometimes
                 used to encode special characters in XML element and attribute names). This
                 example uses functions from the EXPath Binary module.</p></li>
@@ -9518,11 +9516,10 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
           <p>Here's a simple example that tests whether a particular element has element-only
             content:</p>
 
-          <samp><![CDATA[let $bookDecl := saxon:schema('element declaration', QName('', 'book')) 
+          <pre><code class="language-xquery"><![CDATA[let $bookDecl := saxon:schema('element declaration', QName('', 'book')) 
 return if ($bookDecl('type definition')('variety') = 'element-only') 
        then ... 
-       else ... ]]>
-          </samp>
+       else ... ]]></code></pre>
 
         </div>
       </details>
@@ -9693,7 +9690,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
           <p>For example, the function may be used as follows in XSLT. This example constructs a
             variable to hold the mail-client configuration and constructs the content as html:</p>
 
-          <samp><![CDATA[<xsl:variable name="mailSetup" select="map{'to':'recipient@example.com', 'from':'sender@example.com', 
+          <pre><code class="language-xml"><![CDATA[<xsl:variable name="mailSetup" select="map{'to':'recipient@example.com', 'from':'sender@example.com', 
     'smtp-server':'smtp.example.com', 'username':'user@example.com', 'password':'pass'}"/>
 <xsl:variable name="html">
     <html>
@@ -9704,7 +9701,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
     </html>
 </xsl:variable>
   
-<xsl:value-of select="saxon:send-mail($mailSetup, 'Test email' , $html, ())"/>]]></samp>
+<xsl:value-of select="saxon:send-mail($mailSetup, 'Test email' , $html, ())"/>]]></code></pre>
         </div>
       </details>
     </function>
@@ -9751,7 +9748,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
           </ul>
 
           <p>For example, the function may be used as follows in XQuery:</p>
-          <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
+          <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform"; 
 
 <out>{ 
@@ -9760,7 +9757,7 @@ return saxon:serialize($x, <xsl:output method="xml"
                                  omit-xml-declaration="yes"
                                  indent="yes" 
                                  saxon:indent-spaces="1"/>) 
-}</out>]]></samp>
+}</out>]]></code></pre>
 
           <p>The function serializes the specified document, or the subtree rooted at the specified
             element, according to the parameters specified, and returns the serialized document as a
@@ -9858,7 +9855,7 @@ return saxon:serialize($x, <xsl:output method="xml"
             enables burst-mode streaming by reading a source document and delivering a sequence of
             element nodes representing selected elements within that document. For example:</p>
 
-          <samp><![CDATA[for $e in saxon:stream(doc('employees.xml')/*/employee) return <sal>{$e/salary}</sal>]]></samp>
+          <pre><code class="language-xquery"><![CDATA[for $e in saxon:stream(doc('employees.xml')/*/employee) return <sal>{$e/salary}</sal>]]></code></pre>
 
           <p>This example returns a sequence of <code>&lt;sal&gt;</code> elements. The result of the
               <code>saxon:stream</code> call is a sequence of <code>&lt;employee&gt;</code>
@@ -10091,13 +10088,13 @@ return saxon:serialize($x, <xsl:output method="xml"
           an empty sequence.</p>
 
           <p>Here is an example of how to use the function from XQuery:</p>
-          <samp><![CDATA[let $results := 
+          <pre><code class="language-xquery"><![CDATA[let $results := 
    <customers>{ //customer[location="Scotland"] }</customers> 
 let $rendition := saxon:compile-stylesheet(doc('show-customers.xsl')) 
-return saxon:transform($rendition, $results)]]></samp>
+return saxon:transform($rendition, $results)]]></code></pre>
 
           <p>The following example uses XSLT's ability to create multiple output files:</p>
-          <samp><![CDATA[let $splitter := saxon:compile-stylesheet( 
+          <pre><code class="language-xquery"><![CDATA[let $splitter := saxon:compile-stylesheet( 
   <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
                      version="2.0"> 
     <xsl:template match="customer"> 
@@ -10110,7 +10107,7 @@ let $results :=
   document { 
     <customers>{ //customer[location="Scotland"] }</customers> 
   } 
-return saxon:transform($splitter, $results)]]></samp>
+return saxon:transform($splitter, $results)]]></code></pre>
 
           <p>Note (a) the need to double the curly braces to ensure that the contained expression is
             expanded when the stylesheet is executed by XSLT, not when it is created by XQuery, and
@@ -10161,11 +10158,12 @@ return saxon:transform($splitter, $results)]]></samp>
           timestamp will show the time at which the variable is evaluated, not the time at which it is declared.</p>
           
           <p>If the value is to be used for measuring execution time, the following code is suggested:</p>
-          <samp><![CDATA[<xsl:variable name="start" select="saxon:timestamp()" as="xs:dateTimeStamp"/>
+          <pre><code class="language-xml"><![CDATA[<xsl:variable name="start" select="saxon:timestamp()" as="xs:dateTimeStamp"/>
 <!-- force evaluation -->
 <xsl:if test="$start eq xs:dateTime('1900-01-01T00:00:00')"><x/></xsl:if>
 <!-- code under test goes here -->
-<xsl:message expand-text="yes">Execution time: {(saxon:timestamp() - $start) div xs:duration('PT0.001S')}ms </xsl:message>]]></samp>
+<xsl:message expand-text="yes">Execution time: {(saxon:timestamp() - $start) div
+xs:duration('PT0.001S')}ms </xsl:message>]]></code></pre>
           <p><em>(Saxon's optimizer will pre-evaluate the constant expressions at compile time,
           so these do not add run-time overhead.)</em></p>
         </div>
@@ -10599,13 +10597,13 @@ return saxon:transform($splitter, $results)]]></samp>
           
           
           <p>Here is an example of how to use the function from XQuery:</p>
-          <samp><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
+          <pre><code class="language-xquery"><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
             
 <out>{ 
    let $q1 := "declare variable $x external; declare variable $y external; <z>{$x + $y + .}</z>" 
    let $qry := saxon:xquery($q1)
    return $qry(4, map{xs:QName('x'): 3, xs:QName('y'): 2})
-}</out>]]></samp>
+}</out>]]></code></pre>
           
           <p>The result of the query is a sequence containing the single integer 9.</p>
         </div>

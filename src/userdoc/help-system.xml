@@ -248,7 +248,7 @@
         <section id="graphics" title="Using graphics">
             <h1>Using graphics</h1>
             <p>Images should be referenced using the usual </p>
-            <samp><![CDATA[<img src="/docimg/graphic.jpg"/>]]></samp>
+            <pre><code class="language-xml"><![CDATA[<img src="/docimg/graphic.jpg"/>]]></code></pre>
             <p>
                 <img src="/docimg/black-knight.png" alt="picture of a black knight chess piece."/>
             </p>
@@ -261,13 +261,13 @@
         <section id="markup" title="Using markup">
             <h1>Using markup</h1>
             <p>Code samples use the HTML <code>samp</code> element as follows:</p>
-            <samp><![CDATA[<html>
+            <pre><code class="language-xml"><![CDATA[<html>
     <head></head>
     <body>
         <p>First Para</p>
         <p>Second Para</p>
     </body>
-</html>]]></samp>
+</html>]]></code></pre>
             <p>Text sections that are asides (annotations to the main topic) are marked using the
                     <code>aside</code> element:</p>
             <aside>

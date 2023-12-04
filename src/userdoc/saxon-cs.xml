@@ -415,7 +415,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>Here is an example of an initialization class. It switches the configuration option <code>Feature.TIMING</code> on,
       and declares an extension function:</p>
       
-      <samp><![CDATA[    public class UuidInit : IProcessorInitializer {
+      <pre><code class="language-css"><![CDATA[    public class UuidInit : IProcessorInitializer {
 
         public void Initialize(Processor processor) {
             Console.WriteLine("UuidInit invoked for " + processor.ProductTitle);
@@ -425,7 +425,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
                 processor.ParseItemType("function() as xs:string"),
                 args => new XdmAtomicValue(Guid.NewGuid().ToString()));
         }
-    }]]></samp>
+    }]]></code></pre>
       
       <p>To invoke this initializer, specify <code>-init:uuid.dll</code> on the command line, where <code>uuid.dll</code>
       is the location of the compiled project.</p>
