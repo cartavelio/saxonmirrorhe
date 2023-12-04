@@ -7,19 +7,18 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
-import net.sf.saxon.expr.elab.BooleanElaborator;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 
@@ -34,43 +33,6 @@ public class Matches extends RegexFunction {
     protected boolean allowRegexMatchingEmptyString() {
         return true;
     }
-
-    //#if CSHARP==false
-    /**
-     * Interface used by compiled bytecode
-     *
-     * @param input   the value to be tested
-     * @param regex   the regular expression
-     * @param flags   the flags
-     * @param context the dynamic context
-     * @return true if the string matches the regex
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    public boolean evalMatches(AtomicValue input, AtomicValue regex, UnicodeString flags, XPathContext context) throws XPathException {
-        RegularExpression re;
-
-        if (regex == null) {
-            return false;
-        }
-
-        try {
-            String lang = "XP30";
-            if (context.getConfiguration().getXsdVersion() == Configuration.XSD11) {
-                lang += "/XSD11";
-            }
-            re = context.getConfiguration().compileRegularExpression(
-                    regex.getUnicodeStringValue(), flags.toString(), lang, null);
-
-        } catch (XPathException err) {
-            XPathException de = new XPathException(err);
-            de.maybeSetErrorCode("FORX0002");
-            de.setXPathContext(context);
-            throw de;
-        }
-        return re.containsMatch(input.getUnicodeStringValue());
-    }
-    //#endif
 
     public boolean evalMatches(UnicodeString input, UnicodeString regex, UnicodeString flags, XPathContext context) throws XPathException {
         RegularExpression re;
