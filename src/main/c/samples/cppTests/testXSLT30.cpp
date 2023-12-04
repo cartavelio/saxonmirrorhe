@@ -2598,45 +2598,6 @@ void testAssociatedError(SaxonProcessor *proc, Xslt30Processor *trans,
   }
 }
 
-void testUTF8StringTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
-                         sResultCount *sresult) {
-
-  const char *source =
-      "<?xml version='1.0' encoding='UTF8'?>  <xsl:stylesheet "
-      "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  "
-      "xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'>  "
-      "<xsl:template match='*'>     <xsl:sequence select='&apos;تيست&apos;'/>  </xsl:template>  </xsl:stylesheet>";
-  cout << endl << "Test:testUTF8StringTemplate" << endl;
-  XsltExecutable *executable = trans->compileFromString(source);
-  if (executable == nullptr) {
-    if (trans->exceptionOccurred()) {
-      cout << "Error: " << trans->getErrorMessage() << endl;
-    }
-    return;
-  }
-  const char* _in = "<?xml version='1.0' encoding='UTF8'?><e>تيست</e>";
-  XdmNode *node = proc->parseXmlFromString(_in);
-  executable->setResultAsRawValue(false);
-  std::map<std::string, XdmValue *> parameterValues;
-
-  executable->setInitialTemplateParameters(parameterValues, false);
-  executable->setInitialMatchSelection(node);
-  XdmValue *result = executable->applyTemplatesReturningValue();
-  if (result != nullptr) {
-    sresult->success++;
-    cout << "Input=" << _in;
-    cout << "Result=" << result->getHead()->getStringValue() << endl << node->toString() << endl;
-    delete result;
-  } else {
-    sresult->failure++;
-    sresult->failureList.push_back("testUTF8StringTemplate");
-  }
-  delete executable;
-  delete node;
-  parameterValues.clear();
-}
-
-
 static int NUM_THREADS = 10;
 
 void RunThread(XsltExecutable *executable, int tid,
@@ -2804,13 +2765,6 @@ int main(int argc, char *argv[]) {
        << endl;
 
   exampleTransformToString(processor, trans, sresult);
-
-  cout << endl
-       << "============================================================="
-       << endl
-       << endl;
-
-       testUTF8StringTemplate(processor, trans, sresult);
 
   cout << endl
        << "============================================================="

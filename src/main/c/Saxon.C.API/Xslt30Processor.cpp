@@ -60,21 +60,9 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *p, std::string curr) {
 Xslt30Processor::~Xslt30Processor() {
   clearParameters();
   clearProperties();
-  if(cppXT != -1) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)cppXT);
-    cppXT = -1;
-
-  }
+  cppXT = -1;
   cwdXT.erase();
   exceptionClear();
-  if(importPackageValue != -1) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)importPackageValue);
-    importPackageValue = -1;
-  }
-
-
 }
 
 Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
