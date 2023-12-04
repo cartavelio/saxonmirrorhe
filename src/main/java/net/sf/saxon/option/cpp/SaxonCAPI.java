@@ -323,7 +323,9 @@ public class SaxonCAPI {
     }
 
     static CCharPointer stringToNative2(net.sf.saxon.option.cpp.SaxonCAPI.AllocatorCCharFn alloc, String string) {
-
+        /*if(string.isEmpty()) {
+            return WordFactory.nullPointer();
+        }*/
         byte[] b = string.getBytes(StandardCharsets.UTF_8);
         CCharPointer a = alloc.call(b.length + 1);
         for (int i = 0; i < b.length; i++) {
@@ -826,93 +828,6 @@ public class SaxonCAPI {
 
 
     /**
-     * parse JSON supplied by file
-     *
-     * @param thread     - The Graalvm IsolateThread
-     * @param processorRef - The Reference to the processor object coming from the C++ code
-     * @param cfilename - File name of the JSON document to parse
-     * @return XdmValue
-     */
-    @CEntryPoint(name = "parseJsonFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long parseJsonFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer cfilename) throws SaxonApiException {
-
-        Processor proc = null;
-        if(processorRef == WordFactory.nullPointer()){
-            throw new SaxonApiException("Processor object is null");
-        } else {
-            proc =  objectHandles.get(processorRef);
-        }
-
-
-        String filename = null;
-        if(cfilename != WordFactory.nullPointer()) {
-            filename = CTypeConversion.toJavaString(cfilename);
-        } else {
-            throw new SaxonApiException("JSON file name is null");
-        }
-        JsonBuilder builder = proc.newJsonBuilder();
-        XdmValue result = null;
-
-        if(filename.startsWith("http:")) {
-            URL url = null;
-            try {
-                url = new URL(filename);
-
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                result = builder.parseJson(in);
-            } catch (MalformedURLException e) {
-                throw new SaxonApiException(e);
-            } catch (IOException e) {
-                throw new SaxonApiException(e);
-            }
-        } else {
-            try {
-                FileReader reader = new FileReader(new File(filename));
-                result = builder.parseJson(reader);
-            } catch (FileNotFoundException e) {
-                throw new SaxonApiException(e);
-            }
-        }
-
-        ObjectHandle handle = createHandle(result);
-        return handle.rawValue();
-
-    }
-
-    /**
-     * parse JSON supplied as a string
-     *
-     * @param thread     - The Graalvm IsolateThread
-     * @param processorRef - The Reference to the processor object coming from the C++ code
-     * @param cjson_string - String representation of the JSON
-     * @return XdmValue
-     */
-    @CEntryPoint(name = "parseJsonString", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long parseJsonString(IsolateThread thread, ObjectHandle processorRef, CCharPointer cjson_string) throws SaxonApiException {
-
-        Processor proc;
-        if(processorRef == WordFactory.nullPointer()){
-            throw new SaxonApiException("Processor object is null");
-        } else {
-            proc =  objectHandles.get(processorRef);
-        }
-
-
-        String json = null;
-        if(cjson_string != WordFactory.nullPointer()) {
-            json = CTypeConversion.toJavaString(cjson_string);
-        } else {
-            throw new SaxonApiException("JSON file name is null");
-        }
-        JsonBuilder builder = proc.newJsonBuilder();
-        XdmValue result = builder.parseJson(json);
-
-        ObjectHandle handle = createHandle(result);
-        return handle.rawValue();
-    }
-
-
-    /**
      * parse XML document supplied by file
      *
      * @param ccwd     - Current Working directory
@@ -1311,25 +1226,6 @@ public class SaxonCAPI {
 
     }
 
-    public static String escapeURIPathParam(String path) {
-        try {
-             return new URI(null, null, path, null).toASCIIString();
-         } catch (URISyntaxException e) {
-             // do some error handling
-         }
-         return "";
-     }
-
-     private static char toHex(int ch) {
-      return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
-     }
-
-     private static boolean isUnsafe(char ch) {
-      if (ch > 128 || ch < 0)
-       return true;
-      return " %$&+,/:;=?@<>#%".indexOf(ch) >= 0;
-     }
-
 
     /**
      * Resolve file name. Returns the file as a Source object
@@ -1343,51 +1239,52 @@ public class SaxonCAPI {
      */
     public static Source resolveFileToSource(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
 
-        Source source;
+        Source source = null;
+        //String ccwd = null;
         URI cwdURI = null;
+        String ffilename = filename;
+
+
+        if(cwd != null) {
+            cwdURI =  new File(cwd).toURI();
+        } /*else {
+
+            ccwd = "";
+        } */
 
         char separatorChar = '/';
-        char foundSeparator = File.separatorChar;
-        if(filename.contains("\\")) {
-            foundSeparator = '\\';
-        }
-        if (foundSeparator != '/') {
-            filename = filename.replace(foundSeparator, separatorChar);
+        if (File.separatorChar != '/') {
+            filename.replace(File.separatorChar, separatorChar);
             File file = new File(filename);
             if(file.isAbsolute()) {
-                filename = file.toURI().toString();
+                ffilename = file.toURI().toString();
             }
         }
 
+        if(debug) {
+            System.err.println("ccwd = " + cwd);
+            System.err.println("ccwdURI = " + cwdURI.toString());
+            System.err.println("filename = " + filename);
+            System.err.println("request.uri = " + ffilename);
+            System.err.println("(cwdURI != null ? cwdURI.resolve(ffilename).toString() : ffilename) = "+(cwdURI != null ? cwdURI.resolve(ffilename).getPath() : ffilename));
+           // System.err.println("path.resolve(ffilename).toString() = "+path.resolve(ffilename).toString());
+        }
+
+        ResourceRequest request = new ResourceRequest();
+        request.baseUri = (cwdURI != null ? cwdURI.toString() : null);
+        request.uri = (cwdURI != null ? cwdURI.resolve(ffilename).getPath() : ffilename);
+        request.nature = nature;
+
         try {
-            if(cwd != null) {
-                cwd = escapeURIPathParam(cwd);
-                cwdURI = new URI(cwd);
-            }
-            filename = escapeURIPathParam(filename);
-
-            if (debug) {
-                System.err.println("ccwd = " + cwd);
-                if(cwdURI != null) {
-                    System.err.println("ccwdURI = " + cwdURI.toString());
-                }
-                System.err.println("filename = " + filename);
-                System.err.println("(cwdURI != null ? cwdURI.resolve(filename).toString() : filename) = " + (cwdURI != null ? cwdURI.resolve(filename).toASCIIString() : filename));
-            }
-
-            ResourceRequest request = new ResourceRequest();
-            request.baseUri = (cwdURI != null ? cwdURI.toString() : null);
-            request.uri = (cwdURI != null ? cwdURI.resolve(filename).toASCIIString() : filename);
-            request.nature = nature;
-
+            //source = resolver.resolve(request);
             Configuration config = processor.getUnderlyingConfiguration();
             source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
 
-            if (debug) {
-                System.err.println("DEBUG source.getSystemID()=" + source.getSystemId());
+            if(debug) {
+                System.err.println("DEBUG source.getSystemID()="+source.getSystemId());
             }
             if (source == null) {
-                if (debug) {
+                if(debug) {
                     System.err.println("DEBUG: Using resolver fallback");
                 }
                 source = resolveFileToSource_fallback(cwd, filename);
@@ -1395,9 +1292,18 @@ public class SaxonCAPI {
             }
 
             return source;
-        } catch (XPathException | URISyntaxException | NullPointerException exception) {
+        } catch (XPathException exception) {
             if(debug) {
                 System.err.println("DEBUG: Exception thrown: "+exception.getMessage());
+                System.err.println("DEBUG: Using resolver fallback");
+
+            }
+            source = resolveFileToSource_fallback(cwd, filename);
+            return source;
+            //throw new SaxonApiException(exception);
+        } catch (NullPointerException exception) {
+            if(debug) {
+                System.err.println("DEBUG: NullPointerException thrown: "+exception.getMessage());
                 System.err.println("DEBUG: Using resolver fallback");
 
             }
@@ -1557,9 +1463,75 @@ public class SaxonCAPI {
         SaxonCAPI.debug  = true;
         Processor processor = new Processor(false);
         //processor.setConfigurationProperty("http://saxon.sf.net/feature/allowedProtocols", "http,https");
-        //processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
-        Source source = SaxonCAPI.resolveFileToSource(processor, "file:///Users/ond1/work/", "test.sef", ResourceRequest.XSLT_NATURE);
+        processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
+        Source source = SaxonCAPI.resolveFileToSource(processor, "file:///home/ond1/work/repository/temp/", "identity1.xsl", ResourceRequest.XSLT_NATURE);
     }   
+
+     /*public static void testj() throws SaxonApiException, URISyntaxException {
+
+        String xml = "<out><person att1='value1' att2='value2'>text1</person>\n" +
+                "        <person>text2</person>\n" +
+                "        <person>text3</person>\n" +
+                "    </out>";
+        StringReader reader = new StringReader(xml);
+        Processor processor = new Processor(false);
+        DocumentBuilder builder = processor.newDocumentBuilder();
+
+        Source source = new SAXSource(new InputSource(reader));
+
+        source.setSystemId(null);
+
+         String userDir = System.getProperty("user.dir");
+
+         char separatorChar = '/';
+         if (File.separatorChar != '/') {
+             userDir.replace(File.separatorChar, separatorChar);
+         }
+
+         if(userDir.endsWith("/")) {
+             userDir += "/";
+         }
+         System.out.println("userDir="+userDir);
+         URI cwdURI = new File(userDir).toURI();
+         String baseUri = "file";
+         cwdURI = cwdURI.resolve(baseUri);
+         builder.setBaseURI(cwdURI);
+
+
+          System.out.println("baseUri="+baseUri);
+         System.out.println("cwdUri="+cwdURI);
+
+          System.out.println(builder.getBaseURI());
+        XdmNode doc = builder.build(source);
+
+        System.err.println("doc.getBaseURI = "+ doc.getBaseURI());
+        XdmNode node= doc.children().iterator().next();
+        System.err.println("outer node="+node.toString());
+        Iterator<XdmNode> iterx = node.children().iterator();
+        XdmNode node1 = iterx.next();
+
+        if(iterx.hasNext()){
+            iterx.next();
+            XdmNode nodexx = iterx.next();
+            System.err.println("nodexx="+nodexx.getNodeKind());
+            System.err.println("nodexx="+nodexx);
+        }
+        Iterator<XdmNode> iter = node1.axisIterator(Axis.CHILD);
+        XdmNode node2 = iter.next();
+
+        System.err.println("test method");
+        System.err.println("node1="+node1.toString());
+        XdmSequenceIterator<XdmNode> iteryy = node1.axisIterator(Axis.CHILD);
+
+        while(iteryy.hasNext()) {
+            System.err.println("test method cp0");
+            XdmNode attrNode = iteryy.next();
+            System.err.println(attrNode.toString());
+        }
+
+
+
+    }  */
 
 
 

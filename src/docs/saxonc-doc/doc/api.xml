@@ -3163,69 +3163,6 @@
          </li>
       </ul>
 
-      <h2>Using the C API in applications</h2>
-
-      <p>In this section we give a tutorial of how to setup a C API application. In <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
-                     >SaxonCProcessor.h</a> we have several functions to execute both XSLT stylesheets and XQuery queries.
-         Please note the compile phase happens within the same execute function call.
-         There are functions output the results to file or string representation. The XML document sources and execution file are supplied as arguments to the function, but users
-         may find it useful to supply parameters and properties using the structs sxnc_parameter and sxnc_property, respectively.</p>
-
-      <p>Basis setup of a C application:</p>
-      <p>The first step is the memory allocation of the processor and variables required by SaxonC. To simplify the process we have the utility
-         function <code>initSaxonc()</code> to alloc the following variables:</p>
-
-      <ul>
-              <li>environ - SaxonC environment given as the struct <code>sxnc_environment</code></li>
-              <li>processor - The SaxonC Processor data structure given as the struct <code>sxnc_processor</code> which is used as a reference to the Java Saxon Processor object in Java</li>
-              <li>parameters - The sxnc_parameter struct as an array is used to represent the the parameters required by the XSLT, XQuery and XPath processors. For example stylesheet
-                 parameters can be supplied here. See further details <a href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration">here</a>.</li>
-              <li>properties - The sxnc_property struct as an arra is used to represent the properties required by the XSLT, XQuery and processors. See full list
-                 of properties <a href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration">here</a>.</li>
-
-           </ul>
-
-      <p>See example code below:</p>
-
-      <samp><![CDATA[int cap = 10;
-   sxnc_parameter *parameters;
-   int parLen = 0, parCap;
-   parCap = cap;
-   sxnc_property *properties;
-   int propLen = 0;
-   parCap = cap;
-   sxnc_environment *environ;
-   sxnc_processor *processor;
-
-   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);
-      ]]></samp>
-
-
-
-      <p>Secondly, the following code shows how we setup the Graalvm environment to create and initialize a new independent VM instanc. This is required to use by the SaxonC processors:</p>
-      <samp><![CDATA[sxnc_environment *environ;
-         create_graalvm_isolate(environi);
-         ]]></samp>
-
-      <p>Thirdly, we next have to create the Saxon Processor which is used by the XSLT, XQuery and XPath processors. The last argument is required to specify if the SaxonProcessor is to be
-         run with license enabled or off:</p>
-      <samp><![CDATA[int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
-
-      <p>We can now execute XSLT, XQuery or XPath files. The following example we are executing the stylesheet and saving the results as a string representation.
-         Notice here we have not supplied any parameters or properties:</p>
-      <samp><![CDATA[const char *result =
-            xsltApplyStylesheet(environ, processor, cwd, "../data/sample.xml",
-                                "../data/test.xsl", 0, 0, 0, 0);]]]></samp>
-
-      <p>In the next example we execute an XPath expression. We also have some XDM values that we can pass as parameters to the XPath evaluate function.
-      Please note that there are several utility function in SaxonCXPath.h to construct a Xdm values:</p>
-
-      <samp><![CDATA[setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
-
-        sxnc_value *result = evaluate(environi, xpathProc, cwd, "/out/person",
-                                      parameters, properties, 0, propLen);]></samp>
-
    </section>
 
 
