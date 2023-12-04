@@ -2824,7 +2824,7 @@ public class XPathParser {
                         grumble("Expected '(' or '{' after '->'");
                     }
                 }
-                if (!t.currentTokenValue.equals("function")) {
+                if (!(t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
                     grumble("Expected 'function' to follow the annotation assertion");
                 }
                 annotations.check(env.getConfiguration(), "IF");

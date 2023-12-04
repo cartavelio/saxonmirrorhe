@@ -832,14 +832,14 @@ public class XQueryParser extends XPathParser {
             t.setState(Tokenizer.DEFAULT_STATE);
             StructuredQName qName;
             NamespaceUri uri;
-            if (t.currentTokenValue.indexOf(':') < 0) {
-                uri = NamespaceUri.XQUERY;
-                qName = new StructuredQName("", uri, t.currentTokenValue);
-            } else {
-                qName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
-                assert qName != null;
-                uri = qName.getNamespaceUri();
-            }
+//            if (t.currentTokenValue.indexOf(':') < 0) {
+//                uri = NamespaceUri.XQUERY;
+//                qName = new StructuredQName("", uri, t.currentTokenValue);
+//            } else {
+            qName = makeStructuredQName(t.currentTokenValue, NamespaceUri.XQUERY);
+            assert qName != null;
+            uri = qName.getNamespaceUri();
+//            }
             Annotation annotation = new Annotation(qName);
             if (uri.equals(NamespaceUri.XQUERY)) {
                 if (!qName.equals(Annotation.PRIVATE) && !qName.equals(Annotation.PUBLIC) &&
@@ -849,8 +849,8 @@ public class XQueryParser extends XPathParser {
                 annotation.addAnnotationParameter(new Int64Value(options));
             } else if (isReservedInQuery(uri)) {
                 grumble("The annotation " + t.currentTokenValue + " is in a reserved namespace", "XQST0045");
-            } else if (uri.isEmpty()) {
-                grumble("The annotation " + t.currentTokenValue + " is in no namespace", "XQST0045");
+//            } else if (uri.isEmpty()) {
+//                grumble("The annotation " + t.currentTokenValue + " is in no namespace", "XQST0045");
             } else {
                 // no action - ignore namespaced annotations
             }
