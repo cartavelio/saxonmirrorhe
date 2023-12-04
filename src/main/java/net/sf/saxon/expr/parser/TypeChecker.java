@@ -15,7 +15,6 @@ import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -189,13 +188,9 @@ public class TypeChecker {
                     ExpressionTool.copyLocationInfo(exp, cexp);
                     try {
                         if (exp instanceof Literal) {
-                            try {
-                                exp = Literal.makeLiteral(
-                                        SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
-                                ExpressionTool.copyLocationInfo(cexp, exp);
-                            } catch (UncheckedXPathException e) {
-                                throw e.getXPathException();
-                            }
+                            exp = Literal.makeLiteral(
+                                    SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
+                            ExpressionTool.copyLocationInfo(cexp, exp);
                         } else {
                             exp = cexp;
                         }
@@ -227,13 +222,9 @@ public class TypeChecker {
                     ExpressionTool.copyLocationInfo(exp, conversion);
                     try {
                         if (exp instanceof Literal) {
-                            try {
-                                exp = Literal.makeLiteral(
-                                        SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
-                                ExpressionTool.copyLocationInfo(supplied, exp);
-                            } catch (UncheckedXPathException e) {
-                                throw e.getXPathException();
-                            }
+                            exp = Literal.makeLiteral(
+                                    SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
+                            ExpressionTool.copyLocationInfo(supplied, exp);
                         } else {
                             exp = conversion;
                         }
