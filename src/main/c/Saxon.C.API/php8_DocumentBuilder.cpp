@@ -223,16 +223,23 @@ PHP_METHOD(DocumentBuilder, getBaseUri) {
 
 PHP_METHOD(DocumentBuilder, parseXmlFromString) {
   DocumentBuilder *documentBuilder;
+  char *encoding = nullptr;
   char *source;
-  size_t len1;
+  size_t len1, len2;
 
-  if (ZEND_NUM_ARGS() > 1) {
+  if (ZEND_NUM_ARGS() > 2) {
     WRONG_PARAM_COUNT;
   }
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
+  if (ZEND_NUM_ARGS() == 1 &&
+      zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  }
+  } else   if (ZEND_NUM_ARGS() == 2 &&
+     zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &source, &len1, &encoding, &len2) == FAILURE) {
+     RETURN_NULL();
+   } else {
+    RETURN_NULL();
+   }
   zend_object *pobj = Z_OBJ_P(getThis());
   documentBuilder_object *obj =
       (documentBuilder_object *)((char *)pobj -
@@ -241,7 +248,7 @@ PHP_METHOD(DocumentBuilder, parseXmlFromString) {
   documentBuilder = obj->documentBuilder;
   if (documentBuilder != nullptr) {
 
-    XdmNode *node = documentBuilder->parseXmlFromString(source);
+    XdmNode *node = documentBuilder->parseXmlFromString(source, encoding);
     if (node != nullptr) {
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
         RETURN_NULL();
