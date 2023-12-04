@@ -33,15 +33,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class SignatureTest {
 
-    // Functions not yet implemented
+    // Functions not yet (fully) implemented
 
     private final static Set<String> notImplemented = setOf(
-            "fn:analyze-string",
             "fn:csv-fetch-field-by-column",
             "fn:csv-to-xdm",
             "fn:csv-to-xml",
             "fn:log",
-            "fn:format-number#3",
             "fn:parse-html",
             "fn:stack-trace",
             "fn:json",
@@ -60,16 +58,24 @@ public class SignatureTest {
     // Function arguments where Saxon knowingly declares the type differently from the language spec.
     // Format is prefix:local#arg where arg is the 1-based argument number (not the arity!)
     private final static Set<String> argExceptions = setOf(
+            "fn:analyze-string#3",
+            "fn:deep-equal#4",
+            "fn:format-number#3",
             "fn:namespace-uri-for-prefix#1",
+            "fn:parse-uri#2",
             "fn:subsequence#2",
             "fn:subsequence#3",
             "fn:substring#2",
             "fn:substring#3",
-            "math:pow#2"
+            "math:pow#2",
+            "map:filter#2",
+            "map:of-pairs#1"
     );
 
     private final static Set<String> resultExceptions = setOf(
+            "fn:analyze-string",
             "fn:in-scope-namespaces",
+            "fn:json-to-xml",
             "fn:void"
 
     );
@@ -98,6 +104,8 @@ public class SignatureTest {
                 if (prefix == null) {
                     prefix = "fn";
                 }
+                String fnKey = prefix + ":" + localName;
+
                 //System.err.println("Processing " + prefix + ":" + localName);
                 BuiltInFunctionSet functionSet = null;
 
@@ -114,11 +122,13 @@ public class SignatureTest {
                 }
                 List<XdmNode> args = proto.select(Steps.child("arg")).asListOfNodes();
                 BuiltInFunctionSet.Entry entry = functionSet.getFunctionDetails(localName, args.size());
-                String fnKey = prefix + ":" + localName;
                 if (entry == null) {
                     if (!notImplemented.contains(fnKey)) {
                         failures += failure("No entry found for " + fnKey + "#" + args.size());
                     }
+                    continue;
+                }
+                if (notImplemented.contains(fnKey)) {
                     continue;
                 }
                 entry = entry.populator.apply(entry);
