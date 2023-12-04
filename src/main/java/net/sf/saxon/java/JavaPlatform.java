@@ -436,7 +436,7 @@ public class JavaPlatform implements Platform {
 
     @Override
     public StringCollator makeUcaCollator(String uri, Configuration config) throws XPathException {
-        UcaCollatorUsingJava collator = new UcaCollatorUsingJava(uri);
+        UcaCollatorUsingJava collator = new UcaCollatorUsingJava(uri, config);
         if ("yes".equals(collator.getProperties().getProperty("numeric"))) {
             return new AlphanumericCollator(collator);
         } else {
