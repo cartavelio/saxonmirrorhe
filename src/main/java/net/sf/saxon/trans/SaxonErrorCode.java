@@ -619,11 +619,7 @@ public class SaxonErrorCode {
 
     public static final String SXWN9043 = "SXWN9043";
 
-    /**
-     * SXWN9044: saxon:capture has no effect here
-     */
 
-    public static final String SXWN9044 = "SXWN9044";
 
     /**
      * SXWN9045: non-streamed input supplied for a streamable stylesheet
