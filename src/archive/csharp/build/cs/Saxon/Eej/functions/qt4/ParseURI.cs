@@ -8,10 +8,14 @@ namespace Saxon.Eej.functions.qt4 {
             Saxon.Hej.ma.map.MapItem map = new Saxon.Impl.DataModel.ImmMap();
             map = map.addEntry(URI, new Saxon.Hej.value.StringValue(uristr));
             uristr = System.Text.RegularExpressions.Regex.Replace(uristr, "\\\\", "/");
-            checkOptions(arguments);
+            try {
+                checkOptions(arguments);
+            } catch (Saxon.Ejava.lang.IllegalArgumentException e) {
+                throw new Saxon.Hej.trans.XPathException(e);
+            }
             int pos = uristr.IndexOf("#");
             if ((pos>=0)) {
-                map = map.addEntry(FRAGMENT, new Saxon.Hej.value.StringValue(uristr.Substring((pos+1))));
+                map = map.addEntry(FRAGMENT, new Saxon.Hej.value.StringValue(Saxon.Eej.functions.qt4.DecodeFromURI.decode(uristr.Substring((pos+1)))));
                 uristr = uristr.Substring(0, pos - 0);
             }
             string query;
@@ -56,13 +60,13 @@ namespace Saxon.Eej.functions.qt4 {
                     map = map.addEntry(HIERARCHICAL, Saxon.Hej.value.BooleanValue.get(hierarchical));
                 } else {
                     hierarchical = uristr.StartsWith("/");
-                    if (!("".Equals(uristr))) {
+                    if (!(uristr.Length==0)) {
                         map = map.addEntry(HIERARCHICAL, Saxon.Hej.value.BooleanValue.get(hierarchical));
                     }
                 }
             }
             string authority;
-            if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^//*[a-zA-Z][:|].*$")) {
+            if (((((scheme == null) || "file".Equals(scheme))) && System.Text.RegularExpressions.Regex.IsMatch(uristr, "^//*[a-zA-Z][:|].*$"))) {
                 authority = null;
                 uristr = System.Text.RegularExpressions.Regex.Replace(uristr, "^/+([a-zA-Z]).", "/$1:");
                 filepath = uristr.Substring(1);
@@ -131,40 +135,45 @@ namespace Saxon.Eej.functions.qt4 {
                     filepath = uristr;
                 }
                 map = map.addEntry(PATH, new Saxon.Hej.value.StringValue(uristr));
-                System.Collections.Generic.List<Saxon.Hej.om.GroundedValue> pathSegments = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
+                Saxon.Hej.om.GroundedValue pathSegments = Saxon.Hej.value.EmptySequence.getInstance();
                 pos = uristr.IndexOf(pathSeparator);
                 while ((pos>=0)) {
-                    string seg = decodeString(uristr.Substring(0, pos - 0));
-                    if ((((pathSegments.Count == 0) && "tel".Equals(scheme)) && seg.StartsWith(" "))) {
+                    string seg = Saxon.Eej.functions.qt4.DecodeFromURI.decode(uristr.Substring(0, pos - 0));
+                    if ((((pathSegments.getLength() == 0) && "tel".Equals(scheme)) && seg.StartsWith(" "))) {
                         seg = ("+"+seg.Substring(1));
                     }
-                    pathSegments.Add(new Saxon.Hej.value.StringValue(seg));
-                    uristr = uristr.Substring((pos+pathSeparator.Length));
+                    pathSegments = pathSegments.concatenate(new Saxon.Hej.value.StringValue(seg));
+                    uristr = uristr.Substring((pos+1));
                     pos = uristr.IndexOf(pathSeparator);
                 }
-                pathSegments.Add(new Saxon.Hej.value.StringValue(decodeString(uristr)));
-                map = map.addEntry(PATH_SEGMENTS, new Saxon.Hej.ma.arrays.SimpleArrayItem(pathSegments));
+                pathSegments = pathSegments.concatenate(new Saxon.Hej.value.StringValue(Saxon.Eej.functions.qt4.DecodeFromURI.decode(uristr)));
+                map = map.addEntry(PATH_SEGMENTS, pathSegments);
             }
             if ((filepath != null)) {
-                filepath = decodeString(filepath);
+                filepath = Saxon.Eej.functions.qt4.DecodeFromURI.decode(filepath);
                 map = map.addEntry(FILEPATH, new Saxon.Hej.value.StringValue(filepath));
             }
             if ((query != null)) {
-                System.Collections.Generic.List<Saxon.Hej.om.GroundedValue> querySegments = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
-                foreach (string str in System.Text.RegularExpressions.Regex.Split(query, querySeparator)) {
-                    Saxon.Hej.ma.map.MapItem seg = new Saxon.Impl.DataModel.ImmMap();
+                Saxon.Impl.DataModel.ImmMap querySegments = new Saxon.Impl.DataModel.ImmMap();
+                foreach (string str in System.Text.RegularExpressions.Regex.Split(query, (""+querySeparator))) {
                     pos = str.IndexOf("=");
+                    Saxon.Hej.value.StringValue key;
+                    Saxon.Hej.value.StringValue value;
                     if ((pos>=0)) {
-                        string key = str.Substring(0, pos - 0);
-                        string value = str.Substring((pos+1));
-                        seg = seg.addEntry(KEY, new Saxon.Hej.value.StringValue(decodeString(key)));
-                        seg = seg.addEntry(VALUE, new Saxon.Hej.value.StringValue(decodeString(value)));
+                        key = new Saxon.Hej.value.StringValue(Saxon.Eej.functions.qt4.DecodeFromURI.decode(str.Substring(0, pos - 0)));
+                        value = new Saxon.Hej.value.StringValue(Saxon.Eej.functions.qt4.DecodeFromURI.decode(str.Substring((pos+1))));
                     } else {
-                        seg = seg.addEntry(VALUE, new Saxon.Hej.value.StringValue(decodeString(str)));
+                        key = new Saxon.Hej.value.StringValue("");
+                        value = new Saxon.Hej.value.StringValue(Saxon.Eej.functions.qt4.DecodeFromURI.decode(str));
                     }
-                    querySegments.Add(seg);
+                    Saxon.Hej.om.GroundedValue currentValue = querySegments.get(key);
+                    if ((currentValue == null)) {
+                        querySegments = (Saxon.Impl.DataModel.ImmMap)(querySegments.addEntry(key, value));
+                    } else {
+                        querySegments = (Saxon.Impl.DataModel.ImmMap)(querySegments.addEntry(key, currentValue.concatenate(value)));
+                    }
                 }
-                map = map.addEntry(QUERY_SEGMENTS, new Saxon.Hej.ma.arrays.SimpleArrayItem(querySegments));
+                map = map.addEntry(QUERY_PARAMETERS, querySegments);
             }
             return map;
         }

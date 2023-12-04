@@ -163,7 +163,7 @@ namespace Saxon.Hej.pattern {
             if ((inPredicate>0)) {
                 return base.parseExpression();
             } else {
-                if (((allowXPath40Syntax && (t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND)) && ((((t.currentTokenValue.Equals("record") || t.currentTokenValue.Equals("type")) || t.currentTokenValue.Equals("map")) || t.currentTokenValue.Equals("array"))))) {
+                if (((allowXPath40Syntax && (t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA)) && ((((t.currentTokenValue.Equals("record") || t.currentTokenValue.Equals("type")) || t.currentTokenValue.Equals("map")) || t.currentTokenValue.Equals("array"))))) {
                     Saxon.Hej.type.ItemType type = parseItemType();
                     Saxon.Hej.expr.Expression expr = new Saxon.Hej.pattern.ItemTypePattern(type);
                     expr.setRetainedStaticContext(env.makeRetainedStaticContext());
@@ -173,7 +173,7 @@ namespace Saxon.Hej.pattern {
                     }
                     return expr;
                 } else {
-                    if (((allowXPath40Syntax && (t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND)) && (t.currentTokenValue.Equals("atomic")))) {
+                    if (((allowXPath40Syntax && (t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA)) && (t.currentTokenValue.Equals("atomic")))) {
                         nextToken();
                         expect(Saxon.Hej.expr.parser.Token.NAME);
                         Saxon.Hej.om.StructuredQName typeName = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
@@ -228,7 +228,7 @@ namespace Saxon.Hej.pattern {
                         grumble("In an XSLT pattern, a function call is allowed only as the first step in a path");
                     }
                     return base.parseBasicStep(firstInPattern);
-                  case Saxon.Hej.expr.parser.Token.NODEKIND:
+                  case Saxon.Hej.expr.parser.Token.KEYWORD_LBRA:
                     switch (t.currentTokenValue) {
                       case "type":
                       case "tuple":

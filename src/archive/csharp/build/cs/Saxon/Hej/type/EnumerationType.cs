@@ -33,7 +33,7 @@ namespace Saxon.Hej.type {
             return false;
         }
         public Saxon.Hej.om.StructuredQName getTypeName() {
-            return null;
+            return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.ANONYMOUS, ("E"+GetHashCode()));
         }
         public double getDefaultPriority() {
             return 0;
@@ -108,7 +108,7 @@ namespace Saxon.Hej.type {
             return -1;
         }
         public string getDisplayName() {
-            return null;
+            return getTypeName().getDisplayName();
         }
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
             return null;
@@ -151,6 +151,24 @@ namespace Saxon.Hej.type {
         }
         public string getDescription() {
             return ToString();
+        }
+        public override string ToString() {
+            Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(256);
+            fsb.append("enum(");
+            foreach (string st in values) {
+                char delim = '"';
+                if ((st.IndexOf('"')>=0)) {
+                    if ((st.IndexOf('\'')>0)) {
+                        delim = '`';
+                    } else {
+                        delim = '\'';
+                    }
+                }
+                fsb.append(delim).append(st).append(delim).append(", ");
+            }
+            fsb.setLength((fsb.length()-2));
+            fsb.append(")");
+            return fsb.ToString();
         }
         public void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType @base, int block) {
         }

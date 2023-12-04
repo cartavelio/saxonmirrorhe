@@ -21,7 +21,7 @@ namespace Saxon.Hej.expr.instruct {
             this.numberOfVariables = numberOfVariables;
             Saxon.Impl.Helpers.ListUtils.TrimToSize(variableMap);
         }
-        public int allocateSlotNumber(Saxon.Hej.om.StructuredQName qName) {
+        public virtual int allocateSlotNumber(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.expr.LocalBinding binding) {
             variableMap.Add(qName);
             return numberOfVariables++;
         }

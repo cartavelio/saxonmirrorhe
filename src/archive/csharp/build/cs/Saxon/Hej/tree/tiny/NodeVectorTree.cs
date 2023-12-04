@@ -9,6 +9,7 @@ namespace Saxon.Hej.tree.tiny {
         int getFingerprint(int nodeNr);
         byte[] getNodeKindArray();
         int[] getNameCodeArray();
+        Saxon.Hej.om.NamePool getNamePool();
     
     }
 }

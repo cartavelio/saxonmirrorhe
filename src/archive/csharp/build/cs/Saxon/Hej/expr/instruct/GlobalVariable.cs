@@ -315,7 +315,11 @@ namespace Saxon.Hej.expr.instruct {
             if ((v != null)) {
                 return v;
             } else {
-                return actuallyEvaluate(context, null);
+                Saxon.Hej.expr.Component target = context.getCurrentComponent();
+                if ((target == null)) {
+                    target = getDeclaringComponent();
+                }
+                return actuallyEvaluate(context, target);
             }
         }
         public virtual Saxon.Hej.om.GroundedValue evaluateVariable(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.Component target) {

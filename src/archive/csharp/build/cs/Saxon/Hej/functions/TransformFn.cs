@@ -45,7 +45,7 @@ namespace Saxon.Hej.functions {
             op.addAllowedOption("post-process", Saxon.Hej.value.SequenceType.makeSequenceType(new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_STRING, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE));
             return op;
         }
-        private void checkTransformOptions(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.expr.XPathContext context, int languageVersion) {
+        private void checkTransformOptions(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, Saxon.Hej.expr.XPathContext context, int languageVersion) {
             if (options.Count==0) {
                 throw new Saxon.Hej.trans.XPathException("No transformation options supplied", "FOXT0002");
             }
@@ -55,20 +55,20 @@ namespace Saxon.Hej.functions {
                 }
             }
         }
-        private string checkStylesheetMutualExclusion(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map) {
+        private string checkStylesheetMutualExclusion(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> map) {
             return exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text");
         }
-        private string checkStylesheetMutualExclusion30(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map) {
+        private string checkStylesheetMutualExclusion30(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> map) {
             string styleOption = exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text", "package-name", "package-node", "package-location");
             if (styleOption.Equals("package-location")) {
                 throw new Saxon.Hej.trans.XPathException((("The transform option "+styleOption)+" is not implemented in Saxon"), "FOXT0002");
             }
             return styleOption;
         }
-        private string checkInvocationMutualExclusion(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options) {
+        private string checkInvocationMutualExclusion(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options) {
             return oneOf(options, "initial-mode", "initial-template");
         }
-        private string oneOf(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map, params string[]  keys) {
+        private string oneOf(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> map, params string[]  keys) {
             string found = null;
             foreach (string s in keys) {
                 if ((Saxon.Impl.Helpers.MapUtils.Get(map, s) != null)) {
@@ -81,7 +81,7 @@ namespace Saxon.Hej.functions {
             }
             return found;
         }
-        private string exactlyOneOf(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map, params string[]  keys) {
+        private string exactlyOneOf(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> map, params string[]  keys) {
             string found = oneOf(map, keys);
             if ((found == null)) {
                 throw new Saxon.Hej.trans.XPathException(("One of the following transform options must be present: "+enumerate(keys)));
@@ -101,7 +101,7 @@ namespace Saxon.Hej.functions {
             }
             return buffer.ToString();
         }
-        private string checkInvocationMutualExclusion30(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map) {
+        private string checkInvocationMutualExclusion30(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> map) {
             return oneOf(map, "initial-mode", "initial-template", "initial-function");
         }
         private void unsuitable(string option, string value) {
@@ -124,7 +124,7 @@ namespace Saxon.Hej.functions {
             }
             throw new Saxon.Hej.trans.XPathException(("Unrecognized boolean value "+value), "FOXT0002");
         }
-        private void setRequestedProperties(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.s9api.Processor processor) {
+        private void setRequestedProperties(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, Saxon.Hej.s9api.Processor processor) {
             Saxon.Hej.ma.map.MapItem requestedProps = (Saxon.Hej.ma.map.MapItem)(Saxon.Impl.Helpers.MapUtils.Get(options, "requested-properties").head());
             Saxon.Hej.tree.iter.AtomicIterator optionIterator = requestedProps.keys();
             while (true) {
@@ -250,7 +250,7 @@ namespace Saxon.Hej.functions {
                 }
             }
         }
-        private void setStaticParams(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.s9api.XsltCompiler xsltCompiler, bool allowTypedNodes) {
+        private void setStaticParams(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, Saxon.Hej.s9api.XsltCompiler xsltCompiler, bool allowTypedNodes) {
             Saxon.Hej.ma.map.MapItem staticParamsMap = (Saxon.Hej.ma.map.MapItem)(Saxon.Impl.Helpers.MapUtils.Get(options, "static-params").head());
             Saxon.Hej.tree.iter.AtomicIterator paramIterator = staticParamsMap.keys();
             while (true) {
@@ -271,7 +271,7 @@ namespace Saxon.Hej.functions {
                 }
             }
         }
-        private Saxon.Hej.s9api.XsltExecutable getStylesheet(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.s9api.XsltCompiler xsltCompiler, string styleOptionStr, Saxon.Hej.expr.XPathContext context) {
+        private Saxon.Hej.s9api.XsltExecutable getStylesheet(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, Saxon.Hej.s9api.XsltCompiler xsltCompiler, string styleOptionStr, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.Item styleOptionItem = Saxon.Impl.Helpers.MapUtils.Get(options, styleOptionStr).head();
             System.Uri stylesheetBaseUri = null;
             Saxon.Hej.om.Sequence seq;
@@ -422,7 +422,7 @@ namespace Saxon.Hej.functions {
             }
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options = getDetails().optionDetails.processSuppliedOptions((Saxon.Hej.ma.map.MapItem)(arguments[0].head()), context);
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options = getDetails().optionDetails.processSuppliedOptions((Saxon.Hej.ma.map.MapItem)(arguments[0].head()), context);
             Saxon.Hej.om.Sequence vendorOptionsValue = Saxon.Impl.Helpers.MapUtils.Get(options, "vendor-options");
             Saxon.Hej.ma.map.MapItem vendorOptions = ((vendorOptionsValue == null) ? null : (Saxon.Hej.ma.map.MapItem)(vendorOptionsValue.head()));
             Saxon.Hej.Configuration targetConfig = context.getConfiguration();
@@ -618,6 +618,7 @@ namespace Saxon.Hej.functions {
                 transformer.setBaseOutputURI(baseOutputUri);
                 transformer.setInitialTemplateParameters(templateParams, false);
                 transformer.setInitialTemplateParameters(tunnelParams, true);
+                transformer.setResourceResolver(context.getResourceResolver());
                 if (((schemaValidation == Saxon.Hej.lib.Validation.STRICT) || (schemaValidation == Saxon.Hej.lib.Validation.LAX))) {
                     if ((sourceNode != null)) {
                         sourceNode = validate(sourceNode, targetConfig, schemaValidation);

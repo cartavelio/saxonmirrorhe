@@ -11,9 +11,9 @@
 
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>pdbonly</DebugType>
-        <Optimize>false</Optimize>
+        <Optimize>true</Optimize>
         <OutputType>Exe</OutputType>
-        <PublishSingleFile>false</PublishSingleFile>
+        <PublishSingleFile>true</PublishSingleFile>
         <SelfContained>true</SelfContained>
         <PublishReadyToRun>true</PublishReadyToRun>
         <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>

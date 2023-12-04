@@ -59,6 +59,7 @@ namespace Saxon.Hej.style {
             call.setRetainedStaticContext(makeRetainedStaticContext());
             Saxon.Hej.expr.instruct.WithParam[] actualParams = getWithParamInstructions(call, exec, decl, false);
             call.setParameters(actualParams);
+            call.setLocation(saveLocation());
             if ((xslIterate != null)) {
                 Saxon.Hej.tree.iter.AxisIterator declaredParams = xslIterate.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD);
                 Saxon.Hej.om.NodeInfo param;

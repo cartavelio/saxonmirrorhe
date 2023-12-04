@@ -133,7 +133,7 @@ namespace Saxon.Hej.style {
                 }
             }
             try {
-                return new Saxon.Hej.expr.instruct.AnalyzeString(select, regex, flags, ((matchingBlock == null) ? null : matchingBlock.simplify()), ((nonMatchingBlock == null) ? null : nonMatchingBlock.simplify()), pattern);
+                return new Saxon.Hej.expr.instruct.AnalyzeString(select, regex, flags, ((matchingBlock == null) ? null : matchingBlock.simplify()), ((nonMatchingBlock == null) ? null : nonMatchingBlock.simplify()), pattern).withLocation(saveLocation());
             } catch (Saxon.Hej.trans.XPathException e) {
                 compileError(e);
                 return null;

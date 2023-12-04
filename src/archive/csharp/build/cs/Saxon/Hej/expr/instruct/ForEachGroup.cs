@@ -7,7 +7,7 @@ namespace Saxon.Hej.expr.instruct {
         public const int GROUP_ADJACENT = 1;
         public const int GROUP_STARTING = 2;
         public const int GROUP_ENDING = 3;
-        public const int GROUP_BREAKING_WHEN = 4;
+        public const int GROUP_SPLIT_WHEN = 4;
         private readonly byte algorithm;
         private Saxon.Hej.lib.StringCollator collator;
         private Saxon.Hej.expr.sort.AtomicComparer[] sortComparators = null;
@@ -327,7 +327,7 @@ namespace Saxon.Hej.expr.instruct {
               case GROUP_ENDING:
                 groupIterator = new Saxon.Hej.expr.sort.GroupEndingIterator(selectPull, (Saxon.Hej.pattern.Pattern)(getGroupingKey()), context);
                 break ;
-              case GROUP_BREAKING_WHEN:
+              case GROUP_SPLIT_WHEN:
                 Saxon.Hej.om.FunctionItem breakWhen = (Saxon.Hej.om.FunctionItem)(getGroupingKey().evaluateItem(context));
                 groupIterator = new Saxon.Hej.expr.sort.GroupBreakingIterator(selectPull, breakWhen, context);
                 break ;
@@ -383,7 +383,7 @@ namespace Saxon.Hej.expr.instruct {
             }
             @out.setChildRole("select");
             getSelectExpression().export(@out);
-            @out.setChildRole(((((algorithm == GROUP_BY) || (algorithm == GROUP_ADJACENT)) || (algorithm == GROUP_BREAKING_WHEN)) ? "key" : "match"));
+            @out.setChildRole(((((algorithm == GROUP_BY) || (algorithm == GROUP_ADJACENT)) || (algorithm == GROUP_SPLIT_WHEN)) ? "key" : "match"));
             getGroupingKey().export(@out);
             if ((getSortKeyDefinitions() != null)) {
                 @out.setChildRole("sort");
@@ -407,8 +407,8 @@ namespace Saxon.Hej.expr.instruct {
                 return "starting";
               case GROUP_ENDING:
                 return "ending";
-              case GROUP_BREAKING_WHEN:
-                return "breaking";
+              case GROUP_SPLIT_WHEN:
+                return "split";
               default:
                 return "** unknown algorithm **";
             }
@@ -465,7 +465,7 @@ namespace Saxon.Hej.expr.instruct {
                     return context => new Saxon.Hej.expr.sort.GroupStartingIterator(selectPull, (Saxon.Hej.pattern.Pattern)(expr.getGroupingKey()), context);
                   case GROUP_ENDING:
                     return context => new Saxon.Hej.expr.sort.GroupEndingIterator(selectPull, (Saxon.Hej.pattern.Pattern)(expr.getGroupingKey()), context);
-                  case GROUP_BREAKING_WHEN:
+                  case GROUP_SPLIT_WHEN:
                     return context => {
                         Saxon.Hej.om.FunctionItem breakWhen = (Saxon.Hej.om.FunctionItem)(expr.getGroupingKey().evaluateItem(context));
                         return new Saxon.Hej.expr.sort.GroupBreakingIterator(selectPull, breakWhen, context);

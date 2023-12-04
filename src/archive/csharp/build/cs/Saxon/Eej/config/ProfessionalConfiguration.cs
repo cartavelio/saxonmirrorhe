@@ -259,14 +259,10 @@ namespace Saxon.Eej.config {
             }
         }
         public override Saxon.Hej.functions.registry.BuiltInFunctionSet getXSLTFunctionSet(int version) {
-            if ((version == 30)) {
-                return Saxon.Hej.functions.registry.XSLT30FunctionSet.getInstance();
+            if ((version == 40)) {
+                return Saxon.Eej.functions.registry.XSLT40FunctionSet.getInstance();
             } else {
-                if ((version == 40)) {
-                    return Saxon.Eej.functions.registry.XSLT40FunctionSet.getInstance();
-                } else {
-                    throw new Saxon.Ejava.lang.IllegalArgumentException((("Unsupported XSLT version "+version)+" (must be 30 or 40)"));
-                }
+                return base.getXSLTFunctionSet(version);
             }
         }
         public override Saxon.Hej.functions.registry.BuiltInFunctionSet getXPathFunctionSet(int version) {
@@ -287,7 +283,14 @@ namespace Saxon.Eej.config {
         public override Saxon.Hej.functions.registry.BuiltInFunctionSet getXQueryUpdateFunctionSet() {
             return Saxon.Eej.functions.registry.XQUpdate10FunctionSet.getInstance();
         }
-        public override Saxon.Hej.functions.SystemFunction makeSystemFunction(string localName, int arity) {
+        public Saxon.Hej.functions.SystemFunction makeSystemFunction(string localName, int arity) {
+            try {
+                return getXSLTFunctionSet(30).makeFunction(localName, arity);
+            } catch (Saxon.Hej.trans.XPathException e) {
+                return null;
+            }
+        }
+        public override Saxon.Hej.functions.SystemFunction makeSystemFunction40(string localName, int arity) {
             try {
                 return getXSLTFunctionSet(40).makeFunction(localName, arity);
             } catch (Saxon.Hej.trans.XPathException e) {

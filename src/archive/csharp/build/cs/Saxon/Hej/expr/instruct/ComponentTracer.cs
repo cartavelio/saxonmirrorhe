@@ -114,7 +114,12 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
                         listener.enter(expr.component, expr.properties, context);
                         Saxon.Hej.om.SequenceIterator result = /*Delegate.iterate()*/baseEval(context);
-                        Saxon.Hej.om.GroundedValue extent = Saxon.Hej.om.SequenceTool.toGroundedValue(result);
+                        Saxon.Hej.om.GroundedValue extent;
+                        try {
+                            extent = Saxon.Hej.om.SequenceTool.toGroundedValue(result);
+                        } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
                         listener.leave(expr.component);
                         return extent.iterate();
                     } else {

@@ -31,6 +31,9 @@ namespace Saxon.Hej.tree.wrapper {
                 return wrap(n);
             }
         }
+        public override Saxon.Hej.om.Durability getDurability() {
+            return underlyingTree.getDurability();
+        }
         public override System.Collections.Generic.IEnumerator<string> getUnparsedEntityNames() {
             return underlyingTree.getUnparsedEntityNames();
         }

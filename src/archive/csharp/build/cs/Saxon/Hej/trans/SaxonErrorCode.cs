@@ -99,7 +99,6 @@ namespace Saxon.Hej.trans {
         public const string SXWN9041 = "SXWN9041";
         public const string SXWN9042 = "SXWN9042";
         public const string SXWN9043 = "SXWN9043";
-        public const string SXWN9044 = "SXWN9044";
         public const string SXWN9045 = "SXWN9045";
         public const string SXWN9046 = "SXWN9046";
         public const string SXWN9047 = "SXWN9047";

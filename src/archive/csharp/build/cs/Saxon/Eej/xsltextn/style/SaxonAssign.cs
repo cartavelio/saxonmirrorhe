@@ -54,7 +54,7 @@ namespace Saxon.Eej.xsltextn.style {
             } else {
                 instruction.setSelectExpr(compileSequenceConstructor(exec, decl, false));
             }
-            return instruction;
+            return instruction.withLocation(saveLocation());
         }
     
     }

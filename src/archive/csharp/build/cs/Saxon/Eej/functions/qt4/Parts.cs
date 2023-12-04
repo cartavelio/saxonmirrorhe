@@ -127,7 +127,11 @@ namespace Saxon.Eej.functions.qt4 {
                 details = new System.Collections.Generic.Dictionary<string, Saxon.Eej.functions.qt4.Parts.ComponentDetails>();
             }
             foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Eej.functions.qt4.Parts.ComponentDetails> component in details) {
-                result.initialPut(component.Key, Saxon.Hej.om.SequenceTool.toGroundedValue(component.Value.supplier(subject)));
+                try {
+                    result.initialPut(component.Key, Saxon.Hej.om.SequenceTool.toGroundedValue(component.Value.supplier(subject)));
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             result.initialPut("value", subject);
             return result;
@@ -209,6 +213,7 @@ namespace Saxon.Eej.functions.qt4 {
             Saxon.Hej.ma.map.DictionaryMap dict = new Saxon.Hej.ma.map.DictionaryMap();
             try {
                 System.Uri uri = new System.Uri(arg, System.UriKind.RelativeOrAbsolute);
+                doExtraChecks(uri);
                 dict.initialPut("isValid", Saxon.Hej.value.BooleanValue.TRUE);
                 bool absolute = uri.IsAbsoluteUri;
                 dict.initialPut("isAbsolute", Saxon.Hej.value.BooleanValue.get(absolute));
@@ -309,6 +314,9 @@ namespace Saxon.Eej.functions.qt4 {
         }
         private static System.Uri getSurrogateURI(System.Uri relative) {
             return new System.Uri(new System.Uri("http://dummy.uri/"), relative);
+        }
+        private static void doExtraChecks(System.Uri uri) {
+            if (!uri.IsWellFormedOriginalString()) throw new System.UriFormatException("Invalid URI");
         }
     
     }

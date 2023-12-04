@@ -185,6 +185,14 @@ namespace Saxon.Hej.expr {
             }
         
         }
+        public override string toShortString() {
+            Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(targetFunction.getChildExpression().toShortString()).append('(');
+            foreach (Saxon.Hej.expr.Operand op in suppliedArguments) {
+                sb.append(op.getChildExpression().toShortString()).append(',');
+            }
+            sb.setCharAt((sb.length()-1), ')');
+            return sb.ToString();
+        }
     
     }
 }

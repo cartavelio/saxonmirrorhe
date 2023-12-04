@@ -55,7 +55,7 @@ namespace Saxon.Hej.expr {
                 if (Saxon.Hej.type.Type.isGuaranteedComparable(pt0, pt1, false)) {
                     knownToBeComparable = true;
                 } else {
-                    if (!(Saxon.Hej.type.Type.isPossiblyComparable(pt0, pt1, false))) {
+                    if (!(Saxon.Hej.type.Type.isPossiblyComparable(pt0, pt1, visitor.getStaticContext().getXPathVersion()))) {
                         env.issueWarning(((("Cannot compare "+t0)+" to ")+t1), Saxon.Hej.trans.SaxonErrorCode.SXWN9025, getLocation());
                     }
                 }

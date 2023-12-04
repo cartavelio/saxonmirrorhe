@@ -17,6 +17,8 @@ namespace Saxon.Eej.ee.extfn.js {
                 return new Saxon.Eej.ee.extfn.js.IXSLRemoveProperty();
               case "set-style":
                 return new Saxon.Eej.ee.extfn.js.IXSLSetStyle();
+              case "promise":
+                return new Saxon.Eej.ee.extfn.js.IXSLPromise();
             }
             return null;
         } ;

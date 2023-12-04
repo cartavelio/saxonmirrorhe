@@ -69,6 +69,7 @@ namespace Saxon.Hej.style {
             compileConditions(exec, decl, conditions);
             Saxon.Hej.expr.instruct.Choose choose = new Saxon.Hej.expr.instruct.Choose(conditions, actions);
             choose.setInstruction(true);
+            choose.setLocation(saveLocation());
             return choose;
         }
         protected internal abstract void compileConditions(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.expr.Expression[] conditions);

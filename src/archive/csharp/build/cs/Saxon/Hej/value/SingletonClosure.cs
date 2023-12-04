@@ -8,11 +8,7 @@ namespace Saxon.Hej.value {
         public SingletonClosure(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.elab.PullEvaluator inputEvaluator, Saxon.Hej.expr.XPathContext context)  {
             setInputEvaluator(inputEvaluator);
             savedXPathContext = context.newContext();
-            saveContext(exp, context);
-        }
-        public SingletonClosure(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.XPathContext context)  {
-            setInputEvaluator(exp.makeElaborator().elaborateForPull());
-            savedXPathContext = context.newContext();
+            savedXPathContext.setOrigin(this);
             saveContext(exp, context);
         }
         public override Saxon.Hej.om.SequenceIterator iterate() {
@@ -38,7 +34,7 @@ namespace Saxon.Hej.value {
                 throw e.getXPathException();
             }
         }
-        public Saxon.Hej.om.Item asItem() {
+        public Saxon.Hej.om.Item asItem() { lock(this) {
             if (!(built)) {
                 value = /*Delegate.iterate()*/inputEvaluator(savedXPathContext).next();
                 built = true;
@@ -49,7 +45,7 @@ namespace Saxon.Hej.value {
                 }
             }
             return value;
-        }
+        }}
         public Saxon.Hej.om.Item itemAt(int n) {
             if ((n != 0)) {
                 return null;
@@ -62,12 +58,15 @@ namespace Saxon.Hej.value {
         public override  /* REPLACING public override */ Saxon.Hej.om.GroundedValue materialize() {
             try {
                 return Saxon.Hej.om.SequenceTool.itemOrEmpty(asItem());
-            } catch (Saxon.Hej.trans.XPathException e) {
-                throw new Saxon.Hej.trans.UncheckedXPathException(e);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
         }
         public override Saxon.Hej.value.SingletonClosure makeRepeatable() {
             return this;
+        }
+        public bool isBuilt() {
+            return built;
         }
     
     }

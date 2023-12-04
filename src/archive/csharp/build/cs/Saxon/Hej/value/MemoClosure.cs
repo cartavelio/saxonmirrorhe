@@ -11,13 +11,6 @@ namespace Saxon.Hej.value {
             setSavedXPathContext(c2);
             saveContext(expr, context);
         }
-        public MemoClosure(Saxon.Hej.expr.Expression expr, Saxon.Hej.expr.XPathContext context)  {
-            setInputEvaluator(expr.makeElaborator().elaborateForPull());
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            setSavedXPathContext(c2);
-            saveContext(expr, context);
-        }
         public override Saxon.Hej.om.SequenceIterator iterate() { lock(this) {
             try {
                 makeSequence();
@@ -67,6 +60,9 @@ namespace Saxon.Hej.value {
         }
         public override Saxon.Hej.om.Sequence makeRepeatable() {
             return this;
+        }
+        public Saxon.Hej.om.Sequence getSequenceAsIs() {
+            return sequence;
         }
     
     }

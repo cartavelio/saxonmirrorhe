@@ -5,7 +5,13 @@ namespace Saxon.Hej.functions {
     public class UnparsedTextLines : Saxon.Hej.functions.UnparsedTextFunction, Saxon.Hej.expr.Callable {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.value.StringValue hrefVal = (Saxon.Hej.value.StringValue)(arguments[0].head());
-            string encoding = ((getArity() == 2) ? arguments[1].head().getStringValue() : null);
+            string encoding;
+            if ((getArity() == 2)) {
+                Saxon.Hej.om.Item enc = arguments[1].head();
+                encoding = ((enc == null) ? null : enc.getStringValue());
+            } else {
+                encoding = null;
+            }
             try {
                 return Saxon.Hej.om.SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, context));
             } catch (Saxon.Hej.trans.XPathException e) {

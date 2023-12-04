@@ -5,18 +5,50 @@ namespace Saxon.Hej.ma.map {
     public class RecordTest : Saxon.Hej.type.AnyFunctionType, Saxon.Hej.ma.map.RecordType {
         private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.value.SequenceType> fieldTypes = new System.Collections.Generic.Dictionary<string, Saxon.Hej.value.SequenceType>();
         private readonly System.Collections.Generic.ISet<string> optionalFields = new System.Collections.Generic.HashSet<string>();
-        private bool extensible;
+        private bool _extensible;
+        public static Saxon.Hej.ma.map.RecordTest VALUE_RECORD = nonExtensible(new Saxon.Hej.ma.map.RecordTest.Field("value", Saxon.Hej.value.SequenceType.ANY_SEQUENCE, false));
+        public static Saxon.Hej.ma.map.RecordTest KEY_VALUE_RECORD = nonExtensible(new Saxon.Hej.ma.map.RecordTest.Field("key", Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE, false), new Saxon.Hej.ma.map.RecordTest.Field("value", Saxon.Hej.value.SequenceType.ANY_SEQUENCE, false));
+        public class Field {
+            internal string name;
+            internal Saxon.Hej.value.SequenceType type;
+            internal bool optional;
+            public Field(string name, Saxon.Hej.value.SequenceType type, bool optional)  {
+                this.name = name;
+                this.type = type;
+                this.optional = optional;
+            }
+        
+        }
         public RecordTest()  {
         }
         public RecordTest(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.ICollection<string> optionalFieldNames, bool extensible)  {
             setDetails(names, types, optionalFieldNames, extensible);
+        }
+        public static Saxon.Hej.ma.map.RecordTest extensible(params Saxon.Hej.ma.map.RecordTest.Field[]  fields) {
+            return makeRecordTest(true, fields);
+        }
+        public static Saxon.Hej.ma.map.RecordTest nonExtensible(params Saxon.Hej.ma.map.RecordTest.Field[]  fields) {
+            return makeRecordTest(false, fields);
+        }
+        private static Saxon.Hej.ma.map.RecordTest makeRecordTest(bool extensible, params Saxon.Hej.ma.map.RecordTest.Field[]  fields) {
+            System.Collections.Generic.IList<string> fieldNames = new System.Collections.Generic.List<string>(fields.Length);
+            System.Collections.Generic.IList<string> optionalFieldNames = new System.Collections.Generic.List<string>(fields.Length);
+            System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> fieldTypes = new System.Collections.Generic.List<Saxon.Hej.value.SequenceType>(fields.Length);
+            foreach (Saxon.Hej.ma.map.RecordTest.Field field in fields) {
+                fieldNames.Add(field.name);
+                fieldTypes.Add(field.type);
+                if (field.optional) {
+                    optionalFieldNames.Add(field.name);
+                }
+            }
+            return new Saxon.Hej.ma.map.RecordTest(fieldNames, fieldTypes, optionalFieldNames, extensible);
         }
         public void setDetails(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.ICollection<string> optionalFieldNames, bool extensible) {
             for (int i = 0; (i<names.Count); i++) {
                 Saxon.Impl.Helpers.MapUtils.Put(fieldTypes, names[i], types[i]);
             }
             Saxon.Impl.Helpers.SetUtils.AddAll(optionalFields, optionalFieldNames);
-            this.extensible = extensible;
+            this._extensible = extensible;
         }
         public override  /* REPLACING public */ Saxon.Hej.om.Genre getGenre() {
             return Saxon.Hej.om.Genre.MAP;
@@ -37,7 +69,7 @@ namespace Saxon.Hej.ma.map {
             return optionalFields.Contains(field);
         }
         public bool isExtensible() {
-            return extensible;
+            return _extensible;
         }
         public override bool matches(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             if (!(((item is Saxon.Hej.ma.map.MapItem)))) {
@@ -56,7 +88,7 @@ namespace Saxon.Hej.ma.map {
                     }
                 }
             }
-            if (!(extensible)) {
+            if (!(_extensible)) {
                 Saxon.Hej.tree.iter.AtomicIterator keyIter = map.keys();
                 Saxon.Hej.value.AtomicValue key;
                 while (((key = ((/*1430*/Saxon.Hej.value.AtomicValue)keyIter.next())) != null)) {
@@ -74,7 +106,7 @@ namespace Saxon.Hej.ma.map {
             return new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ATOMIC};
         }
         public override Saxon.Hej.value.SequenceType getResultType() {
-            if (extensible) {
+            if (_extensible) {
                 return Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
             } else {
                 Saxon.Hej.type.ItemType resultType = null;
@@ -95,7 +127,7 @@ namespace Saxon.Hej.ma.map {
             foreach (Saxon.Hej.value.SequenceType st in fieldTypes.Values) {
                 prio *= st.getPrimaryType().getNormalizedDefaultPriority();
             }
-            return (extensible ? (0.5+(prio/2)) : prio);
+            return (_extensible ? (0.5+(prio/2)) : prio);
         }
         public override string ToString() {
             return makeString(x => x.ToString() /* method reference */);
@@ -124,7 +156,7 @@ namespace Saxon.Hej.ma.map {
                 if (isOptionalField(field.Key)) {
                     sb.append('?');
                 }
-                sb.append(": ");
+                sb.append(" as ");
                 if ((field.Value.getPrimaryType() == this)) {
                     sb.append("..").append(Saxon.Hej.value.Cardinality.getOccurrenceIndicator(field.Value.getCardinality()));
                 } else {
@@ -138,7 +170,7 @@ namespace Saxon.Hej.ma.map {
             return sb.ToString();
         }
         public override bool Equals(System.Object other) {
-            return ((this == other) || ((((other is Saxon.Hej.ma.map.RecordTest) && (extensible == ((Saxon.Hej.ma.map.RecordTest)(other)).extensible)) && fieldTypes.Equals(((Saxon.Hej.ma.map.RecordTest)(other)).fieldTypes)) && optionalFields.Equals(((Saxon.Hej.ma.map.RecordTest)(other)).optionalFields)));
+            return ((this == other) || ((((other is Saxon.Hej.ma.map.RecordTest) && (_extensible == ((Saxon.Hej.ma.map.RecordTest)(other))._extensible)) && fieldTypes.Equals(((Saxon.Hej.ma.map.RecordTest)(other)).fieldTypes)) && optionalFields.Equals(((Saxon.Hej.ma.map.RecordTest)(other)).optionalFields)));
         }
         public override int GetHashCode() {
             int h = 0x27ca481f;
@@ -283,7 +315,7 @@ namespace Saxon.Hej.ma.map {
                     Saxon.Hej.value.SequenceType required = entry.Value;
                     Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.ma.map.MapItem)(item)).get(new Saxon.Hej.value.StringValue(key));
                     if ((value == null)) {
-                        if (!(Saxon.Hej.value.Cardinality.allowsZero(required.getCardinality()))) {
+                        if ((!(Saxon.Hej.value.Cardinality.allowsZero(required.getCardinality())) && !(isOptionalField(key)))) {
                             return Saxon.Ejava.util.Optional<string>.of((("Field "+key)+" is absent; it must have a value"));
                         }
                     } else {
@@ -297,7 +329,7 @@ namespace Saxon.Hej.ma.map {
                         }
                     }
                 }
-                if (!(extensible)) {
+                if (!(_extensible)) {
                     Saxon.Hej.tree.iter.AtomicIterator keyIter = ((Saxon.Hej.ma.map.MapItem)(item)).keys();
                     Saxon.Hej.value.AtomicValue key;
                     while (((key = ((/*1430*/Saxon.Hej.value.AtomicValue)keyIter.next())) != null)) {

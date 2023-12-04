@@ -31,7 +31,7 @@ namespace Saxon.Hej.expr {
             }
             return null;
         }
-        protected internal virtual bool matches() {
+        protected internal bool matches() {
             Saxon.Hej.om.SequenceIterator iterator = filter.iterate(filterContext);
             return testPredicateValue(iterator, @base.position(), filter);
         }
@@ -82,14 +82,6 @@ namespace Saxon.Hej.expr {
         }
         public void close() {
             @base.close();
-        }
-        public sealed class NonNumeric : Saxon.Hej.expr.FilterIterator {
-            public NonNumeric(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.Expression filter, Saxon.Hej.expr.XPathContext context) : base (@base, filter, context) {
-            }
-            protected internal override bool matches() {
-                return this.filter.effectiveBooleanValue(this.filterContext);
-            }
-        
         }
     
     }

@@ -19,9 +19,9 @@ namespace Saxon.Eej.ee.trans {
         public Saxon.Eej.ee.trans.TemplateRuleInitializer getInitializer() {
             return initializer;
         }
-        public override void prepareInitializer(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.om.StructuredQName modeName) {
+        public override void prepareInitializer(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
             if ((getInitializer() == null)) {
-                setInitializer(new Saxon.Eej.ee.trans.TemplateRuleInitializer(compilation, decl, modeName));
+                setInitializer(new Saxon.Eej.ee.trans.TemplateRuleInitializer(compilation, decl, this));
             }
         }
         public override void initialize() { lock(this) {
@@ -31,15 +31,6 @@ namespace Saxon.Eej.ee.trans {
                 initializer = null;
             }
         }}
-        public override Saxon.Hej.expr.instruct.TemplateRule copy() {
-            Saxon.Hej.expr.instruct.TemplateRule tr = new Saxon.Eej.ee.trans.TemplateRuleEE();
-            if (((body == null) || (matchPattern == null))) {
-                slaveCopies.Add(tr);
-            } else {
-                copyTo(tr);
-            }
-            return tr;
-        }
         public bool isActuallyStreamable(System.Collections.Generic.IList<string> reasons) {
             if ((matchPattern == null)) {
                 if ((reasons != null)) {

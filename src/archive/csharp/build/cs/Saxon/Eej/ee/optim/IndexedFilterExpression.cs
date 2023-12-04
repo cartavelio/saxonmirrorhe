@@ -179,7 +179,7 @@ namespace Saxon.Eej.ee.optim {
                     }
                     Saxon.Hej.expr.sort.AtomicComparer comparer = expr.comparer.provideContext(context);
                     Saxon.Hej.om.SequenceIterator values = /*Delegate.iterate()*/searchPullEvaluator(context);
-                    return indexedValue.findItems(expr.getUseExpression(), values, expr.convertUntypedToOther, false, comparer, context);
+                    return indexedValue.findItems(expr.getUseExpression(), values, expr.convertUntypedToOther, comparer, context);
                 } ;
             }
         

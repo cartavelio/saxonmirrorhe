@@ -47,6 +47,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 defaultValue = Saxon.Hej.om.SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
             } catch (Saxon.Hej.trans.XPathException e) {
                 error(e.Message);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                error(e.getXPathException().Message);
             }
             Saxon.Hej.expr.PackageData pd = new Saxon.Hej.expr.PackageData(getConfiguration());
             pd.setHostLanguage(Saxon.Api.HostLanguage.XML_SCHEMA, getConfiguration().getXsdVersion());

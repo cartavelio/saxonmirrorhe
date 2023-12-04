@@ -83,6 +83,12 @@ namespace Saxon.Impl.Helpers {
 
             return System.Text.Encoding.GetEncoding(enc);
         }
+        
+        // The following method is needed because the transpiler generates the same code
+        // for getBytes(String) and getBytes(Encoding)
+        public static Encoding EncodingForName(Encoding enc) {
+            return enc;
+        }
 
     }
     

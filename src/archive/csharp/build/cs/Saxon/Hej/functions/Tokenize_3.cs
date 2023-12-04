@@ -15,7 +15,10 @@ namespace Saxon.Hej.functions {
             if (input.isEmpty()) {
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
-            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments);
+            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments, 1, 2);
+            if ((re == null)) {
+                return Saxon.Hej.om.SequenceTool.toLazySequence(new Saxon.Hej.value.Whitespace.Tokenizer(input));
+            }
             return Saxon.Hej.om.SequenceTool.toLazySequence(re.tokenize(input));
         }
     

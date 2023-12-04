@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.config {
     public class SlotManagerEE : Saxon.Hej.expr.instruct.SlotManager {
+        private Saxon.Hej.z.IntHashMap<Saxon.Hej.expr.LocalBinding> bindings = new Saxon.Hej.z.IntHashMap<Saxon.Hej.expr.LocalBinding>();
+        public override int allocateSlotNumber(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.expr.LocalBinding binding) {
+            int slot = base.allocateSlotNumber(qName, binding);
+            if ((binding != null)) {
+                bindings.put(slot, binding);
+            }
+            return slot;
+        }
         public override void showStackFrame(Saxon.Hej.expr.XPathContext context, Saxon.Hej.lib.Logger logger) {
             try {
                 if ((context != null)) {
@@ -37,7 +45,13 @@ namespace Saxon.Eej.ee.config {
                         bool foundOne = false;
                         for (int i = 0; (i<map.getNumberOfVariables()); i++) {
                             if ((values[i] != null)) {
-                                logger.info(((("        $"+map.getVariableMap()[i].getDisplayName())+" = ")+Saxon.Hej.trans.Err.depictSequence(values[i])));
+                                Saxon.Hej.om.StructuredQName qName = map.getVariableMap()[i];
+                                string expr = "";
+                                Saxon.Hej.expr.LocalBinding binding = bindings.get(i);
+                                if ((qName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE) && (binding is Saxon.Hej.expr.Assignation))) {
+                                    expr = ((" {"+((Saxon.Hej.expr.Assignation)(binding)).getSequence().toShortString())+"}");
+                                }
+                                logger.info((((("        $"+qName.getDisplayName())+expr)+" = ")+Saxon.Hej.trans.Err.depictSequence(values[i])));
                                 foundOne = true;
                             }
                         }

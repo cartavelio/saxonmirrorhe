@@ -25,7 +25,7 @@ namespace Saxon.Hej.functions {
             return re.containsMatch(input);
         }
         public override Saxon.Hej.value.BooleanValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments);
+            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments, 1, 2);
             Saxon.Hej.value.StringValue arg = (Saxon.Hej.value.StringValue)(arguments[0].head());
             Saxon.Hej.str.UnicodeString @in = ((arg == null) ? Saxon.Hej.str.EmptyUnicodeString.getInstance() : arg.getUnicodeStringValue());
             bool result = re.containsMatch(@in);

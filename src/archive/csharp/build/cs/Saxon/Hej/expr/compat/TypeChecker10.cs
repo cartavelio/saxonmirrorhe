@@ -18,7 +18,7 @@ namespace Saxon.Hej.expr.compat {
             }
             Saxon.Hej.type.ItemType reqItemType = req.getPrimaryType();
             if (((req.getPrimaryType().Equals(Saxon.Hej.type.BuiltInAtomicType.STRING) && !(Saxon.Hej.value.Cardinality.allowsMany(req.getCardinality()))) && !(th.isSubType(supplied.getItemType(), Saxon.Hej.type.BuiltInAtomicType.STRING)))) {
-                Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(config);
+                Saxon.Hej.expr.parser.RetainedStaticContext rsc = supplied.getRetainedStaticContext();
                 Saxon.Hej.expr.Expression fn = Saxon.Hej.functions.SystemFunction.makeCall("string", rsc, supplied);
                 try {
                     return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
@@ -27,7 +27,7 @@ namespace Saxon.Hej.expr.compat {
                 }
             }
             if ((reqItemType.Equals(Saxon.Hej.type.NumericType.getInstance()) || ((reqItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.DOUBLE) && !(Saxon.Hej.value.Cardinality.allowsMany(req.getCardinality()))) && !(th.isSubType(supplied.getItemType(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE))))) {
-                Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(config);
+                Saxon.Hej.expr.parser.RetainedStaticContext rsc = supplied.getRetainedStaticContext();
                 Saxon.Hej.expr.Expression fn = Saxon.Hej.functions.SystemFunction.makeCall("number", rsc, supplied);
                 try {
                     return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());

@@ -9,7 +9,7 @@ namespace Saxon.Hej.trans.rules {
         }
         protected internal ShallowSkipRuleSet()  {
         }
-        public virtual void process(Saxon.Hej.om.Item item, Saxon.Hej.expr.instruct.ParameterSet parameters, Saxon.Hej.expr.instruct.ParameterSet tunnelParams, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locationId) {
+        public void process(Saxon.Hej.om.Item item, Saxon.Hej.expr.instruct.ParameterSet parameters, Saxon.Hej.expr.instruct.ParameterSet tunnelParams, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locationId) {
             if ((item is Saxon.Hej.om.NodeInfo)) {
                 Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
                 switch (node.getNodeKind()) {
@@ -60,7 +60,7 @@ namespace Saxon.Hej.trans.rules {
                 }
             }
         }
-        public virtual string getName() {
+        public string getName() {
             return "shallow-skip";
         }
         public Saxon.Hej.trans.rules.BuiltInRules[] getActionForParentNodes(int nodeKind) {

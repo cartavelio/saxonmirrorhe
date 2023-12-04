@@ -45,7 +45,7 @@ namespace Saxon.Hej.functions {
             } else {
                 input = inputItem.getUnicodeStringValue();
             }
-            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments);
+            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments, 1, 2);
             Saxon.Hej.regex.RegexIterator iter = re.analyze(input);
             if ((vocab.resultName == null)) {
                 bool schemaAware = context.getController().getExecutable().isSchemaAware();

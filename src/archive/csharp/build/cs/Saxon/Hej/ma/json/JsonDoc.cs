@@ -31,7 +31,7 @@ namespace Saxon.Hej.ma.json {
             } catch (System.IO.IOException ioErr) {
                 throw Saxon.Hej.functions.UnparsedTextFunction.handleIOError(absoluteURI, ioErr);
             }
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions;
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions;
             if ((getArity() == 2)) {
                 Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
                 checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);

@@ -171,8 +171,10 @@ namespace Saxon.Hej.expr.instruct {
         
         }
         private static Saxon.Hej.om.Item substitute(Saxon.Hej.om.NodeInfo node) {
-            switch (node.getTreeInfo().getDurability()) {
+            Saxon.Hej.om.Durability durability = node.getTreeInfo().getDurability();
+            switch (durability) {
               case Saxon.Hej.om.Durability.LASTING:
+              case Saxon.Hej.om.Durability.UNDEFINED:
                 return node;
               case Saxon.Hej.om.Durability.TEMPORARY:
                 return new Saxon.Hej.expr.instruct.MemoFunction.NodeSurrogate(node);

@@ -69,7 +69,7 @@ namespace Saxon.Hej.expr.sort {
                 return Saxon.Hej.expr.CompareToConstant.interpretComparisonResult(@operator, comp);
             } ;
         }
-        private static int applyPromotion(Saxon.Hej.type.BuiltInAtomicType type) {
+        private static int applyPromotion(Saxon.Hej.type.BuiltInAtomicType type, int version) {
             if (type.isPrimitiveNumeric()) {
                 return Saxon.Hej.om.StandardNames.XS_DOUBLE;
             }
@@ -77,12 +77,16 @@ namespace Saxon.Hej.expr.sort {
             if (((fp == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC) || (fp == Saxon.Hej.om.StandardNames.XS_ANY_URI))) {
                 return Saxon.Hej.om.StandardNames.XS_STRING;
             } else {
-                return fp;
+                if (((fp == Saxon.Hej.om.StandardNames.XS_HEX_BINARY) && (version>=40))) {
+                    return Saxon.Hej.om.StandardNames.XS_BASE64_BINARY;
+                } else {
+                    return fp;
+                }
             }
         }
-        public static Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction makeAtomicComparisonFunction(Saxon.Hej.type.BuiltInAtomicType type0, Saxon.Hej.type.BuiltInAtomicType type1, Saxon.Hej.lib.StringCollator collator, int @operator, bool allowRecursion) {
-            int fp0 = applyPromotion(type0);
-            int fp1 = applyPromotion(type1);
+        public static Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction makeAtomicComparisonFunction(Saxon.Hej.type.BuiltInAtomicType type0, Saxon.Hej.type.BuiltInAtomicType type1, Saxon.Hej.lib.StringCollator collator, int @operator, bool allowRecursion, int version) {
+            int fp0 = applyPromotion(type0, version);
+            int fp1 = applyPromotion(type1, version);
             if ((fp0 == fp1)) {
                 switch (fp0) {
                   case Saxon.Hej.om.StandardNames.XS_DATE_TIME:
@@ -152,7 +156,7 @@ namespace Saxon.Hej.expr.sort {
                     Saxon.Hej.type.BuiltInAtomicType bt = b.getPrimitiveType();
                     lock (firstTimeFunction) {
                         if ((firstTimeFunction[0] == null)) {
-                            Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, @operator, false);
+                            Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, @operator, false, version);
                             firstTimeFunction[0] = comparisonFunction;
                             firstTimeTypes[0] = at;
                             firstTimeTypes[1] = bt;
@@ -161,7 +165,7 @@ namespace Saxon.Hej.expr.sort {
                             if (((firstTimeTypes[0] == at) && (firstTimeTypes[1] == bt))) {
                                 return /*Delegate.compare()*/firstTimeFunction[0](a, b, context);
                             } else {
-                                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, @operator, false);
+                                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, @operator, false, version);
                                 return /*Delegate.compare()*/comparisonFunction(a, b, context);
                             }
                         }

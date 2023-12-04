@@ -9,12 +9,16 @@ namespace Saxon.Hej.expr {
             this.start = start;
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
-            getOperand().optimize(visitor, contextInfo);
-            if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
-                Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()));
-                return Saxon.Hej.expr.Literal.makeLiteral(value, this);
+            try {
+                getOperand().optimize(visitor, contextInfo);
+                if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext()));
+                    return Saxon.Hej.expr.Literal.makeLiteral(value, this);
+                }
+                return this;
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
-            return this;
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.TailExpression exp = new Saxon.Hej.expr.TailExpression(getBaseExpression().copy(rebindings), start);

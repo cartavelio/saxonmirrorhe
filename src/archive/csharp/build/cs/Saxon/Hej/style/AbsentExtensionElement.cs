@@ -21,7 +21,7 @@ namespace Saxon.Hej.style {
             if ((reportingCircumstances == Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS)) {
                 compileError(validationError);
             }
-            if ((getEffectiveVersion()>=40)) {
+            if (((getEffectiveVersion()>=40) && !(isInXsltNamespace()))) {
                 Saxon.Hej.style.PrincipalStylesheetModule pack = getPrincipalStylesheetModule();
                 Saxon.Hej.expr.instruct.NamedTemplate template = pack.getNamedTemplate(getNodeName().getStructuredQName());
                 if ((template != null)) {

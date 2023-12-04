@@ -9,6 +9,10 @@ namespace Saxon.Eej.ee.extfn.js {
         public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.om.StructuredQName fName = functionName.getComponentName();
             if (Saxon.Hej.om.NamespaceUri.GLOBAL_JS.Equals(fName.getNamespaceUri())) {
+                if (((keywords != null) && !(keywords.Count==0))) {
+                    reasons.Add("Calls to external Javascript functions cannot use keyword arguments");
+                    return null;
+                }
                 try {
                     Saxon.Hej.expr.Expression windowCall = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
                     Saxon.Hej.expr.Expression callCall = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("call", 3).makeFunctionCall(windowCall, new Saxon.Hej.expr.StringLiteral(fName.getLocalPart()), new Saxon.Hej.ma.arrays.SquareArrayConstructor(Saxon.Ejava.util.Arrays.asList(staticArgs)));

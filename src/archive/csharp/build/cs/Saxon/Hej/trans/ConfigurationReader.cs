@@ -17,6 +17,7 @@ namespace Saxon.Hej.trans {
         private readonly System.Collections.Generic.Stack<string> localNameStack = new System.Collections.Generic.Stack<string>();
         private string systemId = null;
         private System.Collections.Generic.List<string> catalogFiles = null;
+        private const int OBSOLETE_PROPERTY = -9999;
         public ConfigurationReader()  {
         }
         public void setPipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration pipe) {
@@ -68,15 +69,23 @@ namespace Saxon.Hej.trans {
             activeSource.deliver(this, new Saxon.Hej.lib.ParseOptions());
             if (!(errors.Count==0)) {
                 Saxon.Hej.lib.ErrorReporter reporter;
+                Saxon.Hej.s9api.XmlProcessingError foundFatal = null;
                 if ((targetConfig == null)) {
                     reporter = new Saxon.Hej.lib.StandardErrorReporter();
                 } else {
                     reporter = targetConfig.makeErrorReporter();
                 }
                 foreach (Saxon.Hej.s9api.XmlProcessingError err in errors) {
+                    if (!(err.isWarning())) {
+                        if ((foundFatal == null)) {
+                            foundFatal = err;
+                        }
+                    }
                     reporter.report(err.asWarning());
                 }
-                throw Saxon.Hej.trans.XPathException.fromXmlProcessingError(errors[0]);
+                if ((foundFatal != null)) {
+                    throw Saxon.Hej.trans.XPathException.fromXmlProcessingError(foundFatal);
+                }
             }
             if ((baseConfiguration != null)) {
                 targetConfig.importLicenseDetails(baseConfiguration);
@@ -255,29 +264,31 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "collationUriResolver", Saxon.Hej.lib.FeatureCode.COLLATION_URI_RESOLVER_CLASS, "J");
             applyProperty(props, "collectionFinder", Saxon.Hej.lib.FeatureCode.COLLECTION_FINDER_CLASS, "J");
             applyProperty(props, "compileWithTracing", Saxon.Hej.lib.FeatureCode.COMPILE_WITH_TRACING, "JN");
-            applyProperty(props, "debugByteCode", Saxon.Hej.lib.FeatureCode.DEBUG_BYTE_CODE, "J");
-            applyProperty(props, "debugByteCodeDirectory", Saxon.Hej.lib.FeatureCode.DEBUG_BYTE_CODE_DIR, "J");
+            applyProperty(props, "debugByteCode", OBSOLETE_PROPERTY, "J");
+            applyProperty(props, "debugByteCodeDirectory", OBSOLETE_PROPERTY, "J");
             applyProperty(props, "defaultCollation", Saxon.Hej.lib.FeatureCode.DEFAULT_COLLATION, "JN");
             applyProperty(props, "defaultCollection", Saxon.Hej.lib.FeatureCode.DEFAULT_COLLECTION, "JN");
             applyProperty(props, "defaultRegexEngine", Saxon.Hej.lib.FeatureCode.DEFAULT_REGEX_ENGINE, "J");
-            applyProperty(props, "displayByteCode", Saxon.Hej.lib.FeatureCode.DISPLAY_BYTE_CODE, "J");
+            applyProperty(props, "displayByteCode", OBSOLETE_PROPERTY, "J");
             applyProperty(props, "dtdValidation", Saxon.Hej.lib.FeatureCode.DTD_VALIDATION, "JN");
             applyProperty(props, "dtdValidationRecoverable", Saxon.Hej.lib.FeatureCode.DTD_VALIDATION_RECOVERABLE, "J");
             applyProperty(props, "eagerEvaluation", Saxon.Hej.lib.FeatureCode.EAGER_EVALUATION, "JN");
             applyProperty(props, "entityResolver", Saxon.Hej.lib.FeatureCode.ENTITY_RESOLVER_CLASS, "J");
-            applyProperty(props, "errorListener", Saxon.Hej.lib.FeatureCode.ERROR_LISTENER_CLASS, "J");
             applyProperty(props, "environmentVariableResolver", Saxon.Hej.lib.FeatureCode.ENVIRONMENT_VARIABLE_RESOLVER_CLASS, "J");
+            applyProperty(props, "errorListener", Saxon.Hej.lib.FeatureCode.ERROR_LISTENER_CLASS, "J");
             applyProperty(props, "expandAttributeDefaults", Saxon.Hej.lib.FeatureCode.EXPAND_ATTRIBUTE_DEFAULTS, "JN");
-            applyProperty(props, "generateByteCode", Saxon.Hej.lib.FeatureCode.GENERATE_BYTE_CODE, "J");
+            applyProperty(props, "generateByteCode", OBSOLETE_PROPERTY, "J");
             applyProperty(props, "ignoreSAXSourceParser", Saxon.Hej.lib.FeatureCode.IGNORE_SAX_SOURCE_PARSER, "J");
+            applyProperty(props, "lazyConstructionMode", OBSOLETE_PROPERTY, "JN");
             applyProperty(props, "lineNumbering", Saxon.Hej.lib.FeatureCode.LINE_NUMBERING, "JN");
             applyProperty(props, "markDefaultedAttributes", Saxon.Hej.lib.FeatureCode.MARK_DEFAULTED_ATTRIBUTES, "J");
-            applyProperty(props, "maxCompiledClasses", Saxon.Hej.lib.FeatureCode.MAX_COMPILED_CLASSES, "J");
-            applyProperty(props, "monitorHotSpotByteCode", Saxon.Hej.lib.FeatureCode.MONITOR_HOT_SPOT_BYTE_CODE, "J");
+            applyProperty(props, "maxCompiledClasses", OBSOLETE_PROPERTY, "J");
+            applyProperty(props, "monitorHotSpotByteCode", OBSOLETE_PROPERTY, "J");
             applyProperty(props, "optimizationLevel", Saxon.Hej.lib.FeatureCode.OPTIMIZATION_LEVEL, "JN");
             applyProperty(props, "parser", Saxon.Hej.lib.FeatureCode.SOURCE_PARSER_CLASS, "J");
             applyProperty(props, "preEvaluateDoc", Saxon.Hej.lib.FeatureCode.PRE_EVALUATE_DOC_FUNCTION, "JN");
             applyProperty(props, "recognizeUriQueryParameters", Saxon.Hej.lib.FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS, "JN");
+            applyProperty(props, "regexBacktrackingLimit", Saxon.Hej.lib.FeatureCode.REGEX_BACKTRACKING_LIMIT, "JN");
             applyProperty(props, "resourceResolver", Saxon.Hej.lib.FeatureCode.RESOURCE_RESOLVER_CLASS, "J");
             applyProperty(props, "retainNodeForDiagnostics", Saxon.Hej.lib.FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS, "JN");
             applyProperty(props, "schemaValidation", Saxon.Hej.lib.FeatureCode.SCHEMA_VALIDATION_MODE, "JN");
@@ -293,7 +304,8 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "suppressEvaluationExpiryWarning", Saxon.Hej.lib.FeatureCode.SUPPRESS_EVALUATION_EXPIRY_WARNING, "JN");
             applyProperty(props, "suppressXPathWarnings", Saxon.Hej.lib.FeatureCode.SUPPRESS_XPATH_WARNINGS, "JN");
             applyProperty(props, "suppressXsltNamespaceCheck", Saxon.Hej.lib.FeatureCode.SUPPRESS_XSLT_NAMESPACE_CHECK, "JN");
-            applyProperty(props, "thresholdForHotspotByteCode", Saxon.Hej.lib.FeatureCode.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, "J");
+            applyProperty(props, "thresholdForFunctionInlining", Saxon.Hej.lib.FeatureCode.THRESHOLD_FOR_FUNCTION_INLINING, "JN");
+            applyProperty(props, "thresholdForHotspotByteCode", OBSOLETE_PROPERTY, "J");
             applyProperty(props, "timing", Saxon.Hej.lib.FeatureCode.TIMING, "JN");
             applyProperty(props, "traceExternalFunctions", Saxon.Hej.lib.FeatureCode.TRACE_EXTERNAL_FUNCTIONS, "JN");
             applyProperty(props, "traceListener", Saxon.Hej.lib.FeatureCode.TRACE_LISTENER_CLASS, "J");
@@ -301,6 +313,7 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "traceOptimizerDecisions", Saxon.Hej.lib.FeatureCode.TRACE_OPTIMIZER_DECISIONS, "JN");
             applyProperty(props, "treeModel", Saxon.Hej.lib.FeatureCode.TREE_MODEL_NAME, "JN");
             applyProperty(props, "unparsedTextUriResolver", Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
+            applyProperty(props, "unparsedTextURIResolver", Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
             applyProperty(props, "uriResolver", Saxon.Hej.lib.FeatureCode.URI_RESOLVER_CLASS, "J");
             applyProperty(props, "usePiDisableOutputEscaping", Saxon.Hej.lib.FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING, "JN");
             applyProperty(props, "useTypedValueCache", Saxon.Hej.lib.FeatureCode.USE_TYPED_VALUE_CACHE, "JN");
@@ -308,17 +321,30 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "validationWarnings", Saxon.Hej.lib.FeatureCode.VALIDATION_WARNINGS, "JN");
             applyProperty(props, "versionOfXml", Saxon.Hej.lib.FeatureCode.XML_VERSION, "J");
             applyProperty(props, "xInclude", Saxon.Hej.lib.FeatureCode.XINCLUDE, "J");
+            applyProperty(props, "xpathVersionForXsd", Saxon.Hej.lib.FeatureCode.XPATH_VERSION_FOR_XSD, "JN");
+            applyProperty(props, "xpathVersionForXslt", Saxon.Hej.lib.FeatureCode.XPATH_VERSION_FOR_XSLT, "JN");
             applyProperty(props, "zipUriPattern", Saxon.Hej.lib.FeatureCode.ZIP_URI_PATTERN, "JN");
+            foreach (string name in props.stringPropertyNames()) {
+                if (!(name.Equals("#element"))) {
+                    error("global", name, props.getProperty(name), "#unrecognized");
+                }
+            }
         }
         private void applyProperty(Saxon.Ejava.util.Properties props, string attributeName, int featureCode, string flags) {
             string value = props.getProperty(attributeName);
             if ((value != null)) {
+                if ((featureCode == OBSOLETE_PROPERTY)) {
+                    error(props.getProperty("#element"), attributeName, value, "#obsolete");
+                    props.remove(attributeName);
+                    return ;
+                }
                 if (!(checkPlatform(flags))) {
                     error(props.getProperty("#element"), attributeName, value, (("Property "+attributeName)+" is not available in SaxonCS"));
                     return ;
                 }
                 try {
                     targetConfig.setConfigurationProperty(Saxon.Hej.lib.FeatureIndex.getData(featureCode).uri, value);
+                    props.remove(attributeName);
                 } catch (Saxon.Ejava.lang.IllegalArgumentException e) {
                     string message = e.Message;
                     if (message.StartsWith(attributeName)) {
@@ -532,6 +558,8 @@ namespace Saxon.Hej.trans {
                 value = Saxon.Hej.om.SequenceTool.toGroundedValue(exp.iterate(env.makeEarlyEvaluationContext()));
             } catch (Saxon.Hej.trans.XPathException e) {
                 error(e);
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                error(e.getXPathException());
             }
             if ((currentPackage.staticParams == null)) {
                 currentPackage.staticParams = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.om.GroundedValue>();
@@ -556,12 +584,18 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "emptyLeast", Saxon.Hej.lib.FeatureCode.XQUERY_EMPTY_LEAST, "JN");
             applyProperty(props, "inheritNamespaces", Saxon.Hej.lib.FeatureCode.XQUERY_INHERIT_NAMESPACES, "JN");
             applyProperty(props, "moduleUriResolver", Saxon.Hej.lib.FeatureCode.MODULE_URI_RESOLVER_CLASS, "J");
+            applyProperty(props, "multipleModuleImports", Saxon.Hej.lib.FeatureCode.XQUERY_MULTIPLE_MODULE_IMPORTS, "JN");
             applyProperty(props, "preserveBoundarySpace", Saxon.Hej.lib.FeatureCode.XQUERY_PRESERVE_BOUNDARY_SPACE, "JN");
             applyProperty(props, "preserveNamespaces", Saxon.Hej.lib.FeatureCode.XQUERY_PRESERVE_NAMESPACES, "JN");
             applyProperty(props, "requiredContextItemType", Saxon.Hej.lib.FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE, "JN");
             applyProperty(props, "schemaAware", Saxon.Hej.lib.FeatureCode.XQUERY_SCHEMA_AWARE, "JN");
             applyProperty(props, "staticErrorListener", Saxon.Hej.lib.FeatureCode.XQUERY_STATIC_ERROR_LISTENER_CLASS, "J");
             applyProperty(props, "version", Saxon.Hej.lib.FeatureCode.XQUERY_VERSION, "JN");
+            foreach (string name in props.stringPropertyNames()) {
+                if (!(name.Equals("#element"))) {
+                    error("xquery", name, props.getProperty(name), "#unrecognized");
+                }
+            }
         }
         private void readXsltElement(Saxon.Hej.om.AttributeMap atts) {
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
@@ -578,9 +612,9 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "enableAssertions", Saxon.Hej.lib.FeatureCode.XSLT_ENABLE_ASSERTIONS, "JN");
             applyProperty(props, "initialMode", Saxon.Hej.lib.FeatureCode.XSLT_INITIAL_MODE, "JN");
             applyProperty(props, "initialTemplate", Saxon.Hej.lib.FeatureCode.XSLT_INITIAL_TEMPLATE, "JN");
-            applyProperty(props, "messageEmitter", Saxon.Hej.lib.FeatureCode.MESSAGE_EMITTER_CLASS, "J");
+            applyProperty(props, "messageEmitter", OBSOLETE_PROPERTY, "J");
             applyProperty(props, "outputUriResolver", Saxon.Hej.lib.FeatureCode.OUTPUT_URI_RESOLVER_CLASS, "J");
-            applyProperty(props, "recoveryPolicy", Saxon.Hej.lib.FeatureCode.RECOVERY_POLICY_NAME, "JN");
+            applyProperty(props, "recoveryPolicy", OBSOLETE_PROPERTY, "JN");
             applyProperty(props, "resultDocumentThreads", Saxon.Hej.lib.FeatureCode.RESULT_DOCUMENT_THREADS, "JN");
             applyProperty(props, "schemaAware", Saxon.Hej.lib.FeatureCode.XSLT_SCHEMA_AWARE, "JN");
             applyProperty(props, "staticErrorListener", Saxon.Hej.lib.FeatureCode.XSLT_STATIC_ERROR_LISTENER_CLASS, "J");
@@ -588,6 +622,12 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "strictStreamability", Saxon.Hej.lib.FeatureCode.STRICT_STREAMABILITY, "JN");
             applyProperty(props, "styleParser", Saxon.Hej.lib.FeatureCode.STYLE_PARSER_CLASS, "J");
             applyProperty(props, "version", Saxon.Hej.lib.FeatureCode.XSLT_VERSION, "JN");
+            applyProperty(props, "versionWarning", OBSOLETE_PROPERTY, "JN");
+            foreach (string name in props.stringPropertyNames()) {
+                if (!(name.Equals("#element"))) {
+                    error("xslt", name, props.getProperty(name), "#unrecognized");
+                }
+            }
         }
         private void readXsdElement(Saxon.Hej.om.AttributeMap atts) {
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
@@ -600,14 +640,20 @@ namespace Saxon.Hej.trans {
                 }
             }
             props.setProperty("#element", "xsd");
+            applyProperty(props, "allowUnresolvedSchemaComponents", Saxon.Hej.lib.FeatureCode.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS, "JN");
             applyProperty(props, "assertionsCanSeeComments", Saxon.Hej.lib.FeatureCode.ASSERTIONS_CAN_SEE_COMMENTS, "JN");
             applyProperty(props, "implicitSchemaImports", Saxon.Hej.lib.FeatureCode.IMPLICIT_SCHEMA_IMPORTS, "JN");
             applyProperty(props, "multipleSchemaImports", Saxon.Hej.lib.FeatureCode.MULTIPLE_SCHEMA_IMPORTS, "JN");
             applyProperty(props, "occurrenceLimits", Saxon.Hej.lib.FeatureCode.OCCURRENCE_LIMITS, "JN");
             applyProperty(props, "schemaUriResolver", Saxon.Hej.lib.FeatureCode.SCHEMA_URI_RESOLVER_CLASS, "J");
-            applyProperty(props, "thresholdForCompilingTypes", Saxon.Hej.lib.FeatureCode.THRESHOLD_FOR_COMPILING_TYPES, "JN");
+            applyProperty(props, "thresholdForCompilingTypes", OBSOLETE_PROPERTY, "JN");
             applyProperty(props, "useXsiSchemaLocation", Saxon.Hej.lib.FeatureCode.USE_XSI_SCHEMA_LOCATION, "JN");
             applyProperty(props, "version", Saxon.Hej.lib.FeatureCode.XSD_VERSION, "JN");
+            foreach (string name in props.stringPropertyNames()) {
+                if (!(name.Equals("#element"))) {
+                    error("xsd", name, props.getProperty(name), "#unrecognized");
+                }
+            }
         }
         private void error(string element, string attribute, string actual, string required) {
             Saxon.Hej.trans.XmlProcessingIncident err;
@@ -617,10 +663,18 @@ namespace Saxon.Hej.trans {
                 if ((actual == null)) {
                     err = new Saxon.Hej.trans.XmlProcessingIncident(((("Missing configuration property "+element)+"/@")+attribute));
                 } else {
-                    if (required.Contains("is not available in")) {
-                        err = new Saxon.Hej.trans.XmlProcessingIncident(((((("Configuration property "+element)+"/@")+attribute)+": ")+required));
+                    if (required.Equals("#unrecognized")) {
+                        err = new Saxon.Hej.trans.XmlProcessingIncident(((("Unrecognized configuration property "+element)+"/@")+attribute));
                     } else {
-                        err = new Saxon.Hej.trans.XmlProcessingIncident((((((((("Invalid configuration property "+element)+"/@")+attribute)+". Supplied value: '")+actual)+"'; required: '")+required)+"'"));
+                        if (required.Equals("#obsolete")) {
+                            err = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(((("Obsolete configuration property "+element)+"/@")+attribute)).asWarning());
+                        } else {
+                            if (required.Contains("is not available in")) {
+                                err = new Saxon.Hej.trans.XmlProcessingIncident(((((("Configuration property "+element)+"/@")+attribute)+": ")+required));
+                            } else {
+                                err = new Saxon.Hej.trans.XmlProcessingIncident((((((((("Invalid configuration property "+element)+"/@")+attribute)+". Supplied value: '")+actual)+"'; required: '")+required)+"'"));
+                            }
+                        }
                     }
                 }
             }

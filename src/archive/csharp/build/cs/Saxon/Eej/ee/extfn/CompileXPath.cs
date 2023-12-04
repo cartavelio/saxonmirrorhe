@@ -99,7 +99,7 @@ namespace Saxon.Eej.ee.extfn {
                 }
             }
             Saxon.Hej.ma.map.MapItem globalFunctions = (Saxon.Hej.ma.map.MapItem)(options.get(Saxon.Hej.value.StringValue.bmp("globalFunctions")));
-            Saxon.Hej.expr.parser.XPathParser parser = configuration.newExpressionParser("XP", false);
+            Saxon.Hej.expr.parser.XPathParser parser = configuration.newExpressionParser("XP", false, env);
             Saxon.Hej.expr.StaticContext parseContext = new Saxon.Hej.sxpath.IndependentContext(configuration);
             if ((globalFunctions != null)) {
                 Saxon.Hej.pattern.NameTest argTest = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, exportURI, "arg", configuration.getNamePool());
@@ -221,7 +221,7 @@ namespace Saxon.Eej.ee.extfn {
         }
         public static Saxon.Hej.expr.Expression make(string expression, Saxon.Hej.expr.StaticContext env, int start, int terminator, Saxon.Hej.expr.parser.CodeInjector codeInjector, bool inCatch) {
             int languageLevel = env.getXPathVersion();
-            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
+            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
             if (inCatch) {
                 parser.setCatchDepth(1);
             }

@@ -61,8 +61,12 @@ namespace Saxon.Hej.expr {
                     item = mem.itemAt((index-1));
                 } else {
                     if (((iter is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(iter)).isActuallyGrounded())) {
-                        Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
-                        item = value.itemAt((index-1));
+                        try {
+                            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
+                            item = value.itemAt((index-1));
+                        } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
                     } else {
                         Saxon.Hej.om.SequenceIterator tail = Saxon.Hej.expr.TailIterator.make(iter, index);
                         item = tail.next();

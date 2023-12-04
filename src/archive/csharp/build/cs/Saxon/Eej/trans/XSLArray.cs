@@ -32,19 +32,6 @@ namespace Saxon.Eej.trans {
                 }
             }
         }
-        private class FocusFunction : Saxon.Hej.expr.Callable {
-            internal Saxon.Hej.expr.elab.SequenceEvaluator evaluator;
-            public FocusFunction(Saxon.Hej.expr.Expression expression)  {
-                this.evaluator = expression.makeElaborator().eagerly();
-            }
-            public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                Saxon.Hej.om.Item current = arguments[0].head();
-                Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
-                c2.setCurrentIterator(new Saxon.Hej.tree.iter.ManualIterator(current));
-                return evaluator.evaluate(c2);
-            }
-        
-        }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             base.validate(decl);
             use = typeCheck("use", use);
@@ -68,7 +55,7 @@ namespace Saxon.Eej.trans {
                 Saxon.Hej.functions.SystemFunction mapEntry = Saxon.Hej.ma.map.MapFunctionSet.getInstance(40).makeFunction("entry", 2);
                 Saxon.Hej.expr.Expression mapEntryCall = mapEntry.makeFunctionCall(new Saxon.Hej.expr.StringLiteral("value"), use);
                 Saxon.Hej.expr.instruct.ForEach bangExpression = new Saxon.Hej.expr.instruct.ForEach(getSelectExpression(), mapEntryCall);
-                Saxon.Hej.functions.SystemFunction arrayOf = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(40).makeFunction("of", 1);
+                Saxon.Hej.functions.SystemFunction arrayOf = Saxon.Hej.ma.arrays.ArrayFunctionSet.getInstance(40).makeFunction("of-members", 1);
                 functionCall = arrayOf.makeFunctionCall(bangExpression);
             }
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);

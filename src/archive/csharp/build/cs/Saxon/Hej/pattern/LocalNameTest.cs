@@ -49,6 +49,9 @@ namespace Saxon.Hej.pattern {
         public bool matches(Saxon.Hej.om.StructuredQName qname) {
             return localName.Equals(qname.getLocalPart());
         }
+        public bool matchesFingerprint(Saxon.Hej.om.NamePool namePool, int fp) {
+            return namePool.getLocalName(fp).Equals(localName);
+        }
         public override double getDefaultPriority() {
             return -(0.25);
         }
@@ -79,9 +82,6 @@ namespace Saxon.Hej.pattern {
         }
         public string exportQNameTest() {
             return ("*:"+localName);
-        }
-        public string generateJavaScriptNameTest(int targetVersion) {
-            return (("q.local==='"+localName)+"'");
         }
         public override Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             Saxon.Ejava.util.Optional<string> explanation = base.explainMismatch(item, th);

@@ -93,6 +93,7 @@ namespace Saxon.Hej.style {
             }
             Saxon.Hej.expr.instruct.Choose choose = new Saxon.Hej.expr.instruct.Choose(conditions, actions);
             choose.setInstruction(true);
+            choose.setLocation(saveLocation());
             return choose;
         }
         public override Saxon.Hej.expr.Expression compileSequenceConstructor(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl, bool includeParams) {

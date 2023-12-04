@@ -24,7 +24,7 @@ namespace Saxon.Hej.pattern {
             return (binding == this.binding);
         }
         public override int allocateSlots(Saxon.Hej.expr.instruct.SlotManager slotManager, int nextFree) {
-            slotManager.allocateSlotNumber(Saxon.Hej.functions.Current.FN_CURRENT);
+            slotManager.allocateSlotNumber(Saxon.Hej.functions.Current.FN_CURRENT, null);
             binding.setSlotNumber(nextFree++);
             return wrappedPattern.allocateSlots(slotManager, nextFree);
         }

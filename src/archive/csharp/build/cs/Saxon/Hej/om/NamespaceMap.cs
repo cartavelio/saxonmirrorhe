@@ -55,6 +55,9 @@ namespace Saxon.Hej.om {
             System.Array.Sort(bindingArray, (x, y) => System.String.Compare(x.getPrefix(), y.getPrefix(), System.StringComparison.Ordinal));
         }
         public static Saxon.Hej.om.NamespaceMap fromNamespaceResolver(Saxon.Hej.om.NamespaceResolver resolver) {
+            if ((resolver is Saxon.Hej.om.NamespaceMap)) {
+                return (Saxon.Hej.om.NamespaceMap)(resolver);
+            }
             System.Collections.Generic.IEnumerator<string> iter = resolver.iteratePrefixes();
             System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> bindings = new System.Collections.Generic.List<Saxon.Hej.om.NamespaceBinding>();
             while (iter.MoveNext()) {
@@ -316,7 +319,7 @@ namespace Saxon.Hej.om {
             }
         }
         public System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> GetEnumerator() {
-            return new Inner_Iterator_180(this);
+            return new Inner_Iterator_183(this);
         }
         // Extra method to make the class IEnumerable as well as IEnumerable<T>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
@@ -406,9 +409,9 @@ namespace Saxon.Hej.om {
             return ((this == obj) || ((((obj is Saxon.Hej.om.NamespaceMap) && Saxon.Ejava.util.Arrays.Equals(prefixes, ((Saxon.Hej.om.NamespaceMap)(obj)).prefixes)) && Saxon.Ejava.util.Arrays.Equals(uris, ((Saxon.Hej.om.NamespaceMap)(obj)).uris))));
         }
     
-        private class Inner_Iterator_180 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> {
+        private class Inner_Iterator_183 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> {
             private readonly NamespaceMap outerInstance;
-            public Inner_Iterator_180(NamespaceMap outerInstance) {
+            public Inner_Iterator_183(NamespaceMap outerInstance) {
                 this.outerInstance = outerInstance;
                 i = 0;
             }

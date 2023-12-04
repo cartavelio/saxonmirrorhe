@@ -23,7 +23,7 @@ namespace Saxon.Hej.value {
         public StringValue(string value) : this (value, Saxon.Hej.type.BuiltInAtomicType.STRING) {
         }
         public StringValue(string value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
-            this.content = Saxon.Hej.str.StringView.of(value).tidy();
+            this.content = Saxon.Hej.str.StringTool.fromCharSequence(value);
         }
         public static Saxon.Hej.value.StringValue makeUntypedAtomic(Saxon.Hej.str.UnicodeString value) {
             return new Saxon.Hej.value.StringValue(value, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC);

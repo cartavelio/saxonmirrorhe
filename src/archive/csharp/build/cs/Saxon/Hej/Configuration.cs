@@ -475,13 +475,17 @@ namespace Saxon.Hej {
             throw new Saxon.Hej.trans.XPathException((("Class "+className)+" is not a TraceListener"));
         }
         public virtual Saxon.Hej.functions.registry.BuiltInFunctionSet getXSLTFunctionSet(int version) {
-            if ((version == 30)) {
-                return Saxon.Hej.functions.registry.XSLT30FunctionSet.getInstance();
+            if ((version == 20)) {
+                return Saxon.Hej.functions.registry.XPath20FunctionSet.getInstance();
             } else {
-                if ((version == 40)) {
-                    throw new Saxon.Ejava.lang.IllegalArgumentException("XSLT 4.0 requires Saxon-PE or higher");
+                if ((((version == 30) || (version == 31)) || (version == 305))) {
+                    return Saxon.Hej.functions.registry.XSLT30FunctionSet.getInstance();
                 } else {
-                    throw new Saxon.Ejava.lang.IllegalArgumentException((("Unsupported XSLT version "+version)+" (must be 30)"));
+                    if ((version == 40)) {
+                        throw new Saxon.Ejava.lang.IllegalArgumentException("XSLT 4.0 requires Saxon-PE or higher");
+                    } else {
+                        throw new Saxon.Ejava.lang.IllegalArgumentException((("Unsupported function library version "+version)+" (must be 20|30|31|40)"));
+                    }
                 }
             }
         }
@@ -503,12 +507,15 @@ namespace Saxon.Hej {
         public virtual Saxon.Hej.functions.registry.BuiltInFunctionSet getXQueryUpdateFunctionSet() {
             return null;
         }
-        public virtual Saxon.Hej.functions.SystemFunction makeSystemFunction(string localName, int arity) {
+        public Saxon.Hej.functions.SystemFunction makeSystemFunction(string localName, int arity, int xpathVersion) {
             try {
-                return getXSLTFunctionSet(30).makeFunction(localName, arity);
+                return getXSLTFunctionSet(((xpathVersion == 31) ? 30 : xpathVersion)).makeFunction(localName, arity);
             } catch (Saxon.Hej.trans.XPathException e) {
                 return null;
             }
+        }
+        public virtual Saxon.Hej.functions.SystemFunction makeSystemFunction40(string localName, int arity) {
+            return makeSystemFunction(localName, arity, 40);
         }
         public void registerExtensionFunction(Saxon.Hej.lib.ExtensionFunctionDefinition function) {
             integratedFunctionLibrary.registerFunction(function);
@@ -517,6 +524,9 @@ namespace Saxon.Hej {
             return integratedFunctionLibrary;
         }
         public Saxon.Hej.functions.FunctionLibraryList getBuiltInExtensionLibraryList(int version) { lock(this) {
+            if ((version != 40)) {
+                version = 31;
+            }
             Saxon.Hej.functions.FunctionLibraryList result = builtInExtensionLibraryList.get(version);
             if ((result == null)) {
                 result = makeBuiltInExtensionLibraryList(version);
@@ -1074,7 +1084,11 @@ namespace Saxon.Hej {
             return xqe;
         }
         public virtual Saxon.Hej.om.GroundedValue makeSequenceExtent(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
         public virtual Saxon.Hej.style.StyleNodeFactory makeStyleNodeFactory(Saxon.Hej.style.Compilation compilation) {
             return new Saxon.Hej.style.StyleNodeFactory(this, compilation);
@@ -1154,7 +1168,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_442(this, source, config);
+                return new Inner_ActiveSource_446(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1258,9 +1272,7 @@ namespace Saxon.Hej {
                             if ((code == Saxon.Hej.lib.FeatureCode.ALLOW_SYNTAX_EXTENSIONS)) {
                                 bool b = requireBoolean(name, value);
                                 defaultXsltCompilerInfo.setXsltVersion((b ? 40 : 30));
-                                if ((defaultStaticQueryContext != null)) {
-                                    defaultStaticQueryContext.setLanguageVersion((b ? 40 : 30));
-                                }
+                                getDefaultStaticQueryContext().setLanguageVersion((b ? 40 : 30));
                             }
                         }
                     }
@@ -1924,9 +1936,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_442 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_446 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_442(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_446(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;

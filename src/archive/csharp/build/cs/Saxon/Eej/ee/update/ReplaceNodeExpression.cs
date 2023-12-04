@@ -162,7 +162,12 @@ namespace Saxon.Eej.ee.update {
                             @out.close();
                             Saxon.Hej.om.NodeInfo root = builder.getCurrentRoot();
                             Saxon.Hej.tree.iter.AxisIterator top = root.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD);
-                            Saxon.Hej.om.GroundedValue extent = Saxon.Hej.om.SequenceTool.toGroundedValue(top);
+                            Saxon.Hej.om.GroundedValue extent;
+                            try {
+                                extent = Saxon.Hej.om.SequenceTool.toGroundedValue(top);
+                            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                throw e.getXPathException();
+                            }
                             int len = extent.getLength();
                             Saxon.Hej.om.NodeInfo[] array = new Saxon.Hej.om.NodeInfo[len];
                             for (int i = 0; (i<len); i++) {

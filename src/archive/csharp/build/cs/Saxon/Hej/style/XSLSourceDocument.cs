@@ -136,7 +136,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = makeExpressionVisitor();
                 action = action.simplify();
                 action = action.typeCheck(visitor, config.makeContextItemStaticInfo(Saxon.Hej.pattern.NodeKindTest.DOCUMENT, false));
-                return config.makeStreamInstruction(href, action, streaming, parseOptions, null, allocateLocation(), makeRetainedStaticContext());
+                return config.makeStreamInstruction(href, action, streaming, parseOptions, null, saveLocation(), makeRetainedStaticContext());
             } catch (Saxon.Hej.trans.XPathException err) {
                 compileError(err);
                 return null;

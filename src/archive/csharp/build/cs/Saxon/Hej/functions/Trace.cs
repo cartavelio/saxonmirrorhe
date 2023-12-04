@@ -57,7 +57,13 @@ namespace Saxon.Hej.functions {
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.Controller controller = context.getController();
-            string label = ((arguments.Length == 1) ? "*" : arguments[1].head().getStringValue());
+            string label = "*";
+            if ((arguments.Length>1)) {
+                Saxon.Hej.om.Item labelArg = arguments[1].head();
+                if ((labelArg != null)) {
+                    label = labelArg.getStringValue();
+                }
+            }
             if (controller.isTracing()) {
                 Saxon.Hej.om.Sequence value = arguments[0].materialize();
                 notifyListener(label, value, context);

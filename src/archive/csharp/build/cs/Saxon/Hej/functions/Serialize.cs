@@ -233,7 +233,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.om.StructuredQName name = new Saxon.Hej.om.StructuredQName("output", Saxon.Hej.om.NamespaceUri.OUTPUT, "serialization-parameters");
             return new Saxon.Hej.serialize.CharacterMap(name, intHashMap);
         }
-        private Saxon.Hej.serialize.SerializationProperties serializationParamsFromMap(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map, Saxon.Hej.expr.XPathContext context) {
+        private Saxon.Hej.serialize.SerializationProperties serializationParamsFromMap(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> map, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.Sequence seqVal;
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
             Saxon.Hej.serialize.CharacterMapIndex charMapIndex = new Saxon.Hej.serialize.CharacterMapIndex();
@@ -371,7 +371,7 @@ namespace Saxon.Hej.functions {
                                 paramMap = paramMap.addEntry(new Saxon.Hej.value.StringValue(s), paramMap.get(k));
                             }
                         }
-                        System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);
+                        System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);
                         @params = serializationParamsFromMap(checkedOptions, context);
                     } else {
                         throw new Saxon.Hej.trans.XPathException((("Second argument to fn:serialize() must either be an element named {"+Saxon.Hej.lib.NamespaceConstant.OUTPUT)+"}serialization-parameters, or a map (if using XPath 3.1)"), "XPTY0004");

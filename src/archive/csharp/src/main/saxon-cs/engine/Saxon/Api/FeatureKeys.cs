@@ -770,7 +770,7 @@ public abstract class FeatureKeys
 
     /// <summary><para>At one time this property controlled how recoverable errors were handled
     ///            (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-    ///            specification, so the property is now deprecated.</para>
+    ///            specification, so the property is deprecated from Saxon 10.0.</para>
     /// </summary>
 
     public const string RECOVERY_POLICY = 
@@ -781,7 +781,7 @@ public abstract class FeatureKeys
 
     /// <summary><para>At one time this property controlled how recoverable errors were handled
     ///                (fatal error, warning, or ignored). XSLT 3.0 has eliminated all recoverable errors from the
-    ///                specification, so the property is now deprecated.</para>
+    ///                specification, so the property is deprecated from Saxon 10.0.</para>
     /// </summary>
 
     public const string RECOVERY_POLICY_NAME = 

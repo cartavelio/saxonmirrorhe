@@ -58,7 +58,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             alternative = new Saxon.Eej.ee.schema.TypeAlternative(config, condition, xpath);
             alternative.setLocator(this);
             alternative.setNamespaceContext(makeNamespaceContext());
-            alternative.setDefaultElementNamespace(defaultNamespace);
+            alternative.setDefaultElementNamespace(defaultNamespaceUri);
             alternative.setBaseURI(getBaseURI());
             alternative.setParameters(parameters);
             string attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "type");

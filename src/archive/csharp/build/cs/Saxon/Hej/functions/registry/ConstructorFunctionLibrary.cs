@@ -12,6 +12,9 @@ namespace Saxon.Hej.functions.registry {
                 return null;
             }
             Saxon.Hej.om.NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
+            if (uri.Equals(Saxon.Hej.om.NamespaceUri.ANONYMOUS)) {
+                return null;
+            }
             string localName = functionName.getComponentName().getLocalPart();
             Saxon.Hej.type.SchemaType type = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", uri, localName));
             if (((type == null) || type.isComplexType())) {
@@ -54,9 +57,32 @@ namespace Saxon.Hej.functions.registry {
             string localName = functionName.getComponentName().getLocalPart();
             bool builtInNamespace = uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA);
             if (builtInNamespace) {
-                if ((functionName.getArity() != 1)) {
-                    reasons.Add("A constructor function must have exactly one argument");
-                    return null;
+                int languageVersion = env.getXPathVersion();
+                if (((languageVersion>=40) && (arguments.Length == 0))) {
+                    Saxon.Hej.trans.SymbolicName.F f1 = new Saxon.Hej.trans.SymbolicName.F(functionName.getComponentName(), 1);
+                    return bind(f1, new Saxon.Hej.expr.Expression[]{new Saxon.Hej.expr.ContextItemExpression()}, keywords, env, reasons);
+                } else {
+                    if ((functionName.getArity() != 1)) {
+                        reasons.Add("A constructor function must have exactly one argument");
+                        return null;
+                    }
+                }
+                if (((keywords != null) && !(keywords.Count==0))) {
+                    if ((keywords.Count != 1)) {
+                        reasons.Add("The keyword for the sole argument of a constructor function is 'value'");
+                        return null;
+                    }
+                    foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.StructuredQName,int> kw in keywords) {
+                        if (kw.Key.getEQName().Equals("Q{}value")) {
+                            if ((kw.Value != 0)) {
+                                reasons.Add("The 'value' keyword in a constructor function call must be the first and only argument");
+                                return null;
+                            }
+                        } else {
+                            reasons.Add((("The argument keyword '"+kw.Key.getEQName())+" is not allowed in a constructor function call"));
+                            return null;
+                        }
+                    }
                 }
                 Saxon.Hej.type.SimpleType type = Saxon.Hej.type.Type.getBuiltInSimpleType(uri, localName);
                 if ((type != null)) {

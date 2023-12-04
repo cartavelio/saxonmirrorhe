@@ -92,7 +92,7 @@ namespace Saxon.Hej.expr.instruct {
         private class TraceExpressionElaborator : Saxon.Hej.expr.elab.FallbackElaborator {
             public override Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthWhenAbsent) {
                 Saxon.Hej.expr.instruct.TraceExpression expr = (Saxon.Hej.expr.instruct.TraceExpression)(getExpression());
-                Saxon.Hej.expr.elab.StringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForString(false);
+                Saxon.Hej.expr.elab.StringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForString(zeroLengthWhenAbsent);
                 return context => {
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));

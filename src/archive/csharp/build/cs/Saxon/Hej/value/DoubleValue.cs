@@ -62,7 +62,8 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.value.FloatingPointConverter.convertDouble(value, true);
         }
         public static Saxon.Hej.str.UnicodeString doubleToString(double value) {
-            return Saxon.Hej.value.FloatingPointConverter.convertDouble(value, false);
+            double d = System.Math.Abs(value);
+            return Saxon.Hej.value.FloatingPointConverter.convertDouble(value, ((d != 0) && (((d>=1000000) || (d<0.000001)))));
         }
         public override Saxon.Hej.value.NumericValue negate() {
             return new Saxon.Hej.value.DoubleValue(-(value));

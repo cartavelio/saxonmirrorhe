@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.instruct {
     public class TemplateRule : Saxon.Hej.trans.rules.RuleTarget, Saxon.Hej.s9api.Location, Saxon.Hej.expr.ExpressionOwner, Saxon.Hej.trace.TraceableComponent {
+        protected internal Saxon.Hej.trans.Mode mode;
         protected internal Saxon.Hej.expr.Expression body;
         protected internal Saxon.Hej.expr.elab.PushEvaluator bodyEvaluator;
         protected internal Saxon.Hej.pattern.Pattern matchPattern;
-        private bool _hasRequiredParams;
         private Saxon.Hej.value.SequenceType requiredType;
         private bool declaredStreamable;
         private Saxon.Hej.type.ItemType requiredContextItemType = Saxon.Hej.type.AnyItemType.getInstance();
@@ -17,11 +17,21 @@ namespace Saxon.Hej.expr.instruct {
         private int lineNumber;
         private int columnNumber;
         private readonly System.Collections.Generic.IList<Saxon.Hej.trans.rules.Rule> rules = new System.Collections.Generic.List<Saxon.Hej.trans.rules.Rule>();
-        protected internal System.Collections.Generic.IList<Saxon.Hej.expr.instruct.TemplateRule> slaveCopies = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.TemplateRule>();
         public TemplateRule()  {
         }
         public void setMatchPattern(Saxon.Hej.pattern.Pattern pattern) {
+            if ((matchPattern != pattern)) {
+                foreach (Saxon.Hej.trans.rules.Rule r in rules) {
+                    r.setPattern(pattern);
+                }
+            }
             matchPattern = pattern;
+        }
+        public void setMode(Saxon.Hej.trans.Mode m) {
+            this.mode = m;
+        }
+        public Saxon.Hej.trans.Mode getMode() {
+            return mode;
         }
         public Saxon.Hej.expr.Expression getBody() {
             return body;
@@ -53,12 +63,6 @@ namespace Saxon.Hej.expr.instruct {
         }
         public Saxon.Hej.expr.instruct.SlotManager getStackFrameMap() {
             return stackFrameMap;
-        }
-        public void setHasRequiredParams(bool has) {
-            _hasRequiredParams = has;
-        }
-        public bool hasRequiredParams() {
-            return _hasRequiredParams;
         }
         public void setRequiredType(Saxon.Hej.value.SequenceType type) {
             requiredType = type;
@@ -129,7 +133,7 @@ namespace Saxon.Hej.expr.instruct {
                 }
             }
         }
-        public virtual void prepareInitializer(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.om.StructuredQName modeName) {
+        public virtual void prepareInitializer(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
         }
         public virtual void initialize() {
         }
@@ -198,20 +202,6 @@ namespace Saxon.Hej.expr.instruct {
                 presenter.emitAttribute("streamable", "1");
             }
         }
-        public virtual Saxon.Hej.expr.instruct.TemplateRule copy() {
-            Saxon.Hej.expr.instruct.TemplateRule tr = new Saxon.Hej.expr.instruct.TemplateRule();
-            if (((body == null) || (matchPattern == null))) {
-                slaveCopies.Add(tr);
-            } else {
-                copyTo(tr);
-            }
-            return tr;
-        }
-        public void updateSlaveCopies() {
-            foreach (Saxon.Hej.expr.instruct.TemplateRule tr in slaveCopies) {
-                copyTo(tr);
-            }
-        }
         protected internal void copyTo(Saxon.Hej.expr.instruct.TemplateRule tr) {
             if ((body != null)) {
                 tr.body = body.copy(new Saxon.Hej.expr.parser.RebindingMap());
@@ -219,7 +209,6 @@ namespace Saxon.Hej.expr.instruct {
             if ((matchPattern != null)) {
                 tr.matchPattern = matchPattern.copy(new Saxon.Hej.expr.parser.RebindingMap());
             }
-            tr._hasRequiredParams = _hasRequiredParams;
             tr.requiredType = requiredType;
             tr.declaredStreamable = declaredStreamable;
             tr.requiredContextItemType = requiredContextItemType;

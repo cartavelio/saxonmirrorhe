@@ -397,12 +397,10 @@ namespace Saxon.Hej.trans {
     Saxon.Hej.type.ItemType toType = loader.parseAlphaCodeForItemType(element, "to");
     Saxon.Hej.expr.AtomicSequenceConverter asc = new Saxon.Hej.expr.AtomicSequenceConverter(body, (Saxon.Hej.type.PlainType)(toType));
     string flags = element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "flags");
+    bool allow40 = (loader.topLevelPackage.getHostLanguageVersion()>=40);
     if ("p".Equals(flags)) {
-        if (toType.Equals(Saxon.Hej.type.BuiltInAtomicType.DOUBLE)) {
-            asc.setConverter(new Saxon.Hej.type.Converter.PromoterToDouble());
-        } else {
-            asc.setConverter(new Saxon.Hej.type.Converter.PromoterToFloat());
-        }
+        Saxon.Hej.type.Converter promoter = Saxon.Hej.expr.parser.TypeChecker.makePromotingConverter(fromType, toType.getPrimitiveType(), loader.config.getConversionRules(), allow40);
+        asc.setConverter(promoter);
     } else {
         if ("d".Equals(flags)) {
             asc.setConverter(new Saxon.Hej.type.Converter.DownCastingConverter((Saxon.Hej.type.AtomicType)(toType), loader.config.getConversionRules()));
@@ -819,8 +817,8 @@ namespace Saxon.Hej.trans {
                 if ("ending".Equals(algorithmAtt)) {
                     algo = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ENDING;
                 } else {
-                    if ("breaking".Equals(algorithmAtt)) {
-                        algo = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BREAKING_WHEN;
+                    if ("split".Equals(algorithmAtt)) {
+                        algo = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_SPLIT_WHEN;
                     } else {
                         throw new Saxon.Ejava.lang.AssertionError(("Unknown grouping algorithm: "+algorithmAtt));
                     }
@@ -833,7 +831,7 @@ namespace Saxon.Hej.trans {
     bool inFork = ((flags != null) && flags.Contains("k"));
     Saxon.Hej.expr.Expression select = loader.getExpressionWithRole(element, "select");
     Saxon.Hej.expr.Expression key;
-    if ((((algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY) || (algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ADJACENT)) || (algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BREAKING_WHEN))) {
+    if ((((algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BY) || (algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ADJACENT)) || (algo == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_SPLIT_WHEN))) {
         key = loader.getExpressionWithRole(element, "key");
     } else {
         key = loader.getPatternWithRole(element, "match");
@@ -2677,19 +2675,7 @@ namespace Saxon.Hej.trans {
                     nsAtt = Saxon.Hej.tree.util.Navigator.getInheritedAttributeValue(element, Saxon.Hej.om.NamespaceUri.NULL, "ns");
                 }
                 if (((nsAtt != null) && !(nsAtt.Length==0))) {
-                    string[] namespaces = System.Text.RegularExpressions.Regex.Split(nsAtt, " ");
-                    foreach (string ns in namespaces) {
-                        int eq = ns.IndexOf('=');
-                        if ((eq<0)) {
-                            throw new Saxon.Ejava.lang.IllegalStateException(("ns="+nsAtt));
-                        }
-                        string prefix = ns.Substring(0, eq - 0);
-                        string uri = ns.Substring((eq+1));
-                        if (uri.Equals("~")) {
-                            uri = Saxon.Hej.lib.NamespaceConstant.getUriForConventionalPrefix(prefix);
-                        }
-                        rsc.declareNamespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri));
-                    }
+                    rsc.setNamespaces(fromExportedNamespaces(nsAtt));
                 }
                 if ((defaultElementNS == null)) {
                     defaultElementNS = Saxon.Hej.tree.util.Navigator.getInheritedAttributeValue(element, Saxon.Hej.om.NamespaceUri.NULL, "defaultElementNS");
@@ -2702,6 +2688,25 @@ namespace Saxon.Hej.trans {
             } else {
                 return contextStack.Peek();
             }
+        }
+        public static Saxon.Hej.om.NamespaceMap fromExportedNamespaces(string nsAtt) {
+            Saxon.Hej.om.NamespaceMap map = Saxon.Hej.om.NamespaceMap.emptyMap();
+            if ((nsAtt != null)) {
+                string[] namespaces = System.Text.RegularExpressions.Regex.Split(nsAtt, " ");
+                foreach (string ns in namespaces) {
+                    int eq = ns.IndexOf('=');
+                    if ((eq<0)) {
+                        throw new Saxon.Ejava.lang.IllegalStateException(("ns="+nsAtt));
+                    }
+                    string prefix = ns.Substring(0, eq - 0);
+                    string uri = ns.Substring((eq+1));
+                    if (uri.Equals("~")) {
+                        uri = Saxon.Hej.lib.NamespaceConstant.getUriForConventionalPrefix(prefix);
+                    }
+                    map = map.put(prefix, Saxon.Hej.om.NamespaceUri.of(uri));
+                }
+            }
+            return map;
         }
         private Saxon.Hej.pattern.Pattern getFirstChildPattern(Saxon.Hej.om.NodeInfo parent) {
             Saxon.Hej.om.NodeInfo node = ((/*1430*/Saxon.Hej.om.NodeInfo)parent.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.ELEMENT).next());

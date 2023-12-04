@@ -10,6 +10,7 @@ namespace Saxon.Hej.s9api {
         string getMessage();
         Saxon.Hej.s9api.Location getLocation();
         string getModuleUri();
+        Saxon.Hej.expr.Expression getFailingExpression();
         bool isWarning();
         string getPath();
         System.Exception getCause();

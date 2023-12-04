@@ -58,7 +58,7 @@ namespace Saxon.Eej.ee.optim {
             }
             return null;
         }
-        public Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, bool firstOnly, Saxon.Hej.lib.StringCollator collator, Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, Saxon.Hej.lib.StringCollator collator, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.z.IntSet selectedItems = null;
             Saxon.Hej.lib.ConversionRules rules = context.getConfiguration().getConversionRules();
             int implicitTimezone = context.getImplicitTimezone();
@@ -124,14 +124,7 @@ namespace Saxon.Eej.ee.optim {
                     while (ii.hasNext()) {
                         int type = ii.next();
                         Saxon.Hej.type.BuiltInAtomicType requiredType = (Saxon.Hej.type.BuiltInAtomicType)(Saxon.Hej.type.BuiltInType.getSchemaType(type));
-                        Saxon.Hej.value.AtomicValue conv;
-                        Saxon.Hej.type.ConversionResult result = Saxon.Hej.type.Converter.convert(value, requiredType, rules);
-                        if ((result is Saxon.Hej.type.ValidationFailure)) {
-                            string msg = ((("Failure converting untypedAtomic value to "+requiredType.getDisplayName())+" during comparison operation. ")+((Saxon.Hej.type.ValidationFailure)(result)).getMessage());
-                            throw new Saxon.Hej.trans.XPathException(msg, "FORG0001").withXPathContext(context);
-                        } else {
-                            conv = (Saxon.Hej.value.AtomicValue)(result);
-                        }
+                        Saxon.Hej.value.AtomicValue conv = Saxon.Hej.type.Converter.convert(value, requiredType, rules);
                         Saxon.Hej.z.IntSet list = Saxon.Impl.Helpers.MapUtils.Get(vi.index, conv.getXPathMatchKey(collator, implicitTimezone));
                         if ((list != null)) {
                             if ((selectedItems == null)) {
@@ -149,12 +142,6 @@ namespace Saxon.Eej.ee.optim {
                         } else {
                             selectedItems = selectedItems.union(list);
                         }
-                    }
-                }
-                if (((firstOnly && (selectedItems != null)) && !(selectedItems.isEmpty()))) {
-                    Saxon.Hej.z.IntIterator it = selectedItems.iterator();
-                    if (it.hasNext()) {
-                        return singletonIterator(it.next());
                     }
                 }
             }

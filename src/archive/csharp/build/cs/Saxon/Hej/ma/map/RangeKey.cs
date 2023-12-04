@@ -59,7 +59,7 @@ namespace Saxon.Hej.ma.map {
         public override Saxon.Hej.ma.map.MapItem addEntry(Saxon.Hej.value.AtomicValue key, Saxon.Hej.om.GroundedValue value) {
             return Saxon.Impl.DataModel.ImmMap.copy(this).addEntry(key, value);
         }
-        public override bool conforms(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
+        public override bool conforms(Saxon.Hej.type.PlainType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
             Saxon.Hej.tree.iter.AtomicIterator keyIter = keys();
             Saxon.Hej.value.AtomicValue key;
             while (((key = ((/*1430*/Saxon.Hej.value.AtomicValue)keyIter.next())) != null)) {

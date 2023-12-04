@@ -9,7 +9,7 @@ namespace Saxon.Hej.om {
         private System.Collections.Generic.IDictionary<string,System.Object> userData;
         private long documentNumber = -1;
         private Saxon.Hej.om.SpaceStrippingRule spaceStrippingRule = Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance();
-        private Saxon.Hej.om.Durability durability;
+        private Saxon.Hej.om.Durability durability = /*explicit enum*/ Saxon.Hej.om.Durability.UNDEFINED;
         public GenericTreeInfo(Saxon.Hej.Configuration config)  {
             this.config = config;
         }
@@ -61,8 +61,12 @@ namespace Saxon.Hej.om {
         public void setDurability(Saxon.Hej.om.Durability durability) {
             this.durability = durability;
         }
-        public Saxon.Hej.om.Durability getDurability() {
-            return durability;
+        public virtual Saxon.Hej.om.Durability getDurability() {
+            if ((durability == /*explicit enum*/ Saxon.Hej.om.Durability.UNDEFINED)) {
+                return (isMutable() ? Saxon.Hej.om.Durability.MUTABLE : Saxon.Hej.om.Durability.LASTING);
+            } else {
+                return durability;
+            }
         }
         public bool isMutable() {
             return (durability == Saxon.Hej.om.Durability.MUTABLE);

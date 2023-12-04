@@ -41,14 +41,22 @@ namespace Saxon.Hej.expr {
                 }
             }
             if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
-                return new Saxon.Hej.expr.Literal(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+                try {
+                    return new Saxon.Hej.expr.Literal(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             return this;
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             getOperand().optimize(visitor, contextItemType);
             if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
-                return new Saxon.Hej.expr.Literal(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+                try {
+                    return new Saxon.Hej.expr.Literal(Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             if ((getBaseExpression() is Saxon.Hej.ma.arrays.SquareArrayConstructor)) {
                 System.Collections.Generic.IList<Saxon.Hej.expr.Expression> children = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>();

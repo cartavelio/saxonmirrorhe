@@ -30,6 +30,7 @@ namespace Saxon.Hej.query {
         private int constructionMode = Saxon.Hej.lib.Validation.PRESERVE;
         private Saxon.Hej.om.NamespaceUri defaultFunctionNamespace;
         private Saxon.Hej.om.NamespaceUri defaultElementNamespace;
+        private bool fixedDefaultElementNamespace;
         private bool preserveSpace = false;
         private bool defaultEmptyLeast = true;
         private string defaultCollationName;
@@ -125,7 +126,6 @@ namespace Saxon.Hej.query {
                 codeInjector = sqc.getCodeInjector();
                 optimizerOptions = sqc.getOptimizerOptions();
             }
-            initializeFunctionLibraries(sqc);
         }
         public static Saxon.Hej.query.QueryModule makeQueryModule(string baseURI, Saxon.Hej.expr.instruct.Executable executable, Saxon.Hej.query.QueryModule importer, string query, Saxon.Hej.om.NamespaceUri namespaceURI) {
             Saxon.Ejava.util.Objects.requireNonNull(baseURI, "Base URI of XQuery module must not be null");
@@ -160,7 +160,8 @@ namespace Saxon.Hej.query {
             }
             return module;
         }
-        private void initializeFunctionLibraries(Saxon.Hej.query.StaticQueryContext sqc) {
+        public void initializeFunctionLibraries() {
+            Saxon.Hej.query.StaticQueryContext sqc = userQueryContext;
             Saxon.Hej.Configuration config = getConfiguration();
             if (isTopLevelModule()) {
                 globalFunctionLibrary = new Saxon.Hej.query.XQueryFunctionLibrary(config);
@@ -366,7 +367,7 @@ namespace Saxon.Hej.query {
             foreach (System.Collections.Generic.IEnumerable<Saxon.Hej.expr.instruct.GlobalVariable> iter in iters) {
                 foreach (Saxon.Hej.expr.instruct.GlobalVariable var in iter) {
                     if (!(varDefinitions.Contains(var))) {
-                        int slot = globalVariableMap.allocateSlotNumber(var.getVariableQName());
+                        int slot = globalVariableMap.allocateSlotNumber(var.getVariableQName(), null);
                         var.compile(getExecutable(), slot);
                         varDefinitions.Add(var);
                     }
@@ -634,8 +635,9 @@ namespace Saxon.Hej.query {
         public Saxon.Hej.om.NamespaceUri getDefaultElementNamespace() {
             return checkURIForPrefix("");
         }
-        public void setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri uri) {
+        public void setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri uri, bool isFixedDefault) {
             defaultElementNamespace = uri;
+            fixedDefaultElementNamespace = isFixedDefault;
         }
         public Saxon.Hej.om.NamespaceUri getDefaultFunctionNamespace() {
             return defaultFunctionNamespace;

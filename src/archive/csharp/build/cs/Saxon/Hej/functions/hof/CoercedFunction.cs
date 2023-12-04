@@ -40,7 +40,7 @@ namespace Saxon.Hej.functions.hof {
             return targetFunction.getFunctionName();
         }
         public override string getDescription() {
-            return ("coerced "+targetFunction.getDescription());
+            return (((targetFunction.getDescription()+" (used where the required type is ")+requiredType)+")");
         }
         public override int getArity() {
             return targetFunction.getArity();
@@ -68,12 +68,12 @@ namespace Saxon.Hej.functions.hof {
             if (req.getResultType().matches(rawResult, th)) {
                 return rawResult;
             } else {
-                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, targetFunction.getDescription(), 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, getDescription(), 0);
                 return th.applyFunctionConversionRules(rawResult, req.getResultType(), role, Saxon.Hej.expr.parser.Loc.NONE);
             }
         }
         private static string wrongArityMessage(Saxon.Hej.om.FunctionItem supplied, int expected) {
-            return ((((("The supplied function ("+supplied.getDescription())+") has ")+Saxon.Hej.expr.FunctionCall.pluralArguments(supplied.getArity()))+" - expected ")+expected);
+            return ((((("The supplied function ("+supplied.getDescription())+") has ")+Saxon.Hej.expr.FunctionCall.plural(supplied.getArity(), "parameter"))+" - expected a function with ")+Saxon.Hej.expr.FunctionCall.plural(expected, "parameter"));
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("coercedFn");

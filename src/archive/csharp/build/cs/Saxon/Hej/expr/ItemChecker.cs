@@ -52,20 +52,16 @@ namespace Saxon.Hej.expr {
                 return operand;
             } else {
                 if ((relation == Saxon.Hej.type.Affinity.DISJOINT)) {
-                    if ((requiredItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.STRING) && th.isSubType(supplied, Saxon.Hej.type.BuiltInAtomicType.ANY_URI))) {
-                        return operand;
-                    } else {
-                        if (Saxon.Hej.value.Cardinality.allowsZero(card)) {
-                            if (!(((operand is Saxon.Hej.expr.Literal)))) {
-                                Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                                string message = role.composeErrorMessage(requiredItemType, operand, th);
-                                visitor.getStaticContext().issueWarning(("The only value that can pass type-checking is an empty sequence. "+message), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
-                            }
-                        } else {
+                    if (Saxon.Hej.value.Cardinality.allowsZero(card)) {
+                        if (!(((operand is Saxon.Hej.expr.Literal)))) {
                             Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                             string message = role.composeErrorMessage(requiredItemType, operand, th);
-                            throw new Saxon.Hej.trans.XPathException(message).withErrorCode(role.getErrorCode()).withLocation(this.getLocation()).asTypeErrorIf(role.isTypeError());
+                            visitor.getStaticContext().issueWarning(("The only value that can pass type-checking is an empty sequence. "+message), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
                         }
+                    } else {
+                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
+                        string message = role.composeErrorMessage(requiredItemType, operand, th);
+                        throw new Saxon.Hej.trans.XPathException(message).withErrorCode(role.getErrorCode()).withLocation(this.getLocation()).asTypeErrorIf(role.isTypeError());
                     }
                 }
             }
@@ -96,20 +92,16 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
-        public Saxon.Hej.om.SequenceIterator checkSequence(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.XPathContext context) {
+        private Saxon.Hej.om.SequenceIterator checkSequence(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.Expression baseExpr = getBaseExpression();
             Saxon.Hej.type.TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             Saxon.Ejava.util.function.Consumer<Saxon.Hej.om.Item> checker = item => {
-                if (requiredItemType.matches(item, th)) {
-                } else {
-                    if ((requiredItemType.getUType().subsumes(Saxon.Hej.type.UType.STRING) && Saxon.Hej.type.BuiltInAtomicType.ANY_URI.matches(item, th))) {
-                    } else {
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                        string message = role.composeErrorMessage(requiredItemType, item, th);
-                        string errorCode = role.getErrorCode();
-                        Saxon.Hej.trans.XPathException te = new Saxon.Hej.trans.XPathException(message, errorCode).withFailingExpression(baseExpr).withLocation(baseExpr.getLocation()).asTypeErrorIf(!("XPDY0050".Equals(errorCode)));
-                        throw new Saxon.Hej.trans.UncheckedXPathException(te);
-                    }
+                if (!(requiredItemType.matches(item, th))) {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
+                    string message = role.composeErrorMessage(requiredItemType, item, th);
+                    string errorCode = role.getErrorCode();
+                    Saxon.Hej.trans.XPathException te = new Saxon.Hej.trans.XPathException(message, errorCode).withFailingExpression(baseExpr).withLocation(baseExpr.getLocation()).asTypeErrorIf(!("XPDY0050".Equals(errorCode)));
+                    throw new Saxon.Hej.trans.UncheckedXPathException(te);
                 }
             } ;
             return new Saxon.Hej.expr.ItemCheckingIterator(@base, checker);
@@ -125,19 +117,15 @@ namespace Saxon.Hej.expr {
             if (requiredItemType.matches(item, th)) {
                 return item;
             } else {
-                if ((requiredItemType.getUType().subsumes(Saxon.Hej.type.UType.STRING) && ((Saxon.Hej.type.BuiltInAtomicType.ANY_URI.matches(item, th) || Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC.matches(item, th))))) {
-                    return item;
+                Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
+                string message = role.composeErrorMessage(requiredItemType, item, th);
+                string errorCode = role.getErrorCode();
+                if ("XPDY0050".Equals(errorCode)) {
+                    dynamicError(message, errorCode, context);
                 } else {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                    string message = role.composeErrorMessage(requiredItemType, item, th);
-                    string errorCode = role.getErrorCode();
-                    if ("XPDY0050".Equals(errorCode)) {
-                        dynamicError(message, errorCode, context);
-                    } else {
-                        typeError(message, errorCode, context);
-                    }
-                    return null;
+                    typeError(message, errorCode, context);
                 }
+                return null;
             }
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {

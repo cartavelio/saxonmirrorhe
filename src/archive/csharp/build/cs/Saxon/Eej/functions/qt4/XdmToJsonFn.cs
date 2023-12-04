@@ -27,7 +27,7 @@ namespace Saxon.Eej.functions.qt4 {
             Saxon.Eej.functions.qt4.XdmToJsonFn.JsonConversionContext jcc = new Saxon.Eej.functions.qt4.XdmToJsonFn.JsonConversionContext();
             jcc.config = context.getConfiguration();
             jcc.elementNameStack.Push(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "dummy"));
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.Sequence>();
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>();
             bool indent = false;
             bool escapeSolidus = false;
             bool uniform = false;
@@ -52,7 +52,7 @@ namespace Saxon.Eej.functions.qt4 {
             emitSequence(val, jcc, false);
             return new Saxon.Hej.value.StringValue(builder.toUnicodeString());
         }
-        private void initLayoutMap(Saxon.Eej.functions.qt4.XdmToJsonFn.JsonConversionContext jcc, System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions, Saxon.Hej.Configuration config) {
+        private void initLayoutMap(Saxon.Eej.functions.qt4.XdmToJsonFn.JsonConversionContext jcc, System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions, Saxon.Hej.Configuration config) {
             Saxon.Hej.ma.map.MapItem val = (Saxon.Hej.ma.map.MapItem)(Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "layouts").materialize());
             foreach (Saxon.Hej.ma.map.KeyValuePair pair in val.keyValuePairs()) {
                 Saxon.Hej.om.StructuredQName qn = ((Saxon.Hej.value.QNameValue)(pair.key)).getStructuredQName();

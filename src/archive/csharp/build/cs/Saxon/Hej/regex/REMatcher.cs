@@ -316,7 +316,7 @@ namespace Saxon.Hej.regex {
             result = result.concat(@in.substring(pos, len));
             return result.economize();
         }
-        public Saxon.Hej.str.UnicodeString replaceWith(Saxon.Hej.str.UnicodeString @in, System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString> replacer) {
+        public Saxon.Hej.str.UnicodeString replaceWith(Saxon.Hej.str.UnicodeString @in, System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString[],Saxon.Hej.str.UnicodeString> replacer) {
             Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
             int pos = 0;
             int len = @in.length32();
@@ -325,7 +325,15 @@ namespace Saxon.Hej.regex {
                     sb.append(@in.codePointAt(i));
                 }
                 Saxon.Hej.str.UnicodeString matchingSubstring = @in.substring(getParenStart(0), getParenEnd(0));
-                Saxon.Hej.str.UnicodeString replacement = replacer(matchingSubstring);
+                int nrOfGroups = (program.maxParens-1);
+                Saxon.Hej.str.UnicodeString[] groups = new Saxon.Hej.str.UnicodeString[nrOfGroups];
+                for (int i = 0; (i<nrOfGroups); i++) {
+                    groups[i] = getParen((i+1));
+                    if ((groups[i] == null)) {
+                        groups[i] = Saxon.Hej.str.EmptyUnicodeString.getInstance();
+                    }
+                }
+                Saxon.Hej.str.UnicodeString replacement = replacer(matchingSubstring, groups);
                 Saxon.Hej.z.IntIterator iter = replacement.codePoints();
                 while (iter.hasNext()) {
                     sb.append(iter.next());

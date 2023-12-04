@@ -39,6 +39,7 @@ namespace Saxon.Api {
         private readonly StandardMessageHandler _standardMessageHandler;
         private ResourceResolver textResolver;
         private ResourceResolver xmlDocumentResolver;
+        private ErrorReporter errorReporter;
 
         // internal constructor
 
@@ -284,7 +285,19 @@ namespace Saxon.Api {
             }
             get => traceFunctionDestination;
         }
+        
+        /// <summary>
+        /// The <code>ErrorReporter</code> to be used at run-time to notify any dynamic
+        /// errors that occur.
+        /// </summary>
 
+        public ErrorReporter ErrorReporter {
+            get => errorReporter;
+            set {
+                errorReporter = value;
+                s9Transformer.setErrorReporter(new ErrorReporterWrapper(value));
+            }
+        }
 
         /// <summary>
         /// Set the value of a stylesheet parameter.

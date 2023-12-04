@@ -14,7 +14,16 @@ namespace Saxon.Hej.functions {
         }
         public static Saxon.Hej.functions.SystemFunction makeFunction(string name, Saxon.Hej.expr.parser.RetainedStaticContext rsc, int arity) {
             Saxon.Ejava.util.Objects.requireNonNull(rsc);
-            Saxon.Hej.functions.SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity);
+            Saxon.Hej.functions.SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity, rsc.getPackageData().getHostLanguageVersion());
+            if ((fn == null)) {
+                throw new Saxon.Ejava.lang.IllegalArgumentException(((name+"#")+arity));
+            }
+            fn.setRetainedStaticContext(rsc);
+            return fn;
+        }
+        public static Saxon.Hej.functions.SystemFunction makeFunction40(string name, Saxon.Hej.expr.parser.RetainedStaticContext rsc, int arity) {
+            Saxon.Ejava.util.Objects.requireNonNull(rsc);
+            Saxon.Hej.functions.SystemFunction fn = rsc.getConfiguration().makeSystemFunction40(name, arity);
             if ((fn == null)) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException(((name+"#")+arity));
             }
@@ -94,7 +103,7 @@ namespace Saxon.Hej.functions {
                 usages = details.usage;
             }
             try {
-                for (int i = 0; (i<usages.Length); i++) {
+                for (int i = 0; (i<roles.Length); i++) {
                     roles[i] = new Saxon.Hej.expr.OperandRole(0, usages[i], getRequiredType(i));
                 }
             } catch (System.IndexOutOfRangeException e) {

@@ -7,7 +7,7 @@ namespace Saxon.Eej.ee.schema {
         private readonly string conditionText;
         private Saxon.Hej.om.NamespaceResolver namespaceContext;
         private string baseURI;
-        private string defaultNamespace;
+        private Saxon.Hej.om.NamespaceUri defaultNamespace;
         private System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.sxpath.XPathVariable> declaredParams;
         private Saxon.Eej.ee.schema.TypeReference typeReference;
         public TypeAlternative(Saxon.Eej.config.EnterpriseConfiguration config, Saxon.Hej.sxpath.XPathExpression condition, string text)  {
@@ -21,10 +21,10 @@ namespace Saxon.Eej.ee.schema {
         public string getConditionText() {
             return conditionText;
         }
-        public void setDefaultElementNamespace(string @namespace) {
+        public void setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
             defaultNamespace = @namespace;
         }
-        public string getDefaultElementNamespace() {
+        public Saxon.Hej.om.NamespaceUri getDefaultElementNamespace() {
             return defaultNamespace;
         }
         public void setNamespaceContext(Saxon.Hej.om.NamespaceResolver resolver) {
@@ -67,7 +67,7 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitNamespaceContext(getNamespaceContext());
             serializer.emitAttribute("test", ((conditionText == null) ? "true()" : conditionText));
             serializer.emitAttribute("type", serializer.getTypeLink((Saxon.Hej.type.SchemaType)(typeReference.getTarget())));
-            serializer.emitAttribute("defaultNamespace", getDefaultElementNamespace());
+            serializer.emitAttribute("defaultNamespace", getDefaultElementNamespace().ToString());
             serializer.emitAttribute("xml:base", getBaseURI());
             serializer.endElement();
         }

@@ -28,6 +28,9 @@ namespace Saxon.Hej.type {
         public virtual bool isAlwaysSuccessful() {
             return false;
         }
+        public virtual bool isPromoter() {
+            return false;
+        }
         public virtual Saxon.Hej.type.Converter setNamespaceResolver(Saxon.Hej.om.NamespaceResolver resolver) {
             return this;
         }
@@ -399,6 +402,8 @@ namespace Saxon.Hej.type {
         
         }
         public class PromoterToDouble : Saxon.Hej.type.Converter {
+            public PromoterToDouble(Saxon.Hej.lib.ConversionRules rules) : base (rules) {
+            }
             private Saxon.Hej.type.StringConverter stringToDouble = null;
             public override Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {
                 if ((input is Saxon.Hej.value.DoubleValue)) {
@@ -420,10 +425,15 @@ namespace Saxon.Hej.type {
                     }
                 }
             }
+            public override bool isPromoter() {
+                return true;
+            }
         
         }
         public class PromoterToFloat : Saxon.Hej.type.Converter {
             private Saxon.Hej.type.StringConverter stringToFloat = null;
+            public PromoterToFloat(Saxon.Hej.lib.ConversionRules rules) : base (rules) {
+            }
             public override Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {
                 if ((input is Saxon.Hej.value.FloatValue)) {
                     return input;
@@ -449,6 +459,91 @@ namespace Saxon.Hej.type {
                         }
                     }
                 }
+            }
+            public override bool isPromoter() {
+                return true;
+            }
+        
+        }
+        public class PromoterToString : Saxon.Hej.type.Converter {
+            public static Saxon.Hej.type.Converter.PromoterToString INSTANCE = new Saxon.Hej.type.Converter.PromoterToString();
+            public override Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {
+                switch (input.getPrimitiveType().getFingerprint()) {
+                  case Saxon.Hej.om.StandardNames.XS_STRING:
+                    return input;
+                  case Saxon.Hej.om.StandardNames.XS_ANY_URI:
+                  case Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC:
+                    return new Saxon.Hej.value.StringValue(input.getUnicodeStringValue());
+                  default:
+                    Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure(("Required type is xs:string; supplied value is "+Saxon.Hej.trans.Err.depict(input)));
+                    err.setErrorCode("XPTY0004");
+                    return err;
+                }
+            }
+            public override bool isPromoter() {
+                return true;
+            }
+        
+        }
+        public class PromoterToAnyURI : Saxon.Hej.type.Converter {
+            public static Saxon.Hej.type.Converter.PromoterToAnyURI INSTANCE = new Saxon.Hej.type.Converter.PromoterToAnyURI();
+            public override Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {
+                switch (input.getPrimitiveType().getFingerprint()) {
+                  case Saxon.Hej.om.StandardNames.XS_ANY_URI:
+                    return input;
+                  case Saxon.Hej.om.StandardNames.XS_STRING:
+                  case Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC:
+                    return new Saxon.Hej.value.AnyURIValue(input.getUnicodeStringValue());
+                  default:
+                    Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure(("Required type is xs:anyURI; supplied value is "+Saxon.Hej.trans.Err.depict(input)));
+                    err.setErrorCode("XPTY0004");
+                    return err;
+                }
+            }
+            public override bool isPromoter() {
+                return true;
+            }
+        
+        }
+        public class PromoterToHexBinary : Saxon.Hej.type.Converter {
+            public static Saxon.Hej.type.Converter.PromoterToHexBinary INSTANCE = new Saxon.Hej.type.Converter.PromoterToHexBinary();
+            public override Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {
+                switch (input.getPrimitiveType().getFingerprint()) {
+                  case Saxon.Hej.om.StandardNames.XS_HEX_BINARY:
+                    return input;
+                  case Saxon.Hej.om.StandardNames.XS_BASE64_BINARY:
+                    return new Saxon.Hej.value.HexBinaryValue(((Saxon.Hej.value.Base64BinaryValue)(input)).getBinaryValue());
+                  case Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC:
+                    return Saxon.Hej.type.StringConverter.StringToHexBinary.INSTANCE.convertString(input.getUnicodeStringValue());
+                  default:
+                    Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure(("Required type is xs:hexBinary; supplied value is "+Saxon.Hej.trans.Err.depict(input)));
+                    err.setErrorCode("XPTY0004");
+                    return err;
+                }
+            }
+            public override bool isPromoter() {
+                return true;
+            }
+        
+        }
+        public class PromoterToBase64Binary : Saxon.Hej.type.Converter {
+            public static Saxon.Hej.type.Converter.PromoterToBase64Binary INSTANCE = new Saxon.Hej.type.Converter.PromoterToBase64Binary();
+            public override Saxon.Hej.type.ConversionResult convert(Saxon.Hej.value.AtomicValue input) {
+                switch (input.getPrimitiveType().getFingerprint()) {
+                  case Saxon.Hej.om.StandardNames.XS_BASE64_BINARY:
+                    return input;
+                  case Saxon.Hej.om.StandardNames.XS_HEX_BINARY:
+                    return new Saxon.Hej.value.Base64BinaryValue(((Saxon.Hej.value.HexBinaryValue)(input)).getBinaryValue());
+                  case Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC:
+                    return Saxon.Hej.type.StringConverter.StringToBase64Binary.INSTANCE.convertString(input.getUnicodeStringValue());
+                  default:
+                    Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure(("Required type is xs:base64Binary; supplied value is "+Saxon.Hej.trans.Err.depict(input)));
+                    err.setErrorCode("XPTY0004");
+                    return err;
+                }
+            }
+            public override bool isPromoter() {
+                return true;
             }
         
         }

@@ -93,7 +93,7 @@ namespace Saxon.Hej.expr {
             }
             if ((((t0.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC) || t0.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) || t1.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC)) || t1.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC))) {
             } else {
-                if (!(Saxon.Hej.type.Type.isPossiblyComparable(pt0, pt1, Saxon.Hej.expr.parser.Token.isOrderedOperator(singletonOperator)))) {
+                if (!(Saxon.Hej.type.Type.isPossiblyComparable(pt0, pt1, visitor.getStaticContext().getXPathVersion()))) {
                     string message = ((((("In {"+toShortString())+"}: cannot compare ")+t0)+" to ")+t1);
                     if ((Saxon.Hej.value.Cardinality.allowsZero(c0) || Saxon.Hej.value.Cardinality.allowsZero(c1))) {
                         if (!(doneWarnings)) {

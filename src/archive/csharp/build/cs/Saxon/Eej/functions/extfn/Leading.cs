@@ -5,7 +5,7 @@ namespace Saxon.Eej.functions.extfn {
     public class Leading : Saxon.Hej.functions.SystemFunction {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.expr.XPathContext c2 = context.newCleanContext();
-            Saxon.Hej.om.FunctionItem function = ((arguments.Length == 2) ? (Saxon.Hej.om.FunctionItem)(arguments[1].head()) : context.getConfiguration().makeSystemFunction("data", 1));
+            Saxon.Hej.om.FunctionItem function = ((arguments.Length == 2) ? (Saxon.Hej.om.FunctionItem)(arguments[1].head()) : context.getConfiguration().makeSystemFunction("data", 1, 31));
             return Saxon.Hej.om.SequenceTool.toLazySequence(new Saxon.Eej.functions.extfn.Leading.LeadingIterator(arguments[0].iterate(), function, c2));
         }
         private class LeadingIterator : Saxon.Hej.om.SequenceIterator {

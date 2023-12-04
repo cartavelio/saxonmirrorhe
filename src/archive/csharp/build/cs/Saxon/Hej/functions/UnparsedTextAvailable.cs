@@ -8,7 +8,13 @@ namespace Saxon.Hej.functions {
             if ((hrefVal == null)) {
                 return Saxon.Hej.value.BooleanValue.FALSE;
             }
-            string encoding = ((getArity() == 2) ? arguments[1].head().getStringValue() : null);
+            string encoding;
+            if ((getArity() == 2)) {
+                Saxon.Hej.om.Item enc = arguments[1].head();
+                encoding = ((enc == null) ? null : enc.getStringValue());
+            } else {
+                encoding = null;
+            }
             return Saxon.Hej.value.BooleanValue.get(evalUnparsedTextAvailable(hrefVal, encoding, context));
         }
         public bool evalUnparsedTextAvailable(Saxon.Hej.value.StringValue hrefVal, string encoding, Saxon.Hej.expr.XPathContext context) {

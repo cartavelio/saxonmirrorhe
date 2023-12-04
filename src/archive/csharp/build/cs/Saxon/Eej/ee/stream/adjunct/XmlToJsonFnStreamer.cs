@@ -33,7 +33,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 Saxon.Hej.ma.json.XMLToJsonFn target = (Saxon.Hej.ma.json.XMLToJsonFn)(exp.getTargetFunction(getContext()));
                 if ((exp.getArity()>1)) {
                     Saxon.Hej.ma.map.MapItem suppliedOptions = (Saxon.Hej.ma.map.MapItem)(exp.getArg(1).evaluateItem(getContext()));
-                    System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options = target.getDetails().optionDetails.processSuppliedOptions(suppliedOptions, getContext());
+                    System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options = target.getDetails().optionDetails.processSuppliedOptions(suppliedOptions, getContext());
                     indenting = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "indent").head())).getBooleanValue();
                 }
             }

@@ -40,7 +40,11 @@ namespace Saxon.Hej.expr.instruct {
             return actuallyEvaluate(context, target);
         }
         public override Saxon.Hej.om.GroundedValue evaluateVariable(Saxon.Hej.expr.XPathContext context) {
-            return evaluateVariable(context, null);
+            Saxon.Hej.expr.Component target = context.getCurrentComponent();
+            if ((target == null)) {
+                target = getDeclaringComponent();
+            }
+            return evaluateVariable(context, target);
         }
         protected internal override string getFlags() {
             string f = base.getFlags();

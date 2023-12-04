@@ -4,9 +4,10 @@ using System.Linq;
 namespace Saxon.Hej.functions {
     public class RegexFunctionSansFlags : Saxon.Hej.functions.SystemFunction {
         private Saxon.Hej.functions.SystemFunction addFlagsArgument() {
-            Saxon.Hej.Configuration config = getRetainedStaticContext().getConfiguration();
-            Saxon.Hej.functions.SystemFunction @fixed = config.makeSystemFunction(getFunctionName().getLocalPart(), (getArity()+1));
-            @fixed.setRetainedStaticContext(getRetainedStaticContext());
+            Saxon.Hej.expr.parser.RetainedStaticContext rsc = getRetainedStaticContext();
+            Saxon.Hej.Configuration config = rsc.getConfiguration();
+            Saxon.Hej.functions.SystemFunction @fixed = config.makeSystemFunction(getFunctionName().getLocalPart(), (getArity()+1), rsc.getPackageData().getHostLanguageVersion());
+            @fixed.setRetainedStaticContext(rsc);
             return @fixed;
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {

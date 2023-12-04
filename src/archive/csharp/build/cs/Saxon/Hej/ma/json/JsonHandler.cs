@@ -110,8 +110,8 @@ namespace Saxon.Hej.ma.json {
                 return REPLACEMENT;
             }
         }
-        public void setFallbackFunction(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Sequence val = Saxon.Impl.Helpers.MapUtils.Get(options, "fallback");
+        public void setFallbackFunction(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, Saxon.Hej.expr.XPathContext context) {
+            Saxon.Hej.om.GroundedValue val = Saxon.Impl.Helpers.MapUtils.Get(options, "fallback");
             if ((val != null)) {
                 Saxon.Hej.om.Item fn = val.head();
                 if ((fn is Saxon.Hej.om.FunctionItem)) {

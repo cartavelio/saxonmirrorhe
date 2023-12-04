@@ -88,6 +88,7 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.expr.instruct.CopyOf inst = new Saxon.Hej.expr.instruct.CopyOf(select, copyNamespaces, validation, schemaType, false);
             inst.setCopyAccumulators(copyAccumulators);
+            inst.setLocation(saveLocation());
             inst.setSchemaAware(exec.isSchemaAware());
             return inst;
         }

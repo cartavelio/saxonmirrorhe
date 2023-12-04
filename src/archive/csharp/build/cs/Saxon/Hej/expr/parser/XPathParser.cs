@@ -425,6 +425,8 @@ namespace Saxon.Hej.expr.parser {
                 return parseIfExpression();
               case Saxon.Hej.expr.parser.Token.SWITCH:
                 return parseSwitchExpression();
+              case Saxon.Hej.expr.parser.Token.SWITCH_CASE:
+                return parseSwitchExpression();
               case Saxon.Hej.expr.parser.Token.TYPESWITCH:
                 return parseTypeswitchExpression();
               case Saxon.Hej.expr.parser.Token.VALIDATE:
@@ -478,11 +480,32 @@ namespace Saxon.Hej.expr.parser {
                   case Saxon.Hej.expr.parser.Token.CASTABLE_AS:
                     nextToken();
                     Saxon.Hej.type.CastingTarget at;
-                    if ((((languageVersion>=40) && (t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND)) && t.currentTokenValue.Equals("union"))) {
+                    if (((allowXPath40Syntax && (t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA)) && t.currentTokenValue.Equals("union"))) {
                         at = (Saxon.Hej.type.CastingTarget)(parseItemType());
                     } else {
                         expect(Saxon.Hej.expr.parser.Token.NAME);
-                        at = getSimpleType(t.currentTokenValue);
+                        if (scanOnly) {
+                            at = Saxon.Hej.type.BuiltInAtomicType.STRING;
+                        } else {
+                            Saxon.Hej.om.StructuredQName sq = null;
+                            try {
+                                sq = qNameParser.parse(t.currentTokenValue, env.getDefaultElementNamespace());
+                            } catch (Saxon.Hej.trans.XPathException e) {
+                                grumble(e.Message, e.getErrorCodeQName());
+                                System.Diagnostics.Debug.Assert(false);
+                            }
+                            Saxon.Hej.type.ItemType alias = env.resolveTypeAlias(sq);
+                            if ((alias != null)) {
+                                if ((alias is Saxon.Hej.type.CastingTarget)) {
+                                    at = (Saxon.Hej.type.CastingTarget)(alias);
+                                } else {
+                                    grumble((("The type "+t.currentTokenValue)+" cannot be used as the target of a cast"));
+                                    at = null;
+                                }
+                            } else {
+                                at = getSimpleType(t.currentTokenValue);
+                            }
+                        }
                         nextToken();
                     }
                     if ((at == Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC)) {
@@ -505,6 +528,7 @@ namespace Saxon.Hej.expr.parser {
                     lhs = parseArrowPostfix(lhs);
                     break ;
                   case Saxon.Hej.expr.parser.Token.MAPPING_ARROW:
+                    checkLanguageVersion40();
                     lhs = parseMappingArrowPostfix(lhs);
                     break ;
                   default:
@@ -589,14 +613,21 @@ namespace Saxon.Hej.expr.parser {
                         grumble("Concatenation operator ('||') requires XPath 3.0 to be enabled");
                     }
                     Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(env);
+                    Saxon.Hej.Configuration config = env.getConfiguration();
+                    Saxon.Hej.functions.registry.BuiltInFunctionSet lib = config.getXPathFunctionSet(env.getXPathVersion());
                     if (lhs.isCallOn(typeof(Saxon.Hej.functions.Concat))) {
                         Saxon.Hej.expr.Expression[] args = ((Saxon.Hej.expr.SystemFunctionCall)(lhs)).getArguments();
                         Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[(args.Length+1)];
                         Saxon.Ejava.lang.System.arraycopy(args, 0, newArgs, 0, args.Length);
                         newArgs[args.Length] = rhs;
-                        return Saxon.Hej.functions.SystemFunction.makeCall("concat", rsc, newArgs);
+                        Saxon.Hej.functions.SystemFunction concat = lib.makeFunction("concat", newArgs.Length);
+                        concat.setRetainedStaticContext(rsc);
+                        return concat.makeFunctionCall(newArgs);
                     } else {
-                        return Saxon.Hej.functions.SystemFunction.makeCall("concat", rsc, lhs, rhs);
+                        Saxon.Hej.functions.SystemFunction concat = lib.makeFunction("concat", 2);
+                        concat.setRetainedStaticContext(rsc);
+                        Saxon.Hej.expr.Expression[] args = new Saxon.Hej.expr.Expression[]{lhs, rhs};
+                        return concat.makeFunctionCall(args);
                     }
                 }
               case Saxon.Hej.expr.parser.Token.PLUS:
@@ -746,21 +777,32 @@ namespace Saxon.Hej.expr.parser {
             if (((t.currentToken == Saxon.Hej.expr.parser.Token.FOR_MEMBER) && !(allowXPath40Syntax))) {
                 grumble("'for member' requires XPath 4.0 to be enabled");
             }
+            if ((t.currentToken == Saxon.Hej.expr.parser.Token.LET)) {
+                return parseLetExpression();
+            } else {
+                return parseForExpression();
+            }
+        }
+        private Saxon.Hej.expr.Expression parseForExpression() {
             int clauses = 0;
             int offset;
             int @operator = t.currentToken;
             Saxon.Hej.expr.Assignation first = null;
             Saxon.Hej.expr.Assignation previous = null;
             do {
+                bool forMember = false;
                 offset = t.currentTokenStartOffset;
                 nextToken();
+                if ((isKeyword("member") && (clauses>0))) {
+                    forMember = true;
+                    nextToken();
+                }
                 expect(Saxon.Hej.expr.parser.Token.DOLLAR);
                 nextToken();
                 expect(Saxon.Hej.expr.parser.Token.NAME);
                 string var = t.currentTokenValue;
                 Saxon.Hej.expr.Assignation firstClause;
                 Saxon.Hej.expr.Assignation lastClause;
-                bool forMember = false;
                 if ((@operator == Saxon.Hej.expr.parser.Token.FOR)) {
                     firstClause = lastClause = new Saxon.Hej.expr.ForExpression();
                     firstClause.setRequiredType(Saxon.Hej.value.SequenceType.SINGLE_ITEM);
@@ -803,6 +845,47 @@ namespace Saxon.Hej.expr.parser {
                 }
                 previous = lastClause;
             } while (((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA) || ((allowXPath40Syntax && (t.currentToken == @operator)))));
+            expect(Saxon.Hej.expr.parser.Token.RETURN);
+            nextToken();
+            previous.setAction(parseExprSingle());
+            for (int i = 0; (i<clauses); i++) {
+                undeclareRangeVariable();
+            }
+            return makeTracer(first, first.getVariableQName());
+        }
+        private Saxon.Hej.expr.Expression parseLetExpression() {
+            int clauses = 0;
+            int offset;
+            Saxon.Hej.expr.Assignation first = null;
+            Saxon.Hej.expr.Assignation previous = null;
+            do {
+                offset = t.currentTokenStartOffset;
+                nextToken();
+                expect(Saxon.Hej.expr.parser.Token.DOLLAR);
+                nextToken();
+                expect(Saxon.Hej.expr.parser.Token.NAME);
+                string var = t.currentTokenValue;
+                Saxon.Hej.expr.Assignation firstClause;
+                Saxon.Hej.expr.Assignation lastClause;
+                firstClause = lastClause = new Saxon.Hej.expr.LetExpression();
+                firstClause.setRequiredType(Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
+                clauses++;
+                setLocation(firstClause, offset);
+                setLocation(lastClause, offset);
+                lastClause.setVariableQName(makeStructuredQName(var, Saxon.Hej.om.NamespaceUri.NULL));
+                nextToken();
+                expect(Saxon.Hej.expr.parser.Token.ASSIGN);
+                nextToken();
+                Saxon.Hej.expr.Expression collection = parseExprSingle();
+                firstClause.setSequence(collection);
+                declareRangeVariable(lastClause);
+                if ((previous == null)) {
+                    first = firstClause;
+                } else {
+                    previous.setAction(firstClause);
+                }
+                previous = lastClause;
+            } while (((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA) || ((allowXPath40Syntax && (t.currentToken == Saxon.Hej.expr.parser.Token.LET)))));
             expect(Saxon.Hej.expr.parser.Token.RETURN);
             nextToken();
             previous.setAction(parseExprSingle());
@@ -966,6 +1049,12 @@ namespace Saxon.Hej.expr.parser {
                 if (uri.Equals(Saxon.Hej.om.NamespaceUri.DOT_NET_TYPE)) {
                     return Saxon.Hej.Version.platform.getExternalObjectType(config, uri, local);
                 } else {
+                    if (allowXPath40Syntax) {
+                        Saxon.Hej.type.ItemType it = env.resolveTypeAlias(sq);
+                        if ((it != null)) {
+                            return it;
+                        }
+                    }
                     Saxon.Hej.type.SchemaType st = config.getSchemaType(sq);
                     if ((st == null)) {
                         grumble(("Unknown simple type "+qname), "XPST0051");
@@ -1137,7 +1226,7 @@ namespace Saxon.Hej.expr.parser {
                     primaryType = getPlainType(t.currentTokenValue);
                     nextToken();
                 } else {
-                    if ((t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND)) {
+                    if (((t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA) || (t.currentToken == Saxon.Hej.expr.parser.Token.FUNCTION))) {
                         switch (t.currentTokenValue) {
                           case "item":
                             nextToken();
@@ -1146,10 +1235,19 @@ namespace Saxon.Hej.expr.parser {
                             primaryType = Saxon.Hej.type.AnyItemType.getInstance();
                             break ;
                           case "function":
-                            checkLanguageVersion30();
-                            Saxon.Hej.query.AnnotationList annotations = Saxon.Hej.query.AnnotationList.EMPTY;
-                            primaryType = parseFunctionItemType(annotations);
-                            break ;
+                            {
+                                checkLanguageVersion30();
+                                Saxon.Hej.query.AnnotationList annotations = Saxon.Hej.query.AnnotationList.EMPTY;
+                                primaryType = parseFunctionItemType(annotations);
+                                break ;
+                            }
+                          case "fn":
+                            {
+                                checkLanguageVersion40();
+                                Saxon.Hej.query.AnnotationList annotations = Saxon.Hej.query.AnnotationList.EMPTY;
+                                primaryType = parseFunctionItemType(annotations);
+                                break ;
+                            }
                           case "map":
                             primaryType = parseMapItemType();
                             break ;
@@ -1273,6 +1371,12 @@ namespace Saxon.Hej.expr.parser {
             Saxon.Hej.ma.map.RecordTest recordTest = new Saxon.Hej.ma.map.RecordTest();
             while (true) {
                 string name;
+                if (((t.currentToken == Saxon.Hej.expr.parser.Token.STAR) || (t.currentToken == Saxon.Hej.expr.parser.Token.MULT))) {
+                    extensible = true;
+                    p.nextToken();
+                    p.expect(Saxon.Hej.expr.parser.Token.RPAR);
+                    break ;
+                }
                 if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
                     name = t.currentTokenValue;
                     if (!(Saxon.Hej.om.NameChecker.isValidNCName(name))) {
@@ -1316,12 +1420,6 @@ namespace Saxon.Hej.expr.parser {
                 } else {
                     if ((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA)) {
                         p.nextToken();
-                        if (((t.currentToken == Saxon.Hej.expr.parser.Token.STAR) || (t.currentToken == Saxon.Hej.expr.parser.Token.MULT))) {
-                            extensible = true;
-                            p.nextToken();
-                            p.expect(Saxon.Hej.expr.parser.Token.RPAR);
-                            break ;
-                        }
                     } else {
                         p.grumble((("Expected ',' or ')' after field in RecordTest, found '"+Saxon.Hej.expr.parser.Token.tokens[t.currentToken])+'\''));
                     }
@@ -1336,26 +1434,30 @@ namespace Saxon.Hej.expr.parser {
             nextToken();
             System.Collections.Generic.IList<Saxon.Hej.type.AtomicType> memberTypes = new System.Collections.Generic.List<Saxon.Hej.type.AtomicType>(6);
             while (true) {
-                if (((t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND) && t.currentTokenValue.Equals("enum"))) {
+                if (((t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA) && t.currentTokenValue.Equals("enum"))) {
                     Saxon.Hej.type.EnumerationType type = parseEnumType();
                     memberTypes.Add(type);
                 } else {
                     expect(Saxon.Hej.expr.parser.Token.NAME);
-                    Saxon.Hej.om.StructuredQName member = getQNameParser().parse(t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
-                    Saxon.Hej.type.ItemType type = getPlainType(member);
-                    if ((type is Saxon.Hej.type.AtomicType)) {
-                        memberTypes.Add((Saxon.Hej.type.AtomicType)(type));
+                    if (scanOnly) {
+                        memberTypes.Add(Saxon.Hej.type.BuiltInAtomicType.STRING);
                     } else {
-                        if ((type is Saxon.Hej.type.PlainType)) {
-                            foreach (Saxon.Hej.type.PlainType pt in ((Saxon.Hej.type.UnionType)(type)).getPlainMemberTypes()) {
-                                if ((pt is Saxon.Hej.type.AtomicType)) {
-                                    memberTypes.Add((Saxon.Hej.type.AtomicType)(pt));
-                                } else {
-                                    grumble(((("Union type "+type)+" has a non-atomic member type ")+pt));
-                                }
-                            }
+                        Saxon.Hej.om.StructuredQName member = getQNameParser().parse(t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
+                        Saxon.Hej.type.ItemType type = getPlainType(member);
+                        if ((type is Saxon.Hej.type.AtomicType)) {
+                            memberTypes.Add((Saxon.Hej.type.AtomicType)(type));
                         } else {
-                            grumble((("Type "+t.currentTokenValue)+" exists, but is not atomic"));
+                            if ((type is Saxon.Hej.type.PlainType)) {
+                                foreach (Saxon.Hej.type.PlainType pt in ((Saxon.Hej.type.UnionType)(type)).getPlainMemberTypes()) {
+                                    if ((pt is Saxon.Hej.type.AtomicType)) {
+                                        memberTypes.Add((Saxon.Hej.type.AtomicType)(pt));
+                                    } else {
+                                        grumble(((("Union type "+type)+" has a non-atomic member type ")+pt));
+                                    }
+                                }
+                            } else {
+                                grumble((("Type "+t.currentTokenValue)+" exists, but is not atomic"));
+                            }
                         }
                     }
                     nextToken();
@@ -1455,11 +1557,11 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.value.SequenceType valueType = parseSequenceType();
                 expect(Saxon.Hej.expr.parser.Token.RPAR);
                 nextToken();
-                if (!(((keyType is Saxon.Hej.type.AtomicType)))) {
-                    grumble("Key type of a map must be atomic");
+                if (!(((keyType is Saxon.Hej.type.PlainType)))) {
+                    grumble(("Key type of a map must be an atomic or pure union type: found "+keyType));
                     return null;
                 }
-                return new Saxon.Hej.ma.map.MapType((Saxon.Hej.type.AtomicType)(keyType), valueType);
+                return new Saxon.Hej.ma.map.MapType((Saxon.Hej.type.PlainType)(keyType), valueType);
             }
         }
         protected internal Saxon.Hej.type.ItemType parseArrayItemType() {
@@ -1559,7 +1661,7 @@ namespace Saxon.Hej.expr.parser {
               case Saxon.Hej.expr.parser.Token.PREFIX:
               case Saxon.Hej.expr.parser.Token.SUFFIX:
               case Saxon.Hej.expr.parser.Token.STAR:
-              case Saxon.Hej.expr.parser.Token.NODEKIND:
+              case Saxon.Hej.expr.parser.Token.KEYWORD_LBRA:
               case Saxon.Hej.expr.parser.Token.DOT:
               case Saxon.Hej.expr.parser.Token.DOTDOT:
               case Saxon.Hej.expr.parser.Token.FUNCTION:
@@ -1756,12 +1858,12 @@ namespace Saxon.Hej.expr.parser {
                         expect(Saxon.Hej.expr.parser.Token.LPAR);
                         return parseDynamicFunctionCall(var, lhs);
                     } else {
-                        if (((token == Saxon.Hej.expr.parser.Token.NODEKIND) && t.currentTokenValue.Equals("function"))) {
+                        if (((token == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA) && t.currentTokenValue.Equals("function"))) {
                             Saxon.Hej.expr.Expression fn = parseInlineFunction(Saxon.Hej.query.AnnotationList.EMPTY);
                             expect(Saxon.Hej.expr.parser.Token.LPAR);
                             return parseDynamicFunctionCall(fn, lhs);
                         } else {
-                            if (((token == Saxon.Hej.expr.parser.Token.KEYWORD_CURLY) && t.currentTokenValue.Equals("function"))) {
+                            if (((token == Saxon.Hej.expr.parser.Token.KEYWORD_CURLY) && ((t.currentTokenValue.Equals("function") || t.currentTokenValue.Equals("fn"))))) {
                                 Saxon.Hej.expr.Expression fn = parseFocusFunction(Saxon.Hej.query.AnnotationList.EMPTY);
                                 expect(Saxon.Hej.expr.parser.Token.LPAR);
                                 return parseDynamicFunctionCall(fn, lhs);
@@ -1799,12 +1901,12 @@ namespace Saxon.Hej.expr.parser {
                         expect(Saxon.Hej.expr.parser.Token.LPAR);
                         rhs = parseDynamicFunctionCall(var, varRef);
                     } else {
-                        if (((token == Saxon.Hej.expr.parser.Token.NODEKIND) && t.currentTokenValue.Equals("function"))) {
+                        if (((token == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA) && t.currentTokenValue.Equals("function"))) {
                             Saxon.Hej.expr.Expression fn = parseInlineFunction(Saxon.Hej.query.AnnotationList.EMPTY);
                             expect(Saxon.Hej.expr.parser.Token.LPAR);
                             rhs = parseDynamicFunctionCall(fn, varRef);
                         } else {
-                            if (((token == Saxon.Hej.expr.parser.Token.KEYWORD_CURLY) && t.currentTokenValue.Equals("function"))) {
+                            if (((token == Saxon.Hej.expr.parser.Token.KEYWORD_CURLY) && ((t.currentTokenValue.Equals("function") || t.currentTokenValue.Equals("fn"))))) {
                                 Saxon.Hej.expr.Expression fn = parseFocusFunction(Saxon.Hej.query.AnnotationList.EMPTY);
                                 expect(Saxon.Hej.expr.parser.Token.LPAR);
                                 rhs = parseDynamicFunctionCall(fn, varRef);
@@ -1900,7 +2002,7 @@ namespace Saxon.Hej.expr.parser {
                             }
                         }
                     }
-                    if (!(t.currentTokenValue.Equals("function"))) {
+                    if (!(((t.currentTokenValue.Equals("function") || t.currentTokenValue.Equals("fn"))))) {
                         grumble("Expected 'function' to follow the annotation assertion");
                     }
                     annotations.check(env.getConfiguration(), "IF");
@@ -1927,8 +2029,8 @@ namespace Saxon.Hej.expr.parser {
                     }
                     break ;
                 }
-              case Saxon.Hej.expr.parser.Token.NODEKIND:
-                if (t.currentTokenValue.Equals("function")) {
+              case Saxon.Hej.expr.parser.Token.KEYWORD_LBRA:
+                if ((t.currentTokenValue.Equals("function") || (t.currentTokenValue.Equals("fn")))) {
                     Saxon.Hej.query.AnnotationList annotations = Saxon.Hej.query.AnnotationList.EMPTY;
                     return parseInlineFunction(annotations);
                 }
@@ -1938,14 +2040,14 @@ namespace Saxon.Hej.expr.parser {
               case Saxon.Hej.expr.parser.Token.SUFFIX:
               case Saxon.Hej.expr.parser.Token.STAR:
                 byte defaultAxis = Saxon.Hej.om.AxisInfo.CHILD;
-                if (((t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND) && ((t.currentTokenValue.Equals("attribute") || t.currentTokenValue.Equals("schema-attribute"))))) {
+                if (((t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA) && ((t.currentTokenValue.Equals("attribute") || t.currentTokenValue.Equals("schema-attribute"))))) {
                     defaultAxis = Saxon.Hej.om.AxisInfo.ATTRIBUTE;
                 } else {
-                    if (((t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND) && t.currentTokenValue.Equals("namespace-node"))) {
+                    if (((t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA) && t.currentTokenValue.Equals("namespace-node"))) {
                         defaultAxis = Saxon.Hej.om.AxisInfo.NAMESPACE;
                         testPermittedAxis(Saxon.Hej.om.AxisInfo.NAMESPACE, "XQST0134");
                     } else {
-                        if (((firstInPattern && (t.currentToken == Saxon.Hej.expr.parser.Token.NODEKIND)) && t.currentTokenValue.Equals("document-node"))) {
+                        if (((firstInPattern && (t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_LBRA)) && t.currentTokenValue.Equals("document-node"))) {
                             defaultAxis = Saxon.Hej.om.AxisInfo.SELF;
                         }
                     }
@@ -1968,7 +2070,7 @@ namespace Saxon.Hej.expr.parser {
                   case Saxon.Hej.expr.parser.Token.PREFIX:
                   case Saxon.Hej.expr.parser.Token.SUFFIX:
                   case Saxon.Hej.expr.parser.Token.STAR:
-                  case Saxon.Hej.expr.parser.Token.NODEKIND:
+                  case Saxon.Hej.expr.parser.Token.KEYWORD_LBRA:
                   case Saxon.Hej.expr.parser.Token.LPAR:
                     Saxon.Hej.expr.AxisExpression ae2 = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, parseNodeTest(Saxon.Hej.type.Type.ATTRIBUTE));
                     setLocation(ae2);
@@ -1994,7 +2096,7 @@ namespace Saxon.Hej.expr.parser {
                   case Saxon.Hej.expr.parser.Token.PREFIX:
                   case Saxon.Hej.expr.parser.Token.SUFFIX:
                   case Saxon.Hej.expr.parser.Token.STAR:
-                  case Saxon.Hej.expr.parser.Token.NODEKIND:
+                  case Saxon.Hej.expr.parser.Token.KEYWORD_LBRA:
                   case Saxon.Hej.expr.parser.Token.LPAR:
                     Saxon.Hej.expr.Expression ax = new Saxon.Hej.expr.AxisExpression(axis, parseNodeTest(principalNodeType));
                     setLocation(ax);
@@ -2011,6 +2113,7 @@ namespace Saxon.Hej.expr.parser {
                   case "array":
                     return parseArrayCurlyConstructor();
                   case "function":
+                  case "fn":
                     return parseFocusFunction(null);
                 }
                 goto case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;
@@ -2409,7 +2512,7 @@ namespace Saxon.Hej.expr.parser {
               case Saxon.Hej.expr.parser.Token.STAR:
                 nextToken();
                 return Saxon.Hej.pattern.NodeKindTest.makeNodeKindTest(nodeType);
-              case Saxon.Hej.expr.parser.Token.NODEKIND:
+              case Saxon.Hej.expr.parser.Token.KEYWORD_LBRA:
                 return parseKindTest();
               default:
                 grumble("Unrecognized node test");
@@ -2430,45 +2533,38 @@ namespace Saxon.Hej.expr.parser {
         private Saxon.Hej.pattern.NodeTest parseKindTest() {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
             string typeName = t.currentTokenValue;
-            bool schemaDeclaration = typeName.StartsWith("schema-");
-            int primaryType = getSystemType(typeName);
-            int fp = -1;
             bool empty = false;
             nextToken();
             if ((t.currentToken == Saxon.Hej.expr.parser.Token.RPAR)) {
-                if (schemaDeclaration) {
-                    grumble("schema-element() and schema-attribute() require a name to be supplied");
-                    return null;
-                }
                 empty = true;
                 nextToken();
             }
-            switch (primaryType) {
-              case Saxon.Hej.type.Type.ITEM:
+            switch (typeName) {
+              case "item":
                 grumble("item() is not allowed in a path expression");
                 return null;
-              case Saxon.Hej.type.Type.NODE:
+              case "node":
                 if (empty) {
                     return Saxon.Hej.pattern.AnyNodeTest.getInstance();
                 } else {
                     grumble("Expected ')': no arguments are allowed in node()");
                     return null;
                 }
-              case Saxon.Hej.type.Type.TEXT:
+              case "text":
                 if (empty) {
                     return Saxon.Hej.pattern.NodeKindTest.TEXT;
                 } else {
                     grumble("Expected ')': no arguments are allowed in text()");
                     return null;
                 }
-              case Saxon.Hej.type.Type.COMMENT:
+              case "comment":
                 if (empty) {
                     return Saxon.Hej.pattern.NodeKindTest.COMMENT;
                 } else {
                     grumble("Expected ')': no arguments are allowed in comment()");
                     return null;
                 }
-              case Saxon.Hej.type.Type.NAMESPACE:
+              case "namespace-node":
                 if (empty) {
                     if (!(isNamespaceTestAllowed())) {
                         grumble("namespace-node() test is not allowed in XPath 2.0/XQuery 1.0");
@@ -2486,26 +2582,20 @@ namespace Saxon.Hej.expr.parser {
                         return null;
                     }
                 }
-              case Saxon.Hej.type.Type.DOCUMENT:
+              case "document-node":
                 if (empty) {
                     return Saxon.Hej.pattern.NodeKindTest.DOCUMENT;
                 } else {
-                    int innerType;
-                    try {
-                        innerType = getSystemType(t.currentTokenValue);
-                    } catch (Saxon.Hej.trans.XPathException err) {
-                        innerType = Saxon.Hej.type.Type.ITEM;
-                    }
-                    if ((innerType != Saxon.Hej.type.Type.ELEMENT)) {
-                        grumble("Argument to document-node() must be an element type descriptor");
-                        return null;
+                    if (!(((t.currentTokenValue.Equals("element") || t.currentTokenValue.Equals("schema-element"))))) {
+                        grumble("Argument to document-node() must be element(...) or schema-element(...)");
                     }
                     Saxon.Hej.pattern.NodeTest inner = parseKindTest();
                     expect(Saxon.Hej.expr.parser.Token.RPAR);
                     nextToken();
                     return new Saxon.Hej.pattern.DocumentNodeTest(inner);
                 }
-              case Saxon.Hej.type.Type.PROCESSING_INSTRUCTION:
+              case "processing-instruction":
+                int fp = -1;
                 if (empty) {
                     return Saxon.Hej.pattern.NodeKindTest.PROCESSING_INSTRUCTION;
                 } else {
@@ -2537,146 +2627,110 @@ namespace Saxon.Hej.expr.parser {
                 expect(Saxon.Hej.expr.parser.Token.RPAR);
                 nextToken();
                 return new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.PROCESSING_INSTRUCTION, fp, pool);
-              case Saxon.Hej.type.Type.ATTRIBUTE:
-              case Saxon.Hej.type.Type.ELEMENT:
-                string nodeName = "";
-                Saxon.Hej.pattern.NodeTest nodeTest = null;
+              case "schema-attribute":
                 if (empty) {
-                    return Saxon.Hej.pattern.NodeKindTest.makeNodeKindTest(primaryType);
+                    grumble((typeName+"schema-attribute() requires a name to be supplied"));
+                    return null;
                 } else {
-                    if (((t.currentToken == Saxon.Hej.expr.parser.Token.STAR) || (t.currentToken == Saxon.Hej.expr.parser.Token.MULT))) {
-                        if (schemaDeclaration) {
-                            grumble("schema-element() and schema-attribute() must specify an actual name, not '*'");
-                            return null;
-                        }
-                        nodeTest = Saxon.Hej.pattern.NodeKindTest.makeNodeKindTest(primaryType);
-                        nextToken();
+                    expect(Saxon.Hej.expr.parser.Token.NAME);
+                    string name = t.currentTokenValue;
+                    fp = makeFingerprint(name, false);
+                    nextToken();
+                    expect(Saxon.Hej.expr.parser.Token.RPAR);
+                    nextToken();
+                    if (!(env.isImportedSchema(pool.getURI(fp)))) {
+                        grumble((("No schema has been imported for namespace '"+pool.getURI(fp))+'\''), "XPST0008");
+                    }
+                    Saxon.Hej.type.SchemaDeclaration decl = env.getConfiguration().getAttributeDeclaration(fp);
+                    if ((decl == null)) {
+                        grumble((("There is no declaration for attribute @"+name)+" in an imported schema"), "XPST0008");
+                        return null;
                     } else {
-                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
-                            nodeName = t.currentTokenValue;
-                            fp = makeFingerprint(t.currentTokenValue, (primaryType == Saxon.Hej.type.Type.ELEMENT));
-                            nextToken();
-                        } else {
-                            if (((((t.currentToken == Saxon.Hej.expr.parser.Token.PREFIX) || (t.currentToken == Saxon.Hej.expr.parser.Token.SUFFIX))) && allowXPath40Syntax)) {
-                                nodeTest = parseNodeTest((short)(primaryType));
-                            } else {
-                                grumble((("Unexpected "+Saxon.Hej.expr.parser.Token.tokens[t.currentToken])+" after '(' in SequenceType"));
-                            }
-                        }
+                        return decl.makeSchemaNodeTest();
                     }
                 }
-                Saxon.Hej.om.NamespaceUri suri = null;
-                if ((fp != -1)) {
-                    suri = pool.getURI(fp);
+              case "schema-element":
+                if (empty) {
+                    grumble((typeName+"schema-element() requires a name to be supplied"));
+                    return null;
+                } else {
+                    expect(Saxon.Hej.expr.parser.Token.NAME);
+                    string name = t.currentTokenValue;
+                    fp = makeFingerprint(name, true);
+                    nextToken();
+                    expect(Saxon.Hej.expr.parser.Token.RPAR);
+                    nextToken();
+                    if (!(env.isImportedSchema(pool.getURI(fp)))) {
+                        grumble((("No schema has been imported for namespace '"+pool.getURI(fp))+'\''), "XPST0008");
+                    }
+                    Saxon.Hej.type.SchemaDeclaration decl = env.getConfiguration().getElementDeclaration(fp);
+                    if ((decl == null)) {
+                        grumble((("There is no declaration for element "+name)+" in an imported schema"), "XPST0008");
+                        return null;
+                    } else {
+                        return decl.makeSchemaNodeTest();
+                    }
+                }
+              case "attribute":
+              case "element":
+                bool isElementTest = typeName.Equals("element");
+                int nodeKind = (isElementTest ? Saxon.Hej.type.Type.ELEMENT : Saxon.Hej.type.Type.ATTRIBUTE);
+                Saxon.Hej.pattern.NodeTest nodeTest;
+                if (empty) {
+                    return (isElementTest ? Saxon.Hej.pattern.NodeKindTest.ELEMENT : Saxon.Hej.pattern.NodeKindTest.ATTRIBUTE);
+                }
+                System.Collections.Generic.IList<Saxon.Hej.pattern.NodeTest> tests = parseNameTestUnion(nodeKind);
+                if ((tests.Count == 1)) {
+                    nodeTest = tests[0];
+                } else {
+                    if (!(allowXPath40Syntax)) {
+                        grumble("NameTestUnion syntax requires 4.0 to be enabled");
+                    }
+                    nodeTest = Saxon.Hej.pattern.NameTestUnion.withTests(tests);
                 }
                 if ((t.currentToken == Saxon.Hej.expr.parser.Token.RPAR)) {
                     nextToken();
-                    if ((fp == -1)) {
-                        return nodeTest;
-                    } else {
-                        if ((primaryType == Saxon.Hej.type.Type.ATTRIBUTE)) {
-                            if (schemaDeclaration) {
-                                Saxon.Hej.type.SchemaDeclaration attributeDecl = env.getConfiguration().getAttributeDeclaration((fp&unchecked((int)0xfffff)));
-                                if (!(env.isImportedSchema(suri))) {
-                                    grumble((("No schema has been imported for namespace '"+suri)+'\''), "XPST0008");
-                                }
-                                if ((attributeDecl == null)) {
-                                    grumble((("There is no declaration for attribute @"+nodeName)+" in an imported schema"), "XPST0008");
-                                    return null;
-                                } else {
-                                    return attributeDecl.makeSchemaNodeTest();
-                                }
-                            } else {
-                                return new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, fp, pool);
-                            }
-                        } else {
-                            if (schemaDeclaration) {
-                                if (!(env.isImportedSchema(suri))) {
-                                    grumble((("No schema has been imported for namespace '"+suri)+'\''), "XPST0008");
-                                }
-                                Saxon.Hej.type.SchemaDeclaration elementDecl = env.getConfiguration().getElementDeclaration((fp&unchecked((int)0xfffff)));
-                                if ((elementDecl == null)) {
-                                    grumble((("There is no declaration for element <"+nodeName)+"> in an imported schema"), "XPST0008");
-                                    return null;
-                                } else {
-                                    return elementDecl.makeSchemaNodeTest();
-                                }
-                            } else {
-                                return makeNameTest(Saxon.Hej.type.Type.ELEMENT, nodeName, true);
-                            }
-                        }
-                    }
+                    return nodeTest;
                 } else {
                     if ((t.currentToken == Saxon.Hej.expr.parser.Token.COMMA)) {
-                        if (schemaDeclaration) {
-                            grumble("schema-element() and schema-attribute() must have one argument only");
-                            return null;
-                        }
                         nextToken();
                         Saxon.Hej.pattern.NodeTest result;
-                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.STAR)) {
-                            grumble("'*' is no longer permitted as the second argument of element() and attribute()");
-                            return null;
-                        } else {
-                            if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
-                                Saxon.Hej.type.SchemaType schemaType;
-                                Saxon.Hej.om.StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
-                                System.Diagnostics.Debug.Assert((contentType != null));
-                                Saxon.Hej.om.NamespaceUri uri = contentType.getNamespaceUri();
-                                if (uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
-                                    schemaType = env.getConfiguration().getSchemaType(contentType);
-                                } else {
-                                    if (!(env.isImportedSchema(uri))) {
-                                        grumble((("No schema has been imported for namespace '"+uri)+'\''), "XPST0008");
-                                    }
-                                    schemaType = env.getConfiguration().getSchemaType(contentType);
-                                }
-                                if ((schemaType == null)) {
-                                    grumble(("Unknown type name "+contentType.getEQName()), "XPST0008");
-                                    return null;
-                                }
-                                if (((primaryType == Saxon.Hej.type.Type.ATTRIBUTE) && schemaType.isComplexType())) {
-                                    warning("An attribute cannot have a complex type", Saxon.Hej.trans.SaxonErrorCode.SXWN9041);
-                                }
-                                Saxon.Hej.pattern.ContentTypeTest typeTest = new Saxon.Hej.pattern.ContentTypeTest(primaryType, schemaType, env.getConfiguration(), false);
-                                if (((fp == -1) && (((nodeTest == null) || (nodeTest is Saxon.Hej.pattern.NodeKindTest))))) {
-                                    result = typeTest;
-                                    if ((primaryType == Saxon.Hej.type.Type.ATTRIBUTE)) {
-                                        nextToken();
-                                    } else {
-                                        nextToken();
-                                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.QMARK)) {
-                                            typeTest.setNillable(true);
-                                            nextToken();
-                                        }
-                                    }
-                                } else {
-                                    if ((primaryType == Saxon.Hej.type.Type.ATTRIBUTE)) {
-                                        if ((nodeTest == null)) {
-                                            nodeTest = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, fp, pool);
-                                        }
-                                        if (((schemaType == Saxon.Hej.type.AnyType.getInstance()) || (schemaType == Saxon.Hej.type.AnySimpleType.getInstance()))) {
-                                            result = nodeTest;
-                                        } else {
-                                            result = new Saxon.Hej.pattern.CombinedNodeTest(nodeTest, Saxon.Hej.expr.parser.Token.INTERSECT, typeTest);
-                                        }
-                                        nextToken();
-                                    } else {
-                                        if ((nodeTest == null)) {
-                                            nodeTest = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, fp, pool);
-                                        }
-                                        result = new Saxon.Hej.pattern.CombinedNodeTest(nodeTest, Saxon.Hej.expr.parser.Token.INTERSECT, typeTest);
-                                        nextToken();
-                                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.QMARK)) {
-                                            typeTest.setNillable(true);
-                                            nextToken();
-                                        }
-                                    }
-                                }
-                            } else {
-                                grumble((("Unexpected "+Saxon.Hej.expr.parser.Token.tokens[t.currentToken])+" after ',' in SequenceType"));
+                        if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
+                            Saxon.Hej.om.StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
+                            Saxon.Hej.om.NamespaceUri uri = contentType.getNamespaceUri();
+                            if (!(((uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA) || env.isImportedSchema(uri))))) {
+                                grumble((("No schema has been imported for namespace '"+uri)+'\''), "XPST0008");
+                            }
+                            Saxon.Hej.type.SchemaType schemaType = env.getConfiguration().getSchemaType(contentType);
+                            if ((schemaType == null)) {
+                                grumble(("Unknown type name "+contentType.getEQName()), "XPST0008");
                                 return null;
                             }
+                            if (((nodeKind == Saxon.Hej.type.Type.ATTRIBUTE) && schemaType.isComplexType())) {
+                                warning("An attribute cannot have a complex type", Saxon.Hej.trans.SaxonErrorCode.SXWN9041);
+                            }
+                            nextToken();
+                            bool nillable = false;
+                            if ((t.currentToken == Saxon.Hej.expr.parser.Token.QMARK)) {
+                                nillable = true;
+                                if ((nodeKind == Saxon.Hej.type.Type.ATTRIBUTE)) {
+                                    grumble("attribute() tests must not be nillable");
+                                }
+                                nextToken();
+                            }
+                            if (((((schemaType == Saxon.Hej.type.AnyType.getInstance()) && nillable)) || (((nodeKind == Saxon.Hej.type.Type.ATTRIBUTE) && (schemaType == Saxon.Hej.type.AnySimpleType.getInstance()))))) {
+                                result = nodeTest;
+                            } else {
+                                Saxon.Hej.pattern.NodeTest typeTest = new Saxon.Hej.pattern.ContentTypeTest(nodeKind, schemaType, env.getConfiguration(), nillable);
+                                if ((nodeTest is Saxon.Hej.pattern.NodeKindTest)) {
+                                    result = typeTest;
+                                } else {
+                                    result = new Saxon.Hej.pattern.CombinedNodeTest(nodeTest, Saxon.Hej.expr.parser.Token.INTERSECT, typeTest);
+                                }
+                            }
+                        } else {
+                            grumble((("Unexpected "+Saxon.Hej.expr.parser.Token.tokens[t.currentToken])+" after ',' in SequenceType"));
+                            return null;
                         }
                         expect(Saxon.Hej.expr.parser.Token.RPAR);
                         nextToken();
@@ -2687,60 +2741,57 @@ namespace Saxon.Hej.expr.parser {
                 }
                 return null;
               default:
-                grumble("Unknown node kind");
+                grumble(("Unknown node kind "+typeName));
                 return null;
             }
         }
-        protected internal bool isNamespaceTestAllowed() {
-            return allowXPath30Syntax;
-        }
-        private int getSystemType(string name) {
-            if ("item".Equals(name)) {
-                return Saxon.Hej.type.Type.ITEM;
-            } else {
-                if ("document-node".Equals(name)) {
-                    return Saxon.Hej.type.Type.DOCUMENT;
-                } else {
-                    if ("element".Equals(name)) {
-                        return Saxon.Hej.type.Type.ELEMENT;
+        public System.Collections.Generic.IList<Saxon.Hej.pattern.NodeTest> parseNameTestUnion(int nodeKind) {
+            System.Collections.Generic.IList<Saxon.Hej.pattern.NodeTest> tests = new System.Collections.Generic.List<Saxon.Hej.pattern.NodeTest>();
+            bool matchesAll = false;
+            while (true) {
+                string tokv = t.currentTokenValue;
+                switch (t.currentToken) {
+                  case Saxon.Hej.expr.parser.Token.NAME:
+                    nextToken();
+                    tests.Add(makeNameTest(nodeKind, tokv, true));
+                    break ;
+                  case Saxon.Hej.expr.parser.Token.PREFIX:
+                    nextToken();
+                    tests.Add(makeNamespaceTest(nodeKind, tokv));
+                    break ;
+                  case Saxon.Hej.expr.parser.Token.SUFFIX:
+                    nextToken();
+                    tokv = t.currentTokenValue;
+                    if ((t.currentToken == Saxon.Hej.expr.parser.Token.NAME)) {
                     } else {
-                        if ("schema-element".Equals(name)) {
-                            return Saxon.Hej.type.Type.ELEMENT;
-                        } else {
-                            if ("attribute".Equals(name)) {
-                                return Saxon.Hej.type.Type.ATTRIBUTE;
-                            } else {
-                                if ("schema-attribute".Equals(name)) {
-                                    return Saxon.Hej.type.Type.ATTRIBUTE;
-                                } else {
-                                    if ("text".Equals(name)) {
-                                        return Saxon.Hej.type.Type.TEXT;
-                                    } else {
-                                        if ("comment".Equals(name)) {
-                                            return Saxon.Hej.type.Type.COMMENT;
-                                        } else {
-                                            if ("processing-instruction".Equals(name)) {
-                                                return Saxon.Hej.type.Type.PROCESSING_INSTRUCTION;
-                                            } else {
-                                                if ("namespace-node".Equals(name)) {
-                                                    return Saxon.Hej.type.Type.NAMESPACE;
-                                                } else {
-                                                    if ("node".Equals(name)) {
-                                                        return Saxon.Hej.type.Type.NODE;
-                                                    } else {
-                                                        grumble(("Unknown type "+name));
-                                                        return -1;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        grumble("Expected name after '*:'");
                     }
+                    nextToken();
+                    tests.Add(makeLocalNameTest(nodeKind, tokv));
+                    break ;
+                  case Saxon.Hej.expr.parser.Token.STAR:
+                  case Saxon.Hej.expr.parser.Token.MULT:
+                    nextToken();
+                    matchesAll = true;
+                    break ;
+                  default:
+                    grumble(("Unrecognized name test at "+Saxon.Hej.expr.parser.Token.tokens[t.currentToken]));
+                    return null;
+                }
+                if (((t.currentToken == Saxon.Hej.expr.parser.Token.UNION) && !(t.currentTokenValue.Equals("union")))) {
+                    nextToken();
+                } else {
+                    break ;
                 }
             }
+            if (matchesAll) {
+                tests.Clear();
+                tests.Add(Saxon.Hej.pattern.NodeKindTest.makeNodeKindTest(nodeKind));
+            }
+            return tests;
+        }
+        protected internal bool isNamespaceTestAllowed() {
+            return allowXPath30Syntax;
         }
         protected internal void checkLanguageVersion30() {
             if (!(allowXPath30Syntax)) {
@@ -2753,8 +2804,9 @@ namespace Saxon.Hej.expr.parser {
             }
         }
         protected internal void checkLanguageVersion40() {
+            string lang = getLanguage();
             if (!(allowXPath40Syntax)) {
-                grumble("The XPath parser is not configured to allow use of XPath 4.0 syntax");
+                grumble((("The parser is not configured to allow use of "+lang)+" 4.0 syntax"));
             }
         }
         protected internal void checkMapExtensions() {
@@ -3137,7 +3189,7 @@ namespace Saxon.Hej.expr.parser {
             try {
                 functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
                 if (functionName.getPrefix().Equals("")) {
-                    if (Saxon.Hej.expr.parser.XPathParser.isReservedFunctionName31(functionName.getLocalPart())) {
+                    if (Saxon.Hej.expr.parser.XPathParser.isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
                         grumble((("The unprefixed function name '"+functionName.getLocalPart())+"' is reserved in XPath 3.1"));
                     }
                 }
@@ -3298,7 +3350,7 @@ namespace Saxon.Hej.expr.parser {
                 uf.setParameterDefinitions(paramArray);
                 Saxon.Hej.expr.instruct.SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
                 for (int i = 0; (i<expandedArity); i++) {
-                    int slot = stackFrame.allocateSlotNumber(paramArray[i].getVariableQName());
+                    int slot = stackFrame.allocateSlotNumber(paramArray[i].getVariableQName(), paramArray[i]);
                     paramArray[i].setSlotNumber(slot);
                 }
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(body, expandedArity, stackFrame);
@@ -3328,7 +3380,7 @@ namespace Saxon.Hej.expr.parser {
                 uf.setParameterDefinitions(paramArray);
                 Saxon.Hej.expr.instruct.SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
                 foreach (Saxon.Hej.expr.instruct.UserFunctionParameter param in paramArray) {
-                    stackFrame.allocateSlotNumber(param.getVariableQName());
+                    stackFrame.allocateSlotNumber(param.getVariableQName(), param);
                 }
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(body, @params.Count, stackFrame);
                 uf.setStackFrameMap(stackFrame);
@@ -3516,8 +3568,9 @@ namespace Saxon.Hej.expr.parser {
             return result;
         }
         private readonly static string[] reservedFunctionNames31 = new string[]{"array", "attribute", "comment", "document-node", "element", "empty-sequence", "function", "if", "item", "map", "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"};
-        public static bool isReservedFunctionName31(string name) {
-            int x = Saxon.Ejava.util.Arrays.binarySearch(reservedFunctionNames31, name);
+        private readonly static string[] reservedFunctionNames40 = new string[]{"attribute", "comment", "document-node", "element", "empty-sequence", "fn", "function", "if", "item", "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"};
+        public static bool isReservedFunctionName(string name, int version) {
+            int x = Saxon.Ejava.util.Arrays.binarySearch(((version>=40) ? reservedFunctionNames40 : reservedFunctionNames31), name);
             return (x>=0);
         }
         public Saxon.Hej.tree.util.IndexedStack<Saxon.Hej.expr.LocalBinding> getRangeVariables() {
@@ -3584,10 +3637,10 @@ namespace Saxon.Hej.expr.parser {
                 return new Saxon.Hej.om.FingerprintedQName(prefix, uri, local, fp);
             }
         }
-        public Saxon.Hej.pattern.NodeTest makeNameTest(short nodeType, string qname, bool useDefault) {
+        public Saxon.Hej.pattern.NodeTest makeNameTest(int nodeKind, string qname, bool useDefault) {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
             Saxon.Hej.om.NamespaceUri defaultNS = Saxon.Hej.om.NamespaceUri.NULL;
-            if ((((useDefault && (nodeType == Saxon.Hej.type.Type.ELEMENT)) && !(qname.StartsWith("Q{"))) && !(qname.Contains(":")))) {
+            if ((((useDefault && (nodeKind == Saxon.Hej.type.Type.ELEMENT)) && !(qname.StartsWith("Q{"))) && !(qname.Contains(":")))) {
                 Saxon.Api.UnprefixedElementMatchingPolicy policy = env.getUnprefixedElementMatchingPolicy();
                 switch (policy) {
                   case Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace:
@@ -3597,50 +3650,50 @@ namespace Saxon.Hej.expr.parser {
                     defaultNS = env.getDefaultElementNamespace();
                     Saxon.Hej.om.StructuredQName q = makeStructuredQName(qname, defaultNS);
                     int fp1 = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
-                    Saxon.Hej.pattern.NameTest test1 = new Saxon.Hej.pattern.NameTest(nodeType, fp1, pool);
+                    Saxon.Hej.pattern.NameTest test1 = new Saxon.Hej.pattern.NameTest(nodeKind, fp1, pool);
                     int fp2 = pool.allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, q.getLocalPart());
-                    Saxon.Hej.pattern.NameTest test2 = new Saxon.Hej.pattern.NameTest(nodeType, fp2, pool);
+                    Saxon.Hej.pattern.NameTest test2 = new Saxon.Hej.pattern.NameTest(nodeKind, fp2, pool);
                     return new Saxon.Hej.pattern.CombinedNodeTest(test1, Saxon.Hej.expr.parser.Token.UNION, test2);
                   case Saxon.Api.UnprefixedElementMatchingPolicy.AnyNamespace:
                     if (!(Saxon.Hej.om.NameChecker.isValidNCName(Saxon.Hej.str.StringTool.codePoints(qname)))) {
                         grumble((("Invalid name '"+qname)+"'"));
                     }
-                    return new Saxon.Hej.pattern.LocalNameTest(pool, nodeType, qname);
+                    return new Saxon.Hej.pattern.LocalNameTest(pool, nodeKind, qname);
                 }
             }
             Saxon.Hej.om.StructuredQName qName = makeStructuredQName(qname, defaultNS);
             int fp = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
-            return new Saxon.Hej.pattern.NameTest(nodeType, fp, pool);
+            return new Saxon.Hej.pattern.NameTest(nodeKind, fp, pool);
         }
-        public Saxon.Hej.pattern.QNameTest makeQNameTest(short nodeType, string qname) {
+        public Saxon.Hej.pattern.QNameTest makeQNameTest(int nodeKind, string qname) {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
             Saxon.Hej.om.StructuredQName q = makeStructuredQName(qname, Saxon.Hej.om.NamespaceUri.NULL);
             System.Diagnostics.Debug.Assert((q != null));
             int fp = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
-            return new Saxon.Hej.pattern.NameTest(nodeType, fp, pool);
+            return new Saxon.Hej.pattern.NameTest(nodeKind, fp, pool);
         }
-        public Saxon.Hej.pattern.NamespaceTest makeNamespaceTest(short nodeType, string prefix) {
+        public Saxon.Hej.pattern.NamespaceTest makeNamespaceTest(int nodeKind, string prefix) {
             Saxon.Hej.om.NamePool pool = env.getConfiguration().getNamePool();
             if (scanOnly) {
-                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, Saxon.Hej.om.NamespaceUri.SAXON);
+                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeKind, Saxon.Hej.om.NamespaceUri.SAXON);
             }
             if (prefix.StartsWith("Q{")) {
                 string uri = prefix.Substring(2, (prefix.Length-2) - 2);
-                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, Saxon.Hej.om.NamespaceUri.of(uri));
+                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeKind, Saxon.Hej.om.NamespaceUri.of(uri));
             }
             try {
                 Saxon.Hej.om.StructuredQName sq = qNameParser.parse((prefix+":dummy"), Saxon.Hej.om.NamespaceUri.NULL);
-                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeType, sq.getNamespaceUri());
+                return new Saxon.Hej.pattern.NamespaceTest(pool, nodeKind, sq.getNamespaceUri());
             } catch (Saxon.Hej.trans.XPathException err) {
                 grumble(err.Message, err.getErrorCodeQName());
                 return null;
             }
         }
-        public Saxon.Hej.pattern.LocalNameTest makeLocalNameTest(short nodeType, string localName) {
+        public Saxon.Hej.pattern.LocalNameTest makeLocalNameTest(int nodeKind, string localName) {
             if (!(Saxon.Hej.om.NameChecker.isValidNCName(Saxon.Hej.str.StringTool.codePoints(localName)))) {
                 grumble((("Local name ["+localName)+"] contains invalid characters"));
             }
-            return new Saxon.Hej.pattern.LocalNameTest(env.getConfiguration().getNamePool(), nodeType, localName);
+            return new Saxon.Hej.pattern.LocalNameTest(env.getConfiguration().getNamePool(), nodeKind, localName);
         }
         protected internal void setLocation(Saxon.Hej.expr.Expression exp) {
             setLocation(exp, t.currentTokenStartOffset);

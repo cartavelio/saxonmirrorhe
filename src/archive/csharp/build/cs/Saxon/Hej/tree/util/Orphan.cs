@@ -269,7 +269,11 @@ namespace Saxon.Hej.tree.util {
 
         /* Expanding default method materialize from interface Sequence */
         public Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         /* Expanding default method toShortString from interface Item */

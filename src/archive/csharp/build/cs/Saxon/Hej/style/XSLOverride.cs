@@ -37,7 +37,7 @@ namespace Saxon.Hej.style {
                                 }
                                 Saxon.Hej.om.StructuredQName[] modeNames = decl.getModeNames();
                                 foreach (Saxon.Hej.om.StructuredQName modeName in modeNames) {
-                                    if (modeName.Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {
+                                    if (modeName.Equals(Saxon.Hej.trans.Mode.OMNI_MODE_NAME)) {
                                         ((Saxon.Hej.style.StyleElement)(curr)).compileError("An overriding template rule must not specify mode=\"#all\"", "XTSE3440");
                                     } else {
                                         if (modeName.Equals(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME)) {

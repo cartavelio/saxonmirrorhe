@@ -28,7 +28,7 @@ namespace Saxon.Eej.xsltextn.pedigree {
         public override Saxon.Hej.ma.map.MapItem remove(Saxon.Hej.value.AtomicValue key) {
             return @base.remove(key);
         }
-        public override bool conforms(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
+        public override bool conforms(Saxon.Hej.type.PlainType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
             return @base.conforms(keyType, valueType, th);
         }
         public override Saxon.Hej.ma.map.MapType getItemType(Saxon.Hej.type.TypeHierarchy th) {

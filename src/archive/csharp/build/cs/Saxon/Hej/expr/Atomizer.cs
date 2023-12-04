@@ -144,7 +144,7 @@ namespace Saxon.Hej.expr {
             if ((roleSupplier == null)) {
                 return message;
             } else {
-                return ((message+". Found while atomizing the ")+roleSupplier().getMessage());
+                return ((((((message+". Found while atomizing the ")+roleSupplier().getMessage())+" in {")+toShortString())+"} on line ")+getLocation().getLineNumber());
             }
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
@@ -386,6 +386,14 @@ namespace Saxon.Hej.expr {
                     } catch (Saxon.Hej.trans.XPathException e) {
                         if ((expr.roleSupplier == null)) {
                             throw;
+                        } else {
+                            string message = expr.expandMessage(e.Message);
+                            throw new Saxon.Hej.trans.XPathException(message).withErrorCode(e.getErrorCodeQName()).withLocation(e.getLocator()).withXPathContext(context).maybeWithLocation(expr.getLocation());
+                        }
+                    } catch (Saxon.Hej.trans.UncheckedXPathException uxe) {
+                        Saxon.Hej.trans.XPathException e = uxe.getXPathException();
+                        if ((expr.roleSupplier == null)) {
+                            throw e;
                         } else {
                             string message = expr.expandMessage(e.Message);
                             throw new Saxon.Hej.trans.XPathException(message).withErrorCode(e.getErrorCodeQName()).withLocation(e.getLocator()).withXPathContext(context).maybeWithLocation(expr.getLocation());

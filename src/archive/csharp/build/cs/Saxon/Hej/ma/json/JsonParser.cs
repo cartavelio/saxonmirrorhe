@@ -39,7 +39,7 @@ namespace Saxon.Hej.ma.json {
                 invalidJSON("Unexpected token beyond end of JSON input", ERR_GRAMMAR, t.lineNumber);
             }
         }
-        public static int getFlags(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, bool allowValidate, bool isSchemaAware) {
+        public static int getFlags(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, bool allowValidate, bool isSchemaAware) {
             int flags = 0;
             Saxon.Hej.value.BooleanValue debug = (Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "debug"));
             if (((debug != null) && debug.getBooleanValue())) {
@@ -520,7 +520,7 @@ namespace Saxon.Hej.ma.json {
                 return (("<"+token)+">");
             }
         }
-        public void setNumberParser(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.expr.XPathContext context) {
+        public void setNumberParser(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.Sequence val = Saxon.Impl.Helpers.MapUtils.Get(options, "number-parser");
             if ((val != null)) {
                 Saxon.Hej.om.Item fn = val.head();

@@ -13,7 +13,7 @@ namespace Saxon.Hej.trans.rules {
         protected internal int part;
         private bool alwaysMatches;
         private int rank;
-        public Rule()  {
+        protected internal Rule()  {
         }
         public Rule(Saxon.Hej.pattern.Pattern p, Saxon.Hej.trans.rules.RuleTarget o, int prec, int min, double prio, int seq, int part)  {
             pattern = p;
@@ -25,26 +25,6 @@ namespace Saxon.Hej.trans.rules {
             sequence = seq;
             this.part = part;
             o.registerRule(this);
-        }
-        protected internal void copyFrom(Saxon.Hej.trans.rules.Rule r, bool copyChain) {
-            pattern = r.pattern.copy(new Saxon.Hej.expr.parser.RebindingMap());
-            action = ((r.action is Saxon.Hej.expr.instruct.TemplateRule) ? ((Saxon.Hej.expr.instruct.TemplateRule)(r.action)).copy() : r.action);
-            precedence = r.precedence;
-            minImportPrecedence = r.minImportPrecedence;
-            priority = r.priority;
-            sequence = r.sequence;
-            part = r.part;
-            if (((r.next == null) || !(copyChain))) {
-                next = null;
-            } else {
-                next = r.next.copy(true);
-            }
-            action.registerRule(this);
-        }
-        public virtual Saxon.Hej.trans.rules.Rule copy(bool copyChain) {
-            Saxon.Hej.trans.rules.Rule r2 = new Saxon.Hej.trans.rules.Rule();
-            r2.copyFrom(this, copyChain);
-            return r2;
         }
         public int getSequence() {
             return sequence;

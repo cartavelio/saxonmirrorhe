@@ -137,6 +137,19 @@ namespace Saxon.Hej.ma.arrays {
                 return (("["+getOperanda().getOperand(0).getChildExpression().toShortString())+", ...]");
             }
         }
+        public override string ToString() {
+            int n = getOperanda().getNumberOfOperands();
+            switch (n) {
+              case 0:
+                return "[]";
+              case 1:
+                return (("["+getOperanda().getOperand(0).getChildExpression().ToString())+"]");
+              case 2:
+                return (((("["+getOperanda().getOperand(0).getChildExpression().ToString())+", ")+getOperanda().getOperand(1).getChildExpression().ToString())+"]");
+              default:
+                return (("["+getOperanda().getOperand(0).getChildExpression().ToString())+", ...]");
+            }
+        }
         public override int getImplementationMethod() {
             return EVALUATE_METHOD;
         }

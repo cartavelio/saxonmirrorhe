@@ -84,14 +84,12 @@ namespace Saxon.Eej.ee.schema {
             receiver.endElement();
         }
         public void emitNamespaceContext(Saxon.Hej.om.NamespaceResolver resolver) {
-            for (System.Collections.Generic.IEnumerator<string> iter = resolver.iteratePrefixes(); iter.MoveNext() /*UNSAFE CONVERSION*/; ) {
-                string prefix = iter.Current;
-                Saxon.Hej.om.NamespaceUri uri = resolver.getURIForPrefix(prefix, false);
-                namespaceMap = namespaceMap.put(prefix, uri);
-            }
+            Saxon.Hej.om.NamespaceMap namespaces = Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(resolver);
+            string nsDisplay = Saxon.Hej.trace.ExpressionPresenter.getNamespacesAsString(namespaces, false);
+            emitAttribute("nsContext", nsDisplay);
         }
         public void declareNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
-            namespaceMap = namespaceMap.put(prefix, uri);
+            cco.@namespace(prefix, uri, 0);
         }
         public void emitAttribute(string attributeName, string value) {
             if (!(inStartTag)) {

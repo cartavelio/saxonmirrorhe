@@ -48,6 +48,9 @@ namespace Saxon.Hej.pattern {
         public bool matches(Saxon.Hej.om.StructuredQName qname) {
             return Saxon.Hej.om.NameOfNode.makeName(origin).getStructuredQName().Equals(qname);
         }
+        public bool matchesFingerprint(Saxon.Hej.om.NamePool namePool, int fp) {
+            return (fp == getFingerprint());
+        }
         public override double getDefaultPriority() {
             return 0.0;
         }
@@ -102,9 +105,6 @@ namespace Saxon.Hej.pattern {
         }
         public string exportQNameTest() {
             return "";
-        }
-        public string generateJavaScriptNameTest(int targetVersion) {
-            return "false";
         }
     
     }

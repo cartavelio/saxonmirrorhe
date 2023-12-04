@@ -9,10 +9,10 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.value.AtomicValue content = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
             System.IO.StringReader sr = new System.IO.StringReader(content.getStringValue());
             Saxon.Ejavax.xml.transform.Source source = new Saxon.Ejavax.xml.transform.stream.StreamSource(sr, getStaticBaseUriString());
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions;
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions;
             Saxon.Hej.lib.ParseOptions parseOptions;
             if ((arguments.Length == 1)) {
-                checkedOptions = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.Sequence>();
+                checkedOptions = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>();
                 parseOptions = new Saxon.Hej.lib.ParseOptions();
             } else {
                 checkedOptions = getDetails().optionDetails.processSuppliedOptions((Saxon.Hej.ma.map.MapItem)(arguments[1].head()), context);

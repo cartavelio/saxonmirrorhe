@@ -78,6 +78,9 @@ namespace Saxon.Hej.pattern {
             computeUriAndLocal();
             return (qname.getLocalPart().Equals(localName) && qname.hasURI(uri));
         }
+        public bool matchesFingerprint(Saxon.Hej.om.NamePool namePool, int fp) {
+            return (fp == fingerprint);
+        }
         public override double getDefaultPriority() {
             return 0.0;
         }
@@ -126,10 +129,6 @@ namespace Saxon.Hej.pattern {
         }
         public string exportQNameTest() {
             return getMatchingNodeName().getEQName();
-        }
-        public string generateJavaScriptNameTest(int targetVersion) {
-            computeUriAndLocal();
-            return (((("q.uri==='"+Saxon.Hej.trace.ExpressionPresenter.jsEscape(uri.ToString()))+"'&&q.local==='")+localName)+"'");
         }
         public override Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             Saxon.Ejava.util.Optional<string> explanation = base.explainMismatch(item, th);

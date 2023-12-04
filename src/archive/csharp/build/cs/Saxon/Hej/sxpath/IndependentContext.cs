@@ -194,7 +194,7 @@ namespace Saxon.Hej.sxpath {
                 va[var.getLocalSlotNumber()] = var;
             }
             foreach (Saxon.Hej.sxpath.XPathVariable v in va) {
-                map.allocateSlotNumber(v.getVariableQName());
+                map.allocateSlotNumber(v.getVariableQName(), v);
             }
             return map;
         }

@@ -47,7 +47,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
                 }
             }
-            if ((algorithm == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BREAKING_WHEN)) {
+            if ((algorithm == Saxon.Hej.expr.instruct.ForEachGroup.GROUP_SPLIT_WHEN)) {
                 reasons.Add("Streaming is not implemented for xsl:for-each-group/@break-when");
                 return Saxon.Eej.ee.stream.PostureAndSweep.ROAMING_AND_FREE_RANGING;
             }

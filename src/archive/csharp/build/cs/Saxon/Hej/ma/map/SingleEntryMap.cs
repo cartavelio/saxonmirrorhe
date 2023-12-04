@@ -42,7 +42,7 @@ namespace Saxon.Hej.ma.map {
                 return new Saxon.Impl.DataModel.ImmMap();
             }
         }
-        public override bool conforms(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
+        public override bool conforms(Saxon.Hej.type.PlainType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
             return (keyType.matches(key, th) && valueType.matches(value, th));
         }
         public override Saxon.Hej.type.ItemType getItemType(Saxon.Hej.type.TypeHierarchy th) {

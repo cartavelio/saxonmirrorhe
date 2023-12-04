@@ -160,28 +160,34 @@ namespace Saxon.Hej.trace {
                     emitAttribute("defaultFunctionNS", defaultFnNs);
                 }
                 if ((!(options.suppressStaticContext) && (((parentSC == null) || !(sc.declaresSameNamespaces(parentSC)))))) {
-                    Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
-                    for (System.Collections.Generic.IEnumerator<string> iter = sc.iteratePrefixes(); iter.MoveNext() /*UNSAFE CONVERSION*/; ) {
-                        string p = iter.Current;
-                        Saxon.Hej.om.NamespaceUri uri = sc.getURIForPrefix(p, true);
-                        ub.append(p);
-                        ub.append("=");
-                        if (uri.Equals(Saxon.Hej.om.NamespaceUri.getUriForConventionalPrefix(p))) {
-                            ub.append("~");
-                        } else {
-                            Saxon.Hej.str.UnicodeString uUri = uri.toUnicodeString();
-                            if (Saxon.Hej.value.Whitespace.containsWhitespace(uUri.codePoints())) {
-                                throw new Saxon.Hej.trans.XPathException((("Cannot export a stylesheet if namespaces contain whitespace: '"+uri)+"'"));
-                            }
-                            ub.append(uUri);
-                        }
-                        ub.append(" ");
-                    }
-                    emitAttribute("ns", Saxon.Hej.value.Whitespace.trim(ub.toUnicodeString()).ToString());
+                    bool includeXmlNamespace = ("JS".Equals(getOptions().target) && (getOptions().targetVersion == 2));
+                    emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap(), includeXmlNamespace));
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Ejava.lang.AssertionError(e);
             }
+        }
+        public static string getNamespacesAsString(Saxon.Hej.om.NamespaceMap sc, bool includeXmlNamespace) {
+            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
+            for (System.Collections.Generic.IEnumerator<string> iter = sc.iteratePrefixes(); iter.MoveNext() /*UNSAFE CONVERSION*/; ) {
+                string p = iter.Current;
+                if ((includeXmlNamespace || !(p.Equals("xml")))) {
+                    Saxon.Hej.om.NamespaceUri uri = sc.getURIForPrefix(p, true);
+                    ub.append(p);
+                    ub.append("=");
+                    if (uri.Equals(Saxon.Hej.om.NamespaceUri.getUriForConventionalPrefix(p))) {
+                        ub.append("~");
+                    } else {
+                        Saxon.Hej.str.UnicodeString uUri = uri.toUnicodeString();
+                        if (Saxon.Hej.value.Whitespace.containsWhitespace(uUri.codePoints())) {
+                            throw new Saxon.Hej.trans.XPathException((("Cannot export a stylesheet if namespaces contain whitespace: '"+uri)+"'"));
+                        }
+                        ub.append(uUri);
+                    }
+                    ub.append(" ");
+                }
+            }
+            return ub.ToString().Trim();
         }
         public int startElement(string name) {
             nameStack.Push(name);

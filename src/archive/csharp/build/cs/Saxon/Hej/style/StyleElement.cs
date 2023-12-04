@@ -248,7 +248,7 @@ namespace Saxon.Hej.style {
                 }
             }
         }
-        public void processStandardAttributes(Saxon.Hej.om.NamespaceUri @namespace) {
+        public virtual void processStandardAttributes(Saxon.Hej.om.NamespaceUri @namespace) {
             processExtensionElementAttribute(@namespace);
             processExcludedNamespaces(@namespace);
             processVersionAttribute(@namespace);
@@ -503,7 +503,7 @@ namespace Saxon.Hej.style {
                 }
             }
         }
-        internal int getEffectiveVersion() {
+        internal virtual int getEffectiveVersion() {
             if ((version == -1)) {
                 Saxon.Hej.om.NodeInfo node = ((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent());
                 if ((node is Saxon.Hej.style.StyleElement)) {
@@ -809,11 +809,15 @@ namespace Saxon.Hej.style {
                 exp = Saxon.Hej.expr.parser.ExpressionTool.resolveCallsToCurrentFunction(exp);
                 return exp;
             } catch (Saxon.Hej.trans.XPathException err) {
-                if (err.isReportableStatically()) {
-                    compileError(err.withLocation(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromClarkName(name))));
+                Saxon.Hej.trans.XPathException e2 = err;
+                if (e2.isReportableStatically()) {
+                    if (!(((e2.getLocator() is Saxon.Hej.expr.parser.XPathParser.NestedLocation)))) {
+                        e2 = e2.withLocation(new Saxon.Hej.tree.AttributeLocation(this, Saxon.Hej.om.StructuredQName.fromClarkName(name)));
+                    }
+                    compileError(e2);
                     return exp;
                 } else {
-                    Saxon.Hej.expr.ErrorExpression erexp = new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(err));
+                    Saxon.Hej.expr.ErrorExpression erexp = new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(e2));
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, erexp);
                     return erexp;
                 }
@@ -1267,6 +1271,7 @@ namespace Saxon.Hej.style {
             }
             Saxon.Hej.trans.XmlProcessingIncident se = new Saxon.Hej.trans.XmlProcessingIncident(err.Message, err.showErrorCode(), err.getLocator());
             se.setHostLanguage(Saxon.Api.HostLanguage.XSLT);
+            se.setFailingExpression(err.getFailingExpression());
             compileError(se);
         }
         public void compileError(string message) {

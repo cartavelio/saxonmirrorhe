@@ -127,8 +127,9 @@ namespace Saxon.Hej.value {
             }
             public override  /* REPLACING public override */ string ToString() {
                 Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
+                fsb.append('(');
                 for (int i = 0; (i<getLength()); i++) {
-                    fsb.append(((i == 0) ? "(" : ", "));
+                    fsb.append(((i == 0) ? "" : ", "));
                     fsb.append(items[i].ToString());
                 }
                 fsb.append(')');
@@ -168,7 +169,11 @@ namespace Saxon.Hej.value {
 
         /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         /* Expanding default method toShortString from interface GroundedValue */

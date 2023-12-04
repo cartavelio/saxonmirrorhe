@@ -117,7 +117,7 @@ namespace Saxon.Hej.style {
             if ((p == null)) {
                 compileError("Local variable must be declared within a template or function", "XTSE0010");
             } else {
-                slotNumber = p.allocateSlotNumber(name);
+                slotNumber = p.allocateSlotNumber(name, null);
             }
             if (sourceBinding.hasProperty(Saxon.Hej.style.SourceBinding.BindingProperty.REQUIRED)) {
                 if ((sourceBinding.getSelectExpression() != null)) {

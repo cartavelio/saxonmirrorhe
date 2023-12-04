@@ -180,7 +180,7 @@ namespace Saxon.Hej.style {
         private void registerGlobalVariable(Saxon.Hej.expr.Component c, Saxon.Hej.expr.instruct.SlotManager slotManager) {
             if ((c.getActor() is Saxon.Hej.expr.instruct.GlobalVariable)) {
                 Saxon.Hej.expr.instruct.GlobalVariable var = (Saxon.Hej.expr.instruct.GlobalVariable)(c.getActor());
-                int slot = slotManager.allocateSlotNumber(var.getVariableQName());
+                int slot = slotManager.allocateSlotNumber(var.getVariableQName(), null);
                 var.setPackageData(this);
                 var.setBinderySlotNumber(slot);
             }
@@ -237,7 +237,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.trans.Visibility oldV = oldC.getVisibility();
                 Saxon.Hej.trans.Visibility newV = Saxon.Hej.trans.Visibility.UNDEFINED;
                 if ((overrides.Contains(name) && !(((oldC.getActor() is Saxon.Hej.trans.Mode))))) {
-                    newV = Saxon.Hej.trans.Visibility.HIDDEN;
+                    newV = /*explicit enum*/ Saxon.Hej.trans.Visibility.HIDDEN;
                 } else {
                     Saxon.Hej.trans.Visibility acceptedVisibility = explicitAcceptedVisibility(name, acceptors);
                     if ((acceptedVisibility != Saxon.Hej.trans.Visibility.UNDEFINED)) {
@@ -257,7 +257,7 @@ namespace Saxon.Hej.style {
                         if (((oldV == Saxon.Hej.trans.Visibility.PUBLIC) || (oldV == Saxon.Hej.trans.Visibility.FINAL))) {
                             newV = Saxon.Hej.trans.Visibility.PRIVATE;
                         } else {
-                            newV = Saxon.Hej.trans.Visibility.HIDDEN;
+                            newV = /*explicit enum*/ Saxon.Hej.trans.Visibility.HIDDEN;
                         }
                     }
                 }
@@ -271,7 +271,7 @@ namespace Saxon.Hej.style {
                         abstractComponents.Remove(name);
                     }
                 }
-                if ((newC.getVisibility() == Saxon.Hej.trans.Visibility.HIDDEN)) {
+                if ((newC.getVisibility() == /*explicit enum*/ Saxon.Hej.trans.Visibility.HIDDEN)) {
                     hiddenComponents.Add(newC);
                 } else {
                     if ((Saxon.Impl.Helpers.MapUtils.Get(componentIndex, name) != null)) {
@@ -289,7 +289,7 @@ namespace Saxon.Hej.style {
                         }
                     }
                 }
-                if (((newC.getActor() is Saxon.Hej.trans.Mode) && overrides.Contains(name))) {
+                if ((((newC.getActor() is Saxon.Hej.trans.Mode) && overrides.Contains(name)) && !(newC.getVisibility().Equals(/*explicit enum*/ Saxon.Hej.trans.Visibility.HIDDEN)))) {
                     addCompletionAction(() => {
                         trace(("Doing mode completion for "+newC.getActor().getSymbolicName()));
                         System.Collections.Generic.IList<Saxon.Hej.expr.ComponentBinding> oldBindings = newC.getBaseComponent().getComponentBindings();
@@ -324,7 +324,7 @@ namespace Saxon.Hej.style {
             }
             foreach (Saxon.Hej.expr.Component oldC in usedPackage.hiddenComponents) {
                 trace((((oldC.getActor().getSymbolicName()+" (HIDDEN, declared in ")+oldC.getDeclaringPackage().getPackageName())+") becomes HIDDEN"));
-                Saxon.Hej.expr.Component newC = Saxon.Hej.expr.Component.makeComponent(oldC.getActor(), Saxon.Hej.trans.Visibility.HIDDEN, Saxon.Hej.trans.VisibilityProvenance.DERIVED, this, oldC.getDeclaringPackage());
+                Saxon.Hej.expr.Component newC = Saxon.Hej.expr.Component.makeComponent(oldC.getActor(), /*explicit enum*/ Saxon.Hej.trans.Visibility.HIDDEN, Saxon.Hej.trans.VisibilityProvenance.DERIVED, this, oldC.getDeclaringPackage());
                 Saxon.Impl.Helpers.MapUtils.Put(correspondence, oldC, newC);
                 newC.setBaseComponent(oldC);
                 hiddenComponents.Add(newC);
@@ -396,7 +396,7 @@ namespace Saxon.Hej.style {
             Saxon.Hej.functions.FunctionLibraryList functionLibrary = new Saxon.Hej.functions.FunctionLibraryList();
             functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(hostLanguageVersion));
             functionLibrary.addFunctionLibrary(new Saxon.Hej.style.StylesheetFunctionLibrary(this, true));
-            functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(hostLanguageVersion));
+            functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(((hostLanguageVersion == 40) ? 40 : 31)));
             functionLibrary.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
             if ("JS".Equals(getTargetEdition())) {
                 addIxslFunctionLibrary(functionLibrary);

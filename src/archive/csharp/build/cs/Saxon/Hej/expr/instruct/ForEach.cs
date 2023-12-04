@@ -126,10 +126,39 @@ namespace Saxon.Hej.expr.instruct {
             if (((getSelect().getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && (getAction() is Saxon.Hej.expr.AxisExpression))) {
                 return new Saxon.Hej.expr.SimpleStepExpression(getSelect(), getAction());
             }
+            if (((getSelect() is Saxon.Hej.expr.RangeExpression) && isSimpleArithmeticShift(getAction()))) {
+                Saxon.Hej.expr.ArithmeticExpression arith = (Saxon.Hej.expr.ArithmeticExpression)(getAction());
+                Saxon.Hej.expr.RangeExpression range = (Saxon.Hej.expr.RangeExpression)(getSelect());
+                return new Saxon.Hej.expr.RangeExpression(new Saxon.Hej.expr.ArithmeticExpression(range.getStartExpression().copy(new Saxon.Hej.expr.parser.RebindingMap()), arith.getOperator(), arith.getRhsExpression().copy(new Saxon.Hej.expr.parser.RebindingMap())), new Saxon.Hej.expr.ArithmeticExpression(range.getEndExpression().copy(new Saxon.Hej.expr.parser.RebindingMap()), arith.getOperator(), arith.getRhsExpression().copy(new Saxon.Hej.expr.parser.RebindingMap()))).typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
+            }
+            if (((((getSelect() is Saxon.Hej.expr.Literal) && (((Saxon.Hej.expr.Literal)(getSelect())).getGroundedValue() is Saxon.Hej.value.IntegerRange)) && isSimpleArithmeticShift(getAction())) && (getSeparatorExpression() == null))) {
+                Saxon.Hej.expr.ArithmeticExpression arith = (Saxon.Hej.expr.ArithmeticExpression)(getAction());
+                Saxon.Hej.value.IntegerRange range = (Saxon.Hej.value.IntegerRange)(((Saxon.Hej.expr.Literal)(getSelect())).getGroundedValue());
+                Saxon.Hej.expr.Expression shift = arith.getRhsExpression();
+                Saxon.Hej.expr.Expression newStart = new Saxon.Hej.expr.ArithmeticExpression(Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.value.Int64Value(range.start), this), arith.getOperator(), shift.copy(new Saxon.Hej.expr.parser.RebindingMap()));
+                Saxon.Hej.expr.Expression newEnd = new Saxon.Hej.expr.ArithmeticExpression(Saxon.Hej.expr.Literal.makeLiteral(new Saxon.Hej.value.Int64Value(range.end), this), arith.getOperator(), shift.copy(new Saxon.Hej.expr.parser.RebindingMap()));
+                return new Saxon.Hej.expr.RangeExpression(newStart, newEnd).typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
+            }
             if ((((threadsOp != null) && !(Saxon.Hej.expr.Literal.isEmptySequence(getThreads()))) && !(containsTailCall))) {
                 return visitor.obtainOptimizer().generateMultithreadedInstruction(this);
             }
             return this;
+        }
+        private bool isSimpleArithmeticShift(Saxon.Hej.expr.Expression exp) {
+            if (!(((exp is Saxon.Hej.expr.ArithmeticExpression)))) {
+                return false;
+            }
+            Saxon.Hej.expr.ArithmeticExpression arith = (Saxon.Hej.expr.ArithmeticExpression)(exp);
+            if (!(((arith.getLhsExpression() is Saxon.Hej.expr.ContextItemExpression)))) {
+                return false;
+            }
+            if (!((((arith.getOperator() == Saxon.Hej.expr.parser.Token.PLUS) || (arith.getOperator() == Saxon.Hej.expr.parser.Token.MINUS))))) {
+                return false;
+            }
+            if (!((((arith.getRhsExpression() is Saxon.Hej.expr.Literal) || (arith.getRhsExpression() is Saxon.Hej.expr.VariableReference))))) {
+                return false;
+            }
+            return true;
         }
         public override Saxon.Hej.expr.Expression unordered(bool retainAllNodes, bool forStreaming) {
             setSelect(getSelect().unordered(retainAllNodes, forStreaming));

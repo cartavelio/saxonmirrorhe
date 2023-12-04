@@ -972,7 +972,11 @@ namespace Saxon.Eej.config {
             if ((@ref == Saxon.Hej.expr.FilterExpression.FILTERED)) {
                 return Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(expression.iterate(context));
             } else {
-                return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+                try {
+                    return Saxon.Hej.om.SequenceTool.toGroundedValue(expression.iterate(context));
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
         }
         public override void declareBuiltInExtensionElementNamespaces() {

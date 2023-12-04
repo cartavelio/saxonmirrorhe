@@ -59,7 +59,7 @@ namespace Saxon.Hej.style {
             Saxon.Hej.expr.instruct.ValueOf inst = new Saxon.Hej.expr.instruct.ValueOf(select, disable, false);
             inst.setRetainedStaticContext(makeRetainedStaticContext());
             compileContent(exec, decl, inst, separator);
-            return inst;
+            return inst.withLocation(saveLocation());
         }
     
     }

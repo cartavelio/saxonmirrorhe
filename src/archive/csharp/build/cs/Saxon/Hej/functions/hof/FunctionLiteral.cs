@@ -28,7 +28,7 @@ namespace Saxon.Hej.functions.hof {
             return Saxon.Hej.expr.StaticProperty.EXACTLY_ONE;
         }
         protected internal override int computeSpecialProperties() {
-            return Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED;
+            return (Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED|Saxon.Hej.expr.StaticProperty.COMPUTED_FUNCTION);
         }
         public override bool isVacuousExpression() {
             return false;

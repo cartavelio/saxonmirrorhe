@@ -30,7 +30,7 @@ namespace Saxon.Hej.ma.json {
         private Saxon.Hej.ma.json.XMLToJsonFn.Options getOptions(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             if ((getArity()>1)) {
                 Saxon.Hej.ma.map.MapItem suppliedOptions = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
-                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
+                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
                 Saxon.Hej.ma.json.XMLToJsonFn.Options o = new Saxon.Hej.ma.json.XMLToJsonFn.Options();
                 o.indent = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "indent").head())).getBooleanValue();
                 Saxon.Hej.om.Sequence format = Saxon.Impl.Helpers.MapUtils.Get(options, "number-formatter");

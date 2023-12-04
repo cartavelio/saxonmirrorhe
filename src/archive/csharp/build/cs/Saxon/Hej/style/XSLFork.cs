@@ -42,7 +42,7 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.expr.Expression content = compileSequenceConstructor(exec, decl, true);
             if ((content is Saxon.Hej.expr.instruct.Block)) {
-                return new Saxon.Hej.expr.instruct.Fork(((Saxon.Hej.expr.instruct.Block)(content)).getOperanda());
+                return new Saxon.Hej.expr.instruct.Fork(((Saxon.Hej.expr.instruct.Block)(content)).getOperanda()).withLocation(saveLocation());
             } else {
                 return content;
             }

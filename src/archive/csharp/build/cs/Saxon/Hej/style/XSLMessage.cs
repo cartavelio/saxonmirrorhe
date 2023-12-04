@@ -86,6 +86,7 @@ namespace Saxon.Hej.style {
                 }
             }
             Saxon.Hej.expr.instruct.MessageInstr m = new Saxon.Hej.expr.instruct.MessageInstr(select, terminate, errorCode);
+            m.setLocation(saveLocation());
             m.setRetainedStaticContext(makeRetainedStaticContext());
             return m;
         }

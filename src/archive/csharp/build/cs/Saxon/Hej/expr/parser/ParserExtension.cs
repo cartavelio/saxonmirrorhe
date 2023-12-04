@@ -56,8 +56,8 @@ namespace Saxon.Hej.expr.parser {
             }
         
         }
-        public virtual void parseTypeAliasDeclaration(Saxon.Hej.query.XQueryParser p) {
-            needExtension(p, "Type alias declarations");
+        public virtual void parseItemTypeDeclaration(Saxon.Hej.query.XQueryParser p) {
+            needExtension(p, "Item type declarations");
         }
         public virtual void parseRevalidationDeclaration(Saxon.Hej.query.XQueryParser p) {
             needUpdate(p, "A revalidation declaration");

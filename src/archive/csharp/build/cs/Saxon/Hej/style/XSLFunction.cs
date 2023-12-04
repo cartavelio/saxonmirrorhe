@@ -19,6 +19,7 @@ namespace Saxon.Hej.style {
         private Saxon.Hej.trans.FunctionStreamability streamability;
         private Saxon.Hej.expr.instruct.UserFunction.Determinism determinism = Saxon.Hej.expr.instruct.UserFunction.Determinism.PROACTIVE;
         private bool explaining;
+        private bool updating = false;
         public Saxon.Hej.expr.instruct.Actor getActor() {
             return compiledFunction;
         }
@@ -116,7 +117,17 @@ namespace Saxon.Hej.style {
                             }
                         }
                     } else {
-                        checkUnknownAttribute(name);
+                        if (uri.Equals(Saxon.Hej.om.NamespaceUri.IXSL)) {
+                            if (isExtensionAttributeAllowed(att.getNodeName().getDisplayName())) {
+                                if (local.Equals("updating")) {
+                                    if (getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
+                                        updating = processBooleanAttribute("ixsl:updating", att.getValue());
+                                    }
+                                }
+                            }
+                        } else {
+                            checkUnknownAttribute(name);
+                        }
                     }
                 }
             }
@@ -254,6 +265,9 @@ namespace Saxon.Hej.style {
                 prepareAttributes();
             }
             return overrideExtensionFunction;
+        }
+        public bool isUpdating() {
+            return updating;
         }
         public override void index(Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.style.PrincipalStylesheetModule top) {
             getCompiledFunction();
@@ -444,6 +458,7 @@ namespace Saxon.Hej.style {
                 fn.setDeclaredVisibility(getDeclaredVisibility());
                 fn.setDeclaredStreamability(streamability);
                 fn.setDeterminism(determinism);
+                fn.setIxslUpdating(updating);
                 System.Collections.Generic.IList<Saxon.Hej.query.Annotation> annotations = new System.Collections.Generic.List<Saxon.Hej.query.Annotation>();
                 if (memoFunction) {
                     annotations.Add(new Saxon.Hej.query.Annotation(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "memo-function")));

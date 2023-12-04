@@ -271,7 +271,7 @@ namespace Saxon.Hej.expr.parser {
                 int count = ((Saxon.Hej.expr.Assignation)(exp)).getRequiredSlots();
                 nextFree += count;
                 if ((frame != null)) {
-                    frame.allocateSlotNumber(((Saxon.Hej.expr.Assignation)(exp)).getVariableQName());
+                    frame.allocateSlotNumber(((Saxon.Hej.expr.Assignation)(exp)).getVariableQName(), (Saxon.Hej.expr.Assignation)(exp));
                 }
             }
             if (((exp is Saxon.Hej.expr.instruct.LocalParam) && (((Saxon.Hej.expr.instruct.LocalParam)(exp)).getSlotNumber()<0))) {
@@ -281,7 +281,7 @@ namespace Saxon.Hej.expr.parser {
                 foreach (Saxon.Hej.expr.flwor.Clause c in ((Saxon.Hej.expr.flwor.FLWORExpression)(exp)).getClauseList()) {
                     foreach (Saxon.Hej.expr.flwor.LocalVariableBinding b in c.getRangeVariables()) {
                         b.setSlotNumber(nextFree++);
-                        frame.allocateSlotNumber(b.getVariableQName());
+                        frame.allocateSlotNumber(b.getVariableQName(), b);
                     }
                 }
             }
@@ -361,7 +361,7 @@ namespace Saxon.Hej.expr.parser {
                                 return (((n.compareTo(0) != 0)) && !(n.isNaN()));
                             } else {
                                 iterator.close();
-                                ebvError(("a sequence starting with an atomic value of type "+((Saxon.Hej.value.AtomicValue)(first)).getItemType().getTypeName().getDisplayName()));
+                                ebvError(("a sequence starting with an atomic value of type "+((Saxon.Hej.value.AtomicValue)(first)).getItemType().getDescription()));
                                 return false;
                             }
                         }

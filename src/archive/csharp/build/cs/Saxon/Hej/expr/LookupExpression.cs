@@ -228,7 +228,12 @@ namespace Saxon.Hej.expr {
                             Saxon.Hej.expr.elab.PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                             return context => {
                                 Saxon.Hej.om.SequenceIterator baseIterator = /*Delegate.iterate()*/lhs(context);
-                                Saxon.Hej.om.GroundedValue rhsValue = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                                Saxon.Hej.om.GroundedValue rhsValue;
+                                try {
+                                    rhsValue = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
                                 return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => Saxon.Hej.expr.MappingIterator.map(rhsValue.iterate(), index => {
                                     Saxon.Hej.ma.arrays.ArrayItem array = (Saxon.Hej.ma.arrays.ArrayItem)(baseItem);
                                     int subscript = (Saxon.Hej.ma.arrays.ArrayFunctionSet.checkSubscript((Saxon.Hej.value.IntegerValue)(index), array.arrayLength())-1);
@@ -261,7 +266,12 @@ namespace Saxon.Hej.expr {
                                 Saxon.Hej.expr.elab.PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                                 return context => {
                                     Saxon.Hej.om.SequenceIterator baseIterator = /*Delegate.iterate()*/lhs(context);
-                                    Saxon.Hej.om.GroundedValue rhsVal = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                                    Saxon.Hej.om.GroundedValue rhsVal;
+                                    try {
+                                        rhsVal = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                        throw e.getXPathException();
+                                    }
                                     return Saxon.Hej.expr.MappingIterator.map(baseIterator, baseItem => Saxon.Hej.expr.MappingIterator.map(rhsVal.iterate(), index => optionalGroundedValueIterator(((Saxon.Hej.ma.map.MapItem)(baseItem)).get((Saxon.Hej.value.AtomicValue)(index)))));
                                 } ;
                             }
@@ -271,7 +281,12 @@ namespace Saxon.Hej.expr {
                         Saxon.Hej.expr.elab.PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                         return context => {
                             Saxon.Hej.om.SequenceIterator baseIterator = /*Delegate.iterate()*/lhs(context);
-                            Saxon.Hej.om.GroundedValue rhsVal = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                            Saxon.Hej.om.GroundedValue rhsVal;
+                            try {
+                                rhsVal = Saxon.Hej.om.SequenceTool.toGroundedValue(/*Delegate.iterate()*/rhs(context));
+                            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                throw e.getXPathException();
+                            }
                             Saxon.Hej.expr.MappingFunction mappingFunction = Saxon.Hej.expr.SequenceMapper.of(baseItem => {
                                 switch (baseItem.getGenre()) {
                                   case Saxon.Hej.om.Genre.ARRAY:
@@ -299,7 +314,11 @@ namespace Saxon.Hej.expr {
                                             throw new Saxon.Hej.trans.XPathException((("An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator ("+baseItem.toShortString())+") is not a singleton string"), "XPTY0004").asTypeError().withLocation(expr.getLocation()).withFailingExpression(expr);
                                         }
                                         string key = ((Saxon.Hej.value.StringValue)(rhsVal)).getStringValue();
-                                        return context.getConfiguration().externalObjectAsMap((Saxon.Hej.value.ObjectValue<object>)(baseItem), key).get((Saxon.Hej.value.StringValue)(rhsVal)).iterate();
+                                        Saxon.Hej.om.GroundedValue entry = context.getConfiguration().externalObjectAsMap((Saxon.Hej.value.ObjectValue<object>)(baseItem), key).get((Saxon.Hej.value.StringValue)(rhsVal));
+                                        if ((entry == null)) {
+                                            throw new Saxon.Hej.trans.XPathException(((("There is no unique method named "+key)+" in the external object of type ")+((Saxon.Hej.value.ObjectValue<object>)(baseItem)).getObject().GetType().Name), "XPTY0004");
+                                        }
+                                        return entry.iterate();
                                     }
                                   default:
                                     {

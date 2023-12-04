@@ -82,6 +82,8 @@ namespace Saxon.Hej.style {
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.expr.sort.MergeInstr merge = new Saxon.Hej.expr.sort.MergeInstr();
+            merge.setLocation(saveLocation());
+            merge.setRetainedStaticContext(makeRetainedStaticContext());
             int entries = numberOfMergeSources;
             Saxon.Hej.expr.sort.MergeInstr.MergeSource[] sources = new Saxon.Hej.expr.sort.MergeInstr.MergeSource[entries];
             Saxon.Hej.expr.Expression action = Saxon.Hej.expr.Literal.makeEmptySequence();

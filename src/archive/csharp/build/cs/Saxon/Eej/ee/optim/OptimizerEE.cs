@@ -318,6 +318,9 @@ namespace Saxon.Eej.ee.optim {
                             if (((Saxon.Hej.value.AtomicValue)(item)).isUntypedAtomic()) {
                                 return null;
                             }
+                            if ((item is Saxon.Hej.value.QualifiedNameValue)) {
+                                return null;
+                            }
                             trie.initialPut((Saxon.Hej.value.AtomicValue)(item), Saxon.Hej.value.BooleanValue.TRUE);
                         } else {
                             return null;
@@ -1235,7 +1238,7 @@ namespace Saxon.Eej.ee.optim {
                 }
                 Saxon.Hej.expr.instruct.SlotManager slots = getConfiguration().makeSlotManager();
                 Saxon.Hej.om.StructuredQName valueName = Saxon.Hej.om.NamespaceUri.NULL.qName("value");
-                slots.allocateSlotNumber(valueName);
+                slots.allocateSlotNumber(valueName, null);
                 Saxon.Hej.expr.SuppliedParameterReference @ref = new Saxon.Hej.expr.SuppliedParameterReference(0);
                 Saxon.Hej.expr.ArithmeticExpression increment = new Saxon.Hej.expr.ArithmeticExpression(@ref, Saxon.Hej.expr.parser.Token.PLUS, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.PLUS_ONE, ni));
                 increment.setCalculator(Saxon.Hej.expr.Calculator.INTEGER_INTEGER[Saxon.Hej.expr.Calculator.PLUS]);

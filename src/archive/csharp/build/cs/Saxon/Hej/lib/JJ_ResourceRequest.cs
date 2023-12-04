@@ -40,6 +40,19 @@ namespace Saxon.Hej.lib {
             return rr;
         }
         public Saxon.Ejavax.xml.transform.Source resolve(params Saxon.Hej.lib.JJ_ResourceResolver[]  resolvers) {
+            string requestedUri = relativeUri;
+            if ((requestedUri == null)) {
+                requestedUri = uri;
+            }
+            string id = null;
+            Saxon.Hej.lib.JJ_ResourceRequest adjustedRequest = this;
+            int hash = requestedUri.IndexOf('#');
+            if ((hash>=0)) {
+                adjustedRequest = copy();
+                adjustedRequest.relativeUri = requestedUri.Substring(0, hash - 0);
+                id = requestedUri.Substring((hash+1));
+            }
+            Saxon.Ejavax.xml.transform.Source resolvedSource = null;
             foreach (Saxon.Hej.lib.JJ_ResourceResolver resolver in resolvers) {
                 if ((resolver != null)) {
                     Saxon.Ejavax.xml.transform.Source s = null;
@@ -57,11 +70,20 @@ namespace Saxon.Hej.lib {
                         }
                     }
                     if ((s != null)) {
-                        return s;
+                        resolvedSource = s;
+                        break ;
                     }
                 }
             }
-            return null;
+            if ((resolvedSource != null)) {
+                if ((id != null)) {
+                    string idFinal = id;
+                    Saxon.Hej.@event.FilterFactory factory = next => new Saxon.Hej.@event.IDFilter(next, idFinal);
+                    resolvedSource = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(resolvedSource);
+                    ((Saxon.Hej.lib.AugmentedSource)(resolvedSource)).addFilter(factory);
+                }
+            }
+            return resolvedSource;
         }
     
     }

@@ -68,6 +68,9 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.value.Base64BinaryValue.byteArrayHashCode(binaryValue);
         }
         public int compareTo(Saxon.Hej.expr.sort.XPathComparable o) {
+            if ((o is Saxon.Hej.value.Base64BinaryValue)) {
+                o = new Saxon.Hej.value.HexBinaryValue(((Saxon.Hej.value.Base64BinaryValue)(o)).getBinaryValue());
+            }
             if ((o is Saxon.Hej.value.HexBinaryValue)) {
                 byte[] other = ((Saxon.Hej.value.HexBinaryValue)(o)).binaryValue;
                 int len0 = binaryValue.Length;
@@ -82,7 +85,7 @@ namespace Saxon.Hej.value {
                 }
                 return System.Math.Sign((len0-len1));
             } else {
-                throw new System.InvalidCastException(("Cannot compare xs:hexBinary to "+o.ToString()));
+                throw new System.InvalidCastException(("Cannot compare xs:hexBinary to "+o.GetType()));
             }
         }
     

@@ -36,7 +36,7 @@ namespace Saxon.Hej.style {
             if ((val == null)) {
                 val = compileSequenceConstructor(exec, decl, false);
             }
-            Saxon.Hej.expr.Expression brake = new Saxon.Hej.expr.instruct.BreakInstr();
+            Saxon.Hej.expr.Expression brake = new Saxon.Hej.expr.instruct.BreakInstr().withLocation(saveLocation());
             brake.setRetainedStaticContext(makeRetainedStaticContext());
             return Saxon.Hej.expr.instruct.Block.makeBlock(val, brake);
         }

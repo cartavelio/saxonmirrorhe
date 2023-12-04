@@ -18,13 +18,13 @@ namespace Saxon.Hej.ma.json {
         }
         public static new Saxon.Hej.functions.OptionsParameter OPTION_DETAILS;
         protected internal override Saxon.Hej.om.Item eval(string input, Saxon.Hej.ma.map.MapItem options, Saxon.Hej.expr.XPathContext context) {
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions = null;
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions = null;
             if ((options != null)) {
                 checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
             }
             return parse(input, checkedOptions, context);
         }
-        public static Saxon.Hej.om.Item parse(string input, System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options, Saxon.Hej.expr.XPathContext context) {
+        public static Saxon.Hej.om.Item parse(string input, System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.ma.json.JsonParser parser = new Saxon.Hej.ma.json.JsonParser();
             int flags = 0;
             if ((options != null)) {

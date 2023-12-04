@@ -3,16 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.regex {
     public class UnicodeBlocks {
-        private static System.Collections.Generic.IDictionary<string,Saxon.Hej.z.IntSet> blocks = null;
+        private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.z.IntSet> blocks = new System.Collections.Generic.Dictionary<string, Saxon.Hej.z.IntSet>(250);
+        private UnicodeBlocks()  {
+            build();
+        }
+        private class Holder {
+            public static readonly Saxon.Hej.regex.UnicodeBlocks INSTANCE = new Saxon.Hej.regex.UnicodeBlocks();
+        
+        }
+        private static Saxon.Hej.regex.UnicodeBlocks getInstance() {
+            return Saxon.Hej.regex.UnicodeBlocks.Holder.INSTANCE;
+        }
         public static Saxon.Hej.z.IntSet getBlock(string name) {
-            if ((blocks == null)) {
-                readBlocks(new Saxon.Hej.Configuration());
-            }
-            Saxon.Hej.z.IntSet cc = Saxon.Impl.Helpers.MapUtils.Get(blocks, name);
+            Saxon.Hej.regex.UnicodeBlocks instance = getInstance();
+            Saxon.Hej.z.IntSet cc = Saxon.Impl.Helpers.MapUtils.Get(instance.blocks, name);
             if ((cc != null)) {
                 return cc;
             }
-            cc = Saxon.Impl.Helpers.MapUtils.Get(blocks, normalizeBlockName(name));
+            cc = Saxon.Impl.Helpers.MapUtils.Get(instance.blocks, normalizeBlockName(name));
             return cc;
         }
         private static string normalizeBlockName(string name) {
@@ -33,12 +41,12 @@ namespace Saxon.Hej.regex {
             }
             return fsb.ToString();
         }
-        private static void readBlocks(Saxon.Hej.Configuration config) { lock(typeof(UnicodeBlocks)) {
-            blocks = new System.Collections.Generic.Dictionary<string, Saxon.Hej.z.IntSet>(250);
+        private void build() {
             System.IO.Stream @in = Saxon.Hej.Version.platform.locateResource("unicodeBlocks.xml", new System.Collections.Generic.List<string>());
             if ((@in == null)) {
                 throw new Saxon.Hej.regex.RESyntaxException("Unable to read unicodeBlocks.xml file");
             }
+            Saxon.Hej.Configuration config = new Saxon.Hej.Configuration();
             Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP).withDTDValidationMode(Saxon.Hej.lib.Validation.SKIP).withSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance()).withPleaseCloseAfterUse(true);
             Saxon.Hej.om.TreeInfo doc;
             try {
@@ -70,7 +78,7 @@ namespace Saxon.Hej.regex {
                 }
                 Saxon.Impl.Helpers.MapUtils.Put(blocks, blockName, range);
             }
-        }}
+        }
     
     }
 }

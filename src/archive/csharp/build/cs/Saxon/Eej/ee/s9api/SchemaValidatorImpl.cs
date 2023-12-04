@@ -86,7 +86,7 @@ namespace Saxon.Eej.ee.s9api {
         public override void setParameter(Saxon.Api.QName name, Saxon.Api.XdmValue value) {
             try {
                 suppliedParams.put(name.GetStructuredQName(), ((value == null) ? null : ((Saxon.Hej.om.Sequence)(((Saxon.Hej.om.GroundedValue)value.Unwrap()))).materialize()));
-            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+            } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }

@@ -78,6 +78,9 @@ namespace Saxon.Hej.functions.hof {
             }
             return new Saxon.Hej.type.SpecificFunctionType(argTypes, resultType);
         }
+        protected internal override int computeSpecialProperties() {
+            return Saxon.Hej.expr.StaticProperty.COMPUTED_FUNCTION;
+        }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             System.Collections.Generic.IList<Saxon.Hej.expr.Operand> operanda = new System.Collections.Generic.List<Saxon.Hej.expr.Operand>((boundArgumentsOp.Length+1));
             operanda.Add(baseOp);

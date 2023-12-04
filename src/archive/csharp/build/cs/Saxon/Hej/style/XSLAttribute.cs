@@ -131,7 +131,6 @@ namespace Saxon.Hej.style {
             return "XTSE0840";
         }
         public override Saxon.Hej.expr.instruct.Instruction compile(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
-            Saxon.Hej.om.NamespaceResolver nsContext = null;
             if ((attributeName is Saxon.Hej.expr.StringLiteral)) {
                 string qName = Saxon.Hej.value.Whitespace.trim(((Saxon.Hej.expr.StringLiteral)(attributeName)).stringify());
                 string[] parts;
@@ -153,7 +152,7 @@ namespace Saxon.Hej.style {
                     attributeName.obtainFingerprint(getNamePool());
                     Saxon.Hej.expr.instruct.FixedAttribute instruction = new Saxon.Hej.expr.instruct.FixedAttribute(attributeName, validationAction, schemaType);
                     instruction.setInstruction(true);
-                    instruction.setLocation(allocateLocation());
+                    instruction.setLocation(saveLocation());
                     compileContent(compilation, decl, instruction, separator);
                     return instruction;
                 } else {
@@ -184,18 +183,15 @@ namespace Saxon.Hej.style {
                         nodeName.obtainFingerprint(getNamePool());
                         Saxon.Hej.expr.instruct.FixedAttribute fixedAtt = new Saxon.Hej.expr.instruct.FixedAttribute(nodeName, validationAction, schemaType);
                         fixedAtt.setInstruction(true);
+                        fixedAtt.setLocation(saveLocation());
                         compileContent(compilation, decl, fixedAtt, separator);
                         return fixedAtt;
                     }
                 }
-            } else {
-                if ((@namespace == null)) {
-                    nsContext = getAllNamespaces();
-                }
             }
             Saxon.Hej.expr.instruct.ComputedAttribute inst = new Saxon.Hej.expr.instruct.ComputedAttribute(attributeName, @namespace, validationAction, schemaType, false);
             inst.setInstruction(true);
-            inst.setLocation(allocateLocation());
+            inst.setLocation(saveLocation());
             compileContent(compilation, decl, inst, separator);
             return inst;
         }

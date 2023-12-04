@@ -15,7 +15,7 @@ namespace Saxon.Hej.ma.map {
         }
         abstract public Saxon.Hej.ma.map.MapItem addEntry(Saxon.Hej.value.AtomicValue key, Saxon.Hej.om.GroundedValue value);
         abstract public Saxon.Hej.ma.map.MapItem remove(Saxon.Hej.value.AtomicValue key);
-        abstract public bool conforms(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th);
+        abstract public bool conforms(Saxon.Hej.type.PlainType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th);
         abstract public Saxon.Hej.type.ItemType getItemType(Saxon.Hej.type.TypeHierarchy th);
         abstract public Saxon.Hej.type.UType getKeyUType();
         public string toShortString() {
@@ -125,7 +125,7 @@ namespace Saxon.Hej.ma.map {
             return null;
         }
         public virtual string getDescription() {
-            return "map";
+            return toShortString();
         }
         public int getArity() {
             return 1;
@@ -231,7 +231,11 @@ namespace Saxon.Hej.ma.map {
 
         /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         /* Expanding default method asIterable from interface GroundedValue */

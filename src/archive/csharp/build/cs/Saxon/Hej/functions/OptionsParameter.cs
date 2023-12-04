@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.functions {
     public class OptionsParameter {
         private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.value.SequenceType> allowedOptions = new System.Collections.Generic.Dictionary<string, Saxon.Hej.value.SequenceType>(8);
-        private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> defaultValues = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.Sequence>(8);
+        private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> defaultValues = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>(8);
         private readonly System.Collections.Generic.ISet<string> requiredOptions = new System.Collections.Generic.HashSet<string>(4);
         private readonly System.Collections.Generic.IDictionary<string,System.Collections.Generic.ISet<string>> allowedValues = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.ISet<string>>(8);
         private string errorCodeForDisallowedValue;
@@ -19,7 +19,7 @@ namespace Saxon.Hej.functions {
             Saxon.Impl.Helpers.MapUtils.Put(allowedOptions, name, type);
             requiredOptions.Add(name);
         }
-        public void addAllowedOption(string name, Saxon.Hej.value.SequenceType type, Saxon.Hej.om.Sequence defaultValue) {
+        public void addAllowedOption(string name, Saxon.Hej.value.SequenceType type, Saxon.Hej.om.GroundedValue defaultValue) {
             Saxon.Impl.Helpers.MapUtils.Put(allowedOptions, name, type);
             if ((defaultValue != null)) {
                 Saxon.Impl.Helpers.MapUtils.Put(defaultValues, name, defaultValue);
@@ -30,8 +30,8 @@ namespace Saxon.Hej.functions {
             Saxon.Impl.Helpers.MapUtils.Put(allowedValues, name, valueSet);
             errorCodeForDisallowedValue = errorCode;
         }
-        public System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> processSuppliedOptions(Saxon.Hej.ma.map.MapItem supplied, Saxon.Hej.expr.XPathContext context) {
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> result = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.Sequence>();
+        public System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> processSuppliedOptions(Saxon.Hej.ma.map.MapItem supplied, Saxon.Hej.expr.XPathContext context) {
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> result = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>();
             Saxon.Hej.type.TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             foreach (string req in requiredOptions) {
                 if ((supplied.get(new Saxon.Hej.value.StringValue(req)) == null)) {
@@ -79,7 +79,7 @@ namespace Saxon.Hej.functions {
                     }
                     Saxon.Impl.Helpers.MapUtils.Put(result, nominalKey, actual);
                 } else {
-                    Saxon.Hej.om.Sequence def = Saxon.Impl.Helpers.MapUtils.Get(defaultValues, nominalKey);
+                    Saxon.Hej.om.GroundedValue def = Saxon.Impl.Helpers.MapUtils.Get(defaultValues, nominalKey);
                     if ((def != null)) {
                         Saxon.Impl.Helpers.MapUtils.Put(result, nominalKey, def);
                     }
@@ -87,12 +87,8 @@ namespace Saxon.Hej.functions {
             }
             return result;
         }
-        public System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> getDefaultOptions() {
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> result = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.Sequence>();
-            foreach (System.Collections.Generic.KeyValuePair<string,Saxon.Hej.om.Sequence> entry in defaultValues) {
-                Saxon.Impl.Helpers.MapUtils.Put(result, entry.Key, entry.Value);
-            }
-            return result;
+        public System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> getDefaultOptions() {
+            return new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>(defaultValues);
         }
         public string getErrorCodeForAbsentValue() {
             return errorCodeForAbsentValue;

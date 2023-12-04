@@ -11,16 +11,14 @@ namespace Saxon.Eej.trans {
                 requireXslt40Element();
             } else {
                 if (!(getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION))) {
-                    compileError("xsl:array requires a Saxon-PE or -EE license");
+                    compileError("xsl:array-member requires a Saxon-PE or -EE license");
                 }
             }
             if ((getSelectExpression() == null)) {
                 setSelectExpression(compileSequenceConstructor(exec, decl, false));
             }
-            Saxon.Hej.expr.Expression result = Saxon.Hej.expr.Literal.makeEmptySequence();
-            Saxon.Hej.functions.SystemFunction arrayMem = Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance().makeFunction("parcel", 1);
-            result = arrayMem.makeFunctionCall(getSelectExpression());
-            return result;
+            Saxon.Hej.functions.SystemFunction arrayMem = Saxon.Hej.ma.map.MapFunctionSet.getInstance(31).makeFunction("entry", 2);
+            return arrayMem.makeFunctionCall(new Saxon.Hej.expr.StringLiteral("value"), getSelectExpression());
         }
     
     }

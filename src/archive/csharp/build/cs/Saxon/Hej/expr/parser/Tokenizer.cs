@@ -175,7 +175,7 @@ namespace Saxon.Hej.expr.parser {
             }
         }
         private void handleLCURLY() {
-            if (!(((state == SEQUENCE_TYPE_STATE)))) {
+            if ((state != SEQUENCE_TYPE_STATE)) {
                 currentToken = Saxon.Hej.expr.parser.Token.KEYWORD_CURLY;
                 lookAhead();
             }
@@ -414,7 +414,7 @@ namespace Saxon.Hej.expr.parser {
                         nextToken = Saxon.Hej.expr.parser.Token.FAT_ARROW;
                         return ;
                     }
-                    if (((((languageLevel>=40) && (inputOffset<(inputLength-1))) && (input[inputOffset] == '!')) && isGreaterThanChar(input[(inputOffset+1)]))) {
+                    if ((((inputOffset<(inputLength-1)) && (input[inputOffset] == '!')) && isGreaterThanChar(input[(inputOffset+1)]))) {
                         inputOffset += 2;
                         nextToken = Saxon.Hej.expr.parser.Token.MAPPING_ARROW;
                         return ;
@@ -907,11 +907,14 @@ namespace Saxon.Hej.expr.parser {
             switch (s) {
               case "if":
                 return Saxon.Hej.expr.parser.Token.IF;
-              case "map":
               case "namespace-node":
-              case "array":
               case "function":
-                return ((languageLevel == 20) ? Saxon.Hej.expr.parser.Token.FUNCTION : Saxon.Hej.expr.parser.Token.NODEKIND);
+                return ((languageLevel == 20) ? Saxon.Hej.expr.parser.Token.FUNCTION : Saxon.Hej.expr.parser.Token.KEYWORD_LBRA);
+              case "fn":
+                return ((languageLevel>=40) ? Saxon.Hej.expr.parser.Token.KEYWORD_LBRA : Saxon.Hej.expr.parser.Token.FUNCTION);
+              case "array":
+              case "map":
+                return ((languageLevel == 31) ? Saxon.Hej.expr.parser.Token.KEYWORD_LBRA : Saxon.Hej.expr.parser.Token.FUNCTION);
               case "node":
               case "schema-attribute":
               case "schema-element":
@@ -923,14 +926,14 @@ namespace Saxon.Hej.expr.parser {
               case "item":
               case "text":
               case "attribute":
-                return Saxon.Hej.expr.parser.Token.NODEKIND;
+                return Saxon.Hej.expr.parser.Token.KEYWORD_LBRA;
               case "atomic":
               case "tuple":
               case "record":
               case "type":
               case "union":
               case "enum":
-                return (allowSaxonExtensions ? Saxon.Hej.expr.parser.Token.NODEKIND : Saxon.Hej.expr.parser.Token.FUNCTION);
+                return (allowSaxonExtensions ? Saxon.Hej.expr.parser.Token.KEYWORD_LBRA : Saxon.Hej.expr.parser.Token.FUNCTION);
               case "switch":
                 return ((languageLevel == 20) ? Saxon.Hej.expr.parser.Token.FUNCTION : Saxon.Hej.expr.parser.Token.SWITCH);
               case "otherwise":

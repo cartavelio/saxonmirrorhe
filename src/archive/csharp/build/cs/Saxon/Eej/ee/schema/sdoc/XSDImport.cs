@@ -78,7 +78,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     if (((status == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN) && !(config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS)))) {
                         if ((schemaLocation != null)) {
                             string message = (("The schema document at "+schemaLocation)+" is not being read because schema components for this namespace are already available");
-                            if (!(@namespace.Equals(Saxon.Hej.lib.NamespaceConstant.XML))) {
+                            if (!(targetNamespace.Equals(Saxon.Hej.om.NamespaceUri.XML))) {
                                 message += ". To force the schema document to be read, set --multipleSchemaImports:on";
                             }
                             warning(message);

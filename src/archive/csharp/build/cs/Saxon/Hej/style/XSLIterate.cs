@@ -77,7 +77,7 @@ namespace Saxon.Hej.style {
             }
             try {
                 action = action.simplify();
-                return new Saxon.Hej.expr.instruct.IterateInstr(select, paramBlock, action, finallyExp);
+                return new Saxon.Hej.expr.instruct.IterateInstr(select, paramBlock, action, finallyExp).withLocation(saveLocation());
             } catch (Saxon.Hej.trans.XPathException err) {
                 compileError(err);
                 return null;

@@ -165,7 +165,7 @@ namespace Saxon.Hej.style {
             Saxon.Hej.tree.iter.AxisIterator ai = iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR);
             Saxon.Hej.om.NodeInfo node;
             while (((node = ((/*1430*/Saxon.Hej.om.NodeInfo)ai.next())) != null)) {
-                if (((node is Saxon.Hej.style.XSLGeneralVariable) || (node is Saxon.Hej.style.XSLFunction))) {
+                if (((node is Saxon.Hej.style.XSLGeneralVariable) || (((node is Saxon.Hej.style.XSLFunction) && !(((Saxon.Hej.style.XSLFunction)(node)).isUpdating()))))) {
                     issueWarning((("An xsl:result-document instruction inside "+node.getDisplayName())+" will always fail at run-time"), "XTDE1480");
                     return new Saxon.Hej.expr.ErrorExpression("Call to xsl:result-document while in temporary output state", "XTDE1480", false);
                 }
@@ -233,6 +233,7 @@ namespace Saxon.Hej.style {
             }
             inst.setContentExpression(content);
             inst.setAsynchronous(async);
+            inst.setLocation(saveLocation());
             return inst;
         }
     

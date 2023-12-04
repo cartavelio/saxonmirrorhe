@@ -13,7 +13,7 @@ namespace Saxon.Hej.trans {
             if (@base.getModeName().Equals(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME)) {
                 throw new Saxon.Ejava.lang.AssertionError("Cannot override an unnamed mode");
             }
-            if (@base.getModeName().Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {
+            if (@base.getModeName().Equals(Saxon.Hej.trans.Mode.OMNI_MODE_NAME)) {
                 throw new Saxon.Ejava.lang.AssertionError("Cannot override mode='#all'");
             }
             this.@base = @base;

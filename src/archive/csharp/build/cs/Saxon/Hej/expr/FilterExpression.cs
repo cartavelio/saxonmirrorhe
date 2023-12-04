@@ -682,15 +682,8 @@ namespace Saxon.Hej.expr {
                     throw e.maybeWithLocation(getLocation());
                 }
             }
-            Saxon.Hej.om.SequenceIterator baseIter = getBase().iterate(context);
-            if ((baseIter is Saxon.Hej.tree.iter.EmptyIterator)) {
-                return baseIter;
-            }
-            if ((filterIsPositional && !(filterIsSingletonBoolean))) {
-                return new Saxon.Hej.expr.FilterIterator(baseIter, getFilter(), context);
-            } else {
-                return new Saxon.Hej.expr.FilterIterator.NonNumeric(baseIter, getFilter(), context);
-            }
+            Saxon.Hej.expr.elab.PullEvaluator puller = makeElaborator().elaborateForPull();
+            return /*Delegate.iterate()*/puller(context);
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.FilterExpression fe = new Saxon.Hej.expr.FilterExpression(getBase().copy(rebindings), getFilter().copy(rebindings));

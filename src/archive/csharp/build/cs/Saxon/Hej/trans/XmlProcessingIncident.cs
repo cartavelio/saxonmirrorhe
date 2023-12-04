@@ -13,6 +13,7 @@ namespace Saxon.Hej.trans {
         private bool _hasBeenReported = false;
         private Saxon.Api.HostLanguage hostLanguage = Saxon.Api.HostLanguage.UNKNOWN;
         private bool _isStaticError;
+        private Saxon.Hej.expr.Expression failingExpression;
         public XmlProcessingIncident(string message, string errorCode, Saxon.Hej.s9api.Location location)  {
             Saxon.Ejava.util.Objects.requireNonNull(message);
             Saxon.Ejava.util.Objects.requireNonNull(errorCode);
@@ -95,6 +96,12 @@ namespace Saxon.Hej.trans {
         }
         public string getModuleUri() {
             return getLocation().getSystemId();
+        }
+        public Saxon.Hej.expr.Expression getFailingExpression() {
+            return failingExpression;
+        }
+        public void setFailingExpression(Saxon.Hej.expr.Expression expr) {
+            this.failingExpression = expr;
         }
         public Saxon.Hej.s9api.Location getLocation() {
             return ((locator == null) ? Saxon.Hej.expr.parser.Loc.NONE : locator);

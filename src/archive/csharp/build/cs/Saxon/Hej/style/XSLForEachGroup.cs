@@ -6,7 +6,7 @@ namespace Saxon.Hej.style {
         private Saxon.Hej.expr.Expression select = null;
         private Saxon.Hej.expr.Expression groupBy = null;
         private Saxon.Hej.expr.Expression groupAdjacent = null;
-        private Saxon.Hej.expr.Expression breakWhen = null;
+        private Saxon.Hej.expr.Expression splitWhen = null;
         private Saxon.Hej.pattern.Pattern starting = null;
         private Saxon.Hej.pattern.Pattern ending = null;
         private Saxon.Hej.expr.Expression collationName;
@@ -25,7 +25,7 @@ namespace Saxon.Hej.style {
             string groupAdjacentAtt = null;
             string startingAtt = null;
             string endingAtt = null;
-            string breakWhenAtt = null;
+            string splitWhenAtt = null;
             string collationAtt = null;
             foreach (Saxon.Hej.om.AttributeInfo att in attributes()) {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
@@ -51,8 +51,14 @@ namespace Saxon.Hej.style {
                     break ;
                   case "break-when":
                     if (requireXslt40Attribute("break-when")) {
-                        breakWhenAtt = ((("function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean "+"{ Q{http://www.w3.org/2005/xpath-functions}boolean(")+value)+") }");
-                        breakWhen = makeExpression(breakWhenAtt, att);
+                        splitWhenAtt = ((("function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean "+"{ Q{http://www.w3.org/2005/xpath-functions}boolean(")+value)+") }");
+                        splitWhen = makeExpression(splitWhenAtt, att);
+                    }
+                    break ;
+                  case "split-when":
+                    if (requireXslt40Attribute("split-when")) {
+                        splitWhenAtt = ((("function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean "+"{ Q{http://www.w3.org/2005/xpath-functions}boolean(")+value)+") }");
+                        splitWhen = makeExpression(splitWhenAtt, att);
                     }
                     break ;
                   case "collation":
@@ -71,7 +77,7 @@ namespace Saxon.Hej.style {
                 select = Saxon.Hej.expr.Literal.makeEmptySequence();
                 reportAbsence("select");
             }
-            int c = (((((((groupByAtt == null) ? 0 : 1))+(((groupAdjacentAtt == null) ? 0 : 1)))+(((startingAtt == null) ? 0 : 1)))+(((endingAtt == null) ? 0 : 1)))+(((breakWhenAtt == null) ? 0 : 1)));
+            int c = (((((((groupByAtt == null) ? 0 : 1))+(((groupAdjacentAtt == null) ? 0 : 1)))+(((startingAtt == null) ? 0 : 1)))+(((endingAtt == null) ? 0 : 1)))+(((splitWhenAtt == null) ? 0 : 1)));
             if ((c != 1)) {
                 compileError(("Exactly one of the attributes group-by, group-adjacent, group-starting-with, "+"and group-ending-with must be specified"), "XTSE1080");
             }
@@ -134,12 +140,12 @@ namespace Saxon.Hej.style {
                         compileError(err);
                     }
                 } else {
-                    if ((breakWhen != null)) {
-                        breakWhen = typeCheck("break-when", breakWhen);
+                    if ((splitWhen != null)) {
+                        splitWhen = typeCheck("break-when", splitWhen);
                         try {
                             Saxon.Hej.type.SpecificFunctionType breakWhenType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
                             Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0, "XTTE1100");
-                            breakWhen = tc.staticTypeCheck(breakWhen, Saxon.Hej.value.SequenceType.makeSequenceType(breakWhenType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE), role, visitor);
+                            splitWhen = tc.staticTypeCheck(splitWhen, Saxon.Hej.value.SequenceType.makeSequenceType(breakWhenType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE), role, visitor);
                         } catch (Saxon.Hej.trans.XPathException err) {
                             compileError(err);
                         }
@@ -194,9 +200,9 @@ namespace Saxon.Hej.style {
                             algorithm = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_ENDING;
                             key = ending;
                         } else {
-                            if ((breakWhen != null)) {
-                                algorithm = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_BREAKING_WHEN;
-                                key = breakWhen;
+                            if ((splitWhen != null)) {
+                                algorithm = Saxon.Hej.expr.instruct.ForEachGroup.GROUP_SPLIT_WHEN;
+                                key = splitWhen;
                             }
                         }
                     }
@@ -210,6 +216,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.expr.instruct.ForEachGroup instr = new Saxon.Hej.expr.instruct.ForEachGroup(select, action.simplify(), algorithm, key, collator, collationName, makeSortKeys(compilation, decl));
                 instr.setIsInFork((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()).getFingerprint() == Saxon.Hej.om.StandardNames.XSL_FORK));
                 instr.setComposite(composite);
+                instr.setLocation(saveLocation());
                 return instr;
             } catch (Saxon.Hej.trans.XPathException e) {
                 compileError(e);

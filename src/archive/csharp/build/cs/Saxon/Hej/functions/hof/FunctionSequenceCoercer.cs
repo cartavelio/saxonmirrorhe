@@ -17,12 +17,16 @@ namespace Saxon.Hej.functions.hof {
             return Saxon.Hej.expr.OperandRole.INSPECT;
         }
         public override Saxon.Hej.expr.Expression simplify() {
-            setBaseExpression(getBaseExpression().simplify());
-            if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
-                Saxon.Hej.om.GroundedValue val = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(new Saxon.Hej.expr.EarlyEvaluationContext(getConfiguration())));
-                return Saxon.Hej.expr.Literal.makeLiteral(val, this);
+            try {
+                setBaseExpression(getBaseExpression().simplify());
+                if ((getBaseExpression() is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.om.GroundedValue val = Saxon.Hej.om.SequenceTool.toGroundedValue(iterate(new Saxon.Hej.expr.EarlyEvaluationContext(getConfiguration())));
+                    return Saxon.Hej.expr.Literal.makeLiteral(val, this);
+                }
+                return this;
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
-            return this;
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             getOperand().typeCheck(visitor, contextInfo);

@@ -13,22 +13,26 @@ namespace Saxon.Hej.expr.accum {
             return accumulator;
         }
         public void buildIndex(Saxon.Hej.om.NodeInfo doc, Saxon.Hej.expr.XPathContext context) {
-            if (building) {
-                throw new Saxon.Hej.trans.XPathException((("Accumulator "+accumulator.getAccumulatorName().getDisplayName())+" requires access to its own value"), "XTDE3400");
+            try {
+                if (building) {
+                    throw new Saxon.Hej.trans.XPathException((("Accumulator "+accumulator.getAccumulatorName().getDisplayName())+" requires access to its own value"), "XTDE3400");
+                }
+                building = true;
+                Saxon.Hej.expr.Expression initialValue = accumulator.getInitialValueExpression();
+                Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                Saxon.Hej.expr.instruct.SlotManager sf = accumulator.getSlotManagerForInitialValueExpression();
+                Saxon.Hej.om.Sequence[] slots = new Saxon.Hej.om.Sequence[sf.getNumberOfVariables()];
+                c2.setStackFrame(sf, slots);
+                c2.setCurrentIterator(new Saxon.Hej.tree.iter.ManualIterator(doc));
+                Saxon.Hej.om.Sequence val = Saxon.Hej.om.SequenceTool.toGroundedValue(initialValue.iterate(c2));
+                values.Add(new Saxon.Hej.expr.accum.AccumulatorData.DataPoint(new Saxon.Hej.expr.accum.AccumulatorData.Visit(doc, false), val));
+                val = visit(doc, val, c2);
+                values.Add(new Saxon.Hej.expr.accum.AccumulatorData.DataPoint(new Saxon.Hej.expr.accum.AccumulatorData.Visit(doc, true), val));
+                Saxon.Impl.Helpers.ListUtils.TrimToSize(((System.Collections.Generic.List<Saxon.Hej.expr.accum.AccumulatorData.DataPoint>)(values)));
+                building = false;
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
             }
-            building = true;
-            Saxon.Hej.expr.Expression initialValue = accumulator.getInitialValueExpression();
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            Saxon.Hej.expr.instruct.SlotManager sf = accumulator.getSlotManagerForInitialValueExpression();
-            Saxon.Hej.om.Sequence[] slots = new Saxon.Hej.om.Sequence[sf.getNumberOfVariables()];
-            c2.setStackFrame(sf, slots);
-            c2.setCurrentIterator(new Saxon.Hej.tree.iter.ManualIterator(doc));
-            Saxon.Hej.om.Sequence val = Saxon.Hej.om.SequenceTool.toGroundedValue(initialValue.iterate(c2));
-            values.Add(new Saxon.Hej.expr.accum.AccumulatorData.DataPoint(new Saxon.Hej.expr.accum.AccumulatorData.Visit(doc, false), val));
-            val = visit(doc, val, c2);
-            values.Add(new Saxon.Hej.expr.accum.AccumulatorData.DataPoint(new Saxon.Hej.expr.accum.AccumulatorData.Visit(doc, true), val));
-            Saxon.Impl.Helpers.ListUtils.TrimToSize(((System.Collections.Generic.List<Saxon.Hej.expr.accum.AccumulatorData.DataPoint>)(values)));
-            building = false;
         }
         private Saxon.Hej.om.Sequence visit(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.Sequence value, Saxon.Hej.expr.XPathContext context) {
             try {

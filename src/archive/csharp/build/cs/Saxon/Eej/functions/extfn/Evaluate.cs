@@ -30,7 +30,7 @@ namespace Saxon.Eej.functions.extfn {
             Saxon.Hej.sxpath.IndependentContext env = makeStaticContext(context, namespaceOrigin, baseUri);
             Saxon.Hej.expr.instruct.Executable exec = context.getController().getExecutable();
             env.setExecutable(exec);
-            env.setXPathLanguageLevel(30);
+            env.setXPathLanguageLevel(31);
             env.setAllowUndeclaredVariables(true);
             Saxon.Eej.functions.extfn.Evaluate.PreparedExpression pexpr = new Saxon.Eej.functions.extfn.Evaluate.PreparedExpression();
             pexpr.expStaticContext = env;

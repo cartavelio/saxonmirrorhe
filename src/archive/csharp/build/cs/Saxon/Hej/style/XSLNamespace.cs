@@ -47,7 +47,7 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.expr.instruct.NamespaceConstructor inst = new Saxon.Hej.expr.instruct.NamespaceConstructor(name);
             compileContent(exec, decl, inst, new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.SINGLE_SPACE));
-            return inst;
+            return inst.withLocation(saveLocation());
         }
     
     }

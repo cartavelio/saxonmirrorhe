@@ -36,6 +36,10 @@ namespace Saxon.Hej.style {
                             }
                         }
                         break ;
+                      case "capture":
+                        requireXslt40Attribute("capture");
+                        capture = processBooleanAttribute("capture", value);
+                        break ;
                       default:
                         checkUnknownAttribute(attName);
                         break ;
@@ -58,7 +62,7 @@ namespace Saxon.Hej.style {
             }
             match = makePattern(matchAtt, "match");
             if ((capture && !(postDescent))) {
-                issueWarning("saxon:capture has no effect on a pre-descent accumulator rule", Saxon.Hej.trans.SaxonErrorCode.SXWN9044);
+                compileErrorInAttribute("capture='yes' is not allowed on an accumulator rule with phase='start'", "XTSE3355", "capture");
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {

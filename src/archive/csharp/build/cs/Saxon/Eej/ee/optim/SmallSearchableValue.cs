@@ -8,7 +8,7 @@ namespace Saxon.Eej.ee.optim {
             this.end = end;
         }
         private delegate bool EqualityComparer (Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b);
-        public override Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, bool firstOnly, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context) {
             System.Collections.Generic.IList<Saxon.Hej.om.Item> selected = new System.Collections.Generic.List<Saxon.Hej.om.Item>();
             Saxon.Hej.expr.XPathContext c2 = context.newContext();
             Saxon.Hej.tree.iter.ManualIterator manual = new Saxon.Hej.tree.iter.ManualIterator();
@@ -30,16 +30,22 @@ namespace Saxon.Eej.ee.optim {
                 Saxon.Hej.om.Item key;
                 while (((key = keys.next()) != null)) {
                     Saxon.Hej.om.AtomicSequence atomized = key.atomize();
+                    bool matched = false;
                     foreach (Saxon.Hej.value.AtomicValue sought in soughtValues) {
                         foreach (Saxon.Hej.value.AtomicValue val in atomized) {
                             if (/*Delegate.compare()*/compare(val, sought)) {
-                                if (firstOnly) {
-                                    return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(value[i]);
-                                } else {
-                                    selected.Add(value[i]);
-                                }
+                                selected.Add(value[i]);
+                                matched = true;
+                                break ;
                             }
                         }
+                        if (matched) {
+                            break ;
+                        }
+                    }
+                    if (matched) {
+                        keys.close();
+                        break ;
                     }
                 }
             }

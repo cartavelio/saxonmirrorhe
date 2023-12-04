@@ -47,7 +47,7 @@ namespace Saxon.Hej.type {
             return "function(*)";
         }
         public virtual Saxon.Hej.type.PlainType getAtomizedItemType() {
-            return null;
+            return Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC;
         }
         public virtual bool isAtomizable(Saxon.Hej.type.TypeHierarchy th) {
             return true;

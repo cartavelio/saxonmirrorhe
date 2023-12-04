@@ -8,10 +8,12 @@ namespace Saxon.Hej.value {
         protected internal int depth = 0;
         protected internal Saxon.Hej.expr.elab.LearningEvaluator learningEvaluator;
         protected internal int serialNumber;
+        protected internal Saxon.Hej.expr.Expression expression;
         protected internal Saxon.Hej.om.SequenceIterator inputIterator;
         public Closure()  {
         }
         public void saveContext(Saxon.Hej.expr.Expression expression, Saxon.Hej.expr.XPathContext context) {
+            this.expression = expression;
             if ((((expression.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LOCAL_VARIABLES)) != 0)) {
                 Saxon.Hej.expr.StackFrame localStackFrame = context.getStackFrame();
                 Saxon.Hej.om.Sequence[] local = localStackFrame.getStackFrameValues();
@@ -23,7 +25,11 @@ namespace Saxon.Hej.value {
                         if ((local[i] is Saxon.Hej.value.Closure)) {
                             int cdepth = ((Saxon.Hej.value.Closure)(local[i])).depth;
                             if ((cdepth>=10)) {
-                                local[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(local[i].iterate());
+                                try {
+                                    local[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(local[i].iterate());
+                                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
                             } else {
                                 if (((cdepth+1)>depth)) {
                                     depth = (cdepth+1);
@@ -76,10 +82,17 @@ namespace Saxon.Hej.value {
         public virtual Saxon.Hej.om.Sequence makeRepeatable() {
             return materialize();
         }
+        public Saxon.Hej.expr.Expression getExpression() {
+            return expression;
+        }
     
         /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
     }

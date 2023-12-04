@@ -330,7 +330,7 @@ namespace Saxon.Hej.expr.instruct {
                         Saxon.Hej.functions.FunctionLibraryList libraryList1 = new Saxon.Hej.functions.FunctionLibraryList();
                         foreach (Saxon.Hej.functions.FunctionLibrary lib in libraryList0.getLibraryList()) {
                             if (((lib is Saxon.Hej.functions.registry.BuiltInFunctionSet) && ((Saxon.Hej.functions.registry.BuiltInFunctionSet)(lib)).getNamespace().Equals(Saxon.Hej.om.NamespaceUri.FN))) {
-                                libraryList1.addFunctionLibrary(config.getXPathFunctionSet(version));
+                                libraryList1.addFunctionLibrary(config.getXPathFunctionSet(((version == 40) ? 40 : 31)));
                             } else {
                                 if (((lib is Saxon.Hej.style.StylesheetFunctionLibrary) || (lib is Saxon.Hej.functions.ExecutableFunctionLibrary))) {
                                     libraryList1.addFunctionLibrary(new Saxon.Hej.style.PublicStylesheetFunctionLibrary(lib));
@@ -388,7 +388,7 @@ namespace Saxon.Hej.expr.instruct {
                         expr = Saxon.Hej.expr.parser.ExpressionTool.resolveCallsToCurrentFunction(expr);
                         Saxon.Hej.expr.parser.ContextItemStaticInfo cit;
                         if ((instr.getContextItemExpr() != null)) {
-                            cit = config.makeContextItemStaticInfo(instr.getContextItemExpr().getItemType(), false);
+                            cit = config.makeContextItemStaticInfo(instr.getContextItemExpr().getItemType(), Saxon.Hej.value.Cardinality.allowsZero(instr.getContextItemExpr().getCardinality()));
                         } else {
                             cit = Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT;
                         }

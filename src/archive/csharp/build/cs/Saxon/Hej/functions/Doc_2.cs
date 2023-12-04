@@ -20,7 +20,7 @@ namespace Saxon.Hej.functions {
             op.addAllowedOption("use-xsi-schema-location", Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
             return op;
         }
-        public static Saxon.Hej.lib.ParseOptions setParseOptions(Saxon.Hej.expr.parser.RetainedStaticContext rsc, System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions, Saxon.Hej.expr.XPathContext context) {
+        public static Saxon.Hej.lib.ParseOptions setParseOptions(Saxon.Hej.expr.parser.RetainedStaticContext rsc, System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.lib.ParseOptions result = context.getConfiguration().getParseOptions();
             Saxon.Hej.om.Sequence value = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "validation");
             if ((value != null)) {
@@ -91,7 +91,7 @@ namespace Saxon.Hej.functions {
             }
             string href = hrefVal.getStringValue();
             Saxon.Hej.om.Item param = arguments[1].head();
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions((Saxon.Hej.ma.map.MapItem)(param), context);
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions((Saxon.Hej.ma.map.MapItem)(param), context);
             Saxon.Hej.lib.ParseOptions parseOptions = setParseOptions(getRetainedStaticContext(), checkedOptions, context);
             Saxon.Hej.om.NodeInfo item = fetch(href, parseOptions, context).getRootNode();
             if ((item == null)) {

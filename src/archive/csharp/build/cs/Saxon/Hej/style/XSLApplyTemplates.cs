@@ -127,6 +127,7 @@ namespace Saxon.Hej.style {
             compileSequenceConstructor(compilation, decl, true);
             Saxon.Hej.trans.rules.RuleManager rm = compilation.getPrincipalStylesheetModule().getRuleManager();
             Saxon.Hej.expr.instruct.ApplyTemplates app = new Saxon.Hej.expr.instruct.ApplyTemplates(sortedSequence, useCurrentMode, useTailRecursion, defaultedSelectExpression, isWithinDeclaredStreamableConstruct(), mode, rm);
+            app.setLocation(saveLocation());
             app.setActualParams(getWithParamInstructions(app, compilation, decl, false));
             app.setTunnelParams(getWithParamInstructions(app, compilation, decl, true));
             if ((separator != null)) {

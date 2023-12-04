@@ -157,13 +157,12 @@ namespace Saxon.Hej.lib {
                 if ((locator is Saxon.Hej.expr.parser.XPathParser.NestedLocation)) {
                     Saxon.Hej.expr.parser.XPathParser.NestedLocation nestedLoc = (Saxon.Hej.expr.parser.XPathParser.NestedLocation)(locator);
                     Saxon.Hej.s9api.Location outerLoc = nestedLoc.getContainingLocation();
-                    int line = nestedLoc.getLocalLineNumber();
-                    int column = nestedLoc.getColumnNumber();
-                    string lineInfo = ((line<=0) ? "" : (("on line "+line)+' '));
-                    string columnInfo = ((column<=0) ? "" : ((("at "+(((line<=0) ? "char " : "column ")))+column)+' '));
+                    int line = (nestedLoc.getLocalLineNumber()+1);
+                    int column = (nestedLoc.getColumnNumber()+1);
+                    string lineInfo = ((line<=1) ? "" : (("on line "+line)+' '));
+                    string columnInfo = ((column<=1) ? "" : ((("at "+(((line<=1) ? "char " : "column ")))+column)+' '));
                     string nearBy = nestedLoc.getNearbyText();
-                    Saxon.Hej.expr.Expression failingExpression = null;
-                    string extraContext = formatExtraContext(failingExpression, nearBy);
+                    string extraContext = formatExtraContext(error.getFailingExpression(), nearBy);
                     if ((outerLoc is Saxon.Hej.tree.AttributeLocation)) {
                         string innerLoc = ((lineInfo+extraContext)+columnInfo);
                         return (((kind+innerLoc)+langText)+getLocationMessageText(outerLoc));
@@ -210,7 +209,7 @@ namespace Saxon.Hej.lib {
             return message;
         }
         public string formatNestedMessages(Saxon.Hej.s9api.XmlProcessingError err, string message) {
-            if ((err.getCause() == null)) {
+            if (((err.getCause() == null) || isSAXParseException(err.getCause()))) {
                 return message;
             } else {
                 Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(message);
@@ -264,6 +263,9 @@ namespace Saxon.Hej.lib {
         }
         protected internal void outputStackTrace(Saxon.Hej.lib.Logger @out, Saxon.Hej.expr.XPathContext context) {
             logStackTrace(context, @out, stackTraceDetail);
+        }
+        public Saxon.Hej.s9api.XmlProcessingError getLatestError() {
+            return latestError;
         }
     
     }

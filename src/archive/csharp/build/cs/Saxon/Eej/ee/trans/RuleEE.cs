@@ -4,14 +4,7 @@ using System.Linq;
 namespace Saxon.Eej.ee.trans {
     public class RuleEE : Saxon.Hej.trans.rules.Rule {
         private System.Collections.Generic.IList<Saxon.Eej.ee.trans.Precondition> preconditions = new System.Collections.Generic.List<Saxon.Eej.ee.trans.Precondition>();
-        public RuleEE()  {
-        }
         public RuleEE(Saxon.Hej.pattern.Pattern p, Saxon.Hej.trans.rules.RuleTarget o, int prec, int min, double prio, int seq, int part) : base (p, o, prec, min, prio, seq, part) {
-        }
-        public override Saxon.Hej.trans.rules.Rule copy(bool copyChain) {
-            Saxon.Eej.ee.trans.RuleEE r2 = new Saxon.Eej.ee.trans.RuleEE();
-            r2.copyFrom(this, copyChain);
-            return r2;
         }
         public System.Collections.Generic.IList<Saxon.Eej.ee.trans.Precondition> getPreconditions() {
             return preconditions;

@@ -12,7 +12,7 @@ namespace Saxon.Hej.expr.flwor {
         }
         public override void processTuple(Saxon.Hej.expr.XPathContext context) {
             currentWindows = new System.Collections.Generic.List<Saxon.Hej.expr.flwor.WindowClause.Window>();
-            bool autoclose = (windowClause.isTumblingWindow() && (windowClause.getEndCondition() == null));
+            bool autoClose = (windowClause.isTumblingWindow() && (windowClause.getEndCondition() == null));
             Saxon.Hej.om.Item previousPrevious = null;
             Saxon.Hej.om.Item previous = null;
             Saxon.Hej.om.Item current = null;
@@ -30,14 +30,14 @@ namespace Saxon.Hej.expr.flwor {
                 }
                 position++;
                 if ((position>0)) {
-                    if (((((windowClause.isSlidingWindow() || currentWindows.Count==0) || autoclose)) && windowClause.matchesStart(previous, current, next, position, context))) {
-                        if ((autoclose && !(currentWindows.Count==0))) {
+                    if (((((windowClause.isSlidingWindow() || currentWindows.Count==0) || autoClose)) && windowClause.matchesStart(previous, current, next, position, context))) {
+                        if ((autoClose && !(currentWindows.Count==0))) {
                             Saxon.Hej.expr.flwor.WindowClause.Window w = currentWindows[0];
                             w.endItem = previous;
                             w.endPreviousItem = previousPrevious;
                             w.endNextItem = current;
                             w.endPosition = (position-1);
-                            despatch(w, getOutputter(), context);
+                            despatch(w, context);
                             currentWindows.Clear();
                         }
                         Saxon.Hej.expr.flwor.WindowClause.Window window = new Saxon.Hej.expr.flwor.WindowClause.Window();
@@ -61,7 +61,7 @@ namespace Saxon.Hej.expr.flwor {
                                 w.endPreviousItem = previous;
                                 w.endNextItem = next;
                                 w.endPosition = position;
-                                despatch(w, getOutputter(), context);
+                                despatch(w, context);
                                 if (w.isDespatched()) {
                                     removals.Add(w);
                                 }
@@ -73,17 +73,30 @@ namespace Saxon.Hej.expr.flwor {
                     }
                 }
             }
-            if (windowClause.isIncludeUnclosedWindows()) {
-                foreach (Saxon.Hej.expr.flwor.WindowClause.Window w in currentWindows) {
-                    w.endItem = current;
-                    w.endPreviousItem = previous;
-                    w.endNextItem = null;
-                    w.endPosition = position;
-                    despatch(w, getOutputter(), context);
+            if (!(windowClause.isIncludeUnclosedWindows())) {
+                for (int i = (currentWindows.Count-1); (i>=0); i--) {
+                    if (!(currentWindows[i].isFinished())) {
+                        Saxon.Impl.Helpers.ListUtils.Remove(currentWindows, i);
+                    }
+                }
+            }
+            foreach (Saxon.Hej.expr.flwor.WindowClause.Window w in currentWindows) {
+                if (w.isFinished()) {
+                    if (!(w.isDespatched())) {
+                        despatch(w, context);
+                    }
+                } else {
+                    if (windowClause.isIncludeUnclosedWindows()) {
+                        w.endItem = current;
+                        w.endPreviousItem = previous;
+                        w.endNextItem = null;
+                        w.endPosition = position;
+                        despatch(w, context);
+                    }
                 }
             }
         }
-        private void despatch(Saxon.Hej.expr.flwor.WindowClause.Window w, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
+        private void despatch(Saxon.Hej.expr.flwor.WindowClause.Window w, Saxon.Hej.expr.XPathContext context) {
             windowClause.checkWindowContents(w);
             while (true) {
                 int earliestStart = System.Int32.MaxValue;

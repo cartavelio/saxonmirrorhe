@@ -342,11 +342,15 @@ namespace Saxon.Hej {
                 queryFileName = (("{"+value)+"}");
             }
             string qv = options.getOptionValue("qversion");
-            if ((((qv != null) && !("3.1".Equals(qv))) && !("4.0".Equals(qv)))) {
-                config.getLogger().warning("-qversion ignored: 3.1 is assumed");
+            if (((qv == null) && config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS))) {
+                languageVersion = "4.0";
             } else {
-                if ("4.0".Equals(qv)) {
-                    languageVersion = "4.0";
+                if ((((qv != null) && !("3.1".Equals(qv))) && !("4.0".Equals(qv)))) {
+                    config.getLogger().warning("-qversion ignored: 3.1 is assumed");
+                } else {
+                    if ("4.0".Equals(qv)) {
+                        languageVersion = "4.0";
+                    }
                 }
             }
             value = options.getOptionValue("repeat");
@@ -551,8 +555,9 @@ namespace Saxon.Hej {
                                 }
                                 try {
                                     string queryText = Saxon.Hej.query.QueryReader.readSourceQuery(config, (Saxon.Ejavax.xml.transform.stream.StreamSource)(sources[0]), config.getValidCharacterChecker());
+                                    compiler.setBaseURI(new System.Uri(sources[0].getSystemId(), System.UriKind.RelativeOrAbsolute));
                                     exp = compiler.compile(queryText);
-                                } catch (Saxon.Hej.trans.XPathException e) {
+                                } catch (Exception e) when (e is Saxon.Hej.trans.XPathException || e is System.UriFormatException) {
                                     throw new Saxon.Api.SaxonApiException(e);
                                 }
                                 break ;

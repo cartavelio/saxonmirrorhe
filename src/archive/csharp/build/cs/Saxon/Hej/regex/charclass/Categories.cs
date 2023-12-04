@@ -61,9 +61,18 @@ namespace Saxon.Hej.regex.charclass {
             }
 
         }
-        private static System.Collections.Generic.Dictionary<string,Saxon.Hej.regex.charclass.Categories.Category> CATEGORIES = null;
-        static void build() {
-            CATEGORIES = new System.Collections.Generic.Dictionary<string, Saxon.Hej.regex.charclass.Categories.Category>(30);
+        private readonly System.Collections.Generic.Dictionary<string,Saxon.Hej.regex.charclass.Categories.Category> CATEGORIES = new System.Collections.Generic.Dictionary<string, Saxon.Hej.regex.charclass.Categories.Category>(30);
+        private Categories()  {
+            build();
+        }
+        private class Holder {
+            public static readonly Saxon.Hej.regex.charclass.Categories INSTANCE = new Saxon.Hej.regex.charclass.Categories();
+        
+        }
+        private static Saxon.Hej.regex.charclass.Categories getInstance() {
+            return Saxon.Hej.regex.charclass.Categories.Holder.INSTANCE;
+        }
+        private void build() {
             System.IO.Stream @in = Saxon.Hej.Version.platform.locateResource("categories.xml", new System.Collections.Generic.List<string>());
             if ((@in == null)) {
                 throw new System.Exception("Unable to read categories.xml file");
@@ -117,10 +126,7 @@ namespace Saxon.Hej.regex.charclass {
         public readonly static Saxon.Hej.regex.charclass.PredicateCharacterClass ESCAPE_w = new Saxon.Hej.regex.charclass.PredicateCharacterClass(value => !((((CATEGORY_P.test(value) || CATEGORY_Z.test(value)) || CATEGORY_C.test(value)))));
         public readonly static Saxon.Hej.regex.charclass.CharacterClass ESCAPE_W = new Saxon.Hej.regex.charclass.InverseCharacterClass(ESCAPE_w);
         public static Saxon.Hej.regex.charclass.Categories.Category getCategory(string cat) { lock(typeof(Categories)) {
-            if ((CATEGORIES == null)) {
-                build();
-            }
-            return Saxon.Impl.Helpers.MapUtils.Get(CATEGORIES, cat);
+            return Saxon.Impl.Helpers.MapUtils.Get(getInstance().CATEGORIES, cat);
         }}
     
     }

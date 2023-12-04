@@ -23,7 +23,7 @@ namespace Saxon.Hej.functions.hof {
             Saxon.Hej.om.Sequence vendorOptionsOption = null;
             if ((args.Length == 2)) {
                 Saxon.Hej.ma.map.MapItem suppliedOptions = (Saxon.Hej.ma.map.MapItem)(args[1].head());
-                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
+                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
                 xqueryVersionOption = Saxon.Impl.Helpers.MapUtils.Get(checkedOptions, "xquery-version");
                 if ((xqueryVersionOption != null)) {
                     double vn = ((Saxon.Hej.value.DecimalValue)(xqueryVersionOption.head())).getDoubleValue();
@@ -93,9 +93,11 @@ namespace Saxon.Hej.functions.hof {
             Saxon.Hej.query.QueryModule main = new Saxon.Hej.query.QueryModule(staticQueryContext);
             main.setPackageData(lib.getPackageData());
             main.setExecutable(lib.getExecutable());
+            main.initializeFunctionLibraries();
             lib.link(main);
             Saxon.Hej.query.XQueryExpression xqe = new Saxon.Hej.query.XQueryExpression(new Saxon.Hej.expr.ContextItemExpression(), main, false);
             Saxon.Hej.query.DynamicQueryContext dqc = new Saxon.Hej.query.DynamicQueryContext(context.getConfiguration());
+            Saxon.Hej.query.XQueryParser.createRunTimeFunctionLibrary(main, config, main.getExecutable());
             if ((variablesOption != null)) {
                 Saxon.Hej.ma.map.MapItem extVariables = (Saxon.Hej.ma.map.MapItem)(variablesOption.head());
                 Saxon.Hej.tree.iter.AtomicIterator iterator = extVariables.keys();

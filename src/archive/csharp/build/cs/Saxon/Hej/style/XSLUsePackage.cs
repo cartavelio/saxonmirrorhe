@@ -174,7 +174,7 @@ namespace Saxon.Hej.style {
                         if (((overridingDeclaration is Saxon.Hej.style.XSLTemplate) && (overridingDeclaration.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "match") != null))) {
                             Saxon.Hej.om.StructuredQName[] modeNames = ((Saxon.Hej.style.XSLTemplate)(overridingDeclaration)).getModeNames();
                             foreach (Saxon.Hej.om.StructuredQName modeName in modeNames) {
-                                if (modeName.Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {
+                                if (modeName.Equals(Saxon.Hej.trans.Mode.OMNI_MODE_NAME)) {
                                     ((Saxon.Hej.style.StyleElement)(overridingDeclaration)).compileError("The mode name #all must not appear in an overriding template rule", "XTSE3440");
                                     continue ;
                                 }

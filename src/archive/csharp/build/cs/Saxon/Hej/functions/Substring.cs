@@ -123,6 +123,15 @@ namespace Saxon.Hej.functions {
                 return substring(arg0, arg1);
             } else {
                 Saxon.Hej.value.NumericValue arg2 = (Saxon.Hej.value.NumericValue)(arguments[2].head());
+                if ((arg2 == null)) {
+                    if ((getRetainedStaticContext().getPackageData().getHostLanguageVersion()<40)) {
+                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("3rd argument of substring() must not be an empty sequence (unless 4.0 is enabled)", "XPTY0004");
+                        err.setIsTypeError(true);
+                        throw err;
+                    } else {
+                        return substring(arg0, arg1);
+                    }
+                }
                 return substring(arg0, arg1, arg2);
             }
         }
@@ -146,6 +155,7 @@ namespace Saxon.Hej.functions {
                     } ;
                 } else {
                     Saxon.Hej.expr.elab.ItemEvaluator arg2Eval = fnc.getArg(2).makeElaborator().elaborateForItem();
+                    bool disallowEmpty = (fnc.getRetainedStaticContext().getPackageData().getHostLanguageVersion()<40);
                     return context => {
                         Saxon.Hej.value.StringValue sv = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/arg0Eval(context));
                         if ((nullable && (sv == null))) {
@@ -153,6 +163,15 @@ namespace Saxon.Hej.functions {
                         }
                         Saxon.Hej.value.NumericValue start = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/arg1Eval(context));
                         Saxon.Hej.value.NumericValue len = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/arg2Eval(context));
+                        if ((len == null)) {
+                            if (disallowEmpty) {
+                                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("3rd argument of substring() must not be an empty sequence (unless 4.0 is enabled)", "XPTY0004");
+                                err.setIsTypeError(true);
+                                throw err;
+                            } else {
+                                return substring(sv, start);
+                            }
+                        }
                         return substring(sv, start, len);
                     } ;
                 }

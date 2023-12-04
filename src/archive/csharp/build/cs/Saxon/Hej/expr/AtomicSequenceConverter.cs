@@ -247,7 +247,7 @@ namespace Saxon.Hej.expr {
             destination.emitAttribute("from", Saxon.Hej.type.AlphaCode.fromItemType(getBaseExpression().getItemType()));
             destination.emitAttribute("to", Saxon.Hej.type.AlphaCode.fromItemType(requiredItemType));
             string flags = "";
-            if (((converter is Saxon.Hej.type.Converter.PromoterToDouble) || (converter is Saxon.Hej.type.Converter.PromoterToFloat))) {
+            if (converter.isPromoter()) {
                 flags = "p";
             }
             if ((converter is Saxon.Hej.type.Converter.DownCastingConverter)) {
@@ -259,7 +259,17 @@ namespace Saxon.Hej.expr {
             if ((getRoleSupplier() != null)) {
                 destination.emitAttribute("diag", getRoleSupplier()().save());
             }
-            getBaseExpression().export(destination);
+            if (((converter.isPromoter() && "JS".Equals(destination.getOptions().target)) && (destination.getOptions().targetVersion == 2))) {
+                destination.startElement("cvUntyped");
+                destination.emitAttribute("to", Saxon.Hej.type.AlphaCode.fromItemType(requiredItemType));
+                if ((getRoleSupplier() != null)) {
+                    destination.emitAttribute("diag", getRoleSupplier()().save());
+                }
+                getBaseExpression().export(destination);
+                destination.endElement();
+            } else {
+                getBaseExpression().export(destination);
+            }
             destination.endElement();
         }
         public override Saxon.Hej.expr.elab.Elaborator getElaborator() {

@@ -52,7 +52,8 @@ namespace Saxon.Hej.functions.hof {
                 nominalTarget.setBody(o);
                 Saxon.Hej.expr.instruct.SlotManager slotManager = visitor.getConfiguration().makeSlotManager();
                 for (int i = 0; (i<getArity()); i++) {
-                    slotManager.allocateSlotNumber(nominalTarget.getParameterDefinitions()[i].getVariableQName());
+                    Saxon.Hej.expr.instruct.UserFunctionParameter param = nominalTarget.getParameterDefinitions()[i];
+                    slotManager.allocateSlotNumber(param.getVariableQName(), param);
                 }
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(o, getArity(), slotManager);
                 nominalTarget.setStackFrameMap(slotManager);
@@ -92,6 +93,9 @@ namespace Saxon.Hej.functions.hof {
         }
         public override Saxon.Hej.type.ItemType getItemType() {
             return nominalTarget.getFunctionItemType();
+        }
+        protected internal override int computeSpecialProperties() {
+            return Saxon.Hej.expr.StaticProperty.COMPUTED_FUNCTION;
         }
         public override Saxon.Hej.type.UType getStaticUType(Saxon.Hej.type.UType contextItemType) {
             return Saxon.Hej.type.UType.FUNCTION;

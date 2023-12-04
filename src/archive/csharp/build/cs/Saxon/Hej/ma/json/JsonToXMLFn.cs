@@ -32,7 +32,7 @@ namespace Saxon.Hej.ma.json {
         protected internal virtual Saxon.Hej.om.Item eval(string input, Saxon.Hej.ma.map.MapItem options, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.ma.json.JsonParser parser = new Saxon.Hej.ma.json.JsonParser();
             int flags = 0;
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> checkedOptions = null;
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> checkedOptions = null;
             if ((options != null)) {
                 checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
                 flags = Saxon.Hej.ma.json.JsonParser.getFlags(checkedOptions, true, context.getController().getExecutable().isSchemaAware());

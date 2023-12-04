@@ -317,7 +317,7 @@ namespace Saxon.Hej.value {
             sb.append('E');
             appendInt(sb, H);
         }
-        public static Saxon.Hej.str.UnicodeString convertDouble(double d, bool forceExponential) {
+        public static Saxon.Hej.str.UnicodeString convertDouble(double d, bool useExponential) {
             Saxon.Hej.str.UnicodeBuilder s = new Saxon.Hej.str.UnicodeBuilder(32);
             if ((d == System.Double.NegativeInfinity)) {
                 s.appendLatin(NEGATIVE_INFINITY);
@@ -333,7 +333,7 @@ namespace Saxon.Hej.value {
                                 s.append('-');
                             }
                             s.append('0');
-                            if (forceExponential) {
+                            if (useExponential) {
                                 s.append(".0E0");
                             }
                         } else {
@@ -361,7 +361,7 @@ namespace Saxon.Hej.value {
                                                 s.append((d).ToString(System.Globalization.CultureInfo.InvariantCulture));
                                                 return s.toUnicodeString();
                                             }
-                                            if ((forceExponential || (((d>=1000000) || (d<0.000001))))) {
+                                            if (useExponential) {
                                                 fppfppExponential(s, exp, fraction, 52);
                                             } else {
                                                 if ((d<=0.01)) {

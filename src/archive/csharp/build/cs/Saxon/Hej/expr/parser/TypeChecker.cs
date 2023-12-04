@@ -36,13 +36,17 @@ namespace Saxon.Hej.expr.parser {
                 Saxon.Hej.type.Affinity affinity = th.relationship(reqItemType, suppliedItemType);
                 itemTypeOK = ((affinity == Saxon.Hej.type.Affinity.SAME_TYPE) || (affinity == Saxon.Hej.type.Affinity.SUBSUMES));
             }
-            if (!(itemTypeOK)) {
-                if (reqItemType.isPlainType()) {
+            if (reqItemType.isPlainType()) {
+                if (!(itemTypeOK)) {
                     if ((!(suppliedItemType.isPlainType()) && !(((suppliedCard == Saxon.Hej.expr.StaticProperty.EMPTY))))) {
-                        if (!(suppliedItemType.isAtomizable(th))) {
+                        bool atomizable = suppliedItemType.isAtomizable(th);
+                        if ((atomizable && (((exp.getSpecialProperties()&Saxon.Hej.expr.StaticProperty.COMPUTED_FUNCTION)) != 0))) {
+                            atomizable = false;
+                        }
+                        if (!(atomizable)) {
                             string shortItemType;
                             if ((suppliedItemType is Saxon.Hej.ma.map.RecordType)) {
-                                shortItemType = "a tuple type";
+                                shortItemType = "a record type";
                             } else {
                                 if ((suppliedItemType is Saxon.Hej.ma.map.MapType)) {
                                     shortItemType = "a map type";
@@ -59,7 +63,7 @@ namespace Saxon.Hej.expr.parser {
                                 }
                             }
                             Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                            throw new Saxon.Hej.trans.XPathException((((("An atomic value is required for the "+role.getMessage())+", but the supplied type is ")+shortItemType)+", which cannot be atomized"), "FOTY0013", supplied.getLocation()).asTypeError().withFailingExpression(supplied);
+                            throw new Saxon.Hej.trans.XPathException((((("An atomic value is required for the "+role.getMessage())+", but the supplied type is ")+shortItemType)+", which cannot be atomized")).withErrorCode("FOTY0013").withLocation(supplied.getLocation()).asTypeError().withFailingExpression(supplied);
                         }
                         if ((exp.getRetainedStaticContext() == null)) {
                             exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
@@ -74,25 +78,57 @@ namespace Saxon.Hej.expr.parser {
                         suppliedCard = exp.getCardinality();
                         cardOK = Saxon.Hej.value.Cardinality.subsumes(reqCard, suppliedCard);
                     }
+                }
+                if ((((reqItemType is Saxon.Hej.type.BuiltInAtomicType) && ((Saxon.Hej.type.BuiltInAtomicType)(reqItemType)).isPrimitiveType()) && !(itemTypeOK))) {
+                    int rt = ((Saxon.Hej.type.BuiltInAtomicType)(reqItemType)).getFingerprint();
+                    Saxon.Hej.type.UType promotables = promotableTypes(rt, allow40);
+                    if (suppliedItemType.getUType().intersection(promotables).Equals(Saxon.Hej.type.UType.VOID)) {
+                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
+                        throw new Saxon.Hej.trans.XPathException(((((("An item of type "+suppliedItemType)+" cannot be converted to ")+reqItemType)+" as required for the ")+role.getMessage())).withErrorCode(role.getErrorCode()).withLocation(supplied.getLocation()).withFailingExpression(supplied);
+                    }
+                    Saxon.Hej.lib.ConversionRules rules = config.getConversionRules();
+                    Saxon.Hej.expr.Expression promoted = null;
+                    Saxon.Hej.type.Converter converter = makePromotingConverter(suppliedItemType, rt, rules, allow40);
+                    if ((converter != null)) {
+                        promoted = makePromoter(exp, converter, (Saxon.Hej.type.BuiltInAtomicType)(reqItemType));
+                    }
+                    if ((promoted != null)) {
+                        if ((promoted is Saxon.Hej.expr.AtomicSequenceConverter)) {
+                            ((Saxon.Hej.expr.AtomicSequenceConverter)(promoted)).setRoleDiagnostic(roleSupplier);
+                        }
+                        exp = promoted;
+                        try {
+                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            throw err.maybeWithLocation(exp.getLocation()).asStaticError().withFailingExpression(supplied);
+                        }
+                        suppliedItemType = reqItemType;
+                        suppliedCard = -1;
+                        itemTypeOK = true;
+                    }
+                }
+                if (!(itemTypeOK)) {
                     if ((suppliedItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) && !(((reqItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) || reqItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC)))))) {
                         if (((Saxon.Hej.type.PlainType)(reqItemType)).isNamespaceSensitive()) {
                             Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An untyped atomic value cannot be converted to a QName or NOTATION as required for the "+role.getMessage()), "XPTY0117", supplied.getLocation());
-                            err.setIsTypeError(true);
-                            throw err;
+                            throw new Saxon.Hej.trans.XPathException(("An untyped atomic value cannot be converted to a QName or NOTATION as required for the "+role.getMessage())).withErrorCode("XPTY0117").withLocation(supplied.getLocation()).withFailingExpression(supplied);
                         }
                         Saxon.Hej.expr.UntypedSequenceConverter cexp = Saxon.Hej.expr.UntypedSequenceConverter.makeUntypedSequenceConverter(config, exp, (Saxon.Hej.type.PlainType)(reqItemType));
                         cexp.setRoleDiagnostic(roleSupplier);
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                         try {
                             if ((exp is Saxon.Hej.expr.Literal)) {
-                                exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
-                                Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(cexp, exp);
+                                try {
+                                    exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
+                                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(cexp, exp);
+                                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
                             } else {
                                 exp = cexp;
                             }
                         } catch (Saxon.Hej.trans.XPathException err) {
-                            throw err.maybeWithLocation(exp.getLocation()).withFailingExpression(supplied).withErrorCode(roleSupplier().getErrorCode()).asStaticError();
+                            throw err.maybeWithLocation(exp.getLocation()).withFailingExpression(supplied).maybeWithErrorCode(roleSupplier().getErrorCode()).asStaticError();
                         }
                         itemTypeOK = true;
                         suppliedItemType = reqItemType;
@@ -109,8 +145,12 @@ namespace Saxon.Hej.expr.parser {
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, conversion);
                         try {
                             if ((exp is Saxon.Hej.expr.Literal)) {
-                                exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
-                                Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(supplied, exp);
+                                try {
+                                    exp = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.om.SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
+                                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(supplied, exp);
+                                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
                             } else {
                                 exp = conversion;
                             }
@@ -119,94 +159,44 @@ namespace Saxon.Hej.expr.parser {
                             throw err.maybeWithLocation(exp.getLocation()).asStaticError();
                         }
                     }
-                    if ((reqItemType is Saxon.Hej.type.AtomicType)) {
-                        int rt = ((Saxon.Hej.type.AtomicType)(reqItemType)).getFingerprint();
-                        if (((rt == Saxon.Hej.om.StandardNames.XS_DOUBLE) && (th.relationship(suppliedItemType, Saxon.Hej.type.NumericType.getInstance()) != /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT))) {
-                            Saxon.Hej.expr.Expression cexp = makePromoterToDouble(exp);
-                            if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
-                            }
-                            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
-                            exp = cexp;
-                            try {
-                                exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                            } catch (Saxon.Hej.trans.XPathException err) {
-                                throw err.maybeWithLocation(exp.getLocation()).asStaticError();
-                            }
-                            suppliedItemType = Saxon.Hej.type.BuiltInAtomicType.DOUBLE;
-                            suppliedCard = -1;
-                        } else {
-                            if ((((rt == Saxon.Hej.om.StandardNames.XS_FLOAT) && (th.relationship(suppliedItemType, Saxon.Hej.type.NumericType.getInstance()) != /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) && !(th.isSubType(suppliedItemType, Saxon.Hej.type.BuiltInAtomicType.DOUBLE)))) {
-                                Saxon.Hej.expr.Expression cexp = makePromoterToFloat(exp);
-                                if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                    ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
-                                }
-                                Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
-                                exp = cexp;
-                                try {
-                                    exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                                } catch (Saxon.Hej.trans.XPathException err) {
-                                    throw err.maybeWithLocation(exp.getLocation()).asStaticError().withFailingExpression(supplied);
-                                }
-                                suppliedItemType = Saxon.Hej.type.BuiltInAtomicType.FLOAT;
-                                suppliedCard = -1;
-                            }
+                }
+                if (((!(itemTypeOK) && (reqItemType.getBasicAlphaCode().Length>2)) && (visitor.getStaticContext().getXPathVersion()>=40))) {
+                    if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {
+                        itemTypeOK = true;
+                        Saxon.Hej.expr.Expression cexp = makeDownCaster(exp, (Saxon.Hej.type.AtomicType)(reqItemType), config);
+                        if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
+                            ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
                         }
-                        if (((rt == Saxon.Hej.om.StandardNames.XS_STRING) && th.isSubType(suppliedItemType, Saxon.Hej.type.BuiltInAtomicType.ANY_URI))) {
-                            itemTypeOK = true;
-                            Saxon.Hej.expr.Expression cexp = makePromoterToString(exp);
-                            if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
-                            }
-                            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
-                            exp = cexp;
-                            try {
-                                exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                            } catch (Saxon.Hej.trans.XPathException err) {
-                                throw err.maybeWithLocation(exp.getLocation()).withFailingExpression(supplied).asStaticError();
-                            }
-                            suppliedItemType = Saxon.Hej.type.BuiltInAtomicType.STRING;
-                            suppliedCard = -1;
+                        Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
+                        exp = cexp;
+                        try {
+                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            throw err.maybeWithLocation(exp.getLocation()).asStaticError().withFailingExpression(supplied);
                         }
-                        if (((!(itemTypeOK) && (reqItemType.getBasicAlphaCode().Length>2)) && (visitor.getStaticContext().getXPathVersion()>=40))) {
-                            if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {
-                                itemTypeOK = true;
-                                Saxon.Hej.expr.Expression cexp = makeDownCaster(exp, (Saxon.Hej.type.AtomicType)(reqItemType), config);
-                                if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                    ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
-                                }
-                                Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
-                                exp = cexp;
-                                try {
-                                    exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                                } catch (Saxon.Hej.trans.XPathException err) {
-                                    throw err.maybeWithLocation(exp.getLocation()).asStaticError().withFailingExpression(supplied);
-                                }
-                                suppliedItemType = reqItemType;
-                            }
+                        suppliedItemType = reqItemType;
+                    }
+                }
+            } else {
+                if ((((!(itemTypeOK) && (reqItemType is Saxon.Hej.type.FunctionItemType)) && !(((Saxon.Hej.type.FunctionItemType)(reqItemType)).isMapType())) && !(((Saxon.Hej.type.FunctionItemType)(reqItemType)).isArrayType()))) {
+                    Saxon.Hej.type.Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
+                    if ((r != /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) {
+                        if (!(((suppliedItemType is Saxon.Hej.type.FunctionItemType)))) {
+                            exp = new Saxon.Hej.expr.ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
+                            suppliedItemType = th.getGenericFunctionItemType();
                         }
+                        exp = makeFunctionSequenceCoercer(exp, (Saxon.Hej.type.FunctionItemType)(reqItemType), roleSupplier, allow40);
+                        itemTypeOK = true;
                     }
                 } else {
-                    if ((((reqItemType is Saxon.Hej.type.FunctionItemType) && !(((Saxon.Hej.type.FunctionItemType)(reqItemType)).isMapType())) && !(((Saxon.Hej.type.FunctionItemType)(reqItemType)).isArrayType()))) {
-                        Saxon.Hej.type.Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
-                        if ((r != /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) {
-                            if (!(((suppliedItemType is Saxon.Hej.type.FunctionItemType)))) {
-                                exp = new Saxon.Hej.expr.ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
-                                suppliedItemType = th.getGenericFunctionItemType();
-                            }
-                            exp = makeFunctionSequenceCoercer(exp, (Saxon.Hej.type.FunctionItemType)(reqItemType), roleSupplier, allow40);
+                    if (((!(itemTypeOK) && (reqItemType is Saxon.Hej.type.JavaExternalObjectType)) && (reqCard == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE))) {
+                        if (typeof(Saxon.Hej.om.Sequence).IsAssignableFrom(((Saxon.Hej.type.JavaExternalObjectType)(reqItemType)).getJavaClass())) {
                             itemTypeOK = true;
-                        }
-                    } else {
-                        if (((reqItemType is Saxon.Hej.type.JavaExternalObjectType) && (reqCard == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE))) {
-                            if (typeof(Saxon.Hej.om.Sequence).IsAssignableFrom(((Saxon.Hej.type.JavaExternalObjectType)(reqItemType)).getJavaClass())) {
-                                itemTypeOK = true;
-                            } else {
-                                if ((supplied is Saxon.Hej.expr.FunctionCall)) {
-                                    if (((Saxon.Hej.expr.FunctionCall)(supplied)).adjustRequiredType((Saxon.Hej.type.JavaExternalObjectType)(reqItemType))) {
-                                        itemTypeOK = true;
-                                        cardOK = true;
-                                    }
+                        } else {
+                            if ((supplied is Saxon.Hej.expr.FunctionCall)) {
+                                if (((Saxon.Hej.expr.FunctionCall)(supplied)).adjustRequiredType((Saxon.Hej.type.JavaExternalObjectType)(reqItemType))) {
+                                    itemTypeOK = true;
+                                    cardOK = true;
                                 }
                             }
                         }
@@ -227,7 +217,7 @@ namespace Saxon.Hej.expr.parser {
             }
             if (((suppliedCard == Saxon.Hej.expr.StaticProperty.EMPTY) && ((((reqCard&Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) == 0)))) {
                 Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                throw new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode(), supplied.getLocation()).asTypeErrorIf(role.isTypeError()).withFailingExpression(supplied);
+                throw new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+role.getMessage())).withErrorCode(role.getErrorCode()).withLocation(supplied.getLocation()).asTypeErrorIf(role.isTypeError()).withFailingExpression(supplied);
             }
             Saxon.Hej.type.Affinity relation = (itemTypeOK ? /*explicit enum*/ Saxon.Hej.type.Affinity.SUBSUMED_BY : th.relationship(suppliedItemType, reqItemType));
             if ((reqCard == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) {
@@ -243,7 +233,7 @@ namespace Saxon.Hej.expr.parser {
                     }
                 } else {
                     string msg = role.composeErrorMessage(reqItemType, supplied, th);
-                    throw new Saxon.Hej.trans.XPathException(msg, role.getErrorCode(), supplied.getLocation()).asTypeErrorIf(role.isTypeError()).withFailingExpression(supplied);
+                    throw new Saxon.Hej.trans.XPathException(msg).withErrorCode(role.getErrorCode()).withLocation(supplied.getLocation()).asTypeErrorIf(role.isTypeError()).withFailingExpression(supplied);
                 }
             }
             if (!((((relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SAME_TYPE) || (relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SUBSUMED_BY))))) {
@@ -253,9 +243,7 @@ namespace Saxon.Hej.expr.parser {
                     }
                     Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     string msg = role.composeErrorMessage(reqItemType, supplied, th);
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, role.getErrorCode(), supplied.getLocation());
-                    err.setIsTypeError(role.isTypeError());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(msg).withErrorCode(role.getErrorCode()).withLocation(supplied.getLocation()).asTypeErrorIf(role.isTypeError()).withFailingExpression(supplied);
                 } else {
                     Saxon.Hej.expr.Expression cexp = new Saxon.Hej.expr.ItemChecker(exp, reqItemType, roleSupplier);
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
@@ -265,9 +253,7 @@ namespace Saxon.Hej.expr.parser {
             if (!(cardOK)) {
                 if ((exp is Saxon.Hej.expr.Literal)) {
                     Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Required cardinality of "+role.getMessage())+" is ")+Saxon.Hej.value.Cardinality.describe(reqCard))+"; supplied value has cardinality ")+Saxon.Hej.value.Cardinality.describe(suppliedCard)), role.getErrorCode(), supplied.getLocation());
-                    err.setIsTypeError(role.isTypeError());
-                    throw err;
+                    throw new Saxon.Hej.trans.XPathException(((((("Required cardinality of "+role.getMessage())+" is ")+Saxon.Hej.value.Cardinality.describe(reqCard))+"; supplied value has cardinality ")+Saxon.Hej.value.Cardinality.describe(suppliedCard))).withErrorCode(role.getErrorCode()).withLocation(supplied.getLocation()).withFailingExpression(supplied).asTypeErrorIf(role.isTypeError());
                 } else {
                     Saxon.Hej.expr.Expression cexp = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(exp, reqCard, roleSupplier);
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
@@ -275,6 +261,32 @@ namespace Saxon.Hej.expr.parser {
                 }
             }
             return exp;
+        }
+        public static Saxon.Hej.type.Converter makePromotingConverter(Saxon.Hej.type.ItemType suppliedItemType, int requiredType, Saxon.Hej.lib.ConversionRules rules, bool allow40) {
+            switch (requiredType) {
+              case Saxon.Hej.om.StandardNames.XS_DOUBLE:
+                return new Saxon.Hej.type.Converter.PromoterToDouble(rules);
+              case Saxon.Hej.om.StandardNames.XS_FLOAT:
+                return new Saxon.Hej.type.Converter.PromoterToFloat(rules);
+              case Saxon.Hej.om.StandardNames.XS_STRING:
+                return new Saxon.Hej.type.Converter.PromoterToString();
+              case Saxon.Hej.om.StandardNames.XS_ANY_URI:
+                if (allow40) {
+                    return new Saxon.Hej.type.Converter.PromoterToAnyURI();
+                }
+                break ;
+              case Saxon.Hej.om.StandardNames.XS_HEX_BINARY:
+                if (allow40) {
+                    return new Saxon.Hej.type.Converter.PromoterToHexBinary();
+                }
+                break ;
+              case Saxon.Hej.om.StandardNames.XS_BASE64_BINARY:
+                if (allow40) {
+                    return new Saxon.Hej.type.Converter.PromoterToBase64Binary();
+                }
+                break ;
+            }
+            return null;
         }
         public virtual Saxon.Hej.expr.Expression makeArithmeticExpression(Saxon.Hej.expr.Expression lhs, int @operator, Saxon.Hej.expr.Expression rhs) {
             return new Saxon.Hej.expr.ArithmeticExpression(lhs, @operator, rhs);
@@ -401,15 +413,6 @@ namespace Saxon.Hej.expr.parser {
             }
             return null;
         }
-        private static Saxon.Hej.expr.Expression makePromoterToDouble(Saxon.Hej.expr.Expression exp) {
-            return makePromoter(exp, new Saxon.Hej.type.Converter.PromoterToDouble(), Saxon.Hej.type.BuiltInAtomicType.DOUBLE);
-        }
-        private static Saxon.Hej.expr.Expression makePromoterToFloat(Saxon.Hej.expr.Expression exp) {
-            return makePromoter(exp, new Saxon.Hej.type.Converter.PromoterToFloat(), Saxon.Hej.type.BuiltInAtomicType.FLOAT);
-        }
-        private static Saxon.Hej.expr.Expression makePromoterToString(Saxon.Hej.expr.Expression exp) {
-            return makePromoter(exp, new Saxon.Hej.type.Converter.ToStringConverter(), Saxon.Hej.type.BuiltInAtomicType.STRING);
-        }
         private static Saxon.Hej.expr.Expression makePromoter(Saxon.Hej.expr.Expression exp, Saxon.Hej.type.Converter converter, Saxon.Hej.type.BuiltInAtomicType type) {
             Saxon.Hej.lib.ConversionRules rules = exp.getConfiguration().getConversionRules();
             converter.setConversionRules(rules);
@@ -425,6 +428,35 @@ namespace Saxon.Hej.expr.parser {
             asc.setConverter(converter);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, asc);
             return asc;
+        }
+        private Saxon.Hej.type.UType promotableTypes(int targetType, bool allow40) {
+            if (allow40) {
+                switch (targetType) {
+                  case Saxon.Hej.om.StandardNames.XS_DOUBLE:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.DECIMAL).union(Saxon.Hej.type.UType.FLOAT).union(Saxon.Hej.type.UType.DOUBLE);
+                  case Saxon.Hej.om.StandardNames.XS_FLOAT:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.DECIMAL).union(Saxon.Hej.type.UType.FLOAT);
+                  case Saxon.Hej.om.StandardNames.XS_ANY_URI:
+                  case Saxon.Hej.om.StandardNames.XS_STRING:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.ANY_URI).union(Saxon.Hej.type.UType.STRING);
+                  case Saxon.Hej.om.StandardNames.XS_HEX_BINARY:
+                  case Saxon.Hej.om.StandardNames.XS_BASE64_BINARY:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.HEX_BINARY).union(Saxon.Hej.type.UType.BASE64_BINARY);
+                  default:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.fromTypeCode(targetType));
+                }
+            } else {
+                switch (targetType) {
+                  case Saxon.Hej.om.StandardNames.XS_DOUBLE:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.DECIMAL).union(Saxon.Hej.type.UType.FLOAT).union(Saxon.Hej.type.UType.DOUBLE);
+                  case Saxon.Hej.om.StandardNames.XS_FLOAT:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.DECIMAL).union(Saxon.Hej.type.UType.FLOAT);
+                  case Saxon.Hej.om.StandardNames.XS_STRING:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.STRING).union(Saxon.Hej.type.UType.ANY_URI);
+                  default:
+                    return Saxon.Hej.type.UType.UNTYPED_ATOMIC.union(Saxon.Hej.type.UType.fromTypeCode(targetType));
+                }
+            }
         }
     
     }

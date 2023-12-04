@@ -33,7 +33,7 @@ namespace Saxon.Hej.expr.flwor {
                 }
             }
             while (!(finished)) {
-                bool autoclose = (windowClause.isTumblingWindow() && (windowClause.getEndCondition() == null));
+                bool autoClose = (windowClause.isTumblingWindow() && (windowClause.getEndCondition() == null));
                 Saxon.Hej.om.Item oldPrevious = previous;
                 previous = current;
                 current = next;
@@ -43,8 +43,8 @@ namespace Saxon.Hej.expr.flwor {
                 }
                 position++;
                 if ((position>0)) {
-                    if (((((windowClause.isSlidingWindow() || currentWindows.Count==0) || autoclose)) && windowClause.matchesStart(previous, current, next, position, context))) {
-                        if ((autoclose && !(currentWindows.Count==0))) {
+                    if (((((windowClause.isSlidingWindow() || currentWindows.Count==0) || autoClose)) && windowClause.matchesStart(previous, current, next, position, context))) {
+                        if ((autoClose && !(currentWindows.Count==0))) {
                             Saxon.Hej.expr.flwor.WindowClause.Window w = currentWindows[0];
                             w.endItem = previous;
                             w.endPreviousItem = oldPrevious;
@@ -92,6 +92,13 @@ namespace Saxon.Hej.expr.flwor {
                         processWindow(earliest, context);
                         return true;
                     }
+                }
+            }
+            foreach (Saxon.Hej.expr.flwor.WindowClause.Window w in currentWindows) {
+                if ((w.isFinished() && !(w.isDespatched()))) {
+                    processWindow(w, context);
+                    Saxon.Impl.Helpers.ListUtils.Remove(currentWindows, w);
+                    return true;
                 }
             }
             return false;

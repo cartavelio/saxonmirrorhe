@@ -97,7 +97,11 @@ namespace Saxon.Hej.expr {
                 }
                 return @base;
             }
-            return new Saxon.Hej.expr.CardinalityCheckingIterator(@base, requiredCardinality, roleSupplier, getLocation());
+            try {
+                return new Saxon.Hej.expr.CardinalityCheckingIterator(@base, requiredCardinality, roleSupplier, getLocation());
+            } catch (Saxon.Hej.trans.XPathException e) {
+                throw e.maybeWithContext(context);
+            }
         }
         public static string depictSequenceStart(Saxon.Hej.om.SequenceIterator seq, int max) {
             Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder(64);

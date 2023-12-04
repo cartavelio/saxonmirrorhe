@@ -176,30 +176,36 @@ namespace Saxon.Hej.expr {
         }
         protected internal virtual void checkArguments(Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
         }
-        protected internal int checkArgumentCount(int min, int max) {
+        protected internal void checkArgumentCount(int min, int max) {
             int numArgs = getArity();
             string msg = null;
             if (((min == max) && (numArgs != min))) {
-                msg = ((("Function "+getDisplayName())+" must have ")+pluralArguments(min));
+                msg = ((("Function call to "+getDisplayName())+" must supply ")+plural(min, "argument"));
             } else {
                 if ((numArgs<min)) {
-                    msg = ((("Function "+getDisplayName())+" must have at least ")+pluralArguments(min));
+                    msg = ((("Function call to "+getDisplayName())+" must supply at least ")+plural(min, "argument"));
                 } else {
                     if ((numArgs>max)) {
-                        msg = ((("Function "+getDisplayName())+" must have no more than ")+pluralArguments(max));
+                        msg = ((("Function call to "+getDisplayName())+" must supply no more than ")+plural(max, "argument"));
                     }
                 }
             }
             if ((msg != null)) {
                 throw new Saxon.Hej.trans.XPathException(msg, "XPST0017").asStaticError().withLocation(getLocation());
             }
-            return numArgs;
         }
         public override int getImplementationMethod() {
             return (ITERATE_METHOD|EVALUATE_METHOD);
         }
-        public static string pluralArguments(int num) {
-            return ((num == 1) ? "one argument" : ((num+" arguments")));
+        public static string plural(int num, string thing) {
+            switch (num) {
+              case 0:
+                return (("no "+thing)+"s");
+              case 1:
+                return ("one "+thing);
+              default:
+                return (((num+" ")+thing)+"s");
+            }
         }
         public Saxon.Hej.expr.parser.PathMap.PathMapNodeSet addExternalFunctionCallToPathMap(Saxon.Hej.expr.parser.PathMap pathMap, Saxon.Hej.expr.parser.PathMap.PathMapNodeSet pathMapNodes) {
             Saxon.Hej.expr.parser.PathMap.PathMapNodeSet result = new Saxon.Hej.expr.parser.PathMap.PathMapNodeSet();

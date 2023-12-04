@@ -110,6 +110,7 @@ namespace Saxon.Hej.style {
                 content = Saxon.Hej.expr.Literal.makeEmptySequence();
             }
             Saxon.Hej.expr.instruct.Copy inst = new Saxon.Hej.expr.instruct.Copy(copyNamespaces, inheritNamespaces, schemaType, validationAction);
+            inst.setLocation(saveLocation());
             inst.setContentExpression(content);
             if (selectSpecified) {
                 return new Saxon.Hej.expr.instruct.ForEach(select, inst);

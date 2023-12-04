@@ -13,7 +13,7 @@ namespace Saxon.Eej.ee.optim {
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.STRING_LITERAL), (values, env) => Saxon.Hej.expr.StringLiteral.makeLiteral(Saxon.Hej.value.StringValue.makeStringValue(values[0])));
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.NUMBER), (values, env) => toNumericLiteral(values[0]));
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.SLASH), (values, env) => new Saxon.Hej.expr.RootExpression());
-            Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.NODEKIND, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
+            Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.KEYWORD_LBRA, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
     string kind = values[0];
     Saxon.Hej.pattern.NodeTest test = null;
     switch (kind) {
@@ -244,6 +244,9 @@ namespace Saxon.Eej.ee.optim {
         }
         public Saxon.Hej.expr.Expression parse(Saxon.Hej.expr.parser.Tokenizer t, Saxon.Hej.expr.StaticContext env, string expression, int start, int terminator) {
             if ((((expression.Length-start)>30) && (terminator != Saxon.Hej.expr.parser.Token.RCURLY))) {
+                return null;
+            }
+            if ((env.getXPathVersion()<31)) {
                 return null;
             }
             try {

@@ -170,13 +170,13 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.expr.UserFunctionCall ufc = new Saxon.Hej.expr.UserFunctionCall();
             ufc.setFunction(function);
             ufc.setStaticType(staticType);
+            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ufc);
             int numArgs = getArity();
             Saxon.Hej.expr.Expression[] a2 = new Saxon.Hej.expr.Expression[numArgs];
             for (int i = 0; (i<numArgs); i++) {
                 a2[i] = getArg(i).copy(rebindings);
             }
             ufc.setArguments(a2);
-            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, ufc);
             return ufc;
         }
         protected internal override int computeCardinality() {

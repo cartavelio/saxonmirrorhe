@@ -5,7 +5,7 @@ namespace Saxon.Hej.expr.parser {
     public class Loc : Saxon.Hej.s9api.Location {
         private readonly string systemId;
         private readonly int lineNumber;
-        private int columnNumber = -1;
+        private readonly int columnNumber;
         public static Saxon.Hej.expr.parser.Loc NONE = new Saxon.Hej.expr.parser.Loc(null, -1, -1);
         public Loc(Saxon.Ejavax.xml.transform.SourceLocator loc)  {
             systemId = loc.getSystemId();

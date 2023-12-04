@@ -23,12 +23,21 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[(arguments.Length-1)];
                 Saxon.Ejava.lang.System.arraycopy(arguments, 0, newArgs, 0, newArgs.Length);
                 return fn.makeFunctionCall(newArgs);
+            } else {
+                if (Saxon.Hej.expr.Literal.isEmptySequence(c)) {
+                    string coll = visitor.getStaticContext().getDefaultCollationName();
+                    Saxon.Hej.functions.CollatingFunctionFixed fn = bindCollation(coll);
+                    Saxon.Hej.expr.Expression[] newArgs = new Saxon.Hej.expr.Expression[(arguments.Length-1)];
+                    Saxon.Ejava.lang.System.arraycopy(arguments, 0, newArgs, 0, newArgs.Length);
+                    return fn.makeFunctionCall(newArgs);
+                }
             }
             return null;
         }
         public Saxon.Hej.functions.CollatingFunctionFixed bindCollation(string collationName) {
             Saxon.Hej.Configuration config = getRetainedStaticContext().getConfiguration();
-            Saxon.Hej.functions.CollatingFunctionFixed @fixed = (Saxon.Hej.functions.CollatingFunctionFixed)(config.makeSystemFunction(getFunctionName().getLocalPart(), (getArity()-1)));
+            int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            Saxon.Hej.functions.CollatingFunctionFixed @fixed = (Saxon.Hej.functions.CollatingFunctionFixed)(config.makeSystemFunction(getFunctionName().getLocalPart(), (getArity()-1), version));
             @fixed.setRetainedStaticContext(getRetainedStaticContext());
             @fixed.setCollationName(collationName);
             return @fixed;
@@ -50,7 +59,13 @@ namespace Saxon.Hej.functions {
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
             int c = getCollationArgument();
-            string collation = args[c].head().getStringValue();
+            Saxon.Hej.om.Item collArg = args[c].head();
+            string collation;
+            if ((collArg == null)) {
+                collation = getRetainedStaticContext().getDefaultCollationName();
+            } else {
+                collation = collArg.getStringValue();
+            }
             collation = expandCollationURI(collation, getRetainedStaticContext().getStaticBaseUri());
             Saxon.Hej.functions.CollatingFunctionFixed @fixed = bindCollation(collation);
             Saxon.Hej.om.Sequence[] retainedArgs = new Saxon.Hej.om.Sequence[(args.Length-1)];

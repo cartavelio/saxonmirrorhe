@@ -72,7 +72,7 @@ namespace Saxon.Hej.functions {
             public Saxon.Hej.expr.sort.AtomicComparer comparer;
             private static readonly string[] booleanOptions = new string[]{"base-uri", "comments", "debug", "false-on-error", "id-property", "idrefs-property", "in-scope-namespaces", "namespace-prefixes", "nilled-property", "normalize-space", "preserve-space", "processing-instructions", "text-boundaries", "timezones", "type-annotations", "type-variety", "typed-values"};
             public DeepEqualOptions(Saxon.Hej.ma.map.MapItem map, string collationName, Saxon.Hej.expr.XPathContext context)  {
-                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> values = OPTION_DETAILS.processSuppliedOptions(map, context);
+                System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> values = OPTION_DETAILS.processSuppliedOptions(map, context);
                 foreach (string option in Saxon.Hej.functions.DeepEqual40.DeepEqualOptions.booleanOptions) {
                     setBooleanOption(values, option);
                 }
@@ -99,7 +99,7 @@ namespace Saxon.Hej.functions {
                     comparer = new Saxon.Hej.functions.DeepEqual40.NormalizingComparer(comparer, this);
                 }
             }
-            private void setBooleanOption(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> map, string optionName) {
+            private void setBooleanOption(System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> map, string optionName) {
                 Saxon.Hej.om.Sequence value = Saxon.Impl.Helpers.MapUtils.Get(map, optionName);
                 if ((value != null)) {
                     bool booleanValue = Saxon.Hej.expr.parser.ExpressionTool.effectiveBooleanValue(value.iterate());

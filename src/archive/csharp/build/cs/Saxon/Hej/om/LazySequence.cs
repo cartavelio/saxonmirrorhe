@@ -25,7 +25,11 @@ namespace Saxon.Hej.om {
     
         /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
     }

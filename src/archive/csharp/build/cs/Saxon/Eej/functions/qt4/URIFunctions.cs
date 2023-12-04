@@ -9,6 +9,34 @@ namespace Saxon.Eej.functions.qt4 {
             Saxon.Impl.Helpers.MapUtils.Put(defaultPorts, "https", "443");
             Saxon.Impl.Helpers.MapUtils.Put(defaultPorts, "ssh", "22");
             Saxon.Impl.Helpers.MapUtils.Put(defaultPorts, "ftp", "21");
+            System.Collections.Generic.HashSet<System.Char> chars = new System.Collections.Generic.HashSet<System.Char>();
+            for (char ch = 'A'; (ch<='Z'); ch++) {
+                chars.Add(ch);
+            }
+            for (char ch = 'a'; (ch<='z'); ch++) {
+                chars.Add(ch);
+            }
+            for (char ch = '0'; (ch<='9'); ch++) {
+                chars.Add(ch);
+            }
+            chars.Add('-');
+            chars.Add('.');
+            chars.Add('_');
+            chars.Add('~');
+            chars.Add('!');
+            chars.Add('$');
+            chars.Add('&');
+            chars.Add('\'');
+            chars.Add('(');
+            chars.Add(')');
+            chars.Add('*');
+            chars.Add('+');
+            chars.Add(',');
+            chars.Add(';');
+            chars.Add('=');
+            chars.Add(':');
+            chars.Add('@');
+            unescapedUriCharacters = unmodifiable(chars);
         }
         protected internal static System.Collections.Generic.HashSet<string> hierarchicalSchemes = new System.Collections.Generic.HashSet<string>(Saxon.Ejava.util.Arrays.asList("http", "https", "ftp", "file"));
         protected internal static System.Collections.Generic.HashSet<string> nonHierarchicalSchemes = new System.Collections.Generic.HashSet<string>(Saxon.Ejava.util.Arrays.asList("urn", "mailto", "news", "tel", "tag", "jar"));
@@ -27,14 +55,18 @@ namespace Saxon.Eej.functions.qt4 {
         protected internal static readonly Saxon.Hej.value.AtomicValue PATH = new Saxon.Hej.value.StringValue("path");
         protected internal static readonly Saxon.Hej.value.AtomicValue FILEPATH = new Saxon.Hej.value.StringValue("filepath");
         protected internal static readonly Saxon.Hej.value.AtomicValue PATH_SEGMENTS = new Saxon.Hej.value.StringValue("path-segments");
-        protected internal static readonly Saxon.Hej.value.AtomicValue QUERY_SEGMENTS = new Saxon.Hej.value.StringValue("query-segments");
+        protected internal static readonly Saxon.Hej.value.AtomicValue QUERY_PARAMETERS = new Saxon.Hej.value.StringValue("query-parameters");
         protected internal static readonly Saxon.Hej.value.AtomicValue QUERY = new Saxon.Hej.value.StringValue("query");
         protected internal static readonly Saxon.Hej.value.AtomicValue KEY = new Saxon.Hej.value.StringValue("key");
         protected internal static readonly Saxon.Hej.value.AtomicValue VALUE = new Saxon.Hej.value.StringValue("value");
         protected internal static readonly Saxon.Hej.value.AtomicValue FRAGMENT = new Saxon.Hej.value.StringValue("fragment");
         protected internal static readonly Saxon.Hej.value.AtomicValue HIERARCHICAL = new Saxon.Hej.value.StringValue("hierarchical");
-        protected internal string pathSeparator = "/";
-        protected internal string querySeparator = "&";
+        protected internal static readonly System.Collections.Generic.ISet<System.Char> unescapedUriCharacters;
+        private static System.Collections.Generic.ISet<System.Char> unmodifiable(System.Collections.Generic.ISet<System.Char> chars) {
+            return chars;
+        }
+        protected internal char pathSeparator = '/';
+        protected internal char querySeparator = '&';
         protected internal bool allowDeprecatedFeatures = false;
         protected internal bool omitDefaultPorts = false;
         protected internal bool hierarchical = true;
@@ -54,10 +86,18 @@ namespace Saxon.Eej.functions.qt4 {
             if ((getArity() == 2)) {
                 Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
                 if ((options.get(PATH_SEPARATOR) != null)) {
-                    pathSeparator = options.get(PATH_SEPARATOR).getStringValue();
+                    string str = options.get(PATH_SEPARATOR).getStringValue();
+                    if ((str.Length != 1)) {
+                        throw new Saxon.Hej.trans.XPathException("The path separator must be a single character", "FOXX0000");
+                    }
+                    pathSeparator = str[0];
                 }
                 if ((options.get(QUERY_SEPARATOR) != null)) {
-                    querySeparator = options.get(QUERY_SEPARATOR).getStringValue();
+                    string str = options.get(QUERY_SEPARATOR).getStringValue();
+                    if ((str.Length != 1)) {
+                        throw new Saxon.Hej.trans.XPathException("The query separator must be a single character", "FOXX0000");
+                    }
+                    querySeparator = str[0];
                 }
                 allowDeprecatedFeatures = ((options.get(ALLOW_DEPRECATED_FEATURES) != null) && options.get(ALLOW_DEPRECATED_FEATURES).effectiveBooleanValue());
                 omitDefaultPorts = ((options.get(OMIT_DEFAULT_PORTS) != null) && options.get(OMIT_DEFAULT_PORTS).effectiveBooleanValue());
@@ -69,30 +109,65 @@ namespace Saxon.Eej.functions.qt4 {
             Saxon.Ejava.lang.StringBuilder output = new Saxon.Ejava.lang.StringBuilder();
             for (int pos = 0; (pos<input.Length); pos++) {
                 char ch = input[pos];
-                if ((ch == ' ')) {
-                    output.append("+");
+                if (((ch>127) || unescapedUriCharacters.Contains(ch))) {
+                    output.append(ch);
                 } else {
-                    if ((ch == '/')) {
-                        output.append("%2F");
-                    } else {
-                        output.append(ch);
-                    }
+                    output.append("%");
+                    output.append(toTwoHexDigits(ch));
                 }
             }
             return output.ToString();
         }
-        protected internal string encodeOtherSegment(Saxon.Hej.om.GroundedValue value) {
+        protected internal string encodeQueryPart(Saxon.Hej.om.GroundedValue value) {
             string input = value.getStringValue();
             Saxon.Ejava.lang.StringBuilder output = new Saxon.Ejava.lang.StringBuilder();
             for (int pos = 0; (pos<input.Length); pos++) {
                 char ch = input[pos];
-                if ((ch == ' ')) {
-                    output.append("+");
-                } else {
-                    if (((((((ch == '=') || (ch == '&')) || (ch == ';')) || (ch == '?')) || (ch == '#')) || (ch == '\''))) {
-                        output.append("%").append(toTwoHexDigits((int)(ch)));
-                    } else {
+                if ((ch == querySeparator)) {
+                    output.append("%");
+                    output.append(toTwoHexDigits(querySeparator));
+                    continue ;
+                }
+                switch (ch) {
+                  case '=':
+                    output.append("%3D");
+                    break ;
+                  case '&':
+                    output.append("%26");
+                    break ;
+                  case '/':
+                  case '?':
+                    output.append(ch);
+                    break ;
+                  default:
+                    if (((ch>127) || unescapedUriCharacters.Contains(ch))) {
                         output.append(ch);
+                    } else {
+                        output.append("%");
+                        output.append(toTwoHexDigits(ch));
+                    }
+                    break ;
+                }
+            }
+            return output.ToString();
+        }
+        protected internal string encodeFragmentIdentifier(Saxon.Hej.om.GroundedValue value) {
+            string input = value.getStringValue();
+            Saxon.Ejava.lang.StringBuilder output = new Saxon.Ejava.lang.StringBuilder();
+            for (int pos = 0; (pos<input.Length); pos++) {
+                char ch = input[pos];
+                if (((ch>127) || unescapedUriCharacters.Contains(ch))) {
+                    output.append(ch);
+                } else {
+                    switch (ch) {
+                      case '/':
+                      case '?':
+                        output.append(ch);
+                        break ;
+                      default:
+                        output.append("%");
+                        output.append(toTwoHexDigits(ch));
+                        break ;
                     }
                 }
             }
@@ -100,26 +175,6 @@ namespace Saxon.Eej.functions.qt4 {
         }
         private string toTwoHexDigits(int ch) {
             return String.Format("{0:X2}", ch);
-        }
-        protected internal string decodeString(string value) {
-            Saxon.Ejava.util.regex.Pattern pattern = Saxon.Ejava.util.regex.Pattern.compile("^(.*?)(\\+|%[0-9a-fA-F]{2})(.*)$");
-            string input = value;
-            Saxon.Ejava.util.regex.Matcher matcher = pattern.matcher(input);
-            Saxon.Ejava.lang.StringBuilder output = new Saxon.Ejava.lang.StringBuilder();
-            while (matcher.find()) {
-                output.append(matcher.group(1));
-                string esc = matcher.group(2);
-                if ("+".Equals(esc)) {
-                    output.append(" ");
-                } else {
-                    int hex = Saxon.Impl.Helpers.Utils.ParseInt(esc.Substring(1), 16);
-                    output.append((char)(hex));
-                }
-                input = matcher.group(3);
-                matcher = pattern.matcher(input);
-            }
-            output.append(input);
-            return output.ToString();
         }
     
     }

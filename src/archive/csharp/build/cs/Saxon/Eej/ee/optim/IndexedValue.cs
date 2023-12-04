@@ -10,7 +10,7 @@ namespace Saxon.Eej.ee.optim {
             this.value = array;
             this.end = end;
         }
-        public override Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, bool firstOnly, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context) {
             Saxon.Eej.ee.optim.MultiIndex index = null;
             lock (this) {
                 for (int i = 0; (i<indexedExpressions.Count); i++) {
@@ -37,7 +37,7 @@ namespace Saxon.Eej.ee.optim {
                     indexes.Add(index);
                 }
             }
-            return index.findItems(use, values, convertUntypedToOther, firstOnly, comparer.getCollator(), context);
+            return index.findItems(use, values, convertUntypedToOther, comparer.getCollator(), context);
         }
         public override bool containsNode(Saxon.Hej.om.NodeInfo sought) { lock(this) {
             if ((distinctNodes == null)) {

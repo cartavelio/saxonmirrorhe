@@ -21,6 +21,9 @@ namespace Saxon.Hej.ma.map {
                 Saxon.Impl.Helpers.MapUtils.Put(hashMap, key, existingValue.concatenate(value));
             }
         }
+        public bool containsStringKey(string key) {
+            return hashMap.ContainsKey(key);
+        }
         public override Saxon.Hej.om.GroundedValue get(Saxon.Hej.value.AtomicValue key) {
             if ((key is Saxon.Hej.value.StringValue)) {
                 return Saxon.Impl.Helpers.MapUtils.Get(hashMap, key.getStringValue());
@@ -50,7 +53,7 @@ namespace Saxon.Hej.ma.map {
         public override Saxon.Hej.ma.map.MapItem remove(Saxon.Hej.value.AtomicValue key) {
             return toHashTrieMap().remove(key);
         }
-        public override bool conforms(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
+        public override bool conforms(Saxon.Hej.type.PlainType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th) {
             if (isEmpty()) {
                 return true;
             }

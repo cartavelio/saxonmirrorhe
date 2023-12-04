@@ -22,7 +22,7 @@ namespace Saxon.Hej.s9api {
         public void setParameter(Saxon.Api.QName name, Saxon.Api.XdmValue value) {
             try {
                 compilerInfo.setParameter(name.GetStructuredQName(), ((Saxon.Hej.om.Sequence)(((Saxon.Hej.om.GroundedValue)value.Unwrap()))).materialize());
-            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+            } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }

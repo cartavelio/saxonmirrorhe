@@ -118,7 +118,7 @@ namespace Saxon.Hej.style {
                 Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
                 newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
                 newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
-                slotManager.allocateSlotNumber(Saxon.Hej.om.NamespaceUri.NULL.qName("value"));
+                slotManager.allocateSlotNumber(Saxon.Hej.om.NamespaceUri.NULL.qName("value"), null);
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(newValueExp, 1, slotManager);
                 bool isPreDescent = !(rule.isPostDescent());
                 Saxon.Hej.trans.SimpleMode mode = (isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules());

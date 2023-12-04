@@ -8,10 +8,10 @@ namespace Saxon.Hej.functions {
         public ExecutableFunctionLibrary(Saxon.Hej.Configuration config)  {
             this.config = config;
         }
-        public void addFunction(Saxon.Hej.expr.instruct.UserFunction fn) {
+        public virtual void addFunction(Saxon.Hej.expr.instruct.UserFunction fn) {
             Saxon.Impl.Helpers.MapUtils.Put(functions, fn.getSymbolicName(), fn);
         }
-        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+        public virtual Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.instruct.UserFunction fn = Saxon.Impl.Helpers.MapUtils.Get(functions, functionName);
             if ((fn == null)) {
                 return null;
@@ -23,17 +23,17 @@ namespace Saxon.Hej.functions {
             fc.setStaticType(fn.getResultType());
             return fc;
         }
-        public Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+        public virtual Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
             Saxon.Hej.expr.instruct.UserFunction fn = Saxon.Impl.Helpers.MapUtils.Get(functions, functionName);
             if (((fn != null) && fn.isUpdating())) {
                 throw new Saxon.Hej.trans.XPathException("Cannot bind a function item to an updating function");
             }
             return fn;
         }
-        public bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
+        public virtual bool isAvailable(Saxon.Hej.trans.SymbolicName.F functionName, int languageLevel) {
             return (Saxon.Impl.Helpers.MapUtils.Get(functions, functionName) != null);
         }
-        public Saxon.Hej.functions.FunctionLibrary copy() {
+        public virtual Saxon.Hej.functions.FunctionLibrary copy() {
             Saxon.Hej.functions.ExecutableFunctionLibrary efl = new Saxon.Hej.functions.ExecutableFunctionLibrary(config);
             efl.functions = new System.Collections.Generic.Dictionary<Saxon.Hej.trans.SymbolicName, Saxon.Hej.expr.instruct.UserFunction>(functions);
             return efl;

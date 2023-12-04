@@ -18,6 +18,7 @@ namespace Saxon.Hej.expr.instruct {
         protected internal Saxon.Hej.expr.elab.SequenceEvaluator bodyEvaluator = null;
         protected internal Saxon.Hej.expr.elab.PushEvaluator pushEvaluator = null;
         private bool updating = false;
+        private bool ixslUpdating = false;
         private int inlineable = -1;
         private int inliningCount = 0;
         private bool overrideExtensionFunction = true;
@@ -229,6 +230,9 @@ namespace Saxon.Hej.expr.instruct {
         public bool isUpdating() {
             return updating;
         }
+        public void setIxslUpdating(bool isUpdating) {
+            this.ixslUpdating = isUpdating;
+        }
         public void setDeclaredStreamability(Saxon.Hej.trans.FunctionStreamability streamability) {
             this.declaredStreamability = ((streamability == null) ? Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED : streamability);
         }
@@ -365,6 +369,9 @@ namespace Saxon.Hej.expr.instruct {
             }
             if (isMemoFunction()) {
                 flags += "m";
+            }
+            if (ixslUpdating) {
+                flags += "u";
             }
             switch (declaredStreamability.innerEnumValue) {
               case Saxon.Hej.trans.FunctionStreamability.InnerEnum.UNCLASSIFIED:
@@ -518,7 +525,11 @@ namespace Saxon.Hej.expr.instruct {
 
         /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         /* Expanding default method asIterable from interface GroundedValue */

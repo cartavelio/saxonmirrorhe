@@ -273,7 +273,7 @@ namespace Saxon.Hej.type {
         
         }
         public class StringToFloat : Saxon.Hej.type.StringConverter {
-            public StringToFloat(Saxon.Hej.lib.ConversionRules rules) : base (rules) {
+            public StringToFloat(Saxon.Hej.lib.ConversionRules rules) : base (Saxon.Ejava.util.Objects.requireNonNull(rules)) {
             }
             public override Saxon.Hej.type.ConversionResult convertString(Saxon.Hej.str.UnicodeString input) {
                 try {

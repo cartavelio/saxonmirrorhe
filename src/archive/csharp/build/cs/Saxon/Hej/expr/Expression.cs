@@ -404,6 +404,10 @@ namespace Saxon.Hej.expr {
         public virtual void setLocation(Saxon.Hej.s9api.Location id) {
             location = id;
         }
+        public Saxon.Hej.expr.Expression withLocation(Saxon.Hej.s9api.Location id) {
+            setLocation(id);
+            return this;
+        }
         public Saxon.Hej.s9api.Location getLocation() {
             int limit = 0;
             Saxon.Hej.expr.Expression exp = this;

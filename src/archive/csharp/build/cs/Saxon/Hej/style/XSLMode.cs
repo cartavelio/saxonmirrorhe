@@ -28,6 +28,7 @@ namespace Saxon.Hej.style {
         }
         public override void index(Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.style.PrincipalStylesheetModule top) {
             Saxon.Hej.om.StructuredQName name = getObjectName();
+            bool enclosing = hasChildNodes();
             Saxon.Hej.trans.SymbolicName sName = new Saxon.Hej.trans.SymbolicName(Saxon.Hej.om.StandardNames.XSL_MODE, name);
             System.Collections.Generic.Dictionary<Saxon.Hej.trans.SymbolicName,Saxon.Hej.expr.Component> componentIndex = top.getStylesheetPackage().getComponentIndex();
             if (!(name.Equals(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME))) {
@@ -40,7 +41,7 @@ namespace Saxon.Hej.style {
                 }
             }
             mode = (Saxon.Hej.trans.SimpleMode)(top.getRuleManager().obtainMode(name, true));
-            mode.setEnclosingMode(hasChildNodes());
+            mode.setEnclosingMode(enclosing);
             if (name.Equals(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME)) {
                 top.getRuleManager().setUnnamedModeExplicit(true);
             } else {
@@ -103,9 +104,8 @@ namespace Saxon.Hej.style {
                       case "deep-skip":
                       case "fail":
                         break ;
-                      case "shallow-skip-all":
                       case "shallow-copy-all":
-                        requireXslt40Attribute("onNoMatch");
+                        requireXslt40Attribute("on-no-match");
                         break ;
                       default:
                         invalidAttribute(f, "text-only-copy|shallow-copy|deep-copy|shallow-skip|deep-skip|fail");
@@ -263,7 +263,8 @@ namespace Saxon.Hej.style {
             }
             foreach (Saxon.Hej.om.NodeInfo t in children()) {
                 if ((t is Saxon.Hej.style.XSLTemplate)) {
-                    ((Saxon.Hej.style.XSLTemplate)(t)).compileDeclaration(compilation, decl);
+                    Saxon.Hej.style.ComponentDeclaration templateDecl = new Saxon.Hej.style.ComponentDeclaration(decl.getModule(), (Saxon.Hej.style.XSLTemplate)(t));
+                    ((Saxon.Hej.style.XSLTemplate)(t)).compileDeclaration(compilation, templateDecl);
                 }
             }
         }

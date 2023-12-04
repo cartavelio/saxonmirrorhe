@@ -23,6 +23,13 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             return null;
         }
+        internal override int getEffectiveVersion() {
+            if ((getAttributeValue("version") != null)) {
+                return base.getEffectiveVersion();
+            } else {
+                return getCompilation().getCompilerInfo().getXsltVersion();
+            }
+        }
     
     }
 }

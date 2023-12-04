@@ -7,5 +7,6 @@ namespace Saxon.Hej.om {
         TEMPORARY,
         FLEETING,
         MUTABLE,
+        UNDEFINED,
     }
 }

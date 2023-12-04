@@ -32,6 +32,9 @@ namespace Saxon.Hej.functions.registry {
         protected internal const int ABS = (1<<25);
         protected internal const int TRA = (1<<26);
         protected internal const int NAV = (1<<27);
+        protected internal static Saxon.Hej.ma.map.RecordTest.Field field(string name, Saxon.Hej.value.SequenceType type, bool optional) {
+            return new Saxon.Hej.ma.map.RecordTest.Field(name, type, optional);
+        }
         private readonly System.Collections.Generic.Dictionary<string,Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry> functionTable = new System.Collections.Generic.Dictionary<string, Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry>(200);
         private readonly System.Collections.Generic.Dictionary<string,int> sequenceVariadicFunctions = new System.Collections.Generic.Dictionary<string, int>(10);
         public void importFunctionSet(Saxon.Hej.functions.registry.BuiltInFunctionSet importee) {
@@ -77,32 +80,8 @@ namespace Saxon.Hej.functions.registry {
                                 reasons.Add("concat() prior to XPath 4.0 requires at least two arguments");
                                 return null;
                             }
-                            Saxon.Hej.expr.Expression[] a2 = new Saxon.Hej.expr.Expression[staticArgs.Length];
-                            for (int i = 0; (i<staticArgs.Length); i++) {
-                                if ((staticArgs[i] is Saxon.Hej.expr.StringLiteral)) {
-                                    a2[i] = staticArgs[i];
-                                } else {
-                                    int pos = i;
-                                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "concat", pos);
-                                    a2[i] = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(staticArgs[i], Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE, role);
-                                    a2[i].setRetainedStaticContext(env.makeRetainedStaticContext());
-                                }
-                            }
-                            staticArgs = a2;
                         }
                     }
-                    int declaredArity = entry.maxArity;
-                    Saxon.Hej.expr.Expression[] newArgs = Saxon.Ejava.util.Arrays.copyOf(staticArgs, declaredArity);
-                    if ((declaredArity>staticArgs.Length)) {
-                        newArgs[(declaredArity-1)] = Saxon.Hej.expr.Literal.makeEmptySequence();
-                    } else {
-                        if ((declaredArity<staticArgs.Length)) {
-                            Saxon.Hej.expr.Expression block = new Saxon.Hej.expr.instruct.Block(Saxon.Ejava.util.Arrays.copyOfRange(staticArgs, (declaredArity-1), staticArgs.Length));
-                            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(staticArgs[0], block);
-                            newArgs[(declaredArity-1)] = block;
-                        }
-                    }
-                    staticArgs = newArgs;
                 } else {
                     if (((((keywords != null) && !(keywords.Count==0))) || (staticArgs.Length<entry.maxArity))) {
                         staticArgs = Saxon.Hej.expr.instruct.UserFunction.makeExpandedArgumentArray(staticArgs, keywords, entry);
@@ -171,7 +150,7 @@ namespace Saxon.Hej.functions.registry {
             if ((functionName.hasURI(getNamespace()) && (getFunctionDetails(functionName.getLocalPart(), arity) != null))) {
                 Saxon.Hej.expr.parser.RetainedStaticContext rsc = staticContext.makeRetainedStaticContext();
                 Saxon.Hej.functions.SystemFunction fn = makeFunction(functionName.getLocalPart(), arity);
-                if ((((staticContext.getXPathVersion()<40) && (fn is Saxon.Hej.functions.Concat)) && (arity<2))) {
+                if ((((staticContext.getXPathVersion()<40) && (fn is Saxon.Hej.functions.Concat31)) && (arity<2))) {
                     return null;
                 }
                 fn.setRetainedStaticContext(rsc);

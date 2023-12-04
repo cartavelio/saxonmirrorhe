@@ -273,13 +273,13 @@ namespace Saxon.Hej.type {
             }
             Saxon.Hej.type.Affinity affinity = th.sequenceTypeRelationship(resultType, other.getResultType());
             if (((affinity != Saxon.Hej.type.Affinity.SAME_TYPE) && (affinity != Saxon.Hej.type.Affinity.SUBSUMES))) {
-                string s = (((("The return type of the required function is "+resultType)+" but the return")+"type of the supplied function is ")+other.getResultType());
+                string s = ((("The return type of the required function is "+resultType)+" but the return type of the supplied function is ")+other.getResultType());
                 return Saxon.Ejava.util.Optional<string>.of(s);
             }
             for (int j = 0; (j<getArity()); j++) {
                 affinity = th.sequenceTypeRelationship(argTypes[j], other.getArgumentTypes()[j]);
                 if (((affinity != Saxon.Hej.type.Affinity.SAME_TYPE) && (affinity != Saxon.Hej.type.Affinity.SUBSUMED_BY))) {
-                    string s = (((((("The type of the "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((j+1)))+" argument of the required function is ")+argTypes[j])+" but the declared")+"type of the corresponding argument of the supplied function is ")+other.getArgumentTypes()[j]);
+                    string s = ((((("The type of the "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((j+1)))+" argument of the required function is ")+argTypes[j])+" but the declared type of the corresponding argument of the supplied function is ")+other.getArgumentTypes()[j]);
                     return Saxon.Ejava.util.Optional<string>.of(s);
                 }
             }

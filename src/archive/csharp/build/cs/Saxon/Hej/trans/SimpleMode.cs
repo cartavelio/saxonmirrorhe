@@ -49,10 +49,6 @@ namespace Saxon.Hej.trans {
                   case "streamable":
                     bool streamable = "yes".Equals(value);
                     setStreamable(streamable);
-                    if (streamable) {
-                        Saxon.Hej.trans.Mode omniMode = manager.obtainMode(Saxon.Hej.trans.Mode.OMNI_MODE, true);
-                        omniMode.setStreamable(true);
-                    }
                     break ;
                   case "typed":
                     mustBeTyped = (("yes".Equals(value) || "strict".Equals(value)) || "lax".Equals(value));
@@ -81,9 +77,6 @@ namespace Saxon.Hej.trans {
                         break ;
                       case "shallow-copy-all":
                         @base = Saxon.Hej.trans.rules.ShallowCopyAllRuleSet.getInstance();
-                        break ;
-                      case "shallow-skip-all":
-                        @base = Saxon.Hej.trans.rules.ShallowSkipAllRuleSet.getInstance();
                         break ;
                       default:
                         break ;
@@ -127,18 +120,6 @@ namespace Saxon.Hej.trans {
         }
         public string getLabel() {
             return (isUnnamedMode() ? "the unnamed mode" : ("mode "+modeName.getDisplayName()));
-        }
-        public static void copyRules(Saxon.Hej.trans.SimpleMode from, Saxon.Hej.trans.SimpleMode to) {
-            try {
-                from.processRules(r => {
-                    Saxon.Hej.trans.rules.Rule r2 = r.copy(false);
-                    to.addRule(r2.getPattern(), r2);
-                } );
-            } catch (Saxon.Hej.trans.XPathException e) {
-                throw new Saxon.Ejava.lang.AssertionError(e);
-            }
-            to.mostRecentRule = from.mostRecentRule;
-            to.mostRecentModuleHash = from.mostRecentModuleHash;
         }
         protected internal virtual Saxon.Hej.trans.rules.RuleSearchState makeRuleSearchState(Saxon.Hej.trans.rules.RuleChain chain, Saxon.Hej.expr.XPathContext context) {
             return Saxon.Hej.trans.rules.RuleSearchState.getInstance();

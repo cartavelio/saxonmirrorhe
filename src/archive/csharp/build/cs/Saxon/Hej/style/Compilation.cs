@@ -22,6 +22,7 @@ namespace Saxon.Hej.style {
         private System.Collections.Generic.IList<Saxon.Hej.trans.packages.VersionedPackageName> usingPackages = new System.Collections.Generic.List<Saxon.Hej.trans.packages.VersionedPackageName>();
         private Saxon.Hej.expr.instruct.GlobalParameterSet suppliedParameters;
         private bool fallbackToNonStreaming = false;
+        private System.Collections.Generic.ISet<Saxon.Hej.om.StructuredQName> referencedModes = new System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName>();
         public Saxon.Hej.trans.Timer timer = null;
         private class ValueAndPrecedence {
             public ValueAndPrecedence(Saxon.Hej.om.GroundedValue v, Saxon.Hej.value.NestedIntegerValue p, bool isParam)  {
@@ -40,6 +41,7 @@ namespace Saxon.Hej.style {
             schemaAware = info.isSchemaAware();
             preScan = info.isJustInTimeCompilation();
             suppliedParameters = compilerInfo.getParameters();
+            referencedModes.Add(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME);
             qNameParser = new Saxon.Hej.om.QNameParser(null).withAcceptEQName(true).withErrorOnBadSyntax("XTSE0020").withErrorOnUnresolvedPrefix("XTSE0280");
             if (TIMING) {
                 timer = new Saxon.Hej.trans.Timer();
@@ -119,8 +121,15 @@ namespace Saxon.Hej.style {
             setMinimalPackageData();
             Saxon.Hej.om.NodeInfo document;
             Saxon.Hej.om.NodeInfo outermost = null;
-            if ((source is Saxon.Hej.om.NodeInfo)) {
-                Saxon.Hej.om.NodeInfo root = (Saxon.Hej.om.NodeInfo)(source);
+            Saxon.Hej.om.NodeInfo root = null;
+            if ((source is Saxon.Hej.om.NodeSource)) {
+                root = ((Saxon.Hej.om.NodeSource)(source)).getNode();
+            } else {
+                if ((source is Saxon.Hej.om.NodeInfo)) {
+                    root = ((Saxon.Hej.om.NodeInfo)(source));
+                }
+            }
+            if ((root != null)) {
                 if ((root.getNodeKind() == Saxon.Hej.type.Type.DOCUMENT)) {
                     document = root;
                     outermost = ((/*1430*/Saxon.Hej.om.NodeInfo)document.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.ELEMENT).next());
@@ -135,6 +144,9 @@ namespace Saxon.Hej.style {
                 document = Saxon.Hej.style.StylesheetModule.loadStylesheetModule(source, true, this, Saxon.Hej.value.NestedIntegerValue.TWO);
                 outermost = ((/*1430*/Saxon.Hej.om.NodeInfo)document.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.ELEMENT).next());
             }
+            if ((outermost == null)) {
+                throw new Saxon.Hej.trans.XPathException(("No stylesheet element found at "+source.getSystemId()), "XPST0010");
+            }
             if ((outermost is Saxon.Hej.style.LiteralResultElement)) {
                 document = ((Saxon.Hej.style.LiteralResultElement)(outermost)).makeStylesheet(true);
                 outermost = ((/*1430*/Saxon.Hej.om.NodeInfo)document.iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.ELEMENT).next());
@@ -144,7 +156,7 @@ namespace Saxon.Hej.style {
                 if ((outermost is Saxon.Hej.style.XSLPackage)) {
                     xslpackage = (Saxon.Hej.style.XSLPackage)(outermost);
                 } else {
-                    throw new Saxon.Hej.trans.XPathException("Outermost element must be xsl:package, xsl:stylesheet, or xsl:transform");
+                    throw new Saxon.Hej.trans.XPathException((("Outermost element must be xsl:package, xsl:stylesheet, or xsl:transform (found "+outermost.getDisplayName())+")"), "XPST0010").withLocation(outermost);
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
                 if (!(e.hasBeenReported())) {
@@ -393,6 +405,9 @@ namespace Saxon.Hej.style {
         }
         public void setFallbackToNonStreaming(bool fallbackToNonStreaming) {
             this.fallbackToNonStreaming = fallbackToNonStreaming;
+        }
+        public System.Collections.Generic.ISet<Saxon.Hej.om.StructuredQName> getAllKnownModeNames() {
+            return referencedModes;
         }
     
     }

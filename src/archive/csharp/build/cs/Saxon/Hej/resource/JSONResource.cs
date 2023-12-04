@@ -32,7 +32,7 @@ namespace Saxon.Hej.resource {
                     return null;
                 }
             }
-            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> options = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.Sequence>();
+            System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>();
             Saxon.Impl.Helpers.MapUtils.Put(options, "liberal", Saxon.Hej.value.BooleanValue.FALSE);
             Saxon.Impl.Helpers.MapUtils.Put(options, "duplicates", Saxon.Hej.value.StringValue.bmp("use-first"));
             Saxon.Impl.Helpers.MapUtils.Put(options, "escape", Saxon.Hej.value.BooleanValue.FALSE);

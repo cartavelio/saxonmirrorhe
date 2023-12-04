@@ -134,14 +134,37 @@ namespace Saxon.Hej.trans {
                 return "(*null*)";
             }
             try {
-                Saxon.Hej.om.GroundedValue val = seq.materialize();
-                if ((val.getLength() == 0)) {
-                    return "()";
-                } else {
-                    if ((val.getLength() == 1)) {
-                        return depict(seq.head());
+                if ((seq is Saxon.Hej.om.GroundedValue)) {
+                    Saxon.Hej.om.GroundedValue val = (Saxon.Hej.om.GroundedValue)(seq);
+                    if ((val.getLength() == 0)) {
+                        return "()";
                     } else {
-                        return depictSequenceStart(val.iterate(), 3, val.getLength());
+                        if ((val.getLength() == 1)) {
+                            return depict(seq.head());
+                        } else {
+                            return depictSequenceStart(val.iterate(), 3, val.getLength());
+                        }
+                    }
+                } else {
+                    if ((seq is Saxon.Hej.value.SingletonClosure)) {
+                        Saxon.Hej.value.SingletonClosure sc = (Saxon.Hej.value.SingletonClosure)(seq);
+                        if (sc.isBuilt()) {
+                            return ((sc.asItem() == null) ? "()" : depict(sc.asItem()));
+                        } else {
+                            return "(*not-yet-evaluated singleton*)";
+                        }
+                    } else {
+                        if ((seq is Saxon.Hej.value.MemoClosure)) {
+                            Saxon.Hej.value.MemoClosure mc = (Saxon.Hej.value.MemoClosure)(seq);
+                            seq = mc.getSequenceAsIs();
+                            if ((seq == null)) {
+                                return "(*not-yet-evaluated sequence*)";
+                            } else {
+                                return depictSequence(seq);
+                            }
+                        } else {
+                            return "(*lazily evaluated*)";
+                        }
                     }
                 }
             } catch (System.Exception e) {

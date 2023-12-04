@@ -16,17 +16,16 @@ namespace Saxon.Hej.style {
         private double priority;
         private Saxon.Hej.expr.instruct.SlotManager stackFrameMap;
         private Saxon.Hej.expr.instruct.NamedTemplate compiledNamedTemplate;
-        private readonly System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.instruct.TemplateRule> compiledTemplateRules = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.expr.instruct.TemplateRule>();
+        private readonly System.Collections.Generic.IList<Saxon.Hej.expr.instruct.TemplateRule> compiledTemplateRules = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.TemplateRule>();
         private Saxon.Hej.value.SequenceType requiredType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
         private bool declaresRequiredType = false;
-        private bool hasRequiredParams = false;
-        private bool isTailRecursive = false;
         private Saxon.Hej.trans.Visibility visibility = Saxon.Hej.trans.Visibility.PRIVATE;
         private Saxon.Hej.type.ItemType requiredContextItemType = Saxon.Hej.type.AnyItemType.getInstance();
         private bool mayOmitContextItem = true;
         private bool absentFocus = false;
         private bool jitCompilationDone = false;
         private bool explaining;
+        private System.Collections.Generic.IList<Saxon.Hej.pattern.Pattern> subPatterns;
         public Saxon.Hej.expr.instruct.Actor getActor() {
             return compiledNamedTemplate;
         }
@@ -89,7 +88,7 @@ namespace Saxon.Hej.style {
         }
         public void checkCompatibility(Saxon.Hej.expr.Component component) {
             Saxon.Hej.expr.instruct.NamedTemplate other = (Saxon.Hej.expr.instruct.NamedTemplate)(component.getActor());
-            if (!(getSymbolicName().Equals(other.getSymbolicName()))) {
+            if (!(Saxon.Ejava.util.Objects.Equals(getSymbolicName(), other.getSymbolicName()))) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException();
             }
             Saxon.Hej.value.SequenceType req = ((requiredType == null) ? Saxon.Hej.value.SequenceType.ANY_SEQUENCE : requiredType);
@@ -196,7 +195,6 @@ namespace Saxon.Hej.style {
                     if ((matchAtt == null)) {
                         compileError("The mode attribute must be absent if the match attribute is absent", "XTSE0500");
                     }
-                    getModeNames();
                 }
             } catch (Saxon.Hej.trans.XPathException err) {
                 Saxon.Hej.trans.XPathException e2 = err.replacingErrorCode("XTSE0020", "XTSE0550");
@@ -313,7 +311,7 @@ namespace Saxon.Hej.style {
                         } else {
                             if ("#all".Equals(s)) {
                                 allModes = true;
-                                mname = Saxon.Hej.trans.Mode.OMNI_MODE;
+                                mname = Saxon.Hej.trans.Mode.OMNI_MODE_NAME;
                             } else {
                                 mname = makeQName(s, "XTSE0550", "mode");
                             }
@@ -337,7 +335,7 @@ namespace Saxon.Hej.style {
             System.Collections.Generic.ISet<Saxon.Hej.trans.Mode> modes = new System.Collections.Generic.HashSet<Saxon.Hej.trans.Mode>(names.Length);
             Saxon.Hej.trans.rules.RuleManager mgr = getPrincipalStylesheetModule().getRuleManager();
             foreach (Saxon.Hej.om.StructuredQName name in names) {
-                if (name.Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {
+                if (name.Equals(Saxon.Hej.trans.Mode.OMNI_MODE_NAME)) {
                     modes.Add(mgr.getUnnamedMode());
                     Saxon.Impl.Helpers.SetUtils.AddAll(modes, mgr.getAllNamedModes());
                 } else {
@@ -349,9 +347,9 @@ namespace Saxon.Hej.style {
             }
             return modes;
         }
-        public bool isOmniMode() {
+        public bool appliesToAllModes() {
             foreach (Saxon.Hej.om.StructuredQName name in getModeNames()) {
-                if (name.Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {
+                if (name.Equals(Saxon.Hej.trans.Mode.OMNI_MODE_NAME)) {
                     return true;
                 }
             }
@@ -387,8 +385,9 @@ namespace Saxon.Hej.style {
                 }
                 if (getPrincipalStylesheetModule().isDeclaredModes()) {
                     Saxon.Hej.trans.rules.RuleManager manager = getPrincipalStylesheetModule().getRuleManager();
-                    if ((modeNames != null)) {
-                        foreach (Saxon.Hej.om.StructuredQName name in modeNames) {
+                    Saxon.Hej.om.StructuredQName[] modes = getModeNames();
+                    if ((modes != null)) {
+                        foreach (Saxon.Hej.om.StructuredQName name in modes) {
                             if ((name.Equals(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME) && !(manager.isUnnamedModeExplicit()))) {
                                 compileError("The unnamed mode has not been declared in an xsl:mode declaration", "XTSE3085");
                             }
@@ -407,20 +406,42 @@ namespace Saxon.Hej.style {
                 }
             }
             bool hasContent = false;
-            foreach (Saxon.Hej.om.NodeInfo param in children(x => (x is Saxon.Hej.style.StyleElement))) {
-                if ((param.getFingerprint() == Saxon.Hej.om.StandardNames.XSL_CONTEXT_ITEM)) {
-                } else {
-                    if ((param is Saxon.Hej.style.XSLLocalParam)) {
-                        if (((Saxon.Hej.style.XSLLocalParam)(param)).isRequiredParam()) {
-                            hasRequiredParams = true;
-                        }
-                    } else {
-                        hasContent = true;
-                    }
+            foreach (Saxon.Hej.om.NodeInfo child in children(x => (x is Saxon.Hej.style.StyleElement))) {
+                if (!((((child.getFingerprint() == Saxon.Hej.om.StandardNames.XSL_CONTEXT_ITEM) || (child.getFingerprint() == Saxon.Hej.om.StandardNames.XSL_PARAM))))) {
+                    hasContent = true;
+                    break ;
                 }
             }
             if (((visibility == Saxon.Hej.trans.Visibility.ABSTRACT) && hasContent)) {
                 compileError("A template with visibility='abstract' must have no body");
+            }
+            if ((match != null)) {
+                subPatterns = new System.Collections.Generic.List<Saxon.Hej.pattern.Pattern>(2);
+                if (prioritySpecified) {
+                    subPatterns.Add(match);
+                } else {
+                    gatherSubPatterns(match, subPatterns);
+                }
+            }
+        }
+        private void gatherSubPatterns(Saxon.Hej.pattern.Pattern match, System.Collections.Generic.IList<Saxon.Hej.pattern.Pattern> subPatterns) {
+            if ((match is Saxon.Hej.pattern.UnionPattern)) {
+                Saxon.Hej.pattern.UnionPattern up = (Saxon.Hej.pattern.UnionPattern)(match);
+                gatherSubPatterns(up.getLHS(), subPatterns);
+                gatherSubPatterns(up.getRHS(), subPatterns);
+            } else {
+                if ((((match is Saxon.Hej.pattern.NodeTestPattern) && (match.getItemType() is Saxon.Hej.pattern.CombinedNodeTest)) && (((Saxon.Hej.pattern.CombinedNodeTest)(match.getItemType())).getOperator() == Saxon.Hej.expr.parser.Token.UNION))) {
+                    Saxon.Hej.pattern.CombinedNodeTest cnt = (Saxon.Hej.pattern.CombinedNodeTest)(match.getItemType());
+                    Saxon.Hej.pattern.NodeTest[] nt = cnt.getComponentNodeTests();
+                    Saxon.Hej.pattern.NodeTestPattern nt0 = new Saxon.Hej.pattern.NodeTestPattern(nt[0]);
+                    subPatterns.Add(nt0);
+                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(match, nt0);
+                    Saxon.Hej.pattern.NodeTestPattern nt1 = new Saxon.Hej.pattern.NodeTestPattern(nt[1]);
+                    Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(match, nt1);
+                    subPatterns.Add(nt1);
+                } else {
+                    subPatterns.Add(match);
+                }
             }
         }
         public override void validateSubtree(Saxon.Hej.style.ComponentDeclaration decl, bool excludeStylesheet) {
@@ -452,7 +473,7 @@ namespace Saxon.Hej.style {
                 return ;
             }
             if (compilation.getCompilerInfo().getOptimizerOptions().isSet(Saxon.Hej.expr.parser.OptimizerOptions.TAIL_CALLS)) {
-                isTailRecursive = markTailCalls();
+                markTailCalls();
             }
             Saxon.Hej.expr.Expression body = compileSequenceConstructor(compilation, decl, true);
             body.restoreParentPointers();
@@ -464,16 +485,16 @@ namespace Saxon.Hej.style {
                 checkStrictStreamability(body);
             }
             if ((getTemplateName() != null)) {
-                compileNamedTemplate(compilation, body, decl);
+                compileNamedTemplate(body);
             }
             if ((match != null)) {
-                compileTemplateRule(compilation, body, decl);
+                compileTemplateRule(compilation, body);
             }
         }
         private void checkStrictStreamability(Saxon.Hej.expr.Expression body) {
             getConfiguration().checkStrictStreamability(this, body);
         }
-        private void compileNamedTemplate(Saxon.Hej.style.Compilation compilation, Saxon.Hej.expr.Expression body, Saxon.Hej.style.ComponentDeclaration decl) {
+        private void compileNamedTemplate(Saxon.Hej.expr.Expression body) {
             Saxon.Hej.expr.parser.RetainedStaticContext rsc = body.getRetainedStaticContext();
             compiledNamedTemplate.setPackageData(rsc.getPackageData());
             compiledNamedTemplate.setBody(body);
@@ -481,7 +502,6 @@ namespace Saxon.Hej.style {
             compiledNamedTemplate.setSystemId(getSystemId());
             compiledNamedTemplate.setLineNumber(getLineNumber());
             compiledNamedTemplate.setColumnNumber(getColumnNumber());
-            compiledNamedTemplate.setHasRequiredParams(hasRequiredParams);
             compiledNamedTemplate.setRequiredType(requiredType);
             compiledNamedTemplate.setContextItemRequirements(requiredContextItemType, mayOmitContextItem, absentFocus);
             compiledNamedTemplate.setRetainedStaticContext(rsc);
@@ -532,7 +552,7 @@ namespace Saxon.Hej.style {
             }
             return body;
         }
-        public void compileTemplateRule(Saxon.Hej.style.Compilation compilation, Saxon.Hej.expr.Expression body, Saxon.Hej.style.ComponentDeclaration decl) {
+        public void compileTemplateRule(Saxon.Hej.style.Compilation compilation, Saxon.Hej.expr.Expression body) {
             Saxon.Hej.Configuration config = getConfiguration();
             if ((getTemplateName() != null)) {
                 body = body.copy(new Saxon.Hej.expr.parser.RebindingMap());
@@ -546,60 +566,38 @@ namespace Saxon.Hej.style {
             cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
             body = refineTemplateBody(body, cisi);
             bool first = true;
-            foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.instruct.TemplateRule> kvp in compiledTemplateRules) {
-                if (!(kvp.Key.Equals(Saxon.Hej.trans.Mode.OMNI_MODE))) {
-                    Saxon.Hej.expr.instruct.TemplateRule rule = kvp.Value;
-                    if (first) {
-                        rule.setMatchPattern(match);
-                        rule.setBody(body);
-                        if ((compilation.getCompilerInfo().getCodeInjector() != null)) {
-                            compilation.getCompilerInfo().getCodeInjector().process(rule);
-                            body = rule.getBody();
-                        }
-                        first = false;
-                    } else {
-                        if ((rule.getBody() == null)) {
-                            body = body.copy(new Saxon.Hej.expr.parser.RebindingMap());
-                        } else {
-                            body = rule.getBody();
-                        }
+            foreach (Saxon.Hej.expr.instruct.TemplateRule rule in compiledTemplateRules) {
+                if (first) {
+                    rule.setBody(body);
+                    if ((compilation.getCompilerInfo().getCodeInjector() != null)) {
+                        compilation.getCompilerInfo().getCodeInjector().process(rule);
+                        body = rule.getBody();
                     }
-                    setCompiledTemplateRuleProperties(rule, body);
-                    rule.updateSlaveCopies();
+                    first = false;
+                } else {
+                    if ((rule.getBody() == null)) {
+                        body = body.copy(new Saxon.Hej.expr.parser.RebindingMap());
+                    } else {
+                        body = rule.getBody();
+                    }
                 }
+                setCompiledTemplateRuleProperties(rule, body);
             }
         }
         private void createSkeletonTemplate(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {
-            Saxon.Hej.om.StructuredQName[] modes = modeNames;
-            if (isOmniMode()) {
-                System.Collections.Generic.IList<Saxon.Hej.om.StructuredQName> all = new System.Collections.Generic.List<Saxon.Hej.om.StructuredQName>();
-                all.Add(Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME);
-                Saxon.Hej.trans.rules.RuleManager mgr = getCompilation().getPrincipalStylesheetModule().getRuleManager();
-                foreach (Saxon.Hej.trans.Mode m in mgr.getAllNamedModes()) {
-                    all.Add(m.getModeName());
-                }
-                modes = all.ToArray();
-            }
-            foreach (Saxon.Hej.om.StructuredQName modeName in modes) {
-                Saxon.Hej.expr.instruct.TemplateRule templateRule = Saxon.Impl.Helpers.MapUtils.Get(compiledTemplateRules, modeName);
-                if ((templateRule == null)) {
-                    templateRule = getConfiguration().makeTemplateRule();
-                }
-                templateRule.prepareInitializer(compilation, decl, modeName);
-                Saxon.Impl.Helpers.MapUtils.Put(compiledTemplateRules, modeName, templateRule);
+            foreach (Saxon.Hej.expr.instruct.TemplateRule templateRule in compiledTemplateRules) {
+                templateRule.prepareInitializer(compilation, decl);
                 Saxon.Hej.expr.parser.RetainedStaticContext rsc = makeRetainedStaticContext();
                 templateRule.setPackageData(rsc.getPackageData());
                 setCompiledTemplateRuleProperties(templateRule, null);
             }
         }
         private void setCompiledTemplateRuleProperties(Saxon.Hej.expr.instruct.TemplateRule templateRule, Saxon.Hej.expr.Expression body) {
-            templateRule.setMatchPattern(match);
             templateRule.setBody(body);
             templateRule.setStackFrameMap(stackFrameMap);
             templateRule.setSystemId(getSystemId());
             templateRule.setLineNumber(getLineNumber());
             templateRule.setColumnNumber(getColumnNumber());
-            templateRule.setHasRequiredParams(hasRequiredParams);
             templateRule.setRequiredType(requiredType);
             templateRule.setContextItemRequirements(requiredContextItemType, absentFocus);
         }
@@ -627,82 +625,65 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.style.StylesheetModule module = declaration.getModule();
                 Saxon.Hej.trans.rules.RuleManager mgr = getCompilation().getPrincipalStylesheetModule().getRuleManager();
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(getStaticContext());
-                foreach (Saxon.Hej.om.StructuredQName modeName in getModeNames()) {
-                    Saxon.Hej.trans.Mode mode = mgr.obtainMode(modeName, false);
-                    if ((mode == null)) {
-                        if (mgr.existsOmniMode()) {
-                            Saxon.Hej.trans.Mode omniMode = mgr.obtainMode(Saxon.Hej.trans.Mode.OMNI_MODE, true);
-                            mode = mgr.obtainMode(modeName, true);
-                            Saxon.Hej.trans.SimpleMode.copyRules(omniMode.getActivePart(), mode.getActivePart());
-                        } else {
-                            mode = mgr.obtainMode(modeName, true);
-                        }
-                    } else {
-                        bool ok = getPrincipalStylesheetModule().checkAcceptableModeForPackage(this, mode);
-                        if (!(ok)) {
-                            return ;
-                        }
-                        if ((mode.isEnclosingMode() && !((((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) is Saxon.Hej.style.XSLMode) && (mode == ((Saxon.Hej.style.XSLMode)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getMode())))))) {
-                            compileError(("An xsl:template rule must not refer to a mode that contains enclosed template rules "+"unless it is itself enclosed by that xsl:mode declaration"), "XTSE4020");
-                        }
+                System.Collections.Generic.IEnumerable<Saxon.Hej.om.StructuredQName> modeNames = Saxon.Ejava.util.Arrays.asList(getModeNames());
+                if (appliesToAllModes()) {
+                    modeNames = getCompilation().getAllKnownModeNames();
+                }
+                foreach (Saxon.Hej.om.StructuredQName modeName in modeNames) {
+                    Saxon.Hej.trans.Mode mode = mgr.obtainMode(modeName, true);
+                    if ((appliesToAllModes() && mode.isEnclosingMode())) {
+                        continue ;
                     }
-                    Saxon.Hej.pattern.Pattern match1 = match.copy(new Saxon.Hej.expr.parser.RebindingMap());
-                    string typed = mode.getActivePart().getPropertyValue("typed");
-                    if (("strict".Equals(typed) || "lax".Equals(typed))) {
-                        Saxon.Hej.pattern.Pattern match2;
-                        try {
-                            match2 = match1.convertToTypedPattern(typed);
-                        } catch (Saxon.Hej.trans.XPathException e) {
-                            throw e.maybeWithLocation(this);
-                        }
-                        if ((match2 != match1)) {
-                            Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), mayOmitContextItem);
-                            Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(match, match2);
-                            match2.setOriginalText(match.ToString());
-                            match2 = match2.typeCheck(visitor, info);
-                            match1 = match2;
-                        }
-                        if ((modeNames.Length == 1)) {
-                            match = match2;
-                        }
+                    bool ok = getPrincipalStylesheetModule().checkAcceptableModeForPackage(this, mode);
+                    if (!(ok)) {
+                        return ;
                     }
-                    Saxon.Hej.expr.instruct.TemplateRule rule = Saxon.Impl.Helpers.MapUtils.Get(compiledTemplateRules, modeName);
-                    if ((rule == null)) {
-                        rule = getConfiguration().makeTemplateRule();
-                        Saxon.Impl.Helpers.MapUtils.Put(compiledTemplateRules, modeName, rule);
+                    if ((mode.isEnclosingMode() && !((((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) is Saxon.Hej.style.XSLMode) && (mode == ((Saxon.Hej.style.XSLMode)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getMode())))))) {
+                        compileError(("An xsl:template rule must not refer to a mode that contains enclosed template rules "+"unless it is itself enclosed by that xsl:mode declaration"), "XTSE4020");
                     }
-                    double prio = (prioritySpecified ? priority : System.Double.NaN);
-                    mgr.registerRule(match1, rule, mode, module, prio, mgr.allocateSequenceNumber(), 0);
-                    if (mode.isDeclaredStreamable()) {
-                        rule.setDeclaredStreamable(true);
-                        if (!(match1.isMotionless())) {
-                            bool fallback = getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.STREAMING_FALLBACK);
-                            string message = "Template rule is declared streamable but the match pattern is not motionless";
-                            if (fallback) {
-                                message += "\n  * Falling back to non-streaming implementation";
-                                getStaticContext().issueWarning(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9024, this);
-                                rule.setDeclaredStreamable(false);
-                                getCompilation().setFallbackToNonStreaming(true);
-                            } else {
-                                throw new Saxon.Hej.trans.XPathException(message, "XTSE3430", this);
+                    int part = 0;
+                    int seq = mgr.allocateSequenceNumber();
+                    foreach (Saxon.Hej.pattern.Pattern subPattern in subPatterns) {
+                        Saxon.Hej.pattern.Pattern match1 = subPattern.copy(new Saxon.Hej.expr.parser.RebindingMap());
+                        string typed = mode.getActivePart().getPropertyValue("typed");
+                        if (("strict".Equals(typed) || "lax".Equals(typed))) {
+                            Saxon.Hej.pattern.Pattern match2;
+                            try {
+                                match2 = match1.convertToTypedPattern(typed);
+                            } catch (Saxon.Hej.trans.XPathException e) {
+                                throw e.maybeWithLocation(this);
+                            }
+                            if ((match2 != match1)) {
+                                Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), mayOmitContextItem);
+                                Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(match, match2);
+                                match2.setOriginalText(match.ToString());
+                                match2 = match2.typeCheck(visitor, info);
+                                match1 = match2;
                             }
                         }
-                    }
-                    if (((mode.getDefaultResultType() != null) && !(declaresRequiredType))) {
-                        rule.setRequiredType(mode.getDefaultResultType());
-                    }
-                    if (mode.getModeName().Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {
-                        Saxon.Impl.Helpers.MapUtils.Put(compiledTemplateRules, Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME, rule);
-                        mgr.registerRule(match1, rule, mgr.getUnnamedMode(), module, prio, mgr.allocateSequenceNumber(), 0);
-                        foreach (Saxon.Hej.trans.Mode m in mgr.getAllNamedModes()) {
-                            if (((m is Saxon.Hej.trans.SimpleMode) && !(m.isEnclosingMode()))) {
-                                Saxon.Hej.expr.instruct.TemplateRule ruleCopy = rule.copy();
-                                if (m.isDeclaredStreamable()) {
-                                    ruleCopy.setDeclaredStreamable(true);
+                        Saxon.Hej.expr.instruct.TemplateRule rule = getConfiguration().makeTemplateRule();
+                        rule.setMode(mode);
+                        rule.setMatchPattern(match1);
+                        compiledTemplateRules.Add(rule);
+                        double prio = (prioritySpecified ? priority : System.Double.NaN);
+                        mgr.registerRule(match1, rule, mode, module, prio, seq, part++);
+                        if (mode.isDeclaredStreamable()) {
+                            rule.setDeclaredStreamable(true);
+                            if (!(match1.isMotionless())) {
+                                bool fallback = getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.STREAMING_FALLBACK);
+                                string message = "Template rule is declared streamable but the match pattern is not motionless";
+                                if (fallback) {
+                                    message += "\n  * Falling back to non-streaming implementation";
+                                    getStaticContext().issueWarning(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9024, this);
+                                    rule.setDeclaredStreamable(false);
+                                    getCompilation().setFallbackToNonStreaming(true);
+                                } else {
+                                    throw new Saxon.Hej.trans.XPathException(message, "XTSE3430", this);
                                 }
-                                Saxon.Impl.Helpers.MapUtils.Put(compiledTemplateRules, m.getModeName(), ruleCopy);
-                                mgr.registerRule(match1.copy(new Saxon.Hej.expr.parser.RebindingMap()), ruleCopy, m, module, prio, mgr.allocateSequenceNumber(), 0);
                             }
+                        }
+                        if (((mode.getDefaultResultType() != null) && !(declaresRequiredType))) {
+                            rule.setRequiredType(mode.getDefaultResultType());
                         }
                     }
                 }
@@ -710,35 +691,18 @@ namespace Saxon.Hej.style {
         }
         public void allocatePatternSlotNumbers() {
             if ((match != null)) {
-                foreach (Saxon.Hej.expr.instruct.TemplateRule templateRule in compiledTemplateRules.Values) {
-                    foreach (Saxon.Hej.trans.rules.Rule r in templateRule.getRules()) {
-                        Saxon.Hej.pattern.Pattern match = r.getPattern();
-                        int nextFree = 0;
-                        if ((((match.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CURRENT_ITEM)) != 0)) {
-                            nextFree = 1;
-                        }
-                        int slots = match.allocateSlots(getSlotManager(), nextFree);
-                        if (((slots == 0) && ((((match.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_USER_FUNCTIONS)) != 0)))) {
-                            slots = 1;
-                        }
-                        if ((slots>0)) {
-                            Saxon.Hej.trans.rules.RuleManager mgr = getCompilation().getPrincipalStylesheetModule().getRuleManager();
-                            bool appliesToAll = false;
-                            foreach (Saxon.Hej.om.StructuredQName nc in modeNames) {
-                                if (nc.Equals(Saxon.Hej.trans.Mode.OMNI_MODE)) {
-                                    appliesToAll = true;
-                                    break ;
-                                }
-                                Saxon.Hej.trans.Mode mode = mgr.obtainMode(nc, true);
-                                mode.getActivePart().allocatePatternSlots(slots);
-                            }
-                            if (appliesToAll) {
-                                foreach (Saxon.Hej.trans.Mode m in mgr.getAllNamedModes()) {
-                                    m.getActivePart().allocatePatternSlots(slots);
-                                }
-                                mgr.getUnnamedMode().getActivePart().allocatePatternSlots(slots);
-                            }
-                        }
+                foreach (Saxon.Hej.expr.instruct.TemplateRule templateRule in compiledTemplateRules) {
+                    Saxon.Hej.pattern.Pattern match = templateRule.getMatchPattern();
+                    int nextFree = 0;
+                    if ((((match.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CURRENT_ITEM)) != 0)) {
+                        nextFree = 1;
+                    }
+                    int slots = match.allocateSlots(getSlotManager(), nextFree);
+                    if (((slots == 0) && ((((match.getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_USER_FUNCTIONS)) != 0)))) {
+                        slots = 1;
+                    }
+                    if ((slots>0)) {
+                        templateRule.getMode().getActivePart().allocatePatternSlots(slots);
                     }
                 }
             }
@@ -765,14 +729,18 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.expr.parser.ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
                 cisi.setContextPostureStriding();
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = makeExpressionVisitor();
-                match.resetLocalStaticProperties();
-                match = match.optimize(visitor, cisi);
+                foreach (Saxon.Hej.expr.instruct.TemplateRule compiledTemplateRule in compiledTemplateRules) {
+                    if (compiledTemplateRule.getMode().getModeName().Equals(Saxon.Hej.trans.Mode.OMNI_MODE_NAME)) {
+                        compiledTemplateRule.getMatchPattern().resetLocalStaticProperties();
+                        Saxon.Hej.pattern.Pattern m2 = compiledTemplateRule.getMatchPattern().optimize(visitor, cisi);
+                        compiledTemplateRule.setMatchPattern(m2);
+                    }
+                }
                 if (!(isDeferredCompilation(getCompilation()))) {
                     Saxon.Hej.expr.parser.Optimizer opt = getConfiguration().obtainOptimizer();
                     try {
-                        foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.instruct.TemplateRule> entry in compiledTemplateRules) {
-                            if (!(entry.Key.Equals(Saxon.Hej.trans.Mode.OMNI_MODE))) {
-                                Saxon.Hej.expr.instruct.TemplateRule compiledTemplateRule = entry.Value;
+                        foreach (Saxon.Hej.expr.instruct.TemplateRule compiledTemplateRule in compiledTemplateRules) {
+                            if (!(compiledTemplateRule.getMode().getModeName().Equals(Saxon.Hej.trans.Mode.OMNI_MODE_NAME))) {
                                 Saxon.Hej.expr.Expression templateRuleBody = compiledTemplateRule.getBody();
                                 visitor.setOptimizeForStreaming(compiledTemplateRule.isDeclaredStreamable());
                                 templateRuleBody = templateRuleBody.typeCheck(visitor, cisi);
@@ -785,9 +753,6 @@ namespace Saxon.Hej.style {
                                     Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), mayOmitContextItem);
                                     info.setContextPostureStriding();
                                     Saxon.Hej.pattern.Pattern m2 = match.optimize(visitor, info);
-                                    if ((compiledTemplateRules.Count>1)) {
-                                        m2 = m2.copy(new Saxon.Hej.expr.parser.RebindingMap());
-                                    }
                                     if ((m2 != match)) {
                                         r.setPattern(m2);
                                     }
@@ -837,9 +802,6 @@ namespace Saxon.Hej.style {
         }
         public Saxon.Hej.pattern.Pattern getMatch() {
             return match;
-        }
-        public System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.instruct.TemplateRule> getTemplateRulesByMode() {
-            return compiledTemplateRules;
         }
     
     }

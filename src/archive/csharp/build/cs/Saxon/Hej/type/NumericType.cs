@@ -159,7 +159,7 @@ namespace Saxon.Hej.type {
         public bool isSameType(Saxon.Hej.type.SchemaType other) {
             return (other is Saxon.Hej.type.NumericType);
         }
-        public override  /* REPLACING public */ string getDescription() {
+        public override  /* REPLACING public override */ string getDescription() {
             return "xs:numeric";
         }
         public string getSystemId() {

@@ -25,6 +25,27 @@ namespace Saxon.Hej.style {
         public override bool isInXsltNamespace() {
             return false;
         }
+        public override void processStandardAttributes(Saxon.Hej.om.NamespaceUri @namespace) {
+            int processorVersion = getCompilation().getCompilerInfo().getXsltVersion();
+            if (((((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()) is Saxon.Hej.tree.linked.DocumentImpl) && (processorVersion>=40))) {
+                if ((getAttributeValue(@namespace, "version") == null)) {
+                    version = processorVersion;
+                } else {
+                    processVersionAttribute(@namespace);
+                }
+                if (((version>=40) && (getAttributeValue(@namespace, "expand-text") == null))) {
+                    expandText = true;
+                } else {
+                    processExpandTextAttribute(@namespace);
+                }
+                processExtensionElementAttribute(@namespace);
+                processExcludedNamespaces(@namespace);
+                processDefaultXPathNamespaceAttribute(@namespace);
+                processDefaultValidationAttribute(@namespace);
+            } else {
+                base.processStandardAttributes(@namespace);
+            }
+        }
         protected internal override void prepareAttributes() {
             Saxon.Hej.om.AttributeMap atts = attributes();
             int num = atts.size();
@@ -193,8 +214,9 @@ namespace Saxon.Hej.style {
             return inst;
         }
         public Saxon.Hej.tree.linked.DocumentImpl makeStylesheet(bool topLevel) {
+            int processorVersion = getCompilation().getCompilerInfo().getXsltVersion();
             Saxon.Hej.style.StyleNodeFactory nodeFactory = getCompilation().getStyleNodeFactory(topLevel);
-            if (!(isInScopeNamespace(Saxon.Hej.om.NamespaceUri.XSLT))) {
+            if ((!(isInScopeNamespace(Saxon.Hej.om.NamespaceUri.XSLT)) && (processorVersion<40))) {
                 string message;
                 if ((getLocalPart().Equals("stylesheet") || getLocalPart().Equals("transform"))) {
                     message = ("Namespace for stylesheet element should be "+Saxon.Hej.lib.NamespaceConstant.XSLT);
@@ -206,7 +228,7 @@ namespace Saxon.Hej.style {
                 throw err;
             }
             string version = getAttributeValue(Saxon.Hej.om.NamespaceUri.XSLT, "version");
-            if ((version == null)) {
+            if (((version == null) && (processorVersion<40))) {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Simplified stylesheet: xsl:version attribute is missing").withErrorCode("XTSE0150").asStaticError().withLocation(allocateLocation());
                 compileError(err);
                 throw err;
@@ -221,7 +243,10 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.s9api.Location loc = Saxon.Hej.expr.parser.Loc.NONE;
                 Saxon.Hej.om.NamespaceMap map = getAllNamespaces().put("xsl", Saxon.Hej.om.NamespaceUri.XSLT);
                 Saxon.Hej.om.AttributeMap atts = Saxon.Hej.om.EmptyAttributeMap.getInstance();
-                atts = atts.put(new Saxon.Hej.om.AttributeInfo(new Saxon.Hej.om.NoNamespaceName("version"), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, version, loc, Saxon.Hej.@event.ReceiverOption.NONE));
+                atts = atts.put(new Saxon.Hej.om.AttributeInfo(new Saxon.Hej.om.NoNamespaceName("version"), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, ((version == null) ? "4.0" : version), loc, Saxon.Hej.@event.ReceiverOption.NONE));
+                if (((processorVersion>=40) && (getAttributeValue(Saxon.Hej.om.NamespaceUri.XSLT, "expand-text") == null))) {
+                    atts = atts.put(new Saxon.Hej.om.AttributeInfo(new Saxon.Hej.om.NoNamespaceName("expand-text"), Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, "yes", loc, Saxon.Hej.@event.ReceiverOption.NONE));
+                }
                 int st = Saxon.Hej.om.StandardNames.XSL_STYLESHEET;
                 builder.startElement(new Saxon.Hej.om.CodedName(st, "xsl", getNamePool()), Saxon.Hej.type.Untyped.getInstance(), atts, map, loc, Saxon.Hej.@event.ReceiverOption.NONE);
                 atts = Saxon.Hej.om.EmptyAttributeMap.getInstance();

@@ -38,8 +38,8 @@ namespace Saxon.Hej.regex {
                 throw new Saxon.Hej.trans.XPathException(e.Message, "FORX0004");
             }
         }
-        public Saxon.Hej.str.UnicodeString replaceWith(Saxon.Hej.str.UnicodeString input, System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString> replacement) {
-            throw new Saxon.Hej.trans.XPathException("saxon:replace-with() is not supported with the Java regex engine");
+        public Saxon.Hej.str.UnicodeString replaceWith(Saxon.Hej.str.UnicodeString input, System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString[],Saxon.Hej.str.UnicodeString> replacement) {
+            throw new Saxon.Hej.trans.XPathException("fn:replace#5 is not supported with the Java regex engine");
         }
         public Saxon.Hej.tree.iter.AtomicIterator tokenize(Saxon.Hej.str.UnicodeString input) {
             if (input.isEmpty()) {

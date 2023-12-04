@@ -68,7 +68,7 @@ namespace Saxon.Hej.regex {
                 throw new Saxon.Hej.trans.XPathException(err.Message, "FORX0004");
             }
         }
-        public Saxon.Hej.str.UnicodeString replaceWith(Saxon.Hej.str.UnicodeString input, System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString> replacer) {
+        public Saxon.Hej.str.UnicodeString replaceWith(Saxon.Hej.str.UnicodeString input, System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString[],Saxon.Hej.str.UnicodeString> replacer) {
             Saxon.Hej.regex.REMatcher matcher = new Saxon.Hej.regex.REMatcher(regex);
             try {
                 return matcher.replaceWith(input.tidy(), replacer);

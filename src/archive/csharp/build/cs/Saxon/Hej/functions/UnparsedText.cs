@@ -5,7 +5,13 @@ namespace Saxon.Hej.functions {
     public class UnparsedText : Saxon.Hej.functions.UnparsedTextFunction, Saxon.Hej.functions.PushableFunction {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.value.StringValue hrefVal = (Saxon.Hej.value.StringValue)(arguments[0].head());
-            string encoding = ((getArity() == 2) ? arguments[1].head().getStringValue() : null);
+            string encoding;
+            if ((getArity() == 2)) {
+                Saxon.Hej.om.Item enc = arguments[1].head();
+                encoding = ((enc == null) ? null : enc.getStringValue());
+            } else {
+                encoding = null;
+            }
             try {
                 return Saxon.Hej.om.SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -72,7 +78,7 @@ namespace Saxon.Hej.functions {
                             content = consumer.toUnicodeString();
                         } catch (Saxon.Hej.trans.XPathException e) {
                             error = e;
-                            content = Saxon.Hej.str.StringView.tidy((errorValue+e.Message));
+                            content = Saxon.Hej.str.StringView.tidy(((char)(errorValue)+e.Message));
                         }
                         if ((cache == null)) {
                             cache = new System.Collections.Generic.Dictionary<System.Uri, Saxon.Hej.str.UnicodeString>();

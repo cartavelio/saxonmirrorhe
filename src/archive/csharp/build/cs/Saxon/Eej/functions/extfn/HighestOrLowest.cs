@@ -9,7 +9,7 @@ namespace Saxon.Eej.functions.extfn {
             if ((arguments.Length == 2)) {
                 function = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
             } else {
-                function = config.makeSystemFunction("data", 1);
+                function = config.makeSystemFunction("data", 1, 31);
             }
             Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[1];
             Saxon.Hej.value.AtomicValue maxSoFar = null;

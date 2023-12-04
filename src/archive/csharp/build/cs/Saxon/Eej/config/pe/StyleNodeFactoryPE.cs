@@ -55,6 +55,19 @@ namespace Saxon.Eej.config.pe {
             }
             return temp;
         }
+        protected internal override Saxon.Hej.style.StyleElement makeXSLElement(int f, Saxon.Hej.tree.linked.NodeImpl parent) {
+            if ((getCompilation().getCompilerInfo().getXsltVersion()>=40)) {
+                switch (f) {
+                  case Saxon.Hej.om.StandardNames.XSL_ARRAY:
+                    return new Saxon.Eej.trans.XSLArray();
+                  case Saxon.Hej.om.StandardNames.XSL_ARRAY_MEMBER:
+                    return new Saxon.Eej.trans.XSLArrayMember();
+                  case Saxon.Hej.om.StandardNames.XSL_SWITCH:
+                    return new Saxon.Hej.style.XSLSwitch();
+                }
+            }
+            return base.makeXSLElement(f, parent);
+        }
         public override bool isElementAvailable(Saxon.Hej.om.NamespaceUri uri, string localName, bool instructionsOnly) {
             bool b = base.isElementAvailable(uri, localName, instructionsOnly);
             if (b) {

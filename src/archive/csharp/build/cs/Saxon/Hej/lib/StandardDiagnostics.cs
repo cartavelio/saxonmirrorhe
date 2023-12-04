@@ -197,24 +197,30 @@ namespace Saxon.Hej.lib {
             if ((level>0)) {
                 int depth = 20;
                 while (((depth-->0) && (context != null))) {
+                    Saxon.Hej.expr.ContextOriginator originator = ((context is Saxon.Hej.expr.XPathContextMajor) ? ((Saxon.Hej.expr.XPathContextMajor)(context)).getOrigin() : null);
                     Saxon.Hej.expr.Component component = context.getCurrentComponent();
-                    if ((component != null)) {
-                        if ((component.getActor() is Saxon.Hej.trans.Mode)) {
-                            Saxon.Hej.trans.rules.Rule rule = context.getCurrentTemplateRule();
-                            if ((rule != null)) {
-                                Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder();
-                                Saxon.Hej.s9api.Location loc = rule.getPattern().getLocation();
-                                sb.append("  In template rule with match=\"").append(rule.getPattern().toShortString()).append("\" ");
-                                if (((loc != null) && (loc.getLineNumber() != -1))) {
-                                    sb.append("on line ").append(loc.getLineNumber()).append(" ");
+                    if (((originator is Saxon.Hej.value.Closure) && (((Saxon.Hej.value.Closure)(originator)).getExpression() != null))) {
+                        Saxon.Hej.expr.Expression expr = ((Saxon.Hej.value.Closure)(originator)).getExpression();
+                        @out.error(((((("During lazy evaluation of "+expr.toShortString())+" on line ")+expr.getLocation().getLineNumber())+" of ")+expr.getLocation().getSystemId()));
+                    } else {
+                        if ((component != null)) {
+                            if ((component.getActor() is Saxon.Hej.trans.Mode)) {
+                                Saxon.Hej.trans.rules.Rule rule = context.getCurrentTemplateRule();
+                                if ((rule != null)) {
+                                    Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder();
+                                    Saxon.Hej.s9api.Location loc = rule.getPattern().getLocation();
+                                    sb.append("  In template rule with match=\"").append(rule.getPattern().toShortString()).append("\" ");
+                                    if (((loc != null) && (loc.getLineNumber() != -1))) {
+                                        sb.append("on line ").append(loc.getLineNumber()).append(" ");
+                                    }
+                                    if (((loc != null) && (loc.getSystemId() != null))) {
+                                        sb.append("of ").append(abbreviateLocationURI(loc.getSystemId()));
+                                    }
+                                    @out.error(sb.ToString());
                                 }
-                                if (((loc != null) && (loc.getSystemId() != null))) {
-                                    sb.append("of ").append(abbreviateLocationURI(loc.getSystemId()));
-                                }
-                                @out.error(sb.ToString());
+                            } else {
+                                @out.error(new System.Text.RegularExpressions.Regex("^at ").Replace(getLocationMessageText(component.getActor()), "In ", 1));
                             }
-                        } else {
-                            @out.error(getLocationMessageText(component.getActor()).Replace("$at ", "In "));
                         }
                     }
                     try {
@@ -222,11 +228,12 @@ namespace Saxon.Hej.lib {
                     } catch (System.Exception e) {
                     }
                     context = context.getMajorContext();
-                    Saxon.Hej.expr.ContextOriginator originator = ((Saxon.Hej.expr.XPathContextMajor)(context)).getOrigin();
-                    if (((originator == null) || (originator is Saxon.Hej.Controller))) {
+                    if ((originator is Saxon.Hej.Controller)) {
                         return ;
                     } else {
-                        @out.error(("     invoked by "+showOriginator(originator)));
+                        if (((originator != null) && !(((originator is Saxon.Hej.value.Closure))))) {
+                            @out.error(("     invoked by "+showOriginator(originator)));
+                        }
                     }
                     context = context.getCaller();
                 }
@@ -264,7 +271,25 @@ namespace Saxon.Hej.lib {
                                         if ((originator is Saxon.Hej.expr.instruct.GlobalVariable)) {
                                             sb.append(((Saxon.Hej.expr.instruct.GlobalVariable)(originator)).getDescription());
                                         } else {
-                                            sb.append("unknown caller (").append(originator.GetType()).append(")");
+                                            if ((originator is Saxon.Hej.value.MemoClosure)) {
+                                                Saxon.Hej.expr.Expression expr = ((Saxon.Hej.value.MemoClosure)(originator)).getExpression();
+                                                if ((expr == null)) {
+                                                    sb.append("lazy evaluation of expression");
+                                                } else {
+                                                    sb.append("lazy evaluation of ").append(expr.toShortString()).append(" on line ").append(expr.getLocation().getLineNumber());
+                                                }
+                                            } else {
+                                                if ((originator is Saxon.Hej.value.SingletonClosure)) {
+                                                    Saxon.Hej.expr.Expression expr = ((Saxon.Hej.value.SingletonClosure)(originator)).getExpression();
+                                                    if ((expr == null)) {
+                                                        sb.append("lazy evaluation of singleton expression");
+                                                    } else {
+                                                        sb.append("lazy evaluation of ").append(expr.toShortString()).append(" on line ").append(expr.getLocation().getLineNumber());
+                                                    }
+                                                } else {
+                                                    sb.append("unknown caller (").append(originator.GetType()).append(")");
+                                                }
+                                            }
                                         }
                                     }
                                 }

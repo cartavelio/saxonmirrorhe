@@ -16,7 +16,7 @@ namespace Saxon.Eej.functions.extfn {
                 arguments = extra;
             }
             Saxon.Hej.om.FunctionItem arg2 = (Saxon.Hej.om.FunctionItem)(arguments[2].head());
-            System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString> fn = @in => {
+            System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.str.UnicodeString[],Saxon.Hej.str.UnicodeString> fn = (@in, groups) => {
                 try {
                     Saxon.Hej.om.Sequence result = arg2.call(context, new Saxon.Hej.om.Sequence[]{new Saxon.Hej.value.StringValue(@in)});
                     return result.head().getUnicodeStringValue();
@@ -24,7 +24,7 @@ namespace Saxon.Eej.functions.extfn {
                     throw new Saxon.Ejava.lang.AssertionError(e);
                 }
             } ;
-            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments);
+            Saxon.Hej.regex.RegularExpression re = getRegularExpression(arguments, 1, 3);
             return new Saxon.Hej.value.StringValue(re.replaceWith(input.getUnicodeStringValue(), fn));
         }
     

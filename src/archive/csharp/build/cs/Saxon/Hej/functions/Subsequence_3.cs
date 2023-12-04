@@ -10,6 +10,9 @@ namespace Saxon.Hej.functions {
             return Saxon.Hej.om.SequenceTool.toLazySequence(subSequence(arguments[0].iterate(), (Saxon.Hej.value.NumericValue)(arguments[1].head()), (Saxon.Hej.value.NumericValue)(arguments[2].head()), context));
         }
         public static Saxon.Hej.om.SequenceIterator subSequence(Saxon.Hej.om.SequenceIterator seq, Saxon.Hej.value.NumericValue startVal, Saxon.Hej.value.NumericValue lengthVal, Saxon.Hej.expr.XPathContext context) {
+            if ((lengthVal == null)) {
+                return Saxon.Hej.functions.Subsequence_2.subSequence(seq, startVal);
+            }
             if (((startVal is Saxon.Hej.value.Int64Value) && (lengthVal is Saxon.Hej.value.Int64Value))) {
                 long lstart = startVal.longValue();
                 if ((lstart>System.Int32.MaxValue)) {

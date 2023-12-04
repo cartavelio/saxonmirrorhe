@@ -88,27 +88,29 @@ namespace Saxon.Hej.serialize {
             } else {
                 if ((item is Saxon.Hej.value.NumericValue)) {
                     Saxon.Hej.value.NumericValue num = (Saxon.Hej.value.NumericValue)(item);
-                    if (num.isNaN()) {
-                        if (unfailing) {
-                            emit("NaN");
-                        } else {
-                            throw new Saxon.Hej.trans.XPathException("JSON has no way of representing NaN", "SERE0020");
-                        }
+                    if ((item is Saxon.Hej.value.DecimalValue)) {
+                        emit(num.getUnicodeStringValue());
                     } else {
-                        if (System.Double.IsInfinity(num.getDoubleValue())) {
+                        if (num.isNaN()) {
                             if (unfailing) {
-                                emit(((num.getDoubleValue()<0) ? "-INF" : "INF"));
+                                emit("NaN");
                             } else {
-                                throw new Saxon.Hej.trans.XPathException("JSON has no way of representing Infinity", "SERE0020");
+                                throw new Saxon.Hej.trans.XPathException("JSON has no way of representing NaN", "SERE0020");
                             }
                         } else {
-                            if ((item is Saxon.Hej.value.IntegerValue)) {
-                                emit((num.longValue()+""));
-                            } else {
-                                if (((num.isWholeNumber() && !(num.isNegativeZero())) && (num.abs().compareTo(1_000_000_000_000_000_000L)<0))) {
-                                    emit((num.longValue()+""));
+                            if (System.Double.IsInfinity(num.getDoubleValue())) {
+                                if (unfailing) {
+                                    emit(((num.getDoubleValue()<0) ? "-INF" : "INF"));
                                 } else {
-                                    emit(num.getStringValue());
+                                    throw new Saxon.Hej.trans.XPathException("JSON has no way of representing Infinity", "SERE0020");
+                                }
+                            } else {
+                                if (num.isNegativeZero()) {
+                                    emit("-0");
+                                } else {
+                                    double val = num.getDoubleValue();
+                                    double abs = System.Math.Abs(val);
+                                    emit(Saxon.Hej.value.FloatingPointConverter.convertDouble(val, ((abs>=1e18) || (abs<1e-18))));
                                 }
                             }
                         }
@@ -225,6 +227,14 @@ namespace Saxon.Hej.serialize {
             return Saxon.Hej.ma.json.JsonReceiver.escape(cs, false, !(escapeSolidus), c => (((c<31) || (((c>=127) && (c<=159)))) || !(characterSet.inCharset(c))));
         }
         private void emit(string s) {
+            System.Diagnostics.Debug.Assert((writer != null));
+            try {
+                writer.write(s);
+            } catch (System.IO.IOException e) {
+                throw new Saxon.Hej.trans.XPathException(e);
+            }
+        }
+        private void emit(Saxon.Hej.str.UnicodeString s) {
             System.Diagnostics.Debug.Assert((writer != null));
             try {
                 writer.write(s);

@@ -10,8 +10,12 @@ namespace Saxon.Hej.functions {
             }
             string relative = arg0.getStringValue();
             string @base;
+            Saxon.Hej.om.Item baseArg = null;
             if ((getArity() == 2)) {
-                @base = arguments[1].head().getStringValue();
+                baseArg = arguments[1].head();
+            }
+            if ((baseArg != null)) {
+                @base = baseArg.getStringValue();
             } else {
                 @base = getStaticBaseUriString();
                 if ((@base == null)) {

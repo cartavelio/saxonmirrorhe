@@ -78,7 +78,7 @@ namespace Saxon.Hej.expr {
                 p1 = Saxon.Hej.type.BuiltInAtomicType.STRING;
             }
             needsRuntimeCheck = (p0.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC) || p1.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC));
-            if ((!(needsRuntimeCheck) && !(Saxon.Hej.type.Type.isPossiblyComparable(p0, p1, Saxon.Hej.expr.parser.Token.isOrderedOperator(@operator))))) {
+            if ((!(needsRuntimeCheck) && !(Saxon.Hej.type.Type.isPossiblyComparable(p0, p1, visitor.getStaticContext().getXPathVersion())))) {
                 bool opt0 = Saxon.Hej.value.Cardinality.allowsZero(getLhsExpression().getCardinality());
                 bool opt1 = Saxon.Hej.value.Cardinality.allowsZero(getRhsExpression().getCardinality());
                 if ((opt0 || opt1)) {
@@ -227,7 +227,7 @@ namespace Saxon.Hej.expr {
                 if (((card0 == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO) || (card1 == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO))) {
                     return context => resultWhenEmpty;
                 }
-                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparer = Saxon.Hej.expr.sort.GenericAtomicComparer.makeAtomicComparisonFunction(operandType(expr.getLhsExpression()), operandType(expr.getRhsExpression()), defaultCollation, @operator, true);
+                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparer = Saxon.Hej.expr.sort.GenericAtomicComparer.makeAtomicComparisonFunction(operandType(expr.getLhsExpression()), operandType(expr.getRhsExpression()), defaultCollation, @operator, true, expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion());
                 bool nullable0 = Saxon.Hej.value.Cardinality.allowsZero(card0);
                 bool nullable1 = Saxon.Hej.value.Cardinality.allowsZero(card1);
                 if ((!(nullable0) && !(nullable1))) {
@@ -279,7 +279,7 @@ namespace Saxon.Hej.expr {
                 if (!(((t1 is Saxon.Hej.type.BuiltInAtomicType)))) {
                     t1 = Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC;
                 }
-                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparer = Saxon.Hej.expr.sort.GenericAtomicComparer.makeAtomicComparisonFunction((Saxon.Hej.type.BuiltInAtomicType)(t0), (Saxon.Hej.type.BuiltInAtomicType)(t1), defaultCollation, @operator, true);
+                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparer = Saxon.Hej.expr.sort.GenericAtomicComparer.makeAtomicComparisonFunction((Saxon.Hej.type.BuiltInAtomicType)(t0), (Saxon.Hej.type.BuiltInAtomicType)(t1), defaultCollation, @operator, true, expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion());
                 bool nullable0 = Saxon.Hej.value.Cardinality.allowsZero(card0);
                 bool nullable1 = Saxon.Hej.value.Cardinality.allowsZero(card1);
                 if ((!(nullable0) && !(nullable1))) {

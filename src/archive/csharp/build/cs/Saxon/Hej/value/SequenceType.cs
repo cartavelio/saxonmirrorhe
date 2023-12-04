@@ -88,6 +88,9 @@ namespace Saxon.Hej.value {
             }
             return new Saxon.Hej.value.SequenceType(primaryType, cardinality);
         }
+        public static Saxon.Hej.value.SequenceType one(Saxon.Hej.type.ItemType itemType) {
+            return new Saxon.Hej.value.SequenceType(itemType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
+        }
         public Saxon.Hej.type.ItemType getPrimaryType() {
             return primaryType;
         }

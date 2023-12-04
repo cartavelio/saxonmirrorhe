@@ -23,6 +23,8 @@ namespace Saxon.Hej.expr {
             this.config = config;
             targetEdition = config.getEditionCode();
             globalSlotManager = config.makeSlotManager();
+            hostLanguage = Saxon.Api.HostLanguage.XPATH;
+            hostLanguageVersion = 31;
         }
         public Saxon.Hej.Configuration getConfiguration() {
             return config;

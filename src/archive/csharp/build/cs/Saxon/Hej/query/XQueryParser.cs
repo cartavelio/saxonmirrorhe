@@ -79,16 +79,7 @@ namespace Saxon.Hej.query {
                 }
                 exec.fixupQueryModules(mainModule);
                 Saxon.Hej.query.XQueryExpression queryExp = config.makeXQueryExpression(exp, mainModule, streaming);
-                Saxon.Hej.functions.FunctionLibrary userlib = exec.getFunctionLibrary();
-                Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-                lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
-                lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
-                lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
-                lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
-                lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());
-                config.addExtensionBinders(lib);
-                lib.addFunctionLibrary(userlib);
-                exec.setFunctionLibrary(lib);
+                createRunTimeFunctionLibrary(mainModule, config, exec);
                 return queryExp;
             } catch (Saxon.Hej.trans.XPathException e) {
                 if (!(e.hasBeenReported())) {
@@ -96,6 +87,18 @@ namespace Saxon.Hej.query {
                 }
                 throw;
             }
+        }
+        public static void createRunTimeFunctionLibrary(Saxon.Hej.query.QueryModule mainModule, Saxon.Hej.Configuration config, Saxon.Hej.expr.instruct.Executable exec) {
+            Saxon.Hej.functions.FunctionLibrary userlib = exec.getFunctionLibrary();
+            Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
+            lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
+            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
+            lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
+            lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
+            lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());
+            config.addExtensionBinders(lib);
+            lib.addFunctionLibrary(userlib);
+            exec.setFunctionLibrary(lib);
         }
         private static string normalizeLineEndings11(string @in) {
             if ((((@in.IndexOf((char)(unchecked((int)0xd)))<0) && (@in.IndexOf((char)(unchecked((int)0x85)))<0)) && (@in.IndexOf((char)(0x2028))<0))) {
@@ -173,6 +176,8 @@ namespace Saxon.Hej.query {
             }
             parseVersionDeclaration();
             allowXPath40Syntax = t.allowSaxonExtensions = ((allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS)) || (languageVersion>=40));
+            env.setXPathVersion(languageVersion);
+            env.initializeFunctionLibraries();
             Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(env.getLiveNamespaceResolver()).withAcceptEQName(true).withUnescaper(new Saxon.Hej.query.XQueryParser.Unescaper(env.getConfiguration().getValidCharacterChecker()));
             setQNameParser(qp);
             parseProlog();
@@ -180,7 +185,7 @@ namespace Saxon.Hej.query {
             Saxon.Hej.expr.Expression exp = parseExpression();
             exp = makeTracer(exp, null);
             if ((t.currentToken != Saxon.Hej.expr.parser.Token.EOF)) {
-                grumble((("Unexpected token "+currentTokenDisplay())+" beyond end of query"));
+                grumble((("Unexpected token "+currentTokenDisplay())+": no further input expected"));
             }
             setLocation(exp);
             Saxon.Hej.expr.parser.ExpressionTool.setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
@@ -219,6 +224,8 @@ namespace Saxon.Hej.query {
             }
             parseVersionDeclaration();
             allowXPath40Syntax = t.allowSaxonExtensions = (allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_SYNTAX_EXTENSIONS));
+            env.setXPathVersion(languageVersion);
+            env.initializeFunctionLibraries();
             if ((t.currentToken != Saxon.Hej.expr.parser.Token.MODULE_NAMESPACE)) {
                 if ((t.currentToken == Saxon.Hej.expr.parser.Token.EOF)) {
                     grumble((("The file imported for module "+env.getModuleNamespace())+(((queryString.Trim().Length == 0) ? " is empty" : " has no significant content"))));
@@ -257,7 +264,10 @@ namespace Saxon.Hej.query {
                     grumble(("Invalid XQuery version "+queryVersion), "XQST0031");
                 }
                 if (queryVersion.Equals("4.0")) {
+                    languageVersion = 40;
                     allowXPath40Syntax = true;
+                    t.languageLevel = 40;
+                    env.getPackageData().setHostLanguage(Saxon.Api.HostLanguage.XQUERY, 40);
                 }
                 nextToken();
                 if ("encoding".Equals(t.currentTokenValue)) {
@@ -351,8 +361,39 @@ namespace Saxon.Hej.query {
                                 annotationList.check(env.getConfiguration(), "DV");
                                 parseVariableDeclaration(annotationList);
                             } else {
-                                grumble("Annotations can appear only in 'declare variable' and 'declare function'");
+                                if (isKeyword("item-type")) {
+                                    annotationList.check(env.getConfiguration(), "DI");
+                                    parseItemTypeDeclaration(annotationList);
+                                } else {
+                                    grumble("Annotations can appear only in 'declare variable' and 'declare function'");
+                                }
                             }
+                        }
+                        break ;
+                      case Saxon.Hej.expr.parser.Token.DECLARE_FIXED:
+                        checkLanguageVersion40();
+                        nextToken();
+                        if (!(isKeyword("default"))) {
+                            grumble("expected 'default' after 'declare fixed");
+                        }
+                        nextToken();
+                        expect(Saxon.Hej.expr.parser.Token.NAME);
+                        switch (t.currentTokenValue) {
+                          case "element":
+                            if (!(allowDeclarations)) {
+                                grumble("Namespace declarations cannot follow variables, functions, or options");
+                            }
+                            parseDefaultElementNamespace(true);
+                            break ;
+                          case "function":
+                            if (!(allowDeclarations)) {
+                                grumble("Namespace declarations cannot follow variables, functions, or options");
+                            }
+                            parseDefaultFunctionNamespace();
+                            break ;
+                          default:
+                            grumble("After 'declare fixed default', expected 'element' or 'function'");
+                            break ;
                         }
                         break ;
                       case Saxon.Hej.expr.parser.Token.DECLARE_DEFAULT:
@@ -363,7 +404,7 @@ namespace Saxon.Hej.query {
                             if (!(allowDeclarations)) {
                                 grumble("Namespace declarations cannot follow variables, functions, or options");
                             }
-                            parseDefaultElementNamespace();
+                            parseDefaultElementNamespace(false);
                             break ;
                           case "function":
                             if (!(allowDeclarations)) {
@@ -477,13 +518,13 @@ namespace Saxon.Hej.query {
                         }
                         parseOptionDeclaration();
                         break ;
-                      case Saxon.Hej.expr.parser.Token.DECLARE_TYPE:
-                        checkSyntaxExtensions("declare type");
+                      case Saxon.Hej.expr.parser.Token.DECLARE_ITEM_TYPE:
+                        checkSyntaxExtensions("declare item-type");
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
-                        parseTypeAliasDeclaration();
+                        parseItemTypeDeclaration(Saxon.Hej.query.AnnotationList.EMPTY);
                         break ;
                       case Saxon.Hej.expr.parser.Token.DECLARE_CONSTRUCTION:
                         if (!(allowDeclarations)) {
@@ -549,14 +590,9 @@ namespace Saxon.Hej.query {
                 t.setState(Saxon.Hej.expr.parser.Tokenizer.DEFAULT_STATE);
                 Saxon.Hej.om.StructuredQName qName;
                 Saxon.Hej.om.NamespaceUri uri;
-                if ((t.currentTokenValue.IndexOf(':')<0)) {
-                    uri = Saxon.Hej.om.NamespaceUri.XQUERY;
-                    qName = new Saxon.Hej.om.StructuredQName("", uri, t.currentTokenValue);
-                } else {
-                    qName = makeStructuredQName(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.NULL);
-                    System.Diagnostics.Debug.Assert((qName != null));
-                    uri = qName.getNamespaceUri();
-                }
+                qName = makeStructuredQName(t.currentTokenValue, Saxon.Hej.om.NamespaceUri.XQUERY);
+                System.Diagnostics.Debug.Assert((qName != null));
+                uri = qName.getNamespaceUri();
                 Saxon.Hej.query.Annotation annotation = new Saxon.Hej.query.Annotation(qName);
                 if (uri.Equals(Saxon.Hej.om.NamespaceUri.XQUERY)) {
                     if ((((!(qName.Equals(Saxon.Hej.query.Annotation.PRIVATE)) && !(qName.Equals(Saxon.Hej.query.Annotation.PUBLIC))) && !(qName.Equals(Saxon.Hej.query.Annotation.UPDATING))) && !(qName.Equals(Saxon.Hej.query.Annotation.SIMPLE)))) {
@@ -567,10 +603,6 @@ namespace Saxon.Hej.query {
                     if (isReservedInQuery(uri)) {
                         grumble((("The annotation "+t.currentTokenValue)+" is in a reserved namespace"), "XQST0045");
                     } else {
-                        if (uri.isEmpty()) {
-                            grumble((("The annotation "+t.currentTokenValue)+" is in no namespace"), "XQST0045");
-                        } else {
-                        }
                     }
                 }
                 nextToken();
@@ -580,6 +612,14 @@ namespace Saxon.Hej.query {
                         grumble("Annotation parameter list cannot be empty");
                     }
                     while (true) {
+                        bool negative = (t.currentToken == Saxon.Hej.expr.parser.Token.MINUS);
+                        if (negative) {
+                            if (!(allowXPath40Syntax)) {
+                                grumble("Minus sign in annotation value requires 4.0 to be enabled");
+                                return null;
+                            }
+                            nextToken();
+                        }
                         Saxon.Hej.expr.Literal arg;
                         switch (t.currentToken) {
                           case Saxon.Hej.expr.parser.Token.STRING_LITERAL:
@@ -594,12 +634,38 @@ namespace Saxon.Hej.query {
                           case Saxon.Hej.expr.parser.Token.BINARY_INTEGER:
                             arg = (Saxon.Hej.expr.Literal)(parseBinaryLiteral(false));
                             break ;
+                          case Saxon.Hej.expr.parser.Token.FUNCTION:
+                            if (t.currentTokenValue.Equals("true")) {
+                                arg = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE);
+                            } else {
+                                if (t.currentTokenValue.Equals("false")) {
+                                    arg = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.FALSE);
+                                } else {
+                                    grumble("The only function calls allowed in an annotation are true() and false()");
+                                    return null;
+                                }
+                            }
+                            if (!(allowXPath40Syntax)) {
+                                grumble("Annotation values true() and false() require 4.0 to be enabled");
+                                return null;
+                            }
+                            nextToken();
+                            expect(Saxon.Hej.expr.parser.Token.RPAR);
+                            nextToken();
+                            break ;
                           default:
                             grumble("Annotation parameter must be a literal");
                             return null;
                         }
                         Saxon.Hej.om.GroundedValue val = arg.getGroundedValue();
-                        if (((val is Saxon.Hej.value.StringValue) || (val is Saxon.Hej.value.NumericValue))) {
+                        if (negative) {
+                            if ((val is Saxon.Hej.value.NumericValue)) {
+                                val = ((Saxon.Hej.value.NumericValue)(val)).negate();
+                            } else {
+                                grumble("Minus sign in annotation parameter must be followed by a numeric literal");
+                            }
+                        }
+                        if ((((val is Saxon.Hej.value.StringValue) || (val is Saxon.Hej.value.NumericValue)) || (val is Saxon.Hej.value.BooleanValue))) {
                             annotation.addAnnotationParameter((Saxon.Hej.value.AtomicValue)(val));
                         } else {
                             grumble("Annotation parameter must be a string or number");
@@ -792,10 +858,16 @@ namespace Saxon.Hej.query {
             sImport.locationURIs = new System.Collections.Generic.List<string>(5);
             sImport.offset = t.currentTokenStartOffset;
             nextToken();
+            bool fixedDefault = false;
             if (isKeyword("namespace")) {
                 prefix = readNamespaceBinding();
             } else {
-                if (isKeyword("default")) {
+                if (isKeyword("fixed")) {
+                    checkLanguageVersion40();
+                    fixedDefault = true;
+                    nextToken();
+                }
+                if ((isKeyword("default") || (t.currentToken == Saxon.Hej.expr.parser.Token.DEFAULT))) {
                     nextToken();
                     if (!(isKeyword("element"))) {
                         grumble("In 'import schema', expected 'element namespace'");
@@ -835,7 +907,7 @@ namespace Saxon.Hej.query {
             if ((prefix != null)) {
                 try {
                     if (prefix.Length==0) {
-                        ((Saxon.Hej.query.QueryModule)(env)).setDefaultElementNamespace(sImport.namespaceURI);
+                        ((Saxon.Hej.query.QueryModule)(env)).setDefaultElementNamespace(sImport.namespaceURI, fixedDefault);
                     } else {
                         if (((sImport.namespaceURI == null) || sImport.namespaceURI.isEmpty())) {
                             grumble("A prefix cannot be bound to the null namespace", "XQST0057");
@@ -1170,7 +1242,7 @@ namespace Saxon.Hej.query {
             ((Saxon.Hej.query.QueryModule)(env)).setDefaultFunctionNamespace(uri);
             nextToken();
         }
-        private void parseDefaultElementNamespace() {
+        private void parseDefaultElementNamespace(bool isFixedDefault) {
             if (foundDefaultElementNamespace) {
                 grumble("default element namespace appears more than once", "XQST0066");
             }
@@ -1186,7 +1258,7 @@ namespace Saxon.Hej.query {
             if ((uri.Equals(Saxon.Hej.om.NamespaceUri.XML) || uri.Equals(Saxon.Hej.om.NamespaceUri.XMLNS))) {
                 grumble("Reserved namespace used as default element/type namespace", "XQST0070");
             }
-            ((Saxon.Hej.query.QueryModule)(env)).setDefaultElementNamespace(uri);
+            ((Saxon.Hej.query.QueryModule)(env)).setDefaultElementNamespace(uri, isFixedDefault);
             nextToken();
         }
         private void parseNamespaceDeclaration() {
@@ -1551,8 +1623,8 @@ namespace Saxon.Hej.query {
             memoFunction = false;
         }
         public static readonly Saxon.Hej.om.StructuredQName SAXON_MEMO_FUNCTION = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "memo-function");
-        protected internal void parseTypeAliasDeclaration() {
-            parserExtension.parseTypeAliasDeclaration(this);
+        protected internal void parseItemTypeDeclaration(Saxon.Hej.query.AnnotationList annotations) {
+            parserExtension.parseItemTypeDeclaration(this);
         }
         private void parseOptionDeclaration() {
             nextToken();
@@ -1798,11 +1870,19 @@ namespace Saxon.Hej.query {
         private void parseForClause(Saxon.Hej.expr.flwor.FLWORExpression flwor, System.Collections.Generic.IList<Saxon.Hej.expr.flwor.Clause> clauseList) {
             bool first = true;
             bool forMember = (t.currentToken == Saxon.Hej.expr.parser.Token.FOR_MEMBER);
-            if ((forMember && !(allowXPath40Syntax))) {
-                grumble("The 'for member' syntax requires XQuery 4.0 to be enabled");
-            }
             do {
                 nextToken();
+                if (!(first)) {
+                    if (isKeyword("member")) {
+                        forMember = true;
+                        nextToken();
+                    } else {
+                        forMember = false;
+                    }
+                }
+                if ((forMember && !(allowXPath40Syntax))) {
+                    grumble("The 'for member' syntax requires XQuery 4.0 to be enabled");
+                }
                 int offset = t.currentTokenStartOffset;
                 Saxon.Hej.expr.flwor.ForClause clause = new Saxon.Hej.expr.flwor.ForClause();
                 clause.setRepeated((!(first) || containsLoopingClause(clauseList)));
@@ -2388,12 +2468,32 @@ namespace Saxon.Hej.query {
             return innerLet;
         }
         protected internal override Saxon.Hej.expr.Expression parseSwitchExpression() {
-            int offset = t.currentTokenStartOffset;
-            nextToken();
-            Saxon.Hej.expr.Expression operand = parseExpression();
-            expect(Saxon.Hej.expr.parser.Token.RPAR);
-            nextToken();
+            Saxon.Hej.expr.Expression operand;
             bool braced = false;
+            if ((t.currentToken == Saxon.Hej.expr.parser.Token.SWITCH)) {
+                nextToken();
+                operand = parseExpression();
+                expect(Saxon.Hej.expr.parser.Token.RPAR);
+                nextToken();
+            } else {
+                if ((t.currentToken == Saxon.Hej.expr.parser.Token.KEYWORD_CURLY)) {
+                    checkLanguageVersion40();
+                    operand = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE);
+                    braced = true;
+                    nextToken();
+                    if (isKeyword("case")) {
+                        t.currentToken = Saxon.Hej.expr.parser.Token.CASE;
+                    }
+                } else {
+                    if ((t.currentToken == Saxon.Hej.expr.parser.Token.SWITCH_CASE)) {
+                        checkLanguageVersion40();
+                        operand = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE);
+                        t.currentToken = Saxon.Hej.expr.parser.Token.CASE;
+                    } else {
+                        throw new Saxon.Ejava.lang.AssertionError();
+                    }
+                }
+            }
             if ((t.currentToken == Saxon.Hej.expr.parser.Token.LCURLY)) {
                 checkLanguageVersion40();
                 braced = true;
@@ -2621,6 +2721,8 @@ namespace Saxon.Hej.query {
                     return parseProcessingInstructionConstructor(offset);
                   case "namespace":
                     return parseNamespaceConstructor(offset);
+                  case "switch":
+                    return parseSwitchExpression();
                   default:
                     grumble((("Unrecognized keyword '"+t.currentTokenValue)+"' before {...} "));
                     break ;
@@ -2988,7 +3090,7 @@ namespace Saxon.Hej.query {
                         tests.Add(Saxon.Hej.pattern.AnyNodeTest.getInstance());
                         break ;
                       default:
-                        grumble("Unrecognized name test");
+                        grumble(("Unrecognized name test in catch clause at "+Saxon.Hej.expr.parser.Token.tokens[t.currentToken]));
                         return null;
                     }
                 } while (((t.currentToken == Saxon.Hej.expr.parser.Token.UNION) && !(t.currentTokenValue.Equals("union"))));

@@ -16,7 +16,11 @@ namespace Saxon.Hej.om {
                 return Saxon.Hej.value.EmptySequence.getInstance();
             } else {
                 if (((iterator is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(iterator)).isActuallyGrounded())) {
-                    return toGroundedValue(iterator);
+                    try {
+                        return toGroundedValue(iterator);
+                    } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 } else {
                     return new Saxon.Hej.om.MemoSequence(iterator);
                 }
@@ -24,7 +28,11 @@ namespace Saxon.Hej.om {
         }
         public static Saxon.Hej.om.Sequence toLazySequence(Saxon.Hej.om.SequenceIterator iterator) {
             if (((((iterator is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(iterator)).isActuallyGrounded()) && !(((iterator is Saxon.Hej.expr.AscendingRangeIterator)))) && !(((iterator is Saxon.Hej.expr.DescendingRangeIterator))))) {
-                return toGroundedValue(iterator);
+                try {
+                    return toGroundedValue(iterator);
+                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             } else {
                 return new Saxon.Hej.om.LazySequence(iterator);
             }
@@ -94,7 +102,11 @@ namespace Saxon.Hej.om {
             if (((sequence is Saxon.Hej.om.Item) && (index == 0))) {
                 return (Saxon.Hej.om.Item)(sequence);
             }
-            return sequence.materialize().itemAt(index);
+            try {
+                return sequence.materialize().itemAt(index);
+            } catch (Saxon.Hej.trans.XPathException e) {
+                throw new Saxon.Hej.trans.UncheckedXPathException(e);
+            }
         }
         public static Saxon.Hej.om.Item asItem(Saxon.Hej.om.Sequence sequence) {
             if ((sequence is Saxon.Hej.om.Item)) {

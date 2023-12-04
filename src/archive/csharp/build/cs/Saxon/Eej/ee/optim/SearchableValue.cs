@@ -49,7 +49,7 @@ namespace Saxon.Eej.ee.optim {
         public int getLength() {
             return end;
         }
-        public abstract Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, bool firstOnly, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context);
+        public abstract Saxon.Hej.om.SequenceIterator findItems(Saxon.Hej.expr.Expression use, Saxon.Hej.om.SequenceIterator values, bool convertUntypedToOther, Saxon.Hej.expr.sort.AtomicComparer comparer, Saxon.Hej.expr.XPathContext context);
         public Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
             if ((length>end)) {
                 length = end;
@@ -83,7 +83,11 @@ namespace Saxon.Eej.ee.optim {
     
         /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            try {
+                return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         /* Expanding default method toShortString from interface GroundedValue */

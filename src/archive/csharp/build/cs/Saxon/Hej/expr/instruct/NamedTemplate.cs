@@ -4,8 +4,6 @@ using System.Linq;
 namespace Saxon.Hej.expr.instruct {
     public class NamedTemplate : Saxon.Hej.expr.instruct.Actor, Saxon.Hej.trace.TraceableComponent {
         private Saxon.Hej.om.StructuredQName templateName;
-        private bool _hasRequiredParams;
-        private bool bodyIsTailCallReturner;
         private Saxon.Hej.value.SequenceType requiredType;
         private Saxon.Hej.type.ItemType requiredContextItemType = Saxon.Hej.type.AnyItemType.getInstance();
         private bool mayOmitContextItem = true;
@@ -44,12 +42,6 @@ namespace Saxon.Hej.expr.instruct {
         }
         public Saxon.Hej.om.StructuredQName getObjectName() {
             return templateName;
-        }
-        public void setHasRequiredParams(bool has) {
-            _hasRequiredParams = has;
-        }
-        public bool hasRequiredParams() {
-            return _hasRequiredParams;
         }
         public void setRequiredType(Saxon.Hej.value.SequenceType type) {
             requiredType = type;

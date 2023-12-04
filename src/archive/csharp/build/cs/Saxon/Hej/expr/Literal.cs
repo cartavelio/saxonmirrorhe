@@ -470,7 +470,9 @@ namespace Saxon.Hej.expr {
                     bool ebv = value.effectiveBooleanValue();
                     return context => ebv;
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    return context => {
+                        throw e;
+                    } ;
                 }
             }
             public override Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthWhenAbsent) {
@@ -479,7 +481,9 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.str.UnicodeString str = value.getUnicodeStringValue();
                     return context => str;
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    return context => {
+                        throw e;
+                    } ;
                 }
             }
             public override Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthWhenAbsent) {
@@ -488,7 +492,9 @@ namespace Saxon.Hej.expr {
                     string str = value.getStringValue();
                     return context => str;
                 } catch (Saxon.Hej.trans.XPathException e) {
-                    throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                    return context => {
+                        throw e;
+                    } ;
                 }
             }
             public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {

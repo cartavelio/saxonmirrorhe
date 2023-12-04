@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.trans {
     public abstract class Mode : Saxon.Hej.expr.instruct.Actor {
-        public static readonly Saxon.Hej.om.StructuredQName OMNI_MODE = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "_omniMode");
+        public static readonly Saxon.Hej.om.StructuredQName OMNI_MODE_NAME = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "_omniMode");
         public static readonly Saxon.Hej.om.StructuredQName UNNAMED_MODE_NAME = new Saxon.Hej.om.StructuredQName("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "unnamed");
         public static readonly Saxon.Hej.om.StructuredQName DEFAULT_MODE_NAME = new Saxon.Hej.om.StructuredQName("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "default");
         protected internal Saxon.Hej.om.StructuredQName modeName;
@@ -264,32 +264,28 @@ namespace Saxon.Hej.trans {
             if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowCopyAllRuleSet)) {
                 return "CA";
             } else {
-                if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowSkipAllRuleSet)) {
-                    return "SA";
+                if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowCopyRuleSet)) {
+                    return "SC";
                 } else {
-                    if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowCopyRuleSet)) {
-                        return "SC";
+                    if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowSkipRuleSet)) {
+                        return "SS";
                     } else {
-                        if ((builtInRuleSet is Saxon.Hej.trans.rules.ShallowSkipRuleSet)) {
-                            return "SS";
+                        if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepCopyRuleSet)) {
+                            return "DC";
                         } else {
-                            if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepCopyRuleSet)) {
-                                return "DC";
+                            if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepSkipRuleSet)) {
+                                return "DS";
                             } else {
-                                if ((builtInRuleSet is Saxon.Hej.trans.rules.DeepSkipRuleSet)) {
-                                    return "DS";
+                                if ((builtInRuleSet is Saxon.Hej.trans.rules.FailRuleSet)) {
+                                    return "FF";
                                 } else {
-                                    if ((builtInRuleSet is Saxon.Hej.trans.rules.FailRuleSet)) {
-                                        return "FF";
+                                    if ((builtInRuleSet is Saxon.Hej.trans.rules.TextOnlyCopyRuleSet)) {
+                                        return "TC";
                                     } else {
-                                        if ((builtInRuleSet is Saxon.Hej.trans.rules.TextOnlyCopyRuleSet)) {
-                                            return "TC";
+                                        if ((builtInRuleSet is Saxon.Hej.trans.rules.RuleSetWithWarnings)) {
+                                            return (getCodeForBuiltInRuleSet(((Saxon.Hej.trans.rules.RuleSetWithWarnings)(builtInRuleSet)).getBaseRuleSet())+"+W");
                                         } else {
-                                            if ((builtInRuleSet is Saxon.Hej.trans.rules.RuleSetWithWarnings)) {
-                                                return (getCodeForBuiltInRuleSet(((Saxon.Hej.trans.rules.RuleSetWithWarnings)(builtInRuleSet)).getBaseRuleSet())+"+W");
-                                            } else {
-                                                return "???";
-                                            }
+                                            return "???";
                                         }
                                     }
                                 }
@@ -322,11 +318,7 @@ namespace Saxon.Hej.trans {
                                     if (code.StartsWith("CA")) {
                                         @base = Saxon.Hej.trans.rules.ShallowCopyAllRuleSet.getInstance();
                                     } else {
-                                        if (code.StartsWith("SA")) {
-                                            @base = Saxon.Hej.trans.rules.ShallowSkipAllRuleSet.getInstance();
-                                        } else {
-                                            throw new Saxon.Ejava.lang.IllegalArgumentException(code);
-                                        }
+                                        throw new Saxon.Ejava.lang.IllegalArgumentException(code);
                                     }
                                 }
                             }

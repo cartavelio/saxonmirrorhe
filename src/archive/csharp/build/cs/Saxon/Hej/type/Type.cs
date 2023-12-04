@@ -235,6 +235,12 @@ namespace Saxon.Hej.type {
             Saxon.Hej.type.ItemType p1 = t1.getPrimitiveItemType();
             Saxon.Hej.type.ItemType p2 = t2.getPrimitiveItemType();
             if ((p1 == p2)) {
+                if (((t1.getGenre() == Saxon.Hej.om.Genre.ARRAY) && (t2.getGenre() == Saxon.Hej.om.Genre.ARRAY))) {
+                    return Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE;
+                }
+                if (((t1.getGenre() == Saxon.Hej.om.Genre.MAP) && (t2.getGenre() == Saxon.Hej.om.Genre.MAP))) {
+                    return Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE;
+                }
                 return p1;
             }
             if (((((p1 == Saxon.Hej.type.BuiltInAtomicType.DECIMAL) && (p2 == Saxon.Hej.type.BuiltInAtomicType.INTEGER))) || (((p2 == Saxon.Hej.type.BuiltInAtomicType.DECIMAL) && (p1 == Saxon.Hej.type.BuiltInAtomicType.INTEGER))))) {
@@ -293,7 +299,7 @@ namespace Saxon.Hej.type {
             }
             return (t1 == t2);
         }
-        public static bool isPossiblyComparable(Saxon.Hej.type.BuiltInAtomicType t1, Saxon.Hej.type.BuiltInAtomicType t2, bool ordered) {
+        public static bool isPossiblyComparable(Saxon.Hej.type.BuiltInAtomicType t1, Saxon.Hej.type.BuiltInAtomicType t2, int version) {
             if ((t1 == t2)) {
                 return true;
             }
@@ -320,6 +326,14 @@ namespace Saxon.Hej.type {
             }
             if (t2.Equals(Saxon.Hej.type.BuiltInAtomicType.YEAR_MONTH_DURATION)) {
                 t2 = Saxon.Hej.type.BuiltInAtomicType.DURATION;
+            }
+            if ((version>=40)) {
+                if (t1.Equals(Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY)) {
+                    t1 = Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY;
+                }
+                if (t2.Equals(Saxon.Hej.type.BuiltInAtomicType.BASE64_BINARY)) {
+                    t2 = Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY;
+                }
             }
             return (t1 == t2);
         }

@@ -18,6 +18,9 @@ namespace Saxon.Hej.tree.wrapper {
         public override  /* REPLACING public */ bool isTyped() {
             return underlyingTree.isTyped();
         }
+        public override Saxon.Hej.om.Durability getDurability() {
+            return underlyingTree.getDurability();
+        }
         public override Saxon.Hej.om.NodeInfo selectID(string id, bool getParent) {
             Saxon.Hej.om.NodeInfo n = underlyingTree.selectID(id, false);
             if ((n == null)) {

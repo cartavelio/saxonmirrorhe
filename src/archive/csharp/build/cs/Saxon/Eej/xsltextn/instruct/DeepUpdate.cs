@@ -115,7 +115,12 @@ namespace Saxon.Eej.xsltextn.instruct {
                                 }
                             }
                             Saxon.Hej.om.SequenceIterator actionIter = /*Delegate.iterate()*/actionPuller(c3);
-                            Saxon.Hej.om.GroundedValue actionVal = Saxon.Hej.om.SequenceTool.toGroundedValue(actionIter);
+                            Saxon.Hej.om.GroundedValue actionVal;
+                            try {
+                                actionVal = Saxon.Hej.om.SequenceTool.toGroundedValue(actionIter);
+                            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                throw e.getXPathException();
+                            }
                             Saxon.Eej.xsltextn.pedigree.Pedigree pedigree = ((Saxon.Eej.xsltextn.pedigree.PedigreeValue)(selected)).getPedigree();
                             Saxon.Eej.xsltextn.pedigree.PedigreeValue parent = pedigree.getContainer();
                             Saxon.Hej.om.GroundedValue val = actionVal;

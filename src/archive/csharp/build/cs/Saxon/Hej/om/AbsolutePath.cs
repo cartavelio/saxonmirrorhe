@@ -66,6 +66,9 @@ namespace Saxon.Hej.om {
         public string getSystemId() {
             return systemId;
         }
+        public System.Collections.Generic.IList<Saxon.Hej.om.AbsolutePath.PathElement> getPathElements() {
+            return path;
+        }
         public class PathElement {
             internal int nodeKind;
             internal Saxon.Hej.om.NodeName name;

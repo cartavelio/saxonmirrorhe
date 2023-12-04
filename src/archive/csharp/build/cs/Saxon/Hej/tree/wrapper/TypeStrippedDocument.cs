@@ -11,6 +11,9 @@ namespace Saxon.Hej.tree.wrapper {
         public Saxon.Hej.tree.wrapper.TypeStrippedNode wrap(Saxon.Hej.om.NodeInfo node) {
             return Saxon.Hej.tree.wrapper.TypeStrippedNode.makeWrapper(node, this, null);
         }
+        public override Saxon.Hej.om.Durability getDurability() {
+            return underlyingTree.getDurability();
+        }
         public override Saxon.Hej.om.NodeInfo selectID(string id, bool getParent) {
             Saxon.Hej.om.NodeInfo n = underlyingTree.selectID(id, false);
             if ((n == null)) {

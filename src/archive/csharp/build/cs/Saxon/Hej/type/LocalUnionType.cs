@@ -10,6 +10,16 @@ namespace Saxon.Hej.type {
         public virtual Saxon.Hej.om.StructuredQName getTypeName() {
             return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.ANONYMOUS, ("U"+GetHashCode()));
         }
+        public virtual string getDescription() {
+            Saxon.Ejava.lang.StringBuilder builder = new Saxon.Ejava.lang.StringBuilder("union(");
+            foreach (Saxon.Hej.type.AtomicType at in memberTypes) {
+                builder.append(at.getDescription());
+                builder.append(", ");
+            }
+            builder.setLength((builder.length()-2));
+            builder.append(")");
+            return builder.ToString();
+        }
         public LocalUnionType(System.Collections.Generic.IList<Saxon.Hej.type.AtomicType> memberTypes)  {
             this.memberTypes = memberTypes;
         }
@@ -153,15 +163,6 @@ namespace Saxon.Hej.type {
         /* Expanding default method explainMismatch from interface ItemType */
         public virtual Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             return Saxon.Ejava.util.Optional<string>.empty();
-        }
-
-        /* Expanding default method getDescription from interface UnionType */
-        public virtual string getDescription() {
-            if ((this is Saxon.Hej.type.SimpleType)) {
-                return ((Saxon.Hej.type.SimpleType)(this)).getDescription();
-            } else {
-                return ToString();
-            }
         }
 
         /* Expanding default method getNormalizedDefaultPriority from interface ItemType */

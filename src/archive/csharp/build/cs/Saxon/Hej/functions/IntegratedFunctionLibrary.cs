@@ -12,6 +12,10 @@ namespace Saxon.Hej.functions {
             if ((defn == null)) {
                 return null;
             }
+            if (((keywords != null) && !(keywords.Count==0))) {
+                reasons.Add("Calls to external Java functions cannot use keyword arguments");
+                return null;
+            }
             return makeFunctionCall(defn, staticArgs);
         }
         public static Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.lib.ExtensionFunctionDefinition defn, Saxon.Hej.expr.Expression[] staticArgs) {

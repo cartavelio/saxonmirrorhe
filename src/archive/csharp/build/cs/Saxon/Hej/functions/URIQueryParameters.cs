@@ -80,6 +80,7 @@ namespace Saxon.Hej.functions {
                                     } else {
                                         if (keyword.Equals("xinclude")) {
                                             if (value.Equals("yes")) {
+                                                checkXIncludeIsSupported();
                                                 xinclude = Saxon.Ejava.util.Optional<bool>.of(true);
                                             } else {
                                                 if (value.Equals("no")) {
@@ -115,6 +116,9 @@ namespace Saxon.Hej.functions {
                     }
                 }
             }
+        }
+        private static void checkXIncludeIsSupported() {
+            throw new Saxon.Hej.trans.XPathException("XInclude is not supported in SaxonCS");
         }
         public static Saxon.Ejava.io.FilenameFilter makeGlobFilter(string value) {
             Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();

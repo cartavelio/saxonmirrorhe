@@ -138,7 +138,7 @@ namespace Saxon.Hej.query {
                     Saxon.Hej.expr.instruct.UserFunctionParameter[] @params = getParameterDefinitions();
                     for (int i = 0; (i<@params.Length); i++) {
                         @params[i].setSlotNumber(i);
-                        map.allocateSlotNumber(@params[i].getVariableQName());
+                        map.allocateSlotNumber(@params[i].getVariableQName(), @params[i]);
                     }
                     Saxon.Hej.expr.parser.RetainedStaticContext rsc = null;
                     try {
@@ -307,7 +307,7 @@ namespace Saxon.Hej.query {
                 Saxon.Hej.expr.PackageData pd = outerInstance.staticContext.getPackageData();
                 /*localparam*/variable.setPackageData(/*localvar*/pd);
                 Saxon.Hej.expr.instruct.SlotManager sm = /*localvar*/pd.getGlobalSlotManager();
-                int slot = /*localvar*/sm.allocateSlotNumber(/*localparam*/variable.getVariableQName());
+                int slot = /*localvar*/sm.allocateSlotNumber(/*localparam*/variable.getVariableQName(), null);
                 /*localparam*/variable.compile(outerInstance.staticContext.getExecutable(), /*localvar*/slot);
                 /*localvar*/pd.addGlobalVariable(/*localparam*/variable);
             }

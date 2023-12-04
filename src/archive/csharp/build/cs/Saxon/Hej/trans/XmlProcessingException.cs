@@ -45,6 +45,9 @@ namespace Saxon.Hej.trans {
         public System.Exception getCause() {
             return exception.InnerException;
         }
+        public Saxon.Hej.expr.Expression getFailingExpression() {
+            return exception.getFailingExpression();
+        }
         public void setWarning(bool warning) {
             _isWarning = warning;
         }

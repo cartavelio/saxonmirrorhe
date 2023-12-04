@@ -354,7 +354,6 @@ namespace Saxon.Hej.type {
                     if ((fingerprint == Saxon.Hej.om.StandardNames.XS_NOTATION)) {
                         Saxon.Hej.value.NotationValue nv = (Saxon.Hej.value.NotationValue)(result);
                         if (!(rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName()))) {
-                            System.Console.Error.WriteLine(rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName()));
                             return new Saxon.Hej.type.ValidationFailure((((("Notation {"+nv.getNamespaceURI())+"}")+nv.getLocalName())+" is not declared in the schema"));
                         }
                     }
