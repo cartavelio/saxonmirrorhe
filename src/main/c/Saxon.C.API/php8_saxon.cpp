@@ -543,7 +543,7 @@ PHP_METHOD(SaxonProcessor, setCatalog) {
   char *catalogFile;
   size_t len;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "sb", &catalogFile, &len) ==
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &catalogFile, &len) ==
       FAILURE) {
     RETURN_NULL();
   }
@@ -557,6 +557,30 @@ PHP_METHOD(SaxonProcessor, setCatalog) {
 
     if (catalogFile != nullptr) {
       saxonProcessor->setCatalog(catalogFile);
+    }
+  }
+}
+
+
+PHP_METHOD(SaxonProcessor, setCatalogFiles) {
+  SaxonProcessor *saxonProcessor;
+  char *catalogFile;
+  size_t len;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &catalogFile, &len) ==
+      FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  saxonProcessor_object *obj =
+      (saxonProcessor_object *)((char *)pobj -
+                                XtOffsetOf(saxonProcessor_object, std));
+  saxonProcessor = obj->saxonProcessor;
+  if (saxonProcessor != nullptr) {
+
+    if (catalogFile != nullptr) {
+      saxonProcessor->setCatalogFiles(catalogFile);
     }
   }
 }

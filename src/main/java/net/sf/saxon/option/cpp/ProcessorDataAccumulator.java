@@ -172,7 +172,7 @@ public class ProcessorDataAccumulator {
         }
 
         if(SaxonCAPI.debug) {
-            System.err.println("ProcessorDataAccumulator - addProcessorValue paramNamei= " + paramNamei);
+            System.err.println("ProcessorDataAccumulator - addProcessorProperty paramNamei= " + paramNamei);
         }
 
         processorData.paramNames.add(paramNamei);
