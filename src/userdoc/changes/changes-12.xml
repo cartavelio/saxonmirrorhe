@@ -403,15 +403,6 @@
         <ul>
             <li><p>Functions that accept a collation argument now allow it to be set to an empty sequence,
             which has the same effect as omitting the argument.</p></li>
-            <li><p>The <code>fn:duplicate-values()</code> function is implemented. This returns all
-            values that appear more than once in the input sequence.</p></li>
-            <li><p>The new <code>fn:all()</code> function is renamed <code>fn:every()</code>.</p></li>
-            <li><p>The new <code>map:of()</code> function is renamed <code>map:of-pairs()</code>.</p></li>
-            <li><p>The new <code>array:of()</code> function is renamed <code>array:of-members()</code>.</p></li>
-            <li><p>Implemented <code>array:split()</code>, <code>map:pair</code>.</p></li>
-            <li><p>Constructor functions have a zero-arity version that takes the context item as
-                the default argument. Also, they single argument version can be called using <code>value</code>
-                as the argument keyword.</p></li>
         </ul>
         
       
@@ -502,10 +493,6 @@
         
         <p>From 12.3, Switch and Typeswitch expressions in XQuery allow curly braces, for example:
         <code>switch($x){case 1: return "a" case 2: return "b" default: return "?"}</code></p>
-        
-        <p>From 12.4, element and attribute tests can use the syntax <code>element(A|B)</code>
-        and <code>attribute(A|B)</code> to accept a union of names. Wildcards are also allowed,
-        for example <code>element(p:*|q:*)</code></p>
         
         
         <h2>XQuery 4.0 extensions</h2>
@@ -621,9 +608,6 @@
             is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
         <p>The reason for this change is that the object is no longer copied during operations such as function inlining; since it is no longer
             implemented as a node in the expression tree, this copying was found to be unnecessary.</p>
-        
-        <p>From 12.4, the conversions available between XPath and Java types include a mapping from <code>xs:string</code>
-        to <code>net.sf.saxon.str.UnicodeString</code> in both directions.</p>
     </category>
     
     <!--<category name="sql" class="javaonly">
