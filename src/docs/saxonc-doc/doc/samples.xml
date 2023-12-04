@@ -34,7 +34,7 @@
                      >Evaluating XPath expressions from C</a>, respectively</p>
 
         <p>To build SaxonC on C, the following files are required: <code>SaxonCGlue.c</code>,
-              <code>SaxonXProcessor.c</code> and <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code> then
+              <code>SaxonCProcessor.c</code> and <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code> then
             compile the sample test code by running the build script <code>build64-linux.sh</code> file for linux, <code>build64-mac.sh</code> for
             MacOS and <code>build64-windows.bat</code> on Windows. This script builds the test harness executables, using a command similar to the
            following:</p>
@@ -194,6 +194,26 @@ queryProc->setProperty("q", "family.xq");
 queryProc->runQueryToString();
   ]]></samp>
      
+     <p>C++ Example 5: parsing XML represented as a lexical string</p>
+     
+     <samp><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+DocumentBuilder * builder = proc->newDocumentBuilder();
+XdmNode *d = builder->parseXmlFromString("<doc/>");
+  ]]></samp>
+     
+     <p>C++ Example 6: parsing XML from a file</p>
+     
+     <samp><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+DocumentBuilder * builder = proc->newDocumentBuilder();
+XdmNode *d = builder->parseXmlFromFile(dir+"books.xml"");
+  ]]></samp>
+     
+     <p>C++ Example 7: parsing XML directly using SaxonProcessor</p>
+     
+     <samp><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+XdmNode *input = proc->parseXmlFromString("<z/>");
+  ]]></samp>
+     
      <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
 
    </section>
@@ -256,6 +276,11 @@ queryProc->runQueryToString();
   $xsltProc->clearParameters();
   $xsltProc->clearProperties();
 ?>]]></samp>
+     
+     <p>Example of parsing XML represented as a lexical string:</p>
+     
+     <samp><![CDATA[  $xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value</b></doc>");
+]]></samp>
    </section>
 
    <section id="samples_python" title="Python samples">
@@ -343,6 +368,12 @@ with PySaxonProcessor(license=False) as proc:
   result = executable.apply_templates_returning_string()
   print(result)
     ]]></samp>
+     
+     <p>Example 3: Parsing XML from a file:</p>
+     
+     <samp><![CDATA[  builder = saxonproc.new_document_builder()
+  node = builder.parse_xml(xml_file_name='books.xml')
+  ]]></samp>
      
      <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
      
