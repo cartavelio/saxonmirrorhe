@@ -1961,7 +1961,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             boolean allow40 = loader.topLevelPackage.getHostLanguageVersion() >= 40;
             if ("p".equals(flags)) {
-                Converter promoter = TypeChecker.makePromotingConverter(allow40, toType.getPrimitiveType(), loader.config.getConversionRules());
+                Converter promoter = TypeChecker.makePromotingConverter(fromType, toType.getPrimitiveType(), loader.config.getConversionRules(), allow40);
                 asc.setConverter(promoter);
             } else if ("d".equals(flags)) {   // Bug 5968
                 asc.setConverter(new Converter.DownCastingConverter((AtomicType)toType, loader.config.getConversionRules()));
