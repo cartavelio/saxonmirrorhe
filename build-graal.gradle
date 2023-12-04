@@ -675,6 +675,8 @@ task all_saxonc_releases() {
                            ? "libs/nix"
                            : "libs/win"))
 
+    def gccopts = arch == "amd64" ? "-m64" : ""
+
     def location = "../"
 
     def libpath = ''
@@ -758,16 +760,19 @@ task all_saxonc_releases() {
         }
       }
     }
-
     doLast {
       copy {
         from "${projectDir}/src/main/c/command"
         into "${saxoncReleaseDir}/command"
+        if (edition == "he") {
+          exclude "Validate.c"
+        }
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
                   .replace('@@EDITION@@', edition.toUpperCase())
                   .replace('@@libdir@@', libdir)
+                  .replace('@@gccopts@@', gccopts)
         }
       }
     }
