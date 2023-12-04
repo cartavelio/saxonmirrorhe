@@ -44,8 +44,17 @@
       <reason>Tokenize#2 does not currently allow second argument to be an empty sequence</reason>
    </exception>
    
- 
+   <exception test-set="fn-parts" test-case="  
+      parts-anyURI-007
+      parts-anyURI-025
+      parts-anyURI-026" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-23"/>
+      <reason>fn:parts is not yet in the spec; URI parsing is superseded.</reason>
+   </exception>
    
+ 
+ 
+ 
 
    <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
       <created by="Michael Kay" on="2018-02-01"/>
