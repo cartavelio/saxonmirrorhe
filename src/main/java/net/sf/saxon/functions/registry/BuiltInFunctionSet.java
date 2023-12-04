@@ -17,6 +17,7 @@ import net.sf.saxon.functions.Concat;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -86,6 +87,17 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     protected static final int TRA = 1 << 26;   // = usage TRANSMISSION (node is included in function result)
     protected static final int NAV = 1 << 27;   // = usage NAVIGATION (function navigates from this node)
 
+    /**
+     * Convenience method for defining fields of a record type
+     * @param name the field name
+     * @param type the field type
+     * @param optional true if the field is optional
+     * @return the field definition
+     */
+
+    protected static RecordTest.Field field(String name, SequenceType type, boolean optional) {
+        return new RecordTest.Field(name, type, optional);
+    }
 
     private final HashMap<String, net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry> functionTable = new HashMap<>(200);
     //private List<BuiltInFunctionSet> importedFunctions = new ArrayList<BuiltInFunctionSet>();
