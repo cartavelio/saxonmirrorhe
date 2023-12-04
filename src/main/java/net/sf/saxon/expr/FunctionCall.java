@@ -397,10 +397,8 @@ public abstract class FunctionCall extends Expression {
      *
      * @param min the minimum number of arguments allowed
      * @param max the maximum number of arguments allowed
-     * @return the actual number of arguments
      * @throws net.sf.saxon.trans.XPathException if the number of arguments is out of range
      */
-
     protected void checkArgumentCount(int min, int max) throws XPathException {
         int numArgs = getArity();
         String msg = null;
