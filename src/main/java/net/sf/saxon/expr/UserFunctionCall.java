@@ -416,13 +416,13 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         UserFunctionCall ufc = new UserFunctionCall();
         ufc.setFunction(function);
         ufc.setStaticType(staticType);
+        ExpressionTool.copyLocationInfo(this, ufc);
         int numArgs = getArity();
         Expression[] a2 = new Expression[numArgs];
         for (int i = 0; i < numArgs; i++) {
             a2[i] = getArg(i).copy(rebindings);
         }
         ufc.setArguments(a2);
-        ExpressionTool.copyLocationInfo(this, ufc);
         return ufc;
     }
 

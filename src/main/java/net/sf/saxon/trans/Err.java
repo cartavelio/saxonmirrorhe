@@ -17,6 +17,7 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.value.SingletonClosure;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntIterator;
 
@@ -189,13 +190,32 @@ public class Err {
             return "(*null*)";
         }
         try {
-            GroundedValue val = seq.materialize();
-            if (val.getLength() == 0) {
-                return "()";
-            } else if (val.getLength() == 1) {
-                return depict(seq.head());
+            if (seq instanceof GroundedValue) {
+                GroundedValue val = (GroundedValue) seq;
+                if (val.getLength() == 0) {
+                    return "()";
+                } else if (val.getLength() == 1) {
+                    return depict(seq.head());
+                } else {
+                    return depictSequenceStart(val.iterate(), 3, val.getLength());
+                }
+            } else if (seq instanceof SingletonClosure) {
+                SingletonClosure sc = (SingletonClosure) seq;
+                if (sc.isBuilt()) {
+                    return sc.asItem() == null ? "()" : depict(sc.asItem());
+                } else {
+                    return "(*not-yet-evaluated singleton*)";
+                }
+            } else if (seq instanceof net.sf.saxon.value.MemoClosure) {
+                net.sf.saxon.value.MemoClosure mc = (net.sf.saxon.value.MemoClosure)seq;
+                seq = mc.getSequenceAsIs();
+                if (seq == null) {
+                    return "(*not-yet-evaluated sequence*)";
+                } else {
+                    return depictSequence(seq);
+                }
             } else {
-                return depictSequenceStart(val.iterate(), 3, val.getLength());
+                return "(*lazily evaluated*)";
             }
         } catch (Exception e) {
             return "(*unreadable*)";

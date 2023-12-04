@@ -453,7 +453,7 @@ public class IndependentContext extends AbstractStaticContext
             va[var.getLocalSlotNumber()] = var;
         }
         for (XPathVariable v : va) {
-            map.allocateSlotNumber(v.getVariableQName());
+            map.allocateSlotNumber(v.getVariableQName(), v);
         }
         return map;
     }

@@ -14,6 +14,7 @@ import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -145,7 +146,8 @@ public class UserFunctionReference extends Expression
             nominalTarget.setBody(o);
             SlotManager slotManager = visitor.getConfiguration().makeSlotManager();
             for (int i = 0; i < getArity(); i++) {
-                slotManager.allocateSlotNumber(nominalTarget.getParameterDefinitions()[i].getVariableQName());
+                UserFunctionParameter param = nominalTarget.getParameterDefinitions()[i];
+                slotManager.allocateSlotNumber(param.getVariableQName(), param);
             }
             ExpressionTool.allocateSlots(o, getArity(), slotManager);
             nominalTarget.setStackFrameMap(slotManager);

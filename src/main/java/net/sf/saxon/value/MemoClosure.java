@@ -148,7 +148,9 @@ public class MemoClosure extends Closure implements ContextOriginator {
         return this;
     }
 
-
+    public Sequence getSequenceAsIs() {
+        return sequence;
+    }
 
 }
 

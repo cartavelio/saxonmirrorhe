@@ -185,7 +185,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
         if (p == null) {
             compileError("Local variable must be declared within a template or function", "XTSE0010");
         } else {
-            slotNumber = p.allocateSlotNumber(name);
+            slotNumber = p.allocateSlotNumber(name, null);
         }
 
         if (sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
