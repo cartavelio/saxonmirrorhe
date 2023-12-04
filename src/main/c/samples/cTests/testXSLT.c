@@ -52,7 +52,7 @@ int main() {
 
   const char *result =
       xsltApplyStylesheet(environi, processor, cwd, "data/cat.xml",
-                          "../data/test.xsl", 0, 0, 0, 0);
+                          "data/test.xsl", 0, 0, 0, 0);
 
   xsltSaveResultToFile(environi, processor, cwd, "data/cat.xml",
                        "data/test.xsl", "outputFile.xml", 0, 0, 0, 0);
@@ -67,7 +67,7 @@ int main() {
     printf("Test 1 Pass: %s", result);
   }
 
-  if (exists("outputFile.xml")) {
+  if (exists("../outputFile.xml")) {
     printf("Test 2 - Pass: outputFile.xml exists \n");
   } else {
     printf("Test 2 - Fail: outputFile.xml not found \n");
