@@ -29,7 +29,7 @@ public class FoldLeftFn extends FoldingFunction {
         return new FoldLeftFold(context, arg0.materialize(), (FunctionItem)arguments[1].head());
     }
 
-    public class FoldLeftFold implements Fold {
+    public static class FoldLeftFold implements Fold {
 
         private final XPathContext context;
         private final FunctionItem function;
