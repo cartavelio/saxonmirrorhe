@@ -79,3 +79,16 @@ existing environments.
   (b) that it’s the correct environment for the branch you have checked out.
 * `pyenv_install_saxon_EDITIONc` installs Saxon C EDITION. For example,
   `penv_install_saxon_eec` installs Saxon EE in the current virtual environment.
+
+## Building the wheel locally
+
+From the `build/eec_pypi` (or `pec_pypi` or `hec_pypi`) directories,
+you can build the wheel locally with the command
+
+```
+python setup.py bdist_wheel
+```
+
+The resulting wheel needs to be installed globally or you have to run
+the build wheel tools that will relocate the binary libraries. But you
+can test the build process.
