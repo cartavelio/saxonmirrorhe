@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml;
 using NUnit.Framework;
 using Saxon.Api;
 
@@ -42,6 +39,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void testParseRecordType() {
             Processor proc = new();
+            proc.SetProperty(Feature.XQUERY_VERSION, "4.0");
             XdmItemType mapType = proc.ParseItemType("record(banana as xs:string, rhubarb as xs:integer*)");
             XdmMap map = new XdmMap();
             map = map.Put(new XdmAtomicValue("banana"), new XdmAtomicValue("custard"));
