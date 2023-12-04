@@ -44,7 +44,7 @@ public class WindowClausePush extends TuplePush {
     @Override
     public void processTuple(XPathContext context) throws XPathException {
         currentWindows = new ArrayList<>();
-        boolean autoclose = windowClause.isTumblingWindow() && windowClause.getEndCondition() == null;
+        boolean autoClose = windowClause.isTumblingWindow() && windowClause.getEndCondition() == null;
         Item previousPrevious = null;
         Item previous = null;
         Item current = null;
@@ -63,16 +63,16 @@ public class WindowClausePush extends TuplePush {
             }
             position++;
             if (position > 0) {
-                if ((windowClause.isSlidingWindow() || currentWindows.isEmpty() || autoclose) &&
+                if ((windowClause.isSlidingWindow() || currentWindows.isEmpty() || autoClose) &&
                         windowClause.matchesStart(previous, current, next, position, context)) {
-                    if (autoclose && !currentWindows.isEmpty()) {
+                    if (autoClose && !currentWindows.isEmpty()) {
                         // automatically end the previous window
                         WindowClause.Window w = currentWindows.get(0);
                         w.endItem = previous;
                         w.endPreviousItem = previousPrevious;
                         w.endNextItem = current;
                         w.endPosition = position - 1;
-                        despatch(w, getOutputter(), context);
+                        despatch(w, context);
                         currentWindows.clear();
                     }
                     WindowClause.Window window = new WindowClause.Window();
@@ -96,7 +96,7 @@ public class WindowClausePush extends TuplePush {
                             w.endPreviousItem = previous;
                             w.endNextItem = next;
                             w.endPosition = position;
-                            despatch(w, getOutputter(), context);
+                            despatch(w, context);
                             if (w.isDespatched()) {
                                 removals.add(w);
                             }
@@ -108,16 +108,31 @@ public class WindowClausePush extends TuplePush {
                 }
             }
         }
-        // on completion, despatch unclosed windows if required
-        if (windowClause.isIncludeUnclosedWindows()) {
-            for (WindowClause.Window w : currentWindows) {
+
+        // on completion, first discard windows that aren't finished and don't auto-close
+        if (!windowClause.isIncludeUnclosedWindows()) {
+            for (int i = currentWindows.size() - 1; i >= 0; i--) {
+                if (!currentWindows.get(i).isFinished()) {
+                    currentWindows.remove(i);
+                }
+            }
+        }
+
+        // now despatch any remaining windows that are finished or that auto-close
+        for (WindowClause.Window w : currentWindows) {
+            if (w.isFinished()) {
+                if (!w.isDespatched()) {
+                    despatch(w, context);
+                }
+            } else if (windowClause.isIncludeUnclosedWindows()) {
                 w.endItem = current;
                 w.endPreviousItem = previous;
                 w.endNextItem = null;
                 w.endPosition = position;
-                despatch(w, getOutputter(), context);
+                despatch(w, context);
             }
         }
+
     }
 
 
@@ -126,12 +141,11 @@ public class WindowClausePush extends TuplePush {
      * variables to the appropriate properties of the window
      *
      * @param w       the window to be despatched
-     * @param output the destination for the result
      * @param context the dynamic evaluation context
      * @throws XPathException if anything goes wrong, for example if the window contents have the wrong type
      */
 
-    private void despatch(WindowClause.Window w, Outputter output, XPathContext context) throws XPathException {
+    private void despatch(WindowClause.Window w, XPathContext context) throws XPathException {
 
         windowClause.checkWindowContents(w);
 
