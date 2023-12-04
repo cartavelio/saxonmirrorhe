@@ -1347,7 +1347,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                         return !inverse;
                     default:
                         System.err.println("*** Unknown feature in HE: " + value);
-                        return !env.processor.getSaxonEdition().equals("HE");
+                        return env.processor.getSaxonEdition().equals("HE") ? false : null;
                 }
 
             case "default_language_for_numbering": {
