@@ -231,17 +231,15 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                 if (er instanceof StandardErrorReporter) {
                     StandardErrorReporter ser = (StandardErrorReporter) er;
                     XmlProcessingError latestError = ser.getLatestError();
-                    throw new XPathException(ser.getExpandedMessage(latestError)).withErrorCode(SaxonErrorCode.SXXP0003);
-                } else {
-                    XPathException de = new XPathException(err).withErrorCode(SaxonErrorCode.SXXP0003);
-                    de.setHasBeenReported(true);
-                    throw de;
+                    if (latestError != null) {
+                        throw new XPathException(ser.getExpandedMessage(latestError))
+                                .withErrorCode(SaxonErrorCode.SXXP0003);
+                    }
                 }
-            } else {
-                XPathException de = new XPathException(err).withErrorCode(SaxonErrorCode.SXXP0003);
-                de.setHasBeenReported(true);
-                throw de;
             }
+            XPathException de = new XPathException(err).withErrorCode(SaxonErrorCode.SXXP0003);
+            de.setHasBeenReported(true);
+            throw de;
         } catch (java.io.IOException err) {
             throw new XPathException("I/O error reported by XML parser processing " +
                                              getSystemId(), err).withErrorCode(SaxonErrorCode.SXXP0003);
