@@ -174,13 +174,13 @@
                     >http://www.expath.org/spec/archive/editor#fn.</xsl:when>
                 <xsl:when test="$p = 'expath-binary'">http://www.expath.org/spec/binary#</xsl:when>
                 <xsl:when test="$p = 'expath-file'">http://www.expath.org/spec/file#</xsl:when>
-                <xsl:when test="$p = 'exslt-common'">http://www.exslt.org/exsl/functions/</xsl:when>
-                <xsl:when test="$p = 'exslt-math'">http://www.exslt.org/math/functions/</xsl:when>
+                <xsl:when test="$p = 'exslt-common'">http://exslt.github.io/exsl/functions/</xsl:when>
+                <xsl:when test="$p = 'exslt-math'">http://exslt.github.io/math/functions/</xsl:when>
                 <xsl:when test="$p = 'exslt-random'"
-                    >http://www.exslt.org/random/functions/</xsl:when>
-                <xsl:when test="$p = 'exslt-sets'">http://www.exslt.org/set/functions/</xsl:when>
+                    >http://exslt.github.io/random/functions/</xsl:when>
+                <xsl:when test="$p = 'exslt-sets'">http://exslt.github.io/set/functions/</xsl:when>
                 <xsl:when test="$p = 'exslt-dates-and-times'"
-                    >http://www.exslt.org/date/functions/</xsl:when>
+                    >http://exslt.github.io/date/functions/</xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="$p"/>
                 </xsl:otherwise>
