@@ -1,27 +1,23 @@
 ﻿using System;
-
+using System.IO;
 
 namespace SaxonCS_NUnit
 {
     public class ConfigTest {
         
-        public static string repo = "/Users/mike/GitHub/saxon2020/";
-        public static string qt4cg = "/Users/mike/GitHub/qt4cg/";
-        public static string extraTests = "/Users/mike/GitHub/extra-test-suites/";
+        public static string repo = Environment.GetEnvironmentVariable("SAXONDEV_DIR");
+        public static string extraTests = Environment.GetEnvironmentVariable("SAXON_EXTRA_TEST_SUITE_DIR");
         
         
-        public static string NUNIT_DATA_DIR = repo + "src/test/nunit/testdata/";
-		public static string DATA_DIR = repo + "src/test/testdata/";
-        public static string SANDPIT_DIR = DATA_DIR + "sandpit/";
-        public static string XMARK_DIR = extraTests + "data/xmark/";
+        public static string NUNIT_DATA_DIR = Path.Combine(repo, "src/test/nunit/testdata/");
+		public static string DATA_DIR = Path.Combine(repo, "src/test/testdata/");
+        public static string SANDPIT_DIR = Path.Combine(DATA_DIR, "sandpit/");
+        public static string XMARK_DIR = Path.Combine(extraTests, "data/xmark/");
         public static string RESOURCES_DIR = NUNIT_DATA_DIR;
-        public static string XSLT3TS_DIR =  qt4cg + "xslt40-test/tests/";
+        public static string XSLT3TS_DIR =  Path.Combine(Environment.GetEnvironmentVariable("W3C_XSLT40_TEST_SUITE_DIR"), "tests");
 
         public static Uri RepoUri = new Uri(repo);
-        public static Uri Qt4cgUri = new Uri(qt4cg);
         public static Uri DataDirUri = new Uri(RepoUri, DATA_DIR);
-        public static Uri BugsDirUri = new Uri(RepoUri, "src/test/bugs/");
-        public static Uri NUnitDataDirUri = new Uri(RepoUri, "src/test/nunit/testdata/");
         public static Uri SandpitDirUri = new Uri(DataDirUri, "sandpit/");
     }
 }
