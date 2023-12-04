@@ -147,7 +147,7 @@
      <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a stylesheet parameter, and using the
        new feature rich <code>XsltExecutable</code> API</p>
 
-      <pre><code class="language-clike"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
+      <pre><code class="language-cpp"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 
 XdmAtomicValue * value =processor->makeStringValue("Hello to you");
@@ -181,7 +181,7 @@ delete value;
 
        <p>C++ Example 2: basic XSLT transformation where we compile and execute the transform in one go on the <code>Xslt30Processor</code></p>
 
-       <pre><code class="language-clike"><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
+       <pre><code class="language-cpp"><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 const char * result = xslt->transformFileToString("cat.xml","test.xsl")<<endl;
 if(result != nullptr) {
@@ -199,7 +199,7 @@ if(result != nullptr) {
 
      <p>C++ Example 3: XSLT transformation using the <code>Xslt30Processor</code> and <code>XsltExecutable</code></p>
 
-      <pre><code class="language-clike"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
+      <pre><code class="language-cpp"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 xslt->setInitialMatchSelectionAsFile("cat.xml");
 XsltExecutable * executable = xslt->compileFromFile("test.xsl");
@@ -232,7 +232,7 @@ delete executable2;
 
       <p>C++ Example 4: basic XQuery processing</p>
 
-      <pre><code class="language-clike"><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
+      <pre><code class="language-cpp"><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
 XsltProcessor * xslt = processor->newXQueryProcessor();
 queryProc->setProperty("s", "cat.xml");
 queryProc->setProperty("q", "family.xq");
@@ -241,21 +241,21 @@ queryProc->runQueryToString();
      
      <p>C++ Example 5: parsing XML represented as a lexical string</p>
      
-     <pre><code class="language-clike"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+     <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromString("<doc/>");
   ]]></code></pre>
      
      <p>C++ Example 6: parsing XML from a file</p>
      
-     <pre><code class="language-clike"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+     <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromFile(dir+"books.xml"");
   ]]></code></pre>
      
      <p>C++ Example 7: parsing XML directly using SaxonProcessor</p>
      
-     <pre><code class="language-clike"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
+     <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 XdmNode *input = proc->parseXmlFromString("<z/>");
   ]]></code></pre>
      

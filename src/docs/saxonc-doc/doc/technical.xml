@@ -50,7 +50,7 @@
               >PySaxonApiError</a>, and in the PHP extension as a PHP exception.</p>
 
        <p>C++ Example: handling exceptions</p>
-       <pre><code class="language-clike"><![CDATA[try {
+       <pre><code class="language-cpp"><![CDATA[try {
     xmlfile = sproc->parseXmlFromString("<xml><value>5</value></xml>");
 } catch (SaxonApiException &e) {
     const char * emessage = e.getMessage();
