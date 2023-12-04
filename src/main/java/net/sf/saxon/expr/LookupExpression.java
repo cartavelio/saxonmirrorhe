@@ -23,7 +23,6 @@ import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
@@ -528,12 +527,7 @@ public class LookupExpression extends BinaryExpression {
                     PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                     return context -> {
                         SequenceIterator baseIterator = lhs.iterate(context);
-                        GroundedValue rhsValue;
-                        try {
-                            rhsValue = SequenceTool.toGroundedValue(rhs.iterate(context));
-                        } catch (UncheckedXPathException e) {
-                            throw e.getXPathException();
-                        }
+                        GroundedValue rhsValue = SequenceTool.toGroundedValue(rhs.iterate(context));
                         return MappingIterator.map(baseIterator, baseItem ->
                                 MappingIterator.map(rhsValue.iterate(), index -> {
                                     ArrayItem array = (ArrayItem) baseItem;
@@ -570,12 +564,7 @@ public class LookupExpression extends BinaryExpression {
                     PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                     return context -> {
                         SequenceIterator baseIterator = lhs.iterate(context);
-                        GroundedValue rhsVal;
-                        try {
-                            rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
-                        } catch (UncheckedXPathException e) {
-                            throw e.getXPathException();
-                        }
+                        GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
                         return MappingIterator.map(baseIterator, baseItem ->
                                 MappingIterator.map(rhsVal.iterate(), index ->
                                         optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
@@ -589,12 +578,7 @@ public class LookupExpression extends BinaryExpression {
                 PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
                 return context -> {
                     SequenceIterator baseIterator = lhs.iterate(context);
-                    GroundedValue rhsVal;
-                    try {
-                        rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
-                    } catch (UncheckedXPathException e) {
-                        throw e.getXPathException();
-                    }
+                    GroundedValue rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
                     MappingFunction mappingFunction = SequenceMapper.of(baseItem -> {
                         switch (baseItem.getGenre()) {
                             case ARRAY: {

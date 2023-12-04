@@ -3744,11 +3744,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public GroundedValue makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
-        try {
-            return SequenceTool.toGroundedValue(expression.iterate(context));
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
+        return SequenceTool.toGroundedValue(expression.iterate(context));
     }
 
 
