@@ -1111,6 +1111,10 @@ task all_saxonc_releases() {
   }
 }
 
+// I'd be inclined to give saxonc_stage_wheels, saxonc_prepare_wheels, and
+// saxonc_build_wheels different names, but two of the names have been in use
+// for a while, so I'm not changing them
+
 task saxonc_stage_wheels(
   type: Tar,
   dependsOn: ['saxon_eec_stage_wheel', 'saxon_pec_stage_wheel', 'saxon_hec_stage_wheel']
@@ -1131,11 +1135,43 @@ task saxonc_stage_wheels(
   }
 }
 
-task saxonc_build_wheels(
+task saxonc_prepare_wheels(
   dependsOn: ['saxonc_stage_wheels']
 ) {
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
+  if (user == 'ndw') {
+    user = 'norm' // HACK
+  }
 
+  doFirst {
+    if (awscli == null) {
+      throw new GradleException("Did not find 'aws' on path")
+    }
+  }
+
+  def wheels = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
+  if (project.findProperty("skipWheelUpload") == null
+      && project.findProperty('wheelDryRun') == null) {
+    doLast {
+      println("Copying ${systemOsName} staging files to s3://saxonica-wheel-staging/${user}/${wheels}")
+      exec {
+        workingDir "${buildDir}/distributions"
+        commandLine awscli, "--profile", "saxonica",
+          "s3", "cp", "${wheels}",
+          "s3://saxonica-wheel-staging/${user}/${wheels}"
+      }
+    }
+  } else {
+    doLast {
+      println("Skipping upload of ${wheels}")
+    }
+  }
+}
+
+task saxonc_build_wheels(
+  dependsOn: ['saxonc_prepare_wheels']
+) {
+  def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
   if (user == 'ndw') {
     user = 'norm' // HACK
   }
@@ -1185,9 +1221,6 @@ task saxonc_build_wheels(
   }
 
   doFirst {
-    if (awscli == null) {
-      throw new GradleException("Did not find 'aws' on path")
-    }
     delete "${buildDir}/BuildWheels"
   }
 
@@ -1196,24 +1229,6 @@ task saxonc_build_wheels(
     exec {
       workingDir buildDir
       commandLine 'git', 'clone', 'git@github.com:Saxonica/BuildWheels.git'
-    }
-  }
-
-  def wheels = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
-  if (project.findProperty("skipWheelUpload") == null
-      && project.findProperty('wheelDryRun') == null) {
-    doLast {
-      println("Copying ${systemOsName} staging files to s3://saxonica-wheel-staging/${user}/${wheels}")
-      exec {
-        workingDir "${buildDir}/distributions"
-        commandLine awscli, "--profile", "saxonica",
-          "s3", "cp", "${wheels}",
-          "s3://saxonica-wheel-staging/${user}/${wheels}"
-      }
-    }
-  } else {
-    doLast {
-      println("Skipping upload of ${wheels}")
     }
   }
 
@@ -1252,9 +1267,7 @@ task saxonc_build_wheels(
         commandLine 'git', 'commit', '-m', msg, 'config.json'
       }
     }
-  }
 
-  if (project.findProperty('wheelDryRun') == null) {
     doLast {
       println("Pushing build trigger")
       exec {
