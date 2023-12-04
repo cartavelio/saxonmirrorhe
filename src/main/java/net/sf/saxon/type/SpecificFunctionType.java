@@ -441,16 +441,16 @@ public class SpecificFunctionType extends AnyFunctionType {
         }
         Affinity affinity = th.sequenceTypeRelationship(resultType, other.getResultType());
         if (affinity != Affinity.SAME_TYPE && affinity != Affinity.SUBSUMES) {
-            String s = "The return type of the required function is " + resultType + " but the return"
-                    + "type of the supplied function is " + other.getResultType();
+            String s = "The return type of the required function is " + resultType +
+                    " but the return type of the supplied function is " + other.getResultType();
             return Optional.of(s);
         }
         for (int j=0; j<getArity(); j++) {
             affinity = th.sequenceTypeRelationship(argTypes[j], other.getArgumentTypes()[j]);
             if (affinity != Affinity.SAME_TYPE && affinity != Affinity.SUBSUMED_BY) {
                 String s = "The type of the " + RoleDiagnostic.ordinal(j+1) +
-                        " argument of the required function is " + argTypes[j] + " but the declared"
-                        + "type of the corresponding argument of the supplied function is " +
+                        " argument of the required function is " + argTypes[j] +
+                        " but the declared type of the corresponding argument of the supplied function is " +
                         other.getArgumentTypes()[j];
                 return Optional.of(s);
             }

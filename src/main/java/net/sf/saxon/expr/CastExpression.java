@@ -8,10 +8,10 @@
 package net.sf.saxon.expr;
 
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.String_1;
 import net.sf.saxon.lib.ConversionRules;
@@ -93,6 +93,7 @@ public class CastExpression extends CastingExpression implements Callable {
             ConversionRules rules = visitor.getConfiguration().getConversionRules();
 
             if (sourceType.isAtomicType() && sourceType != BuiltInAtomicType.ANY_ATOMIC) {
+                //System.err.println("Allocating converter from " + sourceType + " to " + getTargetType());
                 converter = rules.getConverter((AtomicType)sourceType, getTargetType());
                 if (converter == null) {
                     throw new XPathException("Casting from " + sourceType + " to " + getTargetType() +
