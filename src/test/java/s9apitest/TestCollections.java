@@ -4,6 +4,7 @@ import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.URIQueryParameters;
+import net.sf.saxon.junit.TestHttpServer;
 import net.sf.saxon.lib.CollectionFinder;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Resource;
@@ -23,6 +24,8 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,7 +40,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class TestCollections {
     private final ConfigTest configTest = new ConfigTest();
-    
+    private final Path testDataDirPath = Paths.get(new ConfigTest().getDataDir()).resolve("collectionTests");
+    private TestHttpServer testHttp = new TestHttpServer(testDataDirPath);
+
+
     private XdmAtomicValue composeURI(String basedir, String additional) {
         if (basedir.startsWith("/")) {
             return new XdmAtomicValue("file://" + basedir + additional);
@@ -388,17 +394,25 @@ public class TestCollections {
     @Test
     public void testCollectionWithHttp() {
         try {
+            testHttp.route(http -> {
+                http.get("/catalog.xml", testHttp.file("catalog.xml"));
+                http.get("/sample.json", testHttp.file("sample.json", "application/json"));
+                http.get("/welcome.xml", testHttp.file("welcome.xml"));
+            });
+
             Processor p = new Processor(true);
             XPathCompiler c = p.newXPathCompiler();
             c.setLanguageVersion("3.1");
             XPathExecutable exec = c.compile("count(collection(.))");
             XPathSelector eval = exec.load();
-            eval.setContextItem(new XdmAtomicValue("https://dev.saxonica.com/tests/collection/catalog.xml"));
+            eval.setContextItem(new XdmAtomicValue(testHttp.url("/catalog.xml")));
             XdmValue val = eval.evaluate();
             assertEquals(2, Integer.parseInt(val.toString()));
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
+        } finally {
+            testHttp.stop();
         }
     }
 
