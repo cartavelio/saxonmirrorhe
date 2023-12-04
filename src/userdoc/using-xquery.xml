@@ -387,6 +387,18 @@
          </tr>
          <tr class="javaonly">
             <td>
+               <p>-qversion:(3.1|4.0)</p>
+            </td>
+            <td>
+               <p>Defines the XQuery specification version to be used, in the absence of a version
+                  declaration in the query itself. The default is <code>3.1</code>, and this is the
+                  only permitted value for Saxon-HE. The value <code>4.0</code> enables features
+                  defined in the draft XQuery 4.0 family of specifications, which should be regarded
+                  as experimental and subject to change.</p>
+            </td>
+         </tr>
+         <tr class="javaonly">
+            <td>
                <p>-r:classname</p>
             </td>
             <td>
