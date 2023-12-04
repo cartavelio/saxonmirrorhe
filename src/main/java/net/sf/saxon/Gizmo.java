@@ -31,6 +31,7 @@ import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.sxpath.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -377,7 +378,11 @@ public class Gizmo {
                         throw new XPathException("\"Unknown command \" + cmd + \"");
                     }
                 } else {
-                    cmd.action.perform(new StringBuilder(remainder));
+                    try {
+                        cmd.action.perform(new StringBuilder(remainder));
+                    } catch (UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 }
 
             } catch (XPathException e) {
