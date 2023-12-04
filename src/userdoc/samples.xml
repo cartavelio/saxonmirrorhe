@@ -447,18 +447,20 @@
 
         <p>The <code>samples/cs</code> directory contains an example application written in C#,
             designed to illustrate use of the Saxon API available in the <code>Saxon.Api</code>
-            namespace. The application is named <code>Examples.cs</code>; it shows various ways of invoking XSLT, XQuery,
-            XPath, and schema validation. The idea is that you should be able to
+            namespace. The application is named <code>Examples.cs</code>; it shows various ways of
+            invoking XSLT, XQuery, XPath, and schema validation. The idea is that you should be able to
             cut and paste a suitable fragment of code into your own application as a quick way of
             getting started.</p>
 
         <p>The main value of these samples is in reading the source code rather than in actually
             running them; however, running them is also a good check that your installation has been
-            set up correctly. A quick look at the comments in the source should enable you to see
+            set up correctly. The easiest (or most productive) way to run the example application is
+            to create a command-line application in your IDE (for example, Visual Studio), copy the
+            <code>Example.cs</code> source code into the IDE as your entry module, and add a
+            dependency on SaxonCS. A quick look at the comments in the source should enable you to see
             how they are executed.</p>
         
-        <p>The example applications can be run from the command line (executables are found in the
-            <code>samples/cs/bin</code> directory). They take the following arguments:</p>
+        <p>The example application can be run from the command line. It takes the following arguments:</p>
 
         <ul>
             <li>
