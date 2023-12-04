@@ -1065,7 +1065,7 @@ cdef class PyXslt30Processor:
          cdef char * c_package_file_name
          if package_file_name is not None and len(package_file_name) > 0:
              py_ta_string = package_file_name.encode('UTF-8') if package_file_name is not None else None
-             c_package_file_name = py_ta_string if py_lang_string is not None else ""
+             c_package_file_name = py_ta_string if py_ta_string is not None else ""
              self.thisxptr.importPackage(c_package_file_name)
 
 
