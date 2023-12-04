@@ -1,5 +1,6 @@
+set -e
 rm -rf ./build
-./gradlew clean
+./gradlew clean saxonc_stage_wheels all_saxonc_releases
 ./gradlew -PbuildMacArch=x64 dotnetMakeApp
 ./gradlew -PbuildMacArch=arm64 dotnetMakeApp
 lipo -create -output ./SaxonCS \
