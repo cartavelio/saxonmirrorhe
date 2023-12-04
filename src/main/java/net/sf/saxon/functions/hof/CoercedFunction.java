@@ -199,8 +199,8 @@ public class CoercedFunction extends AbstractFunction {
 
 
     private static String wrongArityMessage(FunctionItem supplied, int expected) {
-        return "The supplied function (" + supplied.getDescription() + ") has " + FunctionCall.pluralArguments(supplied.getArity()) +
-                " - expected " + expected;
+        return "The supplied function (" + supplied.getDescription() + ") has " + FunctionCall.plural(supplied.getArity(), "parameter") +
+                " - expected a function with " + FunctionCall.plural(expected, "parameter");
     }
 
     /**
