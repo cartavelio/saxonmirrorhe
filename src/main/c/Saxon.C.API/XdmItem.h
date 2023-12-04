@@ -117,18 +117,17 @@ public:
    */
   virtual int64_t getUnderlyingValue();
 
+  //! Get the string value of the item.
   /**
-   * Get the string value of the item. For a node, this gets the string value
-   * of the node. For an atomic value, it has the same effect as casting the
+   * For a node, this gets the string value of the node.
+   * For an atomic value, it has the same effect as casting the
    * value to a string. In all cases the result is the same as applying the
    * XPath string() function. <p>For atomic values, the result is the same as
    * the result of calling <code>toString</code>. This is not the case for
    * nodes, where <code>toString</code> returns an XML serialization of the
-   * node.</p>
+   * node. The caller should deallocate memory using `delete`.</p>
    *
    * @return the result of converting the item to a string.
-   * @deprecated the SaxonProcessor argument. It has been removed from release
-   * version 1.2.1
    */
   virtual const char *getStringValue();
 

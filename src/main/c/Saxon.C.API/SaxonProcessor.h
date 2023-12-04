@@ -776,7 +776,7 @@ protected:
                      from the underlying Java code via JNI */
 
 private:
-  void createException(const char *message = nullptr);
+  //void createException(const char *message = nullptr);
 
   void initialize(bool l);
 
