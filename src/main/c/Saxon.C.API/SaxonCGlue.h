@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2023 Saxonica Liimited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -53,10 +53,6 @@ static const bool true = 1;
 #endif
 #endif
 
-/*!    \file  SaxonCGlue.h
-*   \brief This C header file contains a number of factory functions for running SaxonC C/C++ APIs, including GraalVM create and destroy functions.
-*/
-
 //#define DEBUG
 
 EXTERN_SAXONC
@@ -70,8 +66,8 @@ extern char *resources_dir;
 extern int jvmCreated; // TODO this might not be required in graalvm - remove
 
 //===============================================================================================//
-/** <code>sxnc_environment</code>. This struct captures the GraalVM properties
- * associated with the compiled SaxonC library. <p/>
+/*! <code>Environment</code>. This struct captures the Graalvm properties
+ * associated with the cross compiled SaxonC library. <p/>
  */
 typedef struct {
   graal_isolate_t *isolate;
@@ -81,8 +77,8 @@ typedef struct {
 
 //===============================================================================================//
 
-/** <code>sxnc_parameter</code>. This struct captures details of parameters used
- * for transformations, queries, and XPath expressions, as (string, value) pairs. <p/>
+/*! <code>sxnc_parameter</code>. This struct captures details of parameters used
+ * for the transformation as (string, value) pairs. <p/>
  */
 typedef struct {
   char *name;
@@ -93,8 +89,8 @@ typedef struct {
 
 //===============================================================================================//
 
-/** <code>sxnc_property</code>. This struct captures details of properties used
- * for transformations, queries, and XPath expressions, as (string, string) pairs. <p/>
+/*! <code>sxnc_property</code>. This struct captures details of properties used
+ * for the transformation as (string, string) pairs. <p/>
  */
 typedef struct {
   char *name;
@@ -102,15 +98,15 @@ typedef struct {
                   Java object. */
 } sxnc_property;
 
-/**! <code>sxnc_value</code>. This struct is used to capture the XdmValue and its
+/*! <code>sxnc_value</code>. This struct is used to capture the xdmvalue and its
  * type information. <p/>
  */
 typedef struct {
   int64_t xdmvalue; /*!< Internal use only. The value given as a Java object. */
 } sxnc_value;
 
-/**! <code>sxnc_processor</code>. This struct is used to capture the Java
- * processor objects created in C for XSLT, XQuery and XPath. <p/>
+/*! <code>sxnc_processor</code>. This struct is used to capture the Java
+ * processor objects created in C for XSLT, XQuery and XPath <p/>
  */
 typedef struct {
   int64_t value;
@@ -122,76 +118,76 @@ typedef void *(*allocFn)(size_t length);
 
 extern const char *failure;
 
-/**
+/*
  * Get resources directory.
  */
 
 char *getResourceDirectory();
 
-/**
+/*
  * Get resources directory. This is to replace getResourceDirectory().
  */
 
 char *_getResourceDirectory();
 
-/**
- * Load dll using the default setting in SaxonC.
- * Recommended method to use to load library.
+/*
+ * Load dll using the default setting in SaxonC
+ * Recommended method to use to load library
  */
 int create_graalvm_isolate(sxnc_environment *env);
 
 int attach_graalvm_thread(sxnc_environment *env);
 
-/**
- * Closes down the GraalVM environment used by SaxonC
+/*
+ * Closes down the Graalvm environment used by SaxonC
  */
 int detach_graalvm_thread(sxnc_environment *env);
 
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 
-/**
- * Create a pointer to the Saxon Processor. Here we pass in the processor pointer
+/*
+ * Create pointer to the SaxonProcessor. Here we pass in the processor pointer
  * which should have been allocated memory space in advance. Return status true
- * = success, false = failed to create Saxon Processor.
+ * = success, false = failed to create SaxonProcessor
  */
 int c_createSaxonProcessor(sxnc_environment *environi,
                            sxnc_processor *processor, int license);
 
-/**
+/*
  * Callback to check for exceptions. When called it returns the exception as a
- * string.
+ * string
  */
 const char *checkForException(sxnc_environment *environi);
 
-/**
+/*
  * Clean up and destroy GraalVM to release memory used.
  */
 void graal_tear_down(graal_isolatethread_t *thread);
 
-/**
- * Get a parameter from the list.
+/*
+ * Get a parameter from list
  */
 int64_t getParameter(sxnc_parameter *parameters, int parLen, const char *name);
 
-/**
- * Get a property from the list.
+/*
+ * Get a property from list
  */
 char *getProperty(sxnc_property *properties, int propLen, const char *name);
 
-/**
- * Set a parameter.
+/*
+ * set a parameter
  */
 void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap,
                   const char *name, sxnc_value *value);
 
-/**
- * Set a property.
+/*
+ * set a property
  */
 void setProperty(sxnc_property **properties, int *propLen, int *propCap,
                  const char *name, const char *value);
 
-/**
- * Clear parameters and properties.
+/*
+ * clear parameter
  */
 void clearSettings(sxnc_parameter **parameters, int *parLen,
                    sxnc_property **properties, int *propLen);
