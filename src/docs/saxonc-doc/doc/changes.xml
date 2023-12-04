@@ -109,11 +109,16 @@
                <code>Xslt30Processor</code> class. This method supports the <code>xsl:use-package</code> declaration to import a library package before
                compiling a primary stylesheet or package.</li>
             <li>The <code>PyXdmNode</code> now implements the built-in function <code>len()</code> to return the number of
-               children at a given node. Note this is different to the <code>size()</code> method which on a sequence gives the value 1 for a <code>PyXdmNode</code>.</li>
-            <li>SaxonC Python API now supports for the subscript operator (i.e. square brackets []) on PyXdmValue and PyXdmNode objects. For example, given a node object n and
-               integer i, n[i] returns the ith child node at n or None if ith item does not exist. Also, operator like n[i][j] gives the child node of n[i].
-               For a PyXdmValue object, n[i] gives the ith item in the sequence.</li>
-            <li>Added ICU localization support to SaxonCEE and SaxonCPE.</li>
+               children at a given node. Note this is different to the <code>size()</code> method inherited
+               from <code>PyXdmValue</code> which gets the number of items in a sequence, and so returns the
+               value 1 for a <code>PyXdmNode</code>.</li>
+            <li>The SaxonC Python API now supports the subscript operator (i.e. square brackets []) on
+               <code>PyXdmValue</code> and <code>PyXdmNode</code> objects. For example, given a node object
+               <code>n</code> and integer <code>i</code>, <code>n[i]</code> returns the i'th child node of
+               <code>n</code> or None if the i'th child does not exist. Then <code>n[i][j]</code> returns the
+               j'th child node of <code>n[i]</code>, and so on. For a <code>PyXdmValue</code> object,
+               <code>n[i]</code> returns the i'th item in the sequence.</li>
+            <li>Added ICU localization support for SaxonC-EE and SaxonC-PE.</li>
          </ul>
       </category>
       
