@@ -609,6 +609,7 @@ cdef class PySaxonProcessor:
             argumentV[x] =  <saxoncClasses.XdmValue *>mvalue_.derivedmmptr
           else:
             raise Exception("Argument value at position " , x , " is not of type PyXdmValue. The following object found: ", type(values[x]))
+          argumentV[x].incrementRefCount()
 
         newArray_ = PyXdmArray()
         newArray_.derivedaaptr = newArray_.derivedfptr = newArray_.derivedptr = newArray_.thisvptr =  self.thisptr.makeArray(argumentV, len_)
@@ -655,10 +656,12 @@ cdef class PySaxonProcessor:
             if isinstance(key, PyXdmAtomicValue):
                 avalue_ = key
                 c_keys[i]=avalue_.derivedaptr
+                avalue_.derivedaptr.incrementRefCount()
 
                 if isinstance(value, PyXdmValue) or isinstance(value, PyXdmAtomicValue) or isinstance(value, PyXdmItem) or isinstance(value, PyXdmNode) or isinstance(value, PyXdmMap) or isinstance(value, PyXdmArray) or isinstance(value, PyXdmFunctionItem):
                      value_ = value
                      c_values[i] = value_.thisvptr
+                     value_.thisvptr.incrementRefCount()
 
                 else:
                        raise Exception("Error in making PyXdmMap")
@@ -666,9 +669,6 @@ cdef class PySaxonProcessor:
             else:
                  raise Exception("Error in the making of the PyXdmMap - wrong key type")
             i +=1
-
-
-
 
         if len_ == 0:
             return None
@@ -2750,6 +2750,7 @@ cdef class PyXsltExecutable:
           if isinstance(args[x], PyXdmValue):
             value_ = args[x]
             argumentV[x] = value_.thisvptr
+            value_.thisvptr.incrementRefcount()
           else:
             raise Exception("Argument value at position " , x , " is not a PyXdmValue. The following object found: ", type(args[x]))
         '''c_functionName = make_c_str(function_name)'''
@@ -2832,6 +2833,7 @@ cdef class PyXsltExecutable:
           if isinstance(args[x], PyXdmValue):
             value_ = args[x]
             argumentV[x] = value_.thisvptr
+            value_.thisvptr.incrementRefCount()
           else:
             raise Exception("Argument value at position ",x," is not a PyXdmValue")
         '''c_functionName = make_c_str(function_name)'''
@@ -2893,6 +2895,7 @@ cdef class PyXsltExecutable:
           if isinstance(args[x], PyXdmValue):
             value_ = args[x]
             argumentV[x] = value_.thisvptr
+            value_.thisvptr.incrementRefCount()
           else:
             raise Exception("Argument value at position ",x," is not a PyXdmValue")
         '''c_functionName = make_c_str(function_name)'''
@@ -5105,6 +5108,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
            if isinstance(args[x], PyXdmValue):
              ivalue_ = args[x]
              argumentV[x] = ivalue_.thisvptr
+             value_.thisvptr.incrementRefCount()
            else:
              raise Exception("Argument value at position ",x," is not a PyXdmValue")
          '''c_functionName = make_c_str(function_name)'''
