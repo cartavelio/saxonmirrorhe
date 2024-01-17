@@ -30,11 +30,10 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
   cppXQ = j_createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread,
                                             (void *)p->procRef);
   if (cppXQ == SXN_UNSET) {
-
     throw SaxonApiException(
         "Error: Failed to create the XPathProcessor internal object");
-
-    return;
+  } else if(cppXQ == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
 
 #ifdef DEBUG

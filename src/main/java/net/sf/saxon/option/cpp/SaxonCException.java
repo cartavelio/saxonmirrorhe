@@ -99,6 +99,18 @@ public class SaxonCException  {
         if(exception.getMessage() == null) {
             return WordFactory.nullPointer();
         }
+        if(SaxonCAPI.debug) {
+            String messageStr = exception.getMessage();
+            System.err.println("Java Debug: Exception found: " + messageStr);
+            if(messageStr.contains("Invalid handle")){
+                System.err.println("Found Invalid Handle error");
+                StringWriter sw = new StringWriter();
+               PrintWriter pw = new PrintWriter(sw);
+               throwable.printStackTrace(pw);
+               System.err.println(sw.toString());
+            }
+
+        }
         CCharPointer a = null;
         int lineNumber = exception.getLineNumber();
         if(exception.getErrorCode() == null) {
