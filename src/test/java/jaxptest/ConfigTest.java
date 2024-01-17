@@ -7,7 +7,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.ConfigurationReader;
 import net.sf.saxon.trans.XPathException;
@@ -20,18 +19,11 @@ import javax.xml.transform.sax.TemplatesHandler;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -43,7 +35,6 @@ public class ConfigTest {
     private String BUGS_DIR = null;
     private String XMARK_DIR = null;
     private String QT4_TESTS_DIR = null;
-    private String QT4_SPECS_DIR = null;
 
     public ConfigTest() {
         // The directories above used to be static final, but that had the nasty consequence
@@ -88,11 +79,9 @@ public class ConfigTest {
         return QT4_TESTS_DIR;
     }
 
-     public String getQt4SpecsDir() {
-         if (QT4_SPECS_DIR == null) {
-             QT4_SPECS_DIR = qt4SpecsDirectory();
-         }
-         return QT4_SPECS_DIR;
+    public String getQt4SpecsDir() {
+        String testDir = getQt4TestsDir();
+        return testDir.replace("qt4tests", "qtspecs");
     }
 
     private static String junitDataDirectory() {
@@ -224,34 +213,6 @@ public class ConfigTest {
         return path;
     }
 
-    private static String qt4SpecsDirectory() {
-        File dir = null;
-        String envar = "W3C_QT4_SPECS_DIR";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume that the specs live as a sibling of the qt4 tests
-            Path qt4TestsPath = Paths.get(qt4TestsDirectory());
-            Path assumedQt4SpecsPath = qt4TestsPath.resolve("../qtspecs");
-
-            if (!assumedQt4SpecsPath.toFile().isDirectory()) {
-                // Assume the current directory is the root of the project
-                throw new RuntimeException("Environment variable " + envar + " is not set, and there is no 'qtspecs' dir sibling of the W3C_QT4_TEST_DIR dir");
-            }
-            dir = assumedQt4SpecsPath.toAbsolutePath().toFile();
-        }
-        else {
-            dir = new File(env);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-            }
-        }
-        String path = dir.getAbsolutePath().replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
-        return path;
-    }
-
     @Test
     public void testGeneralConfiguration() {
         try {
@@ -263,62 +224,6 @@ public class ConfigTest {
             fail(e.getMessage());
         }
     }
-
-    @Test
-    public void testUnparsedTextResolverInConfigFile() {
-        // Bug 6201
-        try {
-            // Approved spelling
-            String configXml = "<configuration edition=\"HE\" xmlns=\"http://saxon.sf.net/ns/configuration\">\n"
-                    + "   <global unparsedTextURIResolver=\"jaxptest.ConfigTest$LocalUnparsedTextResolver\"/>\n"
-                    + "</configuration>";
-            Configuration config = new ConfigurationReader().makeConfiguration(
-                    new StreamSource(new StringReader(configXml)));
-            Processor proc = new Processor(config);
-            XPathCompiler xp = proc.newXPathCompiler();
-            XPathSelector exp = xp.compile("unparsed-text('http://dummy/text')").load();
-            XdmValue val = exp.evaluate();
-            assertEquals("Let it be", val.toString());
-        } catch (XPathException | SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testUnparsedTextResolverInConfigFileMisspelled() {
-        // Bug 6201
-        try {
-            // Unapproved spelling retained for bug-compatibility
-            String configXml = "<configuration edition=\"HE\" xmlns=\"http://saxon.sf.net/ns/configuration\">\n"
-                    + "   <global unparsedTextUriResolver=\"jaxptest.ConfigTest$LocalUnparsedTextResolver\"/>\n"
-                    + "</configuration>";
-            Configuration config = new ConfigurationReader().makeConfiguration(
-                    new StreamSource(new StringReader(configXml)));
-            Processor proc = new Processor(config);
-            XPathCompiler xp = proc.newXPathCompiler();
-            XPathSelector exp = xp.compile("unparsed-text('http://dummy/text')").load();
-            XdmValue val = exp.evaluate();
-            assertEquals("Let it be", val.toString());
-        } catch (XPathException | SaxonApiException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testInvalidAttributeInConfigFile() {
-        // Bug 6202
-        try {
-            String configXml = "<configuration edition=\"HE\" xmlns=\"http://saxon.sf.net/ns/configuration\">\n"
-                    + "   <global poverty='a thing'/>\n"
-                    + "</configuration>";
-            Configuration config = new ConfigurationReader().makeConfiguration(
-                    new StreamSource(new StringReader(configXml)));
-            fail("Error not detected");
-        } catch (XPathException e) {
-            assertTrue(e.getMessage().contains("poverty"));
-        }
-    }
-
 
     @Test
     public void testWhitespaceDefault() {
@@ -605,16 +510,6 @@ public class ConfigTest {
         String base = new File(getDataDir() + "config.xml").toURI().toASCIIString();
         testXsltSecureProcessing(new StreamSource(new StringReader(xml), base),
                                  new StreamSource(new StringReader(xsl), base), false);
-    }
-
-    public static class LocalUnparsedTextResolver implements UnparsedTextURIResolver {
-        @Override
-        public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
-            if (absoluteURI.toString().equals("http://dummy/text")) {
-                return new StringReader("Let it be");
-            }
-            return null;
-        }
     }
 
 

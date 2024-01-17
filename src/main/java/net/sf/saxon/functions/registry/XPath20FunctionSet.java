@@ -11,7 +11,6 @@ import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.NumericType;
 import net.sf.saxon.type.Type;
@@ -98,7 +97,8 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
         // Concat changes in 4.0:
-        registerVariadic("concat", 1, e -> e.populate(Concat31::new, BuiltInAtomicType.STRING, ONE, SEQV)
+        // TODO: reimpose restrictions if 4.0 not in use
+        registerVariadic("concat", 1, e -> e.populate(Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
 
         register("contains", 2, e -> e.populate(Contains::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
@@ -412,7 +412,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("replace", 4, e -> e.populate(CSharp.staticRef(Replace::make20), BuiltInAtomicType.STRING, ONE, 0)
+        register("replace", 4, e -> e.populate(Replace::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null)
@@ -501,7 +501,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("substring", 3, e -> e.populate(Substring::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, NumericType.getInstance(), ONE, null)
-                .arg(2, NumericType.getInstance(), OPT, null));
+                .arg(2, NumericType.getInstance(), ONE, null));
 
         register("substring-after", 2, e -> e.populate(SubstringAfter::new, BuiltInAtomicType.STRING, ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)

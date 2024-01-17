@@ -72,11 +72,17 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         SequenceType oneOnDuplicatesFunction = SequenceType.makeSequenceType(
                 ON_DUPLICATES_CALLBACK_TYPE, StaticProperty.EXACTLY_ONE);
 
-        RecordTest KVP_TYPE = new RecordTest(
-                Arrays.asList(new String[]{"key", "value"}),
-                Arrays.asList(new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE}),
+        RecordTest KVP_TYPE_EXTENSIBLE = new RecordTest(
+                Arrays.asList("key", "value"),
+                Arrays.asList(SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE),
                 Collections.emptyList(),
                 true);
+
+        RecordTest KVP_TYPE_INEXTENSIBLE = new RecordTest(
+                Arrays.asList("key", "value"),
+                Arrays.asList(SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE),
+                Collections.emptyList(),
+                false);
 
         OptionsParameter mergeOptionDetails = new OptionsParameter();
         mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
@@ -116,7 +122,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
 
-        register("find", 2, e -> e.populate( MapFind::new, ArrayItemType.getInstance(), ONE, 0)
+        register("find", 2, e -> e.populate( MapFind::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
@@ -185,14 +191,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
 
-            register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE, STAR, 0)
+            register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_INEXTENSIBLE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("entries", 1, e -> e.populate(MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("of-pairs", 1, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                    .arg(0, KVP_TYPE, STAR | INS, null));
+                    .arg(0, KVP_TYPE_EXTENSIBLE, STAR | INS, null));
 
             register("of-pairs", 2, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null)
@@ -207,7 +213,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.SINGLE_BOOLEAN
             );
 
-            register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, STAR, 0)
+            register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, FILTER_TYPE, ONE | INS, null));
 
