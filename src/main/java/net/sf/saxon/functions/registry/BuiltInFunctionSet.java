@@ -13,7 +13,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.functions.Concat;
+import net.sf.saxon.functions.Concat31;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
@@ -358,7 +358,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         if (functionName.hasURI(getNamespace()) && getFunctionDetails(functionName.getLocalPart(), arity) != null) {
             RetainedStaticContext rsc = staticContext.makeRetainedStaticContext();
             SystemFunction fn = makeFunction(functionName.getLocalPart(), arity);
-            if (staticContext.getXPathVersion() < 40 && fn instanceof Concat && arity < 2) {
+            if (staticContext.getXPathVersion() < 40 && fn instanceof Concat31 && arity < 2) {
                 // Treat concat() specially prior to 4.0
                 return null;
             }
