@@ -450,8 +450,8 @@ public:
   /**
    *
    * @param source the source document as a lexical string
-   * @param encoding of the source string argument. If not specified then platform default encoding is used
-   * @param validator SchemaValidator object if it exists. Default is null
+   * @param encoding the encoding used to decode the source string. If not specified then platform default encoding is used
+   * @param validator can be used to supply a SchemaValidator to validate the document. Default is null
    * @return an XdmNode
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
@@ -463,7 +463,7 @@ public:
   /**
    *
    * @param source the filename of the source document
-   * @param validator the SchemaValidator if it exists. Default is null
+   * @param validator can be used to supply a SchemaValidator to validate the document. Default is null
    * @return an XdmNode
    * @throws SaxonApiException  if there ia a failure in the parsing of the XML
    * file
@@ -475,7 +475,7 @@ public:
   /**
    *
    * @param source the URI of the source document
-   * @param validator  SchemaValidator object. Default is null
+   * @param validator can be used to supply a SchemaValidator to validate the document. Default is null
    * @return an XdmNode
    * @throws SaxonApiException if there ia failure in the parsing of the XML
    * file

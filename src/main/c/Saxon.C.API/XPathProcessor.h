@@ -241,7 +241,8 @@ public:
 
   //! Set the policy for matching unprefixed element names in XPath expressions
   /**
-  * @param policy the policy to be used
+  * @param policy the policy to be used, possible values: DEFAULT_NAMESPACE = 0,
+  * ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 2
   *
   */
   void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
