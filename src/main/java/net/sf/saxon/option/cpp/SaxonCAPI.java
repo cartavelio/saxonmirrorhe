@@ -1455,7 +1455,6 @@ public class SaxonCAPI {
 
             Configuration config = processor.getUnderlyingConfiguration();
             source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
-            
 
             if (debug) {
                 System.err.println("DEBUG source.getSystemID()=" + source.getSystemId());
