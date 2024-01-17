@@ -1353,7 +1353,7 @@
          <p>Assertions enable cross-validation of different elements or attributes within a complex
             type. For example, specifying:</p>
          <pre><code class="language-xml"><![CDATA[<xs:assert test="xs:date(@date-of-birth) lt xs:date(@date-of-death)"/>
-]]></pre>
+]]></code></pre>
 
          <p>will cause a run-time validation error if an instance document is validated in which the
             relevant condition does not hold.</p>
