@@ -49,6 +49,7 @@ public class SingletonClosure extends Closure implements Sequence {
     public SingletonClosure(Expression exp, PullEvaluator inputEvaluator, XPathContext context) throws XPathException {
         setInputEvaluator(inputEvaluator);
         savedXPathContext = context.newContext();
+        savedXPathContext.setOrigin(this);
         saveContext(exp, context);
         //Instrumentation.count("SingletonClosure.new()");
     }
@@ -161,6 +162,10 @@ public class SingletonClosure extends Closure implements Sequence {
     @Override
     public SingletonClosure makeRepeatable() {
         return this;
+    }
+
+    public boolean isBuilt() {
+        return built;
     }
 
 }
