@@ -382,7 +382,7 @@ public class XQueryParser extends XPathParser {
         // End of diagnostic code
 
         if (t.currentToken != Token.EOF) {
-            grumble("Unexpected token " + currentTokenDisplay() + " beyond end of query");
+            grumble("Unexpected token " + currentTokenDisplay() + ": no further input expected");
         }
         setLocation(exp);
         ExpressionTool.setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
