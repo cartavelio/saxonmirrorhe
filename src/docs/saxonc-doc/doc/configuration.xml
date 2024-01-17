@@ -189,7 +189,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                otherwise the result is returned as an <code>XdmNode</code> object with a Document
                node as its root.</td>
          </tr>
-         <tr>
+         <<!--<tr>
             <td>'extc'</td>
             <td>
                <code>setProperty("extc", "dir/saxonc")</code>
@@ -206,7 +206,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <code>setProperty("m", "")</code>
             </td>
             <td>Creates a message listener which is available in the SaxonC API.</td>
-         </tr>
+         </tr> -->
       </table>
    </section>
 
