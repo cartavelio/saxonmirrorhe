@@ -11,8 +11,8 @@
     <p>SaxonC 1.1 and later releases implement the <a href="https://www.w3.org/TR/xquery-31/"
             class="bodylink">XQuery 3.1 Recommendation</a> dated 18 April 2017.</p>
 
-    <p>Further general details on the XQuery 3.1 support in Saxon you can find in the
-        <a href="https://www.saxonica.com/documentation12/index.html#!using-xquery">main Saxon documentation</a> and
+    <p>Further general details on the XQuery 3.1 support in Saxon you can find in the main
+        <a href="https://www.saxonica.com/documentation12/index.html#!using-xquery">Saxon documentation</a> and
         and <a class="bodylink" href="https://www.saxonica.com/documentation12/index.html#!using-xquery/performanceanalysis">Performance
               analysis</a> which applies to SaxonC.</p>
 
@@ -20,6 +20,10 @@
 
     <p>The XQuery processor may be invoked either from the operating system command line, or via an
         API from a user-written application. There is no graphical user interface provided.</p>
+
+    <nav>
+       <ul/>
+    </nav>
     
 
     <section id="commandline" title="From the command line">
