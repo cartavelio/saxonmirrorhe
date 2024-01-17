@@ -1,73 +1,68 @@
 package nativetests;
 
-import net.sf.saxon.expr.instruct.GlobalParam;
-import net.sf.saxon.expr.instruct.GlobalParameterSet;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.s9api.*;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XsltController;
+import com.saxonica.config.JavaLocalizerFactory;
+import com.saxonica.config.ProfessionalConfiguration;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.number.Numberer_en;
+import net.sf.saxon.lib.LocalizerFactory;
+import net.sf.saxon.lib.Numberer;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XPathCompiler;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.transform.stream.StreamSource;
-import java.io.StringReader;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test various aspects of setting the Saxon Configuration from Java code
  */
-public class Bug6236Test {
+public class ConfigurationTest {
+
+    /**
+     * Demonstrate use of a user-written LocalizerFactory to customize numbering
+     */
 
     @Test
-    public void testBug6236() {
-        String xsl = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
-                + "                xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
-                + "                version=\"3.0\">\n"
-                + "  <xsl:output method=\"xml\" indent=\"yes\"/>\n"
-                + "  <xsl:mode on-no-match=\"shallow-copy\"/>\n"
-                + "  <xsl:param name=\"always-assume-indentation\" as=\"xs:boolean\" select=\"false()\"/> \n"
-                + "  <xsl:param name=\"is-indented\" as=\"xs:boolean\"\n"
-                + "    select=\"$always-assume-indentation or exists(/*[text()])\"/>\n"
-                + "  <xsl:template match=\"/*\" mode=\"#all\">\n"
-                + "    <xsl:copy>\n"
-                + "      <xsl:attribute name=\"is-indented\" select=\"$is-indented\"/>\n"
-                + "      <xsl:apply-templates select=\"@*, node()\" mode=\"#current\"/>\n"
-                + "    </xsl:copy>\n"
-                + "  </xsl:template>\n"
-                + "</xsl:stylesheet>";
-
+    public void testCustomizedNumbering() {
         try {
-            Processor proc = new Processor(false);
-            DocumentBuilder builder = proc.newDocumentBuilder();
-            XdmNode doc = builder.build(new StreamSource(new StringReader("<doc>42</doc>")));
-            System.out.println("saxon product version: " + proc.getSaxonProductVersion());
-            XsltCompiler xsltCompiler = proc.newXsltCompiler();
-            XsltExecutable compiledExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsl)));
-            XsltTransformer loadedExecutable = compiledExecutable.load();
-            loadedExecutable.setInitialContextNode(doc);
-            XsltController controller = loadedExecutable.getUnderlyingController();
-            controller.initializeController(new GlobalParameterSet());
-
-            //XPathContextMajor context = controller.newXPathContext();
-            //controller.preEvaluateGlobals(context);
-
-
-            for (GlobalParam gp : controller.getExecutable().getGlobalParameters().values()) {
-                String localName = gp.getVariableQName().getLocalPart();
-                System.out.println("local param name: " + localName);
-                GroundedValue val = gp.evaluateVariable(controller.newXPathContext(), gp.getDeclaringComponent());
-                if (localName.equals("always-assume-indentation")) {
-                    assertEquals(val.head().getStringValue(), "false");
-                } else if (localName.equals("is-indented")) {
-                    assertEquals(val.head().getStringValue(), "true");
+            Configuration config = new ProfessionalConfiguration();
+            LocalizerFactory lf = new JavaLocalizerFactory(config) {
+                @Override
+                public Numberer getNumberer(String language, String country) {
+                    Numberer n = super.getNumberer(language, country);
+                    if (n instanceof Numberer_en) {
+                        // request "twenty-six" rather than "twenty six"
+                        ((Numberer_en) n).setTensUnitsSeparatorCardinal("-");
+                    }
+                    return n;
                 }
-            }
-        } catch (XPathException | SaxonApiException e) {
-            e.printStackTrace();
-            fail(e);
+            };
+            config.setLocalizerFactory(lf);
+            Processor p = new Processor(config);
+            XPathCompiler xp = p.newXPathCompiler();
+            xp.setLanguageVersion("3.0");
+            String result = xp.compile("format-integer(26, 'w')").load().evaluateSingle().toString();
+            assertEquals("twenty six", result.replace('-', ' '), "result");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testLicenseProperties() {
+        Configuration config = new ProfessionalConfiguration();
+        Properties props = config.getLicenseFeatures();
+        assertEquals("Saxonica", props.getProperty("Licensor"));
+        assertNotNull(props.getProperty("Licensee"));
+        assertNotNull(props.getProperty("Email"));
+        assertNotNull(props.getProperty("Issued"));
+        assertNotNull(props.getProperty("Signature"));
+    }
+
 
 }
 
