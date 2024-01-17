@@ -162,7 +162,8 @@ task run_cmd_samples(
                     "run_cmd_books_sample_tests",
                     "run_cmd_tour_sample_tests",
                     "run_cmd_shakespeare_sample_tests",
-                    "run_cmd_bible_sample_tests"]
+                    "run_cmd_bible_sample_tests",
+                    "run_cmd_samples_cs"]
 ) {}
 
 // TODO still need to check the output of running the command line samples
@@ -386,6 +387,61 @@ task run_cmd_bible_sample_tests(
 
   }
   run_cmd_bible_sample_tests.dependsOn t
+}
+
+
+// Run the command line samples with SaxonCS (as well as SaxonJ above)
+// TODO other command line samples too: config, books, tour
+task run_cmd_samples_cs(
+        description: "Run command line samples with SaxonCS",
+        dependsOn: ["run_shakespeare_Transform_cs",
+                    "run_bible_Transform_cs"]
+) {}
+
+task run_shakespeare_Transform_cs(
+        dependsOn: ["dotnetPublish", "ee_samples_common"],
+        description: "Run the cmd shakespeare sample transform with SaxonCS"
+) {
+  def resdir = "${buildDir}/samples/results/cmd/cs"
+  doFirst {
+    mkdir "${resdir}/playhtml/"
+  }
+  doLast {
+    if (dotnetex == null) {
+      throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+      workingDir = "${buildDir}/output/ee/resources/samples"
+      commandLine "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", "transform",
+              "-s:data/othello.xml", "-xsl:styles/play.xsl", "dir=file://${resdir}/playhtml"
+    }
+  }
+}
+
+task run_bible_Transform_cs(
+        dependsOn: ["dotnetPublish", "ee_samples_common"],
+        description: "Run the cmd bible sample transform with SaxonCS"
+) {
+  def resdir = "${buildDir}/samples/results/cmd/cs"
+  doFirst {
+    mkdir "${resdir}/biblehtml/"
+  }
+  doLast {
+    if (dotnetex == null) {
+      throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+      workingDir = "${buildDir}/output/ee/resources/samples"
+      commandLine "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", "transform",
+              "-s:${projectDir}/src/test/testdata/bible/nt/nt.xml", "-xsl:styles/bible.xsl", "dir=${resdir}/biblehtml"
+    }
+  }
+  // TODO test output to ensure transform runs correctly, not just without failure
+  /*doLast {
+    try new FileReader c.f. build.gradle#837
+  }*/
 }
 
 // ============================================================
