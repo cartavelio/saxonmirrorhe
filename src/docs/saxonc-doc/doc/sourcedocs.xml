@@ -96,8 +96,8 @@
       <li><p>The resulting absolute URI is dereferenced by a 3-step process:</p>
         <ol>
           <li><p>Firstly, the user can use the<code>SaxonProcessor.setcwd()</code> which acts as the base URI. Alternatively the user can set on the
-            <code>Xslt30Processor.setcwd()</code>, <code>XsltExecutable.setBaseOutputURI()</code> or the
-          <code>XQueryProcessor.setQueryBaseURI()</code>.</p></li>
+            <code>Xslt30Processor.setcwd()</code>, <code>XsltExecutable.setBaseOutputURI()</code> for XSLT or the
+          <code>XQueryProcessor.setQueryBaseURI()</code> for XQuery or for building documents <code>DocumentBuilder.setBaseUri()</code>.</p></li>
           <li><p>Secondly, the default resolver at this level is designed
           to invoke a third-party library called the <em>catalog resolver</em>, which looks
           up known URIs in an XML-based catalog. By default there is a single built-in catalog 
@@ -1200,8 +1200,8 @@ using Saxon from the command line, it is possible to specify a catalog to be use
 
     <p>For simple parsing of the XML document it is possible to do this directly on the <code>SaxonProcessor</code> without creating a <code>DocumentBuilder</code> in the C++ interface.</p>
     
-    <p >On C++ and similarly on Python and PHP, the different ways of supplying input to the <code>DocumentBuilder</code>
-      are represented as string XML and filename of the XML document. For example:</p>
+    <p >On C++ and similarly on Python and PHP, source XML documents are parsed from file name of lexical string
+      as input to the  <code>DocumentBuilder</code>. For example:</p>
       
     <div>
     <ul>
@@ -1622,12 +1622,8 @@ using Saxon from the command line, it is possible to specify a catalog to be use
       
       <p>In Saxon, all XDM nodes are represented internally using the interface 
         <a href="https://www.saxonica.com/documentation12/index.html#!xpath-api/nodeinfo" class="bodylink">NodeInfo</a>, which is not exposed
-        in the public SaxonC APIs. Saxon provides a number
-      of implementations of the <code>NodeInfo</code> interface, including implementations 
-        that wrap third-party tree models.</p>
-    
-    <aside>In principle it is possible for third parties to provide additional implementations
-    of the <code>NodeInfo</code> interface. However, this is a complex undertaking.</aside>
+        in the public SaxonC APIs.</p>
+
     
     <p>In this section:</p>
     
