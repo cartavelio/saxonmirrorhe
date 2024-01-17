@@ -137,7 +137,7 @@
             </td>
             <td>
                <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html"
+                  <a href="https://www.saxonica.com/saxon-c/doc12/html/classschemavalidator.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_schemavalidator">PHP</a><br/>
                   <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator"
@@ -154,31 +154,6 @@
          href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html">SaxonCProcessor.h</a>, 
       <a class="bodylink"
          href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCXPath_8h.html">SaxonCXPath.h</a>.</p>
-   
-   <p>For further information about these APIs see the following sections:</p>
-   
-   <nav>
-      <ul/>
-   </nav>
-   
-   <p>The SaxonC APIs provide a custom-designed interface for all XML processing. The APIs are useful when
-      you want to write your own applications in C/C++, Python or PHP to invoke XSLT transforms, XQuery,
-      XPath evaluation, or XML Schema validation with Saxon. For more information on how to
-      get started using these APIs, see the relevant sections in the main Saxon documentation:</p>
-   
-   <ul>
-      <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation" >XSLT
-         transformations from a C/C++, Python or PHP application</a></li>
-      <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query" >XQuery from a
-         C/C++, Python or PHP application</a></li>
-      <li><a target="_blank" href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath"
-         >Evaluating XPath expressions from a C/C++, Python or PHP application</a></li>
-      <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation"
-         >Validation from C/C++, Python or PHP</a></li>
-   </ul>
 
 
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
@@ -468,7 +443,7 @@
                   <span class="signature">setConfigurationProperty(string $name, string
                      $value)</span>
                   <div class="fcomment">Set a configuration property specific to the processor in
-                     use. Properties specified here are common across all the processors. See <a target="_blank"
+                     use. Properties specified here are common across all the processors. See <a
                         href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
                         >Configuration features</a> for more details.</div>
                </td>
@@ -883,22 +858,6 @@
                   <div class="fcomment">Compile a stylesheet received as an <a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a> and save as an exported file
                      (SEF).</div>
-               </td>
-            </tr>
-
-            <tr>
-               <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">importPackage(string
-                     $packageFileName)</span>
-                  <div class="fcomment">Calling this method makes the supplied package available for reference
-                     in the <code>xsl:use-package</code> declarations of subsequent compilations performed using this
-                     <a class="bodylink code" href="../saxon_c_php_xslt30processor">Saxon\Xslt30Processor</a>.
-                     The package to be imported should be supplied as an SEF; the file name of this SEF is
-                     specified by the $packageFileName argument. If relative, the file name is resolved
-                     against the cwd, which is set using <code>setcwd()</code>.</div>
                </td>
             </tr>
             
@@ -3189,15 +3148,15 @@
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
-               >SaxonCProcessor.h</a> - consists of functions to compile and execute XSLT 3.0 stylesheets and XQuery 3.1 queries.
+               >SaxonCProcessor.h</a>
          </li>
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCXPath_8h.html"
-               >SaxonCXPath.h</a> - consists of functions to compile and evaluate XPath 3.1 expressions.
+               >SaxonCXPath.h</a>
          </li>
       </ul>
-
+      
    </section>
 
 
