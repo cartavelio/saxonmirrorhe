@@ -487,7 +487,7 @@ public class XPathProcessor extends SaxonCAPI {
         String cwd = null;
 
         if(c_cwd != WordFactory.nullPointer()) {
-            SaxonCAPI.toJavaString(c_cwd, WordFactory.nullPointer());
+            cwd = SaxonCAPI.toJavaString(c_cwd, WordFactory.nullPointer());
         }
         String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
         setupXPathCompiler(compiler, optionsMap);
@@ -529,11 +529,11 @@ public class XPathProcessor extends SaxonCAPI {
             DocumentBuilder builder = processor.newDocumentBuilder();
             Object valuei = null;
 
-            if (cwd != null && cwd.length() > 0) {
+            /*if (cwd != null && cwd.length() > 0) {
                 if (!cwd.endsWith("/")) {
                     cwd = cwd.concat("/");
                 }
-            }
+            }*/
 
             if (map.containsKey("s")) {
                 valuei = map.get("s");

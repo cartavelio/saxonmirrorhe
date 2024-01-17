@@ -45,15 +45,15 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
   }
 
   try {
-    queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
+    queryProc->executeQueryToFile(nullptr, "cppTests/catOutput.xml", nullptr);
     if (CppTestUtils::exists("catOutput.xml")) {
-      cout << "The file $filename exists" << endl;
+      cout << "The file catOutput.xml exists" << endl;
       sresult->success++;
       remove("catOutput.xml");
     } else {
       sresult->failure++;
       sresult->failureList.push_back("testXQuery1");
-      cout << "The file $filename does not exist" << endl;
+      cout << "The file catOutput.xml does not exist" << endl;
     }
   } catch (SaxonApiException &e) {
     sresult->failure++;
@@ -364,7 +364,7 @@ void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
   XQueryProcessor *queryProc = processor->newXQueryProcessor();
   cout << endl << "testXQueryLineNumber:" << endl;
   cout << "cwd = " << processor->getcwd() << endl;
-  string baseURI = string("file://") + processor->getcwd() + string("/");
+  string baseURI = string("file://") + processor->getcwd();
   cerr << " BaseURI=" << baseURI.c_str() << endl;
   queryProc->setQueryBaseURI(baseURI.c_str());
 
