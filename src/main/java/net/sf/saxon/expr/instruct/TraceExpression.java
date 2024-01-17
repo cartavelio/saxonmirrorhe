@@ -320,15 +320,16 @@ public class TraceExpression extends Instruction {
         @Override
         public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
             TraceExpression expr = (TraceExpression) getExpression();
+            Expression body = expr.getBody();
             StringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForString(zeroLengthWhenAbsent);
             return context -> {
                 Controller controller = context.getController();
                 assert controller != null;
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
-                    listener.enter(expr, expr.properties, context);
+                    listener.enter(body, expr.properties, context);
                     String result = baseEval.eval(context);
-                    listener.leave(expr);
+                    listener.leave(body);
                     return result;
                 } else {
                     return baseEval.eval(context);
@@ -339,16 +340,16 @@ public class TraceExpression extends Instruction {
         @Override
         public UpdateEvaluator elaborateForUpdate() {
             TraceExpression expr = (TraceExpression) getExpression();
+            Expression body = expr.getBody();
             UpdateEvaluator baseEval = expr.getBody().makeElaborator().elaborateForUpdate();
             return (context, pul) -> {
                 Controller controller = context.getController();
                 assert controller != null;
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
-
-                    listener.enter(expr, expr.properties, context);
+                    listener.enter(body, expr.properties, context);
                     baseEval.registerUpdates(context, pul);
-                    listener.leave(expr);
+                    listener.leave(body);
                 } else {
                     baseEval.registerUpdates(context, pul);
                 }
@@ -383,6 +384,7 @@ public class TraceExpression extends Instruction {
         @Override
         public PullEvaluator elaborateForPull() {
             TraceExpression expr = (TraceExpression) getExpression();
+            Expression body = expr.getBody();
             PullEvaluator baseEval = expr.getBody().makeElaborator().elaborateForPull();
             return context -> {
                 Controller controller = context.getController();
@@ -390,9 +392,9 @@ public class TraceExpression extends Instruction {
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
 
-                    listener.enter(expr, expr.properties, context);
+                    listener.enter(body, expr.properties, context);
                     SequenceIterator result = baseEval.iterate(context);
-                    listener.leave(expr);
+                    listener.leave(body);
                     return result;
                 } else {
                     return baseEval.iterate(context);
@@ -424,6 +426,7 @@ public class TraceExpression extends Instruction {
         @Override
         public ItemEvaluator elaborateForItem() {
             TraceExpression expr = (TraceExpression) getExpression();
+            Expression body = expr.getBody();
             ItemEvaluator baseEval = expr.getBody().makeElaborator().elaborateForItem();
             return context -> {
                 Controller controller = context.getController();
@@ -431,9 +434,9 @@ public class TraceExpression extends Instruction {
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
 
-                    listener.enter(expr, expr.properties, context);
+                    listener.enter(body, expr.properties, context);
                     Item result = baseEval.eval(context);
-                    listener.leave(expr);
+                    listener.leave(body);
                     return result;
                 } else {
                     return baseEval.eval(context);
@@ -444,16 +447,16 @@ public class TraceExpression extends Instruction {
         @Override
         public BooleanEvaluator elaborateForBoolean() {
             TraceExpression expr = (TraceExpression) getExpression();
+            Expression body = expr.getBody();
             BooleanEvaluator baseEval = expr.getBody().makeElaborator().elaborateForBoolean();
             return context -> {
                 Controller controller = context.getController();
                 assert controller != null;
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
-
-                    listener.enter(expr, expr.properties, context);
+                    listener.enter(body, expr.properties, context);
                     boolean result = baseEval.eval(context);
-                    listener.leave(expr);
+                    listener.leave(body);
                     return result;
                 } else {
                     return baseEval.eval(context);
@@ -464,6 +467,7 @@ public class TraceExpression extends Instruction {
         @Override
         public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
             TraceExpression expr = (TraceExpression) getExpression();
+            Expression body = expr.getBody();
             UnicodeStringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForUnicodeString(zeroLengthWhenAbsent);
             return context -> {
                 Controller controller = context.getController();
@@ -471,9 +475,9 @@ public class TraceExpression extends Instruction {
                 if (controller.isTracing()) {
                     TraceListener listener = controller.getTraceListener();
 
-                    listener.enter(expr, expr.properties, context);
+                    listener.enter(body, expr.properties, context);
                     UnicodeString result = baseEval.eval(context);
-                    listener.leave(expr);
+                    listener.leave(body);
                     return result;
                 } else {
                     return baseEval.eval(context);

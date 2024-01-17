@@ -8,8 +8,14 @@
 package net.sf.saxon.trace;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.LetExpression;
-import net.sf.saxon.expr.instruct.FixedAttribute;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.TraceExpression;
+import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.tree.AttributeLocation;
 
 /**
  * A code injector that wraps every expression (other than a literal) in a TraceExpression, which causes
@@ -19,7 +25,44 @@ public class XSLTTraceCodeInjector extends TraceCodeInjector {
 
     @Override
     protected boolean isApplicable(Expression exp) {
-        return exp.isInstruction() || exp instanceof LetExpression || exp instanceof FixedAttribute; // TODO: for now...
+        if (traceLevel == TraceLevel.HIGH) {
+            return !(exp instanceof TraceExpression);
+        }
+        return isTraceableExpression(exp);
     }
+
+    /**
+     * Decide whether a particular expression should be traced when tracing XSLT stylesheet execution.
+     */
+    public static boolean isTraceableExpression(Expression exp) {
+        // Never trace an empty sequence (it's often an empty sequence constructor, for example <lre/>
+        if (Literal.isEmptySequence(exp)) {
+            return false;
+        }
+        // Don't trace an expression if its parent is an XPath expression (as distinct from an XSLT instruction)
+        Expression parent = exp.getParentExpression();
+        if (parent instanceof TraceExpression) {
+            parent = parent.getParentExpression();
+        }
+        if (parent != null && parent.getLocation() instanceof XPathParser.NestedLocation) {
+            return false;
+        }
+        // Do trace an expression if it's the direct content of an `xsl:sequence` instruction (which doesn't
+        // actually appear on the expression tree in its own right)
+        Location loc = exp.getLocation();
+        if (loc instanceof XPathParser.NestedLocation) {
+            loc = ((XPathParser.NestedLocation) loc).getContainingLocation();
+        }
+        if (loc instanceof AttributeLocation) {
+            StructuredQName elementName = ((AttributeLocation) loc).getElementName();
+            return elementName.hasURI(NamespaceUri.XSLT) && elementName.getLocalPart().equals("sequence");
+        }
+        // Otherwise trace the expression if it has a known location which differs from the parent expression
+        // except in the case where the parent expression is a sequence constructor (`Block`)
+        return loc != null
+                && loc.getLineNumber() != -1
+                && !(parent != null && loc == parent.getLocation() && !(parent instanceof Block));
+    }
+   
 }
 

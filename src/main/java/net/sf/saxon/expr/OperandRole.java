@@ -59,6 +59,10 @@ public class OperandRole {
             new OperandRole(0, OperandUsage.ABSORPTION,  SequenceType.SINGLE_ATOMIC);
     public final static OperandRole ATOMIC_SEQUENCE =
             new OperandRole(0, OperandUsage.ABSORPTION,  SequenceType.ATOMIC_SEQUENCE);
+    public final static OperandRole CONSTRAINED_SINGLE_ATOMIC =
+            new OperandRole(OperandRole.CONSTRAINED_CLASS, OperandUsage.ABSORPTION, SequenceType.SINGLE_ATOMIC);
+    public final static OperandRole CONSTRAINED_ATOMIC_SEQUENCE =
+            new OperandRole(OperandRole.CONSTRAINED_CLASS, OperandUsage.ABSORPTION, SequenceType.ATOMIC_SEQUENCE);
     public final static OperandRole NEW_FOCUS_ATOMIC =
             new OperandRole(OperandRole.USES_NEW_FOCUS | OperandRole.HIGHER_ORDER, OperandUsage.ABSORPTION, SequenceType.ATOMIC_SEQUENCE);
     public final static OperandRole PATTERN =

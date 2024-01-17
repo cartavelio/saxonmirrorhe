@@ -154,6 +154,15 @@ public class Choose extends Instruction implements ConditionalInstruction {
         return exp instanceof Choose && ((Choose) exp).size() == 1;
     }
 
+    public boolean isActionOperand(Expression child) {
+        for (Operand actionOp : actionOps) {
+            if (actionOp.getChildExpression() == child) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Get the i'th condition counting from zero
      * @param i the index of the required condition

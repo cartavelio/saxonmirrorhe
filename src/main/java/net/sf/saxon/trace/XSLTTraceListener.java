@@ -9,6 +9,7 @@ package net.sf.saxon.trace;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LetExpression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.functions.Trace;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -18,6 +19,19 @@ import net.sf.saxon.lib.NamespaceConstant;
  */
 
 public class XSLTTraceListener extends AbstractTraceListener {
+
+    protected boolean isApplicable(Traceable info) {
+        if (!super.isApplicable(info)) {
+            return false;
+        };
+        if (detail == TraceLevel.HIGH) {
+            return true;
+        }
+        if (info instanceof Expression) {
+            return XSLTTraceCodeInjector.isTraceableExpression((Expression)info);
+        }
+        return false;
+    }
 
     /**
      * Generate attributes to be included in the opening trace element
@@ -51,6 +65,8 @@ public class XSLTTraceListener extends AbstractTraceListener {
                 return "xsl:variable";
             } else if (expr.isCallOn(Trace.class)) {
                 return "fn:trace";
+            } else if (expr instanceof SystemFunctionCall) {
+                return ((SystemFunctionCall)expr).getTargetFunction().getFunctionName().getDisplayName();
             } else  {
                 return expr.getExpressionName();
             }

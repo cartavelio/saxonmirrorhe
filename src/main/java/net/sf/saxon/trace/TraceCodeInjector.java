@@ -24,6 +24,12 @@ import net.sf.saxon.trans.XPathException;
  */
 public class TraceCodeInjector implements CodeInjector {
 
+    protected int traceLevel = TraceLevel.NORMAL;
+
+    public void setTraceLevel(int traceLevel) {
+        this.traceLevel = traceLevel;
+    }
+
     @Override
     public Expression inject(Expression exp) {
         if (exp instanceof FLWORExpression) {
