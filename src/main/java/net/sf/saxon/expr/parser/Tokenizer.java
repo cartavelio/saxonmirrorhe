@@ -394,7 +394,8 @@ public final class Tokenizer {
 
     private void handleLCURLY() throws XPathException
     {
-        if (state != SEQUENCE_TYPE_STATE) {
+        if (!(state == SEQUENCE_TYPE_STATE))
+        {
             currentToken = Token.KEYWORD_CURLY;
             lookAhead();        // swallow the "{"
         }
@@ -672,11 +673,12 @@ public final class Tokenizer {
                         nextToken = Token.FAT_ARROW;
                         return;
                     }
-                    if (inputOffset < inputLength - 1
+                    if (languageLevel >= 40
+                            && inputOffset < inputLength - 1
                             && input.charAt(inputOffset) == '!'
                             && isGreaterThanChar(input.charAt(inputOffset+1))) {
                         inputOffset+=2;
-                        nextToken = Token.MAPPING_ARROW;  // Accepted in 4.0 only
+                        nextToken = Token.MAPPING_ARROW;
                         return;
                     }
                     nextToken = Token.EQUALS;
@@ -1228,13 +1230,13 @@ public final class Tokenizer {
                 return Token.IF;
             case "namespace-node":
             case "function":
-                return languageLevel == 20 ? Token.FUNCTION : Token.KEYWORD_LBRA;
+                return languageLevel == 20 ? Token.FUNCTION : Token.NODEKIND;
             case "fn":
-                return languageLevel >= 40 ? Token.KEYWORD_LBRA : Token.FUNCTION;
+                return languageLevel >= 40 ? Token.NODEKIND : Token.FUNCTION;
             case "array":
             case "map":
                  // first reserved in 3.1, unreserved again in 4.0
-                return languageLevel == 31 ? Token.KEYWORD_LBRA : Token.FUNCTION;
+                return languageLevel == 31 ? Token.NODEKIND : Token.FUNCTION;
             case "node":
             case "schema-attribute":
             case "schema-element":
@@ -1246,14 +1248,14 @@ public final class Tokenizer {
             case "item":
             case "text":
             case "attribute":
-                return Token.KEYWORD_LBRA;
+                return Token.NODEKIND;
             case "atomic":
             case "tuple": // Retained as synonym of "record" for the time being
             case "record":
             case "type":
             case "union":
             case "enum":
-                return allowSaxonExtensions ? Token.KEYWORD_LBRA : Token.FUNCTION; // Saxon extension types
+                return allowSaxonExtensions ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
             case "switch":
                 // Reserved in XPath 3.0, even though only used in XQuery
                 return languageLevel == 20 ? Token.FUNCTION : Token.SWITCH;
