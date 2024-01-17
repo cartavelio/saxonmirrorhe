@@ -902,7 +902,7 @@ task all_saxonc_releases() {
     lastLinePatch = ('[tool.cibuildwheel]\n'
                      + 'build = "*"\n'
                      + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n'
-                     + 'archs = ["${systemOsArch}"]\n'
+                     + "archs = [\"${systemOsArch}\"]\n"
                      + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
   } else if (systemOsName == 'windows') {
     lastLinePatch = ('[tool.cibuildwheel]\n'
