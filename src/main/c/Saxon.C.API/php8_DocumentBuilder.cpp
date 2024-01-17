@@ -215,7 +215,7 @@ PHP_METHOD(DocumentBuilder, getBaseUri) {
   if (documentBuilder != nullptr) {
     const char *baseUri = documentBuilder->getBaseUri();
     if (baseUri != nullptr) {
-      _RETURN_STRING(baseUri);
+      RETURN_STRING(baseUri);
     }
   }
   RETURN_NULL();
@@ -398,7 +398,7 @@ PHP_METHOD(DocumentBuilder, getErrorCode) {
     const char *errCode = documentBuilder->getErrorCode();
     if (errCode != NULL) {
       // char *str = estrdup(errCode);
-      _RETURN_STRING(errCode);
+      RETURN_STRING(errCode);
     }
   }
   RETURN_NULL();
@@ -420,7 +420,7 @@ PHP_METHOD(DocumentBuilder, getErrorMessage) {
     const char *errStr = documentBuilder->getErrorMessage();
     if (errStr != NULL) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(errStr);
+      RETURN_STRING(errStr);
     }
   }
   RETURN_NULL();

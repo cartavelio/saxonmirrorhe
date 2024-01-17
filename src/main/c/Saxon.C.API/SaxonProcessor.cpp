@@ -105,7 +105,7 @@ const char *SaxonProcessor::getErrorMessage() {
   if (exception == nullptr) {
     return nullptr;
   }
-  return exception->getMessage(); //- TODO remove comment
+  return exception->getMessage();
 }
 
 void SaxonProcessor::exceptionClear() {

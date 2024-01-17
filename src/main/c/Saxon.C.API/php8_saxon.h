@@ -77,13 +77,14 @@ extern zend_module_entry saxon_module_entry;
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+/*
 #if PHP_MAJOR_VERSION < 7
 #define _ZVAL_STRING(str, len) ZVAL_STRING(str, len, 0)
 #define _RETURN_STRING(str) RETURN_STRING(str, 0)
 #else
 #define _ZVAL_STRING(str, len) ZVAL_STRING(str, len)
 #define _RETURN_STRING(str) RETURN_STRING(str)
-#endif
+#endif    */
 
 struct zvalArr {
   zval *_val;

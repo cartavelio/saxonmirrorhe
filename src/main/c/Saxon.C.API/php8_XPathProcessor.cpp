@@ -556,7 +556,7 @@ PHP_METHOD(XPathProcessor, getErrorCode) {
     const char *errCode = xpathProcessor->getErrorCode();
     if (errCode != nullptr) {
       // char *str = estrdup(errCode);
-      _RETURN_STRING(errCode);
+      RETURN_STRING(errCode);
     }
   }
   RETURN_NULL();
@@ -577,7 +577,7 @@ PHP_METHOD(XPathProcessor, getErrorMessage) {
     const char *errStr = xpathProcessor->getErrorMessage();
     if (errStr != nullptr) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(errStr);
+      RETURN_STRING(errStr);
     }
   }
   RETURN_NULL();

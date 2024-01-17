@@ -423,10 +423,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
       if (Z_TYPE_P(val) != NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
-        /*std::cerr<<"test type:"<<(Z_OBJCE_P(val)->name)<<std::endl;
-          php_printf("num_key %d =>", num_key);
-          php_printf("key %d =>", key);
-          */
+
         if (strcmp(objName, "Saxon\\XdmNode") == 0) {
           zend_object *ooth = Z_OBJ_P(val);
           xdmNode_object *nobj =
@@ -465,8 +462,9 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString) {
       const char *result = xsltExecutable->callFunctionReturningString(
           functionName, arguments, argument_length);
       if (result != nullptr) {
-        // char *str = estrdup(result);
-        _RETURN_STRING(result);
+      RETVAL_STRING(result);
+      saxonProcessor->deleteString(result);
+      return;
       }
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
@@ -638,7 +636,9 @@ PHP_METHOD(XsltExecutable, callTemplateReturningString) {
       const char *result = xsltExecutable->callTemplateReturningString(
           (len2 == 0 ? NULL : templateName));
       if (result != nullptr) {
-        _RETURN_STRING(result);
+      RETVAL_STRING(result);
+      saxonProcessor->deleteString(result);
+      return;
       }
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
@@ -739,7 +739,9 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningString) {
       const char *result = xsltExecutable->applyTemplatesReturningString();
 
       if (result != nullptr) {
-        _RETURN_STRING(result);
+      RETVAL_STRING(result);
+      saxonProcessor->deleteString(result);
+      return;
       }
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
@@ -1194,7 +1196,9 @@ PHP_METHOD(XsltExecutable, transformFileToString) {
     try {
       const char *result = xsltExecutable->transformFileToString(infilename);
       if (result != nullptr) {
-        _RETURN_STRING(result);
+      RETVAL_STRING(result);
+      saxonProcessor->deleteString(result);
+      return;
       }
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
@@ -1227,8 +1231,9 @@ PHP_METHOD(XsltExecutable, transformToString) {
       if (ZEND_NUM_ARGS() == 0 || !oth) {
         result = xsltExecutable->transformToString();
         if (result != nullptr) {
-          _RETURN_STRING(result);
-          return;
+            RETVAL_STRING(result);
+            saxonProcessor->deleteString(result);
+            return;
         }
 
       } else {
@@ -1256,7 +1261,9 @@ PHP_METHOD(XsltExecutable, transformToString) {
           }
         }
         if (result != nullptr) {
-          _RETURN_STRING(result);
+            RETVAL_STRING(result);
+            saxonProcessor->deleteString(result);
+            return;
         }
       }
     } catch (SaxonApiException &e) {
@@ -1724,7 +1731,7 @@ PHP_METHOD(XsltExecutable, getErrorMessage) {
         const char *errStr = exception->getMessage();
         if (errStr != NULL) {
           // char *str = estrdup(errStr);
-          _RETURN_STRING(errStr);
+          RETURN_STRING(errStr);
         }
       }
     }

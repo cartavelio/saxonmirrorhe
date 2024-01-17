@@ -408,7 +408,7 @@ PHP_METHOD(SaxonProcessor, EQNameToClarkName) {
     const char *qname = saxonProcessor->EQNameToClarkName(eqname);
     if (qname != NULL) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(qname);
+      RETURN_STRING(qname);
     }
   }
 
@@ -436,7 +436,9 @@ PHP_METHOD(SaxonProcessor, clarkNameToEQName) {
     const char *qname = saxonProcessor->clarkNameToEQName(clname);
     if (qname != NULL) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(qname);
+      RETVAL_STRING(qname);
+      saxonProcessor->deleteString(qname);
+      return;
     }
   }
 
@@ -1177,9 +1179,7 @@ PHP_METHOD(SaxonProcessor, version) {
   saxonProcessor = obj->saxonProcessor;
   if (saxonProcessor != nullptr) {
     const char *verStr = saxonProcessor->version();
-    // char *str = estrdup(saxonProcessor->version());
-    _RETURN_STRING(verStr);
-    // efree(verStr);
+    RETURN_STRING(verStr);
   }
   RETURN_NULL();
 }
@@ -1218,7 +1218,7 @@ PHP_METHOD(SaxonProcessor, getErrorMessage) {
     const char *errStr = saxonProcessor->getErrorMessage();
     if (errStr != NULL) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(errStr);
+      RETURN_STRING(errStr);
     }
   }
   RETURN_NULL();
@@ -1624,12 +1624,14 @@ PHP_METHOD(XdmValue, __toString) {
   if (xdmValue != nullptr) {
     const char *value = xdmValue->toString();
     if (value != nullptr) {
-      _RETURN_STRING(value);
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     } else {
-      _RETURN_STRING("");
+      RETURN_NULL();
     }
   } else {
-    _RETURN_STRING("");
+    RETURN_NULL();
   }
 }
 
@@ -1842,9 +1844,11 @@ PHP_METHOD(XdmItem, getStringValue) {
   xdmItem = obj->xdmItem;
 
   if (xdmItem != nullptr) {
-    const char *valueStr = xdmItem->getStringValue();
-    if (valueStr != nullptr) {
-      _RETURN_STRING(valueStr);
+    const char *value = xdmItem->getStringValue();
+    if (value != nullptr) {
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     }
   }
   RETURN_NULL();
@@ -1861,12 +1865,12 @@ PHP_METHOD(XdmItem, __toString) {
   if (xdmItem != nullptr) {
     const char *value = xdmItem->toString();
     if (value != nullptr) {
-      _RETURN_STRING(value);
+      RETURN_STRING(value);
     } else {
-      _RETURN_STRING("");
+      RETURN_NULL();
     }
   }
-  _RETURN_STRING("");
+  RETURN_NULL();
 }
 
 PHP_METHOD(XdmItem, isAtomic) {
@@ -2017,9 +2021,10 @@ PHP_METHOD(XdmNode, getStringValue) {
   xdmNode = obj->xdmNode;
 
   if (xdmNode != nullptr) {
-    const char *valueStr = xdmNode->getStringValue();
-    if (valueStr != nullptr) {
-      _RETURN_STRING(valueStr);
+    const char *value = xdmNode->getStringValue();
+    if (value != nullptr) {
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
       return;
     }
   }
@@ -2037,12 +2042,14 @@ PHP_METHOD(XdmNode, __toString) {
   if (xdmNode != nullptr) {
     const char *value = xdmNode->toString();
     if (value != nullptr) {
-      _RETURN_STRING(value);
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     } else {
-      _RETURN_STRING("");
+      RETURN_NULL();
     }
   } else {
-    _RETURN_STRING("");
+    RETURN_NULL();
   }
 }
 
@@ -2089,7 +2096,7 @@ PHP_METHOD(XdmNode, getNodeName) {
     const char *valueStr = xdmNode->getNodeName();
     if (valueStr != nullptr) {
       // char *str = estrdup(valueStr);
-      _RETURN_STRING(valueStr);
+      RETURN_STRING(valueStr);
     }
   }
   RETURN_NULL();
@@ -2106,7 +2113,7 @@ PHP_METHOD(XdmNode, getLocalName) {
     const char *valueStr = xdmNode->getLocalName();
     if (valueStr != nullptr) {
       // char *str = estrdup(valueStr);
-      _RETURN_STRING(valueStr);
+      RETURN_STRING(valueStr);
       return;
     }
   }
@@ -2123,8 +2130,7 @@ PHP_METHOD(XdmNode, getBaseURI) {
   if (xdmNode != nullptr) {
     const char *valueStr = xdmNode->getBaseUri();
     if (valueStr != nullptr) {
-      // char *str = estrdup(valueStr);
-      _RETURN_STRING(valueStr);
+      RETURN_STRING(valueStr);
     }
   }
   RETURN_NULL();
@@ -2357,10 +2363,10 @@ PHP_METHOD(XdmNode, getAttributeValue) {
   xdmNode = obj->xdmNode;
   if (xdmNode != nullptr && name != nullptr) {
 
-    const char *valueStr = xdmNode->getAttributeValue(name);
-    if (valueStr != nullptr) {
-      // char *str = estrdup(valueStr);
-      _RETURN_STRING(valueStr);
+    const char *value = xdmNode->getAttributeValue(name);
+    if (value != nullptr) {
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
       return;
     }
   }
@@ -2496,10 +2502,11 @@ PHP_METHOD(XdmAtomicValue, getStringValue) {
   saxonProc = obj2->saxonProcessor;
 
   if (xdmAtomicValue != nullptr) {
-    const char *valueStr = xdmAtomicValue->getStringValue();
-    if (valueStr != nullptr) {
-      // char *str = estrdup(valueStr);
-      _RETURN_STRING(valueStr);
+    const char *value = xdmAtomicValue->getStringValue();
+    if (value != nullptr) {
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     }
   }
   RETURN_NULL();
@@ -2519,7 +2526,7 @@ PHP_METHOD(XdmAtomicValue, getPrimitiveTypeName) {
     const char *valueStr = xdmAtomicValue->getPrimitiveTypeName();
     if (valueStr != nullptr) {
       // char *str = estrdup(valueStr);
-      _RETURN_STRING(valueStr);
+      RETURN_STRING(valueStr);
     }
   }
   RETURN_NULL();
@@ -2537,12 +2544,14 @@ PHP_METHOD(XdmAtomicValue, __toString) {
   if (xdmAtomicValue != nullptr) {
     const char *value = xdmAtomicValue->getStringValue();
     if (value != nullptr) {
-      _RETURN_STRING(value);
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     } else {
-      _RETURN_STRING("");
+      RETURN_NULL();
     }
   } else {
-    _RETURN_STRING("");
+    RETURN_NULL();
   }
 }
 
@@ -2616,12 +2625,14 @@ PHP_METHOD(XdmFunctionItem, __toString) {
   if (xdmFunctionItem != nullptr) {
     const char *value = xdmFunctionItem->toString();
     if (value != nullptr) {
-      _RETURN_STRING(value);
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     } else {
-      _RETURN_STRING("");
+      RETURN_NULL();
     }
   } else {
-    _RETURN_STRING("");
+    RETURN_NULL();
   }
 }
 
@@ -2635,12 +2646,12 @@ PHP_METHOD(XdmFunctionItem, getName) {
   if (xdmFunctionItem != nullptr) {
     const char *value = xdmFunctionItem->getName();
     if (value != nullptr) {
-      _RETURN_STRING(value);
+      RETURN_STRING(value);
     } else {
-      _RETURN_STRING("");
+      RETURN_NULL();
     }
   } else {
-    _RETURN_STRING("");
+    RETURN_NULL();
   }
 }
 
@@ -2891,9 +2902,9 @@ PHP_METHOD(XdmMap, __toString) {
   if (xdmMap != nullptr) {
     const char *value = xdmMap->toString();
     if (value != nullptr) {
-        //str = strpprintf(0,"%s",value);
-        //operator delete (value);
-      _RETURN_STRING(value);
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     } else {
       RETURN_EMPTY_STRING();
     }
@@ -3211,12 +3222,14 @@ PHP_METHOD(XdmArray, __toString) {
   if (xdmArray != nullptr) {
     const char *value = xdmArray->toString();
     if (value != nullptr) {
-      _RETURN_STRING(value);
+      RETVAL_STRING(value);
+      saxonProcessor->deleteString(value);
+      return;
     } else {
-      RETURN_EMPTY_STRING();
+      RETURN_NULL();
     }
   } else {
-    RETURN_EMPTY_STRING();
+    RETURN_NULL();
   }
 }
 

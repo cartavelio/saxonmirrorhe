@@ -175,11 +175,11 @@ function exampleSimple6($proc, $xpathEngine)
                 if ($node->getChildCount() > 0) {
                     $childNode = $node->getChildNode(0);
                     if ($childNode instanceof Saxon\XdmNode) {
-                        echo "child node XdmNode";
+                        echo "child node XdmNode found ";
                     }
 
                     if ($childNode == NULL) {
-                        echo "child node is null <br/>";
+                        echo "child0 node is null <br/>";
                     }
                     $strValue = $childNode->getStringValue();
                     if ($childNode->isAtomic()) {
@@ -192,7 +192,7 @@ function exampleSimple6($proc, $xpathEngine)
                     if ($nodeNamei != NULL) {
                         echo 'Child node name=' . $nodeNamei;
                     } else {
-                        echo 'Child node is null';
+                        echo 'Child node name is null (possibly a text node)';
                     }
                 }
 
