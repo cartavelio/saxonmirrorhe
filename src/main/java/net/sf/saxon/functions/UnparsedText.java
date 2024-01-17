@@ -136,7 +136,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                         content = consumer.toUnicodeString();
                     } catch (XPathException e) {
                         error = e;
-                        content = StringView.tidy(errorValue + e.getMessage());
+                        content = StringView.tidy((char)errorValue + e.getMessage());
                     }
                     if (cache == null) {
                         cache = new HashMap<>();
