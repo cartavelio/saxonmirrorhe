@@ -118,15 +118,6 @@ public abstract class Converter {
     }
 
     /**
-     * Ask if this converter implements promotion rules
-     * @return true if this Converter handles type promotion in the coercion rules
-     */
-
-    public boolean isPromoter() {
-        return false;
-    }
-
-    /**
      * Provide a namespace resolver, needed for conversion to namespace-sensitive types such as QName and NOTATION.
      * The resolver is ignored if the target type is not namespace-sensitive
      *
@@ -733,10 +724,6 @@ public abstract class Converter {
 
     public static class PromoterToDouble extends Converter {
 
-        public PromoterToDouble(ConversionRules rules) {
-            super(rules);
-        }
-
         /*@Nullable*/ private StringConverter stringToDouble = null;
 
         /*@NotNull*/
@@ -758,10 +745,6 @@ public abstract class Converter {
                 return err;
             }
         }
-
-        public boolean isPromoter() {
-            return true;
-        }
     }
 
     /**
@@ -771,10 +754,6 @@ public abstract class Converter {
     public static class PromoterToFloat extends Converter {
 
         /*@Nullable*/ private StringConverter stringToFloat = null;
-
-        public PromoterToFloat(ConversionRules rules) {
-            super(rules);
-        }
 
         /*@NotNull*/
         @Override
@@ -800,11 +779,6 @@ public abstract class Converter {
                 return err;
             }
         }
-
-        @Override
-        public boolean isPromoter() {
-            return true;
-        }
     }
 
     /**
@@ -828,99 +802,6 @@ public abstract class Converter {
                     err.setErrorCode("XPTY0004");
                     return err;
             }
-        }
-
-        @Override
-        public boolean isPromoter() {
-            return true;
-        }
-    }
-
-    /**
-     * Converter that implements the promotion rules from xs:string to xs:anyURI
-     */
-
-    public static class PromoterToAnyURI extends Converter {
-
-        public static PromoterToAnyURI INSTANCE = new PromoterToAnyURI();
-
-        @Override
-        public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
-            switch (input.getPrimitiveType().getFingerprint()) {
-                case StandardNames.XS_ANY_URI:
-                    return input;
-                case StandardNames.XS_STRING:
-                case StandardNames.XS_UNTYPED_ATOMIC:
-                    return new AnyURIValue(input.getUnicodeStringValue());
-                default:
-                    ValidationFailure err = new ValidationFailure(
-                            "Required type is xs:anyURI; supplied value is " + Err.depict(input));
-                    err.setErrorCode("XPTY0004");
-                    return err;
-            }
-        }
-
-        @Override
-        public boolean isPromoter() {
-            return true;
-        }
-    }
-
-    /**
-     * Converter that implements the promotion rules from xs:string to xs:anyURI
-     */
-
-    public static class PromoterToHexBinary extends Converter {
-
-        public static PromoterToHexBinary INSTANCE = new PromoterToHexBinary();
-
-        @Override
-        public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
-            switch (input.getPrimitiveType().getFingerprint()) {
-                case StandardNames.XS_HEX_BINARY:
-                    return input;
-                case StandardNames.XS_BASE64_BINARY:
-                    return new HexBinaryValue(((Base64BinaryValue)input).getBinaryValue());
-                case StandardNames.XS_UNTYPED_ATOMIC:
-                    return StringConverter.StringToHexBinary.INSTANCE.convertString(input.getUnicodeStringValue());
-                default:
-                    ValidationFailure err = new ValidationFailure(
-                            "Required type is xs:hexBinary; supplied value is " + Err.depict(input));
-                    err.setErrorCode("XPTY0004");
-                    return err;
-            }
-        }
-
-        @Override
-        public boolean isPromoter() {
-            return true;
-        }
-    }
-
-    public static class PromoterToBase64Binary extends Converter {
-
-        public static PromoterToBase64Binary INSTANCE = new PromoterToBase64Binary();
-
-        @Override
-        public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
-            switch (input.getPrimitiveType().getFingerprint()) {
-                case StandardNames.XS_BASE64_BINARY:
-                    return input;
-                case StandardNames.XS_HEX_BINARY:
-                    return new Base64BinaryValue(((HexBinaryValue) input).getBinaryValue());
-                case StandardNames.XS_UNTYPED_ATOMIC:
-                    return StringConverter.StringToBase64Binary.INSTANCE.convertString(input.getUnicodeStringValue());
-                default:
-                    ValidationFailure err = new ValidationFailure(
-                            "Required type is xs:base64Binary; supplied value is " + Err.depict(input));
-                    err.setErrorCode("XPTY0004");
-                    return err;
-            }
-        }
-
-        @Override
-        public boolean isPromoter() {
-            return true;
         }
     }
 
