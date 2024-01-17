@@ -420,7 +420,7 @@ public class ConfigurationReader implements Receiver {
             }
             try {
                 targetConfig.setConfigurationProperty(FeatureIndex.getData(featureCode).uri, value);
-                props.setProperty(attributeName, null);
+                props.remove(attributeName);
             } catch (IllegalArgumentException e) {
                 String message = e.getMessage();
                 if (message.startsWith(attributeName)) {
