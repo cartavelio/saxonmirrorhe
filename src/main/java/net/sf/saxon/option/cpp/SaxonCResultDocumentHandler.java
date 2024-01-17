@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This is the SaxonC SaxonCResultDocumentHandler class which implements Function<URI, Destination> interface
+ * This is the SaxonC SaxonCResultDocumentHandler class which implements Function&lt;URI, Destination&gt; interface
  * Here we capture the secondary result-documents
  */
 public class SaxonCResultDocumentHandler implements java.util.function.Function<URI, Destination> {
