@@ -2226,7 +2226,7 @@ PHP_METHOD(XdmNode, getChildNode) {
 
 
 PHP_METHOD(XdmNode, getChildren) {
- zval * retval;
+ zval  retval;
   /*long indexi;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
     RETURN_NULL();
@@ -2252,16 +2252,16 @@ PHP_METHOD(XdmNode, getChildren) {
         for(int i=0; i< count; i++) {
             XdmNode *cNode = childNodes[i];
             cNode->incrementRefCount();
-           if (object_init_ex(retval, xdmNode_ce) != SUCCESS) {
+           if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
                    RETURN_NULL();
             }
-            zend_object *zobj = Z_OBJ_P(retval);
+            zend_object *zobj = Z_OBJ_P(&retval);
             xdmNode_object *vobj =
                 (xdmNode_object *)((char *)zobj -
                                    XtOffsetOf(xdmNode_object, std));
             assert(vobj != nullptr);
             vobj->xdmNode = cNode;
-            zend_hash_index_add(ret, idx, retval);
+            zend_hash_index_add(ret, idx, &retval);
             idx++;
         }
           delete [] childNodes;
@@ -2402,7 +2402,7 @@ PHP_METHOD(XdmNode, getParent) {
 }
 
 PHP_METHOD(XdmNode, getAttributeNodes) {
-    zval * retval;
+    zval retval;
   /*if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
     RETURN_NULL();
   }*/
@@ -2425,16 +2425,16 @@ PHP_METHOD(XdmNode, getAttributeNodes) {
         for(int i=0; i< count; i++) {
             XdmNode *attNode = attNodes[i];
             attNode->incrementRefCount();
-           if (object_init_ex(retval, xdmNode_ce) != SUCCESS) {
+           if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
                    RETURN_NULL();
             }
-            zend_object *zobj = Z_OBJ_P(retval);
+            zend_object *zobj = Z_OBJ_P(&retval);
             xdmNode_object *vobj =
                 (xdmNode_object *)((char *)zobj -
                                    XtOffsetOf(xdmNode_object, std));
             assert(vobj != nullptr);
             vobj->xdmNode = attNode;
-            zend_hash_index_add(ret, idx, retval);
+            zend_hash_index_add(ret, idx, &retval);
             idx++;
         }
           delete [] attNodes;
