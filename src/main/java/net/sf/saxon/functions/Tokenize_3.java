@@ -50,7 +50,7 @@ public class Tokenize_3 extends RegexFunction {
         if (input.isEmpty()) {
             return EmptySequence.getInstance();
         }
-        RegularExpression re = getRegularExpression(arguments);
+        RegularExpression re = getRegularExpression(arguments, 1, 2);
         if (re == null) {
             return SequenceTool.toLazySequence(new Whitespace.Tokenizer(input));
         }
