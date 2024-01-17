@@ -1195,6 +1195,8 @@ public final class Tokenizer {
                 return Token.UNION;
             case "where":
                 return Token.WHERE;
+            case "while":
+                return Token.WHILE;
             case "with":
                 return Token.WITH;
             case "orElse":

@@ -361,6 +361,11 @@ public abstract class Token {
     public static final int OR_ELSE = 81;
 
     /**
+     * Keyword "while"
+     */
+    public static final int WHILE = 82;
+
+    /**
      * Thin arrow operator "-&gt;" (XQuery 4.0)
      */
     public static final int THIN_ARROW = 83;
@@ -755,6 +760,8 @@ public abstract class Token {
         tokens[KEYWORD_CURLY] = "<keyword> {";
         tokens[RCURLY] = "}";
         tokens[LET] = "let";
+        tokens[WHERE] = "where";
+        tokens[WHILE] = "while";
         tokens[VALIDATE] = "validate {";
         tokens[TAG] = "<element>";
         tokens[PRAGMA] = "(# ... #)";
