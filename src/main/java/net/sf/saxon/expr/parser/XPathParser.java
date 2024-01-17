@@ -967,6 +967,7 @@ public class XPathParser {
                     lhs = parseArrowPostfix(lhs);
                     break;
                 case Token.MAPPING_ARROW:
+                    checkLanguageVersion40();
                     lhs = parseMappingArrowPostfix(lhs);
                     break;
                 default:
