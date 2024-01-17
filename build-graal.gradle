@@ -1361,53 +1361,73 @@ project.task("all_python_test_suites") {
     }    
   }
   ["xslt30", "qt3"].each { testsuite ->
-    Task t = task "${edition}c_${testsuite}_test_suite"(
-            dependsOn: ["pyenv_install_saxon_${edition}c"]
-    ) {
-      def output_path = "${buildDir}/test-results/${edition}c/${saxonVersion}/${testsuite}/${DSTAMP}";
+    def langs
+    if (testsuite == "qt3") {
+      langs = ["XP31", "XQ31", "XP40", "XQ40"]
+    } else {
+      langs = [""]
+    }
 
-      inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
-      outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
-      outputs.files fileTree(dir: output_path)
-
-      doFirst {
-        mkdir(output_path)
+    langs.each { lang ->
+      def langslug
+      if (lang == "") {
+        langslug = ""
+      } else {
+        langslug = "_${lang}"
       }
 
-      doLast {
-        copy {
-          from "${projectDir}/src/main/c/pypi/testsuite_driver"
-          into "${buildDir}/c/${edition}c_testsuite_driver"
-          filter { line ->
-            line.replaceAll('@@edition@@', edition)
-                    .replaceAll('@@version@@', saxonVersion)
+      Task t = task "${edition}c_${testsuite}_test_suite${langslug}"(
+        dependsOn: ["pyenv_install_saxon_${edition}c"]
+      ) {
+        def output_path = "${buildDir}/test-results/${edition}c/${saxonVersion}/${testsuite}/${DSTAMP}";
+
+        inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
+        outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
+        outputs.files fileTree(dir: output_path)
+
+        doFirst {
+          mkdir(output_path)
+        }
+
+        doLast {
+          copy {
+            from "${projectDir}/src/main/c/pypi/testsuite_driver"
+            into "${buildDir}/c/${edition}c_testsuite_driver"
+            filter { line ->
+              line.replaceAll('@@edition@@', edition)
+                .replace('@@EDITION@@', edition.toUpperCase())
+                .replaceAll('@@version@@', saxonVersion)
+                .replaceAll('@@VERSION@@', saxonVersion)
+            }
+          }
+        }
+
+        doLast {
+          exec {
+            workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+            commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
+          }
+        }
+
+        doLast {
+          exec {
+            workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+            if (testsuite == "xslt30") {
+              commandLine "python3", "./${testsuite}_test_suite_driver.py",
+                "${testsuites.w3cXslt30TestSuiteDir}/..",
+                "-o", output_path
+            } else if (testsuite == "qt3") {
+              commandLine "python3", "./${testsuite}_test_suite_driver.py",
+                "${testsuites.w3cQT3TestSuiteDir}",
+                "-o", output_path, "-l", lang
+            } else {
+              throw new GradleException("Unexpected test suite: ${testsuite}")
+            }
           }
         }
       }
-
-      doLast {
-        exec {
-          workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-          commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
-        }
-      }
-
-      doLast {
-        exec {
-          workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-          if (testsuite == "xslt30") {
-            commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}/..",
-                    "-o", output_path
-          } else if (testsuite == "qt3") {
-            commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cQT3TestSuiteDir}/..",
-                    "-o", output_path, "-l", "XP30"
-          } else {
-            throw new GradleException("Unexpected test suite: ${testsuite}")
-          }
-        }
-      }
+      tasks.findByName("all_python_test_suites").dependsOn t
     }
   }
-  tasks.findByName("all_python_test_suites").dependsOn 
 }
 

@@ -145,6 +145,7 @@ def process_catalog(path: str, catalogi):
             print("<b>Test sets: " + str(xml.size) + "<b/> See <a href='#results'> Results here </a>")
 
             for i in range(xml.size):
+                value = xml.item_at(i)
                 if value is not None and value.is_node:
                     node = value.get_node_value()
                     if node is not None:
@@ -920,7 +921,7 @@ def main(argv):
             diri = str(sys.argv[1])
         except TypeError as ex:
             print("Error test suite directory missing")
-            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir>')
+            print('qt3_test_suite_driver.py <testsuitedir> -l <lang> -t <testpattern> -s <testset> -o <resultdir>')
             sys.exit(2)
 
         print("Test suite directory = " + diri)
