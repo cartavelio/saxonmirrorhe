@@ -70,13 +70,13 @@ public abstract class XSLBreakOrContinue extends StyleElement {
             } else if (inst instanceof XSLTry || inst instanceof XSLCatch) {
                 //compilable = false;
             } else if (inst instanceof XSLWhen || inst instanceof XSLOtherwise
-                    || inst instanceof XSLIf || inst instanceof XSLChoose) {
+                    || inst instanceof XSLIf || inst instanceof XSLChooseOrSwitch) {
                 // continue;
             } else if (inst == null) {
-                compileError(getDisplayName() + " is not allowed at outermost level", "XTSE3120");//XTSE0010
+                compileError(getDisplayName() + " is not allowed at outermost level", "XTSE3120");
                 return;
             } else {
-                compileError(getDisplayName() + " is not allowed within " + inst.getDisplayName(), "XTSE3120");//XTSE0010
+                compileError(getDisplayName() + " is not allowed within " + inst.getDisplayName(), "XTSE3120");
                 return;
             }
         }
