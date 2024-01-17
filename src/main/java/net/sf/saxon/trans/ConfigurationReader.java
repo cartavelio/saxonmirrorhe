@@ -381,6 +381,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "preEvaluateDoc", FeatureCode.PRE_EVALUATE_DOC_FUNCTION, "JN");
         applyProperty(props, "preferJaxpParser", OBSOLETE_PROPERTY, "N");
         applyProperty(props, "recognizeUriQueryParameters", FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS, "JN");
+        applyProperty(props, "regexBacktrackingLimit", FeatureCode.REGEX_BACKTRACKING_LIMIT, "JN");
         applyProperty(props, "resourceResolver", FeatureCode.RESOURCE_RESOLVER_CLASS, "J");
         applyProperty(props, "retainNodeForDiagnostics", FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS, "JN");
         applyProperty(props, "schemaValidation", FeatureCode.SCHEMA_VALIDATION_MODE, "JN");
@@ -430,6 +431,7 @@ public class ConfigurationReader implements Receiver {
         if (value != null) {
             if (featureCode == OBSOLETE_PROPERTY) {
                 error(props.getProperty("#element"), attributeName, value, "#obsolete");
+                props.remove(attributeName);
                 return;
             }
             if (!checkPlatform(flags)) {
