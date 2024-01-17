@@ -122,7 +122,7 @@
     a string in the form of a date, time, or dateTime using the appropriate variant of the format-date/time
     function:</p>
 
-         <pre><code class="language-xquery"><![CDATA[declare function local:format(
+         <samp><![CDATA[declare function local:format(
               $in as union(xs:dateTime, xs:date, xs:time, xs:string), 
               $fmt as xs:string) as xs:string {
    typeswitch ($in) 
@@ -132,7 +132,7 @@
    case xs:string return local:format($in cast as union(xs:dateTime, xs:date, xs:time), $fmt)
    default return error()
    };    
-local:format("2016-10-07", $fmt)]]></code></pre>
+local:format("2016-10-07", $fmt)]]></samp>
       </section>
       <section id="record-types" title="Record types">
 
@@ -171,12 +171,12 @@ local:format("2016-10-07", $fmt)]]></code></pre>
 
          <p>For example:</p>
 
-         <pre><code class="language-xquery">record(ssn as xs:string, emp as element(employee))</code></pre>
+         <samp>record(ssn as xs:string, emp as element(employee))</samp>
 
 
          <p>or: </p>
 
-         <pre><code class="language-xquery">record('first name', 'middle initial', 'last name', *)</code></pre>
+         <samp>record('first name', 'middle initial', 'last name', *)</samp>
 
 
          <p>The instances of a record type are maps. A record type is essentially a way of defining a more
@@ -267,7 +267,7 @@ local:format("2016-10-07", $fmt)]]></code></pre>
       complex number arithmetic, where a complex number is defined as the type <code>record(r as
         xs:double, i as xs:double)</code>:</p>
 
-         <pre><code class="language-xml"><![CDATA[<xsl:function name="cx:complex" as="record(r as xs:double, i as xs:double)">
+         <samp><![CDATA[<xsl:function name="cx:complex" as="record(r as xs:double, i as xs:double)">
   <xsl:param name="real" as="xs:double"/>
   <xsl:param name="imag" as="xs:double"/>
   <xsl:sequence select="map{'r':$real, 'i':$imag}"/>
@@ -277,11 +277,11 @@ local:format("2016-10-07", $fmt)]]></code></pre>
   <xsl:param name="x" as="record(r as xs:double, i as xs:double)"/>
   <xsl:param name="y" as="record(r as xs:double, i as xs:double)"/>
   <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
-</xsl:function>]]></code></pre>
+</xsl:function>]]></samp>
 
          <p>The same functions could be written in XQuery:</p>
 
-         <pre><code class="language-xquery"><![CDATA[declare function cx:complex ($real as xs:double, $imag as xs:double)
+         <samp><![CDATA[declare function cx:complex ($real as xs:double, $imag as xs:double)
                  as record(r as xs:double, i as xs:double) {
   map{'r':$real, 'i':$imag}
 };
@@ -290,7 +290,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                          $y as record(r as xs:double, i as xs:double))
                  as record(r as xs:double, i as xs:double) {
   cx:number($x?r + $y?r, $x?i + $y?i)
-};]]></code></pre>
+};]]></samp>
 
          <p>Two additional extensions help to improve the usability of record types:</p>
 
@@ -321,11 +321,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>The syntax ".." allows a field of a record type to reference the containing record type, thus
        allowing recursive structures. For example a simple linked list can be declared using the type:</p>
 
-         <pre><code class="language-xquery">record(value, next as ..?)</code></pre>
+         <samp>record(value, next as ..?)</samp>
 
          <p>While a binary tree can be declared as:</p>
 
-         <pre><code class="language-xquery">record(left? as .., value, right? as ..)</code></pre>
+         <samp>record(left? as .., value, right? as ..)</samp>
 
          <p>It will only be possible to create a finite instance of a recursive record type if the self-reference is
        made optional, either by making the field itself optional (as in the second example), or by allowing it
@@ -342,7 +342,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>An enumeration type defines a set of permitted <code>xs:string</code> values. For example, an enumeration
             type might be defined as:</p>
 
-         <pre><code class="language-xquery">enum("red", "green", "blue")</code></pre>
+         <samp>enum("red", "green", "blue")</samp>
 
          <p>The values conforming to an enumeration type are strings: the expression <code>$S instance of enum(A, B, C)</code>
             is true if <code>$S</code> is an instance of <code>xs:string</code> (note: not <code>xs:untypedAtomic</code>
@@ -351,7 +351,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>A typical use case is in a function signature. For example the function signature of <code>fn:normalize-unicode()</code>
             could be restated as:</p>
 
-         <pre><code class="language-xquery">function($s as xs:string, $form as enum("NFC", "NFD", "NFKC", "NFKD")) as xs:string</code></pre>
+         <samp>function($s as xs:string, $form as enum("NFC", "NFD", "NFKC", "NFKD")) as xs:string</samp>
       </section>
 
       <section id="kindtests" title="KindTests and NodeTests">
@@ -361,9 +361,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
          <p>The syntax for the <code>element()</code> and <code>attribute()</code>
             <code>KindTests</code> is extended to allow constructs of the form</p>
-         <pre><code class="language-xquery">element(*:div)</code></pre>
+         <samp>element(*:div)</samp>
          <p>or </p>
-         <pre><code class="language-xquery">attribute(myns:*, myns:someType)</code></pre>
+         <samp>attribute(myns:*, myns:someType)</samp>
          <p>More specifically, the grammar for <code>ElementNameOrWildCard</code>
                changes from <code>ElementName | "*"</code> to simply <code>NameTest</code>; and similarly <code>AttribNameOrWildCard</code> also 
                expands simply to <code>NameTest</code>. This change is made largely for orthogonality reasons (there is no reason to have 
@@ -412,7 +412,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>In XSLT, type aliases can be defined using the top-level declaration <a
                class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a>:</p>
 
-         <pre><code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
+         <samp><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
 
 <xsl:function name="cx:complex" as="type(cx:complex)">
   <xsl:param name="r" as="xs:double"/>
@@ -425,7 +425,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
   <xsl:param name="y" as="type(cx:complex)"/>
   <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
 </xsl:function>
-]]></code></pre>
+]]></samp>
 
          <p>XSLT-defined type aliases are scoped to a package. The usual rules for import precedence apply.</p>
 
@@ -436,9 +436,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                href="/v4extensions/xslt-syntax-extensions/match-patterns"
                >XSLT 4.0 extensions: Match patterns</a>). For example:</p>
 
-         <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></code></pre>
+         <samp>&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></samp>
 
-         <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
+         <samp>&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></samp>
 
          <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
         <code>.[. instance of T]</code>. The experimental syntax <code>~T</code> used in earlier releases
@@ -476,7 +476,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>The second argument may be omitted and defaults to <code>fn:identity#1</code>, so 
          <code>fn:all((1=1, 2=2, 3=4))</code> returns false.</p>
       
-      <aside>The function has been renamed <code>fn:every</code>; for the time being both names are available.</aside>
+      <aside><p>The function has been renamed <code>fn:every</code>; for the time being both names are available.</p></aside>
 
       <kbd>fn:all-different(
          $values	as xs:anyAtomicType*,	
@@ -681,16 +681,16 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Returns an arity-2 function corresponding to a supplied binary operator, for example <code>fn:op("is")</code>
       returns <code>function($x, $y){$x is $y}</code>.</p>
 
-      <kbd>fn:parcel( $input as item()* ) as record(value)</kbd>
+      <kbd>fn:parcel($input as item()*) as record(value)</kbd>
 
       <p>Wraps an arbitrary sequence of items as a <i>parcel</i>: a parcel is a map with a single entry,
       whose key is the string <code>"value"</code> and whose value is the wrapped sequence. Parcels are
       useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
       array as a parcel.</p>
       
-      <aside>This function has been dropped from the spec.</aside>
+      <aside><p>This function has been dropped from the spec.</p></aside>
 
-      <kbd>fn:parse-html( $input as xs:string ) as document-node</kbd>
+      <kbd>fn:parse-html($input as xs:string) as document-node</kbd>
 
       <p>Parses an HTML5 document (supplied as a string) using the HTML5 parsing algorithm, returning
       the result as an XDM document. In SaxonJ this is implemented using <code>validator.nu</code>; in SaxonCS the
@@ -711,7 +711,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Parses a URI value, returning a map that identifies the component parts of the URI. Inverse of
          <code>fn:build-uri()</code>. Available from Saxon 12.1.</p>
 
-      <kbd>fn:parts( $in as item() ) as map(xs:string, xs:anyAtomicType)</kbd>
+      <kbd>fn:parts($in as item()) as map(xs:string, xs:anyAtomicType)</kbd>
 
       <p>Decomposes a composite "atomic" value into its parts, in the form of a map. For example, an <code>xs:dateTime</code>
       value is decomposed into year, month, day, hour, minute, second, and timezone. Other values that are decomposable include
@@ -719,11 +719,13 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       For values that are not decomposable, the resulting map contains a single entry whose key is "value" and whose corresponding
       value is the input value.</p>
 
-      <aside>Likely to be dropped.</aside>
+      <p>
+         <em>Likely to be dropped.</em>
+      </p>
 
       <kbd>fn:range()</kbd>
 
-      <aside>Dropped from Saxon 12.</aside>
+      <p>Dropped from Saxon 12.</p>
 
       <kbd>fn:remove(
          $input	  as item()*,	
@@ -775,11 +777,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>Returns all items in a sequence except the last.</p>
 
-      <kbd>fn:unparcel( $parcel as record(value, *) ) as item()*</kbd>
+      <kbd>fn:unparcel($parcel as record(value, *)) as item()*</kbd>
 
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
       
-      <aside>This function has been dropped from the spec.</aside>
+      <aside><p>This function has been dropped from the spec.</p></aside>
       
       <kbd>fn:void(
          $input	as item()*	
@@ -828,7 +830,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
          function.</p>
 
-      <kbd>array:of( $input as record(value, *)* ) as array(*)</kbd>
+      <kbd>array:of($input as record(value, *)*) as array(*)</kbd>
 
       <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
       whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
@@ -861,29 +863,31 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       the values are combined using the <code>$combine</code> function.</p>
 
 
-      <kbd>map:entries( $map as map(*) ) as map(*)*</kbd>
+      <kbd>map:entries($map as map(*)) as map(*)*</kbd>
 
       <p>Accepts a map as input, and turns it into a sequence of singleton maps representing the key-value pairs contained in the map.
       Equivalent to <code>map:for-each($map, ->($k, $v){map{$k : $v}})</code>.</p>
 
-      <kbd>map:filter( $map as map(*), $predicate as function(xs:anyAtomicType, item()* ) as xs:boolean) as map(*)</kbd>
+      <kbd>map:filter($map as map(*), $predicate as function(xs:anyAtomicType, item()*) as xs:boolean) as map(*)</kbd>
 
       <p>Accepts a map as input, and returns a new map containing those entries from the original map that satisfy the predicate function.</p>
 
-      <kbd>map:keys( $map as map(*), $predicate as function(item()*) as xs:boolean := true#0 ) as xs:atomicValue*</kbd>
+      <kbd>map:keys($map as map(*), $predicate as function(item()*) as xs:boolean := true#0) as xs:atomicValue*</kbd>
       
       <p>The second argument is new in 4.0; if supplied, <code>map:keys()</code> returns the keys from entries in the map where
          applying the predicate to the corresponding value returns true.</p>
       
 
-      <kbd>map:pairs( $map as map(*) ) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
+      <kbd>map:pairs($map as map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
 
       <p>Accepts a map as input, and turns it into a sequence of maps representing the key-value pairs contained in the map.
          Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>. This differs from
       <code>map:entries</code> in that each entry in the input map is turned into a map with two entries, named "key"
       and "value", rather than a singleton map with one entry.</p>
       
-      <aside>Previously named <code>map:key-value-pairs</code>.</aside>
+      <p>
+         <em>Previously named <code>map:key-value-pairs</code>.</em>
+      </p>
 
 
 
@@ -941,7 +945,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>Simple inline functions are particularly convenient when providing functions as arguments to higher-order functions,
         many of which accept a single item as their one argument.
         For example, to sort employees in order of salary, you can write:</p>
-         <pre><code class="language-xquery">sort(//employee, (), function{@salary})</code></pre>
+         <samp>sort(//employee, (), function{@salary})</samp>
 
          <aside>Earlier Saxon releases experimented with the notations <code>.{@salary}</code> and <code>fn{@salary}</code>.
             These forms have been dropped. The form <code>->{@salary}</code>, however, remains available for the time
@@ -950,7 +954,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>Simple inline functions can access externally-defined local variables in the usual way (that is, they have a closure).</p>
 
          <p>The expression <code class="bold">function{EXPR}</code> is a syntactic shorthand for:</p>
-         <pre><code class="language-xquery">function($x as item()) as item()* {$x!(EXPR)}</code></pre>
+         <samp>function($x as item()) as item()* {$x!(EXPR)}</samp>
 
 
 
@@ -990,15 +994,15 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <ul>
             <li>
                <p>XQuery syntax:</p>
-               <pre><code class="language-xquery"><![CDATA[declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S'))
-                         as xs:dateTime]]></code></pre>
+               <samp><![CDATA[declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S'))
+                         as xs:dateTime]]></samp>
             </li>
             <li>
                <p>XSLT syntax:</p>
-               <pre><code class="language-xml"><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
+               <samp><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
   <xsl:param name="x" as="xs:dateTime" required="yes"/>
   <xsl:param name="x" as="xs:duration" required="no" select="xs:duration('PT0S')"/>
-</xsl:function>]]></code></pre>
+</xsl:function>]]></samp>
             </li>
          </ul>
 
@@ -1020,7 +1024,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>In a static function call, arguments may be supplied either by position or by name. The call must have zero or more
             positional parameters followed by zero or more keyword parameters. For example:</p>
 
-         <pre><code class="language-xquery">sort(//employee, key := ->{@salary})</code></pre>
+         <samp>sort(//employee, key := ->{@salary})</samp>
 
          <p>Although keywords will often be used for optional parameters as in this example, there is no rule requiring this.
             Whether a parameter is optional or required, the corresponding argument may be supplied either positionally or by keyword.</p>
@@ -1126,7 +1130,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
         returns the value of <code>A</code> unless it is an empty sequence, in which case it returns the value of <code>B</code>.
         For example, the expression:</p>
 
-            <pre><code class="language-xquery">chapter[title='Introduction'] otherwise chapter[1]</code></pre>
+            <samp>chapter[title='Introduction'] otherwise chapter[1]</samp>
 
             <p>returns the chapter(s) entited "Introduction" if such a chapter exists; otherwise it returns the first chapter.</p>
 
@@ -1167,7 +1171,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
             <p>This means that the expression:</p>
 
-            <pre><code class="language-xquery">//chapter[pages=0 or length div pages]</code></pre>
+            <samp>//chapter[pages=0 or length div pages]</samp>
 
             <p>will never fail with a divide-by-zero error, even if the operands are evaluated in a different order.</p>
 
@@ -1175,7 +1179,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                   the following is now guaranteed to return no failure if <code>@code</code> is
                   non-numeric:</p>
 
-            <pre><code class="language-xquery">@code[. castable as xs:integer][xs:integer(.) = 2]</code></pre>
+            <samp>@code[. castable as xs:integer][xs:integer(.) = 2]</samp>
 
 
          </section>
@@ -1204,7 +1208,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       convenient iterative processing of the members of an array.</p>
 
             <p>For example: </p>
-            <pre><code class="language-xquery">for member $m in [(3,5,6), (8,12)] return sum($m)</code></pre>
+            <samp>for member $m in [(3,5,6), (8,12)] return sum($m)</samp>
             <p>returns the sequence <code>(14, 20)</code>.</p>
 
             <p>A <code>ForMemberExpr</code> is a new kind of <code>ExprSingle</code>; this means it can be used anywhere a <code>ForExpr</code>
@@ -1234,13 +1238,13 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
             <p>Some further examples:</p>
 
-            <pre><code class="language-xquery"><![CDATA[let $json := '[{"x":1, "y":"one"}, {"x":2, "y":"two"}]'
-return for member $map in parse-json($json) return $map?y]]></code></pre>
+            <samp><![CDATA[let $json := '[{"x":1, "y":"one"}, {"x":2, "y":"two"}]'
+return for member $map in parse-json($json) return $map?y]]></samp>
 
             <p>returns <code>("one", "two")</code>.</p>
 
-            <pre><code class="language-xquery"><![CDATA[let $json := '[[1,2,3], [4,5,6]]'
-return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
+            <samp><![CDATA[let $json := '[[1,2,3], [4,5,6]]'
+return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
 
             <p>returns <code>(2, 4, 6, 8, 10, 12)</code>.</p>
 
@@ -1310,7 +1314,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
             See <a class="bodylink" href="/v4extensions/new-types/type-aliases"
                >Type aliases</a> for an overview. For example:</p>
 
-         <pre><code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>]]></code></pre>
+         <samp><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>]]></samp>
       </section>
 
       <section id="match-patterns" title="Match patterns">
@@ -1346,13 +1350,13 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
          <p>For example if a <a class="bodylink" href="/v4extensions/new-types/type-aliases"
                >type alias</a> has been declared:</p>
 
-         <pre><code class="language-xml">&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></code></pre>
+         <samp>&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></samp>
 
          <p>Then it can be used in a match pattern to match instances of the type, with or without predicates:</p>
 
-         <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></code></pre>
+         <samp>&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></samp>
 
-         <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
+         <samp>&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></samp>
 
          <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
       <code>.[. instance of type(T)]</code>.</p>
@@ -1366,13 +1370,13 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
          <p>Patterns for record types are particularly useful when JSON is processed using XSLT template rules. For example,
          a JSON object such as the following: </p>
 
-         <pre><code class="language-json"><![CDATA[{
+         <samp><![CDATA[{
   "firstName": "John",
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "age": 45,
   "weight": 67
-}]]></code></pre>
+}]]></samp>
 
          <p>can be matched with a pattern such as <code>match="record(firstName, lastName, email, *)"</code>. Naming a few of the
          properties that characterize the object is sufficient (but remember to make the record type extensible by including <code>", *</code>
@@ -1401,21 +1405,21 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
         instructions can define the returned value using a <code class="bold"
                      >select</code> attribute in place
       of a sequence constructor. For example:</p>
-               <pre><code class="language-xml"><![CDATA[<xsl:choose>
+               <samp><![CDATA[<xsl:choose>
   <xsl:when test="$day = 'Monday'" select="1"/>
   <xsl:when test="$day = 'Tuesday'" select="2"/>
   <xsl:when test="$day = 'Wednesday'" select="3"/>
   <xsl:when test="$day = 'Thursday'" select="4"/>
   <xsl:when test="$day = 'Friday'" select="5"/>
   <xsl:otherwise select="-1"/>
-</xsl:choose>]]></code></pre>
+</xsl:choose>]]></samp>
             </li>
             <li>
                <p>The <code>xsl:if</code> instruction can deliver its results using <code
                      class="bold">then</code>
         and <code class="bold"
                   >else</code> attributes in place of a contained sequence constructor. For example:</p>
-               <pre><code class="language-xml"><![CDATA[<xsl:if test="$day = 'Monday'" then="1" else="0"/>]]></code></pre>
+               <samp><![CDATA[<xsl:if test="$day = 'Monday'" then="1" else="0"/>]]></samp>
                <p>If the <code>then</code> attribute is present, the <code>xsl:if</code> instruction must
           be empty (have no children). Either attribute can be used independently; there is no
         requirement for both to be present.</p>
@@ -1429,7 +1433,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
                >xsl:switch</a> instruction provides
             an alternative to <code>xsl:choose</code>. It is best illustrated by example:</p>
 
-         <pre><code class="language-xml"><![CDATA[<xsl:function name="f:days-in-month" as="xs:integer?">
+         <samp><![CDATA[<xsl:function name="f:days-in-month" as="xs:integer?">
   <xsl:param name="month-number" as="xs:integer"/>
   <xsl:param name="leap-year" as="xs:boolean"/>
   <xsl:switch select="$month-number">
@@ -1439,7 +1443,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
       <xsl:if test="$leap-year" then="29" else="28"/>
     </xsl:when>
   </xsl:switch>
-</xsl:function>]]></code></pre>
+</xsl:function>]]></samp>
 
       </section>
       <section id="ext-ins-call-template" title="Extension instructions calling templates">
@@ -1450,20 +1454,20 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
          to using <code>xsl:call-template</code>.</p>
 
          <p>For example, if the template is declared as:</p>
-         <pre><code class="language-xml"><![CDATA[<xsl:template name="x:indent">
+         <samp><![CDATA[<xsl:template name="x:indent">
   <xsl:param name="spaces" as="xs:integer"/>
   <xsl:value-of select="'&#xa;' || string-join((1 to $spaces)!' ')"/>
-</xsl:template>]]></code></pre>
+</xsl:template>]]></samp>
 
          <p>Then it may be invoked by writing:</p>
 
-         <pre><code class="language-xml"><![CDATA[<x:indent spaces="4"/>]]></code></pre>
+         <samp><![CDATA[<x:indent spaces="4"/>]]></samp>
 
          <p>which (assuming the presence of <code>extension-element-prefixes="x"</code>) is equivalent to:</p>
 
-         <pre><code class="language-xml"><![CDATA[<xsl:call-template name="x:indent">
+         <samp><![CDATA[<xsl:call-template name="x:indent">
   <xsl:with-param name="spaces" select="4"/>
-</xsl:call-template>]]></code></pre>
+</xsl:call-template>]]></samp>
 
          <p>Attributes on the extension instruction are mapped to parameters declared in the named template.
             The rules for passing parameters are as follows:</p>
@@ -1510,14 +1514,14 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 
          <!--<p>The new <a class="bodylink code" href="/xsl-elements/match">xsl:match</a> instruction is most
             useful if wrapped in a stylesheet function. For example:</p>
-         <pre><code class="language-xml"><![CDATA[  <xsl:function name="f:in-appendix" as="xs:boolean">
+         <samp><![CDATA[  <xsl:function name="f:in-appendix" as="xs:boolean">
     <xsl:param name="content" as="element(*)"/>
     <xsl:match select="$content" pattern="chapter[@class='appendix']//* | addendum//*"/>
   </xsl:function>
   
   ...
   
-  <xsl:if test="f:in-appendix(.)">...</xsl:if>]]></code></pre>-->
+  <xsl:if test="f:in-appendix(.)">...</xsl:if>]]></samp>-->
       </section>
       <section id="iteration-maps-arrays" title="Iterating over maps and arrays">
          <h1>Iterating over maps and arrays</h1>
