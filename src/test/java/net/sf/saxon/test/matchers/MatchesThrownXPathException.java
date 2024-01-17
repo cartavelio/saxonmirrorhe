@@ -1,5 +1,6 @@
 package net.sf.saxon.test.matchers;
 
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -19,8 +20,23 @@ public class MatchesThrownXPathException extends TypeSafeDiagnosingMatcher<Execu
             actual.execute();
         } catch (XPathException ex) {
             boolean ok = ex.hasErrorCode(code);
-            if (!ok) mismatchDescription.appendText("was an XPathException with error code ").appendValue(ex.getErrorCodeQName());
+            if (!ok) {
+                mismatchDescription.appendText("was an XPathException with error code ")
+                        .appendValue(ex.getErrorCodeQName());
+            }
             return ok;
+        } catch (UncheckedXPathException uex) {
+            XPathException ex = uex.getXPathException();
+            boolean ok = ex.hasErrorCode(code);
+            mismatchDescription.appendText("was an UncheckedXPathException");
+            if (ok) {
+                mismatchDescription.appendText(", but with the correct ");
+            } else {
+                mismatchDescription.appendText(" with ");
+            }
+            mismatchDescription.appendText("error code ").appendValue(ex.getErrorCodeQName());
+            return false;
+
         } catch (Throwable t) {
             mismatchDescription.appendText("was not an XPathException, was ").appendValue(t);
             return false;
