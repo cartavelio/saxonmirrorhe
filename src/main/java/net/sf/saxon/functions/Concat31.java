@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -30,11 +31,11 @@ import net.sf.saxon.value.StringValue;
 import java.util.Arrays;
 
 /**
- * Implementation of the fn:concat() function as defined in XPath 2.0, 3.0, and 3.1
+ * Implementation of the fn:concat() function
  */
 
 
-public class Concat31 extends SystemFunction implements PushableFunction {
+public class Concat extends SystemFunction implements PushableFunction {
 
     @Override
     protected Sequence resultIfEmpty(int arg) {
@@ -49,7 +50,7 @@ public class Concat31 extends SystemFunction implements PushableFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType[] argTypes = new SequenceType[getArity()];
-        Arrays.fill(argTypes, SequenceType.OPTIONAL_ATOMIC);
+        Arrays.fill(argTypes, SequenceType.ATOMIC_SEQUENCE);
         return new SpecificFunctionType(argTypes, SequenceType.SINGLE_STRING);
     }
 
@@ -80,8 +81,8 @@ public class Concat31 extends SystemFunction implements PushableFunction {
             public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
                 UnicodeBuilder buffer = new UnicodeBuilder();
                 for (Operand o: operands()) {
-                    Item item = o.getChildExpression().evaluateItem(context);
-                    if (item != null) {
+                    SequenceIterator iter = o.getChildExpression().iterate(context);
+                    for (Item item; (item = iter.next()) != null; ) {
                         buffer.accept(item.getUnicodeStringValue());
                     }
                 }
@@ -101,9 +102,14 @@ public class Concat31 extends SystemFunction implements PushableFunction {
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         UnicodeBuilder builder = new UnicodeBuilder();
         for (Sequence arg : arguments) {
-            Item head = arg.head();
-            if (head != null) {
-                builder.accept(head.getUnicodeStringValue());
+            if (arg instanceof Item) {
+                // common case, avoid creating a singleton iterator
+                builder.accept(((Item)arg).getUnicodeStringValue());
+            } else {
+                SequenceIterator iter = arg.iterate();
+                for (Item item; (item = iter.next()) != null; ) {
+                    builder.accept(item.getUnicodeStringValue());
+                }
             }
         }
         return new StringValue(builder.toUnicodeString());
@@ -114,9 +120,9 @@ public class Concat31 extends SystemFunction implements PushableFunction {
         UniStringConsumer output = destination.getStringReceiver(false, Loc.NONE);
         output.open();
         for (Sequence arg : arguments) {
-            Item head = arg.head();
-            if (head != null) {
-                output.accept(head.getUnicodeStringValue());
+            SequenceIterator iter = arg.iterate();
+            for (Item item; (item = iter.next()) != null; ) {
+                output.accept(item.getUnicodeStringValue());
             }
         }
         output.close();
