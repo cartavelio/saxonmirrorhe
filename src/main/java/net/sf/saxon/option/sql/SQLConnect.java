@@ -213,7 +213,7 @@ public class SQLConnect extends ExtensionInstruction {
                         .withLocation(getLocation());
             }
 
-            return new ObjectValue<>(connection);
+            return new ObjectValue<>(connection, Connection.class);
 
         }
 

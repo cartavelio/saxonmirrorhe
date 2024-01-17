@@ -175,7 +175,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         @Override
         public Item next() {
             if (sources.hasNext()) {
-                return new ObjectValue<Resource>(sources.next());
+                return new ObjectValue<Resource>(sources.next(), Resource.class);
             } else {
                 return null;
             }

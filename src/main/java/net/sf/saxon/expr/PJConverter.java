@@ -760,7 +760,7 @@ public abstract class PJConverter {
             }
             if (!(head instanceof AnyExternalObject)) {
                 if (Sequence.class.isAssignableFrom(targetClass)) {
-                    head = new ObjectValue<>(value);
+                    head = new ObjectValue<>(value, targetClass);
                 } else {
                     throw new XPathException("Expected external object of class " + targetClass.getName() +
                             ", got " + head.getClass());
