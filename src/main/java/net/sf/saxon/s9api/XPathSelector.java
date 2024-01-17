@@ -200,16 +200,13 @@ public class XPathSelector implements Iterable<XdmItem> {
 
 
     /**
-     * Set a callback to be used for reporting of run-time conditions.
+     * Set a callback to be used for reporting of run-time errors and warnings.
      * Note that fatal run-time errors are always reported by throwing an exception,
-     * and are not notified to the <code>ErrorReporter</code>.
-     * <p>This method is therefore not especially useful; its only real effect is to
-     * control the way that warnings are reported, and there are not many conditions
-     * in pure XPath processing that result in warnings being generated dynamically.</p>
-     * <p>By default, warnings are reported to a default error reporter which writes to
+     * so this is primarily useful for controlling the way that warnings are reported.
+     * <p>By default, errors are reported to a default error reporter which writes to
      * the logging destination associated with the Saxon {@link Configuration}, which
      * in turn defaults to the system error stream.</p>
-     * @param reporter the user-supplied error reporter to be called when run-time warnings
+     * @param reporter the user-supplied error reporter to be called when dynamic errors and warnings
      *                 arise
      * @since 10.0
      */

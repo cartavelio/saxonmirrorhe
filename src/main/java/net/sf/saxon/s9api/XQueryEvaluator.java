@@ -317,7 +317,9 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * encountered during this query evaluation.
      * <p>Calling this method overwrites the effect of any previous call on {@link #setErrorListener(ErrorListener)}
      * or {@code setErrorList}.</p>
-     * <p>If no error reporter is supplied by the caller, error information will be written to the standard error stream.</p>
+     * <p>By default, errors are reported to a default error reporter which writes to
+     * the logging destination associated with the Saxon {@link Configuration}, which
+     * in turn defaults to the system error stream.</p>
      *
      * @param reporter a callback function which will be notified of all Static errors and warnings
      *                 encountered during a compilation episode.
