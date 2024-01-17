@@ -77,7 +77,6 @@ public class QueryModule implements StaticContext {
     private int constructionMode = Validation.PRESERVE;
     private NamespaceUri defaultFunctionNamespace;
     private NamespaceUri defaultElementNamespace;
-    private boolean fixedDefaultElementNamespace;
     private boolean preserveSpace = false;
     private boolean defaultEmptyLeast = true;
     private String defaultCollationName;
@@ -864,7 +863,7 @@ public class QueryModule implements StaticContext {
         for (Iterable<GlobalVariable> iter : iters) {
             for (GlobalVariable var : iter) {
                 if (!varDefinitions.contains(var)) {
-                    int slot = globalVariableMap.allocateSlotNumber(var.getVariableQName(), null);
+                    int slot = globalVariableMap.allocateSlotNumber(var.getVariableQName());
                     var.compile(getExecutable(), slot);
                     varDefinitions.add(var);
                 }
@@ -1367,7 +1366,7 @@ public class QueryModule implements StaticContext {
     }
 
     /**
-     * Return a NamespaceResolver which is "live" in the sense that, as the parse proceeds,
+     * Return a NamespaceResolver which is "live" in the sense that, as the parse proceeeds,
      * it always uses the namespaces declarations in scope at the relevant time
      * @return a live NamespaceResolver
      */
@@ -1498,9 +1497,8 @@ public class QueryModule implements StaticContext {
      * @param uri the default namespace for elements and types
      */
 
-    public void setDefaultElementNamespace(NamespaceUri uri, boolean isFixedDefault) {
+    public void setDefaultElementNamespace(NamespaceUri uri) {
         defaultElementNamespace = uri;
-        fixedDefaultElementNamespace = isFixedDefault;
     }
 
     /**
