@@ -290,16 +290,11 @@ PHP_METHOD(Xslt30Processor, compileFromAssociatedFile) {
 PHP_METHOD(Xslt30Processor, compileFromString) {
   Xslt30Processor *xslt30Processor;
   char *stylesheetStr;
-  char * encodingStr = nullptr;
-  size_t len1, len2, myint;
-
-  if ( ZEND_NUM_ARGS() == 1 && zend_parse_parameters(ZEND_NUM_ARGS(), "s", &stylesheetStr, &len1) ==
+  size_t len1, myint;
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &stylesheetStr, &len1) ==
       FAILURE) {
     RETURN_NULL();
-  } else if (ZEND_NUM_ARGS() == 2 && zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &stylesheetStr, &len1, &encodingStr, &len2) ==
-        FAILURE) {
-      RETURN_NULL();
-   }
+  }
 
   zend_object *pobj = Z_OBJ_P(getThis());
   xslt30Processor_object *obj =
@@ -309,7 +304,7 @@ PHP_METHOD(Xslt30Processor, compileFromString) {
   if (xslt30Processor != nullptr) {
     try {
       XsltExecutable *executable =
-          xslt30Processor->compileFromString(stylesheetStr, encodingStr);
+          xslt30Processor->compileFromString(stylesheetStr);
 
       if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
         RETURN_NULL();

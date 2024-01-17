@@ -1,7 +1,7 @@
 
 //============================= SaxonProcessor
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonproc_construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonproc_construct, 0, 0, 1)
 // the first argument to this is if this is a reference
 // the second argument to this is the name
 ZEND_ARG_INFO(0, license)
@@ -56,10 +56,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_setCatalog, 0, 0, 1)
 ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_setCatalogFiles, 0, 0, 1)
-ZEND_ARG_INFO(0, filenames)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_clarkNameToEQName, 0, 0, 1)
@@ -185,7 +181,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_applyTemplatesReturningFile, 0, 0, 1)
 ZEND_ARG_INFO(0, file_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setInitialTemplateParameters, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setInitialTemplateParameters, 0, 0, 2)
 ZEND_ARG_INFO(0, parameters)
 ZEND_ARG_INFO(0, tunnel)
 ZEND_END_ARG_INFO()
@@ -314,7 +310,8 @@ ZEND_ARG_INFO(0, source_file_name)
 ZEND_ARG_INFO(0, stylesheet_file_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromFile, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromFile, 0, 0, 2)
+ZEND_ARG_INFO(0, source_file_name)
 ZEND_ARG_INFO(0, stylesheet_file_name)
 ZEND_END_ARG_INFO()
 
@@ -324,13 +321,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromString, 0, 0, 1)
 ZEND_ARG_INFO(0, xml_string)
-ZEND_ARG_INFO(0, encoding_Str)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromStringAndSave, 0, 0, 2)
 ZEND_ARG_INFO(0, xml_string)
 ZEND_ARG_INFO(0, output_file_name)
-ZEND_ARG_INFO(0, encoding_Str)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromFileAndSave, 0, 0, 2)
@@ -554,10 +549,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_evaluate, 0, 0, 1)
 ZEND_ARG_INFO(0, xpath)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setUnprefixedElementMatchingPolicy, 0, 0, 1)
-ZEND_ARG_INFO(0, policy)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_evaluateSingle, 0, 0, 1)
