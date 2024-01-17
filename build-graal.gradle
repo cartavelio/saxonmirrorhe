@@ -764,7 +764,7 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/command"
         into "${saxoncReleaseDir}/command"
-        if (edition == "he") {
+        if (edition != "ee") {
           exclude "Validate.c"
         }
         filter { line ->
