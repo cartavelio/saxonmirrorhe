@@ -137,7 +137,7 @@ cdef char * out_make_c_str(str str_value, encoding='utf-8'):
      if str_value is None:
          return NULL
      else:
-         py_string_string = str_value.encode('UTf-8').decode(encoding) if str_value is not None else None
+         py_string_string = str_value.encode('UTF-8').decode(encoding) if str_value is not None else None
          c_string = py_string_string if str_value is not None else ""
          return c_string
 
@@ -1240,7 +1240,7 @@ cdef class PyXslt30Processor:
         stylesheet if it has not yet been executed.
         Args:
             name (str): The name of the stylesheet parameter
-            encoding (str): The encoding of the name string. If not specified then the platform default encoding is used
+            encoding (str): The encoding of the name string. If not specified then the platform default encoding is used.
         Returns:
             bool: True if the removal of the parameter has been successful, False otherwise.
         """
@@ -1469,7 +1469,8 @@ cdef class PyXslt30Processor:
             **kwds: Required keyword arguments: source_file (str) and stylesheet_file (str).
                 Possible arguments: base_output_uri (str) which is used for resolving relative URIs in the href
                 attribute of the xsl:result-document instruction. Also accept the keyword 'encoding' (str) to
-                specify the encoding of the output string. This must be the same used in the transformation. If not specified then the platform default encoding is used.
+                specify the encoding of the output string. This must match the encoding specified by xsl:output in
+                the stylesheet. If not specified then the platform default encoding is used.
         Example:
             result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
         Raises:
@@ -2140,8 +2141,9 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: one of source_file (str) or xdm_node (PyXdmNode);
                 base_output_uri (str) which is used for resolving relative URIs
                 in the href attribute of the xsl:result-document instruction.
-                Also accept the keyword 'encoding' (str) to specify the encoding of the output string.
-                This must be the same used in the transformation. If not specified then the platform default encoding is used.
+                Also accept the keyword 'encoding' (str) to specify the encoding of the output string. This must
+                match the encoding specified by xsl:output in the stylesheet, or as specified using set_property()
+                on this PyXsltExecutable. If not specified then the platform default encoding is used.
         Raises:
             PySaxonApiError: Error raised in the event of a dynamic error
 
@@ -2461,9 +2463,10 @@ cdef class PyXsltExecutable:
         Args:
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue) can be used to supply
                 the initial match selection; and base_output_uri (str) which is used for resolving relative URIs
-                in the href attribute of the xsl:result-document instruction.  Also accept the keyword 'encoding' (str) to
-                specify the encoding of the output string. This must be the same used in the transformation.
-                If not specified then the platform default encoding is used.
+                in the href attribute of the xsl:result-document instruction.  Also accept the keyword 'encoding'
+                (str) to specify the encoding of the output string. This must match the encoding specified by
+                xsl:output in the stylesheet, or as specified using set_property() on this PyXsltExecutable. If
+                not specified then the platform default encoding is used.
         Returns:
             str: Result of the transformation as a str value
         Raises:
@@ -2680,8 +2683,10 @@ cdef class PyXsltExecutable:
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: base_output_uri (str) which is used for resolving relative URIs in
-                the href attribute of the xsl:result-document instruction. encoding (str) set the encoding of the output string.
-                 This must be the same used in the transformation. If not specified then the platform default encoding is used.
+                the href attribute of the xsl:result-document instruction. Also accept the keyword 'encoding' (str)
+                to specify the encoding of the output string. This must match the encoding specified by xsl:output
+                in the stylesheet, or as specified using set_property() on this PyXsltExecutable. If not specified
+                then the platform default encoding is used.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Raises:
@@ -2854,8 +2859,10 @@ cdef class PyXsltExecutable:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
 			    to the function.
-            **kwds: Possible keyword arguments: base_output_uri (str), encoding (str) of the output string. If not supplied the default platform encoding is used.
-            This must match the encoding used by the transformation.
+            **kwds: Possible keyword arguments: base_output_uri (str). Also accept the keyword 'encoding' (str) to
+                specify the encoding of the output string. This must match the encoding specified by xsl:output in
+                the stylesheet, or as specified using set_property() on this PyXsltExecutable. If not specified
+                then the platform default encoding is used.
         Returns:
             str: Result of the transformation as a str value
         Raises:
@@ -4582,8 +4589,8 @@ cdef class PyXdmNode(PyXdmItem):
         """
         node_kind(self)
         Node kind property. 
-        There are seven kinds of node: documents=9, elements = 1, attributes =2, text=3, comments = 8, processing-instructions = 7,
-        and namespaces=13.
+        There are seven kinds of node: documents=9, elements = 1, attributes =2, text=3, comments = 8,
+        processing-instructions = 7, and namespaces=13.
         Returns:
             int: an integer identifying the kind of node. These integer values are the same as those used in the DOM
         """
