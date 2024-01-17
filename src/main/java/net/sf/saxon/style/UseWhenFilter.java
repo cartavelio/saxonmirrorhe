@@ -271,10 +271,11 @@ public class UseWhenFilter extends ProxyReceiver {
                         e.setErrorCode("XTSE0210");
                     }
                 }
+                e.maybeSetLocation(location);
                 if (!e.hasBeenReported()) {
                     compilation.reportError(e);
                 }
-                throw e.maybeWithLocation(location);
+                throw e;
             }
         }
     }
