@@ -1668,250 +1668,25 @@ public class SaxonCAPI {
      * @param cwd       - Current working directory
      * @param filename - the file name
      * @param nature  - the nature of the file
-     * @return Source
+     * @return
      * @throws SaxonApiException if error occurs when parsing file
      */
     public static Source resolveFileToSource(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
-
-        Source source;
-        URI cwdURI = null;
-
-        char separatorChar = '/';
-        char foundSeparator = File.separatorChar;
-        if(filename.contains("\\")) {
-            foundSeparator = '\\';
-        }
-        if (foundSeparator != '/') {
-            filename = filename.replace(foundSeparator, separatorChar);
-            File file = new File(filename);
-            if(file.isAbsolute()) {
-                filename = file.toURI().toString();
-            }
-        }
-
-        try {
-            if(cwd != null) {
-                if (debug) {
-                    System.err.println("ccwd-cp0 = " + cwd);
-                }
-                cwd = escapeURIPathParam(cwd);
-                cwdURI = new URI(cwd);
-            }
-            filename = escapeURIPathParam(filename);
-
-            if (debug) {
-                System.err.println("ccwd = " + cwd);
-                if(cwdURI != null) {
-                    System.err.println("ccwdURI = " + cwdURI.toString());
-                }
-                System.err.println("filename = " + filename);
-                System.err.println("(cwdURI != null ? cwdURI.resolve(filename).toString() : filename) = " + (cwdURI != null ? cwdURI.resolve(filename).toASCIIString() : filename));
-            }
-
-            ResourceRequest request = new ResourceRequest();
-            request.baseUri = (cwdURI != null ? cwdURI.toString() : null);
-            request.uri = (cwdURI != null ? cwdURI.resolve(filename).toASCIIString() : filename);
-            request.nature = nature;
-
-            Configuration config = processor.getUnderlyingConfiguration();
-            source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
-
-            if (debug) {
-                System.err.println("DEBUG source.getSystemID()=" + source.getSystemId());
-            }
-            if (source == null) {
-                if (debug) {
-                    System.err.println("DEBUG: Using resolver fallback");
-                }
-                source = resolveFileToSource_fallback(cwd, filename);
-
-            }
-
-            return source;
-        } catch (XPathException | URISyntaxException | NullPointerException exception) {
-            if(debug) {
-                System.err.println("DEBUG: Exception thrown: "+exception.getMessage());
-                System.err.println("DEBUG: Using resolver fallback");
-
-            }
-            source = resolveFileToSource_fallback(cwd, filename);
-            return source;
-        }
-
+        return PathHelper.resolveToSource(processor.getUnderlyingConfiguration(), cwd, filename, nature);
     }
 
 
     /**
-     * Resolve file name. Returns the file as a String object
+     * Resolve file name. Returns the file as a URI object
      *
      * @param processor  - processor object
      * @param cwd       - Current working directory
      * @param filename - the file name
-     * @return Source
+     * @return
      * @throws SaxonApiException if error occurs when parsing file
      */
     public static URI resolveFileToURI(Processor processor, String cwd, String filename) throws SaxonApiException {
-        
-        URI cwdURI = null;
-
-        char separatorChar = '/';
-        char foundSeparator = File.separatorChar;
-        if(filename.contains("\\")) {
-            foundSeparator = '\\';
-        }
-        if (foundSeparator != '/') {
-            filename = filename.replace(foundSeparator, separatorChar);
-            File file = new File(filename);
-            if(file.isAbsolute()) {
-                filename = file.toURI().toString();
-            }
-        }
-        
-
-        try {
-            if(cwd != null) {
-                cwd = escapeURIPathParam(cwd);
-                cwdURI = new URI(cwd);
-            }
-            filename = escapeURIPathParam(filename);
-
-            if (debug) {
-                System.err.println("ccwd = " + cwd);
-                if(cwdURI != null) {
-                    System.err.println("ccwdURI = " + cwdURI.toString());
-                }
-                System.err.println("filename = " + filename);
-                System.err.println("(cwdURI != null ? cwdURI.resolve(filename).toString() : filename) = " + (cwdURI != null ? cwdURI.resolve(filename).toASCIIString() : filename));
-            }
-
-
-
-            URI result = cwdURI.resolve(filename);
-
-            return result;
-
-
-        } catch (Exception exception) {
-            if(debug) {
-                System.err.println("DEBUG: Exception thrown: "+exception.getMessage());
-                System.err.println("DEBUG: Using resolver fallback");
-                exception.printStackTrace();
-            }
-            return null;
-        }
-
-
-    }
-
-    /**
-     * Fallback mode when resolving a file is the XML resolver fails.
-     * @param cwd
-     * @param filename
-     * @return  Source object
-     * @throws SaxonApiException if errors occurs when resolving file
-     */
-    public static Source resolveFileToSource_fallback(String cwd, String filename) throws SaxonApiException {
-
-        Source source = null;
-        File file = null;
-
-        if (cwd != null && cwd.length() > 0) {
-
-            try {
-                if (filename.startsWith("http:")) {
-                    URI fileURI = null;
-                    fileURI = new URI(filename);
-                    URL url = fileURI.toURL();
-                    InputStream in = url.openStream();
-                    source = new StreamSource(in);
-                    source.setSystemId(filename);
-
-                } else {
-
-                    file = absoluteFile(cwd, filename);
-                    source = new StreamSource(file);
-                    source.setSystemId(file.getAbsolutePath());
-                }
-            } catch (Exception e) {
-                URL url = null;
-                try {
-                    URI fileURI = null;
-                    fileURI = new URI(filename);
-                    url = fileURI.toURL();
-                    InputStream in = url.openStream();
-                    source = new StreamSource(in);
-                    source.setSystemId(filename);
-                } catch (MalformedURLException e1) {
-                    throw new SaxonApiException(e);
-                } catch (IOException e1) {
-                    throw new SaxonApiException(e);
-                } catch (URISyntaxException e1) {
-                    throw new SaxonApiException(e1);
-                }
-
-            }
-
-
-            return source;
-        } else {
-            if (filename == null) {
-                throw new SaxonApiException("Null string found for the filename");
-            }
-            file = new File(filename);
-            StreamSource stream = new StreamSource(file);
-            stream.setSystemId(filename);
-            source = stream;
-            return source;
-        }
-    }
-
-
-    /**
-     * Create a File object given the filename and the cwd used fix-up the location of the file.
-     *
-     * @param cwd      - Supply the current working directory which the filename will be resolved against
-     * @param filename  - the file name
-     * @return file object
-     * @throws SaxonApiException if cannot create file or if filename is null
-     */
-    public static File absoluteFile(String cwd, String filename) throws SaxonApiException {
-        if (filename == null) {
-            throw new SaxonApiException("Failed to create file - File name is null");
-        }
-        if (cwd == null) {
-            try {
-                return new File(filename);
-            } catch (NullPointerException ex) {
-                throw new SaxonApiException("Failed to create file");
-            }
-        }
-        ;
-        char separatorChar = '/';
-        if (File.separatorChar != '/') {
-            filename.replace(separatorChar, File.separatorChar);
-            cwd.replace(separatorChar, File.separatorChar);
-            separatorChar = '\\';
-        }
-        if (cwd != null && !cwd.endsWith(String.valueOf(separatorChar))) {
-            cwd = cwd.concat(String.valueOf(separatorChar));
-        }
-        File absFile = null;
-        try {
-            absFile = new File(filename);
-        } catch (NullPointerException ex) {
-            throw new SaxonApiException("Failed to create file");
-        }
-        String fullpath;
-        if (!absFile.isAbsolute()) {
-            fullpath = cwd + filename;
-        } else {
-            fullpath = filename;
-        }
-        try {
-            return new File(fullpath);
-        } catch (NullPointerException ex) {
-            throw new SaxonApiException("Failed to create file - File name is null");
-        }
+        return PathHelper.resolveToURI(processor.getUnderlyingConfiguration(), cwd, filename);
     }
 
     /**
