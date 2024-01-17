@@ -1,5 +1,6 @@
 package net.sf.saxon.junit;
 
+import spark.Response;
 import spark.Route;
 import spark.Service;
 
