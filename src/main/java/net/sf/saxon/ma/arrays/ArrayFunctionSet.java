@@ -208,6 +208,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(2, BuiltInAtomicType.INTEGER, OPT, null)
                     .arg(3, BuiltInAtomicType.INTEGER, OPT, null));
 
+            register("split", 1, 1, e -> e.populate(ArraySplit::new, ArrayItemType.ANY_ARRAY_TYPE, STAR, 0)
+                             .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+
             register("replace", 3, e -> e.populate(ArrayReplace::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
@@ -825,6 +828,24 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 members.add(UnparcelFn.unparcel(parcel, context));
             }
             return new SimpleArrayItem(members);
+        }
+    }
+
+    /**
+     * Implementation of the function array:slice(array, start, end, step) =&gt; array
+     */
+    public static class ArraySplit extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem input = (ArrayItem) arguments[0].head();
+            List<Item> result = new ArrayList<>();
+            for (GroundedValue member : input.members()) {
+                List<GroundedValue> subArray  = new ArrayList<>();
+                subArray.add(member);
+                result.add(new SimpleArrayItem(subArray));
+            }
+            return SequenceExtent.makeSequenceExtent(result);
         }
     }
 
