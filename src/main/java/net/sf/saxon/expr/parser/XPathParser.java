@@ -566,7 +566,6 @@ public class XPathParser {
     /*@NotNull*/
     public Expression parse(String expression, int start, int terminator, StaticContext env)
             throws XPathException {
-        // System.err.println("Parse expression: " + expression);
         this.env = env;
         int languageVersion = env.getXPathVersion();
         if (languageVersion == 20 && language == ParsedLanguage.XQUERY) {
