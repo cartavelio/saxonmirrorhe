@@ -20,7 +20,7 @@ XdmValue::XdmValue(const XdmValue &other) {
   //values.resize(0);
   values_cap = other.values_cap;
   relinquished_values = new char[values_cap];
-  memset(relinquished_values, 0, sizeof((char *) + relinquished_values));
+  memset(relinquished_values, 0, sizeof(*relinquished_values) * values_cap);
   for (int i = 0; i < xdmSize; i++) {
     addXdmItem(other.values[i]);
   }
@@ -56,8 +56,7 @@ XdmValue::XdmValue(int64_t valRef) {
   values_cap = 1;
   values = new XdmItem*[values_cap];
   relinquished_values = new char[values_cap];
-  memset(relinquished_values, 0, sizeof((char *) + relinquished_values));
-  //values.resize(0); // TODO memory issue might occur here. Need to delete XdmItems
+  relinquished_values[0] = 0;
   addXdmItem(value);
   jValues = -1;
   valueType = nullptr;
@@ -66,8 +65,6 @@ XdmValue::XdmValue(int64_t valRef) {
 
 XdmValue::XdmValue(int64_t val, bool arr) {
   xdmSize = 0;
-  //values.resize(0);
-
   jValues = -1;
   valueType = nullptr;
   toStringValue = nullptr;
@@ -82,7 +79,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
   values_cap =xdmSizei;
   values = new XdmItem*[values_cap];
   relinquished_values = new char[values_cap];
-  memset(relinquished_values, 0, sizeof((char *) + relinquished_values));
+  memset(relinquished_values, 0, sizeof(*relinquished_values) * values_cap);
   int typeRef = 0;
 
   for (int p = 1; p <= xdmSizei; ++p) {

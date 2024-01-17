@@ -812,16 +812,12 @@ void testContext2NotRootNamedTemplate(SaxonProcessor *saxonproc,
 
   cerr << "result2 = " << result2Str << std::endl;
   delete result2Str;
-  cerr << "checkpoint0 " <<  std::endl;
   delete item1;
   item1= nullptr;
-  cerr << "checkpoint1 " <<  std::endl;
   delete result;
   result = nullptr;
   delete input_;
-  cerr << "checkpoint 2 " <<  std::endl;
   delete executable;
-  cerr << "checkpoint3 " <<  std::endl;
 }
 
 void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
