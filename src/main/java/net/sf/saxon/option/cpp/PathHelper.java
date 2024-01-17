@@ -4,6 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.DirectResourceResolver;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
@@ -50,7 +51,7 @@ public class PathHelper {
      * namespace (for XSLT and XSD).
      *
      * @param config   - The current Configuration object
-     * @param cwd      - Current working directory
+     * @param cwd      - Current working directory, which must be non-null and an absolute system path
      * @param path     - the file path or URI
      * @param nature   - one of the ResourceRequest.*_NATURE strings
      * @return
@@ -60,20 +61,24 @@ public class PathHelper {
         Source source;
         Path cwdPath = null;
         URI cwdURI = null;
+        if (cwd == null || cwd == "") {
+            throw new SaxonApiException("C API call error - cwd must be set to an absolute system path");
+        }
         try {
-            if (cwd != null) {
-                cwdPath = Paths.get(cwd);
-                cwdURI = cwdPath.toUri();
-                // should we throw if cwdPath is not absolute?
-            }
+            cwdPath = Paths.get(cwd);
+            cwdURI = cwdPath.toUri();
 
             URI normalisedPathURI = normalisePathToURI(path);
             ResourceRequest request = new ResourceRequest();
-            request.baseUri = (cwdURI != null ? cwdURI.toString() : null);
+            request.baseUri = cwdURI.toASCIIString();
             if (normalisedPathURI == null) {
-                request.uri = (cwdURI != null ? cwdPath.resolve(path).toUri().toASCIIString() : normalisePathToRelativeURI(path));
+                request.relativeUri = path;
+                request.uri = cwdPath.resolve(path).toUri().toASCIIString();
+            } else {
+                request.uri = normalisedPathURI.toASCIIString();
             }
             request.nature = nature;
+            request.purpose = ResourceRequest.ANY_PURPOSE;
 
             source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
 
