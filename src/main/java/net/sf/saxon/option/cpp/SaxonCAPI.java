@@ -137,6 +137,7 @@ public class SaxonCAPI {
         String debugFlag  = System.getenv("SAXONC_DEBUG_FLAG");
         if(debugFlag != null && debugFlag.equals("true")) {
             SaxonCAPI.debug = true;
+            PathHelper.debug = true;
             //com.oracle.svm.core.SubstrateGCOptions.VerboseGC.update(true);
         }
         if (debug && licensei) {
