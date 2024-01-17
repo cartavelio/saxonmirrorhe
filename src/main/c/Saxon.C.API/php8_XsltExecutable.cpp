@@ -338,9 +338,9 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
       XdmValue *result = xsltExecutable->callFunctionReturningValue(
           functionName, arguments, argument_length);
       for (int i = 0; i< argument_length;i++) {
-        delete argument[i];
+        delete arguments[i];
       }
-      delete [] argument_length;
+      delete [] arguments;
 
       if (result != nullptr) {
         result->incrementRefCount();
@@ -360,9 +360,9 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
       }
     } catch (SaxonApiException &e) {
       for (int i = 0; i< argument_length;i++) {
-        delete argument[i];
+        delete arguments[i];
       }
-      delete [] argument_length;
+      delete [] arguments;
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
   }
