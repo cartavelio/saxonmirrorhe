@@ -132,21 +132,21 @@
         declaration in XQuery.)</p>
 
       <p>For example, to invoke the <code>saxon:evaluate()</code> function in XSLT, write:</p>
-      <samp><![CDATA[<xsl:variable name="expression"
+      <pre><code class="language-xml"><![CDATA[<xsl:variable name="expression"
       select="concat('child::', $param, '[', $index, ']')"/>
 ..
 <xsl:copy-of select="saxon:evaluate($expression)"
      xmlns:saxon="http://saxon.sf.net/"/>
-]]></samp>
+]]></code></pre>
 
       <p>The equivalent in XQuery is:</p>
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+      <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/";
 declare variable $param as xs:string external;
 declare variable $index as xs:integer external;
 declare variable $expression :=
       concat('child::', $param, '[', $index, ']');
 saxon:evaluate($expression)
-]]></samp>
+]]></code></pre>
 
       <aside>Saxon extension functions are not as stable as functions in the core library. Many of
         them are retained over a long sequence of releases, but on occasions they are superseded by
@@ -349,9 +349,9 @@ saxon:evaluate($expression)
         <code>extension-element-prefixes</code> attribute.</p>
 
     <p>For example, the <code>saxon:assignable</code> attribute can be set as follows:</p>
-    <samp><![CDATA[<xsl:variable name="counter" saxon:assignable="yes" 
+    <pre><code class="language-xml"><![CDATA[<xsl:variable name="counter" saxon:assignable="yes" 
     xmlns:saxon="http://saxon.sf.net/">
-]]></samp>
+]]></code></pre>
     
     <p>Like standard attributes in no namespace, extension attributes in the Saxon namespace
     can be prefixed with an underscore and used as shadow attributes (evaluated with a static expression).
@@ -383,25 +383,25 @@ saxon:evaluate($expression)
         more specific type for a value.</p>
       
       <p>For example:</p>
-      <samp><![CDATA[<xsl:param name="options" 
+      <pre><code class="language-xml"><![CDATA[<xsl:param name="options" 
    as="map(xs:string, xs:anyAtomicType*)"
    saxon:as="tuple(validate as xs:boolean, duplicates as xs:boolean, limit as xs:integer, 
       codes as xs:string*)"
    xmlns:saxon="http://saxon.sf.net/"
    select="map{'validate': true(), 'duplicates': false(), 'limit': 17, 
-      'codes': ('USD', 'GBP', 'EUR')}"/>]]></samp>
+      'codes': ('USD', 'GBP', 'EUR')}"/>]]></code></pre>
       
-      <samp><![CDATA[<xsl:variable name="sqlConnection" 
+      <pre><code class="language-xml"><![CDATA[<xsl:variable name="sqlConnection" 
    saxon:as="javatype:java.sql.Connection"
    xmlns:saxon="http://saxon.sf.net/"
    xmlns:javatype="http://saxon.sf.net/java-type"
-   select="..."/>]]></samp>
+   select="..."/>]]></code></pre>
       
-      <samp><![CDATA[<xsl:param name="when"
+      <pre><code class="language-xml"><![CDATA[<xsl:param name="when"
    required="yes"
    as="xs:anyAtomicType"
    saxon:as="union(xs:date, xs:time, xs:dateTime)"
-   xmlns:saxon="http://saxon.sf.net/">]]></samp>
+   xmlns:saxon="http://saxon.sf.net/">]]></code></pre>
       
       <p>If both the <code>as</code> and <code>saxon:as</code> attributes are present, then the type given in the
       <code>saxon:as</code> attribute must be a subtype of the type given in the <code>as</code> attribute.</p>
@@ -537,16 +537,17 @@ saxon:evaluate($expression)
         the standard error output) a representation of the optimized expression tree for the
         template or function containing that instruction. The tree is represented by indentation.
         For example, consider this source code:</p>
-      <samp><![CDATA[<xsl:variable name="p" select="0"/>
+      <pre><code class="language-xml"><![CDATA[<xsl:variable name="p" select="0"/>
 
- <xsl:template match="/" saxon:explain="yes" xmlns:saxon="http://saxon.sf.net/" exclude-result-prefixes="saxon">
+ <xsl:template match="/" saxon:explain="yes" xmlns:saxon="http://saxon.sf.net/" 
+   exclude-result-prefixes="saxon">
    <a>
      <xsl:choose>
      <xsl:when test="$p != 0"><xsl:value-of select="1 div $p"/></xsl:when>
      <xsl:otherwise>12</xsl:otherwise>
      </xsl:choose>
    </a>
- </xsl:template>]]></samp>
+ </xsl:template>]]></code></pre>
 
       <p>This produces the output:</p>
       <samp><![CDATA[Optimized expression tree for template at line 8 in file:/e:/temp/test.xsl:
@@ -804,10 +805,10 @@ saxon:evaluate($expression)
     <p>In XQuery, Saxon allows both standard serialization options and Saxon-specific serialization
       parameters to be specified by means of a <code>saxon:output</code> option declaration in the
       query prolog. For example:</p>
-    <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+    <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/";
 declare option saxon:output "indent=yes";
 declare option saxon:output "saxon:indent-spaces=3";
-]]></samp>
+]]></code></pre>
 
     <h3 class="subtitle">Standard serialization parameters</h3>
 
@@ -966,7 +967,7 @@ declare option saxon:output "saxon:indent-spaces=3";
 
         <p> In the following example, the image displays as a small red dot. Note that whitespace
           can be freely inserted into the base64Binary string. </p>
-        <samp><![CDATA[<xsl:template name="main">
+        <pre><code class="language-xml"><![CDATA[<xsl:template name="main">
   <html>
     <head>
       <title>An image</title>
@@ -984,7 +985,7 @@ declare option saxon:output "saxon:indent-spaces=3";
     </xsl:text>
   </xsl:result-document>
 </xsl:template>
-]]></samp>
+]]></code></pre>
 
         <p>It is of course possible to construct the base64Binary value programmatically. 
           The functions in the EXPath binary module are useful for this purpose: see the 
@@ -1026,7 +1027,7 @@ declare option saxon:output "saxon:indent-spaces=3";
           cannot appear in the middle of an <code>xs:hexBinary</code> value, but the string can be
           split into multiple text nodes so long as each contains an even number of characters. </p>
 
-        <samp><![CDATA[<xsl:template name="main">
+        <pre><code class="language-xml"><![CDATA[<xsl:template name="main">
   <html>
     <head>
       <title>An image</title>
@@ -1055,7 +1056,7 @@ declare option saxon:output "saxon:indent-spaces=3";
     <xsl:text>454E44AE426082</xsl:text>
   </xsl:result-document>
 </xsl:template>
-]]></samp>
+]]></code></pre>
 
         <p>It is of course possible to construct the hexBinary value programmatically. The EXPath binary
           library is however geared towards creating base64Binary values, so that will usually be a better option.</p>
@@ -1125,10 +1126,10 @@ declare option saxon:output "saxon:indent-spaces=3";
       
       <p>Saxon provides an option declaration to set serialization parameters. This takes the form
         shown in the following example:</p>
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+      <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/";
 declare option saxon:output "method=html";
 declare option saxon:output "saxon:indent-spaces=1";
-]]></samp>
+]]></code></pre>
       
       <p>All the standard serialization parameters described in the <a
         href="http://www.w3.org/TR/xslt-xquery-serialization-31/" class="bodylink">W3C
@@ -1214,20 +1215,20 @@ declare option saxon:output "saxon:indent-spaces=1";
       
       <p>Saxon provides an option declaration to treat the immediately following function as a
         memo-function. This takes the form shown in the following example:</p>
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+      <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/";
 declare option saxon:memo-function "true";
 declare function local:factorial($n as xs:integer) as xs:integer {
   local:factorial($n - 1) * n
 };
-]]></samp>
+]]></code></pre>
       
       <p>Alternatively:</p>
       
-      <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/";
+      <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/";
 declare %saxon:memo-function function local:factorial($n as xs:integer) as xs:integer {
   local:factorial($n - 1) * n
 };
-]]></samp>
+]]></code></pre>
       
       <p>A memo function remembers the results of previous calls, so if it is called twice with the
         same arguments, it will not repeat the computation, but return the previous result.</p>
@@ -1257,8 +1258,8 @@ declare %saxon:memo-function function local:factorial($n as xs:integer) as xs:in
         static and dynamic type checking.</p>
       
       <p>The extension takes the form:</p>
-      <samp><![CDATA[(# saxon:validate-type my:personType #) { expr }
-]]></samp>
+      <pre><code class="language-xquery"><![CDATA[(# saxon:validate-type my:personType #) { expr }
+]]></code></pre>
       
       <p>Conceptually, it makes a copy of the result of evaluating <code>expr</code> and validates
         it against the named schema type, causing the copied nodes to acquire type annotations
@@ -1279,7 +1280,7 @@ declare %saxon:memo-function function local:factorial($n as xs:integer) as xs:in
         <code>"http://saxon.sf.net/"</code>.</p>
       
       <p>Here is a complete example:</p>
-      <samp><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
+      <pre><code class="language-xquery"><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
 declare namespace saxon="http://saxon.sf.net/";
 import schema namespace fpml = "http://www.fpml.org/2005/FpML-4-2" at "....";
 
@@ -1290,7 +1291,7 @@ declare function time:getCurrentHourMinuteTime() as element(*, fpml:HourMinuteTi
             <time>{substring($time, 1, 5)}:00</time>
         }
 };        
-]]></samp>
+]]></code></pre>
       
       <p>Saxon ignores any pragmas in a namespace other than the Saxon namespace; it rejects any
         pragmas whose QName is ill-formed, as well as pragmas in the Saxon namespace whose local
@@ -1298,7 +1299,7 @@ declare function time:getCurrentHourMinuteTime() as element(*, fpml:HourMinuteTi
       
       <p>The construct also allows validation of attributes against a simple type definition, for
         example:</p>
-      <samp><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
+      <pre><code class="language-xquery"><![CDATA[module namespace time="http://www.example.com/module/hour-minute-time";
 declare namespace saxon="http://saxon.sf.net/";
 import schema namespace fpml = "http://www.fpml.org/2005/FpML-4-2" at "....";
 
@@ -1308,7 +1309,7 @@ declare function time:getCurrentHourMinuteTime() as attribute(*, fpml:HourMinute
        attribute time {concat(substring($time, 1, 5), ':00')}
     }
 };        
-]]></samp>
+]]></code></pre>
     </section>
     
     <section id="trace" title="FLWOR expression trace clause">
@@ -1324,11 +1325,11 @@ declare function time:getCurrentHourMinuteTime() as attribute(*, fpml:HourMinute
       
       <p>For example,</p>
       
-      <samp><![CDATA[for $item in //items
+      <pre><code class="language-xquery"><![CDATA[for $item in //items
 trace "item: " || $item/@id
 let $price := $item/cost + $item/markup
 trace "selling-price: " || $price
-return "€" + $price]]></samp>
+return "€" + $price]]></code></pre>
       
       <p>Output is displayed in the same way as for the <a class="bodylink code"
         href="/functions/fn/trace">fn:trace()</a> function. It is sent to the current <code>Logger</code>,

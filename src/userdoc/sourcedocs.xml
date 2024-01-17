@@ -244,7 +244,7 @@
         
         
         
-        <samp><![CDATA[<?xml version="1.0"?>
+        <pre><code class="language-xml"><![CDATA[<?xml version="1.0"?>
 <catalog  xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">  
    <group  prefer="public"  xml:base="file:///usr/share/xml/" >  
 
@@ -257,7 +257,7 @@
          uri="docbook45/docbookx.dtd"/>
 
    </group>
-</catalog>]]></samp>
+</catalog>]]></code></pre>
         
         <p>There are many tutorials for XML catalogs available on the web, including some that have
           information specific to Saxon, but take care that it is relevant to the current release.
@@ -1817,9 +1817,9 @@
       events that need to be changed. The filter can be injected into the pipeline by supplying 
       the document in the form of an <code java="net.sf.saxon.lib.AugmentedSource">AugmentedSource</code>: a typical example would be:</p>
       
-      <samp><![CDATA[AugmentedSource as = AugmentedSource.makeAugmentedSource(new StreamSource(...));
+      <pre><code class="language-java"><![CDATA[AugmentedSource as = AugmentedSource.makeAugmentedSource(new StreamSource(...));
 as.addFilter(receiver -> new MyFilter(receiver));
-documentBuilder.build(as);]]></samp>
+documentBuilder.build(as);]]></code></pre>
       
       <p>Here <code>MyFilter</code> is typically a class that extends <code>ProxyReceiver</code>
       by overriding some of its methods: for example, you might override the <code>comment()</code>
@@ -1872,9 +1872,9 @@ documentBuilder.build(as);]]></samp>
         
         <p>It is also possible to switch on XInclude processing (for all documents) by setting the
           system property:</p>
-        <samp><![CDATA[-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=
+        <pre><code class="language-java"><![CDATA[-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=
     org.apache.xerces.parsers.XIncludeParserConfiguration
-]]></samp>
+]]></code></pre>
         
         <p>An alternative approach is to incorporate an XInclude processor as a SAX filter in the input
           pipeline. You can find a suitable SAX filter at <a href="http://xincluder.sourceforge.net/"
@@ -2301,11 +2301,11 @@ documentBuilder.build(as);]]></samp>
           <h2 class="subtitle">The Sapling tree API</h2>
           <p>A new API offered from Saxon 10 is the Sapling tree API. This provides a collection of methods to create
             nodes; for example, to create a document containing a <code>body</code> element with two paragraphs, the expression</p>
-          <samp><![CDATA[doc(
+          <pre><code class="language-java"><![CDATA[doc(
   elem("body")
     .child(elem("p").text("Hello"), 
            elem("p").text("World"))
-      )]]></samp>
+      )]]></code></pre>
           <p>might be used. These methods are found in package <code>net.sf.saxon.sapling</code>, specifically in the
             class <code java="net.sf.saxon.sapling.Saplings">net.sf.saxon.sapling.Saplings</code>.</p>
           <p>The "Sapling" nodes created by these methods are transient nodes used only during tree construction; when the Sapling
@@ -2344,16 +2344,16 @@ documentBuilder.build(as);]]></samp>
             Furthermore, these methods return the element to which they are applied, allowing method chaining.
             So a typical sequence of calls might be:</p>
           
-          <samp><![CDATA[   out.element("employee")
+          <pre><code class="language-java"><![CDATA[   out.element("employee")
       .attribute("ssn", "123456")
       .attribute("location", "Berlin")
       .text("Helmut Schmidt")
       .close();
-]]></samp>
+]]></code></pre>
           
           <p>This example constructs a slightly more complex tree:</p>
           
-          <samp><![CDATA[   Processor processor = new Processor(false);
+          <pre><code class="language-java"><![CDATA[   Processor processor = new Processor(false);
    Serializer destination = processor.newSerializer(new File("out.xml"));
    destination.setOutputProperty(Serializer.Property.INDENT, "no");
    Push.Document doc = processor.newPush(destination).document(true);
@@ -2366,7 +2366,7 @@ documentBuilder.build(as);]]></samp>
          .text(emp.name);
    }
    doc.close(); 
-]]></samp>
+]]></code></pre>
           
           <p>Note that there are no explicit <code>endElement</code> events here; an end tag is written automatically when
             the next sibling is written to the parent element, or when the parent element is closed. The <code>close()</code>
@@ -2519,14 +2519,14 @@ documentBuilder.build(as);]]></samp>
     <p>If the collection URI identifies a file, Saxon treats this as a collection catalog. This is a file
       in XML format that lists the documents comprising the collection. Here is an example of such a
       catalog file:</p>
-    <samp><![CDATA[<collection stable="true">
+    <pre><code class="language-xml"><![CDATA[<collection stable="true">
   <doc href="dir/contents.json"/>
   <doc href="dir/chap1.xml"/>
   <doc href="dir/chap2.xml"/>
   <doc href="dir/chap3.xml"/>
   <doc href="dir/chap4.xml"/>
   <doc href="dir/index.json"/>
-</collection>]]></samp>
+</collection>]]></code></pre>
 
     <p>The <code>stable</code> attribute indicates whether the collection is stable or not. The
       default value is <code>true</code>. If a collection is stable, then the URIs listed in the
@@ -2854,11 +2854,11 @@ documentBuilder.build(as);]]></samp>
             parallel evaluation of multiple threads (Saxon-EE only).</p>
           <p>For example, a <code>CollectionFinder</code> written to handle collection URIs using the
             scheme name "sql" might be supplied as:</p>
-          <samp><![CDATA[config.setCollectionFinder((context, uri) -> 
+          <pre><code class="language-java"><![CDATA[config.setCollectionFinder((context, uri) -> 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
       : new StandardCollectionFinder().findCollection(context, uri)
-)]]></samp>
+)]]></code></pre>
           <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
             of <code>ResourceCollection</code>, perhaps one that retrieves XML documents from
             a relational database.</p>
@@ -2875,11 +2875,11 @@ documentBuilder.build(as);]]></samp>
               parallel evaluation of multiple threads.</p>
             <p>For example, a <code>CollectionFinder</code> written to handle collection URIs using the
               scheme name "sql" might be supplied as:</p>
-            <samp><![CDATA[processor.CollectionFinder = uri => 
+            <pre><code class="language-cs"><![CDATA[processor.CollectionFinder = uri => 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
       : new StandardCollectionFinder().findCollection(context, uri)
-)]]></samp>
+)]]></code></pre>
             <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
               of <code>IEnumerable&lt;IResource&gt;</code>, perhaps one that retrieves XML documents from
               a relational database.</p>
