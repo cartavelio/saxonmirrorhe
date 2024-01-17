@@ -3,24 +3,28 @@
 
    <h1>Configuration</h1>
 
-   <p>There are many parameters and options that can be set to control the way in which Saxon
-      behaves. For a comprehensive guide to the Saxon configuration features see the <a
-         href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
-         target="_blank">Saxon 12 documentation</a>.</p>
-
-   <aside>Note that a small number of the features are not available with SaxonC. Please see the <a
-      href="/technical">Technical information: Limitations</a> section for details.</aside>
+   <p>There are many configuration parameters and options that can be set to control the way in which Saxon
+      behaves. In the SaxonC API in C/C++, PHP and Python, these may either be set at a global level on the
+      <code>SaxonProcessor</code>, or on the specific XSLT, XQuery, XPath and Schema processors.</p>
+   
+   <p>For a complete list of the available Saxon configuration features see the <a
+      href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
+      >Configuration features</a> section in the main Saxon documentation.</p>
+   
+   <p>Note that a small number of the features are not available with SaxonC. Please see the <a
+      href="/technical">Technical information: Limitations</a> section for details.</p>
 
    <h2 class="subtitle">Setting properties on the SaxonProcessor</h2>
 
-   <p>In the SaxonC API in C/C++, PHP and Python, these configuration features can be set at a global
-      level when the <code>SaxonProcessor</code> is created, using the
-         <code>setConfigurationProperty()</code> method. For example in C++:</p>
+   <p>In the SaxonC API, configuration features can be set at a global level when the
+      <code>SaxonProcessor</code> is created, using the <code>setConfigurationProperty()</code> method
+      (<code>set_configuration_property()</code> in Python). For example in C++:</p>
 
    <samp><![CDATA[saxonProcessor->setConfigurationProperty("xsdversion", "1.1");
 
 saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSchemaImports",
   "on");]]></samp>
+   
 
    <h2 class="subtitle">Setting properties on the specific processors</h2>
 
@@ -36,14 +40,17 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       <ul/>
    </nav>
 
-   <section id="xslt" title="XSLT processor">
-      <h1>XSLT processor</h1>
+   <section id="xslt" title="XSLT processor configuration">
+      <h1>XSLT processor configuration</h1>
 
       <p>Details about parameters which can be set on <code>Xslt30Processor</code> or
          <code>XsltExecutable</code>; and properties which can be set on
          <code>XsltExecutable</code>.</p>
 
       <h3 class="codeTitle">setParameter(string $name, XdmValue $value)</h3>
+      
+      <p>The <code>setParameter</code> method is used to supply values for stylesheet parameters (and template
+         parameters), and can also be used to set the source document for a transformation.</p>
 
       <table>
          <thead>
@@ -90,9 +97,9 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       <h3 class="codeTitle">setProperty(string $name, string $propValue)</h3>
 
       <p>The properties available are a subset of those specified for running XSLT from the command
-         line (see the <a target="_blank"
-            href="http://www.saxonica.com/documentation12/index.html#!using-xsl/commandline">Saxon 12
-            documentation</a> for more information).</p>
+         line (see the <a
+            href="http://www.saxonica.com/documentation12/index.html#!using-xsl/commandline">Using XSLT from
+            the command line</a> section in the main Saxon documentation for more information).</p>
 
       <table>
          <thead>
@@ -189,7 +196,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                otherwise the result is returned as an <code>XdmNode</code> object with a Document
                node as its root.</td>
          </tr>
-         <<!--<tr>
+         <!--<tr>
             <td>'extc'</td>
             <td>
                <code>setProperty("extc", "dir/saxonc")</code>
@@ -210,13 +217,16 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       </table>
    </section>
 
-   <section id="xquery" title="XQuery processor">
-      <h1>XQuery processor</h1>
+   <section id="xquery" title="XQuery processor configuration">
+      <h1>XQuery processor configuration</h1>
 
       <p>Details about parameters and properties which can be set on an
          <code>XQueryProcessor</code>.</p>
 
       <h3 class="codeTitle">setParameter(string $name, XdmValue $value)</h3>
+      
+      <p>The <code>setParameter</code> method is used to supply values for query external variables, and can
+         also be used to set the context item for a query.</p>
 
       <table>
          <thead>
@@ -256,11 +266,11 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       </table>
 
       <h3 class="codeTitle">setProperty(string $name, string $propValue)</h3>
-
-      <p>The properties available are a subset of those specified for running XQuery from the
-         command line (see the <a target="_blank"
-            href="http://www.saxonica.com/documentation12/index.html#!using-xquery/commandline">Saxon
-            12 documentation</a> for more information).</p>
+      
+      <p>The properties available are a subset of those specified for running XQuery from the command
+         line (see the <a
+            href="http://www.saxonica.com/documentation12/index.html#!using-xquery/commandline">Using XQuery
+            from the command line</a> section in the main Saxon documentation for more information).</p>
 
       <table>
          <thead>
@@ -355,7 +365,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <p>Invoke a schema-aware query. Requires SaxonC-EE.</p>
             </td>
          </tr>
-         <tr>
+         <!--<tr>
             <td>'extc'</td>
             <td>
                <code>setProperty("extc", "dir/saxonc")</code>
@@ -365,17 +375,20 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                   more information on extension functions, see <a href="/extensibility">Extension
                      functions in C++/PHP</a>.)</p>
             </td>
-         </tr>
+         </tr>-->
       </table>
    </section>
 
-   <section id="xpath" title="XPath processor">
-      <h1>XPath processor</h1>
+   <section id="xpath" title="XPath processor configuration">
+      <h1>XPath processor configuration</h1>
 
       <p>Details about parameters and properties which can be set on an
          <code>XPathProcessor</code>.</p>
 
       <h3 class="codeTitle">setParameter(string $name, XdmValue $value)</h3>
+      
+      <p>The <code>setParameter</code> method is used to supply values for variable references in XPath
+         expressions, and can also be used to set the context item for an expression.</p>
 
       <table>
          <thead>
@@ -476,7 +489,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <p>Specifies the directory where the resources files are found.</p>
             </td>
          </tr>
-         <tr>
+         <!--<tr>
             <td>'extc'</td>
             <td>
                <code>setProperty("extc", "dir/saxonc")</code>
@@ -486,17 +499,20 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                   more information on extension functions, see <a href="/extensibility">Extension
                      functions in C++/PHP</a>.)</p>
             </td>
-         </tr>
+         </tr>-->
       </table>
    </section>
 
-   <section id="schema" title="Schema validator">
-      <h1>Schema validator</h1>
+   <section id="schema" title="Schema validator configuration">
+      <h1>Schema validator configuration</h1>
 
       <p>Details about parameters and properties which can be set on a
          <code>SchemaValidator</code>.</p>
 
       <h3 class="codeTitle">setParameter(string $name, XdmValue $value)</h3>
+      
+      <p>The <code>setParameter</code> method is used to supply values for schema extension parameters, and
+         can also be used to set the source document for validation.</p>
 
       <table>
          <thead>
@@ -522,9 +538,8 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
             </td>
             <td>
                <p>Sets the value of a Saxon extension parameter defined in the schema (see <a
-                     target="_blank"
                      href="http://www.saxonica.com/documentation12/index.html#!schema-processing/parameterizing-schemas"
-                     >Parameterizing schemas</a> in the Saxon 12 documentation for more
+                     >Parameterizing schemas</a> in the main Saxon documentation for more
                   information).</p>
             </td>
          </tr>
@@ -533,9 +548,9 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       <h3 class="codeTitle">setProperty(string $name, string $propValue)</h3>
 
       <p>The properties available are a subset of those specified for running schema validation from
-         the command line (see the <a target="_blank"
+         the command line (see the <a
             href="http://www.saxonica.com/documentation12/index.html#!schema-processing/commandline"
-            >Saxon 12 documentation</a> for more information).</p>
+            >Validation from the command line</a> section in the main Saxon documentation for more information).</p>
 
       <table>
          <thead>
