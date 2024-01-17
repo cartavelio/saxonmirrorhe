@@ -884,6 +884,10 @@ public class XQueryParser extends XPathParser {
                 while (true) {
                     boolean negative = t.currentToken == Token.MINUS;
                     if (negative) {
+                        if (!allowXPath40Syntax) {
+                            grumble("Minus sign in annotation value requires 4.0 to be enabled");
+                            return null;
+                        }
                         nextToken();
                     }
                     Literal arg;
