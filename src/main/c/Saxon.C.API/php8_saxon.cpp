@@ -126,7 +126,7 @@ PHP_METHOD(SaxonProcessor, __construct) {
       (saxonProcessor_object *)((char *)zobj -
                                 XtOffsetOf(saxonProcessor_object, std));
 
-  saxonProc = new SaxonProcessor(license);
+  saxonProc = new SaxonProcessor(true);
 
   obj->saxonProcessor = saxonProc;
   // std::cerr<<"SaxonProcessorConstructor cp1"<<std::endl;
@@ -543,7 +543,7 @@ PHP_METHOD(SaxonProcessor, setCatalog) {
   char *catalogFile;
   size_t len;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &catalogFile, &len) ==
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "sb", &catalogFile, &len) ==
       FAILURE) {
     RETURN_NULL();
   }
@@ -557,56 +557,6 @@ PHP_METHOD(SaxonProcessor, setCatalog) {
 
     if (catalogFile != nullptr) {
       saxonProcessor->setCatalog(catalogFile);
-    }
-  }
-}
-
-
-PHP_METHOD(SaxonProcessor, setCatalogFiles) {
-  SaxonProcessor *saxonProcessor;
-  zval *items_zval;
-  size_t len;
-  HashTable *arr_hash;
-
-
-  zval *val;
-  long num_key;
-  int argument_length = 0;
-  zend_string *key;
-  int i =0;
-
-  const char ** catalogFiles = nullptr;
-
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &items_zval) ==
-      FAILURE) {
-    RETURN_NULL();
-  }
-
-  zend_object *pobj = Z_OBJ_P(getThis());
-  saxonProcessor_object *obj =
-      (saxonProcessor_object *)((char *)pobj -
-                                XtOffsetOf(saxonProcessor_object, std));
-  saxonProcessor = obj->saxonProcessor;
-  if (saxonProcessor != nullptr) {
-    arr_hash = Z_ARRVAL_P(items_zval);
-    argument_length = zend_hash_num_elements(arr_hash);
-
-    catalogFiles = new const char *[argument_length];
-
-    ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-      if (Z_TYPE_P(val) == IS_STRING) {
-        catalogFiles[i]  = Z_STRVAL_P(val);
-
-        i++;
-      } else {
-        // TODO error warning
-      }
-    }
-    ZEND_HASH_FOREACH_END();
-
-    if (catalogFiles != nullptr) {
-      saxonProcessor->setCatalogFiles(catalogFiles, argument_length);
-      delete [] catalogFiles;
     }
   }
 }
@@ -637,16 +587,12 @@ PHP_METHOD(SaxonProcessor, setcwd) {
 PHP_METHOD(SaxonProcessor, parseJsonFromString) {
   SaxonProcessor *saxonProcessor;
   char *source;
-  char *encoding = nullptr;
-  size_t len1, len2;
+  size_t len1;
 
   if (ZEND_NUM_ARGS() == 1 &&
       zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  } else   if (ZEND_NUM_ARGS() == 2 &&
-     zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &source, &len1, &encoding, &len2) == FAILURE) {
-     RETURN_NULL();
-   }
+  } 
 
   zend_object *pobj = Z_OBJ_P(getThis());
   saxonProcessor_object *obj =
@@ -656,18 +602,18 @@ PHP_METHOD(SaxonProcessor, parseJsonFromString) {
   saxonProcessor = obj->saxonProcessor;
   if (saxonProcessor != nullptr) {
 
-    XdmValue *value = saxonProcessor->parseJsonFromString(source, encoding);
-    if (value != nullptr) {
-      if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+    XdmNode *node = saxonProcessor->parseJsonFromString(source);
+    if (node != nullptr) {
+      if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
         RETURN_NULL();
       } else {
-        value->incrementRefCount();
+        node->incrementRefCount();
         zend_object *vobj = Z_OBJ_P(return_value);
-        xdmValue_object *xdmVObj =
-            (xdmValue_object *)((char *)vobj - XtOffsetOf(xdmValue_object, std));
-        assert(xdmVObj != nullptr);
+        xdmNode_object *xdmNObj =
+            (xdmNode_object *)((char *)vobj - XtOffsetOf(xdmNode_object, std));
+        assert(xdmNObj != nullptr);
 
-        xdmVObj->xdmValue = value;
+        xdmNObj->xdmNode = node;
       }
     } else {
       if (obj->saxonProcessor->exceptionOccurred()) {
@@ -726,23 +672,15 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
   SchemaValidator *validator = nullptr;
   zval *oth = nullptr;
   char *source;
-  char * encoding = nullptr;
-  size_t len1, len2;
-
-  if (ZEND_NUM_ARGS() > 3) {
-    WRONG_PARAM_COUNT;
-  }
+  size_t len1;
 
   if (ZEND_NUM_ARGS() == 1 &&
       zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  }   else if (ZEND_NUM_ARGS() == 2 &&
+  } else if (ZEND_NUM_ARGS() == 2 &&
              zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &source, &len1,
                                    &oth) == FAILURE) {
     RETURN_NULL();
-  }  else if (ZEND_NUM_ARGS() == 3 &&
-              zend_parse_parameters(ZEND_NUM_ARGS(), "szs", &source, &len1, &oth, &encoding, &len2) == FAILURE) {
-            RETURN_NULL();
   }
 
   zend_object *pobj = Z_OBJ_P(getThis());
@@ -763,7 +701,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
       }
     }
 
-    XdmNode *node = saxonProcessor->parseXmlFromString(source, encoding, validator);
+    XdmNode *node = saxonProcessor->parseXmlFromString(source, validator);
     if (node != nullptr) {
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
         RETURN_NULL();
@@ -3461,17 +3399,37 @@ zend_function_entry SaxonProcessor_methods[] = {
                ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromString,
                                        arginfo_saxonc_parseXmlFromString,
                                        ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, parseXmlFromFile,arginfo_saxonc_parseXmlFromFile,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, parseXmlFromUri,arginfo_saxonc_parseXmlFromUri,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor,newXPathProcessor,arginfo_saxonc_newXPathProcessor,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, newDocumentBuilder,arginfo_saxonc_newDocumentBuilder,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor,newXslt30Processor,arginfo_saxonc_newXslt30Processor,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, newXQueryProcessor,arginfo_saxonc_newXQueryProcessor,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, newSchemaValidator,arginfo_saxonc_newSchemaValidator,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, setCatalog, arginfo_saxonc_setCatalog,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, setCatalogFiles, arginfo_saxonc_setCatalogFiles,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor,setConfigurationProperty,arginfo_saxonc_setConfigurationProperty,ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, parseXmlFromFile,
+                   arginfo_saxonc_parseXmlFromFile,
+                   ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromUri,
+                                           arginfo_saxonc_parseXmlFromUri,
+                                           ZEND_ACC_PUBLIC)
+                PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,
+                       ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
+                                               newXPathProcessor,
+                                               arginfo_saxonc_newXPathProcessor,
+                                               ZEND_ACC_PUBLIC)
+                    PHP_ME(
+                        SaxonProcessor, newDocumentBuilder,
+                        arginfo_saxonc_newDocumentBuilder,
+                        ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
+                                                newXslt30Processor,
+                                                arginfo_saxonc_newXslt30Processor,
+                                                ZEND_ACC_PUBLIC)
+                        PHP_ME(SaxonProcessor, newXQueryProcessor,
+                               arginfo_saxonc_newXQueryProcessor,
+                               ZEND_ACC_PUBLIC)
+                            PHP_ME(SaxonProcessor, newSchemaValidator,
+                                   arginfo_saxonc_newSchemaValidator,
+                                   ZEND_ACC_PUBLIC)
+                                PHP_ME(SaxonProcessor, setCatalog,
+                                       arginfo_saxonc_setCatalog,
+                                       ZEND_ACC_PUBLIC)
+                                    PHP_ME(
+                                        SaxonProcessor,
+                                        setConfigurationProperty,
+                                        arginfo_saxonc_setConfigurationProperty,
+                                        ZEND_ACC_PUBLIC)
     // PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr,
     // ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor, version, arginfo_saxonc_version, ZEND_ACC_PUBLIC)

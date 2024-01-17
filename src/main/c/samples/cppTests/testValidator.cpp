@@ -42,8 +42,6 @@ void testValidator1(SaxonProcessor *processor, SchemaValidator *val,
     delete input;
     input = nullptr;
   }
-  val->clearParameters();
-  val->clearProperties();
 
 }
 
@@ -67,7 +65,7 @@ void testValidatorInParseXml(SaxonProcessor *processor, SchemaValidator *val,
   try {
     val->registerSchemaFromString(sch1);
 
-    input = processor->parseXmlFromString(invalid_xml.c_str(), nullptr, val);
+    input = processor->parseXmlFromString(invalid_xml.c_str(), val, nullptr);
     // val->setSourceNode(input);
     // val->validate();
     sresult->failure++;
@@ -178,12 +176,11 @@ void testValidator3(SaxonProcessor *processor, SchemaValidator *val,
   }
 }
 
-void testValidator4(const char* cwd, sResultCount *sresult) {
+void testValidator4(sResultCount *sresult) {
 
   SaxonProcessor *processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("xsdversion", "1.1");
   SchemaValidator *val = processor->newSchemaValidator();
-  val->setcwd(cwd);
   val->clearParameters(true);
   val->clearProperties();
   cout << endl
@@ -192,10 +189,10 @@ void testValidator4(const char* cwd, sResultCount *sresult) {
        << endl;
 
   try {
-    val->registerSchemaFromFile("data/family-ext.xsd");
+    val->registerSchemaFromFile("../data/family-ext.xsd");
 
-    val->registerSchemaFromFile("data/family.xsd");
-    val->validate("data/family.xml");
+    val->registerSchemaFromFile("../data/family.xsd");
+    val->validate("../data/family.xml");
     cout << endl << "Doc1 is OK" << endl;
     sresult->success++;
   } catch (SaxonApiException &e) {
@@ -235,7 +232,7 @@ void testValidator4a(sResultCount *sresult) {
     const char *valueStr = node->toString();
     if (valueStr != nullptr) {
       cout << endl << "Doc1 is OK:" << valueStr << endl;
-      operator delete ((char *)valueStr);
+      delete valueStr;
     } else {
       cout << endl << "Error: Doc reported as valid!" << endl;
     }
@@ -316,7 +313,6 @@ void testValidator5(SaxonProcessor *processor, SchemaValidator *val,
     if (value != nullptr) {
       cout << endl << "Validation Report: " << value << endl;
       sresult->success++;
-      operator delete ((char *)value);
     } else {
       cout << endl << "Validation Report value is NULL" << endl;
       sresult->failure++;
@@ -415,7 +411,7 @@ int main(int argc, char *argv[]) {
   processor->setConfigurationProperty(
       "http://saxon.sf.net/feature/multipleSchemaImports", "on");
   SchemaValidator *validator2 = processor->newSchemaValidator();
-  testValidator4(cwd, sresult);
+  testValidator4(sresult);
   testValidator4a(sresult);
   processor->setConfigurationProperty("xsdversion", "1.1");
   SchemaValidator *validator3 = processor->newSchemaValidator();

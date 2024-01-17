@@ -280,12 +280,13 @@ public:
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
    * @param stylesheet as a lexical string representation
+   * @param encoding of the stylesheet string argument. If not specified then platform default encoding is used
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
-  XsltExecutable *compileFromString(const char *stylesheet);
+  XsltExecutable *compileFromString(const char *stylesheet, const char * encoding = nullptr);
 
   //! Get the stylesheet associated
   /* via the xml-stylesheet processing instruction (see
@@ -316,7 +317,7 @@ public:
    * @param filename - the file to which the compiled package should be saved
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
-  void compileFromStringAndSave(const char *stylesheet, const char *filename);
+  void compileFromStringAndSave(const char *stylesheet, const char *filename, const char * encoding = nullptr);
 
   //! compile a stylesheet received as a file and save to an exported file
   //! (SEF).

@@ -360,9 +360,9 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
     if name is not None:
         print("Loading environment " + name)
         environments_i[name] = environment
-        if name == "works-mod":
+        '''if name == "works-mod":
             print(env)
-            exit(0)
+            exit(0)'''
     else:
         print("Loading environment without name")
 
