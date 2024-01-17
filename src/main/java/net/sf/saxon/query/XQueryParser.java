@@ -624,6 +624,32 @@ public class XQueryParser extends XPathParser {
                             grumble("Annotations can appear only in 'declare variable' and 'declare function'");
                         }
                         break;
+                    case Token.DECLARE_FIXED:
+                        checkLanguageVersion40();
+                        nextToken();
+                        if (!isKeyword("default")) {
+                            grumble("expected 'default' after 'declare fixed");
+                        }
+                        nextToken();
+                        expect(Token.NAME);
+                        switch (t.currentTokenValue) {
+                            case "element":
+                                if (!allowDeclarations) {
+                                    grumble("Namespace declarations cannot follow variables, functions, or options");
+                                }
+                                parseDefaultElementNamespace(true);
+                                break;
+                            case "function":
+                                if (!allowDeclarations) {
+                                    grumble("Namespace declarations cannot follow variables, functions, or options");
+                                }
+                                parseDefaultFunctionNamespace();
+                                break;
+                            default:
+                                grumble("After 'declare fixed default', expected 'element' or 'function'");
+                                break;
+                        }
+                        break;
                     case Token.DECLARE_DEFAULT:
                         nextToken();
                         expect(Token.NAME);
@@ -633,7 +659,7 @@ public class XQueryParser extends XPathParser {
                                     grumble("Namespace declarations cannot follow variables, functions, or options");
                                 }
                                 //allowSetters = false;
-                                parseDefaultElementNamespace();
+                                parseDefaultElementNamespace(false);
                                 break;
                             case "function":
                                 if (!allowDeclarations) {
@@ -1173,19 +1199,27 @@ public class XQueryParser extends XPathParser {
         sImport.locationURIs = new ArrayList<>(5);
         sImport.offset = t.currentTokenStartOffset;
         nextToken();
+        boolean fixedDefault = false;
         if (isKeyword("namespace")) {
             prefix = readNamespaceBinding();
-        } else if (isKeyword("default")) {
-            nextToken();
-            if (!isKeyword("element")) {
-                grumble("In 'import schema', expected 'element namespace'");
+        } else {
+            if (isKeyword("fixed")) {
+                checkLanguageVersion40();
+                fixedDefault = true;
+                nextToken();
             }
-            nextToken();
-            if (!isKeyword("namespace")) {
-                grumble("In 'import schema', expected keyword 'namespace'");
+            if (isKeyword("default") || t.currentToken == Token.DEFAULT) {
+                nextToken();
+                if (!isKeyword("element")) {
+                    grumble("In 'import schema', expected 'element namespace'");
+                }
+                nextToken();
+                if (!isKeyword("namespace")) {
+                    grumble("In 'import schema', expected keyword 'namespace'");
+                }
+                nextToken();
+                prefix = "";
             }
-            nextToken();
-            prefix = "";
         }
         if (t.currentToken == Token.STRING_LITERAL) {
             NamespaceUri uri = NamespaceUri.of(uriLiteral(t.currentTokenValue));
@@ -1212,7 +1246,7 @@ public class XQueryParser extends XPathParser {
         if (prefix != null) {
             try {
                 if (prefix.isEmpty()) {
-                    ((QueryModule) env).setDefaultElementNamespace(sImport.namespaceURI);
+                    ((QueryModule) env).setDefaultElementNamespace(sImport.namespaceURI, fixedDefault);
                 } else {
                     if (sImport.namespaceURI == null || sImport.namespaceURI.isEmpty()) {
                         grumble("A prefix cannot be bound to the null namespace", "XQST0057");
@@ -1637,7 +1671,7 @@ public class XQueryParser extends XPathParser {
      * @throws XPathException to indicate a syntax error
      */
 
-    private void parseDefaultElementNamespace() throws XPathException {
+    private void parseDefaultElementNamespace(boolean isFixedDefault) throws XPathException {
         if (foundDefaultElementNamespace) {
             grumble("default element namespace appears more than once", "XQST0066");
         }
@@ -1653,7 +1687,7 @@ public class XQueryParser extends XPathParser {
         if (uri.equals(NamespaceUri.XML) || uri.equals(NamespaceUri.XMLNS)) {
             grumble("Reserved namespace used as default element/type namespace", "XQST0070");
         }
-        ((QueryModule) env).setDefaultElementNamespace(uri);
+        ((QueryModule) env).setDefaultElementNamespace(uri, isFixedDefault);
         nextToken();
     }
 
