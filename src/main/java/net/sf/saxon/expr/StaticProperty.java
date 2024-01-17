@@ -164,7 +164,7 @@ public abstract class StaticProperty {
             ALLOWS_ONE | ALLOWS_MANY;
 
     /**
-     * Occurence indicator for "zero or more" (*)
+     * Occurrence indicator for "zero or more" (*)
      */
 
     public static final int ALLOWS_ZERO_OR_MORE =
