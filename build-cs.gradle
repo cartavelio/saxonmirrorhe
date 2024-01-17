@@ -424,6 +424,30 @@ task eecs_dll(
   }
 }
 
+task eecsTest(
+  dependsOn: ["dotnetRelease"],
+  group: "Verification",
+  description: "Run SaxonCS nUnit tests"
+) {
+  def reportDir = layout.buildDirectory.dir("reports/tests/eecsTest")
+  inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
+  inputs.files fileTree(dir: "${projectDir}/src/test/nunit")
+  outputs.dir reportDir
+
+  doLast {
+    if (dotnetex == null) {
+      throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
+    }
+
+    exec {
+      workingDir = "${projectDir}/src/test/nunit"
+      commandLine dotnetex, 'test', '--nologo', '--',
+              "NUnit.TestOutputXml=${reportDir.get()}"
+    }
+  }
+}
+
+
 task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
