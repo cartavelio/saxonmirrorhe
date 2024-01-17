@@ -61,20 +61,31 @@ int attach_graalvm_thread(sxnc_environment *env) {
 }
 
 int detach_graalvm_thread(sxnc_environment *env) {
-  /*graal_isolatethread_t *curthread =
-  graal_get_current_thread(((env)->isolate)); if(!curthread) { fprintf(stdout,
-  "Cur detach thread pointer not in isolate \n"); fflush(stdout); return 1;
+  graal_isolatethread_t *curthread =
+  graal_get_current_thread(((env)->isolate));
+  if(!curthread) {
+    if(getenv("SAXONC_DEBUG_FLAG")){
+        fprintf(stdout,"Cur detach thread pointer not in isolate \n");
+        fflush(stdout);
+    }
+    return 1;
   }
-  fprintf(stdout, "detach: Cur thread pointer %p\n", (void *)curthread);
-  fflush(stdout);
+  if(getenv("SAXONC_DEBUG_FLAG")){
+    fprintf(stdout, "detach: Cur thread pointer %p\n", (void *)curthread);
+    fflush(stdout);
+  }
   if (graal_detach_thread(curthread) != 0) {
-      fprintf(stdout, "graal_detach_thread error\n");
-      fflush(stdout);
+    if(getenv("SAXONC_DEBUG_FLAG")){
+        fprintf(stdout, "graal_detach_thread error\n");
+        fflush(stdout);
+    }
       return 1;
   }
   (env)->thread = (env)->mainthread;
-  fprintf(stdout, "graal_dettach_thread pointer %p\n", (void *)((env)->thread));
-   fflush(stdout);*/
+  if(getenv("SAXONC_DEBUG_FLAG")) {
+    fprintf(stdout, "graal_dettach_thread pointer %p\n", (void *)((env)->thread));
+    fflush(stdout);
+  }
 
   return 0;
 }
