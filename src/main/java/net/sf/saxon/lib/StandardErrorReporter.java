@@ -532,7 +532,7 @@ public class StandardErrorReporter
      */
 
     public String formatNestedMessages(XmlProcessingError err, String message) {
-        if (err.getCause() == null) {
+        if (err.getCause() == null || isSAXParseException(err.getCause())) {
             return message;
         } else {
             StringBuilder sb = new StringBuilder(message);
@@ -636,6 +636,9 @@ public class StandardErrorReporter
         logStackTrace(context, out, stackTraceDetail);
     }
 
+    public XmlProcessingError getLatestError() {
+        return latestError;
+    }
 
 }
 
