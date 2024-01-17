@@ -79,7 +79,6 @@ ext {
                      : (systemOs.isWindows()
                         ? "windows"
                         : "unknown")))
-  systemOsArch = System.getProperty("os.arch") == "amd64" ? "x86_64" : System.getProperty("os.arch")
   icu4jJar = null
   tagsoupJar = null
   mailJar = null
@@ -95,13 +94,13 @@ ext {
   c_sqlserver = "sqlserver"
   c_documentation = "saxonicadocs"
   dotnetex = null
-  awscli = null
+  scp = null
   csver = null
   csrid = null
   csbuildarch = null
   csarcarch = null
   csconfiguration = findProperty("csConfiguration") ?: "Release"
-  csoptimize = findProperty("csOptimize") ?: "true"
+  csoptimize = findProperty("csOptimize") ?: "false"
   csplatform = null
   c_sendria = "sendriasmtp"
   testWithJava = null
@@ -126,14 +125,14 @@ spath.each { dir ->
       }
     }
   }
-  if (awscli == null) {
-    def fn = new File(dir + "/aws")
+  if (scp == null) {
+    def fn = new File(dir + "/scp")
     if (fn.exists() && fn.canExecute()) {
-      awscli = fn.toString()
+      scp = fn.toString()
     } else {
-      fn = new File(dir + "/aws.exe")
+      fn = new File(dir + "/scp.exe")
       if (fn.exists() && fn.canExecute()) {
-        awscli = fn.toString()
+        scp = fn.toString()
       }
     }
   }    
@@ -234,8 +233,6 @@ dependencies {
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     [group: sqlDriverGroup, name: sqlDriverName, version: sqlDriverVersion],
     [group: 'nu.validator', name: 'htmlparser', version: htmlparserVersion],
-    [group: 'com.squareup.okhttp3', name: 'mockwebserver', version: '4.12.0'],
-    [group: 'com.sparkjava', name: 'spark-core', version: '2.9.4'],
     files("src/main/resources"),
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
@@ -248,7 +245,6 @@ dependencies {
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     [group: 'org.postgresql', name: 'postgresql', version: '42.5.1'],
     [group: 'mysql', name: 'mysql-connector-java', version: '8.0.31'],
-    [group: 'com.squareup.okhttp3', name: 'mockwebserver3-junit5', version: '5.0.0-alpha.11'],
     files("${buildDir}/classes/${saxonEdition}j"),
     files("${buildDir}/resources/test/classpath-testing.jar")
   )
@@ -1025,6 +1021,24 @@ task eej_MetaInf(
 
 // ============================================================
 
+task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
+  // Chicken, meet egg. We need to build the compiler to compile the
+  // stylesheet to provide function implementations for SaxonJ
+  inputs.files fileTree("${projectDir}/src/main/xslt")
+  outputs.files "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
+  doLast {
+    javaexec {
+      classpath = configurations.productTests + project.files(file("${buildDir}/classes/eej"))
+      mainClass = "com.saxonica.Transform"
+      args "-xsl:src/main/xslt/function-library.xsl",
+        "-export:${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml",
+        "-target:HE", "-nogo", "--allowSyntaxExtensions:on"
+    }
+  }
+}
+
+// ============================================================
+
 // The jar Class-Path allows the jar to find dependent libraries
 // locally. These are for the libraries we ship with the product.
 def heJarClassPath = "lib/xmlresolver-${xmlresolverVersion}.jar lib/xmlresolver.jar "
@@ -1092,11 +1106,8 @@ def compareManifests(File jarfile, File jargold) {
   ZipInputStream zs = new ZipInputStream(new BufferedInputStream(new FileInputStream(jarfile)))
   println("COMPARE: $jarfile")
   println("       : $jargold")
-
-  boolean signature = false;
   ZipEntry entry
   while ((entry = zs.getNextEntry()) != null) {
-    signature = signature || entry.getName().contains('META-INF/TE-')
     if (!entry.getName().contains('$')) {
       jarmanifest.add(entry.getName())
     }
@@ -1119,13 +1130,10 @@ def compareManifests(File jarfile, File jargold) {
 
   boolean missing = false;
   goldmanifest.each { fn ->
-    if (!jarmanifest.contains(fn) && !fn.contains('META-INF/TE-')) {
+    if (!jarmanifest.contains(fn)) {
       println("Missing file: ${fn}")
       missing = true;
     }
-  }
-  if (jarsigner.makeSignedJars && !signature) {
-    println("WARNING: did not find expected jar signature!")
   }
 
   if (releaseBuild && missing) {
@@ -1135,7 +1143,7 @@ def compareManifests(File jarfile, File jargold) {
 
 task hejJar(
   type: Jar,
-  dependsOn: ["hej_MetaInf", "hejCompile", "processResources"],
+  dependsOn: ["hej_MetaInf", "hejCompile", "compile_function_library"],
   description: "Build the HE jar file"
 ) {
   archiveBaseName = "saxon-he-${saxonVersion}"
@@ -1211,7 +1219,7 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
 
 task pejJar(
   type: Jar,
-  dependsOn: ["pej_MetaInf", "pejCompile", "processResources"],
+  dependsOn: ["pej_MetaInf", "pejCompile", "compile_function_library"],
   description: "Build the PE jar file"
 ) {
   archiveBaseName = "saxon-pe-${saxonVersion}"
@@ -1263,7 +1271,7 @@ pejJarSql.finalizedBy(testPejJarSql)
 
 task eejJar(
   type: Jar,
-  dependsOn: ["eej_MetaInf", "eejCompile", "processResources"],
+  dependsOn: ["eej_MetaInf", "eejCompile", "compile_function_library"],
   description: "Build the EE jar file"
 ) {
   archiveBaseName = "saxon-ee-${saxonVersion}"
@@ -1322,7 +1330,20 @@ task eej_compile_junit_tests(
 ) {
   classpath = configurations.productTests + files("${buildDir}/classes/eej")
   source fileTree(dir: "${projectDir}/src/test/java",
-                  excludes: ["failing/*.java", "tools/*.java"])
+                  include: ["jaxptest/*.java",
+                            "millicom/*.java",
+                            "commands/*.java",
+                            // "failing/*.java",  // Known to fail?
+                            "internaltests/*.java",
+                            "jstests/*.java",
+                            "nativetests/*.java",
+                            "performance/*.java",
+                            "pulltests/*.java",
+                            "regextests/*.java",
+                            "s9apitest/*.java",
+                            "sorttests/*.java",
+                            // "tools/*.java",    // Not tests
+                            "xqjtests/*.java"])
   destinationDirectory = new File("${buildDir}/test_classes/eej")
 }
 
@@ -1336,7 +1357,6 @@ tasks.withType(Test) {
 
 task eejTests(
   type: Test,
-  group: 'Verification',
   dependsOn: ["eej_compile_junit_tests"]
 ) {
   classpath = (files("${buildDir}/classes/java/test")
@@ -1895,17 +1915,6 @@ task sqlServerStop(dependsOn: ["docker-sql-up"]) {
           "-f", "${sqlServer}-compose.yml",
           "down"
       }
-    }
-  }
-  doLast {
-    try {
-      exec {
-        commandLine DockerContainer.docker(), "volume", "rm", "${sqlServer}-data"
-      }
-    } catch (Exception e) {
-      println("***************************************************************")
-      println("Failed to remove sqldata volume.")
-      println("***************************************************************")
     }
   }
 }
