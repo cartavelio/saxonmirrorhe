@@ -404,9 +404,7 @@ public class StandardErrorReporter
             String lineInfo = line <= 1 ? "" : "on line " + line + ' ';
             String columnInfo = column <= 1 ? "" : "at " + (line <= 1 ? "char " : "column ") + column + ' ';
             String nearBy = nestedLoc.getNearbyText();
-
-            Expression failingExpression = null;
-            String extraContext = formatExtraContext(failingExpression, nearBy);
+            String extraContext = formatExtraContext(error.getFailingExpression(), nearBy);
 
             if (outerLoc instanceof AttributeLocation) {
                 // Typical XSLT case

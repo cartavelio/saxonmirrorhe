@@ -1575,11 +1575,15 @@ public abstract class StyleElement extends ElementImpl {
             // we can't report a dynamic error such as divide by zero unless the expression
             // is actually executed.
             //err.printStackTrace();
-            if (err.isReportableStatically()) {
-                compileError(err.withLocation(new AttributeLocation(this, StructuredQName.fromClarkName(name))));
+            XPathException e2 = err;
+            if (e2.isReportableStatically()) {
+                if (!(e2.getLocator() instanceof XPathParser.NestedLocation)) {
+                    e2 = e2.withLocation(new AttributeLocation(this, StructuredQName.fromClarkName(name)));
+                }
+                compileError(e2);
                 return exp;
             } else {
-                ErrorExpression erexp = new ErrorExpression(new XmlProcessingException(err));
+                ErrorExpression erexp = new ErrorExpression(new XmlProcessingException(e2));
                 ExpressionTool.copyLocationInfo(exp, erexp);
                 return erexp;
             }
@@ -2369,6 +2373,7 @@ public abstract class StyleElement extends ElementImpl {
         }
         XmlProcessingIncident se = new XmlProcessingIncident(err.getMessage(), err.showErrorCode(), err.getLocator());
         se.setHostLanguage(HostLanguage.XSLT);
+        se.setFailingExpression(err.getFailingExpression());
         compileError(se);
     }
     /**
