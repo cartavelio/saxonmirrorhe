@@ -36,8 +36,7 @@ public class SignatureTest {
     // Functions not yet (fully) implemented
 
     private final static Set<String> notImplemented = setOf(
-            "fn:csv-fetch-field-by-column",
-            "fn:csv-to-xdm",
+            "fn:csv-to-simple-rows",
             "fn:csv-to-xml",
             "fn:log",
             "fn:parse-html",
@@ -51,8 +50,6 @@ public class SignatureTest {
             "map:values",
             "array:values",
             "array:deep-update"
-
-
     );
 
     // Function arguments where Saxon knowingly declares the type differently from the language spec.
