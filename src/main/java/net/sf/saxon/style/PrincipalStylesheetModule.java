@@ -567,7 +567,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     /**
      * Process the attributes of every node in the stylesheet
      *
-     * @throws net.sf.saxon.trans.XPathException if static errors are found in the stylesheet
      */
 
     public void processAllAttributes() {
