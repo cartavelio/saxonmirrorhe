@@ -1763,7 +1763,7 @@
       </signatures>
       <status>
         <p>Available since Saxon 9.3, provided XPath 3.0 is enabled.</p>
-        <p>Localization capabilities extended (a little) in Saxon 12.0.</p>
+        <p>Localization capabilities extended (a little) in Saxon 12.0</p>
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
@@ -6387,182 +6387,6 @@
       </details>
     </function>
     
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">eval</name>
-      <description>
-        <p>Evaluates a previously compiled expression.</p>
-      </description>
-      <signatures>
-        <proto return-type="xs:double">
-          <arg name="stored-expression" type="jt:net.sf.saxon.functions.Evaluate-PreparedExpression"
-            desc="The compiled expression to be evaluated"/>
-          <arg name="param1" type="item()*" desc="The value to be bound to $p1"/>
-          <arg name="param2" type="item()*" desc="The value to be bound to $p2"/>
-          <arg name="param3" type="item()*" desc="The value to be bound to $p3 ..."/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since before Saxon 7.2. Dropped in 12.0, but then reinstated
-        in 12.4 for the benefit of XQuery users, where the <code>xsl:evaluate</code> instruction is
-        not available.</p>
-      </status>
-      <saxon-edition>PE/EE</saxon-edition>
-      <details>
-        <div>
-          
-          <p>This function returns the result of evaluating the supplied stored expression. A stored
-            expression may be obtained as the result of calling the <a class="bodylink code"
-              href="/functions/saxon/expression">saxon:expression</a> function.</p>
-          
-          <p>The stored expression is evaluated in the current dynamic context, that is, the context
-            node is the current node, and the context position and context size are the same as the
-            result of calling <code>position()</code> or <code>last()</code> respectively.</p>
-          
-          <p>The second and subsequent arguments to <code>saxon:eval</code> supply values for the
-            variables <code>$p1</code>, <code>$p2</code>, etc. within the stored expression. For
-            details see <code>saxon:expression</code>.</p>
-        </div>
-      </details>
-      <see-also name="expression" namespace="http://saxon.sf.net/"/>
-    </function>
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">evaluate</name>
-      <description>
-        <p>Allows XPath expressions to be constructed and evaluated dynamically at run-time.</p>
-      </description>
-      <signatures>
-        <proto return-type="item()*">
-          <arg name="xpath" type="xs:string" desc="The XPath expression to be evaluated"/>
-          <arg name="param1" type="item()*" desc="The value to be bound to $p1"/>
-          <arg name="param2" type="item()*" desc="The value to be bound to $p2"/>
-          <arg name="param3" type="item()*" desc="The value to be bound to $p3 ..."/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since before Saxon 7.2. Dropped in 12.0, but then reinstated
-          in 12.4 for the benefit of XQuery users, where the <code>xsl:evaluate</code> instruction is
-          not available.
-          Note that an <a class="bodylink code"
-          href="/xsl-elements/evaluate">xsl:evaluate</a> instruction with similar functionality is
-          available as a standard feature in XSLT 3.0.</p>
-      </status>
-      <saxon-edition>PE/EE</saxon-edition>
-      <details>
-        <div>
-          
-          <p>The number of arguments is variable (1 or more).</p>
-          
-          <p>The supplied string must contain an XPath expression. The result of the function is the
-            result of evaluating the XPath expression. This is useful where an expression needs to
-            be constructed at run-time or passed to the stylesheet as a parameter, for example where
-            a sort key is determined dynamically.</p>
-          
-          <p>The static context for the expression includes all the in-scope namespaces, types, and
-            functions from the calling stylesheet or query. It does <b>not</b> include any variables
-            from the calling environment. The base URI and default function namespace are inherited
-            from the calling environment. The default namespace for elements and types is taken from
-            the value of the <code>xpath-default-namespace</code> attribute in the stylesheet, if
-            present.</p>
-          
-          <p>If stylesheet functions are to be called from the expression, they should be declared
-            with <code>visibility="public"</code>.</p>
-          
-          <p>The expression may contain references to variables <code>$p1</code>, <code>$p2</code>,
-            etc., and the values of these variables may be supplied in the second, third, and
-            subsequent arguments to the <code>saxon:evaluate()</code> call.</p>
-          
-          <p>The function <code>saxon:evaluate(string)</code> is shorthand for
-            <code>saxon:eval(saxon:expression(string))</code>. For the rules governing what may
-            and may not appear in the expression, see the details of
-            <code>saxon:expression</code>.</p>
-          
-          
-        </div>
-      </details>
-      <see-also name="expression" namespace="http://saxon.sf.net/"/>
-    </function>
-    
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">expression</name>
-      <description>
-        <p>Creates a stored expression that can be evaluated repeatedly with different argument
-          values and a different dynamic context. </p>
-      </description>
-      <signatures>
-        <proto return-type="jt:net.sf.saxon.functions.Evaluate-PreparedExpression">
-          <arg name="string" type="xs:string" desc="The expression to be compiled"/>
-        </proto>
-        <proto return-type="jt:net.sf.saxon.functions.Evaluate-PreparedExpression">
-          <arg name="string" type="xs:string" desc="The expression to be compiled"/>
-          <arg name="ns" type="element()" desc="Provides the namespace context"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since before Saxon 7.2. Dropped in 12.0, but then reinstated
-          in 12.4 for the benefit of XQuery users, where the <code>xsl:evaluate</code> instruction is
-          not available.</p>
-      </status>
-      <saxon-edition>PE/EE</saxon-edition>
-      <details>
-        <div>
-          <p>This function creates a stored expression that can be evaluated repeatedly with
-            different argument values and a different dynamic context.</p>
-          
-          <p>The supplied string must contain an XPath expression. The result of the function is a
-            <i>stored expression</i>, which may be supplied as an argument to other extension
-            functions such as <a class="bodylink code" href="/functions/saxon/eval"
-              >saxon:eval()</a>. The result of the expression will usually depend on the context item.
-            The context for the expression includes the namespaces in scope at this point in the
-            stylesheet. The expression may contain references to the nine variables
-            <code>$p1</code>, <code>$p2</code>, ... <code>$p9</code> only. It may contain calls on
-            Java extension functions, including Saxon-defined, EXSLT-defined, and EXPath-defined
-            functions, as well as user-defined functions declared within the containing query or
-            stylesheet. But it does not allow access to stylesheet variables, or functions defined
-            in the XSLT specification such as <code>key()</code> or
-            <code>format-number()</code>.</p>
-          
-          <p>If stylesheet functions are to be called from the expression, they should be declared
-            with <code>visibility="public"</code>.</p>
-          
-          <p>
-            <i>Use of the <code>current()</code> function is allowed, provided <a
-              class="bodylink code" href="/functions/saxon/evaluate">saxon:evaluate()</a> is
-              called from XSLT: the value is the context item at the point where
-              <code>saxon:evaluate()</code> or <code>saxon:eval()</code> is called. Use of other
-              XSLT-specific functions such as <code>key()</code> or <code>format-number()</code> is
-              untested; they might work in some cases and fail in others, possibly in an obscure
-              way.</i>
-          </p>
-          
-          <p>If the second argument is present, its value must be a single element node. The
-            in-scope namespace bindings of this element node will be used to resolve any namespace
-            prefixes present in the XPath expression. The default namespace for the element is also
-            used as the default namespace for elements and types within the XPath expression. In
-            addition, standard namespace bindings are automatically available for the prefixes xml,
-            xs, xsi, fn, and saxon.</p>
-          
-          <p>If the second argument is omitted, then the namespace context for the expression is
-            taken from the stylesheet. (This is also the rule used by
-            <code>saxon:evaluate()</code>.) If the expression contains namespace prefixes, these are
-            interpreted in terms of the namespace declarations in scope at the point where the
-            <code>saxon:expression()</code> function is called, not those in scope where the
-            stored expression is evaluated.</p>
-          
-          <p>The stored expression (if it is to be evaluated using <code>saxon:eval()</code>) may
-            contain references to variables named <code>$p1</code>, <code>$p2</code>, ...
-            <code>$p9</code>. The values of these variables can be supplied when the expression is
-            evaluated using <code>saxon:eval()</code>. The second argument of
-            <code>saxon:eval()</code> supplies the value of <code>$p1</code>, the third argument
-            supplies the value of <code>$p2</code>, and so on.</p>
-          
-          <p>For example, following <code>&lt;xsl:variable name="add" select="saxon:expression('$p1
-            + $p2')"/&gt;</code>, the instruction <code>&lt;xsl:value-of select="saxon:eval($add,
-              6, 7)"/&gt;</code> will output <code>13</code>.</p>
-        </div>
-      </details>
-      <see-also name="eval" namespace="http://saxon.sf.net/"/>
-      <see-also name="evaluate" namespace="http://saxon.sf.net/"/>
-    </function>
     
     
     
@@ -6595,14 +6419,14 @@
           
           <p>For example, if the function is declared as:</p>
           
-          <pre><code class="language-xquery"><![CDATA[declare namespace a="http://a.com/";
-declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></code></pre>
+          <samp><![CDATA[declare namespace a="http://a.com/";
+declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
           
           <p>then the function call <code>saxon:function-annotations(local:f#0)</code> returns
             a sequence containing a single map of the form:</p>
           
-          <pre><code class="language-xquery"><![CDATA[map{"name": QName("http://a.com/", "colour"),
-    "params": ("blue", 3)}]]></code></pre>
+          <samp><![CDATA[map{"name": QName("http://a.com/", "colour"),
+    "params": ("blue", 3)}]]></samp>
           
           <p>Function annotations are retained (as required by the W3C specification) when a function is 
           coerced as a result of type-checking. Annotations are also retained when functions are partially applied.</p>
@@ -6934,7 +6758,7 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></code></pr
               <code>map:size()</code>.</p>
 
           <p>For example, consider a source document of the form:</p>
-          <pre><code class="language-xml"><![CDATA[<doc> 
+          <samp><![CDATA[<doc> 
     <town name="Amherst" state="NH"/> 
     <town name="Amherst" state="MA"/> 
     <town name="Auburn" state="MA"/> 
@@ -6946,32 +6770,33 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></code></pr
     <town name="Bristol" state="NH"/> 
     <town name="Bristol" state="VT"/>
     <town name="Cambridge" state="ME"/> 
-</doc>]]></code></pre>
+</doc>]]></samp>
 
           <p>and suppose there is a requirement to find <code>&lt;town&gt;</code> elements
             efficiently given the abbreviation for the <code>state</code>. You can do this by first
             setting up an indexed sequence. In XQuery you can write:</p>
-          <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
+          <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
 declare namespace java="http://saxon.sf.net/java-type"; 
-declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/@state});]]></code></pre>
+declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/@state});]]></samp>
 
           <p>This could be a local variable (declared in a <code>let</code> clause) rather than a
             global variable. The XSLT equivalent is:</p>
-          <pre><code class="language-xml"><![CDATA[<xsl:variable name="indexedTowns" select="saxon:index(//town, 
-      function($t){$t/@state})" as="map(*)"/>]]></code></pre>
+          <samp><![CDATA[<xsl:variable name="indexedTowns" select="saxon:index(//town, 
+      function($t){$t/@state})" as="map(*)"/>]]></samp>
 
           <p>You can then find all the towns in New Hampshire using the expression:</p>
-          <pre><code class="language-xquery">map:get($indexedTowns, "NH")</code></pre>
+          <samp>map:get($indexedTowns, "NH")</samp>
 
           <p>Indexed sequences were introduced primarily for use in XQuery, where they provide
             functionality equivalent to the standard <code>xsl:key</code> mechanism in XSLT. From
             Saxon 9.5 the data structure used for an indexed sequence is a map, and with the
             introduction of maps the function could now be implemented simply as:</p>
 
-          <pre><code class="language-xquery"><![CDATA[declare function saxon:index($seq as item()*, $f as function(item()) as xs:anyAtomicValue) { 
+          <samp><![CDATA[declare function saxon:index($seq as item()*, $f as function(item()) as xs:anyAtomicValue) { 
     map:merge( for $item in $seq for $key in $f($item) group by $key
                  return map:entry($key, $item) ) 
-};]]></code></pre>
+};]]>
+          </samp>
 
           <p>For further information about maps see <a class="bodylink"
               href="/expressions/xpath30maps">Maps in XPath</a>.</p>
@@ -7106,7 +6931,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           </p>
 
           <p>The following example will return true:</p>
-          <pre><code class="language-xquery">saxon:is-whole-number(12e0)</code></pre>
+          <samp>saxon:is-whole-number(12e0)</samp>
         </div>
       </details>
     </function>
@@ -7308,7 +7133,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           <p>To use this function, it is first necessary to declare a key as a range key, which can
             be done using a declaration such as:</p>
 
-          <pre><code class="language-xml"><![CDATA[<xsl:key name="k" match="transaction" use="@date" saxon:range-key="yes"/>]]></code></pre>
+          <samp><![CDATA[<xsl:key name="k" match="transaction" use="@date" saxon:range-key="yes"/>]]></samp>
 
           <p>The effect of this declaration is that Saxon builds the index underpinning the key
             using a Java <code>TreeMap</code> rather than a <code>HashMap</code>, making ordered
@@ -7336,7 +7161,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             determine if the map is empty, and so on. The maps for several documents can be combined
             into a single map using a construct such as:</p>
 
-          <pre><code class="language-xml"><![CDATA[map:merge(collection('dir?select="*.xml')!saxon:key-map('k', ., (), ()))]]></code></pre>
+          <samp><![CDATA[map:merge(collection('dir?select="*.xml')!saxon:key-map('k', ., (), ()))]]></samp>
 
           <p>Note however that the resulting map will not be sorted.</p>
         </div>
@@ -7378,7 +7203,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             an empty sequence.</p>
 
           <p>Example:</p>
-          <pre><code class="language-xml"><![CDATA[format-dateTime(saxon:last-modified(resolve-uri('lookup.xml', static-base-uri()))]]></code></pre>
+          <samp><![CDATA[format-dateTime(saxon:last-modified(resolve-uri('lookup.xml', static-base-uri()))]]></samp>
           
           <p>This function differs from the EXPath function <code>file:last-modified</code> in that it takes
           a URI rather than a filename as input, and may work for resources other than files: for example,
@@ -7424,7 +7249,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             true.</p>
 
           <p>For example:</p>
-          <pre><code class="language-xml"><![CDATA[saxon:leading(following-sibling::*, function($x){exists($x/self::para}))]]></code></pre>
+          <samp><![CDATA[saxon:leading(following-sibling::*, function($x){exists($x/self::para}))]]></samp>
 
           <p>where the supplied function tests whether the supplied item is a
               <code>&lt;para&gt;</code> element.</p>
@@ -8108,9 +7933,9 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           </p>
           
           <p>For more complex use cases, the function can be called explicitly. For example, this query:</p>
-          <pre><code class="language-xquery"><![CDATA[declare namespace StreamSource = "java:javax.xml.transform.stream.StreamSource";
+          <samp><![CDATA[declare namespace StreamSource = "java:javax.xml.transform.stream.StreamSource";
 declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
-StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></code></pre>
+StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
           
           <p>produces:</p>
           
@@ -8443,7 +8268,7 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></code></pre>
             the containing array.</p>
           <p>If the supplied argument has no pedigree information, the result is an empty sequence.</p>
           <p>For example, given the input:</p>
-          <pre><code class="language-xquery"><![CDATA[let $M :=
+          <samp><![CDATA[let $M :=
   map{ 
     "roman": map{
                "min":1,
@@ -8461,11 +8286,11 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></code></pre>
 let $augmentedMap := $M => saxon:with-pedigree()
 let $romanCodes := $augmentedMap?roman?codes
 return ....  
-]]></code></pre>
+]]></samp>
           <p>Then <code>($romanCodes => saxon:pedigree())?container?max</code> returns 10.</p>
           <p>The function is particularly useful when using <code>xsl:apply-templates</code> to process JSON structures
             recursively. For example, it becomes possible to write a template rule such as:</p>
-          <pre><code class="language-xml">&lt;xsl:template match=".[saxon:pedigree(.)?key='roman']"></code></pre>
+          <samp>&lt;xsl:template match=".[saxon:pedigree(.)?key='roman']"></samp>
           <p>Which matches a map (or array) whose key value in its parent map is "roman".</p>
           <p>See also the <a class="bodylink code"
             href="/extensions/instructions/deep-update">saxon:deep-update</a> extension
@@ -8554,12 +8379,12 @@ return ....
           <p>The compiled stylesheet can be used repeatedly with different inputs.</p>
 
           <p>Here is an example of how to use the function from XQuery:</p>
-          <pre><code class="language-xquery"><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
+          <samp><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
             
 <out>{ 
 let $q1 := "declare variable $x external; declare variable $y external; <z>{$x + $y + .}</z&>" 
     return saxon:query(saxon:compile-query($q1), 4, (<x>3</x>, <y>2</y>)) 
-}</out>]]></code></pre>
+}</out>]]></samp>
 
           <p>The result of the query is a sequence containing the single integer 9.</p>
         </div>
@@ -8621,7 +8446,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
       </signatures>
       <status>
         <p>Available since Saxon 10. In 12.4 the function becomes obsolescent, since the functionality
-          has been absorbed into the standard 4.0 <a class="bodylink code" href="/functions/fn/replace">fn:replace()</a> function.</p>
+        has been absorbed into the standard 4.0 <code>fn:replace</code> function.</p>
       </status>
       <saxon-edition>PE/EE 10</saxon-edition>
       <details>
@@ -8641,11 +8466,12 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
               upper-case#1)</code> returns <code>"Registration: ABC123"</code>.</p></li>
             <li><p><code>replace-with("Part 2 Chapter 5", "[0-9]+",
               function($in){string(number($in)+1)}</code> returns <code>"Part 3 Chapter 6"</code>.</p></li>
-            <li><pre><code class="language-xquery"><![CDATA[saxon:replace-with('ALPHA_x002F_OMEGA', '_x[0-9A-F]{4}_',
-  function($s) {$s => substring(3, 4)
-  => bin:hex()
-  => bin:unpack-unsigned-integer(0,2)
-  => codepoints-to-string()})]]></code></pre>
+            <li><samp>saxon:replace-with('ALPHA_x002F_OMEGA', '_x[0-9A-F]{4}_',
+              function($s) {$s => substring(3, 4)
+              => bin:hex()
+              => bin:unpack-unsigned-integer(0,2)
+              => codepoints-to-string()})
+            </samp>
               <p>outputs <code>ALPHA/OMEGA</code> (this handles a convention sometimes
                 used to encode special characters in XML element and attribute names). This
                 example uses functions from the EXPath Binary module.</p></li>
@@ -8655,7 +8481,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
           
           <p>Note: the callback function does not have access to captured groups within the
           matched substring, only to the matched substring as a whole. For access to captured
-          groups, use the 4.0 version of <code>fn:replace()</code>.</p>
+          groups, use the 4.0 version of <code>fn:replace</code>.</p>
         </div>
       </details>
       
@@ -9516,10 +9342,11 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
           <p>Here's a simple example that tests whether a particular element has element-only
             content:</p>
 
-          <pre><code class="language-xquery"><![CDATA[let $bookDecl := saxon:schema('element declaration', QName('', 'book')) 
+          <samp><![CDATA[let $bookDecl := saxon:schema('element declaration', QName('', 'book')) 
 return if ($bookDecl('type definition')('variety') = 'element-only') 
        then ... 
-       else ... ]]></code></pre>
+       else ... ]]>
+          </samp>
 
         </div>
       </details>
@@ -9690,7 +9517,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
           <p>For example, the function may be used as follows in XSLT. This example constructs a
             variable to hold the mail-client configuration and constructs the content as html:</p>
 
-          <pre><code class="language-xml"><![CDATA[<xsl:variable name="mailSetup" select="map{'to':'recipient@example.com', 'from':'sender@example.com', 
+          <samp><![CDATA[<xsl:variable name="mailSetup" select="map{'to':'recipient@example.com', 'from':'sender@example.com', 
     'smtp-server':'smtp.example.com', 'username':'user@example.com', 'password':'pass'}"/>
 <xsl:variable name="html">
     <html>
@@ -9701,7 +9528,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
     </html>
 </xsl:variable>
   
-<xsl:value-of select="saxon:send-mail($mailSetup, 'Test email' , $html, ())"/>]]></code></pre>
+<xsl:value-of select="saxon:send-mail($mailSetup, 'Test email' , $html, ())"/>]]></samp>
         </div>
       </details>
     </function>
@@ -9748,7 +9575,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
           </ul>
 
           <p>For example, the function may be used as follows in XQuery:</p>
-          <pre><code class="language-xquery"><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
+          <samp><![CDATA[declare namespace saxon="http://saxon.sf.net/"; 
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform"; 
 
 <out>{ 
@@ -9757,7 +9584,7 @@ return saxon:serialize($x, <xsl:output method="xml"
                                  omit-xml-declaration="yes"
                                  indent="yes" 
                                  saxon:indent-spaces="1"/>) 
-}</out>]]></code></pre>
+}</out>]]></samp>
 
           <p>The function serializes the specified document, or the subtree rooted at the specified
             element, according to the parameters specified, and returns the serialized document as a
@@ -9855,7 +9682,7 @@ return saxon:serialize($x, <xsl:output method="xml"
             enables burst-mode streaming by reading a source document and delivering a sequence of
             element nodes representing selected elements within that document. For example:</p>
 
-          <pre><code class="language-xquery"><![CDATA[for $e in saxon:stream(doc('employees.xml')/*/employee) return <sal>{$e/salary}</sal>]]></code></pre>
+          <samp><![CDATA[for $e in saxon:stream(doc('employees.xml')/*/employee) return <sal>{$e/salary}</sal>]]></samp>
 
           <p>This example returns a sequence of <code>&lt;sal&gt;</code> elements. The result of the
               <code>saxon:stream</code> call is a sequence of <code>&lt;employee&gt;</code>
@@ -10088,13 +9915,13 @@ return saxon:serialize($x, <xsl:output method="xml"
           an empty sequence.</p>
 
           <p>Here is an example of how to use the function from XQuery:</p>
-          <pre><code class="language-xquery"><![CDATA[let $results := 
+          <samp><![CDATA[let $results := 
    <customers>{ //customer[location="Scotland"] }</customers> 
 let $rendition := saxon:compile-stylesheet(doc('show-customers.xsl')) 
-return saxon:transform($rendition, $results)]]></code></pre>
+return saxon:transform($rendition, $results)]]></samp>
 
           <p>The following example uses XSLT's ability to create multiple output files:</p>
-          <pre><code class="language-xquery"><![CDATA[let $splitter := saxon:compile-stylesheet( 
+          <samp><![CDATA[let $splitter := saxon:compile-stylesheet( 
   <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
                      version="2.0"> 
     <xsl:template match="customer"> 
@@ -10107,7 +9934,7 @@ let $results :=
   document { 
     <customers>{ //customer[location="Scotland"] }</customers> 
   } 
-return saxon:transform($splitter, $results)]]></code></pre>
+return saxon:transform($splitter, $results)]]></samp>
 
           <p>Note (a) the need to double the curly braces to ensure that the contained expression is
             expanded when the stylesheet is executed by XSLT, not when it is created by XQuery, and
@@ -10158,12 +9985,11 @@ return saxon:transform($splitter, $results)]]></code></pre>
           timestamp will show the time at which the variable is evaluated, not the time at which it is declared.</p>
           
           <p>If the value is to be used for measuring execution time, the following code is suggested:</p>
-          <pre><code class="language-xml"><![CDATA[<xsl:variable name="start" select="saxon:timestamp()" as="xs:dateTimeStamp"/>
+          <samp><![CDATA[<xsl:variable name="start" select="saxon:timestamp()" as="xs:dateTimeStamp"/>
 <!-- force evaluation -->
 <xsl:if test="$start eq xs:dateTime('1900-01-01T00:00:00')"><x/></xsl:if>
 <!-- code under test goes here -->
-<xsl:message expand-text="yes">Execution time: {(saxon:timestamp() - $start) div
-xs:duration('PT0.001S')}ms </xsl:message>]]></code></pre>
+<xsl:message expand-text="yes">Execution time: {(saxon:timestamp() - $start) div xs:duration('PT0.001S')}ms </xsl:message>]]></samp>
           <p><em>(Saxon's optimizer will pre-evaluate the constant expressions at compile time,
           so these do not add run-time overhead.)</em></p>
         </div>
@@ -10597,13 +10423,13 @@ xs:duration('PT0.001S')}ms </xsl:message>]]></code></pre>
           
           
           <p>Here is an example of how to use the function from XQuery:</p>
-          <pre><code class="language-xquery"><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
+          <samp><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
             
 <out>{ 
    let $q1 := "declare variable $x external; declare variable $y external; <z>{$x + $y + .}</z>" 
    let $qry := saxon:xquery($q1)
    return $qry(4, map{xs:QName('x'): 3, xs:QName('y'): 2})
-}</out>]]></code></pre>
+}</out>]]></samp>
           
           <p>The result of the query is a sequence containing the single integer 9.</p>
         </div>
