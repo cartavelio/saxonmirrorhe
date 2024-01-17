@@ -382,9 +382,7 @@ as required; implementing-classes key correction
     </xsl:template>
 
     <xsl:template match="class" mode="tree">
-        <xsl:variable name="afterDot" select="substring-after(@type,'.')"/>
-        <xsl:variable name="type"
-            select="if (string-length($afterDot) gt 0) then $afterDot else @type"/>
+        <xsl:variable name="type" select="tokenize(@type,'\.')[last()]"/>
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
             select="exists(@interface) and exists(key('implementing-classes', @fulltype)[@visibility ne 'package-private'])" />
         <xsl:variable name="has-nonPP-subclasses" as="xs:boolean"
@@ -407,9 +405,7 @@ as required; implementing-classes key correction
     </xsl:template>
     
     <xsl:template match="class" mode="deeptree">
-        <xsl:variable name="afterDot" select="substring-after(@type,'.')"/>
-        <xsl:variable name="type"
-            select="if (string-length($afterDot) gt 0) then $afterDot else @type"/>
+        <xsl:variable name="type" select="tokenize(@type,'\.')[last()]"/>
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
             select="exists(@interface) and exists(key('implementing-classes', @fulltype)[@visibility ne 'package-private'])" />
         <xsl:variable name="has-nonPP-subclasses" as="xs:boolean"
@@ -516,6 +512,8 @@ as required; implementing-classes key correction
     </xsl:template>
 
     <xsl:template match="class">
+        <xsl:variable name="type" 
+            select="if (starts-with(@type, 'EXPathArchive.')) then (substring-after(@type,'EXPathArchive.')) else @type"/>
         <!-- Don't include class if 'package-private' and no non-package-private classes-implemented-by-interface or
             subclasses, or no non-package-private members -->
         <xsl:variable name="implementing-classes" as="element(implemented-by)?">
@@ -543,7 +541,7 @@ as required; implementing-classes key correction
             <!--<xsl:if test="@visibility eq 'package-private'">
                 <xsl:message>isPP: <xsl:value-of select="@fulltype"/></xsl:message>
             </xsl:if>-->
-            <class id="{@type}">
+            <class id="{$type}">
                 <xsl:apply-templates select="@* except @type"/>
                 <xsl:apply-templates select="node() except class"/>
                 <xsl:apply-templates select="class">
@@ -585,6 +583,11 @@ as required; implementing-classes key correction
 
     <xsl:template match="method/@name|field/@name|constructor/@name|exception/@type|enumConstant/@name">
         <xsl:attribute name="id" select="."/>
+    </xsl:template>
+    
+    <xsl:template match="method/@type|param/@type">
+        <xsl:attribute name="type" select="if (starts-with(., 'EXPathArchive.')) then
+            (substring-after(., 'EXPathArchive.')) else ."/>
     </xsl:template>
 
 </xsl:stylesheet>

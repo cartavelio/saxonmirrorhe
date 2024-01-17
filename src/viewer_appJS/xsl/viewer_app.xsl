@@ -376,10 +376,12 @@
                         </xsl:result-document>
                     </xsl:when>
                     <xsl:when test="$count gt 2">
+                        <xsl:variable name="class-parts" as="xs:string*" 
+                            select="(subsequence($hash-parts, 3, $count - 3), $hpj)"/>
                         <xsl:variable name="showclass"
                             select="if ($count eq 3) 
                             then $packageDoc/package/(class|interface|enum|delegate)[@id eq $hpj]
-                            else $packageDoc/package/class/class[@id eq concat($hash-parts[$count - 1],'.',$hpj)]"/>
+                            else $packageDoc/package/class//class[@id eq string-join($class-parts, '.')]"/>
                         <xsl:if test="empty($showclass)">
                             <xsl:result-document href="#main" method="ixsl:replace-content">
                                 <xsl:sequence select="f:classnotfound($hash-parts)"/>
@@ -1146,6 +1148,14 @@
                         <xsl:when test="contains($pageref, 'Saxon.Api')">
                             <xsl:value-of select="concat('dotnetdoc/Saxon.Api/',
                                 translate(substring-after($pageref, 'Saxon.Api.'),'.','/'))"/>
+                        </xsl:when>
+                        <!-- Special check for only java package which contains upper case -->
+                        <xsl:when test="$pageref eq 'com.saxonica.functions.extfn.EXPathArchive'">
+                            <xsl:value-of select="'javadoc/com.saxonica.functions.extfn.EXPathArchive'"/>
+                        </xsl:when>
+                        <xsl:when test="contains($pageref, 'extfn.EXPathArchive')">
+                            <xsl:value-of select="concat('javadoc/com.saxonica.functions.extfn.EXPathArchive/',
+                                translate(substring-after($pageref, 'extfn.EXPathArchive.'),'.','/'))"/>
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:variable name="section" select="if (contains($pageref, 'Saxon.Api') or
