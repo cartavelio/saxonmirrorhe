@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2023 Saxonica Liimited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -239,7 +239,7 @@ public:
 
   //! Get the array of nodes reachable from this node via a given axis.
   /**
-  * @param axis - identifies which axis is to be navigated. Axis options are as follows:
+  * @param EnumXdmAxis - axis identifies which axis is to be navigated. Axis options are as follows:
          * ANCESTOR = 0, ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
          * DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
          * FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10,
