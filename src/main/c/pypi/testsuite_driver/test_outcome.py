@@ -124,7 +124,7 @@ class PyTestOutcome:
                     print("uri=" + uri)
                     print(*self.result_documents, sep=", ")
                     doc = self.result_documents[uri]
-                    ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result, assert_xpc, catalog_xpc, assert_set)
+                    ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, None, assert_xpc, catalog_xpc, assert_set)
                     if not ok:
                         print("**** Assertion failed for result-document " + uri)
 
@@ -306,8 +306,9 @@ class PyTestOutcome:
             result_string = result.item_at(0).string_value
             result_string = result_string.strip().replace("\r\n", "\n").replace("\n", "")
 
-            '''print("result = " + result_string)
-            print("assertion = " + assertion_string)'''
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            print("assert_string_value, result = " + result_string)
+            print("assertion = " + assertion_string)
 
         return result_string == assertion_string
 
@@ -406,6 +407,8 @@ class PyTestOutcome:
             no_wsp_result_node = executable1.apply_templates_returning_value(xdm_value=result_node)
 
             assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
+            assert_xpc.declare_variable("result_xml")
+            assert_xpc.declare_variable("comparand_node")
             assert_xpc.set_parameter("result_xml", no_wsp_result_node.item_at(0))
             assert_xpc.set_parameter("comparand_node", no_wsp_comparand_node.item_at(0))
             resulti = assert_xpc.effective_boolean_value("fn:deep-equal($result_xml, $comparand_node)")
