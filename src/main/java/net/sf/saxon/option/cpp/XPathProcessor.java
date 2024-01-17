@@ -26,27 +26,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * * This class is to use with SaxonC on C++ for XPath queries to be compiled and executed
+ * * This class is to use with SaxonC on C++
  */
 public class XPathProcessor extends SaxonCAPI {
 
     private XPathCompiler compiler = null;
     //private XPathSelector selector = null;
     //private XdmItem contextItem = null;
-
-    /**
-     * XPathProcessor default constructor
-     */
+                                                                   
     public XPathProcessor() {
         super();
         compiler = processor.newXPathCompiler();
         compiler.setAllowUndeclaredVariables(true);
     }
 
-    /**
-     * XPathProcessor constructor
-     * @param l - license flag
-     */
     public XPathProcessor(boolean l) {
         super(l);
         compiler = processor.newXPathCompiler();
@@ -60,10 +53,6 @@ public class XPathProcessor extends SaxonCAPI {
 //#endif
     }
 
-    /**
-     * XPathProcessor constructor with the Processor object
-     * @param proc   - the Processor object
-     */
     public XPathProcessor(Processor proc) {
         super(proc);
         compiler = processor.newXPathCompiler();
@@ -78,9 +67,9 @@ public class XPathProcessor extends SaxonCAPI {
     }
 
     /**
-     * Create XPathProcessor and add to the ObjectHandle's pool. creates a HE XPath processor
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @return long value referencing the XPathProcessor object in the ObjectHandles pool
+     * Create XPathProcessor and add to the ObjectHandle's pool
+     * @param thread
+     * @return
      */
     @CEntryPoint(name = "createXPathProcessor")
     public static long createXPathProcessor(IsolateThread thread) {
@@ -88,12 +77,6 @@ public class XPathProcessor extends SaxonCAPI {
             return handle.rawValue();
     }
 
-    /**
-     * Create XPathProcessor and add to the ObjectHandle's pool with reference to a Processor
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param processorRef  - long value referencing the Processor object in the ObjectHandles pool.
-     * @return  long value referencing the XPathProcessor object in the ObjectHandles pool
-     */
     @CEntryPoint(name = "createXPathProcessorWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXPathProcessor(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
@@ -104,11 +87,6 @@ public class XPathProcessor extends SaxonCAPI {
             return handle.rawValue();
     }
 
-    /**
-     * create new XPathProcessor object
-     * @param proc - processor
-     * @return XPathProcessor object
-     */
     public static XPathProcessor newInstance(Processor proc) {
         return new XPathProcessor(proc);
     }
@@ -135,19 +113,18 @@ public class XPathProcessor extends SaxonCAPI {
      *               is in no namespace.
      * @throws NullPointerException if either the prefix or uri is null.
      */
-    @CEntryPoint(name = "j_xp_declareNamespace", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long declareNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_prefix, CCharPointer c_uri) throws SaxonApiException {
-        String prefix = SaxonCAPI.toJavaString(c_prefix, WordFactory.nullPointer());
-        String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
+    @CEntryPoint(name = "j_xp_declareNamespace")
+    public static void declareNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_prefix, CCharPointer c_uri) {
+        String prefix = CTypeConversion.toJavaString(c_prefix);
+        String uri = CTypeConversion.toJavaString(c_uri);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         xPathProcessor.getCompiler().declareNamespace(prefix, uri);
-        return SaxonCAPI.STATUS_OK;
     }
 
     /**
      * Declare a variable as part of the static context for XPath expressions compiled using this
      * {@code XPathCompiler}. It is an error for the XPath expression to refer to a variable unless it has been
-     * declared, unless the method setAllowUndeclaredVariables has been called to permit
+     * declared, unless the method {@link #setAllowUndeclaredVariables(boolean)} has been called to permit
      * undeclared variables. This method declares the existence of the variable, but it does not
      * bind any value to the variable; that is done later, when the XPath expression is evaluated.
      * The variable is allowed to have any type (that is, the required type is <code>item()*</code>).
@@ -156,15 +133,14 @@ public class XPathProcessor extends SaxonCAPI {
      * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_qname The name of the variable, expressions as a clark name string
      */
-    @CEntryPoint(name = "j_xp_declareVariable", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long declareVariable(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_qname) throws SaxonApiException {
-        String qname = SaxonCAPI.toJavaString(c_qname, WordFactory.nullPointer());
+    @CEntryPoint(name = "j_xp_declareVariable")
+    public static void declareVariable(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_qname) {
+        String qname = CTypeConversion.toJavaString(c_qname);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if(compiler != null) {
             compiler.declareVariable(QName.fromClarkName(qname));
         }
-        return SaxonCAPI.STATUS_OK;
     }
 
 
@@ -176,22 +152,21 @@ public class XPathProcessor extends SaxonCAPI {
      * the set of declarations and definitions made available to the XPath expression is empty). The schema
      * document for the specified namespace may be loaded before or after this method is called.</p>
      * <p>This method does not bind a prefix to the namespace. That must be done separately, using the
-     * declareNamespace method via the C++ API.</p>
+     * {@link #declareNamespace(String, String)} method.</p>
      *
      * @param thread - Graalvm runtime data structure for the thread
      * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      */
-    @CEntryPoint(name = "j_xp_importSchemaNamespace", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long importSchemaNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_uri) throws SaxonApiException{
-        String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
+    @CEntryPoint(name = "j_xp_importSchemaNamespace")
+    public static void importSchemaNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_uri) {
+        String uri = CTypeConversion.toJavaString(c_uri);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if(compiler != null) {
             compiler.importSchemaNamespace(uri);
         }
-        return SaxonCAPI.STATUS_OK;
     }
 
     /**
@@ -250,7 +225,7 @@ public class XPathProcessor extends SaxonCAPI {
         if(c_uriStr == WordFactory.nullPointer()) {
             throw new SaxonApiException("URI string is null");
         }
-        String uriStr = SaxonCAPI.toJavaString(c_uriStr, WordFactory.nullPointer());
+        String uriStr = CTypeConversion.toJavaString(c_uriStr);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         URI uri = null;
@@ -316,15 +291,12 @@ public class XPathProcessor extends SaxonCAPI {
      **/
     @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
-        if(xpathProcessorRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XPathProcessor is null");
-        }
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            cwd = CTypeConversion.toJavaString(ccwd);
         }
-        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (SaxonCAPI.debug) {
             if (xpathStr != null) {
@@ -379,18 +351,7 @@ public class XPathProcessor extends SaxonCAPI {
                     System.err.println("DEBUG setUnprefixedElementMatchingPolicy value=" + valueInt);
                     System.err.println("DEBUG setUnprefixedElementMatchingPolicy size=" + UnprefixedElementMatchingPolicy.values().length);
                 }
-                switch (valueInt) {
-
-                    case 0:
-                        compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE);
-                        break;
-                    case 1:
-                        compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
-                        break;
-                    case 2:
-                        compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
-                        break;
-                }
+                compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.values()[valueInt]);
             }
 
         }
@@ -443,9 +404,9 @@ public class XPathProcessor extends SaxonCAPI {
 
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            cwd = CTypeConversion.toJavaString(ccwd);
         }
-        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (debug) {
@@ -490,9 +451,9 @@ public class XPathProcessor extends SaxonCAPI {
         String cwd = null;
 
         if(c_cwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(c_cwd, WordFactory.nullPointer());
+            CTypeConversion.toJavaString(c_cwd);
         }
-        String xpathStr = SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        String xpathStr = CTypeConversion.toJavaString(c_xpathStr);
         setupXPathCompiler(compiler, optionsMap);
         XPathSelector selector = compiler.compile(xpathStr).load();
 
@@ -513,13 +474,10 @@ public class XPathProcessor extends SaxonCAPI {
      * In addition we can supply the source, stylesheet and output file names.
      * We can also supply values to xsl:param and xsl:variables required in the stylesheet.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
-     * @param api        - The SaxonCAPI object
      *  @param cwd       - current working directory
      * @param processor - required to use the same processor as for the compiled stylesheet
      * @param selector  - compiled and loaded XPath expression ready for execution.
-     * @param map       - The map of properties to apply on the XPath processor
-     * @param parameters  - map of parameters to apply on the XPath processor
-     * @throws SaxonApiException if error in apply XPath property
+     * @param map
      */
     public static void applyXPathProperties(SaxonCAPI api, String cwd, Processor processor, XPathSelector selector, Map<String, Object> map, Map<QName, XdmValue> parameters) throws SaxonApiException {
         if (!map.isEmpty()) {
@@ -532,11 +490,11 @@ public class XPathProcessor extends SaxonCAPI {
             DocumentBuilder builder = processor.newDocumentBuilder();
             Object valuei = null;
 
-            /*if (cwd != null && cwd.length() > 0) {
+            if (cwd != null && cwd.length() > 0) {
                 if (!cwd.endsWith("/")) {
                     cwd = cwd.concat("/");
                 }
-            }*/
+            }
 
             if (map.containsKey("s")) {
                 valuei = map.get("s");

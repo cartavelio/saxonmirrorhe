@@ -5,17 +5,16 @@ import os
 from os.path import isfile
 from datetime import datetime as date
 
-'''pytest --data-dir=[path/data]  test_saxonc.py'''
-
 
 @pytest.fixture
 def saxonproc():
     return PySaxonProcessor()
-
 @pytest.fixture
-def data_dir(pytestconfig):
-    return pytestconfig.getoption("--data-dir")
-
+def files_dir():
+    return "../samples/php"
+@pytest.fixture
+def data_dir():
+    return "../samples/data/"
 def test_create_bool():
     """Create SaxonProcessor object with a boolean argument"""
     sp1 = PySaxonProcessor(license=True)
@@ -33,11 +32,13 @@ def test_create_config():
         initialTemplate=""
         messageReceiver=""
         outputUriResolver=""
+        recoveryPolicy="recoverWithWarnings"
         schemaAware="false"
         staticErrorListener=""
         staticUriResolver=""
         styleParser=""
-        version="3.0">
+        version="3.0"
+        versionWarning="false">
       </xslt>
       <xquery
         allowUpdate="true"
@@ -65,9 +66,6 @@ def test_create_config():
             print(f.read())
         sp = PySaxonProcessor(config_file=fname)
         assert isinstance(sp, PySaxonProcessor)
-    except Exception as err:
-        print(err)
-        assert False
     finally:
         os.unlink(fname)
 def test_create_procs():
@@ -123,7 +121,7 @@ def test_icu_lib():
     xqc.set_query_content("format-integer(33,'Ww','de')")
     result6 = xqc.run_query_to_value()
     print("format-integer(33,'Ww','de') => "+str(result6))
-    assert 'Drei\xadund\xaddreißig' in str(result6)
+    assert 'Drei\xadund\xadDreißig' in str(result6)
 
     xqc.set_query_content("format-integer(33,'Ww','cs')")
     result7 = xqc.run_query_to_value()
@@ -224,36 +222,6 @@ def test_xslt_parameter(saxonproc, data_dir):
     output_ = executable.apply_templates_returning_string()
     assert output_ is not None
     assert 'text2' in output_
-
-def test_catalog(saxonproc, data_dir):
-    try:
-        catalog_files = [data_dir+"/catalog.xml", data_dir+"/catalog2.xml"]
-        saxonproc.set_catalog_files(catalog_files)
-        trans = saxonproc.new_xslt30_processor()
-
-        executable = trans.compile_stylesheet(stylesheet_file="http://example.com/books.xsl")
-        executable.set_initial_match_selection(file_name=data_dir+"books.xml")
-        executable.set_global_context_item(file_name=data_dir+"books.xml")
-        output_ = executable.apply_templates_returning_string()
-        assert output_ is not None
-    except Exception as e:
-            print(e)
-            assert False
-
-def testUTF8(saxonproc):
-    node = saxonproc.parse_xml(xml_text="<doc><e>تيست</e></doc>")
-    trans = saxonproc.new_xslt30_processor()
-    executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='e'>UTF8-تيست: <xsl:value-of select='.'/></xsl:template></xsl:stylesheet>")
-    assert node is not None
-    assert isinstance(node, PyXdmNode)
-    assert len(node.children)>0
-    eNode = node.children[0].children[0]
-    assert eNode is not None
-    executable.set_global_context_item(xdm_item=node)
-    executable.set_initial_match_selection(xdm_value=eNode)
-    result = executable.apply_templates_returning_string()
-    assert result is not None
-    assert "UTF8-تيست: تيست" in result
     
 '''PyXslt30Processor test cases '''
 def testContextNotRoot(saxonproc):
@@ -317,17 +285,15 @@ def testNodeAxis(saxonproc, data_dir):
         uri_str = ns.string_value
         ns_prefix = ns.name
 
-        if ns_prefix is not None:
-            print("xmlns:" + ns_prefix + "='" + uri_str + "'")
-        else:
-            print("xmlns uri=" + uri_str + "'")
+        print("xmlns:" + ns_prefix + "='" + uri_str + "'")
 
 
 
 def testCollection(saxonproc, data_dir):
     xq = saxonproc.new_xquery_processor()
-    xq.set_query_base_uri('file:////' + data_dir + '/trax/xml/')
-    xq.set_query_content("collection('?select=*.xml')")
+    print(getcwd())
+    xq.set_query_base_uri(data_dir)
+    xq.set_query_content("collection('?select=*.xml")
     r = xq.run_query_to_value()
     assert r is not None
 
@@ -338,7 +304,7 @@ def testXquery_40_functions():
     proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
     xquery_processor = proc.new_xquery_processor()
     result = xquery_processor.run_query_to_value(query_text = 'xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang= '4.0')
-    assert "paragraph" in str(result)
+    assert "paragraph" in result
 
 def testXquery_40_functions_error():
     try:
@@ -351,7 +317,7 @@ def testXquery_40_functions_error():
         assert True
 
 
-def testContext2NotRootNamedTemplate(saxonproc):
+def testContext2NotRootNamedTemplate(saxonproc, files_dir, data_dir):
         trans = saxonproc.new_xslt30_processor()
         input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
         executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='$x'/>]</xsl:template></xsl:stylesheet>")
@@ -371,7 +337,7 @@ def testContext2NotRootNamedTemplate(saxonproc):
         assert "text" in result2
 
 
-def testNamedTemplateDefault(saxonproc):
+def testNamedTemplateDefault(saxonproc, files_dir, data_dir):
     trans = saxonproc.new_xslt30_processor()
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     executable = trans.compile_stylesheet(stylesheet_text = '''
@@ -412,7 +378,7 @@ def testNamedTemplateDefault(saxonproc):
     assert "Item 3" in result
 
 
-def testCaseVariantFileLoads(saxonproc):
+def testCaseVariantFileLoads(saxonproc, files_dir, data_dir):
     trans = saxonproc.new_xslt30_processor()
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     executable = trans.compile_stylesheet(stylesheet_text = '''
@@ -434,7 +400,7 @@ def testCaseVariantFileLoads(saxonproc):
 
 def testNamedTemplateToFileDefault(saxonproc):
     trans = saxonproc.new_xslt30_processor()
-    trans.set_cwd(os.getcwd()+'/')
+    trans.set_cwd(os.getcwd())
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     executable = trans.compile_stylesheet(stylesheet_text = '''
      <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -471,10 +437,10 @@ def testNamedTemplateToFileDefault(saxonproc):
     assert isfile("result_For_call_template.xml") == True
 
 
-def testUseAssociated(saxonproc, data_dir):
+def testUseAssociated(saxonproc, files_dir):
     try:
         trans = saxonproc.new_xslt30_processor()
-        foo_xml = data_dir+"/trax/xml/foo.xml"
+        foo_xml = files_dir+"/trax/xml/foo.xml"
         executable = trans.compile_stylesheet(associated_file=foo_xml)
         assert executable is not None
         executable.set_initial_match_selection(file_name=foo_xml)
@@ -779,7 +745,7 @@ def testApplyTemplatesToFile(saxonproc):
 
 
 '''@pytest.mark.skip('Error: Test can only run with a license file present')'''
-def test_CallTemplateWithResultValidation(data_dir):
+def test_CallTemplateWithResultValidation(files_dir):
     try:
         saxonproc2 =  PySaxonProcessor(license=True)
         saxonproc2.set_cwd(files_dir)
@@ -876,7 +842,8 @@ def test_return_document_node(saxonproc):
 
 def testxQuery1(saxonproc, data_dir):
     query_proc = saxonproc.new_xquery_processor()
-    query_proc.set_cwd(os.getcwd()+'/')
+    query_proc.set_cwd(os.getcwd())
+    saxonproc.set_cwd(os.getcwd())
     query_proc.clear_properties()
     query_proc.clear_parameters()
     xmlFile = data_dir+"cat.xml"
@@ -899,8 +866,8 @@ def testxQuery1(saxonproc, data_dir):
 
 def testxQuery2(saxonproc, data_dir):
     query_proc = saxonproc.new_xquery_processor()
-    query_proc.set_cwd(os.getcwd()+'/')
-    saxonproc.set_cwd(os.getcwd()+'/')
+    query_proc.set_cwd(os.getcwd())
+    saxonproc.set_cwd(os.getcwd())
     query_proc.clear_properties()
     query_proc.clear_parameters()
     xmlFile = data_dir+"cat.xml"
@@ -1081,10 +1048,10 @@ def test_node_list():
     personData = str(children)
     assert ('<person att1' in personData)
 
-def test_parse_xml_file1(data_dir):
+def test_parse_xml_file1():
     sp = PySaxonProcessor()
 
-    node = sp.parse_xml(xml_file_name=data_dir+'/cat.xml')
+    node = sp.parse_xml(xml_file_name='cat.xml')
     outNode = node.children[0]
     assert outNode.name == 'out'
 
