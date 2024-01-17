@@ -25,6 +25,16 @@
 
    <p>Versions are available for the following platforms: Linux 64-bit, Mac OS (AArch64 and Intel x86_64), and
       Windows 64-bit.</p>
+   
+   <aside>This documentation contains information specific to SaxonC, including details about how to
+      install the products and get started using them, and the full API documentation for C/C++,
+      Python and PHP. Please also see the main <a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html">Saxon 12 documentation</a> for
+      further information on Saxon generally. A number of direct links are provided from this
+      documentation to specific sections of the main documentation, but there is plenty more which
+      will be relevant to SaxonC users. In particular, from Saxon 12.4 the main documentation has
+      been updated to provide more details relevant for the C/C++, PHP and Python platforms where
+      this differs to Saxon on the Java and C# platforms.</aside>
 
 
 
