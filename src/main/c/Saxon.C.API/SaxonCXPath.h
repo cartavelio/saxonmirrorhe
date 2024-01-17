@@ -104,6 +104,7 @@ int c_createXPathProcessor(sxnc_environment *environi,
  * @param proc - Pointer to the XPath Processor used for creating the XPath executable
  * @param cwd - Current working directory
  * @param xpathStr - A string containing the source text of the XPath expression
+ * @param encoding -  the encoding of the string. Accept null. If not specified then the platform default encoding is used.
  * @param parameters - Array of parameters for the XPath expression, as mappings (string, value)
  * @param properties - Array of properties for the XPath expression, as mappings (string, string).
  *                  This could contain the context node, source as string or file name, etc.
@@ -113,7 +114,7 @@ int c_createXPathProcessor(sxnc_environment *environi,
  **/
 
 sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
-                     char *xpathStr, sxnc_parameter *parameters,
+                     char *xpathStr, char * encoding, sxnc_parameter *parameters,
                      sxnc_property *properties, int parLen, int propLen);
 
 /**
@@ -124,6 +125,7 @@ sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
  * @param proc - Pointer to the XPath Processor used for creating the XPath executable
  * @param cwd - Current working directory
  * @param xpathStr - A string containing the source text of the XPath expression
+ * @param encoding -  the encoding of the string. Accept null. If not specified then the platform default encoding is used.
  * @param parameters - Array of parameters for the XPath expression, as mappings (string, value)
  * @param properties - Array of properties for the XPath expression, as mappings (string, string).
  *                 This could contain the context node, source as string or file name, etc.
@@ -132,7 +134,7 @@ sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
  * @return sxnc_value - The sxnc_value struct encapsulates the returned XdmItem object or NULL if the expression returns an empty sequence.
  **/
 sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
-                           char *cwd, char *xpathStr,
+                           char *cwd, char *xpathStr, char * encoding,
                            sxnc_parameter *parameters,
                            sxnc_property *properties, int parLen, int propLen);
 
@@ -143,6 +145,7 @@ sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
  * @param proc - Pointer to the XPath Processor used for creating the XPath executable
  * @param cwd - Current working directory
  * @param xpathStr - A string containing the source text of the XPath expression
+ * @param encoding -  the encoding of the string. Accept null. If not specified then the platform default encoding is used.
  * @param parameters - Array of parameters for the XPath expression, as mappings (string, value)
  * @param properties - Array of properties for the XPath expression, as mappings (string, string).
  *                 This could contain the context node, source as string or file name, etc.
@@ -152,7 +155,7 @@ sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
  **/
 
 bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
-                           char *cwd, char *xpathStr,
+                           char *cwd, char *xpathStr, char * encoding,
                            sxnc_parameter *parameters,
                            sxnc_property *properties, int parLen, int propLen);
 

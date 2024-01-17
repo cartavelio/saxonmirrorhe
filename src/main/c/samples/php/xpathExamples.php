@@ -95,12 +95,13 @@ function exampleSimple4($proc, $xpathEngine)
             $nodeValue = $resultValue->getNodeValue();
             $nodeKind = $nodeValue->getNodeKind();
             echo " NodeKind : " . $nodeKind . "<br/>";
-
+            $arr = $nodeValue->getAttributeNodes();
             $attCount = $nodeValue->getAttributeCount();
             for ($i = 0; $i < $attCount; $i++) {
-                $attNode = $nodeValue->getAttributeNode($i);
+                $attNode = $arr[$i];
                 $attName = $attNode->getNodeName();
                 $attVal = $nodeValue->getAttributeValue($attName);
+                
                 $nodeKindi = $attNode->getNodeKind();
                 echo ' Attribute name=' . $attName . ' value=' . $attVal . ', nodeKind=' . $nodeKindi . ' <br/>';
 

@@ -221,21 +221,19 @@ void XQueryProcessor::setUpdating(bool updating) {
 
 void XQueryProcessor::executeQueryToFile(const char *infilename,
                                          const char *ofilename,
-                                         const char *query) {
+                                         const char *query,
+                                         const char* encoding) {
   SaxonProcessor::attachCurrentThread();
 
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
-  if (query != nullptr) {
-    setProperty("qs", query);
-  }
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   int64_t status = j_executeQueryToFile(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
-      (char *)cwdXQ.c_str(), (char *)ofilename,
+      (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
 
@@ -250,20 +248,19 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
 }
 
 XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
-                                               const char *query) {
+                                               const char *query,
+                                               const char* encoding) {
   SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
-  if (query != nullptr) {
-    setProperty("qs", query);
-  }
+
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   int64_t result = j_executeQueryToValue(
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
-      (char *)cwdXQ.c_str(),
+      (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
   if (processorDataRef > 0) {
@@ -281,21 +278,19 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
 }
 
 const char *XQueryProcessor::executeQueryToString(const char *infilename,
-                                                  const char *query) {
+                                                  const char *query,
+                                                  const char* encoding) {
   SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
-  }
-  if (query != nullptr) {
-    setProperty("qs", query);
   }
   allocFn fn = operator new;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   char *result = j_executeQueryToString(
       SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef,
-      (char *)cwdXQ.c_str(),
+      (char *)cwdXQ.c_str(),(char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
 

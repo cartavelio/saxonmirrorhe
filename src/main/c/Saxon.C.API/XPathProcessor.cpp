@@ -101,7 +101,7 @@ XPathProcessor::~XPathProcessor() {
   // exceptionClear();
 }
 
-XdmValue *XPathProcessor::evaluate(const char *xpathStr) {
+XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char* encoding) {
   if (xpathStr == nullptr) {
     throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
   }
@@ -112,7 +112,7 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr) {
       SaxonProcessor::createParameterJArray(parameters, properties, 0);
   int64_t results =
       j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP,
-                 (char *)cwdXP.c_str(), (char *)xpathStr,
+                 (char *)cwdXP.c_str(), (char *)xpathStr, (char *)encoding,
                  (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                                  : (void *)processorDataRef));
   if (processorDataRef > 0) {
@@ -129,7 +129,7 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr) {
   return nullptr;
 }
 
-XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr) {
+XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr, const char* encoding) {
 
   if (xpathStr == nullptr) {
     throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
@@ -141,7 +141,7 @@ XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr) {
       SaxonProcessor::createParameterJArray(parameters, properties);
   int64_t result = j_evaluateSingle(
       SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(),
-      (char *)xpathStr,
+      (char *)xpathStr, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
   if (processorDataRef > 0) {
@@ -302,14 +302,14 @@ const char * XPathProcessor::getBaseURI() {
     return (const char *)xp_baseURI;
 }
 
-bool XPathProcessor::effectiveBooleanValue(const char *xpathStr) {
+bool XPathProcessor::effectiveBooleanValue(const char *xpathStr, const char* encoding) {
   SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   int resultsi = j_effectiveBooleanValue(
       SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(),
-      (char *)xpathStr,
+      (char *)xpathStr, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
   if (processorDataRef > 0) {

@@ -418,7 +418,7 @@ PHP_METHOD(XdmNode, getAttributeCount);
 PHP_METHOD(XdmNode, getChildNode);
 PHP_METHOD(XdmNode, axisNodes);
 PHP_METHOD(XdmNode, getParent);
-PHP_METHOD(XdmNode, getAttributeNode);
+PHP_METHOD(XdmNode, getAttributeNodes);
 PHP_METHOD(XdmNode, getAttributeValue);
 PHP_METHOD(XdmNode, getTypedValue);
 

@@ -1874,9 +1874,11 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
                </td>
                <td>
-                  <span class="signature">evaluate(string $xpathStr)</span>
+                  <span class="signature">evaluate(string $xpathStr, string $encoding = NULL)</span>
                   <div class="fcomment">Compile and evaluate an XPath expression, supplied as a
-                     character string, returning the result as an <a class="bodylink code"
+                     character string. The optional $encoding argument can be used to specify
+                     the encoding used to decode the string; if not specified then the platform
+                     default encoding is used. Return the result as an <a class="bodylink code"
                         href="../saxon_c_php_xdmvalue">XdmValue</a>.</div>
                </td>
             </tr>
@@ -1885,10 +1887,12 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmitem">Saxon\XdmItem</a>
                </td>
                <td>
-                  <span class="signature">evaluateSingle(string $xpathStr)</span>
+                  <span class="signature">evaluateSingle(string $xpathStr, string $encoding = NULL)</span>
                   <div class="fcomment">Compile and evaluate an XPath expression whose result is
                      expected to be a single item, with a given context item. The expression is
-                     supplied as a character string, and the result returned as an <a
+                     supplied as a character string. The optional $encoding argument can be used
+                     to specify the encoding used to decode the string; if not specified then the
+                     platform default encoding is used. The result returned is as an <a
                         class="bodylink code" href="../saxon_c_php_xdmitem">XdmItem</a>.
                      Returns null if the expression returns an empty sequence. If the expression
                      returns a sequence of more than one item, any items after the first are ignored.</div>

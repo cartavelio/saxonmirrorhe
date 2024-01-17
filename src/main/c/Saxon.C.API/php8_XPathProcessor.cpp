@@ -256,12 +256,17 @@ PHP_METHOD(XPathProcessor, effectiveBooleanValue) {
 
   XPathProcessor *xpathProcessor;
   char *xpathStr;
+  char *encoding = nullptr;
   zval *oth;
-  size_t len1, myint;
+  size_t len1, len2, myint;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &xpathStr, &len1) ==
       FAILURE) {
     RETURN_BOOL(false);
-  }
+  }  else   if (ZEND_NUM_ARGS() == 2 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1, &encoding, &len2) == FAILURE) {
+             RETURN_NULL();
+           }
+
   zend_object *pobj = Z_OBJ_P(getThis());
   xpathProcessor_object *obj =
       (xpathProcessor_object *)((char *)pobj -
@@ -269,7 +274,7 @@ PHP_METHOD(XPathProcessor, effectiveBooleanValue) {
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr && xpathStr != nullptr) {
     try {
-      bool result = xpathProcessor->effectiveBooleanValue(xpathStr);
+      bool result = xpathProcessor->effectiveBooleanValue(xpathStr, encoding);
       RETURN_BOOL(result);
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
@@ -281,12 +286,16 @@ PHP_METHOD(XPathProcessor, evaluate) {
 
   XPathProcessor *xpathProcessor;
   char *xpathStr;
+  char *encoding = nullptr;
   zval *oth;
-  size_t len1, myint;
+  size_t len1, len2, myint;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &xpathStr, &len1) ==
       FAILURE) {
     RETURN_NULL();
-  }
+  } else   if (ZEND_NUM_ARGS() == 2 &&
+         zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1, &encoding, &len2) == FAILURE) {
+         RETURN_NULL();
+       }
   zend_object *pobj = Z_OBJ_P(getThis());
   xpathProcessor_object *obj =
       (xpathProcessor_object *)((char *)pobj -
@@ -294,7 +303,7 @@ PHP_METHOD(XPathProcessor, evaluate) {
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr && xpathStr != nullptr) {
     try {
-      XdmValue *node = xpathProcessor->evaluate(xpathStr);
+      XdmValue *node = xpathProcessor->evaluate(xpathStr, encoding);
       if (node != nullptr) {
         node->incrementRefCount();
         if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
@@ -338,12 +347,17 @@ PHP_METHOD(XPathProcessor, evaluate) {
 PHP_METHOD(XPathProcessor, evaluateSingle) {
   XPathProcessor *xpathProcessor;
   char *xpathStr;
+  char *encoding = nullptr;
   zval *oth;
-  size_t len1, myint;
+  size_t len1, len2, myint;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &xpathStr, &len1) ==
       FAILURE) {
     RETURN_NULL();
-  }
+  }  else   if (ZEND_NUM_ARGS() == 2 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &xpathStr, &len1, &encoding, &len2) == FAILURE) {
+             RETURN_NULL();
+           }
+
   zend_object *pobj = Z_OBJ_P(getThis());
   xpathProcessor_object *obj =
       (xpathProcessor_object *)((char *)pobj -
@@ -357,7 +371,7 @@ PHP_METHOD(XPathProcessor, evaluateSingle) {
 
   if (xpathProcessor != nullptr) {
     try {
-      XdmItem *node = xpathProcessor->evaluateSingle(xpathStr);
+      XdmItem *node = xpathProcessor->evaluateSingle(xpathStr, encoding);
       if (node != nullptr) {
         node->incrementRefCount();
         if (object_init_ex(return_value, xdmItem_ce) != SUCCESS) {

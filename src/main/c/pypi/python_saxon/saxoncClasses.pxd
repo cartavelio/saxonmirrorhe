@@ -458,9 +458,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         const char * getBaseURI()
 
-        XdmValue * evaluate(const char * xpathStr)  except +raise_py_error
+        XdmValue * evaluate(const char * xpathStr, const char* encoding)  except +raise_py_error
    
-        XdmItem * evaluateSingle(const char * xpathStr)  except +raise_py_error
+        XdmItem * evaluateSingle(const char * xpathStr, const char* encoding)  except +raise_py_error
 
         void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
 
@@ -476,7 +476,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setLanguageVersion(const char * version)
 
-        bool effectiveBooleanValue(const char * xpathStr) except +raise_py_error
+        bool effectiveBooleanValue(const char * xpathStr, const char* encoding) except +raise_py_error
 
         void setParameter(const char * name, XdmValue*value)
 
@@ -537,6 +537,12 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         XdmValue * runQueryToValue() except +raise_py_error
         const char * runQueryToString() except +raise_py_error
+
+        void executeQueryToFile(const char *infilename,const char *ofilename,const char *query, const char* encoding) except +raise_py_error
+
+        XdmValue *executeQueryToValue(const char *infilename, const char *query, const char* encoding) except +raise_py_error
+
+        const char *executeQueryToString(const char *infilename, const char *query, const char* encoding) except +raise_py_error
 
         void runQueryToFile() except +raise_py_error
 
