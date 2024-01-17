@@ -17,6 +17,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Converter;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.OutputKeys;
@@ -195,16 +196,14 @@ public class JSONEmitter {
             } else {
                 double val = num.getDoubleValue();
                 double abs = Math.abs(val);
-                // Avoid exponential notation except in extremis
-                emit(FloatingPointConverter.convertDouble(val, abs >= 1e18 || abs < 1e-18));
-//                if (num.isWholeNumber() && abs < 1e18) {
-//                    emit(num.longValue() + "");
-//                } else if (abs < 1e18 && abs > 1e-18) {
-//                    // Avoid exponential notation except in extremis
-//                    emit(Converter.DoubleToDecimal.INSTANCE.convert(num).asAtomic().getUnicodeStringValue());
-//                } else {
-//                    emit(num.getUnicodeStringValue());
-//                }
+                if (num.isWholeNumber() && abs < 1e18) {
+                    emit(num.longValue() + "");
+                } else if (abs < 1e18 && abs > 1e-18) {
+                    // Avoid exponential notation except in extremis
+                    emit(Converter.DoubleToDecimal.INSTANCE.convert(num).asAtomic().getUnicodeStringValue());
+                } else {
+                    emit(num.getUnicodeStringValue());
+                }
             }
         } else if (item instanceof BooleanValue) {
             emit(item.getStringValue());
