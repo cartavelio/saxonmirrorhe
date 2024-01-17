@@ -162,6 +162,7 @@ public class XSLMerge extends StyleElement {
 
         MergeInstr merge = new MergeInstr();
         merge.setLocation(saveLocation());
+        merge.setRetainedStaticContext(makeRetainedStaticContext());
         int entries = numberOfMergeSources;
         MergeSource[] sources = new MergeSource[entries];
         Expression action = Literal.makeEmptySequence();
