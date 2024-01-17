@@ -1844,9 +1844,12 @@ void testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans,
     if (mmap.size() == 2) {
       sresult->success++;
       map<string,  XdmValue *>::iterator it;
-
+      
       for (it = mmap.begin(); it != mmap.end(); it++){
-            delete it->second;
+        const char * docStr = (it->second)->toString();
+        cout << "Result doc: " << docStr << endl;
+        delete docStr;
+        delete (it->second);
       }
       mmap.clear();
 
@@ -3169,6 +3172,7 @@ int main(int argc, char *argv[]) {
   delete trans;
   delete trans2;
   delete processor;
+  delete SaxonProcessor::sxn_environ;
   processor->release();
 
   cout << endl
