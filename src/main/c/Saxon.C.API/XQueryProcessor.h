@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2023 Saxonica Liimited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -154,9 +154,7 @@ public:
   /**
    * The result is is saved to file
    *
-   * @param infilename - The file name of the source document
-   * @param ofilename - The file name of where result will be stored
-   * @param query - The query as string representation.
+
    * @throws SaxonApiException
    */
   void executeQueryToFile(const char *infilename, const char *ofilename,
