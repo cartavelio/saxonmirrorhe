@@ -316,11 +316,119 @@
    </exception>
    
    <exception test-set="app-spec-examples" 
-      test-case="" 
+      test-case="fo-test-fn-chain-001
+      fo-test-fn-chain-002
+      fo-test-fn-chain-003
+      fo-test-fn-chain-004
+      fo-test-fn-chain-005
+      fo-test-fn-chain-006
+      fo-test-fn-chain-007
+      fo-test-fn-chain-008
+      fo-test-fn-chain-009
+      fo-test-fn-chain-010
+      fo-test-fn-chain-011
+      fo-test-fn-chain-012
+      fo-test-fn-chain-013
+      fo-test-fn-chain-014
+      fo-test-fn-chain-015
+      fo-test-fn-chain-016
+      fo-test-fn-chain-017" 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
+      <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-csv-to-simple-rows-001
+      fo-test-fn-csv-to-simple-rows-002
+      fo-test-fn-csv-to-simple-rows-003
+      fo-test-fn-csv-to-simple-rows-004
+      fo-test-fn-csv-to-simple-rows-005
+      fo-test-fn-csv-to-simple-rows-006
+      fo-test-fn-csv-to-simple-rows-007
+      fo-test-fn-csv-to-simple-rows-008" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-csv-to-xml-001
+      fo-test-fn-csv-to-xml-002
+      fo-test-fn-csv-to-xml-003
+      fo-test-fn-csv-to-xml-004
+      fo-test-fn-csv-to-xml-005
+      fo-test-fn-csv-to-xml-006
+      fo-test-fn-csv-to-xml-007
+      fo-test-fn-csv-to-xml-008
+      fo-test-fn-csv-to-xml-009" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-function-annotations-001
+      fo-test-fn-function-annotations-002
+      fo-test-fn-function-annotations-003" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-invisible-xml-001
+      fo-test-fn-invisible-xml-002
+      fo-test-fn-invisible-xml-003" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-parse-csv-001
+      fo-test-fn-parse-csv-002
+      fo-test-fn-parse-csv-003
+      fo-test-fn-parse-csv-005
+      fo-test-fn-parse-csv-006
+      fo-test-fn-parse-csv-007
+      fo-test-fn-parse-csv-008
+      fo-test-fn-parse-csv-009
+      fo-test-fn-parse-csv-010
+      fo-test-fn-parse-csv-011
+      fo-test-fn-parse-csv-012
+      fo-test-fn-parse-csv-013
+      fo-test-fn-parse-csv-014
+      fo-test-fn-parse-csv-015
+      fo-test-fn-parse-csv-016
+      fo-test-fn-parse-csv-017
+      fo-test-fn-parse-csv-018
+      fo-test-fn-parse-csv-019
+      fo-test-fn-parse-csv-020
+      fo-test-fn-parse-csv-021
+      fo-test-fn-parse-csv-022" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-map-substitute-001
+      fo-test-map-substitute-002" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-map-replace-001
+      fo-test-map-replace-002
+      fo-test-map-replace-003" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
    
  
    
