@@ -541,7 +541,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     /**
      * Get the total number of months (ignoring the days/hours/minutes/seconds)
      *
-     * @return the total number of months, that is (getYears()*12) + getMonths(), as a positive
+     * @return the total number of months, that is <code>getYears()*12 + getMonths()</code>, as a positive
      *         or negative number according as the duration is positive or negative
      */
 

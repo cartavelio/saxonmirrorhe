@@ -216,7 +216,7 @@ public class MessageInstr extends Instruction {
 
     /**
      * The MessageAdapter is a filter applied to the message pipeline which is designed to ensure that outputting an attribute
-     * with no containing element (for example &lt;xsl:message select="@x"/>) is not an error. Such an attribute is wrapped in
+     * with no containing element (for example &lt;xsl:message select="@x"/&gt;) is not an error. Such an attribute is wrapped in
      * a processing instruction so it can exist as a child of a document node.
      */
 
