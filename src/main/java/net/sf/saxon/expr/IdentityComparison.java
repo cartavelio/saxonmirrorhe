@@ -267,6 +267,19 @@ public final class IdentityComparison extends BinaryExpression {
     }
 
     /**
+     * Display the operator used by this binary expression
+     *
+     * @return String representation of the operator (for diagnostic display only)
+     */
+    @Override
+    protected String displayOperator() {
+        if (generateIdEmulation) {
+            return "is-g";
+        }
+        return super.displayOperator();
+    }
+
+    /**
      * Make an elaborator for this expression
      *
      * @return a suitable elaborator
@@ -290,28 +303,54 @@ public final class IdentityComparison extends BinaryExpression {
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
             final int operator = exp.getOperator();
+            final boolean generateIdEmulation = exp.isGenerateIdEmulation();
 
-            return context -> {
-                NodeInfo v0 = (NodeInfo)p0.eval(context);
-                if (nullable0 && v0 == null) {
-                    return false;
-                }
-                NodeInfo v1 = (NodeInfo)p1.eval(context);
-                if (nullable1 && v1 == null) {
-                    return false;
-                }
-                switch (operator) {
-                    case Token.IS:
-                        return v0.equals(v1);
-                    case Token.PRECEDES:
+            switch (operator) {
+                case Token.IS:
+                    if (nullable0 || nullable1) {
+                        if (generateIdEmulation) {
+                            return context -> {
+                                NodeInfo v0 = (NodeInfo) p0.eval(context);
+                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                if (v0 == null) {
+                                    return v1 == null;
+                                }
+                                return v0.equals(v1);
+                            };
+                        } else {
+                            return context -> {
+                                NodeInfo v0 = (NodeInfo) p0.eval(context);
+                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                if (v0 == null || v1 == null) {
+                                    return false;
+                                }
+                                return v0.equals(v1);
+                            };
+                        }
+                    } else {
+                        return context -> p0.eval(context).equals(p1.eval(context));
+                    }
+                case Token.PRECEDES:
+                    return context -> {
+                        NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        if (v0 == null || v1 == null) {
+                            return false;
+                        }
                         return GlobalOrderComparer.getInstance().compare(v0, v1) < 0;
-                    case Token.FOLLOWS:
+                    };
+                case Token.FOLLOWS:
+                    return context -> {
+                        NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        NodeInfo v1 = (NodeInfo) p1.eval(context);
+                        if (v0 == null || v1 == null) {
+                            return false;
+                        }
                         return GlobalOrderComparer.getInstance().compare(v0, v1) > 0;
-                    default:
-                        throw new UnsupportedOperationException("Unknown node identity test");
-                }
-            };
-
+                    };
+                default:
+                    throw new IllegalStateException();
+            }
         }
 
         public ItemEvaluator elaborateForItem() {
@@ -321,26 +360,52 @@ public final class IdentityComparison extends BinaryExpression {
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
             final int operator = exp.getOperator();
+            final boolean generateIdEmulation = exp.isGenerateIdEmulation();
 
             switch (operator) {
                 case Token.IS:
                     if (nullable0 || nullable1) {
-                        return context -> {
-                            NodeInfo v0 = (NodeInfo) p0.eval(context);
-                            NodeInfo v1 = (NodeInfo) p1.eval(context);
-                            if (v0 == null || v1 == null) {
-                                return null;
-                            }
-                            return BooleanValue.get(v0.equals(v1));
-                        };
+                        if (generateIdEmulation) {
+                            return context -> {
+                                NodeInfo v0 = (NodeInfo) p0.eval(context);
+                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                if (v0 == null) {
+                                    if (v1 == null) {
+                                        // generate-id(()) = generate-id(()) is true: bug 6279
+                                        return BooleanValue.TRUE;
+                                    } else {
+                                        return BooleanValue.FALSE;
+                                    }
+                                }
+                                if (v1 == null) {
+                                    return BooleanValue.FALSE;
+                                }
+                                return BooleanValue.get(v0.equals(v1));
+                            };
+                        } else {
+                            return context -> {
+                                NodeInfo v0 = (NodeInfo) p0.eval(context);
+                                if (v0 == null) {
+                                    return null;
+                                }
+                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                if (v1 == null) {
+                                    return null;
+                                }
+                                return BooleanValue.get(v0.equals(v1));
+                            };
+                        }
                     } else {
                         return context -> BooleanValue.get(p0.eval(context).equals(p1.eval(context)));
                     }
                 case Token.PRECEDES:
                     return context -> {
                         NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        if (v0 == null) {
+                            return null;
+                        }
                         NodeInfo v1 = (NodeInfo) p1.eval(context);
-                        if (v0 == null || v1 == null) {
+                        if (v1 == null) {
                             return null;
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) < 0);
@@ -348,8 +413,11 @@ public final class IdentityComparison extends BinaryExpression {
                 case Token.FOLLOWS:
                     return context -> {
                         NodeInfo v0 = (NodeInfo) p0.eval(context);
+                        if (v0 == null) {
+                            return null;
+                        }
                         NodeInfo v1 = (NodeInfo) p1.eval(context);
-                        if (v0 == null || v1 == null) {
+                        if (v1 == null) {
                             return null;
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) > 0);

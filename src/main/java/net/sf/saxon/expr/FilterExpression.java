@@ -290,9 +290,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         filterIsPositional = isPositionalFilter(getFilter(), th);
 
         // determine whether the filter always evaluates to a single boolean
-        filterIsSingletonBoolean =
-                getFilter().getCardinality() == StaticProperty.EXACTLY_ONE &&
-                        getFilter().getItemType().equals(BuiltInAtomicType.BOOLEAN);
+        filterIsSingletonBoolean = computeFilterIsSingletonBoolean();
 
         // determine whether the filter expression is independent of the focus
 
@@ -300,6 +298,11 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
         ExpressionTool.resetStaticProperties(this);
         return this;
+    }
+
+    private boolean computeFilterIsSingletonBoolean() {
+        return !Cardinality.allowsMany(getFilter().getCardinality()) &&
+                getFilter().getItemType().equals(BuiltInAtomicType.BOOLEAN);
     }
 
     /**
@@ -408,9 +411,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
         // determine whether the filter might depend on position
         filterIsPositional = isPositionalFilter(getFilter(), th);
-        filterIsSingletonBoolean =
-                getFilter().getCardinality() == StaticProperty.EXACTLY_ONE &&
-                        getFilter().getItemType().equals(BuiltInAtomicType.BOOLEAN);
+        filterIsSingletonBoolean = computeFilterIsSingletonBoolean();
 
         // determine whether the filter is indexable
         if (!filterIsPositional && !visitor.isOptimizeForStreaming() && !indexingDisabled) {
