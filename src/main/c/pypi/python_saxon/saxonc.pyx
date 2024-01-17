@@ -16,6 +16,7 @@ from libcpp.map cimport map
 from cython.operator import dereference, postincrement
 from os.path import isfile
 import sys
+from enum import IntEnum
 
 from libc.stdlib cimport free, malloc, realloc
 from libc.string cimport memcpy
@@ -28,6 +29,17 @@ class PySaxonApiError(RuntimeError):
   pass
 
 cdef public PyObject* pysaxonapierror = <PyObject*>PySaxonApiError
+
+
+class XdmType(IntEnum):
+    XDM_VALUE = 0
+    XDM_ATOMIC_VALUE = 1
+    XDM_NODE = 2
+    XDM_FUNCTION_ITEM = 3
+    XDM_MAP = 4
+    XDM_ARRAY = 5
+    XDM_EMPTY = 6
+    XDM_ITEM = 7
 
 
 
@@ -1523,23 +1535,23 @@ cdef class PyXslt30Processor:
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
-        if type_== 4:
+        if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem()
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
             mval = PyXdmMap()
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
             aaval = PyXdmArray()
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             return aaval
@@ -2237,27 +2249,27 @@ cdef class PyXsltExecutable:
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
-        if type_== 4:
+        if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             aval.thisvptr.incrementRefCount()
             return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             nval.thisvptr.incrementRefCount()
             return nval
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem()
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
             mval = PyXdmMap()
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
             aaval = PyXdmArray()
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
@@ -2346,27 +2358,27 @@ cdef class PyXsltExecutable:
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
-        if type_== 4:
+        if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             aval.thisvptr.incrementRefCount()
             return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             nval.thisvptr.incrementRefCount()
             return nval
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem()
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
             mval = PyXdmMap()
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
             aaval = PyXdmArray()
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
@@ -2568,25 +2580,25 @@ cdef class PyXsltExecutable:
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
-        if type_== 4:
+        if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem()
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
             mval = PyXdmMap()
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
             aaval = PyXdmArray()
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
@@ -2737,25 +2749,25 @@ cdef class PyXsltExecutable:
         if xdmValue is NULL:
           return None
         cdef type_ = xdmValue.getType()
-        if type_== 4:
+        if type_== XdmType.XDM_ATOMIC_VALUE:
           aval = PyXdmAtomicValue()
           aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
           return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
           nval = PyXdmNode()
           nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
           return nval
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem()
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
             mval = PyXdmMap()
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
             aaval = PyXdmArray()
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
@@ -3112,25 +3124,25 @@ cdef class PyXQueryProcessor:
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
-        if type_== 4:
+        if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem()
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
             mval = PyXdmMap()
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
             aaval = PyXdmArray()
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
@@ -3400,27 +3412,27 @@ cdef class PyXPathProcessor:
         if xdmItem == NULL:
             return None
         cdef type_ = xdmItem.getType()
-        if type_ == 4:
+        if type_ == XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
             aval.derivedptr.incrementRefCount()
             return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
             val = PyXdmNode()
             val.derivednptr = val.derivedptr = val.thisvptr = <saxoncClasses.XdmNode*>xdmItem
             val.derivedptr.incrementRefCount()
             return val
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem()
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
             fval.thisvptr.incrementRefCount()
             return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
             mval = PyXdmMap()
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
             mval.thisvptr.incrementRefCount()
             return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
             aaval = PyXdmArray()
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
             aaval.thisvptr.incrementRefCount()
@@ -4096,27 +4108,27 @@ cdef class PyXdmValue:
 
         cdef PyXdmItem val = PyXdmItem()
         cdef type_ = xdmItem.getType()
-        if type_== 4:
+        if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue()
             xdmItem.incrementRefCount()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
             return aval
-        elif type_ == 3:
+        elif type_ == XdmType.XDM_NODE:
             nval = PyXdmNode()
             xdmItem.incrementRefCount()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
             return nval
-        elif type_ == 5:
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
              fval = PyXdmFunctionItem()
              fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
              fval.thisvptr.incrementRefCount()
              return fval
-        elif type_ == 6:
+        elif type_ == XdmType.XDM_MAP:
              mval = PyXdmMap()
              mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
              mval.thisvptr.incrementRefCount()
              return mval
-        elif type_ == 7:
+        elif type_ == XdmType.XDM_ARRAY:
              aaval = PyXdmArray()
              aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
              aaval.thisvptr.incrementRefCount()
@@ -4151,29 +4163,31 @@ cdef class PyXdmValue:
         else :
             type_ = xdmItem.getType()
             xdmItem.incrementRefCount()
-            if type_== 4:
+            if type_== XdmType.XDM_ATOMIC_VALUE:
                 aval = PyXdmAtomicValue()
                 aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
                 return aval
-            elif type_ == 3:
+            elif type_ == XdmType.XDM_NODE:
                 nval = PyXdmNode()
                 nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
                 return nval
-            elif type_ == 5:
+            elif type_ == XdmType.XDM_FUNCTION_ITEM:
                 fval = PyXdmFunctionItem()
                 fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
                 fval.thisvptr.incrementRefCount()
                 return fval
-            elif type_ == 6:
+            elif type_ == XdmType.XDM_MAP:
                 mval = PyXdmMap()
                 mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
                 mval.thisvptr.incrementRefCount()
                 return mval
-            elif type_ == 7:
+            elif type_ == XdmType.XDM_ARRAY:
                 aaval = PyXdmArray()
                 aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
                 aaval.thisvptr.incrementRefCount()
                 return aaval
+            elif type_ == XdmType.XDM_EMPTY:
+                return None
             else:
                 ival = PyXdmItem()
                 ival.thisvptr = xdmItem
@@ -5077,32 +5091,32 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          if c_xdmValue == NULL:
              return None
          type_ = c_xdmValue.getType()
-         if type_== 1:
+         if type_== XdmType.XDM_VALUE:
               value_ = PyXdmValue()
               value_.thisvptr = c_xdmValue
               value_.thisvptr.incrementRefCount()
               return value_
-         if type_== 4:
+         if type_== XdmType.XDM_ATOMIC_VALUE:
               aval = PyXdmAtomicValue()
               aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>c_xdmValue
               aval.thisvptr.incrementRefCount()
               return aval
-         elif type_ == 3:
+         elif type_ == XdmType.XDM_NODE:
               nval = PyXdmNode()
               nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_xdmValue
               nval.thisvptr.incrementRefCount()
               return nval
-         elif type_ == 5:
+         elif type_ == XdmType.XDM_FUNCTION_ITEM:
               fval = PyXdmFunctionItem()
               fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>c_xdmValue
               fval.thisvptr.incrementRefCount()
               return fval
-         elif type_ == 6:
+         elif type_ == XdmType.XDM_MAP:
               mval = PyXdmMap()
               mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>c_xdmValue
               mval.thisvptr.incrementRefCount()
               return mval
-         elif type_ == 7:
+         elif type_ == XdmType.XDM_ARRAY:
               aaval = PyXdmArray()
               aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>c_xdmValue
               aaval.thisvptr.incrementRefCount()
@@ -5213,32 +5227,32 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
 
              type_ = c_xdmValue.getType()
-             if type_== 1:
+             if type_== XdmType.XDM_VALUE:
                  value_ = PyXdmValue()
                  value_.thisvptr = c_xdmValue
                  value_.thisvptr.incrementRefCount()
                  return value_
-             if type_== 4:
+             if type_== XdmType.XDM_ATOMIC_VALUE:
                  aval = PyXdmAtomicValue()
                  aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>c_xdmValue
                  aval.thisvptr.incrementRefCount()
                  return aval
-             elif type_ == 3:
+             elif type_ == XdmType.XDM_NODE:
                  nval = PyXdmNode()
                  nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_xdmValue
                  nval.thisvptr.incrementRefCount()
                  return nval
-             elif type_ == 5:
+             elif type_ == XdmType.XDM_FUNCTION_ITEM:
                  fval = PyXdmFunctionItem()
                  fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>c_xdmValue
                  fval.thisvptr.incrementRefCount()
                  return fval
-             elif type_ == 6:
+             elif type_ == XdmType.XDM_MAP:
                  mval = PyXdmMap()
                  mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>c_xdmValue
                  mval.thisvptr.incrementRefCount()
                  return mval
-             elif type_ == 7:
+             elif type_ == XdmType.XDM_ARRAY:
                  aaval = PyXdmArray()
                  aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>c_xdmValue
                  aaval.thisvptr.incrementRefCount()
@@ -5388,32 +5402,32 @@ cdef class PyXdmMap(PyXdmFunctionItem):
              for i in range(count):
 
                  type_ = c_values[i].getType()
-                 if type_== 1:
+                 if type_== XdmType.XDM_VALUE:
                      val = PyXdmValue()
                      val.thisvptr = c_values[i]
                      val.thisvptr.incrementRefCount()
                      p_values.append(val)
-                 if type_== 4:
+                 if type_== XdmType.XDM_ATOMIC_VALUE:
                      aval = PyXdmAtomicValue()
                      aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>c_values[i]
                      aval.thisvptr.incrementRefCount()
                      p_values.append(aval)
-                 elif type_ == 3:
+                 elif type_ == XdmType.XDM_NODE:
                      nval = PyXdmNode()
                      nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_values[i]
                      nval.thisvptr.incrementRefCount()
                      p_values.append(nval)
-                 elif type_ == 5:
+                 elif type_ == XdmType.XDM_FUNCTION_ITEM:
                      fval = PyXdmFunctionItem()
                      fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>c_values[i]
                      fval.thisvptr.incrementRefCount()
                      p_values.append(fval)
-                 elif type_ == 6:
+                 elif type_ == XdmType.XDM_MAP:
                      mval = PyXdmMap()
                      mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>c_values[i]
                      mval.thisvptr.incrementRefCount()
                      p_values.append(mval)
-                 elif type_ == 7:
+                 elif type_ == XdmType.XDM_ARRAY:
                      aaval = PyXdmArray()
                      aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>c_values[i]
                      aaval.thisvptr.incrementRefCount()

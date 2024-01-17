@@ -396,6 +396,10 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     XdmValue *value = nullptr;
     int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                      (void *)results);
+
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "C++ makeXdmValueFromRef - typeRef= " << typeRef << std::endl;
+    }
     if (typeRef == SXN_EXCEPTION) {
 
       throw SaxonApiException();
