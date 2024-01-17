@@ -289,7 +289,7 @@ void XPathProcessor::setBaseURI(const char *uriStr) {
   if (uriStr != nullptr) {
     j_xp_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP,
                   (char *)uriStr);
-    delete [] xp_baseURI;
+    operator delete (xp_baseURI);
     xp_baseURI = nullptr;
   }
 }
@@ -300,7 +300,7 @@ const char * XPathProcessor::getBaseURI() {
         allocFn fn = operator new;
         xp_baseURI = j_xp_getBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (void *)fn);
     }
-    return xp_baseURI;
+    return (const char *)xp_baseURI;
 }
 
 bool XPathProcessor::effectiveBooleanValue(const char *xpathStr) {
