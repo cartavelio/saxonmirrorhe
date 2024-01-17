@@ -37,6 +37,8 @@ import java.util.Arrays;
  * Evaluating the expression returns a function item. The reason that UserFunctionReference is treated
  * as an expression rather than a value is that the binding to the actual function may be deferred, for
  * example if the function is overridden in a different package.
+ *
+ * <p>Also used on some occasions for references to system functions.</p>
  */
 
 public class UserFunctionReference extends Expression
@@ -304,7 +306,7 @@ public class UserFunctionReference extends Expression
      */
     @Override
     public Expression copy(RebindingMap rebindings) {
-        UserFunctionReference ref = new UserFunctionReference(nominalTarget);
+        UserFunctionReference ref = new UserFunctionReference(nominalTarget, functionName);
         ref.optimizeCounter = optimizeCounter;
         ref.typeCheckCounter = typeCheckCounter;
         return ref;
@@ -501,6 +503,9 @@ public class UserFunctionReference extends Expression
 
         @Override
         public FunctionItemType getFunctionItemType() {
+            if (function instanceof UserFunction) {
+                return ((UserFunction) function).getFunctionItemType(getArity());
+            }
             return function.getFunctionItemType();
         }
 
