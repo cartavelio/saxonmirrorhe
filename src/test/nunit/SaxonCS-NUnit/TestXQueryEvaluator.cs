@@ -1,13 +1,9 @@
 ﻿using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using J2N.Text;
 using Saxon.Api;
-using Saxon.Ejavax.xml.transform;
 using static Saxon.Api.Steps;
 
 namespace SaxonCS_NUnit {

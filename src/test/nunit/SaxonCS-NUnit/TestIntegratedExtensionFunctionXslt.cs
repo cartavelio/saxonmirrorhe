@@ -6,7 +6,6 @@ using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using StaticContext = Saxon.Api.StaticContext;
-using XdmAtomicType = Saxon.Api.XdmAtomicType;
 using XdmNodeKind = Saxon.Api.XdmNodeKind;
 
 namespace SaxonCS_NUnit {
