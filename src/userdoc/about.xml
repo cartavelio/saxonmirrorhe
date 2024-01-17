@@ -410,7 +410,7 @@
       <p>As well as features standardized by W3C, Saxon provides an extensive library of <a
             class="bodylink" href="/extensions">extensions</a>, all implemented in conformance with
          the XSLT and XQuery Recommendations to ensure that portable stylesheets and queries can be
-         written. These include the <a href="http://www.exslt.org/" class="bodylink">EXSLT</a>
+         written. These include the <a href="http://exslt.github.io/" class="bodylink">EXSLT</a>
          extension libraries <strong>common</strong>, <strong>sets</strong>, <strong>math</strong>,
          and <strong>dates-and-times</strong>, and the <a href="http://www.expath.org/"
             class="bodylink">EXPath</a> modules <strong>binary</strong>, <strong>file</strong>, and
