@@ -1062,7 +1062,7 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
-        String charsetFlag  = System.getenv("SAXONC_DEBUG_CHARSET_FLAG");
+        //String charsetFlag  = System.getenv("SAXONC_DEBUG_CHARSET_FLAG");
         /*if(charsetFlag != null && charsetFlag.equals("true")) {
             String charsetStr = serializer.getOutputProperty(Serializer.Property.ENCODING);
             if(charsetStr != null) {
