@@ -142,6 +142,15 @@ public:
    */
   int getArity() { return 1; }
 
+    //! Get the string value of the XdmArray item.
+    /**
+     * Get the value of the item as a string. For arrays, there is no string value,
+     * so an exception is thrown.
+     *
+     * @return the string value of the item
+     */
+    const char *getStringValue();
+
   /**
    * Determine whether the item is a function or some other type of item
    *

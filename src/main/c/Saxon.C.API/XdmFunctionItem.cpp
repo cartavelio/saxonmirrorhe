@@ -116,6 +116,10 @@ XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
   return nullptr;
 }
 
+const char * XdmFunctionItem::getStringValue(){
+    throw SaxonApiException("The string value of a function is not defined", "FOTY0014", nullptr, -1);
+}
+
 XdmValue *XdmFunctionItem::call(SaxonProcessor *processor, XdmValue **arguments,
                                 int argument_length) {
   if ((argument_length > 0 && arguments == nullptr) || processor == nullptr) {

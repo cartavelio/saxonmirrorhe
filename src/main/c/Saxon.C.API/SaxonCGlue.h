@@ -13,12 +13,11 @@
 #include <libsaxon-@@edition@@c-@@VERSION@@.h>
 
 #include <stdio.h>
+#include <stdint.h>
 #if defined __linux__ || defined __APPLE__
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #else
-#include <stdint.h>
 #include <windows.h>
 #endif
 

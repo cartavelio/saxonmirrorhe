@@ -25,8 +25,8 @@ int query(sxnc_environment *environi, int argc, const char *argv[]) {
   }
   int64_t processorDataRef =
       createProcessorDataWithCapacity(environi->thread, argc);
-
-  for (int i = 1; i < argc; i++) {
+  int i = 0;
+  for (; i < argc; i++) {
 #ifdef DEBUG
     printf("\nArgument = %s", (char *)argv[i]);
 #endif

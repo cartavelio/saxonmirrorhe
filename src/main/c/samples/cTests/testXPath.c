@@ -52,11 +52,11 @@ int main() {
   printf("XPath Tests\n\nSaxon version: %s \n", verCh);
   setProperty(&properties, &propLen, &propCap, "s", "data/cat.xml");
 
-  sxnc_value *result = evaluate(environi, xpathProc, cwd, "/out/person",
+  sxnc_value *result = evaluate(environi, xpathProc, cwd, "/out/person", NULL,
                                 parameters, properties, 0, propLen);
 
   bool resultBool =
-      effectiveBooleanValue(environi, xpathProc, cwd, "count(/out/person)>0",
+      effectiveBooleanValue(environi, xpathProc, cwd, "count(/out/person)>0", NULL,
                             parameters, properties, 0, propLen);
 
   if (!result) {

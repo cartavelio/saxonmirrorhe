@@ -43,11 +43,21 @@ XsltExecutable::~XsltExecutable() {
   clearParameters();
 
   if (saxonMessageListenerRef != SXN_UNSET) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                          (void *)saxonMessageListenerRef);
     saxonMessageListenerRef = SXN_UNSET;
   }
   if (saxonResultDocRef != SXN_UNSET) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                          (void *)saxonResultDocRef);
     saxonResultDocRef = SXN_UNSET;
   }
+    if(executableRef != SXN_UNSET) {
+      j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                        (void *)executableRef);
+      executableRef = SXN_UNSET;
+
+    }
 }
 
 XsltExecutable::XsltExecutable(const XsltExecutable &other) {
