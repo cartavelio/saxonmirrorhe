@@ -15,7 +15,6 @@ import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -126,21 +125,18 @@ public class TypeChecker {
         }
 
 
-        if (reqItemType.isPlainType()) {
+        if (!itemTypeOK) {
+            // Now apply the conversions needed in 2.0 mode
 
-            if (!itemTypeOK) {
+            if (reqItemType.isPlainType()) {
 
                 // rule 1: Atomize
                 if (!suppliedItemType.isPlainType() &&
                         !(suppliedCard == StaticProperty.EMPTY)) {
-                    boolean atomizable = suppliedItemType.isAtomizable(th);
-                    if (atomizable && (exp.getSpecialProperties() & StaticProperty.COMPUTED_FUNCTION) != 0) {
-                        atomizable = false; // in this case we know the function isn't going to be an array
-                    }
-                    if (!atomizable) {
+                    if (!suppliedItemType.isAtomizable(th)) {
                         String shortItemType;
                         if (suppliedItemType instanceof RecordType) {
-                            shortItemType = "a record type";
+                            shortItemType = "a tuple type";
                         } else if (suppliedItemType instanceof MapType) {
                             shortItemType = "a map type";
                         } else if (suppliedItemType instanceof FunctionItemType) {
@@ -153,11 +149,8 @@ public class TypeChecker {
                         RoleDiagnostic role = roleSupplier.get();
                         throw new XPathException(
                                 "An atomic value is required for the " + role.getMessage() +
-                                        ", but the supplied type is " + shortItemType + ", which cannot be atomized")
-                                .withErrorCode("FOTY0013")
-                                .withLocation(supplied.getLocation())
-                                .asTypeError()
-                                .withFailingExpression(supplied);
+                                        ", but the supplied type is " + shortItemType + ", which cannot be atomized", "FOTY0013", supplied.getLocation())
+                                .asTypeError().withFailingExpression(supplied);
                     }
 
                     if (exp.getRetainedStaticContext() == null) {
@@ -173,62 +166,10 @@ public class TypeChecker {
                     suppliedCard = exp.getCardinality();
                     cardOK = Cardinality.subsumes(reqCard, suppliedCard);
                 }
-            }
 
-            // rule 2: convert untypedAtomic to the required type
+                // rule 2: convert untypedAtomic to the required type
 
-            // The specification says we do untypedAtomic conversion first, then promotion. However, if the
-            // target type is one to which promotion applies, then we combine the two operations into one:
-            // the conversion functions that handle type promotion (for example from float to double) also
-            // handle conversion from untypedAtomic, so we only need to make one pass over the data.
-
-            // rule 3: type promotion (combined with untypedAtomic conversion)
-
-            if (reqItemType instanceof BuiltInAtomicType && ((BuiltInAtomicType) reqItemType).isPrimitiveType() && !itemTypeOK) {
-                int rt = ((BuiltInAtomicType) reqItemType).getFingerprint();
-                UType promotables = promotableTypes(rt, allow40);
-                if (suppliedItemType.getUType().intersection(promotables).equals(UType.VOID)) {
-                    // Promotion cannot succeed: raise a static type error
-                    RoleDiagnostic role = roleSupplier.get();
-                    throw new XPathException(
-                            "An item of type " + suppliedItemType +
-                                    " cannot be converted to " + reqItemType +
-                                    " as required for the " + role.getMessage())
-                            .withErrorCode(role.getErrorCode())
-                            .withLocation(supplied.getLocation())
-                            .withFailingExpression(supplied);
-                }
-                ConversionRules rules = config.getConversionRules();
-                Expression promoted = null;
-                Converter converter = makePromotingConverter(suppliedItemType, rt, rules, allow40);
-                if (converter != null) {
-                    promoted = makePromoter(exp, converter, (BuiltInAtomicType)reqItemType);
-                }
-
-                if (promoted != null) {
-                    if (promoted instanceof AtomicSequenceConverter) {
-                        ((AtomicSequenceConverter) promoted).setRoleDiagnostic(roleSupplier);
-                    }
-                    exp = promoted;
-                    try {
-                        exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                    } catch (XPathException err) {
-                        throw err.maybeWithLocation(exp.getLocation())
-                                .asStaticError()
-                                .withFailingExpression(supplied);
-                    }
-                    suppliedItemType = reqItemType;
-                    suppliedCard = -1;
-                    itemTypeOK = true;
-
-                }
-            }
-
-            if (!itemTypeOK) {
-
-                // Revisit rule 2 (conversion from untyped atomic) for target types that have not been handled by a Promoter
-
-                //   2b: all supplied values are untyped atomic. Convert if necessary, and we're finished.
+                //   2a: all supplied values are untyped atomic. Convert if necessary, and we're finished.
 
                 if (suppliedItemType.equals(BuiltInAtomicType.UNTYPED_ATOMIC)
                         && !(reqItemType.equals(BuiltInAtomicType.UNTYPED_ATOMIC) || reqItemType.equals(BuiltInAtomicType.ANY_ATOMIC))) {
@@ -236,39 +177,34 @@ public class TypeChecker {
                     if (((PlainType) reqItemType).isNamespaceSensitive()) {
                         // See spec bug 11964
                         RoleDiagnostic role = roleSupplier.get();
-                        throw new XPathException(
+                        XPathException err = new XPathException(
                                 "An untyped atomic value cannot be converted to a QName or NOTATION as required for the " +
-                                        role.getMessage())
-                                .withErrorCode("XPTY0117")
-                                .withLocation(supplied.getLocation())
-                                .withFailingExpression(supplied);
+                                role.getMessage(), "XPTY0117", supplied.getLocation());
+                        err.setIsTypeError(true);
+                        throw err;
                     }
                     UntypedSequenceConverter cexp = UntypedSequenceConverter.makeUntypedSequenceConverter(config, exp, (PlainType) reqItemType);
                     cexp.setRoleDiagnostic(roleSupplier);
                     ExpressionTool.copyLocationInfo(exp, cexp);
                     try {
                         if (exp instanceof Literal) {
-                            try {
-                                exp = Literal.makeLiteral(
-                                        SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
-                                ExpressionTool.copyLocationInfo(cexp, exp);
-                            } catch (UncheckedXPathException e) {
-                                throw e.getXPathException();
-                            }
+                            exp = Literal.makeLiteral(
+                                    SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
+                            ExpressionTool.copyLocationInfo(cexp, exp);
                         } else {
                             exp = cexp;
                         }
                     } catch (XPathException err) {
                         throw err.maybeWithLocation(exp.getLocation())
                                 .withFailingExpression(supplied)
-                                .maybeWithErrorCode(roleSupplier.get().getErrorCode())
+                                .withErrorCode(roleSupplier.get().getErrorCode())
                                 .asStaticError();
                     }
                     itemTypeOK = true;
                     suppliedItemType = reqItemType;
                 }
 
-                //   2c: some supplied values are untyped atomic. Convert these to the required type; but
+                //   2b: some supplied values are untyped atomic. Convert these to the required type; but
                 //   there may be other values in the sequence that won't convert and still need to be checked
 
                 if (suppliedItemType.equals(BuiltInAtomicType.ANY_ATOMIC)
@@ -286,13 +222,9 @@ public class TypeChecker {
                     ExpressionTool.copyLocationInfo(exp, conversion);
                     try {
                         if (exp instanceof Literal) {
-                            try {
-                                exp = Literal.makeLiteral(
-                                        SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
-                                ExpressionTool.copyLocationInfo(supplied, exp);
-                            } catch (UncheckedXPathException e) {
-                                throw e.getXPathException();
-                            }
+                            exp = Literal.makeLiteral(
+                                    SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
+                            ExpressionTool.copyLocationInfo(supplied, exp);
                         } else {
                             exp = conversion;
                         }
@@ -301,61 +233,120 @@ public class TypeChecker {
                         throw err.maybeWithLocation(exp.getLocation()).asStaticError();
                     }
                 }
-            }
 
-            // New 4.0 rule - relabelling (or "downcasting")
+                // Rule 3a: numeric promotion decimal -> float -> double
 
-            if (!itemTypeOK && reqItemType.getBasicAlphaCode().length() > 2 && visitor.getStaticContext().getXPathVersion() >= 40) {
-                // allow down-conversion ("relabelling")
-                if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {
-                    itemTypeOK = true;
-                    Expression cexp = makeDownCaster(exp, (AtomicType) reqItemType, config);
-                    if (cexp instanceof AtomicSequenceConverter) {
-                        ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
+                if (reqItemType instanceof AtomicType) {
+                    int rt = ((AtomicType) reqItemType).getFingerprint();
+                    if (rt == StandardNames.XS_DOUBLE &&
+                            th.relationship(suppliedItemType, NumericType.getInstance()) != DISJOINT) {
+                        Expression cexp = makePromoterToDouble(exp);
+                        if (cexp instanceof AtomicSequenceConverter) {
+                            ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
+                        }
+                        ExpressionTool.copyLocationInfo(exp, cexp);
+                        exp = cexp;
+                        try {
+                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                        } catch (XPathException err) {
+                            throw err.maybeWithLocation(exp.getLocation()).asStaticError();
+                        }
+                        suppliedItemType = BuiltInAtomicType.DOUBLE;
+                        suppliedCard = -1;
+
+                    } else if (rt == StandardNames.XS_FLOAT &&
+                            th.relationship(suppliedItemType, NumericType.getInstance()) != DISJOINT &&
+                            !th.isSubType(suppliedItemType, BuiltInAtomicType.DOUBLE)) {
+                        Expression cexp = makePromoterToFloat(exp);
+                        if (cexp instanceof AtomicSequenceConverter) {
+                            ((AtomicSequenceConverter)cexp).setRoleDiagnostic(roleSupplier);
+                        }
+                        ExpressionTool.copyLocationInfo(exp, cexp);
+                        exp = cexp;
+                        try {
+                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                        } catch (XPathException err) {
+                            throw err.maybeWithLocation(exp.getLocation())
+                                    .asStaticError()
+                                    .withFailingExpression(supplied);
+                        }
+                        suppliedItemType = BuiltInAtomicType.FLOAT;
+                        suppliedCard = -1;
+
                     }
-                    ExpressionTool.copyLocationInfo(exp, cexp);
-                    exp = cexp;
-                    try {
-                        exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                    } catch (XPathException err) {
-                        throw err.maybeWithLocation(exp.getLocation())
-                                .asStaticError()
-                                .withFailingExpression(supplied);
+
+                    // Rule 3b: promotion from anyURI -> string
+
+                    if (rt == StandardNames.XS_STRING && th.isSubType(suppliedItemType, BuiltInAtomicType.ANY_URI)) {
+                        itemTypeOK = true;
+                        Expression cexp = makePromoterToString(exp);
+                        if (cexp instanceof AtomicSequenceConverter) {
+                            ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
+                        }
+                        ExpressionTool.copyLocationInfo(exp, cexp);
+                        exp = cexp;
+                        try {
+                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                        } catch (XPathException err) {
+                            throw err.maybeWithLocation(exp.getLocation())
+                                    .withFailingExpression(supplied)
+                                    .asStaticError();
+                        }
+                        suppliedItemType = BuiltInAtomicType.STRING;
+                        suppliedCard = -1;
                     }
-                    suppliedItemType = reqItemType;
+
+                    if (!itemTypeOK && reqItemType.getBasicAlphaCode().length() > 2 && visitor.getStaticContext().getXPathVersion() >= 40) {
+                        // allow down-conversion ("relabelling")
+                        if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {
+                            itemTypeOK = true;
+                            Expression cexp = makeDownCaster(exp, (AtomicType) reqItemType, config);
+                            if (cexp instanceof AtomicSequenceConverter) {
+                                ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
+                            }
+                            ExpressionTool.copyLocationInfo(exp, cexp);
+                            exp = cexp;
+                            try {
+                                exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                            } catch (XPathException err) {
+                                throw err.maybeWithLocation(exp.getLocation())
+                                        .asStaticError()
+                                        .withFailingExpression(supplied);
+                            }
+                            suppliedItemType = reqItemType;
+                        }
+                    }
+
                 }
 
-            }
-        // Function coercion
-
-        } else if (!itemTypeOK && reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
-                && !((FunctionItemType) reqItemType).isArrayType()) {
-            Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
-            if (r != DISJOINT) {
-                if (!(suppliedItemType instanceof FunctionItemType)) {
-                    exp = new ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
-                    suppliedItemType = th.getGenericFunctionItemType();
-                }
-                exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier, allow40);
-                itemTypeOK = true;
-            }
-
-        // External object conversion
-
-        } else if (!itemTypeOK && reqItemType instanceof JavaExternalObjectType &&
-                /*Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass()) &&  */
-                reqCard == StaticProperty.EXACTLY_ONE) {
-
-            if (Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass())) {
-                // special case: allow an extension function to call an instance method on the implementation type of an XDM value
-                // we leave the conversion to be sorted out at run-time
-                itemTypeOK = true;
-            } else if (supplied instanceof FunctionCall) {
-                // adjust the required type of the Java extension function call
-                // this does nothing unless supplied is an instanceof JavaExtensionFunctionCall
-                if (((FunctionCall) supplied).adjustRequiredType((JavaExternalObjectType) reqItemType)) {
+            } else if (reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
+                    && !((FunctionItemType) reqItemType).isArrayType()) {
+                Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
+                if (r != DISJOINT) {
+                    if (!(suppliedItemType instanceof FunctionItemType)) {
+                        exp = new ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
+                        suppliedItemType = th.getGenericFunctionItemType();
+                    }
+                    exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier, allow40);
                     itemTypeOK = true;
-                    cardOK = true;
+                }
+
+            } else if (reqItemType instanceof JavaExternalObjectType &&
+                    /*Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass()) &&  */
+                    reqCard == StaticProperty.EXACTLY_ONE) {
+
+                if (Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass())) {
+                    // special case: allow an extension function to call an instance method on the implementation type of an XDM value
+                    // we leave the conversion to be sorted out at run-time
+                    itemTypeOK = true;
+                } else if (supplied instanceof FunctionCall) {
+                    // adjust the required type of the Java extension function call
+                    // this does nothing unless supplied is an instanceof JavaExtensionFunctionCall
+                    if (((FunctionCall) supplied).adjustRequiredType((JavaExternalObjectType) reqItemType)) {
+                        itemTypeOK = true;
+                        cardOK = true;
+                    }
+
                 }
 
             }
@@ -384,9 +375,7 @@ public class TypeChecker {
         // If the supplied value is () and () isn't allowed, fail now
         if (suppliedCard == StaticProperty.EMPTY && ((reqCard & StaticProperty.ALLOWS_ZERO) == 0)) {
             RoleDiagnostic role = roleSupplier.get();
-            throw new XPathException("An empty sequence is not allowed as the " + role.getMessage())
-                    .withErrorCode(role.getErrorCode())
-                    .withLocation(supplied.getLocation())
+            throw new XPathException("An empty sequence is not allowed as the " + role.getMessage(), role.getErrorCode(), supplied.getLocation())
                     .asTypeErrorIf(role.isTypeError())
                     .withFailingExpression(supplied);
         }
@@ -413,9 +402,7 @@ public class TypeChecker {
                 }
             } else {
                 String msg = role.composeErrorMessage(reqItemType, supplied, th);
-                throw new XPathException(msg)
-                        .withErrorCode(role.getErrorCode())
-                        .withLocation(supplied.getLocation())
+                throw new XPathException(msg, role.getErrorCode(), supplied.getLocation())
                         .asTypeErrorIf(role.isTypeError())
                         .withFailingExpression(supplied);
             }
@@ -433,11 +420,9 @@ public class TypeChecker {
                 }
                 RoleDiagnostic role = roleSupplier.get();
                 String msg = role.composeErrorMessage(reqItemType, supplied, th);
-                throw new XPathException(msg)
-                        .withErrorCode(role.getErrorCode())
-                        .withLocation(supplied.getLocation())
-                        .asTypeErrorIf(role.isTypeError())
-                        .withFailingExpression(supplied);
+                XPathException err = new XPathException(msg, role.getErrorCode(), supplied.getLocation());
+                err.setIsTypeError(role.isTypeError());
+                throw err;
             } else {
                 Expression cexp = new ItemChecker(exp, reqItemType, roleSupplier);
                 ExpressionTool.copyLocationInfo(exp, cexp);
@@ -448,14 +433,12 @@ public class TypeChecker {
         if (!cardOK) {
             if (exp instanceof Literal) {
                 RoleDiagnostic role = roleSupplier.get();
-                throw new XPathException("Required cardinality of " + role.getMessage() +
+                XPathException err = new XPathException("Required cardinality of " + role.getMessage() +
                                                                 " is " + Cardinality.describe(reqCard) +
                                                                 "; supplied value has cardinality " +
-                                                                Cardinality.describe(suppliedCard))
-                        .withErrorCode(role.getErrorCode())
-                        .withLocation(supplied.getLocation())
-                        .withFailingExpression(supplied)
-                        .asTypeErrorIf(role.isTypeError());
+                                                                Cardinality.describe(suppliedCard), role.getErrorCode(), supplied.getLocation());
+                err.setIsTypeError(role.isTypeError());
+                throw err;
             } else {
                 Expression cexp = CardinalityChecker.makeCardinalityChecker(exp, reqCard, roleSupplier);
                 ExpressionTool.copyLocationInfo(exp, cexp);
@@ -464,46 +447,6 @@ public class TypeChecker {
         }
 
         return exp;
-    }
-
-    /**
-     * Make an expression that performs type promotion on a supplied sequence
-     *
-     * @param suppliedItemType the inferred type of the supplied value
-     * @param requiredType     the required type, the target of promotion
-     * @param rules            the conversion rules
-     * @param allow40          true if XPath 4.0 is enabled
-     * @return the promoting converter, if available for the required type, or null.
-     * Note that promoting converters not only implement
-     * type promotion (for example from decimal to double) but also perform conversion of untypedAtomic values
-     * to the target type.
-     */
-    public static Converter makePromotingConverter(ItemType suppliedItemType, int requiredType, ConversionRules rules, boolean allow40) {
-        switch (requiredType) {
-            case StandardNames.XS_DOUBLE:
-                return new Converter.PromoterToDouble(rules);
-            case StandardNames.XS_FLOAT:
-                return new Converter.PromoterToFloat(rules);
-            case StandardNames.XS_STRING:
-                return new Converter.PromoterToString();
-            case StandardNames.XS_ANY_URI:
-                if (allow40) {
-                    return new Converter.PromoterToAnyURI();
-                }
-                break;
-            case StandardNames.XS_HEX_BINARY:
-                if (allow40) {
-                    return new Converter.PromoterToHexBinary();
-                }
-                break;
-            case StandardNames.XS_BASE64_BINARY:
-                if (allow40) {
-                    return new Converter.PromoterToBase64Binary();
-                }
-                break;
-
-        }
-        return null;
     }
 
     public Expression makeArithmeticExpression(Expression lhs, int operator, Expression rhs) {
@@ -752,6 +695,18 @@ public class TypeChecker {
         return null;
     }
 
+    private static Expression makePromoterToDouble(Expression exp) {
+        return makePromoter(exp, new Converter.PromoterToDouble(), BuiltInAtomicType.DOUBLE);
+    }
+
+    private static Expression makePromoterToFloat(Expression exp) {
+        return makePromoter(exp, new Converter.PromoterToFloat(), BuiltInAtomicType.FLOAT);
+    }
+
+    private static Expression makePromoterToString(Expression exp) {
+        return makePromoter(exp, new Converter.ToStringConverter(), BuiltInAtomicType.STRING);
+    }
+
     private static Expression makePromoter(Expression exp, Converter converter, BuiltInAtomicType type) {
         ConversionRules rules = exp.getConfiguration().getConversionRules();
         converter.setConversionRules(rules);
@@ -767,36 +722,6 @@ public class TypeChecker {
         asc.setConverter(converter);
         ExpressionTool.copyLocationInfo(exp, asc);
         return asc;
-    }
-
-    private UType promotableTypes(int targetType, boolean allow40) {
-        if (allow40) {
-            switch (targetType) {
-                case StandardNames.XS_DOUBLE:
-                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT).union(UType.DOUBLE);
-                case StandardNames.XS_FLOAT:
-                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT);
-                case StandardNames.XS_ANY_URI:
-                case StandardNames.XS_STRING:
-                    return UType.UNTYPED_ATOMIC.union(UType.ANY_URI).union(UType.STRING);
-                case StandardNames.XS_HEX_BINARY:
-                case StandardNames.XS_BASE64_BINARY:
-                    return UType.UNTYPED_ATOMIC.union(UType.HEX_BINARY).union(UType.BASE64_BINARY);
-                default:
-                    return UType.UNTYPED_ATOMIC.union(UType.fromTypeCode(targetType));
-            }
-        } else {
-            switch (targetType) {
-                case StandardNames.XS_DOUBLE:
-                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT).union(UType.DOUBLE);
-                case StandardNames.XS_FLOAT:
-                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT);
-                case StandardNames.XS_STRING:
-                    return UType.UNTYPED_ATOMIC.union(UType.STRING).union(UType.ANY_URI);
-                default:
-                    return UType.UNTYPED_ATOMIC.union(UType.fromTypeCode(targetType));
-            }
-        }
     }
 
 }

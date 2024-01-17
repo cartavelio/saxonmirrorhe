@@ -71,11 +71,7 @@ public class SequenceTool {
         if (iterator instanceof EmptyIterator) {
             return EmptySequence.getInstance();
         } else if (iterator instanceof GroundedIterator && ((GroundedIterator) iterator).isActuallyGrounded()) {
-            try {
-                return toGroundedValue(iterator);
-            } catch (UncheckedXPathException e) {
-                throw e.getXPathException();
-            }
+            return toGroundedValue(iterator);
         } else {
             return new MemoSequence(iterator);
         }
@@ -97,11 +93,7 @@ public class SequenceTool {
         if (iterator instanceof GroundedIterator && ((GroundedIterator) iterator).isActuallyGrounded() &&
                 !(iterator instanceof AscendingRangeIterator) &&
                 !(iterator instanceof DescendingRangeIterator)) {
-            try {
-                return toGroundedValue(iterator);
-            } catch (UncheckedXPathException e) {
-                throw e.getXPathException();
-            }
+            return toGroundedValue(iterator);
         } else {
             return new LazySequence(iterator);
         }
