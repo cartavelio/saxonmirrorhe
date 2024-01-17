@@ -19,6 +19,7 @@ public final class Version {
 
     private static final int MAJOR_VERSION = 12;
     private static final int MINOR_VERSION = 4;
+    private static final int PATCH_VERSION = 1;
     private static final int BUILD = 120112; //mmddhh  BEWARE: a leading 0 means octal.
     private static final String MAJOR_RELEASE_DATE = "2023-01-12";
     private static final String MINOR_RELEASE_DATE = "2023-12-01";
@@ -66,21 +67,25 @@ public final class Version {
      */
 
     public static String getProductVersion() {
-        return MAJOR_VERSION + "." + MINOR_VERSION;
+        if (PATCH_VERSION == 0) {
+            return MAJOR_VERSION + "." + MINOR_VERSION;
+        }
+        return MAJOR_VERSION + "." + MINOR_VERSION + "." + PATCH_VERSION;
     }
 
     /**
      * Get the components of the structured version number. This is used in the .NET product
      * to locate an assembly in the dynamic assembly cache; it is also used by XQJ. The caller can assume
-     * that there will always be at least two components. The current implementation in Saxon 10
-     * returns [10, n, b] where n is the minor version number (initially 0, incremented for each
-     * maintenance release), and b is the build number, which is typically a six-digit number.
+     * that there will always be at least two components. The current implementation in Saxon 12
+     * returns [12, n, b, p] where n is the minor version number (initially 0, incremented for each
+     * maintenance release), b is the build number, which is typically a six-digit number, and
+     * p is the patch number (initially 0, incremented for each patch release).
      *
-     * @return the three components of the version number, as an array: for example {9, 0, 1, 1}
+     * @return the four components of the version number, as an array: for example {12, 4, 120112, 1}
      */
 
     public static int[] getStructuredVersionNumber() {
-        return new int[]{MAJOR_VERSION, MINOR_VERSION, BUILD};
+        return new int[]{MAJOR_VERSION, MINOR_VERSION, BUILD, PATCH_VERSION};
     }
 
     /**
