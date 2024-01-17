@@ -19,7 +19,10 @@ XQueryProcessor::XQueryProcessor() {
 XQueryProcessor::~XQueryProcessor() {
   clearProperties();
   clearParameters();
-  cppXQ = SXN_UNSET;
+  if (cppXQ != SXN_UNSET) {
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXQ);
+    cppXQ = SXN_UNSET;
+  }
   cwdXQ.erase();
   exceptionClear();
 }
@@ -263,7 +266,7 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                       : (void *)processorDataRef));
-  if (processorDataRef > 0) {
+  if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;

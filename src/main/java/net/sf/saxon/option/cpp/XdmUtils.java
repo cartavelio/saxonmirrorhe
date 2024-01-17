@@ -284,8 +284,10 @@ public class XdmUtils {
     public static CCharPointer getPrimitiveTypeName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle valueRef) {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
 
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(getEQName(value.getPrimitiveTypeName()));
-        return holder.get();
+        String eqname = getEQName(value.getPrimitiveTypeName());
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, eqname);
+
+        return a;
     }
 
     /**
