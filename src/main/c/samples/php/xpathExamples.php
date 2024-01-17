@@ -155,6 +155,48 @@ function exampleSimple5($proc, $xpathEngine)
     $xpathEngine->clearProperties();
 }
 
+/* simple example to show xpath singleton evaluation. Convert XdmItem to a XdmNode and test tree navigation */
+function exampleSimple5b_ChildrenNodes($proc, $xpathEngine)
+{
+    echo '<b>Simple Example - 5b </b><br/>';
+    $sourceNode = $proc->parseXmlFromString("<out attr='valuex'><person attr1='value1' attr2='value2'>text1</person><person>text2</person><person1>text3</person1></out>");
+    if ($sourceNode == NULL) {
+        echo "SourceNode is NULL<br />";
+    }
+    $xpathEngine->setContextItem($sourceNode);
+    $resultValue = $xpathEngine->evaluateSingle("(/out)");
+
+    if ($resultValue != null) {
+        if ($resultValue->isNode()) {
+            echo "Result is a node <br/>";
+            $nodeValue = $resultValue->getNodeValue();
+            $nodeKind = $nodeValue->getNodeKind();
+            echo "NodeKind : " . $nodeKind;
+
+            $children = $nodeValue->getChildren();
+            if($children != NULL) {
+                foreach ($children as $child) {
+                    if ($child != null) {
+                        $namei = $child->getNodeName();
+                        echo ' Node name=' . $namei;
+                    } else {
+                        echo 'Test Failed';
+
+                    }
+
+                }
+            }
+        } else if ($resultValue->isAtomic()) {
+            echo "Error: Result is an atomic <br/>";
+        }
+
+    } else {
+        echo "Result is null";
+    }
+    $xpathEngine->clearParameters();
+    $xpathEngine->clearProperties();
+}
+
 /* simple example to show xpath evaluation and conversion to a XdmNode. */
 function exampleSimple6($proc, $xpathEngine)
 {
@@ -243,6 +285,8 @@ echo '<br/>';
 exampleSimple4($proc, $xpath);
 echo '<br/>';
 exampleSimple5($proc, $xpath);
+echo '<br/>';
+exampleSimple5b_ChildrenNodes($proc, $xpath);
 echo '<br/>';
 exampleSimple6($proc, $xpath);
 echo '<br/>';
