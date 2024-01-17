@@ -209,6 +209,7 @@ PHP_METHOD(SaxonProcessor, attachCurrentThread);
 PHP_METHOD(SaxonProcessor, detachCurrentThread);
 
 PHP_METHOD(SaxonProcessor, setCatalog);
+PHP_METHOD(SaxonProcessor, setCatalogFiles);
 PHP_METHOD(SaxonProcessor, registerPHPFunctions);
 PHP_METHOD(SaxonProcessor, getErrorMessage);
 PHP_METHOD(SaxonProcessor, exceptionOccurred);

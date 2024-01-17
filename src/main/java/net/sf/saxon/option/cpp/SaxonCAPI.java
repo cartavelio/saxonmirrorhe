@@ -702,19 +702,27 @@ public class SaxonCAPI {
      *  Set the XML catalog file
      * @param thread - Graalvm runtime data structure for a thread
      * @param processorRef  - long reference pointing to the processor object in the ObjectHandle
-     * @param catalogFile  - C char array pointer of the  catalog file name given as a full path
+     * @param catalogFilesRef  - C char array pointer of the  catalog file name given as a full path
      * @return success status. 1 is success, -1 is a fail and -2 is a exception thrown
      * @throws SaxonApiException  if we cannot convert the catalogFile string to Java object
      */
-    @CEntryPoint(name = "j_setCatalogFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) throws SaxonApiException {
-        Processor processor = objectHandles.get(processorRef);
-        if (processor == null || catalogFile == WordFactory.nullPointer()) {
+    @CEntryPoint(name = "j_setCatalogFiles", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_setCatalogFiles(IsolateThread thread, ObjectHandle processorRef, ObjectHandle catalogFilesRef) throws SaxonApiException {
+
+        if (processorRef == WordFactory.nullPointer() || catalogFilesRef == WordFactory.nullPointer()) {
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }
-        //processor.setCatalogFiles(SaxonCAPI.toJavaString(catalogFile));
-        ArrayList list = new ArrayList();
-        list.add(SaxonCAPI.toJavaString(catalogFile, WordFactory.nullPointer()));
+
+        Processor processor = objectHandles.get(processorRef);
+        ProcessorDataAccumulator accumulator = objectHandles.get(catalogFilesRef);
+
+        String [] catalogFiles = accumulator.getParameterNames();
+        if(catalogFiles.length == 0) {
+            return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
+        }
+
+        ArrayList<String> list = (ArrayList<String>) Arrays.asList(catalogFiles);
+        //list.add(SaxonCAPI.toJavaString(catalogFile, WordFactory.nullPointer()));
         Configuration config = processor.getUnderlyingConfiguration();
         if (config.getResourceResolver() instanceof ConfigurableResourceResolver) {
             CommandLineOptions.setCatalogFiles(((ConfigurableResourceResolver) config.getResourceResolver() ), list);

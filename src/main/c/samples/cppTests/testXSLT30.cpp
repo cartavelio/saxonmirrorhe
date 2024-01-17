@@ -981,9 +981,9 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
     return;
   }
 
-  if (CppTestUtils::exists("output1.xml")) {
+  if (CppTestUtils::exists("../output1.xml")) {
     cout << "The file $filename exists" << endl;
-    remove("output1.xml");
+    remove("../output1.xml");
     sresult->success++;
   } else {
     cout << "The file " << filename << " does not exist" << endl;
@@ -1045,9 +1045,9 @@ void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
   executable->setOutputFile(filename);
   executable->transformToFile(xmlfile);
 
-  if (CppTestUtils::exists("output2.xml")) {
+  if (CppTestUtils::exists("../output2.xml")) {
     cout << "The file output2.xml exists" << endl;
-    remove("output2.xml");
+    remove("../output2.xml");
     sresult->success++;
   } else {
     cout << "The file " << filename << " does not exist" << endl;
@@ -1139,13 +1139,13 @@ void exampleTransformToString(SaxonProcessor *sproc, Xslt30Processor *proc,
     sresult->failureList.push_back("exampleTransformToString");
   } else {
     cout << "exampleTransformToString = " << result << endl;
-    string filename = baseURI + "/output.xml";
+    string filename = baseURI + "/../output.xml";
     if (CppTestUtils::exists(filename.c_str())) {
       cout << "The file output.xml exists" << endl;
       remove("output.xml");
       sresult->success++;
     } else {
-      cout << "The file output.xml does not exist" << endl;
+      cout << "The file output.xml does not exist file path="<< filename << endl;
 
       sresult->failure++;
       sresult->failureList.push_back("exampleTransformToString");
@@ -2526,8 +2526,11 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
   proc->setcwd(cwd);
   XsltExecutable *executable = nullptr;
   Xslt30Processor *trans = nullptr;
+  const char ** catalogFiles = nullptr;
   try {
-    proc->setCatalog("data/catalog.xml");
+    catalogFiles = new const char*[1]{"data/catalog.xml"};
+
+    proc->setCatalogFiles(catalogFiles, 1);
 
     trans = proc->newXslt30Processor();
 
@@ -2555,6 +2558,10 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
     }
     trans = nullptr;
 
+
+    delete [] catalogFiles;
+    catalogFiles = nullptr;
+
   } catch (SaxonApiException &e) {
     const char *message = e.getMessage();
     if (message != nullptr) {
@@ -2569,6 +2576,99 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
 
     if (trans != nullptr) {
         delete trans;
+    }
+    if(catalogFiles != nullptr) {
+        delete [] catalogFiles;
+        catalogFiles = nullptr;
+    }
+  }
+}
+
+void testCatalog2(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
+
+#ifdef MEM_DEBUG
+  SaxonProcessor::getInfo();
+#endif
+  cout << endl << "Test: testCatalog2" << endl;
+  bool trace = false;
+  proc->setcwd(cwd);
+  XsltExecutable *executable = nullptr;
+  XsltExecutable *executable2 = nullptr;
+  Xslt30Processor *trans = nullptr;
+  const char ** catalogFiles = nullptr;
+  try {
+    catalogFiles = new const char*[2]{"data/catalog.xml", "data/catalog2.xml"};
+    
+    proc->setCatalogFiles(catalogFiles, 2);
+
+    trans = proc->newXslt30Processor();
+
+    executable = trans->compileFromFile("data/example.xsl");
+
+    executable->setInitialMatchSelectionAsFile("data/example.xml");
+
+    const char *result = executable->applyTemplatesReturningString();
+
+    if (result != NULL) {
+      std::cerr << "testCatalog result= " << result << std::endl;
+      delete result;
+      sresult->success++; // TODO - check the results more carefully
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testCatalog2-1");
+
+    }
+    if (executable != nullptr) {
+        delete executable;
+    }
+    executable = nullptr;
+    if (trans != nullptr) {
+        delete trans;
+    }
+    trans = nullptr;
+
+    executable2 = trans->compileFromFile("http://example.com/books.xsl");
+
+    executable2->setInitialMatchSelectionAsFile("data/books.xml");
+
+    XdmValue *resultValue = executable2->applyTemplatesReturningValue();
+    if (resultValue != nullptr) {
+      XdmItem * item1 = resultValue->getHead();
+      const char * result2 = item1->getStringValue();
+      std::cerr << "testCatalog result= " << result2 << std::endl;
+      delete result2;
+      delete item1;
+      sresult->success++; // TODO - check the results more carefully
+      delete resultValue;
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testCatalog2-1");
+
+    }
+    delete executable2;
+    delete [] catalogFiles;
+    catalogFiles = nullptr;
+
+
+  } catch (SaxonApiException &e) {
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cerr << "exception-proc=" << message << endl;
+    }
+    sresult->failure++;
+    sresult->failureList.push_back("testCatalog2");
+    if (executable != nullptr) {
+        delete executable;
+        executable = nullptr;
+    }
+
+    if (trans != nullptr) {
+        delete trans;
+    }
+
+    if(catalogFiles != nullptr) {
+        delete [] catalogFiles;
+        catalogFiles = nullptr;
     }
   }
 }
@@ -2981,6 +3081,13 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
+  testCatalog2(cwd, processor, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
   testTransformToString2b(processor, trans, sresult);
 
   cout << endl
@@ -3172,8 +3279,8 @@ int main(int argc, char *argv[]) {
   delete trans;
   delete trans2;
   delete processor;
-  delete SaxonProcessor::sxn_environ;
   processor->release();
+  delete SaxonProcessor::sxn_environ;
 
   cout << endl
        << "======================== Test Results ========================"
