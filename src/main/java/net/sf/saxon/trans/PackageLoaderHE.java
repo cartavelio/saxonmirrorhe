@@ -2418,8 +2418,8 @@ public class PackageLoaderHE implements IPackageLoader {
                 algo = ForEachGroup.GROUP_STARTING;
             } else if ("ending".equals(algorithmAtt)) {
                 algo = ForEachGroup.GROUP_ENDING;
-            } else if ("breaking".equals(algorithmAtt)) {
-                algo = ForEachGroup.GROUP_BREAKING_WHEN;
+            } else if ("split".equals(algorithmAtt)) {
+                algo = ForEachGroup.GROUP_SPLIT_WHEN;
             } else {
                 throw new AssertionError("Unknown grouping algorithm: " + algorithmAtt);
             }
@@ -2428,7 +2428,7 @@ public class PackageLoaderHE implements IPackageLoader {
             boolean inFork = flags != null && flags.contains("k");
             Expression select = loader.getExpressionWithRole(element, "select");
             Expression key;
-            if (algo == ForEachGroup.GROUP_BY || algo == ForEachGroup.GROUP_ADJACENT || algo == ForEachGroup.GROUP_BREAKING_WHEN) {
+            if (algo == ForEachGroup.GROUP_BY || algo == ForEachGroup.GROUP_ADJACENT || algo == ForEachGroup.GROUP_SPLIT_WHEN) {
                 key = loader.getExpressionWithRole(element, "key");
             } else {
                 key = loader.getPatternWithRole(element, "match");
