@@ -58,26 +58,24 @@ int64_t XdmItem::getUnderlyingValue() {
 }
 
 const char *XdmItem::getStringValue() {
-  const char *stringValuei = nullptr;
-  //if (stringValue == nullptr) {
+  if (stringValue == nullptr) {
     if (value < 0) {
       return nullptr;
     }
     allocFn fn = operator new;
-    stringValuei = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread,
+    stringValue = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread,
                                            (void *)fn, (void *)value);
-  //}
-  return stringValuei;
+  }
+  return stringValue;
 }
 
 const char *XdmItem::toString() {
-  const char *itemToStringi = nullptr;
-  //if (itemToString == nullptr) {
-  allocFn fn = operator new;
-  itemToStringi = xdmItemToString(SaxonProcessor::sxn_environ->thread,
+  if (itemToString == nullptr) {
+    allocFn fn = operator new;
+    itemToString = xdmItemToString(SaxonProcessor::sxn_environ->thread,
                                    (void *)fn, (void *)value);
-  //}
-  return itemToStringi;
+  }
+  return itemToString;
 }
 
 /**
@@ -98,7 +96,7 @@ XdmItem::~XdmItem() {
   /*else {
        decrementRefCount();
    }*/
-  /*if (stringValue != nullptr) {
+  if (stringValue != nullptr) {
     delete[] stringValue;
     stringValue = nullptr;
   }
@@ -106,7 +104,7 @@ XdmItem::~XdmItem() {
   if (itemToString != nullptr) {
     delete[] itemToString;
     itemToString = nullptr;
-  } */
+  }
 }
 
 void XdmItem::incrementRefCount() {

@@ -21,6 +21,7 @@ SchemaValidator::SchemaValidator(SaxonProcessor *p, std::string curr) {
   exception = nullptr;
 
   if (cppV < 0) {
+
     throw SaxonApiException();
   }
 
@@ -329,9 +330,8 @@ void SchemaValidator::clearParameters(bool delVal) {
         delete value;
       }
     }
-    }
     parameters.clear();
-
+  }
 }
 
 void SchemaValidator::clearProperties() { properties.clear(); }

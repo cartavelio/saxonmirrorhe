@@ -85,19 +85,6 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   }
 }
 
-void XsltExecutable::deleteXdmValueArray(XdmValue **arr, int len) {
-    if(arr != nullptr && len > 0) {
-        for (int i = 0; i < len; i++) {
-            if(arr[i]->getRefCount() < 1) {
-                delete arr[i];
-            } else {
-                arr[i]->decrementRefCount();
-            }
-        }
-        delete[] arr;
-    }
-}
-
 bool XsltExecutable::exceptionOccurred() { return exceptionFound; }
 
 void XsltExecutable::setGlobalContextItem(XdmItem *value) {
@@ -241,14 +228,12 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
 
         value = SaxonProcessor::makeXdmValueFromRef(results[i]);
         if (value != nullptr && str != nullptr) {
-          std::string docUriString = std::string(str);
-          resultDocumentMap[docUriString] = value;
-          operator delete (str);
+          resultDocumentMap[str] = value;
         } else {
           throw SaxonApiException("getResultDocuments failed to create value");
         }
       }
-      operator delete (results);
+      delete[] results;
       j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                         (void *)resultUrisRef);
     } /*else {
@@ -1031,7 +1016,7 @@ XdmValue *XsltExecutable::getXslMessages() {
           throw SaxonApiException("getXslMessages failed to create value");
         }
       }
-      operator delete (results);
+      delete[] results;
       return value;
     }
   }
