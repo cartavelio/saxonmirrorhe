@@ -830,6 +830,10 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.declareVariable(new QName("result"));
             assertXpc.setBaseURI(assertion.getBaseURI());
 
+            if ("4.0".equals(langVersion)) {
+                assertXpc.setLanguageVersion(langVersion);
+            }
+
             copySchemaNamespaces(env, assertXpc);  // ensure environment has schema namespaces
 
             boolean success = outcome.testAssertion(assertion, outcome, outcome.getPrincipalResultDoc(), assertXpc, xpath, debug);
