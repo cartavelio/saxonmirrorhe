@@ -45,15 +45,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final Set<String> optionalFields = new HashSet<>();
-    private boolean _extensible;
-
-    public static RecordTest VALUE_RECORD = nonExtensible(
-            new Field("value", SequenceType.ANY_SEQUENCE, false)
-    );
-    public static RecordTest KEY_VALUE_RECORD = nonExtensible(
-            new Field("key", SequenceType.ATOMIC_SEQUENCE, false),
-            new Field("value", SequenceType.ANY_SEQUENCE, false)
-    );
+    private boolean extensible;
 
     /**
      * Class representing one field definition within a record type definition,
@@ -137,7 +129,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
             fieldTypes.put(names.get(i), types.get(i));
         }
         optionalFields.addAll(optionalFieldNames);
-        this._extensible = extensible;
+        this.extensible = extensible;
     }
 
     /**
@@ -212,7 +204,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
      */
     @Override
     public boolean isExtensible() {
-        return _extensible;
+        return extensible;
     }
 
     /**
@@ -238,7 +230,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
                 return false;
             }
         }
-        if (!_extensible) {
+        if (!extensible) {
             AtomicIterator keyIter = map.keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
@@ -280,7 +272,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
 
     @Override
     public SequenceType getResultType() {
-        if (_extensible) {
+        if (extensible) {
             return SequenceType.ANY_SEQUENCE;
         } else {
             ItemType resultType = null;
@@ -310,7 +302,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
         for (SequenceType st : fieldTypes.values()) {
             prio *= st.getPrimaryType().getNormalizedDefaultPriority();
         }
-        return _extensible ? 0.5 + prio/2 : prio;
+        return extensible ? 0.5 + prio/2 : prio;
     }
 
     /**
@@ -394,7 +386,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
     public boolean equals(Object other) {
         return this == other ||
                 other instanceof RecordTest
-                        && _extensible == ((RecordTest) other)._extensible
+                        && extensible == ((RecordTest) other).extensible
                         && fieldTypes.equals(((RecordTest) other).fieldTypes)
                         && optionalFields.equals(((RecordTest) other).optionalFields);
     }
@@ -565,7 +557,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
                     }
                 }
             }
-            if (!_extensible) {
+            if (!extensible) {
                 AtomicIterator keyIter = ((MapItem)item).keys();
                 AtomicValue key;
                 while ((key = keyIter.next()) != null) {

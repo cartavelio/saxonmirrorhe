@@ -73,17 +73,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         SequenceType oneOnDuplicatesFunction = SequenceType.makeSequenceType(
                 ON_DUPLICATES_CALLBACK_TYPE, StaticProperty.EXACTLY_ONE);
 
-        RecordTest KVP_TYPE_EXTENSIBLE = new RecordTest(
-                Arrays.asList("key", "value"),
-                Arrays.asList(SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE),
-                Collections.emptyList(),
-                true);
+        RecordTest KVP_TYPE_EXTENSIBLE = RecordTest.extensible(
+                field("key", SequenceType.SINGLE_ATOMIC, false),
+                field("value", SequenceType.ANY_SEQUENCE, false));
 
-        RecordTest KVP_TYPE_INEXTENSIBLE = new RecordTest(
-                Arrays.asList("key", "value"),
-                Arrays.asList(SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE),
-                Collections.emptyList(),
-                false);
+        RecordTest KVP_TYPE_INEXTENSIBLE = RecordTest.nonExtensible(
+                field("key", SequenceType.SINGLE_ATOMIC, false),
+                field("value", SequenceType.ANY_SEQUENCE, false));
 
         OptionsParameter mergeOptionDetails = new OptionsParameter();
         mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
