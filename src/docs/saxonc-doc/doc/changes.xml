@@ -82,7 +82,7 @@
                <code>XQueryProcessor</code>.</li>
             <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code> and
                <code>XQueryProcessor</code>; this can be used to enable use of the experimental 4.0 extensions
-               with SaxonC-PE and SaxonC-EE (as documented in the main <a
+               with SaxonC-PE and SaxonC-EE (as documented in the main <a target="_blank"
                   href="https://www.saxonica.com/documentation12/index.html#!v4extensions">Saxon 12 documentation</a>).</li>
             <li>The <code>registerSchemaFromNode()</code> method has been added to <code>SchemaValidator</code>.</li>
          </ul>
