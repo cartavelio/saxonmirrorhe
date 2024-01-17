@@ -2528,7 +2528,7 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
   Xslt30Processor *trans = nullptr;
   const char ** catalogFiles = nullptr;
   try {
-    catalogFiles = new const char*[1]{"../data/catalog.xml"};
+    catalogFiles = new const char*[1]{"data/catalog.xml"};
 
     proc->setCatalogFiles(catalogFiles, 1);
 
@@ -2597,7 +2597,7 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) 
   Xslt30Processor *trans = nullptr;
   const char ** catalogFiles = nullptr;
   try {
-    catalogFiles = new const char*[2]{"../data/catalog.xml", "../data/catalog2.xml"};
+    catalogFiles = new const char*[2]{"data/catalog.xml", "data/catalog2.xml"};
     
     proc->setCatalogFiles(catalogFiles, 2);
     proc->setcwd(cwd);
@@ -2657,6 +2657,78 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) 
     }
   }
 }
+
+
+
+void testCatalogError(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
+
+#ifdef MEM_DEBUG
+  SaxonProcessor::getInfo();
+#endif
+  cout << endl << "Test: testCatalogError" << endl;
+  bool trace = false;
+  proc->setcwd(cwd);
+  XsltExecutable *executable = nullptr;
+  Xslt30Processor *trans = nullptr;
+  const char ** catalogFiles = nullptr;
+  try {
+    catalogFiles = new const char*[1]{"data/catalog-err.xml"};
+
+    proc->setCatalogFiles(catalogFiles, 1);
+
+    trans = proc->newXslt30Processor();
+
+    executable = trans->compileFromFile("data/example.xsl");
+
+    executable->setInitialMatchSelectionAsFile("data/example.xml");
+
+    const char *result = executable->applyTemplatesReturningString();
+
+    if (result != NULL) {
+      std::cerr << "testCatalog result= " << result << std::endl;
+      delete result;
+      sresult->failureList.push_back("testCatalogError");
+    } else {
+
+      sresult->failureList.push_back("testCatalog-err-1");
+
+    }
+    sresult->failure++;
+    if (executable != nullptr) {
+        delete executable;
+    }
+    executable = nullptr;
+    if (trans != nullptr) {
+        delete trans;
+    }
+    trans = nullptr;
+
+
+    delete [] catalogFiles;
+    catalogFiles = nullptr;
+
+  } catch (SaxonApiException &e) {
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cerr << "Expected exception-proc=" << message << endl;
+    }
+    sresult->success++;
+
+    if (executable != nullptr) {
+        delete executable;
+        executable = nullptr;
+    }
+
+    if (trans != nullptr) {
+        delete trans;
+    }
+    if(catalogFiles != nullptr) {
+        delete [] catalogFiles;
+        catalogFiles = nullptr;
+    }
+  }
+}
+
 
 void testSaxSourceNoSystemId(SaxonProcessor *proc, DocumentBuilder *builder,
                              sResultCount *sresult) {
@@ -3067,6 +3139,13 @@ int main(int argc, char *argv[]) {
        << endl;
 
   testCatalog2(cwd, processor, sresult);
+
+    cout << endl
+         << "============================================================="
+         << endl
+         << endl;
+
+  testCatalogError(cwd, processor, sresult);
 
   cout << endl
        << "============================================================="
