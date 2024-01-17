@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Hej.om;
+using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
 
 namespace SaxonCS_NUnit {
@@ -1123,13 +1124,13 @@ namespace SaxonCS_NUnit {
                 XdmItemType makeBodyElementType = proc.ParseItemType("function() as node()");
                 proc.RegisterExtensionFunction(new QName("java:jaxptest.DOMTest", "makeBodyElement"), 
                     makeBodyElementType, args => {
-                        XNamespace XHTML = NamespaceConstant.XHTML;
-                        XDocument doc = new(
-                            new XElement(XHTML + "body", 
-                                new XElement(XHTML + "p", "Lorem Ipsum")
-                            ));
+                        XmlDocument doc = new();
+                        XmlElement body = doc.CreateElement("xhtml:body", NamespaceConstant.XHTML);
+                        XmlElement para = doc.CreateElement("xhtml:p", NamespaceConstant.XHTML);
+                        body.AppendChild(para);
+                        para.AppendChild(doc.CreateTextNode(("Lorem Ipsum")));
                         DocumentBuilder builder = proc.NewDocumentBuilder();
-                        return builder.Wrap(builder.Wrap(doc), doc.FirstNode);
+                        return builder.Wrap(builder.Wrap(doc), body);
                     });
                 XsltExecutable templates = proc.NewXsltCompiler().Compile(new StringReader(xslt));
                 Xslt30Transformer transformer = templates.Load30();
@@ -1137,10 +1138,10 @@ namespace SaxonCS_NUnit {
 
                 transformer.ApplyTemplates(new StringReader("<a/>"), proc.NewSerializer(sw));
                 Console.Error.WriteLine(sw.ToString());
-                Assert.That(sw.ToString().Contains("<body xmlns=\"http://www.w3.org/1999/xhtml\"><p>Lorem Ipsum</p></body>"));
+                Assert.That(sw.ToString().Contains("<xhtml:body><xhtml:p>Lorem Ipsum</xhtml:p></xhtml:body>"));
             }
             catch (Exception e) {
-                Console.Error.WriteLine(e.StackTrace);
+                //e.printStackTrace();
                 Assert.Fail(e.Message);
             }
         }
