@@ -16,13 +16,11 @@
         
     </category>
     
-    <category name="documentation">
+    <!--<category name="documentation">
         
-        <p>From 12.4, this documentation has been updated to provide more details relevant for the
-            C/C++, PHP and Python platforms where this differs to Saxon on the Java and C# platforms.</p>
  
         
-    </category>
+    </category>-->
     
     <!--<category name="xslt30">
 
@@ -170,11 +168,6 @@
         
         <p>Added the property <code cs="Saxon.Api.XdmNode#OutermostElement">XdmNode.OutermostElement</code> to find the 
             outermost element (also known as the document element) of a tree.</p>
-        
-        <p>In 12.4, added an <code>ErrorReporter</code> property to classes 
-            <code>XQueryEvaluator</code>, <code>XsltTransformer</code>, and <code>Xslt30Transformer</code>,
-            allowing dynamic errors and warnings to be intercepted and notified somewhere other than the system
-            error stream.</p>
         
         
         
@@ -410,40 +403,15 @@
         <ul>
             <li><p>Functions that accept a collation argument now allow it to be set to an empty sequence,
             which has the same effect as omitting the argument.</p></li>
-            <li><p>The <code>fn:duplicate-values()</code> function is implemented. This returns all
-            values that appear more than once in the input sequence.</p></li>
-            <li><p>The <code>fn:void()</code> function is implemented. This evaluates the supplied argument,
-                raises an error if evaluation fails, and then returns an empty sequence. The function is primarily
-            designed (like the <code>saxon:do</code> instruction) for evaluating expressions that have side-effects,
-            such as functions in the EXPath file module.</p></li>
-            <li><p>The new <code>fn:all()</code> function is renamed <code>fn:every()</code>.</p></li>
-            <li><p>The <code>fn:transitive-closure()</code> function is completely redesigned according
-            to the latest draft specification.</p></li>
-            <li><p>The new <code>map:of()</code> function is renamed <code>map:of-pairs()</code>.</p></li>
-            <li><p>The new <code>array:of()</code> function is renamed <code>array:of-members()</code>.</p></li>
-            <li><p>Implemented <code>array:split()</code>, and <code>map:pair()</code>.</p></li>
-            <li><p>The <code>action</code> parameter of <code>fn:replace()</code> is implemented, allowing the
-            replacement string to be computed. This makes the Saxon extension function <code>saxon:replace-with()</code>
-            obsolescent. The new function is more powerful in that it supplies captured groups to the action
-            function.</p></li>
-            <li><p>Constructor functions have a zero-arity version that takes the context item as
-                the default argument. Also, the single argument version can be called using <code>value</code>
-                as the argument keyword.</p></li>
-            <li><p>The <code>fn:codepoints-to-string()</code> had been changed to allow a variable number of
-            arguments (rather than a single sequence-valued argument). This change didn't make it into the spec
-            and has now been reverted.</p></li>
         </ul>
-        
         
       
         <h2>Dropped or Changed Extension Functions</h2>
         
         <p>The Saxon extension functions <code>saxon:evaluate()</code>, <code>saxon:eval()</code>, and <code>saxon:expression()</code>
-            were dropped in Saxon 12.0. (The function <code>saxon:evaluate-node()</code> was dropped in Saxon 10). 
+            have been dropped. (The function <code>saxon:evaluate-node()</code> was dropped in Saxon 10). 
             The same effect (and more) can be achieved using the standard XSLT 3.0 instruction
-            <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>. From Saxon 12.4,
-            the functions are reinstated for the benefit of XQuery users, where the
-            <code>xsl:evaluate</code> instruction is not available.</p>
+            <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>.</p>
         
         <p>The Saxon extension function <a class="bodylink code" href="/functions/saxon/in-scope-namespaces">saxon:in-scope-namespaces()</a> has been
             aligned with the proposed 4.0 function <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the
@@ -526,27 +494,6 @@
         <p>From 12.3, Switch and Typeswitch expressions in XQuery allow curly braces, for example:
         <code>switch($x){case 1: return "a" case 2: return "b" default: return "?"}</code></p>
         
-        <p>From 12.4, element and attribute tests can use the syntax <code>element(A|B)</code>
-        and <code>attribute(A|B)</code> to accept a union of names. Wildcards are also allowed,
-        for example <code>element(p:*|q:*)</code></p>
-        
-        <p>From 12.4, casting to locally-defined union types and enumeration types is supported.</p>
-        
-        <p>From 12.4, an extensible record test with no named fields is allowed: <code>record(*)</code>.</p>
-        
-        <p>From 12.4, there has been a change to the <code>for member</code> construct. To do two nested iterations
-        over arrays <code>$A</code> and <code>$B</code>, you now need to write <code>for member $a in $A,
-        member $b in $B return ...</code>. Previously the second <code>member</code> was not needed, it was assumed to
-        apply to subsequent clauses.</p>
-        
-        <p>From 12.4, the atomic types <code>xs:hexBinary</code> and <code>xs:base64Binary</code> are mutually
-        comparable; and promotion on function calls and variable binding now ensures that either type can be supplied
-        where the other is required.</p>
-        
-        
-        
-        
-        
         
         <h2>XQuery 4.0 extensions</h2>
         
@@ -568,25 +515,29 @@
             same way as function parameters. For example it becomes possible to say 
         <code>let $x as xs:double := 1</code> because the integer 1 is now coerced to an <code>xs:double</code>.</p>
         
-        <p>From 12.4, <code>true()</code> and <code>false()</code> are allowed as annotation values. (In previous
-        XQuery versions, only string literals and numeric literals were allowed.)</p>
-        
-        <p>From 12.4, the comparand expression in a switch expression can be omitted, and defaults to <code>true()</code>.</p>
-        
-        <p>From 12.4, the XQuery syntax for declaring named item types is changed to match the syntax in the
-        draft specification (<code>declare item-type my:type as union(x, y);</code> in place of 
-        <code>declare type my:type = union(x, y)</code>).</p>
-
-        
-        
-        <h2>XSLT 4.0 extensions</h2>
+        <h2>XSLT extensions</h2>
         
         
         <p>If XSLT 4.0 extensions are enabled, two new (experimental) values are available for <code>xsl:mode/@on-no-match</code>,
             namely <code>shallow-copy-all</code> and <code>shallow-skip-all</code>. These have the same effect as <code>shallow-copy</code>
             and <code>shallow-skip</code> respectively, except when processing maps and arrays.</p>
         
-        <p>The <code>shallow-skip-all</code> option has been dropped from the spec, and is removed in Saxon 12.4.</p>
+        <p>For <code>shallow-skip-all</code>:</p>
+        
+        <ul>
+            <li>When processing an array that does not match any template rule, the array
+                is split into a set of parcels, one for each member of the array, and each parcel is processed by making
+                an implicit call on <code>xsl:apply-templates</code>. A parcel is represented as a single-entry map with the key
+                <code>"value"</code>, and can be matched using the pattern <code>match="record(value)"</code>. The value of the array
+                member can be extracted from the parcel using the function <code>fn:unparcel()</code>. If a parcel does not match any
+                template rule, then it will not be processed.
+            </li>
+            <li>When processing a map that does not match any template rule, the map
+                is split into a set of map entries, one for each key-value pair in the map. These entries are represented
+                as singleton maps, and they are processed by making an implicit call on <code>xsl:apply-templates</code>. However,
+                if a singleton map does not match any template rule, then to prevent infinite recursion 
+                it is not processed at all.</li>
+        </ul>
         
         <p>For <code>shallow-copy-all</code>:</p>
         
@@ -636,10 +587,6 @@
         of <code>xsl:mode</code>, and within those template rules, any <code>xsl:apply-templates</code> instruction
         defaults to the enclosing mode.</p>
         
-        <p>From 12.4 the <code>xsl:accumulator-rule/@saxon:capture</code> extension has now been incorporated
-                as a standard XSLT 4.0 feature under the name <code>xsl:accumulator-rule/@capture</code>.
-                The Saxon attribute name remains available for the time being as a synonym.</p>
-        
         <aside>Our general policy on implementation of new features in the draft 4.0 specifications is that
         the Saxon product will modify or remove such features when the specification changes, even if this
         creates backwards incompatibility. We will try to hold incompatible changes to the next major Saxon release where possible,
@@ -661,9 +608,6 @@
             is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
         <p>The reason for this change is that the object is no longer copied during operations such as function inlining; since it is no longer
             implemented as a node in the expression tree, this copying was found to be unnecessary.</p>
-        
-        <p>From 12.4, the conversions available between XPath and Java types include a mapping from <code>xs:string</code>
-        to <code>net.sf.saxon.str.UnicodeString</code> in both directions.</p>
     </category>
     
     <!--<category name="sql" class="javaonly">
