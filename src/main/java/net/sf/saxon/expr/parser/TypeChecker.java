@@ -9,8 +9,6 @@ package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.functions.hof.FunctionLiteral;
-import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordType;
@@ -136,9 +134,8 @@ public class TypeChecker {
                 if (!suppliedItemType.isPlainType() &&
                         !(suppliedCard == StaticProperty.EMPTY)) {
                     boolean atomizable = suppliedItemType.isAtomizable(th);
-                    if (suppliedItemType.getGenre() == Genre.FUNCTION &&
-                            (exp instanceof UserFunctionReference || exp instanceof FunctionLiteral)) {
-                        atomizable = false; // special case functions when we know the function isn't going to be an array
+                    if (atomizable && (exp.getSpecialProperties() & StaticProperty.COMPUTED_FUNCTION) != 0) {
+                        atomizable = false; // in this case we know the function isn't going to be an array
                     }
                     if (!atomizable) {
                         String shortItemType;

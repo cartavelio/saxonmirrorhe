@@ -346,8 +346,7 @@ public abstract class StaticProperty {
                     HAS_SIDE_EFFECTS |
                     NOT_UNTYPED_ATOMIC |
                     ALL_NODES_UNTYPED |
-                    ALL_NODES_NEWLY_CREATED |
-                    COMPUTED_FUNCTION;
+                    ALL_NODES_NEWLY_CREATED;
 
     /**
      * Mask for nodeset-related properties
