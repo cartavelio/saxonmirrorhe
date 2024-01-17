@@ -1387,21 +1387,17 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get the set of functions in the "fn" namespace
-     *
-     * @param version The XPath or XSLT version. 20 requests the XPath 2.0 function set (used in XSD assertion processing),
-     *                30 or 31 gives the XSLT 3.0 function set, and 40 the XSLT 4.0 function set
-     * @return the relevant function library
+     * Get the set of functions in the "fn" namespace defined in the XSLT and F&amp;O specifications
+     * @param version The XSLT version (30 or 40)
+     * @return the function library
      */
     public BuiltInFunctionSet getXSLTFunctionSet(int version) {
-        if (version == 20) {
-            return XPath20FunctionSet.getInstance();
-        } else if (version == 30 || version == 31 || version == 305) {
+        if (version == 30) {
             return XSLT30FunctionSet.getInstance();
         } else if (version == 40) {
             throw new IllegalArgumentException("XSLT 4.0 requires Saxon-PE or higher");
         } else {
-            throw new IllegalArgumentException("Unsupported function library version " + version + " (must be 20|30|31|40)");
+            throw new IllegalArgumentException("Unsupported XSLT version " + version + " (must be 30)");
         }
     }
 
@@ -1438,16 +1434,12 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return the function
      */
 
-    public SystemFunction makeSystemFunction(String localName, int arity, int xpathVersion) {
+    public SystemFunction makeSystemFunction(String localName, int arity) {
         try {
-            return getXSLTFunctionSet(xpathVersion == 31 ? 30 : xpathVersion).makeFunction(localName, arity);
+            return getXSLTFunctionSet(30).makeFunction(localName, arity);
         } catch (XPathException e) {
             return null;
         }
-    }
-
-    public SystemFunction makeSystemFunction40(String localName, int arity) {
-        return makeSystemFunction(localName, arity, 40);
     }
 
     /**
@@ -1478,27 +1470,8 @@ public class Configuration implements SourceResolver, NotationSet {
         return integratedFunctionLibrary;
     }
 
-    /**
-     * Get the function library list for built-in functions other than the functions in the
-     * core FN namespace. This includes for example functions for the math, array, and map
-     * namespaces, extensions in the Saxon namespace, and EXPath extensions for the file and
-     * binary modules. The actual set of libraries varies by Saxon edition. The function library
-     * list is created if it does not already exist. The client can add additional libraries to
-     * the returned library list. However, this should be regarded as a "system programming"
-     * interface, exposing capabilities that might have unpredictable effects.
-     * @param version The configuration can hold different library lists for different
-     *                XPath versions. The version number currently affects the map and array
-     *                libraries, which exist in 3.1 and 4.0 versions. Specifying 40 gives
-     *                the XPath 4.0 version of these libraries, anything else gives the XPath 3.1
-     *                version.
-     * @return the function library list for built-in function libraries other than the core
-     * FN namespace.
-     */
 
     public synchronized FunctionLibraryList getBuiltInExtensionLibraryList(int version) {
-        if (version != 40) {
-            version = 31;
-        }
         FunctionLibraryList result = builtInExtensionLibraryList.get(version);
         if (result == null) {
             result = makeBuiltInExtensionLibraryList(version);
@@ -2860,7 +2833,6 @@ public class Configuration implements SourceResolver, NotationSet {
             return parser;
         }
 
-        //XMLReader parser;
         if (getSourceParserClass() != null) {
             parser = makeParser(getSourceParserClass());
         } else {
@@ -2881,13 +2853,13 @@ public class Configuration implements SourceResolver, NotationSet {
         } catch (XPathException err) {
             throw new TransformerFactoryConfigurationError(err);
         }
-        //if (isValidation()) {
+        if (isValidation()) {
             try {
-                parser.setFeature("http://xml.org/sax/features/validation", isValidation());
+                parser.setFeature("http://xml.org/sax/features/validation", true);
             } catch (SAXException err) {
                 throw new TransformerFactoryConfigurationError("The XML parser does not support validation");
             }
-        //}
+        }
 
         return parser;
     }
@@ -3772,11 +3744,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public GroundedValue makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
-        try {
-            return SequenceTool.toGroundedValue(expression.iterate(context));
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
+        return SequenceTool.toGroundedValue(expression.iterate(context));
     }
 
 
@@ -4471,7 +4439,9 @@ public class Configuration implements SourceResolver, NotationSet {
             } else if (code == FeatureCode.ALLOW_SYNTAX_EXTENSIONS) {
                 boolean b = requireBoolean(name, value);
                 defaultXsltCompilerInfo.setXsltVersion(b ? 40 : 30);
-                getDefaultStaticQueryContext().setLanguageVersion(b ? 40 : 30);
+                if (defaultStaticQueryContext != null) {
+                    defaultStaticQueryContext.setLanguageVersion(b ? 40 : 30);
+                }
             }
             internalSetBooleanProperty(code, name, value);
         } else if (stringFeatures.contains(code)) {
