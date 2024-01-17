@@ -598,9 +598,7 @@ public class Query {
         }
 
         String qv = options.getOptionValue("qversion");
-        if (qv == null && config.getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)) {
-            languageVersion = "4.0";
-        } else if (qv != null && !"3.1".equals(qv) && !"4.0".equals(qv)) {
+        if (qv != null && !"3.1".equals(qv) && !"4.0".equals(qv)) {
             config.getLogger().warning("-qversion ignored: 3.1 is assumed");
         } else if ("4.0".equals(qv)) {
             languageVersion = "4.0";
