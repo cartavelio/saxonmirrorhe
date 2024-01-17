@@ -7,9 +7,13 @@ import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.test.xdmfixtures.DslLambda;
+import net.sf.saxon.test.xdmfixtures.MapBuilder;
 import net.sf.saxon.trans.XPathException;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class OptionsParameterHelper {
     /**
@@ -64,12 +68,18 @@ public class OptionsParameterHelper {
     /**
      *
      * @param params the OptionsParameters instance
-     * @param options the options to process, as a Map rather than an XDM MapItem
+     * @param options the options to process, as a MapItem
      * @param ctxt the XPathContext to evaluate the options using
      * @return the parsed options
      * @throws XPathException
      */
     public static Map<String, Sequence> parsedOptionParameters(OptionsParameter params, MapItem options, XPathContext ctxt) throws XPathException {
         return params.processSuppliedOptions(options, ctxt);
+    }
+
+    public static Map<String, Sequence> parsedOptionParameters(OptionsParameter params, DslLambda<MapBuilder> definition) throws XPathException {
+        MapBuilder builder = new MapBuilder();
+        definition.buildWith(builder);
+        return parsedOptionParameters(params, builder.getValue());
     }
 }

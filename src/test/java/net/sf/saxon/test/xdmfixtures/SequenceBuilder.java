@@ -3,9 +3,7 @@ package net.sf.saxon.test.xdmfixtures;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +24,11 @@ public class SequenceBuilder implements BuilderDsl {
     }
 
     public SequenceBuilder append(String... strings) {
-        return append(Arrays.stream(strings).map(StringValue::new));
+        return append(AtomicValueBuilder.strings(strings));
+    }
+
+    public SequenceBuilder append(Integer... nums) {
+        return append(AtomicValueBuilder.integers(nums));
     }
 
     public SequenceBuilder append(Stream<GroundedValue> stream) {

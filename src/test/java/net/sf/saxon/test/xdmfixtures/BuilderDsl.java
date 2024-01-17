@@ -3,6 +3,9 @@ package net.sf.saxon.test.xdmfixtures;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.StringValue;
 
 import java.util.stream.Stream;
 

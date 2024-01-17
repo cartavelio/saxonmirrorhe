@@ -37,12 +37,12 @@ public class MapBuilder implements BuilderDsl {
     }
 
     public MapBuilder put(String name, String value) {
-        map.initialPut(name, new StringValue(value));
+        map.initialPut(name, AtomicValueBuilder.string(value));
         return this;
     }
 
-    public MapBuilder put(String name, Number value) {
-        map.initialPut(name, integerValue(value));
+    public MapBuilder put(String name, Integer value) {
+        map.initialPut(name, AtomicValueBuilder.integer(value));
         return this;
     }
 
