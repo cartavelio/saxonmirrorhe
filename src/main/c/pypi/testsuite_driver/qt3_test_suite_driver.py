@@ -1,6 +1,6 @@
 import urllib.parse
 
-from saxoncee import *
+from saxonc@@edition@@ import *
 import os
 import psutil
 from Environment import Environment, Spec
@@ -930,13 +930,13 @@ def main(argv):
         try:
             opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
         except getopt.GetoptError:
-            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -lang <processor language>')
+            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -l <processor language>')
             sys.exit(2)
         print(opts)
         print(args)
         for opt, arg in opts:
             if opt == '-h':
-                print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
+                print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> -l <language>')
                 sys.exit()
             elif opt in ("-t", "--testpattern"):
                 run_test_case_name = arg
