@@ -81,7 +81,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         Sequence vendorOptionsOption = null;
         if (args.length == 2) {
             MapItem suppliedOptions = (MapItem) args[1].head();
-            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
+            Map<String, Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             xqueryVersionOption = checkedOptions.get("xquery-version");
             if (xqueryVersionOption != null) {
                 double vn = ((DecimalValue) xqueryVersionOption.head()).getDoubleValue();
@@ -164,7 +164,6 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         // so use alternative constructor?
         main.setPackageData(lib.getPackageData());
         main.setExecutable(lib.getExecutable());
-        main.initializeFunctionLibraries();
         lib.link(main);
         XQueryExpression xqe = new XQueryExpression(new ContextItemExpression(), main, false);
         DynamicQueryContext dqc = new DynamicQueryContext(context.getConfiguration());
