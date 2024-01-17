@@ -94,7 +94,7 @@ ext {
   c_sqlserver = "sqlserver"
   c_documentation = "saxonicadocs"
   dotnetex = null
-  scp = null
+  awscli = null
   csver = null
   csrid = null
   csbuildarch = null
@@ -125,14 +125,14 @@ spath.each { dir ->
       }
     }
   }
-  if (scp == null) {
-    def fn = new File(dir + "/scp")
+  if (awscli == null) {
+    def fn = new File(dir + "/aws")
     if (fn.exists() && fn.canExecute()) {
-      scp = fn.toString()
+      awscli = fn.toString()
     } else {
-      fn = new File(dir + "/scp.exe")
+      fn = new File(dir + "/aws.exe")
       if (fn.exists() && fn.canExecute()) {
-        scp = fn.toString()
+        awscli = fn.toString()
       }
     }
   }    

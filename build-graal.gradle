@@ -464,7 +464,8 @@ task unjar_htmlParser(
 
 task graal_hec_jar(
   type: Jar,
-  dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces",
+              "compile_function_library", "unjar_ICU4jJar"],
   description: "Build the HE jar file for SaxonC"
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-he/META-INF")
@@ -506,7 +507,8 @@ task graal_hec_jar(
 
 task graal_pec_jar(
   type: Jar,
-  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser", "compile_function_library"],
+  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
+              "compile_function_library", "unjar_ICU4jJar"],
   description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
@@ -582,7 +584,8 @@ task graal_pec_jar(
 
 task graal_eec_jar(
   type: Jar,
-  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser", "compile_function_library","unjar_ICU4jJar"],
+  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
+              "compile_function_library","unjar_ICU4jJar"],
   description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
@@ -1173,8 +1176,8 @@ task saxonc_build_wheels(
   }
 
   doFirst {
-    if (scp == null) {
-      throw new GradleException("Did not find 'scp' on path")
+    if (awscli == null) {
+      throw new GradleException("Did not find 'aws' on path")
     }
     delete "${buildDir}/BuildWheels"
   }
@@ -1194,13 +1197,13 @@ task saxonc_build_wheels(
       if (systemOsName == "mac") {
         wheels = "${systemOsName}-${osarch}.wheels.tar.gz"
       }
-      def path = "/var/www/html/dev.saxonica.com/github-wheel-sources"
 
-      println("Copying ${systemOsName} staging files to dev.saxonica.com/${wheels}")
+      println("Copying ${systemOsName} staging files to s3://saxonica-wheel-staging/${user}/${wheels}")
       exec {
         workingDir "${buildDir}/distributions"
-        commandLine scp, "${systemOsName}.wheels.tar.gz",
-          "dev.saxonica.com:${path}/${user}/${wheels}"
+        commandLine awscli, "--profile", "saxonica",
+          "s3", "cp", "${systemOsName}.wheels.tar.gz",
+          "s3://saxonica-wheel-staging/${user}/${wheels}"
       }
     }
   } else {
