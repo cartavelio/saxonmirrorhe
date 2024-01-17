@@ -405,136 +405,131 @@ public abstract class Token {
      */
     public static final int DECLARE_DEFAULT = 91;
     /**
-     * "declare fixed"
-     */
-    public static final int DECLARE_FIXED = 92;
-    /**
      * "declare construction"
      */
-    public static final int DECLARE_CONSTRUCTION = 98;
+    public static final int DECLARE_CONSTRUCTION = 92;
     /**
      * "declare base-uri"
      */
-    public static final int DECLARE_BASEURI = 99;
+    public static final int DECLARE_BASEURI = 93;
     /**
      * "declare boundary-space"
      */
-    public static final int DECLARE_BOUNDARY_SPACE = 101;
+    public static final int DECLARE_BOUNDARY_SPACE = 94;
     /**
      * "declare decimal-format"
      */
-    public static final int DECLARE_DECIMAL_FORMAT = 103;
+    public static final int DECLARE_DECIMAL_FORMAT = 95;
     /**
      * "import schema"
      */
-    public static final int IMPORT_SCHEMA = 105;
+    public static final int IMPORT_SCHEMA = 96;
     /**
      * "import module"
      */
-    public static final int IMPORT_MODULE = 107;
+    public static final int IMPORT_MODULE = 97;
     /**
      * "declare variable"
      */
-    public static final int DECLARE_VARIABLE = 108;
+    public static final int DECLARE_VARIABLE = 98;
     /**
      * "declare context"
      */
-    public static final int DECLARE_CONTEXT = 109;
+    public static final int DECLARE_CONTEXT = 99;
     /**
      * "declare function"
      */
-    public static final int DECLARE_FUNCTION = 110;
+    public static final int DECLARE_FUNCTION = 100;
     /**
      * "module namespace"
      */
-    public static final int MODULE_NAMESPACE = 111;
+    public static final int MODULE_NAMESPACE = 101;
     /**
      * Various compound symbols supporting XQuery validation expression
      */
-    public static final int VALIDATE = 112;
-    public static final int VALIDATE_STRICT = 113;
-    public static final int VALIDATE_LAX = 114;
-    public static final int VALIDATE_TYPE = 115;
+    public static final int VALIDATE = 102;
+    public static final int VALIDATE_STRICT = 103;
+    public static final int VALIDATE_LAX = 104;
+    public static final int VALIDATE_TYPE = 105;
     /**
      * percent sign '%'
      */
-    public static final int PERCENT = 116;
+    public static final int PERCENT = 106;
 
     /**
      * "declare xmlspace"
      */
-    public static final int DECLARE_ORDERING = 117;
+    public static final int DECLARE_ORDERING = 107;
 
     /**
      * "declare copy-namespaces"
      */
-    public static final int DECLARE_COPY_NAMESPACES = 118;
+    public static final int DECLARE_COPY_NAMESPACES = 108;
     /**
      * "declare option"
      */
-    public static final int DECLARE_OPTION = 119;
+    public static final int DECLARE_OPTION = 109;
     /**
      * "declare revalidation"
      */
-    public static final int DECLARE_REVALIDATION = 124;
+    public static final int DECLARE_REVALIDATION = 110;
     /**
      * "insert node/nodes"
      */
-    public static final int INSERT_NODE = 125;
+    public static final int INSERT_NODE = 111;
     /**
      * "delete node/nodes"
      */
-    public static final int DELETE_NODE = 126;
+    public static final int DELETE_NODE = 112;
     /**
      * "replace node/nodes"
      */
-    public static final int REPLACE_NODE = 127;
+    public static final int REPLACE_NODE = 113;
     /**
      * "replace value"
      */
-    public static final int REPLACE_VALUE = 128;
+    public static final int REPLACE_VALUE = 114;
     /**
      * "rename node"
      */
-    public static final int RENAME_NODE = 130;
+    public static final int RENAME_NODE = 115;
     /**
      * "first into"
      */
-    public static final int FIRST_INTO = 131;
+    public static final int FIRST_INTO = 116;
     /**
      * "last into"
      */
-    public static final int LAST_INTO = 132;
+    public static final int LAST_INTO = 117;
     /**
      * "after"
      */
-    public static final int AFTER = 133;
+    public static final int AFTER = 118;
     /**
      * "before"
      */
-    public static final int BEFORE = 134;
+    public static final int BEFORE = 119;
     /**
      * "into"
      */
-    public static final int INTO = 135;
+    public static final int INTO = 120;
     /**
      * "with"
      */
-    public static final int WITH = 136;
+    public static final int WITH = 121;
     /**
      * "declare updating [function]"
      */
-    public static final int DECLARE_UPDATING = 138;
+    public static final int DECLARE_UPDATING = 122;
     /**
      * declare %
      */
-    public static final int DECLARE_ANNOTATED = 140;
+    public static final int DECLARE_ANNOTATED = 123;
     /**
      * Saxon extension: declare type
      */
-    public static final int DECLARE_ITEM_TYPE = 144;
-    public static final int SWITCH_CASE = 145;
-
+    public static final int DECLARE_TYPE = 124;
+    public static final int SWITCH_CASE = 125;
     /**
      * semicolon separator
      */
@@ -793,12 +788,11 @@ public abstract class Token {
         mapDouble("declare base-uri", DECLARE_BASEURI);
         mapDouble("declare boundary-space", DECLARE_BOUNDARY_SPACE);
         mapDouble("declare decimal-format", DECLARE_DECIMAL_FORMAT);
-        mapDouble("declare fixed", DECLARE_FIXED);
         mapDouble("declare ordering", DECLARE_ORDERING);
         mapDouble("declare copy-namespaces", DECLARE_COPY_NAMESPACES);
         mapDouble("declare option", DECLARE_OPTION);
         mapDouble("declare revalidation", DECLARE_REVALIDATION);
-        mapDouble("declare item-type", DECLARE_ITEM_TYPE);
+        mapDouble("declare type", DECLARE_TYPE); // Saxon extension
         mapDouble("import schema", IMPORT_SCHEMA);
         mapDouble("import module", IMPORT_MODULE);
         mapDouble("declare variable", DECLARE_VARIABLE);

@@ -843,6 +843,8 @@ public class XPathParser {
                 return parseIfExpression();
             case Token.SWITCH:
                 return parseSwitchExpression();
+            case Token.SWITCH_CASE:
+                return parseSwitchExpression();
             case Token.TYPESWITCH:
                 return parseTypeswitchExpression();
             case Token.VALIDATE:
@@ -920,7 +922,7 @@ public class XPathParser {
                 case Token.CASTABLE_AS:
                     nextToken();
                     CastingTarget at;
-                    if (allowXPath40Syntax && t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("union")) {
+                    if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("union")) {
                         // Saxon 9.8 / XPath 4.0 proposed extension
                         at = (CastingTarget)parseItemType();
                     } else {
@@ -1785,7 +1787,7 @@ public class XPathParser {
         } else if (t.currentToken == Token.NAME) {
             primaryType = getPlainType(t.currentTokenValue);
             nextToken();
-        } else if (t.currentToken == Token.NODEKIND || t.currentToken == Token.FUNCTION) {
+        } else if (t.currentToken == Token.KEYWORD_LBRA || t.currentToken == Token.FUNCTION) {
             // Which includes things such as "map" and "array"
             switch (t.currentTokenValue) {
                 case "item":
@@ -2000,7 +2002,7 @@ public class XPathParser {
         List<AtomicType> memberTypes = new ArrayList<>(6);
 
         while (true) {
-            if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("enum")) {
+            if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
                 EnumerationType type = parseEnumType();
                 memberTypes.add(type);
             } else {
@@ -2310,7 +2312,7 @@ public class XPathParser {
             case Token.PREFIX:
             case Token.SUFFIX:
             case Token.STAR:
-            case Token.NODEKIND:
+            case Token.KEYWORD_LBRA:
             case Token.DOT:
             case Token.DOTDOT:
             case Token.FUNCTION:
@@ -2599,7 +2601,7 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAR);
             return parseDynamicFunctionCall(var, lhs);
-        } else if (token == Token.NODEKIND && t.currentTokenValue.equals("function")) {
+        } else if (token == Token.KEYWORD_LBRA && t.currentTokenValue.equals("function")) {
             Expression fn = parseInlineFunction(AnnotationList.EMPTY);
             expect(Token.LPAR);
             return parseDynamicFunctionCall(fn, lhs);
@@ -2646,7 +2648,7 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAR);
             rhs = parseDynamicFunctionCall(var, varRef);
-        } else if (token == Token.NODEKIND && t.currentTokenValue.equals("function")) {
+        } else if (token == Token.KEYWORD_LBRA && t.currentTokenValue.equals("function")) {
             Expression fn = parseInlineFunction(AnnotationList.EMPTY);
             expect(Token.LPAR);
             rhs = parseDynamicFunctionCall(fn, varRef);
@@ -2815,8 +2817,8 @@ public class XPathParser {
                 }
                 break;
             }
-            case Token.NODEKIND:
-                if (t.currentTokenValue.equals("function")) {
+            case Token.KEYWORD_LBRA:
+                if (t.currentTokenValue.equals("function") || (t.currentTokenValue.equals("fn"))) {
                     AnnotationList annotations = AnnotationList.EMPTY;
                     return parseInlineFunction(annotations);
                 }
@@ -2827,13 +2829,13 @@ public class XPathParser {
             case Token.SUFFIX:
             case Token.STAR:
                 byte defaultAxis = AxisInfo.CHILD;
-                if (t.currentToken == Token.NODEKIND &&
+                if (t.currentToken == Token.KEYWORD_LBRA &&
                         (t.currentTokenValue.equals("attribute") || t.currentTokenValue.equals("schema-attribute"))) {
                     defaultAxis = AxisInfo.ATTRIBUTE;
-                } else if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("namespace-node")) {
+                } else if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("namespace-node")) {
                     defaultAxis = AxisInfo.NAMESPACE;
                     testPermittedAxis(AxisInfo.NAMESPACE, "XQST0134");
-                } else if (firstInPattern && t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("document-node")) {
+                } else if (firstInPattern && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("document-node")) {
                     defaultAxis = AxisInfo.SELF;
                 }
                 NodeTest test = parseNodeTest(Type.ELEMENT);
@@ -2857,7 +2859,7 @@ public class XPathParser {
                     case Token.PREFIX:
                     case Token.SUFFIX:
                     case Token.STAR:
-                    case Token.NODEKIND:
+                    case Token.KEYWORD_LBRA:
                     case Token.LPAR:
                         AxisExpression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, parseNodeTest(Type.ATTRIBUTE));
                         setLocation(ae2);
@@ -2886,7 +2888,7 @@ public class XPathParser {
                     case Token.PREFIX:
                     case Token.SUFFIX:
                     case Token.STAR:
-                    case Token.NODEKIND:
+                    case Token.KEYWORD_LBRA:
                     case Token.LPAR:
                         Expression ax = new AxisExpression(axis, parseNodeTest(principalNodeType));
                         setLocation(ax);
@@ -3428,7 +3430,7 @@ public class XPathParser {
                 nextToken();
                 return NodeKindTest.makeNodeKindTest(nodeType);
 
-            case Token.NODEKIND:
+            case Token.KEYWORD_LBRA:
                 return parseKindTest();
 
             default:
