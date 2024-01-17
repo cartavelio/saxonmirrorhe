@@ -266,6 +266,10 @@
     
     <xsl:mode name="highlight-text" on-no-match="shallow-copy"/>
     
+    <xsl:template match="pre//text()" mode="highlight-text">
+        <xsl:copy select="."/>
+    </xsl:template>
+    
     <xsl:template match="text()" mode="highlight-text">
         <xsl:param name="search"/>
         <xsl:if test="normalize-space() != ''">
