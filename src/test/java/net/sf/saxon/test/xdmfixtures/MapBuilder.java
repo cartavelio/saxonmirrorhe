@@ -4,9 +4,6 @@ import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.value.StringValue;
-
-import static com.saxonica.functions.qt4.csv.TestHelpers.integerValue;
 
 public class MapBuilder implements BuilderDsl {
     DictionaryMap map = new DictionaryMap();
