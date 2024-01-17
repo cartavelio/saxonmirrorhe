@@ -7,7 +7,10 @@
   task "${release}_samples_common"(
     type: Copy,
     dependsOn: ["${release}_samples_setup", "${release}_samples_cs"]
-  ) { }
+  ) {
+    into "${buildDir}/output/${release}/resources/use-cases"
+    from "${projectDir}/src/use-cases"
+  }
 
   task "${release}_samples_setup"(
     type: Copy
@@ -54,127 +57,23 @@
 
 // ============================================================
 
-// These tests of generated configuration files are intended to check for consistency between
-// ConfigurationReader and the FeatureKeys source. If the tests fail, then there is some
-// inconsistency to resolve.
-// The generated configuration files are not actually included in the samples in saxon-resources
-// (see run_config_samples below for testing of the sample configuration files.)
-
-task run_config_tests(
-        description: "Test generated configuration files"
-) {}
-
-["he", "pe", "ee"].each { edition ->
-  def EDITION = edition.toUpperCase()
-  ["all", "current"].each { features ->
-    def includeObsolete = "true()"
-    if (features == "current") {
-      includeObsolete = "false()"
-    }
-    def options = "${EDITION}-${features}"
-    Task t = task "gen_config_file_${options}"(
-            type: JavaExec,
-            dependsOn: ["hej_featureKeys"],
-            description: "Generate test configuration file for ${EDITION}"
-    ) {
-      inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
-      outputs.file "${buildDir}/samples/config/generated-config-${options}.xml"
-      classpath = configurations.preprocessor
-      mainClass = "net.sf.saxon.Transform"
-      args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToConfigFile.xsl",
-              "-s:${projectDir}/tools/featureKeys/config-base.xml",
-              "-o:${buildDir}/samples/config/generated-config-${options}.xml",
-              "edition=${EDITION}",
-              "platform=J",
-              "?include-obsolete=${includeObsolete}"
-    }
-    run_config_tests.dependsOn t
-
-    Task t2 = task "validate_generated-config-${options}"(
-            type: JavaExec,
-            dependsOn: ["gen_config_file_${options}", "gen_config_schema", "copy_samples", "eejJar"],
-            description: "Validate the generated-config-${options}.xml test configuration file"
-    ) {
-      inputs.files "${buildDir}/samples/config/generated-config-${options}.xml"
-      inputs.files "${buildDir}/saxon-resources/samples/config/config.xsd"
-      workingDir = "${buildDir}/saxon-resources/samples"
-
-      classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
-
-      mainClass = "com.saxonica.Validate"
-      args "-t",
-              "-s:${buildDir}/samples/config/generated-config-${options}.xml",
-              "-xsd:${buildDir}/saxon-resources/samples/config/config.xsd"
-
-      // All validation tests should result in "Validation successful"
-    }
-    run_config_tests.dependsOn t2
-
-    def dependencies = ["gen_config_file_${options}", "copy_samples", "${edition}jJar"]
-    if (edition != "he") {
-      dependencies += "${edition}jJarSql"
-    }
-
-    Task t3 = task "run_with_generated-config-${options}"(
-            type: JavaExec,
-            dependsOn: dependencies,
-            description: "Run a transform using the generated-config-${options}.xml sample configuration file"
-    ) {
-      doFirst {
-        mkdir "${buildDir}/samples/results/config/"
-      }
-      inputs.files "${buildDir}/samples/config/generated-config-${options}.xml"
-      workingDir = "${buildDir}/saxon-resources/samples"
-
-      classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
-
-      if (edition != "he") {
-        classpath += files("${buildDir}/libs/saxon-${edition}-sql-${saxonVersion}.jar")
-      }
-
-      mainClass = "net.sf.saxon.Transform"
-      args "-t",
-              "-config:${buildDir}/samples/config/generated-config-${options}.xml",
-              "-s:data/books.xml",
-              "-xsl:styles/books.xsl",
-              "-o:${buildDir}/samples/results/config/books-with-generated-config-${options}.html",
-              "--traceListenerOutputFile:${buildDir}/samples/results/config/traceOutput-${options}.log"
-
-      // Running the generated-config-${edition}-current.xml configuration files should not produce any warnings.
-
-      // Should only get warnings for obsolete features when running the generated-config-${edition}-all.xml
-      // configuration files.
-      // e.g. Warning
-      //   Obsolete configuration property global/@lazyConstructionMode
-    }
-    run_config_tests.dependsOn t3
-
-  }
-}
-
-// ============================================================
-
 task run_cmd_samples(
         description: "Run command line samples",
         dependsOn: ["run_config_samples",
                     "run_cmd_books_sample_tests",
                     "run_cmd_tour_sample_tests",
                     "run_cmd_shakespeare_sample_tests",
-                    "run_cmd_bible_sample_tests",
-                    "run_cmd_samples_cs"]
+                    "run_cmd_bible_sample_tests"]
 ) {}
 
 // TODO still need to check the output of running the command line samples
 
 task run_config_samples(
-        description: "Test validation of the sample configuration files",
-        dependsOn: ["run_config_tests"]
+        description: "Test validation of the sample configuration files"
 ) {}
 
 ["config", "config-HE"].each {configFile ->
-  Task t = task "validate_${configFile}"(
+  Task t = task "run_${configFile}"(
           type: JavaExec,
           dependsOn: ["gen_config_schema", "copy_samples", "eejJar"],
           description: "Validate the ${configFile}.xml sample configuration file"
@@ -194,37 +93,48 @@ task run_config_samples(
   run_config_samples.dependsOn t
 }
 
-["config", "config-HE"].each {configFile ->
-  def edition = "ee"
-  if (configFile == "config-HE") {
-    edition = "he"
-  }
-  def dependencies = ["copy_samples", "${edition}jJar"]
-  if (edition != "he") {
-    dependencies += "${edition}jJarSql"
-  }
+["config"].each {configFile ->
   Task t = task "run_with_${configFile}"(
           type: JavaExec,
-          dependsOn: dependencies,
+          dependsOn: ["copy_samples", "eejJar", "eejJarSql"],
           description: "Run a transform using the ${configFile}.xml sample configuration file"
   ) {
     inputs.files "${buildDir}/saxon-resources/samples/config/${configFile}.xml"
     workingDir = "${buildDir}/saxon-resources/samples"
 
     classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
-
-    if (edition != "he") {
-      classpath += files("${buildDir}/libs/saxon-${edition}-sql-${saxonVersion}.jar")
-    }
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
+        + files("${buildDir}/libs/saxon-ee-sql-${saxonVersion}.jar")
 
     mainClass = "net.sf.saxon.Transform"
     args "-t",
             "-config:${buildDir}/saxon-resources/samples/config/${configFile}.xml",
             "-s:data/books.xml",
             "-xsl:styles/books.xsl",
-            "-o:${buildDir}/samples/results/cmd/booksWith${configFile}.html",
-            "--traceListenerOutputFile:${buildDir}/samples/results/cmd/traceOutput-${configFile}.log"
+            "-o:${buildDir}/samples/results/cmd/booksWith${configFile}.html"
+
+  }
+  run_config_samples.dependsOn t
+}
+
+["config-HE"].each {configFile ->
+  Task t = task "run_with_${configFile}"(
+          type: JavaExec,
+          dependsOn: ["copy_samples", "hejJar"],
+          description: "Run a transform using the ${configFile}.xml sample configuration file"
+  ) {
+    inputs.files "${buildDir}/saxon-resources/samples/config/${configFile}.xml"
+    workingDir = "${buildDir}/saxon-resources/samples"
+
+    classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-he-${saxonVersion}.jar")
+
+    mainClass = "net.sf.saxon.Transform"
+    args "-t",
+            "-config:${buildDir}/saxon-resources/samples/config/${configFile}.xml",
+            "-s:data/books.xml",
+            "-xsl:styles/books.xsl",
+            "-o:${buildDir}/samples/results/cmd/booksWith${configFile}.html"
 
   }
   run_config_samples.dependsOn t
@@ -387,61 +297,6 @@ task run_cmd_bible_sample_tests(
 
   }
   run_cmd_bible_sample_tests.dependsOn t
-}
-
-
-// Run the command line samples with SaxonCS (as well as SaxonJ above)
-// TODO other command line samples too: config, books, tour
-task run_cmd_samples_cs(
-        description: "Run command line samples with SaxonCS",
-        dependsOn: ["run_shakespeare_Transform_cs",
-                    "run_bible_Transform_cs"]
-) {}
-
-task run_shakespeare_Transform_cs(
-        dependsOn: ["dotnetPublish", "ee_samples_common"],
-        description: "Run the cmd shakespeare sample transform with SaxonCS"
-) {
-  def resdir = "${buildDir}/samples/results/cmd/cs"
-  doFirst {
-    mkdir "${resdir}/playhtml/"
-  }
-  doLast {
-    if (dotnetex == null) {
-      throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
-    }
-
-    exec {
-      workingDir = "${buildDir}/output/ee/resources/samples"
-      commandLine "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", "transform",
-              "-s:data/othello.xml", "-xsl:styles/play.xsl", "dir=file://${resdir}/playhtml"
-    }
-  }
-}
-
-task run_bible_Transform_cs(
-        dependsOn: ["dotnetPublish", "ee_samples_common"],
-        description: "Run the cmd bible sample transform with SaxonCS"
-) {
-  def resdir = "${buildDir}/samples/results/cmd/cs"
-  doFirst {
-    mkdir "${resdir}/biblehtml/"
-  }
-  doLast {
-    if (dotnetex == null) {
-      throw new GradleException("Cannot run: failed to find dotnet[.exe] on path.")
-    }
-
-    exec {
-      workingDir = "${buildDir}/output/ee/resources/samples"
-      commandLine "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", "transform",
-              "-s:${projectDir}/src/test/testdata/bible/nt/nt.xml", "-xsl:styles/bible.xsl", "dir=${resdir}/biblehtml"
-    }
-  }
-  // TODO test output to ensure transform runs correctly, not just without failure
-  /*doLast {
-    try new FileReader c.f. build.gradle#837
-  }*/
 }
 
 // ============================================================
