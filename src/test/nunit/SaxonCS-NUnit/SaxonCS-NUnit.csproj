@@ -24,6 +24,7 @@
 
 <ItemGroup>
     <Compile Remove="TestIntegratedExtensionFunctionXslt.cs"/>
+    <Compile Remove="TestXdmFunction.cs"/>
 </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\build\cs\SaxonCS.csproj" />
