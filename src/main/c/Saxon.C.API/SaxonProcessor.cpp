@@ -774,6 +774,8 @@ void SaxonProcessor::setCatalogFiles(const char ** catalogFiles, int length) {
                                  (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
+  } else if (result == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
 }
 

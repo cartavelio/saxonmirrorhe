@@ -553,11 +553,7 @@ public class Xslt30Processor extends SaxonCAPI {
         compiler.setSchemaAware(xslt30Processor.schemaAware);
         source = new StreamSource(reader);
         if (cwd != null && cwd.length() > 0) {
-            if (!cwd.endsWith("/")) {
-                cwd = cwd.concat("/");
-            }
-            source.setSystemId(cwd);
-
+            source.setSystemId(cwd+ (!cwd.endsWith("/") ? "/" : ""));
         }
         compiler.setErrorList(SaxonCException.errorList);
         XsltExecutable executable = compiler.compile(source);
@@ -1640,11 +1636,11 @@ public class Xslt30Processor extends SaxonCAPI {
             Object valuei = null;
             DocumentBuilder builder = processor.newDocumentBuilder();
 
-            if (cwd != null && cwd.length() > 0) {
+            /*if (cwd != null && cwd.length() > 0) {
                 if (!cwd.endsWith("/")) {
                     cwd = cwd.concat("/");
                 }
-            }
+            }   */
 
             if (map.containsKey("extc")) {
                 //extension function library path
