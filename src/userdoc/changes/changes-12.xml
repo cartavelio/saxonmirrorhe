@@ -528,6 +528,8 @@
             same way as function parameters. For example it becomes possible to say 
         <code>let $x as xs:double := 1</code> because the integer 1 is now coerced to an <code>xs:double</code>.</p>
         
+        <p>From 12.4, <code>true()</code> and <code>false()</code> are allowed as annotation values. (In previous
+        XQuery versions, only string literals and numeric literals were allowed).</p>
         <h2>XSLT extensions</h2>
         
         
