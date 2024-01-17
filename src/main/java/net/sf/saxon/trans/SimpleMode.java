@@ -174,6 +174,9 @@ public class SimpleMode extends Mode {
                         case "shallow-copy-all":
                             base = ShallowCopyAllRuleSet.getInstance();
                             break;
+                        case "shallow-skip-all":
+                            base = ShallowSkipAllRuleSet.getInstance();
+                            break;
                         default:
                             // already validated
                             break;

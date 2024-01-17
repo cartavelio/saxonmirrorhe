@@ -1206,6 +1206,7 @@ public abstract class StyleElement extends ElementImpl {
         final StructuredQName checkedName = defaultMode;
         if (psm != null && psm.isDeclaredModes()) {
             // It will be null on the xsl:package element itself
+            getContainingPackage().getRuleManager().registerModeName(checkedName);
             psm.addFixupAction(() -> {
                 if (psm.getRuleManager().obtainMode(checkedName, false) == null) {
                     throw new XPathException("Mode " + checkedName.getDisplayName()
@@ -1575,15 +1576,11 @@ public abstract class StyleElement extends ElementImpl {
             // we can't report a dynamic error such as divide by zero unless the expression
             // is actually executed.
             //err.printStackTrace();
-            XPathException e2 = err;
-            if (e2.isReportableStatically()) {
-                if (!(e2.getLocator() instanceof XPathParser.NestedLocation)) {
-                    e2 = e2.withLocation(new AttributeLocation(this, StructuredQName.fromClarkName(name)));
-                }
-                compileError(e2);
+            if (err.isReportableStatically()) {
+                compileError(err.withLocation(new AttributeLocation(this, StructuredQName.fromClarkName(name))));
                 return exp;
             } else {
-                ErrorExpression erexp = new ErrorExpression(new XmlProcessingException(e2));
+                ErrorExpression erexp = new ErrorExpression(new XmlProcessingException(err));
                 ExpressionTool.copyLocationInfo(exp, erexp);
                 return erexp;
             }
@@ -2373,7 +2370,6 @@ public abstract class StyleElement extends ElementImpl {
         }
         XmlProcessingIncident se = new XmlProcessingIncident(err.getMessage(), err.showErrorCode(), err.getLocator());
         se.setHostLanguage(HostLanguage.XSLT);
-        se.setFailingExpression(err.getFailingExpression());
         compileError(se);
     }
     /**

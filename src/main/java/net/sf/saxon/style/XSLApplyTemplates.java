@@ -93,6 +93,7 @@ public class XSLApplyTemplates extends StyleElement {
                     break;
                 default:
                     modeName = makeQName(modeAttribute, null, "mode");
+                    getContainingPackage().getRuleManager().registerModeName(modeName);
                     break;
             }
         }
@@ -203,7 +204,6 @@ public class XSLApplyTemplates extends StyleElement {
                 isWithinDeclaredStreamableConstruct(),
                 mode,
                 rm);
-        app.setLocation(saveLocation());
         app.setActualParams(getWithParamInstructions(app, compilation, decl, false));
         app.setTunnelParams(getWithParamInstructions(app, compilation, decl, true));
         if (separator != null) {
