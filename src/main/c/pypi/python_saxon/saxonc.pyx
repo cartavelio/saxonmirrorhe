@@ -1171,11 +1171,11 @@ cdef class PyXslt30Processor:
          """
          import_package(self, package_file_name)
          Import a library package.  Calling this method makes the supplied package available for reference
-         in the xsl:use-package declarations of subsequent compilations performed using this
-         Xslt30Processor.
+         in the xsl:use-package declarations of subsequent compilations performed using this Xslt30Processor.
          Args:
-             package_file_name (str): the sef file name of the package to be imported. File name resolved against the cwd
-             which is set using the setcwd
+             package_file_name (str): the file name of the package to be imported, which should be supplied
+                as an SEF. If relative, the file name of the SEF is resolved against the cwd, which is set
+                using the set_cwd method.
 
          Example:
             xsltproc = saxon_proc.new_xslt30_processor()

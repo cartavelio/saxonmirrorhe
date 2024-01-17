@@ -896,8 +896,9 @@
                   <div class="fcomment">Calling this method makes the supplied package available for reference
                      in the <code>xsl:use-package</code> declarations of subsequent compilations performed using this
                      <a class="bodylink code" href="../saxon_c_php_xslt30processor">Saxon\Xslt30Processor</a>.
-                     The $packageFileName is given as the SEF file name of the package to be imported. File name resolved
-                     against the cwd which is set using the <code>setcwd()</code>.</div>
+                     The package to be imported should be supplied as an SEF; the file name of this SEF is
+                     specified by the $packageFileName argument. If relative, the file name is resolved
+                     against the cwd, which is set using <code>setcwd()</code>.</div>
                </td>
             </tr>
             
