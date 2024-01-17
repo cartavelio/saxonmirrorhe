@@ -183,6 +183,11 @@
       <reason>Fixed default namespace declaration not yet implemented</reason>
    </exception>
    
+   <exception test-set="prod-SchemaImport" test-case="qischema017" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-20"/>
+      <reason>Fixed default namespace declaration not yet implemented</reason>
+   </exception>
+   
    <exception test-set="prod-VersionDecl" test-case="version_declaration-015
       version_declaration-016" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-20"/>
