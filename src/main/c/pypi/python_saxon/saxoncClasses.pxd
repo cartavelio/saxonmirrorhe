@@ -9,10 +9,6 @@ cdef extern from "@@location@@Saxon.C.API/CythonExceptionHandler.h":
 
 
 cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
-
-    cdef cppclass UnprefixedElementMatchingPolicy:
-      pass
-
     cdef cppclass SaxonProcessor:
         SaxonProcessor(bool) except +raise_py_error
         SaxonProcessor(const char * configFile) except +raise_py_error
@@ -33,9 +29,6 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         XdmValue ** createXdmValueArray(int len)
 
-        void deleteXdmValueArray(XdmValue ** arr, int len)
-
-        void deleteXdmAtomicValueArray(XdmAtomicValue ** arr, int len)
 
         XdmAtomicValue ** createXdmAtomicValueArray(int len)
 
@@ -68,7 +61,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         DocumentBuilder * newDocumentBuilder() except +raise_py_error
 
-        XdmAtomicValue * makeStringValue(const char* str1, const char* encoding)
+        XdmAtomicValue * makeStringValue(const char* str1)
 
         XdmAtomicValue * makeIntegerValue(int i)
 
@@ -108,21 +101,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setCatalog(const char * filename)  except +raise_py_error
 
-        void setCatalogFiles(const char ** filenames, int _len)  except +raise_py_error
-
         const char * getStringValue(XdmItem * item)
 
-        XdmNode * parseXmlFromString(const char* source, const char* encoding, SchemaValidator * validator) except +raise_py_error
-
-        XdmNode * parseXmlFromString(const char* source) except +raise_py_error
+        XdmNode * parseXmlFromString(const char* source, SchemaValidator * validator) except +raise_py_error
 
         XdmNode * parseXmlFromFile(const char* source, SchemaValidator * validator)  except +raise_py_error
 
         XdmNode * parseXmlFromUri(const char* source, SchemaValidator * validator)   except +raise_py_error
-
-        XdmValue * parseJsonFromString(const char* source, const char* encoding) except +raise_py_error
-
-        XdmValue * parseJsonFromFile(const char* source)  except +raise_py_error
 
         bool isSchemaAwareProcessor()
 
@@ -153,7 +138,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         const char * getBaseUri()
 
-        XdmNode* parseXmlFromString(const char * content, const char * encoding) except +raise_py_error
+        XdmNode* parseXmlFromString(const char * content) except +raise_py_error
 
         XdmNode* parseXmlFromFile(const char * filename)  except +raise_py_error
 
@@ -218,13 +203,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         XsltExecutable * compileFromFile(const char* stylesheet)  except +raise_py_error
 
         # compile a stylesheet received as a string.
-        XsltExecutable * compileFromString(const char* stylesheet, const char * encoding)   except +raise_py_error
+        XsltExecutable * compileFromString(const char* stylesheet)   except +raise_py_error
 
         # Get the stylesheet associated via the xml-stylesheet processing instruction
         XsltExecutable * compileFromAssociatedFile(const char* sourceFile)    except +raise_py_error
 
         # Compile a stylesheet received as a string and save to an exported file (SEF).
-        void compileFromStringAndSave(const char* stylesheet, const char* filename, const char * encoding)  except +raise_py_error
+        void compileFromStringAndSave(const char* stylesheet, const char* filename)  except +raise_py_error
 
         # Compile a stylesheet received as a file and save to an exported file (SEF).
         void compileFromFileAndSave(const char* xslFilename, const char* filename)  except +raise_py_error
@@ -451,22 +436,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setLax(bool l)
 
     cdef cppclass XPathProcessor:
-
         XPathProcessor() except +raise_py_error
 
         void setBaseURI(const char * uriStr)
 
-        const char * getBaseURI()
-
         XdmValue * evaluate(const char * xpathStr)  except +raise_py_error
    
         XdmItem * evaluateSingle(const char * xpathStr)  except +raise_py_error
-
-        void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
-
-        UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
-
-        UnprefixedElementMatchingPolicy convertEnumPolicy(int n);
 
         void setContextItem(XdmItem * item)
         
@@ -620,8 +596,6 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
         const char* getBaseUri()
 
         XdmNode* getParent()
-
-        XdmNode *getChild(int i, bool cache);
 
         const char* getAttributeValue(const char *str)
 
