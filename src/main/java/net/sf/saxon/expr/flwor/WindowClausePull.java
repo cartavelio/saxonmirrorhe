@@ -151,6 +151,16 @@ public class WindowClausePull extends TuplePull {
                 }
             }
         }
+        // At the end of the input sequence, there may be a window that hasn't been despatched because
+        // earlier windows were still unclosed: see SlidingWindowExpr564
+        for (WindowClause.Window w : currentWindows) {
+            if (w.isFinished() && !w.isDespatched()) {
+                processWindow(w, context);
+                currentWindows.remove(w);
+                return true;
+            }
+        }
+
         return false;
     }
 
