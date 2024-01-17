@@ -233,6 +233,7 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
     if (cached) {
       attrValues = attrValuesi;
     }
+    operator delete (results);
     return attrValuesi;
   }
 }
@@ -263,6 +264,8 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
     // this->incrementRefCount();
     valuesi[p - 1] = tempNode;
   }
+
+  operator delete (results);
 
   return valuesi;
 }
