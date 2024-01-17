@@ -59,7 +59,7 @@ public class ReceivingDestination extends AbstractDestination {
      *      <li>The {@code Receiver} is an instance of {@link SequenceNormalizer}</li>
      *      <li>The {@code Receiver} implements {@link ReceiverWithOutputProperties},
      *      and a call on {@code getOutputProperties(SaxonOutputPropertes.REQUIRE_WELL_FORMED)} returns "no"</li>
-     *      <li>The method {#acceptRawOutput()} is implemented in a subclass of {@code ReceivingDestination},
+     *      <li>The method {@code #acceptsRawOutput()} is implemented in a subclass of {@code ReceivingDestination},
      *      and returns false.</li>
      *  </ol>
      */

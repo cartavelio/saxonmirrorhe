@@ -74,7 +74,7 @@ public class KeyIndex {
 
     /**
      * Get the underlying map
-     * @return the underlying map. The "Object" in the map entry is either a @code{NodeInfo}
+     * @return the underlying map. The "Object" in the map entry is either a {@code NodeInfo}
      * or a {@code List<NodeInfo>}
      */
 

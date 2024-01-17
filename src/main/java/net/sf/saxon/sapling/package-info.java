@@ -10,6 +10,6 @@
  * using a lightweight immutable data structure called a <i>sapling</i>; once construction of a sapling
  * tree is complete, it can be copied to form a fully-functional XDM tree in the form of an
  * <code>XdmNode</code> or <code>NodeInfo</code> object.</p>
- * <p>An overview of the API can be found in the Javadoc for class <a href="SaplingNode.html">SaplingNode</a>.</p>
+ * <p>An overview of the API can be found in the Javadoc for class {@link net.sf.saxon.sapling.SaplingNode}.</p>
  */
 package net.sf.saxon.sapling;

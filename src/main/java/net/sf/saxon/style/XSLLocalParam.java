@@ -298,7 +298,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
     /**
      * Get the static type of the parameter. This is the declared type, because we cannot know
      * the actual value in advance.
-     * @return the declared type (or @code {item()*} if no type is declared)
+     * @return the declared type (or {@code item()*} if no type is declared)
      */
 
     public SequenceType getRequiredType() {
