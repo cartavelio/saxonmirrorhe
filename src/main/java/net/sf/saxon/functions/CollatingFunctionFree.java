@@ -14,7 +14,6 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -96,8 +95,9 @@ public class CollatingFunctionFree extends SystemFunction {
 
     public CollatingFunctionFixed bindCollation(String collationName) throws XPathException {
         Configuration config = getRetainedStaticContext().getConfiguration();
-        CollatingFunctionFixed fixed = (CollatingFunctionFixed)config.makeSystemFunction40(
-                getFunctionName().getLocalPart(), getArity()-1);
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        CollatingFunctionFixed fixed =
+                (CollatingFunctionFixed) config.makeSystemFunction(getFunctionName().getLocalPart(), getArity() - 1, version);
         fixed.setRetainedStaticContext(getRetainedStaticContext());
         fixed.setCollationName(collationName);
         return fixed;
