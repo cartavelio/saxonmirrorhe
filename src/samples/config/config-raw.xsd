@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
   targetNamespace="http://saxon.sf.net/ns/configuration" xmlns:saxon="http://saxon.sf.net/"
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:c="http://saxon.sf.net/ns/configuration">
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:c="http://saxon.sf.net/ns/configuration"
+  xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+  vc:minVersion="1.1">
   <xs:import namespace="http://saxon.sf.net/" schemaLocation="saxon-attributes.xsd"/>
   
   <xs:element name="configuration">
@@ -78,7 +80,7 @@
       <xs:attribute name="maxCompiledClasses" use="optional" type="xs:nonNegativeInteger"/>
       <xs:attribute name="monitorHotSpotByteCode" use="optional" type="xs:boolean"/>
       <xs:attribute name="optimizationLevel" use="optional" type="xs:integer"/>
-      <xs:attribute name="parser" use="optional" type="c:javaClassNameType"/>
+      <xs:attribute name="parser" use="optional" type="c:javaClassNameOrDefaultType"/>
       <xs:attribute name="preEvaluateDoc" use="optional" type="xs:boolean"/>
       <xs:attribute name="recognizeUriQueryParameters" use="optional" type="xs:boolean"/>
       <xs:attribute name="regexBacktrackingLimit" use="optional" type="xs:integer"/>
@@ -645,6 +647,25 @@
     <xs:restriction base="xs:string">
       <xs:pattern value="(([\p{L}$_][\p{L}$_0-9]*)(\.[\p{L}$_][\p{L}$_0-9]*)*)?"/>
     </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="javaClassNameOrDefaultType">
+    <xs:annotation>
+      <xs:documentation> A fully-qualified Java class name, or the string "#DEFAULT".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="c:javaClassNameType">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="#DEFAULT">
+            <xs:annotation>
+              <xs:documentation> To request the default internal JDK parser
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
   </xs:simpleType>
 
   <xs:simpleType name="listOfQNameType">
