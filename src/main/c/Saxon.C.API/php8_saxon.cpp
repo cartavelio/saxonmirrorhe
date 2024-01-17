@@ -587,12 +587,18 @@ PHP_METHOD(SaxonProcessor, setcwd) {
 PHP_METHOD(SaxonProcessor, parseJsonFromString) {
   SaxonProcessor *saxonProcessor;
   char *source;
-  size_t len1;
+  char *encoding = nullptr;
+  size_t len1, len2;
 
   if (ZEND_NUM_ARGS() == 1 &&
       zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  } 
+  } else   if (ZEND_NUM_ARGS() == 2 &&
+     zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &source, &len1, &encoding, &len2) == FAILURE) {
+     RETURN_NULL();
+   } else {
+    RETURN_NULL();
+   }
 
   zend_object *pobj = Z_OBJ_P(getThis());
   saxonProcessor_object *obj =
@@ -602,18 +608,18 @@ PHP_METHOD(SaxonProcessor, parseJsonFromString) {
   saxonProcessor = obj->saxonProcessor;
   if (saxonProcessor != nullptr) {
 
-    XdmNode *node = saxonProcessor->parseJsonFromString(source);
-    if (node != nullptr) {
-      if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+    XdmValue *value = saxonProcessor->parseJsonFromString(source, encoding);
+    if (value != nullptr) {
+      if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
         RETURN_NULL();
       } else {
-        node->incrementRefCount();
+        value->incrementRefCount();
         zend_object *vobj = Z_OBJ_P(return_value);
-        xdmNode_object *xdmNObj =
-            (xdmNode_object *)((char *)vobj - XtOffsetOf(xdmNode_object, std));
+        xdmValue_object *xdmVObj =
+            (xdmValue_object *)((char *)vobj - XtOffsetOf(xdmValue_object, std));
         assert(xdmNObj != nullptr);
 
-        xdmNObj->xdmNode = node;
+        xdmVObj->xdmValue = value;
       }
     } else {
       if (obj->saxonProcessor->exceptionOccurred()) {
@@ -672,14 +678,20 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
   SchemaValidator *validator = nullptr;
   zval *oth = nullptr;
   char *source;
-  size_t len1;
+  char * encoding = nullptr;
+  size_t len1, len2;
 
   if (ZEND_NUM_ARGS() == 1 &&
       zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  } else if (ZEND_NUM_ARGS() == 2 &&
+  }   else if (ZEND_NUM_ARGS() == 2 &&
              zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &source, &len1,
                                    &oth) == FAILURE) {
+    RETURN_NULL();
+  }  if (ZEND_NUM_ARGS() == 3 &&
+              zend_parse_parameters(ZEND_NUM_ARGS(), "szs", &source, &len1, &oth, &encoding, &len2) == FAILURE) {
+            RETURN_NULL();
+  }else {
     RETURN_NULL();
   }
 
@@ -701,7 +713,7 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
       }
     }
 
-    XdmNode *node = saxonProcessor->parseXmlFromString(source, validator);
+    XdmNode *node = saxonProcessor->parseXmlFromString(source, encoding, validator);
     if (node != nullptr) {
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
         RETURN_NULL();

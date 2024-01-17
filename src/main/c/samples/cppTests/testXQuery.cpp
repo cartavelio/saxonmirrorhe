@@ -45,15 +45,15 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
   }
 
   try {
-    queryProc->executeQueryToFile(nullptr, "cppTests/catOutput.xml", nullptr);
+    queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
     if (CppTestUtils::exists("catOutput.xml")) {
-      cout << "The file catOutput.xml exists" << endl;
+      cout << "The file $filename exists" << endl;
       sresult->success++;
       remove("catOutput.xml");
     } else {
       sresult->failure++;
       sresult->failureList.push_back("testXQuery1");
-      cout << "The file catOutput.xml does not exist" << endl;
+      cout << "The file $filename does not exist" << endl;
     }
   } catch (SaxonApiException &e) {
     sresult->failure++;
@@ -232,7 +232,15 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
       cerr << "failure in testReusability-1" << endl;
       sresult->failure++;
       sresult->failureList.push_back("testReusability");
-
+      if (queryProc2->exceptionOccurred()) {
+        SaxonApiException *exception = queryProc2->getException();
+        if (exception != nullptr) {
+          cout << "Exception found. " << endl;
+          const char *message = queryProc2->getErrorMessage();
+          cout << "Error Message = " << message << endl;
+          queryProc2->exceptionClear();
+        }
+      }
     }
     delete val;
   } else {
@@ -267,10 +275,8 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
   XdmValue *val2 = queryProc3->runQueryToValue();
 
   if (val2 != nullptr) {
-    const char * valStr = (val2->itemAt(0))->getStringValue();
-
     cout << "XdmValue size=" << val2->size() << ", "
-         << valStr << endl;
+         << (val2->itemAt(0))->getStringValue() << endl;
     if (((XdmItem *)val2->itemAt(0))->isAtomic()) {
       sresult->success++;
       cout << "Test3: Result is atomic" << endl;
@@ -280,7 +286,6 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
       cout << "PrimitiveTypeName of  atomic2="
            << atomic2->getPrimitiveTypeName() << endl;
     }
-    operator delete ((char *) valStr);
     delete val2;
   } else {
     if (queryProc3->exceptionOccurred()) {
@@ -338,7 +343,7 @@ void testXQueryLineNumberError(const char *cwd, sResultCount *sresult) {
       sresult->failureList.push_back("testXQueryLineNumberError");
 
       cout << "Result :" << result << endl;
-      operator delete ((char *)result);
+      delete result;
     }
   } catch (SaxonApiException &e) {
     sresult->success++;
@@ -359,7 +364,7 @@ void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
   XQueryProcessor *queryProc = processor->newXQueryProcessor();
   cout << endl << "testXQueryLineNumber:" << endl;
   cout << "cwd = " << processor->getcwd() << endl;
-  string baseURI = string("file://") + processor->getcwd();
+  string baseURI = string("file://") + processor->getcwd() + string("/");
   cerr << " BaseURI=" << baseURI.c_str() << endl;
   queryProc->setQueryBaseURI(baseURI.c_str());
 
@@ -372,8 +377,6 @@ void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
     const char *result = queryProc->runQueryToString();
     cout << "Result :" << result << endl;
     sresult->success++;
-
-    operator delete ((char *)result);
 
   } catch (SaxonApiException &e) {
     sresult->failure++;

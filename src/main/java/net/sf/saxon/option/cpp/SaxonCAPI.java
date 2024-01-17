@@ -1786,9 +1786,6 @@ public class SaxonCAPI {
         File file = null;
 
         if (cwd != null && cwd.length() > 0) {
-            if (!cwd.endsWith("/")) {
-                cwd = cwd.concat("/");
-            }
 
             try {
                 if (filename.startsWith("http:")) {
@@ -1917,7 +1914,7 @@ public class SaxonCAPI {
         SaxonCAPI.debug  = true;
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(Feature.LICENSE_FILE_LOCATION, "/Users/ond1/work/development/git/private/saxon-license.lic");
-        //String result = SaxonCAPI.resolveFileToString(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.1/samples/cppTests/", "../data/test.xsl", ResourceRequest.XSLT_NATURE);
+        Source result = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.3/samples/cppTests", "../php/xsl/foo.xsl", ResourceRequest.XSLT_NATURE);
         //Source source = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.1/samples/cppTests/", "../data/test.xsl", ResourceRequest.XSLT_NATURE);
 
         //XsltCompiler compiler = processor.newXsltCompiler();
