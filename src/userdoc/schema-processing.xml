@@ -20,8 +20,9 @@
       <ul/>
    </nav>
 
-   <p class="conly">For details of using XMl Schema on SaxonC (specifically C++, PHP and on Python) see the
-      <a href="https://www.saxonica.com/saxon-c/documentation12/#!using-schema-processor">SaxonC documentation</a>.</p>
+   <p class="conly">For details about using XML Schema from SaxonC, see <a class="bodylink"
+      href="https://www.saxonica.com/saxon-c/documentation12/#!using-schema-processor">Using XML Schema
+      (XSD)</a> in the SaxonC documentation.</p>
 
    
    <section id="commandline" title="Validation from the command line">
@@ -35,16 +36,19 @@
       </div>
 
       <div class="csonly">
-            <p>To validate one or more source documents using SaxonCS, write:</p>
+         
+          <p>To validate one or more source documents using SaxonCS, write:</p>
          <kbd>dotnet SaxonCS validate [options]  source.xml...  </kbd>
       </div>
 
       <div class="conly">
-           <p>To validate one or more source documents using SaxonC, compile the <code>Validate.c</code> command line C
-              program run the batch script <code>./build-saxonc-commands.sh</code> on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
-           <p>We should now have the executable <code>validate</code> so we can now write write commands as follows:</p>
-           <kbd>./Validate   [options]  source.xml...  </kbd>
-        </div>
+         <p>For SaxonC, the <code>validate</code> executable file must first be built. To do this, compile
+            the <code>Validate.c</code> C command line program by running the batch script
+            <code>./build-saxonc-commands.sh</code> on Linux or MacOS, or
+            <code>build-saxonc-commands.bat</code> on Windows.</p>
+         <p>Then to validate one or more source documents using SaxonC, write:</p>
+         <kbd>./validate   [options]  source.xml...  </kbd>
+      </div>
       
       <p>The command
          allows you to validate one or more source XML documents against a given schema, or simply to check a
@@ -74,10 +78,12 @@
          schema for internal correctness. So a schema can be verified using the command:</p>
       <kbd class="javaonly">java com.saxonica.Validate -xsd:schema.xsd</kbd>
       <kbd class="csonly">dotnet SaxonCS validate -xsd:schema.xsd</kbd>
+      <kbd class="conly">./validate -xsd:schema.xsd</kbd>
 
       <p>More generally the syntax of the command is:</p>
       <kbd class="javaonly">java com.saxonica.Validate [options] [params] [filenames] </kbd>
       <kbd class="csonly">dotnet SaxonCS validate [options] [params] [filenames] </kbd>
+      <kbd class="conly">./validate [options] [params] [filenames] </kbd>
 
       <p>where options generally take the form <code>-name:value</code> and params take the form
             <code>keyword=value</code>.</p>      
@@ -1043,7 +1049,8 @@
             href="net.sf.saxon.s9api.SchemaManager">net.sf.saxon.s9api.SchemaManager</a> class.</li>
          <li class="csonly">From C#, use the <code>ExportComponents()</code> method of the <a class="cslink"
             href="Saxon.Api.SchemaManager">Saxon.Api.SchemaManager</a> class.</li>
-         <li class="conly">SaxonC: From the C++, Python and PHP APIs, use the <code>exportSchema()</code> method of the <code>SchemaValidator</code> class.</li>
+         <li class="conly">From SaxonC, use the <code>exportSchema()</code> method of the
+            <code>SchemaValidator</code> class.</li>
       </ul>
       <p>The export is unselective: it will output an SCM file containing all the schema
          components that have been loaded into the <code>Configuration</code>, other than built-in
