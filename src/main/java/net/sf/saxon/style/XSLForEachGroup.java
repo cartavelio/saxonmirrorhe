@@ -303,7 +303,7 @@ public final class XSLForEachGroup extends StyleElement {
             algorithm = ForEachGroup.GROUP_ENDING;
             key = ending;
         } else if (splitWhen != null) {
-            algorithm = ForEachGroup.GROUP_SPLIT_WHEN;
+            algorithm = ForEachGroup.GROUP_BREAKING_WHEN;
             key = splitWhen;
         }
 
@@ -323,7 +323,6 @@ public final class XSLForEachGroup extends StyleElement {
                 makeSortKeys(compilation, decl));
             instr.setIsInFork(getParent().getFingerprint() == StandardNames.XSL_FORK);
             instr.setComposite(composite);
-            instr.setLocation(saveLocation());
             return instr;
         } catch (XPathException e) {
             compileError(e);
