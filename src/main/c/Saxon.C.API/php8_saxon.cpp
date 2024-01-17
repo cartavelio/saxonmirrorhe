@@ -1865,9 +1865,8 @@ PHP_METHOD(XdmItem, __toString) {
     } else {
       _RETURN_STRING("");
     }
-  } else {
-    _RETURN_STRING("");
   }
+  _RETURN_STRING("");
 }
 
 PHP_METHOD(XdmItem, isAtomic) {
@@ -2880,6 +2879,11 @@ PHP_METHOD(XdmMap, __destruct) {
 
 PHP_METHOD(XdmMap, __toString) {
   XdmMap *xdmMap;
+  //zend_string *str;
+
+  if (zend_parse_parameters_none() == FAILURE) {
+  		RETURN_THROWS();
+  	}
   zend_object *oobj = Z_OBJ_P(getThis());
   xdmMap_object *obj =
       (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
@@ -2887,12 +2891,14 @@ PHP_METHOD(XdmMap, __toString) {
   if (xdmMap != nullptr) {
     const char *value = xdmMap->toString();
     if (value != nullptr) {
+        //str = strpprintf(0,"%s",value);
+        //operator delete (value);
       _RETURN_STRING(value);
     } else {
-      _RETURN_STRING("");
+      RETURN_EMPTY_STRING();
     }
   } else {
-    _RETURN_STRING("");
+    RETURN_EMPTY_STRING();
   }
 }
 
@@ -3207,10 +3213,10 @@ PHP_METHOD(XdmArray, __toString) {
     if (value != nullptr) {
       _RETURN_STRING(value);
     } else {
-      _RETURN_STRING("");
+      RETURN_EMPTY_STRING();
     }
   } else {
-    _RETURN_STRING("");
+    RETURN_EMPTY_STRING();
   }
 }
 
@@ -3627,9 +3633,8 @@ zend_function_entry xdmMap_methods[] = {
     PHP_ME(XdmMap, __construct, arginfo_saxonc_xdmmap_construct,
            ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
         PHP_ME(XdmMap, __destruct, arginfo_saxonc_xdmmap_destruct,
-               ZEND_ACC_PUBLIC) PHP_ME(XdmMap, __toString,
-                                       arginfo_saxonc_xdmmap_toString,
-                                       ZEND_ACC_PUBLIC)
+               ZEND_ACC_PUBLIC)
+               PHP_ME(XdmMap, __toString,arginfo_saxonc_xdmmap_toString,ZEND_ACC_PUBLIC)
             PHP_ME(XdmMap, mapSize, arginfo_saxonc_xdmmap_mapSize,
                    ZEND_ACC_PUBLIC)
                 PHP_ME(XdmMap, get, arginfo_saxonc_xdmmap_get, ZEND_ACC_PUBLIC)

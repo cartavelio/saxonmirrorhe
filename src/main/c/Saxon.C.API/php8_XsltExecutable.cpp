@@ -276,6 +276,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
                                  XtOffsetOf(xdmNode_object, std));
           if (nobj != nullptr) {
             XdmValue *value = (XdmValue *)nobj->xdmNode;
+            value->incrementRefCount();
             arguments[num_key] = value;
           }
         } else if (strcmp(objName, "Saxon\\XdmAtomicValue") == 0) {
@@ -285,6 +286,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
                                         XtOffsetOf(xdmAtomicValue_object, std));
           if (nobj != nullptr) {
             XdmValue *value = (XdmValue *)nobj->xdmAtomicValue;
+            value->incrementRefCount();
             arguments[num_key] = value;
           }
         } else if (strcmp(objName, "Saxon\\XdmValue") == 0) {
@@ -294,6 +296,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
                                   XtOffsetOf(xdmValue_object, std));
           if (nobj != nullptr) {
             XdmValue *value = nobj->xdmValue;
+            value->incrementRefCount();
             arguments[num_key] = value;
           }
         } else if (strcmp(objName, "Saxon\\XdmFunctionItem") == 0) {
@@ -304,6 +307,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
                                                     std));
           if (nobj != nullptr) {
             XdmValue *value = (XdmValue *)nobj->xdmFunctionItem;
+            value->incrementRefCount();
             arguments[num_key] = value;
           }
 
@@ -313,6 +317,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
               (xdmMap_object *)((char *)ooth - XtOffsetOf(xdmMap_object, std));
           if (nobj != nullptr) {
             XdmValue *value = (XdmValue *)nobj->xdmMap;
+            value->incrementRefCount();
             arguments[num_key] = value;
           }
 
@@ -323,6 +328,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
                                   XtOffsetOf(xdmArray_object, std));
           if (nobj != nullptr) {
             XdmValue *value = (XdmValue *)nobj->xdmArray;
+            value->incrementRefCount();
             arguments[num_key] = value;
           }
 
@@ -338,7 +344,10 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
       XdmValue *result = xsltExecutable->callFunctionReturningValue(
           functionName, arguments, argument_length);
       for (int i = 0; i< argument_length;i++) {
-        delete arguments[i];
+        arguments[i]->decrementRefCount();
+        if(arguments[i]->getRefCount() < 1) {
+            delete arguments[i];
+        }
       }
       delete [] arguments;
 
@@ -360,7 +369,10 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue) {
       }
     } catch (SaxonApiException &e) {
       for (int i = 0; i< argument_length;i++) {
-        delete arguments[i];
+        arguments[i]->decrementRefCount();
+        if(arguments[i]->getRefCount() < 1) {
+            delete arguments[i];
+        }
       }
       delete [] arguments;
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
