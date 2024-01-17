@@ -8,7 +8,9 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.AssertionFailureBuilder;
 
@@ -30,30 +32,46 @@ class AssertXPathDeepEqual {
     }
 
     static void assertXPathDeepEqual(Sequence expected, Sequence actual, String message) {
-        deepEqual(expected, actual, message);
+        performAssertion((GroundedValue) expected, (GroundedValue) actual, message);
     }
 
     static void assertXPathDeepEqual(Sequence expected, Sequence actual, Supplier<String> messageSupplier) {
-        deepEqual(expected, actual, messageSupplier);
+        performAssertion((GroundedValue) expected, (GroundedValue) actual, messageSupplier);
     }
 
-    static void deepEqual(Sequence expected, Sequence actual, Object messageOrSupplier) {
-        XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        StringCollator collator = CodepointCollator.getInstance();
-        AtomicComparer comparer = new GenericAtomicComparer(collator, ctxt);
+    static void assertXPathDeepEqual(GroundedValue expected, GroundedValue actual) {
+        assertXPathDeepEqual(expected, actual, (String) null);
+    }
+
+    static void assertXPathDeepEqual(GroundedValue expected, GroundedValue actual, String message) {
+        performAssertion(expected, actual, message);
+    }
+
+    static void assertXPathDeepEqual(GroundedValue expected, GroundedValue actual, Supplier<String> messageSupplier) {
+        performAssertion(expected, actual, messageSupplier);
+    }
+
+    static void performAssertion(GroundedValue expected, GroundedValue actual, Object messageOrSupplier) {
         try {
-            if (!DeepEqual.deepEqual(expected.iterate(), actual.iterate(), comparer, ctxt, 0)) {
-                buildFailure(expected, actual, messageOrSupplier).buildAndThrow();
+            if (!deepEqual(expected, actual)) {
+                buildFailure(XdmValue.wrap(expected).toString(), XdmValue.wrap(actual).toString(), messageOrSupplier).buildAndThrow();
             }
         } catch (XPathException ex) {
-            buildFailure(expected, actual, messageOrSupplier) //
+            buildFailure(expected.toString(), actual.toString(), messageOrSupplier) //
                     .reason("Unexpected exception") //
                     .cause(ex) //
                     .buildAndThrow();
         }
     }
 
-    private static AssertionFailureBuilder buildFailure(Object expected, Object actual, Object messageOrSupplier) {
+    static boolean deepEqual(GroundedValue expected, GroundedValue actual) throws XPathException {
+        XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
+        StringCollator collator = CodepointCollator.getInstance();
+        AtomicComparer comparer = new GenericAtomicComparer(collator, ctxt);
+        return DeepEqual.deepEqual(expected.iterate(), actual.iterate(), comparer, ctxt, 0);
+    }
+
+    private static AssertionFailureBuilder buildFailure(String expected, String actual, Object messageOrSupplier) {
         return assertionFailure() //
                 .message(messageOrSupplier) //
                 .expected(expected) //
