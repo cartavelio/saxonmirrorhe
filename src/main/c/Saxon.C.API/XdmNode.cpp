@@ -50,15 +50,15 @@ XdmNode::~XdmNode() {
   }
   // if(getRefCount() <= 1) {
   if (baseURI != nullptr) {
-    delete baseURI;
+    operator delete ((char *)baseURI);
     baseURI = nullptr;
   }
   if (nodeName != nullptr) {
-    delete nodeName;
+    operator delete ((char *)nodeName);
     nodeName = nullptr;
   }
   if (localName != nullptr) {
-    delete localName;
+    operator delete ((char *)localName);
     localName = nullptr;
   }
 
