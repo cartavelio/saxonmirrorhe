@@ -171,7 +171,7 @@ task buildCWrappers (
 
   task "${edition}c_graalImage"(
     dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
-    description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging, \"-J-Dfile.encoding=UTF-8\",  Next options for heap size: -R:MaxHeapSize=1000000, -H:+AllowVMInspection"
+    description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu,  Next options for heap size: -R:MaxHeapSize=1000000, -H:+AllowVMInspection"
   ) {
     inputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
     outputs.file "libsaxon-${edition}c-${saxonVersion}.o"
@@ -464,8 +464,7 @@ task unjar_htmlParser(
 
 task graal_hec_jar(
   type: Jar,
-  dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces",
-              "processResources", "unjar_ICU4jJar"],
+  dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces", "compile_function_library"],
   description: "Build the HE jar file for SaxonC"
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-he/META-INF")
@@ -473,6 +472,7 @@ task graal_hec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
+  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
   outputs.file "${buildDir}/c/jars/hec/saxon-he-${saxonVersion}.jar"
 
   archiveBaseName = "saxon-he-${saxonVersion}"
@@ -491,10 +491,13 @@ task graal_hec_jar(
     include "net/**"
   }
   from ("${buildDir}/xerces") {
-    include "**/*.class"
-    include "**/*.properties"
-    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
-    exclude "META-INF/MANIFEST.MF"
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
   }
   doFirst {
     mkdir "build/c/jars/hec"
@@ -503,8 +506,7 @@ task graal_hec_jar(
 
 task graal_pec_jar(
   type: Jar,
-  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-              "processResources", "unjar_ICU4jJar"],
+  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser", "compile_function_library"],
   description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
@@ -512,6 +514,7 @@ task graal_pec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
+  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
   outputs.file "${buildDir}/c/jars/pec/saxon-pe-${saxonVersion}.jar"
 
   archiveBaseName = "saxon-pe-${saxonVersion}"
@@ -564,10 +567,13 @@ task graal_pec_jar(
       exclude "META-INF/MANIFEST.MF"
     }
   from ("${buildDir}/jLine") {
-    include "**/*.class"
-    include "**/*.*"
-    include "**/*.properties"
-    exclude "META-INF/MANIFEST.MF"
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
   }
   doFirst {
     mkdir "build/c/pec"
@@ -576,8 +582,7 @@ task graal_pec_jar(
 
 task graal_eec_jar(
   type: Jar,
-  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-              "processResources","unjar_ICU4jJar"],
+  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser", "compile_function_library"],
   description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
@@ -585,6 +590,7 @@ task graal_eec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
+  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
   outputs.file "${buildDir}/c/jars/eec/saxon-ee-${saxonVersion}.jar"
 
   archiveBaseName = "saxon-ee-${saxonVersion}"
@@ -625,11 +631,14 @@ task graal_eec_jar(
       exclude "META-INF/MANIFEST.MF"
     }
   from ("${buildDir}/jLine") {
-    include "**/*.class"
-    include "**/*.*"
-    include "**/*.res"
-    include "**/*.properties"
-    exclude "META-INF/MANIFEST.MF"
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.res"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
   }
   doFirst {
     mkdir "${buildDir}/c/eec"
@@ -662,8 +671,6 @@ task all_saxonc_releases() {
                         : (systemOs.isLinux()
                            ? "libs/nix"
                            : "libs/win"))
-
-    def gccopts = arch == "amd64" ? "-m64" : ""
 
     def location = "../"
 
@@ -748,19 +755,16 @@ task all_saxonc_releases() {
         }
       }
     }
+
     doLast {
       copy {
         from "${projectDir}/src/main/c/command"
         into "${saxoncReleaseDir}/command"
-        if (edition != "ee") {
-          exclude "Validate.c"
-        }
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
                   .replace('@@EDITION@@', edition.toUpperCase())
                   .replace('@@libdir@@', libdir)
-                  .replace('@@gccopts@@', gccopts)
         }
       }
     }
@@ -895,7 +899,7 @@ task all_saxonc_releases() {
     lastLinePatch = ('[tool.cibuildwheel]\n'
                      + 'build = "*"\n'
                      + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n'
-                     + "archs = [\"${systemOsArch}\"]\n"
+                     + 'archs = ["x86_64"]\n'
                      + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
   } else if (systemOsName == 'windows') {
     lastLinePatch = ('[tool.cibuildwheel]\n'
@@ -1104,19 +1108,15 @@ task all_saxonc_releases() {
   }
 }
 
-// I'd be inclined to give saxonc_stage_wheels, saxonc_prepare_wheels, and
-// saxonc_build_wheels different names, but two of the names have been in use
-// for a while, so I'm not changing them
-
 task saxonc_stage_wheels(
   type: Tar,
   dependsOn: ['saxon_eec_stage_wheel', 'saxon_pec_stage_wheel', 'saxon_hec_stage_wheel']
 
 ) {
   inputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}")
-  outputs.file "${buildDir}/distributions/${systemOsName}-${systemOsArch}.wheels.tar.gz"
+  outputs.file "${buildDir}/distributions/${systemOsName}.wheels.tar.gz"
 
-  archiveFileName = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
+  archiveFileName = "${systemOsName}.wheels.tar.gz"
   from "${buildDir}/wheels"
   include "${systemOsName}/**"
   exclude "${systemOsName}/*/build/**"
@@ -1128,71 +1128,33 @@ task saxonc_stage_wheels(
   }
 }
 
-task saxonc_prepare_wheels(
+task saxonc_build_wheels(
   dependsOn: ['saxonc_stage_wheels']
 ) {
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
+
   if (user == 'ndw') {
     user = 'norm' // HACK
   }
 
-  doFirst {
-    if (awscli == null) {
-      throw new GradleException("Did not find 'aws' on path")
-    }
-  }
-
-  def wheels = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
-  if (project.findProperty("skipWheelUpload") == null
-      && project.findProperty('wheelDryRun') == null) {
-    doLast {
-      println("Copying ${systemOsName} staging files to s3://saxonica-wheel-staging/${user}/${wheels}")
-      exec {
-        workingDir "${buildDir}/distributions"
-        commandLine awscli, "--profile", "saxonica",
-          "s3", "cp", "${wheels}",
-          "s3://saxonica-wheel-staging/${user}/${wheels}"
-      }
-    }
-  } else {
-    doLast {
-      println("Skipping upload of ${wheels}")
-    }
-  }
-}
-
-task saxonc_build_wheels(
-  dependsOn: ['saxonc_prepare_wheels']
-) {
-  def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
-  if (user == 'ndw') {
-    user = 'norm' // HACK
-  }
-
+  def osarch = System.getProperty("os.arch") 
   def now = new Date()
   def isodate = "${now.format('yyyy-MM-dd')}T${now.format('HH-mm-ss')}"
 
-  def buildMacA64    = project.findProperty('macWheels_aarch64') != null
-  def buildMacX86    = project.findProperty('macWheels_x86_64') != null
-  def buildLinuxA64  = project.findProperty('linuxWheels_aarch64') != null
-  def buildLinuxX86  = project.findProperty('linuxWheels_x86_64') != null
-  def buildWindows   = project.findProperty('windowsWheels') != null
+  def buildMacA64  = project.findProperty('macWheels_aarch64') != null
+  def buildMacX86  = project.findProperty('macWheels_x86_64') != null
+  def buildLinux   = project.findProperty('linuxWheels') != null
+  def buildWindows = project.findProperty('windowsWheels') != null
 
-  if (!buildMacA64 && !buildMacX86 && !buildLinuxA64 && !buildLinuxX86 && !buildWindows) {
+  if (!buildMacA64 && !buildMacX86 && !buildLinux && !buildWindows) {
     if (systemOs.isMacOsX()) {
-      if (systemOsArch == 'x86_64') {
+      if (osarch == 'x86_64') {
         buildMacX86 = true
       } else {
         buildMacA64 = true
       }
     }
-    if (systemOs.isLinux()) {
-      if (systemOsArch == 'x86_64') {
-        buildLinuxX86 = true
-      } else {
-        buildLinuxA64 = true
-      }
-    }
+    buildLinux = systemOs.isLinux()
     buildWindows = systemOs.isWindows()
   }
 
@@ -1203,17 +1165,17 @@ task saxonc_build_wheels(
   if (buildMacA64) {
     arch.add("macaarch64")
   }
-  if (buildLinuxX86) {
-    arch.add("linuxx86_64")
-  }
-  if (buildLinuxA64) {
-    arch.add("linuxaarch64")
+  if (buildLinux) {
+    arch.add("linux")
   }
   if (buildWindows) {
     arch.add("windows")
   }
 
   doFirst {
+    if (scp == null) {
+      throw new GradleException("Did not find 'scp' on path")
+    }
     delete "${buildDir}/BuildWheels"
   }
 
@@ -1225,6 +1187,28 @@ task saxonc_build_wheels(
     }
   }
 
+  if (project.findProperty("skipWheelUpload") == null
+      && project.findProperty('wheelDryRun') == null) {
+    doLast {
+      def wheels = "${systemOsName}.wheels.tar.gz"
+      if (systemOsName == "mac") {
+        wheels = "${systemOsName}-${osarch}.wheels.tar.gz"
+      }
+      def path = "/var/www/html/dev.saxonica.com/github-wheel-sources"
+
+      println("Copying ${systemOsName} staging files to dev.saxonica.com/${wheels}")
+      exec {
+        workingDir "${buildDir}/distributions"
+        commandLine scp, "${systemOsName}.wheels.tar.gz",
+          "dev.saxonica.com:${path}/${user}/${wheels}"
+      }
+    }
+  } else {
+    doLast {
+      println("Skipping upload of ${systemOsName}.wheels.tar.gz")
+    }
+  }
+
   doLast {
     println("Creating build configuration")
     def m = new PrintStream(new File("${buildDir}/BuildWheels/config.json"))
@@ -1232,8 +1216,7 @@ task saxonc_build_wheels(
     m.println("  \"user\": \"${user}\",")
     m.println("  \"macx86_64\": ${buildMacX86},")
     m.println("  \"macaarch64\": ${buildMacA64},")
-    m.println("  \"linuxx86_64\": ${buildLinuxX86},")
-    m.println("  \"linuxaarch64\": ${buildLinuxA64},")
+    m.println("  \"linux\": ${buildLinux},")
     m.println("  \"windows\": ${buildWindows},")
 
     if (buildMacX86) {
@@ -1260,7 +1243,9 @@ task saxonc_build_wheels(
         commandLine 'git', 'commit', '-m', msg, 'config.json'
       }
     }
+  }
 
+  if (project.findProperty('wheelDryRun') == null) {
     doLast {
       println("Pushing build trigger")
       exec {
@@ -1354,73 +1339,52 @@ project.task("all_python_test_suites") {
     }    
   }
   ["xslt30", "qt3"].each { testsuite ->
-    def langs
-    if (testsuite == "qt3") {
-      langs = ["XP31", "XQ31", "XP40", "XQ40"]
-    } else {
-      langs = [""]
-    }
+    Task t = task "${edition}c_${testsuite}_test_suite"(
+            dependsOn: ["pyenv_install_saxon_${edition}c"]
+    ) {
+      def output_path = "${buildDir}/test-results/${edition}c/${saxonVersion}/${testsuite}/${DSTAMP}";
 
-    langs.each { lang ->
-      def langslug
-      if (lang == "") {
-        langslug = ""
-      } else {
-        langslug = "_${lang}"
+      inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
+      outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
+      outputs.files fileTree(dir: output_path)
+
+      doFirst {
+        mkdir(output_path)
       }
 
-      Task t = task "${edition}c_${testsuite}_test_suite${langslug}"(
-        dependsOn: ["pyenv_install_saxon_${edition}c"]
-      ) {
-        def output_path = "${buildDir}/test-results/${edition}c/${saxonVersion}/${testsuite}/${DSTAMP}";
-
-        inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
-        outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
-        outputs.files fileTree(dir: output_path)
-
-        doFirst {
-          mkdir(output_path)
-        }
-
-        doLast {
-          copy {
-            from "${projectDir}/src/main/c/pypi/testsuite_driver"
-            into "${buildDir}/c/${edition}c_testsuite_driver"
-            filter { line ->
-              line.replaceAll('@@edition@@', edition)
-                .replace('@@EDITION@@', edition.toUpperCase())
-                .replaceAll('@@version@@', saxonVersion)
-                .replaceAll('@@VERSION@@', saxonVersion)
-            }
-          }
-        }
-
-        doLast {
-          exec {
-            workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-            commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
-          }
-        }
-
-        doLast {
-          exec {
-            workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-            if (testsuite == "xslt30") {
-              commandLine "python3", "./${testsuite}_test_suite_driver.py",
-                "${testsuites.w3cXslt30TestSuiteDir}/..",
-                "-o", output_path
-            } else if (testsuite == "qt3") {
-              commandLine "python3", "./${testsuite}_test_suite_driver.py",
-                "${testsuites.w3cQT3TestSuiteDir}",
-                "-o", output_path, "-l", lang
-            } else {
-              throw new GradleException("Unexpected test suite: ${testsuite}")
-            }
+      doLast {
+        copy {
+          from "${projectDir}/src/main/c/pypi/testsuite_driver"
+          into "${buildDir}/c/${edition}c_testsuite_driver"
+          filter { line ->
+            line.replaceAll('@@edition@@', edition)
+                    .replaceAll('@@version@@', saxonVersion)
           }
         }
       }
-      tasks.findByName("all_python_test_suites").dependsOn t
+
+      doLast {
+        exec {
+          workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+          commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
+        }
+      }
+
+      doLast {
+        exec {
+          workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+          if (${testsuite} == "xslt30") {
+            commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}/..",
+                    "-o", output_path
+          } else if (${testsuite} == "qt3") {
+            commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cQT3TestSuiteDir}/..",
+                    "-o", output_path
+          }
+
+        }
+      }
     }
   }
+  tasks.findByName("all_python_test_suites").dependsOn 
 }
 

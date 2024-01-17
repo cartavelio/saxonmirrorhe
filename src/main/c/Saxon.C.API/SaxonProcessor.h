@@ -35,7 +35,6 @@
 #include <string>
 #include <vector>
 
-
 #include "DocumentBuilder.h"
 #include "SaxonApiException.h"
 #include "SaxonCGlue.h"
@@ -68,7 +67,6 @@ void operator delete(void *, std::size_t) noexcept;
 
 #endif
 
-
 class Xslt30Processor;
 
 class XQueryProcessor;
@@ -97,17 +95,41 @@ class DocumentBuilder;
 
 class SaxonApiException;
 
+enum class UnprefixedElementMatchingPolicy {
 
-typedef enum eXdmType {
-  XDM_VALUE = 0,
-  XDM_ATOMIC_VALUE = 1,
-  XDM_NODE = 2,
-  XDM_FUNCTION_ITEM = 3,
-  XDM_MAP = 4,
-  XDM_ARRAY = 5,
-  XDM_EMPTY = 6,
-  XDM_ITEM = 7,
-} XDM_TYPE;
+  /**
+   * The standard W3C policy, whereby element names are implicitly qualified by
+   * the default namespace for elements and types, as defined in the XPath
+   * static context. In XSLT this can be set using the
+   * <code>[xsl:]xpath-default-namespace</code> attribute, or programmatically
+   * using {@link XsltCompiler#setDefaultElementNamespace(String)}
+   */
+  DEFAULT_NAMESPACE,
+  /**
+   * Under this policy, unprefixed element names match on the local part only;
+   * an element with this local name is matched regardless of its namespace
+   * (that is, it can have any namespace, or none)
+   */
+  ANY_NAMESPACE,
+  /**
+   * Under this policy, unprefixed element names match provided that (a) the
+   * local part of the name matches, and (b) the namespace part of the name is
+   * either equal to the default namespace for elements and types, or is absent.
+   *
+   * <p>This policy is provided primarily for use with HTML, where it can be
+   * unpredictable whether HTML elements are in the XHTML namespace or in no
+   * namespace. It is also useful with other vocabularies where instances are
+   * sometimes in a namespace and sometimes not. The policy approximates to the
+   * special rules defined in the HTML5 specification, which states that
+   * unprefixed names are treated as matching names in the XHTML namespace if
+   * the context item for a step is "a node in an HTML DOM", and as matching
+   * no-namespace names otherwise; since in the XDM data model it is not
+   * possible to make a distinction between different kinds of DOM, this policy
+   * allows use of unprefixed names both when matching elements in the XHTML
+   * namespace and when matching no-namespace elements</p>
+   */
+  DEFAULT_NAMESPACE_OR_NONE
+};
 
 //==========================================
 
@@ -241,10 +263,9 @@ public:
    * of a zero-length string (and potentially other strings, in future)
    *
    * @param str the String value. NULL is taken as equivalent to "".
-   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
    * @return the corresponding StringValue
    */
-  XdmAtomicValue *makeStringValue(std::string str, const char* encoding = nullptr);
+  XdmAtomicValue *makeStringValue(std::string str);
 
   //! Factory method. Unlike the constructor, this avoids creating a new
   //! StringValue in the case
@@ -252,11 +273,10 @@ public:
    *
    * of a zero-length string (and potentially other strings, in future)
    *
-   * @param str - the char pointer array. nullptr is taken as equivalent to "".
-   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
+   * @param str the char pointer array. nullptr is taken as equivalent to "".
    * @return the corresponding StringValue
    */
-  XdmAtomicValue *makeStringValue(const char *str, const char* encoding = nullptr);
+  XdmAtomicValue *makeStringValue(const char *str);
 
   /*!
    * Factory method: makes either an Int64Value or a BigIntegerValue depending
@@ -450,13 +470,12 @@ public:
   /**
    *
    * @param source the source document as a lexical string
-   * @param encoding of the source string argument. If not specified then platform default encoding is used
    * @param validator SchemaValidator object if it exists. Default is null
    * @return an XdmNode
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
    */
-  XdmNode *parseXmlFromString(const char *source, const char * encoding = nullptr,
+  XdmNode *parseXmlFromString(const char *source,
                               SchemaValidator *validator = nullptr);
 
   //! Parse a source document file and return it as an XdmNode.
@@ -482,28 +501,6 @@ public:
    */
   XdmNode *parseXmlFromUri(const char *source,
                            SchemaValidator *validator = nullptr);
-
-
-  //! Parse a lexical representation of the JSON and return it as an
-  //! XdmValue
-  /**
-   *
-   * @param source the JSON as a lexical string
-   * @param encoding the encoding of the source argument. Argument can be omitted and NULL accepted to use the default platform encoding
-   * @return an XdmValue
-   * @throws SaxonApiException if there is a failure in the parsing of the JSON
-   */
-  XdmValue *parseJsonFromString(const char *source, const char * encoding=NULL);
-
-  //! Parse a source JSON file and return it as an XdmValue.
-  /**
-   *
-   * @param source the filename of the JSON. This is a full path filename or a URI
-   * @return an XdmValue
-   * @throws SaxonApiException  if there ia a failure in the parsing of the XML
-   * file
-   */
-  XdmValue *parseJsonFromFile(const char *source);
 
   //! Get the kind of node.
   /**
@@ -536,26 +533,10 @@ public:
   //! Utility method for working with SaxonC on Python
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
-  //! Utility method for Python API - internal use only
-  /**
-   * This method deletes a XdmValue pointer array
-   * @param arr - XdmValue pointer array
-   * @param len - length of the array
-   */
-  void deleteXdmValueArray(XdmValue **arr, int len);
-
   //! Utility method for working with SaxonC on Python
   XdmAtomicValue **createXdmAtomicValueArray(int len) {
     return (new XdmAtomicValue *[len]);
   }
-
-  //! Utility method for Python API - internal use only
-  /**
-   * This method deletes a XdmAtomicValue pointer array
-   * @param arr - XdmAtomicValue pointer array
-   * @param len - length of the array
-   */
-  void deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len);
 
   //! Checks for pending exceptions and creates a SaxonApiException object,
   //! which handles one or more local exceptions objects
@@ -596,17 +577,8 @@ public:
    * set catalog to be used in Saxon
    * @param catalogFile file name to the catalog
    * @throws SaxonApiException if fail to set the catalog file
-   * @deprecated
    */
   void setCatalog(const char *catalogFile);
-
-    /**
-     * set catalog files to be used in Saxon
-     * @param catalogFiles - the catalog file names array to the catalog
-     * @param length  - number of catalog files in the array argument
-     * @throws SaxonApiException if fail to set the catalog file
-     */
-    void setCatalogFiles(const char ** catalogFiles, int length);
 
   //! Set a configuration property specific to the processor in use.
   /**
@@ -725,7 +697,7 @@ public:
     if (data != nullptr) {
       // std::cerr<<"static method SaxonProcessor.deleteString - deleting string
       // data"<<std::endl;
-      operator delete ((char *)data);
+      delete[] data;
       data = nullptr;
     }
   }
@@ -767,7 +739,7 @@ protected:
                      from the underlying Java code via JNI */
 
 private:
-  //void createException(const char *message = nullptr);
+  void createException(const char *message = nullptr);
 
   void initialize(bool l);
 

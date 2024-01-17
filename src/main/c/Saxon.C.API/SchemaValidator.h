@@ -132,8 +132,6 @@ public:
   /**
    * @param source - The source document supplied as an XdmNode, which will be
    * used to validate against the schema using the validate methods.
-   * The deletion of allocated memory associated with the source node is the document is
-   * the responsbility of the caller.
    */
   void setSourceNode(XdmNode *source);
 

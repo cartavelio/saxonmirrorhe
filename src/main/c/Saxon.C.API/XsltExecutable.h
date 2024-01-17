@@ -53,19 +53,16 @@ public:
    */
   void setBaseOutputURI(const char *baseURI);
 
-  //! Supply the context item to be used when evaluating global variables and parameters.
+  //! Set the source document from an XdmNode for the transformation.
   /**
-   * Set the source document from an XdmNode for the transformation.
-   * @param value - the item to be used as the context item within the initializers of global variables and parameters. Given as a pointer to the XdmItem
+   * @param value - The source to the stylesheet as a pointer to the XdmNode
    * object.
    */
 
   void setGlobalContextItem(XdmItem *value);
 
   /**
-   * Supply the context item to be used when evaluating global variables and parameters.
    * Set the source from file for the transformation.
-   * @param filename - the item to be used as the context item within the initializers of global variables and parameters.
    */
   void setGlobalContextFromFile(const char *filename);
 
@@ -258,7 +255,12 @@ public:
    * @param arr - XdmValue pointer array
    * @param len - length of the array
    */
-  void deleteXdmValueArray(XdmValue **arr, int len);
+  void deleteXdmValueArray(XdmValue **arr, int len) {
+    for (int i = 0; i < len; i++) {
+      // delete arr[i];
+    }
+    delete[] arr;
+  }
 
   //! This method gives users the option to switch on or off the
   //! <code>xsl:message</code> feature.
@@ -546,7 +548,6 @@ private:
   // jclass messageListenerClass, resultDocumentClass;
   int64_t procRef, executableRef, selectionRef, saxonMessageListenerRef,
       saxonResultDocRef;
-  bool selectionStringFlag;  /*!< Flag to indicate that the selection was retrieved as a string file value instead of XdmValue */
   std::string cwdXE;         /*!< current working directory */
   std::string resources_dir; /*!< current Saxon resources directory */
   bool tunnel, jitCompilation, rawResultsFlag, exceptionFound;
