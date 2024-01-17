@@ -232,13 +232,8 @@ public class Compilation {
         setMinimalPackageData();
         NodeInfo document;
         NodeInfo outermost = null;
-        NodeInfo root = null;
-        if (source instanceof NodeSource) {
-            root = ((NodeSource)source).getNode();
-        } else if (source instanceof NodeInfo) {
-            root = ((NodeInfo)source);
-        }
-        if (root != null) {
+        if (source instanceof NodeInfo) {
+            NodeInfo root = (NodeInfo)source;
             if (root.getNodeKind() == Type.DOCUMENT) {
                 document = root;
                 outermost = document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
@@ -247,13 +242,9 @@ public class Compilation {
                 outermost = root;
             }
         }
-
         if (!(outermost instanceof XSLPackage)) {
             document = StylesheetModule.loadStylesheetModule(source, true, this, NestedIntegerValue.TWO);
             outermost = document.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
-        }
-        if (outermost == null) {
-            throw new XPathException("No stylesheet element found at " + source.getSystemId(), "XPST0010");
         }
 
         if (outermost instanceof LiteralResultElement) {
@@ -266,10 +257,7 @@ public class Compilation {
             if (outermost instanceof XSLPackage) {
                 xslpackage = (XSLPackage) outermost;
             } else {
-                throw new XPathException(
-                        "Outermost element must be xsl:package, xsl:stylesheet, or xsl:transform (found "
-                                + outermost.getDisplayName() + ")", "XPST0010")
-                        .withLocation(outermost);
+                throw new XPathException("Outermost element must be xsl:package, xsl:stylesheet, or xsl:transform");
             }
         } catch (XPathException e) {
             if (!e.hasBeenReported()) {
