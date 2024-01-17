@@ -112,9 +112,11 @@ task run_config_tests(
       mainClass = "com.saxonica.Validate"
       args "-t",
               "-s:${buildDir}/samples/config/generated-config-${options}.xml",
-              "-xsd:${buildDir}/output/ee/resources/samples/config/config.xsd"
+              "-xsd:${buildDir}/output/ee/resources/samples/config/config.xsd",
+              "-report:${buildDir}/samples/config/reportfile-${options}.xml"
 
       // All validation tests should result in "Validation successful"
+      // (without -quit:off, the task will fail if validation fails)
     }
     run_config_tests.dependsOn t2
 
@@ -157,6 +159,28 @@ task run_config_tests(
       //   Obsolete configuration property global/@lazyConstructionMode
     }
     run_config_tests.dependsOn t3
+
+    Task t4 = task "validate_report_for_generated-config-${options}"(
+            type: JavaExec,
+            dependsOn: ["validate_generated-config-${options}"],
+            description: "Validate the validation report for generated-config-${options}.xml"
+    ) {
+      inputs.files "${buildDir}/samples/config/generated-config-${options}.xml"
+      inputs.files "${buildDir}/output/ee/resources/samples/config/config.xsd"
+      workingDir = "${buildDir}/output/ee/resources/samples"
+
+      classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
+
+      mainClass = "com.saxonica.Validate"
+      args "-t",
+              "-s:${buildDir}/samples/config/reportfile-${options}.xml",
+              "-xsd:${buildDir}/output/ee/resources/samples/schemas/validation-reports.xsd"
+
+      // All validation tests should result in "Validation successful"
+      // (without -quit:off, the task will fail if validation fails)
+    }
+    run_config_tests.dependsOn t4
 
   }
 }
@@ -237,7 +261,7 @@ task run_config_samples(
   run_config_samples.dependsOn t
 }
 
-def booksTests = ["ee": ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2", "Validate"],
+def booksTests = ["ee": ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2", "Validate_1", "Validate_2"],
                   "pe": ["Transform_1", "Transform_2", "Transform_3", "Query_1", "Query_2"],
                   "he": ["Transform_1", "Transform_2", "Transform_3", "Query_1"]]
 def booksSampleArgs = ["Transform_1": ["-s:data/books.xml", "-xsl:styles/books.xsl", "-t"],
@@ -245,7 +269,10 @@ def booksSampleArgs = ["Transform_1": ["-s:data/books.xml", "-xsl:styles/books.x
                        "Transform_3": ["-s:data/books.xml", "-xsl:styles/books-csv.xsl"],
                        "Query_1": ["-s:data/books.xml", "-q:query/books.xq"],
                        "Query_2": ["-s:data/books.xml", "-qs:saxon:line-number((//*)[last()])", "-l:on"],
-                       "Validate": ["-s:data/books.xml", "-xsd:data/books.xsd"]]
+                       "Validate_1": ["-s:data/books.xml", "-xsd:data/books.xsd"],
+                       "Validate_2": ["-s:data/books-invalid.xml", "-xsd:data/books.xsd", "-quit:off"]]
+// Note for Validate_2, data/books-invalid.xml is not expected to be valid (but we want to check the validation report),
+// so use -quit:off to prevent task failure.
 
 task run_cmd_books_sample_tests(
         description: "Run the command line books sample tests"
@@ -255,12 +282,14 @@ task run_cmd_books_sample_tests(
   def tests = booksTests[edition]
   tests.each { test ->
     def call = test.split("_")[0]
+    def resdir = "${buildDir}/samples/results/cmd/${edition}"
+    def outputfile = "books_${test}.html"
+    def reportfile = "report_${test}.xml"
     Task t = task "run_books_${test}_${edition}"(
             type: JavaExec,
             dependsOn: ["${edition}jJar", "${edition}_samples_common"],
             description: "Run the cmd books sample with ${edition}, test ${test}"
     ) {
-      def resdir = "${buildDir}/samples/results/cmd/${edition}"
       doFirst {
         mkdir resdir
         if ((test != "Transform_1") && (test != "Transform_2")) {
@@ -268,8 +297,10 @@ task run_cmd_books_sample_tests(
         }
       }
 
-      def outputfile = "books_${test}.html"
       outputs.file "${resdir}/${outputfile}"
+      if ((test == "Validate_1") || (test == "Validate_2")) {
+        outputs.file "${resdir}/${reportfile}"
+      }
       workingDir = "${buildDir}/output/${edition}/resources/samples"
 
       def jclass = "net.sf.saxon.Transform"
@@ -289,11 +320,38 @@ task run_cmd_books_sample_tests(
       if ((test == "Transform_1") || (test == "Transform_2")) {
         testargs += ["-o:${resdir}/${outputfile}"]
       }
+      if ((test == "Validate_1") || (test == "Validate_2")) {
+        testargs += ["-report:${resdir}/${reportfile}"]
+      }
       //println (testargs)
       args testargs
 
     }
     run_cmd_books_sample_tests.dependsOn t
+
+    if (edition == "ee" && ((test == "Validate_1") || (test == "Validate_2"))) {
+      Task t2 = task "validate_report_${test}"(
+              type: JavaExec,
+              dependsOn: ["run_books_${test}_ee"],
+              description: "Validate the ${test} validation report against validation-reports.xsd"
+      ) {
+        inputs.files "${resdir}/${reportfile}"
+        workingDir = "${buildDir}/output/ee/resources/samples"
+
+        classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
+
+        mainClass = "com.saxonica.Validate"
+        args "-t",
+                "-s:${resdir}/${reportfile}",
+                "-xsd:schemas/validation-reports.xsd"
+
+        // All validation tests should result in "Validation successful"
+        // (without -quit:off, the task will fail if validation fails)
+      }
+      run_cmd_books_sample_tests.dependsOn t2
+    }
+
   }
 }
 
