@@ -431,7 +431,7 @@ def patchReleaseInfo(String src) {
     commandLine 'git', 'rev-parse', '--short', 'HEAD'
     standardOutput = stdout
   }
-  def hash = stdout.toString().trim().substring(0, 6) // Keep it in the range of an int.
+  def hash = stdout.toString().trim()
   def minorDate = new Date().format("yyyy-MM-dd")
   def lines = []
 
