@@ -111,7 +111,7 @@ PHP_METHOD(Xslt30Processor, transformFileToString) {
           xslt30Processor->transformFileToString(infilename, styleFileName);
       if (result != nullptr) {
       RETVAL_STRING(result);
-      saxonProcessor->deleteString(result);
+      SaxonProcessor::deleteString(result);
       return;
       }
     } catch (SaxonApiException &e) {
@@ -631,7 +631,7 @@ PHP_METHOD(Xslt30Processor, getErrorMessage) {
     const char *errStr = xslt30Processor->getErrorMessage();
     if (errStr != NULL) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(errStr);
+      RETURN_STRING(errStr);
     }
   }
   RETURN_NULL();

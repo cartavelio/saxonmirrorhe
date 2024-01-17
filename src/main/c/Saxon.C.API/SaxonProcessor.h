@@ -719,7 +719,7 @@ public:
                        cross compiled SaxonC library. */
   std::string cwd;  /*!< current working directory */
 
-  //! Utility method required for python extension to delete string created in
+  //! Utility method required for python and PHP extension to delete string created in
   //! the C++ code-base
   static void deleteString(const char *data) {
     if (data != nullptr) {

@@ -437,7 +437,7 @@ PHP_METHOD(SaxonProcessor, clarkNameToEQName) {
     if (qname != NULL) {
       // char *str = estrdup(errStr);
       RETVAL_STRING(qname);
-      saxonProcessor->deleteString(qname);
+      SaxonProcessor::deleteString(qname);
       return;
     }
   }
@@ -1625,7 +1625,7 @@ PHP_METHOD(XdmValue, __toString) {
     const char *value = xdmValue->toString();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     } else {
       RETURN_NULL();
@@ -1847,7 +1847,7 @@ PHP_METHOD(XdmItem, getStringValue) {
     const char *value = xdmItem->getStringValue();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     }
   }
@@ -2024,7 +2024,7 @@ PHP_METHOD(XdmNode, getStringValue) {
     const char *value = xdmNode->getStringValue();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     }
   }
@@ -2043,7 +2043,7 @@ PHP_METHOD(XdmNode, __toString) {
     const char *value = xdmNode->toString();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     } else {
       RETURN_NULL();
@@ -2366,7 +2366,7 @@ PHP_METHOD(XdmNode, getAttributeValue) {
     const char *value = xdmNode->getAttributeValue(name);
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     }
   }
@@ -2505,7 +2505,7 @@ PHP_METHOD(XdmAtomicValue, getStringValue) {
     const char *value = xdmAtomicValue->getStringValue();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     }
   }
@@ -2545,7 +2545,7 @@ PHP_METHOD(XdmAtomicValue, __toString) {
     const char *value = xdmAtomicValue->getStringValue();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     } else {
       RETURN_NULL();
@@ -2626,7 +2626,7 @@ PHP_METHOD(XdmFunctionItem, __toString) {
     const char *value = xdmFunctionItem->toString();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     } else {
       RETURN_NULL();
@@ -2903,7 +2903,7 @@ PHP_METHOD(XdmMap, __toString) {
     const char *value = xdmMap->toString();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     } else {
       RETURN_EMPTY_STRING();
@@ -3223,7 +3223,7 @@ PHP_METHOD(XdmArray, __toString) {
     const char *value = xdmArray->toString();
     if (value != nullptr) {
       RETVAL_STRING(value);
-      saxonProcessor->deleteString(value);
+      SaxonProcessor::deleteString(value);
       return;
     } else {
       RETURN_NULL();
