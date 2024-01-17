@@ -144,7 +144,7 @@
          <p>From SaxonC 12.4.2:</p>
 
          <ul>
-            <li>PHP API: The method <code>XdmNode.getAttributeNode($index)</code> has been replaced with getAttributeNodes(), which returns a PHP array of attribute nodes
+            <li>PHP API: We have added the method <code>XdmNode.getAttributeNodes()</code>, which returns a PHP array of attribute nodes
                consisting of XdmNode object.</li>
             <li>PHP API: We have added the method <code>XdmNode.getChildren()</code> which returns the children of the current node as
                an PHP array of XdmNode objects.</li>

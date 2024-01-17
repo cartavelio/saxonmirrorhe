@@ -2814,13 +2814,24 @@
             </tr>
             <tr>
                <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
+               </td>
+               <td>
+                  <span class="signature">getAttributeNode(int indexi)</span>
+                  <div class="fcomment">Return an <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a> object
+                     representing the attribute node of this node. If the ith attribute does not exists
+                     then return NULL.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
                   array
                </td>
                <td>
                   <span class="signature">getAttributeNodes()</span>
                   <div class="fcomment">Return an array of <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
-                     representing the attribute node sof this node. If there are no attribute
-                     nodes then return null. Note: From SaxonC 12.4.2 this method replaces <code>getAttributeNode($index)</code></div>
+                     representing the attribute node of this node. If there are no attribute
+                     nodes then return NULL. Note: this method was added in SaxonC 12.4.2.</div>
                </td>
             </tr>
             <tr>
