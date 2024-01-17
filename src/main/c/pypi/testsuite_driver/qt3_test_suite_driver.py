@@ -49,7 +49,7 @@ xpathProcForCompareNodes = driver_proc.new_xpath_processor()
 xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
 
 schemaValidator = None
-test_report = PyTestReport()
+test_report = None
 
 spec: Spec
 
@@ -180,9 +180,15 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
     if os.path.exists(test_set_file):
 
         test_set_xml = doc_builderi.parse_xml(xml_file_name=test_set_file)
+
         if test_set_xml is not None:
             create_local_environments(test_set_xml, xpathProcForEnv)
-            child0 = test_set_xml.children[0]
+            test_set_nodes = test_set_xml.axis_nodes(3)
+            child0 = None
+            for x in test_set_nodes:
+                if x.node_kind == 1:
+                    child0 = x
+                    break
             xpathProcForEnv.set_context(xdm_item=child0)
             envs = xpathProcForEnv.evaluate("//environment[@name]")
 
@@ -628,7 +634,6 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         base_output_uri = urllib.parse.urljoin(base_output_uri,
                                                str(output_uri.item_at(0).get_atomic_value().string_value))'''
 
-    print(test_queries)
     '''global_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
                                       False, False)
 
@@ -646,144 +651,45 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     outcome = PyTestOutcome()
 
     pos = 0
-    for test_query in test_queries.item_at(pos):
-        pos += 1
-        xpath_proc.set_context(xdm_item=test_query)
-        exp = None
-        try:
-            exp = str(xpath_proc.evaluate("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)"))
-        except PySaxonApiError as ex:
-            break
-        if exp is not None:
-            if "XP" == spec.short_spec_name or "XT" == spec.short_spec_name:
-                testxpc = environment.xpath_proc
-                testxpc.set_language_version(spec.version)
-                testxpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
-                testxpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
-                testxpc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
-                testxpc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
-                testxpc.set_base_uri(test_case_node.base_uri[5:])
-
-                if environment.context_item is not None:
-                    testxpc.set_context(environment.context_item)
-                try:
-                    result = testxpc.evaluate(exp)
-
-                except PySaxonApiError as ex:
-                    print(ex)
-                    errorResult = ex
-
     try:
-        for key in static_params:
-            environment.xslt_proc.set_parameter(key, static_params[key])
+        for test_query in test_queries.item_at(pos):
+            pos += 1
+            xpath_proc.set_context(xdm_item=test_query)
+            exp = None
 
+            exp = str(xpath_proc.evaluate("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)"))
 
+            if exp is not None:
+                if "XP" == spec.short_spec_name or "XT" == spec.short_spec_name:
+                    testxpc = environment.xpath_proc
+                    testxpc.set_language_version(spec.version)
+                    testxpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
+                    testxpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
+                    testxpc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
+                    testxpc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
+                    testxpc.set_base_uri(test_case_node.base_uri[5:])
 
-        if test_query is not None:
-            file_name = test_query.get_node_value().get_attribute_value("file")
-            environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name)
-        elif principle_package is not None:
-            file_name = principle_package.get_node_value().get_attribute_value("file")
-            if file_name != "":
-                output_file = (file_name[-4] + "_created_from_test_driver.sef")
-                environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file)
-                environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file)
+                    if environment.context_item is not None:
+                        testxpc.set_context(xdm_item=environment.context_item)
+                        result = testxpc.evaluate(exp)
+                    else:
+                        result = testxpc.evaluate(exp)
+                    break
+                elif "XQ" == spec.short_spec_name:
+                    testxqc = environment.xquery_proc
+                    testxqc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
+                    testxqc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
+                    testxqc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
+                    testxqc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
 
-
-        if environment.sheet is None:
-            print("Environment not is a clean state")
-            return
-
-        for key in global_params:
-            environment.sheet.set_parameter(key, global_params[key])
-
-        environment.sheet.set_capture_result_documents(True)
-        environment.sheet.set_save_xsl_message(True, None)
-
-        if environment.context_item is not None:
-            '''print(environment.context_item)'''
-            environment.sheet.set_global_context_item(xdm_item=environment.context_item)
-
-        if initial_template is not None or initial_mode_name is not None:
-            '''TODO check for params - set to tunnel'''
-            print("")
-        if initial_mode_name is not None:
-            environment.sheet.set_initial_mode(initial_mode_name)
-        if initial_template is not None:
-            init_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
-                                                 False, False)
-            tunnel_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
-                                               False, True)
-            environment.sheet.set_initial_template_parameters(False, init_params)
-            environment.sheet.set_initial_template_parameters(True, tunnel_params)
-            if serialize_check is not None and str(serialize_check) == "yes":
-                outcome.serialized_result = environment.sheet.call_template_returning_string(
-                    initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
-                outcome.base_uri = base_output_uri
-            else:
-                result = environment.sheet.call_template_returning_value(
-                    initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
-
-        elif initial_function is not None:
-            initial_function_node = initial_function.get_node_value()
-            initial_function_name = initial_function_node.get_attribute_value("name")
-            '''check for namespace'''
-            namespace_uri = ""
-            if ":" in initial_function_name:
-                initial_function_name_split = initial_function_name.split(':')
-                prefix = initial_function_name_split[0]
-                namespaces = initial_function_node.axis_nodes(8)
-                for ns in namespaces:
-                    uri_str = ns.string_value
-                    ns_prefix = ns.name
-
-                    if ns_prefix is not None and prefix == ns_prefix:
-                        initial_function_name = "{" + uri_str + "}" + initial_function_name_split[1]
-
-
-                initial_function_name =  initial_function_name
-
-            attributes = initial_function_node.attributes
-
-            children = initial_function_node.children
-            if children is not None:
-                for x in children:
-                    nodex = x.item_at(0).get_node_value()
-                    print(nodex)
-                    if nodex.name == "param":
-                        exit()
-            if serialize_check is not None and str(serialize_check) == "yes":
-                outcome.serialized_result = environment.sheet.call_function_returning_string(initial_function_name, [])
-                outcome.base_uri = base_output_uri
-            else:
-                result = environment.sheet.call_function_returning_value(initial_function_name, [])
-        elif environment.context_item is not None:
-            if serialize_check is not None and str(serialize_check) == "yes":
-                outcome.serialized_result = environment.sheet.apply_templates_returning_string(xdm_value=environment.context_item,
-                                                                   base_output_uri=base_output_uri)
-                outcome.base_uri = base_output_uri
-            else:
-                result = environment.sheet.apply_templates_returning_value(xdm_value=environment.context_item,
-                                                                       base_output_uri=base_output_uri)
-        else:
-            if serialize_check is not None and str(serialize_check) == "yes":
-                outcome.serialized_result = environment.sheet.call_template_returning_string(base_output_uri=base_output_uri)
-                outcome.base_uri = base_output_uri
-            else:
-                result = environment.sheet.call_template_returning_value(base_output_uri=base_output_uri)
-        outcome.result_documents = environment.sheet.get_result_documents()
-        outcome.xsl_messages = environment.sheet.get_xsl_messages()
-        '''print(environment.sheet.get_xsl_messages())'''
-        '''print('Result = ' + str(result))'''
-
-        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-            if result is not None:
-                print("Result = " + str(result))
-            elif outcome.serialized_result is not None:
-                print("Serialized Result = " + outcome.serialized_result)
-            else:
-                print("No result available")
-
+                    'TODO - the base_uri contains file:/// the resolving does not work with file:'
+                    testxqc.set_query_base_uri(test_case_node.base_uri)
+                    if environment.context_item is not None:
+                        testxqc.set_context(xdm_item=environment.context_item)
+                    result = testxqc.run_query_to_value(query_text=exp)
+                else:
+                    test_report.write_test_case_element(str(test_name), "notRun", None)
+                    not_run += 1
 
 
     except PySaxonApiError as ex:
@@ -844,8 +750,10 @@ def main(argv):
     global schemaValidator
     global host_lang
     global spec
+    global test_report
+    global saxon_version
 
-    saxon_version = driver_proc.version
+
 
     print("W3 QT3 Test Suite")
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
@@ -887,6 +795,7 @@ def main(argv):
             elif opt in ("-l", "--lang"):
                 host_lang = arg
                 spec = process_spec(arg)
+                test_report = PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version)
 
     '''dir = os.getcwd()'''
     if spec is None:

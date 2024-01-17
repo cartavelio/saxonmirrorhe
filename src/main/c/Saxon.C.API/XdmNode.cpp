@@ -50,24 +50,24 @@ XdmNode::~XdmNode() {
   }
   // if(getRefCount() <= 1) {
   if (baseURI != nullptr) {
-    operator delete ((char *)baseURI);
+    delete baseURI;
     baseURI = nullptr;
   }
   if (nodeName != nullptr) {
-    operator delete ((char *)nodeName);
+    delete nodeName;
     nodeName = nullptr;
   }
   if (localName != nullptr) {
-    operator delete ((char *)localName);
+    delete localName;
     localName = nullptr;
   }
 
-  /* if (nodeToString != nullptr) {
+  if (nodeToString != nullptr) {
     delete[] nodeToString;
     nodeToString = nullptr;
   }
 
-  if (children != nullptr) {
+  /* if (children != nullptr) {
 
        for (int p = 0; p < childCount; ++p) {
            delete children[p];
@@ -84,7 +84,6 @@ XdmNode::~XdmNode() {
    }     */
 
   //}
-
 }
 
 const char *XdmNode::getLocalName() {
@@ -158,16 +157,15 @@ XdmItem *XdmNode::getHead() { return this; }
 const char *XdmNode::getStringValue() { return XdmItem::getStringValue(); }
 
 const char *XdmNode::toString() {
-  const char *nodeToStringi = nullptr;
-  //if (nodeToString == nullptr) {
+  if (nodeToString == nullptr) {
     allocFn fn = operator new;
-    nodeToStringi = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
+    nodeToString = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
                                    (void *)fn, (void *)value);
-    if (nodeToStringi == nullptr) {
+    if (nodeToString == nullptr) {
       throw SaxonApiException();
     }
-  //}
-  return nodeToStringi;
+  }
+  return nodeToString;
 }
 
 const char *XdmNode::getBaseUri() {
@@ -184,7 +182,7 @@ XdmNode *XdmNode::getParent() {
   if (parent == nullptr) {
     int64_t nodeRef =
         getParentForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)value);
-    if (nodeRef > SXN_UNSET) {
+    if (nodeRef > -1) {
       parent = new XdmNode(nullptr, nodeRef, UNKNOWN);
       // parent->incrementRefCount();
       return parent;
@@ -234,7 +232,6 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
     if (cached) {
       attrValues = attrValuesi;
     }
-    operator delete (results);
     return attrValuesi;
   }
 }
@@ -265,8 +262,6 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
     // this->incrementRefCount();
     valuesi[p - 1] = tempNode;
   }
-
-  operator delete (results);
 
   return valuesi;
 }
@@ -338,7 +333,7 @@ XdmNode *XdmNode::getChild(int i, bool cached) {
     int64_t childRef =
         j_getChild(SaxonProcessor::sxn_environ->thread, (void *)value, i);
 
-    if(childRef == SXN_UNSET) {
+    if(childRef == -1) {
         return nullptr;
     }
 

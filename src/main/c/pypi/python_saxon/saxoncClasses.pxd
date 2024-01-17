@@ -597,6 +597,8 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         XdmNode* getParent()
 
+        XdmNode *getChild(int i, bool cache);
+
         const char* getAttributeValue(const char *str)
 
         int getAttributeCount()

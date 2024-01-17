@@ -49,7 +49,7 @@ xpathProcForCompareNodes = driver_proc.new_xpath_processor()
 xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
 
 schemaValidator = None
-test_report = PyTestReport()
+test_report = PyTestReport("xslt30", "http://www.w3.org/2012/11/xslt30-test-results", "XT30",driver_proc.version[:8], saxon_version)
 
 globalEnvironments = {}
 localEnvironments = {}
@@ -279,9 +279,8 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
         print("Loading environment without name")
 
     '''set the base URI if specified'''
-    base_uri = str(env.base_uri).split("file://", 1)[1]
+    base_uri = str(env.base_uri)
     environment.proc.set_cwd(base_uri)
-    '''TODO There is a bug with the DocumentBuilder base_uri and cwd for the processor'''
     builder = environment.proc.new_document_builder()
     base = xpc.evaluate("//static-base-uri")
     if base is not None:
@@ -317,9 +316,6 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
         schema_validator.set_cwd(base_uri)
     except PySaxonApiError as ex:
         print("*** Failed to create PySchemaValidator :" + str(ex))
-
-    ''' PyXdmNode.base_uri returns file:// - this will cause problems with resolving later.'''
-    '''Create bug issue to remove the file:// internally TODO create bug issue '''
 
     schemas = xpc.evaluate("schema")
     validate_sources = False
@@ -621,7 +617,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                 return
 
     'TODO - the base_uri contains file:/// the resolving of stylesheet does not work with file:'
-    environment.xslt_proc.set_cwd(test_case_node.base_uri[5:])
+    environment.xslt_proc.set_cwd(test_case_node.base_uri)
     environment.xslt_proc.set_jit_compilation(False)
     errorResult = None
     result = None
@@ -811,8 +807,7 @@ def main(argv):
     global path
     global results_path
     global schemaValidator
-
-    saxon_version = driver_proc.version
+    global saxon_version
 
     print("W3 XSLT 3.0 Test Suite")
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
