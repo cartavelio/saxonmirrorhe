@@ -63,8 +63,6 @@ void SaxonProcessor_free_storage(zend_object *object) {
     delete saxonProc;
   }
   zend_object_std_dtor(object);
-
-  efree(obj);
 }
 
 void SaxonProcessor_destroy_storage(zend_object *pobj) {
@@ -147,16 +145,13 @@ PHP_METHOD(SaxonProcessor, __construct) {
     // php_error(E_WARNING,cwd2);
 
     saxonProc->setcwd(cwd);
-    // -- code above tries to use VCWD_GETCWD but there is a linkage error
+
+    delete [] cwd;
 #else
     char cwd[256];
 
     VCWD_GETCWD(cwd, sizeof(cwd));
-    if (cwd == nullptr) {
-      // php_error(E_WARNING,"cwd is nullptrXXXXXXXXXXXXXXXXXXXXXXX");
-    } else {
-      //  php_error(E_WARNING,cwd);
-
+    if (cwd != nullptr) {
       saxonProc->setcwd(cwd);
     }
 #endif
