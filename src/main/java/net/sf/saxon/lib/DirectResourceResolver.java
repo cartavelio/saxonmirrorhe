@@ -11,11 +11,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -61,6 +59,23 @@ public class DirectResourceResolver implements ResourceResolver {
             }
         }
 
+//        String relativeURI = request.relativeUri;
+//        if (relativeURI == null) {
+//            relativeURI = request.uri;
+//        }
+//        String id = null;
+
+        // Extract any fragment identifier. Note, this code is no longer used to
+        // resolve fragment identifiers in URI references passed to the document()
+        // function: the code of the document() function handles these itself.
+
+//        int hash = relativeURI.indexOf('#');
+//        if (hash >= 0) {
+//            request = request.copy();
+//            request.relativeUri = relativeURI.substring(0, hash);
+//            id = relativeURI.substring(hash + 1);
+//        }
+
         InputStream stream;
         if (ResourceRequest.BINARY_NATURE.equals(request.nature)) {
             // This path is used by the unparsed-text resolver when no encoding is supplied;
@@ -75,31 +90,26 @@ public class DirectResourceResolver implements ResourceResolver {
 
         Source ss;
         try {
-            // Get an input stream from the request URI
             stream = ResourceLoader.urlStream(config, request.uri);
         } catch (IOException e) {
             stream = null; // Carry on, the XML parser might know what to do with it.
         }
 
-        if (ResourceRequest.TEXT_NATURE.equals(request.nature)) {
-            // Typically happens when using unparsed-text() with an explicit encoding
-            return new StreamSource(stream, request.uri);
-        }
-
         InputSource is = new InputSource(request.uri);
         is.setByteStream(stream);
-        XMLReader parser;
-        if (ResourceRequest.XSLT_NATURE.equals(request.nature) || ResourceRequest.XSD_NATURE.equals(request.nature)) {
-            parser = config.getStyleParser();
-        } else {
-            parser = config.getSourceParser();
-        }
-        ss = new SAXSource(parser, is);
+        ss = new SAXSource(config.getStyleParser(), is);
         if (stream != null) {
             // We created the stream, so we must close it after use
             ss = AugmentedSource.makeAugmentedSource(ss);
             ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
         }
+
+//        if (id != null) {
+//            final String idFinal = id;
+//            FilterFactory factory = next -> new IDFilter(next, idFinal);
+//            ss = AugmentedSource.makeAugmentedSource(ss);
+//            ((AugmentedSource) ss).addFilter(factory);
+//        }
 
         return ss;
 
