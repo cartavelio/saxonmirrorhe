@@ -413,7 +413,6 @@
     optimizationLevel="10"
     parser=""
     preEvaluateDoc="false"
-    preferJaxpParser="true"
     recognizeUriQueryParameters="true"
     regexBacktrackingLimit="10000000"
     retainNodeForDiagnostics="false"
