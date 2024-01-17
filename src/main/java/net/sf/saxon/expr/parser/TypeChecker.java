@@ -182,9 +182,21 @@ public class TypeChecker {
 
             if (reqItemType instanceof BuiltInAtomicType && ((BuiltInAtomicType) reqItemType).isPrimitiveType() && !itemTypeOK) {
                 int rt = ((BuiltInAtomicType) reqItemType).getFingerprint();
+                UType promotables = promotableTypes(rt, allow40);
+                if (suppliedItemType.getUType().intersection(promotables).equals(UType.VOID)) {
+                    // Promotion cannot succeed: raise a static type error
+                    RoleDiagnostic role = roleSupplier.get();
+                    throw new XPathException(
+                            "An item of type " + suppliedItemType +
+                                    " cannot be converted to " + reqItemType +
+                                    " as required for the " + role.getMessage())
+                            .withErrorCode(role.getErrorCode())
+                            .withLocation(supplied.getLocation())
+                            .withFailingExpression(supplied);
+                }
                 ConversionRules rules = config.getConversionRules();
                 Expression promoted = null;
-                Converter converter = makePromotingConverter(allow40, rt, rules);
+                Converter converter = makePromotingConverter(suppliedItemType, rt, rules, allow40);
                 if (converter != null) {
                     promoted = makePromoter(exp, converter, (BuiltInAtomicType)reqItemType);
                 }
@@ -453,15 +465,16 @@ public class TypeChecker {
     /**
      * Make an expression that performs type promotion on a supplied sequence
      *
-     * @param allow40      true if XPath 4.0 is enabled
-     * @param requiredType the required type, the target of promotion
-     * @param rules        the conversion rules
+     * @param suppliedItemType the inferred type of the supplied value
+     * @param requiredType     the required type, the target of promotion
+     * @param rules            the conversion rules
+     * @param allow40          true if XPath 4.0 is enabled
      * @return the promoting converter, if available for the required type, or null.
      * Note that promoting converters not only implement
      * type promotion (for example from decimal to double) but also perform conversion of untypedAtomic values
      * to the target type.
      */
-    public static Converter makePromotingConverter(boolean allow40, int requiredType, ConversionRules rules) {
+    public static Converter makePromotingConverter(ItemType suppliedItemType, int requiredType, ConversionRules rules, boolean allow40) {
         switch (requiredType) {
             case StandardNames.XS_DOUBLE:
                 return new Converter.PromoterToDouble(rules);
@@ -750,6 +763,36 @@ public class TypeChecker {
         asc.setConverter(converter);
         ExpressionTool.copyLocationInfo(exp, asc);
         return asc;
+    }
+
+    private UType promotableTypes(int targetType, boolean allow40) {
+        if (allow40) {
+            switch (targetType) {
+                case StandardNames.XS_DOUBLE:
+                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT).union(UType.DOUBLE);
+                case StandardNames.XS_FLOAT:
+                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT);
+                case StandardNames.XS_ANY_URI:
+                case StandardNames.XS_STRING:
+                    return UType.UNTYPED_ATOMIC.union(UType.ANY_URI).union(UType.STRING);
+                case StandardNames.XS_HEX_BINARY:
+                case StandardNames.XS_BASE64_BINARY:
+                    return UType.UNTYPED_ATOMIC.union(UType.HEX_BINARY).union(UType.BASE64_BINARY);
+                default:
+                    return UType.UNTYPED_ATOMIC.union(UType.fromTypeCode(targetType));
+            }
+        } else {
+            switch (targetType) {
+                case StandardNames.XS_DOUBLE:
+                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT).union(UType.DOUBLE);
+                case StandardNames.XS_FLOAT:
+                    return UType.UNTYPED_ATOMIC.union(UType.DECIMAL).union(UType.FLOAT);
+                case StandardNames.XS_STRING:
+                    return UType.UNTYPED_ATOMIC.union(UType.STRING).union(UType.ANY_URI);
+                default:
+                    return UType.UNTYPED_ATOMIC.union(UType.fromTypeCode(targetType));
+            }
+        }
     }
 
 }
