@@ -114,7 +114,7 @@ namespace Saxon.Impl.Dom {
 
         public override string getLocalPart() {
             if (node.NodeType == NodeType.Element) {
-                return ((IElement)node).LocalName.ToLower();
+                return ((IElement)node).LocalName;
             }
             else {
                 return "";
