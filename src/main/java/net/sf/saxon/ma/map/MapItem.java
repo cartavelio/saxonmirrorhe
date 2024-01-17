@@ -340,7 +340,7 @@ public abstract class MapItem implements FunctionItem {
      */
     @Override
     public String getDescription() {
-        return "map";
+        return toShortString();
     }
 
     /**
