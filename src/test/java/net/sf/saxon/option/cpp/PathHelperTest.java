@@ -31,15 +31,7 @@ class PathHelperTest {
         @EnabledOnOs(OS.WINDOWS)
         class WindowsOnly {
             String cwd = "Z:\\path\\to\\cwd";
-            @Test
-            void relativePathProducesSource() throws SaxonApiException {
-                expected = "file:///Z:/path/to/cwd/source.xml";
-
-                Source result = PathHelper.resolveToSource(config, cwd, "source.xml", nature);
-                actual = result.getSystemId();
-
-                assertThat(actual, equalTo(expected));
-            }
+            String forwardSlashCwd = "Z:/path/to/cwd";
 
             @Nested
             @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -70,22 +62,96 @@ class PathHelperTest {
 
                     assertThat(actual, equalTo(expected));
                 }
+
+                @Test
+                @DisplayName("absolute paths using forward slash produce a source")
+                void absolutePathProducesSource() throws SaxonApiException {
+                    expected = "file:/Z:/new/path/to/source.xml";
+
+                    Source result = PathHelper.resolveToSource(config, cwd, "Z:/new/path/to/source.xml", nature);
+                    actual = result.getSystemId();
+
+                    assertThat(actual, equalTo(expected));
+                }
+
+                @Test
+                @DisplayName("absolute paths using backslash produce a source")
+                void absolutePathWithBackslashProducesSource() throws SaxonApiException {
+                    expected = "file:/Z:/new/path/to/source.xml";
+
+                    Source result = PathHelper.resolveToSource(config, cwd, "Z:\\new\\path\\to\\source.xml", nature);
+                    actual = result.getSystemId();
+
+                    assertThat(actual, equalTo(expected));
+                }
+
+                @Test
+                @DisplayName("Fully-qualified URIs produce a source")
+                void uriProducesSource() throws SaxonApiException {
+                    expected = "http://example.org/path/to/source.xml";
+
+                    Source result = PathHelper.resolveToSource(config, cwd, "http://example.org/path/to/source.xml", nature);
+                    actual = result.getSystemId();
+
+                    assertThat(actual, equalTo(expected));
+                }
             }
 
             @Nested
             @TestInstance(TestInstance.Lifecycle.PER_CLASS)
             class WithCatalogResolverSuccess {
+                public String input;
                 public final URI resolverSourceURI = URI.create("http://example.org/source");
+                public final MockResolver mockResolver = new MockResolver(resolverSourceURI);
+
                 @BeforeAll
                 void setResolver() {
-                    config.setResourceResolver(new MockResolver(resolverSourceURI));
+                    config.setResourceResolver(mockResolver);
+                }
+                
+                @Test
+                @DisplayName("relative paths produce a source resolved against the absolute path created by resolving the input against the CWD")
+                void relativePathProducesSource() throws SaxonApiException {
+                    input = "source.xml";
+                    expected = mockResolver.resolvedMockUri("file:///" + forwardSlashCwd + "/" + input);
+
+                    Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                    actual = result.getSystemId();
+
+                    assertThat(actual, equalTo(expected));
                 }
 
                 @Test
-                void relativePathProducesSource() throws SaxonApiException {
-                    expected = resolverSourceURI.toASCIIString();
+                @DisplayName("absolute paths (with forward slash as separator) produce a source")
+                void absolutePathProducesSource() throws SaxonApiException {
+                    input = "Z:/new/path/to/source.xml";
+                    expected = mockResolver.resolvedMockUri("file:/" + input);
 
-                    Source result = PathHelper.resolveToSource(config, cwd, "source.xml", nature);
+                    Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                    actual = result.getSystemId();
+
+                    assertThat(actual, equalTo(expected));
+                }
+
+                @Test
+                @DisplayName("absolute paths (with backslash as separator) produce a source")
+                void absolutePathWithBackslashProducesSource() throws SaxonApiException {
+                    input = "Z:\\new\\path\\to\\source.xml";
+                    expected = mockResolver.resolvedMockUri("file:/Z:/new/path/to/source.xml");
+
+                    Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                    actual = result.getSystemId();
+
+                    assertThat(actual, equalTo(expected));
+                }
+
+                @Test
+                @DisplayName("Fully-qualified URIs produce a source")
+                void uriProducesSource() throws SaxonApiException {
+                    input = "http://new/path/to/source.xml";
+                    expected = mockResolver.resolvedMockUri(input);
+
+                    Source result = PathHelper.resolveToSource(config, cwd, input, nature);
                     actual = result.getSystemId();
 
                     assertThat(actual, equalTo(expected));
