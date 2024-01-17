@@ -374,7 +374,7 @@ namespace TestDriver {
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
-            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE");
+            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE") || item.StringValue.StartsWith("XPST");
             bool expectStaticError = testCase.Select(
                 Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>) IsStaticError)).Any();
             if (expectStaticError) {
