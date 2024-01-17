@@ -122,7 +122,7 @@ class SaxonTestSuite {
   }
 
   def javaTask(options) {
-    if (options['suite'] == "xsd") {
+    if (options['suite'] == "xsd" || options['suite'] == 'xsdextra') {
       this.javaXsdTask(options)
       return
     }
