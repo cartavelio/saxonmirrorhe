@@ -404,7 +404,9 @@ public class StandardErrorReporter
             String lineInfo = line <= 1 ? "" : "on line " + line + ' ';
             String columnInfo = column <= 1 ? "" : "at " + (line <= 1 ? "char " : "column ") + column + ' ';
             String nearBy = nestedLoc.getNearbyText();
-            String extraContext = formatExtraContext(error.getFailingExpression(), nearBy);
+
+            Expression failingExpression = null;
+            String extraContext = formatExtraContext(failingExpression, nearBy);
 
             if (outerLoc instanceof AttributeLocation) {
                 // Typical XSLT case
@@ -532,7 +534,7 @@ public class StandardErrorReporter
      */
 
     public String formatNestedMessages(XmlProcessingError err, String message) {
-        if (err.getCause() == null || isSAXParseException(err.getCause())) {
+        if (err.getCause() == null) {
             return message;
         } else {
             StringBuilder sb = new StringBuilder(message);
@@ -636,9 +638,6 @@ public class StandardErrorReporter
         logStackTrace(context, out, stackTraceDetail);
     }
 
-    public XmlProcessingError getLatestError() {
-        return latestError;
-    }
 
 }
 

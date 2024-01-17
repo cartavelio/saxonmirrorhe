@@ -45,6 +45,8 @@ public class Loc implements Location {
      */
 
     public Loc(String systemId, int lineNumber, int columnNumber) {
+        assert lineNumber != 0;
+        assert columnNumber != 0;
         this.systemId = systemId;
         this.lineNumber = lineNumber;
         this.columnNumber = columnNumber;
