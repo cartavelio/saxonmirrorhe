@@ -185,7 +185,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_applyTemplatesReturningFile, 0, 0, 1)
 ZEND_ARG_INFO(0, file_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setInitialTemplateParameters, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setInitialTemplateParameters, 0, 0, 1)
 ZEND_ARG_INFO(0, parameters)
 ZEND_ARG_INFO(0, tunnel)
 ZEND_END_ARG_INFO()
@@ -314,8 +314,7 @@ ZEND_ARG_INFO(0, source_file_name)
 ZEND_ARG_INFO(0, stylesheet_file_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromFile, 0, 0, 2)
-ZEND_ARG_INFO(0, source_file_name)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromFile, 0, 0, 1)
 ZEND_ARG_INFO(0, stylesheet_file_name)
 ZEND_END_ARG_INFO()
 
