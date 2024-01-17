@@ -237,7 +237,8 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
                 if (!keys.contains(tokens[0])) {
                     unknownKeys.add(tokens[0]);
                 }
-                props.setProperty(tokens[0], tokens[1]);
+                String value = tokens.length >= 2 ? tokens[1] : "";
+                props.setProperty(tokens[0], value);
             }
         }
         String fallback = props.getProperty("fallback");
