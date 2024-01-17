@@ -523,7 +523,7 @@ public class StylesheetPackage extends PackageData {
     private void registerGlobalVariable(Component c, SlotManager slotManager) {
         if (c.getActor() instanceof GlobalVariable) {
             GlobalVariable var = (GlobalVariable) c.getActor();
-            int slot = slotManager.allocateSlotNumber(var.getVariableQName(), null);
+            int slot = slotManager.allocateSlotNumber(var.getVariableQName());
             var.setPackageData(this);
             var.setBinderySlotNumber(slot);
 //            if (c.getVisibility() != Visibility.HIDDEN) {
@@ -710,7 +710,7 @@ public class StylesheetPackage extends PackageData {
                     trace("Doing mode completion for " + newC.getActor().getSymbolicName());
                     List<ComponentBinding> oldBindings = newC.getBaseComponent().getComponentBindings();
                     List<ComponentBinding> newBindings = newC.getComponentBindings();
-                    //assert newBindings.size() == oldBindings.size();
+                    assert newBindings.size() == oldBindings.size();
                     for (int i=0; i<oldBindings.size(); i++) {
                         SymbolicName name12 = oldBindings.get(i).getSymbolicName();
                         Component target;
@@ -841,7 +841,7 @@ public class StylesheetPackage extends PackageData {
         FunctionLibraryList functionLibrary = new FunctionLibraryList();
         functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(hostLanguageVersion));
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(this, true));
-        functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(hostLanguageVersion==40 ? 40 : 31));
+        functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(hostLanguageVersion));
         functionLibrary.addFunctionLibrary(new ConstructorFunctionLibrary(config));
         if ("JS".equals(getTargetEdition())) {
             addIxslFunctionLibrary(functionLibrary);
