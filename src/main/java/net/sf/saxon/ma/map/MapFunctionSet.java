@@ -568,12 +568,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             Expression[] newArgs = new Expression[4];
             newArgs[0] = arguments[0];
             if (arguments.length < 2 || arguments[1] instanceof DefaultedArgumentExpression) {
-                newArgs[1] = FunctionLiteral.makeLiteral(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1));
+                newArgs[1] = FunctionLiteral.makeLiteral(SystemFunction.makeFunction40("identity", getRetainedStaticContext(), 1));
             } else {
                 newArgs[1] = arguments[1];
             }
             if (arguments.length < 3 || arguments[2] instanceof DefaultedArgumentExpression) {
-                newArgs[2] = FunctionLiteral.makeLiteral(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1));
+                newArgs[2] = FunctionLiteral.makeLiteral(SystemFunction.makeFunction40("identity", getRetainedStaticContext(), 1));
             } else {
                 newArgs[2] = arguments[2];
             }
