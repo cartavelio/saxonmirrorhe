@@ -78,16 +78,6 @@ public abstract class SystemFunction extends AbstractFunction {
         return fn;
     }
 
-    public static SystemFunction makeFunction40(String name, RetainedStaticContext rsc, int arity) {
-        Objects.requireNonNull(rsc);
-        SystemFunction fn = rsc.getConfiguration().makeSystemFunction40(name, arity);
-        if (fn == null) {
-            throw new IllegalArgumentException(name + "#" + arity);
-        }
-        fn.setRetainedStaticContext(rsc);
-        return fn;
-    }
-
     /**
      * Make an expression that either calls this function, or that is equivalent to a call
      * on this function
@@ -384,11 +374,7 @@ public abstract class SystemFunction extends AbstractFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType resultType = SequenceType.makeSequenceType(getResultItemType(), details.cardinality);
-        SequenceType[] paramTypes = details.paramTypes;
-        if (paramTypes.length != arity) {
-            paramTypes = Arrays.copyOf(paramTypes, arity);
-        }
-        return new SpecificFunctionType(paramTypes, resultType);
+        return new SpecificFunctionType(details.paramTypes, resultType);
     }
 
     /**

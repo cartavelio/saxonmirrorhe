@@ -309,6 +309,29 @@ public class TypeChecker {
                         suppliedCard = -1;
                     }
 
+                    // Rule 3c: promotion between xs:hexBinary and xs:base64Binary
+
+                    if (rt == StandardNames.XS_HEX_BINARY) {
+                        itemTypeOK = true;
+                        Expression cexp = makePromoter(exp, Converter.Base64BinaryToHexBinary.INSTANCE, BuiltInAtomicType.HEX_BINARY);
+                        if (cexp instanceof AtomicSequenceConverter) {
+                            ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
+                        }
+                        ExpressionTool.copyLocationInfo(exp, cexp);
+                        exp = cexp;
+                        try {
+                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                        } catch (XPathException err) {
+                            throw err.maybeWithLocation(exp.getLocation())
+                                    .withFailingExpression(supplied)
+                                    .asStaticError();
+                        }
+                        suppliedItemType = BuiltInAtomicType.HEX_BINARY;
+                        suppliedCard = -1;
+                    }
+
+                    // New 4.0 rule - relabelling (or "downcasting")
+
                     if (!itemTypeOK && reqItemType.getBasicAlphaCode().length() > 2 && visitor.getStaticContext().getXPathVersion() >= 40) {
                         // allow down-conversion ("relabelling")
                         if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {

@@ -32,6 +32,20 @@ import java.util.List;
 
 public class Replace extends RegexFunction  {
 
+    private int version = 20;
+
+    public static Replace make20() {
+        Replace rep = new Replace();
+        rep.version = 20;
+        return rep;
+    }
+
+    public static Replace make40() {
+        Replace rep = new Replace();
+        rep.version = 40;
+        return rep;
+    }
+
     private boolean replacementChecked = false;
 
     @Override
@@ -89,7 +103,11 @@ public class Replace extends RegexFunction  {
 
         Item replacementArg = arguments[2].head();
         UnicodeString replacement = replacementArg == null ? null : replacementArg.getUnicodeStringValue();
-
+        if (replacement == null && version == 20) {
+            throw new XPathException("Third argument of fn:replace() must not be empty")
+                    .withErrorCode("XPTY0004")
+                    .asTypeError();
+        }
         java.util.function.BiFunction<UnicodeString, UnicodeString[], UnicodeString> action = null;
         if (arguments.length == 5) {
             FunctionItem actionFn = (FunctionItem) arguments[4].head();

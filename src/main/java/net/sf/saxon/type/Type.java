@@ -416,12 +416,6 @@ public abstract class Type {
         ItemType p1 = t1.getPrimitiveItemType();
         ItemType p2 = t2.getPrimitiveItemType();
         if (p1 == p2) {
-            if (t1.getGenre() == Genre.ARRAY && t2.getGenre() == Genre.ARRAY) {
-                return ArrayItemType.ANY_ARRAY_TYPE;
-            }
-            if (t1.getGenre() == Genre.MAP && t2.getGenre() == Genre.MAP) {
-                return MapType.ANY_MAP_TYPE;
-            }
             return p1;
         }
         if ((p1 == BuiltInAtomicType.DECIMAL && p2 == BuiltInAtomicType.INTEGER) ||
@@ -514,9 +508,9 @@ public abstract class Type {
      * Determine whether two primitive atomic types are comparable under the rules for ValueComparisons
      * (that is, untyped atomic values treated as strings)
      *
-     * @param t1      the first type to compare.
+     * @param t1      the first type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compare.
+     * @param t2      the second type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
      * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
      *                if testing for an equality comparison (eq, ne)
@@ -560,11 +554,12 @@ public abstract class Type {
      * Determine whether two primitive atomic types are comparable under the rules for ValueComparisons
      * (that is, untyped atomic values treated as strings)
      *
-     * @param t1      the first type to compare.
+     * @param t1      the first type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compare.
+     * @param t2      the second type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param version the XPath language level (either 20, 30, 305, 31 or 40)
+     * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
+     *                if testing for an equality comparison (eq, ne)
      * @return true if the types are guaranteed comparable, as defined by the rules of the "eq" operator,
      *         or if we don't yet know (because some subtypes of the static type are comparable
      *         and others are not). False if they are definitely not comparable.
@@ -614,9 +609,9 @@ public abstract class Type {
      * Determine whether two primitive atomic types are comparable under the rules for GeneralComparisons
      * (that is, untyped atomic values treated as comparable to anything)
      *
-     * @param t1      the first type to compare.
+     * @param t1      the first type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compare.
+     * @param t2      the second type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
      * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
      *                if testing for an equality comparison (eq, ne)
@@ -636,9 +631,9 @@ public abstract class Type {
      * (that is, untyped atomic values treated as comparable to anything). This method returns false if a run-time
      * check is necessary.
      *
-     * @param t1      the first type to compare.
+     * @param t1      the first type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compare.
+     * @param t2      the second type to compared.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
      * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
      *                if testing for an equality comparison (eq, ne)
