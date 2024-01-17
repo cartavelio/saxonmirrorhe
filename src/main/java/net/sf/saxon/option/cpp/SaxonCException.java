@@ -80,6 +80,10 @@ public class SaxonCException  {
     @CEntryPoint(name = "j_getErrorMessageWithErrorCode")
     public static CCharPointer j_getErrorMessageWithErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         SaxonApiException exception = null;
+        if(SaxonCAPI.debug) {
+            System.err.println("Java DEBUG: j_getErrorMessageWithErrorCode called");
+        }
+
         if(throwable == null) {
             if(SaxonCAPI.debug) {
                 System.err.println("Java DEBUG: j_getErrorMessage throwable is null");
@@ -97,6 +101,14 @@ public class SaxonCException  {
             exception = new SaxonApiException(throwable);
         }
         if(exception.getMessage() == null) {
+            if(SaxonCAPI.debug) {
+                System.err.println("Java Debug: Exception found: " + throwable.getClass().getName());
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                throwable.printStackTrace(pw);
+                System.err.println(sw.toString());
+            }
+
             return WordFactory.nullPointer();
         }
         if(SaxonCAPI.debug) {
