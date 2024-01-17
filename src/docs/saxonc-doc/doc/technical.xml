@@ -23,6 +23,7 @@
 
    <p>The following limitations apply to the 12 release:</p>
    <ul>
+      <li>ICU localization is not supported in SaxonC 12.0 to 12.3, but is supported from 12.4.</li>
       <li>The XQuery Update feature is not supported.</li>
       <li>Host language extension functions are currently not supported.</li>
    </ul>
