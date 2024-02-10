@@ -247,8 +247,10 @@ void SaxonProcessor::initialize(bool l) {
     /*
      * InitializeGraalvm run-time.
      */
-
     create_graalvm_isolate(SaxonProcessor::sxn_environ);
+#ifdef DEBUG
+    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+#endif
   } else {
 #ifdef DEBUG
     std::cerr << "SaxonProc constructor: jvm exists! jvmCreatedCPP="
@@ -260,12 +262,9 @@ void SaxonProcessor::initialize(bool l) {
       createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
 
   if (procRef == SXN_EXCEPTION) {
-    throw SaxonApiException("Failed to create Processor object");
+    throw SaxonApiException();
   }
 
-#ifdef DEBUG
-  setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
-#endif
 }
 
 void SaxonProcessor::attachCurrentThread() {
