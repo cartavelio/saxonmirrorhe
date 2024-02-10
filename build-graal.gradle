@@ -1321,11 +1321,18 @@ task saxonc_build_wheels(
 // Tasks for running the Python test suites
 
 
-project.task("all_python_test_suites") {
-  description "Runs all Python the test suites"
+tasks.register("all_python_test_suites") {
+  description "Runs all the Python test suites for HE, PE, and EE"
 }
 
 ["ee", "pe", "he"].each { edition ->
+  def editionSuites = tasks.register("python_${edition}_test_suites") {
+    description "Runs all Python the test suites for ${edition}"
+  }
+  tasks.named("all_python_test_suites") {
+    dependsOn editionSuites
+  }
+
   tasks.register("install_saxon_${edition}c_with_pip") {
     inputs.files tasks.findByName("saxon_${edition}c_local_wheel").outputs.getFiles()
     outputs.file layout.buildDirectory.file("wheels/${edition}c_wheel.txt")
@@ -1376,6 +1383,8 @@ project.task("all_python_test_suites") {
 
         executable file("${project.pythonEnv.venvBinPath.get()}/pytest")
         args "--data-dir", file(tasks.named("${edition}c_pytest_data").map { it.destinationDir }), "./test_saxonc.py"
+        environment SAXONC_HOME: saxonLicenseDir
+//        environment SAXONC_DEBUG_FLAG: "true", SAXONC_TESTSUITE_DEBUG: "true"
       }
     }
   }
@@ -1385,7 +1394,13 @@ project.task("all_python_test_suites") {
     if (testsuite == "qt3") {
       langs = ["XP31", "XQ31", "XP40", "XQ40"]
     } else {
-      langs = [""]
+      langs = ["all"]
+    }
+
+    def suiteTask = tasks.register("${edition}c_python_${testsuite}_test_suite")
+
+    editionSuites.configure {
+      dependsOn suiteTask
     }
 
     langs.each { lang ->
@@ -1440,11 +1455,13 @@ project.task("all_python_test_suites") {
             if (testsuite == "qt3") {
               args "-l", lang
             }
+            environment SAXONC_HOME: saxonLicenseDir
 //            environment SAXONC_DEBUG_FLAG: "true", SAXONC_TESTSUITE_DEBUG: "true"
           }
         }
       }
-      tasks.named("all_python_test_suites") {
+
+      suiteTask.configure {
         dependsOn "${edition}c_python_${testsuite}_test_suite${langslug}"
       }
     }
