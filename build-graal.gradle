@@ -936,7 +936,8 @@ tasks.register("pyBuildVenv") {
 
     inputs.dir layout.projectDirectory.dir("src/main/c/pypi")
     inputs.dir layout.projectDirectory.dir("src/main/c/Saxon.C.API")
-    outputs.file(layout.buildDirectory.file("${edition}c_pypi/requirements.txt"))
+    outputs.file(layout.buildDirectory.file("${edition}c_pypi/requirements.txt")) //.withPropertyName("requirementsDotTxt")
+
     outputs.files layout.buildDirectory.files("${edition}c_pypi").asFileTree.matching {
       exclude "dist/**"
     }
@@ -1077,6 +1078,7 @@ tasks.register("pyBuildVenv") {
     dependsOn 'pyBuildVenv'
     description "Install pip requirements into the current Python Venv"
 
+//    inputs.file(tasks.named("setup_${edition}c_pypi").map { it.outputs.requirementsDotTxt })
     inputs.files tasks.named("setup_${edition}c_pypi").map { it.outputs.files }
     outputs.files fileTree(project.pythonEnv.venvDirPath).matching {
       include "lib/python*/site-packages/*.dist-info"
@@ -1430,7 +1432,7 @@ project.task("all_python_test_suites") {
             if (testsuite == "qt3") {
               args "-l", lang
             }
-            environment SAXONC_DEBUG_FLAG: "true"
+//            environment SAXONC_DEBUG_FLAG: "true", SAXONC_TESTSUITE_DEBUG: "true"
           }
         }
       }
