@@ -7,6 +7,7 @@ from Environment import Environment, Spec
 from test_outcome import PyTestOutcome
 from test_report import PyTestReport
 import sys, getopt
+from urllib.parse import urlparse
 from os.path import abspath
 from os.path import isfile
 from datetime import datetime as date
@@ -351,6 +352,11 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
 
     return True
 
+def cwd_from_base_uri(base_uri: str):
+    cwd = os.path.dirname(urlparse(base_uri).path)
+    if os.path.isdir(cwd):
+        return cwd
+    raise IOError("Specified directory <%s> does not exist!" % cwd)
 
 def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, environments_i: dict,
                         environment: Environment):
@@ -368,7 +374,8 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri)
-    environment.proc.set_cwd(base_uri)
+
+    environment.proc.set_cwd(cwd_from_base_uri(base_uri))
     environment.xquery_proc.set_query_base_uri(base_uri)
     '''TODO There is a bug with the DocumentBuilder base_uri and cwd for the processor'''
     builder = environment.proc.new_document_builder()
@@ -480,7 +487,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
 
     try:
         schema_validator = environment.proc.new_schema_validator()
-        schema_validator.set_cwd(base_uri)
+        schema_validator.set_cwd(cwd_from_base_uri(base_uri))
     except PySaxonApiError as ex:
         print("*** Failed to create PySchemaValidator :" + str(ex))
 
@@ -539,7 +546,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
                 sheet = stylesheets.item_at(ii).get_node_value()
                 stylesheet_file = sheet.get_attribute_value("file")
                 print(stylesheet_file)
-                environment.xslt_proc.set_cwd(base_uri)
+                environment.xslt_proc.set_cwd(cwd_from_base_uri(base_uri))
                 environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=stylesheet_file)
         except PySaxonApiError as ex:
             print(ex)

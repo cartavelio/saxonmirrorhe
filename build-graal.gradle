@@ -1395,6 +1395,7 @@ project.task("all_python_test_suites") {
         def output_path = layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion}/${testsuite}/${DSTAMP}")
 
         inputs.files tasks.named("install_saxon_${edition}c_with_pip").map { it.outputs }
+        inputs.files layout.buildDirectory.dir("${edition}c_pypi/testsuite_driver")
         outputs.dir output_path
 
         doLast {
