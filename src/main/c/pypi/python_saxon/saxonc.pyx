@@ -4254,6 +4254,7 @@ cdef class PyXdmValue:
         """
         if value is not None:
             self.thisvptr.addXdmItem(value.derivedptr)
+            value.derivedptr.incrementRefCount()
 
      @property
      def head(self):

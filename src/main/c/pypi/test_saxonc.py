@@ -848,6 +848,32 @@ def test_CallTemplateWithResultValidation(data_dir):
         print("Error: ", err)
 
 
+def testXdmValueToString(saxonproc):
+        xdm_value = PyXdmValue()
+
+        xdm_value.add_xdm_item(saxonproc.make_string_value('foo'))
+
+        print(xdm_value)
+
+        xdm_value.add_xdm_item(saxonproc.make_string_value('bar'))
+
+        print(xdm_value)
+        assert True
+
+def testXdmValueToString2(saxonproc):
+        xdm_value = PyXdmValue()
+        avalue = saxonproc.make_string_value('foo')
+        xdm_value.add_xdm_item(avalue)
+
+        print(xdm_value)
+
+        avalue2 = saxonproc.make_string_value('bar')
+        xdm_value.add_xdm_item(avalue2)
+
+        print(xdm_value)
+        assert True
+
+
 def testCallTemplateNoParamsRaw(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='xsl:initial-template'><xsl:sequence select='42'/></xsl:template></xsl:stylesheet>")

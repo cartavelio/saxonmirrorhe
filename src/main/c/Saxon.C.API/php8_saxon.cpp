@@ -1730,6 +1730,7 @@ PHP_METHOD(XdmValue, addXdmItem) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
           xdmValue->addXdmItem((XdmItem *)value);
+          value->incrementRefCount();
           return;
         }
       }
@@ -1741,6 +1742,7 @@ PHP_METHOD(XdmValue, addXdmItem) {
         XdmItem *value = ooth->xdmItem;
         if (value != nullptr) {
           xdmValue->addXdmItem(value);
+          value->incrementRefCount();
           return;
         }
       }
@@ -1754,6 +1756,7 @@ PHP_METHOD(XdmValue, addXdmItem) {
         XdmAtomicValue *value = ooth->xdmAtomicValue;
         if (value != nullptr) {
           xdmValue->addXdmItem((XdmItem *)value);
+          value->incrementRefCount();
           return;
         }
       }
