@@ -121,7 +121,7 @@ function catalogTest($saxonProc)
     echo '<b>catalogTest:</b><br/>';
     //$proc->clearParameters();
     try {
-        $catalogFiles = array("xml/catalog.xml", "xml/catalog2.xml");
+        $catalogFiles = array("../data/catalog.xml", "../data/catalog2.xml");
         $saxonProc->setCatalogFiles($catalogFiles);
         //$saxonProc->setcwd("../");
         $trans = $saxonProc->newXslt30Processor();
