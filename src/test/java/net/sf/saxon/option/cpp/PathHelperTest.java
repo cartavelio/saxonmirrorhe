@@ -214,6 +214,7 @@ class PathHelperTest {
 
                 @Test
                 @DisplayName("Paths with a question mark in get that percent-encoded, not treated as the start of the query string")
+                @DisabledOnOs(OS.WINDOWS)
                 void pathsWithAQuestionMark() throws SaxonApiException {
                     input = cwdPath.resolve("to?not-a-query.xml");
                     expected = input.toUri();
