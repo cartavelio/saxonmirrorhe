@@ -80,7 +80,7 @@ int c_createXPathProcessor(sxnc_environment *environi,
 }
 
 sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
-                     char *xpathStr, char * encoding, sxnc_parameter *parameters,
+                     char *xpathStr, char *encoding, sxnc_parameter *parameters,
                      sxnc_property *properties, int parLen, int propLen) {
 
   if (!proc) {
@@ -126,7 +126,7 @@ sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
 }
 
 sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
-                           char *cwd, char *xpathStr, char * encoding,
+                           char *cwd, char *xpathStr, char *encoding,
                            sxnc_parameter *parameters,
                            sxnc_property *properties, int parLen, int propLen) {
 
@@ -160,8 +160,9 @@ sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
     }
   }
 
-  int64_t result = j_evaluateSingle(environi->thread, (void *)proc->xpathProc,
-                                    cwd, xpathStr, encoding, (void *)processorDataRef);
+  int64_t result =
+      j_evaluateSingle(environi->thread, (void *)proc->xpathProc, cwd, xpathStr,
+                       encoding, (void *)processorDataRef);
   if (result == -2) {
     return NULL;
   }
@@ -173,7 +174,7 @@ sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
 }
 
 bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
-                           char *cwd, char *xpathStr, char * encoding,
+                           char *cwd, char *xpathStr, char *encoding,
                            sxnc_parameter *parameters,
                            sxnc_property *properties, int parLen, int propLen) {
 

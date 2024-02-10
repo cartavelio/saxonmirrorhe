@@ -12,8 +12,8 @@
 
 #include <libsaxon-@@edition@@c-@@VERSION@@.h>
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #if defined __linux__ || defined __APPLE__
 #include <stdlib.h>
 #include <string.h>
@@ -56,8 +56,9 @@ static const int SXN_EXCEPTION = -2;
 static const int SXN_UNSET = -1;
 
 /*!    \file  SaxonCGlue.h
-*   \brief This C header file contains a number of factory functions for running SaxonC C/C++ APIs, including GraalVM create and destroy functions.
-*/
+ *   \brief This C header file contains a number of factory functions for
+ * running SaxonC C/C++ APIs, including GraalVM create and destroy functions.
+ */
 
 //#define DEBUG
 
@@ -84,7 +85,8 @@ typedef struct {
 //===============================================================================================//
 
 /** <code>sxnc_parameter</code>. This struct captures details of parameters used
- * for transformations, queries, and XPath expressions, as (string, value) pairs. <p/>
+ * for transformations, queries, and XPath expressions, as (string, value)
+ * pairs. <p/>
  */
 typedef struct {
   char *name;
@@ -96,7 +98,8 @@ typedef struct {
 //===============================================================================================//
 
 /** <code>sxnc_property</code>. This struct captures details of properties used
- * for transformations, queries, and XPath expressions, as (string, string) pairs. <p/>
+ * for transformations, queries, and XPath expressions, as (string, string)
+ * pairs. <p/>
  */
 typedef struct {
   char *name;
@@ -104,8 +107,8 @@ typedef struct {
                   Java object. */
 } sxnc_property;
 
-/**! <code>sxnc_value</code>. This struct is used to capture the XdmValue and its
- * type information. <p/>
+/**! <code>sxnc_value</code>. This struct is used to capture the XdmValue and
+ * its type information. <p/>
  */
 typedef struct {
   int64_t xdmvalue; /*!< Internal use only. The value given as a Java object. */
@@ -123,7 +126,6 @@ extern int64_t cpp;
 typedef void *(*allocFn)(size_t length);
 
 extern const char *failure;
-
 
 /**
  * Get resources directory.
@@ -147,9 +149,9 @@ int detach_graalvm_thread(sxnc_environment *env);
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 
 /**
- * Create a pointer to the Saxon Processor. Here we pass in the processor pointer
- * which should have been allocated memory space in advance. Return status true
- * = success, false = failed to create Saxon Processor.
+ * Create a pointer to the Saxon Processor. Here we pass in the processor
+ * pointer which should have been allocated memory space in advance. Return
+ * status true = success, false = failed to create Saxon Processor.
  */
 int c_createSaxonProcessor(sxnc_environment *environi,
                            sxnc_processor *processor, int license);

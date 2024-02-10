@@ -61,29 +61,29 @@ int attach_graalvm_thread(sxnc_environment *env) {
 }
 
 int detach_graalvm_thread(sxnc_environment *env) {
-  graal_isolatethread_t *curthread =
-  graal_get_current_thread(((env)->isolate));
-  if(!curthread) {
-    if(getenv("SAXONC_DEBUG_FLAG")){
-        fprintf(stdout,"Cur detach thread pointer not in isolate \n");
-        fflush(stdout);
+  graal_isolatethread_t *curthread = graal_get_current_thread(((env)->isolate));
+  if (!curthread) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "Cur detach thread pointer not in isolate \n");
+      fflush(stdout);
     }
     return 1;
   }
-  if(getenv("SAXONC_DEBUG_FLAG")){
+  if (getenv("SAXONC_DEBUG_FLAG")) {
     fprintf(stdout, "detach: Cur thread pointer %p\n", (void *)curthread);
     fflush(stdout);
   }
   if (graal_detach_thread(curthread) != 0) {
-    if(getenv("SAXONC_DEBUG_FLAG")){
-        fprintf(stdout, "graal_detach_thread error\n");
-        fflush(stdout);
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "graal_detach_thread error\n");
+      fflush(stdout);
     }
-      return 1;
+    return 1;
   }
   (env)->thread = (env)->mainthread;
-  if(getenv("SAXONC_DEBUG_FLAG")) {
-    fprintf(stdout, "graal_dettach_thread pointer %p\n", (void *)((env)->thread));
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    fprintf(stdout, "graal_dettach_thread pointer %p\n",
+            (void *)((env)->thread));
     fflush(stdout);
   }
 
@@ -162,7 +162,8 @@ void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap,
   (*parLen)++;
   if ((*parLen) >= (*parCap)) {
     (*parCap) *= 2;
-    sxnc_parameter * temp = realloc(*parameters, sizeof(sxnc_parameter) * (*parCap));
+    sxnc_parameter *temp =
+        realloc(*parameters, sizeof(sxnc_parameter) * (*parCap));
     if (temp == NULL) {
       /* XXX: handle the error */
       return;
@@ -187,12 +188,13 @@ void setProperty(sxnc_property **properties, int *propLen, int *propCap,
 
   if (((*propLen) + 1) >= (*propCap)) {
     (*propCap) *= 2;
-        sxnc_property * temp = realloc(*properties, sizeof(sxnc_property) * (*propCap));
+    sxnc_property *temp =
+        realloc(*properties, sizeof(sxnc_property) * (*propCap));
     if (temp == NULL) {
       /* XXX: handle the error */
       return;
     }
-    *properties  = temp;
+    *properties = temp;
   }
   int nameLen = strlen(name) + 1;
   char *newName = (char *)malloc(sizeof(char) * nameLen);

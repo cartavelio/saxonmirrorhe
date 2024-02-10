@@ -21,7 +21,6 @@ class SaxonApiException;
 class XdmValue;
 class XdmItem;
 
-
 enum class UnprefixedElementMatchingPolicy {
 
   /**
@@ -96,35 +95,36 @@ public:
    */
   void setBaseURI(const char *uriStr);
 
-
-    //! Get the static base URI for XPath expressions compiled using this
-    //! XPathCompiler.
-    /**
-     * @return base URI as string of the xPathProcessor
-     */
-    const char * getBaseURI();
+  //! Get the static base URI for XPath expressions compiled using this
+  //! XPathCompiler.
+  /**
+   * @return base URI as string of the xPathProcessor
+   */
+  const char *getBaseURI();
 
   //! Compile and evaluate an XPath expression
   /**
    *  @param xpathStr - supplied as a character string
-   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
+   * @param encoding -  the encoding of the string. If not specified then the
+   * platform default encoding is used.
    *  @return XdmValue - representing the results of the expression.
    * @throws SaxonApiException
    */
-  XdmValue *evaluate(const char *xpathStr, const char* encoding = nullptr);
+  XdmValue *evaluate(const char *xpathStr, const char *encoding = nullptr);
 
   //! Compile and evaluate an XPath expression. The result is expected to be a
   //! single XdmItem or nullptr
   /**
     * @param xpathStr - supplied as a character string
-    * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
+    * @param encoding -  the encoding of the string. If not specified then the
+   platform default encoding is used.
     * @return XdmItem - XdmItem object or nullptr if the expression returns an
    empty sequence.
    * If the expression returns a sequence of more than one item, any items after
    the first are ignored.
    * @throws SaxonApiException
   */
-  XdmItem *evaluateSingle(const char *xpathStr, const char* encoding = nullptr);
+  XdmItem *evaluateSingle(const char *xpathStr, const char *encoding = nullptr);
 
   /** Set the context item
    */
@@ -142,11 +142,13 @@ public:
   //! Evaluate the XPath expression, returning the effective boolean value of
   //! the result.
   /** @param xpathStr - supplied as a character string
-   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
+   * @param encoding -  the encoding of the string. If not specified then the
+   * platform default encoding is used.
    *  @return bool
    * @throws SaxonApiException
    */
-  bool effectiveBooleanValue(const char *xpathStr, const char* encoding = nullptr);
+  bool effectiveBooleanValue(const char *xpathStr,
+                             const char *encoding = nullptr);
 
   /**
    * Set a parameter value used in the query
@@ -244,18 +246,21 @@ public:
 
   //! Set the policy for matching unprefixed element names in XPath expressions
   /**
-  * @param policy the policy to be used, possible values: DEFAULT_NAMESPACE = 0,
-  * ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 2
-  *
-  */
-  void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
+   * @param policy the policy to be used, possible values: DEFAULT_NAMESPACE =
+   * 0, ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 2
+   *
+   */
+  void
+  setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
 
-  UnprefixedElementMatchingPolicy convertEnumPolicy(int n) { return static_cast<UnprefixedElementMatchingPolicy>(n); }
+  UnprefixedElementMatchingPolicy convertEnumPolicy(int n) {
+    return static_cast<UnprefixedElementMatchingPolicy>(n);
+  }
 
   //!! Get the policy for matching unprefixed element names in XPath expressions
   /**
    * @return the policy being used
-  */
+   */
   UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
 
   //! Import a schema namespace
@@ -350,7 +355,7 @@ private:
   SaxonProcessor *proc; /*!< SaxonProcessor pointer to object. This is the
                            object that created the XPathProcessor */
   std::string cwdXP;    /*!< current working directory */
-  char * xp_baseURI;
+  char *xp_baseURI;
   // jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI
   // */
   int64_t cppXP; /*!< The XPathProcessor underlying Java object  */

@@ -17,7 +17,7 @@ XdmValue::XdmValue(const XdmValue &other) {
   xdmSize = other.xdmSize;
   jValues = other.jValues;
   toStringValue = other.toStringValue;
-  //values.resize(0);
+  // values.resize(0);
   values_cap = other.values_cap;
   relinquished_values = new char[values_cap];
   memset(relinquished_values, 0, sizeof(*relinquished_values) * values_cap);
@@ -32,20 +32,20 @@ const char *XdmValue::toString() {
     return nullptr;
   }
   char *toStringValuei = nullptr;
-  //if (toStringValue == nullptr) {
-    allocFn fn = operator new;
-    if (count == 1) {
-      toStringValuei =
-          xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
-                          (void *)(values[0]->getUnderlyingValue()));
-    } else {
-      if (jValues == -1) {
-        jValues = getUnderlyingValue();
-      }
-
-      toStringValuei = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread,
-                                            (void *)fn, (void *)jValues);
+  // if (toStringValue == nullptr) {
+  allocFn fn = operator new;
+  if (count == 1) {
+    toStringValuei =
+        xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
+                        (void *)(values[0]->getUnderlyingValue()));
+  } else {
+    if (jValues == -1) {
+      jValues = getUnderlyingValue();
     }
+
+    toStringValuei = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread,
+                                           (void *)fn, (void *)jValues);
+  }
   //}
   return toStringValuei;
 }
@@ -56,7 +56,7 @@ XdmValue::XdmValue(int64_t valRef) {
   initialize();
   XdmItem *value = new XdmItem(valRef);
   values_cap = 1;
-  values = new XdmItem*[values_cap];
+  values = new XdmItem *[values_cap];
   relinquished_values = new char[values_cap];
   relinquished_values[0] = 0;
   addXdmItem(value);
@@ -75,8 +75,8 @@ XdmValue::XdmValue(int64_t val, bool arr) {
   }
 
   int xdmSizei = results[0];
-  values_cap =xdmSizei;
-  values = new XdmItem*[values_cap];
+  values_cap = xdmSizei;
+  values = new XdmItem *[values_cap];
   relinquished_values = new char[values_cap];
   memset(relinquished_values, 0, sizeof(*relinquished_values) * values_cap);
   int typeRef = 0;
@@ -85,7 +85,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
     typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                  (void *)results[p]);
     if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "C++ XdmValue - typeRef= " << typeRef << std::endl;
+      std::cerr << "C++ XdmValue - typeRef= " << typeRef << std::endl;
     }
     if (typeRef == -2) {
       std::cerr << "Exception thrown while creating XdmValue from array"
@@ -111,7 +111,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
       std::cerr << "Error creating XdmValue from array" << std::endl;
     }
   }
-  operator delete (results);
+  operator delete(results);
 }
 
 XdmValue::~XdmValue() {
@@ -119,16 +119,17 @@ XdmValue::~XdmValue() {
   if (xdmSize > 0 && values != nullptr) {
 
     for (int i = 0; i < xdmSize; i++) {
-      if (relinquished_values[i] == (char)0 && values[i] != nullptr && values[i]->getRefCount() < 1) {
+      if (relinquished_values[i] == (char)0 && values[i] != nullptr &&
+          values[i]->getRefCount() < 1) {
         delete values[i];
         values[i] = nullptr;
       }
     }
-    delete [] values;
-    delete [] relinquished_values;
+    delete[] values;
+    delete[] relinquished_values;
     values = nullptr;
     relinquished_values = nullptr;
-    values_cap =0;
+    values_cap = 0;
   }
   if (valueType != nullptr) {
     delete valueType;
@@ -149,38 +150,38 @@ XdmValue::~XdmValue() {
 void XdmValue::addXdmItem(XdmItem *val) {
 
   if (val != nullptr) {
-    if(values == nullptr){
+    if (values == nullptr) {
       values_cap = 1;
-      values = new XdmItem*[values_cap];
+      values = new XdmItem *[values_cap];
       relinquished_values = new char[values_cap];
       relinquished_values[0] = 0;
     }
 
-
-    if(xdmSize == values_cap) {
-        //resizing values pointer array
-        XdmItem ** newValues = new XdmItem*[values_cap*2];
-        char * new_relinquish_val  = new char[values_cap*2];
-        memset(new_relinquish_val, 0, sizeof(*new_relinquish_val) * values_cap*2);
-        for(int i= 0; i< values_cap; i++) {
-            newValues[i] = values[i];
-            new_relinquish_val[i] = relinquished_values[i];
-        }
-        delete [] values;
-        delete [] relinquished_values;
-        values = newValues;
-        relinquished_values = new_relinquish_val;
-        values_cap *=2;
+    if (xdmSize == values_cap) {
+      // resizing values pointer array
+      XdmItem **newValues = new XdmItem *[values_cap * 2];
+      char *new_relinquish_val = new char[values_cap * 2];
+      memset(new_relinquish_val, 0,
+             sizeof(*new_relinquish_val) * values_cap * 2);
+      for (int i = 0; i < values_cap; i++) {
+        newValues[i] = values[i];
+        new_relinquish_val[i] = relinquished_values[i];
+      }
+      delete[] values;
+      delete[] relinquished_values;
+      values = newValues;
+      relinquished_values = new_relinquish_val;
+      values_cap *= 2;
     }
     values[xdmSize] = val;
-    //values.push_back(val);
-    //val->incrementRefCount();
+    // values.push_back(val);
+    // val->incrementRefCount();
     xdmSize++;
     if (jValues >= 0) {
       jValues = -1;
     }
     if (toStringValue != nullptr) {
-      operator delete (toStringValue);
+      operator delete(toStringValue);
       toStringValue = nullptr;
     }
   }
@@ -189,17 +190,17 @@ void XdmValue::addXdmItem(XdmItem *val) {
 void XdmValue::addUnderlyingValue(int64_t val) {
   XdmItem *valuei = new XdmItem(val);
   valuei->incrementRefCount();
-    if(xdmSize == values_cap) {
-        //resizing values pointer array
-        XdmItem ** newValues = new XdmItem*[values_cap*2];
-        for(int i= 0; i< values_cap; i++) {
-            newValues[i] = values[i];
-        }
-        delete values;
-        values = newValues;
-        values_cap *=2;
+  if (xdmSize == values_cap) {
+    // resizing values pointer array
+    XdmItem **newValues = new XdmItem *[values_cap * 2];
+    for (int i = 0; i < values_cap; i++) {
+      newValues[i] = values[i];
     }
-    values[xdmSize] = valuei;
+    delete values;
+    values = newValues;
+    values_cap *= 2;
+  }
+  values[xdmSize] = valuei;
   xdmSize++;
   jValues = -1; // TODO clear Graalvm reference from ObjectHandles pool
 }

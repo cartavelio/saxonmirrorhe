@@ -41,8 +41,8 @@ zend_class_entry *xdmArray_ce;
 
 zend_class_entry *xsltExecutable_ce;
 
-#include "php8_SchemaValidator.cpp"
 #include "php8_DocumentBuilder.cpp"
+#include "php8_SchemaValidator.cpp"
 #include "php8_XPathProcessor.cpp"
 #include "php8_XQueryProcessor.cpp"
 #include "php8_Xslt30Processor.cpp"
@@ -146,7 +146,7 @@ PHP_METHOD(SaxonProcessor, __construct) {
 
     saxonProc->setcwd(cwd);
 
-    delete [] cwd;
+    delete[] cwd;
 #else
     char cwd[256];
 
@@ -558,24 +558,21 @@ PHP_METHOD(SaxonProcessor, setCatalog) {
   }
 }
 
-
 PHP_METHOD(SaxonProcessor, setCatalogFiles) {
   SaxonProcessor *saxonProcessor;
   zval *items_zval;
   size_t len;
   HashTable *arr_hash;
 
-
   zval *val;
   long num_key;
   int argument_length = 0;
   zend_string *key;
-  int i =0;
+  int i = 0;
 
-  const char ** catalogFiles = nullptr;
+  const char **catalogFiles = nullptr;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &items_zval) ==
-      FAILURE) {
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &items_zval) == FAILURE) {
     RETURN_NULL();
   }
 
@@ -592,7 +589,7 @@ PHP_METHOD(SaxonProcessor, setCatalogFiles) {
 
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
       if (Z_TYPE_P(val) == IS_STRING) {
-        catalogFiles[i]  = Z_STRVAL_P(val);
+        catalogFiles[i] = Z_STRVAL_P(val);
 
         i++;
       } else {
@@ -603,7 +600,7 @@ PHP_METHOD(SaxonProcessor, setCatalogFiles) {
 
     if (catalogFiles != nullptr) {
       saxonProcessor->setCatalogFiles(catalogFiles, argument_length);
-      delete [] catalogFiles;
+      delete[] catalogFiles;
     }
   }
 }
@@ -630,7 +627,6 @@ PHP_METHOD(SaxonProcessor, setcwd) {
   }
 }
 
-
 PHP_METHOD(SaxonProcessor, parseJsonFromString) {
   SaxonProcessor *saxonProcessor;
   char *source;
@@ -640,10 +636,11 @@ PHP_METHOD(SaxonProcessor, parseJsonFromString) {
   if (ZEND_NUM_ARGS() == 1 &&
       zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  } else   if (ZEND_NUM_ARGS() == 2 &&
-     zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &source, &len1, &encoding, &len2) == FAILURE) {
-     RETURN_NULL();
-   }
+  } else if (ZEND_NUM_ARGS() == 2 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &source, &len1,
+                                   &encoding, &len2) == FAILURE) {
+    RETURN_NULL();
+  }
 
   zend_object *pobj = Z_OBJ_P(getThis());
   saxonProcessor_object *obj =
@@ -661,7 +658,8 @@ PHP_METHOD(SaxonProcessor, parseJsonFromString) {
         value->incrementRefCount();
         zend_object *vobj = Z_OBJ_P(return_value);
         xdmValue_object *xdmVObj =
-            (xdmValue_object *)((char *)vobj - XtOffsetOf(xdmValue_object, std));
+            (xdmValue_object *)((char *)vobj -
+                                XtOffsetOf(xdmValue_object, std));
         assert(xdmVObj != nullptr);
 
         xdmVObj->xdmValue = value;
@@ -716,14 +714,12 @@ PHP_METHOD(SaxonProcessor, parseJsonFromFile) {
   RETURN_NULL();
 }
 
-
-
 PHP_METHOD(SaxonProcessor, parseXmlFromString) {
   SaxonProcessor *saxonProcessor;
   SchemaValidator *validator = nullptr;
   zval *oth = nullptr;
   char *source;
-  char * encoding = nullptr;
+  char *encoding = nullptr;
   size_t len1, len2;
 
   if (ZEND_NUM_ARGS() > 3) {
@@ -733,13 +729,14 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
   if (ZEND_NUM_ARGS() == 1 &&
       zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &len1) == FAILURE) {
     RETURN_NULL();
-  }   else if (ZEND_NUM_ARGS() == 2 &&
+  } else if (ZEND_NUM_ARGS() == 2 &&
              zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &source, &len1,
                                    &oth) == FAILURE) {
     RETURN_NULL();
-  }  else if (ZEND_NUM_ARGS() == 3 &&
-              zend_parse_parameters(ZEND_NUM_ARGS(), "szs", &source, &len1, &oth, &encoding, &len2) == FAILURE) {
-            RETURN_NULL();
+  } else if (ZEND_NUM_ARGS() == 3 &&
+             zend_parse_parameters(ZEND_NUM_ARGS(), "szs", &source, &len1, &oth,
+                                   &encoding, &len2) == FAILURE) {
+    RETURN_NULL();
   }
 
   zend_object *pobj = Z_OBJ_P(getThis());
@@ -760,7 +757,8 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
       }
     }
 
-    XdmNode *node = saxonProcessor->parseXmlFromString(source, encoding, validator);
+    XdmNode *node =
+        saxonProcessor->parseXmlFromString(source, encoding, validator);
     if (node != nullptr) {
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
         RETURN_NULL();
@@ -2219,9 +2217,8 @@ PHP_METHOD(XdmNode, getChildNode) {
   RETURN_NULL();
 }
 
-
 PHP_METHOD(XdmNode, getChildren) {
- zval  retval;
+  zval retval;
   /*long indexi;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
     RETURN_NULL();
@@ -2235,42 +2232,40 @@ PHP_METHOD(XdmNode, getChildren) {
 
   if (xdmNode != nullptr) {
     int count = xdmNode->getChildCount();
-      if (count > 0) {
+    if (count > 0) {
 
-        XdmNode **childNodes = xdmNode->getChildren(false);
+      XdmNode **childNodes = xdmNode->getChildren(false);
 
-        if (childNodes != nullptr) {
-       ///// creating PHP array
-            zend_array *ret = zend_new_array(count);
-            zend_ulong idx = 0;
+      if (childNodes != nullptr) {
+        ///// creating PHP array
+        zend_array *ret = zend_new_array(count);
+        zend_ulong idx = 0;
 
-        for(int i=0; i< count; i++) {
-            XdmNode *cNode = childNodes[i];
-            cNode->incrementRefCount();
-           if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
-                   RETURN_NULL();
-            }
-            zend_object *zobj = Z_OBJ_P(&retval);
-            xdmNode_object *vobj =
-                (xdmNode_object *)((char *)zobj -
-                                   XtOffsetOf(xdmNode_object, std));
-            assert(vobj != nullptr);
-            vobj->xdmNode = cNode;
-            zend_hash_index_add(ret, idx, &retval);
-            idx++;
+        for (int i = 0; i < count; i++) {
+          XdmNode *cNode = childNodes[i];
+          cNode->incrementRefCount();
+          if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
+            RETURN_NULL();
+          }
+          zend_object *zobj = Z_OBJ_P(&retval);
+          xdmNode_object *vobj =
+              (xdmNode_object *)((char *)zobj -
+                                 XtOffsetOf(xdmNode_object, std));
+          assert(vobj != nullptr);
+          vobj->xdmNode = cNode;
+          zend_hash_index_add(ret, idx, &retval);
+          idx++;
         }
-          delete [] childNodes;
-          RETVAL_ARR(ret);
-          return;
-
-       }
-       /// end of creating PHP array
-        }
+        delete[] childNodes;
+        RETVAL_ARR(ret);
+        return;
+      }
+      /// end of creating PHP array
     }
+  }
 
   RETURN_NULL();
 }
-
 
 PHP_METHOD(XdmNode, axisNodes) {
   long axisValue;
@@ -2297,19 +2292,20 @@ PHP_METHOD(XdmNode, axisNodes) {
 
       if (axisValue > 0) {
 
-        XdmNode ** nodes = xdmNode->axisNodes(xdmNode->convertEnumXdmAxis(axisValue));
+        XdmNode **nodes =
+            xdmNode->axisNodes(xdmNode->convertEnumXdmAxis(axisValue));
         int axisCount = xdmNode->axisNodeCount();
 
         if (axisCount > 0 && nodes != nullptr) {
-          XdmValue * resultValue = new XdmValue();
-          for(int i = 0; i< axisCount; i++) {
+          XdmValue *resultValue = new XdmValue();
+          for (int i = 0; i < axisCount; i++) {
             nodes[i]->incrementRefCount();
             resultValue->addXdmItem(nodes[i]);
           }
           zend_object *zobj = Z_OBJ_P(return_value);
           xdmValue_object *vobj =
               (xdmValue_object *)((char *)zobj -
-                                 XtOffsetOf(xdmValue_object, std));
+                                  XtOffsetOf(xdmValue_object, std));
           assert(vobj != nullptr);
           vobj->xdmValue = resultValue;
           return;
@@ -2319,7 +2315,6 @@ PHP_METHOD(XdmNode, axisNodes) {
   }
   RETURN_NULL();
 }
-
 
 PHP_METHOD(XdmNode, getParent) {
   XdmNode *xdmNode;
@@ -2352,9 +2347,9 @@ PHP_METHOD(XdmNode, getParent) {
   RETURN_NULL();
 }
 
-    PHP_METHOD(XdmNode, getAttributeNode) {
-    zval * retval;
-    long indexi = 0;
+PHP_METHOD(XdmNode, getAttributeNode) {
+  zval *retval;
+  long indexi = 0;
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
     RETURN_NULL();
   }
@@ -2369,35 +2364,32 @@ PHP_METHOD(XdmNode, getParent) {
     int count = xdmNode->getAttributeCount();
     if (count > 0 && indexi < count) {
 
-        XdmNode **attNodes = xdmNode->getAttributeNodes();
-        XdmNode * attNode = attNodes[indexi];
+      XdmNode **attNodes = xdmNode->getAttributeNodes();
+      XdmNode *attNode = attNodes[indexi];
 
-        attNode->incrementRefCount();
-        if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
-                   RETURN_NULL();
+      attNode->incrementRefCount();
+      if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+        RETURN_NULL();
+      }
+      zend_object *zobj = Z_OBJ_P(return_value);
+      xdmNode_object *vobj =
+          (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
+      assert(vobj != nullptr);
+      vobj->xdmNode = attNode;
+      for (int i = 0; i < count; i++) {
+        if (indexi != i) {
+          delete attNodes[i];
         }
-        zend_object *zobj = Z_OBJ_P(return_value);
-        xdmNode_object *vobj =
-                (xdmNode_object *)((char *)zobj -
-                                   XtOffsetOf(xdmNode_object, std));
-        assert(vobj != nullptr);
-        vobj->xdmNode = attNode;
-        for(int i =0; i< count; i ++) {
-            if(indexi != i) {
-                delete attNodes[i];
-            }
-        }
-        delete [] attNodes;
-        return;
-
-       }
-
+      }
+      delete[] attNodes;
+      return;
+    }
   }
   RETURN_NULL();
 }
 
 PHP_METHOD(XdmNode, getAttributeNodes) {
-    zval retval;
+  zval retval;
   /*if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
     RETURN_NULL();
   }*/
@@ -2411,33 +2403,32 @@ PHP_METHOD(XdmNode, getAttributeNodes) {
   if (xdmNode != nullptr) {
     int count = xdmNode->getAttributeCount();
     if (count > 0) {
-       ///// creating PHP array
-        XdmNode **attNodes = xdmNode->getAttributeNodes();
-        if(attNodes != nullptr) {
-            zend_array *ret = zend_new_array(count);
-            zend_ulong idx = 0;
+      ///// creating PHP array
+      XdmNode **attNodes = xdmNode->getAttributeNodes();
+      if (attNodes != nullptr) {
+        zend_array *ret = zend_new_array(count);
+        zend_ulong idx = 0;
 
-        for(int i=0; i< count; i++) {
-            XdmNode *attNode = attNodes[i];
-            attNode->incrementRefCount();
-           if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
-                   RETURN_NULL();
-            }
-            zend_object *zobj = Z_OBJ_P(&retval);
-            xdmNode_object *vobj =
-                (xdmNode_object *)((char *)zobj -
-                                   XtOffsetOf(xdmNode_object, std));
-            assert(vobj != nullptr);
-            vobj->xdmNode = attNode;
-            zend_hash_index_add(ret, idx, &retval);
-            idx++;
+        for (int i = 0; i < count; i++) {
+          XdmNode *attNode = attNodes[i];
+          attNode->incrementRefCount();
+          if (object_init_ex(&retval, xdmNode_ce) != SUCCESS) {
+            RETURN_NULL();
+          }
+          zend_object *zobj = Z_OBJ_P(&retval);
+          xdmNode_object *vobj =
+              (xdmNode_object *)((char *)zobj -
+                                 XtOffsetOf(xdmNode_object, std));
+          assert(vobj != nullptr);
+          vobj->xdmNode = attNode;
+          zend_hash_index_add(ret, idx, &retval);
+          idx++;
         }
-          delete [] attNodes;
-          RETVAL_ARR(ret);
-          return;
-
-       }
-       /// end of creating PHP array
+        delete[] attNodes;
+        RETVAL_ARR(ret);
+        return;
+      }
+      /// end of creating PHP array
     }
   }
   RETURN_NULL();
@@ -2449,7 +2440,7 @@ PHP_METHOD(XdmNode, getAttributeValue) {
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &len1) == FAILURE) {
     RETURN_NULL();
   }
-  XdmNode *xdmNode;    // c++ object
+  XdmNode *xdmNode; // c++ object
   zend_object *zobj = Z_OBJ_P(getThis());
   xdmNode_object *obj =
       (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
@@ -2983,11 +2974,11 @@ PHP_METHOD(XdmMap, __destruct) {
 
 PHP_METHOD(XdmMap, __toString) {
   XdmMap *xdmMap;
-  //zend_string *str;
+  // zend_string *str;
 
   if (zend_parse_parameters_none() == FAILURE) {
-  		RETURN_THROWS();
-  	}
+    RETURN_THROWS();
+  }
   zend_object *oobj = Z_OBJ_P(getThis());
   xdmMap_object *obj =
       (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
@@ -3575,17 +3566,41 @@ zend_function_entry SaxonProcessor_methods[] = {
                ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromString,
                                        arginfo_saxonc_parseXmlFromString,
                                        ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, parseXmlFromFile,arginfo_saxonc_parseXmlFromFile,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, parseXmlFromUri,arginfo_saxonc_parseXmlFromUri,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor,newXPathProcessor,arginfo_saxonc_newXPathProcessor,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, newDocumentBuilder,arginfo_saxonc_newDocumentBuilder,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor,newXslt30Processor,arginfo_saxonc_newXslt30Processor,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, newXQueryProcessor,arginfo_saxonc_newXQueryProcessor,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, newSchemaValidator,arginfo_saxonc_newSchemaValidator,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, setCatalog, arginfo_saxonc_setCatalog,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor, setCatalogFiles, arginfo_saxonc_setCatalogFiles,ZEND_ACC_PUBLIC)
-        PHP_ME(SaxonProcessor,setConfigurationProperty,arginfo_saxonc_setConfigurationProperty,ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, parseXmlFromFile,
+                   arginfo_saxonc_parseXmlFromFile,
+                   ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromUri,
+                                           arginfo_saxonc_parseXmlFromUri,
+                                           ZEND_ACC_PUBLIC)
+                PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,
+                       ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
+                                               newXPathProcessor,
+                                               arginfo_saxonc_newXPathProcessor,
+                                               ZEND_ACC_PUBLIC)
+                    PHP_ME(
+                        SaxonProcessor, newDocumentBuilder,
+                        arginfo_saxonc_newDocumentBuilder,
+                        ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
+                                                newXslt30Processor,
+                                                arginfo_saxonc_newXslt30Processor,
+                                                ZEND_ACC_PUBLIC)
+                        PHP_ME(SaxonProcessor, newXQueryProcessor,
+                               arginfo_saxonc_newXQueryProcessor,
+                               ZEND_ACC_PUBLIC)
+                            PHP_ME(
+                                SaxonProcessor, newSchemaValidator,
+                                arginfo_saxonc_newSchemaValidator,
+                                ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
+                                                        setCatalog,
+                                                        arginfo_saxonc_setCatalog,
+                                                        ZEND_ACC_PUBLIC)
+                                PHP_ME(SaxonProcessor, setCatalogFiles,
+                                       arginfo_saxonc_setCatalogFiles,
+                                       ZEND_ACC_PUBLIC)
+                                    PHP_ME(
+                                        SaxonProcessor,
+                                        setConfigurationProperty,
+                                        arginfo_saxonc_setConfigurationProperty,
+                                        ZEND_ACC_PUBLIC)
     // PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr,
     // ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor, version, arginfo_saxonc_version, ZEND_ACC_PUBLIC)
@@ -3668,22 +3683,40 @@ zend_function_entry xdmNode_methods[] = {
                                                 arginfo_saxonc_xdmnode_getChildCount,
                                                 ZEND_ACC_PUBLIC)
 
- PHP_ME(XdmNode, axisNodes, arginfo_saxonc_xdmnode_axisNodes,
-                        ZEND_ACC_PUBLIC)
+                        PHP_ME(XdmNode, axisNodes,
+                               arginfo_saxonc_xdmnode_axisNodes,
+                               ZEND_ACC_PUBLIC)
 
-
-                        PHP_ME(XdmNode, getAttributeCount,arginfo_saxonc_xdmnode_getAttributeCount,ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmNode, getChildNode,arginfo_saxonc_xdmnode_getChildNode,ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmNode, getChildren,arginfo_saxonc_xdmnode_getChildren,ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmNode, getParent, arginfo_saxonc_xdmnode_getParent, ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmNode, getAttributeNode, arginfo_saxonc_xdmnode_getAttributeNode, ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmNode, getAttributeNodes, arginfo_saxonc_xdmnode_getAttributeNodes, ZEND_ACC_PUBLIC)
-                        PHP_ME(XdmNode, getAttributeValue,arginfo_saxonc_xdmnode_getAttributeValue,ZEND_ACC_PUBLIC)
+                            PHP_ME(
+                                XdmNode, getAttributeCount,
+                                arginfo_saxonc_xdmnode_getAttributeCount,
+                                ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getChildNode,
+                                                        arginfo_saxonc_xdmnode_getChildNode,
+                                                        ZEND_ACC_PUBLIC)
+                                PHP_ME(XdmNode, getChildren,
+                                       arginfo_saxonc_xdmnode_getChildren,
+                                       ZEND_ACC_PUBLIC)
+                                    PHP_ME(XdmNode, getParent,
+                                           arginfo_saxonc_xdmnode_getParent,
+                                           ZEND_ACC_PUBLIC)
                                         PHP_ME(
-                                            XdmNode, getTypedValue,
-                                            arginfo_saxonc_xdmnode_getTypedValue,
-                                            ZEND_ACC_PUBLIC){nullptr, nullptr,
-                                                             nullptr}};
+                                            XdmNode, getAttributeNode,
+                                            arginfo_saxonc_xdmnode_getAttributeNode,
+                                            ZEND_ACC_PUBLIC)
+                                            PHP_ME(
+                                                XdmNode, getAttributeNodes,
+                                                arginfo_saxonc_xdmnode_getAttributeNodes,
+                                                ZEND_ACC_PUBLIC)
+                                                PHP_ME(
+                                                    XdmNode, getAttributeValue,
+                                                    arginfo_saxonc_xdmnode_getAttributeValue,
+                                                    ZEND_ACC_PUBLIC)
+                                                    PHP_ME(
+                                                        XdmNode, getTypedValue,
+                                                        arginfo_saxonc_xdmnode_getTypedValue,
+                                                        ZEND_ACC_PUBLIC){
+                                                        nullptr, nullptr,
+                                                        nullptr}};
 
 zend_function_entry xdmAtomicValue_methods[] = {
     PHP_ME(XdmAtomicValue, __construct, arginfo_saxonc_xdmatomic_construct,
@@ -3732,8 +3765,9 @@ zend_function_entry xdmMap_methods[] = {
     PHP_ME(XdmMap, __construct, arginfo_saxonc_xdmmap_construct,
            ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
         PHP_ME(XdmMap, __destruct, arginfo_saxonc_xdmmap_destruct,
-               ZEND_ACC_PUBLIC)
-               PHP_ME(XdmMap, __toString,arginfo_saxonc_xdmmap_toString,ZEND_ACC_PUBLIC)
+               ZEND_ACC_PUBLIC) PHP_ME(XdmMap, __toString,
+                                       arginfo_saxonc_xdmmap_toString,
+                                       ZEND_ACC_PUBLIC)
             PHP_ME(XdmMap, mapSize, arginfo_saxonc_xdmmap_mapSize,
                    ZEND_ACC_PUBLIC)
                 PHP_ME(XdmMap, get, arginfo_saxonc_xdmmap_get, ZEND_ACC_PUBLIC)

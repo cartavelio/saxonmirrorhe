@@ -50,15 +50,15 @@ XdmNode::~XdmNode() {
   }
   // if(getRefCount() <= 1) {
   if (baseURI != nullptr) {
-    operator delete ((char *)baseURI);
+    operator delete((char *)baseURI);
     baseURI = nullptr;
   }
   if (nodeName != nullptr) {
-    operator delete ((char *)nodeName);
+    operator delete((char *)nodeName);
     nodeName = nullptr;
   }
   if (localName != nullptr) {
-    operator delete ((char *)localName);
+    operator delete((char *)localName);
     localName = nullptr;
   }
 
@@ -84,7 +84,6 @@ XdmNode::~XdmNode() {
    }     */
 
   //}
-
 }
 
 const char *XdmNode::getLocalName() {
@@ -159,13 +158,13 @@ const char *XdmNode::getStringValue() { return XdmItem::getStringValue(); }
 
 const char *XdmNode::toString() {
   const char *nodeToStringi = nullptr;
-  //if (nodeToString == nullptr) {
-    allocFn fn = operator new;
-    nodeToStringi = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
-                                   (void *)fn, (void *)value);
-    if (nodeToStringi == nullptr) {
-      throw SaxonApiException();
-    }
+  // if (nodeToString == nullptr) {
+  allocFn fn = operator new;
+  nodeToStringi = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
+                                  (void *)fn, (void *)value);
+  if (nodeToStringi == nullptr) {
+    throw SaxonApiException();
+  }
   //}
   return nodeToStringi;
 }
@@ -234,7 +233,7 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
     if (cached) {
       attrValues = attrValuesi;
     }
-    operator delete (results);
+    operator delete(results);
     return attrValuesi;
   }
 }
@@ -266,7 +265,7 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
     valuesi[p - 1] = tempNode;
   }
 
-  operator delete (results);
+  operator delete(results);
 
   return valuesi;
 }
@@ -316,7 +315,7 @@ XdmNode **XdmNode::getChildren(bool cached) {
 
 XdmNode *XdmNode::getChild(int i, bool cached) {
 
-  if( i < 0) {
+  if (i < 0) {
     return nullptr;
   }
 
@@ -338,8 +337,8 @@ XdmNode *XdmNode::getChild(int i, bool cached) {
     int64_t childRef =
         j_getChild(SaxonProcessor::sxn_environ->thread, (void *)value, i);
 
-    if(childRef == SXN_UNSET) {
-        return nullptr;
+    if (childRef == SXN_UNSET) {
+      return nullptr;
     }
 
     child = new XdmNode(this, childRef, UNKNOWN);

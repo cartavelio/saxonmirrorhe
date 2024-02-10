@@ -189,13 +189,13 @@ protected:
     values_cap = 0;
     values = nullptr;
     relinquished_values = nullptr;
-    //relinquished_values[0] = 0;
+    // relinquished_values[0] = 0;
   }
 
   char *valueType; /*!< Cached. The type of the XdmValue */
 
-  XdmItem ** values; /*!< Cached. XdmItems in the XdmValue */
-  char * relinquished_values;
+  XdmItem **values; /*!< Cached. XdmItems in the XdmValue */
+  char *relinquished_values;
   int values_cap;
   int xdmSize;  /*!< Cached. The count of items in the XdmValue */
   int refCount; /*!< The reference count of this XdmValue. If >1 this object

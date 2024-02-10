@@ -17,11 +17,11 @@
 EXTERN_SAXONC
 
 /*!    \file   SaxonCXPath.h
-    \brief  <code>SaxonCXPath.h</code> provides the C API for XPath processing. This file contains a set of functions to compile and execute XPath expressions.
+    \brief  <code>SaxonCXPath.h</code> provides the C API for XPath processing.
+   This file contains a set of functions to compile and execute XPath
+   expressions.
 
 */
-
-
 
 /**
  * Create a boxed Boolean value
@@ -66,8 +66,8 @@ int64_t longValue(sxnc_environment *environi, long l);
 int64_t getJavaStringValue(sxnc_environment *environi, const char *str);
 
 /**
- * A Constructor for internal use. Create an underlying representation for the XdmValue based on the target type.
- * Conversion is applied if possible.
+ * A Constructor for internal use. Create an underlying representation for the
+ * XdmValue based on the target type. Conversion is applied if possible.
  * @param type - the target type of the value
  * @param str - value to convert
  */
@@ -87,12 +87,16 @@ sxnc_value *xdmValue(sxnc_environment *environi, const char *type,
 
 /**
  * Initialise the Saxon Processor and XPath processor.
- * This utility function is used to allocate memory on the heap, therefore is required to be called before execution of XPath.
+ * This utility function is used to allocate memory on the heap, therefore is
+ * required to be called before execution of XPath.
  *
- * @param environi - GraalVM environment held as the struct sxnc_environment. This function calls malloc on the pointer.
- * @param processor - Pointer to the Saxon Processor which is represented as the struct sxnc_processor
- *              and is used for creating the XPath processor. This function calls malloc on the pointer.
- * @param xpath - Pointer to the sxnc_xpath struct which is used for the execution of XPath expressions. This function calls malloc on the pointer
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
+ * This function calls malloc on the pointer.
+ * @param processor - Pointer to the Saxon Processor which is represented as the
+ * struct sxnc_processor and is used for creating the XPath processor. This
+ * function calls malloc on the pointer.
+ * @param xpath - Pointer to the sxnc_xpath struct which is used for the
+ * execution of XPath expressions. This function calls malloc on the pointer
  */
 int c_createXPathProcessor(sxnc_environment *environi,
                            sxnc_processor *processor, sxnc_xpath *xpath);
@@ -101,61 +105,76 @@ int c_createXPathProcessor(sxnc_environment *environi,
  * Compile and evaluate an XPath expression, supplied as a character string,
  * with properties and parameters required by the XPath expression.
  * @param environi - GraalVM environment
- * @param proc - Pointer to the XPath Processor used for creating the XPath executable
+ * @param proc - Pointer to the XPath Processor used for creating the XPath
+ *executable
  * @param cwd - Current working directory
  * @param xpathStr - A string containing the source text of the XPath expression
- * @param encoding -  the encoding of the string. Accept null. If not specified then the platform default encoding is used.
- * @param parameters - Array of parameters for the XPath expression, as mappings (string, value)
- * @param properties - Array of properties for the XPath expression, as mappings (string, string).
- *                  This could contain the context node, source as string or file name, etc.
+ * @param encoding -  the encoding of the string. Accept null. If not specified
+ *then the platform default encoding is used.
+ * @param parameters - Array of parameters for the XPath expression, as mappings
+ *(string, value)
+ * @param properties - Array of properties for the XPath expression, as mappings
+ *(string, string). This could contain the context node, source as string or
+ *file name, etc.
  * @param parLen - The length of the parameters array
  * @param propLen - The length of the properties array
- * @return sxnc_value - The sxnc_value struct encapsulates the returned XdmValue object or NULL if the expression returns an empty sequence.
+ * @return sxnc_value - The sxnc_value struct encapsulates the returned XdmValue
+ *object or NULL if the expression returns an empty sequence.
  **/
 
 sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
-                     char *xpathStr, char * encoding, sxnc_parameter *parameters,
+                     char *xpathStr, char *encoding, sxnc_parameter *parameters,
                      sxnc_property *properties, int parLen, int propLen);
 
 /**
- * Compile and evaluate an XPath expression for which the result is expected to be a single XdmItem or NULL.
- * The XPath expression is supplied as a character string,
- * with properties and parameters required by the XPath expression.
+ * Compile and evaluate an XPath expression for which the result is expected to
+ *be a single XdmItem or NULL. The XPath expression is supplied as a character
+ *string, with properties and parameters required by the XPath expression.
  * @param environi - GraalVM environment
- * @param proc - Pointer to the XPath Processor used for creating the XPath executable
+ * @param proc - Pointer to the XPath Processor used for creating the XPath
+ *executable
  * @param cwd - Current working directory
  * @param xpathStr - A string containing the source text of the XPath expression
- * @param encoding -  the encoding of the string. Accept null. If not specified then the platform default encoding is used.
- * @param parameters - Array of parameters for the XPath expression, as mappings (string, value)
- * @param properties - Array of properties for the XPath expression, as mappings (string, string).
- *                 This could contain the context node, source as string or file name, etc.
+ * @param encoding -  the encoding of the string. Accept null. If not specified
+ *then the platform default encoding is used.
+ * @param parameters - Array of parameters for the XPath expression, as mappings
+ *(string, value)
+ * @param properties - Array of properties for the XPath expression, as mappings
+ *(string, string). This could contain the context node, source as string or
+ *file name, etc.
  * @param parLen - The length of the parameters array
  * @param propLen - The length of the properties array
- * @return sxnc_value - The sxnc_value struct encapsulates the returned XdmItem object or NULL if the expression returns an empty sequence.
+ * @return sxnc_value - The sxnc_value struct encapsulates the returned XdmItem
+ *object or NULL if the expression returns an empty sequence.
  **/
 sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
-                           char *cwd, char *xpathStr, char * encoding,
+                           char *cwd, char *xpathStr, char *encoding,
                            sxnc_parameter *parameters,
                            sxnc_property *properties, int parLen, int propLen);
 
 /**
- * Evaluate an XPath expression, returning the effective boolean value of the result.
+ * Evaluate an XPath expression, returning the effective boolean value of the
+ *result.
  *
  * @param environi - GraalVM environment
- * @param proc - Pointer to the XPath Processor used for creating the XPath executable
+ * @param proc - Pointer to the XPath Processor used for creating the XPath
+ *executable
  * @param cwd - Current working directory
  * @param xpathStr - A string containing the source text of the XPath expression
- * @param encoding -  the encoding of the string. Accept null. If not specified then the platform default encoding is used.
- * @param parameters - Array of parameters for the XPath expression, as mappings (string, value)
- * @param properties - Array of properties for the XPath expression, as mappings (string, string).
- *                 This could contain the context node, source as string or file name, etc.
+ * @param encoding -  the encoding of the string. Accept null. If not specified
+ *then the platform default encoding is used.
+ * @param parameters - Array of parameters for the XPath expression, as mappings
+ *(string, value)
+ * @param properties - Array of properties for the XPath expression, as mappings
+ *(string, string). This could contain the context node, source as string or
+ *file name, etc.
  * @param parLen - The length of the parameters array
  * @param propLen - The length of the properties array
  *
  **/
 
 bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
-                           char *cwd, char *xpathStr, char * encoding,
+                           char *cwd, char *xpathStr, char *encoding,
                            sxnc_parameter *parameters,
                            sxnc_property *properties, int parLen, int propLen);
 
@@ -180,20 +199,23 @@ int size(sxnc_environment *environi, sxnc_value val);
 // /**
 // * Get the n'th item in the value, counting from zero.
 // *
-// * @param n - the item that is required, counting the first item in the sequence
+// * @param n - the item that is required, counting the first item in the
+// sequence
 // * as item zero
-// * @return the n'th item in the sequence making up the value, counting from zero
+// * @return the n'th item in the sequence making up the value, counting from
+// zero
 // */
-//sxnc_value *itemAt(sxnc_environment *environi, sxnc_value, int i);
+// sxnc_value *itemAt(sxnc_environment *environi, sxnc_value, int i);
 
 // /**
 // * Convert the Get the n'th item in the value, counting from zero.
 // *
 // * @param n the item that is required, counting the first item in the sequence
 // * as item zero
-// * @return the n'th item in the sequence making up the value, counting from zero
+// * @return the n'th item in the sequence making up the value, counting from
+// zero
 // */
-//int64_t getvalue(sxnc_environment *environi, sxnc_value);
+// int64_t getvalue(sxnc_environment *environi, sxnc_value);
 
 /**
  * Get the string value of the item. For a node, this gets the string value
@@ -208,8 +230,8 @@ const char *getStringValue(sxnc_environment *environi, sxnc_value value);
 /**
  * Get the integer value of the item.
  * @param value - Value to convert to integer
- * @param failure_value - If the value is not an integer then we can specify the value
- * to return. Default is zero.
+ * @param failure_value - If the value is not an integer then we can specify the
+ *value to return. Default is zero.
  *
  **/
 
@@ -246,8 +268,8 @@ float getFloatValue(sxnc_environment *environi, sxnc_value value,
 /**
  * Get the double value of the item.
  * @param value - Value to convert to double
- * @param failureVal - If the Value is not a double then we can specify the value
- * to return. Default is zero.
+ * @param failureVal - If the Value is not a double then we can specify the
+ *value to return. Default is zero.
  *
  **/
 double getDoubleValue(sxnc_environment *environi, sxnc_value value,

@@ -39,8 +39,9 @@ const char *XdmArray::toString() {
   return str;
 }
 
-const char * XdmArray::getStringValue(){
-    throw SaxonApiException("An array has no string value", "FOTY0014", nullptr, -1);
+const char *XdmArray::getStringValue() {
+  throw SaxonApiException("An array has no string value", "FOTY0014", nullptr,
+                          -1);
 }
 
 XdmArray *XdmArray::put(int n, XdmValue *valuei) {

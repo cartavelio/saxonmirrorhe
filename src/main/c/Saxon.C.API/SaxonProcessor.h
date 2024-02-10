@@ -35,7 +35,6 @@
 #include <string>
 #include <vector>
 
-
 #include "DocumentBuilder.h"
 #include "SaxonApiException.h"
 #include "SaxonCGlue.h"
@@ -68,7 +67,6 @@ void operator delete(void *, std::size_t) noexcept;
 
 #endif
 
-
 class Xslt30Processor;
 
 class XQueryProcessor;
@@ -96,7 +94,6 @@ class XsltExecutable;
 class DocumentBuilder;
 
 class SaxonApiException;
-
 
 typedef enum eXdmType {
   XDM_VALUE = 0,
@@ -241,10 +238,12 @@ public:
    * of a zero-length string (and potentially other strings, in future)
    *
    * @param str the String value. NULL is taken as equivalent to "".
-   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
+   * @param encoding -  the encoding of the string. If not specified then the
+   * platform default encoding is used.
    * @return the corresponding StringValue
    */
-  XdmAtomicValue *makeStringValue(std::string str, const char* encoding = nullptr);
+  XdmAtomicValue *makeStringValue(std::string str,
+                                  const char *encoding = nullptr);
 
   //! Factory method. Unlike the constructor, this avoids creating a new
   //! StringValue in the case
@@ -253,10 +252,12 @@ public:
    * of a zero-length string (and potentially other strings, in future)
    *
    * @param str - the char pointer array. nullptr is taken as equivalent to "".
-   * @param encoding -  the encoding of the string. If not specified then the platform default encoding is used.
+   * @param encoding -  the encoding of the string. If not specified then the
+   * platform default encoding is used.
    * @return the corresponding StringValue
    */
-  XdmAtomicValue *makeStringValue(const char *str, const char* encoding = nullptr);
+  XdmAtomicValue *makeStringValue(const char *str,
+                                  const char *encoding = nullptr);
 
   /*!
    * Factory method: makes either an Int64Value or a BigIntegerValue depending
@@ -450,20 +451,24 @@ public:
   /**
    *
    * @param source the source document as a lexical string
-   * @param encoding the encoding used to decode the source string. If not specified then platform default encoding is used
-   * @param validator can be used to supply a SchemaValidator to validate the document. Default is null
+   * @param encoding the encoding used to decode the source string. If not
+   * specified then platform default encoding is used
+   * @param validator can be used to supply a SchemaValidator to validate the
+   * document. Default is null
    * @return an XdmNode
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
    */
-  XdmNode *parseXmlFromString(const char *source, const char * encoding = nullptr,
+  XdmNode *parseXmlFromString(const char *source,
+                              const char *encoding = nullptr,
                               SchemaValidator *validator = nullptr);
 
   //! Parse a source document file and return it as an XdmNode.
   /**
    *
    * @param source the filename of the source document
-   * @param validator can be used to supply a SchemaValidator to validate the document. Default is null
+   * @param validator can be used to supply a SchemaValidator to validate the
+   * document. Default is null
    * @return an XdmNode
    * @throws SaxonApiException  if there ia a failure in the parsing of the XML
    * file
@@ -475,7 +480,8 @@ public:
   /**
    *
    * @param source the URI of the source document
-   * @param validator can be used to supply a SchemaValidator to validate the document. Default is null
+   * @param validator can be used to supply a SchemaValidator to validate the
+   * document. Default is null
    * @return an XdmNode
    * @throws SaxonApiException if there ia failure in the parsing of the XML
    * file
@@ -483,22 +489,24 @@ public:
   XdmNode *parseXmlFromUri(const char *source,
                            SchemaValidator *validator = nullptr);
 
-
   //! Parse a lexical representation of the JSON and return it as an
   //! XdmValue
   /**
    *
    * @param source the JSON as a lexical string
-   * @param encoding the encoding of the source argument. Argument can be omitted and NULL accepted to use the default platform encoding
+   * @param encoding the encoding of the source argument. Argument can be
+   * omitted and NULL accepted to use the default platform encoding
    * @return an XdmValue
    * @throws SaxonApiException if there is a failure in the parsing of the JSON
    */
-  XdmValue *parseJsonFromString(const char *source, const char * encoding=NULL);
+  XdmValue *parseJsonFromString(const char *source,
+                                const char *encoding = NULL);
 
   //! Parse a source JSON file and return it as an XdmValue.
   /**
    *
-   * @param source the filename of the JSON. This is a full path filename or a URI
+   * @param source the filename of the JSON. This is a full path filename or a
+   * URI
    * @return an XdmValue
    * @throws SaxonApiException  if there ia a failure in the parsing of the XML
    * file
@@ -600,13 +608,13 @@ public:
    */
   void setCatalog(const char *catalogFile);
 
-    /**
-     * set catalog files to be used in Saxon
-     * @param catalogFiles - the catalog file names array to the catalog
-     * @param length  - number of catalog files in the array argument
-     * @throws SaxonApiException if fail to set the catalog file
-     */
-    void setCatalogFiles(const char ** catalogFiles, int length);
+  /**
+   * set catalog files to be used in Saxon
+   * @param catalogFiles - the catalog file names array to the catalog
+   * @param length  - number of catalog files in the array argument
+   * @throws SaxonApiException if fail to set the catalog file
+   */
+  void setCatalogFiles(const char **catalogFiles, int length);
 
   //! Set a configuration property specific to the processor in use.
   /**
@@ -719,13 +727,13 @@ public:
                        cross compiled SaxonC library. */
   std::string cwd;  /*!< current working directory */
 
-  //! Utility method required for python and PHP extension to delete string created in
-  //! the C++ code-base
+  //! Utility method required for python and PHP extension to delete string
+  //! created in the C++ code-base
   static void deleteString(const char *data) {
     if (data != nullptr) {
       // std::cerr<<"static method SaxonProcessor.deleteString - deleting string
       // data"<<std::endl;
-      operator delete ((char *)data);
+      operator delete((char *)data);
       data = nullptr;
     }
   }
@@ -767,7 +775,7 @@ protected:
                      from the underlying Java code via JNI */
 
 private:
-  //void createException(const char *message = nullptr);
+  // void createException(const char *message = nullptr);
 
   void initialize(bool l);
 

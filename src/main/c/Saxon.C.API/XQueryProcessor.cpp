@@ -35,7 +35,7 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
   if (cppXQ == SXN_UNSET) {
     throw SaxonApiException(
         "Error: Failed to create the XPathProcessor internal object");
-  } else if(cppXQ == SXN_EXCEPTION) {
+  } else if (cppXQ == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
 
@@ -225,7 +225,7 @@ void XQueryProcessor::setUpdating(bool updating) {
 void XQueryProcessor::executeQueryToFile(const char *infilename,
                                          const char *ofilename,
                                          const char *query,
-                                         const char* encoding) {
+                                         const char *encoding) {
   SaxonProcessor::attachCurrentThread();
 
   setProperty("resources", proc->getResourcesDirectory());
@@ -238,7 +238,7 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
 
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -252,7 +252,7 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
 
 XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
                                                const char *query,
-                                               const char* encoding) {
+                                               const char *encoding) {
   SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
@@ -265,7 +265,7 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
       SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
@@ -282,7 +282,7 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
 
 const char *XQueryProcessor::executeQueryToString(const char *infilename,
                                                   const char *query,
-                                                  const char* encoding) {
+                                                  const char *encoding) {
   SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
@@ -293,9 +293,9 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
       SaxonProcessor::createParameterJArray(parameters, properties);
   char *result = j_executeQueryToString(
       SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef,
-      (char *)cwdXQ.c_str(),(char *)query, (char *)encoding,
+      (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                      : (void *)processorDataRef));
+                                             : (void *)processorDataRef));
 
   if (result == nullptr) {
     throw SaxonApiException();
