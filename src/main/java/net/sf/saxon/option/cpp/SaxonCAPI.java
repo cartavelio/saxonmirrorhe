@@ -48,6 +48,9 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import java.net.MalformedURLException;
@@ -1618,8 +1621,7 @@ public class SaxonCAPI {
 
 
     /**
-     * Resolve the file with the cwd
-     * deprecated method
+     * Resolve a filename against the cwd and return a File pointing to it
      *
      * @param processor
      * @param cwd       - Current working directory
@@ -1629,18 +1631,17 @@ public class SaxonCAPI {
      * @throws SaxonApiException if error in resolving file
      */
     public static File resolveFile(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
-        String pathStr = null;
         try {
-            pathStr = (new URI(resolveFileToSource(processor, cwd, filename, nature).getSystemId())).getPath();
-        } catch (URISyntaxException e) {
+            Path cwdPath = Paths.get(cwd);
+            Path filePath = Paths.get(filename);
+            Path resolvedPath = cwdPath.resolve(filePath);
+            if(SaxonCAPI.debug) {
+                System.err.println("DEBUG resolveFile path = " + resolvedPath);
+            }
+            return resolvedPath.toFile();
+        } catch (InvalidPathException e) {
             throw  new SaxonApiException(e);
         }
-
-        if(SaxonCAPI.debug) {
-            System.err.println("DEBUG resolveFile path ="+pathStr);
-        }
-        return new File(pathStr);
-
     }
 
     public static String escapeURIPathParam(String path) {
