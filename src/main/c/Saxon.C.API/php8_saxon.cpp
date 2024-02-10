@@ -1612,6 +1612,7 @@ PHP_METHOD(XdmValue, __destruct) {
   if (xdmValue != nullptr) {
     xdmValue->decrementRefCount();
     if (xdmValue->getRefCount() < 1) {
+      xdmValue->resetRelinquishedItems();
       delete xdmValue;
       xdmValue = nullptr;
     } /*else {
@@ -1653,6 +1654,7 @@ PHP_METHOD(XdmValue, getHead) {
         RETURN_NULL();
       } else {
         item->incrementRefCount();
+        item->incrementRefCount(); // incremented as the item is still apart of the XdmValue
         zend_object *oobj = Z_OBJ_P(return_value);
         xdmItem_object *vobj =
             (xdmItem_object *)((char *)oobj - XtOffsetOf(xdmItem_object, std));
@@ -1690,6 +1692,7 @@ PHP_METHOD(XdmValue, itemAt) {
         return;
       } else {
         item->incrementRefCount();
+        item->incrementRefCount(); // incremented as the item is still apart of the XdmValue
         zend_object *oobj = Z_OBJ_P(return_value);
         xdmItem_object *vobj =
             (xdmItem_object *)((char *)oobj - XtOffsetOf(xdmItem_object, std));

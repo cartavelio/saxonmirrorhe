@@ -1,6 +1,8 @@
 <?php
 /*declare(strict_types=1);*/
 use PHPUnit\Framework\TestCase;
+
+// Download phpunit file: wget -O phpunit.phar https://phar.phpunit.de/phpunit-10.phar
 final class SaxonCPHPTests extends TestCase
 {
     protected static $saxonProc;
@@ -30,10 +32,10 @@ final class SaxonCPHPTests extends TestCase
             print("Test: testVersion");
         }
         $this->assertStringContainsString(
-            'SaxonC 11.1 running',
+            '12.4',
             self::$saxonProc->version()
         );
-        $this->assertStringContainsString('11.0 from Saxonica', self::$saxonProc->version());
+        $this->assertStringContainsString('from Saxonica', self::$saxonProc->version());
     }
     public function testSchemaAware(): void
     {
