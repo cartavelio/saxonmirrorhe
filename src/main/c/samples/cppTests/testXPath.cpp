@@ -333,6 +333,7 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
         cout << "toString()=" << resultStr << endl;
         operator delete((char *)resultStr);
       }
+      sresult->success++;
     }
     delete resultValues;
   } catch (SaxonApiException &e) {
@@ -343,6 +344,37 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
     sresult->failure++;
     sresult->failureList.push_back("testXPathAttrValues2");
   }
+}
+
+// Test case on XdmValue without any item (i.e. EmptySequence)
+void testEmptyXdmValueToString(SaxonProcessor *processor, XPathProcessor *xpath,
+                     sResultCount *sresult) {
+      cout << endl << "Test testEmptyXdmValueToString:" << endl;
+    XdmValue * value = new XdmValue();
+
+    try {
+
+        const char * result = value->toString();
+        if(result == nullptr) {
+               sresult->failure++;
+               sresult->failureList.push_back("testEmptyXdmValueToString");
+        } else {
+                cout << "XdmValue().toString() (should be empty)=" << result << endl;
+                operator delete((char *)result);
+            }
+            sresult->success++;
+
+
+    } catch(SaxonApiException &e) {
+
+               const char *message = e.getMessage();
+               cout << "Error Message = " << message << endl;
+
+               sresult->failure++;
+               sresult->failureList.push_back("testEmptyXdmValueToString");
+             }
+
+
 }
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
@@ -506,6 +538,11 @@ int main() {
        << endl
        << endl;
   testXPathValues(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testEmptyXdmValueToString(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl

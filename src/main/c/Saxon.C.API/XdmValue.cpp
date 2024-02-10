@@ -28,13 +28,14 @@ XdmValue::XdmValue(const XdmValue &other) {
 
 const char *XdmValue::toString() {
   int count = size();
-  if (count == 0) {
-    return "";
-  }
-  char *toStringValuei = nullptr;
-  // if (toStringValue == nullptr) {
   allocFn fn = operator new;
-  if (count == 1) {
+  char *toStringValuei = nullptr;
+
+  if (count == 0) {
+    toStringValuei =
+        xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
+                        nullptr);
+  } else if (count == 1) {
     toStringValuei =
         xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
                         (void *)(values[0]->getUnderlyingValue()));
@@ -46,7 +47,7 @@ const char *XdmValue::toString() {
     toStringValuei = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread,
                                            (void *)fn, (void *)jValues);
   }
-  //}
+
   return toStringValuei;
 }
 
