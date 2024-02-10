@@ -553,7 +553,11 @@ PHP_METHOD(SaxonProcessor, setCatalog) {
   if (saxonProcessor != nullptr) {
 
     if (catalogFile != nullptr) {
-      saxonProcessor->setCatalog(catalogFile);
+      try {
+        saxonProcessor->setCatalog(catalogFile);
+      } catch (SaxonApiException &e) {
+             zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+      }
     }
   }
 }
@@ -599,8 +603,12 @@ PHP_METHOD(SaxonProcessor, setCatalogFiles) {
     ZEND_HASH_FOREACH_END();
 
     if (catalogFiles != nullptr) {
-      saxonProcessor->setCatalogFiles(catalogFiles, argument_length);
-      delete[] catalogFiles;
+      try {
+        saxonProcessor->setCatalogFiles(catalogFiles, argument_length);
+        delete[] catalogFiles;
+      } catch (SaxonApiException &e) {
+             zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+      }
     }
   }
 }
