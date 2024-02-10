@@ -121,7 +121,7 @@ task buildSaxonGlue(
 task buildTransform(type: Exec) {
   dependsOn 'buildSaxonGlue'
   workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion}"
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion3}"
   doLast {
     println "built transform wrapper"
   }
@@ -130,7 +130,7 @@ task buildTransform(type: Exec) {
 task buildQuery(type: Exec) {
   dependsOn 'buildSaxonGlue'
   workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion}"
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion3}"
   doLast {
     println "built query wrapper"
   } 
@@ -139,7 +139,7 @@ task buildQuery(type: Exec) {
 task buildValidate(type: Exec) {
   dependsOn 'buildSaxonGlue'
   workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion}"
+  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion3}"
   doLast {
     println "built validate wrapper"
   }
@@ -400,9 +400,9 @@ tasks.register("graal_hec_jar", Jar) {
   inputs.files fileTree(layout.projectDirectory.dir("src/main/resources/net"))
   inputs.files fileTree(layout.buildDirectory.dir("xerces"))
   inputs.files fileTree(layout.buildDirectory.dir("icu"))
-  outputs.file(layout.buildDirectory.file("c/jars/hec/saxon-he-${saxonVersion}.jar")).withPropertyName("saxonJar")
+  outputs.file(layout.buildDirectory.file("c/jars/hec/saxon-he-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
-  archiveBaseName = "saxon-he-${saxonVersion}"
+  archiveBaseName = "saxon-he-${saxonVersion3}"
   destinationDirectory = file(layout.buildDirectory.dir("c/jars/hec"))
   manifest {
     attributes "Project-Name": "Saxon-HE"
@@ -439,9 +439,9 @@ task graal_pec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("c/jars/pec/saxon-pe-${saxonVersion}.jar")).withPropertyName("saxonJar")
+  outputs.file(layout.buildDirectory.file("c/jars/pec/saxon-pe-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
-  archiveBaseName = "saxon-pe-${saxonVersion}"
+  archiveBaseName = "saxon-pe-${saxonVersion3}"
   destinationDirectory = file("${buildDir}/c/jars/pec")
   manifest {
     attributes "Project-Name": "Saxon-PE"
@@ -512,9 +512,9 @@ task graal_eec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("c/jars/eec/saxon-ee-${saxonVersion}.jar")).withPropertyName("saxonJar")
+  outputs.file(layout.buildDirectory.file("c/jars/eec/saxon-ee-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
-  archiveBaseName = "saxon-ee-${saxonVersion}"
+  archiveBaseName = "saxon-ee-${saxonVersion3}"
   destinationDirectory = file("${buildDir}/c/jars/eec")
   manifest {
     attributes "Project-Name": "Saxon-EE"
@@ -600,7 +600,7 @@ def textReplacementFilter(String edition, String location='../', String libpath=
                              + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n')))
   
   return { line ->
-    line.replace('@@VERSION@@', saxonVersion)
+    line.replace('@@VERSION@@', saxonVersion3)
       .replace('@@VERSION.3@@', saxonVersion3)
       .replace('@@edition@@', edition)
       .replace('@@EDITION@@', edition.toUpperCase())
@@ -629,7 +629,7 @@ def textReplacementFilter(String edition, String location='../', String libpath=
   tasks.register("${edition}c_graalJar", Jar) {
     description "Build the ${edition.toUpperCase()} jar file for GraalVM"
 
-    archiveBaseName = "libsaxon-${edition}c-${saxonVersion}"
+    archiveBaseName = "libsaxon-${edition}c-${saxonVersion3}"
     destinationDirectory = layout.buildDirectory.dir("libs")
 
     def jarSrcDirProvider = tasks.named("graal_setup_${edition}c_jar").map {it.destinationDir }
@@ -649,16 +649,17 @@ def textReplacementFilter(String edition, String location='../', String libpath=
     def saxonSourceJar = tasks.named("${edition}c_graalJar").map { it.archiveFile }
     inputs.file saxonSourceJar
     outputs.files fileTree(layout.buildDirectory.dir("c")).matching {
-      include "libsaxon-${edition}c-${saxonVersion}.*"
-      include "libsaxon-${edition}c-${saxonVersion}_dynamic.h"
+      include "libsaxon-${edition}c-${saxonVersion3}.*"
+      include "libsaxon-${edition}c-${saxonVersion3}_dynamic.h"
       include "graal_isolate*"
     }
 
     doLast {
       exec {
+        workingDir "${buildDir}/c"
         executable nativeImage(graalEdition)
         args "-cp", file(saxonSourceJar.get()),
-                "-o", file(layout.buildDirectory.file("c/libsaxon-${edition}c-${saxonVersion}")),
+                "-o", "libsaxon-${edition}c-${saxonVersion3}",
                 "--no-fallback", "-H:Path=${file(layout.buildDirectory.file("c")).toString()}",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
@@ -672,6 +673,16 @@ def textReplacementFilter(String edition, String location='../', String libpath=
                 "--shared"
       }
     }
+
+    if (systemOs.isMacOsX()) {
+      doLast {
+        exec {
+          workingDir "${buildDir}/c"
+          executable "/usr/bin/install_name_tool"
+          args "-id", "libsaxon-${edition}c-${saxonVersion3}.dylib", "libsaxon-${edition}c-${saxonVersion3}.dylib"
+        }
+      }        
+    }
   }
 
   task "${edition}c_graalImageExe"(
@@ -682,8 +693,8 @@ def textReplacementFilter(String edition, String location='../', String libpath=
       def image = nativeImage(graalEdition)
       exec {
         commandLine image,
-                "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar",
-                "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-${edition}c-${saxonVersion}",
+                "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion3}.jar",
+                "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-${edition}c-${saxonVersion3}",
                 "--no-fallback", "-H:Path=${buildDir}/c",
                 "-H:+AllowVMInspection",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
@@ -708,7 +719,7 @@ task all_saxonc_releases() {
   def graalEdition = "graal_ce_home"
 
   def arch = System.getProperty("os.arch") 
-  def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-${arch}-v${saxonVersion}"
+  def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-${arch}-v${saxonVersion3}"
   def saxoncReleaseDir = "${buildDir}/releases/${saxoncReleaseName}"
 
   task "setup_${edition}c_release"(
@@ -962,7 +973,7 @@ tasks.register("pyBuildVenv") {
         into SAXONC_HOME
         from layout.buildDirectory.dir("c")
         include "graal*.h"
-        include "libsaxon-${edition}c-${saxonVersion}.*"
+        include "libsaxon-${edition}c-${saxonVersion3}.*"
       }
     }
 
@@ -980,7 +991,7 @@ tasks.register("pyBuildVenv") {
 //        into "${buildDir}/wheels/${systemOsName}/${edition}c_pypi/${libdir}"
 //        from "${buildDir}/c"
 //        include "graal*.h"
-//        include "libsaxon-${edition}c-${saxonVersion}.*"
+//        include "libsaxon-${edition}c-${saxonVersion3}.*"
 //      }
 //    }
 
@@ -1133,7 +1144,7 @@ tasks.register("pyBuildVenv") {
         into layout.buildDirectory.dir("${wheelDir}/${libdir}")
         from layout.buildDirectory.dir("c")
         include "graal*.h"
-        include "libsaxon-${edition}c-${saxonVersion}.*"
+        include "libsaxon-${edition}c-${saxonVersion3}.*"
       }
     }
 
@@ -1414,7 +1425,7 @@ tasks.register("all_python_test_suites") {
       tasks.register("${edition}c_python_${testsuite}_test_suite${langslug}") {
         dependsOn "install_saxon_${edition}c_with_pip"
 
-        def output_path = layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion}/${testsuite}/${DSTAMP}")
+        def output_path = layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion3}/${testsuite}/${DSTAMP}")
 
         inputs.files tasks.named("install_saxon_${edition}c_with_pip").map { it.outputs }
         inputs.files layout.buildDirectory.dir("${edition}c_pypi/testsuite_driver")
