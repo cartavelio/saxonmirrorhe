@@ -63,10 +63,11 @@ public class PathHelper {
      */
     public Source resolveToSource(Configuration config, String cwd, String path, String nature) throws SaxonApiException {
         Source source;
-        Path cwdPath = null;
-        URI cwdURI = null;
         if (cwd == null || cwd == "") {
             throw new SaxonApiException("C API call error - cwd must be set to an absolute system path");
+        }
+        if (debug) {
+            System.err.println("DEBUG cwd: <" + cwd + ">");
         }
         try {
             if (isURIWithAllowedScheme(path)) {
