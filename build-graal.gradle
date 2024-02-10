@@ -673,16 +673,6 @@ def textReplacementFilter(String edition, String location='../', String libpath=
                 "--shared"
       }
     }
-
-    if (systemOs.isMacOsX()) {
-      doLast {
-        exec {
-          workingDir "${buildDir}/c"
-          executable "/usr/bin/install_name_tool"
-          args "-id", "libsaxon-${edition}c-${saxonVersion3}.dylib", "libsaxon-${edition}c-${saxonVersion3}.dylib"
-        }
-      }        
-    }
   }
 
   task "${edition}c_graalImageExe"(
@@ -865,6 +855,16 @@ task all_saxonc_releases() {
         include "JLINE2.txt"
         include "LICENSE.txt"
       }
+    }
+
+    if (systemOs.isMacOsX()) {
+      doLast {
+        exec {
+          workingDir "${saxoncReleaseDir}/libs/darwin"
+          executable "/usr/bin/install_name_tool"
+          args "-id", "@rpath/libsaxon-${edition}c-${saxonVersion3}.dylib", "libsaxon-${edition}c-${saxonVersion3}.dylib"
+        }
+      }        
     }
   }
 
