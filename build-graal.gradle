@@ -1360,15 +1360,22 @@ project.task("all_python_test_suites") {
     }
   }
 
+  tasks.register("${edition}c_pytest_data", Copy) {
+    from layout.projectDirectory.dir("src/main/c/samples/data")
+    into layout.buildDirectory.dir("${edition}c_pypi/samples/data")
+  }
+
   tasks.register("${edition}c_pytest") {
     dependsOn "install_saxon_${edition}c_with_pip"
+
+    inputs.dir(tasks.named("${edition}c_pytest_data").map { it.destinationDir })
 
     doLast {
       exec {
         workingDir layout.buildDirectory.dir("${edition}c_pypi")
 
         executable file("${project.pythonEnv.venvBinPath.get()}/pytest")
-        args "./test_saxonc.py"
+        args "--data-dir", file(tasks.named("${edition}c_pytest_data").map { it.destinationDir }), "./test_saxonc.py"
       }
     }
   }
