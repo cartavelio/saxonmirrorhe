@@ -884,10 +884,6 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
 XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 
-  if (sourcefile == nullptr) {
-
-    return nullptr;
-  }
 
   setProperty("resources", resources_dir.c_str());
 

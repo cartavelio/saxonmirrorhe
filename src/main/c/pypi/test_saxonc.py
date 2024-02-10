@@ -877,17 +877,17 @@ def testEmptySequenceXdmValue(saxonproc):
     assert result == None
 
 
-def transform_to_value(saxonproc, data_dir):
+def testTransform_to_value(saxonproc, data_dir):
 
     input_xml =os.path.join(data_dir, "input.xml")
     stylesheet = os.path.join(data_dir, "test.xslt")
-    xsltproc = proc.new_xslt30_processor()
+    xsltproc = saxonproc.new_xslt30_processor()
 
-    input_xdm = proc.parse_xml(xml_file_name=input_xml)
+    input_xdm = saxonproc.parse_xml(xml_file_name=input_xml)
     assert "PyXdmNode" in str(type(input_xdm))
 
 
-    stylesheet_xdm = proc.parse_xml(xml_file_name=stylesheet)
+    stylesheet_xdm = saxonproc.parse_xml(xml_file_name=stylesheet)
     assert "PyXdmNode" in str(type(stylesheet_xdm))
 
 
@@ -896,12 +896,27 @@ def transform_to_value(saxonproc, data_dir):
 
     result_xdm = executable.transform_to_value(xdm_node=input_xdm)
     assert result_xdm is not None
-    assert "PyXdmNode" in str(type(result_xdm))
+    assert result_xdm.size == 1
+    assert "PyXdmNode" in str(type(result_xdm.item_at(0)))
 
 
     result_str = executable.transform_to_string(xdm_node=input_xdm)
     assert type(result_str) is str
     print(result_str)
+
+
+def testMakeArray(saxonproc, data_dir):
+    xsltproc = saxonproc.new_xslt30_processor()
+    xsltproc.set_cwd(data_dir)
+    executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' version='2.0'> <xsl:param name='values' select='(2, 3, 4, 5)'/><xsl:output method='xml' indent='yes'/><xsl:template match='*'><output><xsl:for-each select='$values'><out><xsl:value-of select='.'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
+
+    value = saxonproc.make_array([saxonproc.make_integer_value(i) for i in [8,9,10]])
+    
+    executable.set_parameter("values", value)
+
+    result = executable.apply_templates_returning_string(source_file="input.xml")
+    print(result)
+    assert "8 9 10" in result
 
 def testEmptySequenceXdmValue2(saxonproc):
     xp = saxonproc.new_xpath_processor()
