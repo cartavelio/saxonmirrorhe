@@ -127,8 +127,8 @@ function catalogTest($saxonProc)
         $trans = $saxonProc->newXslt30Processor();
         $executable = $trans->compileFromFile("http://example.com/books.xsl");
 
-        $executable->setInitialMatchSelectionAsFile("xml/books.xml");
-        $executable->setGlobalContextFromFile("xml/books.xml");
+        $executable->setInitialMatchSelectionAsFile("../data/books.xml");
+        $executable->setGlobalContextFromFile("../data/books.xml");
 
         $result = $executable->applyTemplatesReturningString();
         echo '<b>catalogTest</b>:<br/>';
