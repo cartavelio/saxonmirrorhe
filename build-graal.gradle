@@ -656,10 +656,9 @@ def textReplacementFilter(String edition, String location='../', String libpath=
 
     doLast {
       exec {
-        workingDir "${buildDir}/c"
         executable nativeImage(graalEdition)
         args "-cp", file(saxonSourceJar.get()),
-                "-o", "libsaxon-${edition}c-${saxonVersion3}",
+                "-o", file(layout.buildDirectory.file("c/libsaxon-${edition}c-${saxonVersion3}")),
                 "--no-fallback", "-H:Path=${file(layout.buildDirectory.file("c")).toString()}",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
