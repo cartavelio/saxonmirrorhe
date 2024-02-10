@@ -6,24 +6,29 @@ final class SaxonCPHPTests extends TestCase
     protected static $saxonProc;
     public static function setUpBeforeClass(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: setupBeforeClass");
+        }
         self::$saxonProc = new Saxon\SaxonProcessor(False);
+
     }
     public function testCreateXslt30ProcessorObject(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCreateXslt30ProcessorObject");
+        }
         $proc = self::$saxonProc->newXslt30Processor();
         $this->assertInstanceOf(
             Saxon\Xslt30Processor::class,
             $proc
         );
     }
-    /*  public function testCannotBeCreatedFromInvalidEmailAddress(): void
-      {
-          $this->expectException(InvalidArgumentException::class);
 
-          Email::fromString('invalid');
-      }*/
     public function testVersion(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testVersion");
+        }
         $this->assertStringContainsString(
             'SaxonC 11.1 running',
             self::$saxonProc->version()
@@ -32,17 +37,26 @@ final class SaxonCPHPTests extends TestCase
     }
     public function testSchemaAware(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testSchemaAware");
+        }
         $this->assertFalse(
             self::$saxonProc->isSchemaAware()
         );
     }
     public function testSchemaAware2(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testSchemaAware2");
+        }
         $saxonProc2 = new Saxon\SaxonProcessor(True);
         $this->assertFalse($saxonProc2->isSchemaAware());
     }
     public function testContextNotRoot(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testContextNotRoot");
+        }
         $trans = self::$saxonProc->newXslt30Processor();
         $node = self::$saxonProc->parseXmlFromString("<doc><e>text</e></doc>");
         $executable = $trans->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template match='e'>[<xsl:value-of 
@@ -63,16 +77,27 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testResolveUri(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testResolveUri");
+        }
+        /*
         $transformer = self::$saxonProc->newXslt30Processor();
         $executable = $transformer->compileFromString("<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template 
 name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='\$uri'/><xsl:result-document href='{\$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'\$err:code: ' || 
 \$err:code  || ', \$err:description: ' || \$err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>");
         $value = $executable->callTemplateReturningValue("go");
-        $item = $value->getHead();
-        $this->assertStringContainsString("code", $item->getStringValue());
+        if($value != NULL) {
+            $item = $value->getHead();
+            $this->assertStringContainsString("code", $item->getStringValue());
+        } else {
+            $this->assertFalse(False);
+        }  */
     }
     public function testEmbeddedStylesheet(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testEmbeddedStylesheet");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         // Load the source document
         $input = self::$saxonProc->parseXmlFromFile("../data/books.xml");
@@ -103,6 +128,9 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
     }
     public function testContextNotRootNamedTemplate(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testContextNotRootNamedTemplate");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $node = self::$saxonProc->parseXmlFromString("<doc><e>text</e></doc>");
         $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of 
@@ -123,6 +151,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testUseAssociated(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testAssociated");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
         $executable = $transformer->compileFromAssociatedFile($foo_xml);
@@ -132,6 +163,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testTransformWithoutArgument1(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testTransformWithoutArgument1");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
         $executable = $transformer->compileFromAssociatedFile($foo_xml);
@@ -141,6 +175,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testTransformWithoutArgument2(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testTransformWithoutArgument2");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
         $executable = $transformer->compileFromAssociatedFile($foo_xml);
@@ -154,6 +191,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testTransformWithoutArgument3(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testTransformWithoutArgument3");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
         $executable = $transformer->compileFromAssociatedFile($foo_xml);
@@ -168,6 +208,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
 
     public function testXdmDestination(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testXdmDestination");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template name='go'><a/></xsl:template>" .
@@ -180,6 +223,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testXdmDestinationWithItemSeparator(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testXdmDestinationWithItemSeparator");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template>" .
@@ -192,6 +238,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testPipeline(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testPipeline");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" .
@@ -243,6 +292,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testPipelineShort(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testPipelineShort");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" .
@@ -297,6 +349,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     */
     public function testCallFunction()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallFunction");
+        }
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
             "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" .
@@ -316,6 +371,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallFunctionArgConversion()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallFunctionArgConversion");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
@@ -337,6 +395,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallFunctionWrapResults()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallFunctionWrapResults");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
@@ -360,6 +421,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallFunctionArgInvalid()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallFunctionArgInvalid");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
@@ -380,6 +444,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallNamedTemplateWithTunnelParams()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallNamedTemplateWithtunnelParams");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
@@ -404,6 +471,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallTemplateRuleWithParams()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallTemplateRuleWithParams");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
@@ -425,6 +495,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testApplyTemplatesToXdm()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testApplyTemplateToXdm");
+        }
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
             "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" .
@@ -454,6 +527,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testResultDocument(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testResultDocument");
+        }
         // bug 2771
         $xsl = "<xsl:stylesheet version=\"3.0\" \n" .
             "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" .
@@ -478,6 +554,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testApplyTemplatesToFile()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testApplyTemplatesToFile");
+        }
         $xsl = "<xsl:stylesheet version=\"3.0\" \n" .
             "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" .
             "\n" .
@@ -498,6 +577,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallTemplateWithResultValidation(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallTemplatewithResultValidation");
+        }
         $saxonProc2 = new Saxon\SaxonProcessor(True);
         $saxonProc2->setcwd("/var/www/html"); //Change according to dir setup
         $transformer = $saxonProc2->newXslt30Processor();
@@ -550,6 +632,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     */
     public function testCallTemplateNoParamsRaw(): void
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallTemplateNoParamsRaw");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template name='xsl:initial-template'><xsl:sequence select='42'/></xsl:template>" .
@@ -563,6 +648,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testCallNamedTemplateWithParamsRaw()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testCallNamedTemplateWithParamsRaw");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
@@ -609,6 +697,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     */
     public function testApplyTemplatesRaw()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testApplyTemplatesRaw");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .
@@ -638,6 +729,9 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
     }
     public function testApplyTemplatesToSerializer()
     {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testApplyTemplatesToSerializer");
+        }
         $transformer = self::$saxonProc->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .

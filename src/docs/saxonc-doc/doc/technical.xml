@@ -1,7 +1,7 @@
 <article id="technical" title="Technical information">
    <h1>Technical information</h1>
 
-   <p>SaxonC is built by compiling the Java code of Saxon 12 using GraalVM Native Image (version 22.3.0).
+   <p>SaxonC is built by compiling the Java code of Saxon 12 using GraalVM Native Image (version 22.3.1).
       This generates platform specific machine code, which we
       interface with C/C++ using the Native Image C API.</p>
 
