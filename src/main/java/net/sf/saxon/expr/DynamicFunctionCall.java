@@ -315,6 +315,7 @@ public class DynamicFunctionCall extends Expression {
             }
             Expression body = expr.targetFunction.getChildExpression();
             ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();
+            final boolean is40 = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
             return context -> {
                 FunctionItem fn = (FunctionItem) functionEvaluator.eval(context);
                 FunctionItemType fit = fn.getFunctionItemType();
@@ -349,9 +350,11 @@ public class DynamicFunctionCall extends Expression {
                 }
 
                 XPathContext c2 = fn.makeNewContext(context, null);
-                c2.setCurrentOutputUri(null);
-                if (c2 instanceof XPathContextMajor) {
-                    ((XPathContextMajor) c2).setCurrentRegexIterator(null);
+                if (!is40) {
+                    c2.setCurrentOutputUri(null);
+                    if (c2 instanceof XPathContextMajor) {
+                        ((XPathContextMajor) c2).setCurrentRegexIterator(null);
+                    }
                 }
                 Sequence rawResult = fn.call(c2, argValues);
                 if (fn.isTrustedResultType()) {
