@@ -420,7 +420,7 @@ cdef class PySaxonProcessor:
         c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.EQNameToClarkName(c_str_)
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
     def clark_name_to_eqname(self, name, encoding=None):
@@ -443,7 +443,7 @@ cdef class PySaxonProcessor:
         c_str_ = py_name_string if name is not None else ""
         cdef const char* c_string = self.thisptr.clarkNameToEQName(c_str_)
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
 
@@ -804,7 +804,7 @@ cdef class PySaxonProcessor:
         """
         cdef const char * c_string = self.thisptr.getStringValue(item.derivedptr)
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
     def parse_xml(self, **kwds):
@@ -1512,7 +1512,7 @@ cdef class PyXslt30Processor:
         cdef const char* c_string
         c_string = self.thisxptr.transformFileToString(c_sourcefile, c_stylesheet)
         py_string_i = make_py_str(c_string, encoding)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def transform_to_file(self, **kwds):
@@ -2203,12 +2203,12 @@ cdef class PyXsltExecutable:
         if xdm_node is not None:
           c_string = self.thisxptr.transformToString(xdm_node.derivednptr)
           py_string_i = make_py_str(c_string, encoding)
-          saxoncClasses.SaxonProcessor.deleteString(c_string)
+          saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
           return py_string_i
         else:
           c_string = self.thisxptr.transformFileToString(c_sourcefile)
           py_string_i = make_py_str(c_string, encoding)
-          saxoncClasses.SaxonProcessor.deleteString(c_string)
+          saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
           return py_string_i
 
      def transform_to_file(self, **kwds):
@@ -2546,7 +2546,7 @@ cdef class PyXsltExecutable:
                       self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
         cdef const char* c_string  = self.thisxptr.applyTemplatesReturningString()
         py_string_i = make_py_str(c_string, encoding)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def apply_templates_returning_file(self, **kwds):
@@ -2734,7 +2734,7 @@ cdef class PyXsltExecutable:
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
 
         py_string_i = make_py_str(c_string, encoding)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def call_template_returning_file(self, str template_name=None, **kwds):
@@ -2921,7 +2921,7 @@ cdef class PyXsltExecutable:
         if "encoding" in kwds:
             encoding = kwds["encoding"]
         py_string_i = make_py_str(c_string, encoding)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def call_function_returning_file(self, str function_name, list args, **kwds):
@@ -3289,7 +3289,7 @@ cdef class PyXQueryProcessor:
         if len(kwds) == 0:
             c_string = self.thisxqptr.runQueryToString()
             py_string_i = make_py_str(c_string)
-            saxoncClasses.SaxonProcessor.deleteString(c_string)
+            saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
             return py_string_i
 
         encoding = None
@@ -3321,7 +3321,7 @@ cdef class PyXQueryProcessor:
 
         c_string = self.thisxqptr.executeQueryToString(NULL, c_content, c_encoding_string)
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def run_query_to_file(self, ** kwds):
@@ -4387,7 +4387,7 @@ cdef class PyXdmValue:
             raise Warning('Empty string returned')
         else:
             py_to_string = make_py_str(c_string)
-            saxoncClasses.SaxonProcessor.deleteString(c_string)
+            saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_to_string
 
 
@@ -4412,7 +4412,7 @@ cdef class PyXdmValue:
         cdef const char* c_string = NULL
         c_string = self.thisvptr.toString()
         py_to_string = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, (self.thisvptr.size() == 0))
         if py_to_string is None:
             return ""
         return py_to_string
@@ -4914,7 +4914,7 @@ cdef class PyXdmNode(PyXdmItem):
         if c_string == NULL:
             return None
         py_string_i = make_py_str(c_string, encoding)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      """@property
@@ -5115,7 +5115,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         """
         cdef const char * c_string = self.derivedaptr.toString()
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def __repr__(self):
@@ -5124,7 +5124,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         """
         cdef const char * c_string = self.derivedaptr.toString()
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def __hash__(self):
@@ -5189,7 +5189,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
         try:
             py_string_i = make_py_str(c_string)
         finally:
-            saxoncClasses.SaxonProcessor.deleteString(c_string)
+            saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def __str__(self):
@@ -5197,7 +5197,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
         try:
             py_string_i = make_py_str(c_string)
         finally:
-            saxoncClasses.SaxonProcessor.deleteString(c_string)
+            saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      @property
@@ -5341,14 +5341,14 @@ cdef class PyXdmMap(PyXdmFunctionItem):
      def __repr__(self):
         cdef const char * c_string = self.derivedmmptr.toString()
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
 
      def __str__(self):
         cdef const char * c_string = self.derivedmmptr.toString()
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      @property
@@ -5651,13 +5651,13 @@ cdef class PyXdmArray(PyXdmFunctionItem):
      def __repr__(self):
         cdef const char * c_string = self.derivedaaptr.toString()
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def __str__(self):
         cdef const char * c_string = self.derivedaaptr.toString()
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def __iter__(self):
@@ -5688,7 +5688,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
         """
         cdef const char * c_string = self.derivedaaptr.getStringValue()
         py_string_i = make_py_str(c_string)
-        saxoncClasses.SaxonProcessor.deleteString(c_string)
+        saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
      def get(self, int n):
