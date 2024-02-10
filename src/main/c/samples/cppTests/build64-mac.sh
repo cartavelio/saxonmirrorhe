@@ -8,7 +8,7 @@ export TURN_ERRORS_TO_WARNINGS="-Wno-error=sizeof-pointer-memaccess -Wno-error=u
 
 library_dir="../../@@libdir@@"
 
-rm -r bin
+rm -rf bin
 mkdir -p bin
 
 gcc -fPIC -I../../Saxon.C.API/graalvm  -c ../../Saxon.C.API/SaxonCGlue.c -o bin/SaxonCGlue.o $@
