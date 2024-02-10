@@ -915,7 +915,7 @@ tasks.register("pyBuildVenv") {
       }
       copy {
         into SAXONC_HOME
-        from layout.buildDirectory.dir("c")
+        from layout.buildDirectory.dir("${edition}c")
         include "graal*.h"
         include "libsaxon-${edition}c-${saxonVersion3}.*"
       }
@@ -1270,7 +1270,7 @@ tasks.register("all_python_test_suites") {
   }
 
   tasks.register("install_saxon_${edition}c_with_pip") {
-    inputs.files tasks.findByName("saxon_${edition}c_local_wheel").outputs.getFiles()
+    inputs.files tasks.named("saxon_${edition}c_local_wheel").map { it.outputs.files }
     outputs.file layout.buildDirectory.file("wheels/${edition}c_wheel.txt")
 
     def wheels = layout.buildDirectory.dir("${edition}c_pypi/dist")
