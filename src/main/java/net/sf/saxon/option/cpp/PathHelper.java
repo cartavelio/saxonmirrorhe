@@ -65,37 +65,55 @@ public class PathHelper {
             throw new SaxonApiException("C API call error - cwd must be set to an absolute system path");
         }
         try {
-            cwdPath = Paths.get(cwd);
-            cwdURI = cwdPath.toUri();
-
-            URI normalisedPathURI = normalisePathToURI(path);
-            ResourceRequest request = new ResourceRequest();
-            request.baseUri = cwdURI.toASCIIString();
-            if (normalisedPathURI == null) {
-                request.relativeUri = path;
-                request.uri = cwdPath.resolve(path).toUri().toASCIIString();
+            if (isURIWithAllowedScheme(path)) {
+                source = resolveURIToSource(config, cwd, path, nature);
             } else {
-                request.uri = normalisedPathURI.toASCIIString();
+                source = resolvePathToSource(config, cwd, path, nature);
             }
-            request.nature = nature;
-            request.purpose = ResourceRequest.ANY_PURPOSE;
-
-            source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
-
             if (debug) {
                 System.err.println("DEBUG source.getSystemID()=" + source.getSystemId());
             }
-            if (source == null) {
-                throw new SaxonApiException("Unable to resolve <" + path + "> into a Source");
+            return source;
+        } catch (XPathException | NullPointerException ex) {
+            if (debug) {
+                System.err.println("DEBUG: Exception thrown: " + ex.getMessage());
             }
 
-            return source;
-        } catch (XPathException | NullPointerException | URISyntaxException exception) {
-            if (debug) {
-                System.err.println("DEBUG: Exception thrown: " + exception.getMessage());
-            }
-            throw new SaxonApiException(exception);
+            throw new SaxonApiException(ex);
         }
+    }
+
+    private static Source resolvePathToSource(Configuration config, String cwd, String input, String nature) throws SaxonApiException {
+        Path cwdPath = Paths.get(cwd);
+        Path inputPath = Paths.get(input);
+
+        Path outputPath = cwdPath.resolve(inputPath);
+        if (!outputPath.toFile().exists()) {
+            throw new SaxonApiException("Unable to resolve <" + input + "> into a Source");
+        }
+
+        return new StreamSource(outputPath.toUri().toString());
+    }
+
+    private static Source resolveURIToSource(Configuration config, String cwd, String input, String nature) throws SaxonApiException, XPathException {
+        Path cwdPath = Paths.get(cwd);
+        URI cwdURI = cwdPath.toUri();
+        Source source;
+
+        ResourceRequest request = new ResourceRequest();
+        request.baseUri = cwdURI.toString();
+        request.relativeUri = input;
+        request.uri = URI.create(input).toString();
+        request.nature = nature;
+        request.purpose = ResourceRequest.ANY_PURPOSE;
+
+        source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+
+        if (source == null) {
+            throw new SaxonApiException("Unable to resolve <" + input + "> into a Source");
+        }
+
+        return source;
     }
 
     /**
@@ -140,19 +158,9 @@ public class PathHelper {
         return rootURI.relativize(new File("/", path).toURI()).toASCIIString();
     }
 
-    private static boolean isURIWithAllowedScheme(String path) {
-        try {
-            URL maybeURL = new URL(path);
-            switch (maybeURL.getProtocol()) {
-                case "http":
-                case "https":
-                case "file":
-                    return true;
-                default:
-                    return false;
-            }
-        } catch (MalformedURLException e) {
-            return false;
-        }
+    private static boolean isURIWithAllowedScheme(String name) {
+        return name.startsWith("http:") ||
+                name.startsWith("https:") ||
+                name.startsWith("file:");
     }
 }

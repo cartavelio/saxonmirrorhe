@@ -17,12 +17,12 @@ public class MockResolver implements ResourceResolver {
         return new BigInteger(requestedUri.getBytes()).toString(16);
     }
 
-    public String resolvedMockUri(String requestedUri) {
-        return mockSourceUri.resolve("#" + encode(requestedUri)).toASCIIString();
+    public URI resolvedMockUri(String requestedUri) {
+        return mockSourceUri.resolve("#" + encode(requestedUri));
     }
 
     @Override
     public Source resolve(ResourceRequest request) throws XPathException {
-        return new StreamSource(resolvedMockUri(request.uri));
+        return new StreamSource(resolvedMockUri(request.uri).toString());
     }
 }
