@@ -711,7 +711,7 @@ task all_saxonc_releases() {
       exec {
         workingDir layout.buildDirectory.dir("${saxoncReleasePath}/samples/cppTests")
         if(systemOs.isLinux() || systemOs.isMacOsX()) {
-          commandLine "${buildCPPScript}", "-L${sharedLibDir}"
+          commandLine "${buildCPPScript}", "-L${file(layout.buildDirectory.file("${edition}c"))}"
         } else {
           commandLine "cmd","/c","${buildCPPScript}"
         }
