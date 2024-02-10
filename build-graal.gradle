@@ -105,49 +105,6 @@ private String findPyenv() {
 
 def saxonApiDir = "${buildDir}/../src/main/c/Saxon.C.API"
 def commandDir = "${buildDir}/../src/main/c/command"
-def sharedLibDir = "${buildDir}/c"
-
-task buildSaxonGlue(
-  type: Exec,
-  dependsOn: ["graal_ce_home"]
-) {
-  workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "-c", "${saxonApiDir}/SaxonCGlue.c", "-o", "${commandDir}/SaxonCGlue.o"
-  doLast {
-    println "built Saxon glue"
-  }
-}
-
-task buildTransform(type: Exec) {
-  dependsOn 'buildSaxonGlue'
-  workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion3}"
-  doLast {
-    println "built transform wrapper"
-  }
-}
-
-task buildQuery(type: Exec) {
-  dependsOn 'buildSaxonGlue'
-  workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Query.c", "-o", "${commandDir}/query", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion3}"
-  doLast {
-    println "built query wrapper"
-  } 
-}
-
-task buildValidate(type: Exec) {
-  dependsOn 'buildSaxonGlue'
-  workingDir "${commandDir}"
-  commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Validate.c", "-o", "${commandDir}/validate", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-${saxonVersion3}"
-  doLast {
-    println "built validate wrapper"
-  }
-}
-
-task buildCWrappers (
-  dependsOn: ['buildTransform', 'buildQuery', 'buildValidate']){
-}
 
 task hec_graal_setupPreprocess(
   type: Copy,
@@ -263,9 +220,6 @@ task hec_graal_preprocess(
     "/i:${buildDir}/filtered/hec", "/o:${buildDir}/preprocess/hec",
     "/p:EE=false", "/p:PE=false", "/p:CSHARP=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false"
-//  doFirst {
-//    mkdir "${buildDir}/preprocess/hec"
-//  }
 }
 
 task pec_graal_preprocess(
@@ -400,10 +354,10 @@ tasks.register("graal_hec_jar", Jar) {
   inputs.files fileTree(layout.projectDirectory.dir("src/main/resources/net"))
   inputs.files fileTree(layout.buildDirectory.dir("xerces"))
   inputs.files fileTree(layout.buildDirectory.dir("icu"))
-  outputs.file(layout.buildDirectory.file("c/jars/hec/saxon-he-${saxonVersion3}.jar")).withPropertyName("saxonJar")
+  outputs.file(layout.buildDirectory.file("hec/jars/saxon-he-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
   archiveBaseName = "saxon-he-${saxonVersion3}"
-  destinationDirectory = file(layout.buildDirectory.dir("c/jars/hec"))
+  destinationDirectory = file(layout.buildDirectory.dir("hec/jars"))
   manifest {
     attributes "Project-Name": "Saxon-HE"
     attributes "Main-Class": "net.sf.saxon.Transform"
@@ -423,9 +377,6 @@ tasks.register("graal_hec_jar", Jar) {
     exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
     exclude "META-INF/MANIFEST.MF"
   }
-//  doFirst {
-//    mkdir "build/c/jars/hec"
-//  }
 }
 
 task graal_pec_jar(
@@ -439,10 +390,10 @@ task graal_pec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("c/jars/pec/saxon-pe-${saxonVersion3}.jar")).withPropertyName("saxonJar")
+  outputs.file(layout.buildDirectory.file("pec/jars/saxon-pe-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
   archiveBaseName = "saxon-pe-${saxonVersion3}"
-  destinationDirectory = file("${buildDir}/c/jars/pec")
+  destinationDirectory = file("${buildDir}/pec/jars")
   manifest {
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
@@ -496,9 +447,6 @@ task graal_pec_jar(
     include "**/*.properties"
     exclude "META-INF/MANIFEST.MF"
   }
-  doFirst {
-    mkdir "build/c/pec"
-  }
 }
 
 task graal_eec_jar(
@@ -512,10 +460,10 @@ task graal_eec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("c/jars/eec/saxon-ee-${saxonVersion3}.jar")).withPropertyName("saxonJar")
+  outputs.file(layout.buildDirectory.file("eec/jars/saxon-ee-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
   archiveBaseName = "saxon-ee-${saxonVersion3}"
-  destinationDirectory = file("${buildDir}/c/jars/eec")
+  destinationDirectory = file("${buildDir}/eec/jars")
   manifest {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
@@ -557,9 +505,6 @@ task graal_eec_jar(
     include "**/*.res"
     include "**/*.properties"
     exclude "META-INF/MANIFEST.MF"
-  }
-  doFirst {
-    mkdir "${buildDir}/c/eec"
   }
 }
 
@@ -644,7 +589,7 @@ def textReplacementFilter(String edition, String location='../', String libpath=
 
   tasks.register("${edition}c_graalImage") {
     dependsOn "graal_${graalEdition}_home"
-    description "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging, \"-J-Dfile.encoding=UTF-8\",  Next options for heap size: -R:MaxHeapSize=1000000, -H:+AllowVMInspection"
+    description "Builds the GraalVM native image for ${edition}c"
 
     def saxonSourceJar = tasks.named("${edition}c_graalJar").map { it.archiveFile }
     inputs.file saxonSourceJar
@@ -658,8 +603,8 @@ def textReplacementFilter(String edition, String location='../', String libpath=
       exec {
         executable nativeImage(graalEdition)
         args "-cp", file(saxonSourceJar.get()),
-                "-o", file(layout.buildDirectory.file("c/libsaxon-${edition}c-${saxonVersion3}")),
-                "--no-fallback", "-H:Path=${file(layout.buildDirectory.file("c")).toString()}",
+                "-o", file(layout.buildDirectory.file("${edition}c/libsaxon-${edition}c-${saxonVersion3}")),
+                "--no-fallback", "-H:Path=${file(layout.buildDirectory.file("${edition}c")).toString()}",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
@@ -683,8 +628,8 @@ def textReplacementFilter(String edition, String location='../', String libpath=
       exec {
         commandLine image,
                 "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion3}.jar",
-                "net.sf.saxon.Transform", "-o","${buildDir}/c/saxon-${edition}c-${saxonVersion3}",
-                "--no-fallback", "-H:Path=${buildDir}/c",
+                "net.sf.saxon.Transform", "-o", "${buildDir}/${edition}c/saxon-${edition}c-${saxonVersion3}",
+                "--no-fallback", "-H:Path=${buildDir}/${edition}c",
                 "-H:+AllowVMInspection",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
@@ -732,7 +677,7 @@ task all_saxonc_releases() {
     doLast {
       copy {
         into "${saxoncReleaseDir}/${libdir}"
-        from "${buildDir}/c"
+        from "${buildDir}/${edition}c"
         include "${saxonc_lib}"
       }
     }
@@ -748,7 +693,7 @@ task all_saxonc_releases() {
 
     doLast {
       copy {
-        from "${buildDir}/c/"
+        from "${buildDir}/${edition}c/"
         into "${saxoncReleaseDir}/Saxon.C.API/graalvm"
         include "graal*.h"
         include "libsaxon-${edition}c*.h"
@@ -976,29 +921,10 @@ tasks.register("pyBuildVenv") {
       }
     }
 
-//    doLast {
-//      def libdir = (systemOs.isMacOsX()
-//              ? "libs/darwin"
-//              : (systemOs.isLinux()
-//              ? "libs/nix"
-//              : "libs/win"))
-//      if (libdir == null) {
-//        throw GradleException("Don't know how to create Python wheels on this OS.");
-//      }
-//
-//      copy {
-//        into "${buildDir}/wheels/${systemOsName}/${edition}c_pypi/${libdir}"
-//        from "${buildDir}/c"
-//        include "graal*.h"
-//        include "libsaxon-${edition}c-${saxonVersion3}.*"
-//      }
-//    }
-
-
     // What does this do?
     doLast {
       copy {
-        from "${buildDir}/c/"
+        from "${buildDir}/${edition}c/"
         into "${buildDir}/${edition}c_pypi/Saxon.C.API/graalvm"
         include "graal*.h"
         include "libsaxon-${edition}c*.h"
@@ -1433,7 +1359,7 @@ tasks.register("all_python_test_suites") {
         doLast {
           copy {
             from "${projectDir}/src/main/c/pypi/testsuite_driver"
-            into "${buildDir}/c/${edition}c_testsuite_driver"
+            into "${buildDir}/${edition}c/${edition}c_testsuite_driver"
             filter textReplacementFilter(edition)
           }
         }
