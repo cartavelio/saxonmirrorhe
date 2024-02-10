@@ -43,7 +43,7 @@ void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
 
   XsltExecutable *executable = nullptr;
   try {
-    executable = trans->compileFromFile("data/test.xsl");
+    executable = trans->compileFromFile("../data/test.xsl");
   } catch (SaxonApiException &e) {
     cerr << " Exception thrown=" << e.what() << endl;
     sresult->failure++;
@@ -60,7 +60,7 @@ void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
     return;
   }
   try {
-    executable->setInitialMatchSelectionAsFile("data/cat.xml");
+    executable->setInitialMatchSelectionAsFile("../data/cat.xml");
   } catch (SaxonApiException &e) {
     cerr << " Exception thrown=" << e.what() << endl;
     sresult->failure++;
@@ -130,7 +130,7 @@ void testTransformToStringExtensionFunc(const char *cwd,
   executable->setProperty("extc",  libStr);
 
   if (nativeFound) {
-      const char *output = executable->transformFileToString("data/cat.xml");
+      const char *output = executable->transformFileToString("../data/cat.xml");
 
       if (output == nullptr) {
 
@@ -161,7 +161,7 @@ void testApplyTemplatesString2(SaxonProcessor *processor,
   cout << "Test: testApplyTemplatesString2:" << endl;
   XdmNode *input = nullptr;
   try {
-    input = processor->parseXmlFromFile("data/cat.xml");
+    input = processor->parseXmlFromFile("../data/cat.xml");
   } catch (SaxonApiException &e) {
     cout << "Source document is null." << endl;
     cerr << " Exception thrown=" << e.what() << endl;
@@ -173,7 +173,7 @@ void testApplyTemplatesString2(SaxonProcessor *processor,
 
   XsltExecutable *executable = nullptr;
   try {
-    executable = trans->compileFromFile("data/test.xsl");
+    executable = trans->compileFromFile("../data/test.xsl");
   } catch (SaxonApiException &e) {
     cerr << " Exception thrown=" << e.what() << endl;
     sresult->failure++;
@@ -216,7 +216,7 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor,
 
   try {
 
-    input = processor->parseXmlFromFile("data/cat.xml");
+    input = processor->parseXmlFromFile("../data/cat.xml");
 
   } catch (SaxonApiException &e) {
     sresult->failure++;
@@ -252,14 +252,14 @@ void testPackageExport(SaxonProcessor *processor, Xslt30Processor *trans,
                        sResultCount *sresult) {
   try {
     cout << "Test: testPackageExport:" << endl;
-    trans->compileFromFileAndSave("data/override-base-f-001.xsl",
-                                  "data/sandpit/test-package-001.pack");
+    trans->compileFromFileAndSave("../data/override-base-f-001.xsl",
+                                  "../data/sandpit/test-package-001.pack");
 
     SaxonProcessor *processor2 = new SaxonProcessor(true);
     processor2->setcwd(processor->getcwd());
     Xslt30Processor *xc2 = processor2->newXslt30Processor();
-    xc2->importPackage("data/sandpit/test-package-001.pack");
-    XsltExecutable *xe = xc2->compileFromFile("data/override-f-001.xsl");
+    xc2->importPackage("../data/sandpit/test-package-001.pack");
+    XsltExecutable *xe = xc2->compileFromFile("../data/override-f-001.xsl");
     const char *result = xe->callTemplateReturningString("main");
     if (result != nullptr) {
       cerr << "Result = " << result << endl;
@@ -330,9 +330,9 @@ void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans,
                             sResultCount *sresult) {
 
   cout << endl << "Test: testTransformToString3" << endl;
-
-  XdmNode *inputi =
-      processor->parseXmlFromString("<out><person>text1</person><person>text2</"
+  XdmNode *inputi = nullptr;
+  try {
+      inputi = processor->parseXmlFromString("<out><person>text1</person><person>text2</"
                                     "person><person>text3</person></out>");
 
   if (inputi == nullptr) {
@@ -346,22 +346,35 @@ void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans,
 
     return;
   }
+  }
+  catch (SaxonApiException &e) {
+      const char *emessage = e.getMessage();
+      const char *code = e.getErrorCode();
+      cout << "Exception found: ";
+      if (code != nullptr) {
+        cout << " error code =" << code << endl;
+      }
+      if (emessage != nullptr) {
+        cout << " message = " << emessage << endl;
+      }
+      sresult->failure++;
+      sresult->failureList.push_back("testTransformToString3");
+      return;
+    }
 
   XdmAtomicValue *value1 = processor->makeIntegerValue(10);
 
   if (value1 == nullptr) {
     cout << "value1 is null." << endl;
-    if (trans->exceptionOccurred()) {
-      cerr << "testTransformToString3 error: " << trans->getErrorMessage()
-           << endl;
-    }
+
     sresult->failure++;
     sresult->failureList.push_back("testTransformToString3");
     delete inputi;
     return;
   }
-
-  XsltExecutable *executable = trans->compileFromFile("data/test.xsl");
+  XsltExecutable *executable = nullptr;
+  try {
+        executable = trans->compileFromFile("../data/test.xsl");
 
   if (executable == nullptr) {
     sresult->failure++;
@@ -393,6 +406,25 @@ void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans,
   delete inputi;
   inputi = nullptr;
   delete executable;
+  }
+    catch (SaxonApiException &e) {
+
+         delete value1;
+      delete inputi;
+        const char *emessage = e.getMessage();
+        const char *code = e.getErrorCode();
+        cout << "Exception found: ";
+        if (code != nullptr) {
+          cout << " error code =" << code << endl;
+        }
+        if (emessage != nullptr) {
+          cout << " message = " << emessage << endl;
+        }
+        sresult->failure++;
+        sresult->failureList.push_back("testTransformToString3");
+        return;
+      }
+
 }
 
 /*
@@ -444,7 +476,7 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans,
     values->addXdmItem(a3);
     values->addXdmItem(a4);
 
-    XdmNode *sheet = processor->parseXmlFromFile("data/test2.xsl");
+    XdmNode *sheet = processor->parseXmlFromFile("../data/test2.xsl");
     if (sheet == nullptr) {
       sresult->failure++;
       sresult->failureList.push_back("testTransformToString4");
@@ -901,9 +933,9 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
 
   XsltExecutable *executable = nullptr;
   try {
-    executable = proc->compileFromFile("php/xsl/foo.xsl");
+    executable = proc->compileFromFile("../php/xsl/foo.xsl");
   } catch (SaxonApiException &e) {
-    cerr << "Failed - Exception throwbn = " << e.what() << endl;
+    cerr << "Failed - Exception thrown = " << e.what() << endl;
     sresult->failure++;
     sresult->failureList.push_back("exampleSimple1");
     return;
@@ -918,7 +950,7 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
     }
     return;
   }
-  executable->setInitialMatchSelectionAsFile("php/xml/foo.xml");
+  executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
   const char *result = executable->applyTemplatesReturningString();
   if (result != NULL) {
     cout << result << endl;
@@ -963,7 +995,7 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
   cout << "<b>exampleSimple2:</b><br/>" << endl;
   XsltExecutable *executable = nullptr;
   try {
-    executable = proc->compileFromFile("php/xsl/foo.xsl");
+    executable = proc->compileFromFile("../php/xsl/foo.xsl");
   } catch (SaxonApiException &e) {
     sresult->failure++;
     sresult->failureList.push_back("exampleSimple2");
@@ -975,11 +1007,11 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
     return;
   }
 
-  executable->setInitialMatchSelectionAsFile("php/xml/foo.xml");
+  executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
   const char *filename = "output1.xml";
   executable->setOutputFile(filename);
   try {
-    executable->applyTemplatesReturningFile("output1.xml");
+    executable->applyTemplatesReturningFile("../output1.xml");
   } catch (SaxonApiException &e) {
     cout << e.getMessage() << endl;
     sresult->failure++;
@@ -1008,7 +1040,7 @@ void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
 
   XdmNode *xmlfile = nullptr;
   try {
-    xmlfile = sproc->parseXmlFromFile("php/xml/foo.xml");
+    xmlfile = sproc->parseXmlFromFile("../php/xml/foo.xml");
   } catch (SaxonApiException &e) {
     sresult->failure++;
     sresult->failureList.push_back("exampleTransformToFile");
@@ -1033,7 +1065,7 @@ void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
   }
   XsltExecutable *executable = nullptr;
   try {
-    executable = proc->compileFromFile("php/xsl/foo.xsl");
+    executable = proc->compileFromFile("../php/xsl/foo.xsl");
   } catch (SaxonApiException &e) {
     if (proc->exceptionOccurred()) {
       cerr << "exampleTransformToFile error: " << e.what() << endl;
@@ -1047,8 +1079,8 @@ void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
     return;
   }
 
-  const char *filename = "output2.xml";
-  executable->setInitialMatchSelectionAsFile("php/xml/foo.xml");
+  const char *filename = "../output2.xml";
+  executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
   executable->setOutputFile(filename);
   executable->transformToFile(xmlfile);
 
@@ -1170,20 +1202,12 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc,
 
   XdmNode *xdmNode =
       saxonProc->parseXmlFromString("<doc><b>text value of out</b></doc>");
-  /*if (xdmNode== nullptr) {
-      cout << "Error: xdmNode is null'" << endl;
-      if(saxonProc->exceptionOccurred()) {
-          cout<<"Error message="<<saxonProc->getErrorMessage()<<endl;
-      }
-      sresult->failure++;
-      sresult->failureList.push_back("exampleSimple3");
-      return;
-  }  */
+
 
   XsltExecutable *executable = nullptr;
 
   try {
-    executable = proc->compileFromFile("php/xsl/foo.xsl");
+    executable = proc->compileFromFile("../php/xsl/foo.xsl");
   } catch (SaxonApiException &e) {
     const char *message = e.getMessage();
     cout << "Error message=" << message << endl;
@@ -1500,7 +1524,7 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
   XdmValue *result = nullptr;
 
   try {
-    result = proc->transformFileToValue("data/xmark100k.xml", "data/q12.xsl");
+    result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
   } catch (SaxonApiException &e) {
     printf("Exception thrown \nCheck For errors:");
     sresult->failure++;
@@ -1533,7 +1557,7 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
 
   XdmValue *result = nullptr;
   try {
-    result = proc->transformFileToValue("data/xmark100k.xml", "data/q12.xsl");
+    result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
   } catch (SaxonApiException &e) {
     printf("Exception thrown \nCheck For errors:");
     sresult->failure++;
@@ -1565,7 +1589,7 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
 
   XdmValue *result = nullptr;
   try {
-    result = proc->transformFileToValue("data/xmark100k.xml", "data/q12.xsl");
+    result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
   } catch (SaxonApiException &e) {
     printf("Result is null \nCheck For errors:");
     const char *message = e.getMessage();
@@ -1600,9 +1624,9 @@ void testPackage1(Xslt30Processor *trans, sResultCount *sresult) {
   trans->clearParameters();
 
   try {
-    trans->compileFromFileAndSave("data/test.xsl", "test1.sef");
+    trans->compileFromFileAndSave("../data/test.xsl", "test1.sef");
     const char *output =
-        trans->transformFileToString("data/cat.xml", "test1.sef");
+        trans->transformFileToString("../data/cat.xml", "test1.sef");
 
     if (output == nullptr) {
       printf("result is null \n");
@@ -1637,7 +1661,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
   trans->clearParameters();
 
   try {
-    trans->compileFromFileAndSave("data/test.xsl", "test1a.sef");
+    trans->compileFromFileAndSave("../data/test.xsl", "test1a.sef");
   } catch (SaxonApiException &e) {
     const char *message = e.getMessage();
     if (message != nullptr) {
@@ -1652,7 +1676,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
   try {
     executable = trans->compileFromFile("test1.sef");
 
-    executable->setInitialMatchSelectionAsFile("data/cat.xml");
+    executable->setInitialMatchSelectionAsFile("../data/cat.xml");
     const char *output = executable->applyTemplatesReturningString();
 
     printf("%s", output);
@@ -2515,15 +2539,15 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
   Xslt30Processor *trans = nullptr;
   const char **catalogFiles = nullptr;
   try {
-    catalogFiles = new const char *[1] { "data/catalog.xml" };
+    catalogFiles = new const char *[1] { "../data/catalog.xml" };
 
     proc->setCatalogFiles(catalogFiles, 1);
 
     trans = proc->newXslt30Processor();
 
-    executable = trans->compileFromFile("data/example.xsl");
+    executable = trans->compileFromFile("../data/example.xsl");
 
-    executable->setInitialMatchSelectionAsFile("data/example.xml");
+    executable->setInitialMatchSelectionAsFile("../data/example.xml");
 
     const char *result = executable->applyTemplatesReturningString();
 
@@ -2584,7 +2608,7 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
   const char **catalogFiles = nullptr;
   try {
     catalogFiles =
-        new const char *[2] { "data/catalog.xml", "data/catalog2.xml" };
+        new const char *[2] { "../data/catalog.xml", "../data/catalog2.xml" };
 
     proc->setCatalogFiles(catalogFiles, 2);
     proc->setcwd(cwd);
@@ -2594,8 +2618,8 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
 
     executable2 = trans->compileFromFile("http://example.com/books.xsl");
 
-    executable2->setInitialMatchSelectionAsFile("data/books.xml");
-    executable2->setGlobalContextFromFile("data/books.xml");
+    executable2->setInitialMatchSelectionAsFile("../data/books.xml");
+    executable2->setGlobalContextFromFile("../data/books.xml");
 
     XdmValue *resultValue = executable2->applyTemplatesReturningValue();
     if (resultValue != nullptr) {
@@ -2655,15 +2679,15 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
   Xslt30Processor *trans = nullptr;
   const char **catalogFiles = nullptr;
   try {
-    catalogFiles = new const char *[1] { "data/catalog-err.xml" };
+    catalogFiles = new const char *[1] { "../data/catalog-err.xml" };
 
     proc->setCatalogFiles(catalogFiles, 1);
 
     trans = proc->newXslt30Processor();
 
-    executable = trans->compileFromFile("data/example.xsl");
+    executable = trans->compileFromFile("../data/example.xsl");
 
-    executable->setInitialMatchSelectionAsFile("data/example.xml");
+    executable->setInitialMatchSelectionAsFile("../data/example.xml");
 
     const char *result = executable->applyTemplatesReturningString();
 
@@ -2914,14 +2938,14 @@ void RunThread(XsltExecutable *executable, int tid,
 void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
                  sResultCount *sresult) {
 
-  std::vector<std::string> s = {"data/xmark100k.xml", "data/xmark1.xml",
-                                "data/xmark4.xml", "data/xmark10.xml"};
+  std::vector<std::string> s = {"../data/xmark100k.xml", "../data/xmark1.xml",
+                                "../data/xmark4.xml", "../data/xmark10.xml"};
 
   std::vector<std::thread> threads;
 
   for (int i = 0; i < s.size(); i++) {
 
-    XsltExecutable *executable = trans->compileFromFile("data/q12.xsl");
+    XsltExecutable *executable = trans->compileFromFile("../data/q12.xsl");
     if (executable == nullptr) {
       continue;
     }

@@ -24,7 +24,7 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
   cout << endl << "Test testXQuery1:" << endl;
   queryProc->clearParameters();
   queryProc->clearProperties();
-  queryProc->setProperty("s", "data/cat.xml");
+  queryProc->setProperty("s", "../data/cat.xml");
 
   queryProc->setProperty("qs", "<out>{count(/out/person)}</out>");
 
@@ -37,7 +37,7 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
     delete result;
   } catch (SaxonApiException &e) {
     sresult->failure++;
-    sresult->failureList.push_back("testXQuery1");
+    sresult->failureList.push_back("testXQuery1-1");
     const char *emessage = e.getMessage();
     if (emessage != nullptr) {
       cerr << "Error: " << emessage << endl;
@@ -45,19 +45,19 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
   }
 
   try {
-    queryProc->executeQueryToFile(nullptr, "cppTests/catOutput.xml", nullptr);
+    queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
     if (CppTestUtils::exists("catOutput.xml")) {
       cout << "The file catOutput.xml exists" << endl;
       sresult->success++;
       remove("catOutput.xml");
     } else {
       sresult->failure++;
-      sresult->failureList.push_back("testXQuery1");
+      sresult->failureList.push_back("testXQuery1-2");
       cout << "The file catOutput.xml does not exist" << endl;
     }
   } catch (SaxonApiException &e) {
     sresult->failure++;
-    sresult->failureList.push_back("testXQuery1");
+    sresult->failureList.push_back("testXQuery1-3");
     cout << "Exception throw = " << e.what() << endl;
   }
 
