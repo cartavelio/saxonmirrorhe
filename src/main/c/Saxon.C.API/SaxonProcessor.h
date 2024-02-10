@@ -99,9 +99,9 @@ typedef enum eXdmType {
   XDM_VALUE = 0,
   XDM_ATOMIC_VALUE = 1,
   XDM_NODE = 2,
-  XDM_FUNCTION_ITEM = 3,
+  XDM_ARRAY = 3,
   XDM_MAP = 4,
-  XDM_ARRAY = 5,
+  XDM_FUNCTION_ITEM = 5,
   XDM_EMPTY = 6,
   XDM_ITEM = 7,
 } XDM_TYPE;
