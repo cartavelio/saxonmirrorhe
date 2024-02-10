@@ -27,14 +27,13 @@ task unjar_JLineJar(
 // ============================================================
 // Tasks to rejar Xerces and XML Resolver
 
-task unjar_XercesImpl(
-  type: Copy,
-  description: "Unjar XercesImpl"
-) {
-  inputs.file("lib/xercesImpl.jar")
-  outputs.files(fileTree("${buildDir}/xerces/org/apache/xerces"))
-  from zipTree(file("lib/xercesImpl.jar"))
-  into "${buildDir}/xerces"
+tasks.register("unjar_XercesImpl", Copy) {
+  description "Unjar XercesImpl"
+//  inputs.file "lib/xercesImpl.jar"
+  outputs.dir layout.buildDirectory.dir("xerces/org/apache/xerces")
+
+  from zipTree("lib/xercesImpl.jar")
+  into layout.buildDirectory.dir("xerces")
 }
 
 task unjar_XmlResolver(
@@ -67,16 +66,15 @@ unjar_XmlResolver.onlyIf {
   !file("${buildDir}/xerces/org/xmlresolver/cat-xhtml.xml").exists()
 }
 
-task rejar_Xerces(
-  type: Jar,
-  dependsOn: ["unjar_XercesImpl", "unjar_XmlResolver", "unjar_XmlResolverData"],
-  description: "Unjar Xerces and Resolver for .NET build"
-) {
-  inputs.files fileTree("${buildDir}/xerces/org")
-  outputs.file "${buildDir}/xerces/xerces.jar"
+tasks.register("rejar_Xerces", Jar) {
+  dependsOn "unjar_XercesImpl", "unjar_XmlResolver", "unjar_XmlResolverData"
+  description "Unjar Xerces and Resolver for .NET build"
+
+  inputs.dir layout.buildDirectory.dir("xerces/org")
+//  outputs.file layout.buildDirectory.file("xerces/xerces.jar")
   archiveBaseName = "xerces"
-  destinationDirectory = file("${buildDir}/xerces")
-  from ("${buildDir}/xerces") {
+  destinationDirectory = layout.buildDirectory.dir("xerces")
+  from(layout.buildDirectory.dir("xerces")) {
     include "**/*.class"
     include "**/*.properties"
     exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
