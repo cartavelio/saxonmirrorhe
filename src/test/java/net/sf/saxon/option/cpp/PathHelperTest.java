@@ -1,6 +1,5 @@
 package net.sf.saxon.option.cpp;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.MockResolver;
 import net.sf.saxon.lib.ResourceRequest;
@@ -10,14 +9,16 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.Source;
 
-import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Function;
 
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -25,34 +26,36 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PathHelperTest {
     Configuration config = new Configuration();
+    String cwd = System.getProperty("java.io.tmpdir");
+    Function<Path, Boolean> pathVerifier = (path) -> true;
+    String nature = ResourceRequest.XML_NATURE;
+    PathHelper subject = new PathHelper(pathVerifier);
 
-    private Path junitDataDirPath;
-    public Path getJunitDataDirPath() {
-        if (junitDataDirPath != null) return junitDataDirPath;
-        junitDataDirPath = junitDataDirectoryPath();
-        return junitDataDirPath;
-    }
-    private static Path junitDataDirectoryPath() {
-        Path dir = null;
-        String envar = "SAXON_TEST_DATA";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume the current directory is the root of the project
-            dir = Paths.get(System.getProperty("user.dir"),  "src", "test", "testdata");
-            if (!dir.toFile().exists() || !dir.toFile().isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.toAbsolutePath() + "; set " + envar);
-            }
-        } else {
-            dir = Paths.get(env);
-            if (!dir.toFile().exists() || !dir.toFile().isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.toAbsolutePath() + "; bad " + envar);
-            }
+    @Nested
+    @DisplayName("verifying paths can be resolved on a local filesystem")
+    class FsPathVerification {
+        @Test
+        @DisplayName("Absolute paths that cannot be resolved throw a SaxonApiException")
+        void badPathsExplode(@TempDir Path tmpDir) {
+            subject = new PathHelper();
+            String cwd = tmpDir.toString();
+
+            assertThrows(SaxonApiException.class, () -> { subject.resolveToSource(config, cwd, "404.xml", nature); });
         }
-        return dir;
-    }
 
-    public Path fixtureDirPath(String fixture) {
-        return getJunitDataDirPath().resolve(fixture);
+        @Test
+        @DisplayName("Absolute paths that can be resolved don't throw")
+        void goodPathsDoNotExplode(@TempDir Path tmpDir) throws SaxonApiException, IOException {
+            subject = new PathHelper();
+            String cwd = tmpDir.toString();
+            Path expected = tmpDir.resolve("200.xml");
+            Files.createFile(expected);
+
+            Source actual = subject.resolveToSource(config, cwd, "200.xml", nature);
+
+            assertThat(actual.getSystemId(), equalTo(expected.toUri().toString()));
+        }
+
     }
 
     @Nested
@@ -60,9 +63,7 @@ class PathHelperTest {
     class ResolvingToSource {
         URI expected;
         URI actual;
-        String nature = ResourceRequest.XML_NATURE;
-        Path cwdPath = fixtureDirPath("bug6273");
-        String cwd = cwdPath.toString();
+        Path cwdPath = Paths.get(cwd);
 
         @Nested
         @DisplayName("Non-URIs are resolved as filesystem paths")
@@ -70,7 +71,8 @@ class PathHelperTest {
             @Test
             @DisplayName("relative paths that cannot be resolved throw a SaxonApiException")
             void relativePathsMustBeResolvable() {
-                assertThrows(SaxonApiException.class, () -> { PathHelper.resolveToSource(config, cwd, "404.xml", nature); });
+                subject = new PathHelper((path) -> false);
+                assertThrows(SaxonApiException.class, () -> { subject.resolveToSource(config, cwd, "404.xml", nature); });
             }
 
             @Test
@@ -78,7 +80,7 @@ class PathHelperTest {
             void relativePathProducesSource() throws SaxonApiException {
                 expected = cwdPath.toUri().resolve("source.xml");
 
-                Source result = PathHelper.resolveToSource(config, cwd, "source.xml", nature);
+                Source result = subject.resolveToSource(config, cwd, "source.xml", nature);
                 actual = URI.create(result.getSystemId());
                 assertThat(actual, equalTo(expected));
             }
@@ -92,7 +94,7 @@ class PathHelperTest {
                 void relativePathWithDepthProducesSource() throws SaxonApiException {
                     expected = cwdPath.toUri().resolve("folder/source.xml");
 
-                    Source result = PathHelper.resolveToSource(config, cwd, "folder\\source.xml", nature);
+                    Source result = subject.resolveToSource(config, cwd, "folder\\source.xml", nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -103,7 +105,7 @@ class PathHelperTest {
                 void absolutePathProducesSource() throws SaxonApiException {
                     expected = cwdPath.toUri().resolve("folder/source.xml");
 
-                    Source result = PathHelper.resolveToSource(config, cwd, cwdPath.resolve("folder/source.xml").toString(), nature);
+                    Source result = subject.resolveToSource(config, cwd, cwdPath.resolve("folder/source.xml").toString(), nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -114,7 +116,7 @@ class PathHelperTest {
                 void absolutePathWithBackslashProducesSource() throws SaxonApiException {
                     expected = cwdPath.toUri().resolve("source.xml");
 
-                    Source result = PathHelper.resolveToSource(config, cwd, cwdPath.resolve("source.xml").toString(), nature);
+                    Source result = subject.resolveToSource(config, cwd, cwdPath.resolve("source.xml").toString(), nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -123,13 +125,15 @@ class PathHelperTest {
                 @Test
                 @DisplayName("Absolute paths that cannot be resolved throw a SaxonApiException")
                 void absolutePathsMustExist() {
-                    assertThrows(SaxonApiException.class, () -> { PathHelper.resolveToSource(config, cwd, "Z:\\Nonsense\\404.xml", nature); });
+                    subject = new PathHelper((path) -> false);
+                    assertThrows(SaxonApiException.class, () -> { subject.resolveToSource(config, cwd, "Z:\\Nonsense\\404.xml", nature); });
                 }
 
                 @Test
                 @DisplayName("Absolute paths (using forward slashes) that cannot be resolved throw a SaxonApiException")
                 void absolutePathsUsingForwardSlashesMustExist() {
-                    assertThrows(SaxonApiException.class, () -> { PathHelper.resolveToSource(config, cwd, "Z:/Nonsense/404.xml", nature); });
+                    subject = new PathHelper((path) -> false);
+                    assertThrows(SaxonApiException.class, () -> { subject.resolveToSource(config, cwd, "Z:/Nonsense/404.xml", nature); });
                 }
             }
 
@@ -142,7 +146,7 @@ class PathHelperTest {
                 void relativePathWithDepthProducesSource() throws SaxonApiException {
                     expected = cwdPath.toUri().resolve("folder/source.xml");
 
-                    Source result = PathHelper.resolveToSource(config, cwd, "folder/source.xml", nature);
+                    Source result = subject.resolveToSource(config, cwd, "folder/source.xml", nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -153,7 +157,7 @@ class PathHelperTest {
                 void relativePathWithSpacesProducesSource() throws SaxonApiException {
                     expected = cwdPath.toUri().resolve("space%20me/source.xml");
 
-                    Source result = PathHelper.resolveToSource(config, cwd, "space me/source.xml", nature);
+                    Source result = subject.resolveToSource(config, cwd, "space me/source.xml", nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -164,7 +168,7 @@ class PathHelperTest {
                 void absolutePathProducesSource() throws SaxonApiException {
                     expected = cwdPath.toUri().resolve("source.xml");
 
-                    Source result = PathHelper.resolveToSource(config, cwd, cwdPath.resolve("source.xml").toString(), nature);
+                    Source result = subject.resolveToSource(config, cwd, cwdPath.resolve("source.xml").toString(), nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -173,7 +177,8 @@ class PathHelperTest {
                 @Test
                 @DisplayName("Absolute paths that cannot be resolved throw a SaxonApiException")
                 void absolutePathsMustExist() {
-                    assertThrows(SaxonApiException.class, () -> { PathHelper.resolveToSource(config, cwd, "/path/to/404.xml", nature); });
+                    subject = new PathHelper((path) -> false);
+                    assertThrows(SaxonApiException.class, () -> { subject.resolveToSource(config, cwd, "/path/to/404.xml", nature); });
                 }
             }
 
@@ -188,7 +193,7 @@ class PathHelperTest {
                     input = cwdPath.resolve("space me").resolve("source.xml");
                     expected = input.toUri();
 
-                    Source result = PathHelper.resolveToSource(config, cwd, input.toString(), nature);
+                    Source result = subject.resolveToSource(config, cwd, input.toString(), nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -201,7 +206,7 @@ class PathHelperTest {
                     input = Paths.get("space me","source.xml");
                     expected = cwdPath.toUri().resolve("space%20me/source.xml");
 
-                    Source result = PathHelper.resolveToSource(config, cwd, input.toString(), nature);
+                    Source result = subject.resolveToSource(config, cwd, input.toString(), nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -213,7 +218,7 @@ class PathHelperTest {
                     input = cwdPath.resolve("to?not-a-query.xml");
                     expected = input.toUri();
 
-                    Source result = PathHelper.resolveToSource(config, cwd, input.toString(), nature);
+                    Source result = subject.resolveToSource(config, cwd, input.toString(), nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -227,7 +232,7 @@ class PathHelperTest {
                     input = cwdPath.resolve("to#not-a-fragment.xml");
                     expected = input.toUri();
 
-                    Source result = PathHelper.resolveToSource(config, cwd, input.toString(), nature);
+                    Source result = subject.resolveToSource(config, cwd, input.toString(), nature);
                     actual = URI.create(result.getSystemId());
 
                     assertThat(actual, equalTo(expected));
@@ -256,7 +261,7 @@ class PathHelperTest {
                         input = "http://new/path/to/source.xml";
                         expected = mockResolver.resolvedMockUri(input);
 
-                        Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                        Source result = subject.resolveToSource(config, cwd, input, nature);
                         actual = URI.create(result.getSystemId());
 
                         assertThat(actual, equalTo(expected));
@@ -268,7 +273,7 @@ class PathHelperTest {
                         input = "file:///new/path/to/source.xml";
                         expected = mockResolver.resolvedMockUri(input);
 
-                        Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                        Source result = subject.resolveToSource(config, cwd, input, nature);
                         actual = URI.create(result.getSystemId());
 
                         assertThat(actual, equalTo(expected));
@@ -280,7 +285,7 @@ class PathHelperTest {
                         input = "file:/new/path/to/source.xml";
                         expected = mockResolver.resolvedMockUri(input);
 
-                        Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                        Source result = subject.resolveToSource(config, cwd, input, nature);
                         actual = URI.create(result.getSystemId());
 
                         assertThat(actual, equalTo(expected));
@@ -292,7 +297,7 @@ class PathHelperTest {
                         input = "file:///Z:/new/path/to/source.xml";
                         expected = mockResolver.resolvedMockUri(input);
 
-                        Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                        Source result = subject.resolveToSource(config, cwd, input, nature);
                         actual = URI.create(result.getSystemId());
 
                         assertThat(actual, equalTo(expected));
@@ -304,7 +309,7 @@ class PathHelperTest {
                         input = "file:/Z:/new/path/to/source.xml";
                         expected = mockResolver.resolvedMockUri(input);
 
-                        Source result = PathHelper.resolveToSource(config, cwd, input, nature);
+                        Source result = subject.resolveToSource(config, cwd, input, nature);
                         actual = URI.create(result.getSystemId());
 
                         assertThat(actual, equalTo(expected));
@@ -324,7 +329,7 @@ class PathHelperTest {
                     void uriProducesSource() throws SaxonApiException {
                         expected = URI.create("http://example.org/new/path/to/source.xml");
 
-                        Source result = PathHelper.resolveToSource(config, cwd, "http://example.org/new/path/to/source.xml", nature);
+                        Source result = subject.resolveToSource(config, cwd, "http://example.org/new/path/to/source.xml", nature);
                         actual = URI.create(result.getSystemId());
 
                         assertThat(actual, equalTo(expected));
@@ -335,7 +340,7 @@ class PathHelperTest {
                     void fileOneSlashUriProducesSource() throws SaxonApiException {
                         expected = URI.create("file:/new/path/to/source.xml");
 
-                        Source result = PathHelper.resolveToSource(config, cwd, "file:/new/path/to/source.xml", nature);
+                        Source result = subject.resolveToSource(config, cwd, "file:/new/path/to/source.xml", nature);
                         actual = URI.create(result.getSystemId());
 
                         assertThat(actual, equalTo(expected));

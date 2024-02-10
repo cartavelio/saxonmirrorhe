@@ -69,6 +69,7 @@ public class SaxonCAPI {
     public static String RESOURCES_DIR = null;
     protected long exceptionCheck = -1;
 
+    public static PathHelper pathHelper = new PathHelper();
 
     public static ObjectHandles objectHandles = ObjectHandles.create();
 
@@ -1673,7 +1674,7 @@ public class SaxonCAPI {
      * @throws SaxonApiException if error occurs when parsing file
      */
     public static Source resolveFileToSource(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
-        return PathHelper.resolveToSource(processor.getUnderlyingConfiguration(), cwd, filename, nature);
+        return pathHelper.resolveToSource(processor.getUnderlyingConfiguration(), cwd, filename, nature);
     }
 
 

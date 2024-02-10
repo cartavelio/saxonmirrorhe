@@ -18,11 +18,33 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Function;
 
 public class PathHelper {
     private static URI rootURI = URI.create("file:///");
     public static boolean debug = false;
 
+    public static Function<Path, Boolean> pathExistsOnFs = (path) -> path.toFile().exists();
+
+    private final Function<Path, Boolean> fsPathVerifier;
+
+    /**
+     * Create a new PathHelper, which uses the fsPathVerifier function to verify
+     * a path to be resolved.
+     *
+     * @param fsPathVerifier
+     */
+    PathHelper(Function<Path, Boolean> fsPathVerifier) {
+        this.fsPathVerifier = fsPathVerifier;
+    }
+
+    /**
+     * Create a new PathHelper, using the default path verifier which requires
+     * paths to be resolved to exist on a local filesysteœm.
+     */
+    PathHelper() {
+        this(pathExistsOnFs);
+    }
     /**
      * Normalise a path string. If an absolute path, a file URI is generated,
      * if an existing HTTP or file URI string, then this is converted directly
@@ -57,7 +79,7 @@ public class PathHelper {
      * @return
      * @throws SaxonApiException if error occurs when resolving the file path
      */
-    public static Source resolveToSource(Configuration config, String cwd, String path, String nature) throws SaxonApiException {
+    public Source resolveToSource(Configuration config, String cwd, String path, String nature) throws SaxonApiException {
         Source source;
         Path cwdPath = null;
         URI cwdURI = null;
@@ -83,19 +105,19 @@ public class PathHelper {
         }
     }
 
-    private static Source resolvePathToSource(Configuration config, String cwd, String input, String nature) throws SaxonApiException {
+    private Source resolvePathToSource(Configuration config, String cwd, String input, String nature) throws SaxonApiException {
         Path cwdPath = Paths.get(cwd);
         Path inputPath = Paths.get(input);
 
         Path outputPath = cwdPath.resolve(inputPath);
-        if (!outputPath.toFile().exists()) {
+        if (!fsPathVerifier.apply(outputPath)) {
             throw new SaxonApiException("Unable to resolve <" + input + "> into a Source");
         }
 
         return new StreamSource(outputPath.toUri().toString());
     }
 
-    private static Source resolveURIToSource(Configuration config, String cwd, String input, String nature) throws SaxonApiException, XPathException {
+    private Source resolveURIToSource(Configuration config, String cwd, String input, String nature) throws SaxonApiException, XPathException {
         Path cwdPath = Paths.get(cwd);
         URI cwdURI = cwdPath.toUri();
         Source source;
