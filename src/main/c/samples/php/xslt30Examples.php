@@ -98,8 +98,9 @@ function exampleSimple2($proc, $xmlFile, $xslFile)
     try {
         $executable = $proc->compileFromFile($xslFile);
         $filename = "output1.xml";
-        $executable->setOutputFile($filename);
-        $executable->transformFileToFile($xmlFile);
+        //$executable->setOutputFile($filename); //This test use to test the use of setOutFile and setting of  transformFileToFile($xmlFile, null).
+        // PHP no longer supports the passing of null
+        $executable->transformFileToFile($xmlFile, $filename);
 
         if (file_exists($filename)) {
             echo "The file $filename exists";
