@@ -722,6 +722,7 @@ public class GlobalVariable extends Actor
      * @throws XPathException if evaluation fails
      */
 
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     protected GroundedValue actuallyEvaluate(XPathContext context, Component target) throws XPathException {
         final Controller controller = context.getController();
         assert controller != null;
@@ -730,24 +731,28 @@ public class GlobalVariable extends Actor
         try {
             // This is the first reference to a global variable; try to evaluate it now.
             // But first check for circular dependencies.
-            setDependencies(this, context);
-
-            // Set a flag to indicate that the variable is being evaluated. This is designed to prevent
-            // (where possible) the same global variable being evaluated several times in different threads
-            boolean go = b.setExecuting(this);
-            if (!go) {
-                // some other thread has evaluated the variable while we were waiting
-                return b.getGlobalVariable(getBinderySlotNumber());
-            }
-
+            checkCircularity(this, context);
+            int slot = getBinderySlotNumber();
             GroundedValue value = getSelectValue(context, target);
             if (_indexed) {
                 value = controller.getConfiguration().obtainOptimizer().makeIndexedValue(value.iterate());
             }
-            return b.saveGlobalVariableValue(this, value);
+            synchronized(b) {
+                // This lock doesn't prevent two different threads evaluating the value in parallel. It does
+                // ensure that when this happens, all threads end up using the same value for the variable.
+                GroundedValue temp = b.getGlobalVariable(slot);
+                if (temp == null) { // check once again, things might have changed
+                    b.setGlobalVariableValue(slot, value);
+                } else {
+                    // Discard the value we have calculated, and use the value computed in another thread
+                    value = temp;
+                }
+            }
+
+            return value;
+
 
         } catch (XPathException err) {
-            b.setNotExecuting(this);
             if (err instanceof XPathException.Circularity) {
                 err.setErrorCode(getPackageData().isXSLT() ? "XTDE0640" : "XQDY0054");
                 err.setXPathContext(context);
@@ -769,14 +774,17 @@ public class GlobalVariable extends Actor
      * on the context stack representing the evaluation of X. We don't set a dependency from X to Y if the value
      * of Y was already available in the Bindery; it's not needed, because in this case we know that evaluation
      * of Y is unproblematic, and can't lead to any circularities.
+     *
      * @param var     the global variable or parameter being evaluated
      * @param context the dynamic evaluation context
      * @throws XPathException if a cycle of dependencies is found
      */
 
-    protected static void setDependencies(GlobalVariable var, XPathContext context) throws XPathException {
+    protected static void checkCircularity(GlobalVariable var, XPathContext context) throws XPathException {
         Controller controller = context.getController();
-        context = context.getMajorContext();
+        if (!(context instanceof XPathContextMajor)) {
+            context = getMajorCaller(context);
+        }
         while (context != null) {
             do {
                 ContextOriginator origin = ((XPathContextMajor) context).getOrigin();
@@ -784,13 +792,17 @@ public class GlobalVariable extends Actor
                     controller.registerGlobalVariableDependency((GlobalVariable) origin, var);
                     return;
                 }
-                context = context.getCaller();
-                if (context != null) {
-                    context = context.getMajorContext();
-                }
+                context = getMajorCaller(context);
             } while (context != null);
         }
+    }
 
+    private static XPathContextMajor getMajorCaller(XPathContext context) {
+        XPathContext caller = context.getCaller();
+        while (!(caller == null || caller instanceof XPathContextMajor)) {
+            caller = caller.getCaller();
+        }
+        return (XPathContextMajor) caller;
     }
 
     /**
