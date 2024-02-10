@@ -90,6 +90,9 @@ public class ProcessorDataAccumulator {
             }
             return;
         }
+        if(SaxonCAPI.debug && objectRef == WordFactory.nullPointer()) {
+            System.err.println("Null found in the ProcessorDataAccumulator - data-pair - addProcessor paramName= " + paramNamei);
+        }
         Object object = SaxonCAPI.objectHandles.get(objectRef);
 
         if(SaxonCAPI.debug) {
