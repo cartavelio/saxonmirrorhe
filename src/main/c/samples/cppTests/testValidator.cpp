@@ -190,10 +190,10 @@ void testValidator4(const char *cwd, sResultCount *sresult) {
        << endl;
 
   try {
-    val->registerSchemaFromFile("data/family-ext.xsd");
+    val->registerSchemaFromFile("../data/family-ext.xsd");
 
-    val->registerSchemaFromFile("data/family.xsd");
-    val->validate("data/family.xml");
+    val->registerSchemaFromFile("../data/family.xsd");
+    val->validate("../data/family.xml");
     cout << endl << "Doc1 is OK" << endl;
     sresult->success++;
   } catch (SaxonApiException &e) {
