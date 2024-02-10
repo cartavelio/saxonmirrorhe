@@ -2,7 +2,7 @@
 
 #Build file for SaxonC on C++
 
-library_dir=../@@libdir@@
+library_dir="../@@libdir@@"
 
 gcc @@gccopts@@ -std=c99 -fPIC -I../Saxon.C.API/graalvm  -c ../Saxon.C.API/SaxonCGlue.c -o SaxonCGlue.o $@
 

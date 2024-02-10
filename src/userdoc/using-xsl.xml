@@ -54,8 +54,9 @@
       <div class="conly">
          <p>For SaxonC, the <code>transform</code> executable file must first be built. To do this, compile
             the <code>Transform.c</code> C command line program by running the batch script
-            <code>./build-saxonc-commands.sh</code> on Linux or MacOS, or
-            <code>build-saxonc-commands.bat</code> on Windows.</p>
+            <code>./build64-linux.sh</code> on Linux,
+            <code>./build64-mac.sh</code> on MacOS, or
+            <code>build-windows.bat</code> on Windows.</p>
          <p>Then the command takes the form:</p>
          <kbd>./transform -s:<i>source</i> -xsl:<i>stylesheet</i> -o:<i>output</i></kbd>
       </div>
