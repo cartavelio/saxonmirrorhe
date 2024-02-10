@@ -1688,7 +1688,7 @@ public class SaxonCAPI {
      * @throws SaxonApiException if error occurs when parsing file
      */
     public static URI resolveFileToURI(Processor processor, String cwd, String filename) throws SaxonApiException {
-        return PathHelper.resolveToURI(processor.getUnderlyingConfiguration(), cwd, filename);
+        return pathHelper.resolveToURI(processor.getUnderlyingConfiguration(), cwd, filename);
     }
 
     /**

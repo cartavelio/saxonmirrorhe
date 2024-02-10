@@ -357,92 +357,12 @@ class PathHelperTest {
         URI actual;
         String nature = ResourceRequest.XML_NATURE;
 
-        @Nested
-        @EnabledOnOs(OS.WINDOWS)
-        class WindowsOnly {
-            String cwd = "Z:\\path\\to\\cwd";
-
-            @Test
-            void relativePathProducesURI() throws SaxonApiException {
-                expected = URI.create("file:///Z:/path/to/cwd/source.xml");
-
-                URI actual = PathHelper.resolveToURI(config, cwd, "source.xml");
-
-                assertThat(actual, equalTo(expected));
-            }
-
-            @Test
-            void relativePathWithSpacesProducesURI() throws SaxonApiException {
-                expected = URI.create("file:///Z:/path/to/cwd/spaced%20name/test.xsl");
-                actual = PathHelper.resolveToURI(config, cwd,"spaced name\\test.xsl");
-
-                assertThat("paths should be correctly percent-encoded", actual, equalTo(expected));
-            }
-
-            @Test
-            void absolutePathProducesURI() throws SaxonApiException {
-                expected = URI.create("file:///X:/other/path/to/source.xml");
-
-                URI actual = PathHelper.resolveToURI(config, cwd, "X:\\other\\path\\to\\source.xml");
-
-                assertThat(actual, equalTo(expected));
-            }
-
-            @Test
-            void fileUriIsReturnedUnchanged() throws SaxonApiException {
-                expected = URI.create("file:///X:/other/path/to/source.xml");
-
-                URI actual = PathHelper.resolveToURI(config, cwd, expected.toASCIIString());
-
-                assertThat(actual, equalTo(expected));
-            }
-        }
-
-        @Nested
-        @DisabledOnOs(OS.WINDOWS)
-        class UnixishOnly {
-            String cwd = "/path/to/cwd";
-            @Test
-            void relativePathProducesURI() throws SaxonApiException {
-                expected = URI.create("file:///path/to/cwd/source.xml");
-
-                URI actual = PathHelper.resolveToURI(config, cwd, "source.xml");
-
-                assertThat(actual, equalTo(expected));
-            }
-
-            @Test
-            void relativePathWithSpacesProducesURI() throws SaxonApiException {
-                expected = URI.create("file:///path/to/cwd/spaced%20name/test.xsl");
-                actual = PathHelper.resolveToURI(config, cwd,"spaced name/test.xsl");
-
-                assertThat("paths should be correctly percent-encoded", actual, equalTo(expected));
-            }
-
-            @Test
-            void absolutePathProducesURI() throws SaxonApiException {
-                expected = URI.create("file:///other/path/to/source.xml");
-
-                URI actual = PathHelper.resolveToURI(config, "", "/other/path/to/source.xml");
-
-                assertThat(actual, equalTo(expected));
-            }
-
-            @Test
-            void fileUriIsReturnedUnchanged() throws SaxonApiException {
-                expected = URI.create("file:///other/path/to/source.xml");
-
-                URI actual = PathHelper.resolveToURI(config, cwd, expected.toASCIIString());
-
-                assertThat(actual, equalTo(expected));
-            }
-        }
-
         @Test
-        void httpUriIsReturnedUnchanged() throws SaxonApiException {
-            expected = URI.create("http://example.org/source.xml");
+        @DisplayName("returns a URI not a Source")
+        void passesThroughToResolveToSourceAndReturnsSystemId() throws SaxonApiException {
+            URI expected = URI.create(subject.resolveToSource(config, cwd, "source.xml", nature).getSystemId());
 
-            URI actual = PathHelper.resolveToURI(config, null, expected.toASCIIString());
+            URI actual = subject.resolveToURI(config, cwd, "source.xml");
 
             assertThat(actual, equalTo(expected));
         }

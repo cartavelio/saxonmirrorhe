@@ -45,24 +45,6 @@ public class PathHelper {
     PathHelper() {
         this(pathExistsOnFs);
     }
-    /**
-     * Normalise a path string. If an absolute path, a file URI is generated,
-     * if an existing HTTP or file URI string, then this is converted directly
-     * into a URI. Returns null if handed a relative path.
-     * @param path
-     * @return
-     * @throws URISyntaxException
-     */
-    public static URI normalisePathToURI(String path) throws URISyntaxException {
-        if (isURIWithAllowedScheme(path)) return new URI(path);
-
-        File file = new File(path);
-        if (file.isAbsolute()) {
-            return file.toURI();
-        } else {
-            return null;
-        }
-    }
 
     /**
      * Resolve a supplied relative or absolute file path, or URI, to a Source.
@@ -149,35 +131,12 @@ public class PathHelper {
      * @return
      * @throws SaxonApiException if error occurs when resolving the file path
      */
-    public static URI resolveToURI(Configuration config, String cwd, String path) throws SaxonApiException {
-        Path cwdPath = null;
+    public URI resolveToURI(Configuration config, String cwd, String path) throws SaxonApiException {
         try {
-            if (cwd != null) {
-                cwdPath = Paths.get(cwd);
-                // should we throw if cwdPath is not absolute?
-            }
-            if (debug) {
-                System.err.println("cwd = " + cwd);
-                System.err.println("path = " + path);
-            }
-
-            URI normalisedPathURI = normalisePathToURI(path);
-            if (normalisedPathURI != null) return normalisedPathURI;
-            if (cwdPath == null) throw new SaxonApiException("Supplied cwd value null, cannot resolve relative path");
-
-            return cwdPath.resolve(path).toUri();
+            return new URI(resolveToSource(config, cwd, path, ResourceRequest.ANY_NATURE).getSystemId());
         } catch (URISyntaxException ex) {
-            if(debug) {
-                System.err.println("DEBUG: Exception thrown: " + ex.getMessage());
-                System.err.println("DEBUG: Using resolver fallback");
-                ex.printStackTrace();
-            }
             throw new SaxonApiException(ex);
         }
-    }
-
-    private static String normalisePathToRelativeURI(String path) {
-        return rootURI.relativize(new File("/", path).toURI()).toASCIIString();
     }
 
     private static boolean isURIWithAllowedScheme(String name) {
