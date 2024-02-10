@@ -66,7 +66,8 @@ public:
   virtual ~SaxonApiException() throw();
 
   /**
-   * Get the error code associated with the exception, if it exists
+   * Get the error code associated with the exception, if it exists.
+   * The caller does not need to deallocate memory.
    * @return the associated error code, or null if no error code is available
    */
   const char *getErrorCode();
@@ -81,7 +82,7 @@ public:
 
   /**
    * Returns the detail message string as a char array of the throwable, if
-   * there is one
+   * there is one. The caller does not need to deallocate memory.
    * @return the detail message string of this <tt>Throwable</tt> instance
    *         (which may be <tt>null</tt>).
    */
@@ -89,13 +90,20 @@ public:
 
   /**
    * Returns the detail message string as a char array of the throwable, if
-   * there is one
+   * there is one.  The caller does not need to deallocate memory.
    * @return the detail message string of this <tt>Throwable</tt> instance with
    * the error code as prefix if there is an error code associated with the
    * exception.
    */
   const char *getMessageWithErrorCode();
 
+    /**
+     * Returns static error messages resulting from compile errors as a char array of the throwable, if
+     * there are any.  The caller does not need to deallocate memory.
+     * @return the detail message string of this <tt>Throwable</tt> instance with
+     * the error code as prefix if there is an error code associated with the
+     * exception.
+     */
   const char *getCombinedStaticErrorMessages();
 
   int staticErrorCount();

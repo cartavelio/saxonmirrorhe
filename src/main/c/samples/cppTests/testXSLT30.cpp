@@ -1189,7 +1189,7 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc,
     cout << "Error message=" << message << endl;
     sresult->failure++;
     sresult->failureList.push_back("exampleSimple3");
-    delete message;
+
     return;
   }
 
@@ -1219,7 +1219,6 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc,
     if (message != nullptr) {
       cout << "Exception success = " << message << endl;
     }
-    // delete message;
     sresult->success++;
     return;
   }
@@ -1877,7 +1876,6 @@ void testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans,
     if (message != nullptr) {
       cout << "Error: " << message << endl;
     }
-    delete message;
   }
 }
 
