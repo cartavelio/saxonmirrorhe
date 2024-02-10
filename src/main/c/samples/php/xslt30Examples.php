@@ -99,7 +99,7 @@ function exampleSimple2($proc, $xmlFile, $xslFile)
         $executable = $proc->compileFromFile($xslFile);
         $filename = "output1.xml";
         $executable->setOutputFile($filename);
-        $executable->transformFileToFile($xmlFile, null);
+        $executable->transformFileToFile($xmlFile);
 
         if (file_exists($filename)) {
             echo "The file $filename exists";
@@ -399,7 +399,7 @@ function testCallFunction($proc, $trans)
     echo "Test: testCallFunction:";
     try {
         $valueArray = array($proc->createAtomicValue((int)2), $proc->createAtomicValue((int)3));
-        $executable = $trans->compileFromFile("php/CallFunctionExample.xsl");
+        $executable = $trans->compileFromFile("CallFunctionExample.xsl");
 
         $v = $executable->callFunctionReturningValue("{http://localhost/}add", $valueArray);
         if ($v != NULL) {
@@ -438,7 +438,7 @@ function testCallTemplate1($proc, $trans)
 
     echo "Test: testCallTemplate1:";
     try {
-        $executable = $trans->compileFromFile("php/xsl/addition.xsl");
+        $executable = $trans->compileFromFile("xsl/addition.xsl");
         if (!$trans->exceptionOccurred()) {
 
             $a = $proc->createAtomicValue((int)2);
@@ -449,7 +449,7 @@ function testCallTemplate1($proc, $trans)
 
             //$valueArray["a"] = $a;
             //$valueArray["b"] = $b;
-            $executable = $trans->compileFromFile("php/xsl/addition.xsl");
+            $executable = $trans->compileFromFile("xsl/addition.xsl");
 
             $executable->setProperty("omit-xml-declaration", "true");
 
