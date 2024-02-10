@@ -301,9 +301,11 @@
                <td>
                   <span class="signature">SaxonProcessor()</span>
                   <div class="fcomment">Default Constructor. Create an unlicensed Saxon
-                     Processor. The current working directory in the SaxonProcessor is defaulted
-                     to the PHP getcwd() function. The cwd length is 256 bytes as default.
-                  But this limit does not apply to the SaxonProcessor.setcwd() method when used.</div>
+                     Processor. When not otherwise supplied, the default for the current working
+                     directory is the result of the PHP getcwd() function, and the length is
+                     limited to 256 bytes. The cwd can be set on the SaxonProcessor (without any
+                     limit on the length) using the two argument constructor, or the
+                     SaxonProcessor.setcwd() method.</div>
                </td>
             </tr>
             <tr>
@@ -314,10 +316,11 @@
                      features of Saxon that need a license file. If false, the method will create a
                      Configuration appropriate for Saxon-HE (Home edition). If true, the method will
                      create a Configuration appropriate to the version of the software that is
-                     running, i.e. Saxon-PE or Saxon-EE. The current working directory in the
-                     SaxonProcessor is defaulted to the PHP getcwd() function. The cwd
-                     length is 256 bytes as default. But this limit does not apply to the
-                     SaxonProcessor.setcwd() method when used.</div>
+                     running, i.e. Saxon-PE or Saxon-EE. When not otherwise supplied, the default
+                     for the current working directory is the result of the PHP getcwd() function,
+                     and the length is limited to 256 bytes. The cwd can be set on the
+                     SaxonProcessor (without any limit on the length) using the two argument
+                     constructor, or the SaxonProcessor.setcwd() method.</div>
                </td>
             </tr>
             <tr>
