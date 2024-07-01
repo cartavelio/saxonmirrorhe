@@ -65,7 +65,7 @@ XdmNode::~XdmNode() {
     localName = nullptr;
   }
 
-    if (SaxonProcessor::extensionFlag && children != nullptr) {
+    /*if (children != nullptr) {
 
         for (int p = 0; p < childCount; ++p) {
             if(children[p]->getRefCount() < 1) {
@@ -73,7 +73,7 @@ XdmNode::~XdmNode() {
             }
         }
         delete[] children;
-    }
+    }*/
 
   /* if (nodeToString != nullptr) {
     delete[] nodeToString;

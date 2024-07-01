@@ -727,8 +727,6 @@ public:
                        cross compiled SaxonC library. */
   std::string cwd;  /*!< current working directory */
 
-  static bool extensionFlag;
-
   //! Utility method required for python and PHP extension to delete string
   //! created in the C++ code-base
   /**
@@ -742,13 +740,6 @@ public:
     }
   }
 
-  static void setSaxonCExtensionFlag(bool flag){
-      extensionFlag = flag;
-  }
-
-  static bool isSaxonCExtension(){
-      return extensionFlag;
-  }
 
   //! Internal method for diagnostics
   void createHeapDump(bool live);

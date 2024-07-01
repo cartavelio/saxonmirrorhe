@@ -327,11 +327,11 @@ void SchemaValidator::setProperty(const char *name, const char *value) {
 }
 
 void SchemaValidator::clearParameters(bool delValues) {
-    if (delValues || SaxonProcessor::extensionFlag) {
+    if (delValues ) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
-            if (!SaxonProcessor::extensionFlag && delValues && value != nullptr) {
+            if (value != nullptr) {
 #ifdef DEBUG
                 std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;
@@ -339,9 +339,6 @@ void SchemaValidator::clearParameters(bool delValues) {
                 delete value;
                 value = nullptr;
             }
-            /*if(SaxonProcessor::extensionFlag) {
-                value->decrementRefCount();
-            }*/
         }
     }
     parameters.clear();
