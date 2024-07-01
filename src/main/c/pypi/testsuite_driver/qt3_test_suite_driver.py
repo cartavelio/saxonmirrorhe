@@ -674,7 +674,7 @@ def get_named_parameters(proc: PySaxonProcessor, xpath_proc: PyXPathProcessor, n
                             print("Error in get_named_parameters - value is None")
                         continue
                 except PySaxonApiError as ex:
-                    print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
+                    print("*** Error evaluating parameter " + name + " in initial-template : " + str(ex))
                     continue
                 '''if as_i is not None:
                     valuei = proc.make_atomic_value(str(as_i), str(value))
