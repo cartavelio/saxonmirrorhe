@@ -103,6 +103,7 @@ public class IndependentContext extends AbstractStaticContext
         setImportedSchemaNamespaces(ic.importedSchemaNamespaces);
         externalResolver = ic.externalResolver;
         autoDeclare = ic.autoDeclare;
+        setUnprefixedElementMatchingPolicy(ic.getUnprefixedElementMatchingPolicy());
         setXPathLanguageLevel(ic.getXPathVersion());
         requiredContextItemType = ic.requiredContextItemType;
         setExecutable(ic.getExecutable());
