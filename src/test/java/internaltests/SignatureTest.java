@@ -38,6 +38,9 @@ public class SignatureTest {
     private final static Set<String> notImplemented = setOf(
             "fn:csv-to-simple-rows",
             "fn:csv-to-xml",
+            "fn:csv-to-xdm",
+            "fn:fetch-field-by-column",
+            "fn:csv-fetch-field-by-column",
             "fn:log",
             "fn:parse-html",
             "fn:stack-trace",

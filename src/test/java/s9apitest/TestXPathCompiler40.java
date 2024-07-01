@@ -60,23 +60,24 @@ public class TestXPathCompiler40 {
         String result = good("if (//*) {3}");
         assertEquals("3", result);
     }
+//    @Ignore("Not implemented in 12.x")
+//    @Test
+//    public void testFor() {
+//        String result = good("string-join(for member $a in [10,20,30] for $x in 0 to 2 return $x+$a)");
+//        assertEquals("10-11-12-20-21-22-30-31-32", result);
+//    }
 
-    @Test
-    public void testFor() {
-        String result = good("string-join(for member $a in [10,20,30] for $x in 0 to 2 return $x+$a)");
-        assertEquals("10-11-12-20-21-22-30-31-32", result);
-    }
+//    @Ignore("Not implemented in 12.x")
+//    @Test
+//    public void testArrayFilter() {
+//        String result = good("[1,2,3,4]?[. ge 2]?* => string-join('-')");
+//        assertEquals("2-3-4", result);
+//    }
 
     @Test
     public void testOtherwise() {
         String result = good("current-date()[. lt xs:date('1900-01-01')] otherwise 'christmas'");
         assertEquals("christmas", result);
-    }
-
-    @Test
-    public void testArrayFilter() {
-        String result = good("[1,2,3,4]?[. ge 2]?* => string-join('-')");
-        assertEquals("2-3-4", result);
     }
 
 }

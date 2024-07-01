@@ -282,6 +282,7 @@ public class ParserTest {
 
     @Test
     public void testLineNumberingTinyTree() {
+        // Line numbers of text nodes change in 12.5
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
@@ -293,8 +294,8 @@ public class ParserTest {
             expectLocation(xpc, doc, "/a/comment()", 2, 19);
             expectLocation(xpc, doc, "/a/processing-instruction()", 3, 9);
             expectLocation(xpc, doc, "/a/x", 4, 6);
-            expectLocation(xpc, doc, "/a/x/text()", 4, 6);
-            expectLocation(xpc, doc, "/a/y/text()", 5, 6);
+            expectLocation(xpc, doc, "/a/x/text()", 4, 10);
+            expectLocation(xpc, doc, "/a/y/text()", 6, 10);
         } catch (SaxonApiException err) {
             err.printStackTrace();
             fail();

@@ -60,10 +60,12 @@ public class TestXsltTracing {
                     //.withDisabled()   // toggle this comment to run without checking
                     .expect(out -> out.contains("<trace saxon-version"))
                     .expect(out -> out.contains("<source node=\"/\" line=\"0\""))
+                    .expect(out -> out.contains("<xsl:template match=\"/\""))
                     .expect(out -> out.contains("<LRE name=\"out\" line=\"3\""))
                     .expect(out -> out.contains("<xsl:value-of line=\"4\""))
                     .expect(out -> out.contains("</xsl:value-of>"))
                     .expect(out -> out.contains("</LRE>"))
+                    .expect(out -> out.contains("</xsl:template"))
                     .expect(out -> out.contains("</source>"))
                     .expect(out -> out.contains("</trace>"));
             tracer.setOutputDestination(logger);
@@ -208,7 +210,7 @@ public class TestXsltTracing {
     }
 
 
-    private class AssertingLogger extends Logger {
+    private static class AssertingLogger extends Logger {
 
         private final List<Function<String, Boolean>> assertions = new ArrayList<>();
         private int count = 0;

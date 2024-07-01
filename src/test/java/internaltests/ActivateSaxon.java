@@ -22,18 +22,18 @@ public class ActivateSaxon {
                     "kjd30jw39303q3$b";
 
     private static String key =
-            "3bf0fb909b003bv0bbv0fb0bq0b090a0q00b3bkb0030j0v03b30b0a0k0j0" +
-                    "k000v09ba000v0003bf0b0f0k0a03bkb0bfbk09b0030kbb0fbfb3bf03b3b" +
-                    "30j0300bb00b90q0j03b0bk0bb00a09b9b0bk09bj0v09bk0b0f0k0a00bk0" +
-                    "a000r093kj9jbjf3w3j3q309zazaa0a0f0f0r00jqjf3bb9303w3f3w393bj" +
-                    "w3q3f3rbzaa0a0f0f0r00jqjf3bb93b3f3kjj3aj99zakj933j93w3r0w3d3" +
-                    "q3bjf3kjq3ajvj9bzad3w3r0w3d3q3bjf39j$3f33j9bzaf0a0a0a0a9r0kj" +
-                    "930j99zav0b0a0q0a0a039r0$3f3q3kj9309za39r00j93q3kj9309zaf000" +
-                    "rkv0a0rka0k0a0k0r0b3939j0j0jqbza0j93qjr039fb09za0j93qjr0f9fb" +
-                    "09za0j93qjr0b9fb09za9b9br0w3d3q3bjq3b39bzar3d303wkf303q3w3d3" +
-                    "vjf30jab93;3q3r3r0$3q3f3r39bzaf303q3w3d3vjf309akrb9bdbr0qjw3" +
-                    "f3ajr3d30bzaqjf3;bak$393f3v303q3rbr093930jw39303q3$bzaf303q3" +
-                    "w3d3vjf309r0kjd30jw39303q3$b";
+            "0bkb90kbq0f0a0f03bv0j09bj0v0fb0b00q0v0fbb0309b3b90q09b3030bb" +
+                    "v09000j00bk0bbk0b000b0f0k0a0309b0b3b3b9bfbk0a000fbb0fbfbkba0" +
+                    "b090j0b0fb90b0bbkb30q0q0b0fbq0v0b030v0bbk0b0kbk0b0f0k0a00bk0" +
+                    "a000r093kj9jbjf3w3j3q309zaza303000r00jqjf3bb9303w3f3w393bjw3" +
+                    "q3f3rbza303000r00jqjf3bb93b3f3kjj3aj99zakj933j93w3r0w3d3q3bj" +
+                    "f3kjq3ajvj9bzad3w3r0w3d3q3bjf39j$3f33j9bzaf0a0a0a0a9r0kj930j" +
+                    "99zaf0f000k0f0a039r0$3f3q3kj9309za39r00j93q3kj9309zak0f0rk90" +
+                    "a0rkb0k0a0k0r0b3939j0j0jqbza0j93qjr039fb09za0j93qjr0f9fb09za" +
+                    "0j93qjr0b9fb09za9b9br0w3d3q3bjq3b39bzar3d303wkf303q3w3d3vjf3" +
+                    "0jab93;3q3r3r0$3q3f3r39bzaf303q3w3d3vjf309akrb9bdbr0qjw3f3aj" +
+                    "r3d30bzaqjf3;bak$393f3v303q3rbr093930jw39303q3$bzaf303q3w3d3" +
+                    "vjf309r0kjd30jw39303q3$b";
 
 
     private static String deobfuscate(String x) {
