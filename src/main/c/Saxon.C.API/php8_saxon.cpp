@@ -125,6 +125,7 @@ PHP_METHOD(SaxonProcessor, __construct) {
                                 XtOffsetOf(saxonProcessor_object, std));
 
   saxonProc = new SaxonProcessor(license);
+  SaxonProcessor::setSaxonCExtensionFlag(true);
 
   obj->saxonProcessor = saxonProc;
   // std::cerr<<"SaxonProcessorConstructor cp1"<<std::endl;
