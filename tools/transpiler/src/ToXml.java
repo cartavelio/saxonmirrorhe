@@ -1,6 +1,7 @@
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
@@ -208,6 +209,10 @@ public class ToXml {
 
         CompilationUnit cu = StaticJavaParser.parse(filename);
         System.err.println("Processing " + filename);
+        /*List<NameExpr>  nes = cu.findAll(NameExpr .class);
+        nes.forEach(ne -> {
+            System.out.println(( ne.calculateResolvedType().describe()));
+        }); */
 
         XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
         //System.err.println(printer.output(cu));

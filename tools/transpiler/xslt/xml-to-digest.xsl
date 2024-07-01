@@ -71,6 +71,7 @@
          <xsl:if test="f:isDelegate(.)">
             <xsl:attribute name="delegate" select="1"/>
          </xsl:if>
+         <xsl:apply-templates select="typeParameters/typeParameter" />
          <xsl:apply-templates select="extendedTypes/extendedType"/>
          <xsl:for-each select="annotations/annotation[name/@identifier='CSharpExtendInterface']/pairs/pair/value">
             <extends name="{@value}"/>
@@ -88,6 +89,7 @@
          </xsl:if>
          <xsl:apply-templates select="extendedTypes/extendedType"/>
          <xsl:apply-templates select="implementedTypes/implementedType"/>
+         <xsl:apply-templates select="typeParameters/typeParameter" />
          <xsl:apply-templates select="members/member[@nodeType='ConstructorDeclaration']"/>
          <xsl:apply-templates select="members/member[@nodeType='FieldDeclaration']"/>
          <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
@@ -100,6 +102,14 @@
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
          </xsl:apply-templates>
       </class>
+   </xsl:template>
+   
+   <xsl:template match="typeParameter">
+      <xsl:message>found code <xsl:copy-of select="."/></xsl:message>
+      <xsl:for-each select=".//name">
+         <xsl:message>cp1 found code <typeParameter name="{@identifier}" /></xsl:message>
+         <typeParameter name="{@identifier}" />                    
+      </xsl:for-each>
    </xsl:template>
    
    <xsl:template match="*[@nodeType='EnumDeclaration']">
