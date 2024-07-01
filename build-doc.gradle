@@ -1080,6 +1080,9 @@ tasks.register("saxonc_api_doc") {
       rename {
         "saxonc.html"
       }
+      filter { line ->
+        line.replace("saxoncee.html", "saxonc.html")
+      }
     }
   }
 }
