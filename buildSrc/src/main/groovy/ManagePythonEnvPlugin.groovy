@@ -97,7 +97,7 @@ abstract class PythonVenv extends DefaultTask {
 
         project.exec {
             executable project.pythonEnv.venvPipPath.get()
-            args("install", "--require-virtualenv", "build", "packaging", "repairwheel", *buildRequirements.get())
+            args("install", "--require-virtualenv", "build", "wheel", "repairwheel", *buildRequirements.get())
         }
     }
 }
@@ -174,8 +174,9 @@ abstract class BuildWheel extends DefaultTask {
     Provider<String> wheelFilePlatformSuffix = pythonExe.map {python ->
         (new ByteArrayOutputStream()).withStream { out ->
             project.exec {
+                workingDir sourceDir.get()
                 executable python
-                args "-c", "import packaging.tags; print(next(packaging.tags.sys_tags()))"
+                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, get_platform(\".\")))"
                 standardOutput out
             }
             out.toString().trim()
