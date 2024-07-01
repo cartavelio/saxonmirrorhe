@@ -57,6 +57,10 @@ public class ComponentTracer extends Instruction {
         return baseOp.getChildExpression();
     }
 
+    public void setProperty(String name, Object value) {
+        properties.put(name, value);
+    }
+
     @Override
     public Iterable<Operand> operands() {
         return baseOp;
@@ -90,7 +94,7 @@ public class ComponentTracer extends Instruction {
     public Expression copy(RebindingMap rebindings) {
         ComponentTracer t = new ComponentTracer();
         t.component = component;
-        t.properties = properties;
+        t.properties = new HashMap<>(properties);
         Expression newBody = getChild().copy(rebindings);  // Bug 4642
         t.baseOp = new Operand(t, newBody, OperandRole.SAME_FOCUS_ACTION);
         t.adoptChildExpression(newBody);
