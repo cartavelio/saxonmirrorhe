@@ -284,7 +284,7 @@ void SaxonProcessor::detachCurrentThread() {
 #ifdef DEBUG
   std::cerr << "detachCurrentThread called" << std::endl;
 #endif
-  detach_graalvm_thread(SaxonProcessor::sxn_environ);
+  int result = detach_graalvm_thread(SaxonProcessor::sxn_environ);
 #ifdef DEBUG
   if (result != 0) {
     std::cerr << "detachCurrentThread failed" << std::endl;
