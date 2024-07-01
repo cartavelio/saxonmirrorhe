@@ -1134,6 +1134,7 @@ tasks.register("all_python_test_suites") {
   tasks.register("${edition}c_pytest", PytestRunner) {
     dependsOn "${edition}c_pypi_pip_install"
     dependsOn "${edition}c_python_install_test_wheel"
+    dependsOn "${edition}c_pytest_data"
 
     pytest = branchVenvTask.map { it.venvBinHostedExe("pytest").get() }
 
@@ -1141,8 +1142,7 @@ tasks.register("all_python_test_suites") {
     environment SAXONC_HOME: saxonLicenseDir
     environment SAXONC_DEBUG_FLAG: "true"//, SAXONC_TESTSUITE_DEBUG: "true"
 
-    Provider<Directory> pytestDataDir = tasks.named("${edition}c_pytest_data").map { it.destinationDir }
-    baseArgs "--data-dir", file(pytestDataDir)
+    baseArgs "--data-dir", file(tasks.named("${edition}c_pytest_data").map { it.destinationDir })
     tests "./test_saxonc.py"
   }
 
