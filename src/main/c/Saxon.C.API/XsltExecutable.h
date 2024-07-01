@@ -242,12 +242,6 @@ public:
    */
   void clearParameters(bool deleteValues = false);
 
-    //! Decrement parameters values in the processor. PHP/Python use only
-    /**
-     * This method decrements the parameters in the processor.
-     * If the ref count is zero the XdmValue objects will be deleted
-     */
-    void decrementParameters();
 
   //! Clear property values set
   void clearProperties();

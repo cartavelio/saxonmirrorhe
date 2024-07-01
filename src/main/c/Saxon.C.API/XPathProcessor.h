@@ -309,12 +309,6 @@ public:
    */
   void clearProperties();
 
-    //! Decrement parameters values in the processor. PHP/Python use only
-    /**
-     * This method decrements the parameters in the processor.
-     * If the ref count is zero the XdmValue objects will be deleted
-     */
-    void decrementParameters();
 
   /**
    * Checks for pending exceptions without creating a local reference to the

@@ -347,36 +347,23 @@ const char *XsltExecutable::getProperty(const char *name) {
   return nullptr;
 }
 
-void XsltExecutable::decrementParameters(){
-    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
-         itr != parameters.end(); itr++) {
-        XdmValue *value = itr->second;
-        if (value != nullptr) {
-#ifdef DEBUG
-            std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
-              << value->getRefCount() << std::endl;
-#endif
-            value->decrementRefCount();
-        }
-    }
-
-}
 
 void XsltExecutable::clearParameters(bool delValues) {
-    if (delValues) {
+    if (delValues || SaxonProcessor::extensionFlag) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
-            if (value != nullptr) {
+            if (delValues && value != nullptr) {
 #ifdef DEBUG
                 std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;
 #endif
-
                 delete value;
                 value = nullptr;
             }
-
+            if(SaxonProcessor::extensionFlag) {
+                value->decrementRefCount();
+            }
         }
     }
     parameters.clear();

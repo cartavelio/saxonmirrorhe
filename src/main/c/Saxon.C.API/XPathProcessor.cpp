@@ -374,32 +374,22 @@ void XPathProcessor::setProperty(const char *name, const char *value) {
     }
 }
 
-void XPathProcessor::decrementParameters() {
-    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
-         itr != parameters.end(); itr++) {
-        XdmValue *value = itr->second;
-        if (value != nullptr) {
-#ifdef DEBUG
-            std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
-              << value->getRefCount() << std::endl;
-#endif
-            value->decrementRefCount();
-        }
-    }
-}
 
-void XPathProcessor::clearParameters(bool delVal) {
-    if (delVal) {
+void XPathProcessor::clearParameters(bool delValues) {
+    if (delValues || SaxonProcessor::extensionFlag) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
-            if (value != nullptr) {
+            if (delValues && value != nullptr) {
 #ifdef DEBUG
                 std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;
 #endif
                 delete value;
                 value = nullptr;
+            }
+            if(SaxonProcessor::extensionFlag) {
+                value->decrementRefCount();
             }
         }
     }
