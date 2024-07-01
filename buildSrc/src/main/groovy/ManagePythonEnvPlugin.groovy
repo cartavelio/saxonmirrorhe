@@ -19,9 +19,11 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecResult
 
+import javax.annotation.Nullable
 import javax.inject.Inject
 
 abstract class ManagePythonEnvExtension {
@@ -732,6 +734,148 @@ abstract class InstallLocalWheel extends DefaultTask {
         project.exec {
             executable pipExe.get()
             args "install", "--force-reinstall", wheel.map { it.asFile }.get()
+        }
+    }
+}
+
+abstract class PytestRunner extends DefaultTask {
+    private final List<Object> baseArguments = new ArrayList<>();
+    private final List<Object> testArguments = new ArrayList<>();
+    private Map<String, Object> environment = [:];
+    private Object workingDir;
+
+    @InputFile
+    abstract RegularFileProperty getPytest()
+
+    @Internal
+    public Object getWorkingDir() {
+        return workingDir;
+    }
+
+    void setWorkingDir(Object dir) {
+        this.workingDir = dir;
+    }
+
+    PytestRunner workingDir(Object dir) {
+        setWorkingDir(dir);
+        return this;
+    }
+
+    boolean hasWorkingDir() {
+        return this.workingDir != null
+    }
+
+    PytestRunner baseArgs(Object... args) {
+        if (args == null) {
+            throw new IllegalArgumentException("args == null!")
+        }
+        baseArgs(Arrays.asList(args))
+        return this
+    }
+
+    PytestRunner baseArgs(Iterable<?> args) {
+        baseArguments.addAll(args)
+        return this;
+    }
+
+    PytestRunner setBaseArgs(List<String> args) {
+        baseArguments.clear()
+        baseArgs(args)
+        return this;
+    }
+
+    PytestRunner setBaseArgs(Iterable<?> args) {
+        baseArguments.clear()
+        baseArgs(args)
+        return this;
+    }
+
+    @Nullable
+    @Optional
+    @Input
+    List<String> getBaseArgs() {
+        List<String> args = new ArrayList<>();
+        for (Object argument : baseArguments) {
+            args.add(argument.toString());
+        }
+        return args;
+    }
+
+    PytestRunner tests(Object... args) {
+        if (args == null) {
+            throw new IllegalArgumentException("args == null!")
+        }
+        tests(Arrays.asList(args))
+        return this
+    }
+
+    PytestRunner tests(Iterable<?> args) {
+        testArguments.addAll(args)
+        return this;
+    }
+
+    @Option(option = "test", description = "set the test specifiers passed to pytest")
+    PytestRunner setTests(List<String> args) {
+        testArguments.clear()
+        tests(args)
+        return this;
+    }
+
+    PytestRunner setTests(Iterable<?> args) {
+        testArguments.clear()
+        tests(args)
+        return this;
+    }
+
+    @Nullable
+    @Optional
+    @Input
+    List<String> getTests() {
+        List<String> args = new ArrayList<>();
+        for (Object argument : testArguments) {
+            args.add(argument.toString());
+        }
+        return args;
+    }
+
+    @Internal
+    public Map<String, Object> getEnvironment() {
+        return this.environment
+    }
+
+    void setEnvironment(Map<String, ?> environmentVariables) {
+        // shallow-copy the input map then replace the existing environment
+        this.environment = environmentVariables + [:]
+    }
+
+    PytestRunner environment(String name, Object value) {
+        getEnvironment().put(name, value);
+        return this;
+    }
+
+    PytestRunner environment(Map<String, ?> environmentVariables) {
+        getEnvironment().putAll(environmentVariables);
+        return this;
+    }
+
+    boolean hasEnvironment() {
+        return !this.environment.isEmpty()
+    }
+
+    @TaskAction
+    void execute() {
+        def runner = this
+        project.exec {
+            if (runner.hasWorkingDir()) {
+                workingDir runner.getWorkingDir()
+            }
+            executable runner.pytest.get()
+            args runner.getBaseArgs()
+            args runner.getTests()
+
+            if (runner.hasEnvironment()) {
+                environment runner.getEnvironment()
+            }
         }
     }
 }
