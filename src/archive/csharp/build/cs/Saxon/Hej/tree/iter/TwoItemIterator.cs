@@ -46,13 +46,13 @@ namespace Saxon.Hej.tree.iter {
             }
         }
     
+        /* Expanding default method close from interface SequenceIterator */
+        public virtual void close() {
+        }
+
         /* Expanding default method materialize from interface GroundedIterator */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
             return Saxon.Hej.value.SequenceExtent.from(this).reduce();
-        }
-
-        /* Expanding default method close from interface SequenceIterator */
-        public virtual void close() {
         }
 
     }

@@ -187,7 +187,7 @@ namespace Saxon.Hej.ma.arrays {
                 return context => {
                     System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>(eagerEvaluators.Count);
                     foreach (Saxon.Hej.expr.elab.SequenceEvaluator e in eagerEvaluators) {
-                        members.Add((Saxon.Hej.om.GroundedValue)(e.evaluate(context)));
+                        members.Add(e.evaluate(context).materialize());
                     }
                     return expr.makeArray(members);
                 } ;

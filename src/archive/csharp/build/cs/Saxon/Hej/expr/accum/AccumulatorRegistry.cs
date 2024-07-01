@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.accum {
     public class AccumulatorRegistry {
-        protected internal System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.accum.Accumulator> accumulatorsByName = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.accum.Accumulator>();
+        protected internal System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.accum.Accumulator> accumulatorsByName = new System.Collections.Concurrent.ConcurrentDictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.expr.accum.Accumulator>();
         public AccumulatorRegistry()  {
         }
         public System.Collections.Generic.ISet<Saxon.Hej.expr.accum.Accumulator> getUsedAccumulators(string useAccumulatorsAtt, Saxon.Hej.style.StyleElement styleElement) {

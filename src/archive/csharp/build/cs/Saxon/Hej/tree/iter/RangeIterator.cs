@@ -30,22 +30,22 @@ namespace Saxon.Hej.tree.iter {
             }
         }
     
+        /* Expanding default method close from interface SequenceIterator */
+        public virtual void close() {
+        }
+
         /* Expanding default method materialize from interface GroundedIterator */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
             return Saxon.Hej.value.SequenceExtent.from(this).reduce();
         }
 
-        /* Expanding default method close from interface SequenceIterator */
-        public virtual void close() {
+        /* Creating stub method next to satisfy interface SequenceIterator */
+        public virtual Saxon.Hej.om.Item next() {
+            throw new System.NotImplementedException();
         }
 
         /* Creating stub method isActuallyGrounded to satisfy interface GroundedIterator */
         public virtual bool isActuallyGrounded() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method next to satisfy interface SequenceIterator */
-        public virtual Saxon.Hej.om.Item next() {
             throw new System.NotImplementedException();
         }
 

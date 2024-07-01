@@ -177,6 +177,9 @@ namespace Saxon.Hej.style {
             pack.setSchemaAware((info.isSchemaAware() || isSchemaAware()));
             pack.setLanguageVersion(info.getXsltVersion());
             pack.createFunctionLibrary();
+            if ((compilerInfo.getStubFunctionLibrary() != null)) {
+                pack.getFunctionLibrary().addFunctionLibrary(compilerInfo.getStubFunctionLibrary());
+            }
             psm.getRuleManager().setCompilerInfo(info);
             setPrincipalStylesheetModule(psm);
             packageData = null;

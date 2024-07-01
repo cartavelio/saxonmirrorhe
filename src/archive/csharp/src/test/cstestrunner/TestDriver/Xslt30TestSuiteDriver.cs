@@ -374,7 +374,9 @@ namespace TestDriver {
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
-            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE") || item.StringValue.StartsWith("XPST");
+            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE") || 
+                                                item.StringValue.StartsWith("XPST") || 
+                                                item.StringValue.StartsWith("XTTE");
             bool expectStaticError = testCase.Select(
                 Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>) IsStaticError)).Any();
             if (expectStaticError) {
@@ -410,6 +412,7 @@ namespace TestDriver {
                                 Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
                                                         loc.SystemId + "#" + loc.LineNumber +
                                                         "\n   " + err.Message);
+                                recordFailure(testSetName, testName);
                             }
                             catch (Exception) {
                                 // No action

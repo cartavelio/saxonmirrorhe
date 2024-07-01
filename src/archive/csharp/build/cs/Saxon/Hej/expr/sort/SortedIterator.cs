@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.sort {
     public class SortedIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.LookaheadIterator {
-        protected internal Saxon.Hej.om.SequenceIterator @base;
+        private readonly Saxon.Hej.om.SequenceIterator @base;
         protected internal Saxon.Hej.expr.sort.SortKeyEvaluator sortKeyEvaluator;
         protected internal Saxon.Hej.expr.sort.AtomicComparer[] comparators;
         protected internal Saxon.Hej.expr.sort.ObjectToBeSorted[] values;
         protected internal int count = -1;
         protected internal int position = 0;
-        protected internal Saxon.Hej.expr.XPathContext context;
+        protected internal readonly Saxon.Hej.expr.XPathContext context;
         private Saxon.Api.HostLanguage hostLanguage;
-        protected internal SortedIterator()  {
+        protected internal Saxon.Hej.om.SequenceIterator getBaseIterator() {
+            return @base;
         }
         public SortedIterator(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.sort.SortKeyEvaluator sortKeyEvaluator, Saxon.Hej.expr.sort.AtomicComparer[] comparators, bool createNewContext)  {
             if (createNewContext) {
                 this.context = context.newMinorContext();
-                this.@base = this.context.trackFocus(@base);
                 this.context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_SORT);
+                this.@base = this.context.trackFocus(@base);
             } else {
-                this.@base = @base;
                 this.context = context;
+                this.@base = @base;
             }
             this.sortKeyEvaluator = sortKeyEvaluator;
             this.comparators = new Saxon.Hej.expr.sort.AtomicComparer[comparators.Length];
@@ -46,9 +47,7 @@ namespace Saxon.Hej.expr.sort {
                         doSort();
                         return (count>0);
                     } catch (Saxon.Hej.trans.XPathException err) {
-                        count = -1;
-                        @base = Saxon.Hej.om.SequenceTool.focusTracker(new Saxon.Hej.expr.ErrorIterator(err));
-                        return true;
+                        throw new Saxon.Hej.trans.UncheckedXPathException(err);
                     }
                 }
             } else {

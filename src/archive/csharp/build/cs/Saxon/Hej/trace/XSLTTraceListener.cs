@@ -3,6 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.trace {
     public class XSLTTraceListener : Saxon.Hej.trace.AbstractTraceListener {
+        protected internal override bool isApplicable(Saxon.Hej.trace.Traceable info) {
+            if (!(base.isApplicable(info))) {
+                return false;
+            }
+            if ((level(info) == Saxon.Hej.trace.TraceLevel.LOW)) {
+                return (detail != Saxon.Hej.trace.TraceLevel.NONE);
+            }
+            if ((detail == Saxon.Hej.trace.TraceLevel.HIGH)) {
+                return true;
+            }
+            if ((info is Saxon.Hej.expr.Expression)) {
+                return Saxon.Hej.trace.XSLTTraceCodeInjector.isTraceableExpression((Saxon.Hej.expr.Expression)(info));
+            }
+            return false;
+        }
         protected internal override string getOpeningAttributes() {
             return (("xmlns:xsl=\""+Saxon.Hej.lib.NamespaceConstant.XSLT)+'\"');
         }
@@ -22,9 +37,13 @@ namespace Saxon.Hej.trace {
                             return "xsl:variable";
                         } else {
                             if (expr.isCallOn(typeof(Saxon.Hej.functions.Trace))) {
-                                return "fn:trace";
+                                return "fn-trace";
                             } else {
-                                return expr.getExpressionName();
+                                if ((expr is Saxon.Hej.expr.SystemFunctionCall)) {
+                                    return "call";
+                                } else {
+                                    return expr.getExpressionName();
+                                }
                             }
                         }
                     }
@@ -46,7 +65,7 @@ namespace Saxon.Hej.trace {
                                     return "xsl:variable";
                                 } else {
                                     if ((info is Saxon.Hej.functions.Trace)) {
-                                        return "fn:trace";
+                                        return "fn-trace";
                                     } else {
                                         return "misc";
                                     }

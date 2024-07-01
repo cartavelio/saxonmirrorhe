@@ -500,7 +500,7 @@ namespace Saxon.Hej.expr.sort {
                 Saxon.Hej.om.Item currentItem = context.getContextItem();
                 manualIterator.setContextItem(currentItem);
                 Saxon.Hej.expr.sort.ItemWithMergeKeys newItem = new Saxon.Hej.expr.sort.ItemWithMergeKeys(currentItem, ms.mergeKeyDefinitions, ms.sourceName, keyContext);
-                return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(new Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>(newItem));
+                return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(new Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>(newItem, typeof(Saxon.Hej.expr.sort.ItemWithMergeKeys)));
             }
         
         }

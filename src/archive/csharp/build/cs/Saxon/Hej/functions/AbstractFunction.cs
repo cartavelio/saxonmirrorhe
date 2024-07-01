@@ -36,7 +36,7 @@ namespace Saxon.Hej.functions {
         public bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
             throw new Saxon.Hej.trans.XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
         }
-        public bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
+        public bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual.DeepEqualOptions options) {
             if (options.falseOnError) {
                 return false;
             }
@@ -52,16 +52,6 @@ namespace Saxon.Hej.functions {
             return getDescription();
         }
     
-        /* Expanding default method isSequenceVariadic from interface FunctionItem */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
-        /* Expanding default method getGenre from interface FunctionItem */
-        public virtual Saxon.Hej.om.Genre getGenre() {
-            return Saxon.Hej.om.Genre.FUNCTION;
-        }
-
         /* Expanding default method reduce from interface Item */
         public virtual Saxon.Hej.om.GroundedValue reduce() {
             return this;
@@ -94,11 +84,6 @@ namespace Saxon.Hej.functions {
                 chain = chain.addAll(val.asIterable());
             }
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
         }
 
         /* Expanding default method head from interface Item */
@@ -138,6 +123,21 @@ namespace Saxon.Hej.functions {
         /* Expanding default method isStreamed from interface Item */
         public virtual bool isStreamed() {
             return false;
+        }
+
+        /* Expanding default method isSequenceVariadic from interface FunctionItem */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method getGenre from interface FunctionItem */
+        public virtual Saxon.Hej.om.Genre getGenre() {
+            return Saxon.Hej.om.Genre.FUNCTION;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Creating stub method getFunctionItemType to satisfy interface FunctionItem */

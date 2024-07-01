@@ -9,7 +9,7 @@ namespace Saxon.Hej.expr.sort {
         private Saxon.Hej.expr.elab.ItemEvaluator[] sortKeyEvaluators;
         public SortExpression(Saxon.Hej.expr.Expression select, Saxon.Hej.expr.sort.SortKeyDefinitionList sortKeys)  {
             selectOp = new Saxon.Hej.expr.Operand(this, select, Saxon.Hej.expr.OperandRole.FOCUS_CONTROLLING_SELECT);
-            sortOp = new Saxon.Hej.expr.Operand(this, sortKeys, Saxon.Hej.expr.OperandRole.ATOMIC_SEQUENCE);
+            sortOp = new Saxon.Hej.expr.Operand(this, sortKeys, Saxon.Hej.expr.OperandRole.CONSTRAINED_ATOMIC_SEQUENCE);
             adoptChildExpression(select);
             adoptChildExpression(sortKeys);
         }

@@ -344,18 +344,22 @@ namespace Saxon.Hej.expr.instruct {
             System.Diagnostics.Debug.Assert((controller != null));
             Saxon.Hej.expr.instruct.Bindery b = controller.getBindery(getPackageData());
             try {
-                setDependencies(this, context);
-                bool go = b.setExecuting(this);
-                if (!(go)) {
-                    return b.getGlobalVariable(getBinderySlotNumber());
-                }
+                checkCircularity(this, context);
+                int slot = getBinderySlotNumber();
                 Saxon.Hej.om.GroundedValue value = getSelectValue(context, target);
                 if (_indexed) {
                     value = controller.getConfiguration().obtainOptimizer().makeIndexedValue(value.iterate());
                 }
-                return b.saveGlobalVariableValue(this, value);
+                lock (b) {
+                    Saxon.Hej.om.GroundedValue temp = b.getGlobalVariable(slot);
+                    if ((temp == null)) {
+                        b.setGlobalVariableValue(slot, value);
+                    } else {
+                        value = temp;
+                    }
+                }
+                return value;
             } catch (Saxon.Hej.trans.XPathException err) {
-                b.setNotExecuting(this);
                 if ((err is Saxon.Hej.trans.XPathException.Circularity)) {
                     err.setErrorCode((getPackageData().isXSLT() ? "XTDE0640" : "XQDY0054"));
                     err.setXPathContext(context);
@@ -368,9 +372,11 @@ namespace Saxon.Hej.expr.instruct {
                 }
             }
         }
-        protected internal static void setDependencies(Saxon.Hej.expr.instruct.GlobalVariable var, Saxon.Hej.expr.XPathContext context) {
+        protected internal static void checkCircularity(Saxon.Hej.expr.instruct.GlobalVariable var, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.Controller controller = context.getController();
-            context = context.getMajorContext();
+            if (!(((context is Saxon.Hej.expr.XPathContextMajor)))) {
+                context = getMajorCaller(context);
+            }
             while ((context != null)) {
                 do {
                     Saxon.Hej.expr.ContextOriginator origin = ((Saxon.Hej.expr.XPathContextMajor)(context)).getOrigin();
@@ -378,12 +384,16 @@ namespace Saxon.Hej.expr.instruct {
                         controller.registerGlobalVariableDependency((Saxon.Hej.expr.instruct.GlobalVariable)(origin), var);
                         return ;
                     }
-                    context = context.getCaller();
-                    if ((context != null)) {
-                        context = context.getMajorContext();
-                    }
+                    context = getMajorCaller(context);
                 } while ((context != null));
             }
+        }
+        private static Saxon.Hej.expr.XPathContextMajor getMajorCaller(Saxon.Hej.expr.XPathContext context) {
+            Saxon.Hej.expr.XPathContext caller = context.getCaller();
+            while (!((((caller == null) || (caller is Saxon.Hej.expr.XPathContextMajor))))) {
+                caller = caller.getCaller();
+            }
+            return (Saxon.Hej.expr.XPathContextMajor)(caller);
         }
         public Saxon.Hej.value.IntegerValue[] getIntegerBoundsForVariable() {
             return ((getBody() == null) ? null : getBody().getIntegerBounds());

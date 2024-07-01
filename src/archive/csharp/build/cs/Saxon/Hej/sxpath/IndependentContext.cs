@@ -19,7 +19,6 @@ namespace Saxon.Hej.sxpath {
             setConfiguration(config);
             clearNamespaces();
             setDefaultFunctionLibrary(31);
-            usingDefaultFunctionLibrary = true;
             setDefaultCollationName(config.getDefaultCollationName());
             setOptimizerOptions(config.getOptimizerOptions());
             Saxon.Hej.expr.PackageData pd = new Saxon.Hej.expr.PackageData(config);
@@ -40,12 +39,15 @@ namespace Saxon.Hej.sxpath {
             if ((libList != null)) {
                 setFunctionLibrary((Saxon.Hej.functions.FunctionLibraryList)(libList.copy()));
             }
+            setDefaultCollationName(ic.getDefaultCollationName());
             setImportedSchemaNamespaces(ic.importedSchemaNamespaces);
             externalResolver = ic.externalResolver;
             autoDeclare = ic.autoDeclare;
+            setUnprefixedElementMatchingPolicy(ic.getUnprefixedElementMatchingPolicy());
             setXPathLanguageLevel(ic.getXPathVersion());
             requiredContextItemType = ic.requiredContextItemType;
             setExecutable(ic.getExecutable());
+            setOptimizerOptions(ic.getOptimizerOptions());
         }
         public override Saxon.Hej.expr.parser.RetainedStaticContext makeRetainedStaticContext() {
             if ((retainedStaticContext == null)) {

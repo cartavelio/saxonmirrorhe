@@ -46,6 +46,14 @@ namespace Saxon.Hej.expr.instruct {
         public static bool isSingleBranchChoice(Saxon.Hej.expr.Expression exp) {
             return ((exp is Saxon.Hej.expr.instruct.Choose) && (((Saxon.Hej.expr.instruct.Choose)(exp)).size() == 1));
         }
+        public bool isActionOperand(Saxon.Hej.expr.Expression child) {
+            foreach (Saxon.Hej.expr.Operand actionOp in actionOps) {
+                if ((actionOp.getChildExpression() == child)) {
+                    return true;
+                }
+            }
+            return false;
+        }
         public Saxon.Hej.expr.Expression getCondition(int i) {
             return conditionOps[i].getChildExpression();
         }

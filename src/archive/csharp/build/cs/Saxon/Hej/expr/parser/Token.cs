@@ -103,6 +103,8 @@ namespace Saxon.Hej.expr.parser {
             tokens[KEYWORD_CURLY] = "<keyword> {";
             tokens[RCURLY] = "}";
             tokens[LET] = "let";
+            tokens[WHERE] = "where";
+            tokens[WHILE] = "while";
             tokens[VALIDATE] = "validate {";
             tokens[TAG] = "<element>";
             tokens[PRAGMA] = "(# ... #)";
@@ -237,6 +239,7 @@ namespace Saxon.Hej.expr.parser {
         public const int OTHERWISE = 79;
         public const int AND_ALSO = 80;
         public const int OR_ELSE = 81;
+        public const int WHILE = 82;
         public const int THIN_ARROW = 83;
         public const int MATH_MULT = 84;
         public const int MATH_DIVIDE = 85;

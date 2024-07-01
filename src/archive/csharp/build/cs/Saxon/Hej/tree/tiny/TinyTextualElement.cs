@@ -302,11 +302,6 @@ namespace Saxon.Hej.tree.tiny {
                 return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
             }
 
-            /* Expanding default method makeRepeatable from interface Sequence */
-            public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-                return this;
-            }
-
             /* Expanding default method getConfiguration from interface NodeInfo */
             public virtual Saxon.Hej.Configuration getConfiguration() {
                 return getTreeInfo().getConfiguration();
@@ -417,6 +412,11 @@ namespace Saxon.Hej.tree.tiny {
             /* Expanding default method iterate from interface Item */
             public virtual Saxon.Hej.om.SequenceIterator iterate() {
                 return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
+            }
+
+            /* Expanding default method makeRepeatable from interface Sequence */
+            public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+                return this;
             }
 
         }

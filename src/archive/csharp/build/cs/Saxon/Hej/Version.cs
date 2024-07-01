@@ -10,10 +10,11 @@ namespace Saxon.Hej {
               platform = new Saxon.Impl.Helpers.DotNetPlatform();
         }
         private const int MAJOR_VERSION = 12;
-        private const int MINOR_VERSION = 4;
-        private const int BUILD = 112912;
+        private const int MINOR_VERSION = 5;
+        private const int PATCH_VERSION = 0;
+        private const int BUILD = 32818;
         private const string MAJOR_RELEASE_DATE = "2023-01-12";
-        private const string MINOR_RELEASE_DATE = "2023-11-29";
+        private const string MINOR_RELEASE_DATE = "2024-06-18";
         private Version()  {
         }
         public static string getProductName() {
@@ -26,10 +27,13 @@ namespace Saxon.Hej {
             return ((edition+" ")+getProductVersion());
         }
         public static string getProductVersion() {
-            return ((MAJOR_VERSION+".")+MINOR_VERSION);
+            if ((PATCH_VERSION == 0)) {
+                return ((MAJOR_VERSION+".")+MINOR_VERSION);
+            }
+            return ((((MAJOR_VERSION+".")+MINOR_VERSION)+".")+PATCH_VERSION);
         }
         public static int[] getStructuredVersionNumber() {
-            return new int[]{MAJOR_VERSION, MINOR_VERSION, BUILD};
+            return new int[]{MAJOR_VERSION, MINOR_VERSION, BUILD, PATCH_VERSION};
         }
         public static string getReleaseDate() {
             return MINOR_RELEASE_DATE;

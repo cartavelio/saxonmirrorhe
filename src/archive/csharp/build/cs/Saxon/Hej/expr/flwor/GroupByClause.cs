@@ -164,7 +164,7 @@ namespace Saxon.Hej.expr.flwor {
                 }
                 for (int i = 0; (i<groupingValues.Length); i++) {
                     try {
-                        if (!(Saxon.Hej.functions.DeepEqual.deepEqual(groupingValues[i].iterate(), ((Saxon.Hej.expr.flwor.GroupByClause.TupleComparisonKey)(other)).groupingValues[i].iterate(), comparers[i], comparers[i].getContext(), 0))) {
+                        if (!(Saxon.Hej.functions.SaxonDeepEqual.deepEqual(groupingValues[i].iterate(), ((Saxon.Hej.expr.flwor.GroupByClause.TupleComparisonKey)(other)).groupingValues[i].iterate(), comparers[i], comparers[i].getContext(), 0))) {
                             return false;
                         }
                     } catch (Saxon.Hej.trans.XPathException e) {

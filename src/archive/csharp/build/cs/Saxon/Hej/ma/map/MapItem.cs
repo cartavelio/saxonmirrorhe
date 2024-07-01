@@ -159,7 +159,7 @@ namespace Saxon.Hej.ma.map {
                     if ((otherValue == null)) {
                         return false;
                     }
-                    if (!(Saxon.Hej.functions.DeepEqual.deepEqual(otherValue.iterate(), thisValue.iterate(), comparer, context, flags))) {
+                    if (!(Saxon.Hej.functions.SaxonDeepEqual.deepEqual(otherValue.iterate(), thisValue.iterate(), comparer, context, flags))) {
                         return false;
                     }
                 }
@@ -167,7 +167,7 @@ namespace Saxon.Hej.ma.map {
             }
             return false;
         }
-        public virtual bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options) {
+        public virtual bool deepEqual40(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.functions.DeepEqual.DeepEqualOptions options) {
             if (((other is Saxon.Hej.ma.map.MapItem) && (((Saxon.Hej.ma.map.MapItem)(other)).size() == size()))) {
                 Saxon.Hej.tree.iter.AtomicIterator keyIter = keys();
                 Saxon.Hej.value.AtomicValue key;
@@ -178,7 +178,7 @@ namespace Saxon.Hej.ma.map {
                     if ((otherValue == null)) {
                         return false;
                     }
-                    if (!(Saxon.Hej.functions.DeepEqual40.deepEqual(otherValue.iterate(), thisValue.iterate(), context, options))) {
+                    if (!(Saxon.Hej.functions.DeepEqual.deepEqual(otherValue.iterate(), thisValue.iterate(), context, options))) {
                         return false;
                     }
                 }
@@ -219,11 +219,6 @@ namespace Saxon.Hej.ma.map {
             return true;
         }
     
-        /* Expanding default method isSequenceVariadic from interface FunctionItem */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
         /* Expanding default method reduce from interface Item */
         public virtual Saxon.Hej.om.GroundedValue reduce() {
             return this;
@@ -258,11 +253,6 @@ namespace Saxon.Hej.ma.map {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
         /* Expanding default method head from interface Item */
         public virtual Saxon.Hej.om.Item head() {
             return this;
@@ -295,6 +285,16 @@ namespace Saxon.Hej.ma.map {
         /* Expanding default method isStreamed from interface Item */
         public virtual bool isStreamed() {
             return false;
+        }
+
+        /* Expanding default method isSequenceVariadic from interface FunctionItem */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
     }

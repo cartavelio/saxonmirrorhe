@@ -10,7 +10,7 @@ namespace Saxon.Eej.functions.extfn {
             compilerInfo.setErrorReporter(context.getErrorReporter());
             compilerInfo.setResourceResolver(context.getResourceResolver());
             Saxon.Hej.PreparedStylesheet pss = Saxon.Hej.style.Compilation.compileSingletonPackage(config, compilerInfo, doc.asActiveSource());
-            return new Saxon.Hej.value.ObjectValue<Saxon.Hej.PreparedStylesheet>(pss);
+            return new Saxon.Hej.value.ObjectValue<Saxon.Hej.PreparedStylesheet>(pss, typeof(Saxon.Hej.PreparedStylesheet));
         }
     
     }

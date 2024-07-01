@@ -77,7 +77,7 @@ namespace Saxon.Hej.om {
                 return Saxon.Hej.value.EmptySequence.getInstance();
             } else {
                 if ((len == 1)) {
-                    return itemAt(0);
+                    return ((/*1430*/Saxon.Hej.value.AtomicValue)itemAt(0));
                 } else {
                     return this;
                 }

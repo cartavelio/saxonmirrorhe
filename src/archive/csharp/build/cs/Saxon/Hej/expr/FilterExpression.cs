@@ -106,10 +106,13 @@ namespace Saxon.Hej.expr {
                 return fie;
             }
             filterIsPositional = isPositionalFilter(getFilter(), th);
-            filterIsSingletonBoolean = ((getFilter().getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && getFilter().getItemType().Equals(Saxon.Hej.type.BuiltInAtomicType.BOOLEAN));
+            filterIsSingletonBoolean = computeFilterIsSingletonBoolean();
             filterIsIndependent = (((getFilter().getDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_FOCUS)) == 0);
             Saxon.Hej.expr.parser.ExpressionTool.resetStaticProperties(this);
             return this;
+        }
+        private bool computeFilterIsSingletonBoolean() {
+            return (!(Saxon.Hej.value.Cardinality.allowsMany(getFilter().getCardinality())) && getFilter().getItemType().Equals(Saxon.Hej.type.BuiltInAtomicType.BOOLEAN));
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             if ((visitor.isOptimizeForStreaming() && (getSelectExpression() is Saxon.Hej.expr.GlobalVariableReference))) {
@@ -168,7 +171,7 @@ namespace Saxon.Hej.expr {
                 }
             }
             filterIsPositional = isPositionalFilter(getFilter(), th);
-            filterIsSingletonBoolean = ((getFilter().getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && getFilter().getItemType().Equals(Saxon.Hej.type.BuiltInAtomicType.BOOLEAN));
+            filterIsSingletonBoolean = computeFilterIsSingletonBoolean();
             if (((!(filterIsPositional) && !(visitor.isOptimizeForStreaming())) && !(indexingDisabled))) {
                 int isIndexable = opt.isIndexableFilter(getFilter());
                 if ((isIndexable != 0)) {

@@ -22,20 +22,23 @@ namespace Saxon.Hej.regex {
             childOp = childOp.optimize(program, flags);
             return this;
         }
+        public override int getMaxLoopingDepth() {
+            return childOp.getMaxLoopingDepth();
+        }
         public override Saxon.Hej.z.IntIterator iterateMatches(Saxon.Hej.regex.REMatcher matcher, int position) {
             if ((((matcher.program.optimizationFlags&Saxon.Hej.regex.REProgram.OPT_HASBACKREFS)) != 0)) {
                 matcher.startBackref[groupNr] = position;
             }
             Saxon.Hej.z.IntIterator basis = childOp.iterateMatches(matcher, position);
-            return new Inner_IntIterator_10(this, matcher, position, basis);
+            return new Inner_IntIterator_11(this, matcher, position, basis);
         }
         public override string display() {
             return (("("+childOp.display())+")");
         }
     
-        private class Inner_IntIterator_10 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_11 : Saxon.Hej.z.IntIterator {
             private readonly OpCapture outerInstance;
-            public Inner_IntIterator_10(OpCapture outerInstance, Saxon.Hej.regex.REMatcher matcher, int position, Saxon.Hej.z.IntIterator basis) {
+            public Inner_IntIterator_11(OpCapture outerInstance, Saxon.Hej.regex.REMatcher matcher, int position, Saxon.Hej.z.IntIterator basis) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.position = position;

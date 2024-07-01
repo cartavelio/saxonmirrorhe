@@ -46,7 +46,7 @@ namespace Saxon.Hej.tree.tiny {
             if ((sb == null)) {
                 return Saxon.Hej.str.EmptyUnicodeString.getInstance();
             }
-            return Saxon.Hej.str.ZenoString.of(sb.toUnicodeString());
+            return sb.toUnicodeString();
         }
     
     }

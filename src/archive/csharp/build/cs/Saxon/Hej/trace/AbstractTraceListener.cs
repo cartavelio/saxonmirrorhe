@@ -4,15 +4,17 @@ using System.Linq;
 namespace Saxon.Hej.trace {
     public abstract class AbstractTraceListener : Saxon.Hej.lib.StandardDiagnostics, Saxon.Hej.lib.TraceListener {
         protected internal int indent = 0;
-        private int detail = 2;
+        protected internal int detail = Saxon.Hej.trace.TraceLevel.NORMAL;
         protected internal Saxon.Hej.lib.Logger @out = new Saxon.Callbacks.StandardLogger();
         private static readonly Saxon.Ejava.lang.StringBuilder spaceBuffer = new Saxon.Ejava.lang.StringBuilder("                ");
         public void setLevelOfDetail(int level) {
             this.detail = level;
         }
         public void open(Saxon.Hej.Controller controller) {
-            @out.info(((((("<trace "+"saxon-version=\"")+Saxon.Hej.Version.getProductVersion())+"\" ")+getOpeningAttributes())+'>'));
-            indent++;
+            if ((indent == 0)) {
+                @out.info(((((("<trace "+"saxon-version=\"")+Saxon.Hej.Version.getProductVersion())+"\" ")+getOpeningAttributes())+'>'));
+                indent++;
+            }
         }
         protected internal abstract string getOpeningAttributes();
         public void close() {
@@ -21,9 +23,13 @@ namespace Saxon.Hej.trace {
         }
         public void enter(Saxon.Hej.trace.Traceable info, System.Collections.Generic.IDictionary<string,System.Object> properties, Saxon.Hej.expr.XPathContext context) {
             if (isApplicable(info)) {
-                Saxon.Hej.s9api.Location loc = info.getLocation();
+                Saxon.Hej.s9api.Location loc = getLocation(info);
                 string file = abbreviateLocationURI(loc.getSystemId());
-                Saxon.Ejava.lang.StringBuilder msg = new Saxon.Ejava.lang.StringBuilder(((Saxon.Hej.trace.AbstractTraceListener.spaces(indent)+'<')+tag(info)));
+                string elementTag = tag(info);
+                Saxon.Ejava.lang.StringBuilder msg = new Saxon.Ejava.lang.StringBuilder(((Saxon.Hej.trace.AbstractTraceListener.spaces(indent)+'<')+elementTag));
+                if ((((info is Saxon.Hej.expr.Expression) && !(((Saxon.Hej.expr.Expression)(info)).isInstruction())) && !(properties.ContainsKey("expr")))) {
+                    Saxon.Impl.Helpers.MapUtils.Put(properties, "expr", ((Saxon.Hej.expr.Expression)(info)).toShortString());
+                }
                 foreach (System.Collections.Generic.KeyValuePair<string,System.Object> entry in properties) {
                     System.Object val = entry.Value;
                     if ((val is Saxon.Hej.om.StructuredQName)) {
@@ -34,7 +40,7 @@ namespace Saxon.Hej.trace {
                         }
                     }
                     if ((val != null)) {
-                        msg.append(' ').append(entry.Key).append("=\"").append(escape(val.ToString())).append('"');
+                        msg.append(' ').append(entry.Key).append("=").append(escape(val.ToString()));
                     }
                 }
                 msg.append(" line=\"").append(loc.getLineNumber()).append('"');
@@ -42,18 +48,29 @@ namespace Saxon.Hej.trace {
                 if ((col>=0)) {
                     msg.append(" column=\"").append(loc.getColumnNumber()).append('"');
                 }
-                msg.append(" module=\"").append(escape(file)).append('"');
+                msg.append(" module=").append(escape(file));
                 msg.append(">");
                 @out.info(msg.ToString());
                 indent++;
             }
         }
+        public static Saxon.Hej.s9api.Location getLocation(Saxon.Hej.trace.Traceable info) {
+            Saxon.Hej.s9api.Location rawLocation = info.getLocation();
+            if ((rawLocation is Saxon.Hej.expr.parser.XPathParser.NestedLocation)) {
+                Saxon.Hej.s9api.Location container = ((Saxon.Hej.expr.parser.XPathParser.NestedLocation)(rawLocation)).getContainingLocation();
+                if ((container is Saxon.Hej.tree.AttributeLocation)) {
+                    return container;
+                }
+            }
+            return rawLocation;
+        }
         public string escape(string @in) {
             if ((@in == null)) {
-                return "";
+                return "\"\"";
             }
+            char quot = (@in.Contains("\"") ? '\'' : '"');
             string collapsed = Saxon.Hej.value.Whitespace.collapseWhitespace(@in);
-            Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder((collapsed.Length+10));
+            Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder((collapsed.Length+10)).append(quot);
             for (int i = 0; (i<collapsed.Length); i++) {
                 char c = collapsed[i];
                 if ((c == '<')) {
@@ -65,8 +82,8 @@ namespace Saxon.Hej.trace {
                         if ((c == '&')) {
                             sb.append("&amp;");
                         } else {
-                            if ((c == '\"')) {
-                                sb.append("&#34;");
+                            if ((c == quot)) {
+                                sb.append(((quot == '"') ? "&quot;" : "&apos;"));
                             } else {
                                 if ((c == '\n')) {
                                     sb.append("&#xA;");
@@ -86,7 +103,7 @@ namespace Saxon.Hej.trace {
                     }
                 }
             }
-            return sb.ToString();
+            return sb.append(quot).ToString();
         }
         public void leave(Saxon.Hej.trace.Traceable info) {
             if (isApplicable(info)) {
@@ -94,19 +111,18 @@ namespace Saxon.Hej.trace {
                 @out.info((((Saxon.Hej.trace.AbstractTraceListener.spaces(indent)+"</")+tag(info))+'>'));
             }
         }
-        protected internal bool isApplicable(Saxon.Hej.trace.Traceable info) {
+        protected internal virtual bool isApplicable(Saxon.Hej.trace.Traceable info) {
             return (level(info)<=detail);
         }
         protected internal abstract string tag(Saxon.Hej.trace.Traceable info);
         protected internal int level(Saxon.Hej.trace.Traceable info) {
-            if (((info is Saxon.Hej.trace.TraceableComponent) || (info is Saxon.Hej.expr.instruct.ApplyTemplates))) {
+            if ((((info is Saxon.Hej.trace.TraceableComponent) || (info is Saxon.Hej.expr.instruct.ApplyTemplates)) || (info is Saxon.Hej.expr.instruct.CallTemplate))) {
                 return 1;
             }
-            if ((info is Saxon.Hej.expr.instruct.Instruction)) {
+            if (((info is Saxon.Hej.expr.Expression) && ((((Saxon.Hej.expr.Expression)(info)).isInstruction() || ((Saxon.Hej.expr.Expression)(info)).isCallOn(typeof(Saxon.Hej.functions.TransformFn)))))) {
                 return 2;
-            } else {
-                return 3;
             }
+            return 3;
         }
         public void startCurrentItem(Saxon.Hej.om.Item item) {
             if (((item is Saxon.Hej.om.NodeInfo) && (detail>0))) {

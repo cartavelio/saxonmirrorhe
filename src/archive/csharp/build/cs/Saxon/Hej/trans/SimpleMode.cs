@@ -43,7 +43,7 @@ namespace Saxon.Hej.trans {
                 string prop = entry.Key;
                 string value = entry.Value;
                 if (value.Equals("##conflict##")) {
-                    throw new Saxon.Hej.trans.XPathException((((("For "+getLabel())+", there are conflicting values for xsl:mode/@")+prop)+" at the same import precedence"), "XTSE0545");
+                    throw new Saxon.Hej.trans.XPathException((((("For "+getLabel())+", there are conflicting values for xsl:mode/@")+prop)+" at the same import precedence"), "XTSE0545").maybeWithLocation(getActivePart());
                 }
                 switch (prop) {
                   case "streamable":

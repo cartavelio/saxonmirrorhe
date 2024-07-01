@@ -85,6 +85,9 @@ namespace Saxon.Eej.functions.qt4 {
         protected internal void checkOptions(Saxon.Hej.om.Sequence[] arguments) {
             if ((getArity() == 2)) {
                 Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
+                if ((options == null)) {
+                    options = new Saxon.Hej.ma.map.DictionaryMap();
+                }
                 if ((options.get(PATH_SEPARATOR) != null)) {
                     string str = options.get(PATH_SEPARATOR).getStringValue();
                     if ((str.Length != 1)) {

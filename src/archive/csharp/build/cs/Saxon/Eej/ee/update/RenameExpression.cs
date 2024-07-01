@@ -132,6 +132,9 @@ namespace Saxon.Eej.ee.update {
                         if (((prefix.Length>0) || !(uri.isEmpty()))) {
                             throw new Saxon.Hej.trans.XPathException("Processing instruction cannot be in a namespace").withErrorCode("XUDY0025").asTypeError().withXPathContext(context).withLocation(expr.getLocation());
                         }
+                        if (Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(localName, "xml")) {
+                            throw new Saxon.Hej.trans.XPathException("Processing instruction cannot be named 'xml'").withErrorCode("XQDY0064").withXPathContext(context).withLocation(expr.getLocation());
+                        }
                     }
                     Saxon.Hej.om.NodeName name = new Saxon.Hej.om.FingerprintedQName(prefix, uri, localName);
                     Saxon.Hej.om.NodeInfo targetNode = node;

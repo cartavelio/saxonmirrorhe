@@ -7,6 +7,7 @@ namespace Saxon.Hej.expr.sort {
             setHostLanguage(Saxon.Api.HostLanguage.XSLT);
         }
         protected internal override void buildArray() {
+            Saxon.Hej.om.SequenceIterator @base = getBaseIterator();
             int allocated = (Saxon.Hej.om.SequenceTool.supportsGetLength(@base) ? Saxon.Hej.om.SequenceTool.getLength(@base) : 100);
             values = new Saxon.Hej.expr.sort.ObjectToBeSorted[allocated];
             count = 0;

@@ -11,7 +11,7 @@ namespace Saxon.Eej.functions.extfn {
                 namespaceOrigin = (Saxon.Hej.om.NodeInfo)(arguments[1].head());
             }
             Saxon.Eej.functions.extfn.Evaluate.PreparedExpression pexpr = prepareExpression(exprText, namespaceOrigin, getStaticBaseUriString(), "saxon:expression", c2);
-            return new Saxon.Hej.value.ObjectValue<Saxon.Eej.functions.extfn.Evaluate.PreparedExpression>(pexpr);
+            return new Saxon.Hej.value.ObjectValue<Saxon.Eej.functions.extfn.Evaluate.PreparedExpression>(pexpr, typeof(Saxon.Eej.functions.extfn.Evaluate.PreparedExpression));
         }
     
     }

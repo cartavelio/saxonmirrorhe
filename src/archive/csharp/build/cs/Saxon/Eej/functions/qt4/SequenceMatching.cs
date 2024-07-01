@@ -16,7 +16,8 @@ namespace Saxon.Eej.functions.qt4 {
                     if ((it0 == null)) {
                         return Saxon.Hej.value.BooleanValue.FALSE;
                     }
-                    bool match = Saxon.Hej.functions.DeepEqual.deepEqual(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(it0), Saxon.Hej.tree.iter.SingletonIterator.makeIterator(it1), comparer, context, 0);
+                    bool match;
+                    match = Saxon.Hej.functions.DeepEqual.deepEqual(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(it0), Saxon.Hej.tree.iter.SingletonIterator.makeIterator(it1), context, Saxon.Hej.functions.DeepEqual.DeepEqualOptions.defaultOptions());
                     if (!(match)) {
                         return Saxon.Hej.value.BooleanValue.FALSE;
                     }

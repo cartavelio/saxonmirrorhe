@@ -181,25 +181,37 @@ namespace Saxon.Hej.expr.instruct {
                 if (noNodeIfEmpty) {
                     Saxon.Hej.expr.elab.ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
                     return (output, context) => {
-                        Saxon.Hej.om.Item value = /*Delegate.eval()*/contentEval(context);
-                        if ((value != null)) {
-                            output.characters(value.getUnicodeStringValue(), loc, options);
+                        try {
+                            Saxon.Hej.om.Item value = /*Delegate.eval()*/contentEval(context);
+                            if ((value != null)) {
+                                output.characters(value.getUnicodeStringValue(), loc, options);
+                            }
+                            return null;
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            throw e.maybeWithLocation(expr.getSelect().getLocation());
                         }
-                        return null;
                     } ;
                 } else {
                     if ((((expr.getSelect().getItemType() == Saxon.Hej.type.BuiltInAtomicType.STRING) && !(expr.isDisableOutputEscaping())) && !(Saxon.Hej.value.Cardinality.allowsZero(expr.getCardinality())))) {
                         Saxon.Hej.expr.elab.PushEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForPush();
                         return (output, context) => {
-                            Saxon.Hej.@event.Outputter streamer = new Saxon.Hej.expr.instruct.ValueOf.TextNodeOutputStreamer(output, loc, options);
-                            return /*Delegate.processLeavingTail()*/contentEval(streamer, context);
+                            try {
+                                Saxon.Hej.@event.Outputter streamer = new Saxon.Hej.expr.instruct.ValueOf.TextNodeOutputStreamer(output, loc, options);
+                                return /*Delegate.processLeavingTail()*/contentEval(streamer, context);
+                            } catch (Saxon.Hej.trans.XPathException e) {
+                                throw e.maybeWithLocation(expr.getSelect().getLocation());
+                            }
                         } ;
                     } else {
                         Saxon.Hej.expr.elab.UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
                         return (output, context) => {
-                            Saxon.Hej.str.UnicodeString value = /*Delegate.eval()*/contentEval(context);
-                            output.characters(value, loc, options);
-                            return null;
+                            try {
+                                Saxon.Hej.str.UnicodeString value = /*Delegate.eval()*/contentEval(context);
+                                output.characters(value, loc, options);
+                                return null;
+                            } catch (Saxon.Hej.trans.XPathException e) {
+                                throw e.maybeWithLocation(expr.getSelect().getLocation());
+                            }
                         } ;
                     }
                 }
@@ -209,7 +221,13 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.elab.ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
                 bool noNodeIfEmpty = expr.noNodeIfEmpty;
                 bool doe = expr.isDisableOutputEscaping();
-                return context => Saxon.Hej.expr.instruct.ValueOf.makeTextNode(/*Delegate.eval()*/contentEval(context), noNodeIfEmpty, doe, context);
+                return context => {
+                    try {
+                        return Saxon.Hej.expr.instruct.ValueOf.makeTextNode(/*Delegate.eval()*/contentEval(context), noNodeIfEmpty, doe, context);
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        throw e.maybeWithLocation(expr.getSelect().getLocation());
+                    }
+                } ;
             }
         
         }

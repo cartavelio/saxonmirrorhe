@@ -442,6 +442,11 @@ namespace Saxon.Eej.config {
                 throw new Saxon.Hej.trans.XPathException(e);
             }
         }
+        public override Saxon.Hej.functions.FunctionLibrary loadStubFunctionLibrary(Saxon.Ejavax.xml.transform.stream.StreamSource jsonSignatures) {
+            Saxon.Eej.ee.extfn.js.StubFunctionLibrary lib = new Saxon.Eej.ee.extfn.js.StubFunctionLibrary(this);
+            lib.loadSignatures(jsonSignatures);
+            return lib;
+        }
         public override void exportComponents(Saxon.Hej.@event.Receiver @out) {
             Saxon.Eej.ee.schema.SchemaModelSerializer serializer = new Saxon.Eej.ee.schema.SchemaModelSerializer(this, @out);
             serializer.serialize();
@@ -753,12 +758,14 @@ namespace Saxon.Eej.config {
                 return parser;
             } else {
                 Saxon.Hej.expr.parser.XPathParser parser = base.newExpressionParser(language, updating, env);
-                parser.setAccelerator(new Saxon.Eej.ee.optim.QuickXPathParser());
+                if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
+                    parser.setAccelerator(new Saxon.Eej.ee.optim.QuickXPathParser());
+                }
                 return parser;
             }
         }
         public override Saxon.Hej.trace.ExpressionPresenter newExpressionExporter(string target, System.IO.Stream destination, Saxon.Hej.style.StylesheetPackage rootPackage) {
-            checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT, "stylesheeet export", -1);
+            checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT, "stylesheet export", -1);
             Saxon.Hej.trace.ExpressionPresenter presenter = new Saxon.Hej.trace.ExpressionPresenter();
             Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = new Saxon.Hej.trace.ExpressionPresenter.ExportOptions();
             options.rootPackage = rootPackage;
@@ -767,6 +774,9 @@ namespace Saxon.Eej.config {
               case "JS":
               case "JS2":
               case "JS3":
+                if ((rootPackage.getHostLanguageVersion()>=40)) {
+                    throw new Saxon.Hej.trans.XPathException("Cannot export SEF files to SaxonJS if 4.0 language extensions are enabled");
+                }
                 options.target = "JS";
                 options.targetVersion = (target.Equals("JS3") ? 3 : 2);
                 Saxon.Hej.@event.PipelineConfiguration pipe = makePipelineConfiguration();

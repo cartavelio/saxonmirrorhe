@@ -96,9 +96,15 @@ namespace Saxon.Hej.expr.instruct {
                     }
                     Saxon.Hej.trans.Mode mode = modeComponent.getActor();
                     Saxon.Hej.om.Item currentItem = context.getCurrentIterator().current();
+                    Saxon.Hej.expr.XPathContextMajor c1 = context.newContext();
+                    c1.setCurrentMode(modeComponent);
+                    c1.setOrigin(expr);
+                    c1.setCurrentComponent(modeComponent);
+                    Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
+                    pipe.setXPathContext(c1);
                     Saxon.Hej.trans.rules.Rule rule;
                     try {
-                        rule = mode.getNextMatchRule(currentItem, currentRule, context);
+                        rule = mode.getNextMatchRule(currentItem, currentRule, c1);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw e.withLocation(this.getExpression().getLocation());
                     }

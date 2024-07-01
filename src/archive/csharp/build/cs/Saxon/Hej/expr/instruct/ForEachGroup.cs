@@ -28,7 +28,7 @@ namespace Saxon.Hej.expr.instruct {
                 collationOp = new Saxon.Hej.expr.Operand(this, collationNameExpression, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
             }
             if ((sortKeys != null)) {
-                sortKeysOp = new Saxon.Hej.expr.Operand(this, sortKeys, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
+                sortKeysOp = new Saxon.Hej.expr.Operand(this, sortKeys, Saxon.Hej.expr.OperandRole.CONSTRAINED_SINGLE_ATOMIC);
             }
             this.algorithm = algorithm;
             this.collator = collator;

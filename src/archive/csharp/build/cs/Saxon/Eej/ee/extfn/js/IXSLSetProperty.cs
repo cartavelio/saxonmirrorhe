@@ -6,6 +6,8 @@ namespace Saxon.Eej.ee.extfn.js {
         private Saxon.Hej.expr.Expression name;
         private Saxon.Hej.expr.Expression select;
         private Saxon.Hej.expr.Expression @object;
+        private Saxon.Hej.expr.Expression convert;
+        private bool convertAttSupplied = false;
         public override bool isInstruction() {
             return true;
         }
@@ -30,6 +32,15 @@ namespace Saxon.Eej.ee.extfn.js {
                     string objectAtt = value;
                     @object = makeExpression(objectAtt, att);
                     break ;
+                  case "convert-value":
+                    bool convertVal = processBooleanAttribute("convert-value", value);
+                    if (convertVal) {
+                        convert = makeExpression("true()", att);
+                    } else {
+                        convert = makeExpression("false()", att);
+                    }
+                    convertAttSupplied = true;
+                    break ;
                   default:
                     checkUnknownAttribute(attName);
                     break ;
@@ -50,14 +61,25 @@ namespace Saxon.Eej.ee.extfn.js {
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
+            checkEmpty();
             name = typeCheck("name", name);
             select = typeCheck("select", select);
             @object = typeCheck("object", @object);
+            convert = typeCheck("convert-value", convert);
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
-            Saxon.Hej.expr.Expression e = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("set-property", 3).makeFunctionCall(name, select, @object);
-            e.setRetainedStaticContext(makeRetainedStaticContext());
-            return e;
+            if (convertAttSupplied) {
+                if (!("JS3".Equals(exec.getCompilerInfo().getTargetEdition()))) {
+                    compileError("ixsl:set-property/@convert-value is available only if the target edition is JS3");
+                } else {
+                    Saxon.Hej.expr.Expression e4 = Saxon.Eej.ee.extfn.js.IXSL3FunctionSet.getInstance().makeFunction("set-property", 4).makeFunctionCall(name, select, @object, convert);
+                    e4.setRetainedStaticContext(makeRetainedStaticContext());
+                    return e4;
+                }
+            }
+            Saxon.Hej.expr.Expression e3 = Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance().makeFunction("set-property", 3).makeFunctionCall(name, select, @object);
+            e3.setRetainedStaticContext(makeRetainedStaticContext());
+            return e3;
         }
     
     }

@@ -23,6 +23,9 @@ namespace Saxon.Hej.regex {
         public override int matchesEmptyString() {
             return @base.matchesEmptyString();
         }
+        public override int getMaxLoopingDepth() {
+            return @base.getMaxLoopingDepth();
+        }
         public override Saxon.Hej.regex.Operation optimize(Saxon.Hej.regex.REProgram program, Saxon.Hej.regex.REFlags flags) {
             @base = @base.optimize(program, flags);
             return this;

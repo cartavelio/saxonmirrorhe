@@ -59,7 +59,8 @@ namespace Saxon.Eej.functions.extfn {
                 }
                 transformer.setApplyFunctionConversionRulesToExternalVariables(true);
                 transformer.initializeController(@params);
-                transformer.applyTemplates(source, new Saxon.Hej.@event.TreeReceiver(builder));
+                Saxon.Hej.@event.Receiver @out = new Saxon.Hej.@event.SequenceNormalizerWithSpaceSeparator(builder);
+                transformer.applyTemplates(source, @out);
                 Saxon.Hej.om.NodeInfo result = builder.getCurrentRoot();
                 if ((result == null)) {
                     return Saxon.Hej.value.EmptySequence.getInstance();

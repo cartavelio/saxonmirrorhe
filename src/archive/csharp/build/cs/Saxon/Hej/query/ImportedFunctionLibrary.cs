@@ -23,7 +23,7 @@ namespace Saxon.Hej.query {
                 }
             }
             if (namespaces.Contains(uri)) {
-                return baseLibrary.bind(symbolicName, staticArgs, null, env, reasons);
+                return baseLibrary.bind(symbolicName, staticArgs, keywords, env, reasons);
             } else {
                 return null;
             }

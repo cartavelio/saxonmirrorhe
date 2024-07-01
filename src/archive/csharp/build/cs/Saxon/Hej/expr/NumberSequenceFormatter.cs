@@ -61,7 +61,7 @@ namespace Saxon.Hej.expr {
                         Saxon.Hej.type.ValidationFailure vf = Saxon.Hej.type.StringConverter.StringToLanguage.INSTANCE.validate(Saxon.Hej.str.StringView.tidy(language));
                         if ((vf != null)) {
                             langOp.setChildExpression(new Saxon.Hej.expr.StringLiteral(Saxon.Hej.value.StringValue.EMPTY_STRING));
-                            throw new Saxon.Hej.trans.XPathException("The lang attribute must be a valid language code", "XTDE0030");
+                            throw new Saxon.Hej.trans.XPathException("The lang attribute must be a valid language code", "XTDE0030").withLocation(getLocation());
                         }
                     }
                     numberer = config.makeNumberer(language, null);

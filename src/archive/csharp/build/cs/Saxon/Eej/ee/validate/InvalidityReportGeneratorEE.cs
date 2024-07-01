@@ -68,7 +68,7 @@ namespace Saxon.Eej.ee.validate {
             }
             errorCount++;
             try {
-                Saxon.Hej.s9api.push.Element error = ((/*1430*/Saxon.Hej.s9api.push.Element)report.element("error").attribute("line", ifPositive(failure.getLineNumber())).attribute("column", ifPositive(failure.getColumnNumber())).attribute("path", failure.getPath().ToString()).attribute("system-id", (((failure.getSystemId() != null) && !(failure.getSystemId().Equals(systemId))) ? failure.getSystemId() : null)).attribute("xsd-part", ifPositive(failure.getSchemaPart())).attribute("constraint", failure.getConstraintReference()).attribute("context-path", ((failure.getContextPath() == null) ? null : failure.getContextPath().ToString())).text(failure.getMessage()));
+                Saxon.Hej.s9api.push.Element error = ((/*1430*/Saxon.Hej.s9api.push.Element)report.element("error").attribute("line", ifPositive(failure.getLineNumber())).attribute("column", ifPositive(failure.getColumnNumber())).attribute("path", ((failure.getPath() == null) ? null : failure.getPath().ToString())).attribute("system-id", (((failure.getSystemId() != null) && !(failure.getSystemId().Equals(systemId))) ? failure.getSystemId() : null)).attribute("xsd-part", ifPositive(failure.getSchemaPart())).attribute("constraint", failure.getConstraintReference()).attribute("context-path", ((failure.getContextPath() == null) ? null : failure.getContextPath().ToString())).text(failure.getMessage()));
                 if ((failure is Saxon.Hej.type.ValidationFailure)) {
                     System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo> offenders = ((Saxon.Hej.type.ValidationFailure)(failure)).getOffendingNodes();
                     foreach (Saxon.Hej.om.NodeInfo node in offenders) {

@@ -47,11 +47,11 @@ namespace Saxon.Eej.config {
         }
         public override void setConfigurationProperty(string name, System.Object value) {
             if (name.Equals("http://saxonica.com/oem-data")) {
-                supplyLicenseKey(new System.IO.StringReader((string)(value)));
+                supplyLicenseKey(new System.IO.StringReader(requireString(name, value)));
             } else {
                 if (name.Equals(Saxon.Hej.lib.Feature<string>.LICENSE_FILE_LOCATION.name)) {
                     lock (verifier) {
-                        verifier.loadLicense((string)(value));
+                        verifier.loadLicense(requireString(name, value));
                         licenseFound = true;
                         licenseNotFound = false;
                         setLicensedFeatures();

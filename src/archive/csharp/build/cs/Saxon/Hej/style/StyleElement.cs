@@ -166,6 +166,7 @@ namespace Saxon.Hej.style {
                     }
                 }
                 Saxon.Hej.trans.XmlProcessingIncident err = new Saxon.Hej.trans.XmlProcessingIncident((("Namespace prefix "+qName.getPrefix())+" refers to a reserved namespace"), "XTSE0080");
+                err.setLocation(this);
                 compileError(err);
                 qName = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "error-name");
             }

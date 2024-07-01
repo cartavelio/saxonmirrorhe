@@ -152,10 +152,11 @@ namespace Saxon.Hej.style {
                             }
                         }
                     }
+                    e.maybeSetLocation(location);
                     if (!(e.hasBeenReported())) {
                         compilation.reportError(e);
                     }
-                    throw e.maybeWithLocation(location);
+                    throw;
                 }
             }
         }

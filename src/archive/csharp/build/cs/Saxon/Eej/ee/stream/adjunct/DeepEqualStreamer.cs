@@ -29,7 +29,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             internal Saxon.Hej.expr.sort.AtomicComparer comparer;
             internal bool done;
             internal bool closed;
-            internal Saxon.Hej.functions.DeepEqual40.DeepEqualOptions options;
+            internal Saxon.Hej.functions.DeepEqual.DeepEqualOptions options;
             public GroundedDeepEqualFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.SystemFunctionCall exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context, int consumingArg) : base (exp, result, context) {
                 this.watchManager = watchManager;
                 other = exp.getArg((1-consumingArg)).iterate(context);
@@ -41,7 +41,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 Saxon.Hej.expr.Expression optionsArg = exp.getArg(3);
                 Saxon.Hej.ma.map.MapItem suppliedOptions = (Saxon.Hej.ma.map.MapItem)(optionsArg.evaluateItem(context));
                 try {
-                    options = new Saxon.Hej.functions.DeepEqual40.DeepEqualOptions(suppliedOptions, collationName, context);
+                    options = new Saxon.Hej.functions.DeepEqual.DeepEqualOptions(suppliedOptions, collationName, context);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     dynamicError(e);
                 }
@@ -50,7 +50,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 if ((!(done) && !(hasFailed()))) {
                     Saxon.Hej.om.Item otherItem = other.next();
                     try {
-                        if (((otherItem == null) || !(Saxon.Hej.functions.DeepEqual40.deepEqual(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(item), Saxon.Hej.tree.iter.SingletonIterator.makeIterator(otherItem), getContext(), options)))) {
+                        if (((otherItem == null) || !(Saxon.Hej.functions.DeepEqual.deepEqual(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(item), Saxon.Hej.tree.iter.SingletonIterator.makeIterator(otherItem), getContext(), options)))) {
                             getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
                             done = true;
                             if (watchManager.allowsEarlyExit()) {

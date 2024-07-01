@@ -10,7 +10,7 @@ namespace Saxon.Hej.expr.elab {
                 Saxon.Hej.expr.Expression child = expr.getOperanda()[i].getChildExpression();
                 if ((child is Saxon.Hej.expr.VariableReference)) {
                     Saxon.Hej.expr.elab.SequenceEvaluator eval = child.makeElaborator().eagerly();
-                    actions[i] = (chain, context) => chain.appendSequence((Saxon.Hej.om.GroundedValue)(eval.evaluate(context)));
+                    actions[i] = (chain, context) => chain.appendSequence(eval.evaluate(context).materialize());
                 } else {
                     Saxon.Hej.expr.elab.PullEvaluator pull = child.makeElaborator().elaborateForPull();
                     actions[i] = (chain, context) => {

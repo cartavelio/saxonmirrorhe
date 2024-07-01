@@ -145,6 +145,7 @@ namespace Saxon.Hej.expr {
                 }
                 Saxon.Hej.expr.Expression body = expr.targetFunction.getChildExpression();
                 Saxon.Hej.expr.elab.ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();
+                bool is40 = (expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion()>=40);
                 return context => {
                     Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(/*Delegate.eval()*/functionEvaluator(context));
                     Saxon.Hej.type.FunctionItemType fit = fn.getFunctionItemType();
@@ -170,9 +171,11 @@ namespace Saxon.Hej.expr {
                         }
                     }
                     Saxon.Hej.expr.XPathContext c2 = fn.makeNewContext(context, null);
-                    c2.setCurrentOutputUri(null);
-                    if ((c2 is Saxon.Hej.expr.XPathContextMajor)) {
-                        ((Saxon.Hej.expr.XPathContextMajor)(c2)).setCurrentRegexIterator(null);
+                    if (!(is40)) {
+                        c2.setCurrentOutputUri(null);
+                        if ((c2 is Saxon.Hej.expr.XPathContextMajor)) {
+                            ((Saxon.Hej.expr.XPathContextMajor)(c2)).setCurrentRegexIterator(null);
+                        }
                     }
                     Saxon.Hej.om.Sequence rawResult = fn.call(c2, argValues);
                     if (fn.isTrustedResultType()) {

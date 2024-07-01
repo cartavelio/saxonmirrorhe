@@ -986,7 +986,12 @@ namespace Saxon.Hej.trans {
             Saxon.Impl.Helpers.MapUtils.Put(eMap, "is", (loader, element) => {
     Saxon.Hej.expr.Expression lhs = loader.getFirstChildExpression(element);
     Saxon.Hej.expr.Expression rhs = loader.getSecondChildExpression(element);
-    return new Saxon.Hej.expr.IdentityComparison(lhs, Saxon.Hej.expr.parser.Token.IS, rhs);
+    string op = element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "op");
+    Saxon.Hej.expr.IdentityComparison comp = new Saxon.Hej.expr.IdentityComparison(lhs, Saxon.Hej.expr.parser.Token.IS, rhs);
+    if ("is-g".Equals(op)) {
+        comp.setGenerateIdEmulation(true);
+    }
+    return comp;
 } );
             Saxon.Impl.Helpers.MapUtils.Put(eMap, "isLast", (loader, element) => {
     bool cond = element.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "test").Equals("1");

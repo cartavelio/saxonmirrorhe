@@ -154,7 +154,7 @@ namespace Saxon.Hej.trans {
             }
         }
         public static void maybeSetLocation(Saxon.Hej.s9api.XmlProcessingError error, Saxon.Hej.s9api.Location loc) {
-            if ((error.getLocation() == null)) {
+            if (((error.getLocation() == null) || (error.getLocation() == Saxon.Hej.expr.parser.Loc.NONE))) {
                 if ((error is Saxon.Hej.trans.XmlProcessingIncident)) {
                     ((Saxon.Hej.trans.XmlProcessingIncident)(error)).setLocation(loc);
                 } else {

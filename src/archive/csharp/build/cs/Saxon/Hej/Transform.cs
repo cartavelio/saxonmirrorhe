@@ -50,6 +50,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("scmin", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Pre-load schema in SCM format");
             options.addRecognizedOption("strip", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Handling of whitespace text nodes in source documents");
             options.setPermittedValues("strip", new string[]{"none", "all", "ignorable"}, null);
+            options.addRecognizedOption("stublib", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "JSON file holding function signatures, for SaxonJS");
             options.addRecognizedOption("t", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Display version and timing information, and names of output files");
             options.addRecognizedOption("target", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Target Saxon edition for execution via -export");
             options.setPermittedValues("target", new string[]{"EE", "PE", "HE", "JS", "JS2", "JS3"}, null);
@@ -258,6 +259,13 @@ namespace Saxon.Hej {
                     }
                     if ("".Equals(value)) {
                         traceListener = new Saxon.Hej.trace.XSLTTraceListener();
+                        if ((@out != null)) {
+                            try {
+                                traceListener.setOutputDestination(new Saxon.Callbacks.StandardLogger(new Saxon.Ejava.io.PrintStream(@out)));
+                            } catch (Saxon.Ejava.io.FileNotFoundException e) {
+                                throw new Saxon.Hej.trans.XPathException(e);
+                            }
+                        }
                     } else {
                         traceListener = config.makeTraceListener(value);
                     }
@@ -265,18 +273,24 @@ namespace Saxon.Hej {
                     processor.setConfigurationProperty(Saxon.Hej.lib.Feature<bool>.LINE_NUMBERING, true);
                     value = options.getOptionValue("Tlevel");
                     if (((value != null) && (traceListener is Saxon.Hej.trace.AbstractTraceListener))) {
+                        Saxon.Hej.trans.CompilerInfo info = compiler.getUnderlyingCompilerInfo();
+                        Saxon.Hej.trace.TraceCodeInjector injector = (Saxon.Hej.trace.TraceCodeInjector)(info.getCodeInjector());
                         switch (value) {
                           case "none":
-                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(0);
+                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(Saxon.Hej.trace.TraceLevel.NONE);
+                            injector.setTraceLevel(Saxon.Hej.trace.TraceLevel.NONE);
                             break ;
                           case "low":
-                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(1);
+                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(Saxon.Hej.trace.TraceLevel.LOW);
+                            injector.setTraceLevel(Saxon.Hej.trace.TraceLevel.LOW);
                             break ;
                           case "normal":
-                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(2);
+                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(Saxon.Hej.trace.TraceLevel.NORMAL);
+                            injector.setTraceLevel(Saxon.Hej.trace.TraceLevel.NORMAL);
                             break ;
                           case "high":
-                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(3);
+                            ((Saxon.Hej.trace.AbstractTraceListener)(traceListener)).setLevelOfDetail(Saxon.Hej.trace.TraceLevel.HIGH);
+                            injector.setTraceLevel(Saxon.Hej.trace.TraceLevel.HIGH);
                             break ;
                         }
                     }
@@ -374,6 +388,10 @@ namespace Saxon.Hej {
                 value = options.getOptionValue("scmin");
                 if ((value != null)) {
                     config.importComponents(new Saxon.Ejavax.xml.transform.stream.StreamSource(value));
+                }
+                value = options.getOptionValue("stublib");
+                if ((value != null)) {
+                    compiler.getUnderlyingCompilerInfo().importStubFunctionLibrary(new Saxon.Ejavax.xml.transform.stream.StreamSource(new Saxon.Ejava.io.File(value)));
                 }
                 if ((additionalSchemas != null)) {
                     Saxon.Hej.trans.CommandLineOptions.loadAdditionalSchemas(config, additionalSchemas);
@@ -738,6 +756,7 @@ namespace Saxon.Hej {
                         Saxon.Hej.s9api.DocumentBuilder builder = processor.newDocumentBuilder();
                         builder.setDTDValidation(getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.DTD_VALIDATION));
                         builder.setWhitespaceStrippingPolicy(sheet.getWhitespaceStrippingPolicy());
+                        builder.setTreeModel(Saxon.Hej.om.TreeModel.getTreeModel(getConfiguration().getTreeModel()));
                         if (getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.DTD_VALIDATION_RECOVERABLE)) {
                             source = new Saxon.Hej.lib.AugmentedSource(source, getConfiguration().getParseOptions());
                         }

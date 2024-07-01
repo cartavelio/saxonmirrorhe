@@ -432,11 +432,6 @@ namespace Saxon.Eej.ee.schema {
             }
         }
     
-        /* Expanding default method explainMismatch from interface ItemType */
-        public virtual Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
-            return Saxon.Ejava.util.Optional<string>.empty();
-        }
-
         /* Expanding default method getNormalizedDefaultPriority from interface ItemType */
         public virtual double getNormalizedDefaultPriority() {
             return (((getDefaultPriority()+1))/2);
@@ -445,6 +440,16 @@ namespace Saxon.Eej.ee.schema {
         /* Expanding default method getFullAlphaCode from interface ItemType */
         public virtual string getFullAlphaCode() {
             return getBasicAlphaCode();
+        }
+
+        /* Expanding default method explainMismatch from interface UnionType */
+        public virtual Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
+            if ((item.getGenre() == /*explicit enum*/ Saxon.Hej.om.Genre.ATOMIC)) {
+                string message = (((("This is a union type, and the supplied value "+Saxon.Hej.trans.Err.depict(item))+" of type ")+((Saxon.Hej.value.AtomicValue)(item)).getItemType().getDescription())+" does not match any of its member types");
+                return Saxon.Ejava.util.Optional<string>.of(message);
+            } else {
+                return Saxon.Ejava.util.Optional<string>.empty();
+            }
         }
 
     }

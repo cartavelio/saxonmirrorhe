@@ -137,7 +137,7 @@ namespace Saxon.Eej.ee.validate {
             return (validator, value, locationId) => {
                 Saxon.Hej.Configuration config = getConfiguration();
                 Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
-                Saxon.Hej.om.SequenceIterator iter = type.getTypedValue(value, Saxon.Hej.expr.instruct.DummyNamespaceResolver.getInstance(), config.getConversionRules()).iterate();
+                Saxon.Hej.om.SequenceIterator iter = ((/*1430*/Saxon.Hej.tree.iter.AtomicIterator)type.getTypedValue(value, Saxon.Hej.expr.instruct.DummyNamespaceResolver.getInstance(), config.getConversionRules()).iterate());
                 Saxon.Hej.value.AtomicValue val;
                 while (((val = (Saxon.Hej.value.AtomicValue)(iter.next())) != null)) {
                     Saxon.Hej.type.AtomicType itemType = val.getItemType();

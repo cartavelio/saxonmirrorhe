@@ -13,7 +13,6 @@ namespace Saxon.Hej.sxpath {
         private Saxon.Hej.om.NamespaceUri defaultElementNamespace = Saxon.Hej.om.NamespaceUri.NULL;
         private bool backwardsCompatible = false;
         private int xpathLanguageLevel = 31;
-        protected internal bool usingDefaultFunctionLibrary;
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.type.ItemType> typeAliases = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Hej.type.ItemType>();
         private Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementPolicy = Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
         private Saxon.Hej.sxpath.AbstractStaticContext.WarningHandler warningHandler;
@@ -81,7 +80,6 @@ namespace Saxon.Hej.sxpath {
         }
         public void setFunctionLibrary(Saxon.Hej.functions.FunctionLibraryList lib) {
             libraryList = lib;
-            usingDefaultFunctionLibrary = false;
         }
         public void setDefaultCollationName(string collationName) {
             defaultCollationName = collationName;

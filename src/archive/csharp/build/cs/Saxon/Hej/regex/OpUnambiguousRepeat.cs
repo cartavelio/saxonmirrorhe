@@ -18,6 +18,9 @@ namespace Saxon.Hej.regex {
                 return -1;
             }
         }
+        public override int getMaxLoopingDepth() {
+            return (op.getMaxLoopingDepth()+1);
+        }
         public override Saxon.Hej.regex.Operation optimize(Saxon.Hej.regex.REProgram program, Saxon.Hej.regex.REFlags flags) {
             op = op.optimize(program, flags);
             return this;

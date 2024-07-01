@@ -887,6 +887,8 @@ namespace Saxon.Hej.expr.parser {
                 return Saxon.Hej.expr.parser.Token.UNION;
               case "where":
                 return Saxon.Hej.expr.parser.Token.WHERE;
+              case "while":
+                return Saxon.Hej.expr.parser.Token.WHILE;
               case "with":
                 return Saxon.Hej.expr.parser.Token.WITH;
               case "orElse":

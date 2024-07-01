@@ -554,6 +554,9 @@ namespace Saxon.Hej {
         }
         public virtual void addExtensionBinders(Saxon.Hej.functions.FunctionLibraryList list) {
         }
+        public virtual Saxon.Hej.functions.FunctionLibrary loadStubFunctionLibrary(Saxon.Ejavax.xml.transform.stream.StreamSource jsonSignatures) {
+            throw new Saxon.Ejava.lang.UnsupportedOperationException();
+        }
         public virtual Saxon.Hej.om.FunctionItem getSystemFunction(Saxon.Hej.om.StructuredQName name, int arity) {
             try {
                 if ((staticContextForSystemFunctions == null)) {
@@ -1168,7 +1171,7 @@ namespace Saxon.Hej {
                 return (Saxon.Hej.lib.ActiveSource)(source);
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                return new Inner_ActiveSource_446(this, source, config);
+                return new Inner_ActiveSource_447(this, source, config);
             }
             Saxon.Hej.lib.ActiveSource activeSource = Saxon.Hej.Version.platform.resolveSource(source, config);
             if ((activeSource != null)) {
@@ -1345,6 +1348,10 @@ namespace Saxon.Hej {
                         {
                             bool b = requireBoolean(name, value);
                             setLineNumbering(b);
+                            break ;
+                        }
+                      case Saxon.Hej.lib.FeatureCode.MESSAGE_EMITTER_CLASS:
+                        {
                             break ;
                         }
                       case Saxon.Hej.lib.FeatureCode.MODULE_URI_RESOLVER:
@@ -1772,6 +1779,8 @@ namespace Saxon.Hej {
                 return isExpandAttributeDefaults();
               case Saxon.Hej.lib.FeatureCode.LINE_NUMBERING:
                 return isLineNumbering();
+              case Saxon.Hej.lib.FeatureCode.MESSAGE_EMITTER_CLASS:
+                return null;
               case Saxon.Hej.lib.FeatureCode.MODULE_URI_RESOLVER:
                 return getModuleURIResolver();
               case Saxon.Hej.lib.FeatureCode.MODULE_URI_RESOLVER_CLASS:
@@ -1936,9 +1945,9 @@ namespace Saxon.Hej {
             return label;
         }
     
-        private class Inner_ActiveSource_446 : Saxon.Hej.lib.ActiveSource {
+        private class Inner_ActiveSource_447 : Saxon.Hej.lib.ActiveSource {
             private readonly Configuration outerInstance;
-            public Inner_ActiveSource_446(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
+            public Inner_ActiveSource_447(Configuration outerInstance, Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.Configuration config) {
                 this.outerInstance = outerInstance;
                 this.source = source;
                 this.config = config;

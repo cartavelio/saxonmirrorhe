@@ -390,12 +390,14 @@ namespace Saxon.Hej.ma.map {
                         } else {
                             if ((args[1] is Saxon.Hej.expr.Literal)) {
                                 Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(((Saxon.Hej.expr.Literal)(args[1])).getGroundedValue().head());
-                                Saxon.Hej.om.GroundedValue dupes = options.get(Saxon.Hej.value.StringValue.bmp("duplicates"));
-                                try {
-                                    if (((dupes != null) && !("combine".Equals(dupes.getStringValue())))) {
-                                        maybeCombined = false;
+                                if ((options != null)) {
+                                    Saxon.Hej.om.GroundedValue dupes = options.get(Saxon.Hej.value.StringValue.bmp("duplicates"));
+                                    try {
+                                        if (((dupes != null) && !("combine".Equals(dupes.getStringValue())))) {
+                                            maybeCombined = false;
+                                        }
+                                    } catch (Saxon.Hej.trans.XPathException e) {
                                     }
-                                } catch (Saxon.Hej.trans.XPathException e) {
                                 }
                             }
                         }

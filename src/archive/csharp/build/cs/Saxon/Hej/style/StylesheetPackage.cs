@@ -242,7 +242,7 @@ namespace Saxon.Hej.style {
                     Saxon.Hej.trans.Visibility acceptedVisibility = explicitAcceptedVisibility(name, acceptors);
                     if ((acceptedVisibility != Saxon.Hej.trans.Visibility.UNDEFINED)) {
                         if (!(Saxon.Hej.style.XSLAccept.isCompatible(oldV, acceptedVisibility))) {
-                            throw new Saxon.Hej.trans.XPathException(((((((("Cannot accept a "+Saxon.Hej.trans.Err.describeVisibility(oldV))+" component (")+name)+") from package ")+usedPackage.getPackageName())+" with visibility ")+Saxon.Hej.trans.Err.describeVisibility(acceptedVisibility)), "XTSE3040");
+                            throw new Saxon.Hej.trans.XPathException(((((((("Cannot accept a "+Saxon.Hej.trans.Err.describeVisibility(oldV))+" component (")+name)+") from package ")+usedPackage.getPackageName())+" with visibility ")+Saxon.Hej.trans.Err.describeVisibility(acceptedVisibility)), "XTSE3040").maybeWithLocation(oldC.getActor().getLocation());
                         }
                         newV = acceptedVisibility;
                     } else {
@@ -398,8 +398,11 @@ namespace Saxon.Hej.style {
             functionLibrary.addFunctionLibrary(new Saxon.Hej.style.StylesheetFunctionLibrary(this, true));
             functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(((hostLanguageVersion == 40) ? 40 : 31)));
             functionLibrary.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
-            if ("JS".Equals(getTargetEdition())) {
+            if (("JS".Equals(getTargetEdition()) || "JS2".Equals(getTargetEdition()))) {
                 addIxslFunctionLibrary(functionLibrary);
+            }
+            if ("JS3".Equals(getTargetEdition())) {
+                addIxsl3FunctionLibrary(functionLibrary);
             }
             queryFunctions = new Saxon.Hej.query.XQueryFunctionLibrary(config);
             functionLibrary.addFunctionLibrary(queryFunctions);
@@ -410,6 +413,11 @@ namespace Saxon.Hej.style {
             this.functionLibrary = functionLibrary;
         }
         protected internal virtual void addIxslFunctionLibrary(Saxon.Hej.functions.FunctionLibraryList functionLibrary) {
+        }
+        protected internal virtual void addIxsl3FunctionLibrary(Saxon.Hej.functions.FunctionLibraryList functionLibrary) {
+        }
+        protected internal virtual void addStubFunctionLibrary(Saxon.Hej.functions.FunctionLibrary stubFunctions) {
+            throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
         public Saxon.Hej.functions.FunctionLibraryList getFunctionLibrary() {
             return functionLibrary;
@@ -537,8 +545,12 @@ namespace Saxon.Hej.style {
             }
             if (!(abstractComponents.Count==0)) {
                 Saxon.Ejava.lang.StringBuilder buff = new Saxon.Ejava.lang.StringBuilder(256);
+                Saxon.Hej.s9api.Location loc = null;
                 int count = 0;
                 foreach (Saxon.Hej.trans.SymbolicName name in Saxon.Impl.Helpers.MapUtils.KeySet(abstractComponents)) {
+                    if ((loc == null)) {
+                        loc = Saxon.Impl.Helpers.MapUtils.Get(abstractComponents, name).getActor().getLocation();
+                    }
                     if ((count++>0)) {
                         buff.append(", ");
                     }
@@ -548,7 +560,7 @@ namespace Saxon.Hej.style {
                         break ;
                     }
                 }
-                throw new Saxon.Hej.trans.XPathException(("The package is not executable, because it contains abstract components: "+buff), "XTSE3080");
+                throw new Saxon.Hej.trans.XPathException(("The package is not executable, because it contains abstract components: "+buff), "XTSE3080").maybeWithLocation(loc);
             }
         }
         public virtual bool isFallbackToNonStreaming() {

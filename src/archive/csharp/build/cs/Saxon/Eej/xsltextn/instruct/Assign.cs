@@ -63,7 +63,7 @@ namespace Saxon.Eej.xsltextn.instruct {
                 }
                 Saxon.Hej.expr.elab.SequenceEvaluator select = expr.getSelectExpr().makeElaborator().eagerly();
                 return (output, context) => {
-                    Saxon.Hej.om.GroundedValue value = (Saxon.Hej.om.GroundedValue)(select.evaluate(context));
+                    Saxon.Hej.om.GroundedValue value = select.evaluate(context).materialize();
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));
                     controller.getBindery(expr.getPackageData()).setGlobalVariable(expr.binding, value);

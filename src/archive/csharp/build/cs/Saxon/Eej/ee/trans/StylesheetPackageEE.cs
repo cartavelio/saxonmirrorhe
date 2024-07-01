@@ -48,6 +48,13 @@ namespace Saxon.Eej.ee.trans {
             functionLibrary.addFunctionLibrary(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.getInstance());
             functionLibrary.addFunctionLibrary(new Saxon.Eej.ee.extfn.js.JSFunctionLibrary());
         }
+        protected internal override void addIxsl3FunctionLibrary(Saxon.Hej.functions.FunctionLibraryList functionLibrary) {
+            functionLibrary.addFunctionLibrary(Saxon.Eej.ee.extfn.js.IXSL3FunctionSet.getInstance());
+            functionLibrary.addFunctionLibrary(new Saxon.Eej.ee.extfn.js.JSFunctionLibrary());
+        }
+        protected internal override void addStubFunctionLibrary(Saxon.Hej.functions.FunctionLibrary stubFunctions) {
+            getFunctionLibrary().addFunctionLibrary(stubFunctions);
+        }
         private void export(Saxon.Hej.trace.ExpressionPresenter presenter, bool topLevel) {
             if ((errorMessageOnExport != null)) {
                 throw new Saxon.Hej.trans.XPathException(("Stylesheet package cannot be exported: "+errorMessageOnExport), errorCodeOnExport);

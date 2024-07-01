@@ -301,11 +301,6 @@ namespace Saxon.Hej.tree.util {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
         /* Expanding default method getConfiguration from interface NodeInfo */
         public Saxon.Hej.Configuration getConfiguration() {
             return getTreeInfo().getConfiguration();
@@ -384,6 +379,14 @@ namespace Saxon.Hej.tree.util {
             return Saxon.Hej.om.Genre.NODE;
         }
 
+        /* Expanding default method removeNamespace from interface MutableNodeInfo */
+        public void removeNamespace(string prefix) {
+        }
+
+        /* Expanding default method addNamespace from interface MutableNodeInfo */
+        public void addNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
+        }
+
         /* Expanding default method head from interface Item */
         public Saxon.Hej.om.Item head() {
             return this;
@@ -418,12 +421,9 @@ namespace Saxon.Hej.tree.util {
             return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
-        /* Expanding default method removeNamespace from interface MutableNodeInfo */
-        public void removeNamespace(string prefix) {
-        }
-
-        /* Expanding default method addNamespace from interface MutableNodeInfo */
-        public void addNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
     }

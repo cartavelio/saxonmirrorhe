@@ -600,6 +600,8 @@ namespace Saxon.Hej {
                 Saxon.Hej.s9api.DocumentBuilder builder = processor.newDocumentBuilder();
                 if (exp.isUpdateQuery()) {
                     builder.setTreeModel(Saxon.Hej.om.TreeModel.LINKED_TREE);
+                } else {
+                    builder.setTreeModel(Saxon.Hej.om.TreeModel.getTreeModel(getConfiguration().getTreeModel()));
                 }
                 if (showTime) {
                     config.getLogger().info(("Processing "+sourceInput.getSystemId()));

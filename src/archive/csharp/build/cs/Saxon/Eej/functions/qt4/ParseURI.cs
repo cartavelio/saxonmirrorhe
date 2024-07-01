@@ -27,29 +27,27 @@ namespace Saxon.Eej.functions.qt4 {
             } else {
                 query = null;
             }
-            string filepath = null;
-            string scheme;
-            if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^[A-Za-z][:|].*$")) {
-                scheme = "file";
-                uristr = ((uristr[0]+":")+uristr.Substring(2));
-                map = map.addEntry(SCHEME, new Saxon.Hej.value.StringValue(scheme));
-                filepath = uristr;
-                uristr = ("/"+uristr);
-            } else {
-                if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^[A-Za-z]+:.*$")) {
-                    pos = uristr.IndexOf(":");
-                    scheme = uristr.Substring(0, pos - 0);
-                    map = map.addEntry(SCHEME, new Saxon.Hej.value.StringValue(scheme));
-                    uristr = uristr.Substring((pos+1));
+            string scheme = null;
+            Saxon.Ejava.util.regex.Pattern pattern = Saxon.Ejava.util.regex.Pattern.compile("^([A-Za-z][-+.A-Za-z0-9]+):(.*)$");
+            Saxon.Ejava.util.regex.Matcher matcher = pattern.matcher(uristr);
+            if (matcher.matches()) {
+                scheme = matcher.group(1).ToLower();
+                uristr = matcher.group(2);
+            }
+            if (((scheme == null) || "file".Equals(scheme))) {
+                pattern = Saxon.Ejava.util.regex.Pattern.compile("^/*([A-Za-z])[:|](.*)$");
+                matcher = pattern.matcher(uristr);
+                if (matcher.find()) {
+                    scheme = "file";
+                    uristr = ((("/"+matcher.group(1))+":")+matcher.group(2));
                 } else {
-                    if ((uncPath && System.Text.RegularExpressions.Regex.IsMatch(uristr, "^//[^/].*$"))) {
+                    if (uncPath) {
                         scheme = "file";
-                        map = map.addEntry(SCHEME, new Saxon.Hej.value.StringValue(scheme));
-                        filepath = uristr;
-                    } else {
-                        scheme = null;
                     }
                 }
+            }
+            if ((scheme != null)) {
+                map = map.addEntry(SCHEME, new Saxon.Hej.value.StringValue(scheme));
             }
             if (((scheme != null) && hierarchicalSchemes.Contains(scheme))) {
                 hierarchical = true;
@@ -65,32 +63,50 @@ namespace Saxon.Eej.functions.qt4 {
                     }
                 }
             }
+            string filepath = null;
             string authority;
-            if (((((scheme == null) || "file".Equals(scheme))) && System.Text.RegularExpressions.Regex.IsMatch(uristr, "^//*[a-zA-Z][:|].*$"))) {
+            if ("file".Equals(scheme)) {
                 authority = null;
-                uristr = System.Text.RegularExpressions.Regex.Replace(uristr, "^/+([a-zA-Z]).", "/$1:");
-                filepath = uristr.Substring(1);
+                pattern = Saxon.Ejava.util.regex.Pattern.compile("^/*(//[^/].*)$");
+                matcher = pattern.matcher(uristr);
+                if ((uncPath && matcher.find())) {
+                    uristr = matcher.group(1);
+                    filepath = uristr;
+                } else {
+                    uristr = System.Text.RegularExpressions.Regex.Replace(uristr, "^/+", "/");
+                    if (System.Text.RegularExpressions.Regex.IsMatch(uristr, "^/[A-Za-z]:.*$")) {
+                        filepath = uristr.Substring(1);
+                    } else {
+                        filepath = uristr;
+                    }
+                }
             } else {
-                Saxon.Ejava.util.regex.Pattern pattern = Saxon.Ejava.util.regex.Pattern.compile("^(///*)([^/]+)(/.*)?$");
-                Saxon.Ejava.util.regex.Matcher matcher = pattern.matcher(uristr);
-                if (matcher.find()) {
-                    if (((matcher.group(3) == null) || matcher.group(3).Length==0)) {
-                        if ((matcher.group(1).Length == 2)) {
-                            authority = matcher.group(2);
-                            map = map.addEntry(AUTHORITY, new Saxon.Hej.value.StringValue(authority));
-                            uristr = "";
+                if (hierarchical) {
+                    pattern = Saxon.Ejava.util.regex.Pattern.compile("^//([^/]+)$");
+                    matcher = pattern.matcher(uristr);
+                    if (matcher.find()) {
+                        authority = matcher.group(1);
+                        uristr = "";
+                    } else {
+                        pattern = Saxon.Ejava.util.regex.Pattern.compile("^//([^/]*)(/.*)$");
+                        matcher = pattern.matcher(uristr);
+                        if (matcher.find()) {
+                            if (((matcher.group(1) != null) && !(matcher.group(1).Length==0))) {
+                                authority = matcher.group(1);
+                            } else {
+                                authority = null;
+                            }
+                            uristr = matcher.group(2);
                         } else {
                             authority = null;
-                            uristr = ("/"+matcher.group(2));
                         }
-                    } else {
-                        authority = matcher.group(2);
-                        map = map.addEntry(AUTHORITY, new Saxon.Hej.value.StringValue(authority));
-                        uristr = matcher.group(3);
                     }
                 } else {
                     authority = null;
                 }
+            }
+            if ((authority != null)) {
+                map = map.addEntry(AUTHORITY, new Saxon.Hej.value.StringValue(authority));
             }
             string port = null;
             if ((authority != null)) {
@@ -104,8 +120,8 @@ namespace Saxon.Eej.functions.qt4 {
                 if ((userinfo != null)) {
                     map = map.addEntry(USERINFO, new Saxon.Hej.value.StringValue(userinfo));
                 }
-                Saxon.Ejava.util.regex.Pattern pattern = Saxon.Ejava.util.regex.Pattern.compile("^([^@]*@)?(\\[[^]]*])(:([^:]*))?$");
-                Saxon.Ejava.util.regex.Matcher matcher = pattern.matcher(authority);
+                pattern = Saxon.Ejava.util.regex.Pattern.compile("^([^@]*@)?(\\[[^]]*])(:([^:]*))?$");
+                matcher = pattern.matcher(authority);
                 if (matcher.find()) {
                     map = map.addEntry(HOST, new Saxon.Hej.value.StringValue(matcher.group(2)));
                     port = ("".Equals(matcher.group(4)) ? null : matcher.group(4));
@@ -150,8 +166,8 @@ namespace Saxon.Eej.functions.qt4 {
                 map = map.addEntry(PATH_SEGMENTS, pathSegments);
             }
             if ((filepath != null)) {
-                filepath = Saxon.Eej.functions.qt4.DecodeFromURI.decode(filepath);
-                map = map.addEntry(FILEPATH, new Saxon.Hej.value.StringValue(filepath));
+                string decoded = Saxon.Eej.functions.qt4.DecodeFromURI.decode(filepath);
+                map = map.addEntry(FILEPATH, new Saxon.Hej.value.StringValue(decoded));
             }
             if ((query != null)) {
                 Saxon.Impl.DataModel.ImmMap querySegments = new Saxon.Impl.DataModel.ImmMap();

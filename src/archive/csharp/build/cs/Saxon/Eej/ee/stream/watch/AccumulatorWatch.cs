@@ -65,14 +65,16 @@ namespace Saxon.Eej.ee.stream.watch {
                     context.getConfiguration().getLogger().info(((((accumulator.getAccumulatorName().getDisplayName()+" BEFORE ")+Saxon.Hej.tree.util.Navigator.getPath(node))+": ")+Saxon.Hej.trans.Err.depictSequence(value)));
                 }
             }
-            Saxon.Hej.trans.rules.Rule capture = postDescentMode.getRule(node, context);
-            if (((capture != null) && ((Saxon.Hej.expr.accum.AccumulatorRule)(capture.getAction())).isCapturing())) {
-                Saxon.Hej.@event.SequenceCollector so = new Saxon.Hej.@event.SequenceCollector(getPipelineConfiguration());
-                Saxon.Hej.@event.ComplexContentOutputter cco = new Saxon.Hej.@event.ComplexContentOutputter(so);
-                Saxon.Eej.ee.stream.feed.ItemFeed feed = new Saxon.Eej.ee.stream.feed.DecomposingFeed(cco, context);
-                Saxon.Eej.ee.stream.watch.Watch snapshotWatch = Saxon.Eej.ee.stream.feed.SnapshotFeed.getWatch(feed, Saxon.Hej.pattern.AnchorPattern.getInstance(), watchManager, context);
-                watchManager.addWatch(snapshotWatch, true);
-                captureStack.Push(cco);
+            if ((node.getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {
+                Saxon.Hej.trans.rules.Rule capture = postDescentMode.getRule(node, context);
+                if (((capture != null) && ((Saxon.Hej.expr.accum.AccumulatorRule)(capture.getAction())).isCapturing())) {
+                    Saxon.Hej.@event.SequenceCollector so = new Saxon.Hej.@event.SequenceCollector(getPipelineConfiguration());
+                    Saxon.Hej.@event.ComplexContentOutputter cco = new Saxon.Hej.@event.ComplexContentOutputter(so);
+                    Saxon.Eej.ee.stream.feed.ItemFeed feed = new Saxon.Eej.ee.stream.feed.DecomposingFeed(cco, context);
+                    Saxon.Eej.ee.stream.watch.Watch snapshotWatch = Saxon.Eej.ee.stream.feed.SnapshotFeed.getWatch(feed, Saxon.Hej.pattern.AnchorPattern.getInstance(), watchManager, context);
+                    watchManager.addWatch(snapshotWatch, true);
+                    captureStack.Push(cco);
+                }
             }
             int depth = nodeStack.Count;
             setAtDepth(preDescentStack, (depth-1), value);
@@ -96,7 +98,7 @@ namespace Saxon.Eej.ee.stream.watch {
             Saxon.Hej.Controller controller = c2.getController();
             System.Diagnostics.Debug.Assert((controller != null));
             Saxon.Hej.om.NodeInfo targetNode = node;
-            if ((target.isPostDescent() && target.isCapturing())) {
+            if ((((node.getNodeKind() == Saxon.Hej.type.Type.ELEMENT) && target.isPostDescent()) && target.isCapturing())) {
                 Saxon.Hej.@event.ComplexContentOutputter cco = captureStack.Pop();
                 Saxon.Hej.@event.SequenceCollector so = (Saxon.Hej.@event.SequenceCollector)(cco.getReceiver());
                 targetNode = (Saxon.Hej.om.NodeInfo)(so.getFirstItem());

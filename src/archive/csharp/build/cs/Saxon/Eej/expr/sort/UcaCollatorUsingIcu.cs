@@ -320,16 +320,17 @@ namespace Saxon.Eej.expr.sort {
                     if (!(keys.Contains(tokens[0]))) {
                         unknownKeys.Add(tokens[0]);
                     }
-                    props.setProperty(tokens[0], tokens[1]);
+                    string value = ((tokens.Length>=2) ? tokens[1] : "");
+                    props.setProperty(tokens[0], value);
                 }
             }
             string fallback = props.getProperty("fallback");
             if ((((fallback != null) && fallback.Equals("no")) && !(unknownKeys.Count==0))) {
-                string message = ((unknownKeys.Count>1) ? "unknown parameters:" : "unknown parameter:");
+                Saxon.Ejava.lang.StringBuilder message = new Saxon.Ejava.lang.StringBuilder(((unknownKeys.Count>1) ? "unknown parameters:" : "unknown parameter:"));
                 foreach (string u in unknownKeys) {
-                    message += (u+" ");
+                    message.append(u).append(" ");
                 }
-                error(message);
+                error(message.ToString());
             }
             return props;
         }

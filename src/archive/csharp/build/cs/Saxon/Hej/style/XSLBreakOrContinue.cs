@@ -37,7 +37,7 @@ namespace Saxon.Hej.style {
                 } else {
                     if (((inst is Saxon.Hej.style.XSLTry) || (inst is Saxon.Hej.style.XSLCatch))) {
                     } else {
-                        if (((((inst is Saxon.Hej.style.XSLWhen) || (inst is Saxon.Hej.style.XSLOtherwise)) || (inst is Saxon.Hej.style.XSLIf)) || (inst is Saxon.Hej.style.XSLChoose))) {
+                        if (((((inst is Saxon.Hej.style.XSLWhen) || (inst is Saxon.Hej.style.XSLOtherwise)) || (inst is Saxon.Hej.style.XSLIf)) || (inst is Saxon.Hej.style.XSLChooseOrSwitch))) {
                         } else {
                             if ((inst == null)) {
                                 compileError((getDisplayName()+" is not allowed at outermost level"), "XTSE3120");

@@ -79,10 +79,12 @@ namespace Saxon.Hej.expr.instruct {
             if ((invocation.getBindingSlot()>=0)) {
                 throw new Saxon.Ejava.lang.AssertionError((("**** Component reference "+name)+" is already bound"));
             }
-            int slot = bindings.Count;
             Saxon.Hej.expr.ComponentBinding cb = new Saxon.Hej.expr.ComponentBinding(name, target);
-            bindings.Add(cb);
-            invocation.setBindingSlot(slot);
+            lock (bindings) {
+                int slot = bindings.Count;
+                bindings.Add(cb);
+                invocation.setBindingSlot(slot);
+            }
         }
         public virtual void setBody(Saxon.Hej.expr.Expression body) {
             this.body = body;

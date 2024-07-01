@@ -101,7 +101,7 @@ namespace Saxon.Hej.functions.hof {
             return Saxon.Hej.type.UType.FUNCTION;
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
-            Saxon.Hej.functions.hof.UserFunctionReference @ref = new Saxon.Hej.functions.hof.UserFunctionReference(nominalTarget);
+            Saxon.Hej.functions.hof.UserFunctionReference @ref = new Saxon.Hej.functions.hof.UserFunctionReference(nominalTarget, functionName);
             @ref.optimizeCounter = optimizeCounter;
             @ref.typeCheckCounter = typeCheckCounter;
             return @ref;
@@ -187,6 +187,7 @@ namespace Saxon.Hej.functions.hof {
                 c2.setCurrentComponent(component);
                 c2.setResourceResolver(oldContext.getResourceResolver());
                 c2.setOrigin(originator);
+                c2.setCaller(oldContext);
                 return function.makeNewContext(c2, originator);
             }
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
@@ -206,6 +207,9 @@ namespace Saxon.Hej.functions.hof {
                 return function.call(c2, args);
             }
             public override Saxon.Hej.type.FunctionItemType getFunctionItemType() {
+                if ((function is Saxon.Hej.expr.instruct.UserFunction)) {
+                    return ((Saxon.Hej.expr.instruct.UserFunction)(function)).getFunctionItemType(getArity());
+                }
                 return function.getFunctionItemType();
             }
             public override Saxon.Hej.query.AnnotationList getAnnotations() {

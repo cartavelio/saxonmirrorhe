@@ -126,7 +126,7 @@ namespace Saxon.Hej.tree.tiny {
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                 attribute2(att.getNodeName(), att.getType(), getAttValue(att), location, att.getProperties());
             }
-            textualElementEligibilityState = (noNewNamespaces ? Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.PRIMED : Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.INELIGIBLE);
+            textualElementEligibilityState = (((noNewNamespaces && !(lineNumbering))) ? Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.PRIMED : Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.INELIGIBLE);
             tree.addNamespaces(nodeNr, namespaceStack.Peek());
             nodeNr++;
         }

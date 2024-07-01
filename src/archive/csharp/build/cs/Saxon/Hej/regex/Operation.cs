@@ -26,15 +26,21 @@ namespace Saxon.Hej.regex {
             return this;
         }
         public abstract string display();
+        public virtual int getMaxLoopingDepth() {
+            return 0;
+        }
         protected internal class ForceProgressIterator : Saxon.Hej.z.IntIterator {
             private readonly Saxon.Hej.z.IntIterator @base;
             internal int countZeroLength = 0;
             internal int currentPos = -1;
-            internal ForceProgressIterator(Saxon.Hej.z.IntIterator @base)  {
+            internal int loopingDepth = 1;
+            internal int maxTries = 10;
+            internal ForceProgressIterator(Saxon.Hej.z.IntIterator @base, int loopingDepth)  {
                 this.@base = @base;
+                this.loopingDepth = System.Math.Max(loopingDepth, 1);
             }
             public bool hasNext() {
-                return ((countZeroLength<=3) && @base.hasNext());
+                return ((countZeroLength<=maxTries) && @base.hasNext());
             }
             public int next() {
                 int p = @base.next();
@@ -43,6 +49,8 @@ namespace Saxon.Hej.regex {
                 } else {
                     countZeroLength = 0;
                     currentPos = p;
+                    double limit = System.Math.Min(System.Int32.MaxValue, (System.Math.Pow((currentPos+2), loopingDepth)/2));
+                    maxTries = (int)(limit);
                 }
                 return p;
             }

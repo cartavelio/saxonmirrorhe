@@ -97,7 +97,11 @@ namespace Saxon.Hej.expr.flwor {
             int n = getSize();
             Saxon.Hej.om.Sequence[] tuple = new Saxon.Hej.om.Sequence[n];
             for (int i = 0; (i<n); i++) {
-                tuple[i] = getSlot(i).evaluateVariable(context);
+                Saxon.Hej.om.GroundedValue v = getSlot(i).evaluateVariable(context).materialize();
+                if ((v is Saxon.Hej.value.StringValue)) {
+                    v = ((Saxon.Hej.value.StringValue)(v)).economize();
+                }
+                tuple[i] = v;
             }
             return new Saxon.Hej.expr.flwor.Tuple(tuple);
         }

@@ -4,8 +4,17 @@ using System.Linq;
 namespace Saxon.Hej.value {
     public class ObjectValue<T>  : Saxon.Hej.value.AnyExternalObject {
         private readonly T value;
+        private readonly System.Type theInterface;
         public ObjectValue(T @object)  {
             value = Saxon.Ejava.util.Objects.requireNonNull(@object, "External object cannot wrap a Java null");
+            theInterface = null;
+        }
+        public ObjectValue(T @object, System.Type theInterface)  {
+            value = Saxon.Ejava.util.Objects.requireNonNull(@object, "External object cannot wrap a Java null");
+            this.theInterface = Saxon.Ejava.util.Objects.requireNonNull(theInterface);
+        }
+        public System.Type getInterface() {
+            return theInterface;
         }
         public Saxon.Hej.om.Genre getGenre() {
             return Saxon.Hej.om.Genre.EXTERNAL;
@@ -85,11 +94,6 @@ namespace Saxon.Hej.value {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
         /* Expanding default method head from interface Item */
         public virtual Saxon.Hej.om.Item head() {
             return this;
@@ -127,6 +131,11 @@ namespace Saxon.Hej.value {
         /* Expanding default method isStreamed from interface Item */
         public virtual bool isStreamed() {
             return false;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
     }

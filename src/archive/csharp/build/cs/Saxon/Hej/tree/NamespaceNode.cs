@@ -231,11 +231,6 @@ namespace Saxon.Hej.tree {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
         /* Expanding default method isSameNodeInfo from interface NodeInfo */
         public virtual bool isSameNodeInfo(Saxon.Hej.om.NodeInfo other) {
             return Equals(other);
@@ -326,6 +321,11 @@ namespace Saxon.Hej.tree {
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
             return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
     }

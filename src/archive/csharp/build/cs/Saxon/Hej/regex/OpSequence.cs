@@ -83,6 +83,13 @@ namespace Saxon.Hej.regex {
             }
             return result;
         }
+        public override int getMaxLoopingDepth() {
+            int max = 0;
+            foreach (Saxon.Hej.regex.Operation o in operations) {
+                max = System.Math.Max(max, o.getMaxLoopingDepth());
+            }
+            return max;
+        }
         public override string display() {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
             foreach (Saxon.Hej.regex.Operation op in operations) {
@@ -121,12 +128,12 @@ namespace Saxon.Hej.regex {
             System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators = new System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator>();
             Saxon.Hej.regex.REMatcher.State savedState = (containsCapturingExpressions() ? matcher.captureState() : null);
             int backtrackingLimit = matcher.getProgram().getBacktrackingLimit();
-            return new Inner_IntIterator_58(this, matcher, iterators, backtrackingLimit, savedState, position);
+            return new Inner_IntIterator_61(this, matcher, iterators, backtrackingLimit, savedState, position);
         }
     
-        private class Inner_IntIterator_58 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_61 : Saxon.Hej.z.IntIterator {
             private readonly OpSequence outerInstance;
-            public Inner_IntIterator_58(OpSequence outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, int backtrackingLimit, Saxon.Hej.regex.REMatcher.State savedState, int position) {
+            public Inner_IntIterator_61(OpSequence outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, int backtrackingLimit, Saxon.Hej.regex.REMatcher.State savedState, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.iterators = iterators;

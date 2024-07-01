@@ -39,11 +39,15 @@ namespace Saxon.Eej.ee.extfn.js {
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
+            checkEmpty();
             select = typeCheck("select", select);
             onCompletion = typeCheck("on-completion", onCompletion);
             onFailure = typeCheck("on-failure", onFailure);
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
+            if (!("JS3".Equals(exec.getCompilerInfo().getTargetEdition()))) {
+                compileError("ixsl:promise is available only if the target edition is JS3");
+            }
             return new Saxon.Eej.ee.extfn.js.IXSLPromise.PromiseInstr(select, onCompletion, onFailure);
         }
         private class PromiseInstr : Saxon.Hej.expr.instruct.Instruction {

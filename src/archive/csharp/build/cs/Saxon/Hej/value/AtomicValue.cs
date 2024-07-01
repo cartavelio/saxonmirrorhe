@@ -165,11 +165,6 @@ namespace Saxon.Hej.value {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
         /* Expanding default method getStringValue from interface Item */
         public virtual string getStringValue() {
             return getUnicodeStringValue().ToString();
@@ -187,6 +182,11 @@ namespace Saxon.Hej.value {
         /* Expanding default method isStreamed from interface Item */
         public virtual bool isStreamed() {
             return false;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
     }

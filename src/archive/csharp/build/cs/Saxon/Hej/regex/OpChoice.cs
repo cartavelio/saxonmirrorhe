@@ -51,6 +51,13 @@ namespace Saxon.Hej.regex {
             }
             return result;
         }
+        public override int getMaxLoopingDepth() {
+            int max = 0;
+            foreach (Saxon.Hej.regex.Operation o in branches) {
+                max = System.Math.Max(max, o.getMaxLoopingDepth());
+            }
+            return max;
+        }
         public override Saxon.Hej.regex.Operation optimize(Saxon.Hej.regex.REProgram program, Saxon.Hej.regex.REFlags flags) {
             for (int i = 0; (i<branches.Count); i++) {
                 Saxon.Hej.regex.Operation o1 = branches[i];
@@ -62,7 +69,7 @@ namespace Saxon.Hej.regex {
             return this;
         }
         public override Saxon.Hej.z.IntIterator iterateMatches(Saxon.Hej.regex.REMatcher matcher, int position) {
-            return new Inner_IntIterator_27(this, matcher, position);
+            return new Inner_IntIterator_30(this, matcher, position);
         }
         public override string display() {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
@@ -80,9 +87,9 @@ namespace Saxon.Hej.regex {
             return fsb.ToString();
         }
     
-        private class Inner_IntIterator_27 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_30 : Saxon.Hej.z.IntIterator {
             private readonly OpChoice outerInstance;
-            public Inner_IntIterator_27(OpChoice outerInstance, Saxon.Hej.regex.REMatcher matcher, int position) {
+            public Inner_IntIterator_30(OpChoice outerInstance, Saxon.Hej.regex.REMatcher matcher, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.position = position;

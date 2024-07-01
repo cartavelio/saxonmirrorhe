@@ -45,6 +45,7 @@ namespace Saxon.Eej.ee.extfn.js {
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
+            checkEmpty();
             name = typeCheck("name", name);
             select = typeCheck("select", select);
             @object = typeCheck("object", @object);

@@ -52,15 +52,28 @@ namespace Saxon.Eej.ee.validate {
                 Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure((((("Identity constraint "+Saxon.Hej.trans.Err.wrap(identityConstraint.getName()))+": the ")+identifyField(column))+" selects more than one node"));
                 ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                 ve.setConstraintReference(1, "cvc-identity-constraint", "3");
+                setPathIfAvailable(ve, locationId);
                 reportValidationError(ve, locationId);
             }
             if ((nillableElement && (identityConstraint is Saxon.Eej.ee.schema.Key))) {
                 Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure("The element declaration of a field in an xs:key constraint must not be nillable");
                 ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                 ve.setConstraintReference(1, "cvc-identity-constraint", "4.2.3");
+                setPathIfAvailable(ve, locationId);
                 reportValidationError(ve, locationId);
             }
             currentRow[column] = value;
+        }
+        private void setPathIfAvailable(Saxon.Hej.type.ValidationFailure ve, Saxon.Hej.s9api.Location locationId) {
+            Saxon.Hej.@event.PathMaintainer pm = (Saxon.Hej.@event.PathMaintainer)(getPipelineConfiguration().getComponent("net.sf.saxon.event.PathMaintainer"));
+            if ((pm != null)) {
+                Saxon.Hej.om.AbsolutePath path = pm.getAbsolutePath();
+                if ((locationId is Saxon.Hej.tree.AttributeLocation)) {
+                    Saxon.Hej.om.NodeName attName = new Saxon.Hej.om.FingerprintedQName(((Saxon.Hej.tree.AttributeLocation)(locationId)).getAttributeName(), getPipelineConfiguration().getConfiguration().getNamePool());
+                    path.appendAttributeName(attName);
+                }
+                ve.setPath(path);
+            }
         }
         private string identifyField(int column) {
             if ((numberOfColumns == 1)) {
@@ -98,6 +111,7 @@ namespace Saxon.Eej.ee.validate {
                                 Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure((((("The "+identifyField(i))+" in constraint ")+Saxon.Hej.trans.Err.wrap(identityConstraint.getName()))+" has no value"));
                                 ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                                 ve.setConstraintReference(1, "cvc-identity-constraint", "4.2.1");
+                                setPathIfAvailable(ve, locationId);
                                 reportValidationError(ve, locationId);
                             } else {
                                 return ;
@@ -117,6 +131,7 @@ namespace Saxon.Eej.ee.validate {
                         Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure(((("More than one referenced value found for keyRef "+Saxon.Hej.trans.Err.wrap(identityConstraint.getName()))+"\n    ")+entry));
                         ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                         ve.setConstraintReference(1, "cvc-identity-constraint", "3");
+                        setPathIfAvailable(ve, locationId);
                         reportValidationError(ve, locationId);
                     }
                     Saxon.Impl.Helpers.MapUtils.Put(table, entry, flags);
@@ -127,6 +142,7 @@ namespace Saxon.Eej.ee.validate {
                             Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure(((("More than one referenced value found for keyRef "+Saxon.Hej.trans.Err.wrap(identityConstraint.getName()))+"\n    ")+entry));
                             ve.setErrorCode(constraintChecker.getValidationContext().getErrorCode());
                             ve.setConstraintReference(1, "cvc-identity-constraint", "3");
+                            setPathIfAvailable(ve, locationId);
                             reportValidationError(ve, locationId);
                         }
                         Saxon.Impl.Helpers.MapUtils.Put(table, entry, flags);
@@ -135,6 +151,7 @@ namespace Saxon.Eej.ee.validate {
                         string err = constraintChecker.getValidationContext().getErrorCode();
                         ve.setErrorCode(err);
                         ve.setConstraintReference(1, "cvc-identity-constraint", ((identityConstraint is Saxon.Eej.ee.schema.Unique) ? "4.1" : "4.2.2"));
+                        setPathIfAvailable(ve, locationId);
                         reportValidationError(ve, locationId);
                     }
                 }
@@ -155,6 +172,7 @@ namespace Saxon.Eej.ee.validate {
                             Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure(((("Value out of sequence for ordered constraint "+identityConstraint.getName())+": ")+entry));
                             ve.setErrorCode(Saxon.Hej.trans.SaxonErrorCode.SXOR0001);
                             ve.setConstraintReference(1, "saxon-identity-constraint", "0");
+                            setPathIfAvailable(ve, locationId);
                             reportValidationError(ve, locationId);
                         }
                     }

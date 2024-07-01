@@ -12,6 +12,8 @@ using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.resource;
 using Saxon.Hej.trans;
 
+#nullable enable 
+
 namespace Saxon.Callbacks {
 
     /// <summary>

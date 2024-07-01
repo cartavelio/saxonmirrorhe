@@ -45,11 +45,6 @@ namespace Saxon.Hej.ma.arrays {
             return Saxon.Hej.om.Genre.ARRAY;
         }
     
-        /* Expanding default method isSequenceVariadic from interface FunctionItem */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
         /* Expanding default method effectiveBooleanValue from interface GroundedValue */
         public virtual bool effectiveBooleanValue() {
             return Saxon.Hej.expr.parser.ExpressionTool.effectiveBooleanValue(iterate());
@@ -87,11 +82,6 @@ namespace Saxon.Hej.ma.arrays {
                 chain = chain.addAll(val.asIterable());
             }
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
         }
 
         /* Expanding default method head from interface Item */
@@ -133,6 +123,27 @@ namespace Saxon.Hej.ma.arrays {
             return false;
         }
 
+        /* Expanding default method isSequenceVariadic from interface FunctionItem */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
+        }
+
+        /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */
+        /* (Also inherited from Item) */
+        public virtual Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method atomize to satisfy interface Item */
+        public virtual Saxon.Hej.om.AtomicSequence atomize() {
+            throw new System.NotImplementedException();
+        }
+
         /* Creating stub method getFunctionItemType to satisfy interface FunctionItem */
         public virtual Saxon.Hej.type.FunctionItemType getFunctionItemType() {
             throw new System.NotImplementedException();
@@ -169,7 +180,7 @@ namespace Saxon.Hej.ma.arrays {
         }
 
         /* Creating stub method deepEqual40 to satisfy interface FunctionItem */
-        public virtual bool deepEqual40(Saxon.Hej.om.FunctionItem arg1, Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.functions.DeepEqual40.DeepEqualOptions arg3) {
+        public virtual bool deepEqual40(Saxon.Hej.om.FunctionItem arg1, Saxon.Hej.expr.XPathContext arg2, Saxon.Hej.functions.DeepEqual.DeepEqualOptions arg3) {
             throw new System.NotImplementedException();
         }
 
@@ -185,17 +196,6 @@ namespace Saxon.Hej.ma.arrays {
 
         /* Creating stub method isTrustedResultType to satisfy interface FunctionItem */
         public virtual bool isTrustedResultType() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */
-        /* (Also inherited from Item) */
-        public virtual Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method atomize to satisfy interface Item */
-        public virtual Saxon.Hej.om.AtomicSequence atomize() {
             throw new System.NotImplementedException();
         }
 

@@ -78,7 +78,7 @@ namespace Saxon.Hej.functions {
         public bool dependsOnContextItem() {
             return (((details.properties&((Saxon.Hej.functions.registry.BuiltInFunctionSet.CITEM|Saxon.Hej.functions.registry.BuiltInFunctionSet.CDOC)))) != 0);
         }
-        public virtual void setDetails(Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry entry) {
+        public void setDetails(Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry entry) {
             details = entry;
         }
         public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry getDetails() {
@@ -136,7 +136,11 @@ namespace Saxon.Hej.functions {
         }
         public override Saxon.Hej.type.FunctionItemType getFunctionItemType() {
             Saxon.Hej.value.SequenceType resultType = Saxon.Hej.value.SequenceType.makeSequenceType(getResultItemType(), details.cardinality);
-            return new Saxon.Hej.type.SpecificFunctionType(details.paramTypes, resultType);
+            Saxon.Hej.value.SequenceType[] paramTypes = details.paramTypes;
+            if ((paramTypes.Length != arity)) {
+                paramTypes = Saxon.Ejava.util.Arrays.copyOf(paramTypes, arity);
+            }
+            return new Saxon.Hej.type.SpecificFunctionType(paramTypes, resultType);
         }
         public virtual Saxon.Hej.type.ItemType getResultItemType(Saxon.Hej.expr.Expression[] args) {
             if ((((details.properties&Saxon.Hej.functions.registry.BuiltInFunctionSet.AS_ARG0)) != 0)) {

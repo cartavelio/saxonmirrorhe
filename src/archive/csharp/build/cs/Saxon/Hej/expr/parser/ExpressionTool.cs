@@ -117,7 +117,7 @@ namespace Saxon.Hej.expr.parser {
             return false;
         }
         public static bool changesXsltContext(Saxon.Hej.expr.Expression exp) {
-            if ((((((((exp is Saxon.Hej.expr.instruct.ResultDocument) || (exp is Saxon.Hej.expr.instruct.CallTemplate)) || (exp is Saxon.Hej.expr.instruct.ApplyTemplates)) || (exp is Saxon.Hej.expr.instruct.NextMatch)) || (exp is Saxon.Hej.expr.instruct.ApplyImports)) || exp.isCallOn(typeof(Saxon.Hej.functions.RegexGroup))) || exp.isCallOn(typeof(Saxon.Hej.functions.CurrentGroup)))) {
+            if (((((((((exp is Saxon.Hej.expr.instruct.ResultDocument) || (exp is Saxon.Hej.expr.instruct.CallTemplate)) || (exp is Saxon.Hej.expr.instruct.ApplyTemplates)) || (exp is Saxon.Hej.expr.instruct.NextMatch)) || (exp is Saxon.Hej.expr.instruct.ApplyImports)) || exp.isCallOn(typeof(Saxon.Hej.functions.RegexGroup))) || exp.isCallOn(typeof(Saxon.Hej.functions.CurrentGroup))) || (exp is Saxon.Hej.expr.DynamicFunctionCall))) {
                 return true;
             }
             foreach (Saxon.Hej.expr.Operand o in exp.operands()) {

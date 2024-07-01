@@ -74,7 +74,7 @@ namespace Saxon.Hej.functions {
             }
             public Saxon.Hej.om.Item next() {
                 if (sources.MoveNext() /*UNSAFE CONVERSION*/) {
-                    return new Saxon.Hej.value.ObjectValue<Saxon.Hej.lib.Resource>(sources.Current);
+                    return new Saxon.Hej.value.ObjectValue<Saxon.Hej.lib.Resource>(sources.Current, typeof(Saxon.Hej.lib.Resource));
                 } else {
                     return null;
                 }
@@ -164,8 +164,13 @@ namespace Saxon.Hej.functions {
                         } else {
                             docKey = new Saxon.Hej.om.DocumentKey(docUri);
                         }
-                        Saxon.Hej.om.TreeInfo info = ((item is Saxon.Hej.om.TreeInfo) ? (Saxon.Hej.om.TreeInfo)(item) : new Saxon.Hej.om.GenericTreeInfo(controller.getConfiguration(), (Saxon.Hej.om.NodeInfo)(item)));
-                        docPool.add(info, docKey);
+                        if ((docPool.find(docKey) == null)) {
+                            if ((item is Saxon.Hej.om.TreeInfo)) {
+                                docPool.add((Saxon.Hej.om.TreeInfo)(item), docKey);
+                            } else {
+                                docPool.add(new Saxon.Hej.om.GenericTreeInfo(controller.getConfiguration(), (Saxon.Hej.om.NodeInfo)(item)), docKey);
+                            }
+                        }
                     }
                 }
                 context.getController().setUserData("saxon:collections", collectionKey, cachedCollection);

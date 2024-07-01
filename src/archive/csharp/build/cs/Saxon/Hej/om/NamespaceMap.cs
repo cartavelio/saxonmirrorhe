@@ -362,7 +362,9 @@ namespace Saxon.Hej.om {
                         i++;
                     } else {
                         if ((j<other.prefixes.Length)) {
-                            result.Add(new Saxon.Hej.om.NamespaceBinding(other.prefixes[j], Saxon.Hej.om.NamespaceUri.NULL));
+                            if (addUndeclarations) {
+                                result.Add(new Saxon.Hej.om.NamespaceBinding(other.prefixes[j], Saxon.Hej.om.NamespaceUri.NULL));
+                            }
                             j++;
                         } else {
                             return result.ToArray();

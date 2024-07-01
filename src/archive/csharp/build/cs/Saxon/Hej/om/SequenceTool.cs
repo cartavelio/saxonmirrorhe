@@ -44,7 +44,7 @@ namespace Saxon.Hej.om {
             try {
                 return ((Saxon.Hej.expr.LastPositionFinder)(iterator)).getLength();
             } catch (System.InvalidCastException e) {
-                throw new Saxon.Ejava.lang.UnsupportedOperationException("getLength() not available");
+                throw new Saxon.Ejava.lang.UnsupportedOperationException(("getLength() not available in "+iterator.GetType()));
             }
         }
         public static void supply(Saxon.Hej.om.SequenceIterator iter, Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item> consumer) {

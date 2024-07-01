@@ -43,7 +43,7 @@ namespace Saxon.Hej.functions.hof {
             return (((targetFunction.getDescription()+" (used where the required type is ")+requiredType)+")");
         }
         public override int getArity() {
-            return targetFunction.getArity();
+            return requiredType.getArity();
         }
         public override Saxon.Hej.query.AnnotationList getAnnotations() {
             return targetFunction.getAnnotations();

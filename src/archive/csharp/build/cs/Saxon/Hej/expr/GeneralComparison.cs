@@ -452,7 +452,8 @@ namespace Saxon.Hej.expr {
             }
             public bool evaluateManyToOne(Saxon.Hej.om.SequenceIterator iter0, Saxon.Hej.value.AtomicValue value1, int singletonOperator, Saxon.Hej.expr.sort.AtomicComparer comparer, bool runTimeCheckNeeded, Saxon.Hej.expr.parser.RetainedStaticContext staticContext, Saxon.Hej.s9api.Location loc, Saxon.Hej.expr.XPathContext context) {
                 try {
-                    if ((value1 == null)) {
+                    if (((value1 == null) || ((value1.isNaN() && (singletonOperator != Saxon.Hej.expr.parser.Token.FNE))))) {
+                        iter0.close();
                         return false;
                     }
                     if ((iter0 is Saxon.Hej.tree.iter.RangeIterator)) {

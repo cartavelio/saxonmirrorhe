@@ -164,10 +164,14 @@ namespace Saxon.Hej.expr.instruct {
                     Saxon.Hej.@event.ComplexContentOutputter cco = new Saxon.Hej.@event.ComplexContentOutputter(rec);
                     cco.startDocument((abort ? Saxon.Hej.@event.ReceiverOption.TERMINATE : Saxon.Hej.@event.ReceiverOption.NONE));
                     try {
-                        Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/select(cco, context);
-                        dispatchTailCall(tc);
+                        try {
+                            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/select(cco, context);
+                            dispatchTailCall(tc);
+                        } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        cco.append(Saxon.Hej.value.StringValue.bmp(((((((("Error "+e.showErrorCode())+" while evaluating xsl:message at line ")+expr.getLocation().getLineNumber())+" of ")+expr.getLocation().getSystemId())+": ")+e.Message)));
+                        cco.append(new Saxon.Hej.value.StringValue(((((((("Error "+e.showErrorCode())+" while evaluating xsl:message at line ")+expr.getLocation().getLineNumber())+" of ")+expr.getLocation().getSystemId())+": ")+e.Message)));
                     }
                     cco.endDocument();
                     cco.close();

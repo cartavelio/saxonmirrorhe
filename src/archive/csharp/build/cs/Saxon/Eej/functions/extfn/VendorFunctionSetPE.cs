@@ -31,7 +31,7 @@ namespace Saxon.Eej.functions.extfn {
             register("context", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.VendorFunctionSetPE.ContextFn(), Saxon.Hej.type.JavaExternalObjectType.of(typeof(Saxon.Hej.expr.XPathContext)), ONE, (CITEM|LATE)));
             register("controller", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.VendorFunctionSetPE.ControllerFn(), Saxon.Hej.type.JavaExternalObjectType.of(typeof(Saxon.Hej.Controller)), ONE, LATE));
             register("current-mode-name", 0, e => e.populate(() => new Saxon.Eej.functions.extfn.VendorFunctionSetPE.CurrentModeName(), Saxon.Hej.type.BuiltInAtomicType.QNAME, OPT, (CITEM|LATE)));
-            register("deep-equal", 4, e => e.populate(() => new Saxon.Eej.functions.extfn.SaxonDeepEqual(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("deep-equal", 4, e => e.populate(() => new Saxon.Hej.functions.SaxonDeepEqual(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(2, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(3, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
             register("decimal-divide", 3, e => e.populate(() => new Saxon.Eej.functions.extfn.DecimalDivide(), Saxon.Hej.type.BuiltInAtomicType.DECIMAL, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.DECIMAL, OPT, EMPTY).arg(1, Saxon.Hej.type.BuiltInAtomicType.DECIMAL, OPT, EMPTY).arg(2, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null));
             register("discard-document", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.VendorFunctionSetPE.DiscardDocument(), Saxon.Hej.pattern.NodeKindTest.DOCUMENT, OPT, 0).arg(0, Saxon.Hej.pattern.NodeKindTest.DOCUMENT, OPT, null));
             register("EQName", 1, e => e.populate(() => new Saxon.Eej.functions.extfn.EQName(), Saxon.Hej.type.BuiltInAtomicType.QNAME, OPT, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, EMPTY));
@@ -170,19 +170,19 @@ namespace Saxon.Eej.functions.extfn {
         }
         public class ContextFn : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                return new Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.XPathContext>(context);
+                return new Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.XPathContext>(context, typeof(Saxon.Hej.expr.XPathContext));
             }
         
         }
         public class ControllerFn : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                return new Saxon.Hej.value.ObjectValue<Saxon.Hej.Controller>(context.getController());
+                return new Saxon.Hej.value.ObjectValue<Saxon.Hej.Controller>(context.getController(), typeof(Saxon.Hej.Controller));
             }
         
         }
         public class ConfigurationFn : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-                return new Saxon.Hej.value.ObjectValue<Saxon.Hej.Configuration>(context.getConfiguration());
+                return new Saxon.Hej.value.ObjectValue<Saxon.Hej.Configuration>(context.getConfiguration(), typeof(Saxon.Hej.Configuration));
             }
         
         }

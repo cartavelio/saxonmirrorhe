@@ -221,7 +221,7 @@ namespace Saxon.Hej.expr {
                 string localPart = getFunctionName().getLocalPart();
                 @out.emitAttribute("name", localPart);
                 getTargetFunction().exportAttributes(@out);
-                if (((((localPart.Equals("concat") && "JS".Equals(@out.getOptions().target)) && (@out.getOptions().targetVersion == 2)) && (getArity() == 1)) && (getArg(0) is Saxon.Hej.expr.instruct.Block))) {
+                if (((((localPart.Equals("concat") && "JS".Equals(@out.getOptions().target)) && (@out.getOptions().targetVersion>=2)) && (getArity() == 1)) && (getArg(0) is Saxon.Hej.expr.instruct.Block))) {
                     foreach (Saxon.Hej.expr.Operand o in getArg(0).operands()) {
                         if ((o.getChildExpression() is Saxon.Hej.expr.Literal)) {
                             foreach (Saxon.Hej.om.Item it in ((Saxon.Hej.expr.Literal)(o.getChildExpression())).getGroundedValue().asIterable()) {

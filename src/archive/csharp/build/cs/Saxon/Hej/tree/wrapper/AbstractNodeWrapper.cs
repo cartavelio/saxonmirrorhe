@@ -249,11 +249,6 @@ namespace Saxon.Hej.tree.wrapper {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
         /* Expanding default method getConfiguration from interface NodeInfo */
         public virtual Saxon.Hej.Configuration getConfiguration() {
             return getTreeInfo().getConfiguration();
@@ -379,9 +374,9 @@ namespace Saxon.Hej.tree.wrapper {
             return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
-        /* Creating stub method getUnderlyingNode to satisfy interface VirtualNode */
-        public virtual System.Object getUnderlyingNode() {
-            throw new System.NotImplementedException();
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */
@@ -422,6 +417,11 @@ namespace Saxon.Hej.tree.wrapper {
 
         /* Creating stub method generateId to satisfy interface NodeInfo */
         public virtual void generateId(Saxon.Ejava.lang.StringBuilder arg1) {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getUnderlyingNode to satisfy interface VirtualNode */
+        public virtual System.Object getUnderlyingNode() {
             throw new System.NotImplementedException();
         }
 

@@ -22,6 +22,7 @@ namespace Saxon.Hej.trans {
         private Saxon.Hej.om.NamespaceUri defaultNamespaceForElementsAndTypes = Saxon.Hej.om.NamespaceUri.NULL;
         private Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
         private int languageVersion = 30;
+        private Saxon.Hej.functions.FunctionLibrary stubFunctionLibrary = null;
         public CompilerInfo(Saxon.Hej.Configuration config)  {
             this.config = config;
             errorReporter = config.makeErrorReporter();
@@ -51,6 +52,7 @@ namespace Saxon.Hej.trans {
             defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
             unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
             languageVersion = info.languageVersion;
+            stubFunctionLibrary = info.stubFunctionLibrary;
         }
         public Saxon.Hej.Configuration getConfiguration() {
             return config;
@@ -172,6 +174,12 @@ namespace Saxon.Hej.trans {
         }
         public System.Collections.Generic.IEnumerable<Saxon.Hej.query.QueryLibrary> getQueryLibraries() {
             return queryLibraries;
+        }
+        public void importStubFunctionLibrary(Saxon.Ejavax.xml.transform.stream.StreamSource jsonSignatures) {
+            stubFunctionLibrary = config.loadStubFunctionLibrary(jsonSignatures);
+        }
+        public Saxon.Hej.functions.FunctionLibrary getStubFunctionLibrary() {
+            return stubFunctionLibrary;
         }
     
     }

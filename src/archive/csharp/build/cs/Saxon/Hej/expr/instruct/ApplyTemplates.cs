@@ -132,9 +132,13 @@ namespace Saxon.Hej.expr.instruct {
                 targetMode = context.getCurrentMode();
             } else {
                 if ((bindingSlot>=0)) {
-                    targetMode = (Saxon.Hej.expr.Component.M)(context.getTargetComponent(bindingSlot));
-                    if ((targetMode.getVisibility() == Saxon.Hej.trans.Visibility.ABSTRACT)) {
-                        throw new Saxon.Ejava.lang.AssertionError("Modes cannot be abstract");
+                    try {
+                        targetMode = (Saxon.Hej.expr.Component.M)(context.getTargetComponent(bindingSlot));
+                        if ((targetMode.getVisibility() == Saxon.Hej.trans.Visibility.ABSTRACT)) {
+                            throw new Saxon.Ejava.lang.AssertionError("Modes cannot be abstract");
+                        }
+                    } catch (System.InvalidCastException e) {
+                        throw new Saxon.Ejava.lang.IllegalStateException(((((((("In apply-templates at "+getLocation().getSystemId())+"#")+getLocation().getLineNumber())+" target component for slot ")+bindingSlot)+" is ")+context.getTargetComponent(bindingSlot).getActor().getSymbolicName()));
                     }
                 } else {
                     targetMode = mode.getDeclaringComponent();

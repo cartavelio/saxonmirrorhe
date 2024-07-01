@@ -14,6 +14,7 @@ namespace Saxon.Hej.om {
             ALL_READ,
             BUSY,
             EMPTY,
+            ERROR,
         }
         private Saxon.Hej.om.MemoSequence.State state = Saxon.Hej.om.MemoSequence.State.UNREAD;
         public MemoSequence(Saxon.Hej.om.SequenceIterator iterator)  {
@@ -56,6 +57,9 @@ namespace Saxon.Hej.om {
                 throw new Saxon.Hej.trans.UncheckedXPathException(de);
               case Saxon.Hej.om.MemoSequence.State.EMPTY:
                 return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+              case Saxon.Hej.om.MemoSequence.State.ERROR:
+                Saxon.Hej.trans.XPathException e2 = new Saxon.Hej.trans.XPathException("Attempting to read a local variable when an error in that variable has already been reported", "XTDE0640");
+                throw new Saxon.Hej.trans.UncheckedXPathException(e2);
               default:
                 throw new Saxon.Ejava.lang.IllegalStateException("Unknown iterator state");
             }
@@ -69,6 +73,9 @@ namespace Saxon.Hej.om {
             }
             if (((state == Saxon.Hej.om.MemoSequence.State.ALL_READ) || (state == Saxon.Hej.om.MemoSequence.State.EMPTY))) {
                 return null;
+            }
+            if ((state == Saxon.Hej.om.MemoSequence.State.ERROR)) {
+                throw new Saxon.Hej.trans.XPathException("Attempting to read a local variable when an error in that variable has already been reported", "XTDE0640");
             }
             if ((state == Saxon.Hej.om.MemoSequence.State.UNREAD)) {
                 Saxon.Hej.om.Item item = inputIterator.next();
@@ -85,15 +92,20 @@ namespace Saxon.Hej.om {
                 }
             }
             int diff = ((n-used)+1);
-            while ((diff-->0)) {
-                Saxon.Hej.om.Item i = inputIterator.next();
-                if ((i == null)) {
-                    state = Saxon.Hej.om.MemoSequence.State.ALL_READ;
-                    condense();
-                    return null;
+            try {
+                while ((diff-->0)) {
+                    Saxon.Hej.om.Item i = inputIterator.next();
+                    if ((i == null)) {
+                        state = Saxon.Hej.om.MemoSequence.State.ALL_READ;
+                        condense();
+                        return null;
+                    }
+                    append(i);
+                    state = Saxon.Hej.om.MemoSequence.State.MAYBE_MORE;
                 }
-                append(i);
-                state = Saxon.Hej.om.MemoSequence.State.MAYBE_MORE;
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                state = Saxon.Hej.om.MemoSequence.State.ERROR;
+                throw e.getXPathException();
             }
             return reservoir[n];
         }}
@@ -132,13 +144,19 @@ namespace Saxon.Hej.om {
                             return null;
                         } else {
                             System.Diagnostics.Debug.Assert((container.inputIterator != null));
-                            Saxon.Hej.om.Item i = container.inputIterator.next();
-                            if ((i == null)) {
-                                container.state = Saxon.Hej.om.MemoSequence.State.ALL_READ;
-                                container.condense();
-                                position = -2;
-                                reportCompletion();
-                                return null;
+                            Saxon.Hej.om.Item i = null;
+                            try {
+                                i = container.inputIterator.next();
+                                if ((i == null)) {
+                                    container.state = Saxon.Hej.om.MemoSequence.State.ALL_READ;
+                                    container.condense();
+                                    position = -2;
+                                    reportCompletion();
+                                    return null;
+                                }
+                            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                                container.state = Saxon.Hej.om.MemoSequence.State.ERROR;
+                                throw;
                             }
                             position = container.used;
                             container.append(i);

@@ -7,6 +7,7 @@ namespace Saxon.Hej.regex {
         protected internal int min;
         protected internal int max;
         internal bool greedy;
+        internal int loopingDepth = -1;
         internal OpRepeat(Saxon.Hej.regex.Operation op, int min, int max, bool greedy)  {
             this.op = op;
             this.min = min;
@@ -33,6 +34,12 @@ namespace Saxon.Hej.regex {
         }
         public override int getMinimumMatchLength() {
             return (min*op.getMinimumMatchLength());
+        }
+        public override int getMaxLoopingDepth() {
+            if ((loopingDepth<0)) {
+                loopingDepth = (op.getMaxLoopingDepth()+1);
+            }
+            return loopingDepth;
         }
         public override Saxon.Hej.regex.Operation optimize(Saxon.Hej.regex.REProgram program, Saxon.Hej.regex.REFlags flags) {
             op = op.optimize(program, flags);
@@ -65,11 +72,11 @@ namespace Saxon.Hej.regex {
                         }
                     }
                 }
-                Saxon.Hej.z.IntIterator @base = new Inner_IntIterator_11(this, matcher, iterators, positions, bound, position);
-                return new Saxon.Hej.regex.Operation.ForceProgressIterator(@base);
+                Saxon.Hej.z.IntIterator @base = new Inner_IntIterator_12(this, matcher, iterators, positions, bound, position);
+                return new Saxon.Hej.regex.Operation.ForceProgressIterator(@base, getMaxLoopingDepth());
             } else {
-                Saxon.Hej.z.IntIterator iter = new Inner_IntIterator_5(this, matcher, iterators, positions, bound, position);
-                return new Saxon.Hej.regex.Operation.ForceProgressIterator(iter);
+                Saxon.Hej.z.IntIterator iter = new Inner_IntIterator_6(this, matcher, iterators, positions, bound, position);
+                return new Saxon.Hej.regex.Operation.ForceProgressIterator(iter, getMaxLoopingDepth());
             }
         }
         public override string display() {
@@ -93,9 +100,9 @@ namespace Saxon.Hej.regex {
             return (op.display()+quantifier);
         }
     
-        private class Inner_IntIterator_5 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_6 : Saxon.Hej.z.IntIterator {
             private readonly OpRepeat outerInstance;
-            public Inner_IntIterator_5(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
+            public Inner_IntIterator_6(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.iterators = iterators;
@@ -138,9 +145,9 @@ namespace Saxon.Hej.regex {
             }
         }
 
-        private class Inner_IntIterator_11 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_12 : Saxon.Hej.z.IntIterator {
             private readonly OpRepeat outerInstance;
-            public Inner_IntIterator_11(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
+            public Inner_IntIterator_12(OpRepeat outerInstance, Saxon.Hej.regex.REMatcher matcher, System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators, System.Collections.Generic.Stack<System.Int32> positions, int bound, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.iterators = iterators;

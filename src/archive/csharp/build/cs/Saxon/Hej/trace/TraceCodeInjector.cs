@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.trace {
     public class TraceCodeInjector : Saxon.Hej.expr.parser.CodeInjector {
+        protected internal int traceLevel = Saxon.Hej.trace.TraceLevel.NORMAL;
+        public void setTraceLevel(int traceLevel) {
+            this.traceLevel = traceLevel;
+        }
         public Saxon.Hej.expr.Expression inject(Saxon.Hej.expr.Expression exp) {
             if ((exp is Saxon.Hej.expr.flwor.FLWORExpression)) {
                 ((Saxon.Hej.expr.flwor.FLWORExpression)(exp)).injectCode(this);

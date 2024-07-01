@@ -19,6 +19,9 @@ namespace Saxon.Hej.expr.instruct {
         public Saxon.Hej.expr.Expression getBody() {
             return baseOp.getChildExpression();
         }
+        public void setProperty(string name, System.Object value) {
+            Saxon.Impl.Helpers.MapUtils.Put(properties, name, value);
+        }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             return baseOp;
         }
@@ -31,7 +34,7 @@ namespace Saxon.Hej.expr.instruct {
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.instruct.ComponentTracer t = new Saxon.Hej.expr.instruct.ComponentTracer();
             t.component = component;
-            t.properties = properties;
+            t.properties = new System.Collections.Generic.Dictionary<string, System.Object>(properties);
             Saxon.Hej.expr.Expression newBody = getChild().copy(rebindings);
             t.baseOp = new Saxon.Hej.expr.Operand(t, newBody, Saxon.Hej.expr.OperandRole.SAME_FOCUS_ACTION);
             t.adoptChildExpression(newBody);
@@ -79,7 +82,9 @@ namespace Saxon.Hej.expr.instruct {
             }
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
+            @out.startElement("componentTracer");
             getChild().export(@out);
+            @out.endElement();
         }
         public override string toShortString() {
             return getChild().toShortString();

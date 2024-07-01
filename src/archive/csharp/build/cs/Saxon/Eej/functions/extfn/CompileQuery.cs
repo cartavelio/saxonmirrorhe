@@ -7,7 +7,7 @@ namespace Saxon.Eej.functions.extfn {
             string query = arguments[0].head().getStringValue();
             Saxon.Hej.query.StaticQueryContext sqc = context.getConfiguration().newStaticQueryContext();
             Saxon.Hej.query.XQueryExpression exp = sqc.compileQuery(query);
-            return new Saxon.Hej.value.ObjectValue<Saxon.Hej.query.XQueryExpression>(exp);
+            return new Saxon.Hej.value.ObjectValue<Saxon.Hej.query.XQueryExpression>(exp, typeof(Saxon.Hej.query.XQueryExpression));
         }
     
     }

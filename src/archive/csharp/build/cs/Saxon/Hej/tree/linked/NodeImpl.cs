@@ -401,11 +401,6 @@ namespace Saxon.Hej.tree.linked {
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
-        }
-
         /* Expanding default method isSameNodeInfo from interface NodeInfo */
         public virtual bool isSameNodeInfo(Saxon.Hej.om.NodeInfo other) {
             return Equals(other);
@@ -471,6 +466,14 @@ namespace Saxon.Hej.tree.linked {
             return Saxon.Hej.om.Genre.NODE;
         }
 
+        /* Expanding default method removeNamespace from interface MutableNodeInfo */
+        public virtual void removeNamespace(string prefix) {
+        }
+
+        /* Expanding default method addNamespace from interface MutableNodeInfo */
+        public virtual void addNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
+        }
+
         /* Expanding default method getStringValue from interface Item */
         public virtual string getStringValue() {
             return getUnicodeStringValue().ToString();
@@ -500,12 +503,9 @@ namespace Saxon.Hej.tree.linked {
             return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
-        /* Expanding default method removeNamespace from interface MutableNodeInfo */
-        public virtual void removeNamespace(string prefix) {
-        }
-
-        /* Expanding default method addNamespace from interface MutableNodeInfo */
-        public virtual void addNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
         /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */

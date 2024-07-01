@@ -160,7 +160,7 @@ namespace Saxon.Hej.trace {
                     emitAttribute("defaultFunctionNS", defaultFnNs);
                 }
                 if ((!(options.suppressStaticContext) && (((parentSC == null) || !(sc.declaresSameNamespaces(parentSC)))))) {
-                    bool includeXmlNamespace = ("JS".Equals(getOptions().target) && (getOptions().targetVersion == 2));
+                    bool includeXmlNamespace = ("JS".Equals(getOptions().target) && (getOptions().targetVersion>=2));
                     emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap(), includeXmlNamespace));
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -278,6 +278,8 @@ namespace Saxon.Hej.trace {
                 if ((receiver is Saxon.Hej.@event.CheckSumFilter)) {
                     int c = ((Saxon.Hej.@event.CheckSumFilter)(receiver)).getChecksum();
                     cco.processingInstruction(Saxon.Hej.@event.CheckSumFilter.SIGMA, Saxon.Hej.str.BMPString.of(Saxon.Impl.Helpers.Utils.intToHexString(c)), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
+                    string digest = ((Saxon.Hej.@event.CheckSumFilter)(receiver)).getDigest();
+                    cco.processingInstruction(Saxon.Hej.@event.CheckSumFilter.SIGMA2, Saxon.Hej.str.BMPString.of(digest), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
                 }
                 cco.endDocument();
                 cco.close();

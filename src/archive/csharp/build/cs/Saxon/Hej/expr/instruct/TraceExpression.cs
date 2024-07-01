@@ -80,6 +80,16 @@ namespace Saxon.Hej.expr.instruct {
                 return -1;
             }
         }
+        public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
+            Saxon.Hej.expr.Expression t = base.optimize(visitor, contextInfo);
+            if ((t != this)) {
+                return t;
+            }
+            if ((getChild() is Saxon.Hej.expr.instruct.TraceExpression)) {
+                return getChild();
+            }
+            return this;
+        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             getChild().export(@out);
         }
@@ -92,15 +102,16 @@ namespace Saxon.Hej.expr.instruct {
         private class TraceExpressionElaborator : Saxon.Hej.expr.elab.FallbackElaborator {
             public override Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthWhenAbsent) {
                 Saxon.Hej.expr.instruct.TraceExpression expr = (Saxon.Hej.expr.instruct.TraceExpression)(getExpression());
+                Saxon.Hej.expr.Expression body = expr.getBody();
                 Saxon.Hej.expr.elab.StringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForString(zeroLengthWhenAbsent);
                 return context => {
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));
                     if (controller.isTracing()) {
                         Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                        listener.enter(expr, expr.properties, context);
+                        listener.enter(body, expr.properties, context);
                         string result = /*Delegate.eval()*/baseEval(context);
-                        listener.leave(expr);
+                        listener.leave(body);
                         return result;
                     } else {
                         return /*Delegate.eval()*/baseEval(context);
@@ -109,15 +120,16 @@ namespace Saxon.Hej.expr.instruct {
             }
             public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
                 Saxon.Hej.expr.instruct.TraceExpression expr = (Saxon.Hej.expr.instruct.TraceExpression)(getExpression());
+                Saxon.Hej.expr.Expression body = expr.getBody();
                 Saxon.Hej.expr.elab.UpdateEvaluator baseEval = expr.getBody().makeElaborator().elaborateForUpdate();
                 return (context, pul) => {
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));
                     if (controller.isTracing()) {
                         Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                        listener.enter(expr, expr.properties, context);
+                        listener.enter(body, expr.properties, context);
                         /*Delegate.registerUpdates()*/baseEval(context, pul);
-                        listener.leave(expr);
+                        listener.leave(body);
                     } else {
                         /*Delegate.registerUpdates()*/baseEval(context, pul);
                     }
@@ -125,15 +137,16 @@ namespace Saxon.Hej.expr.instruct {
             }
             public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
                 Saxon.Hej.expr.instruct.TraceExpression expr = (Saxon.Hej.expr.instruct.TraceExpression)(getExpression());
+                Saxon.Hej.expr.Expression body = expr.getBody();
                 Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBody().makeElaborator().elaborateForPull();
                 return context => {
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));
                     if (controller.isTracing()) {
                         Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                        listener.enter(expr, expr.properties, context);
+                        listener.enter(body, expr.properties, context);
                         Saxon.Hej.om.SequenceIterator result = /*Delegate.iterate()*/baseEval(context);
-                        listener.leave(expr);
+                        listener.leave(body);
                         return result;
                     } else {
                         return /*Delegate.iterate()*/baseEval(context);
@@ -161,15 +174,16 @@ namespace Saxon.Hej.expr.instruct {
             }
             public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
                 Saxon.Hej.expr.instruct.TraceExpression expr = (Saxon.Hej.expr.instruct.TraceExpression)(getExpression());
+                Saxon.Hej.expr.Expression body = expr.getBody();
                 Saxon.Hej.expr.elab.ItemEvaluator baseEval = expr.getBody().makeElaborator().elaborateForItem();
                 return context => {
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));
                     if (controller.isTracing()) {
                         Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                        listener.enter(expr, expr.properties, context);
+                        listener.enter(body, expr.properties, context);
                         Saxon.Hej.om.Item result = /*Delegate.eval()*/baseEval(context);
-                        listener.leave(expr);
+                        listener.leave(body);
                         return result;
                     } else {
                         return /*Delegate.eval()*/baseEval(context);
@@ -178,15 +192,16 @@ namespace Saxon.Hej.expr.instruct {
             }
             public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
                 Saxon.Hej.expr.instruct.TraceExpression expr = (Saxon.Hej.expr.instruct.TraceExpression)(getExpression());
+                Saxon.Hej.expr.Expression body = expr.getBody();
                 Saxon.Hej.expr.elab.BooleanEvaluator baseEval = expr.getBody().makeElaborator().elaborateForBoolean();
                 return context => {
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));
                     if (controller.isTracing()) {
                         Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                        listener.enter(expr, expr.properties, context);
+                        listener.enter(body, expr.properties, context);
                         bool result = /*Delegate.eval()*/baseEval(context);
-                        listener.leave(expr);
+                        listener.leave(body);
                         return result;
                     } else {
                         return /*Delegate.eval()*/baseEval(context);
@@ -195,15 +210,16 @@ namespace Saxon.Hej.expr.instruct {
             }
             public override Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthWhenAbsent) {
                 Saxon.Hej.expr.instruct.TraceExpression expr = (Saxon.Hej.expr.instruct.TraceExpression)(getExpression());
+                Saxon.Hej.expr.Expression body = expr.getBody();
                 Saxon.Hej.expr.elab.UnicodeStringEvaluator baseEval = expr.getBody().makeElaborator().elaborateForUnicodeString(zeroLengthWhenAbsent);
                 return context => {
                     Saxon.Hej.Controller controller = context.getController();
                     System.Diagnostics.Debug.Assert((controller != null));
                     if (controller.isTracing()) {
                         Saxon.Hej.lib.TraceListener listener = controller.getTraceListener();
-                        listener.enter(expr, expr.properties, context);
+                        listener.enter(body, expr.properties, context);
                         Saxon.Hej.str.UnicodeString result = /*Delegate.eval()*/baseEval(context);
-                        listener.leave(expr);
+                        listener.leave(body);
                         return result;
                     } else {
                         return /*Delegate.eval()*/baseEval(context);

@@ -259,7 +259,7 @@ namespace Saxon.Hej.expr {
             if ((getRoleSupplier() != null)) {
                 destination.emitAttribute("diag", getRoleSupplier()().save());
             }
-            if (((converter.isPromoter() && "JS".Equals(destination.getOptions().target)) && (destination.getOptions().targetVersion == 2))) {
+            if (((converter.isPromoter() && "JS".Equals(destination.getOptions().target)) && (destination.getOptions().targetVersion>=2))) {
                 destination.startElement("cvUntyped");
                 destination.emitAttribute("to", Saxon.Hej.type.AlphaCode.fromItemType(requiredItemType));
                 if ((getRoleSupplier() != null)) {

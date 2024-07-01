@@ -145,6 +145,7 @@ namespace Saxon.Eej.config {
                 Saxon.Ejava.util.Properties features = new Saxon.Ejava.util.Properties();
                 license = new Saxon.Eej.config.Verifier.License(features);
                 string signature = "";
+                string signature2024 = "";
                 while (((line = readLine(lineReader)) != null)) {
                     if (((line.Trim().IndexOf('#') == 0) || (line.Trim().IndexOf('!') == 0))) {
                         continue ;
@@ -157,16 +158,32 @@ namespace Saxon.Eej.config {
                         name = line.Trim();
                         value = "";
                     }
-                    if (!("".Equals(name))) {
+                    if (!(name.Length==0)) {
                         features.setProperty(name, value);
-                        if ("Signature".Equals(name)) {
-                            signature = value;
+                        if ("Signature2024".Equals(name)) {
+                            signature2024 = value;
                         } else {
-                            buffer.append(name).append('=').append(value).append('\n');
+                            if ("Signature".Equals(name)) {
+                                signature = value;
+                            } else {
+                                buffer.append(name).append('=').append(value).append('\n');
+                            }
                         }
                     }
                 }
-                bool valid = verify(buffer.ToString(), signature);
+                bool valid;
+                if (!(signature2024.Length==0)) {
+                    bool isvalid = false;
+                    try {
+                        isvalid = verify2(buffer.ToString(), signature2024);
+                    } catch (System.Exception ex) {
+                        buffer.append("Signature2024=").append(signature2024).append('\n');
+                        isvalid = verify(buffer.ToString(), signature);
+                    }
+                    valid = isvalid;
+                } else {
+                    valid = verify(buffer.ToString(), signature);
+                }
                 string licenseDesc = (embedded ? "embedded license" : "license file");
                 if (!(valid)) {
                     throw new Saxon.Hej.trans.LicenseException((("Invalid "+licenseDesc)+" found"), Saxon.Hej.trans.LicenseException.INVALID);
@@ -234,6 +251,7 @@ namespace Saxon.Eej.config {
             return System.Convert.FromHexString(hex);
         }
         protected internal abstract bool verify(string data, string signature);
+        protected internal abstract bool verify2(string data, string signature);
         protected internal class License {
             protected internal readonly Saxon.Ejava.util.Properties features;
             public License(Saxon.Ejava.util.Properties features)  {

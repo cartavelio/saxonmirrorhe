@@ -201,7 +201,7 @@ namespace Saxon.Hej.expr {
             if ((resultWhenEmpty != null)) {
                 @out.emitAttribute("onEmpty", (resultWhenEmpty.getBooleanValue() ? "1" : "0"));
             }
-            if (("JS".Equals(@out.getOptions().target) && (@out.getOptions().targetVersion == 2))) {
+            if (("JS".Equals(@out.getOptions().target) && (@out.getOptions().targetVersion>=2))) {
                 Saxon.Hej.expr.sort.AtomicComparer comparer = getAtomicComparer();
                 @out.emitAttribute("comp", comparer.save());
             }

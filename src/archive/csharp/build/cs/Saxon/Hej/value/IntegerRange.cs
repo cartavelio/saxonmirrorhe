@@ -85,7 +85,7 @@ namespace Saxon.Hej.value {
         }
         public Saxon.Hej.om.GroundedValue reduce() {
             if ((start == end)) {
-                return itemAt(0);
+                return ((/*1430*/Saxon.Hej.value.IntegerValue)itemAt(0));
             } else {
                 return this;
             }

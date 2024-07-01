@@ -48,6 +48,13 @@ namespace Saxon.Hej.value {
                 return new Saxon.Hej.value.StringValue(value.ToString());
             }
         }
+        public Saxon.Hej.value.StringValue economize() {
+            Saxon.Hej.str.UnicodeString c2 = content.economize();
+            if ((c2 == content)) {
+                return this;
+            }
+            return new Saxon.Hej.value.StringValue(c2, typeLabel);
+        }
         public static Saxon.Hej.value.StringValue makeUStringValue(Saxon.Hej.str.UnicodeString value) {
             if (((value == null) || value.isEmpty())) {
                 return Saxon.Hej.value.StringValue.EMPTY_STRING;
@@ -130,7 +137,7 @@ namespace Saxon.Hej.value {
             return s;
         }
         public override Saxon.Hej.expr.sort.XPathComparable getXPathComparable(Saxon.Hej.lib.StringCollator collator, int implicitTimezone) {
-            return new Inner_XPathComparable_55(this, collator);
+            return new Inner_XPathComparable_58(this, collator);
         }
         public override bool isIdentical(Saxon.Hej.value.AtomicValue v) {
             return ((((v is Saxon.Hej.value.StringValue) && (((this is Saxon.Hej.value.AnyURIValue) == (v is Saxon.Hej.value.AnyURIValue)))) && ((this.isUntypedAtomic() == v.isUntypedAtomic()))) && Equals(v));
@@ -185,9 +192,9 @@ namespace Saxon.Hej.value {
 
         }
     
-        private class Inner_XPathComparable_55 : Saxon.Hej.expr.sort.XPathComparable {
+        private class Inner_XPathComparable_58 : Saxon.Hej.expr.sort.XPathComparable {
             private readonly StringValue outerInstance;
-            public Inner_XPathComparable_55(StringValue outerInstance, Saxon.Hej.lib.StringCollator collator) {
+            public Inner_XPathComparable_58(StringValue outerInstance, Saxon.Hej.lib.StringCollator collator) {
                 this.outerInstance = outerInstance;
                 this.collator = collator;
             }

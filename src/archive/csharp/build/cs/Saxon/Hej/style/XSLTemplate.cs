@@ -577,6 +577,9 @@ namespace Saxon.Hej.style {
                 } else {
                     if ((rule.getBody() == null)) {
                         body = body.copy(new Saxon.Hej.expr.parser.RebindingMap());
+                        if ((body is Saxon.Hej.expr.instruct.ComponentTracer)) {
+                            ((Saxon.Hej.expr.instruct.ComponentTracer)(body)).setProperty("match", rule.getMatchPattern());
+                        }
                     } else {
                         body = rule.getBody();
                     }
