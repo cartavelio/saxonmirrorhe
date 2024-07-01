@@ -112,7 +112,17 @@ print(output)
 For more Python examples, and further details about installing and configuring the product, 
 see the [SaxonC 12 documentation](https://www.saxonica.com/saxon-c/documentation12/index.html).
 
+## Using `pylint` on a project which uses `saxonc@@edition@@`
 
+Because the `saxonc@@edition@@` is a C extension, you will need to either configure Pylint to load the module to avoid pylint errors like:
+
+```python
+E0611: No name 'PySaxonProcessor' in module 'saxonc@@edition@@' (no-name-in-module)
+```
+
+```shell
+$ pylint --extension-pkg-allow-list=saxonche  my_module.py
+```
 
 ## Support
 
