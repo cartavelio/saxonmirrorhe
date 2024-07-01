@@ -610,6 +610,14 @@ def wheelPlatformTagTask = tasks.register("wheelPlatformTag", WheelCompatibility
   manylinuxTarget = "manylinux_2_24"
 }
 
+def wheelDebugPlatformTagTask = tasks.register("wheelDebugPlatformTag", WheelCompatibilityTags) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = pyenvTask.map { it.pythonVersion.get() }
+  pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
+  manylinuxTarget = "manylinux_2_24"
+}
+
+
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "ce" : "ee"
   def graalEdition = "ce"
@@ -885,8 +893,8 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
     pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
     productEdition = edition
     productVersion = saxonVersion3
-    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
-    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    wheelSuffix = wheelDebugPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelDebugPlatformTagTask.flatMap { it.macosxDeploymentTarget }
     sourceDir = tasks.named("setup_${edition}c_pypi_debug").map { it.packageDir.get() }
     outputDir = pythonBuildRootPath(edition, true)
     debug = true
@@ -898,7 +906,7 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
     productEdition = edition
-    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.repairedWheelSuffix }
+    repairedWheelFilePlatformSuffix = wheelDebugPlatformTagTask.flatMap { it.repairedWheelSuffix }
     libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
     wheel = tasks.named("${edition}c_python_build_debug_wheel").map { it.wheel.get() }
   }
