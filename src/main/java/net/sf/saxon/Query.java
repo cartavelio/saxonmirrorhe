@@ -969,6 +969,8 @@ public class Query {
             DocumentBuilder builder = processor.newDocumentBuilder();
             if (exp.isUpdateQuery()) {
                 builder.setTreeModel(TreeModel.LINKED_TREE);
+            } else {
+                builder.setTreeModel(TreeModel.getTreeModel(getConfiguration().getTreeModel()));
             }
             if (showTime) {
                 config.getLogger().info("Processing " + sourceInput.getSystemId());
