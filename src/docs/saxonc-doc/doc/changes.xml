@@ -166,6 +166,14 @@
                <code>XdmNode</code> class in the C++, Python and PHP APIs.</li>
             <li>The <code>clearXslMessages()</code> method has been added to the
                <code>XsltExecutable</code> class in the C++, Python and PHP APIs.</li>
+            <li>The <code>PyXdmFunctionItem.get_system_function(...)</code> method is now defined as a static method on the class instead of an instance method.
+               This is a breaking change to maintain consistancy with the C++ API which requires a user to
+            change their code accordingly. See the following code snippet as an example of the new code:
+               <code>PyXdmFunctionItem.get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1</code></li>
+            <li>The <code>XdmValue</code> class constructor now requires the <code>PySaxonProcessor</code> instance as an argument to create an empty sequence.
+               This is another breaking change but an important one for better memory management.
+               Alternatively, we have the new method <code>empty_sequence()</code> method on the <code>PySaxonProcessor</code> to create an empty XdmValue object.
+               For example, <code>xdm_value = PyXdmValue(saxonproc)</code>, where the <code>saxonproc</code> is the instance of the <code>PySaxonProcessor</code> class.</li>
             <li>The way that memory management is handled internally has been significantly overhauled, removing a
                number of memory leaks, and making it much more robust concerning memory handling in C++, Python,
                and PHP. (See bug issues <a href="https://saxonica.plan.io/issues/6338" target="_blank">#6338</a>,
