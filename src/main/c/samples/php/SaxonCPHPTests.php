@@ -237,7 +237,7 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
             $xpathProc->setContextItem($input);
             $result = $xpathProc->evaluateSingle("//BOOKS/ITEM[@CAT='MMP']/TITLE");
             $this->assertNotNull($result);
-            $linenum = $result->getLineNumber();
+            $linenum = $result->getNodeValue()->getLineNumber();
             $this->assertTrue($linenum == 7);
         } catch (Exception $e) {
             echo 'Caught exception: ', $e->getMessage(), "\n";
@@ -260,7 +260,7 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
             $xpathProc->setContextItem($input);
             $result = $xpathProc->evaluateSingle("//BOOKS/ITEM[@CAT='MMP']/TITLE");
             $this->assertNotNull($result);
-            $colnum = $result->getColumnNumber();
+            $colnum = $result->getNodeValue()->getColumnNumber();
             $this->assertTrue($colnum == 14);
         } catch (Exception $e) {
             echo 'Caught exception: ', $e->getMessage(), "\n";
