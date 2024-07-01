@@ -9,9 +9,7 @@ package net.sf.saxon.trace;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.instruct.ComponentTracer;
-import net.sf.saxon.expr.instruct.TraceExpression;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.TransformFn;
 import net.sf.saxon.om.NamespaceUri;
@@ -28,7 +26,7 @@ public class XSLTTraceCodeInjector extends TraceCodeInjector {
     @Override
     protected boolean isApplicable(Expression exp) {
         if (traceLevel == TraceLevel.HIGH) {
-            return !(exp instanceof TraceExpression);
+            return !(exp instanceof TraceExpression || exp instanceof OnEmptyExpr || exp instanceof OnNonEmptyExpr);
         }
         return isTraceableExpression(exp);
     }
@@ -39,6 +37,10 @@ public class XSLTTraceCodeInjector extends TraceCodeInjector {
     public static boolean isTraceableExpression(Expression exp) {
         // Never trace an empty sequence (it's often an empty sequence constructor, for example <lre/>
         if (Literal.isEmptySequence(exp)) {
+            return false;
+        }
+        // Don't trace an on-empty or on-non-empty expression (bug #6428)
+        if (exp instanceof OnEmptyExpr || exp instanceof OnNonEmptyExpr) {
             return false;
         }
         // Don't trace an expression if its parent is an XPath expression (as distinct from an XSLT instruction)
