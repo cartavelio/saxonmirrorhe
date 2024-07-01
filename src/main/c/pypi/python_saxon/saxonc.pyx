@@ -1904,6 +1904,7 @@ cdef class PyXsltExecutable:
              c_xdmNode =  dereference(it).second
              nval = PyXdmValue()
              nval.thisvptr = <saxoncClasses.XdmValue*>c_xdmNode
+             nval.thisvptr.incrementRefCount()
              key_str = make_py_str(dereference(it).first.c_str())
              p_dataMap[key_str] =  nval
              postincrement(it)
