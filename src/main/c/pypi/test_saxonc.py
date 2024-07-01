@@ -298,8 +298,8 @@ def testResolveUri(saxonproc):
     assert "code" in item.string_value
 
 def testXslMessageToFile(saxonproc, data_dir):
-    document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-
+    document = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
+    xsltproc = saxonproc.new_xslt30_processor()
     executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values'><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output><xsl:message>test</xsl:message></xsl:template></xsl:stylesheet>")
 
     message_path: str = 'xslt-messages.xml'
@@ -311,8 +311,8 @@ def testXslMessageToFile(saxonproc, data_dir):
 
 
 def testXslMessageToList(saxonproc, data_dir):
-    document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-
+    document = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
+    xsltproc = saxonproc.new_xslt30_processor()
     executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values'><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output><xsl:message>test</xsl:message></xsl:template></xsl:stylesheet>")
 
     executable.set_save_xsl_message(True)
@@ -321,8 +321,8 @@ def testXslMessageToList(saxonproc, data_dir):
     assert messages.size == 1
 
 def testXslMessageToListRepeat(saxonproc):
-    document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-
+    document = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
+    xsltproc = saxonproc.new_xslt30_processor()
     executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values'><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output><xsl:message>test</xsl:message></xsl:template></xsl:stylesheet>")
 
     executable.set_save_xsl_message(True)
@@ -332,8 +332,8 @@ def testXslMessageToListRepeat(saxonproc):
     assert messages.size == 2
 
 def testXslMessageToListWithClear(saxonproc):
-    document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-
+    document = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
+    xsltproc = saxonproc.new_xslt30_processor()
     executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'> <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:value-of select='//person[1]'/><xsl:for-each select='$values'><out><xsl:value-of select='. * 3'/></out></xsl:for-each></output><xsl:message>test</xsl:message></xsl:template></xsl:stylesheet>")
 
     executable.set_save_xsl_message(True)
