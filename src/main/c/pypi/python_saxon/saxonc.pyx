@@ -1028,6 +1028,7 @@ cdef class PyDocumentBuilder:
     """
     cdef PySaxonProcessor processor
     cdef saxoncClasses.DocumentBuilder *thisdbptr      # hold a C++ instance which we're wrapping
+    cdef PySchemaValidator schema_validator
     def __cinit__(self):
        """Default constructor """
        self.thisdbptr = NULL
@@ -1095,6 +1096,7 @@ cdef class PyDocumentBuilder:
        Args:
            val (PySchemaValidator): the schema validator to be used
        """
+       self.schema_validator = val
        if val is None:
            self.thisdbptr.setSchemaValidator(NULL)
        else:
@@ -1800,6 +1802,7 @@ cdef class PyXsltExecutable:
         cdef py_value_string = None
         cdef char * c_source = NULL
         cdef PyXdmItem xdm_item = None
+        self.__global_context_item = None
         if "file_name" in kwds:
             py_value = kwds["file_name"]
             '''c_source = make_c_str(py_value)'''
@@ -2326,13 +2329,6 @@ cdef class PyXsltExecutable:
             2) result = executable.apply_templates_returning_value(source_file="cat.xml")
         """
         cdef const char * c_sourcefile = NULL
-        cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
         for key, value in kwds.items():
             if isinstance(value, str):
                 if key == "source_file":
@@ -2347,15 +2343,7 @@ cdef class PyXsltExecutable:
                     self.thisxptr.setBaseOutputURI(c_base_output_uri)
             elif key == "xdm_value" or key == "xdm_node":
                 self._set_initial_match_selection(value)
-        cdef PyXdmValue val = None
-        cdef PyXdmAtomicValue aval = None
-        cdef PyXdmNode nval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
-        cdef saxoncClasses.XdmValue * xdmValue = NULL
-        xdmValue = self.thisxptr.applyTemplatesReturningValue()
-        return self.processor.wrap_value(xdmValue)
+        return self.processor.wrap_value(self.thisxptr.applyTemplatesReturningValue())
 
     def _set_initial_match_selection(self, PyXdmValue value):
         """
@@ -2496,15 +2484,7 @@ cdef class PyXsltExecutable:
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
         if template_name is not None:
             c_templateName = py_template_name_string
-        cdef PyXdmValue val = None
-        cdef PyXdmAtomicValue aval = None
-        cdef PyXdmNode nval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
-        cdef saxoncClasses.XdmValue * xdmValue = NULL
-        xdmValue = self.thisxptr.callTemplateReturningValue(c_templateName)
-        return self.processor.wrap_value(xdmValue)
+        return self.processor.wrap_value(self.thisxptr.callTemplateReturningValue(c_templateName))
 
     def call_template_returning_string(self, str template_name=None, **kwds):
         """
@@ -3616,6 +3596,7 @@ cdef class PySchemaValidator:
     cdef PySaxonProcessor processor
     cdef saxoncClasses.SchemaValidator *thissvptr  # hold a C++ instance which we're wrapping
     cdef dict __parameters
+    cdef PyXdmNode __source_node
 
     def __cinit__(self):
         self.thissvptr = NULL
@@ -3786,6 +3767,7 @@ cdef class PySchemaValidator:
         Args:
             source (PyXdmNode): the source node to be validated
         """
+        self.__source_node = self.processor.wrap_node(source.derivednptr)
         self.thissvptr.setSourceNode(source.derivednptr)
 
     @property
@@ -3799,15 +3781,12 @@ cdef class PySchemaValidator:
             PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
             that prevented validation from taking place (such as failure to read or parse the input document)
         """
-        cdef PyXdmNode val = None
         cdef saxoncClasses.XdmNode * xdmNode = NULL
         xdmNode = self.thissvptr.getValidationReport()
         if xdmNode == NULL:
             return None
         else:
-            val = PyXdmNode(self.processor)
-            val.derivednptr = val.derivedptr = val.thisvptr = xdmNode
-            return val
+            return self.processor.wrap_node(xdmNode)
 
     def set_parameter(self, name, PyXdmValue value):
         """
