@@ -990,15 +990,31 @@ def docSaxoncDoxygenTask = tasks.register("saxonc_doxygen") {
   }
 }
 
+def pyenvDocPythonTask = tasks.register("pyenv_doc", PythonPyenv) {
+  pyenvExe = tasks.named("pyenvExe").map { it.pyenv.get() }
+  pythonVersion = "3.9.19"
+  pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
+}
+
+def pyenvDocPythonExeTask = tasks.register('pyenv_doc_python_exe', PythonPyenvPythonExe) {
+  pyenvExe = tasks.named("pyenvExe").map { it.pyenv.get() }
+  pyenvVersionName = pyenvDocPythonTask.map { it.pyenvVersionName.get() }
+}
+
+def branchDocVenvTask = tasks.register("branch_doc_python_venv", PythonVenv) {
+  pyenvPythonExe = pyenvDocPythonExeTask.map { it.pythonExe.get() }
+  suffix = "doc"
+}
+
 tasks.register("saxonc_doc_python_pipInstall", PipInstall) {
-  pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
+  pipExe = branchDocVenvTask.map { it.pipExe.get() }
   requirements = tasks.named("saxonc_doc_pypi").map { it.packageDir.map { it.file("requirements.txt") }.get() }
 }
 
 def docBuildWheelTask = tasks.register("saxonc_doc_python_build_wheel", BuildWheel) {
   manylinuxTarget = "manylinux_2_24"
-  pythonExe = tasks.named("branchVenv").map { it.pythonExe.get() }
-  repairwheelExe = tasks.named("branchVenv").map { it.venvBinHostedExe("repairwheel").get() }
+  pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
+  repairwheelExe = branchDocVenvTask.map { it.venvBinHostedExe("repairwheel").get() }
   productEdition = "ee"
   productVersion = saxonVersion3
   sourceDir = tasks.named("saxonc_doc_pypi").map { it.packageDir.get() }
@@ -1007,7 +1023,7 @@ def docBuildWheelTask = tasks.register("saxonc_doc_python_build_wheel", BuildWhe
 }
 
 def docInstallWheelTask = tasks.register("saxonc_doc_python_install_wheel", InstallLocalWheel) {
-  pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
+  pipExe = branchDocVenvTask.map { it.pipExe.get() }
   wheel = docBuildWheelTask.map { it.wheel.get() }
 }
 
@@ -1015,13 +1031,13 @@ def docPydocTask = tasks.register("saxonc_doc_python_pydoc") {
   dependsOn tasks.named("saxonc_doc_python_pipInstall")
   dependsOn docInstallWheelTask
   inputs.files tasks.named("saxonc_doc_pypi")
-  inputs.file tasks.named("branchVenv").map { it.pythonExe.get() }
+  inputs.file branchDocVenvTask.map { it.pythonExe.get() }
   outputs.file layout.buildDirectory.file("saxonc-pydoc/saxoncee.html")
 
   doLast {
     exec {
       workingDir layout.buildDirectory.dir("saxonc-pydoc")
-      executable tasks.named("branchVenv").flatMap { it.pythonExe }.get()
+      executable branchDocVenvTask.flatMap { it.pythonExe }.get()
       args "-m", "pydoc", "-w", "saxoncee"
     }
   }
