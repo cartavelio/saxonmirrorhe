@@ -856,6 +856,7 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
   tasks.register("${edition}c_python_build_wheel", BuildWheel) {
     manylinuxTarget = "manylinux_2_24"
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    pythonVenvTask = branchVenvTask
     repairwheelExe = branchVenvTask.map { it.venvBinHostedExe("repairwheel").get() }
     productEdition = edition
     productVersion = saxonVersion3
@@ -867,6 +868,7 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
   tasks.register("${edition}c_python_build_debug_wheel", BuildWheel) {
     manylinuxTarget = "manylinux_2_24"
     pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
+    pythonVenvTask = branchVenvTask
     repairwheelExe = branchDebugVenvTask.map { it.venvBinHostedExe("repairwheel").get() }
     productEdition = edition
     productVersion = saxonVersion3

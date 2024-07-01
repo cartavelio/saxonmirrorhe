@@ -20,6 +20,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecResult
 
 import javax.inject.Inject
 
@@ -190,6 +191,9 @@ abstract class PythonVenv extends DefaultTask {
     @Internal
     final Provider<Directory> venvBinPath = venvPath.map { it.dir(project.pythonEnv.pythonBinDirName.get()) }
 
+    @Internal
+    def systemOs = OperatingSystem.current()
+
     @OutputFile
     final Provider<RegularFile> pythonExe = venvPath.flatMap { venvBinHostedExe("python") }
 
@@ -207,6 +211,18 @@ abstract class PythonVenv extends DefaultTask {
         buildRequirements.convention([])
     }
 
+    List<String> platformWheelFixupRequirements() {
+        if (systemOs.isLinux()) {
+            ["auditwheel"]
+        } else if (systemOs.isMacOsX()) {
+            ["delocate"]
+        } else if (systemOs.isWindows()) {
+            ["delvewheel"]
+        } else {
+            throw "Unknown Operating System"
+        }
+    }
+
     @TaskAction
     void execute() {
         logger.info("Creating Python Venv for ${branch.get()}: ${venvName.get()}")
@@ -218,11 +234,10 @@ abstract class PythonVenv extends DefaultTask {
 
         project.exec {
             executable pipExe.get().asFile.toString()
-            args("install", "--require-virtualenv", "build", "wheel", "repairwheel", "setuptools", *buildRequirements.get())
+            args("install", "--require-virtualenv", "build", "wheel", "setuptools", *platformWheelFixupRequirements(), *buildRequirements.get())
         }
     }
 }
-
 
 abstract class PythonSetup extends DefaultTask {
     @Input
@@ -420,6 +435,9 @@ abstract class BuildWheel extends DefaultTask {
     @Input
     abstract Property<String> getManylinuxTarget()
 
+    @Internal
+    abstract Property<PythonVenv> getPythonVenvTask()
+
     @InputFile
     abstract RegularFileProperty getPythonExe()
 
@@ -445,12 +463,14 @@ abstract class BuildWheel extends DefaultTask {
     @Internal
     abstract DirectoryProperty getOutputDir()
 
+    @Internal
+    def systemOs = OperatingSystem.current()
+
     @OutputDirectory
     final Provider<Directory> buildDir = outputDir.map {it.dir("build") }
 
     @Internal
     Provider<String> repairedWheelFilePlatformSuffix = pythonExe.map {python ->
-        OperatingSystem systemOs = OperatingSystem.current()
         def platform = systemOs.isLinux() ? repairedLinuxPlatform() : unrepairedPlatform()
         (new ByteArrayOutputStream()).withStream { out ->
             project.exec {
@@ -509,6 +529,9 @@ abstract class BuildWheel extends DefaultTask {
         outputDir.map { it.file(repairedWheelFilename.get()) }
     }
 
+    @Internal
+    Provider<RegularFile> inputWheel = buildDir.map {it.file("dist/${inputWheelFilename.get()}") }
+
     @TaskAction
     void build() {
         def tmpWheelDir = temporaryDir
@@ -529,12 +552,53 @@ abstract class BuildWheel extends DefaultTask {
             args "-m", "build", "--wheel"
         }
 
+        repairWheel()
+    }
+
+    ExecResult repairWheel() {
+        if (systemOs.isLinux()) {
+            repairLinux()
+        } else if (systemOs.isMacOsX()) {
+            repairMacos()
+        } else if (systemOs.isWindows()) {
+            repairWindows()
+        } else {
+            throw "Unknown Operating System"
+        }
+    }
+
+    // Linux - auditwheel
+    ExecResult repairLinux() {
         project.exec {
-            executable repairwheelExe.get()
-            args "--output-dir", outputDir.get(),
-                    "--lib-dir", libraryDir.get(),
-                    buildDir.map {it.file("dist/${inputWheelFilename.get()}") }.get()
-            println(it.commandLine)
+            workingDir buildDir.get()
+            executable pythonVenvTask.flatMap { it.venvBinHostedExe("auditwheel") }.get()
+            environment "LD_LIBRARY_PATH", libraryDir.get()
+            args "--only-plat", manylinuxTarget.get()
+            args "--plat", manylinuxTarget.get()
+            args "--wheel-dir", outputDir.get()
+            args inputWheel.get()
+        }
+    }
+
+    // MacOS - delocate
+    ExecResult repairMacos() {
+        project.exec {
+            workingDir buildDir.get()
+            executable pythonVenvTask.flatMap { it.venvBinHostedExe("delocate-wheel") }.get()
+            args "-w", outputDir.get()
+            args inputWheel.get()
+        }
+    }
+
+    // Windows - delvewheel
+    ExecResult repairWindows() {
+        project.exec {
+            workingDir buildDir.get()
+            executable pythonExe.get()
+            args "-m", "delvewheel"
+            args "repair", inputWheel.get()
+            args "--wheel-dir", outputDir.get()
+            args "--add-path", libraryDir.get()
         }
     }
 }
