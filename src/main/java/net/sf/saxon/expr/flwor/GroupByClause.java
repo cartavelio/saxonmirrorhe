@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.flwor;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
@@ -15,7 +16,6 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -373,7 +373,7 @@ public class GroupByClause extends Clause {
             }
             for (int i = 0; i < groupingValues.length; i++) {
                 try {
-                    if (!DeepEqual.deepEqual(
+                    if (!SaxonDeepEqual.deepEqual(
                         groupingValues[i].iterate(),
                         ((TupleComparisonKey) other).groupingValues[i].iterate(),
                         comparers[i], comparers[i].getContext(), 0)) {

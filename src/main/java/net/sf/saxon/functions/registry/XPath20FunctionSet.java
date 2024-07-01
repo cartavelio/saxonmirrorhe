@@ -147,7 +147,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 //                .arg(1, Type.ITEM_TYPE, STAR, null)
 //                .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("deep-equal", 2, 4, e -> e.populate(DeepEqual40::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
+        register("deep-equal", 2, 4, e -> e.populate(DeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
                 .arg(1, Type.ITEM_TYPE, STAR | ABS, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT | ABS, null)

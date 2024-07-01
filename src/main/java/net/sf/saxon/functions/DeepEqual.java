@@ -47,7 +47,7 @@ import java.util.function.Function;
  * optionally using a collation
  */
 
-public class DeepEqual40 extends CollatingFunctionFixed {
+public class DeepEqual extends CollatingFunctionFixed {
 
     public static OptionsParameter OPTION_DETAILS;
 

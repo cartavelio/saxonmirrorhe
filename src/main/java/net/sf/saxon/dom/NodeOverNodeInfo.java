@@ -7,10 +7,10 @@
 
 package net.sf.saxon.dom;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
@@ -710,16 +710,16 @@ public abstract class NodeOverNodeInfo implements Node {
         }
         try {
             XPathContext context = node.getConfiguration().getConversionContext();
-            return DeepEqual.deepEqual(
+            return SaxonDeepEqual.deepEqual(
                 SingletonIterator.makeIterator(node),
                 SingletonIterator.makeIterator(((NodeOverNodeInfo) arg).node),
                 new GenericAtomicComparer(CodepointCollator.getInstance(),
                     context),
                 context,
-                DeepEqual.INCLUDE_PREFIXES |
-                    DeepEqual.INCLUDE_COMMENTS |
-                    DeepEqual.COMPARE_STRING_VALUES |
-                    DeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS);
+                SaxonDeepEqual.INCLUDE_PREFIXES |
+                        SaxonDeepEqual.INCLUDE_COMMENTS |
+                        SaxonDeepEqual.COMPARE_STRING_VALUES |
+                        SaxonDeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS);
         } catch (XPathException err) {
             // can't happen
             return false;

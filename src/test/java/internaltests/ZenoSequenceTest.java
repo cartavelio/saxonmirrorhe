@@ -8,12 +8,12 @@
 package internaltests;
 
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.NumericComparer;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -68,7 +68,7 @@ public class ZenoSequenceTest {
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
+            assertTrue(SaxonDeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
             assertEquals(51, ((IntegerValue)chain.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -126,7 +126,7 @@ public class ZenoSequenceTest {
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain3.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
+            assertTrue(SaxonDeepEqual.deepEqual(chain3.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
             assertEquals(51, ((IntegerValue)chain3.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -156,7 +156,7 @@ public class ZenoSequenceTest {
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(sub.iterate(), new AscendingRangeIterator(41, 1, 60), comparer, context, 0));
+            assertTrue(SaxonDeepEqual.deepEqual(sub.iterate(), new AscendingRangeIterator(41, 1, 60), comparer, context, 0));
         } catch (XPathException e) {
             fail();
         }

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.testdriver;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
@@ -15,7 +16,6 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -24,7 +24,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.AdaptiveEmitter;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -817,16 +820,16 @@ public class TestOutcome {
 
             int flag = 0;
 
-            flag |= DeepEqual.INCLUDE_COMMENTS;
-            flag |= DeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS;
-            flag |= DeepEqual.EXCLUDE_VARIETY;
+            flag |= SaxonDeepEqual.INCLUDE_COMMENTS;
+            flag |= SaxonDeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS;
+            flag |= SaxonDeepEqual.EXCLUDE_VARIETY;
             if (!ignorePrefixes) {
-                flag |= DeepEqual.INCLUDE_NAMESPACES;
-                flag |= DeepEqual.INCLUDE_PREFIXES;
+                flag |= SaxonDeepEqual.INCLUDE_NAMESPACES;
+                flag |= SaxonDeepEqual.INCLUDE_PREFIXES;
             }
-            flag |= DeepEqual.COMPARE_STRING_VALUES;
+            flag |= SaxonDeepEqual.COMPARE_STRING_VALUES;
             if (debug) {
-                flag |= DeepEqual.WARNING_IF_FALSE;
+                flag |= SaxonDeepEqual.WARNING_IF_FALSE;
             }
             try {
                 SequenceIterator iter0;
@@ -844,7 +847,7 @@ public class TestOutcome {
                 SequenceIterator iter1 = expected.axisIterator(Axis.CHILD).next()
                         .getUnderlyingValue().iterateAxis(AxisInfo.CHILD);
                 GroundedValue val1 = SequenceTool.toGroundedValue(iter1);
-                boolean success = DeepEqual.deepEqual(
+                boolean success = SaxonDeepEqual.deepEqual(
                     val0.iterate(), val1.iterate(),
                     new GenericAtomicComparer(CodepointCollator.getInstance(), null),
                     assertXpc.getProcessor().getUnderlyingConfiguration().getConversionContext(), flag);
@@ -856,11 +859,11 @@ public class TestOutcome {
                     // need to filter that out ourselves
                     iter0 = new ItemMappingIterator(iter0, new RemoveWhitespace());
                     iter1 = new ItemMappingIterator(iter1, new RemoveWhitespace());
-                    success = DeepEqual.deepEqual(
+                    success = SaxonDeepEqual.deepEqual(
                         iter0, iter1,
                         new GenericAtomicComparer(CodepointCollator.getInstance(), null),
                         assertXpc.getProcessor().getUnderlyingConfiguration().getConversionContext(),
-                        flag | DeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES);
+                        flag | SaxonDeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES);
                     if (success) {
                         comment = "OK after ignoring whitespace text";
                     }

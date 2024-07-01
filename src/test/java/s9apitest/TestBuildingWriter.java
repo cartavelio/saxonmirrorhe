@@ -1,7 +1,7 @@
 package s9apitest;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ public class TestBuildingWriter {
                 String ref = "<ns0:out xmlns:ns0=\"http://outer/\" data=\"3\"><ns0:br/><ns1:br xmlns:ns1=\"http://inner/\" style=\"bold\"/></ns0:out>";
                 DocumentBuilder db = proc.newDocumentBuilder();
                 XdmNode expected = db.build(new StreamSource(new StringReader(ref)));
-                assertNull(DeepEqual.deepEquals(
+                assertNull(SaxonDeepEqual.deepEquals(
                         actual.getUnderlyingNode(),
                         expected.getUnderlyingNode(),
                         CodepointCollatingComparer.getInstance(),
