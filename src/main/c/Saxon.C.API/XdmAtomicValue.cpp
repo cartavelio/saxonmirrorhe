@@ -18,6 +18,11 @@ XdmAtomicValue::XdmAtomicValue(int64_t obj, const char *ty) : XdmItem(obj) {
 }
 
 XdmAtomicValue::~XdmAtomicValue() {
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "~XdmAtomicValue destructor called:" << refCount
+              << " ob ref=" << (this) << "value =" << ((long)value)
+              << std::endl;
+  }
   if (getRefCount() < 1) {
     if (!valType.empty()) {
       valType.clear();
