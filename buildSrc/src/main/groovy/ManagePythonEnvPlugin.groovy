@@ -242,6 +242,9 @@ abstract class PythonSetup extends DefaultTask {
     @OutputDirectory
     final Provider<Directory> packageDir = outputDir.map { it }
 
+    @OutputFile
+    final Provider<RegularFile> requirementsTxtFile = outputDir.map { it.file("requirements.txt") }
+
     @Internal
     def systemOs = OperatingSystem.current()
 
