@@ -1,6 +1,6 @@
 package s9apitest;
 
-import com.saxonica.functions.extfn.SaxonDeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
