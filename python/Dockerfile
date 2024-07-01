@@ -126,7 +126,6 @@ RUN sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #RUN pyenv install /opt/saxonica/python-build/3.12.2-valgrind && \
 #    sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-VOLUME /opt/saxonica/user-scripts
 VOLUME /opt/saxonica/pyenv/versions
 VOLUME /opt/saxonica/pyenv/shims
 

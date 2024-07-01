@@ -902,6 +902,7 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
   }
 
   tasks.register("${edition}c_python_build_wheel", BuildWheel) {
+    manylinuxTarget = "manylinux_2_24"
     pythonExe = tasks.named("branchVenv").map { it.pythonExe.get() }
     repairwheelExe = tasks.named("branchVenv").map { it.venvBinHostedExe("repairwheel").get() }
     productEdition = edition

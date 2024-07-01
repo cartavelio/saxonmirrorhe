@@ -9,7 +9,6 @@ services:
         GID: "${GID}"
     volumes:
       - ../:/opt/saxonica/saxondev
-      - ../../user-scripts:/opt/saxonica/user-scripts
       - gradle:/opt/saxonica/gradle
       - pyenv-versions:/opt/saxonica/pyenv/versions
       - pyenv-shims:/opt/saxonica/pyenv/shims
