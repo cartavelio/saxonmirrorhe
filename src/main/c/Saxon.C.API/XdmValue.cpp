@@ -95,19 +95,19 @@ XdmValue::XdmValue(int64_t val, bool arr) {
     }
     if (typeRef == XDM_ATOMIC_VALUE) {
 
-      addXdmItem(new XdmAtomicValue(results[p]));
+      addXdmItemFromUnderlyingValue(new XdmAtomicValue(results[p]));
 
     } else if (typeRef == XDM_NODE) {
 
-      addXdmItem(new XdmNode(results[p]));
+      addXdmItemFromUnderlyingValue(new XdmNode(results[p]));
 
     } else if (typeRef == XDM_ARRAY) {
-      addXdmItem(new XdmArray(results[p]));
+      addXdmItemFromUnderlyingValue(new XdmArray(results[p]));
     } else if (typeRef == XDM_MAP) {
-      addXdmItem(new XdmMap(results[p]));
+      addXdmItemFromUnderlyingValue(new XdmMap(results[p]));
 
     } else if (typeRef == XDM_FUNCTION_ITEM) {
-      addXdmItem(new XdmFunctionItem(results[p]));
+      addXdmItemFromUnderlyingValue(new XdmFunctionItem(results[p]));
     } else {
       std::cerr << "Error creating XdmValue from array" << std::endl;
     }
@@ -134,7 +134,6 @@ void XdmValue::resetRelinquishedItems(){
 }
 
 XdmValue::~XdmValue() {
-
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmValue destructor called:" << refCount
               << " ob ref=" << (this)  << std::endl;
@@ -168,7 +167,7 @@ XdmValue::~XdmValue() {
           std::cerr << "XdmValue j_handles_destroy" << std::endl;
         }
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
-    jValues = -1;
+    jValues = SXN_UNSET;
   }
 
   xdmSize = 0;
@@ -180,8 +179,13 @@ XdmValue::~XdmValue() {
 }
 
 void XdmValue::addXdmItem(XdmItem *val) {
-
   if (val != nullptr) {
+    int xdmItemIndex = addXdmItemToValue(val);
+    relinquished_values[xdmItemIndex] = (char)1;
+  }
+}
+
+int XdmValue::addXdmItemToValue(XdmItem *val) {
     if (values == nullptr) {
       values_cap = 1;
       values = new XdmItem *[values_cap];
@@ -209,15 +213,26 @@ void XdmValue::addXdmItem(XdmItem *val) {
     values[xdmSize] = val;
     // values.push_back(val);
     // val->incrementRefCount();
+    int addedItemIndex = xdmSize;
     xdmSize++;
-    if (jValues >= 0) {
-      jValues = SXN_UNSET; // TODO clear Graalvm reference from ObjectHandles pool or block user add item if set via jValues
+    if (jValues > 0) {
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr << "XdmValue j_handles_destroy" << std::endl;
+        }
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
+        jValues = SXN_UNSET;
     }
     if (toStringValue != nullptr) {
       operator delete(toStringValue);
       toStringValue = nullptr;
     }
-  }
+    return addedItemIndex;
+}
+
+void XdmValue::addXdmItemFromUnderlyingValue(XdmItem *val) {
+    if (val != nullptr) {
+        addXdmItemToValue(val);
+    }
 }
 
 void XdmValue::addUnderlyingValue(int64_t val) {
@@ -259,9 +274,7 @@ void XdmValue::incrementRefCountForRelinquishedValue(int i){
       std::cerr << "refCount-inc-relinquished-xdmVal=" << refCount << " ob ref=" << (this)
                 << std::endl;
     }
-
   }
-
 }
 
 void XdmValue::decrementRefCount() {
@@ -313,13 +326,13 @@ int64_t XdmValue::getUnderlyingValue() {
 }
 
 void XdmValue::releaseXdmValue() {
-  for (int i = 0; i < xdmSize; i++) {
-    if (values[i] != nullptr) {
-      delete values[i];
-    }
-  }
-
-  jValues = SXN_UNSET;
+//  for (int i = 0; i < xdmSize; i++) {
+//    if (values[i] != nullptr) {
+//      delete values[i];
+//    }
+//  }
+//
+//  jValues = SXN_UNSET;
 }
 
 XdmItem *XdmValue::itemAt(int n) {

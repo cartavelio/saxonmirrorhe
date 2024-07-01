@@ -101,10 +101,11 @@ public:
    */
   virtual ~XdmValue();
 
-  //! Delete the XdmValue object and clean up all items in the sequence. Release
-  //! the underlying JNI object
+  //! This is deprecated and a no-op, C++ destructor handles this case. Delete
+  //! the XdmValue object and clean up all items in the sequence. Release
+  //! the underlying JNI object.
   /*
-   *
+   *! @deprecated
    */
   void releaseXdmValue();
 
@@ -218,6 +219,9 @@ private:
                           available */
   int64_t jValues;     /*!< If this XdmValue is a sequence we store values as an
                           ProcessorDataAccumulator object  */
+
+  int addXdmItemToValue(XdmItem *val);
+  void addXdmItemFromUnderlyingValue(XdmItem *val);
 };
 
 #endif /** SAXON_XDMVALUE_H **/
