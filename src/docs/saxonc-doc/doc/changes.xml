@@ -166,16 +166,19 @@
                <code>XdmNode</code> class in the C++, Python and PHP APIs.</li>
             <li>The <code>clearXslMessages()</code> method has been added to the
                <code>XsltExecutable</code> class in the C++, Python and PHP APIs.</li>
-            <li>The <code>PyXdmFunctionItem.get_system_function(...)</code> method is now defined as
-               a static method on the class, instead of as an instance method.
+            <li>Breaking changes have been made to the <code>PyXdmFunctionItem</code> methods
+               <code>get_system_function()</code> and <code>call()</code>. The
+               <code>PyXdmFunctionItem.get_system_function()</code> method is now defined as
+               a static method on the class, instead of an instance method.
                This is a breaking change to maintain consistency with the C++ API, which requires a user to
-            change their code accordingly. See the following code snippet as an example of the new code:
+               change their code accordingly. See the following code snippet as an example of the new code:
                <pre><code class="language-python"><![CDATA[  PyXdmFunctionItem.get_system_function(saxonproc,
-    '{http://www.w3.org/2005/xpath-functions}parse-json', 1)  ]]></code></pre></li>
-            <li>Along side the <code>PyXdmFunctionItem.get_system_function(...)</code> we have decided to remove the
-               <code>PySaxonProcessor</code> from the python method <code>PyXdmFunctionItem.call(str name, arity, encoding=None)</code>.
-            This is because the <code>PyXdmFunctionItem</code> object already contains the <ocde>PySaxonProcessor</ocde> object internally
-               therefore passing it as an argument is not necessary.</li>
+    '{http://www.w3.org/2005/xpath-functions}parse-json', 1)  ]]></code></pre>
+               Meanwhile, the argument supplying the <code>PySaxonProcessor</code> has been removed
+               for the <code>call()</code> method. This is because the
+               <code>PyXdmFunctionItem</code> object already contains the
+               <code>PySaxonProcessor</code> object internally therefore passing it as an argument
+               is not necessary.</li>
             <li>The <code>PyXdmValue</code> class constructor now requires the
                <code>PySaxonProcessor</code> instance as an argument to create an empty sequence.
                For example, <code>xdm_value = PyXdmValue(saxonproc)</code>, where the
