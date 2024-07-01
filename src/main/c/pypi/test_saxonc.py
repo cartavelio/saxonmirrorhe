@@ -868,7 +868,7 @@ def testParseJsonFunction(saxonproc):
     json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
 
 
-    parse_json_fn = PyXdmFunctionItem().get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
+    parse_json_fn = PyXdmFunctionItem(saxonproc).get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
 
     try:
         parsed_json1 = parse_json_fn.call(saxonproc, [saxonproc.make_string_value(json1, encoding="UTF-8")])
@@ -936,7 +936,7 @@ def test_CallTemplateWithResultValidation(data_dir):
         print("Error: ", err)
 
 def testEmptyXdmValueToString(saxonproc):
-        xdm_value = PyXdmValue()
+        xdm_value = PyXdmValue(saxonproc)
 
         print(xdm_value)
 
@@ -994,13 +994,13 @@ def testEmptySequenceXdmValue2(saxonproc):
     xp = saxonproc.new_xpath_processor()
     xp.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
     xp.declare_variable('p')
-    xdm_value = PyXdmValue()
+    xdm_value = PyXdmValue(saxonproc)
     xp.set_parameter('p', xdm_value)
     assert xp.effective_boolean_value("fn:empty($p)")
 
 
 def testXdmValueToString(saxonproc):
-        xdm_value = PyXdmValue()
+        xdm_value = PyXdmValue(saxonproc)
 
         xdm_value.add_xdm_item(saxonproc.make_string_value('foo'))
 
@@ -1012,7 +1012,7 @@ def testXdmValueToString(saxonproc):
         assert True
 
 def testXdmValueToString2(saxonproc):
-        xdm_value = PyXdmValue()
+        xdm_value = PyXdmValue(saxonproc)
         avalue = saxonproc.make_string_value('foo')
         xdm_value.add_xdm_item(avalue)
 

@@ -351,7 +351,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyDocumentBuilder: a newly created PyDocumentBuilder
         """
-        cdef PyDocumentBuilder val = PyDocumentBuilder()
+        cdef PyDocumentBuilder val = PyDocumentBuilder(self)
         val.thisdbptr = self.thisptr.newDocumentBuilder()
         return val
 
@@ -362,7 +362,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyXslt30Processor: a newly created PyXslt30Processor
         """
-        cdef PyXslt30Processor val = PyXslt30Processor()
+        cdef PyXslt30Processor val = PyXslt30Processor(self)
         val.thisxptr = self.thisptr.newXslt30Processor()
         return val
     def new_xquery_processor(self):
@@ -372,7 +372,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyXQueryProcessor: a newly created PyXQueryProcessor
         """
-        cdef PyXQueryProcessor val = PyXQueryProcessor()
+        cdef PyXQueryProcessor val = PyXQueryProcessor(self)
         val.thisxqptr = self.thisptr.newXQueryProcessor()
         return val
     def new_xpath_processor(self):
@@ -382,7 +382,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyXPathProcessor: a newly created XPathProcessor
         """
-        cdef PyXPathProcessor val = PyXPathProcessor()
+        cdef PyXPathProcessor val = PyXPathProcessor(self)
         val.thisxpptr = self.thisptr.newXPathProcessor()
         return val
     def new_schema_validator(self):
@@ -393,7 +393,7 @@ cdef class PySaxonProcessor:
         Returns:
             PySchemaValidator: a newly created PySchemaValidator
         """
-        cdef PySchemaValidator val = PySchemaValidator()
+        cdef PySchemaValidator val = PySchemaValidator(self)
         val.thissvptr = self.thisptr.newSchemaValidator()
         if val.thissvptr is NULL:
             raise Exception("Error: Saxon Processor is not licensed for schema processing!")
@@ -469,7 +469,7 @@ cdef class PySaxonProcessor:
             py_encoding_string = encoding.encode('UTF-8') if encoding is not None else None
             c_encoding_str_ = py_encoding_string if value is not None else ""
 
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeStringValue(c_str_, c_encoding_str_)
         val.thisvptr.incrementRefCount()
 
@@ -484,7 +484,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyXdmAtomicValue: The corresponding XDM value which is a BigIntegerValue or Int64Value as appropriate
         """
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeIntegerValue(value)
         return val
     def make_double_value(self, value):
@@ -496,7 +496,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyXdmAtomicValue: The corresponding XDM value
         """
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeDoubleValue(value)
         return val
     def make_float_value(self, value):
@@ -508,7 +508,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyXdmAtomicValue: The corresponding XDM value
         """
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeFloatValue(value)
         return val
     def make_long_value(self, value):
@@ -520,7 +520,7 @@ cdef class PySaxonProcessor:
         Returns:
             PyXdmAtomicValue: The corresponding XDM value
         """
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeLongValue(value)
         return val
     def make_boolean_value(self, value):
@@ -533,7 +533,7 @@ cdef class PySaxonProcessor:
             PyXdmAtomicValue: The corresponding XDM value
         """
         cdef bool c_b = value
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeBooleanValue(c_b)
         return val
     def make_qname_value(self, str_, encoding=None):
@@ -550,7 +550,7 @@ cdef class PySaxonProcessor:
             encoding = sys.getdefaultencoding()
         py_value_string = str_.encode(encoding) if str_ is not None else None
         cdef char * c_str_ = py_value_string if str_ is not None else ""
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeQNameValue(c_str_)
         return val
     def make_atomic_value(self, value_type, value, encoding=None):
@@ -569,7 +569,7 @@ cdef class PySaxonProcessor:
             encoding = sys.getdefaultencoding()
         py_valueType_string = value_type.encode(encoding) if value_type is not None else None
         cdef char * c_valueType_string = py_valueType_string if value_type is not None else ""
-        cdef PyXdmAtomicValue val = PyXdmAtomicValue()
+        cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeAtomicValue(c_valueType_string, value)
         if val.derivedaptr == NULL:
             del val
@@ -620,7 +620,7 @@ cdef class PySaxonProcessor:
             raise Exception("Argument value at position " , x , " is not of type PyXdmValue. The following object found: ", type(values[x]))
           argumentV[x].incrementRefCount()
 
-        newArray_ = PyXdmArray()
+        newArray_ = PyXdmArray(self)
         newArray_.derivedaaptr = newArray_.derivedfptr = newArray_.derivedptr = newArray_.thisvptr =  self.thisptr.makeArray(argumentV, len_)
         if len_ > 0:
             self.thisptr.deleteXdmValueArray(argumentV, len_)
@@ -682,7 +682,7 @@ cdef class PySaxonProcessor:
         if len_ == 0:
             return None
 
-        newMap_ = PyXdmMap()
+        newMap_ = PyXdmMap(self)
         newMap_.derivedmmptr = newMap_.derivedfptr = newMap_.derivedptr = newMap_.thisvptr =  self.thisptr.makeMap3(c_keys, c_values, len_)
         if len_ > 0:
             self.thisptr.deleteXdmAtomicValueArray(c_keys, len_)
@@ -746,7 +746,7 @@ cdef class PySaxonProcessor:
         if len(dataMap) == 0:
             return None
 
-        newMap_ = PyXdmMap()
+        newMap_ = PyXdmMap(self)
         newMap_.derivedmmptr = newMap_.derivedfptr = newMap_.derivedptr = newMap_.thisvptr =  self.thisptr.makeMap2(c_dataMap)
         if newMap_.derivedmmptr == NULL:
             return None
@@ -848,7 +848,7 @@ cdef class PySaxonProcessor:
           c_xml_string = py_text_string if py_value is not None else ""
           if c_xml_string == NULL:
               raise Exception("Error converting XML text")
-          val = PyXdmNode()
+          val = PyXdmNode(self)
 
           val.derivednptr =  val.derivedptr = val.thisvptr =self.thisptr.parseXmlFromString(c_xml_string, c_encoding_string, NULL)
 
@@ -865,7 +865,7 @@ cdef class PySaxonProcessor:
           '''c_xml_string = make_c_str(py_value)'''
           py_value_string = py_value.encode('UTF-8') if py_value is not None else None
           c_xml_string = py_value_string if py_value is not None else ""
-          val = PyXdmNode()
+          val = PyXdmNode(self)
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisptr.parseXmlFromFile(c_xml_string, NULL)
           val.derivednptr.incrementRefCount()
           if val.derivednptr is NULL:
@@ -875,7 +875,7 @@ cdef class PySaxonProcessor:
           py_value = kwds["xml_uri"]
           py_uri_string = py_value.encode('UTF-8') if py_value is not None else None
           c_xml_string = py_uri_string if py_value is not None else ""
-          val = PyXdmNode()
+          val = PyXdmNode(self)
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisptr.parseXmlFromUri(c_xml_string, NULL)
           if val.derivednptr is NULL:
               return None
@@ -921,7 +921,7 @@ cdef class PySaxonProcessor:
           c_json_string = py_text_string if py_value is not None else ""
           if c_json_string == NULL:
               raise Exception("Error converting JSON text")
-          val = PyXdmValue()
+          val = PyXdmValue(self)
           val.thisvptr = self.thisptr.parseJsonFromString(c_json_string, c_encoding_string if encoding is not None else NULL)
           if val.thisvptr is NULL:
               return None
@@ -931,7 +931,7 @@ cdef class PySaxonProcessor:
           py_value  = kwds["json_file_name"]
           py_value_string = py_value.encode('UTF-8') if py_value is not None else None
           c_json_string = py_value_string if py_value is not None else ""
-          val = PyXdmValue()
+          val = PyXdmValue(self)
           val.thisvptr = self.thisptr.parseJsonFromFile(c_json_string)
           if val.thisvptr is NULL:
               return None
@@ -979,6 +979,7 @@ cdef class PyDocumentBuilder:
     This class has no public constructor. To construct a PyDocumentBuilder, use the factory method
     PySaxonProcessor.new_document_builder().
     """
+    cdef PySaxonProcessor processor
     cdef saxoncClasses.DocumentBuilder *thisdbptr      # hold a C++ instance which we're wrapping
     def __cinit__(self):
        """Default constructor """
@@ -986,6 +987,13 @@ cdef class PyDocumentBuilder:
     def __dealloc__(self):
        if self.thisdbptr != NULL:
           del self.thisdbptr
+
+    def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
 
     @property
     def line_numbering(self):
@@ -1053,7 +1061,7 @@ cdef class PyDocumentBuilder:
        Returns:
            PySchemaValidator: if one has been set; otherwise None.
        """
-       cdef PySchemaValidator val = PySchemaValidator()
+       cdef PySchemaValidator val = PySchemaValidator(self.processor)
        val.thissvptr = self.thisdbptr.getSchemaValidator()
        if val.thissvptr is NULL:
            raise Exception("Error: Saxon Processor is not licensed for schema processing!")
@@ -1121,7 +1129,7 @@ cdef class PyDocumentBuilder:
           py_value = kwds["xml_text"]
           py_xml_text_string = py_value.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_value is not None else None
           c_xml_string = py_xml_text_string if py_value is not None else ""
-          val = PyXdmNode()
+          val = PyXdmNode(self.processor)
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromString(c_xml_string, c_encoding_string)
           val.derivednptr.incrementRefCount()
           return val
@@ -1131,7 +1139,7 @@ cdef class PyDocumentBuilder:
           '''if py_filename_string  is None or isfile(py_filename_string) == False:
             raise Exception("XML file does not exist")'''
           c_xml_string = py_filename_string if py_value is not None else ""
-          val = PyXdmNode()
+          val = PyXdmNode(self.processor)
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromFile(c_xml_string)
           val.derivednptr.incrementRefCount()
           return val
@@ -1139,7 +1147,7 @@ cdef class PyDocumentBuilder:
           py_value = kwds["xml_uri"]
           py_uri_string = py_value.encode('UTF-8') if py_value is not None else None
           c_xml_string = py_uri_string if py_value is not None else ""
-          val = PyXdmNode()
+          val = PyXdmNode(self.processor)
           val.derivednptr = val.derivedptr = val.thisvptr = self.thisdbptr.parseXmlFromUri(c_xml_string)
           val.derivednptr.incrementRefCount()
           return val
@@ -1154,6 +1162,7 @@ parametersDict = None
 cdef class PyXslt30Processor:
      """A PyXslt30Processor represents a factory to compile, load and execute stylesheets.
      It is possible to cache the context and the stylesheet in the PyXslt30Processor. """
+     cdef PySaxonProcessor processor
      cdef saxoncClasses.Xslt30Processor *thisxptr      # hold a C++ instance which we're wrapping
 
      def __cinit__(self):
@@ -1162,6 +1171,15 @@ cdef class PyXslt30Processor:
      def __dealloc__(self):
         if self.thisxptr != NULL:
            del self.thisxptr
+
+     def __init__(self, processor):
+        """
+        Creates a new PyXslt30Processor, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
+
+
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
@@ -1234,7 +1252,7 @@ cdef class PyXslt30Processor:
             encoding = sys.getdefaultencoding()
         py_name_string = name.encode(encoding) if name is not None else None
         cdef char * c_name = py_name_string if name is not None else ""
-        cdef PyXdmValue val = PyXdmValue()
+        cdef PyXdmValue val = PyXdmValue(self.processor)
         val.thisvptr = self.thisxptr.getParameter(c_name)
         return val
      def remove_parameter(self, name, encoding=None):
@@ -1412,7 +1430,7 @@ cdef class PyXslt30Processor:
             py__string = py_stylesheet_string.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_stylesheet_string is not None else None
             c_stylesheet = py__string if py_stylesheet_string is not None else ""
 
-            executable = PyXsltExecutable()
+            executable = PyXsltExecutable(self.processor)
             cexecutable =  self.thisxptr.compileFromString(c_stylesheet, c_encoding_string)
             if cexecutable is NULL:
                 return None
@@ -1429,7 +1447,7 @@ cdef class PyXslt30Processor:
               raise Exception("Stylesheet file does not exist: "+ py_stylesheet_string)
             c_stylesheet = make_c_str(py_stylesheet_string)'''
 
-            executable = PyXsltExecutable()
+            executable = PyXsltExecutable(self.processor)
             cexecutable =  self.thisxptr.compileFromFile(c_stylesheet)
             if cexecutable is NULL:
                 return None
@@ -1444,7 +1462,7 @@ cdef class PyXslt30Processor:
             py__string = py_stylesheet_string.encode('UTF-8') if py_stylesheet_string is not None else None
             c_stylesheet = py__string if py_stylesheet_string is not None else ""
 
-            executable = PyXsltExecutable()
+            executable = PyXsltExecutable(self.processor)
             cexecutable =  self.thisxptr.compileFromAssociatedFile(c_stylesheet)
             if cexecutable is NULL:
                 return None
@@ -1455,7 +1473,7 @@ cdef class PyXslt30Processor:
             #if not isinstance(py_value, PyXdmNode):
               #raise Exception("stylesheet_node keyword argument is not of type PyXdmNode")
             #value = PyXdmNode(py_value)
-            executable = PyXsltExecutable()
+            executable = PyXsltExecutable(self.processor)
             cexecutable =  self.thisxptr.compileFromXdmNode(py_xdmNode.derivednptr)
             if cexecutable is NULL:
                 return None
@@ -1606,27 +1624,27 @@ cdef class PyXslt30Processor:
             return None
         cdef type_ = xdmValue.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
-            aval = PyXdmAtomicValue()
+            aval = PyXdmAtomicValue(self.processor)
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             return aval
         elif type_ == XdmType.XDM_NODE:
-            nval = PyXdmNode()
+            nval = PyXdmNode(self.processor)
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-            fval = PyXdmFunctionItem()
+            fval = PyXdmFunctionItem(self.processor)
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             return fval
         elif type_ == XdmType.XDM_MAP:
-            mval = PyXdmMap()
+            mval = PyXdmMap(self.processor)
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             return mval
         elif type_ == XdmType.XDM_ARRAY:
-            aaval = PyXdmArray()
+            aaval = PyXdmArray(self.processor)
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             return aaval
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             return val
 
@@ -1680,13 +1698,23 @@ cdef class PyXslt30Processor:
 cdef class PyXsltExecutable:
      """A PyXsltExecutable represents the compiled form of a stylesheet.
      A PyXsltExecutable is created by using one of the compile methods on the PyXslt30Processor class. """
+     cdef PySaxonProcessor processor
      cdef saxoncClasses.XsltExecutable *thisxptr      # hold a C++ instance which we're wrapping
+
      def __cinit__(self):
         """Default constructor """
         self.thisxptr = NULL
      def __dealloc__(self):
         if self.thisxptr != NULL:
            del self.thisxptr
+
+     def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
+
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
@@ -1707,7 +1735,7 @@ cdef class PyXsltExecutable:
          Returns:
              PyXsltExecutable: copy of this object
          """
-         cdef PyXsltExecutable executable = PyXsltExecutable()
+         cdef PyXsltExecutable executable = PyXsltExecutable(self.processor)
          executable.thisxptr = self.thisxptr.clone()
          return executable
 
@@ -1902,7 +1930,7 @@ cdef class PyXsltExecutable:
          cdef str key_str
          while(it != c_dataMap.end()):
              c_xdmNode =  dereference(it).second
-             nval = PyXdmValue()
+             nval = PyXdmValue(self.processor)
              nval.thisvptr = <saxoncClasses.XdmValue*>c_xdmNode
              nval.thisvptr.incrementRefCount()
              key_str = make_py_str(dereference(it).first.c_str())
@@ -1926,7 +1954,7 @@ cdef class PyXsltExecutable:
         if xdmValue is NULL:
             return None
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             xdmValue.incrementRefCount()
             return val
@@ -2000,7 +2028,7 @@ cdef class PyXsltExecutable:
         '''make_c_str(name)'''
         py_string_string = name.encode('utf-8') if name is not None else None
         c_name = py_string_string if name is not None else ""
-        cdef PyXdmValue val = PyXdmValue()
+        cdef PyXdmValue val = PyXdmValue(self.processor)
         val.thisvptr = self.thisxptr.getParameter(c_name)
         return val
      def remove_parameter(self, name):
@@ -2344,32 +2372,32 @@ cdef class PyXsltExecutable:
             return None
         cdef type_ = xdmValue.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
-            aval = PyXdmAtomicValue()
+            aval = PyXdmAtomicValue(self.processor)
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             aval.thisvptr.incrementRefCount()
             return aval
         elif type_ == XdmType.XDM_NODE:
-            nval = PyXdmNode()
+            nval = PyXdmNode(self.processor)
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             nval.thisvptr.incrementRefCount()
             return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-            fval = PyXdmFunctionItem()
+            fval = PyXdmFunctionItem(self.processor)
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
         elif type_ == XdmType.XDM_MAP:
-            mval = PyXdmMap()
+            mval = PyXdmMap(self.processor)
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
         elif type_ == XdmType.XDM_ARRAY:
-            aaval = PyXdmArray()
+            aaval = PyXdmArray(self.processor)
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
             return aaval
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             xdmValue.incrementRefCount()
             return val
@@ -2453,32 +2481,32 @@ cdef class PyXsltExecutable:
             return None
         cdef type_ = xdmValue.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
-            aval = PyXdmAtomicValue()
+            aval = PyXdmAtomicValue(self.processor)
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             aval.thisvptr.incrementRefCount()
             return aval
         elif type_ == XdmType.XDM_NODE:
-            nval = PyXdmNode()
+            nval = PyXdmNode(self.processor)
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             nval.thisvptr.incrementRefCount()
             return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-            fval = PyXdmFunctionItem()
+            fval = PyXdmFunctionItem(self.processor)
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
         elif type_ == XdmType.XDM_MAP:
-            mval = PyXdmMap()
+            mval = PyXdmMap(self.processor)
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
         elif type_ == XdmType.XDM_ARRAY:
-            aaval = PyXdmArray()
+            aaval = PyXdmArray(self.processor)
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
             return aaval
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             return val
      def apply_templates_returning_string(self, **kwds):
@@ -2678,30 +2706,30 @@ cdef class PyXsltExecutable:
             return None
         cdef type_ = xdmValue.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
-            aval = PyXdmAtomicValue()
+            aval = PyXdmAtomicValue(self.processor)
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             return aval
         elif type_ == XdmType.XDM_NODE:
-            nval = PyXdmNode()
+            nval = PyXdmNode(self.processor)
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-            fval = PyXdmFunctionItem()
+            fval = PyXdmFunctionItem(self.processor)
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
         elif type_ == XdmType.XDM_MAP:
-            mval = PyXdmMap()
+            mval = PyXdmMap(self.processor)
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
         elif type_ == XdmType.XDM_ARRAY:
-            aaval = PyXdmArray()
+            aaval = PyXdmArray(self.processor)
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
             return aaval
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             return val
      def call_template_returning_string(self, str template_name=None, **kwds):
@@ -2853,30 +2881,30 @@ cdef class PyXsltExecutable:
           return None
         cdef type_ = xdmValue.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
-          aval = PyXdmAtomicValue()
+          aval = PyXdmAtomicValue(self.processor)
           aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
           return aval
         elif type_ == XdmType.XDM_NODE:
-          nval = PyXdmNode()
+          nval = PyXdmNode(self.processor)
           nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
           return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-            fval = PyXdmFunctionItem()
+            fval = PyXdmFunctionItem(self.processor)
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
         elif type_ == XdmType.XDM_MAP:
-            mval = PyXdmMap()
+            mval = PyXdmMap(self.processor)
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
         elif type_ == XdmType.XDM_ARRAY:
-            aaval = PyXdmArray()
+            aaval = PyXdmArray(self.processor)
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
             return aaval
         else:
-          val = PyXdmValue()
+          val = PyXdmValue(self.processor)
           val.thisvptr = xdmValue
           return val
      def call_function_returning_string(self, str function_name, list args, **kwds):
@@ -3040,7 +3068,9 @@ cdef class PyXsltExecutable:
 
 cdef class PyXQueryProcessor:
      """A PyXQueryProcessor represents a factory to compile, load and execute queries. """
+     cdef PySaxonProcessor processor
      cdef saxoncClasses.XQueryProcessor *thisxqptr      # hold a C++ instance which we're wrapping
+
      def __cinit__(self):
         """
         __cinit__(self)
@@ -3053,6 +3083,12 @@ cdef class PyXQueryProcessor:
         """
         if self.thisxqptr != NULL:
            del self.thisxqptr
+     def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
      def set_context(self, ** kwds):
         """
         set_context(self, **kwds)
@@ -3254,30 +3290,30 @@ cdef class PyXQueryProcessor:
             return None
         cdef type_ = xdmValue.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
-            aval = PyXdmAtomicValue()
+            aval = PyXdmAtomicValue(self.processor)
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
             return aval
         elif type_ == XdmType.XDM_NODE:
-            nval = PyXdmNode()
+            nval = PyXdmNode(self.processor)
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
             return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-            fval = PyXdmFunctionItem()
+            fval = PyXdmFunctionItem(self.processor)
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
             fval.thisvptr.incrementRefCount()
             return fval
         elif type_ == XdmType.XDM_MAP:
-            mval = PyXdmMap()
+            mval = PyXdmMap(self.processor)
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
             mval.thisvptr.incrementRefCount()
             return mval
         elif type_ == XdmType.XDM_ARRAY:
-            aaval = PyXdmArray()
+            aaval = PyXdmArray(self.processor)
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
             aaval.thisvptr.incrementRefCount()
             return aaval
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             val.thisvptr.incrementRefCount()
             return val
@@ -3514,7 +3550,9 @@ cdef class PyXQueryProcessor:
 
 cdef class PyXPathProcessor:
      """A PyXPathProcessor represents a factory to compile, load and execute XPath expressions. """
+     cdef PySaxonProcessor processor
      cdef saxoncClasses.XPathProcessor *thisxpptr      # hold a C++ instance which we're wrapping
+
      def __cinit__(self):
         """
         __cinit__(self)
@@ -3527,6 +3565,14 @@ cdef class PyXPathProcessor:
         """
         if self.thisxpptr != NULL:
            del self.thisxpptr
+
+     def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
+
      def evaluate(self, xpath_str, encoding = None):
         """
         evaluate(self, xpath_str)
@@ -3554,7 +3600,7 @@ cdef class PyXPathProcessor:
         if xdmValue == NULL:
             return None
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             val.thisvptr.incrementRefCount()
             return val
@@ -3594,32 +3640,32 @@ cdef class PyXPathProcessor:
             return None
         cdef type_ = xdmItem.getType()
         if type_ == XdmType.XDM_ATOMIC_VALUE:
-            aval = PyXdmAtomicValue()
+            aval = PyXdmAtomicValue(self.processor)
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
             aval.derivedptr.incrementRefCount()
             return aval
         elif type_ == XdmType.XDM_NODE:
-            val = PyXdmNode()
+            val = PyXdmNode(self.processor)
             val.derivednptr = val.derivedptr = val.thisvptr = <saxoncClasses.XdmNode*>xdmItem
             val.derivedptr.incrementRefCount()
             return val
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-            fval = PyXdmFunctionItem()
+            fval = PyXdmFunctionItem(self.processor)
             fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
             fval.thisvptr.incrementRefCount()
             return fval
         elif type_ == XdmType.XDM_MAP:
-            mval = PyXdmMap()
+            mval = PyXdmMap(self.processor)
             mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
             mval.thisvptr.incrementRefCount()
             return mval
         elif type_ == XdmType.XDM_ARRAY:
-            aaval = PyXdmArray()
+            aaval = PyXdmArray(self.processor)
             aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
             aaval.thisvptr.incrementRefCount()
             return aaval
         else:
-            val = PyXdmItem()
+            val = PyXdmItem(self.processor)
             val.derivedptr = val.thisvptr = xdmItem
             val.derivedptr.incrementRefCount()
             return val
@@ -3935,12 +3981,22 @@ cdef class PyXPathProcessor:
 cdef class PySchemaValidator:
      """A PySchemaValidator represents a factory for validating instance documents against a schema."""
 
+     cdef PySaxonProcessor processor
      cdef saxoncClasses.SchemaValidator *thissvptr      # hold a C++ instance which we're wrapping
+
      def __cinit__(self):
         self.thissvptr = NULL
      def __dealloc__(self):
         if self.thissvptr != NULL:
            del self.thissvptr
+
+     def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
+
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
@@ -4083,7 +4139,7 @@ cdef class PySchemaValidator:
         if xdmNode == NULL:
             return None
         else:
-            val = PyXdmNode()
+            val = PyXdmNode(self.processor)
             val.derivednptr = val.derivedptr = val.thisvptr =  xdmNode
             return val
      def set_source_node(self, PyXdmNode source):
@@ -4111,7 +4167,7 @@ cdef class PySchemaValidator:
         if xdmNode == NULL:
             return None
         else:
-            val = PyXdmNode()
+            val = PyXdmNode(self.processor)
             val.derivednptr = val.derivedptr = val.thisvptr = xdmNode
             return val
      def set_parameter(self, name, PyXdmValue value):
@@ -4251,8 +4307,8 @@ cdef class PySchemaValidator:
 cdef class PyXdmValue:
      """A PyXdmValue represents a value in the XDM data model. A value is a sequence of zero or more items, each
      item being an atomic value, a node, or a function item. """
+     cdef PySaxonProcessor processor
      cdef saxoncClasses.XdmValue *thisvptr      # hold a C++ instance which we're wrapping
-
 
      def __cinit__(self):
         """
@@ -4271,6 +4327,12 @@ cdef class PyXdmValue:
                 del self.thisvptr
                 self.thisvptr = NULL
 
+     def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
 
      def add_xdm_item(self, PyXdmItem value):
         """
@@ -4301,32 +4363,32 @@ cdef class PyXdmValue:
 
         cdef type_ = xdmItem.getType()
         if type_== XdmType.XDM_ATOMIC_VALUE:
-            aval = PyXdmAtomicValue()
+            aval = PyXdmAtomicValue(self.processor)
             xdmItem.incrementRefCount()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
             return aval
         elif type_ == XdmType.XDM_NODE:
-            nval = PyXdmNode()
+            nval = PyXdmNode(self.processor)
             xdmItem.incrementRefCount()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
             return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
-             fval = PyXdmFunctionItem()
+             fval = PyXdmFunctionItem(self.processor)
              fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
              fval.thisvptr.incrementRefCount()
              return fval
         elif type_ == XdmType.XDM_MAP:
-             mval = PyXdmMap()
+             mval = PyXdmMap(self.processor)
              mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
              mval.thisvptr.incrementRefCount()
              return mval
         elif type_ == XdmType.XDM_ARRAY:
-             aaval = PyXdmArray()
+             aaval = PyXdmArray(self.processor)
              aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
              aaval.thisvptr.incrementRefCount()
              return aaval
         else:
-            val = PyXdmItem()
+            val = PyXdmItem(self.processor)
             val.derivedptr = val.thisvptr = xdmItem
             val.derivedptr.incrementRefCount()
             return val
@@ -4357,32 +4419,32 @@ cdef class PyXdmValue:
             type_ = xdmItem.getType()
             xdmItem.incrementRefCount()
             if type_== XdmType.XDM_ATOMIC_VALUE:
-                aval = PyXdmAtomicValue()
+                aval = PyXdmAtomicValue(self.processor)
                 aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
                 return aval
             elif type_ == XdmType.XDM_NODE:
-                nval = PyXdmNode()
+                nval = PyXdmNode(self.processor)
                 nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
                 return nval
             elif type_ == XdmType.XDM_FUNCTION_ITEM:
-                fval = PyXdmFunctionItem()
+                fval = PyXdmFunctionItem(self.processor)
                 fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmItem
                 fval.thisvptr.incrementRefCount()
                 return fval
             elif type_ == XdmType.XDM_MAP:
-                mval = PyXdmMap()
+                mval = PyXdmMap(self.processor)
                 mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmItem
                 mval.thisvptr.incrementRefCount()
                 return mval
             elif type_ == XdmType.XDM_ARRAY:
-                aaval = PyXdmArray()
+                aaval = PyXdmArray(self.processor)
                 aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmItem
                 aaval.thisvptr.incrementRefCount()
                 return aaval
             elif type_ == XdmType.XDM_EMPTY:
                 return None
             else:
-                ival = PyXdmItem()
+                ival = PyXdmItem(self.processor)
                 ival.thisvptr = xdmItem
                 return ival
      @property
@@ -4587,7 +4649,7 @@ cdef class PyXdmItem(PyXdmValue):
         cdef PyXdmNode val = None
         if self.is_node == False:
           raise Exception("The PyXdmItem is not a PyXdmNode therefore cannot be sub-classed to a PyXdmNode")
-        val = PyXdmNode()
+        val = PyXdmNode(self.processor)
         val.derivednptr = val.derivedptr = <saxoncClasses.XdmNode*> self.derivedptr
         val.derivednptr.incrementRefCount()
         return val
@@ -4602,7 +4664,7 @@ cdef class PyXdmItem(PyXdmValue):
         cdef PyXdmMap val = None
         if self.is_map == False:
           raise Exception("The PyXdmItem is not a PyXdmMap therefore cannot be sub-classed to a PyXdmMap")
-        val = PyXdmMap()
+        val = PyXdmMap(self.processor)
         val.derivedmmptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmMap*> self.derivedptr
         val.derivedmmptr.incrementRefCount()
         return val
@@ -4617,7 +4679,7 @@ cdef class PyXdmItem(PyXdmValue):
         cdef PyXdmFunctionItem val = None
         if self.is_function == False:
           raise Exception("The PyXdmItem is not a PyXdmFunctionItem therefore cannot be sub-classed to a PyXdmFunctionItem")
-        val = PyXdmFunctionItem()
+        val = PyXdmFunctionItem(self.processor)
         val.derivedfptr = val.derivedptr = <saxoncClasses.XdmFunctionItem*> self.derivedptr
         val.derivedfptr.incrementRefCount()
         return val
@@ -4632,7 +4694,7 @@ cdef class PyXdmItem(PyXdmValue):
         cdef PyXdmArray val = None
         if self.is_array == False:
           raise Exception("The PyXdmItem is not a PyXdmArray therefore cannot be sub-classed to a PyXdmArray")
-        val = PyXdmArray()
+        val = PyXdmArray(self.processor)
         val.derivedaaptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmArray*> self.derivedptr
         val.derivedaaptr.incrementRefCount()
         return val
@@ -4670,7 +4732,7 @@ cdef class PyXdmItem(PyXdmValue):
         """
         if self.is_atomic == False:
           raise Exception("The PyXdmItem is not a PyXdmAtomicValue")
-        val = PyXdmAtomicValue()
+        val = PyXdmAtomicValue(self.processor)
         val.derivedaptr = val.derivedptr = <saxoncClasses.XdmAtomicValue*>self.derivedptr
         val.derivedaptr.incrementRefCount()
         return val
@@ -4795,7 +4857,7 @@ cdef class PyXdmNode(PyXdmItem):
         if xdmValue == NULL:
             return None
         else:
-            val = PyXdmValue()
+            val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
             return val
 
@@ -4887,7 +4949,7 @@ cdef class PyXdmNode(PyXdmItem):
         if node == NULL:
             return None
         else :
-            val = PyXdmNode()
+            val = PyXdmNode(self.processor)
             val.derivednptr = val.derivedptr = val.thisvptr = node
             node.incrementRefCount()
             return val
@@ -4924,7 +4986,7 @@ cdef class PyXdmNode(PyXdmItem):
         if node == NULL:
             return None
         else :
-            val = PyXdmNode()
+            val = PyXdmNode(self.processor)
             val.derivednptr = val.derivedptr = val.thisvptr = node
             node.incrementRefCount()
             return val
@@ -4999,7 +5061,7 @@ cdef class PyXdmNode(PyXdmItem):
         if count > 0:
             n = self.derivednptr.getAttributeNodes()
             for i in range(count):
-                val = PyXdmNode()
+                val = PyXdmNode(self.processor)
                 val.derivednptr = val.derivedptr = val.thisvptr = n[i]
                 val.derivednptr.incrementRefCount()
                 nodes.append(val)
@@ -5028,7 +5090,7 @@ cdef class PyXdmNode(PyXdmItem):
         count = self.derivednptr.axisNodeCount()
         if count > 0:
             for i in range(count):
-                val = PyXdmNode()
+                val = PyXdmNode(self.processor)
                 val.derivednptr = val.derivedptr = val.thisvptr = n[i]
                 val.derivednptr.incrementRefCount()
                 nodes.append(val)
@@ -5056,7 +5118,7 @@ cdef class PyXdmNode(PyXdmItem):
 
 
             for i in range(count):
-                val = PyXdmNode()
+                val = PyXdmNode(self.processor)
                 val.derivednptr = val.derivedptr = val.thisvptr = n[i]
 
                 val.derivednptr.incrementRefCount()
@@ -5299,7 +5361,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          c_func = self.derivedfptr.getSystemFunction(proc.thisptr, c_name, arity)
          if c_func is NULL:
              return None
-         func = PyXdmFunctionItem()
+         func = PyXdmFunctionItem(self.processor)
          func.derivedfptr = self.derivedptr = self.thisvptr = c_func
          return func
 
@@ -5342,32 +5404,32 @@ cdef class PyXdmFunctionItem(PyXdmItem):
              return None
          type_ = c_xdmValue.getType()
          if type_== XdmType.XDM_VALUE:
-              value_ = PyXdmValue()
+              value_ = PyXdmValue(self.processor)
               value_.thisvptr = c_xdmValue
               value_.thisvptr.incrementRefCount()
               return value_
          if type_== XdmType.XDM_ATOMIC_VALUE:
-              aval = PyXdmAtomicValue()
+              aval = PyXdmAtomicValue(self.processor)
               aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>c_xdmValue
               aval.thisvptr.incrementRefCount()
               return aval
          elif type_ == XdmType.XDM_NODE:
-              nval = PyXdmNode()
+              nval = PyXdmNode(self.processor)
               nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_xdmValue
               nval.thisvptr.incrementRefCount()
               return nval
          elif type_ == XdmType.XDM_FUNCTION_ITEM:
-              fval = PyXdmFunctionItem()
+              fval = PyXdmFunctionItem(self.processor)
               fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>c_xdmValue
               fval.thisvptr.incrementRefCount()
               return fval
          elif type_ == XdmType.XDM_MAP:
-              mval = PyXdmMap()
+              mval = PyXdmMap(self.processor)
               mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>c_xdmValue
               mval.thisvptr.incrementRefCount()
               return mval
          elif type_ == XdmType.XDM_ARRAY:
-              aaval = PyXdmArray()
+              aaval = PyXdmArray(self.processor)
               aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>c_xdmValue
               aaval.thisvptr.incrementRefCount()
               return aaval
@@ -5480,32 +5542,32 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
              type_ = c_xdmValue.getType()
              if type_== XdmType.XDM_VALUE:
-                 value_ = PyXdmValue()
+                 value_ = PyXdmValue(self.processor)
                  value_.thisvptr = c_xdmValue
                  value_.thisvptr.incrementRefCount()
                  return value_
              if type_== XdmType.XDM_ATOMIC_VALUE:
-                 aval = PyXdmAtomicValue()
+                 aval = PyXdmAtomicValue(self.processor)
                  aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>c_xdmValue
                  aval.thisvptr.incrementRefCount()
                  return aval
              elif type_ == XdmType.XDM_NODE:
-                 nval = PyXdmNode()
+                 nval = PyXdmNode(self.processor)
                  nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_xdmValue
                  nval.thisvptr.incrementRefCount()
                  return nval
              elif type_ == XdmType.XDM_FUNCTION_ITEM:
-                 fval = PyXdmFunctionItem()
+                 fval = PyXdmFunctionItem(self.processor)
                  fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>c_xdmValue
                  fval.thisvptr.incrementRefCount()
                  return fval
              elif type_ == XdmType.XDM_MAP:
-                 mval = PyXdmMap()
+                 mval = PyXdmMap(self.processor)
                  mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>c_xdmValue
                  mval.thisvptr.incrementRefCount()
                  return mval
              elif type_ == XdmType.XDM_ARRAY:
-                 aaval = PyXdmArray()
+                 aaval = PyXdmArray(self.processor)
                  aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>c_xdmValue
                  aaval.thisvptr.incrementRefCount()
                  return aaval
@@ -5540,7 +5602,7 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          c_xdmMap = self.derivedmmptr.put(key.derivedaptr, value.thisvptr)
          if c_xdmMap is NULL:
              return None
-         newmap_ = PyXdmMap()
+         newmap_ = PyXdmMap(self.processor)
          newmap_.derivedmmptr = newmap_.derivedfptr = newmap_.derivedptr = newmap_.thisvptr = c_xdmMap
          return newmap_
 
@@ -5564,7 +5626,7 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          c_xdmMap = self.derivedmmptr.remove(key.derivedaptr)
          if c_xdmMap is NULL:
              return None
-         newmap_ = PyXdmMap()
+         newmap_ = PyXdmMap(self.processor)
          newmap_.derivedmmptr = newmap_.derivedfptr = newmap_.derivedptr = newmap_.thisvptr = c_xdmMap
          return newmap_
 
@@ -5584,7 +5646,7 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          if count > 0:
              c_values = self.derivedmmptr.keys()
              for i in range(count):
-                 val = PyXdmAtomicValue()
+                 val = PyXdmAtomicValue(self.processor)
                  val.derivedaptr = val.derivedptr = val.thisvptr = <saxoncClasses.XdmAtomicValue *>c_values[i]
                  val.thisvptr.incrementRefCount()
                  p_values.append(val)
@@ -5655,32 +5717,32 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 
                  type_ = c_values[i].getType()
                  if type_== XdmType.XDM_VALUE:
-                     val = PyXdmValue()
+                     val = PyXdmValue(self.processor)
                      val.thisvptr = c_values[i]
                      val.thisvptr.incrementRefCount()
                      p_values.append(val)
                  if type_== XdmType.XDM_ATOMIC_VALUE:
-                     aval = PyXdmAtomicValue()
+                     aval = PyXdmAtomicValue(self.processor)
                      aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>c_values[i]
                      aval.thisvptr.incrementRefCount()
                      p_values.append(aval)
                  elif type_ == XdmType.XDM_NODE:
-                     nval = PyXdmNode()
+                     nval = PyXdmNode(self.processor)
                      nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>c_values[i]
                      nval.thisvptr.incrementRefCount()
                      p_values.append(nval)
                  elif type_ == XdmType.XDM_FUNCTION_ITEM:
-                     fval = PyXdmFunctionItem()
+                     fval = PyXdmFunctionItem(self.processor)
                      fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>c_values[i]
                      fval.thisvptr.incrementRefCount()
                      p_values.append(fval)
                  elif type_ == XdmType.XDM_MAP:
-                     mval = PyXdmMap()
+                     mval = PyXdmMap(self.processor)
                      mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>c_values[i]
                      mval.thisvptr.incrementRefCount()
                      p_values.append(mval)
                  elif type_ == XdmType.XDM_ARRAY:
-                     aaval = PyXdmArray()
+                     aaval = PyXdmArray(self.processor)
                      aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>c_values[i]
                      aaval.thisvptr.incrementRefCount()
                      p_values.append(aaval)
@@ -5767,7 +5829,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          if c_xdmValue is NULL:
              return None
          else:
-             value_ = PyXdmValue()
+             value_ = PyXdmValue(self.processor)
              value_.thisvptr = c_xdmValue
              return value_
 
@@ -5811,7 +5873,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
 
          if c_xdmArr is NULL:
              return None
-         newarr_ = PyXdmArray()
+         newarr_ = PyXdmArray(self.processor)
          newarr_.derivedaaptr = newarr_.derivedfptr = newarr_.derivedptr = newarr_.thisvptr = c_xdmArr
          return newarr_
 
@@ -5847,7 +5909,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
 
          if c_xdmArr is NULL:
              return None
-         newarr_ = PyXdmArray()
+         newarr_ = PyXdmArray(self.processor)
          newarr_.derivedaaptr = newarr_.derivedfptr = newarr_.derivedptr = newarr_.thisvptr = c_xdmArr
          return newarr_
 
@@ -5868,7 +5930,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
 
          if c_xdmArr is NULL:
              return None
-         newarr_ = PyXdmArray()
+         newarr_ = PyXdmArray(self.processor)
          newarr_.derivedaaptr = newarr_.derivedfptr = newarr_.derivedptr = newarr_.thisvptr = c_xdmArr
          return newarr_
 
@@ -5890,7 +5952,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          if count > 0:
              c_values = self.derivedaaptr.values()
              for i in range(count):
-                 val = PyXdmValue()
+                 val = PyXdmValue(self.processor)
                  val.thisvptr = c_values[i]
                  val.thisvptr.incrementRefCount()
                  p_values.append(val)
