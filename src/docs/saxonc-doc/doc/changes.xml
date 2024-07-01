@@ -50,6 +50,11 @@
                
             </li>
          </ul>
+         <p>From SaxonC 12.1:</p>
+         <ul>
+            <li><p>Updated to version 22.3.1 of GraalVM Native Image, used to compile SaxonC to a
+               native executable.</p></li>
+         </ul>
          <p>From SaxonC 12.4:</p>
          <ul>
             <li><p>Localization using ICU4J is now available.</p></li>
@@ -57,11 +62,6 @@
                href="https://www.saxonica.com/documentation12/index.html">Saxon 12 documentation</a> has
                been updated to provide more details relevant for the C/C++, PHP and Python platforms where
                this differs to Saxon on the Java and C# platforms.</p></li>
-         </ul>
-         <p>From SaxonC 12.5:</p>
-         <ul>
-            <li><p>Updated to version 22.3.1 of GraalVM Native Image, used to compile SaxonC to a
-               native executable.</p></li>
          </ul>
       </category>
 
