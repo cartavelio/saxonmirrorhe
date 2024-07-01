@@ -34,20 +34,11 @@ PHP_METHOD(XsltExecutable, __destruct) {
       (xsltExecutable_object *)((char *)pobj -
                                 XtOffsetOf(xsltExecutable_object, std));
 
-  XsltExecutable *xsltExecutable = obj->xsltExecutable;
-  if (xsltExecutable != nullptr) {
-    std::map<std::string, XdmValue *> parameters =
-        xsltExecutable->getParameters();
-    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
-         itr != parameters.end(); itr++) {
-      XdmValue *value = itr->second;
-      if (value != nullptr) {
-        value->decrementRefCount();
-        if (value->getRefCount() < 1) {
-          delete value;
-        }
-      }
-    }
+
+
+  if(xsltExecutable != nullptr) {
+    XsltExecutable *xsltExecutable = obj->xsltExecutable;
+    _decrementRefCount(xsltExecutable->getParameters());
     xsltExecutable->clearParameters();
     xsltExecutable->clearProperties();
     delete xsltExecutable;
@@ -1510,6 +1501,14 @@ PHP_METHOD(XsltExecutable, setParameter) {
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
     // std::cout<<"test type:"<<(Z_OBJCE_P(oth)->name)<<std::endl;
 
+    XdmValue * oldValue = xsltExecutable->getParameter(name);
+    if(oldValue != nullptr) {
+        oldValue->decrementRefCount();
+        if(oldValue->getRefCount() < 1) {
+            delete oldValue;
+        }
+    }
+
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
       zend_object *ooth = Z_OBJ_P(oth);
       xdmNode_object *nobj =
@@ -1596,19 +1595,7 @@ PHP_METHOD(XsltExecutable, clearParameters) {
                                 XtOffsetOf(xsltExecutable_object, std));
   xsltExecutable = obj->xsltExecutable;
   if (xsltExecutable != nullptr) {
-    std::map<std::string, XdmValue *> parameters =
-        xsltExecutable->getParameters();
-    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
-         itr != parameters.end(); itr++) {
-      XdmValue *value = itr->second;
-      if (value != nullptr) {
-        value->decrementRefCount();
-        if (value->getRefCount() < 1) {
-          delete value;
-          value = nullptr;
-        }
-      }
-    }
+    _decrementRefCount(xsltExecutable->getParameters());
     xsltExecutable->clearParameters();
   }
 }

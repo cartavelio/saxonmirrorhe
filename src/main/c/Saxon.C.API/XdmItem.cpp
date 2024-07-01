@@ -127,7 +127,7 @@ void XdmItem::decrementRefCount() {
         std::cerr << "after refCount-dec-xdmItem=" << refCount
                   << " ob ref=" << (this) << std::endl;
     }
-    if (SaxonProcessor::extensionFlag && refCount == 0) {
+    /*if (SaxonProcessor::extensionFlag && refCount == 0) {
         delete this;
-    }
+    }*/
 }

@@ -174,7 +174,9 @@ struct xsltExecutable_object {
 };
 
 #define PHP_SAXON_EXTNAME "saxonc"
-#define PHP_SAXON_EXTVER "11.4"
+#define PHP_SAXON_EXTVER "12.5"
+
+void _decrementRefCount(std::map<std::string, XdmValue *>);
 
 /*
  * Class:     com_saxonica_functions_extfn_PhpCall_PhpFunctionCall

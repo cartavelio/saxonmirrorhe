@@ -31,6 +31,9 @@ PHP_METHOD(XQueryProcessor, __destruct) {
                                  XtOffsetOf(xqueryProcessor_object, std));
   XQueryProcessor *xqueryProcessor = obj->xqueryProcessor;
   if (xqueryProcessor != nullptr) {
+    _decrementRefCount(xqueryProcessor->getParameters());
+    xqueryProcessor->clearParameters();
+    xqueryProcessor->clearProperties();
     delete xqueryProcessor;
   }
 }
@@ -441,6 +444,19 @@ PHP_METHOD(XQueryProcessor, clearParameters) {
                                  XtOffsetOf(xqueryProcessor_object, std));
   xqueryProcessor = obj->xqueryProcessor;
   if (xqueryProcessor != nullptr) {
+    std::map<std::string, XdmValue *> parameters =
+        xqueryProcessor->getParameters();
+    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+         itr != parameters.end(); itr++) {
+      XdmValue *value = itr->second;
+      if (value != nullptr) {
+        value->decrementRefCount();
+        if (value->getRefCount() < 1) {
+          delete value;
+          value = nullptr;
+        }
+      }
+    }
     xqueryProcessor->clearParameters();
   }
 }

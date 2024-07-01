@@ -25,6 +25,9 @@ PHP_METHOD(XPathProcessor, __destruct) {
 
   XPathProcessor *xpathProc = obj->xpathProcessor;
   if (xpathProc != nullptr) {
+    _decrementRefCount(xpathProc->getParameters());
+    xpathProc->clearParameters();
+    xpathProc->clearProperties();
     delete xpathProc;
   }
 }
@@ -520,6 +523,7 @@ PHP_METHOD(XPathProcessor, clearParameters) {
                                 XtOffsetOf(xpathProcessor_object, std));
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr) {
+    _decrementRefCount(xpathProcessor->getParameters());
     xpathProcessor->clearParameters();
   }
 }

@@ -168,9 +168,7 @@ void XQueryProcessor::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-          if(SaxonProcessor::extensionFlag) {
-              valuei->decrementRefCount();
-          }
+          valuei->decrementRefCount();
           parameters.erase(skey);
       }
     }
@@ -213,9 +211,6 @@ void XQueryProcessor::clearParameters(bool delValues) {
 #endif
                 delete value;
                 value = nullptr;
-            }
-            if(SaxonProcessor::extensionFlag) {
-                value->decrementRefCount();
             }
         }
     }

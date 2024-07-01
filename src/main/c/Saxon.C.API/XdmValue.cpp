@@ -272,9 +272,9 @@ void XdmValue::decrementRefCount() {
     std::cerr << "refCount-dec-xdmVal=" << refCount << " ob ref=" << (this)
               << std::endl;
   }
-  if(SaxonProcessor::extensionFlag && refCount == 0) {
+  /*if(SaxonProcessor::extensionFlag && refCount == 0) {
       delete this;
-  }
+  }*/
 }
 
 XdmItem *XdmValue::getHead() {

@@ -376,7 +376,7 @@ void XPathProcessor::setProperty(const char *name, const char *value) {
 
 
 void XPathProcessor::clearParameters(bool delValues) {
-    if (delValues || SaxonProcessor::extensionFlag) {
+    if (delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
@@ -387,9 +387,6 @@ void XPathProcessor::clearParameters(bool delValues) {
 #endif
                 delete value;
                 value = nullptr;
-            }
-            if(SaxonProcessor::extensionFlag) {
-                value->decrementRefCount();
             }
         }
     }

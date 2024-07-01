@@ -180,10 +180,8 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-          if(SaxonProcessor::extensionFlag) {
-              valuei->decrementRefCount();
-          }
-        parameters.erase(skey);
+          valuei->decrementRefCount();
+          parameters.erase(skey);
       }
     }
     parameters[skey] = value;
@@ -361,9 +359,9 @@ void XsltExecutable::clearParameters(bool delValues) {
                 delete value;
                 value = nullptr;
             }
-            if(SaxonProcessor::extensionFlag) {
+            /*if(SaxonProcessor::extensionFlag) {
                 value->decrementRefCount();
-            }
+            }*/
         }
     }
     parameters.clear();

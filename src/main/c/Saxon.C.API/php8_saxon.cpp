@@ -41,6 +41,20 @@ zend_class_entry *xdmArray_ce;
 
 zend_class_entry *xsltExecutable_ce;
 
+void _decrementRefCount(std::map<std::string, XdmValue *> parameters){
+    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+         itr != parameters.end(); itr++) {
+      XdmValue *value = itr->second;
+      if (value != nullptr) {
+        value->decrementRefCount();
+        if (value->getRefCount() < 1) {
+          delete value;
+          value = nullptr;
+        }
+      }
+    }
+}
+
 #include "php8_SchemaValidator.cpp"
 #include "php8_DocumentBuilder.cpp"
 #include "php8_XPathProcessor.cpp"
@@ -125,7 +139,6 @@ PHP_METHOD(SaxonProcessor, __construct) {
                                 XtOffsetOf(saxonProcessor_object, std));
 
   saxonProc = new SaxonProcessor(license);
-  SaxonProcessor::setSaxonCExtensionFlag(true);
 
   obj->saxonProcessor = saxonProc;
   // std::cerr<<"SaxonProcessorConstructor cp1"<<std::endl;

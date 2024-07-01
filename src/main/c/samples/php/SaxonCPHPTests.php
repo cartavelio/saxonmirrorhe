@@ -191,6 +191,31 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
         $this->assertNotNull($result2);
         $this->assertStringContainsString("[]", $result2);
     }
+
+
+    public function testContextNotRootNamedTemplate2(): void
+    {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testContextNotRootNamedTemplate");
+        }
+        $transformer = self::$saxonProc->newXslt30Processor();
+        $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of 
+select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
+        $executable->setGlobalContextItem(self::$saxonProc->parseXmlFromString("<doc><e>text</e></doc>"));
+        $result = $executable->callTemplateReturningValue("main");
+        echo $executable->getErrorMessage();
+
+        $this->assertNotNull($result);
+        if ($result->getHead() != NULL) {   //$result->getHead(): XdmItem (ref++), result:XdmValue (ref++)   refCount = 2, ref--, refCount = 1
+            $this->assertStringContainsString("[]", $result->getHead()->getStringValue());   //refCount=2
+        }
+        $result2 = $executable->callTemplateReturningString("main");
+        echo $executable->getErrorMessage();
+
+        $this->assertNotNull($result2);
+        $this->assertStringContainsString("[]", $result2);
+    }
+
     public function testUseAssociated(): void
     {
         if(getenv("SAXONC_DEBUG_FLAG")) {
@@ -860,6 +885,26 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
         $executable->setInitialMatchSelection(self::$saxonProc->createAtomicValue(16));
         $sw = $executable->applyTemplatesReturningString();
         $this->assertEquals("16~~17", $sw);
+    }
+
+
+
+public function testSingle()
+{
+    $xml = "<out>".
+        "   <person>text1</person>".
+        "   <person>text2</person>".
+        "   <person>text3</person>".
+    "</out>";
+    $xp = self::$saxonProc->newXPathProcessor();
+
+    $xp->setContextItem(self::$saxonProc->parseXmlFromString($xml));
+    $item = $xp->evaluateSingle("//person[1]");
+    $this->assertInstanceOf(
+        Saxon\XdmItem::class,
+        $item
+    );
+    $this->assertEquals($item, "<person>text1</person>");
     }
     /*  public function testItemSeparatorToSerializer(): void {
           try {

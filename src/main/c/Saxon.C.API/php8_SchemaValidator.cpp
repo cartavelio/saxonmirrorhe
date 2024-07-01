@@ -35,6 +35,9 @@ PHP_METHOD(SchemaValidator, __destruct) {
 
   SchemaValidator *schemaValidator = obj->schemaValidator;
   if (schemaValidator != nullptr) {
+    _decrementRefCount(schemaValidator->getParameters());
+    schemaValidator->clearParameters();
+    schemaValidator->clearProperties();
     delete schemaValidator;
   }
 }
@@ -409,8 +412,8 @@ PHP_METHOD(SchemaValidator, clearParameters) {
                                  XtOffsetOf(schemaValidator_object, std));
   schemaValidator = obj->schemaValidator;
   if (schemaValidator != nullptr) {
-
-    schemaValidator->clearParameters(true);
+    _decrementRefCount(schemaValidator->getParameters());
+    schemaValidator->clearParameters();
     schemaValidator->exceptionClear();
   }
 }
