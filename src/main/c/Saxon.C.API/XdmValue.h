@@ -72,6 +72,12 @@ public:
   void addXdmItem(XdmItem *val);
 
   /**
+   * Add an XdmItem to the sequence, when the sequence was returned from SaxonC: Internal use only.
+   * @param val - XdmItem object
+   */
+  void addXdmItemFromUnderlyingValue(XdmItem *val);
+
+  /**
    * Add an Java XdmValue object to the sequence.
    * See methods the functions in SaxonCXPath of the C library
    * @param val - Java object
@@ -221,7 +227,6 @@ private:
                           ProcessorDataAccumulator object  */
 
   int addXdmItemToValue(XdmItem *val);
-  void addXdmItemFromUnderlyingValue(XdmItem *val);
 };
 
 #endif /** SAXON_XDMVALUE_H **/

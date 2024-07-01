@@ -353,12 +353,12 @@ XdmNode **XdmNode::getChildren(bool cached) {
   if (childNodes == nullptr) {
     return nullptr;
   }
-  children = new XdmNode *[childCount];
+  XdmNode **fetchedChildren = new XdmNode *[childCount];
   for (int p = 0; p < childCount; ++p) {
-    children[p] = new XdmNode(this, (int64_t)childNodes[p], UNKNOWN);
+    fetchedChildren[p] = new XdmNode(this, (int64_t)childNodes[p], UNKNOWN);
   }
   operator delete(childNodes);
-  return children;
+  return fetchedChildren;
 }
 
 XdmNode *XdmNode::getChild(int i, bool cached) {

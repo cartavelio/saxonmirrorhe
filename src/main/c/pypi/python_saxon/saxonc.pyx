@@ -3931,12 +3931,13 @@ cdef class PySchemaValidator:
         self.thissvptr.setLax(lax)
 
 cdef class PyXdmValue:
-     """A PyXdmValue represents a value in the XDM data model. A value is a sequence of zero or more items, each
-     item being an atomic value, a node, or a function item. """
-     cdef PySaxonProcessor processor
-     cdef saxoncClasses.XdmValue *thisvptr      # hold a C++ instance which we're wrapping
+    """A PyXdmValue represents a value in the XDM data model. A value is a sequence of zero or more items, each
+    item being an atomic value, a node, or a function item. """
+    cdef PySaxonProcessor processor
+    cdef saxoncClasses.XdmValue *thisvptr  # hold a C++ instance which we're wrapping
+    cdef dict __items
 
-     def __cinit__(self):
+    def __cinit__(self):
         """
         __cinit__(self)
         Constructor for PyXdmValue
@@ -3945,21 +3946,22 @@ cdef class PyXdmValue:
             self.thisvptr = new saxoncClasses.XdmValue()
             self.thisvptr.incrementRefCount()
 
-     def __dealloc__(self):
+    def __dealloc__(self):
         if type(self) is PyXdmValue and self.thisvptr != NULL:
             self.thisvptr.decrementRefCount()
             if self.thisvptr.getRefCount() < 1:
                 del self.thisvptr
                 self.thisvptr = NULL
 
-     def __init__(self, processor):
+    def __init__(self, processor):
         """
         Creates a new instance, keeping a reference to its PySaxonProcessor
         :param processor:
         """
         self.processor = processor
+        self.__items = {}
 
-     def add_xdm_item(self, PyXdmItem value):
+    def add_xdm_item(self, PyXdmItem value):
         """
         add_xdm_item(self, PyXdmItem value)
         Add an item to the XDM sequence
@@ -3970,8 +3972,8 @@ cdef class PyXdmValue:
             self.thisvptr.addXdmItem(value.derivedptr)
             value.derivedptr.incrementRefCount()
 
-     @property
-     def head(self):
+    @property
+    def head(self):
         """
         head(self)
         Property to get the first item in the sequence
@@ -3979,12 +3981,11 @@ cdef class PyXdmValue:
             PyXdmItem: The first item or None if the sequence is empty
         """
 
-        # cdef saxoncClasses.XdmItem * xdmItem = NULL
-        self.thisvptr.incrementRefCountForRelinquishedValue(0)
-        # xdmItem = self.thisvptr.getHead()
-        return self.processor.wrap_item(self.thisvptr.getHead())
+        if 0 not in self.__items:
+            self.__items[0] = self.processor.wrap_item(self.thisvptr.getHead())
+        return self.__items[0]
 
-     def item_at(self, index):
+    def item_at(self, int index):
         """
         item_at(self, index)
         Get the n'th item in the sequence, counting from zero.
@@ -3996,18 +3997,13 @@ cdef class PyXdmValue:
             If the item does not exist returns None.
 
         """
-        # cdef PyXdmValue val = None
-        # cdef PyXdmAtomicValue aval = None
-        # cdef PyXdmNode nval = None
-        # cdef PyXdmItem ival = None
-        # cdef type_ = None
-        # cdef saxoncClasses.XdmItem * xdmItem = NULL
-        self.thisvptr.incrementRefCountForRelinquishedValue(index)
-        # xdmItem = self.thisvptr.itemAt(index)
-        return self.processor.wrap_item(self.thisvptr.itemAt(index))
+        index = int(index)
+        if index not in self.__items:
+            self.__items[index] = self.processor.wrap_item(self.thisvptr.itemAt(index))
+        return self.__items[index]
 
-     @property
-     def size(self):
+    @property
+    def size(self):
         """
         size(self)
         Get the number of items in the sequence
@@ -4016,12 +4012,12 @@ cdef class PyXdmValue:
         """
         return self.thisvptr.size()
 
-     def __repr__(self):
+    def __repr__(self):
         """
         __repr__(self)
         The string representation of PyXdmItem
         """
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         c_string = self.thisvptr.toString()
         if c_string == NULL:
             raise Warning('Empty string returned')
@@ -4030,26 +4026,24 @@ cdef class PyXdmValue:
             saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_to_string
 
+    def __getitem__(self, index):
+        """
+        __getitem__(self, index)
+        Implement the built-in subscript operator (i.e. square brackets []) to return the ith item in the sequence
 
-     def __getitem__(self, index):
-         """
-         __getitem__(self, index)
-         Implement the built-in subscript operator (i.e. square brackets []) to return the ith item in the sequence
+        Returns:
+           PyXdmItem: The item at the specified index. This could be a PyXdmItem or any of its subclasses:
+           PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmMap or PyXdmArray.
+           If the item does not exist returns None.
+        """
+        return self.item_at(index)
 
-         Returns:
-            PyXdmItem: The item at the specified index. This could be a PyXdmItem or any of its subclasses:
-            PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmMap or PyXdmArray.
-            If the item does not exist returns None.
-         """
-         return self.item_at(index)
-
-
-     def __str__(self):
+    def __str__(self):
         """
         __str__(self)
         The string representation of PyXdmItem
         """
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         c_string = self.thisvptr.toString()
         py_to_string = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string, (self.thisvptr.size() == 0))
@@ -4057,54 +4051,54 @@ cdef class PyXdmValue:
             return ""
         return py_to_string
 
-     def __iter__(self):
+    def __iter__(self):
         """
         __iter__(self)
         Returns the Iterator object of PyXdmValue
         """
         return PyXdmValueIterator(self)
 
-     cdef saxoncClasses.XdmValue* _get_underlying_value(self):
-         """
-         Returns the underlying SaxonC C++ object. For internal use.
-         Returns:
-             XdmValue*
-         """
-         return self.thisvptr
+    cdef saxoncClasses.XdmValue * _get_underlying_value(self):
+        """
+        Returns the underlying SaxonC C++ object. For internal use.
+        Returns:
+            XdmValue*
+        """
+        return self.thisvptr
 
-     cdef saxoncClasses.XdmValue* _borrow_underlying_value(self):
-         self.thisvptr.incrementRefCount()
-         return self.thisvptr
+    cdef saxoncClasses.XdmValue * _borrow_underlying_value(self):
+        self.thisvptr.incrementRefCount()
+        return self.thisvptr
 
-     cdef void _release_borrowed_underlying_value(self):
-         self.thisvptr.decrementRefCount()
+    cdef void _release_borrowed_underlying_value(self):
+        self.thisvptr.decrementRefCount()
 
-     cdef PyXdmValue _wrap_value(self, saxoncClasses.XdmValue* value_ptr):
-         self.thisvptr = value_ptr
-         value_ptr.incrementRefCount()
-         return self
+    cdef PyXdmValue _wrap_value(self, saxoncClasses.XdmValue * value_ptr):
+        self.thisvptr = value_ptr
+        value_ptr.incrementRefCount()
+        return self
 
 cdef class PyXdmValueIterator:
-     """ Iterator class for PyXdmValue """
-     cdef PyXdmValue _value
-     cdef _index
-     def __init__(self, value):
-     # PyXdmValue object reference
+    """ Iterator class for PyXdmValue """
+    cdef PyXdmValue _value
+    cdef _index
+    def __init__(self, value):
+        # PyXdmValue object reference
         self._value = value
         # member variable to keep track of current index
         self._index = 0
 
-     def __iter__(self):
-         return self
+    def __iter__(self):
+        return self
 
-     def __next__(self):
-       """Returns the next value from PyXdmValue object's lists """
-       if self._index < self._value.size :
-           result = self._value.item_at(self._index)
-           self._index +=1
-           return result
-       # End of Iteration
-       raise StopIteration
+    def __next__(self):
+        """Returns the next value from PyXdmValue object's lists """
+        if self._index < self._value.size:
+            result = self._value.item_at(self._index)
+            self._index += 1
+            return result
+        # End of Iteration
+        raise StopIteration
 
 
 
@@ -4677,6 +4671,7 @@ cdef class PyXdmNode(PyXdmItem):
             n = self.derivednptr.getChildren()
             for i in range(count):
                 nodes.append(self.processor.wrap_node(n[i]))
+            saxoncClasses.XdmNode.deleteChildrenArray(n)
         return nodes
     # def getChildCount(self):
 

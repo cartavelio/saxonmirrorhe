@@ -669,6 +669,9 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         int getChildCount()
 
+        @staticmethod
+        void deleteChildrenArray(XdmNode** fetchedChildren)
+
 
 
 cdef extern from "@@location@@Saxon.C.API/XdmAtomicValue.h":

@@ -344,16 +344,13 @@ void XsltExecutable::clearParameters(bool delValues) {
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
             if (delValues && value != nullptr) {
-#ifdef DEBUG
-                std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
-                  << value->getRefCount() << std::endl;
-#endif
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                    std::cerr << "XsltExecutable.clearParameter() - XdmValue refCount="
+                      << value->getRefCount() << std::endl;
+                }
                 delete value;
                 value = nullptr;
             }
-            /*if(SaxonProcessor::extensionFlag) {
-                value->decrementRefCount();
-            }*/
         }
     }
     parameters.clear();

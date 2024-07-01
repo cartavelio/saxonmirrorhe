@@ -348,6 +348,18 @@ public:
 
     bool hasRelinquishedChildren();
 
+  //! Utility method required for python and PHP extension to delete string
+  //! created in the C++ code-base
+  /**
+  * @param fetchedChildren - the array of pointers to child nodes to be deleted
+  */
+  static void deleteChildrenArray(XdmNode **fetchedChildren) {
+    if (fetchedChildren != nullptr) {
+      delete[] fetchedChildren;
+      fetchedChildren = nullptr;
+    }
+  }
+
 
 private:
   const char *baseURI;   /*!< The base URI of this node*/
