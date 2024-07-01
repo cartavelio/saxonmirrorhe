@@ -132,6 +132,13 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         const char * getErrorMessage()
 
+        @staticmethod
+        void setSaxonCExtensionFlag(bool flag)
+
+
+        @staticmethod
+        bool isSaxonCExtension()
+
 
     cdef cppclass DocumentBuilder:
         DocumentBuilder() except +raise_py_error

@@ -134,7 +134,7 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
 
     if (!selectionStringFlag) {
         XdmValue * valuei = getParameter("_i_matches", false);
-        if(valuei != nullptr) {
+        if(SaxonProcessor::extensionFlag == true && valuei != nullptr) {
             valuei->decrementRefCount();
         }
         parameters.erase("_i_matches");
@@ -180,7 +180,9 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-        valuei->decrementRefCount();
+          if(SaxonProcessor::extensionFlag) {
+              valuei->decrementRefCount();
+          }
         parameters.erase(skey);
       }
     }
@@ -345,7 +347,7 @@ const char *XsltExecutable::getProperty(const char *name) {
   return nullptr;
 }
 
-void XsltExecutable::clearParameters(bool delValues) {
+void XsltExecutable::decrementParameters(){
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
         XdmValue *value = itr->second;
@@ -354,11 +356,25 @@ void XsltExecutable::clearParameters(bool delValues) {
             std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
               << value->getRefCount() << std::endl;
 #endif
-            if (delValues) {
+            value->decrementRefCount();
+        }
+    }
+
+}
+
+void XsltExecutable::clearParameters(bool delValues) {
+    if (delValues) {
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+             itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if (value != nullptr) {
+#ifdef DEBUG
+                std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+                  << value->getRefCount() << std::endl;
+#endif
+
                 delete value;
                 value = nullptr;
-            } else {
-                value->decrementRefCount();
             }
 
         }

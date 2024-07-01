@@ -168,8 +168,10 @@ void XQueryProcessor::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-        valuei->decrementRefCount();
-        parameters.erase(skey);
+          if(SaxonProcessor::extensionFlag) {
+              valuei->decrementRefCount();
+          }
+          parameters.erase(skey);
       }
     }
     parameters[skey] = value;
@@ -198,7 +200,7 @@ void XQueryProcessor::setProperty(const char *name, const char *value) {
   }
 }
 
-void XQueryProcessor::clearParameters(bool delVal) {
+void XQueryProcessor::decrementParameters() {
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
         XdmValue *value = itr->second;
@@ -207,11 +209,23 @@ void XQueryProcessor::clearParameters(bool delVal) {
             std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
               << value->getRefCount() << std::endl;
 #endif
-            if (delVal) {
+            value->decrementRefCount();
+        }
+    }
+}
+
+void XQueryProcessor::clearParameters(bool delVal) {
+    if (delVal) {
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+             itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if (value != nullptr) {
+#ifdef DEBUG
+                std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+                  << value->getRefCount() << std::endl;
+#endif
                 delete value;
                 value = nullptr;
-            } else {
-                value->decrementRefCount();
             }
         }
     }

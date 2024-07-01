@@ -173,6 +173,8 @@ cdef str make_py_str(const char * c_value, encoding='utf-8'):
     except UnicodeError as ex:
         raise PySaxonApiError(ex)
 
+_proc_count = 0
+
 cdef class PySaxonProcessor:
     """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
     This class is itself the context that needs to be managed (i.e. allocation & release)
@@ -219,6 +221,9 @@ cdef class PySaxonProcessor:
             except:
                 raise Exception("Failed to create PySaxonProcessor object") from None
 
+        if _proc_count == 1:
+            self.thisptr.setSaxonCExtensionFlag(True)
+
     def __dealloc__(self):
         """The destructor."""
         global _proc_count
@@ -227,7 +232,8 @@ cdef class PySaxonProcessor:
           self.thisptr = NULL
         if _proc_count == 1:
             self.thisptr.release()
-        _proc_count -= 1
+        else:
+            _proc_count = _proc_count - 1
 
 
     def __enter__(self):
@@ -1316,7 +1322,7 @@ cdef class PyDocumentBuilder:
 
 parametersDict = None
 
-_proc_count = 0
+
 
 
 cdef class PyXslt30Processor:

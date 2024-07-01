@@ -129,7 +129,7 @@ void Xslt30Processor::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-        valuei->decrementRefCount();
+        //valuei->decrementRefCount();
         parameters.erase(skey);
       }
     }
@@ -181,7 +181,7 @@ void Xslt30Processor::setTargetEdition(const char *edition) {
   }
 }
 
-void Xslt30Processor::clearParameters(bool delValues) {
+void Xslt30Processor::decrementParameters() {
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
         XdmValue *value = itr->second;
@@ -190,12 +190,25 @@ void Xslt30Processor::clearParameters(bool delValues) {
             std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
               << value->getRefCount() << std::endl;
 #endif
-            if (delValues) {
+            value->decrementRefCount();
+        }
+    }
+}
+
+void Xslt30Processor::clearParameters(bool delValues) {
+    if (delValues) {
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+             itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if (value != nullptr) {
+#ifdef DEBUG
+                std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+                  << value->getRefCount() << std::endl;
+#endif
                 delete value;
                 value = nullptr;
-            } /*else {
-                value->decrementRefCount();
-            }*/
+            }
+
         }
     }
     parameters.clear();

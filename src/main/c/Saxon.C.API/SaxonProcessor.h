@@ -727,6 +727,8 @@ public:
                        cross compiled SaxonC library. */
   std::string cwd;  /*!< current working directory */
 
+  static bool extensionFlag;
+
   //! Utility method required for python and PHP extension to delete string
   //! created in the C++ code-base
   /**
@@ -738,6 +740,14 @@ public:
       operator delete((char *)data);
       data = nullptr;
     }
+  }
+
+  static void setSaxonCExtensionFlag(bool flag){
+      extensionFlag = flag;
+  }
+
+  static bool isSaxonCExtension(){
+      return extensionFlag;
   }
 
   //! Internal method for diagnostics
@@ -753,7 +763,7 @@ public:
 protected:
   // jclass xdmAtomicClass; /*!< The XdmAtomicValue instance */
   // jclass versionClass; /*!< The Version instance */
-  // jclass procClass; /*!< The SAxon Processor instance */
+  // jclass procClass; /*!< The Saxon Processor instance */
   // jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
   std::string cwdV; /*!< current working directory */
   // std::string resources_dir; /*!< current Saxon resources directory */

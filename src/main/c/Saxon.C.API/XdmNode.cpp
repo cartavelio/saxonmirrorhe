@@ -31,6 +31,7 @@ XdmNode::XdmNode(const XdmNode &other) {
   nodeKind = other.nodeKind;
   nodeToString = other.nodeToString;
   axisCount = other.axisCount;
+  children = other.children;
 
 }
 
@@ -63,8 +64,8 @@ XdmNode::~XdmNode() {
     operator delete((char *)localName);
     localName = nullptr;
   }
-//TODO fix this for C++
-    if (children != nullptr) {
+
+    if (SaxonProcessor::extensionFlag && children != nullptr) {
 
         for (int p = 0; p < childCount; ++p) {
             if(children[p]->getRefCount() < 1) {

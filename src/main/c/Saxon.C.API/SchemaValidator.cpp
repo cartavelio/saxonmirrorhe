@@ -293,7 +293,9 @@ void SchemaValidator::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-        valuei->decrementRefCount();
+        if(SaxonProcessor::extensionFlag) {
+            valuei->decrementRefCount();
+        }
         parameters.erase(skey);
       }
     }
@@ -315,7 +317,7 @@ void SchemaValidator::setProperty(const char *name, const char *value) {
       std::string(name), std::string((value == nullptr ? "" : value))));
 }
 
-void SchemaValidator::clearParameters(bool delVal) {
+void SchemaValidator::decrementParameters() {
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
         XdmValue *value = itr->second;
@@ -324,11 +326,23 @@ void SchemaValidator::clearParameters(bool delVal) {
             std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
               << value->getRefCount() << std::endl;
 #endif
-            if (delVal) {
+            value->decrementRefCount();
+        }
+    }
+}
+
+void SchemaValidator::clearParameters(bool delVal) {
+    if (delVal) {
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+             itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if (value != nullptr) {
+#ifdef DEBUG
+                std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+                  << value->getRefCount() << std::endl;
+#endif
                 delete value;
                 value = nullptr;
-            } else {
-                value->decrementRefCount();
             }
         }
     }
