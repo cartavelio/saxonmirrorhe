@@ -30,49 +30,6 @@ RUN echo "GID: ${GID}" && if getent group ${GID} > /dev/null; [ $? -ne 0 ]; then
 
 ENV PATH=/opt/saxonica/bin:$PATH
 
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#		build-essential \
-#		ca-certificates \
-#		cmake \
-#		file \
-#		gettext-base \
-#		gzip \
-#		jq \
-#		libcurl4-openssl-dev \
-#		libssl-dev \
-#		libsqlite3-dev \
-#        libbz2-dev \
-#        liblzma-dev \
-#        libncurses5-dev \
-#        libncursesw5-dev \
-#        libreadline-dev \
-#        libffi-dev \
-#        libsqlite3-dev \
-#        libssl-dev \
-#        libxml2-dev \
-#        libxmlsec1-dev \
-#        llvm \
-#		lsof \
-#        make \
-#        openjdk-11-jdk-headless \
-#		pkg-config \
-#        python3-openssl \
-#		retry \
-#		shellcheck \
-#		software-properties-common \
-#        tk-dev \
-#        unzip \
-#        valgrind \
-#		vim \
-#		wget \
-#        wget \
-#        xz-utils \
-#		zip \
-#        zlib1g-dev && \
-#	# get the semi-official latest-stable git instead of using the old(er) version from the ubuntu distro
-#	add-apt-repository ppa:git-core/ppa && apt-get install -y git && \
-#    git config --global --add safe.directory /opt/saxonica/saxondev && \
-#	rm -rf /var/lib/apt/lists/*
 
 FROM saxon-prereqs AS saxon-graalvm
 
@@ -121,7 +78,6 @@ RUN curl -sSL "https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-ins
 
 RUN pyenv install /opt/saxonica/python-build/3.12.2-valgrind
 RUN sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 
 
 #RUN pyenv install /opt/saxonica/python-build/3.12.2-valgrind && \
