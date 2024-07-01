@@ -1,26 +1,37 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
 
-interface ManagePythonEnvExtension {
-    Property<String> getSystemPythonBinary()
-    Property<String> getVenvPath()
-    Property<String> getVenvPipPath()
-    Property<String> getVenvPythonPath()
-    Property<String> getVenvBinPath()
+import javax.inject.Inject
+
+abstract class ManagePythonEnvExtension {
+    abstract Property<String> getSystemPythonBinary()
+    abstract Property<String> getVenvPath()
+    abstract Property<String> getVenvPipPath()
+    abstract Property<String> getVenvPythonPath()
+    abstract Property<String> getVenvBinPath()
+    abstract Property<String> getVenvBinarySuffix()
+    abstract DirectoryProperty getVenvBinDir()
+
+    Provider<String> venvBinHostedExe(String exe) {
+        venvBinDir.map { it.file("${exe}${venvBinarySuffix.get()}") }
+    }
 }
 
 class ManagePythonEnvPlugin implements Plugin<Project> {
@@ -28,12 +39,12 @@ class ManagePythonEnvPlugin implements Plugin<Project> {
         def extension = project.extensions.create('pythonEnv', ManagePythonEnvExtension)
         OperatingSystem systemOs = OperatingSystem.current()
 
+        def sysVenvBinarySuffix = ".exe"
         def sysPythonBinary = "python"
-        if(systemOs.isMacOsX() || systemOs.isLinux()) {
-            sysPythonBinary = "python3"
-        }
         def pythonBinFolder = "Scripts"
         if(systemOs.isMacOsX() || systemOs.isLinux()) {
+            sysVenvBinarySuffix = ""
+            sysPythonBinary = "python3"
             pythonBinFolder = "bin"
         }
 
@@ -43,14 +54,19 @@ class ManagePythonEnvPlugin implements Plugin<Project> {
         extension.systemPythonBinary.convention(sysPythonBinary)
         extension.venvPath.convention(venvDir.map { it.asFile.toString() })
         extension.venvBinPath.convention(venvBinDir.map { it.asFile.toString() })
-        extension.venvPipPath.convention(venvBinDir.map { it.file("pip").asFile.toString() })
-        extension.venvPythonPath.convention(venvBinDir.map { it.file("python").asFile.toString() })
+        extension.venvBinDir.convention(venvBinDir)
+        extension.venvBinarySuffix.convention(sysVenvBinarySuffix)
+        extension.venvPipPath.convention(venvBinDir.map { it.file("pip3${sysVenvBinarySuffix}").asFile.toString() })
+        extension.venvPythonPath.convention(venvBinDir.map { it.file("python${sysVenvBinarySuffix}").asFile.toString() })
     }
 }
 
 abstract class PythonVenv extends DefaultTask {
     @Input
     abstract Property<String> getBranchesExtension()
+
+    @Input
+    abstract ListProperty<String> getBuildRequirements()
 
     @Internal
     final Provider<String> branch = branchesExtension.map { project.extensions.getByName(it).properties.get("current").get() }
@@ -67,6 +83,7 @@ abstract class PythonVenv extends DefaultTask {
 
     PythonVenv() {
         branchesExtension.convention("branches")
+        buildRequirements.convention([])
     }
 
     @TaskAction
@@ -77,8 +94,14 @@ abstract class PythonVenv extends DefaultTask {
             executable project.pythonEnv.systemPythonBinary.get()
             args "-m", "venv", project.pythonEnv.venvPath.get()
         }
+
+        project.exec {
+            executable project.pythonEnv.venvPipPath.get()
+            args("install", "--require-virtualenv", "build", "packaging", "repairwheel", *buildRequirements.get())
+        }
     }
 }
+
 /**
  * Task for installing packages from a Pip requirements.txt.
  * Note that the lack of outputs for this task means it will always run, which it needs to in order
@@ -102,7 +125,6 @@ abstract class PipInstall extends DefaultTask {
                 args "install", "--require-virtualenv", "--requirement", requirementsFile
             }
         }
-
     }
 
     String installedRequirements(RegularFile requirementsFile) {
@@ -112,5 +134,108 @@ abstract class PipInstall extends DefaultTask {
             args "freeze", "--require-virtualenv", "--local", "--requirement", requirementsFile
         }
         return stdout.toString()
+    }
+}
+
+/**
+ * Task for building a wheel and fixing it up with repairwheel
+ */
+abstract class BuildWheel extends DefaultTask {
+    private final FileSystemOperations fileSystemOperations
+
+    @Inject
+    public BuildWheel(FileSystemOperations fileSystemOperations) {
+        this.fileSystemOperations = fileSystemOperations
+    }
+
+
+    @InputFile
+    abstract RegularFileProperty getPythonExe()
+
+    @Input
+    abstract Property<String> getProductEdition()
+
+    @Input
+    abstract Property<String> getProductVersion()
+
+    @InputDirectory
+    abstract DirectoryProperty getLibraryDir()
+
+    @InputDirectory
+    abstract DirectoryProperty getSourceDir()
+
+    @Internal
+    abstract DirectoryProperty getOutputDir()
+
+    @OutputDirectory
+    final Provider<Directory> buildDir = outputDir.map {it.dir("build") }
+
+    @Internal
+    Provider<String> wheelFilePlatformSuffix = pythonExe.map {python ->
+        (new ByteArrayOutputStream()).withStream { out ->
+            project.exec {
+                executable python
+                args "-c", "import packaging.tags; print(next(packaging.tags.sys_tags()))"
+                standardOutput out
+            }
+            out.toString().trim()
+        }
+    }
+
+    @Internal
+    Provider<String> wheelFilename = productEdition.map { prod ->
+        "saxonc${prod}-${productVersion.get()}-${wheelFilePlatformSuffix.get()}.whl"
+    }
+
+    @OutputFile
+    Provider<RegularFile> wheel = productEdition.flatMap { prod ->
+        outputDir.map { it.file(wheelFilename.get()) }
+    }
+
+    @TaskAction
+    void build() {
+        def tmpWheelDir = temporaryDir
+        def edition = productEdition.get()
+
+        fileSystemOperations.copy {
+            from(sourceDir) {
+                exclude "__pycache__/**"
+                exclude ".pytest_cache/**"
+            }
+            into buildDir
+        }
+
+        project.exec {
+            workingDir buildDir.get()
+            executable pythonExe.get()
+            args "-m", "build", "--wheel"
+        }
+
+        def pythonEnv = project.extensions.getByType(ManagePythonEnvExtension)
+        project.exec {
+            executable pythonEnv.venvBinHostedExe("repairwheel").get()
+            args "--output-dir", outputDir.get(),
+                    "--lib-dir", libraryDir.get(),
+                    buildDir.map {it.file("dist/${wheelFilename.get()}") }.get()
+        }
+    }
+}
+
+/**
+ * Task to install a wheel from a local file
+ */
+abstract class InstallLocalWheel extends DefaultTask {
+    @InputFile
+    abstract RegularFileProperty getPipExe()
+
+    @InputFile
+    abstract RegularFileProperty getWheel()
+
+    @TaskAction
+    void install() {
+        project.exec {
+            executable pipExe.get()
+            args "install", "--force-reinstall", wheel.map { it.asFile }.get()
+        }
     }
 }

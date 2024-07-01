@@ -369,10 +369,9 @@ tasks.register("graal_hec_jar", Jar) {
   inputs.files fileTree(layout.projectDirectory.dir("src/main/resources/net"))
   inputs.files fileTree(layout.buildDirectory.dir("xerces"))
   inputs.files fileTree(layout.buildDirectory.dir("icu"))
-  outputs.file(layout.buildDirectory.file("hec/jars/saxon-he-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
   archiveBaseName = "saxon-he-${saxonVersion3}"
-  destinationDirectory = file(layout.buildDirectory.dir("hec/jars"))
+  destinationDirectory = layout.buildDirectory.dir("hec/build/graalvm")
   manifest {
     attributes "Project-Name": "Saxon-HE"
     attributes "Main-Class": "net.sf.saxon.Transform"
@@ -405,10 +404,9 @@ task graal_pec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("pec/jars/saxon-pe-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
   archiveBaseName = "saxon-pe-${saxonVersion3}"
-  destinationDirectory = file("${buildDir}/pec/jars")
+  destinationDirectory = layout.buildDirectory.dir("pec/build/graalvm")
   manifest {
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
@@ -475,10 +473,9 @@ task graal_eec_jar(
   inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
   inputs.files fileTree(dir: "${buildDir}/xerces")
   inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("eec/jars/saxon-ee-${saxonVersion3}.jar")).withPropertyName("saxonJar")
 
   archiveBaseName = "saxon-ee-${saxonVersion3}"
-  destinationDirectory = file("${buildDir}/eec/jars")
+  destinationDirectory = layout.buildDirectory.dir("eec/build/graalvm")
   manifest {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
@@ -586,14 +583,15 @@ tasks.register("branchVenv", PythonVenv)
     from(layout.projectDirectory.dir("src/graalvm/")) {
       include "META-INF/**/*"
     }
-    into layout.buildDirectory.dir("graalvm/${edition}")
+    into layout.buildDirectory.dir("${edition}c/build/graalvm/jar")
   }
 
   tasks.register("${edition}c_graalJar", Jar) {
     description "Build the ${edition.toUpperCase()} jar file for GraalVM"
 
     archiveBaseName = "libsaxon-${edition}c-${saxonVersion3}"
-    destinationDirectory = layout.buildDirectory.dir("libs")
+    destinationDirectory = layout.buildDirectory.dir("eec/jar")
+
 
     def jarSrcDirProvider = tasks.named("graal_setup_${edition}c_jar").map {it.destinationDir }
 
@@ -608,7 +606,7 @@ tasks.register("branchVenv", PythonVenv)
   tasks.register("${edition}c_build_graal_image", GraalNativeImageTask) {
     sourceJar = tasks.named("${edition}c_graalJar").flatMap { it.archiveFile }
     libVersionedName = "libsaxon-${edition}c-${saxonVersion3}"
-    outputDir = layout.buildDirectory.dir("${edition}c")
+    outputDir = layout.buildDirectory.dir("${edition}c/libsaxon")
   }
 
   task "${edition}c_graalImageExe"(
@@ -750,48 +748,43 @@ task all_saxonc_releases() {
   }
 }
 
-tasks.register("pyBuildVenv") {
-  description "Ensure there is a Python Venv for the current branch, creating one if none exists"
-
-  // only if the venv is not there
-  // (caching this won't work - we don't know the outputs until the task is run)
-  outputs.dir(project.pythonEnv.venvDirPath.map{ it.toString() })
-
-  doFirst {
-    exec {
-      logger.info("Creating Python Venv for ${project.branches.current.get()}")
-      executable project.pythonEnv.systemPythonBinary.get()
-      args "-m", "venv", project.pythonEnv.venvDirPath.get()
-    }
-  }
+def pythonPackageDirPath(String edition) {
+  layout.buildDirectory.dir("${edition}c/python/saxonc${edition}")
 }
+
 
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def graalEdition = "graal_ce_home"
-  def pypiDir = layout.buildDirectory.dir("${edition}c_pypi")
+  def pythonPackageDir = pythonPackageDirPath(edition)
 
   def libpath = systemOs.isWindows() ? 'libs\\\\win\\\\' : ''
+
+  /**
+   * eec/build/graalvm/*.jar
+   * eec/build/graalvm/jar
+   * eec/jar/libsaxon-eec-12.4.2.jar
+   * eec/libsaxon/*.h
+   * eec/libsaxon/*.dylib/so/dll
+   * eec/python/.whl
+   * eec/python/build
+   * eec/python/saxoncee/requirements.txt
+   * eec/python/installed_wheel.txt
+   *
+   * eec/jars/saxon-ee-12.4.2.jar vs
+   * libs/libsaxon-eec-12.4.2.jar
+   */
 
   tasks.register("setup_${edition}c_pypi") {
     inputs.files(tasks.named("${edition}c_build_graal_image").map { it.outputs.files })
     inputs.dir layout.projectDirectory.dir("src/main/c/pypi")
     inputs.dir layout.projectDirectory.dir("src/main/c/Saxon.C.API")
-    outputs.files layout.buildDirectory.dir("${edition}c_pypi").map {
-      it.asFileTree.matching {
-        exclude "built-wheel.txt"
-        exclude "installed-wheel.txt"
-        exclude "build/**"
-        exclude "__pycache__/**"
-        exclude "dist/**"
-        exclude "samples/data/**"
-        exclude "package02.xsltpack" // What is this doing being put here?
-      }
-    }
+
+    outputs.dir pythonPackageDir
 
     doLast {
       copy {
-        into layout.buildDirectory.dir("${edition}c_pypi")
+        into pythonPackageDir
         from layout.projectDirectory.dir("src/main/c/pypi")
         filter textReplacementFilter(edition, '', libpath)
       }
@@ -799,7 +792,7 @@ tasks.register("pyBuildVenv") {
 
     doLast {
       def platformDir = (systemOs.isMacOsX() ? "darwin" : (systemOs.isLinux() ? "nix" : "win"))
-      def SAXONC_HOME = pypiDir.map { it.file("libs/${platformDir}") }
+      def SAXONC_HOME = pythonPackageDir.map { it.file("libs/${platformDir}") }
 
       if (SAXONC_HOME == null) {
         throw GradleException("Don't know how to create Python packages on this OS.");
@@ -816,11 +809,11 @@ tasks.register("pyBuildVenv") {
     doLast {
       copy {
         from(tasks.named("${edition}c_build_graal_image").map { it.headerFiles })
-        into layout.buildDirectory.dir("${edition}c_pypi/Saxon.C.API/graalvm")
+        into pythonPackageDir.map{ it.dir("Saxon.C.API/graalvm") }
       }
       copy {
         from layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
-        into layout.buildDirectory.dir("${edition}c_pypi/python_saxon")
+        into pythonPackageDir.map{ it.dir("python_saxon") }
         include "saxonc.pyx"
         include "saxoncClasses.pxd"
         include "readme.txt"
@@ -828,14 +821,14 @@ tasks.register("pyBuildVenv") {
       }
       copy {
         from layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
-        into layout.buildDirectory.dir("${edition}c_pypi")
+        into pythonPackageDir
         include "test_saxonc.py"
         include "test_saxon_schema.py"
         filter textReplacementFilter(edition)
       }
       copy {
         from layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
-        into layout.buildDirectory.dir("${edition}c_pypi/samples")
+        into pythonPackageDir.map{ it.dir("samples") }
         include "saxon_example.py"
         include "saxon_example2.py"
         include "saxon_example3.py"
@@ -843,7 +836,7 @@ tasks.register("pyBuildVenv") {
       }
       copy {
         from layout.projectDirectory.dir("src/main/c/Saxon.C.API")
-        into layout.buildDirectory.dir("${edition}c_pypi/Saxon.C.API")
+        into pythonPackageDir.map{ it.dir("Saxon.C.API") }
 
         include "*.h"
         include "*.c"
@@ -857,42 +850,18 @@ tasks.register("pyBuildVenv") {
 
   tasks.register("${edition}c_pypi_pip_install", PipInstall) {
     pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
-    requirements = layout.file(tasks.named("setup_${edition}c_pypi").map {
-      it.outputs.files.filter { File file ->
-        file == layout.buildDirectory.file("${edition}c_pypi/requirements.txt").get().asFile
-      }.singleFile
-    })
+    requirements = tasks.named("setup_${edition}c_pypi").map {pythonPackageDir.map { it.file("requirements.txt") }.get() }
   }
 
-  tasks.register("saxon_${edition}c_local_wheel") {
-    dependsOn "${edition}c_pypi_pip_install"
-
-    def pythonExe = tasks.named("branchVenv").map { it.pythonExe.get() }
-    inputs.file pythonExe // probably unnecessary
-    inputs.files tasks.named("setup_${edition}c_pypi").map { it.outputs.files }
-    outputs.file layout.buildDirectory.file("${edition}c_pypi/built-wheel.txt")
-
-    doLast {
-      exec {
-        workingDir layout.buildDirectory.dir("${edition}c_pypi")
-
-        executable pythonExe.get()
-        args "-m", "build", "--wheel"
-      }
-
-    }
-
-    doLast {
-      def wheelFile = fileTree(layout.buildDirectory.dir("${edition}c_pypi/dist")).matching {
-        include "*.whl"
-      }.singleFile
-      file(layout.buildDirectory.file("${edition}c_pypi/built-wheel.txt")).newWriter().withWriter { w ->
-        w << wheelFile.toString()
-        w << "\n"
-        w << wheelShaDigest(wheelFile)
-        w << "\n"
-      }
-    }
+  tasks.register("${edition}c_python_build_wheel", BuildWheel) {
+    pythonExe = tasks.named("branchVenv").map { it.pythonExe.get() }
+    productEdition = edition
+    productVersion = saxonVersion3
+    // This weirdness is because we can't get just the dir from the outputs of the setup task,
+    // but without a link to the setup task it won't get counted as a dependency and run.
+    sourceDir = tasks.named("setup_${edition}c_pypi").map { pythonPackageDir.get() }
+    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
+    outputDir = layout.buildDirectory.dir("${edition}c/python")
   }
 
   task "saxon_${edition}c_stage_wheel"(
@@ -900,7 +869,7 @@ tasks.register("pyBuildVenv") {
   ) {
     def wheelDir = "wheels/${systemOsName}/${edition}c_pypi"
 
-    inputs.files tasks.named("saxon_${edition}c_local_wheel").map { it.outputs.files }
+    inputs.files tasks.named("${edition}c_python_build_wheel").map { it.outputs.files }
     outputs.dir  layout.buildDirectory.dir(wheelDir)
 
     doLast {
@@ -1110,6 +1079,8 @@ tasks.register("all_python_test_suites") {
 }
 
 ["ee", "pe", "he"].each { edition ->
+  def pythonPackageDir = pythonPackageDirPath(edition)
+
   def editionSuites = tasks.register("python_${edition}_test_suites") {
     description "Runs all Python the test suites for ${edition}"
   }
@@ -1117,51 +1088,28 @@ tasks.register("all_python_test_suites") {
     dependsOn editionSuites
   }
 
-  tasks.register("install_saxon_${edition}c_with_pip") {
-    def pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
-    def localWheelTask = tasks.named("saxon_${edition}c_local_wheel")
-    inputs.file pipExe
-    inputs.files localWheelTask.map { it.outputs.files }
-    outputs.file layout.buildDirectory.file("${edition}c_pypi/installed-wheel.txt")
-
-    def wheels = layout.buildDirectory.dir("${edition}c_pypi/dist")
-
-    doLast {
-      exec {
-        workingDir wheels //layout.buildDirectory.dir("${edition}c_pypi/dist")
-
-        def wheel = fileTree(wheels).matching {
-          include "*.whl"
-        }.singleFile
-
-        executable pipExe.get()
-        args "install", "--force-reinstall", wheel
-      }
-
-      def input = localWheelTask.map { it.outputs.files }.get().singleFile.readBytes()
-
-      file(layout.buildDirectory.file("${edition}c_pypi/installed-wheel.txt")).withOutputStream {f ->
-        f.write(input)
-      }
-    }
+  tasks.register("${edition}c_python_install_wheel", InstallLocalWheel) {
+    pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
+    wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
   }
 
   tasks.register("${edition}c_pytest_data", Copy) {
     from layout.projectDirectory.dir("src/main/c/samples/data")
-    into layout.buildDirectory.dir("${edition}c_pypi/samples/data")
+    into pythonPackageDir.map { it.dir("samples/data") }
   }
 
   tasks.register("${edition}c_pytest") {
-    dependsOn "install_saxon_${edition}c_with_pip"
+    dependsOn "${edition}c_pypi_pip_install"
+    dependsOn "${edition}c_python_install_wheel"
 
     def Provider<Directory> pytestDataDir = tasks.named("${edition}c_pytest_data").map { it.destinationDir }
-    def Provider<RegularFile> pytest = tasks.named("branchVenv").map {it.venvBinHostedExe("pytest").get() }
+    def Provider<RegularFile> pytest = pythonEnv.venvBinHostedExe("pytest")
 
     inputs.dir pytestDataDir
 
     doLast {
       exec {
-        workingDir layout.buildDirectory.dir("${edition}c_pypi")
+        workingDir pythonPackageDir
         executable pytest.get()
         args "--data-dir", file(pytestDataDir), "./test_saxonc.py"
         environment SAXONC_HOME: saxonLicenseDir
@@ -1193,25 +1141,24 @@ tasks.register("all_python_test_suites") {
       }
 
       tasks.register("${edition}c_python_${testsuite}_test_suite${langslug}") {
-        def output_path = layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion3}/${testsuite}/${DSTAMP}")
+        dependsOn "${edition}c_python_install_wheel"
 
+        def output_path = layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion3}/${testsuite}/${DSTAMP}")
         def pythonExe = tasks.named("branchVenv").map { it.pythonExe.get() }
-        inputs.file pythonExe
         def pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
+
+        inputs.file pythonExe
         inputs.file pipExe
-        inputs.files tasks.named("install_saxon_${edition}c_with_pip").map { it.outputs }
         inputs.files layout.buildDirectory.dir("${edition}c_pypi/testsuite_driver")
         outputs.dir output_path
 
         doLast {
           copy {
-            from "${projectDir}/src/main/c/pypi/testsuite_driver"
-            into "${buildDir}/${edition}c/${edition}c_testsuite_driver"
+            from layout.projectDirectory.dir("src/main/c/pypi/testsuite_driver")
+            into layout.buildDirectory.dir("${edition}c/${edition}c_testsuite_driver")
             filter textReplacementFilter(edition)
           }
-        }
 
-        doLast {
           exec {
             workingDir layout.buildDirectory.dir("${edition}c_pypi/testsuite_driver")
 

@@ -3,6 +3,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -122,6 +123,10 @@ abstract class GraalNativeImageTask extends DefaultTask {
         names.collect { name -> dir.file(name) }
     })
 
+    // This gets cast to a Provider so it's not updateable
+    @Internal
+    final Provider<Directory> libraryDir = outputDir
+
     private List<Object> generatedArgs() {
         ["-cp", sourceJar.get().asFile.toString(),
          "-o", outputDir.get().file(libVersionedName.get()),
@@ -130,6 +135,7 @@ abstract class GraalNativeImageTask extends DefaultTask {
          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
          "-H:+ReportExceptionStackTraces",
+        //  "-Dfile.encoding=UTF-8",
          "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
          "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
          "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
@@ -148,6 +154,10 @@ abstract class GraalNativeImageTask extends DefaultTask {
     void exec() {
         def firstArgs = generatedArgs()
         def remainingArgs = specifiedArgs.get()
+
+        // project.exec {
+        //     executable project.file("dumpenv.bat")
+        // }
 
         project.exec {
             executable project.graalvm.getNativeImage().get()
