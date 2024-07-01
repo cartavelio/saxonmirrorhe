@@ -122,18 +122,23 @@ public class CheckSumFilter extends ProxyReceiver {
         if (rootElement) {
             rootElement = false;
 
-            // A digest is required unless version is an X.Y string where X < 13.
-            // (If we want to force digests in 12.5, we'll have to edit this a bit.)
-
+            // A digest is required for version 12.5+
             String version = attributes.getValue("saxonVersion");
+            requireDigest = version == null; // No sneaky deleting the version to avoid the check
             if (version != null) {
+                String minorVersion = "x"; // cause number format exception
                 int dpos = version.indexOf('.');
                 if (dpos > 0) {
+                    minorVersion = version.substring(dpos+1);
                     version = version.substring(0, dpos);
                 }
                 try {
                     int majorVersion = Integer.parseInt(version);
-                    requireDigest = majorVersion >= 13;
+                    if (majorVersion > 12) {
+                        requireDigest = true;
+                    } else if (majorVersion == 12) {
+                        requireDigest = Integer.parseInt(minorVersion) >= 5;
+                    }
                 } catch (NumberFormatException e) {
                     requireDigest = true;
                 }
