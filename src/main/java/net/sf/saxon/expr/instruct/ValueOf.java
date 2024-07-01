@@ -400,11 +400,15 @@ public final class ValueOf extends SimpleNodeConstructor {
             if (noNodeIfEmpty) {
                 ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
                 return (output, context) -> {
-                    Item value = contentEval.eval(context);
-                    if (value != null) {
-                        output.characters(value.getUnicodeStringValue(), loc, options);
+                    try {
+                        Item value = contentEval.eval(context);
+                        if (value != null) {
+                            output.characters(value.getUnicodeStringValue(), loc, options);
+                        }
+                        return null;
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(expr.getLocation());
                     }
-                    return null;
                 };
             } else if (expr.getSelect().getItemType() == BuiltInAtomicType.STRING &&
                     !expr.isDisableOutputEscaping()
@@ -416,15 +420,23 @@ public final class ValueOf extends SimpleNodeConstructor {
                 //  (monitor the number of calls on characters(), or the size of the strings)
                 PushEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForPush();
                 return (output, context) -> {
-                    Outputter streamer = new TextNodeOutputStreamer(output, loc, options);
-                    return contentEval.processLeavingTail(streamer, context);
+                    try {
+                        Outputter streamer = new TextNodeOutputStreamer(output, loc, options);
+                        return contentEval.processLeavingTail(streamer, context);
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(expr.getLocation());
+                    }
                 };
             } else {
                 UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
                 return (output, context) -> {
-                    UnicodeString value = contentEval.eval(context);
-                    output.characters(value, loc, options);
-                    return null;
+                    try {
+                        UnicodeString value = contentEval.eval(context);
+                        output.characters(value, loc, options);
+                        return null;
+                    } catch (XPathException e) {
+                        throw e.maybeWithLocation(expr.getLocation());
+                    }
                 };
             }
         }
@@ -435,7 +447,13 @@ public final class ValueOf extends SimpleNodeConstructor {
             ItemEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForItem();
             boolean noNodeIfEmpty = expr.noNodeIfEmpty;
             boolean doe = expr.isDisableOutputEscaping();
-            return context -> ValueOf.makeTextNode(contentEval.eval(context), noNodeIfEmpty, doe, context);
+            return context -> {
+                try {
+                    return ValueOf.makeTextNode(contentEval.eval(context), noNodeIfEmpty, doe, context);
+                } catch (XPathException e) {
+                    throw e.maybeWithLocation(expr.getLocation());
+                }
+            };
         }
 
     }
