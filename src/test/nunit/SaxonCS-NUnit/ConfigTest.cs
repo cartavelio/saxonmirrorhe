@@ -5,7 +5,8 @@ namespace SaxonCS_NUnit
 {
     public class ConfigTest {
         
-        public static string repo = Environment.GetEnvironmentVariable("SAXONDEV_DIR");
+        public static string repo = Environment.GetEnvironmentVariable("SAXONDEV_DIR_12") 
+                                    ?? Environment.GetEnvironmentVariable("SAXONDEV_DIR");
         public static string extraTests = Environment.GetEnvironmentVariable("SAXON_EXTRA_TEST_SUITE_DIR");
         
         
