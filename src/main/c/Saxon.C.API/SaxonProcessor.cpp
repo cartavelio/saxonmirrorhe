@@ -77,7 +77,6 @@ void SaxonProcessor::getInfo() {
 const char *failure;
 sxnc_environment *SaxonProcessor::sxn_environ = 0;
 int SaxonProcessor::jvmCreatedCPP = 0;
-bool SaxonProcessor::extensionFlag = false;
 
 bool SaxonProcessor::exceptionOccurred() {
   return (bool)j_checkForException(sxn_environ->thread);
