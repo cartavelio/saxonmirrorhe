@@ -1,7 +1,7 @@
 import pytest
 from saxonc@@edition@@ import *
 
-class TestXslt30Processor:
+class Test30Processor:
     saxon_processor = PySaxonProcessor()
 
     @pytest.fixture

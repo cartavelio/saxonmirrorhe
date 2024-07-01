@@ -1701,6 +1701,7 @@ cdef class PyXsltExecutable:
     cdef PyXdmItem __global_context_item
     cdef PyXdmValue __initial_match_selection
     cdef dict __initial_template_parameters
+    cdef dict __initial_tunneling_template_parameters
     cdef dict __parameters
 
     def __cinit__(self):
@@ -1719,6 +1720,7 @@ cdef class PyXsltExecutable:
         self.processor = processor
         self.__parameters = {}
         self.__initial_template_parameters = {}
+        self.__initial_tunneling_template_parameters = {}
 
     def set_cwd(self, cwd):
         """
@@ -2038,6 +2040,23 @@ cdef class PyXsltExecutable:
         """
         self.thisxptr.clearProperties()
 
+    def get_initial_template_parameters(self, bool tunnel):
+        """
+        Returns the currently set dictionary of either tunneling or non-tunneling initial template parameters.
+        Any changes you make to the dictionary WILL NOT be reflected in the processor. This is a read-only view of
+        the parameters.
+
+        Args:
+            tunnel (bool): True if these values are to be used for setting tunnel parameters;
+                False if they are to be used for non-tunnel parameters. The default is false.
+        Returns:
+            (dict) the parameters dictionary
+        """
+        if tunnel:
+            return self.__initial_tunneling_template_parameters.copy()
+        else:
+            return self.__initial_template_parameters.copy()
+
     def set_initial_template_parameters(self, bool tunnel, dict parameters):
         """
         set_initial_template_parameters(self, bool tunnel, dict parameters)
@@ -2059,13 +2078,13 @@ cdef class PyXsltExecutable:
         cdef string key_str
         c_tunnel = tunnel
         cdef PyXdmValue _value
+        cdef dict param_dict = self.__initial_tunneling_template_parameters if tunnel else self.__initial_template_parameters
 
-        self.__initial_template_parameters.clear()
         for (key, value) in parameters.items():
             if isinstance(value, PyXdmValue):
                 _value = value
                 key_str = key.encode('UTF-8')
-                self.__initial_template_parameters[key] = self.processor.wrap_value(_value._get_underlying_value())
+                param_dict[key] = self.processor.wrap_value(_value._get_underlying_value())
                 c_params[key_str] = _value._get_underlying_value()
             else:
                 raise Exception("Initial template parameters can only be of type PyXdmValue or its sub-types")

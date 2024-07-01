@@ -1140,7 +1140,7 @@ tasks.register("all_python_test_suites") {
 
     workingDir pythonPackageDir
     environment SAXONC_HOME: saxonLicenseDir
-    environment SAXONC_DEBUG_FLAG: "true"//, SAXONC_TESTSUITE_DEBUG: "true"
+    //environment SAXONC_DEBUG_FLAG: "true"//, SAXONC_TESTSUITE_DEBUG: "true"
 
     baseArgs "--import-mode=importlib", "--data-dir", file(tasks.named("${edition}c_pytest_data").map { it.destinationDir })
     tests "test_saxonc.py", "tests"
