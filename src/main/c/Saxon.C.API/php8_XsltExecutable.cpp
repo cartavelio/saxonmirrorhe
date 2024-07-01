@@ -1333,6 +1333,7 @@ PHP_METHOD(XsltExecutable, transformToValue) {
               XdmNode *value = ooth->xdmNode;
               if (value != nullptr) {
                 node = xsltExecutable->transformToValue(value);
+                value->incrementRefCount();
               }
             }
           }

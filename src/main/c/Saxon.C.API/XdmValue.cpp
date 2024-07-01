@@ -146,8 +146,7 @@ XdmValue::~XdmValue() {
       }
 
     for (int i = 0; i < xdmSize; i++) {
-      if (relinquished_values[i] == (char)0 && values[i] != nullptr &&
-          values[i]->getRefCount() < 1) {
+      if (relinquished_values[i] == (char)0 && values[i] != nullptr) {
         delete values[i];
         values[i] = nullptr;
       }
@@ -164,7 +163,7 @@ XdmValue::~XdmValue() {
       }
     delete valueType;
   }
-  if (jValues > 0 && (this)->getRefCount() < 1) {
+  if (jValues > 0) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr << "XdmValue j_handles_destroy" << std::endl;
         }
