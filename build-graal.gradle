@@ -673,63 +673,67 @@ task all_saxonc_releases() {
 
   def arch = System.getProperty("os.arch") 
   def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-${arch}-v${saxonVersion3}"
-  def saxoncReleaseDir = "${buildDir}/releases/${saxoncReleaseName}"
   def saxoncReleasePath = "releases/${saxoncReleaseName}"
 
-  tasks.register("${edition}c_release_graal_shared_libs", Copy) {
-    def libdir = (systemOs.isMacOsX()
-            ? "libs/darwin"
-            : (systemOs.isLinux()
-            ? "libs/nix"
-            : "libs/win"))
+  ["debug", "release"].each { releaseKind ->
+    def graalTaskNameFragment = releaseKind == "debug" ? "_debug" : ""
+    def releasePath = "${saxoncReleasePath}${releaseKind == "debug" ? "-debug" : ""}"
 
-    from tasks.named("${edition}c_build_graal_image").map { it.sharedLibraryFiles }
-    into layout.buildDirectory.dir("${saxoncReleasePath}/${libdir}")
-  }
+    tasks.register("${edition}c_${releaseKind}_graal_shared_libs", Copy) {
+      def libdir = (systemOs.isMacOsX()
+              ? "libs/darwin"
+              : (systemOs.isLinux()
+              ? "libs/nix"
+              : "libs/win"))
 
-  tasks.register("${edition}c_release_graal_headers", Copy) {
-    from tasks.named("${edition}c_build_graal_image").map { it.headerFiles }
-    into layout.buildDirectory.dir("${saxoncReleasePath}/Saxon.C.API/graalvm")
-  }
+      from tasks.named("${edition}c_build_graal${graalTaskNameFragment}_image").map { it.sharedLibraryFiles }
+      into layout.buildDirectory.dir("${releasePath}/${libdir}")
+    }
 
-  tasks.register("${edition}c_release_c_files", Copy) {
-    into layout.buildDirectory.dir(saxoncReleasePath)
-    from(layout.projectDirectory.dir("src/main/c")) {
-      include "README.md"
-      include "samples/**"
-      include "command/**"
-      include "pypi/**"
-      include "Saxon.C.API/*.h"
-      include "Saxon.C.API/*.c"
-      include "Saxon.C.API/*.cpp"
-      include "Saxon.C.API/config.m4"
-      include "Saxon.C.API/config.w32"
-      exclude "pypi/python_saxon/**"
-      if (edition != "ee") {
-        exclude "command/Validate.c"
+    tasks.register("${edition}c_${releaseKind}_graal_headers", Copy) {
+      from tasks.named("${edition}c_build_graal${graalTaskNameFragment}_image").map { it.headerFiles }
+      into layout.buildDirectory.dir("${releasePath}/Saxon.C.API/graalvm")
+    }
+
+    tasks.register("${edition}c_${releaseKind}_c_files", Copy) {
+      into layout.buildDirectory.dir(releasePath)
+      from(layout.projectDirectory.dir("src/main/c")) {
+        include "README.md"
+        include "samples/**"
+        include "command/**"
+        include "pypi/**"
+        include "Saxon.C.API/*.h"
+        include "Saxon.C.API/*.c"
+        include "Saxon.C.API/*.cpp"
+        include "Saxon.C.API/config.m4"
+        include "Saxon.C.API/config.w32"
+        exclude "pypi/python_saxon/**"
+        if (edition != "ee") {
+          exclude "command/Validate.c"
+        }
+
+        filter textReplacementFilter(edition)
       }
 
-      filter textReplacementFilter(edition)
+      from(layout.projectDirectory.dir("src/main/c")) {
+        include "pypi/python_saxon/**"
+        filter textReplacementFilter(edition, '../../')
+      }
+
+      from(layout.projectDirectory.dir("src/docs")) {
+        include "notices/JAMESCLARK.txt"
+        include "notices/JLINE2.txt"
+        include "notices/LICENSE.txt"
+      }
     }
 
-    from(layout.projectDirectory.dir("src/main/c")) {
-      include "pypi/python_saxon/**"
-      filter textReplacementFilter(edition, '../../')
+    tasks.register("${edition}c_${releaseKind}_dir") {
+      inputs.files(tasks.named("${edition}c_${releaseKind}_graal_shared_libs").map { it.outputs.files })
+      inputs.files(tasks.named("${edition}c_${releaseKind}_graal_headers").map { it.outputs.files })
+      inputs.files(tasks.named("${edition}c_${releaseKind}_c_files").map { it.outputs.files })
+
+      outputs.dir(layout.buildDirectory.dir(releasePath))
     }
-
-    from(layout.projectDirectory.dir("src/docs")) {
-      include "notices/JAMESCLARK.txt"
-      include "notices/JLINE2.txt"
-      include "notices/LICENSE.txt"
-    }
-  }
-
-  tasks.register("${edition}c_release_dir") {
-    inputs.files(tasks.named("${edition}c_release_graal_shared_libs").map { it.outputs.files })
-    inputs.files(tasks.named("${edition}c_release_graal_headers").map { it.outputs.files })
-    inputs.files(tasks.named("${edition}c_release_c_files").map { it.outputs.files })
-
-    outputs.dir(layout.buildDirectory.dir(saxoncReleasePath))
   }
 
   def t = tasks.register("${edition}c_release_zip", Zip) {
