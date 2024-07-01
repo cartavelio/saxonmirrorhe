@@ -741,6 +741,7 @@ abstract class InstallLocalWheel extends DefaultTask {
 abstract class PytestRunner extends DefaultTask {
     private final List<Object> baseArguments = new ArrayList<>();
     private final List<Object> testArguments = new ArrayList<>();
+    private final List<Object> pytestTrailingArguments = new ArrayList<>();
     private Map<String, Object> environment = [:];
     private Object workingDir;
 
@@ -838,6 +839,35 @@ abstract class PytestRunner extends DefaultTask {
         return args;
     }
 
+    @Nullable
+    @Optional
+    @Input
+    List<String> getPytestTrailingArguments() {
+        List<String> args = new ArrayList<>();
+        for (Object argument : pytestTrailingArguments) {
+            args.add(argument.toString());
+        }
+        return args;
+    }
+
+    @Option(option = "s", description = "disable pytest capturing")
+    PytestRunner setS() {
+        pytestTrailingArguments.add("-s")
+        return this;
+    }
+
+    @Option(option = "v", description = "set pytest -v")
+    PytestRunner setV() {
+        pytestTrailingArguments.add("-v")
+        return this;
+    }
+
+    @Option(option = "debug", description = "set SAXONC_DEBUG_FLAG=true")
+    PytestRunner setSaxonCDebug() {
+        getEnvironment().put("SAXONC_DEBUG_FLAG", "true");
+        return this;
+    }
+
     @Internal
     public Map<String, Object> getEnvironment() {
         return this.environment
@@ -872,6 +902,7 @@ abstract class PytestRunner extends DefaultTask {
             executable runner.pytest.get()
             args runner.getBaseArgs()
             args runner.getTests()
+            args runner.getPytestTrailingArguments()
 
             if (runner.hasEnvironment()) {
                 environment runner.getEnvironment()
