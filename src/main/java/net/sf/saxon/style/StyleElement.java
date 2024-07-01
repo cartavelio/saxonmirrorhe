@@ -391,6 +391,7 @@ public abstract class StyleElement extends ElementImpl {
             }
             XmlProcessingIncident err = new XmlProcessingIncident("Namespace prefix " +
                                                       qName.getPrefix() + " refers to a reserved namespace", "XTSE0080");
+            err.setLocation(this);
             compileError(err);
             qName = new StructuredQName("saxon", NamespaceUri.SAXON, "error-name");
         }
