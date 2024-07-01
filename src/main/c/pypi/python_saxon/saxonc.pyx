@@ -1486,13 +1486,15 @@ cdef class PyXslt30Processor:
         cdef py_value = None
         cdef py_value2 = None
         if len(kwds) == 0:
-            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file, stylesheet_file, base_output_uri, encoding)")
+            raise Exception("transform_to_string should only contain the following keyword arguments: (source_file, stylesheet_file, base_output_uri, encoding)")
 
         if "source_file" in kwds:
             py_value2 = kwds["source_file"]
             '''c_sourcefile = make_c_str(py_value2)'''
             py_string_string2 = py_value2.encode('utf-8') if py_value2 is not None else None
             c_sourcefile = py_string_string2 if py_value2 is not None else ""
+        else:
+            raise Exception("Error transform_to_string keyword arguments does not contain source_file")
 
         if "base_output_uri" in kwds:
             py_value = kwds["base_output_uri"]
@@ -1506,6 +1508,8 @@ cdef class PyXslt30Processor:
             py_string_string = py_value1.encode('utf-8') if py_value1 is not None else None
             c_stylesheet = py_string_string if py_value1 is not None else ""
             '''make_c_str(py_value)'''
+        else:
+            raise Exception("Error transform_to_string keyword arguments does not contain stylesheet_file")
 
         encoding = sys.getdefaultencoding()
         if "encoding" in kwds:
