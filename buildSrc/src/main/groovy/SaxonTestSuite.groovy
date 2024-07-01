@@ -757,6 +757,9 @@ class SaxonTestSuite {
     // N.B. The eej and eedotnet patterns are different!
     def eedotnet = (parts[0] == "eedotnet")
     if (eedotnet) {
+      // Only two digits?
+      def vparts = pver.split("\\.")
+      pver = vparts[0] + "." + vparts[1]
       reportfn = "${options['reportDirectory']}/SaxonResults${pver}n.xml";
     }
 
