@@ -22,7 +22,7 @@ public final class Version {
     private static final int PATCH_VERSION = 0; // @@PATCH_VERSION@@
     private static final int BUILD = 32818; // @@BUILD@@; was mmddhh is now git hash. BEWARE: a leading 0 means octal.
     private static final String MAJOR_RELEASE_DATE = "2023-01-12"; // @@MAJOR_DATE@@
-    private static final String MINOR_RELEASE_DATE = "2024-03-28"; // @@MINOR_DATE@@
+    private static final String MINOR_RELEASE_DATE = "2024-06-14"; // @@MINOR_DATE@@
 
     private Version() {
         // class is never instantiated
