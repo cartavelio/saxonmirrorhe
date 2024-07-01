@@ -25,17 +25,9 @@ import javax.inject.Inject
 
 abstract class ManagePythonEnvExtension {
     abstract Property<String> getVenvBasePath()
+    abstract DirectoryProperty getVenvBaseDir()
     abstract Property<String> getPythonBinDirName()
-    abstract Property<String> getVenvPath()
-    abstract Property<String> getVenvPipPath()
-    abstract Property<String> getVenvPythonPath()
-    abstract Property<String> getVenvBinPath()
     abstract Property<String> getVenvBinarySuffix()
-    abstract DirectoryProperty getVenvBinDir()
-
-    Provider<String> venvBinHostedExe(String exe) {
-        venvBinDir.map { it.file("${exe}${venvBinarySuffix.get()}") }
-    }
 }
 
 class ManagePythonEnvPlugin implements Plugin<Project> {
@@ -50,18 +42,12 @@ class ManagePythonEnvPlugin implements Plugin<Project> {
             pythonBinFolder = "bin"
         }
 
-        def venvBaseDir = project.layout.buildDirectory.dir(project.branches.current.map { it })
-        Provider<Directory> venvDir = venvBaseDir
-        def venvBinDir = venvDir.map { it.dir(pythonBinFolder) }
+        def venvBaseDir = project.layout.buildDirectory.dir("pyvenv")
 
         extension.pythonBinDirName.convention(pythonBinFolder)
         extension.venvBinarySuffix.convention(sysVenvBinarySuffix)
+        extension.venvBaseDir.convention(venvBaseDir)
         extension.venvBasePath.convention(venvBaseDir.map { it.asFile.toString() })
-        extension.venvPath.convention(venvDir.map { it.asFile.toString() })
-        extension.venvBinPath.convention(venvBinDir.map { it.asFile.toString() })
-        extension.venvBinDir.convention(venvBinDir)
-        extension.venvPipPath.convention(venvBinDir.map { it.file("pip3${sysVenvBinarySuffix}").asFile.toString() })
-        extension.venvPythonPath.convention(venvBinDir.map { it.file("python${sysVenvBinarySuffix}").asFile.toString() })
     }
 }
 
@@ -189,7 +175,7 @@ abstract class PythonVenv extends DefaultTask {
     }
 
     @Internal
-    final Provider<Directory> venvPath = project.layout.dir(project.pythonEnv.venvBasePath.map { project.file(it) }).map { it.dir(venvName.get()) }
+    final Provider<Directory> venvPath = project.pythonEnv.venvBaseDir.map { it.dir(venvName.get()) }
 
     @Internal
     final Provider<Directory> venvBinPath = venvPath.map { it.dir(project.pythonEnv.pythonBinDirName.get()) }
@@ -418,6 +404,8 @@ abstract class BuildWheel extends DefaultTask {
         this.fileSystemOperations = fileSystemOperations
     }
 
+    @Input
+    abstract Property<String> getManylinuxTarget()
 
     @InputFile
     abstract RegularFileProperty getPythonExe()
@@ -448,7 +436,40 @@ abstract class BuildWheel extends DefaultTask {
     final Provider<Directory> buildDir = outputDir.map {it.dir("build") }
 
     @Internal
-    Provider<String> wheelFilePlatformSuffix = pythonExe.map {python ->
+    Provider<String> repairedWheelFilePlatformSuffix = pythonExe.map {python ->
+        OperatingSystem systemOs = OperatingSystem.current()
+        def platform = systemOs.isLinux() ? repairedLinuxPlatform() : unrepairedPlatform()
+        (new ByteArrayOutputStream()).withStream { out ->
+            project.exec {
+                environment REPAIRED_PLATFORM: platform
+                workingDir sourceDir.get()
+                executable python
+                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; import os; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['REPAIRED_PLATFORM']))"
+                standardOutput out
+            }
+            out.toString().trim()
+        }
+    }
+
+    String repairedLinuxPlatform() {
+        def arch = unrepairedPlatform().replace("linux_", "")
+        "${manylinuxTarget.get()}_${arch}"
+    }
+
+    String unrepairedPlatform() {
+        (new ByteArrayOutputStream()).withStream { out ->
+            project.exec {
+                workingDir sourceDir.get()
+                executable pythonExe.get()
+                args "-c", "from wheel.bdist_wheel import get_platform; print(get_platform('.'))"
+                standardOutput out
+            }
+            out.toString().trim()
+        }
+    }
+
+    @Internal
+    Provider<String> inputWheelFilePlatformSuffix = pythonExe.map {python ->
         (new ByteArrayOutputStream()).withStream { out ->
             project.exec {
                 workingDir sourceDir.get()
@@ -461,13 +482,18 @@ abstract class BuildWheel extends DefaultTask {
     }
 
     @Internal
-    Provider<String> wheelFilename = productEdition.map { prod ->
-        "saxonc${prod}-${productVersion.get()}-${wheelFilePlatformSuffix.get()}.whl"
+    Provider<String> inputWheelFilename = productEdition.map { prod ->
+        "saxonc${prod}-${productVersion.get()}-${inputWheelFilePlatformSuffix.get()}.whl"
+    }
+
+    @Internal
+    Provider<String> repairedWheelFilename = productEdition.map { prod ->
+        "saxonc${prod}-${productVersion.get()}-${repairedWheelFilePlatformSuffix.get()}.whl"
     }
 
     @OutputFile
     Provider<RegularFile> wheel = productEdition.flatMap { prod ->
-        outputDir.map { it.file(wheelFilename.get()) }
+        outputDir.map { it.file(repairedWheelFilename.get()) }
     }
 
     @TaskAction
@@ -494,7 +520,7 @@ abstract class BuildWheel extends DefaultTask {
             executable repairwheelExe.get()
             args "--output-dir", outputDir.get(),
                     "--lib-dir", libraryDir.get(),
-                    buildDir.map {it.file("dist/${wheelFilename.get()}") }.get()
+                    buildDir.map {it.file("dist/${inputWheelFilename.get()}") }.get()
             println(it.commandLine)
         }
     }

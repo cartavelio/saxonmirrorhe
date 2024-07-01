@@ -914,6 +914,7 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
   }
 
   tasks.register("${edition}c_python_build_debug_wheel", BuildWheel) {
+    manylinuxTarget = "manylinux_2_24"
     pythonExe = tasks.named("branchDebugVenv").map { it.pythonExe.get() }
     repairwheelExe = tasks.named("branchDebugVenv").map { it.venvBinHostedExe("repairwheel").get() }
     productEdition = edition
@@ -1169,7 +1170,7 @@ tasks.register("all_python_test_suites") {
     dependsOn "${edition}c_python_install_wheel"
 
     def Provider<Directory> pytestDataDir = tasks.named("${edition}c_pytest_data").map { it.destinationDir }
-    def Provider<RegularFile> pytest = pythonEnv.venvBinHostedExe("pytest")
+    def Provider<RegularFile> pytest = tasks.named("branchVenv").map { it.venvBinHostedExe("pytest") }
 
     inputs.dir pytestDataDir
 

@@ -1,82 +1,78 @@
-FROM ubuntu:latest AS saxon-prereqs
+FROM quay.io/pypa/manylinux_2_28_aarch64 AS saxon-prereqs
 LABEL authors="matt"
 LABEL com.saxonica.project=saxonc
 
 ARG UID
 ARG GID
-# Crib much of this from CircleCI's base and python docker files
-# Change default shell for RUN from Dash to Bash
-SHELL ["/bin/bash", "-exo", "pipefail", "-c"]
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    TERM=dumb \
-    PAGER=cat
+# We're building off the manylinux base image, which is AlmaLinux (RHEL derived)
+
+RUN dnf -y install --allowerasing \
+    sudo \
+    java-11-openjdk-headless \
+    valgrind \
+    bzip2-devel \
+    libffi-devel \
+    ncurses-devel \
+    openssl-devel \
+    readline-devel \
+    sqlite-devel \
+    xz-devel \
+    && \
+    dnf clean all && \
+    rm -rf /var/cache/yum
 
 # Configure environment
-RUN echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/90saxonica && \
-	echo 'DPkg::Options "--force-confnew";' >> /etc/apt/apt.conf.d/90saxonica && \
-	apt-get update && apt-get install -y \
-        curl \
-        locales \
-        sudo \
-	&& \
-    mkdir -p /opt && \
-	locale-gen en_US.UTF-8 && \
-	rm -rf /var/lib/apt/lists/* && \
-    if [ ! getent group ${GID} ]; then groupadd --gid=${GID} saxonica; fi && \
+RUN echo "GID: ${GID}" && if getent group ${GID} > /dev/null; [ $? -ne 0 ]; then groupadd --gid=${GID} saxonica; fi && \
     useradd --uid=${UID} --gid=${GID} --create-home saxonica --home-dir /opt/saxonica && \
     echo 'saxonica ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-saxonica && \
-    echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep && \
     sudo -u saxonica mkdir /opt/saxonica/bin
 
-ENV PATH=/opt/saxonica/bin:$PATH \
-	LANG=en_US.UTF-8 \
-	LANGUAGE=en_US:en \
-	LC_ALL=en_US.UTF-8
+ENV PATH=/opt/saxonica/bin:$PATH
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		build-essential \
-		ca-certificates \
-		cmake \
-		file \
-		gettext-base \
-		gzip \
-		jq \
-		libcurl4-openssl-dev \
-		libssl-dev \
-		libsqlite3-dev \
-        libbz2-dev \
-        liblzma-dev \
-        libncurses5-dev \
-        libncursesw5-dev \
-        libreadline-dev \
-        libffi-dev \
-        libsqlite3-dev \
-        libssl-dev \
-        libxml2-dev \
-        libxmlsec1-dev \
-        llvm \
-		lsof \
-        make \
-        openjdk-11-jdk-headless \
-		pkg-config \
-        python3-openssl \
-		retry \
-		shellcheck \
-		software-properties-common \
-        tk-dev \
-        unzip \
-        valgrind \
-		vim \
-		wget \
-        wget \
-        xz-utils \
-		zip \
-        zlib1g-dev && \
-	# get the semi-official latest-stable git instead of using the old(er) version from the ubuntu distro
-	add-apt-repository ppa:git-core/ppa && apt-get install -y git && \
-    git config --global --add safe.directory /opt/saxonica/saxondev && \
-	rm -rf /var/lib/apt/lists/*
+#RUN apt-get update && apt-get install -y --no-install-recommends \
+#		build-essential \
+#		ca-certificates \
+#		cmake \
+#		file \
+#		gettext-base \
+#		gzip \
+#		jq \
+#		libcurl4-openssl-dev \
+#		libssl-dev \
+#		libsqlite3-dev \
+#        libbz2-dev \
+#        liblzma-dev \
+#        libncurses5-dev \
+#        libncursesw5-dev \
+#        libreadline-dev \
+#        libffi-dev \
+#        libsqlite3-dev \
+#        libssl-dev \
+#        libxml2-dev \
+#        libxmlsec1-dev \
+#        llvm \
+#		lsof \
+#        make \
+#        openjdk-11-jdk-headless \
+#		pkg-config \
+#        python3-openssl \
+#		retry \
+#		shellcheck \
+#		software-properties-common \
+#        tk-dev \
+#        unzip \
+#        valgrind \
+#		vim \
+#		wget \
+#        wget \
+#        xz-utils \
+#		zip \
+#        zlib1g-dev && \
+#	# get the semi-official latest-stable git instead of using the old(er) version from the ubuntu distro
+#	add-apt-repository ppa:git-core/ppa && apt-get install -y git && \
+#    git config --global --add safe.directory /opt/saxonica/saxondev && \
+#	rm -rf /var/lib/apt/lists/*
 
 FROM saxon-prereqs AS saxon-graalvm
 
@@ -101,12 +97,15 @@ FROM saxon-gradle AS saxon-python
 # Run commands as saxonica user
 USER saxonica
 
+# Stop Git complaining about safety
+RUN git config --global --add safe.directory /opt/saxonica/saxondev
+
 # Setup valgrind-enabled python debug build recipe for pyenv
 RUN mkdir -p /opt/saxonica/python-build
 
 ADD 3.12.2-valgrind /opt/saxonica/python-build/
 
-WORKDIR /home/saxonica
+WORKDIR /opt/saxonica
 
 # Install and set up pyenv
 ENV PYENV_ROOT=/opt/saxonica/pyenv \
@@ -120,9 +119,14 @@ RUN curl -sSL "https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-ins
     echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.profile && \
     echo 'eval "$(pyenv init -)"' >> ~/.profile
 
-RUN pyenv install /opt/saxonica/python-build/3.12.2-valgrind && \
-    sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN pyenv install /opt/saxonica/python-build/3.12.2-valgrind
+RUN sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+
+
+#RUN pyenv install /opt/saxonica/python-build/3.12.2-valgrind && \
+#    sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+VOLUME /opt/saxonica/user-scripts
 VOLUME /opt/saxonica/pyenv/versions
 VOLUME /opt/saxonica/pyenv/shims
 
@@ -141,5 +145,3 @@ VOLUME /opt/saxonica/saxondev/buildSrc/build
 VOLUME /opt/saxonica/saxondev/buildSrc/.gradle
 
 WORKDIR /opt/saxonica/saxondev
-
-ENTRYPOINT ["/bin/bash"]
