@@ -1151,6 +1151,7 @@ tasks.register("all_python_test_suites") {
   tasks.register("${edition}c_python_repair_test_wheel", RepairLocalWheel) {
     outputDir = pythonBuildRootPath(edition)
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    manylinuxTarget = "linux"
     pythonVenvTask = branchVenvTask
     productEdition = edition
     repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
