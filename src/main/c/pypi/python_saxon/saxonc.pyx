@@ -1227,7 +1227,6 @@ cdef class PyXslt30Processor:
         """
         self.processor = processor
 
-
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
@@ -1303,6 +1302,7 @@ cdef class PyXslt30Processor:
         cdef PyXdmValue val = PyXdmValue(self.processor)
         val.thisvptr = self.thisxptr.getParameter(c_name)
         return val
+
      def remove_parameter(self, name, encoding=None):
         """
         remove_parameter(self, name, encoding=None)
@@ -1820,6 +1820,7 @@ cdef class PyXsltExecutable:
                 raise Exception("xdm_item value must be of type PyXdmItem")
         else:
           raise Exception(py_error_message)
+
      def set_initial_match_selection(self, **kwds):
         """
         set_initial_match_selection(self, **kwds)
@@ -2038,7 +2039,16 @@ cdef class PyXsltExecutable:
         clear_parameter(self)
         Clear all parameters set on the processor for execution of the stylesheet
         """
+        cdef map[string , saxoncClasses.XdmValue * ] c_parameters
+        c_parameters = self.thisxptr.getParameters()
+        cdef map[string , saxoncClasses.XdmValue * ].iterator it = c_parameters.begin()
+
+        while(it != c_parameters.end()):
+            dereference(it).second.decrementRefCount()
+            postincrement(it)
+
         self.thisxptr.clearParameters()
+
      def clear_properties(self):
         """
         clear_properties(self)
@@ -2391,47 +2401,13 @@ cdef class PyXsltExecutable:
         xdmValue = self.thisxptr.applyTemplatesReturningValue()
         return self.processor.wrap_value(xdmValue)
 
-     def _set_initial_match_selection(self, value):
+     def _set_initial_match_selection(self, PyXdmValue value):
          """
          Set the initial match selection using to the given XDM value
          :param value:
          :return:
          """
-         # cdef PyXdmValue value_ = None
-         # cdef PyXdmItem valuei_ = None
-         # cdef PyXdmNode valuen_ = None
-         # cdef PyXdmAtomicValue valueav_ = None
-         # cdef PyXdmFunctionItem valuef_ = None
-         # cdef PyXdmMap valuem_ = None
-         # cdef PyXdmArray valuear_ = None
-         cdef saxoncClasses.XdmValue *value_ptr = NULL
-
-         if isinstance(value, PyXdmValue):
-             # value_ptr = <saxoncClasses.XdmValue *>(value.thisvptr)
-             value_ptr = (<PyXdmValue>value).thisvptr
-         elif isinstance(value, PyXdmItem):
-             # value_ptr = <saxoncClasses.XdmValue *>value.derivedptr
-             value_ptr = (<PyXdmItem>value).derivedptr
-         elif isinstance(value, PyXdmNode):
-             # value_ptr = <saxoncClasses.XdmValue *>value.derivednptr
-             value_ptr = (<PyXdmNode>value).derivednptr
-         elif isinstance(value, PyXdmAtomicValue):
-             # value_ptr = <saxoncClasses.XdmValue *>value.derivedaptr
-             value_ptr = (<PyXdmAtomicValue>value).derivedaptr
-         elif isinstance(value, PyXdmFunctionItem):
-             # value_ptr = <saxoncClasses.XdmValue *>value.derivedfptr
-             value_ptr = (<PyXdmFunctionItem>value).derivedfptr
-         elif isinstance(value, PyXdmMap):
-             # value_ptr = <saxoncClasses.XdmValue *>value.derivedmmptr
-             value_ptr = (<PyXdmMap>value).derivedmmptr
-         elif isinstance(value, PyXdmArray):
-             # value_ptr = <saxoncClasses.XdmValue *>value.derivedaaptr
-             value_ptr = (<PyXdmArray>value).derivedaaptr
-         else:
-            raise Exception("value not a instance of PyXdmValue or one of its subclasses")
-
-         self.thisxptr.setInitialMatchSelection(value_ptr)
-         value_ptr.incrementRefCount()
+         self.thisxptr.setInitialMatchSelection(value._borrow_underlying_value())
 
      def apply_templates_returning_string(self, **kwds):
         """
@@ -2463,13 +2439,6 @@ cdef class PyXsltExecutable:
 			   print(content)
         """
         cdef const char * c_sourcefile = NULL
-        cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
         encoding = "UTF-8"
 
         for key, value in kwds.items():
@@ -2519,13 +2488,6 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_sourcefile = NULL
         cdef const char * c_outputfile = NULL
-        cdef PyXdmValue value_ = None
-        cdef PyXdmItem valuei_ = None
-        cdef PyXdmNode valuen_ = None
-        cdef PyXdmAtomicValue valueav_ = None
-        cdef PyXdmFunctionItem valuef_ = None
-        cdef PyXdmMap valuem_ = None
-        cdef PyXdmArray valuear_ = None
         py_output_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
@@ -2716,20 +2678,13 @@ cdef class PyXsltExecutable:
 
         for x in range(len(args)):
           if isinstance(args[x], PyXdmValue):
-            value_ = args[x]
-            argumentV[x] = value_.thisvptr
-            argumentV[x].incrementRefCount()
+              value_ = args[x]
+              argumentV[x] = value_._borrow_underlying_value()
           else:
-            raise Exception("Argument value at position " , x , " is not a PyXdmValue. The following object found: ", type(args[x]))
+              raise Exception("Argument value at position " , x , " is not a PyXdmValue. The following object found: ", type(args[x]))
         '''c_functionName = make_c_str(function_name)'''
         py_function_string = function_name.encode('UTF-8') if function_name is not None else None
         c_functionName = py_function_string if function_name is not None else ""
-        cdef PyXdmValue val = None
-        cdef PyXdmAtomicValue aval = None
-        cdef PyXdmNode nval = None
-        cdef PyXdmMap mval = None
-        cdef PyXdmArray aaval = None
-        cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         xdmValue = self.thisxptr.callFunctionReturningValue(c_functionName, argumentV, len(args))
         if len_ > 0:
@@ -2774,18 +2729,13 @@ cdef class PyXsltExecutable:
         cdef saxoncClasses.XdmValue ** argumentV = self.thisxptr.createXdmValueArray(_len)
         for x in range(_len):
           if isinstance(args[x], PyXdmValue):
-            value_ = args[x]
-            argumentV[x] = value_.thisvptr
-            value_.thisvptr.incrementRefCount()
+              value_ = args[x]
+              argumentV[x] = value_._borrow_underlying_value()
           else:
-            raise Exception("Argument value at position ",x," is not a PyXdmValue")
+              raise Exception("Argument value at position ",x," is not a PyXdmValue")
         '''c_functionName = make_c_str(function_name)'''
         py_s_string = function_name.encode('UTF-8') if function_name is not None else None
         c_functionName = py_s_string if function_name is not None else ""
-        cdef PyXdmValue val = None
-        cdef PyXdmAtomicValue aval = None
-        cdef PyXdmNode nval = None
-        cdef saxoncClasses.XdmValue * xdmValue = NULL
         cdef const char* c_string = self.thisxptr.callFunctionReturningString(c_functionName, argumentV, _len)
         if _len > 0:
             self.thisxptr.deleteXdmValueArray(argumentV, _len)
@@ -2836,18 +2786,13 @@ cdef class PyXsltExecutable:
         cdef saxoncClasses.XdmValue ** argumentV = self.thisxptr.createXdmValueArray(_len)
         for x in range(len(args)):
           if isinstance(args[x], PyXdmValue):
-            value_ = args[x]
-            argumentV[x] = value_.thisvptr
-            value_.thisvptr.incrementRefCount()
+              value_ = args[x]
+              argumentV[x] = value_._borrow_underlying_value()
           else:
             raise Exception("Argument value at position ",x," is not a PyXdmValue")
         '''c_functionName = make_c_str(function_name)'''
         py_s_string = function_name.encode('UTF-8') if function_name is not None else None
         c_functionName = py_s_string if function_name is not None else ""
-        cdef PyXdmValue val = None
-        cdef PyXdmAtomicValue aval = None
-        cdef PyXdmNode nval = None
-        cdef saxoncClasses.XdmValue * xdmValue = NULL
         self.thisxptr.callFunctionReturningFile(c_functionName, argumentV, _len, c_outputfile)
         if _len > 0:
             self.thisxptr.deleteXdmValueArray(argumentV, _len)
@@ -4218,6 +4163,11 @@ cdef class PyXdmValue:
         Returns the Iterator object of PyXdmValue
         """
         return PyXdmValueIterator(self)
+
+     cdef saxoncClasses.XdmValue* _borrow_underlying_value(self):
+         self.thisvptr.incrementRefCount()
+         return self.thisvptr
+
 cdef class PyXdmValueIterator:
      """ Iterator class for PyXdmValue """
      cdef PyXdmValue _value
@@ -5121,16 +5071,9 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          """
          cdef saxoncClasses.XdmValue * c_xdmValue = NULL
          cdef PyXdmAtomicValue avalue_
-         cdef PyXdmValue value_
-         cdef PyXdmAtomicValue aval = None
-         cdef PyXdmNode nval = None
-         cdef PyXdmFunctionItem fval = None
-         cdef PyXdmMap mval = None
-         cdef PyXdmArray aaval = None
          cdef int i_key
          cdef float k_key
          cdef str keyStr
-         cdef type_ = 0
          cdef char * c_key_str = NULL
 
          if isinstance(key, PyXdmAtomicValue):
