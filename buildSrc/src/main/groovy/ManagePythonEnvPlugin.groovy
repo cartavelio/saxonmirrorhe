@@ -856,6 +856,12 @@ abstract class PytestRunner extends DefaultTask {
         return this;
     }
 
+    @Option(option = "tee-sys", description = "disable pytest capturing")
+    PytestRunner setTeeS() {
+        pytestTrailingArguments.add("--capture=tee-sys")
+        return this;
+    }
+
     @Option(option = "v", description = "set pytest -v")
     PytestRunner setV() {
         pytestTrailingArguments.add("-v")
