@@ -234,7 +234,7 @@ abstract class PythonVenv extends DefaultTask {
 
         project.exec {
             executable pipExe.get().asFile.toString()
-            args("install", "--require-virtualenv", "build", "wheel", "setuptools", *platformWheelFixupRequirements(), *buildRequirements.get())
+            args("install", "--require-virtualenv", "build", "wheel", "setuptools", "repairwheel", *platformWheelFixupRequirements(), *buildRequirements.get())
         }
     }
 }
