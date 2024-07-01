@@ -86,10 +86,16 @@ public abstract class XdmItem extends XdmValue {
      * returns an XML serialization of the node.</p>
      *
      * @return the result of converting the item to a string.
+     * @throws IllegalStateException if the item is of a type that does not have
+     * a string value, for example a function (including a map or array).
      */
 
     public String getStringValue() {
-        return getUnderlyingValue().getStringValue();
+        try {
+            return getUnderlyingValue().getStringValue();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -101,10 +107,16 @@ public abstract class XdmItem extends XdmValue {
      * but represented as an instance of {@link UnicodeString}.</p>
      *
      * @return the result of converting the item to a string.
+     * @throws IllegalStateException if the item is of a type that does not have
+     * a string value, for example a function (including a map or array).
      */
 
     public UnicodeString getUnicodeStringValue() {
-        return getUnderlyingValue().getUnicodeStringValue();
+        try {
+            return getUnderlyingValue().getUnicodeStringValue();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
