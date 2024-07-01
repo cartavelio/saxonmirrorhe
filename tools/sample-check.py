@@ -15,7 +15,7 @@ def check_against_map(expect, output):
     while len(lines) > 0:
         line = lines[0]
         lines = lines[1:]
-        title = re.match("^====\s*(.+?)\s*====\s*$", line)
+        title = re.match(r"^====\s*(.+?)\s*====\s*$", line)
         if title:
             found[title.group(1)] = 1
             lines = check(expect, title.group(1), lines)
@@ -141,7 +141,7 @@ def check_s9apiexamples_he(output):
          "SerializeA": ["", r"^<a ", r"^.*<z xmlns=../>"],
          "SerializeB": ["", r"<d>4</d>", r"<c>3</c>", r"<b>2</b>"],
          "SerializeC": ["", r"Serialized result: 5 6 7 8 9 10 & 20"],
-         "SerializeD": ["", "Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
+         "SerializeD": ["", r"Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
          "NavigationA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
          "NavigationD": ["", r"^Tess of the .*", r"^Jude the Obscure"]
          }, output)
@@ -169,7 +169,7 @@ def check_s9apiexamples_pe(output):
          "SerializeA": ["", r"^<a ", r"^.*<z xmlns=../>"],
          "SerializeB": ["", r"<d>4</d>", r"<c>3</c>", r"<b>2</b>"],
          "SerializeC": ["", r"Serialized result: 5 6 7 8 9 10 & 20"],
-         "SerializeD": ["", "Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
+         "SerializeD": ["", r"Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
          "NavigationA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
          "NavigationD": ["", r"^Tess of the .*", r"^Jude the Obscure"]
          }, output)
@@ -207,7 +207,7 @@ def check_s9apiexamples_ee(output):
          "SerializeA": ["", r"^<a ", r"^.*<z xmlns=../>"],
          "SerializeB": ["", r"<d>4</d>", r"<c>3</c>", r"<b>2</b>"],
          "SerializeC": ["", r"Serialized result: 5 6 7 8 9 10 & 20"],
-         "SerializeD": ["", "Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
+         "SerializeD": ["", r"Serialized result: <\?xml.*", r"<doc xmlns", r"^.*<heading"],
          "NavigationA": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
          "NavigationB": ["", "Result: 6.11"],
          "NavigationC": ["", r"^TITLE\(7\): Pride and Prejudice", r"^TITLE\(20\): Wuthering Heights"],
@@ -235,13 +235,13 @@ def check_pullexamples(output):
          "Transform the input to the output": ["", "<!DOCTYPE HTML.*", r"^<html>", "^is here", "^.*<head>"],
          "Run XQuery against the input": ["", r"<\?xml.*", "<book>", ".*<author>"],
          "Remove PRICE elements from the input": ["", r"^<\?xml.*", r"<\?xml-stylesheet",
-                                                  "<BOOKLIST.*", "^.*xsi:", "^\s*<BOOKS>",
-                                                  "\s*<ITEM.*", "\s*<TITLE>", "\s*<AUTHOR>",
-                                                  "\s*<PUBLISHER>", "\s*<PUB-DATE>", "\s*<LANGUAGE>",
-                                                  "\s*<QUANTITY>", "\s*<ISBN>", "\s*<PAGES>", 
-                                                  "\s*<DIMENSIONS", "\s*<WEIGHT"],
+                                                  r"<BOOKLIST.*", r"^.*xsi:", r"^\s*<BOOKS>",
+                                                  r"\s*<ITEM.*", r"\s*<TITLE>", r"\s*<AUTHOR>",
+                                                  r"\s*<PUBLISHER>", r"\s*<PUB-DATE>", r"\s*<LANGUAGE>",
+                                                  r"\s*<QUANTITY>", r"\s*<ISBN>", r"\s*<PAGES>", 
+                                                  r"\s*<DIMENSIONS", r"\s*<WEIGHT"],
          "Compute average of PRICE elements in the input": ["", r"<result>11.1749.*"],
-         "Obtain query results using a pull iterator": ["", r"<\?xml.*", "^\s*<e .*", "^\s*<f "],
+         "Obtain query results using a pull iterator": ["", r"<\?xml.*", r"^\s*<e .*", r"^\s*<f "],
          "Obtain query results using a pull iterator on a 'standard' tree": ["", r"<\?xml .*",
                                                                              "<CATEGORIES "],
          }, output)
@@ -281,9 +281,9 @@ def check_xqjexamples(output):
          "TestF": ["", "setDocumentLocator", "startDocument",
                    "startPrefixMapping: .*", "startPrefixMapping: .*",
                    "startElement:.*"],
-         "TestG": ["", "<a xmlns=.*", "^\s*<b>4<"],
+         "TestG": ["", "<a xmlns=.*", r"^\s*<b>4<"],
          "TestH": ["", "1 peach 1951-10-11 PT5M 93.7 <the end>"],
-         "TestI": ["", "^start {.*", "^\s*start namespace .*", "^\s*start namespace .*"],
+         "TestI": ["", r"^start {.*", r"^\s*start namespace .*", r"^\s*start namespace .*"],
          "TestJ": ["", "count: 24"],
          "TestK": ["", r"<BOOKS>", r"^\s*<ITEM "],
          "TestL": ["", r"Locale: Italian"],
