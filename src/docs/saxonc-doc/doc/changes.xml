@@ -172,13 +172,13 @@
             change their code accordingly. See the following code snippet as an example of the new code:
                <pre><code class="language-python"><![CDATA[  PyXdmFunctionItem.get_system_function(saxonproc,
     '{http://www.w3.org/2005/xpath-functions}parse-json', 1)  ]]></code></pre></li>
-            <li>The <code>XdmValue</code> class constructor now requires the
+            <li>The <code>PyXdmValue</code> class constructor now requires the
                <code>PySaxonProcessor</code> instance as an argument to create an empty sequence.
                For example, <code>xdm_value = PyXdmValue(saxonproc)</code>, where the
                <code>saxonproc</code> is the instance of the <code>PySaxonProcessor</code> class.
                This is another breaking change but an important one for better memory management.
                As an alternative, the new method <code>empty_sequence()</code> is added on the
-               <code>PySaxonProcessor</code> class, which can be used to create an empty <code>XdmValue</code> object.</li>
+               <code>PySaxonProcessor</code> class, which can be used to create an empty <code>PyXdmValue</code> object.</li>
             <li>The way that memory management is handled internally has been significantly overhauled, removing a
                number of memory leaks, and making it much more robust concerning memory handling in C++, Python,
                and PHP. (See bug issues <a href="https://saxonica.plan.io/issues/6338" target="_blank">#6338</a>,
