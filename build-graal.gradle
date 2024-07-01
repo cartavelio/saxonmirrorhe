@@ -800,11 +800,11 @@ task all_saxonc_releases() {
 }
 
 
-def pythonBuildRootPath(String edition, Boolean debug = false) {
+Provider<Directory> pythonBuildRootPath(String edition, Boolean debug = false) {
   layout.buildDirectory.dir("${edition}c/python${debug ? "-debug" : ""}")
 }
 
-def pythonPackageDirPath(String edition, Boolean debug = false) {
+Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) {
   pythonBuildRootPath(edition, debug).map { it.dir("saxonc${edition}${debug ? "-debug" : ""}") }
 }
 
@@ -1112,7 +1112,7 @@ tasks.register("all_python_test_suites") {
 
   tasks.register("${edition}c_pytest_data", Copy) {
     from layout.projectDirectory.dir("src/main/c/samples/data")
-    into pythonBuildRootPath(edition).map { it.dir("samples/data") }
+    into pythonBuildRootPath(edition).map { it.dir("samples") }
   }
 
   tasks.register("${edition}c_python_repair_test_wheel", RepairLocalWheel) {
