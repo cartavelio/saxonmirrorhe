@@ -36,8 +36,8 @@ PHP_METHOD(XsltExecutable, __destruct) {
 
 
 
-  if(xsltExecutable != nullptr) {
     XsltExecutable *xsltExecutable = obj->xsltExecutable;
+  if(xsltExecutable != nullptr) {
     _decrementRefCount(xsltExecutable->getParameters());
     xsltExecutable->clearParameters();
     xsltExecutable->clearProperties();
