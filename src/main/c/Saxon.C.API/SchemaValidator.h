@@ -190,6 +190,7 @@ public:
   /**
    * Get a parameter value by name
    * @param name - Specified parameter name to get
+   * @param withParam Internal use only
    * @return XdmValue
    */
   XdmValue *getParameter(const char *name, bool withParam);

@@ -157,9 +157,10 @@ public:
    * the JAXP solution i.e. "{uri}name"
    * @param value of the query parameter, or nullptr to clear a previously set
    * value
+   * @param withParam Internal use only
    */
 
-  void setParameter(const char *name, XdmValue *value, bool withParm=true);
+  void setParameter(const char *name, XdmValue *value, bool withParam=true);
 
   /**
    * Remove a parameter (name, value) pair
@@ -289,6 +290,7 @@ public:
   /**
    * Get a parameter value by name
    * @param name - Specified parameter name to get
+   * @param withParam Internal use only
    * @return XdmValue
    */
   XdmValue *getParameter(const char *name, bool withParam=true);
