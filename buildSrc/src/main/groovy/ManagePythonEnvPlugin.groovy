@@ -449,7 +449,11 @@ abstract class WheelCompatibilityTags extends DefaultTask {
 
     @Internal
     Provider<String> macosxDeploymentTarget = pythonExe.map { python ->
-        execString(python, ["-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version]))"])
+        if (systemOs.isMacOsX()) {
+            execString(python, ["-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version]))"])
+        } else {
+            ""
+        }
     }
 
     @Internal
