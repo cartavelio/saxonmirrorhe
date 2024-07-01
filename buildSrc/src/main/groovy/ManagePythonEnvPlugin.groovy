@@ -176,7 +176,7 @@ abstract class BuildWheel extends DefaultTask {
             project.exec {
                 workingDir sourceDir.get()
                 executable python
-                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, get_platform(\".\")))"
+                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, get_platform('.')))"
                 standardOutput out
             }
             out.toString().trim()
