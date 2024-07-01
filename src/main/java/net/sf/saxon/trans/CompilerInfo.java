@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.expr.parser.OptimizerOptions;
+import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceUri;
@@ -21,6 +22,7 @@ import net.sf.saxon.trans.packages.PackageLibrary;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * This class exists to hold information associated with a specific XSLT compilation episode.
@@ -56,6 +58,8 @@ public class CompilerInfo {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private int languageVersion = 30;
+
+    private FunctionLibrary stubFunctionLibrary = null;
 
     //#if CSHARP==false
     private OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
@@ -111,6 +115,7 @@ public class CompilerInfo {
         defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
         unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
         languageVersion = info.languageVersion;
+        stubFunctionLibrary = info.stubFunctionLibrary;
 
         //#if CSHARP==false
         outputURIResolver = info.outputURIResolver;
@@ -642,6 +647,31 @@ public class CompilerInfo {
 
     public Iterable<QueryLibrary> getQueryLibraries() {
         return queryLibraries;
+    }
+
+    /**
+     * Import a set of stub functions (names and signatures) from a JSON file.
+     * These functions will be added to the static context of the stylesheet, but any attempt to
+     * call the functions will fail with a dynamic error. The main purpose is to allow SaxonJS
+     * stylesheets to be compiled that at run-time will invoke external Javascript functions
+     * available on the target platform; this option will therefore normally be used when
+     * compiling with -nogo. If compiling from the Transform command line, the stub
+     * library can be specified using the option <code>-stublib:filename</code>.
+     * @param jsonSignatures The file containing JSON signatures. The format is
+     *                       described at {@link com.saxonica.ee.extfn.js.StubFunctionLibrary}.
+     * @throws XPathException if the JSON file is invalid
+     */
+    public void importStubFunctionLibrary(StreamSource jsonSignatures) throws XPathException {
+        stubFunctionLibrary = config.loadStubFunctionLibrary(jsonSignatures);
+    }
+
+    /**
+     * Get any function library that has been imported using {@link #importStubFunctionLibrary(StreamSource)}
+     * @return the imported stub function library, or null if none has been imported.
+     */
+
+    public FunctionLibrary getStubFunctionLibrary() {
+        return stubFunctionLibrary;
     }
 
 }
