@@ -432,6 +432,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 System.err.println(err.getMessage());
                 outcome.setException(err.getErrorCode());
                 outcome.setErrorsReported(collector.getErrorCodes());
+                collector.checkLocationInfo(err);
             } catch (Exception err) {
                 err.printStackTrace();
                 System.err.println(err.getMessage());
@@ -717,6 +718,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             //}
         } catch (SaxonApiException err) {
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (collector.getErrorCodes().isEmpty()) {
                 outcome.addReportedError(err.getErrorCode().getLocalName());
             } else {
@@ -956,6 +958,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                         ": " + err.getCause().getMessage());
             }
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (collector.getErrorCodes().isEmpty()) {
                 if (err.getErrorCode() == null) {
                     outcome.addReportedError("Error_with_no_error_code");
@@ -987,6 +990,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
         } catch (SaxonApiException err) {
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (err.getErrorCode() != null) {
                 collector.getErrorCodes().add(err.getErrorCode().getLocalName());
             }
@@ -995,6 +999,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             err.printStackTrace();
             System.err.println(err.getMessage());
             outcome.setException(new QName(err.getClass().getName()));
+            collector.checkLocationInfo(err);
             outcome.setErrorsReported(collector.getErrorCodes());
         }
         return sheet;
@@ -1043,6 +1048,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
         } catch (SaxonApiException err) {
             outcome.setException(err.getErrorCode());
+            collector.checkLocationInfo(err);
             if (err.getErrorCode() != null) {
                 collector.getErrorCodes().add(err.getErrorCode().getLocalName());
             }
@@ -1051,6 +1057,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             err.printStackTrace();
             System.err.println(err.getMessage());
             outcome.setException(new QName(err.getClass().getName()));
+            collector.checkLocationInfo(err);
             outcome.setErrorsReported(collector.getErrorCodes());
         }
         return pack;

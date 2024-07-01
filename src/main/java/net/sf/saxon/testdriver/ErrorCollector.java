@@ -84,4 +84,18 @@ public class ErrorCollector extends StandardErrorReporter {
         return madeEarlyExit;
     }
 
+
+    public void checkLocationInfo(Exception err) {
+        // Uncomment to catch cases where no location is being reported
+//        if (lastError == null) {
+//            if (err instanceof SaxonApiException && ((SaxonApiException) err).getLineNumber() < 0) {
+//                throw new RuntimeException("****** NO location information in error *****");
+//            }
+//        } else if (lastError.getLocation() == null || lastError.getLocation().getLineNumber() < 0) {
+//            if (lastError != null && lastError.getErrorCode().getLocalName().equals("XTSE0545")) {
+//                throw new RuntimeException("****** NO location information in error *****");
+//            }
+//        }
+    }
+
 }

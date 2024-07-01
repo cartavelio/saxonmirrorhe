@@ -134,7 +134,8 @@ public class SimpleMode extends Mode {
                         "For " + getLabel() +
                                 ", there are conflicting values for xsl:mode/@" +
                                 prop +
-                                " at the same import precedence", "XTSE0545");
+                                " at the same import precedence", "XTSE0545")
+                        .maybeWithLocation(getActivePart());
             }
 
             switch (prop) {
