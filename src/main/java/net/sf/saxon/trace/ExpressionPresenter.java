@@ -551,6 +551,9 @@ public class ExpressionPresenter {
                 int c = ((CheckSumFilter) receiver).getChecksum();
                 cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
                                           Loc.NONE, ReceiverOption.NONE);
+                String digest = ((CheckSumFilter) receiver).getDigest();
+                cco.processingInstruction(CheckSumFilter.SIGMA2, BMPString.of(digest),
+                        Loc.NONE, ReceiverOption.NONE);
             }
             cco.endDocument();
             cco.close();

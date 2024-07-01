@@ -7,13 +7,17 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.lib.DigestMaker;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
+
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * A filter to go on a Receiver pipeline and calculate a checksum of the data passing through the pipeline.
@@ -25,19 +29,25 @@ import net.sf.saxon.value.Whitespace;
  */
 
 public class CheckSumFilter extends ProxyReceiver {
-
     private final static boolean DEBUG = false;
-
+    private DigestMaker digest = null;
     private int checksum = 0;
     private int sequence = 0;
     private boolean checkExistingChecksum = false;
     private boolean checksumCorrect = false;
     private boolean checksumFound = false;
+    private boolean digestCorrect = false;
+    private boolean digestFound = false;
+    private boolean requireDigest = false;
+    private boolean rootElement = true;
 
-    public final static String SIGMA = "\u03A3";
+    public final static String SIGMA = "Σ";
+    public final static String SIGMA2 = "Σ2";
 
     public CheckSumFilter(Receiver nextReceiver) {
         super(nextReceiver);
+        rootElement = true;
+        digest = new DigestMaker();
     }
 
     /**
@@ -60,6 +70,15 @@ public class CheckSumFilter extends ProxyReceiver {
     public void startDocument(int properties) throws XPathException {
         trace("CHECKSUM - START DOC");
         super.startDocument(properties);
+    }
+
+    @Override
+    public void endDocument() throws XPathException {
+        /*
+        System.err.println("Σ ::= " + BMPString.of(Integer.toHexString(checksum)));
+        System.err.println(digestbuffer.toString());
+         */
+        nextReceiver.endDocument();
     }
 
     /**
@@ -99,16 +118,59 @@ public class CheckSumFilter extends ProxyReceiver {
         checksum ^= hash(elemName, sequence++);
         trace("After startElement " + elemName.getDisplayName() + ": " + checksum);
         checksumCorrect = false;
+
+        if (rootElement) {
+            rootElement = false;
+
+            // A digest is required unless version is an X.Y string where X < 13.
+            // (If we want to force digests in 12.5, we'll have to edit this a bit.)
+
+            String version = attributes.getValue("saxonVersion");
+            if (version != null) {
+                int dpos = version.indexOf('.');
+                if (dpos > 0) {
+                    version = version.substring(0, dpos);
+                }
+                try {
+                    int majorVersion = Integer.parseInt(version);
+                    requireDigest = majorVersion >= 13;
+                } catch (NumberFormatException e) {
+                    requireDigest = true;
+                }
+            }
+        }
+
+        // Need these in lexicographic order for the cryptographic hash.
+        // I also want to assure that the current checksum works. And I want
+        // to use the hash() function as the common place for collecting data
+        // for both. That means a bit of fiddling around here (extra fiddling
+        // because NodeName doesn't implement Comparable).
+
+        HashMap<String,NodeName> namemap = new HashMap<>();
+        HashMap<String,String> attrmap = new HashMap<>();
+        String[] names = new String[attributes.size()];
+        int index = 0;
         for (AttributeInfo att : attributes) {
-            checksum ^= hash(att.getNodeName(), sequence);
-            checksum ^= hash(att.getValue(), sequence);
+            String key = att.getNodeName().getLocalPart() + att.getNodeName().getNamespaceUri();
+            attrmap.put(key, att.getValue());
+            namemap.put(key, att.getNodeName());
+            names[index++] = key;
+        }
+
+        Arrays.sort(names);
+        for (String key : names) {
+            NodeName name = namemap.get(key);
+            String value = attrmap.get(key);
+            checksum ^= hash(name, sequence);
+            checksum ^= hash(value, sequence);
             //#if CSHARP==false
             if (DEBUG) {
-                System.err.println("After attribute " + att.getNodeName().getDisplayName() + ": " + checksum +
-                                           "(" + hash(att.getNodeName(), sequence) + "," + hash(att.getValue(), sequence) + ")");
+                System.err.println("After attribute " + name.getDisplayName() + ": " + checksum +
+                        "(" + hash(name, sequence) + "," + hash(value, sequence) + ")");
             }
             //#endif
         }
+
         super.startElement(elemName, type, attributes, namespaces, location, properties);
     }
 
@@ -136,6 +198,19 @@ public class CheckSumFilter extends ProxyReceiver {
                 } catch (NumberFormatException e) {
                     checksumCorrect = false;
                 }
+                if (data.toString().equals(getDigest())) {
+                    // This case represents some point in the future when we've
+                    // abandoned the checksum and the digest is stored in SIGMA
+                    digestFound = true;
+                    digestCorrect = true;
+                    checksumCorrect = true; // digest trumps checksum
+                }
+            }
+        }
+        if (target.equals(SIGMA2)) {
+            digestFound = true;
+            if (checkExistingChecksum) {
+                digestCorrect = data.toString().equals(getDigest());
             }
         }
         super.processingInstruction(target, data, locationId, properties);
@@ -150,6 +225,10 @@ public class CheckSumFilter extends ProxyReceiver {
         return checksumFound;
     }
 
+    public boolean isDigestFound() {
+        return digestFound;
+    }
+
     /**
      * Get the accumulated checksum
      * @return the checksum of the events passed through the filter so far.
@@ -160,16 +239,31 @@ public class CheckSumFilter extends ProxyReceiver {
     }
 
     /**
+     * Get the computed hash
+     * @return the hash
+     */
+    public String getDigest() {
+        return digest.getDigest();
+    }
+
+    /**
      * Ask if a correct checksum has been found in the file
      * @return true if a checksum has been found, if its value matches, and if no significant data has been encountered
      * after the checksum
      */
 
     public boolean isChecksumCorrect() {
+        if (requireDigest && !digestCorrect) {
+            return false;
+        }
         return checksumCorrect || "skip".equals(System.getProperty("saxon-checksum"));
     }
 
     private int hash(String s, int sequence) {
+        //System.err.printf("%d %d %s%n", sequence, s.length(), s);
+        digest.update(sequence);
+        digest.update(s);
+
         int h = sequence<<8;
         for (int i=0; i<s.length(); i++) {
             h = (h<<1) + s.charAt(i);
