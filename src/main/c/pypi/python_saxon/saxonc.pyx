@@ -228,8 +228,8 @@ cdef class PySaxonProcessor:
         """The destructor."""
         global _proc_count
         if self.thisptr is not NULL:
-          del self.thisptr
-          self.thisptr = NULL
+            del self.thisptr
+            self.thisptr = NULL
         if _proc_count == 1:
             self.thisptr.release()
         else:
@@ -812,9 +812,7 @@ cdef class PySaxonProcessor:
         cdef char * c_key_str = NULL
         cdef PyXdmMap newMap_ = None
         cdef int i = 0
-        '''global parametersDict
-        if kwds is not None:
-                parametersDict = kwds '''
+
         for (key, value) in dataMap.items():
 
             if isinstance(key, PyXdmAtomicValue):
@@ -870,9 +868,7 @@ cdef class PySaxonProcessor:
         cdef PyXdmMap newMap_ = None
         if encoding is None:
             encoding = sys.getdefaultencoding()
-        '''global parametersDict
-        if kwds is not None:
-                parametersDict = kwds '''
+
         for (key, value) in dataMap.items():
 
             if isinstance(key, str):
@@ -1318,9 +1314,6 @@ cdef class PyDocumentBuilder:
         else:
            raise Exception(py_error_message)
 
-
-
-parametersDict = None
 
 
 
@@ -2278,9 +2271,7 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem fvalue_
         cdef PyXdmItem ivalue_
         cdef PyXdmValue value_
-        global parametersDict
-        if parameters is not None:
-                parametersDict = parameters
+
         for (key, value) in parameters.items():
                 if isinstance(value, PyXdmAtomicValue):
                         avalue_ = value
