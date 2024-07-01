@@ -753,7 +753,7 @@ task all_saxonc_releases() {
     }
   }
 
-  def t = tasks.register("${edition}c_release_zip", Zip) {
+  def t = tasks.register("zip_${edition}c_release", Zip) {
     dependsOn "${edition}c_release_dir"
 
     from layout.buildDirectory.dir("releases")
