@@ -486,6 +486,7 @@ cdef class PySaxonProcessor:
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeIntegerValue(value)
+        val.derivedaptr.incrementRefCount()
         return val
     def make_double_value(self, value):
         """
@@ -574,7 +575,7 @@ cdef class PySaxonProcessor:
         if val.derivedaptr == NULL:
             del val
             return None
-
+        val.derivedaptr.incrementRefCount()
         return val
 
     def make_array(self, list values):
@@ -2569,24 +2570,31 @@ cdef class PyXsltExecutable:
               if isinstance(value, PyXdmValue):
                 value_ = value
                 self.thisxptr.setInitialMatchSelection(value_.thisvptr)
+                value_.thisvptr.incrementRefCount()
               elif isinstance(value, PyXdmItem):
                   valuei_ = value
                   self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
+                  valuei_.derivedptr.incrementRefCount()
               elif isinstance(value, PyXdmNode):
                   valuen_ = value
                   self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
+                  valuen_.derivednptr.incrementRefCount()
               elif isinstance(value, PyXdmAtomicValue):
                       valueav_ = value
                       self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
+                      valueav_.derivedaptr.incrementRefCount()
               elif isinstance(value, PyXdmFunctionItem):
                       valuef_ = value
                       self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
+                      valuef_.derivedfptr.incrementRefCount()
               elif isinstance(value, PyXdmMap):
                       valuem_ = value
                       self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
+                      valuem_.derivedmmptr.incrementRefCount()
               elif isinstance(value, PyXdmArray):
                       valuear_ = value
                       self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
+                      valuear_.derivedaaptr.incrementRefCount()
         cdef const char* c_string  = self.thisxptr.applyTemplatesReturningString()
         py_string_i = make_py_str(c_string, encoding)
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
@@ -3292,10 +3300,12 @@ cdef class PyXQueryProcessor:
         if type_== XdmType.XDM_ATOMIC_VALUE:
             aval = PyXdmAtomicValue(self.processor)
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
+            aval.thisvptr.incrementRefCount()
             return aval
         elif type_ == XdmType.XDM_NODE:
             nval = PyXdmNode(self.processor)
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
+            nval.thisvptr.incrementRefCount()
             return nval
         elif type_ == XdmType.XDM_FUNCTION_ITEM:
             fval = PyXdmFunctionItem(self.processor)
@@ -3587,6 +3597,12 @@ cdef class PyXPathProcessor:
             PySaxonApiError: Error if failure to evaluate XPath expression
         """
         cdef char * c_encoding_string = NULL
+        cdef PyXdmAtomicValue aval = None
+        cdef PyXdmNode nval = None
+        cdef PyXdmFunctionItem fval = None
+        cdef PyXdmMap mval = None
+        cdef PyXdmArray aaval = None
+        cdef PyXdmValue val = None
         if encoding is None:
             encoding = sys.getdefaultencoding()
         else :
@@ -3594,11 +3610,37 @@ cdef class PyXPathProcessor:
             c_encoding_string = py_encoding_string if py_encoding_string is not None else ""
         py_value_string = xpath_str.encode(encoding) if xpath_str is not None else None
         c_xpath = py_value_string if xpath_str is not None else ""
-        cdef PyXdmValue val = None
+
         cdef type_ = 0
         cdef saxoncClasses.XdmValue * xdmValue = self.thisxpptr.evaluate(c_xpath, c_encoding_string)
         if xdmValue == NULL:
             return None
+        type_ = xdmValue.getType()
+        if type_== XdmType.XDM_ATOMIC_VALUE:
+            aval = PyXdmAtomicValue()
+            aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
+            aval.thisvptr.incrementRefCount()
+            return aval
+        elif type_ == XdmType.XDM_NODE:
+            nval = PyXdmNode()
+            nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
+            nval.thisvptr.incrementRefCount()
+            return nval
+        elif type_ == XdmType.XDM_FUNCTION_ITEM:
+            fval = PyXdmFunctionItem()
+            fval.derivedfptr = fval.derivedptr = fval.thisvptr = <saxoncClasses.XdmFunctionItem*>xdmValue
+            fval.thisvptr.incrementRefCount()
+            return fval
+        elif type_ == XdmType.XDM_MAP:
+            mval = PyXdmMap()
+            mval.derivedmmptr = mval.derivedfptr = mval.derivedptr = mval.thisvptr = <saxoncClasses.XdmMap*>xdmValue
+            mval.thisvptr.incrementRefCount()
+            return mval
+        elif type_ == XdmType.XDM_ARRAY:
+            aaval = PyXdmArray()
+            aaval.derivedaaptr = aaval.derivedfptr = aaval.derivedptr = aaval.thisvptr = <saxoncClasses.XdmArray*>xdmValue
+            aaval.thisvptr.incrementRefCount()
+            return aaval
         else:
             val = PyXdmValue(self.processor)
             val.thisvptr = xdmValue
@@ -5139,8 +5181,9 @@ cdef class PyXdmAtomicValue(PyXdmItem):
      def __dealloc__(self):
         if type(self) is PyXdmAtomicValue and self.derivedaptr != NULL:
             self.derivedaptr.decrementRefCount()
-            if self.derivedaptr.getRefCount() < 1:
+            """if self.derivedaptr.getRefCount() < 1:
                 del self.derivedaptr
+                self.derivedaptr = self.derivedptr = self.thisvptr = NULL"""
 
 
 
@@ -5281,6 +5324,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
             self.derivedfptr.decrementRefCount()
             if self.derivedfptr.getRefCount() < 1:
                 del self.derivedfptr
+                self.derivedfptr = self.derivedptr = self.thisvptr = NULL
 
 
 

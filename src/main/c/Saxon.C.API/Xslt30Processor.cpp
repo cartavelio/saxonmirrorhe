@@ -182,21 +182,23 @@ void Xslt30Processor::setTargetEdition(const char *edition) {
 }
 
 void Xslt30Processor::clearParameters(bool delValues) {
-  if (delValues) {
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
-      XdmValue *value = itr->second;
-      if (value != nullptr) {
+        XdmValue *value = itr->second;
+        if (value != nullptr) {
 #ifdef DEBUG
-        std::cout << "clearParameter() - XdmValue refCount="
-                  << value->getRefCount() << std::endl;
+            std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+              << value->getRefCount() << std::endl;
 #endif
-        delete value;
-        value = nullptr;
-      }
+            if (delValues) {
+                delete value;
+                value = nullptr;
+            } /*else {
+                value->decrementRefCount();
+            }*/
+        }
     }
-  }
-  parameters.clear();
+    parameters.clear();
 }
 
 std::map<std::string, XdmValue *> &Xslt30Processor::getParameters() {

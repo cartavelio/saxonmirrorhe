@@ -117,10 +117,13 @@ void XdmItem::incrementRefCount() {
 }
 
 void XdmItem::decrementRefCount() {
-  if (refCount > 0)
-    refCount--;
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "after refCount-dec-xdmItem=" << refCount
-              << " ob ref=" << (this) << std::endl;
-  }
+    if (refCount > 0)
+        refCount--;
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr << "after refCount-dec-xdmItem=" << refCount
+                  << " ob ref=" << (this) << std::endl;
+    }
+    if (refCount == 0) {
+        delete this;
+    }
 }

@@ -181,21 +181,23 @@ void XQueryProcessor::setProperty(const char *name, const char *value) {
 }
 
 void XQueryProcessor::clearParameters(bool delVal) {
-  if (delVal) {
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
-      XdmValue *value = itr->second;
-      if (value != nullptr) {
+        XdmValue *value = itr->second;
+        if (value != nullptr) {
 #ifdef DEBUG
-        std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
-                  << value->getRefCount() << std::endl;
+            std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+              << value->getRefCount() << std::endl;
 #endif
-        delete value;
-        value = nullptr;
-      }
+            if (delVal) {
+                delete value;
+                value = nullptr;
+            }/* else {
+                value->decrementRefCount();
+            }*/
+        }
     }
-  }
-  parameters.clear();
+    parameters.clear();
 }
 
 void XQueryProcessor::clearProperties() {

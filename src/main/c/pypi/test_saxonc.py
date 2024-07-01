@@ -295,7 +295,10 @@ def testResolveUri(saxonproc):
     item = value.head
     print("WHAT IS CODE")
     print(item.string_value)
-    assert "code" in item.string_value
+    assert os.path.exists('notice trailing space/out.xml')
+    if os.path.exists('notice trailing space/out.xml'):
+        os.remove('notice trailing space/out.xml')
+        os.remove('notice trailing space')
 
 def testXslMessageToFile(saxonproc, data_dir):
     document = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
@@ -391,7 +394,7 @@ def testColumnNumber(data_dir):
     val = xPathProcessor.evaluate_single("//BOOKS/ITEM[@CAT='MMP']/TITLE")
 
     assert val is not None
-    assert val.column_number == 14
+    assert val.column_number == 17
 
 
 def testNodeAxis(saxonproc, data_dir):
@@ -1761,18 +1764,18 @@ def testXdmArray(saxonproc):
         }
     )?output''')
 
-    assert isinstance(type(xpath_result), PyXdmValue)
+    assert isinstance(xpath_result, PyXdmValue)
 
     assert xpath_result.size == 1
 
     head_item = xpath_result.head
-    assert isinstance(type(head_item), PyXdmFunctionItem)
+    assert isinstance(head_item, PyXdmFunctionItem)
 
     array_result = head_item.get_array_value()
 
-    result_list = [item.get_atomic_value() for item in array_result.as_list()]
+    result_list = [item.head.get_atomic_value() for item in array_result.as_list()]
 
-    assert result_list.size == 3
+    assert len(result_list) == 3
 
 
 

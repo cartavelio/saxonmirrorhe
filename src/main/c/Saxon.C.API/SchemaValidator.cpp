@@ -316,21 +316,23 @@ void SchemaValidator::setProperty(const char *name, const char *value) {
 }
 
 void SchemaValidator::clearParameters(bool delVal) {
-  if (delVal) {
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
-      XdmValue *value = itr->second;
-      value->decrementRefCount();
+        XdmValue *value = itr->second;
+        if (value != nullptr) {
 #ifdef DEBUG
-      std::cout << "SchemaValidator.clearParameter() - XdmValue refCount="
-                << value->getRefCount() << std::endl;
+            std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+              << value->getRefCount() << std::endl;
 #endif
-      if (value != nullptr && value->getRefCount() < 1) {
-        delete value;
-      }
+            if (delVal) {
+                delete value;
+                value = nullptr;
+            } /*else {
+                value->decrementRefCount();
+            }*/
+        }
     }
-  }
-  parameters.clear();
+    parameters.clear();
 }
 
 void SchemaValidator::clearProperties() { properties.clear(); }

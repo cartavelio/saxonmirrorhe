@@ -122,17 +122,23 @@ void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
 }
 
 void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
-  if (_selection == nullptr) {
-    selectionRef = SXN_UNSET;
-  } else {
-    selectionRef = _selection->getUnderlyingValue();
-    selectionStringFlag = false;
-  }
+    if (_selection == nullptr) {
+        selectionRef = SXN_UNSET;
+    } else {
+        setParameter("_i_matchs", _selection, false);
+        selectionStringFlag = false;
+    }
 }
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
 
-  if (selectionRef != SXN_UNSET && selectionStringFlag) {
+    if (!selectionStringFlag) {
+        XdmValue * valuei = getParameter("_i_matches", false);
+        if(valuei != nullptr) {
+            valuei->decrementRefCount();
+        }
+        parameters.erase("_i_matches");
+    } else if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)selectionRef);
   }
@@ -180,6 +186,22 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
     }
     parameters[skey] = value;
   }
+}
+
+void XsltExecutable::setParameter(const char *name, XdmValue *value,
+                                  bool withParam) {
+    if (value != nullptr && name != nullptr) {
+        std::string skey = (withParam ? "param:" : "") + std::string(name);
+        std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
+        if (it != parameters.end()) {
+            XdmValue *valuei = it->second;
+            if (valuei != nullptr) {
+                valuei->decrementRefCount();
+                parameters.erase(skey);
+            }
+        }
+        parameters[skey] = value;
+    }
 }
 
 void XsltExecutable::setInitialTemplateParameters(
@@ -266,13 +288,13 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
   return resultDocumentMap;
 }
 
-XdmValue *XsltExecutable::getParameter(const char *name) {
+XdmValue *XsltExecutable::getParameter(const char *name, bool withParam) {
   std::map<std::string, XdmValue *>::iterator it;
-  it = parameters.find("param:" + std::string(name));
+  it = parameters.find((withParam ? "param:" : "") + std::string(name));
   if (it != parameters.end())
     return it->second;
   else {
-    it = parameters.find("sparam:" + std::string(name));
+    it = parameters.find((withParam ? "sparam:" : "")  + std::string(name));
     if (it != parameters.end())
       return it->second;
   }
@@ -324,22 +346,24 @@ const char *XsltExecutable::getProperty(const char *name) {
 }
 
 void XsltExecutable::clearParameters(bool delValues) {
-  if (delValues) {
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
          itr != parameters.end(); itr++) {
-
-      XdmValue *value = itr->second;
-      if (value != nullptr) {
+        XdmValue *value = itr->second;
+        if (value != nullptr) {
 #ifdef DEBUG
-        std::cout << "clearParameter() - XdmValue refCount="
-                  << value->getRefCount() << std::endl;
+            std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+              << value->getRefCount() << std::endl;
 #endif
-        delete value;
-        value = nullptr;
-      }
+            if (delValues) {
+                delete value;
+                value = nullptr;
+            } else {
+                value->decrementRefCount();
+            }
+
+        }
     }
-  }
-  parameters.clear();
+    parameters.clear();
 }
 
 void XsltExecutable::clearProperties() {
@@ -385,11 +409,11 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
   proc->attachCurrentThread();
-  if (selectionRef == SXN_UNSET) {
+  /*if (selectionRef == SXN_UNSET) {
     throw SaxonApiException(
         "Error: The initial match selection has not been set. Please set it "
         "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
-  }
+  }*/
 
   setProperty("resources", resources_dir.c_str());
 
@@ -443,11 +467,11 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
 const char *XsltExecutable::applyTemplatesReturningString() {
   proc->attachCurrentThread();
-  if (selectionRef == SXN_UNSET) {
+  /*if (selectionRef == SXN_UNSET) {
     throw SaxonApiException(
         "Error: The initial match selection has not been set. Please set it "
         "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
-  }
+  }*/
 
   setProperty("resources", resources_dir.c_str());
 

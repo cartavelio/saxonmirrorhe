@@ -147,7 +147,7 @@ public:
    * @param name - Specified parameter name to get
    * @return XdmValue
    */
-  XdmValue *getParameter(const char *name);
+  XdmValue *getParameter(const char *name, bool withParam=true);
 
   /**
    * Remove a parameter (name, value) pair from a stylesheet
@@ -550,6 +550,10 @@ private:
    * @param other - Xslt30Processor
    */
   XsltExecutable(const XsltExecutable &other);
+
+
+  void setParameter(const char *name, XdmValue *value, bool withParam);
+
 
   SaxonProcessor *proc; /*! Pointer to SaxonProcessor object*/
                         // jclass  cppClass;
