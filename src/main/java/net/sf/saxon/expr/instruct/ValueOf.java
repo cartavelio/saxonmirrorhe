@@ -407,7 +407,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                         }
                         return null;
                     } catch (XPathException e) {
-                        throw e.maybeWithLocation(expr.getLocation());
+                        throw e.maybeWithLocation(expr.getSelect().getLocation());
                     }
                 };
             } else if (expr.getSelect().getItemType() == BuiltInAtomicType.STRING &&
@@ -424,7 +424,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                         Outputter streamer = new TextNodeOutputStreamer(output, loc, options);
                         return contentEval.processLeavingTail(streamer, context);
                     } catch (XPathException e) {
-                        throw e.maybeWithLocation(expr.getLocation());
+                        throw e.maybeWithLocation(expr.getSelect().getLocation());
                     }
                 };
             } else {
@@ -435,7 +435,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                         output.characters(value, loc, options);
                         return null;
                     } catch (XPathException e) {
-                        throw e.maybeWithLocation(expr.getLocation());
+                        throw e.maybeWithLocation(expr.getSelect().getLocation());
                     }
                 };
             }
@@ -451,7 +451,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                 try {
                     return ValueOf.makeTextNode(contentEval.eval(context), noNodeIfEmpty, doe, context);
                 } catch (XPathException e) {
-                    throw e.maybeWithLocation(expr.getLocation());
+                    throw e.maybeWithLocation(expr.getSelect().getLocation());
                 }
             };
         }
