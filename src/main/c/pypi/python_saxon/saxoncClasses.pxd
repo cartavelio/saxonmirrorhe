@@ -627,6 +627,12 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         XdmValue * getTypedValue()
 
+        void resetRelinquishedChildren()
+
+        void incrementRefCountForRelinquishedChildren()
+
+        bool hasRelinquishedChildren()
+
         const char* getBaseUri()
 
         XdmNode* getParent()

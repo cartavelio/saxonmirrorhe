@@ -10,7 +10,8 @@ XdmNode::XdmNode(int64_t obj)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
       childCount(-1), children(nullptr), parent(nullptr), typedValue(nullptr),
       attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), axisCount(0),
-      nodeToString(nullptr) {}
+      nodeToString(nullptr) {
+}
 
 XdmNode::XdmNode(XdmNode *p, int64_t obj, XDM_NODE_KIND kind)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
@@ -30,6 +31,7 @@ XdmNode::XdmNode(const XdmNode &other) {
   nodeKind = other.nodeKind;
   nodeToString = other.nodeToString;
   axisCount = other.axisCount;
+
 }
 
 bool XdmNode::isAtomic() { return false; }
@@ -61,20 +63,23 @@ XdmNode::~XdmNode() {
     operator delete((char *)localName);
     localName = nullptr;
   }
+//TODO fix this for C++
+    if (children != nullptr) {
+
+        for (int p = 0; p < childCount; ++p) {
+            if(children[p]->getRefCount() < 1) {
+                delete children[p];
+            }
+        }
+        delete[] children;
+    }
 
   /* if (nodeToString != nullptr) {
     delete[] nodeToString;
     nodeToString = nullptr;
   }
 
-  if (children != nullptr) {
 
-       for (int p = 0; p < childCount; ++p) {
-           delete children[p];
-
-       }
-       delete[] children;
-   }
    if (attrCount > 0 && attrValues != nullptr) {
        for (int p = 0; p < attrCount; ++p) {
            delete attrValues[p];
@@ -84,6 +89,40 @@ XdmNode::~XdmNode() {
    }     */
 
   //}
+
+}
+
+void XdmNode::incrementRefCountForRelinquishedChildren() {
+    if (childCount > 0) {
+
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr << "refCount-inc-relinquished-xdmNode=" << refCount << " ob ref=" << (this)
+                      << std::endl;
+        }
+        for(int i=0; i<childCount; i++) {
+            children[i]->incrementRefCount();
+        }
+    }
+}
+
+bool XdmNode::hasRelinquishedChildren(){
+    return children != nullptr;
+}
+
+void XdmNode::resetRelinquishedChildren(){
+    if (childCount > 0 && children != nullptr) {
+
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr << "XdmNode-resetRelinquishedChildren =" << refCount << " ob ref=" << (this)
+                      << std::endl;
+        }
+        for(int i=0; i<childCount; i++) {
+            if(children[i] != nullptr) {
+                children[i]->decrementRefCount();
+            }
+        }
+    }
+
 }
 
 const char *XdmNode::getLocalName() {
@@ -180,6 +219,7 @@ const char *XdmNode::getBaseUri() {
 }
 
 XdmNode *XdmNode::getParent() {
+    //TODO test this still works if the parent node has been deleted
   if (parent == nullptr) {
     int64_t nodeRef =
         getParentForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)value);
@@ -288,6 +328,9 @@ int XdmNode::getChildCount() {
 }
 
 XdmNode **XdmNode::getChildren(bool cached) {
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "~XdmNode getChildren called:" << " ob ref=" << (this)  << std::endl;
+  }
   if (cached && children != nullptr) {
     return children;
   } else {
@@ -298,6 +341,7 @@ XdmNode **XdmNode::getChildren(bool cached) {
     if (childCount == 0) {
       return nullptr;
     }
+
     allocFn fn = operator new;
     long long *childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread,
                                           (void *)fn, (void *)value);
