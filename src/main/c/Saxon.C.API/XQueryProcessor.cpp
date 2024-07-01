@@ -192,9 +192,9 @@ void XQueryProcessor::clearParameters(bool delVal) {
             if (delVal) {
                 delete value;
                 value = nullptr;
-            }/* else {
+            } else {
                 value->decrementRefCount();
-            }*/
+            }
         }
     }
     parameters.clear();

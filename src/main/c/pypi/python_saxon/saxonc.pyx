@@ -499,6 +499,7 @@ cdef class PySaxonProcessor:
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeDoubleValue(value)
+        val.derivedaptr.incrementRefCount()
         return val
     def make_float_value(self, value):
         """
@@ -511,6 +512,7 @@ cdef class PySaxonProcessor:
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeFloatValue(value)
+        val.derivedaptr.incrementRefCount()
         return val
     def make_long_value(self, value):
         """
@@ -523,6 +525,7 @@ cdef class PySaxonProcessor:
         """
         cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeLongValue(value)
+        val.derivedaptr.incrementRefCount()
         return val
     def make_boolean_value(self, value):
         """
@@ -536,6 +539,7 @@ cdef class PySaxonProcessor:
         cdef bool c_b = value
         cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeBooleanValue(c_b)
+        val.derivedaptr.incrementRefCount()
         return val
     def make_qname_value(self, str_, encoding=None):
         """
@@ -553,6 +557,7 @@ cdef class PySaxonProcessor:
         cdef char * c_str_ = py_value_string if str_ is not None else ""
         cdef PyXdmAtomicValue val = PyXdmAtomicValue(self)
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeQNameValue(c_str_)
+        val.derivedaptr.incrementRefCount()
         return val
     def make_atomic_value(self, value_type, value, encoding=None):
         """
@@ -628,6 +633,7 @@ cdef class PySaxonProcessor:
         if newArray_.derivedaaptr == NULL:
             del newArray_
             return None
+        newArray_.derivedaaptr.incrementRefCount()
         return newArray_
 
 
@@ -690,6 +696,7 @@ cdef class PySaxonProcessor:
             self.thisptr.deleteXdmValueArray(c_values, len_)
         if newMap_.derivedmmptr == NULL:
             return None
+        newMap_.derivedmmptr.incrementRefCount()
         return newMap_
 
 
@@ -751,6 +758,7 @@ cdef class PySaxonProcessor:
         newMap_.derivedmmptr = newMap_.derivedfptr = newMap_.derivedptr = newMap_.thisvptr =  self.thisptr.makeMap2(c_dataMap)
         if newMap_.derivedmmptr == NULL:
             return None
+        newMap_.derivedmmptr.incrementRefCount()
         return newMap_
 
 
