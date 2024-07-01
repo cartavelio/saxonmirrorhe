@@ -226,8 +226,6 @@ cdef class PySaxonProcessor:
             except:
                 raise Exception("Failed to create PySaxonProcessor object") from None
 
-        if _proc_count == 1:
-            self.thisptr.setSaxonCExtensionFlag(True)
 
     def __dealloc__(self):
         """The destructor."""
