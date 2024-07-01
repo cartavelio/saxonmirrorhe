@@ -154,6 +154,7 @@ PHP_METHOD(Xslt30Processor, transformFileToValue) {
                                   XtOffsetOf(xdmValue_object, std));
           assert(vobj != nullptr);
           vobj->xdmValue = node;
+          node->incrementRefCount();
         }
       }
     } catch (SaxonApiException &e) {

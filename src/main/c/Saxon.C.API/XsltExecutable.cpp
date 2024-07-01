@@ -104,7 +104,7 @@ bool XsltExecutable::exceptionOccurred() { return exceptionFound; }
 
 void XsltExecutable::setGlobalContextItem(XdmItem *value) {
   if (value != nullptr) {
-    parameters["node"] = value;
+      setParameter("node", (XdmValue*)value, false);
   }
 }
 
@@ -199,7 +199,9 @@ void XsltExecutable::setInitialTemplateParameters(
   for (std::map<std::string, XdmValue *>::iterator itr = _itparameters.begin();
        itr != _itparameters.end(); itr++) {
 
-    parameters["itparam:" + std::string(itr->first)] = itr->second;
+    //parameters["itparam:" + std::string(itr->first)] = itr->second;
+    std::string paramStr = "itparam:" + std::string(itr->first);
+    setParameter(paramStr.c_str(), itr->second, false);
   }
   tunnel = _tunnel;
   if (tunnel) {
@@ -1142,7 +1144,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
 const char *XsltExecutable::transformToString(XdmNode *source) {
 
   if (source != nullptr) {
-    parameters["node"] = source;
+      setParameter("node", (XdmValue *)source, false);
   }
   return transformFileToString(nullptr);
 }
@@ -1150,7 +1152,7 @@ const char *XsltExecutable::transformToString(XdmNode *source) {
 XdmValue *XsltExecutable::transformToValue(XdmNode *source) {
 
   if (source != nullptr) {
-    parameters["node"] = source;
+    setParameter("node", (XdmValue *)source, false);
   }
   return transformFileToValue(nullptr);
 }
@@ -1158,7 +1160,7 @@ XdmValue *XsltExecutable::transformToValue(XdmNode *source) {
 void XsltExecutable::transformToFile(XdmNode *source) {
 
   if (source != nullptr) {
-    parameters["node"] = source;
+      setParameter("node", (XdmValue *)source, false);
   }
   transformFileToFile(nullptr, nullptr);
 }

@@ -280,7 +280,10 @@ const char *SchemaValidator::checkException() { return proc->checkException(); }
 
 void SchemaValidator::setSourceNode(XdmNode *value) {
   if (value != nullptr) {
-    value->incrementRefCount();
+    XdmValue * value = getParameter("node", false);
+    if(value != nullptr) {
+         parameters.erase(std::string("node"));
+    }
     parameters["node"] = (XdmValue *)value;
   }
 }

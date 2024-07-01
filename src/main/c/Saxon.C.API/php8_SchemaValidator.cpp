@@ -168,6 +168,7 @@ PHP_METHOD(SchemaValidator, validateToNode) {
               (xdmNode_object *)((char *)vvobj -
                                  XtOffsetOf(xdmNode_object, std));
           assert(vobj != nullptr);
+          node->incrementRefCount();
           vobj->xdmNode = node;
           return;
         }
@@ -229,6 +230,7 @@ PHP_METHOD(SchemaValidator, getValidationReport) {
               (xdmNode_object *)((char *)vvobj -
                                  XtOffsetOf(xdmNode_object, std));
           assert(vobj != nullptr);
+          node->incrementRefCount();
           vobj->xdmNode = node;
           return;
         }
@@ -262,6 +264,9 @@ PHP_METHOD(SchemaValidator, setSourceNode) {
       if (ooth != nullptr) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
+           XdmValue * oldValue = schemaValidator->getParameter("node", true);
+          _decrementRefCountForValue(oldValue);
+          value->incrementRefCount();
           schemaValidator->setSourceNode(value);
         }
       }
@@ -348,13 +353,7 @@ PHP_METHOD(SchemaValidator, setParameter) {
     }
 
     XdmValue * oldValue = schemaValidator->getParameter(name, false);
-    if(oldValue != nullptr) {
-        oldValue->decrementRefCount();
-        if(oldValue->getRefCount() < 1) {
-            delete oldValue;
-            oldValue = nullptr;
-        }
-    }
+    _decrementRefCountForValue(oldValue);
             
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
 
@@ -366,6 +365,7 @@ PHP_METHOD(SchemaValidator, setParameter) {
       if (ooth != nullptr) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
+        value->incrementRefCount();
           schemaValidator->setParameter(name, (XdmValue *)value);
         }
       }
@@ -376,7 +376,7 @@ PHP_METHOD(SchemaValidator, setParameter) {
       if (ooth != nullptr) {
         XdmValue *value = ooth->xdmValue;
         if (value != nullptr) {
-
+          value->incrementRefCount();
           schemaValidator->setParameter(name, value);
         }
       }
@@ -389,7 +389,7 @@ PHP_METHOD(SchemaValidator, setParameter) {
       if (ooth != nullptr) {
         XdmAtomicValue *value = ooth->xdmAtomicValue;
         if (value != nullptr) {
-
+          value->incrementRefCount();
           schemaValidator->setParameter(name, (XdmValue *)value);
         }
       }
