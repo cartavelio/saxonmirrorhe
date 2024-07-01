@@ -166,8 +166,8 @@
                <code>XdmNode</code> class in the C++, Python and PHP APIs.</li>
             <li>The <code>clearXslMessages()</code> method has been added to the
                <code>XsltExecutable</code> class in the C++, Python and PHP APIs.</li>
-            <li>The <code>PyXdmFunctionItem.get_system_function(...)</code> method is now defined as a static method on the class instead of an instance method.
-               This is a breaking change to maintain consistancy with the C++ API which requires a user to
+            <li>The <code>PyXdmFunctionItem.get_system_function(...)</code> method is now defined as a static method on the class instead of as an instance method.
+               This is a breaking change to maintain consistency with the C++ API which requires a user to
             change their code accordingly. See the following code snippet as an example of the new code:
                <code>PyXdmFunctionItem.get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1</code></li>
             <li>The <code>XdmValue</code> class constructor now requires the <code>PySaxonProcessor</code> instance as an argument to create an empty sequence.
