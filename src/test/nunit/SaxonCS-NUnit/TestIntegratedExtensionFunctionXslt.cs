@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using StaticContext = Saxon.Api.StaticContext;
 using XdmAtomicType = Saxon.Api.XdmAtomicType;
 using XdmNodeKind = Saxon.Api.XdmNodeKind;
@@ -36,11 +37,11 @@ namespace SaxonCS_NUnit {
                 xsl.Run(out1);
 
                 //"sqrt "
-                Assert.IsTrue(sw.ToString().Contains("1.414213"));
+                Assert.That(sw.ToString().Contains("1.414213"));
                 //"zag "
-                Assert.IsTrue(sw.ToString().Contains("123.4"));
+                Assert.That(sw.ToString().Contains("123.4"));
                 //"inscope "
-                Assert.IsTrue(sw.ToString().Contains("1999/XSL/Transform"));
+                Assert.That(sw.ToString().Contains("1999/XSL/Transform"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -427,7 +428,7 @@ namespace SaxonCS_NUnit {
                 ev.SetVariable(new QName("arg"), new XdmAtomicValue("if"));
                 XdmValue val = ev.Evaluate();
                 String result = val.ToString();
-                Assert.AreEqual("/~if/if", result, "result ");
+                ClassicAssert.AreEqual("/~if/if", result, "result ");
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -449,7 +450,7 @@ namespace SaxonCS_NUnit {
                 ev.SetVariable(new QName("arg"), new XdmAtomicValue("if"));
                 XdmValue val = ev.Evaluate();
                 String result = val.ToString();
-                Assert.AreEqual("/~if/if", result, "result ");
+                ClassicAssert.AreEqual("/~if/if", result, "result ");
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -475,7 +476,7 @@ namespace SaxonCS_NUnit {
                 ev.SetExternalVariable(new QName("arg"), new XdmAtomicValue("if"));
                 XdmValue val = ev.Evaluate();
                 String result = val.ToString();
-                Assert.AreEqual("/~if/if", result, "result ");
+                ClassicAssert.AreEqual("/~if/if", result, "result ");
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -524,14 +525,14 @@ return
 ";
             var xquery = xqueryCompiler.Compile(xqueryCode).Load();
             var result = xquery.EvaluateSingle();
-            Assert.IsInstanceOf<XdmNode>(result);
-            Assert.AreEqual(XdmNodeKind.Element, ((XdmNode)result).NodeKind);
-            Assert.AreEqual("robot", ((XdmNode)result).NodeName.LocalName);
+            ClassicAssert.IsInstanceOf<XdmNode>(result);
+            ClassicAssert.AreEqual(XdmNodeKind.Element, ((XdmNode)result).NodeKind);
+            ClassicAssert.AreEqual("robot", ((XdmNode)result).NodeName.LocalName);
 
             var xpath = proc.NewXPathCompiler().Compile("Q{http://example.com/mf}parse-xml('<item/>')");
             var xpathResult = xpath.Load().EvaluateSingle();
-            Assert.IsInstanceOf<XdmNode>(xpathResult);
-            Assert.AreEqual(XdmNodeKind.Document, ((XdmNode)xpathResult).NodeKind);
+            ClassicAssert.IsInstanceOf<XdmNode>(xpathResult);
+            ClassicAssert.AreEqual(XdmNodeKind.Document, ((XdmNode)xpathResult).NodeKind);
 
             var xslt = proc.NewXsltCompiler().Compile(new StringReader(
                 "<out xsl:version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
@@ -541,9 +542,9 @@ return
 
             var xsltResult = xsltTransform.ApplyTemplates(
                 proc.NewDocumentBuilder().Build(new StringReader("<dummy/>")));
-            Assert.IsInstanceOf<XdmNode>(xsltResult);
-            Assert.AreEqual(XdmNodeKind.Element, ((XdmNode)xsltResult).NodeKind);
-            Assert.AreEqual("out", ((XdmNode)xsltResult).NodeName.LocalName);
+            ClassicAssert.IsInstanceOf<XdmNode>(xsltResult);
+            ClassicAssert.AreEqual(XdmNodeKind.Element, ((XdmNode)xsltResult).NodeKind);
+            ClassicAssert.AreEqual("out", ((XdmNode)xsltResult).NodeName.LocalName);
         }
     }
 
@@ -602,8 +603,8 @@ return
             public override XdmValue Call(XdmValue[] arguments, DynamicContext context)
             {
                 string inputString = arguments[0][0].StringValue;
-                Assert.NotNull(processor);
-                Assert.AreSame(processor, context.Processor);
+                ClassicAssert.NotNull(processor);
+                ClassicAssert.AreSame(processor, context.Processor);
                 return processor.NewDocumentBuilder().Build(new StringReader(inputString));
             }
 

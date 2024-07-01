@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Saxon.Api;
 using NamespaceConstant = Saxon.Api.NamespaceConstant;
 
@@ -33,7 +34,7 @@ namespace SaxonCS_NUnit {
                 xqeval.Run(serializer);
 
                 string result = ReadMemoryStream(os);
-                Assert.False(result.Contains("<?xml"), "XML declaration exists");
+                Assert.That(!result.Contains("<?xml"), "XML declaration exists");
                 Assert.That(result.Contains("doc><e"), "Indented");
                 Assert.That(result.Contains("<e><![CDATA"), "Cdata section");
 
@@ -77,7 +78,7 @@ namespace SaxonCS_NUnit {
                 trans.Run(serializer);
 
                 string result = ReadMemoryStream(os);
-                Assert.False(result.Contains("<?xml"), "XML declaration exists");
+                Assert.That(!result.Contains("<?xml"), "XML declaration exists");
                 Assert.That(result.Contains("doc><e"), "Indented");
                 Assert.That(result.Contains("<e><![CDATA"), "Cdata section");
 
@@ -253,7 +254,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Unexpected success");
             }
             catch (SaxonApiException e) {
-                Assert.AreEqual(e.Message, "Cannot serialize a map using this output method");
+                ClassicAssert.AreEqual(e.Message, "Cannot serialize a map using this output method");
             }
         }
 
@@ -349,11 +350,11 @@ namespace SaxonCS_NUnit {
             }
 
             byte[] x = ms.ToArray();
-            Assert.AreEqual(137, x[0]);
-            Assert.AreEqual(80, x[1]);
-            Assert.AreEqual(78, x[2]);
-            Assert.AreEqual(71, x[3]);
-            Assert.AreEqual(247, x.Length);
+            ClassicAssert.AreEqual(137, x[0]);
+            ClassicAssert.AreEqual(80, x[1]);
+            ClassicAssert.AreEqual(78, x[2]);
+            ClassicAssert.AreEqual(71, x[3]);
+            ClassicAssert.AreEqual(247, x.Length);
         }
 
 
@@ -385,11 +386,11 @@ namespace SaxonCS_NUnit {
             }
 
             byte[] x = ms.ToArray();
-            Assert.AreEqual(202, x[0]);
-            Assert.AreEqual(254, x[1]);
-            Assert.AreEqual(186, x[2]);
-            Assert.AreEqual(190, x[3]);
-            Assert.AreEqual(4, x.Length);
+            ClassicAssert.AreEqual(202, x[0]);
+            ClassicAssert.AreEqual(254, x[1]);
+            ClassicAssert.AreEqual(186, x[2]);
+            ClassicAssert.AreEqual(190, x[3]);
+            ClassicAssert.AreEqual(4, x.Length);
         }
 
         [Test]
@@ -411,7 +412,7 @@ namespace SaxonCS_NUnit {
                 Serializer ser = processor.NewSerializer();
                 ser.OutputWriter = (ms);
                 transformer.CallTemplate(null, ser);
-                Assert.AreEqual("<a>{$a < '&lt;'}</a>", ms.ToString());
+                ClassicAssert.AreEqual("<a>{$a < '&lt;'}</a>", ms.ToString());
             }
             catch (SaxonApiException e) {
                 //System.err.println(e.Message);
@@ -419,7 +420,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
 
-            Assert.AreEqual("<a>{$a < '&lt;'}</a>", ms.ToString());
+            ClassicAssert.AreEqual("<a>{$a < '&lt;'}</a>", ms.ToString());
 
         }
 
@@ -528,13 +529,13 @@ namespace SaxonCS_NUnit {
                 xqeval.Run(serializer);
 
                 string result = ReadMemoryStream(os);
-                Assert.False(result.Contains("<?xml"), "XML declaration exists");
-                Assert.True(result.Contains("&#x378;&#x15b38"), "character references");
-                Assert.True(result.Contains("=&gt;"), "Ordinary chars");
-                Assert.AreEqual(0xC0, os.GetBuffer()[9]);
-                Assert.AreEqual(0xC1, os.GetBuffer()[10]);
-                Assert.AreEqual(0xC2, os.GetBuffer()[11]);
-                Assert.AreEqual(0xC3, os.GetBuffer()[12]);
+                ClassicAssert.False(result.Contains("<?xml"), "XML declaration exists");
+                Assert.That(result.Contains("&#x378;&#x15b38"), "character references");
+                Assert.That(result.Contains("=&gt;"), "Ordinary chars");
+                ClassicAssert.AreEqual(0xC0, os.GetBuffer()[9]);
+                ClassicAssert.AreEqual(0xC1, os.GetBuffer()[10]);
+                ClassicAssert.AreEqual(0xC2, os.GetBuffer()[11]);
+                ClassicAssert.AreEqual(0xC3, os.GetBuffer()[12]);
 
             }
             catch (SaxonApiException e) {

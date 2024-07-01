@@ -5,6 +5,7 @@ using System.IO;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
+using NUnit.Framework.Legacy;
 using Processor = Saxon.Api.Processor;
 using SchemaManager = Saxon.Api.SchemaManager;
 using SchemaValidator = Saxon.Api.SchemaValidator;
@@ -212,8 +213,8 @@ namespace SaxonCS_NUnit {
 
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(1, errorList.Count());
-                Assert.True(sapie.Message.Contains("Far too many errors"));
+                ClassicAssert.AreEqual(1, errorList.Count());
+                Assert.That(sapie.Message.Contains("Far too many errors"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -247,8 +248,8 @@ namespace SaxonCS_NUnit {
 
             }
             catch (SaxonApiException sapie) {
-                Assert.AreEqual(1, errorList.Count);
-                Assert.True(sapie.Message.Contains("Far too many errors"));
+                ClassicAssert.AreEqual(1, errorList.Count);
+                Assert.That(sapie.Message.Contains("Far too many errors"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);

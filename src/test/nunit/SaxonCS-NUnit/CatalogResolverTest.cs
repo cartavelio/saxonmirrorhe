@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Saxon.Api;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 
 namespace SaxonCS_NUnit {
@@ -35,7 +36,7 @@ namespace SaxonCS_NUnit {
             builder.DtdValidation = (true);
             try {
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "resolvers/ok.xml"));
-                Assert.NotNull(doc);
+                ClassicAssert.NotNull(doc);
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -52,7 +53,7 @@ namespace SaxonCS_NUnit {
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 builder.DtdValidation = (true);
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri,"resolvers/input.xml"));
-                Assert.NotNull(doc);
+                ClassicAssert.NotNull(doc);
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 
@@ -174,9 +175,9 @@ namespace SaxonCS_NUnit {
                          + "</root>";
 
             void Check(XdmNode node, string prefix, string uri, string local) {
-                Assert.AreEqual( prefix,node.NodeName == null ? "" : node.NodeName.Prefix);
-                Assert.AreEqual(local, node.NodeName == null ? "" : node.NodeName.LocalName);
-                Assert.AreEqual(uri, node.NodeName == null ? "" : node.NodeName.Uri);
+                ClassicAssert.AreEqual( prefix,node.NodeName == null ? "" : node.NodeName.Prefix);
+                ClassicAssert.AreEqual(local, node.NodeName == null ? "" : node.NodeName.LocalName);
+                ClassicAssert.AreEqual(uri, node.NodeName == null ? "" : node.NodeName.Uri);
             }
             
             Processor proc = new();
@@ -530,7 +531,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector xpe = proc.NewXPathCompiler().Compile("/*/*").Load();
                 xpe.ContextItem = proc.NewDocumentBuilder().Wrap(doc);
                 XdmValue isList = xpe.Evaluate();
-                Assert.AreEqual(3, isList.Count(), "length");
+                ClassicAssert.AreEqual(3, isList.Count(), "length");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -634,11 +635,11 @@ namespace SaxonCS_NUnit {
                 XPathSelector xpe = xpc.Compile(exp).Load();
                 xpe.ContextItem = proc.NewDocumentBuilder().Wrap(doc);
                 XdmValue isList = xpe.Evaluate();
-                Assert.AreEqual(4, isList.Count, "length");
-                Assert.AreEqual("anne", isList[0].StringValue);
-                Assert.AreEqual("fred", isList[1].StringValue);
-                Assert.AreEqual("jane", isList[2].StringValue);
-                Assert.AreEqual("sue", isList[3].StringValue);
+                ClassicAssert.AreEqual(4, isList.Count, "length");
+                ClassicAssert.AreEqual("anne", isList[0].StringValue);
+                ClassicAssert.AreEqual("fred", isList[1].StringValue);
+                ClassicAssert.AreEqual("jane", isList[2].StringValue);
+                ClassicAssert.AreEqual("sue", isList[3].StringValue);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -736,8 +737,8 @@ namespace SaxonCS_NUnit {
                 LinqDestination destination = new ();
                 transformer.ApplyTemplates(source, destination);
                 XDocument doc = destination.XDocument;
-                Assert.NotNull(doc.Elements().First());
-                Assert.AreEqual("a", doc.Elements().First().Name.LocalName, "result");
+                ClassicAssert.NotNull(doc.Elements().First());
+                ClassicAssert.AreEqual("a", doc.Elements().First().Name.LocalName, "result");
             }
             catch (TransformerException e) {
                 Assert.Fail(e.getMessage());
@@ -795,17 +796,17 @@ namespace SaxonCS_NUnit {
             DocumentBuilder builder = proc.NewDocumentBuilder();
             XdmNode wrappedDoc = builder.Wrap(document);
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, textNode), serializer);
-            Assert.AreEqual("some text", sw.ToString(), "text node");
+            ClassicAssert.AreEqual("some text", sw.ToString(), "text node");
 
             sw = new StringWriter();
             serializer.OutputWriter = sw;
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, commentNode), serializer);
-            Assert.AreEqual("<!--a comment-->", sw.ToString(), "comment");
+            ClassicAssert.AreEqual("<!--a comment-->", sw.ToString(), "comment");
 
             sw = new StringWriter();
             serializer.OutputWriter = sw;
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, piNode), serializer);
-            Assert.AreEqual("<?tgt some data?>", sw.ToString(), "processing instruction");
+            ClassicAssert.AreEqual("<?tgt some data?>", sw.ToString(), "processing instruction");
         }
 
         [Test]
@@ -821,7 +822,7 @@ namespace SaxonCS_NUnit {
             serializer.SetOutputProperty(Serializer.METHOD, "xml");
 
             transformer.ApplyTemplates(proc.NewDocumentBuilder().Wrap(document), serializer);
-            Assert.AreEqual("", sw.ToString());
+            ClassicAssert.AreEqual("", sw.ToString());
         }
 
         /**
@@ -918,14 +919,14 @@ namespace SaxonCS_NUnit {
 
                 XNamespace fooNs = "http://foo";
                 XElement node = doc.Descendants(fooNs + "foo").First();
-                Assert.AreEqual("http://foo", node.Name.NamespaceName);
+                ClassicAssert.AreEqual("http://foo", node.Name.NamespaceName);
                 
 
                 xq.ContextItem = builder.Wrap(builder.Wrap(doc), node);
 
                 XdmValue result = xq.Evaluate();
-                Assert.AreEqual(1, result.Count);
-                Assert.AreEqual("http://foo", ((XdmNode) result[0]).NodeName.Uri);
+                ClassicAssert.AreEqual(1, result.Count);
+                ClassicAssert.AreEqual("http://foo", ((XdmNode) result[0]).NodeName.Uri);
 
 
             }
@@ -966,7 +967,7 @@ namespace SaxonCS_NUnit {
                 XDocument doc = XDocument.Load(new StringReader(withPrefix ? prefixXml : noPrefixXml));
                 XNamespace fooNs = "http://foo";
                 XElement node = doc.Descendants(fooNs + "foo").First();
-                Assert.AreEqual("http://foo", node.Name.NamespaceName);
+                ClassicAssert.AreEqual("http://foo", node.Name.NamespaceName);
                 
 
                 Xslt30Transformer t = IdentityTransformer(proc);
@@ -1084,7 +1085,7 @@ namespace SaxonCS_NUnit {
                 XdmValue result = xp.Evaluate();
 
                 Console.WriteLine(result.Count);
-                Assert.AreEqual(1, result.Count);
+                ClassicAssert.AreEqual(1, result.Count);
                 for (int i = 0; i < result.Count; i++) {
                     XdmNode n = (XdmNode) result[i];
                     Console.WriteLine(n);
@@ -1128,7 +1129,7 @@ namespace SaxonCS_NUnit {
                 XdmValue result = xp.Evaluate();
 
                 Console.WriteLine(result.Count);
-                Assert.AreEqual(1, result.Count);
+                ClassicAssert.AreEqual(1, result.Count);
                 for (int i = 0; i < result.Count; i++) {
                     XdmNode n = (XdmNode) result[i];
                     Console.WriteLine(n);
@@ -1154,7 +1155,7 @@ namespace SaxonCS_NUnit {
                     "<z xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xsl:version='2.0' count='{count(//*)}'/>";
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
                 transformer.ApplyTemplates(proc.NewDocumentBuilder().Wrap(sourceDoc), proc.NewSerializer(sw));
-                Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><z count=\"0\"/>", sw.ToString());
+                ClassicAssert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><z count=\"0\"/>", sw.ToString());
             }
             catch (Exception e1) {
                 Assert.Fail(e1.Message);
@@ -1172,7 +1173,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
                 LinqDestination result = new LinqDestination();
                 transformer.ApplyTemplates(new StringReader(ss), result);
-                Assert.AreEqual("1", result.XDocument.Element("z").Attribute("count").Value);
+                ClassicAssert.AreEqual("1", result.XDocument.Element("z").Attribute("count").Value);
             }
             catch (TransformerException e1) {
                 Assert.Fail(e1.Message);
@@ -1210,7 +1211,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transformer = proc.NewXsltCompiler().Compile(new StringReader(ss)).Load30();
                 LinqDestination result = new ();
                 transformer.ApplyTemplates(xdmNode, result);
-                Assert.AreEqual("4", result.XDocument.Element("z").Attribute("count").Value);
+                ClassicAssert.AreEqual("4", result.XDocument.Element("z").Attribute("count").Value);
             }
             catch (Exception e1) {
                 Assert.Fail(e1.Message);
@@ -1283,7 +1284,7 @@ namespace SaxonCS_NUnit {
                 identityTransformer.ApplyTemplates(proc.NewDocumentBuilder().Wrap(dest.XDocument), serializer);
                 string output = new UTF8Encoding().GetString(baos.GetBuffer(), 0, (int)baos.Length);
                 Console.Error.WriteLine(output);
-                Assert.AreEqual(output, input);
+                ClassicAssert.AreEqual(output, input);
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -1305,11 +1306,11 @@ namespace SaxonCS_NUnit {
                 Assert.That(root.Attribute("xmlns")?.Value == "http://foo");
                 XNamespace fooNs = "http://foo";
                 XElement a = root.Element(fooNs + "a");
-                Assert.IsNull(a.Attribute("xmlns"));
-                Assert.AreEqual(0, a.Attributes().Count());
+                ClassicAssert.IsNull(a.Attribute("xmlns"));
+                ClassicAssert.AreEqual(0, a.Attributes().Count());
                 XElement b = root.Element(fooNs + "b");
-                Assert.IsNull(b.Attribute("xmlns"));
-                Assert.AreEqual(0, b.Attributes().Count());
+                ClassicAssert.IsNull(b.Attribute("xmlns"));
+                ClassicAssert.AreEqual(0, b.Attributes().Count());
             }
             catch (SaxonApiException err) {
                 Assert.Fail(err.Message);
@@ -1388,8 +1389,8 @@ namespace SaxonCS_NUnit {
                 Console.WriteLine(writer.ToString());
 
                 XDocument doc2 = XDocument.Load(new StringReader(transformed));
-                Assert.AreEqual("someNS", ((XElement)doc2.FirstNode).Name.NamespaceName);
-                Assert.AreEqual("", doc2.Descendants("b").First().Name.NamespaceName);
+                ClassicAssert.AreEqual("someNS", ((XElement)doc2.FirstNode).Name.NamespaceName);
+                ClassicAssert.AreEqual("", doc2.Descendants("b").First().Name.NamespaceName);
             }
             catch (Exception err) {
                 Assert.Fail(err.Message);

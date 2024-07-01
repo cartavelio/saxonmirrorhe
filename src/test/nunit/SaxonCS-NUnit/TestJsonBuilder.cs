@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Saxon.Api;
 
 namespace SaxonCS_NUnit {
@@ -17,9 +18,9 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
-                Assert.AreEqual(m.Size, 2);
+                ClassicAssert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
+                ClassicAssert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
+                ClassicAssert.AreEqual(m.Size, 2);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -34,9 +35,9 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
-                Assert.AreEqual(m.Size, 2);
+                ClassicAssert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
+                ClassicAssert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
+                ClassicAssert.AreEqual(m.Size, 2);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -67,9 +68,9 @@ namespace SaxonCS_NUnit {
                 XdmValue d = builder.ParseJson(sr);
                 Assert.That(d is XdmMap);
                 XdmMap m = (XdmMap) d;
-                Assert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
-                Assert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
-                Assert.AreEqual(m.Size, 2);
+                ClassicAssert.AreEqual(((XdmAtomicValue) m.Get("one")).AsLong(), 1);
+                ClassicAssert.AreEqual(((XdmAtomicValue) m.Get("two")).AsLong(), 2);
+                ClassicAssert.AreEqual(m.Size, 2);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);

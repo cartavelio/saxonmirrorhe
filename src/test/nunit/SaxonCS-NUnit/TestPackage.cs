@@ -2,6 +2,7 @@
 using System.IO;
 using Saxon.Api;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace SaxonCS_NUnit {
     class TestPackage {
@@ -29,7 +30,7 @@ namespace SaxonCS_NUnit {
 
                 file1.Close();
                 file2.Close();
-                Assert.True(true);
+                Assert.That(true);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -68,7 +69,7 @@ namespace SaxonCS_NUnit {
 
                 transf.CallTemplate(null, serializer);
                 string res = sw.ToString();
-                Assert.NotNull(res);
+                ClassicAssert.NotNull(res);
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);

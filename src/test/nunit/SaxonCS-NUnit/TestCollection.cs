@@ -2,6 +2,7 @@
 using Saxon.Api;
 using NUnit.Framework;
 using System.Diagnostics;
+using NUnit.Framework.Legacy;
 
 namespace SaxonCS_NUnit {
     class TestCollection {
@@ -15,7 +16,7 @@ namespace SaxonCS_NUnit {
                 Uri collectionUri = new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml;recurse=no");
                 eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(5, val.Count);
+                ClassicAssert.AreEqual(5, val.Count);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -36,7 +37,7 @@ namespace SaxonCS_NUnit {
                 eval.SetVariable(new QName("a"), new XdmAtomicValue(ConfigTest.DataDirUri));
                 eval.SetVariable(new QName("b"), new XdmAtomicValue("[A-Za-z]+\\.xml"));
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(5, val.Count);
+                ClassicAssert.AreEqual(5, val.Count);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -55,7 +56,7 @@ namespace SaxonCS_NUnit {
                 Uri collectionUri = new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml");
                 eval.ContextItem = (new XdmAtomicValue(collectionUri));
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(5, val.Count);
+                ClassicAssert.AreEqual(5, val.Count);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -72,7 +73,7 @@ namespace SaxonCS_NUnit {
                 Uri collectionUri = new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml;recurse=yes");
                 eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(7, val.Count, "found7");
+                ClassicAssert.AreEqual(7, val.Count, "found7");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -90,8 +91,8 @@ namespace SaxonCS_NUnit {
                     "trax/xml?select=*.xml;recurse=yes;content-type=text/plain");
                 eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(7, val.Count, "found7");
-                Assert.True(val[0] is XdmAtomicValue, "isString");
+                ClassicAssert.AreEqual(7, val.Count, "found7");
+                Assert.That(val[0] is XdmAtomicValue, "isString");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -107,7 +108,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector eval = exec.Load();
                 eval.ContextItem = (new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml")));
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(5, val.Count);
+                ClassicAssert.AreEqual(5, val.Count);
             }
             catch (Exception e) {
                 Assert.Fail(e.ToString());
@@ -123,7 +124,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector eval = exec.Load();
                 eval.ContextItem = (new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, "trax/xml/?select=*.xml;recurse=yes")));
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(7, val.Count);
+                ClassicAssert.AreEqual(7, val.Count);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -142,7 +143,7 @@ namespace SaxonCS_NUnit {
                 Console.WriteLine("Serial processing: " + serial.Milliseconds + "ms");
                 TimeSpan parallel = speedTest(true);
                 Console.WriteLine("Parallel processing: " + parallel.Milliseconds + "ms");
-                Assert.True(parallel < serial, "not faster!");
+                Assert.That(parallel < serial, "not faster!");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -193,7 +194,7 @@ namespace SaxonCS_NUnit {
                 // (duplicates are eliminated). With an unstable collection, the second call returns new
                 // documents, which aren't detected as duplicates. So there are twice as many nodes
                 // in the result.
-                Assert.AreEqual(unstableDocs, stableDocs*2);
+                ClassicAssert.AreEqual(unstableDocs, stableDocs*2);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -212,7 +213,7 @@ namespace SaxonCS_NUnit {
                 Uri collectionUri = new Uri(ConfigTest.DataDirUri, "?select=books.xml;recurse=no;validation=strict");
                 eval.ContextItem = new XdmAtomicValue(collectionUri);
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(false, ((XdmAtomicValue) val).AsBoolean());
+                ClassicAssert.AreEqual(false, ((XdmAtomicValue) val).AsBoolean());
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -229,7 +230,7 @@ namespace SaxonCS_NUnit {
                 eval.ContextItem = (new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, 
                                                        "?select=books.xml;recurse=no;validation=skip")));
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(true, ((XdmAtomicValue) val).AsBoolean());
+                ClassicAssert.AreEqual(true, ((XdmAtomicValue) val).AsBoolean());
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -249,9 +250,9 @@ namespace SaxonCS_NUnit {
                 Uri collectionUri = new Uri(ConfigTest.DataDirUri, "collection.xml");
                 eval.ContextItem = (new XdmAtomicValue(collectionUri));
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(2, val.Count);
-                Assert.AreEqual(1, ((XdmAtomicValue)val[0]).AsDouble());
-                Assert.AreEqual("BOOKLIST", ((XdmAtomicValue)val[1]).StringValue);
+                ClassicAssert.AreEqual(2, val.Count);
+                ClassicAssert.AreEqual(1, ((XdmAtomicValue)val[0]).AsDouble());
+                ClassicAssert.AreEqual("BOOKLIST", ((XdmAtomicValue)val[1]).StringValue);
             }
             catch (Exception e) {
                 Console.Error.WriteLine(e.Message + "\n" + e.StackTrace);

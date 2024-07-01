@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Saxon.Api;
 
 namespace SaxonCS_NUnit {
@@ -32,8 +33,8 @@ namespace SaxonCS_NUnit {
                 XPathCompiler c = p.NewXPathCompiler();
                 XdmValue v = c.Evaluate(@"tokenize('dole0021', '\W+|(?<=\D)(?=\d)|(?<=\d)(?=\D)', ';n')", null);
                 Assert.That(v.Count == 2);
-                Assert.AreEqual(v[0].StringValue, "dole");
-                Assert.AreEqual(v[1].StringValue, "0021");
+                ClassicAssert.AreEqual(v[0].StringValue, "dole");
+                ClassicAssert.AreEqual(v[1].StringValue, "0021");
             }
             catch (Exception e) {
                 Console.WriteLine(e.StackTrace);
@@ -50,7 +51,7 @@ namespace SaxonCS_NUnit {
                 XPathCompiler c = p.NewXPathCompiler();
                 XdmValue v = c.Evaluate("replace('3/20/1986', " +
                                         "'(?<mm>[0-9]+)/(?<dd>[0-9]+)/(?<yy>[0-9]+)', '${yy}/${mm}/${dd}$$', ';n')", null);
-                Assert.AreEqual("1986/3/20$", ((XdmAtomicValue)v).StringValue);
+                ClassicAssert.AreEqual("1986/3/20$", ((XdmAtomicValue)v).StringValue);
             }
             catch (Exception e) {
                 Console.WriteLine(e.StackTrace);

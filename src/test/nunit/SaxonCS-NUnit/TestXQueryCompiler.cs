@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Saxon.Api;
 using Saxon.Ejava.net;
 using Exception = System.Exception;
@@ -29,7 +30,7 @@ namespace SaxonCS_NUnit {
                 });
                 XQueryExecutable exec = c.Compile("import module namespace b = 'b.uri' at 'b.xq'; $b:b");
                 XdmValue val = exec.Load().Evaluate();
-                Assert.AreEqual(42L, ((XdmAtomicValue) val).AsLong());
+                ClassicAssert.AreEqual(42L, ((XdmAtomicValue) val).AsLong());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -47,7 +48,7 @@ namespace SaxonCS_NUnit {
                 XQueryEvaluator eval = c.Compile("/foo").Load();
                 eval.ContextItem = (foo);
                 XdmValue val = eval.Evaluate();
-                Assert.AreEqual(1, val.Count);
+                ClassicAssert.AreEqual(1, val.Count);
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -77,7 +78,7 @@ namespace SaxonCS_NUnit {
                 e2.ContextItem = (foo);
                 e2.SetExternalVariable(new QName("p"), new XdmAtomicValue(6));
                 val = e2.Evaluate();
-                Assert.AreEqual(18, ((XdmAtomicValue) val).AsLong());
+                ClassicAssert.AreEqual(18, ((XdmAtomicValue) val).AsLong());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -101,7 +102,7 @@ namespace SaxonCS_NUnit {
                         XQueryEvaluator q = c.Compile("a:foo/b:bar + a:foo/b:bar + a:foo/b:bar + a:foo/b:bar").Load();
                         q.ContextItem = (foo);
                         XdmAtomicValue v = (XdmAtomicValue) q.EvaluateSingle();
-                        Assert.AreEqual("48", v.ToString(), "ok");
+                        ClassicAssert.AreEqual("48", v.ToString(), "ok");
                     }
                     catch (Exception e) {
                         //e.printStackTrace();
@@ -127,10 +128,10 @@ namespace SaxonCS_NUnit {
                                     "declare variable $m:ten as xs:integer := 10;");
                 string q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
                 XQueryEvaluator ev = comp.Compile(q1).Load();
-                Assert.AreEqual("4", ev.Evaluate().ToString(), "2+2");
+                ClassicAssert.AreEqual("4", ev.Evaluate().ToString(), "2+2");
                 string q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
                 ev = comp.Compile(q2).Load();
-                Assert.AreEqual("15", ev.Evaluate().ToString(), "10+5");
+                ClassicAssert.AreEqual("15", ev.Evaluate().ToString(), "10+5");
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -151,10 +152,10 @@ namespace SaxonCS_NUnit {
                                     "declare variable $m2:ten as xs:integer := $m1:ten;");
                 const string q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
                 XQueryEvaluator ev = comp.Compile(q1).Load();
-                Assert.AreEqual("12", ev.Evaluate().ToString(), "10+2");
+                ClassicAssert.AreEqual("12", ev.Evaluate().ToString(), "10+2");
                 const string q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
                 ev = comp.Compile(q2).Load();
-                Assert.AreEqual("15", ev.Evaluate().ToString(), "10+5");
+                ClassicAssert.AreEqual("15", ev.Evaluate().ToString(), "10+5");
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -181,10 +182,10 @@ namespace SaxonCS_NUnit {
                         : null;
                 };
                 XQueryEvaluator ev = comp.Compile(q1).Load();
-                Assert.AreEqual("12", ev.Evaluate().ToString(), "10+2");
+                ClassicAssert.AreEqual("12", ev.Evaluate().ToString(), "10+2");
                 const string q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
                 ev = comp.Compile(q2).Load();
-                Assert.AreEqual("15", ev.Evaluate().ToString(), "10+5");
+                ClassicAssert.AreEqual("15", ev.Evaluate().ToString(), "10+5");
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -220,12 +221,12 @@ namespace SaxonCS_NUnit {
                                   "import module namespace m3='http://www.example.com/module-three';" +
                                   "m2:subtract(m3:times(4,2),1)";
                 XQueryEvaluator ev = comp.Compile(q1).Load();
-                Assert.AreEqual("7", "7", ev.Evaluate().ToString());
+                ClassicAssert.AreEqual("7", "7", ev.Evaluate().ToString());
                 const string q2 = "import module namespace m2='http://www.example.com/module-two'; " +
                                   "import module namespace m3='http://www.example.com/module-three';" +
                                   "m2:subtract(m3:times(5,2),1)";
                 XQueryEvaluator ev2 = comp.Compile(q2).Load();
-                Assert.AreEqual("9", ev2.Evaluate().ToString());
+                ClassicAssert.AreEqual("9", ev2.Evaluate().ToString());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -254,12 +255,12 @@ namespace SaxonCS_NUnit {
                                   "import module namespace m3='http://www.example.com/module-three';" +
                                   "m2:subtract(m3:times(4,2),1)";
                 XQueryEvaluator ev = comp.Compile(q1).Load();
-                Assert.AreEqual("7", ev.Evaluate().ToString());
+                ClassicAssert.AreEqual("7", ev.Evaluate().ToString());
                 const string q2 = "import module namespace m2='http://www.example.com/module-two'; " +
                                   "import module namespace m3='http://www.example.com/module-three';" +
                                   "m2:subtract(m3:times(5,2),1)";
                 XQueryEvaluator ev2 = comp.Compile(q2).Load();
-                Assert.AreEqual("9", ev2.Evaluate().ToString());
+                ClassicAssert.AreEqual("9", ev2.Evaluate().ToString());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -292,12 +293,12 @@ namespace SaxonCS_NUnit {
                                   "import module namespace m3='http://www.example.com/module-three';" +
                                   "m2:subtract(m3:times(4,2),1) + $m3:twelve";
                 XQueryEvaluator ev = comp.Compile(q1).Load();
-                Assert.AreEqual("19", ev.Evaluate().ToString());
+                ClassicAssert.AreEqual("19", ev.Evaluate().ToString());
                 const string q2 = "import module namespace m2='http://www.example.com/module-two'; " +
                                   "import module namespace m3='http://www.example.com/module-three';" +
                                   "m2:subtract(m3:times(5,2),1) + $m2:eleven";
                 XQueryEvaluator ev2 = comp.Compile(q2).Load();
-                Assert.AreEqual("20", ev2.Evaluate().ToString());
+                ClassicAssert.AreEqual("20", ev2.Evaluate().ToString());
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);
@@ -320,7 +321,7 @@ namespace SaxonCS_NUnit {
                 );
 
                 XdmItem result = exp.Load().EvaluateSingle();
-                Assert.AreEqual("a!", result.StringValue);
+                ClassicAssert.AreEqual("a!", result.StringValue);
 
             }
             catch (SaxonApiException err) {
@@ -421,9 +422,9 @@ namespace SaxonCS_NUnit {
                 XQueryExecutable q = c.Compile(query);
                 var globals = q.GetExternalVariables();
                 ParameterDetails details = globals[new QName("foo")];
-                Assert.AreEqual(3, details.Location.LineNumber);
-                Assert.False(details.Required);
-                Assert.AreEqual(1, globals.Count);
+                ClassicAssert.AreEqual(3, details.Location.LineNumber);
+                Assert.That(!details.Required);
+                ClassicAssert.AreEqual(1, globals.Count);
             }
             catch (SaxonApiException e) {
                 Assert.Fail(e.Message);

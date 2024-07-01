@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Xml;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Saxon.Api;
 using Saxon.Hej;
 
@@ -33,7 +34,7 @@ namespace SaxonCS_NUnit {
                 Uri address = new Uri(ConfigTest.DataDirUri, "saxon-cs.config");
                 Stream configFile = new WebClient().OpenRead(address);
                 Processor processor = new(configFile, address);
-                Assert.NotNull(processor);
+                ClassicAssert.NotNull(processor);
             }
             catch (Exception ex) {
                 Console.Error.WriteLine(ex.StackTrace);
@@ -60,7 +61,7 @@ namespace SaxonCS_NUnit {
                 Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
                 Stream configFile = new WebClient().OpenRead(address);
                 Processor processor = new(configFile, address);
-                Assert.NotNull(processor);
+                ClassicAssert.NotNull(processor);
                 Assert.That(processor.Implementation.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
                 configFile.Close();
                 
@@ -93,7 +94,7 @@ namespace SaxonCS_NUnit {
                 DocumentBuilder builder =  new Processor().NewDocumentBuilder();
                 builder.BaseUri = new Uri("http://www.example.com");
                 XdmNode d = builder.Build(sr);
-                Assert.NotNull(d);
+                ClassicAssert.NotNull(d);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -107,8 +108,8 @@ namespace SaxonCS_NUnit {
                 DocumentBuilder builder =  new Processor().NewDocumentBuilder();
                 builder.BaseUri = new Uri("http://www.example.com");
                 XdmNode d = builder.Build(xml);
-                Assert.NotNull(d);
-                Assert.AreEqual(builder.BaseUri, d.BaseUri);
+                ClassicAssert.NotNull(d);
+                ClassicAssert.AreEqual(builder.BaseUri, d.BaseUri);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -124,11 +125,11 @@ namespace SaxonCS_NUnit {
                 Processor processor =  new();
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 XdmNode d = builder.Build(xml);
-                Assert.NotNull(d);
+                ClassicAssert.NotNull(d);
                 XPathSelector xp = processor.NewXPathCompiler().Compile("/*/*").Load();
                 xp.ContextItem = d;
                 XdmNode e = (XdmNode) xp.EvaluateSingle();
-                Assert.NotNull(e);
+                ClassicAssert.NotNull(e);
                 IEnumerator nsIter = e.EnumerateAxis(XdmAxis.Namespace);
                 Dictionary<string, string> nsBindings = new Dictionary<string, string>();
                 while (nsIter.MoveNext()) {
@@ -137,7 +138,7 @@ namespace SaxonCS_NUnit {
                     nsBindings.Add((ns.NodeName == null ? "" : ns.NodeName.LocalName), ns.StringValue);
                 }
 
-                Assert.True(nsBindings.Count() == 4);
+                Assert.That(nsBindings.Count() == 4);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -165,7 +166,7 @@ namespace SaxonCS_NUnit {
                 Serializer outi = proc.NewSerializer(writer);
 
                 xsl.Run(outi);
-                Assert.True(writer.ToString().Contains("<f/>"), "");
+                Assert.That(writer.ToString().Contains("<f/>"), "");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message + e.StackTrace);
@@ -193,7 +194,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector s = xpc.Compile("distinct-values(//*/base-uri())").Load();
                 s.ContextItem = d;
                 XdmValue v = s.Evaluate();
-                Assert.True(v.Count == 3, "3 distinct base URIs");
+                Assert.That(v.Count == 3, "3 distinct base URIs");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -290,7 +291,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector s = xpc.Compile("distinct-values(//*/base-uri())").Load();
                 s.ContextItem = node;
                 XdmValue v = s.Evaluate();
-                Assert.True(v.Count == 3, "3 distinct base URIs");
+                Assert.That(v.Count == 3, "3 distinct base URIs");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -318,7 +319,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector s = xpc.Compile("distinct-values(//*/base-uri())").Load();
                 s.ContextItem = d;
                 XdmValue v = s.Evaluate();
-                Assert.True(v.Count == 3, "3 distinct base URIs");
+                Assert.That(v.Count == 3, "3 distinct base URIs");
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -345,7 +346,7 @@ namespace SaxonCS_NUnit {
                 XPathSelector s = xpc.Compile("//@CODE").Load();
                 s.ContextItem = d;
                 foreach (XdmItem i in s.Evaluate()) {
-                    Assert.True(((XdmNode) i).BaseUri.ToString().EndsWith("categories.xml"), "baseURI");
+                    Assert.That(((XdmNode) i).BaseUri.ToString().EndsWith("categories.xml"), "baseURI");
                 }
             }
             catch (Exception e) {
@@ -385,7 +386,7 @@ namespace SaxonCS_NUnit {
                 eval.ContextItem = doc;
                 eval.Run(destination);
 
-                Assert.True(sw.ToString().Contains("CODE=\"P\" DESC=\"Paperback\""), "contains CAT");
+                Assert.That(sw.ToString().Contains("CODE=\"P\" DESC=\"Paperback\""), "contains CAT");
 
                 // Test that the projected doc omits the ITEM elements
 
@@ -397,7 +398,7 @@ namespace SaxonCS_NUnit {
                 XQueryEvaluator eval2 = exp.Load();
                 eval2.ContextItem = doc;
                 eval2.Run(destination2);
-                Assert.True(sw2.ToString().Equals("0"), "omits ITEM");
+                Assert.That(sw2.ToString().Equals("0"), "omits ITEM");
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.StackTrace);
@@ -441,7 +442,7 @@ namespace SaxonCS_NUnit {
                     "</svg>");
                 b.BaseUri = new Uri("http://www.saxonica.com/notthere");
                 b.Build(sr);
-                Assert.True(true, "svg11Dtd successful");
+                Assert.That(true, "svg11Dtd successful");
             }
             catch (Exception sae) {
                 Assert.Fail(sae.Message);
@@ -477,7 +478,7 @@ namespace SaxonCS_NUnit {
                     "</svg>");
                 b.BaseUri = new Uri("http://www.saxonica.com/notthere");
                 b.Build(sr);
-                Assert.True(true, "svg10Dtd successful");
+                Assert.That(true, "svg10Dtd successful");
             }
             catch (Exception sae) {
                 Assert.Fail(sae.Message);
@@ -494,17 +495,17 @@ namespace SaxonCS_NUnit {
                 builder.BaseUri = new Uri("http://www.example.com");
                 builder.WhitespacePolicy = WhitespacePolicy.StripAll;
                 string s = builder.Build(sr).ToString();
-                Assert.True(s.Contains("<doc/>"));
+                Assert.That(s.Contains("<doc/>"));
 
                 sr = new StringReader("<doc> </doc>");
                 builder.WhitespacePolicy = WhitespacePolicy.PreserveAll;
                 s = builder.Build(sr).ToString();
-                Assert.True(s.Contains("<doc> </doc"));
+                Assert.That(s.Contains("<doc> </doc"));
 
                 sr = new StringReader("<doc> </doc>"); // Microsoft considers this whitespace to be ignorable
                 builder.WhitespacePolicy = WhitespacePolicy.StripIgnorable;
                 s = builder.Build(sr).ToString();
-                Assert.True(s.Contains("<doc/>"));
+                Assert.That(s.Contains("<doc/>"));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -550,11 +551,11 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestWhitespacePolicyWithDTDValidation() {
             string s = useDTDIgnorableWhitespace(WhitespacePolicy.StripAll);
-            Assert.True(s.StartsWith("rejected"));
+            Assert.That(s.StartsWith("rejected"));
             s = useDTDIgnorableWhitespace(WhitespacePolicy.StripIgnorable);
-            Assert.True(s.Contains("<a><b/><c> </c></a>"));
+            Assert.That(s.Contains("<a><b/><c> </c></a>"));
             s = useDTDIgnorableWhitespace(WhitespacePolicy.PreserveAll);
-            Assert.True(s.StartsWith("rejected"));
+            Assert.That(s.StartsWith("rejected"));
         }
 
         private string useDTDIgnorableWhitespace(WhitespacePolicy policy) {
@@ -602,7 +603,7 @@ namespace SaxonCS_NUnit {
                 StringWriter writer = new StringWriter();
                 ss.OutputWriter = writer;
                 ss.SerializeXdmValue(node);
-                Assert.True(writer.ToString().Contains("<doc><b> </b><i/></doc>"));
+                Assert.That(writer.ToString().Contains("<doc><b> </b><i/></doc>"));
             }
             catch (Exception ex) {
                 Assert.Fail(ex.Message);
@@ -628,7 +629,7 @@ namespace SaxonCS_NUnit {
                 StringWriter writer = new StringWriter();
                 ss.OutputWriter = writer;
                 ss.SerializeXdmValue(node);
-                Assert.True(writer.ToString().Contains("<doc><b> <i/></b><i xml:space=\"preserve\"><sup><i/></sup></i></doc>"));
+                Assert.That(writer.ToString().Contains("<doc><b> <i/></b><i xml:space=\"preserve\"><sup><i/></sup></i></doc>"));
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message + ex.StackTrace);
@@ -652,12 +653,12 @@ namespace SaxonCS_NUnit {
                     enumer.MoveNext();
 
                     if (child.NodeKind == XdmNodeKind.ProcessingInstruction) {
-                        Assert.True(true, "Expect processingInstruction");
+                        Assert.That(true, "Expect processingInstruction");
                         return;
                     }
                 }
 
-                // Assert.True(child.NodeKind == XmlNodeType.ProcessingInstruction, "Expect processingInstruction");
+                // Assert.That(child.NodeKind == XmlNodeType.ProcessingInstruction, "Expect processingInstruction");
                 Assert.Fail("Failed");
             }
             catch (Exception ex) {
@@ -686,12 +687,12 @@ namespace SaxonCS_NUnit {
 
                     if (child.NodeKind == XdmNodeKind.Element) {
                         if (child.GetAttributeValue(new QName("foo")).Equals("bar"))
-                            Assert.True(true, "Expect Attribute");
+                            Assert.That(true, "Expect Attribute");
                         return;
                     }
                 }
 
-                // Assert.True(child.NodeKind == XmlNodeType.ProcessingInstruction, "Expect processingInstruction");
+                // Assert.That(child.NodeKind == XmlNodeType.ProcessingInstruction, "Expect processingInstruction");
                 Assert.Fail("Failed");
             }
             catch (Exception ex) {

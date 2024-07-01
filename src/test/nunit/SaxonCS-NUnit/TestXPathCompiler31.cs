@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using Saxon.Api;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 
 namespace SaxonCS_NUnit {
@@ -56,7 +57,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestArith() {
             string result = good("2+2");
-            Assert.AreEqual("4", result);
+            ClassicAssert.AreEqual("4", result);
         }
 
         [Test]
@@ -66,7 +67,7 @@ namespace SaxonCS_NUnit {
             decimal d = 2.5m;
             //String value2 = d.ToString(System.Globalization.CultureInfo.InvariantCulture);
             XdmAtomicValue value = new XdmAtomicValue(d);
-            Assert.AreEqual("2.5", value.ToString());
+            ClassicAssert.AreEqual("2.5", value.ToString());
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-GB");
         }
@@ -74,43 +75,43 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestIf() {
             string result = good("if (//*) then 3 else 4");
-            Assert.AreEqual("3", result);
+            ClassicAssert.AreEqual("3", result);
         }
 
         [Test]
         public void TestFor() {
             String result = good("string-join(for $i in 1 to 4 return $i, '-')");
-            Assert.AreEqual("1-2-3-4", result);
+            ClassicAssert.AreEqual("1-2-3-4", result);
         }
 
         [Test]
         public void TestExists() {
             String result = good("exists(//*)");
-            Assert.AreEqual("true", result);
+            ClassicAssert.AreEqual("true", result);
         }
 
         [Test]
         public void TestBang() {
             String result = good("string-join((1 to 3)!(. + 1), '-')");
-            Assert.AreEqual("2-3-4", result);
+            ClassicAssert.AreEqual("2-3-4", result);
         }
 
         [Test]
         public void TestConcat() {
             String result = good("'abc' || 'def'");
-            Assert.AreEqual("abcdef", result);
+            ClassicAssert.AreEqual("abcdef", result);
         }
 
         [Test]
         public void TestLet() {
             String result = good("let $x := 3 return $x + 1");
-            Assert.AreEqual("4", result);
+            ClassicAssert.AreEqual("4", result);
         }
 
         [Test]
         public void TestInlineFunctions() {
             String result = good("function($x){$x + 1}(3)");
-            Assert.AreEqual("4", result);
+            ClassicAssert.AreEqual("4", result);
         }
 
         [Test]
@@ -121,13 +122,13 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestDynamicFunctionCall() {
             String result = good("exists#1(3)");
-            Assert.AreEqual("true", result);
+            ClassicAssert.AreEqual("true", result);
         }
 
         [Test]
         public void TestEQNames() {
             String result = good("Q{http://www.w3.org/2005/xpath-functions}exists(3)");
-            Assert.AreEqual("true", result);
+            ClassicAssert.AreEqual("true", result);
         }
 
         [Test]
@@ -138,25 +139,25 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestMaps() {
             String result = good("map{1:'a'}?1");
-            Assert.AreEqual("a", result);
+            ClassicAssert.AreEqual("a", result);
         }
 
         [Test]
         public void TestMapType() {
             String result = good("map{1:'a'} instance of map(*)");
-            Assert.AreEqual("true", result);
+            ClassicAssert.AreEqual("true", result);
         }
 
         [Test]
         public void TestArrays() {
             String result = good("['1a','2a','3a','4a']?2");
-            Assert.AreEqual("2a", result);
+            ClassicAssert.AreEqual("2a", result);
         }
 
         [Test]
         public void TestArrayType() {
             String result = good("['1a','2a','3a','4a'] instance of array(*)");
-            Assert.AreEqual("true", result);
+            ClassicAssert.AreEqual("true", result);
         }
 
         [Test]
@@ -177,25 +178,25 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestRound2() {
             String result = good("round(12.341, 2)");
-            Assert.AreEqual("12.34", result);
+            ClassicAssert.AreEqual("12.34", result);
         }
 
         [Test]
         public void TestGenerateId() {
             String result = good("generate-id(/)");
-            Assert.True(result.Length > 0);
+            Assert.That(result.Length > 0);
         }
 
         [Test]
         public void TestQFlag() {
             String result = good("matches('quid', 'quod', 'q')");
-            Assert.AreEqual("false", result);
+            ClassicAssert.AreEqual("false", result);
         }
 
         [Test]
         public void TestNoNonCapturingGroups() {
             String result = good("replace('abcdef', '(?:abc)(def)', '$1')");
-            Assert.AreEqual("def", result);
+            ClassicAssert.AreEqual("def", result);
         }
 
         [Test]
@@ -203,7 +204,7 @@ namespace SaxonCS_NUnit {
             String result =
                 good(
                     "Q{http://www.w3.org/2005/xpath-functions/map}get(Q{http://www.w3.org/2005/xpath-functions/map}entry('a', 'b'), 'a')");
-            Assert.AreEqual("b", result);
+            ClassicAssert.AreEqual("b", result);
         }
 
         [Test]
@@ -211,13 +212,13 @@ namespace SaxonCS_NUnit {
             String result =
                 good(
                     "Q{http://www.w3.org/2005/xpath-functions/array}flatten(Q{http://www.w3.org/2005/xpath-functions/array}append([], '12'))");
-            Assert.AreEqual("12", result);
+            ClassicAssert.AreEqual("12", result);
         }
 
         [Test]
         public void TestDefaultLanguage() {
             String result = good("default-language()");
-            Assert.True(result.StartsWith("en"));
+            Assert.That(result.StartsWith("en"));
         }
 
         [Test]
@@ -266,8 +267,8 @@ namespace SaxonCS_NUnit {
                 builder.BaseUri = new Uri("http://www.example.com");
                 s.ContextItem = (builder.Build(new StringReader(xml)));
                 XdmItem val = s.EvaluateSingle();
-                Assert.AreEqual("29", val.StringValue);
-                Assert.AreEqual("<age:ag xmlns:age=\"http://www.w3.org/2003/01/geo/wgs84_pos#\">29</age:ag>",
+                ClassicAssert.AreEqual("29", val.StringValue);
+                ClassicAssert.AreEqual("<age:ag xmlns:age=\"http://www.w3.org/2003/01/geo/wgs84_pos#\">29</age:ag>",
                     val.ToString());
             }
             catch (Exception) {
