@@ -98,8 +98,30 @@ public:
    * that some functions (those with particular context dependencies) may be
    * unsuitable for dynamic calling.
    */
-  static XdmFunctionItem *getSystemFunction(SaxonProcessor *processor,
+  static XdmFunctionItem *getSystemFunctionStatic(SaxonProcessor *processor,
                                             const char *name, int arity);
+
+  //! Get a system function
+  /**
+   * This can be any function defined in XPath 3.1 functions and operators,
+   * including functions in the math, map, and array namespaces. It can also be
+   * a Saxon extension function, provided a licensed Processor is used.
+   *
+   * @deprecated
+   * This method will be replaced in a static method of the same name and parameters
+   * in Saxon 13
+   *
+   * @param processor - The Saxon Processor object required to get the system
+   * function
+   * @param name - the name of the function
+   * @param arity - the number of arguments in the function
+   * @return the requested function, or null if there is no such function. Note
+   * that some functions (those with particular context dependencies) may be
+   * unsuitable for dynamic calling.
+   */
+   __attribute__((__deprecated__))
+  XdmFunctionItem *getSystemFunction(SaxonProcessor *processor,
+                                     const char *name, int arity);
 
   /**
    * Utility method for working with SaxonC on Python

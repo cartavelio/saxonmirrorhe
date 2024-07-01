@@ -694,7 +694,8 @@ cdef extern from "@@location@@Saxon.C.API/XdmFunctionItem.h":
 
         int getArity()
 
-        XdmFunctionItem * getSystemFunction(SaxonProcessor * processor, const char * name, int arity)
+        @staticmethod
+        XdmFunctionItem * getSystemFunctionStatic(SaxonProcessor * processor, const char * name, int arity)
 
         XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) except +raise_py_error
 

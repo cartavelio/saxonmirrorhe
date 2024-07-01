@@ -97,7 +97,7 @@ int XdmFunctionItem::getArity() {
   }
 }
 
-XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
+XdmFunctionItem *XdmFunctionItem::getSystemFunctionStatic(SaxonProcessor *processor,
                                                     const char *name,
                                                     int arity) {
   if (processor == nullptr || name == nullptr) {
@@ -115,6 +115,12 @@ XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
   }
 
   return nullptr;
+}
+
+XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
+                                                    const char *name,
+                                                    int arity) {
+    return XdmFunctionItem::getSystemFunctionStatic(processor, name, arity);
 }
 
 const char *XdmFunctionItem::getStringValue() {

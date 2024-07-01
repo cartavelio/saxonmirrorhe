@@ -5051,8 +5051,8 @@ cdef class PyXdmFunctionItem(PyXdmItem):
         py_string_i = make_py_str(c_string)
         return py_string_i
 
-
-     def get_system_function(self, PySaxonProcessor proc, str name, arity, encoding=None):
+     @staticmethod
+     def get_system_function(PySaxonProcessor proc, str name, arity, encoding=None):
          """
          get_system_function(self, PySaxonProcessor proc, str name, arity, encoding=None)
          Get a system function. This can be any function defined in XPath 3.1 functions and operators,
@@ -5075,15 +5075,10 @@ cdef class PyXdmFunctionItem(PyXdmItem):
             encoding = sys.getdefaultencoding()
          py_name_string = name.encode(encoding) if name is not None else None
          c_name = py_name_string if name is not None else ""
-         c_func = self.derivedfptr.getSystemFunction(proc.thisptr, c_name, arity)
-         if c_func is NULL:
-             return None
-         func = PyXdmFunctionItem(self.processor)
-         func.derivedfptr = self.derivedptr = self.thisvptr = c_func
-         return func
 
+         return proc.wrap_function_item(saxoncClasses.XdmFunctionItem.getSystemFunctionStatic(proc.thisptr, c_name, arity))
 
-     def call(self, PySaxonProcessor proc, list args):
+     def call(self, list args):
          """
          call(self, PySaxonProcessor proc, list args)
          Call the function
@@ -5114,9 +5109,9 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          cdef PyXdmFunctionItem fval = None
          cdef PyXdmMap mval = None
          cdef PyXdmArray aaval = None
-         c_xdmValue = self.derivedfptr.call(proc.thisptr, argumentV, _len)
+         c_xdmValue = self.derivedfptr.call(self.processor.thisptr, argumentV, _len)
          if _len > 0:
-             proc.thisptr.deleteXdmValueArray(argumentV, _len)
+             self.processor.thisptr.deleteXdmValueArray(argumentV, _len)
          if c_xdmValue == NULL:
              return None
          type_ = c_xdmValue.getType()

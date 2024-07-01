@@ -100,7 +100,6 @@ def test_version2():
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
 
-@pytest.mark.fail
 def test_icu_lib():
     saxonproc = PySaxonProcessor(license=True)
     print(saxonproc.version)
@@ -421,7 +420,6 @@ def testNodeAxis(saxonproc, data_dir):
             print("xmlns uri=" + uri_str + "'")
 
 
-@pytest.mark.fail
 def testCollection(saxonproc, data_dir):
     xq = saxonproc.new_xquery_processor()
     xq.set_query_base_uri('file:////' + os.path.join(data_dir, "trax/xml/"))
@@ -430,7 +428,6 @@ def testCollection(saxonproc, data_dir):
     assert r is not None
 
 
-@pytest.mark.fail
 def testXquery_40_functions():
     proc = PySaxonProcessor(license=True)
     proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
@@ -877,10 +874,10 @@ def testParseJsonFunction(saxonproc):
     json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
 
 
-    parse_json_fn = PyXdmFunctionItem(saxonproc).get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
+    parse_json_fn = PyXdmFunctionItem.get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
 
     try:
-        parsed_json1 = parse_json_fn.call(saxonproc, [saxonproc.make_string_value(json1, encoding="UTF-8")])
+        parsed_json1 = parse_json_fn.call([saxonproc.make_string_value(json1, encoding="UTF-8")])
         print(parsed_json1)
         assert True
     except PySaxonApiError as e:
@@ -1060,7 +1057,6 @@ def testCallNamedTemplateWithParamsRaw(saxonproc):
     assert val.item_at(0).get_atomic_value().integer_value == 13
     assert val.item_at(1).get_atomic_value().integer_value == 6
 
-@pytest.mark.explodey
 def testApplyTemplatesRaw(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'>  <xsl:template match='*'>     <xsl:param name='a' as='xs:double'/>     <xsl:param name='b' as='xs:float'/>     <xsl:sequence select='., $a + $b'/>  </xsl:template>  </xsl:stylesheet>"
@@ -1082,7 +1078,6 @@ def testApplyTemplatesRaw(saxonproc):
     assert second.is_atomic
     assert second.get_atomic_value().double_value == 17.0
 
-@pytest.mark.explodey
 def testApplyTemplatesToSerializer(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'>  <xsl:output method='text' item-separator='~~'/>  <xsl:template match='.'>     <xsl:param name='a' as='xs:double'/>     <xsl:param name='b' as='xs:float'/>     <xsl:sequence select='., $a + $b'/>  </xsl:template>  </xsl:stylesheet>"
@@ -1378,7 +1373,6 @@ def test_evaluate():
         assert isinstance(value, PyXdmValue)
         assert value.size == 3
 
-@pytest.mark.fail
 def test_evaluate_encoding():
     xml = """\
     <out>
@@ -1476,7 +1470,6 @@ def test_declare_variable_value2(saxonproc):
     except Exception as err:
         assert 'No value has been supplied for variable $s1' in str(err)
 
-@pytest.mark.fail
 def test_packages(data_dir):
     sp = PySaxonProcessor(license=True)
     xsl = """\
@@ -1651,7 +1644,7 @@ def testMapAsFunction():
 
         assert map is not None
         cVar = saxonproc.make_string_value("c")
-        result = map.call(saxonproc, [cVar])
+        result = map.call([cVar])
         assert result is not None
         item = result.head
         assert isinstance(item, PyXdmAtomicValue)
