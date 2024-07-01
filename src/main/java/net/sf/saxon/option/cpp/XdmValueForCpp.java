@@ -123,7 +123,7 @@ public class XdmValueForCpp {
     }
 
     /**
-     *
+     *  Get the typed value of this node, as defined in XDM
      * @param thread - Graalvm runtime data structure for the thread
      * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
      * @return long value reference to the XdmValue
@@ -135,6 +135,47 @@ public class XdmValueForCpp {
         XdmValue resultValue = value.getTypedValue();
         ObjectHandle objectHandle = SaxonCAPI.createHandle(resultValue);
         return objectHandle.rawValue();
+    }
+
+
+    /**
+     *
+     * Get the line number of the node in a source document. For a document constructed using the document
+     * builder, this is available only if the line numbering option was set when the document was built (and
+     * then only for element nodes). If the line number is not available, the value -1 is returned. Line numbers
+     * will typically be as reported by a SAX parser: this means that the line number for an element node is the
+     * line number containing the closing "&gt;" of the start tag.
+     *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param nodeRef - reference to XdmValue held in the ObjectHandle's pool
+     * @return the line number of the node, or -1 if not available.
+     * @throws SaxonApiException
+     */
+    @CEntryPoint(name = "j_getLineNumber1")
+    public static int getLineNumber1(IsolateThread thread, ObjectHandle nodeRef) throws SaxonApiException {
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+        int linenumber = node.getLineNumber();
+        return linenumber;
+    }
+
+    /**
+     *
+     * Get the column number of the node in a source document. For a document constructed using the document
+     * builder, this is available only if the line numbering option was set when the document was built (and
+     * then only for element nodes). If the column number is not available, the value -1 is returned. Column numbers
+     * will typically be as reported by a SAX parser: this means that the column number for an element node is the
+     * position of the closing "&gt;" of the start tag.
+     *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param nodeRef - reference to XdmValue held in the ObjectHandle's pool
+     * @return the column number of the node, or -1 if not available.
+     * @throws SaxonApiException
+     */
+    @CEntryPoint(name = "j_getColumnNumber1")
+    public static int getColumnNumber1(IsolateThread thread, ObjectHandle nodeRef) throws SaxonApiException {
+        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+        int columnNumber = node.getColumnNumber();
+        return columnNumber;
     }
 
     /**

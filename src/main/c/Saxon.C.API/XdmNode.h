@@ -141,6 +141,23 @@ public:
    */
   XdmValue *getTypedValue();
 
+
+  //!Get the line number of the node in a source document.
+  /**
+   *
+   * @return the line number of the node, or -1 if not available.
+   */
+  int getLineNumber();
+
+
+
+  //!Get the column number of the node in a source document.
+  /**
+   *
+   * @return the column number of the node, or -1 if not available.
+   */
+  int getColumnNumber();
+
   //! Get the base URI of this node
   /**
    *

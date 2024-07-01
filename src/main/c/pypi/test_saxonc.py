@@ -297,30 +297,54 @@ def testResolveUri(saxonproc):
     print(item.string_value)
     assert "code" in item.string_value
 def testEmbeddedStylesheet(saxonproc, data_dir):
-    trans = saxonproc.new_xslt30_processor()
-    input_ = saxonproc.parse_xml(xml_file_name=os.path.join(data_dir, "books.xml"))
-    path = "/processing-instruction(xml-stylesheet)[matches(.,'type\\s*=\\s*[''\"\"]text/xsl[''\" \"]')]/replace(., '.*?href\\s*=\\s*[''\" \"](.*?)[''\" \"].*', '$1')"
+        trans = saxonproc.new_xslt30_processor()
+        input_ = saxonproc.parse_xml(xml_file_name=os.path.join(data_dir, "books.xml"))
+        path = "/processing-instruction(xml-stylesheet)[matches(.,'type\\s*=\\s*[''\"\"]text/xsl[''\" \"]')]/replace(., '.*?href\\s*=\\s*[''\" \"](.*?)[''\" \"].*', '$1')"
 
-    print(os.path.join(data_dir, "books.xml"))
+        print(os.path.join(data_dir, "books.xml"))
 
-    assert input_ is not None
+        assert input_ is not None
 
-    xPathProcessor = saxonproc.new_xpath_processor()
+        xPathProcessor = saxonproc.new_xpath_processor()
+        xPathProcessor.set_context(xdm_item=input_)
+        hrefval = xPathProcessor.evaluate_single(path)
+
+        assert hrefval is not None
+        href = hrefval.string_value
+        print("href="+href)
+        assert href != ""
+        styles_dir = data_dir
+        executable = trans.compile_stylesheet(stylesheet_file=os.path.join(styles_dir, href))
+
+        assert executable is not None
+        assert isinstance(input_, PyXdmNode)
+        executable.set_global_context_item(xdm_item=input_)
+        node = executable.apply_templates_returning_value(xdm_value=input_)
+        assert node is not None
+
+def testLineNumber(data_dir):
+    proc = PySaxonProcessor(license=False)
+    proc.set_configuration_property('http://saxon.sf.net/feature/linenumbering', 'on')
+    input_ = proc.parse_xml(xml_file_name=os.path.join(data_dir, "books.xml"))
+
+    xPathProcessor = proc.new_xpath_processor()
     xPathProcessor.set_context(xdm_item=input_)
-    hrefval = xPathProcessor.evaluate_single(path)
+    val = xPathProcessor.evaluate_single("//BOOKS/ITEM[@CAT='MMP']/TITLE")
 
-    assert hrefval is not None
-    href = hrefval.string_value
-    print("href="+href)
-    assert href != ""
-    styles_dir = data_dir
-    executable = trans.compile_stylesheet(stylesheet_file=os.path.join(styles_dir, href))
+    assert val is not None
+    assert val.line_number == 7
 
-    assert executable is not None
-    assert isinstance(input_, PyXdmNode)
-    executable.set_global_context_item(xdm_item=input_)
-    node = executable.apply_templates_returning_value(xdm_value=input_)
-    assert node is not None
+def testColumnNumber(data_dir):
+    proc = PySaxonProcessor(license=False)
+    proc.set_configuration_property('http://saxon.sf.net/feature/linenumbering', 'on')
+    input_ = proc.parse_xml(xml_file_name=os.path.join(data_dir, "books.xml"))
+
+    xPathProcessor = proc.new_xpath_processor()
+    xPathProcessor.set_context(xdm_item=input_)
+    val = xPathProcessor.evaluate_single("//BOOKS/ITEM[@CAT='MMP']/TITLE")
+
+    assert val is not None
+    assert val.column_number == 14
 
 
 def testNodeAxis(saxonproc, data_dir):

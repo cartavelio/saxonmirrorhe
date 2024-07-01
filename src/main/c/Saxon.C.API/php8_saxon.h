@@ -423,6 +423,8 @@ PHP_METHOD(XdmNode, getAttributeNode);
 PHP_METHOD(XdmNode, getAttributeNodes);
 PHP_METHOD(XdmNode, getAttributeValue);
 PHP_METHOD(XdmNode, getTypedValue);
+PHP_METHOD(XdmNode, getLineNumber);
+PHP_METHOD(XdmNode, getColumnNumber);
 
 /*     ============== PHP Interface of   XdmAtomicValue =============== */
 
