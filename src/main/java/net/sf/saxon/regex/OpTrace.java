@@ -65,6 +65,18 @@ public class OpTrace extends Operation {
         return base.matchesEmptyString();
     }
 
+
+    /**
+     * Get the maximum depth of looping within this operation
+     *
+     * @return the maximum number of nested iterations
+     */
+    @Override
+    public int getMaxLoopingDepth() {
+        return base.getMaxLoopingDepth();
+    }
+
+
     @Override
     public Operation optimize(REProgram program, REFlags flags) {
         base = base.optimize(program, flags);

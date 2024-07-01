@@ -47,6 +47,18 @@ public class OpUnambiguousRepeat extends OpRepeat {
         }
     }
 
+
+    /**
+     * Get the maximum depth of looping within this operation
+     *
+     * @return the maximum number of nested iterations
+     */
+    @Override
+    public int getMaxLoopingDepth() {
+        return op.getMaxLoopingDepth() + 1;
+    }
+
+
     @Override
     public Operation optimize(REProgram program, REFlags flags) {
         op = op.optimize(program, flags);
