@@ -79,6 +79,11 @@ public:
    */
   XdmNode(XdmNode *parent, int64_t, XDM_NODE_KIND kind);
 
+  /**
+   * Copy constructor
+   *
+   * @param other The node being copied
+   */
   XdmNode(const XdmNode &other);
 
   //! Destructor.
@@ -270,6 +275,11 @@ public:
   */
   XdmNode **axisNodes(EnumXdmAxis axis);
 
+  /**
+   * Convert an int into the corresponding EnumXdmAxis Enum object
+   *
+   * @param n - the integer value for the XDM axis
+   */
   EnumXdmAxis convertEnumXdmAxis(int n) { return static_cast<EnumXdmAxis>(n); }
 
   //! Get the count of nodes in the nodeAxis array. Cached from the last call to

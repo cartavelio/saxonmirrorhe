@@ -30,7 +30,7 @@ public:
 
   /**
    * A constructor. Create a SaxonApiException
-   * @param message - The detail message string of this throwable.
+   * @param err - The detail message string of this throwable.
    */
   SaxonApiException(const char *err);
 
@@ -97,15 +97,19 @@ public:
    */
   const char *getMessageWithErrorCode();
 
-    /**
-     * Returns static error messages resulting from compile errors as a char array of the throwable, if
-     * there are any.  The caller does not need to deallocate memory.
-     * @return the detail message string of this <tt>Throwable</tt> instance with
-     * the error code as prefix if there is an error code associated with the
-     * exception.
-     */
+  /**
+   * Returns static error messages resulting from compile errors as a char array of the throwable, if
+   * there are any.  The caller does not need to deallocate memory.
+   * @return the detail message string of this <tt>Throwable</tt> instance with
+   * the error code as prefix if there is an error code associated with the
+   * exception.
+   */
   const char *getCombinedStaticErrorMessages();
 
+
+  /**
+   * Returns the number of static errors encountered
+   */
   int staticErrorCount();
 
   /**

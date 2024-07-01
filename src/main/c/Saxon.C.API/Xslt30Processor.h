@@ -317,6 +317,7 @@ public:
    * The compiled stylesheet is saved as SEF to file store
    * @param stylesheet - the stylesheet as a lexical string representation
    * @param filename - the file to which the compiled package should be saved
+   * @param encoding - the string encoding of the filename. Defaults to JVM default
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   void compileFromStringAndSave(const char *stylesheet, const char *filename,

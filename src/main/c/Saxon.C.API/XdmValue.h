@@ -207,8 +207,8 @@ protected:
   char *valueType; /*!< Cached. The type of the XdmValue */
 
   XdmItem **values; /*!< Cached. XdmItems in the XdmValue */
-  char *relinquished_values;
-  int values_cap;
+  char *relinquished_values; /*!< Pointer to the array of items which have been relinquished */
+  int values_cap; /*!< The count of items in the value */
   int xdmSize;  /*!< Cached. The count of items in the XdmValue */
   int refCount; /*!< The reference count of this XdmValue. If >1 this object
                    should not be deleted */

@@ -211,7 +211,7 @@ public:
   /**
    * Set the language version for the XPath compiler.
    *
-   * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
+   * @param version One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
    *              Setting the option to 1.0 requests an XPath 2.0 processor
    * running in 1.0 compatibility mode; this is equivalent to setting the
    * language version to 2.0 and backwards compatibility mode to true.
@@ -253,6 +253,11 @@ public:
   void
   setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
 
+  /**
+   * Convert an int into an UnprefixedElementMatchingPolicy
+   *
+   * @param n - the int representing the policy
+   */
   UnprefixedElementMatchingPolicy convertEnumPolicy(int n) {
     return static_cast<UnprefixedElementMatchingPolicy>(n);
   }

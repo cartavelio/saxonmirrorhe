@@ -108,9 +108,7 @@ SaxonApiException::~SaxonApiException() throw() {
 }
 
 /**
- * Get the error code associated with the ith exception in the vector, if there
- * is one
- * @param i - ith exception in the vector
+ * Get the error code associated with the current exception
  * @return the associated error code, or nullptr if no error code is available
  */
 const char *SaxonApiException::getErrorCode() {

@@ -767,7 +767,7 @@ protected:
   bool licensei; /*!< indicates whether the Processor requires a Saxon that
                     needs a license file (i.e. Saxon-EE) other a Saxon-HE
                     Processor is created  */
-  int64_t procRef;
+  int64_t procRef; //!< ObjectHandle reference to the underlying processor
 
   // JNINativeMethod *nativeMethods; /*!< native methods variable used in
   // extension methods */ std::vector<JNINativeMethod> nativeMethodVect; /*!<

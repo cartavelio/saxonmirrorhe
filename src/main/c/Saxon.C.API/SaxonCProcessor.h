@@ -23,21 +23,21 @@
  * objects created in C for XQuery. <p/>
  */
 typedef struct {
-  int64_t xqueryProc;
+  int64_t xqueryProc; //!< ObjectHandle reference to the underlying XQueryProcessor
 } sxnc_xquery;
 
 /** <code>sxnc_xslt</code>. This struct is used to capture the Java
  * processor objects created in C for XSLT. <p/>
  */
 typedef struct {
-  int64_t xsltProc;
+  int64_t xsltProc; //!< ObjectHandle reference to the underlying XSLTProcessor
 } sxnc_xslt;
 
 /** <code>sxnc_xpath</code>. This struct is used to capture the Java
  * processor objects created in C for XPath. <p/>
  */
 typedef struct {
-  int64_t xpathProc;
+  int64_t xpathProc; //!< ObjectHandle reference to the underlying XPathProcessor
 } sxnc_xpath;
 
 EXTERN_SAXONC
@@ -195,6 +195,11 @@ const char *executeQueryToString(sxnc_environment *environi,
                                  sxnc_property *properties, int parLen,
                                  int propLen);
 
+/**
+ * Get a pointer to the current error message as a string
+ *
+ * @param environi - GraalVM environment
+ */
 const char *c_getErrorMessage(sxnc_environment *environi);
 
 EXTERN_SAXONC_END
