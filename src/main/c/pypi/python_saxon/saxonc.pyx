@@ -3948,6 +3948,9 @@ cdef class PyXdmValue:
      def __dealloc__(self):
         if type(self) is PyXdmValue and self.thisvptr != NULL:
             self.thisvptr.decrementRefCount()
+            if self.thisvptr.getRefCount() < 1:
+                del self.thisvptr
+                self.thisvptr = NULL
 
      def __init__(self, processor):
         """
@@ -4121,6 +4124,9 @@ cdef class PyXdmItem(PyXdmValue):
      def __dealloc__(self):
         if type(self) is PyXdmItem and self.derivedptr != NULL:
             self.derivedptr.decrementRefCount()
+            if self.derivedptr.getRefCount() < 1:
+                del self.derivedptr
+                self.derivedptr = self.thisvptr = NULL
 
      @property
      def string_value(self):
@@ -4309,26 +4315,29 @@ cdef class PyXdmItem(PyXdmValue):
          return self
 
 cdef class PyXdmNode(PyXdmItem):
-     """This class represents a node in the XDM data model. A PyXdmNode is a PyXdmItem, and is therefore a
-     PyXdmValue in its own right, and may also participate as one item within a sequence value.
-     The PyXdmNode interface exposes basic properties of the node, such as its name, its string value, and
-     its typed value.
-     """
-     cdef saxoncClasses.XdmNode *derivednptr      # hold a C++ instance which we're wrapping
+    """This class represents a node in the XDM data model. A PyXdmNode is a PyXdmItem, and is therefore a
+    PyXdmValue in its own right, and may also participate as one item within a sequence value.
+    The PyXdmNode interface exposes basic properties of the node, such as its name, its string value, and
+    its typed value.
+    """
+    cdef saxoncClasses.XdmNode *derivednptr  # hold a C++ instance which we're wrapping
 
-     def __cinit__(self):
+    def __cinit__(self):
         """
          __cinit__(self)
          Constructor for PyXdmNode
         """
         self.derivednptr = self.derivedptr = self.thisvptr = NULL
 
-     def __dealloc__(self):
+    def __dealloc__(self):
         if type(self) is PyXdmNode and self.derivednptr != NULL:
             self.derivednptr.decrementRefCount()
+            if self.derivednptr.getRefCount() < 1:
+                del self.derivednptr
+                self.derivednptr = self.derivedptr = self.thisvptr = NULL
 
-     @property
-     def head(self):
+    @property
+    def head(self):
         """
         head(self)
         Property to get the first item in the sequence represented by this PyXdmNode. Since a PyXdmItem is a sequence
@@ -4338,8 +4347,8 @@ cdef class PyXdmNode(PyXdmItem):
         """
         return self
 
-     @property
-     def node_kind(self):
+    @property
+    def node_kind(self):
         """
         node_kind(self)
         Node kind property. 
@@ -4350,8 +4359,9 @@ cdef class PyXdmNode(PyXdmItem):
         """
         cdef int kind
         return self.derivednptr.getNodeKind()
-     @property
-     def node_kind_str(self):
+
+    @property
+    def node_kind_str(self):
         """
         node_kind_str(self)
         Node kind property string. Returns one of the following: 'document', 'element', 'attribute', 'text', 'comment',
@@ -4380,38 +4390,38 @@ cdef class PyXdmNode(PyXdmItem):
         else:
             raise ValueError('Unknown node kind: %d' % nk)
 
-     @property
-     def name(self):
+    @property
+    def name(self):
         """
         name(self)
         Get the name of the node, as a string in the form of an EQName
         Returns:
             str: the name of the node. In the case of unnamed nodes (e.g. text and comment nodes) returns None
         """
-        cdef const char* c_string = self.derivednptr.getNodeName()
+        cdef const char * c_string = self.derivednptr.getNodeName()
         if c_string == NULL:
             return None
         else:
             py_string_i = make_py_str(c_string)
             return py_string_i
 
-     @property
-     def local_name(self):
+    @property
+    def local_name(self):
         """
         local_name(self)
         Get the local name of the node, as a string
         Returns:
             str: the local name of the node. In the case of unnamed nodes (e.g. text and comment nodes) returns None
         """
-        cdef const char* c_string = self.derivednptr.getLocalName()
+        cdef const char * c_string = self.derivednptr.getLocalName()
         if c_string == NULL:
             return None
         else:
             py_string_i = make_py_str(c_string)
             return py_string_i
 
-     @property
-     def typed_value(self):
+    @property
+    def typed_value(self):
         """
         typed_value(self)
         Get the typed value of this node, as defined in the XPath data model
@@ -4428,8 +4438,8 @@ cdef class PyXdmNode(PyXdmItem):
             val.thisvptr = xdmValue
             return val
 
-     @property
-     def base_uri(self):
+    @property
+    def base_uri(self):
         """
         base_uri(self)
         Base URI property. Get the Base URI for the node, that is, the URI used for resolving a relative URI
@@ -4439,24 +4449,24 @@ cdef class PyXdmNode(PyXdmItem):
             str: String value of the base uri for this node. This may be NULL if the base URI is unknown,
                 including the case where the node has no parent.
         """
-        cdef const char* c_string = self.derivednptr.getBaseUri()
+        cdef const char * c_string = self.derivednptr.getBaseUri()
         py_string_i = make_py_str(c_string)
         return py_string_i
 
-     @property
-     def string_value(self):
+    @property
+    def string_value(self):
         """
         string_value(self)
         Property to get the string value of the node as defined in the XPath data model
         Returns:
             str: The string value of this node
         """
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         c_string = self.derivednptr.getStringValue()
         py_node_string_value = make_py_str(c_string)
         return py_node_string_value
 
-     def get_string_value(self, encoding=None):
+    def get_string_value(self, encoding=None):
         """
         get_string_value(self, encoding=None)
         Property to get the string value of the node as defined in the XPath data model
@@ -4465,26 +4475,26 @@ cdef class PyXdmNode(PyXdmItem):
         Returns:
             str: The string value of this node
         """
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         if encoding is None:
             encoding = sys.getdefaultencoding()
         c_string = self.derivednptr.getStringValue()
         py_node_string_value = make_py_str(c_string, encoding)
         return py_node_string_value
 
-     def __str__(self):
+    def __str__(self):
         """
         __str__(self)
         The string value of the node as returned by the toString method
         Returns:
             str: String value of this node
         """
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         c_string = self.derivednptr.toString()
         py_node_to_string = make_py_str(c_string)
         return py_node_to_string
 
-     def to_string(self, encoding=None):
+    def to_string(self, encoding=None):
         """
         to_string(self, encoding=None)
         The string value of the node as returned by the toString method
@@ -4493,14 +4503,14 @@ cdef class PyXdmNode(PyXdmItem):
         Returns:
             str: String value of this node
         """
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         c_string = self.derivednptr.toString()
         if encoding is None:
             encoding = sys.getdefaultencoding()
         py_node_to_string = make_py_str(c_string, encoding)
         return py_node_to_string
 
-     def __getitem__(self, index):
+    def __getitem__(self, index):
         """
         __getitem__(self, index)
         Implement the built-in subscript operator (i.e. square brackets []) to return the ith child node of the current node
@@ -4512,16 +4522,16 @@ cdef class PyXdmNode(PyXdmItem):
         cdef PyXdmNode val = None
         cdef bool cache = False
         cdef saxoncClasses.XdmNode * node = NULL
-        node =  self.derivednptr.getChild(index, cache)
+        node = self.derivednptr.getChild(index, cache)
         if node == NULL:
             return None
-        else :
+        else:
             val = PyXdmNode(self.processor)
             val.derivednptr = val.derivedptr = val.thisvptr = node
             node.incrementRefCount()
             return val
 
-     def __len__(self):
+    def __len__(self):
         """
         __len__(self)
         Implement the built-in function len() to return the count of child nodes from this current node.
@@ -4531,16 +4541,16 @@ cdef class PyXdmNode(PyXdmItem):
         """
         return self.derivednptr.getChildCount()
 
-     def __repr__(self):
+    def __repr__(self):
         """
         ___repr__(self)
         """
-        cdef const char* c_string = NULL
+        cdef const char * c_string = NULL
         c_string = self.derivednptr.toString()
         py_node_to_string = make_py_str(c_string)
         return py_node_to_string
 
-     def get_parent(self):
+    def get_parent(self):
         """
         get_parent(self)
         Get the current node's parent. If it does not exist return None.
@@ -4549,7 +4559,7 @@ cdef class PyXdmNode(PyXdmItem):
         """
         return self.processor.wrap_node(self.derivednptr.getParent())
 
-     def get_attribute_value(self, name, encoding=None):
+    def get_attribute_value(self, name, encoding=None):
         """
         get_attribute_value(self, name, encoding=None)
         Get the value of a named attribute
@@ -4563,39 +4573,39 @@ cdef class PyXdmNode(PyXdmItem):
         py_value_string = name.encode(encoding) if name is not None else None
         cdef char * c_name = py_value_string if name is not None else ""
 
-        cdef const char* c_string = self.derivednptr.getAttributeValue(c_name)
+        cdef const char * c_string = self.derivednptr.getAttributeValue(c_name)
         if c_string == NULL:
             return None
         py_string_i = make_py_str(c_string, encoding)
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-     """@property
-     def ref_count(self):
-        return self.derivednptr.getRefCount()"""
+    """@property
+    def ref_count(self):
+       return self.derivednptr.getRefCount()"""
 
-     @property
-     def line_number(self):
-         """
-         line_number(self)
-         Get the line number of the node in a source document.
-         Returns:
-             int: The line number of the node, or -1 if not available.
-         """
-         return self.derivednptr.getLineNumber()
+    @property
+    def line_number(self):
+        """
+        line_number(self)
+        Get the line number of the node in a source document.
+        Returns:
+            int: The line number of the node, or -1 if not available.
+        """
+        return self.derivednptr.getLineNumber()
 
-     @property
-     def column_number(self):
-         """
-         column_number(self)
-         Get the column number of the node in a source document.
-         Returns:
-             int: The column number of the node, or -1 if not available.
-         """
-         return self.derivednptr.getColumnNumber()
+    @property
+    def column_number(self):
+        """
+        column_number(self)
+        Get the column number of the node in a source document.
+        Returns:
+            int: The column number of the node, or -1 if not available.
+        """
+        return self.derivednptr.getColumnNumber()
 
-     @property
-     def attribute_count(self):
+    @property
+    def attribute_count(self):
         """
         attribute_count(self)
         Get the number of attribute nodes on this node. If the node is not an element node then returns 0.
@@ -4603,8 +4613,8 @@ cdef class PyXdmNode(PyXdmItem):
             int: The number of attribute nodes
         """
         return self.derivednptr.getAttributeCount()
-     @property
-     def attributes(self):
+    @property
+    def attributes(self):
         """
         attribute_nodes(self)
         Get the attribute nodes of this node as a list of PyXdmNode objects
@@ -4612,7 +4622,7 @@ cdef class PyXdmNode(PyXdmItem):
             list[PyXdmNode]: List of PyXdmNode objects
         """
         cdef list nodes = []
-        cdef saxoncClasses.XdmNode **n
+        cdef saxoncClasses.XdmNode ** n
         cdef int count, i
         cdef PyXdmNode val = None
         count = self.derivednptr.getAttributeCount()
@@ -4622,7 +4632,7 @@ cdef class PyXdmNode(PyXdmItem):
                 nodes.append(self.processor.wrap_node(n[i]))
         return nodes
 
-     def axis_nodes(self, int axis):
+    def axis_nodes(self, int axis):
         """
         axis_nodes(self, int axis)
         Get the array of nodes reachable from this node via a given axis.
@@ -4638,7 +4648,7 @@ cdef class PyXdmNode(PyXdmItem):
             list[PyXdmNode]: List of PyXdmNode objects
         """
         cdef list nodes = []
-        cdef saxoncClasses.XdmNode **n
+        cdef saxoncClasses.XdmNode ** n
         cdef int count, i
         cdef PyXdmNode val = None
         n = self.derivednptr.axisNodes(self.derivednptr.convertEnumXdmAxis(axis))
@@ -4648,8 +4658,8 @@ cdef class PyXdmNode(PyXdmItem):
                 nodes.append(self.processor.wrap_node(n[i]))
         return nodes
 
-     @property
-     def children(self):
+    @property
+    def children(self):
         """
         children(self)
         Get the children of this node as a list of PyXdmNode objects
@@ -4657,7 +4667,7 @@ cdef class PyXdmNode(PyXdmItem):
             list[PyXdmNode]: List of PyXdmNode objects
         """
         cdef list nodes = []
-        cdef saxoncClasses.XdmNode **n
+        cdef saxoncClasses.XdmNode ** n
         cdef int count, i
         cdef PyXdmNode val = None
         count = self.derivednptr.getChildCount()
@@ -4668,11 +4678,10 @@ cdef class PyXdmNode(PyXdmItem):
             else:
                 n = self.derivednptr.getChildren()
 
-
             for i in range(count):
                 nodes.append(self.processor.wrap_node(n[i]))
         return nodes
-      # def getChildCount(self):
+    # def getChildCount(self):
 
 cdef class PyXdmAtomicValue(PyXdmItem):
     """
@@ -4689,9 +4698,9 @@ cdef class PyXdmAtomicValue(PyXdmItem):
     def __dealloc__(self):
         if type(self) is PyXdmAtomicValue and self.derivedaptr != NULL:
             self.derivedaptr.decrementRefCount()
-            """if self.derivedaptr.getRefCount() < 1:
+            if self.derivedaptr.getRefCount() < 1:
                 del self.derivedaptr
-                self.derivedaptr = self.derivedptr = self.thisvptr = NULL"""
+                self.derivedaptr = self.derivedptr = self.thisvptr = NULL
 
     @property
     def primitive_type_name(self):
@@ -4826,41 +4835,45 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         return self.derivedaptr
 
 cdef class PyXdmFunctionItem(PyXdmItem):
-     """
-     The class PyXdmFunctionItem represents a function item
-     """
-     cdef saxoncClasses.XdmFunctionItem *derivedfptr      # hold a C++ instance which we're wrapping
-     def __cinit__(self):
+    """
+    The class PyXdmFunctionItem represents a function item
+    """
+    cdef saxoncClasses.XdmFunctionItem *derivedfptr  # hold a C++ instance which we're wrapping
+
+    def __cinit__(self):
         if type(self) is PyXdmAtomicValue:
             self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmFunctionItem()
 
-     def __dealloc__(self):
+    def __dealloc__(self):
         if type(self) is PyXdmFunctionItem and self.derivedfptr != NULL:
             self.derivedfptr.decrementRefCount()
+            if self.derivedfptr.getRefCount() < 1:
+                del self.derivedfptr
+                self.derivedfptr = self.derivedptr = self.thisvptr = NULL
 
-     @property
-     def name(self):
-         """
-         name(self)
-         Get the name of the function
-         Returns:
-             str: The name of the function as an EQName
-         """
-         cdef const char * c_string = self.derivedfptr.getName()
-         py_string_i = make_py_str(c_string)
-         return py_string_i
+    @property
+    def name(self):
+        """
+        name(self)
+        Get the name of the function
+        Returns:
+            str: The name of the function as an EQName
+        """
+        cdef const char * c_string = self.derivedfptr.getName()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
 
-     @property
-     def arity(self):
-         """
-         arity(self)
-         Get the arity of the function
-         Returns:
-             int: The arity of the function, that is, the number of arguments in the function's signature
-         """
-         return self.derivedfptr.getArity()
+    @property
+    def arity(self):
+        """
+        arity(self)
+        Get the arity of the function
+        Returns:
+            int: The arity of the function, that is, the number of arguments in the function's signature
+        """
+        return self.derivedfptr.getArity()
 
-     def __repr__(self):
+    def __repr__(self):
         cdef const char * c_string = self.derivedfptr.toString()
         try:
             py_string_i = make_py_str(c_string)
@@ -4868,7 +4881,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
             saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-     def __str__(self):
+    def __str__(self):
         cdef const char * c_string = self.derivedfptr.toString()
         try:
             py_string_i = make_py_str(c_string)
@@ -4876,8 +4889,8 @@ cdef class PyXdmFunctionItem(PyXdmItem):
             saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-     @property
-     def string_value(self):
+    @property
+    def string_value(self):
         """
         string_value(self)
         Property to get the string value of the PyXdmFunctionItem
@@ -4888,236 +4901,238 @@ cdef class PyXdmFunctionItem(PyXdmItem):
         py_string_i = make_py_str(c_string)
         return py_string_i
 
-     @staticmethod
-     def get_system_function(PySaxonProcessor proc, str name, arity, encoding=None):
-         """
-         get_system_function(self, PySaxonProcessor proc, str name, arity, encoding=None)
-         Get a system function. This can be any function defined in XPath 3.1 functions and operators,
-         including functions in the math, map, and array namespaces. It can also be a Saxon extension
-         function, provided a licensed Processor is used.
-         Args:
-             proc (PySaxonProcessor): the Saxon processor
-             name (str): the name of the requested function as an EQName or clark name
-             arity (int): the arity of the requested function
-             encoding (str): the encoding of the name string. If not specified then the platform default encoding is used.
-         Returns:
-             PyXdmFunctionItem: the requested function
-         """
-         cdef char * c_str = NULL
-         cdef PyXdmFunctionItem func = None
-         cdef saxoncClasses.XdmFunctionItem * c_func = NULL
-         if proc is None:
-             return None
-         if encoding is None:
+    @staticmethod
+    def get_system_function(PySaxonProcessor proc, str name, arity, encoding=None):
+        """
+        get_system_function(self, PySaxonProcessor proc, str name, arity, encoding=None)
+        Get a system function. This can be any function defined in XPath 3.1 functions and operators,
+        including functions in the math, map, and array namespaces. It can also be a Saxon extension
+        function, provided a licensed Processor is used.
+        Args:
+            proc (PySaxonProcessor): the Saxon processor
+            name (str): the name of the requested function as an EQName or clark name
+            arity (int): the arity of the requested function
+            encoding (str): the encoding of the name string. If not specified then the platform default encoding is used.
+        Returns:
+            PyXdmFunctionItem: the requested function
+        """
+        cdef char * c_str = NULL
+        cdef PyXdmFunctionItem func = None
+        cdef saxoncClasses.XdmFunctionItem * c_func = NULL
+        if proc is None:
+            return None
+        if encoding is None:
             encoding = sys.getdefaultencoding()
-         py_name_string = name.encode(encoding) if name is not None else None
-         c_name = py_name_string if name is not None else ""
+        py_name_string = name.encode(encoding) if name is not None else None
+        c_name = py_name_string if name is not None else ""
 
-         return proc.wrap_function_item(saxoncClasses.XdmFunctionItem.getSystemFunction(proc.thisptr, c_name, arity))
+        return proc.wrap_function_item(saxoncClasses.XdmFunctionItem.getSystemFunction(proc.thisptr, c_name, arity))
 
-     def call(self, list args):
-         """
-         call(self, PySaxonProcessor proc, list args)
-         Call the function
-         Args:
-             proc (PySaxonProcessor): the Saxon processor
-             args (list): the values to be supplied as arguments to the function. The "function
-                conversion rules" will be applied to convert the arguments to the required
-                type when necessary.
-         Returns:
-             PyXdmValue: the result of calling the function
-         """
-         cdef int _len = len(args)
-         cdef saxoncClasses.XdmValue * c_xdmValue = NULL
-         cdef saxoncClasses.XdmValue ** argumentV = self.processor._create_array_of_xdm_values(args)
-         c_xdmValue = self.derivedfptr.call(self.processor.thisptr, argumentV, _len)
-         if _len > 0:
-             self.processor.thisptr.deleteXdmValueArray(argumentV, _len)
-         return self.processor.wrap_value(c_xdmValue)
+    def call(self, list args):
+        """
+        call(self, PySaxonProcessor proc, list args)
+        Call the function
+        Args:
+            proc (PySaxonProcessor): the Saxon processor
+            args (list): the values to be supplied as arguments to the function. The "function
+               conversion rules" will be applied to convert the arguments to the required
+               type when necessary.
+        Returns:
+            PyXdmValue: the result of calling the function
+        """
+        cdef int _len = len(args)
+        cdef saxoncClasses.XdmValue * c_xdmValue = NULL
+        cdef saxoncClasses.XdmValue ** argumentV = self.processor._create_array_of_xdm_values(args)
+        c_xdmValue = self.derivedfptr.call(self.processor.thisptr, argumentV, _len)
+        if _len > 0:
+            self.processor.thisptr.deleteXdmValueArray(argumentV, _len)
+        return self.processor.wrap_value(c_xdmValue)
 
 cdef class PyXdmMap(PyXdmFunctionItem):
-     """
-     The class PyXdmMap represents a map item in the XDM data model. A map is a list of zero or more entries, each of
-     which is a pair comprising a key (which is an atomic value) and a value (which is an arbitrary value).
-     The map itself is an XDM item. A PyXdmMap is immutable.
-     """
-     cdef saxoncClasses.XdmMap *derivedmmptr      # hold a C++ instance which we're wrapping
+    """
+    The class PyXdmMap represents a map item in the XDM data model. A map is a list of zero or more entries, each of
+    which is a pair comprising a key (which is an atomic value) and a value (which is an arbitrary value).
+    The map itself is an XDM item. A PyXdmMap is immutable.
+    """
+    cdef saxoncClasses.XdmMap *derivedmmptr  # hold a C++ instance which we're wrapping
 
-     def __cinit__(self):
+    def __cinit__(self):
         """
          __cinit__(self)
          Constructor for PyXdmMap
         """
         if type(self) is PyXdmMap:
             self.derivedmmptr = self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmMap()
-     def __dealloc__(self):
-        if type(self) is PyXdmMap and self.derivedfptr != NULL:
-            self.derivedfptr.decrementRefCount()
 
-     def __repr__(self):
+    def __dealloc__(self):
+        if type(self) is PyXdmMap and self.derivedmmptr != NULL:
+            self.derivedmmptr.decrementRefCount()
+            if self.derivedmmptr.getRefCount() < 1:
+                del self.derivedmmptr
+                self.derivedmmptr = self.derivedfptr = self.derivedptr = self.thisvptr = NULL
+
+    def __repr__(self):
         cdef const char * c_string = self.derivedmmptr.toString()
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-
-     def __str__(self):
+    def __str__(self):
         cdef const char * c_string = self.derivedmmptr.toString()
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-     @property
-     def map_size(self):
-         """
-         map_size(self)
-         Get the number of entries in the map
-         Returns:
-             int: the number of entries in the map. (Note that the size() method returns 1 (one), because an XDM
-             map is an item.)
-         """
-         return self.derivedmmptr.mapSize()
+    @property
+    def map_size(self):
+        """
+        map_size(self)
+        Get the number of entries in the map
+        Returns:
+            int: the number of entries in the map. (Note that the size() method returns 1 (one), because an XDM
+            map is an item.)
+        """
+        return self.derivedmmptr.mapSize()
 
-     def get(self, key, encoding=None):
-         """
-         get(self, key, encoding=None)
-         Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
-         All keys in the PyXdmMap are of type PyXdmAtomicValue, but for convenience, this method also accepts keys of
-         primitive type (str, int and float), which will be converted to PyXdmAtomicValue internally.
-         Args:
-             key: the key whose associated value is to be returned. The key supports the following types:
-                PyXdmAtomicValue, str, int and float
-             encoding (str): The encoding of the key, if supplied as a string. If not specified then the platform
-                default encoding is used.
-         Returns:
-             PyXdmValue: the value to which the specified key is mapped, or NULL if this map contains no
-             mapping for the key
-         """
-         cdef saxoncClasses.XdmValue * c_xdmValue = NULL
-         cdef PyXdmAtomicValue avalue_
-         cdef int i_key
-         cdef float k_key
-         cdef str keyStr
-         cdef char * c_key_str = NULL
+    def get(self, key, encoding=None):
+        """
+        get(self, key, encoding=None)
+        Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
+        All keys in the PyXdmMap are of type PyXdmAtomicValue, but for convenience, this method also accepts keys of
+        primitive type (str, int and float), which will be converted to PyXdmAtomicValue internally.
+        Args:
+            key: the key whose associated value is to be returned. The key supports the following types:
+               PyXdmAtomicValue, str, int and float
+            encoding (str): The encoding of the key, if supplied as a string. If not specified then the platform
+               default encoding is used.
+        Returns:
+            PyXdmValue: the value to which the specified key is mapped, or NULL if this map contains no
+            mapping for the key
+        """
+        cdef saxoncClasses.XdmValue * c_xdmValue = NULL
+        cdef PyXdmAtomicValue avalue_
+        cdef int i_key
+        cdef float k_key
+        cdef str keyStr
+        cdef char * c_key_str = NULL
 
-         if isinstance(key, PyXdmAtomicValue):
-             avalue_ = key
-             c_xdmValue = self.derivedmmptr.get(avalue_.derivedaptr)
+        if isinstance(key, PyXdmAtomicValue):
+            avalue_ = key
+            c_xdmValue = self.derivedmmptr.get(avalue_.derivedaptr)
 
-         elif  isinstance(key, str):
-             keyStr = key
-             if encoding is None:
-                 encoding = sys.getdefaultencoding()
-             py_value_string = keyStr.encode(encoding) if keyStr is not None else None
-             c_key_str = py_value_string if keyStr is not None else ""
-             c_xdmValue = self.derivedmmptr.get(c_key_str)
+        elif isinstance(key, str):
+            keyStr = key
+            if encoding is None:
+                encoding = sys.getdefaultencoding()
+            py_value_string = keyStr.encode(encoding) if keyStr is not None else None
+            c_key_str = py_value_string if keyStr is not None else ""
+            c_xdmValue = self.derivedmmptr.get(c_key_str)
 
-         elif  isinstance(key, int):
-             i_key = key
-             c_xdmValue = self.derivedmmptr.get(i_key)
+        elif isinstance(key, int):
+            i_key = key
+            c_xdmValue = self.derivedmmptr.get(i_key)
 
-         elif isinstance(key, float):
-             k_key = key
-             c_xdmValue = self.derivedmmptr.get(k_key)
-         else:
-             return None
+        elif isinstance(key, float):
+            k_key = key
+            c_xdmValue = self.derivedmmptr.get(k_key)
+        else:
+            return None
 
-         if c_xdmValue is NULL:
-             return None
-         else:
-             return self.processor.wrap_value(c_xdmValue)
+        if c_xdmValue is NULL:
+            return None
+        else:
+            return self.processor.wrap_value(c_xdmValue)
 
-     def __iter__(self):
+    def __iter__(self):
         """
         __iter__(self)
         Returns the Iterator object of PyXdmMap
         """
         return iter(self.keys())
 
+    def put(self, PyXdmAtomicValue key, PyXdmValue value):
+        """
+        put(self, PyXdmAtomicValue key, PyXdmValue value)
+        Create a new map containing an additional (key, value) pair. If there is an existing entry with
+        the same key, it is replaced.
+        Args:
+            key (PyXdmAtomicValue): The key for the new map entry
+            value (PyXdmValue): The value for the new map entry
+        Returns:
+            PyXdmMap: a new map containing the new entry. The original map is unchanged.
+        """
+        cdef PyXdmMap newmap_
+        cdef saxoncClasses.XdmMap * c_xdmMap = NULL
 
-     def put(self, PyXdmAtomicValue key, PyXdmValue value):
-         """
-         put(self, PyXdmAtomicValue key, PyXdmValue value)
-         Create a new map containing an additional (key, value) pair. If there is an existing entry with
-         the same key, it is replaced.
-         Args:
-             key (PyXdmAtomicValue): The key for the new map entry
-             value (PyXdmValue): The value for the new map entry
-         Returns:
-             PyXdmMap: a new map containing the new entry. The original map is unchanged.
-         """
-         cdef PyXdmMap newmap_
-         cdef saxoncClasses.XdmMap * c_xdmMap = NULL
+        if key is None or value is None:
+            return None
 
-         if key is None or value is None:
-             return None
+        c_xdmMap = self.derivedmmptr.put(key.derivedaptr, value.thisvptr)
+        return self.processor.wrap_map(c_xdmMap)
 
-         c_xdmMap = self.derivedmmptr.put(key.derivedaptr, value.thisvptr)
-         return self.processor.wrap_map(c_xdmMap)
+    def remove(self, PyXdmAtomicValue key):
+        """
+        remove(self, PyXdmAtomicValue key)
+        Create a new map in which the entry for a given key has been removed.
+        Args:
+            key (PyXdmAtomicValue): The key to be removed given as an PyXdmAtomicValue
+        Returns:
+            PyXdmMap: a map without the specified entry. The original map is unchanged.
+        """
+        cdef PyXdmMap newmap_
+        cdef saxoncClasses.XdmMap * c_xdmMap = NULL
 
-     def remove(self, PyXdmAtomicValue key):
-         """
-         remove(self, PyXdmAtomicValue key)
-         Create a new map in which the entry for a given key has been removed.
-         Args:
-             key (PyXdmAtomicValue): The key to be removed given as an PyXdmAtomicValue
-         Returns:
-             PyXdmMap: a map without the specified entry. The original map is unchanged.
-         """
-         cdef PyXdmMap newmap_
-         cdef saxoncClasses.XdmMap * c_xdmMap = NULL
+        if key is None:
+            return None
 
-         if key is None:
-             return None
+        c_xdmMap = self.derivedmmptr.remove(key.derivedaptr)
+        return self.processor.wrap_map(c_xdmMap)
 
-         c_xdmMap = self.derivedmmptr.remove(key.derivedaptr)
-         return self.processor.wrap_map(c_xdmMap)
+    def keys(self):
+        """
+        keys(self)
+        Get the keys in the PyXdmMap
+        Returns:
+            list[PyXdmAtomicValue]: List of PyXdmAtomicValue objects
+        """
+        """TODO: memory management for the array returned from C++"""
+        cdef list p_values = []
+        cdef saxoncClasses.XdmAtomicValue ** c_values
+        cdef PyXdmAtomicValue val = None
+        cdef int count, i
+        count = self.derivedmmptr.mapSize()
+        if count > 0:
+            c_values = self.derivedmmptr.keys()
+            for i in range(count):
+                p_values.append(self.processor.wrap_atomic_value(<saxoncClasses.XdmAtomicValue *> c_values[i]))
+        return p_values
 
-     def keys(self):
-         """
-         keys(self)
-         Get the keys in the PyXdmMap
-         Returns:
-             list[PyXdmAtomicValue]: List of PyXdmAtomicValue objects
-         """
-         """TODO: memory management for the array returned from C++"""
-         cdef list p_values = []
-         cdef saxoncClasses.XdmAtomicValue **c_values
-         cdef PyXdmAtomicValue val = None
-         cdef int count, i
-         count = self.derivedmmptr.mapSize()
-         if count > 0:
-             c_values = self.derivedmmptr.keys()
-             for i in range(count):
-                 p_values.append(self.processor.wrap_atomic_value(<saxoncClasses.XdmAtomicValue *>c_values[i]))
-         return p_values
+    @property
+    def isEmpty(self):
+        """
+        isEmpty(self)
+        Returns true if this map contains no key-value mappings.
+        Returns:
+            bool: true if this map contains no key-value mappings
+        """
+        self.derivedmmptr.isEmpty()
 
-     @property
-     def isEmpty(self):
-         """
-         isEmpty(self)
-         Returns true if this map contains no key-value mappings.
-         Returns:
-             bool: true if this map contains no key-value mappings
-         """
-         self.derivedmmptr.isEmpty()
+    def contains_key(self, PyXdmAtomicValue key):
+        """
+        contains_key(self, PyXdmAtomicValue key)
+        Returns true if this map contains a mapping for the specified key.
+        Args:
+            key (PyXdmAtomicValue): key whose presence in this map is to be tested
+        Returns:
+            bool: true if this map contains a mapping for the specified key
+        """
+        if key is None:
+            return None
 
-     def contains_key(self, PyXdmAtomicValue key):
-         """
-         contains_key(self, PyXdmAtomicValue key)
-         Returns true if this map contains a mapping for the specified key.
-         Args:
-             key (PyXdmAtomicValue): key whose presence in this map is to be tested
-         Returns:
-             bool: true if this map contains a mapping for the specified key
-         """
-         if key is None:
-             return None
+        return self.derivedmmptr.containsKey(key.derivedaptr)
 
-         return self.derivedmmptr.containsKey(key.derivedaptr)
-
-     @property
-     def string_value(self):
+    @property
+    def string_value(self):
         """
         string_value(self)
         Property to get the string value of the PyXdmMap
@@ -5128,74 +5143,77 @@ cdef class PyXdmMap(PyXdmFunctionItem):
         py_string_i = make_py_str(c_string)
         return py_string_i
 
-     def values(self):
-         """
-         values(self)
-         Get the values found in this map, that is, the value parts of the key-value pairs.
-         Returns:
-             list: List of the values found in this map.
-         """
-         """TODO: memory management for the array returned from C++"""
-         cdef list p_values = []
-         cdef saxoncClasses.XdmValue ** c_values
-         cdef int count, i
-         count = self.derivedmmptr.mapSize()
-         if count > 0:
-             c_values = self.derivedmmptr.values()
-             if c_values is NULL:
-                 return None
-             for i in range(count):
-                 p_values.append(self.processor.wrap_value(c_values[i]))
+    def values(self):
+        """
+        values(self)
+        Get the values found in this map, that is, the value parts of the key-value pairs.
+        Returns:
+            list: List of the values found in this map.
+        """
+        """TODO: memory management for the array returned from C++"""
+        cdef list p_values = []
+        cdef saxoncClasses.XdmValue ** c_values
+        cdef int count, i
+        count = self.derivedmmptr.mapSize()
+        if count > 0:
+            c_values = self.derivedmmptr.values()
+            if c_values is NULL:
+                return None
+            for i in range(count):
+                p_values.append(self.processor.wrap_value(c_values[i]))
 
-         return p_values
-
-
+        return p_values
 
 cdef class PyXdmArray(PyXdmFunctionItem):
-     """
-     The class PyXdmArray represents an array in the XDM data model. An array is a list of zero or more members,
-     each of which is an arbitrary XDM value. The array itself is an XDM item. A PyXdmArray is immutable.
-     """
-     cdef saxoncClasses.XdmArray *derivedaaptr      # hold a C++ instance which we're wrapping
-     def __cinit__(self):
+    """
+    The class PyXdmArray represents an array in the XDM data model. An array is a list of zero or more members,
+    each of which is an arbitrary XDM value. The array itself is an XDM item. A PyXdmArray is immutable.
+    """
+    cdef saxoncClasses.XdmArray *derivedaaptr  # hold a C++ instance which we're wrapping
+
+    def __cinit__(self):
         if type(self) is PyXdmArray:
             self.derivedaaptr = self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmArray()
-     def __dealloc__(self):
+
+    def __dealloc__(self):
         if type(self) is PyXdmArray and self.derivedaaptr != NULL:
             self.derivedaaptr.decrementRefCount()
+            if self.derivedaaptr.getRefCount() < 1:
+                del self.derivedaaptr
+                self.derivedaaptr = self.derivedfptr = self.derivedptr = self.thisvptr = NULL
 
-     def __repr__(self):
+    def __repr__(self):
         cdef const char * c_string = self.derivedaaptr.toString()
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-     def __str__(self):
+    def __str__(self):
         cdef const char * c_string = self.derivedaaptr.toString()
         py_string_i = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-     def __iter__(self):
+    def __iter__(self):
         """
         __iter__(self)
         Returns the Iterator object of PyXdmArray
         """
         return iter(self.as_list())
 
-     @property
-     def array_length(self):
-         """
-         array_length(self)
-         Get the number of members in the array
-         Returns:
-             int: the number of members in the array. (Note that the size() method returns 1 (one),
-             because an XDM array is an item.)
-         """
-         return self.derivedaaptr.arrayLength()
+    @property
+    def array_length(self):
+        """
+        array_length(self)
+        Get the number of members in the array
+        Returns:
+            int: the number of members in the array. (Note that the size() method returns 1 (one),
+            because an XDM array is an item.)
+        """
+        return self.derivedaaptr.arrayLength()
 
-     @property
-     def string_value(self):
+    @property
+    def string_value(self):
         """
         string_value(self)
         Property to get the string value of the PyXdmArray
@@ -5207,139 +5225,139 @@ cdef class PyXdmArray(PyXdmFunctionItem):
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
-     def get(self, int n):
-         """
-         get(self, int n)
-         Get the n'th member in the array, counting from zero
-         Args:
-             n (int): the member that is required, counting the first member in the array as member zero
-         Returns:
-             PyXdmValue: the n'th member in the sequence making up the array, counting from zero
-         """
-         return self.processor.wrap_value(self.derivedaaptr.get(n))
+    def get(self, int n):
+        """
+        get(self, int n)
+        Get the n'th member in the array, counting from zero
+        Args:
+            n (int): the member that is required, counting the first member in the array as member zero
+        Returns:
+            PyXdmValue: the n'th member in the sequence making up the array, counting from zero
+        """
+        return self.processor.wrap_value(self.derivedaaptr.get(n))
 
-     def put(self, int n, PyXdmValue value):
-         """
-         put(self, int n, PyXdmValue value)
-         Create a new array in which one member is replaced with a new value.
-         Args:
-             n (int): n the position of the member that is to be replaced, counting the first member
-                in the array as member zero
-             value (PyXdmValue): the new value for this member
-         Returns:
-             PyXdmArray: a new array, the same length as the original, with one member replaced by a new value
-         """
-         cdef PyXdmArray newarr_
-         cdef PyXdmAtomicValue avalue_
-         cdef PyXdmItem ivalue_
-         cdef PyXdmNode nvalue_
-         cdef PyXdmValue value_
-         cdef saxoncClasses.XdmArray * c_xdmArr = NULL
-         cdef saxoncClasses.XdmValue * c_in_xdmValue = NULL
+    def put(self, int n, PyXdmValue value):
+        """
+        put(self, int n, PyXdmValue value)
+        Create a new array in which one member is replaced with a new value.
+        Args:
+            n (int): n the position of the member that is to be replaced, counting the first member
+               in the array as member zero
+            value (PyXdmValue): the new value for this member
+        Returns:
+            PyXdmArray: a new array, the same length as the original, with one member replaced by a new value
+        """
+        cdef PyXdmArray newarr_
+        cdef PyXdmAtomicValue avalue_
+        cdef PyXdmItem ivalue_
+        cdef PyXdmNode nvalue_
+        cdef PyXdmValue value_
+        cdef saxoncClasses.XdmArray * c_xdmArr = NULL
+        cdef saxoncClasses.XdmValue * c_in_xdmValue = NULL
 
-         if value is None or n<0:
-             return None
+        if value is None or n < 0:
+            return None
 
-         if isinstance(value, value):
-             value_ = value
-             c_xdmArr = self.derivedaaptr.put(n, value.thisvptr)
-         elif  isinstance(value, PyXdmNode):
-             nvalue_ = value
-             c_in_xdmValue  = <saxoncClasses.XdmValue*>  nvalue_.derivednptr
-             c_xdmArr = self.derivedaaptr.put(n, c_in_xdmValue)
-         elif  isinstance(value, PyXdmAtomicValue):
-             avalue_ = value
-             c_in_xdmValue  = <saxoncClasses.XdmValue*> avalue_.derivedaptr
-             c_xdmArr = self.derivedaaptr.put(n, c_in_xdmValue)
-         elif  isinstance(value, PyXdmItem):
-             ivalue_ = value
-             c_in_xdmValue  = <saxoncClasses.XdmValue*>  ivalue_.derivedptr
-             c_xdmArr = self.derivedaaptr.put(n, c_in_xdmValue)
+        if isinstance(value, value):
+            value_ = value
+            c_xdmArr = self.derivedaaptr.put(n, value.thisvptr)
+        elif isinstance(value, PyXdmNode):
+            nvalue_ = value
+            c_in_xdmValue = <saxoncClasses.XdmValue *> nvalue_.derivednptr
+            c_xdmArr = self.derivedaaptr.put(n, c_in_xdmValue)
+        elif isinstance(value, PyXdmAtomicValue):
+            avalue_ = value
+            c_in_xdmValue = <saxoncClasses.XdmValue *> avalue_.derivedaptr
+            c_xdmArr = self.derivedaaptr.put(n, c_in_xdmValue)
+        elif isinstance(value, PyXdmItem):
+            ivalue_ = value
+            c_in_xdmValue = <saxoncClasses.XdmValue *> ivalue_.derivedptr
+            c_xdmArr = self.derivedaaptr.put(n, c_in_xdmValue)
 
-         if c_xdmArr is NULL:
-             return None
-         return self.processor.wrap_array(c_xdmArr)
+        if c_xdmArr is NULL:
+            return None
+        return self.processor.wrap_array(c_xdmArr)
 
-     def add_member(self, value):
-         """
-         add_member(self, value)
-         Append a new member to an array.
-         Args:
-             value (PyXdmValue): the new member
-         Returns:
-             PyXdmArray: a new array, one item longer than the original
-         """
+    def add_member(self, value):
+        """
+        add_member(self, value)
+        Append a new member to an array.
+        Args:
+            value (PyXdmValue): the new member
+        Returns:
+            PyXdmArray: a new array, one item longer than the original
+        """
 
-         cdef PyXdmArray newarr_
-         cdef PyXdmAtomicValue avalue_
-         cdef PyXdmItem ivalue_
-         cdef PyXdmNode nvalue_
-         cdef PyXdmValue value_
-         cdef saxoncClasses.XdmArray * c_xdmArr = NULL
+        cdef PyXdmArray newarr_
+        cdef PyXdmAtomicValue avalue_
+        cdef PyXdmItem ivalue_
+        cdef PyXdmNode nvalue_
+        cdef PyXdmValue value_
+        cdef saxoncClasses.XdmArray * c_xdmArr = NULL
 
-         if isinstance(value, PyXdmValue):
-             value_ = value
-             c_xdmArr = self.derivedaaptr.addMember(value_.thisvptr)
-         elif  isinstance(value, PyXdmNode):
-             nvalue_ = value
-             c_xdmArr = self.derivedaaptr.addMember(<saxoncClasses.XdmValue*>  nvalue_.derivednptr)
-         elif  isinstance(value, PyXdmAtomicValue):
-             avalue_ = value
-             c_xdmArr = self.derivedaaptr.addMember(<saxoncClasses.XdmValue*> avalue_.derivedaptr)
-         elif  isinstance(value, PyXdmItem):
-             ivalue_ = value
-             c_xdmArr = self.derivedaaptr.addMember(<saxoncClasses.XdmValue*>  ivalue_.derivedptr)
+        if isinstance(value, PyXdmValue):
+            value_ = value
+            c_xdmArr = self.derivedaaptr.addMember(value_.thisvptr)
+        elif isinstance(value, PyXdmNode):
+            nvalue_ = value
+            c_xdmArr = self.derivedaaptr.addMember(<saxoncClasses.XdmValue *> nvalue_.derivednptr)
+        elif isinstance(value, PyXdmAtomicValue):
+            avalue_ = value
+            c_xdmArr = self.derivedaaptr.addMember(<saxoncClasses.XdmValue *> avalue_.derivedaptr)
+        elif isinstance(value, PyXdmItem):
+            ivalue_ = value
+            c_xdmArr = self.derivedaaptr.addMember(<saxoncClasses.XdmValue *> ivalue_.derivedptr)
 
-         if c_xdmArr is NULL:
-             return None
-         return self.processor.wrap_array(c_xdmArr)
+        if c_xdmArr is NULL:
+            return None
+        return self.processor.wrap_array(c_xdmArr)
 
-     def concat(self, PyXdmArray value):
-         """
-         concat(self, PyXdmArray value)
-         Concatenate another array to this array
-         Args:
-             value (PyXdmArray): the other array
-         Returns:
-             PyXdmArray: a new array, containing the members of this array followed by the members of the other array
-         """
-         cdef PyXdmArray newarr_
+    def concat(self, PyXdmArray value):
+        """
+        concat(self, PyXdmArray value)
+        Concatenate another array to this array
+        Args:
+            value (PyXdmArray): the other array
+        Returns:
+            PyXdmArray: a new array, containing the members of this array followed by the members of the other array
+        """
+        cdef PyXdmArray newarr_
 
-         cdef saxoncClasses.XdmArray * c_xdmArr = NULL
+        cdef saxoncClasses.XdmArray * c_xdmArr = NULL
 
-         c_xdmArr = self.derivedaaptr.concat(value.derivedaaptr)
+        c_xdmArr = self.derivedaaptr.concat(value.derivedaaptr)
 
-         if c_xdmArr is NULL:
-             return None
-         return self.processor.wrap_array(c_xdmArr)
+        if c_xdmArr is NULL:
+            return None
+        return self.processor.wrap_array(c_xdmArr)
 
-     def as_list(self):
-         """
-         as_list(self)
-         Get the members of the array in the form of a list.
-         Returns:
-             list: list of the members of this array
-         """
-         """
-         TODO: handle memory management"""
-         cdef list p_values = []
-         cdef int count, i
-         count = self.derivedaaptr.arrayLength()
-         cdef saxoncClasses.XdmValue **c_values
+    def as_list(self):
+        """
+        as_list(self)
+        Get the members of the array in the form of a list.
+        Returns:
+            list: list of the members of this array
+        """
+        """
+        TODO: handle memory management"""
+        cdef list p_values = []
+        cdef int count, i
+        count = self.derivedaaptr.arrayLength()
+        cdef saxoncClasses.XdmValue ** c_values
 
-         cdef PyXdmValue val = None
-         if count > 0:
-             c_values = self.derivedaaptr.values()
-             for i in range(count):
-                 p_values.append(self.processor.wrap_value(c_values[i]))
-         return p_values
+        cdef PyXdmValue val = None
+        if count > 0:
+            c_values = self.derivedaaptr.values()
+            for i in range(count):
+                p_values.append(self.processor.wrap_value(c_values[i]))
+        return p_values
 
-     @property
-     def arity(self):
-         """
-         arity(self)
-         Get the arity of the function
-         Returns:
-             int: the arity of the function, that is, the number of arguments in the function's signature
-         """
-         return 1
+    @property
+    def arity(self):
+        """
+        arity(self)
+        Get the arity of the function
+        Returns:
+            int: the arity of the function, that is, the number of arguments in the function's signature
+        """
+        return 1
