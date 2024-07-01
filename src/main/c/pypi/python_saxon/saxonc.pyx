@@ -2035,9 +2035,6 @@ cdef class PyXsltExecutable:
          cdef str key_str
          while(it != c_dataMap.end()):
              c_xdmNode =  dereference(it).second
-             # nval = PyXdmValue(self.processor)
-             # nval.thisvptr = <saxoncClasses.XdmValue*>c_xdmNode
-             # nval.thisvptr.incrementRefCount()
              key_str = make_py_str(dereference(it).first.c_str())
              p_dataMap[key_str] = self.processor.wrap_value(<saxoncClasses.XdmValue*>c_xdmNode)
              postincrement(it)
@@ -5853,9 +5850,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
 
          if c_xdmArr is NULL:
              return None
-         newarr_ = PyXdmArray(self.processor)
-         newarr_.derivedaaptr = newarr_.derivedfptr = newarr_.derivedptr = newarr_.thisvptr = c_xdmArr
-         return newarr_
+         return self.processor.wrap_array(c_xdmArr)
 
      def add_member(self, value):
          """
