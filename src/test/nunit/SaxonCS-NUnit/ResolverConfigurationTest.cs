@@ -1,7 +1,6 @@
 using System;
 using System.Xml;
 using NUnit.Framework;
-using Org.XmlResolver.Features;
 using Saxon.Api;
 using Saxon.Callbacks;
 using Saxon.Eej.config;
