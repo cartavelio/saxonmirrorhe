@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
@@ -216,9 +217,16 @@ public class NextMatch extends ApplyNextMatchingTemplate {
 
                 Item currentItem = context.getCurrentIterator().current();
 
+                XPathContextMajor c1 = context.newContext();
+                c1.setCurrentMode(modeComponent);
+                c1.setOrigin(expr);
+                c1.setCurrentComponent(modeComponent);
+                PipelineConfiguration pipe = output.getPipelineConfiguration();
+                pipe.setXPathContext(c1);
+
                 Rule rule;
                 try {
-                    rule = mode.getNextMatchRule(currentItem, currentRule, context);
+                    rule = mode.getNextMatchRule(currentItem, currentRule, c1);
                 } catch (XPathException e) {
                     throw e.withLocation(this.getExpression().getLocation());
                 }
