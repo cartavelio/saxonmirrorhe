@@ -17,7 +17,7 @@ from distutils.dir_util import copy_tree
 
 extra_link_args = []
 def build_debug():
-    if os.environ['BUILD_DEBUG'] == "true":
+    if 'BUILD_DEBUG' in os.environ and os.environ['BUILD_DEBUG'] == "true":
         return True
     else:
         return False

@@ -367,7 +367,7 @@ abstract class PipInstall extends DefaultTask {
     @InputFile
     abstract RegularFileProperty getPipExe()
 
-    @Input
+    @InputFile
     abstract RegularFileProperty getRequirements()
 
     @TaskAction

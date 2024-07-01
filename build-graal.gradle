@@ -898,7 +898,7 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
 
   tasks.register("${edition}c_pypi_pip_install", PipInstall) {
     pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
-    requirements = tasks.named("setup_${edition}c_pypi").map {pythonPackageDir.map { it.file("requirements.txt") }.get() }
+    requirements = tasks.named("setup_${edition}c_pypi").map { pythonPackageDir.map { it.file("requirements.txt") }.get() }
   }
 
   tasks.register("${edition}c_python_build_wheel", BuildWheel) {
@@ -907,9 +907,7 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
     repairwheelExe = tasks.named("branchVenv").map { it.venvBinHostedExe("repairwheel").get() }
     productEdition = edition
     productVersion = saxonVersion3
-    // This weirdness is because we can't get just the dir from the outputs of the setup task,
-    // but without a link to the setup task it won't get counted as a dependency and run.
-    sourceDir = tasks.named("setup_${edition}c_pypi").map { pythonPackageDir.get() }
+    sourceDir = tasks.named("setup_${edition}c_pypi").map { it.packageDir.get() }
     libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
     outputDir = layout.buildDirectory.dir("${edition}c/python")
   }
