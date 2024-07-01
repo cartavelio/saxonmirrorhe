@@ -578,7 +578,9 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 i++;
             } else if (j < other.prefixes.length) {
                 // prefix present in other map, absent from this: add an undeclaration
-                result.add(new NamespaceBinding(other.prefixes[j], NamespaceUri.NULL));
+                if (addUndeclarations) {
+                    result.add(new NamespaceBinding(other.prefixes[j], NamespaceUri.NULL));
+                }
                 j++;
             } else {
                 return result.toArray(NamespaceBinding.EMPTY_ARRAY);
