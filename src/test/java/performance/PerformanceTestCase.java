@@ -17,14 +17,18 @@ public class PerformanceTestCase {
         if (expected == 0) {
             expected = 1;
         }
-        int runs = Integer.min(10000000 / expected, 100);
+        int runs = Integer.min(10000000 / expected, 500);
+        long prestart = System.nanoTime();
         for (int i=0; i<runs; i++) {
             test.run();
         }
+        System.err.println("Warmed up with " + runs + " runs in avg " + ((System.nanoTime() - prestart)/runs));
         long start = System.nanoTime();
         for (int i = 0; i < runs; i++) {
             test.run();
         }
+        System.err.println("Followed up with " + runs + " runs in avg " + ((System.nanoTime() - start)/runs));
+
         long actualNano = (System.nanoTime() - start) / runs;
         long actualMicro = actualNano / 1000;
         System.err.println(test.name() + ": Actual time " + actualMicro + " microsecs - expected " + expected);

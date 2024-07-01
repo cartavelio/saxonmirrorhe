@@ -13,11 +13,16 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.JavaExternalObjectType;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -196,7 +201,11 @@ public class TupleExpression extends Expression {
         final int n = getSize();
         Sequence[] tuple = new Sequence[n];
         for (int i=0; i<n; i++) {
-            tuple[i] = getSlot(i).evaluateVariable(context);
+            GroundedValue v = getSlot(i).evaluateVariable(context).materialize();
+            if (v instanceof StringValue) {
+                v = ((StringValue)v).economize();
+            }
+            tuple[i] = v;
         }
         return new Tuple(tuple);
     }

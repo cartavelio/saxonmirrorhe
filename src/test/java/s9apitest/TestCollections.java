@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -121,7 +120,7 @@ public class TestCollections {
     public void testDirectoryForbiddenProtocol() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http https");
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
@@ -130,6 +129,23 @@ public class TestCollections {
             fail("File scheme should have been disallowed");
         } catch (SaxonApiException e) {
             Assertions.assertTrue(e.getMessage().contains("has been disallowed"));
+        }
+    }
+
+    @Test
+    public void testDirectoryAllowedProtocol() {
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "file,webdav");
+            XPathCompiler c = p.newXPathCompiler();
+            XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
+            XPathSelector eval = exec.load();
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml;recurse=yes"));
+            XdmValue val = eval.evaluate();
+            assertEquals(7, val.size());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail("File scheme should have been allowed");
         }
     }
 

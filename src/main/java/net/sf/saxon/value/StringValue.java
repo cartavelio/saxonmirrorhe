@@ -173,6 +173,14 @@ public class StringValue extends AtomicValue {
         }
     }
 
+    public StringValue economize() {
+        UnicodeString c2 = content.economize();
+        if (c2 == content) {
+            return this;
+        }
+        return new StringValue(c2, typeLabel);
+    }
+
     public static StringValue makeUStringValue(UnicodeString value) {
         if (value == null || value.isEmpty()) {
             return StringValue.EMPTY_STRING;

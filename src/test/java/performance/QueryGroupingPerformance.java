@@ -1,20 +1,59 @@
-package performance;public class QueryGroupingPerformance {
+package performance;
+
+import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class QueryGroupingPerformance extends PerformanceTestCase {
+
+    public void measurePut(final int n) {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            XQueryExecutable exec = comp.compile(new File("/Users/mike/bugs/2024/6446_KayL/testgroupby.xquery"));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode doc = builder.build(new File("/Users/mike/bugs/2024/6446_KayL/testgroupby500.txt"));
+
+            measure(new Measurable() {
+
+                @Override
+                public void run() {
+                    try {
+//                        DocumentBuilder builder = proc.newDocumentBuilder();
+//                        XdmNode doc = builder.build(new File("/Users/mike/bugs/2024/6446_KayL/testgroupby500.txt"));
+                        XQueryEvaluator eval = exec.load();
+                        eval.setContextItem(doc);
+                        XdmValue reault = eval.evaluate();
+                    } catch (SaxonApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public int expectedTimeMicroseconds() {
+                    return n;
+                }
+
+                @Override
+                public String name() {
+                    return "testXQ" + n;
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    //@Tag("performance")
+    public void testXQGrouping() {
+        measurePut(7000);
+    }
+
+
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//
