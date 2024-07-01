@@ -293,12 +293,11 @@ def testResolveUri(saxonproc):
     value = executable.call_template_returning_value("go")
     assert value is not None
     item = value.head
-    print("WHAT IS CODE")
-    print(item.string_value)
-    assert os.path.exists('notice trailing space/out.xml')
-    if os.path.exists('notice trailing space/out.xml'):
-        os.remove('notice trailing space/out.xml')
-        os.remove('notice trailing space')
+
+    assert os.path.exists('notice trailing space /out.xml')
+    if os.path.exists('notice trailing space /out.xml'):
+        os.remove('notice trailing space /out.xml')
+        os.rmdir('notice trailing space ')
 
 def testXslMessageToFile(saxonproc, data_dir):
     document = saxonproc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")

@@ -2075,7 +2075,7 @@ cdef class PyXsltExecutable:
         Args:
             name (str): the name of the stylesheet parameter, as a string. For a namespaced parameter use
                 clark notation {uri}local
-            value (PyXdmValue): the value of the stylesheet parameter, or NULL to clear a previously set value
+            value (PyXdmValue): the value of the stylesheet parameter
         """
         cdef const char * c_str = NULL
         py_string_string = name.encode('utf-8') if name is not None else None
