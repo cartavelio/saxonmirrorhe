@@ -443,7 +443,7 @@ abstract class WheelCompatibilityTags extends DefaultTask {
     @Internal
     Provider<RegularFile> pythonVersionPath = pyenvExe.flatMap { RegularFile pyenv ->
         def versionPath = project.objects.fileProperty()
-        versionPath.set(project.file(execString(pyenv, ["prefix", pythonVersion.get()], [:])))
+        versionPath.set(project.file(execString(pyenv, ["which", "pip"], [PYENV_VERSION: pythonVersion.get()])).parentFile.parentFile)
         versionPath
     }
 
