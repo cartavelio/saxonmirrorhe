@@ -186,7 +186,7 @@ void Xslt30Processor::clearParameters(bool delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
-            if (delValues && value != nullptr) {
+            if (!SaxonProcessor::extensionFlag && delValues && value != nullptr) {
 #ifdef DEBUG
                 std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;
