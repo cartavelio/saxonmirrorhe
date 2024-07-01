@@ -17,14 +17,32 @@ XQueryProcessor::XQueryProcessor() {
 }
 
 XQueryProcessor::~XQueryProcessor() {
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "~XQueryProcessor destructor called: ob ref=" << (this)  << std::endl;
+  }
   clearProperties();
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "~XQueryProcessor properties cleared"  << std::endl;
+  }
   clearParameters();
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "~XQueryProcessor parameters cleared"  << std::endl;
+  }
   if (cppXQ != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXQ);
     cppXQ = SXN_UNSET;
   }
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "~XQueryProcessor j_handles_destroy finished"  << std::endl;
+  }
   cwdXQ.erase();
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "~XQueryProcessor cwdXQ erased"  << std::endl;
+  }
   exceptionClear();
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "~XQueryProcessor exceptions cleared"  << std::endl;
+  }
 }
 
 XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {

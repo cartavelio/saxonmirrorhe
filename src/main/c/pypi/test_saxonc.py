@@ -4,7 +4,7 @@ from saxonc@@edition@@ import *
 import os
 from os.path import isfile
 from datetime import datetime as date
-
+import sys
 '''pytest --data-dir=[path/data]  test_saxonc.py'''
 
 
@@ -347,8 +347,11 @@ def testXslMessageToListWithClear(saxonproc):
     assert messages.size == 1
 
 def testEmbeddedStylesheet(saxonproc, data_dir):
+        print("WAT", file=sys.stderr)
         trans = saxonproc.new_xslt30_processor()
+        print("HELLO MUM 1", file=sys.stderr)
         input_ = saxonproc.parse_xml(xml_file_name=os.path.join(data_dir, "books.xml"))
+        print("HELLO DAD", file=sys.stderr)
         path = "/processing-instruction(xml-stylesheet)[matches(.,'type\\s*=\\s*[''\"\"]text/xsl[''\" \"]')]/replace(., '.*?href\\s*=\\s*[''\" \"](.*?)[''\" \"].*', '$1')"
 
         print(os.path.join(data_dir, "books.xml"))
@@ -358,6 +361,7 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
         xPathProcessor = saxonproc.new_xpath_processor()
         xPathProcessor.set_context(xdm_item=input_)
         hrefval = xPathProcessor.evaluate_single(path)
+        print("HELLO MUM 2", file=sys.stderr)
 
         assert hrefval is not None
         href = hrefval.string_value
@@ -365,11 +369,14 @@ def testEmbeddedStylesheet(saxonproc, data_dir):
         assert href != ""
         styles_dir = data_dir
         executable = trans.compile_stylesheet(stylesheet_file=os.path.join(styles_dir, href))
+        print("HELLO MUM 3", file=sys.stderr)
 
         assert executable is not None
         assert isinstance(input_, PyXdmNode)
         executable.set_global_context_item(xdm_item=input_)
+        print("HELLO MUM 4", file=sys.stderr)
         node = executable.apply_templates_returning_value(xdm_value=input_)
+        print("HELLO MUM 5", file=sys.stderr)
         assert node is not None
 
 def testLineNumber(data_dir):

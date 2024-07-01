@@ -141,6 +141,9 @@ XdmValue::~XdmValue() {
   }
 
   if (xdmSize > 0 && values != nullptr) {
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr << "xdmSize: " << xdmSize << std::endl;
+      }
 
     for (int i = 0; i < xdmSize; i++) {
       if (relinquished_values[i] == (char)0 && values[i] != nullptr &&
@@ -156,9 +159,15 @@ XdmValue::~XdmValue() {
     values_cap = 0;
   }
   if (valueType != nullptr) {
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr << "deleting valueType" << std::endl;
+      }
     delete valueType;
   }
   if (jValues > 0 && (this)->getRefCount() < 1) {
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr << "XdmValue j_handles_destroy" << std::endl;
+        }
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
     jValues = -1;
   }

@@ -876,6 +876,8 @@ abstract class PytestRunner extends DefaultTask {
             if (runner.hasEnvironment()) {
                 environment runner.getEnvironment()
             }
+
+            println(commandLine.join(" "))
         }
     }
 }

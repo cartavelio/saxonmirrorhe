@@ -1139,7 +1139,7 @@ tasks.register("all_python_test_suites") {
 
     workingDir pythonPackageDir
     environment SAXONC_HOME: saxonLicenseDir
-//    environment SAXONC_DEBUG_FLAG: "true", SAXONC_TESTSUITE_DEBUG: "true"
+    environment SAXONC_DEBUG_FLAG: "true"//, SAXONC_TESTSUITE_DEBUG: "true"
 
     Provider<Directory> pytestDataDir = tasks.named("${edition}c_pytest_data").map { it.destinationDir }
     baseArgs "--data-dir", file(pytestDataDir)
