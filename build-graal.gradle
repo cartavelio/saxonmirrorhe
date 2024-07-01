@@ -609,9 +609,17 @@ tasks.register("branchVenv", PythonVenv)
     outputDir = layout.buildDirectory.dir("${edition}c/libsaxon")
   }
 
+  tasks.register("${edition}c_build_graal_debug_image", GraalNativeImageTask) {
+    sourceJar = tasks.named("${edition}c_graalJar").flatMap { it.archiveFile }
+    libVersionedName = "libsaxon-${edition}c-${saxonVersion3}"
+    outputDir = layout.buildDirectory.dir("${edition}c/libsaxon")
+    debug = true
+  }
+
+
   task "${edition}c_graalImageExe"(
           dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
-          description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
+          description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for Fcppging add :${icu4jJar} for icu"
   ) {
     doLast {
       def image = nativeImage(graalEdition)

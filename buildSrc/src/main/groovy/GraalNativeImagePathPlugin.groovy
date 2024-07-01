@@ -89,6 +89,9 @@ abstract class GraalNativeImageTask extends DefaultTask {
     @Input
     abstract ListProperty<String> getSpecifiedArgs()
 
+    @Input
+    abstract Property<Boolean> getDebug()
+
     @Internal
     abstract DirectoryProperty getOutputDir()
 
@@ -128,21 +131,25 @@ abstract class GraalNativeImageTask extends DefaultTask {
     final Provider<Directory> libraryDir = outputDir
 
     private List<Object> generatedArgs() {
-        ["-cp", sourceJar.get().asFile.toString(),
-         "-o", outputDir.get().file(libVersionedName.get()),
-         "--no-fallback", "-H:Path=${outputDir.get().asFile}",
-         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-         "-H:+ReportExceptionStackTraces",
-        //  "-Dfile.encoding=UTF-8",
-         "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
-         "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
-         "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
-         "--enable-url-protocols=https",
-         "--enable-url-protocols=http",
-         "--shared"
-        ]
+        def nativeArgs = ["-cp",
+                          sourceJar.get().asFile.toString(),
+                          "-o", outputDir.get().file(libVersionedName.get()),
+                          "--no-fallback", "-H:Path=${outputDir.get().asFile}",
+                          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+                          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+                          "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+                          "-H:+ReportExceptionStackTraces",
+                          "-Dfile.encoding=UTF-8",
+                          "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
+                          "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
+                          "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
+                          "--enable-url-protocols=https",
+                          "--enable-url-protocols=http",
+                          "--shared"]
+        if (debug.getOrElse(false)) {
+            nativeArgs << "-g" << "-O0"
+        }
+        nativeArgs
     }
 
     List<String> platformSharedLibFileExtensions() {
