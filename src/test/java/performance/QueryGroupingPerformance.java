@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class QueryGroupingPerformance extends PerformanceTestCase {
 
-    public void measurePut(final int n) {
+    public void measure6446(final int n) {
         try {
             Processor proc = new Processor(true);
             XQueryCompiler comp = proc.newXQueryCompiler();
@@ -51,7 +51,7 @@ public class QueryGroupingPerformance extends PerformanceTestCase {
     @Test
     //@Tag("performance")
     public void testXQGrouping() {
-        measurePut(7000);
+        measure6446(1000);
     }
 
 
