@@ -40,7 +40,6 @@ PHP_METHOD(Xslt30Processor, __destruct) {
   Xslt30Processor *xslt30Processor = obj->xslt30Processor;
   _decrementRefCount(xslt30Processor->getParameters());
   xslt30Processor->clearParameters();
-  xslt30Processor->clearProperties();
   if (xslt30Processor != nullptr) {
     delete xslt30Processor;
   }
