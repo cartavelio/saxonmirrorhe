@@ -810,7 +810,7 @@ namespace TestDriver {
                 else {
                     // Some tests, notably test-catalog tests, don't declare the documents they use
                     try {
-                        Stream stream = UriUtils.GetStream(uri);
+                        Stream stream =UriUtils.GetStream(uri);
                         return new TextResource(stream, uri);
                     }
                     catch (FileNotFoundException) {

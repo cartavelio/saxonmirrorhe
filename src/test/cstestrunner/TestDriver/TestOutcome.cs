@@ -12,6 +12,7 @@ using Saxon.Hej.str;
 using JWhitespace = Saxon.Hej.value.Whitespace;
 using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
 using JDeepEqual = Saxon.Hej.functions.DeepEqual;
+using SDeepEqual = Saxon.Eej.functions.extfn.SaxonDeepEqual;
 using JSequenceIterator = Saxon.Hej.om.SequenceIterator;
 using JAxisInfo = Saxon.Hej.om.AxisInfo;
 using JGenericAtomicComparer = Saxon.Hej.expr.sort.GenericAtomicComparer;
@@ -925,17 +926,17 @@ namespace TestDriver {
 
                 int flag = 0;
 
-                flag |= JDeepEqual.INCLUDE_COMMENTS;
-                flag |= JDeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS;
-                flag |= JDeepEqual.EXCLUDE_VARIETY;
+                flag |= SDeepEqual.INCLUDE_COMMENTS;
+                flag |= SDeepEqual.INCLUDE_PROCESSING_INSTRUCTIONS;
+                flag |= SDeepEqual.EXCLUDE_VARIETY;
                 if (!ignorePrefixes) {
-                    flag |= JDeepEqual.INCLUDE_NAMESPACES;
-                    flag |= JDeepEqual.INCLUDE_PREFIXES;
+                    flag |= SDeepEqual.INCLUDE_NAMESPACES;
+                    flag |= SDeepEqual.INCLUDE_PREFIXES;
                 }
 
-                flag |= JDeepEqual.COMPARE_STRING_VALUES;
+                flag |= SDeepEqual.COMPARE_STRING_VALUES;
                 if (debug) {
-                    flag |= JDeepEqual.WARNING_IF_FALSE;
+                    flag |= SDeepEqual.WARNING_IF_FALSE;
                 }
 
                 try {
@@ -964,7 +965,7 @@ namespace TestDriver {
                     JSequenceIterator iter1 = ((NodeInfo) expected.Implementation.iterateAxis(JAxisInfo.CHILD).next())
                         .iterateAxis(JAxisInfo.CHILD);
                     JGroundedValue val1 = SequenceTool.toGroundedValue(iter1);
-                    bool success = JDeepEqual.deepEqual(
+                    bool success = SDeepEqual.deepEqual(
                         val0.iterate(), val1.iterate(),
                         new JGenericAtomicComparer(JCodepointCollator.getInstance(), null),
                         assertXpc.Processor.Implementation.getConversionContext(), flag);
@@ -976,11 +977,11 @@ namespace TestDriver {
                         // need to filter that out ourselves
                         iter0 = new JItemMappingIterator(iter0, new RemoveWhitespace());
                         iter1 = new JItemMappingIterator(iter1, new RemoveWhitespace());
-                        success = JDeepEqual.deepEqual(
+                        success = SDeepEqual.deepEqual(
                             iter0, iter1,
                             new JGenericAtomicComparer(JCodepointCollator.getInstance(), null),
                             assertXpc.Processor.Implementation.getConversionContext(),
-                            flag | JDeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES);
+                            flag | SDeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES);
                         if (success) {
                             comment = "OK after ignoring whitespace text";
                         }
