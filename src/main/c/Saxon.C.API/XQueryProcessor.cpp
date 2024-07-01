@@ -117,9 +117,18 @@ std::map<std::string, std::string> &XQueryProcessor::getProperties() {
  * Set the source document for the query
  */
 void XQueryProcessor::setContextItem(XdmItem *value) {
-  if (value != nullptr) {
-    parameters["node"] = (XdmValue *)value;
-  }
+    if (value == nullptr) {
+        std::map<std::string, XdmValue *>::iterator it;
+        it = parameters.find("node");
+        if (it != parameters.end()) {
+            XdmValue *valuei = it->second;
+            if (valuei != nullptr) {
+                parameters.erase("node");
+            }
+        }
+    } else {
+        setParameter("node", value, false);
+    }
 }
 
 void XQueryProcessor::declareNamespace(const char *prefix, const char *uri) {
@@ -169,9 +178,9 @@ XdmValue *XQueryProcessor::getParameter(const char *name, bool withParam) {
 /**
  * Set a parameter value used in the query
  */
-void XQueryProcessor::setParameter(const char *name, XdmValue *value) {
+void XQueryProcessor::setParameter(const char *name, XdmValue *value, bool withParam) {
   if (value != nullptr && name != nullptr) {
-    std::string skey = ("param:" + std::string(name));
+    std::string skey = (withParam ? "param:" : "") + std::string(name);
     std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;

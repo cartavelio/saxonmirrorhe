@@ -87,7 +87,7 @@ PHP_METHOD(XPathProcessor, setParameter) {
       return;
     }
 
-    XdmValue * oldValue = xpathProcessor->getParameter(name, false);
+    XdmValue * oldValue = xpathProcessor->getParameter(name, true);
     if(oldValue != nullptr) {
         oldValue->decrementRefCount();
         if(oldValue->getRefCount() < 1) {
@@ -434,6 +434,15 @@ PHP_METHOD(XPathProcessor, setContextItem) {
       xpathProcessor->setContextItem(nullptr);
       return;
     }
+        XdmValue * oldValue = xpathProcessor->getParameter("node", false);
+        if(oldValue != nullptr) {
+            oldValue->decrementRefCount();
+            if(oldValue->getRefCount() < 1) {
+                delete oldValue;
+                oldValue = nullptr;
+            }
+        }
+
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
 
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {

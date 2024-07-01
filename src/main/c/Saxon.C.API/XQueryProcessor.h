@@ -72,7 +72,7 @@ public:
    * @param value of the query parameter, or nullptr to clear a previously set
    * value
    */
-  void setParameter(const char *name, XdmValue *value);
+  void setParameter(const char *name, XdmValue *value, bool withParam=true);
 
   //! Set XQuery language version
   /**

@@ -193,9 +193,6 @@ void XPathProcessor::setContextItem(XdmItem *item) {
         if (it != parameters.end()) {
             XdmValue *valuei = it->second;
             if (valuei != nullptr) {
-                if (SaxonProcessor::extensionFlag) {
-                    valuei->decrementRefCount();
-                }
                 parameters.erase("node");
             }
         }
@@ -350,7 +347,6 @@ void XPathProcessor::setParameter(const char *name, XdmValue *value,
         if (it != parameters.end()) {
             XdmValue *valuei = it->second;
             if (valuei != nullptr) {
-                valuei->decrementRefCount();
                 parameters.erase(skey);
             }
         }
@@ -358,9 +354,6 @@ void XPathProcessor::setParameter(const char *name, XdmValue *value,
     }
 }
 
-void XPathProcessor::setParameter(const char *name, XdmValue *value) {
-    setParameter(name, value, true);
-}
 
 bool XPathProcessor::removeParameter(const char *name) {
     return (bool) (parameters.erase("param:" + std::string(name)));
