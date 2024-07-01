@@ -166,7 +166,11 @@
                <code>XdmNode</code> class in the C++, Python and PHP APIs.</li>
             <li>The <code>clearXslMessages()</code> method has been added to the
                <code>XsltExecutable</code> class in the C++, Python and PHP APIs.</li>
-
+            <li>The way that memory management is handled internally has been significantly overhauled, removing a
+               number of memory leaks, and making it much more robust concerning memory handling in C++, Python,
+               and PHP. (See bug issues <a href="https://saxonica.plan.io/issues/6338" target="_blank">#6338</a>,
+               <a href="https://saxonica.plan.io/issues/6349" target="_blank">#6349</a>, and
+               <a href="https://saxonica.plan.io/issues/6392" target="_blank">#6392</a>.)</li>
          </ul>
       </category>
       
