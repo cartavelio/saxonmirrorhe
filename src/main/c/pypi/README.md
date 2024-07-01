@@ -89,8 +89,19 @@ SaxonC-@@EDITION@@ @@VERSION@@ from Saxonica
 
 **Note**: `license=False` requests the open-source version of Saxon, whereas 
 `license=True` requests the commercial product - which requires a license file.
-SaxonC looks for the license key in the directory where the main SaxonC library has been 
-installed, and the directory identified by the environment variable `SAXONC_HOME`.
+SaxonC looks for the license key in the directory identified by the environment 
+variable `SAXONC_HOME`. To explicitly set the location of the license key, 
+create a licensed `PySaxonProcessor` and set the `licenseFileLocation` property 
+on it before doing anything else:
+
+```python
+from saxoncee import PySaxonProcessor
+
+with PySaxonProcessor(license=True) as proc:
+    proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                    "/path/to/saxon-license.lic")
+    ...
+```
 
 ### Example: Running a transformation
 

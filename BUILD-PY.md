@@ -1,94 +1,47 @@
 # Building SaxonC wheels for HE, PE, and EE
 
-This file is about the SaxonC builds, especially the wheel builds.
+This file is about the SaxonC builds, especially local wheel builds.
 
 ## Prerequisites
 
 * Most of the instructions in BUILD.md
-* GraalVM
-* pyenv, https://github.com/pyenv/pyenv
-* pyenv-virtualenv, the virtual environment plugin for pyenv
+* GraalVM + native-image
+* pyenv, https://github.com/pyenv/pyenv (macOS, Linux)
+* pyenv-win, https://github.com/pyenv-win/pyenv-win (Windows)
 
 ## Setup
 
-Virtual environments work by modifying your shell. To make them work
-in the Gradle build, you have to configure the shell parts before you start.
+Gradle tasks make direct use of `pyenv` and `pyenv-win`, so you shouldn't 
+need to do anything. The build scripts will error if pyenv cannot be found.
 
-The build scripts assume that virtual environments with particular names will exist.
-The names are “saxon-{branch}”, for example `saxon-main` and `saxon-saxon12`.
+Primary builds use the `pyenv` task defined in `build-graal.gradle`. That 
+task defines the Python version to use.
 
 ### Managing virtual environments
 
-To create a virtual environment, run a command like this:
+The gradle tasks create a virtual env named after the current branch, and keep it in `build/pyvenv`.
 
-```
-$ pyenv virtualenv 3.9.16 saxon-saxon12
-```
+To activate the virtual env so your shell Python is the right one, using the right virtual env, run:
 
-That command creates an environment named `saxon-saxon12` based of
-Python version 3.9.16.
-
-The command `pyenv versions` will tell you what versions you have installed.
-
-The command `pyenv uninstall name` will uninstall the virtual
-environment named `name`.
-
-Suppose, for example, that you want to try Saxon 12 with Python 3.10.
-
-```
-$ pyenv versions
-  system
-* 3.9.16 (set by /Users/ndw/.pyenv/version)
+```shell
+$ source build/pyvenv/{branch}/bin/activate
 ```
 
-I don’t currently have Python 3.10 installed, so:
+Or, in Powershell on Windows:
 
-```
-$ pyenv install 3.10
-```
-
-Then remove the current 3.9.16 version:
-
-```
-$ pyenv uninstall saxon-saxon12
+```pwsh
+C:\> build\pyvenv\{branch}\Scripts\Activate.ps1
 ```
 
-Then install the new one and activate it:
-
-```
-$ pyenv virtualenv 3.10 saxon-saxon12
-  …
-$ pyenv activate saxon-saxon12
-```
-
-You should now be running 3.10 with the correct virtual environment:
-
-```
-$ python3 —version
-Python 3.10.12
-$ pyenv version
-saxon-saxon12 (set by PYENV_VERSION environment variable)
-```
-
-You can use `pyenv deactivate` and `pyenv activate` to switch between
-existing environments.
+Once activated, the virtual env adds a `deactivate` binary to your `$PATH` so you can simply run `deactivate` to get out of the virtual env and return your Python to system normal.
 
 ## Gradle targets
 
-* `pyenvEnvironment` tests that you (a) have a virtual environment and
-  (b) that it’s the correct environment for the branch you have checked out.
-* `pyenv_install_saxon_EDITIONc` installs Saxon C EDITION. For example,
-  `penv_install_saxon_eec` installs Saxon EE in the current virtual environment.
+* `EDITIONc_python_build_wheel` Builds a local wheel
+* `EDITIONc_python_repair_wheel` Builds the local wheel and ensures the `libsaxon` binary is correctly bundled within it.
+* `EDITIONc_python_install_wheel` Builds and repairs the local wheel, and then installs it into the virtualenv for the current branch, uninstalling any existing version.
 
-## Building the wheel locally
-
-From the `build/eec_pypi` (or `pec_pypi` or `hec_pypi`) directories,
-you can build the wheel locally with the command
-
+For example: 
+```shell
+$ ./gradlew hec_python_install_wheel
 ```
-python setup.py bdist_wheel
-```
-
-The resulting wheel needs to be installed globally or you have to run
-the build wheel tools that will relocate the binary libraries. But you
-can test the build process.
