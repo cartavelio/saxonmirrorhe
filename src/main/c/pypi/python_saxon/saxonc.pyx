@@ -4920,10 +4920,9 @@ cdef class PyXdmFunctionItem(PyXdmItem):
 
     def call(self, list args):
         """
-        call(self, PySaxonProcessor proc, list args)
+        call(self, list args)
         Call the function
         Args:
-            proc (PySaxonProcessor): the Saxon processor
             args (list): the values to be supplied as arguments to the function. The "function
                conversion rules" will be applied to convert the arguments to the required
                type when necessary.
