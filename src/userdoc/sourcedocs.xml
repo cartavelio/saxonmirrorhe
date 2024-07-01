@@ -2121,7 +2121,7 @@ documentBuilder.build(as);]]></code></pre>
           tiny tree, <code>-tree:linked</code> for the linked tree). There is also a variant of the tiny
           tree called a "condensed tiny tree" which saves space (at the expense of build time) by
           recognizing text nodes and attribute nodes whose values appear more than once in the input
-          document: this is selected by the option <code>-tree:tinyc</code>. 
+          document: this is selected by the option <span class="nowrap"><code>-tree:tinyc</code></span>. 
           The tree model can also be selected from the Java or C# API. The default is to use the
           tiny tree model. The choice should make no difference to the results of a transformation
           (except the order of attributes and namespace declarations) but only affects performance.</p>

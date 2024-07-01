@@ -506,9 +506,9 @@ config.setLocalizerFactory(new LocalizerFactory() {
         library.</p>
         <p>Three conditions must be satisfied for this to work:</p>
         <ul>
-          <p>You must be using the SaxonJ PE or EE JAR files.</p>
-          <p>You must have a license file enabled.</p>
-          <p>The ICU4J JAR file (for example <code>icu4j-72.1.jar</code>) must be on the classpath. </p>
+          <li>You must be using the SaxonJ PE or EE JAR files.</li>
+          <li>You must have a license file enabled.</li>
+          <li>The ICU4J JAR file (for example <code>icu4j-72.1.jar</code>) must be on the classpath. </li>
         </ul>
         <p>If any of these conditions is not satisfied, Saxon falls back silently to using collations from the JDK. If it is
           important to use the ICU collations, use <code>fallback=no</code> in the collation URI to prevent this
