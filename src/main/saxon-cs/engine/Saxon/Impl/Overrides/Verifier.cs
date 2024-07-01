@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using NSec.Cryptography;
 using Saxon.Hej.trans;
 
 namespace Saxon.Impl.Overrides {
@@ -8,7 +9,6 @@ namespace Saxon.Impl.Overrides {
 
         internal Verifier()  {
         }
-        
         
         protected internal override void loadLicense(Saxon.Hej.Configuration config) {
             string dir = System.Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR");
@@ -29,8 +29,19 @@ namespace Saxon.Impl.Overrides {
             // Console.WriteLine(parameters);
             
             var decodedSig = decodeSignature(signature);
-            return dsa.VerifyData(binaryData, decodedSig, HashAlgorithmName.SHA1);
-            
+            var valid = dsa.VerifyData(binaryData, decodedSig, HashAlgorithmName.SHA1);
+            return valid;
+        }
+
+        protected internal override bool verify2(string data, string signature)
+        {
+            var algorithm = SignatureAlgorithm.Ed25519;
+            var publicKeyBytes = Convert.FromBase64String(ed25519Pem);
+            var signatureBytes = Convert.FromBase64String(signature);
+            var dataBytes = Encoding.UTF8.GetBytes(data);
+            var publicKey = PublicKey.Import(algorithm, publicKeyBytes, KeyBlobFormat.PkixPublicKey);
+            var valid = algorithm.Verify(publicKey, dataBytes, signatureBytes);
+            return valid;
         }
 
         // The public key in PEM format
@@ -48,7 +59,9 @@ namespace Saxon.Impl.Overrides {
             "5GtA/XYkqcsMyeg=\n" +
             "-----END PUBLIC KEY-----";
         
-     
+        // The public ED25519 key
+        private static string ed25519Pem = "MCowBQYDK2VwAyEAuJ5NKT1yC2v1G1XomulNaQDbsM6Be/RUumghBAmg5dY=";
+        
         // Take the signature as it appears in the license file, and convert it to the
         // form expected by the .NET verification API. We first convert from hex to binary.
         // then treat the binary as a sequence of two long integers encoded in ASN.1 DER
