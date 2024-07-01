@@ -1188,7 +1188,6 @@ tasks.register("all_python_test_suites") {
               args "-l", lang
             }
             environment SAXONC_HOME: saxonLicenseDir
-            println(commandLine)
 //            environment SAXONC_DEBUG_FLAG: "true", SAXONC_TESTSUITE_DEBUG: "true"
           }
         }
