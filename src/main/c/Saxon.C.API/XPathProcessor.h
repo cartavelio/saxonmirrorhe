@@ -286,6 +286,13 @@ public:
   void importSchemaNamespace(const char *uri);
 
   /**
+   * Get a parameter value by name
+   * @param name - Specified parameter name to get
+   * @return XdmValue
+   */
+  XdmValue *getParameter(const char *name, bool withParam=true);
+
+  /**
    * Get all parameters as a std::map
    */
   std::map<std::string, XdmValue *> &getParameters();

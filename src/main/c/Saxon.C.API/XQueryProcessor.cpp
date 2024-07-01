@@ -157,6 +157,15 @@ void XQueryProcessor::setOutputFile(const char *ofile) {
   setProperty("o", ofile);
 }
 
+XdmValue *XQueryProcessor::getParameter(const char *name, bool withParam) {
+  std::map<std::string, XdmValue *>::iterator it;
+  it = parameters.find((withParam ? "param:" : "") + std::string(name));
+  if (it != parameters.end())
+    return it->second;
+
+  return nullptr;
+}
+
 /**
  * Set a parameter value used in the query
  */
@@ -167,7 +176,6 @@ void XQueryProcessor::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-          valuei->decrementRefCount();
           parameters.erase(skey);
       }
     }

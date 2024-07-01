@@ -369,6 +369,15 @@ PHP_METHOD(XQueryProcessor, setParameter) {
       php_error(E_WARNING, "Error setting source value - value is nullptr");
       return;
     }
+
+    XdmValue * oldValue = xqueryProcessor->getParameter(name, false);
+    if(oldValue != nullptr) {
+        oldValue->decrementRefCount();
+        if(oldValue->getRefCount() < 1) {
+            delete oldValue;
+            oldValue = nullptr;
+        }
+    }
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
     // std::cout<<"test type:"<<(Z_OBJCE_P(oth)->name)<<std::endl;
     // Z_ADDREF_P(oth);

@@ -332,6 +332,16 @@ bool XPathProcessor::effectiveBooleanValue(const char *xpathStr,
     return (bool) resultsi;
 }
 
+
+XdmValue * XPathProcessor::getParameter(const char *name, bool withParam) {
+  std::map<std::string, XdmValue *>::iterator it;
+  it = parameters.find((withParam ? "param:" : "") + std::string(name));
+  if (it != parameters.end())
+    return it->second;
+
+  return nullptr;
+}
+
 void XPathProcessor::setParameter(const char *name, XdmValue *value,
                                   bool withParam) {
     if (value != nullptr && name != nullptr) {

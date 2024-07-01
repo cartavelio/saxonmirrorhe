@@ -127,10 +127,9 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
 
     if (!selectionStringFlag) {
         XdmValue * valuei = getParameter("_i_matches", false);
-        if(SaxonProcessor::extensionFlag == true && valuei != nullptr) {
-            valuei->decrementRefCount();
+            if(valuei != nullptr) {
+            parameters.erase("_i_matches");
         }
-        parameters.erase("_i_matches");
     } else if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)selectionRef);
@@ -173,7 +172,6 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-          valuei->decrementRefCount();
           parameters.erase(skey);
       }
     }
@@ -189,7 +187,6 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value,
         if (it != parameters.end()) {
             XdmValue *valuei = it->second;
             if (valuei != nullptr) {
-                valuei->decrementRefCount();
                 parameters.erase(skey);
             }
         }
@@ -340,11 +337,11 @@ const char *XsltExecutable::getProperty(const char *name) {
 
 
 void XsltExecutable::clearParameters(bool delValues) {
-    if (delValues || SaxonProcessor::extensionFlag) {
+    if (delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
-            if (!SaxonProcessor::extensionFlag && delValues && value != nullptr) {
+            if (delValues && value != nullptr) {
 #ifdef DEBUG
                 std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;

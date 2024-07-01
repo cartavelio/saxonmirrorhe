@@ -184,6 +184,15 @@ PHP_METHOD(Xslt30Processor, setParameter) {
       php_error(E_WARNING, "Error setting source value - value is null");
       return;
     }
+
+    XdmValue * oldValue = xslt30Processor->getParameter(name);
+    if(oldValue != nullptr) {
+        oldValue->decrementRefCount();
+        if(oldValue->getRefCount() < 1) {
+            delete oldValue;
+            oldValue = nullptr;
+        }
+    }
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
       zend_object *ooth = Z_OBJ_P(oth);

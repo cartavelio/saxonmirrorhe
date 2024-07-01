@@ -129,7 +129,6 @@ void Xslt30Processor::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-        valuei->decrementRefCount();
         parameters.erase(skey);
       }
     }
@@ -146,7 +145,7 @@ XdmValue *Xslt30Processor::getParameter(const char *name) {
 }
 
 bool Xslt30Processor::removeParameter(const char *name) {
-  return (bool)(parameters.erase("param:" + std::string(name)));
+  return (bool)(parameters.erase("sparam:" + std::string(name)));
 }
 
 void Xslt30Processor::setJustInTimeCompilation(bool jit) {
@@ -182,20 +181,17 @@ void Xslt30Processor::setTargetEdition(const char *edition) {
 }
 
 void Xslt30Processor::clearParameters(bool delValues) {
-    if (delValues || SaxonProcessor::extensionFlag) {
+    if (delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
-            if (!SaxonProcessor::extensionFlag && delValues && value != nullptr) {
+            if (delValues && value != nullptr) {
 #ifdef DEBUG
                 std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;
 #endif
                 delete value;
                 value = nullptr;
-            }
-            if(SaxonProcessor::extensionFlag) {
-                value->decrementRefCount();
             }
         }
     }

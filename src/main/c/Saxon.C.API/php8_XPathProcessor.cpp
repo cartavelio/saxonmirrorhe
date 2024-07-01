@@ -82,7 +82,19 @@ PHP_METHOD(XPathProcessor, setParameter) {
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr) {
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
-    // std::cout<<"test type:"<<(Z_OBJCE_P(oth)->name)<<std::endl;
+    if (Z_TYPE_P(oth) == IS_NULL) {
+      php_error(E_WARNING, "Error setting source value - value is null");
+      return;
+    }
+
+    XdmValue * oldValue = xpathProcessor->getParameter(name, false);
+    if(oldValue != nullptr) {
+        oldValue->decrementRefCount();
+        if(oldValue->getRefCount() < 1) {
+            delete oldValue;
+            oldValue = nullptr;
+        }
+    }
 
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
 

@@ -285,6 +285,15 @@ void SchemaValidator::setSourceNode(XdmNode *value) {
   }
 }
 
+XdmValue *SchemaValidator::getParameter(const char *name, bool withParam) {
+  std::map<std::string, XdmValue *>::iterator it;
+  it = parameters.find((withParam ? "param:" : "") + std::string(name));
+  if (it != parameters.end())
+    return it->second;
+
+  return nullptr;
+}
+
 void SchemaValidator::setParameter(const char *name, XdmValue *value) {
   if (value != nullptr) {
     // value->incrementRefCount();
@@ -293,7 +302,6 @@ void SchemaValidator::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-          valuei->decrementRefCount();
           parameters.erase(skey);
       }
     }
