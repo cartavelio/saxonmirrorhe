@@ -863,7 +863,12 @@ public class Gizmo {
         }
         String varName = buffer.substring(0, ws).trim();
         if (varName.startsWith("$")) {
+            // forgive use of a leading '$'
             varName = varName.substring(1);
+        }
+        if (varName.endsWith(":")) {
+            // forgive use of `:=` in place of `=`
+            varName = varName.substring(0, varName.length() - 1).trim();
         }
         DocumentImpl saved = currentDoc;
 
