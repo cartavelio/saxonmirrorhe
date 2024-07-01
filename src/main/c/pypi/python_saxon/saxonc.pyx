@@ -185,14 +185,14 @@ cdef class PySaxonProcessor:
             xslt30proc = proc.new_xslt30_processor()
     """
     cdef saxoncClasses.SaxonProcessor *thisptr      # hold a C++ instance which we're wrapping
-    cdef bool _release  #  flag to indicate if this PySaxonProcessor should call release
+    # cdef bool _release    flag to indicate if this PySaxonProcessor should call release
     ##
     # The Constructor
     # @param license Flag that a license is to be used
     # @contextlib.contextmanager
-    def __cinit__(self, config_file= None, license=False,  releasei=False):
+    def __cinit__(self, config_file= None, license=False):
         """
-        __cinit__(self, config_file=None, license=False, releasei=False)
+        __cinit__(self, config_file=None, license=False)
         The constructor.
         Args:
             config_file (str): Construct a Saxon processor based on a configuration file
@@ -202,7 +202,9 @@ cdef class PySaxonProcessor:
         """
         cdef const char * c_str = NULL
         cdef bool l = license
-        self._release = releasei
+        global _proc_count
+        _proc_count += 1
+
         if config_file is not None:
             '''make_c_str(config_file)'''
             py_config_string = config_file.encode('UTF-8') if config_file is not None else None
@@ -219,11 +221,15 @@ cdef class PySaxonProcessor:
 
     def __dealloc__(self):
         """The destructor."""
+        global _proc_count
         if self.thisptr is not NULL:
           del self.thisptr
           self.thisptr = NULL
-        if self._release is True:
+        if _proc_count == 1:
             self.thisptr.release()
+        _proc_count -= 1
+
+
     def __enter__(self):
       """enter method for use with the keyword 'with' context
       Deprecated. This may be removed in a later release. """
@@ -1166,6 +1172,8 @@ cdef class PyDocumentBuilder:
 
 
 parametersDict = None
+
+_proc_count = 0
 
 
 cdef class PyXslt30Processor:
