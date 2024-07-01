@@ -209,9 +209,6 @@ public:
    * @param len - length of the array
    */
   void deleteXdmValueArray(XdmValue **arr, int len) {
-    for (int i = 0; i < len; i++) {
-      // delete arr[i];
-    }
     delete[] arr;
   }
 

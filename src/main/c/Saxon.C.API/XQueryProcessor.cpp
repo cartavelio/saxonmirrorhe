@@ -118,7 +118,6 @@ std::map<std::string, std::string> &XQueryProcessor::getProperties() {
  */
 void XQueryProcessor::setContextItem(XdmItem *value) {
   if (value != nullptr) {
-    value->incrementRefCount();
     parameters["node"] = (XdmValue *)value;
   }
 }
