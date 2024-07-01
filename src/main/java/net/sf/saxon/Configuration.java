@@ -4569,6 +4569,10 @@ public class Configuration implements SourceResolver, NotationSet {
                     setLineNumbering(b);
                     break;
                 }
+                case FeatureCode.MESSAGE_EMITTER_CLASS: {
+                    // obsolete: ignored
+                    break;
+                }
                 case FeatureCode.MODULE_URI_RESOLVER:
                     if (!(value instanceof ModuleURIResolver)) {
                         throw new IllegalArgumentException(
@@ -5277,6 +5281,9 @@ public class Configuration implements SourceResolver, NotationSet {
 
             case FeatureCode.LINE_NUMBERING:
                 return isLineNumbering();
+
+            case FeatureCode.MESSAGE_EMITTER_CLASS:
+                return null;
 
             case FeatureCode.MODULE_URI_RESOLVER:
                 return getModuleURIResolver();
