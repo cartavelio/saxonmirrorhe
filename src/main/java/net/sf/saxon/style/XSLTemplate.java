@@ -717,7 +717,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(requiredContextItemType, mayOmitContextItem);
         Expression body2 = refineTemplateBody(body, cisi);
         compiledNamedTemplate.setBody(body2);
-
         if (getCompilation().getCompilerInfo().getCodeInjector() != null) {
             getCompilation().getCompilerInfo().getCodeInjector().process(compiledNamedTemplate);
         }

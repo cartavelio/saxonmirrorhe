@@ -10,6 +10,8 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
@@ -18,6 +20,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Type;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -281,6 +284,34 @@ public class TraceExpression extends Instruction {
     }
 
     /**
+     * Perform optimisation of an expression and its subexpressions. This is the third and final
+     * phase of static optimization.
+     * <p>This method is called after all references to functions and variables have been resolved
+     * to the declaration of the function or variable, and after all type checking has been done.</p>
+     *
+     * @param visitor     an expression visitor
+     * @param contextInfo the static type of "." at the point where this expression is invoked.
+     *                    The parameter is set to null if it is known statically that the context item will be undefined.
+     *                    If the type of the context item is not known statically, the argument is set to
+     *                    {@link Type#ITEM_TYPE}
+     * @return the original expression, rewritten if appropriate to optimize execution
+     * @throws XPathException if an error is discovered during this phase
+     *                        (typically a type error)
+     */
+    @Override
+    public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        // See bug 6415
+        Expression t = super.optimize(visitor, contextInfo);
+        if (t != this) {
+            return t;
+        }
+        if (getChild() instanceof TraceExpression) {
+            return getChild();
+        }
+        return this;
+    }
+
+    /**
      * Export the expression structure. The abstract expression tree
      * is written to the supplied output destination. Note: trace expressions
      * are omitted from the generated SEF file.
@@ -289,6 +320,16 @@ public class TraceExpression extends Instruction {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         getChild().export(out);
+
+        // Following code was written for diagnostics, to show the tree with the trace instructions
+//        out.startElement("traceExp");
+//        for (Map.Entry<String, Object> prop : properties.entrySet()) {
+//            out.emitAttribute(prop.getKey(), prop.getValue().toString());
+//        }
+//        out.emitAttribute("line", getLocation().getLineNumber()+"");
+//        out.emitAttribute("col", getLocation().getColumnNumber() + "");
+//        getChild().export(out);
+//        out.endElement();
     }
 
     /**

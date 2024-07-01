@@ -267,7 +267,9 @@ public class ComponentTracer extends Instruction {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
+        out.startElement("componentTracer");
         getChild().export(out);
+        out.endElement();
     }
 
     /**
