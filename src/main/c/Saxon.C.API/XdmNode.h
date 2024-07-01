@@ -251,7 +251,7 @@ public:
   /**
    *
    *
-   * @param cache - true to cache the attribute nodes for future use. User os
+   * @param cache - deprecated. User is
    * responsible for memory management for the attribute nodes.
    * @return NULL if this node is not an element, or if this element has no
    * attribute with the specified name. Otherwise return the attribute nodes as
@@ -302,21 +302,20 @@ public:
    */
   bool isNode() { return true; }
 
-  //! Get all the child nodes from the current parent node
+  //! Get all the child nodes from the current parent node.
   /**
-   *
+   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
    * @return pointer array of XdmNode objects
    */
-
-  XdmNode **getChildren(bool cache = true);
+  XdmNode **getChildren(bool cache = false);
 
   //! Get the ith child nodes from the current parent node
   /**
-   *
+   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
    * @return a pointer to the ith child node
    */
 
-  XdmNode *getChild(int i, bool cache = true);
+  XdmNode *getChild(int i, bool cache = false);
 
   //! Get the count of child nodes from the current node
   /**

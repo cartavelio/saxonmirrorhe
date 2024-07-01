@@ -4519,17 +4519,12 @@ cdef class PyXdmNode(PyXdmItem):
             PyXdmNode: The child node at the specified index.
             If the child node at the index does not exist returns None.
         """
-        cdef PyXdmNode val = None
-        cdef bool cache = False
         cdef saxoncClasses.XdmNode * node = NULL
-        node = self.derivednptr.getChild(index, cache)
+        node = self.derivednptr.getChild(index)
         if node == NULL:
             return None
         else:
-            val = PyXdmNode(self.processor)
-            val.derivednptr = val.derivedptr = val.thisvptr = node
-            node.incrementRefCount()
-            return val
+            return self.processor.wrap_node(node)
 
     def __len__(self):
         """
@@ -4672,12 +4667,14 @@ cdef class PyXdmNode(PyXdmItem):
         cdef PyXdmNode val = None
         count = self.derivednptr.getChildCount()
         if count > 0:
-            if not self.derivednptr.hasRelinquishedChildren():
-                n = self.derivednptr.getChildren()
-                self.derivednptr.incrementRefCountForRelinquishedChildren()
-            else:
-                n = self.derivednptr.getChildren()
+            # if not self.derivednptr.hasRelinquishedChildren():
+            #     n = self.derivednptr.getChildren()
+            #     self.derivednptr.incrementRefCountForRelinquishedChildren()
+            # else:
+            #     n = self.derivednptr.getChildren()
+            #
 
+            n = self.derivednptr.getChildren()
             for i in range(count):
                 nodes.append(self.processor.wrap_node(n[i]))
         return nodes
