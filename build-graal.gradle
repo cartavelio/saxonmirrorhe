@@ -823,77 +823,15 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
     it.version3 = saxonVersion3
   }
 
-  tasks.register("setup_${edition}c_pypi") {
-    inputs.files(tasks.named("${edition}c_build_graal_image").map { it.outputs.files })
-    inputs.dir layout.projectDirectory.dir("src/main/c/pypi")
-    inputs.dir layout.projectDirectory.dir("src/main/c/Saxon.C.API")
-
-    outputs.dir pythonPackageDir
-
-    doLast {
-      copy {
-        into pythonPackageDir
-        from layout.projectDirectory.dir("src/main/c/pypi")
-        filter textReplacementFilter(edition, '', libpath)
-      }
-    }
-
-    doLast {
-      def platformDir = (systemOs.isMacOsX() ? "darwin" : (systemOs.isLinux() ? "nix" : "win"))
-      def SAXONC_HOME = pythonPackageDir.map { it.file("libs/${platformDir}") }
-
-      if (SAXONC_HOME == null) {
-        throw GradleException("Don't know how to create Python packages on this OS.");
-      }
-      copy {
-        println("\"${edition}c_build_graal_image\" files:")
-        println(tasks.named("${edition}c_build_graal_image").map { it.outputs.files}.get().files)
-        into SAXONC_HOME
-        from(tasks.named("${edition}c_build_graal_image").map { it.outputs.files})
-      }
-    }
-
-    // What does this do?
-    doLast {
-      copy {
-        from(tasks.named("${edition}c_build_graal_image").map { it.headerFiles })
-        into pythonPackageDir.map{ it.dir("Saxon.C.API/graalvm") }
-      }
-      copy {
-        from layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
-        into pythonPackageDir.map{ it.dir("python_saxon") }
-        include "saxonc.pyx"
-        include "saxoncClasses.pxd"
-        include "readme.txt"
-        filter textReplacementFilter(edition)
-      }
-      copy {
-        from layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
-        into pythonPackageDir
-        include "test_saxonc.py"
-        include "test_saxon_schema.py"
-        filter textReplacementFilter(edition)
-      }
-      copy {
-        from layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
-        into pythonPackageDir.map{ it.dir("samples") }
-        include "saxon_example.py"
-        include "saxon_example2.py"
-        include "saxon_example3.py"
-        filter textReplacementFilter(edition)
-      }
-      copy {
-        from layout.projectDirectory.dir("src/main/c/Saxon.C.API")
-        into pythonPackageDir.map{ it.dir("Saxon.C.API") }
-
-        include "*.h"
-        include "*.c"
-        include "*.cpp"
-        exclude "php*"
-
-        filter textReplacementFilter(edition)
-      }
-    }
+  tasks.register("setup_${edition}c_pypi", PythonSetup) {
+    saxoncHomeFiles.from(tasks.named("${edition}c_build_graal_image"))
+    graalImageHeaderFiles.from(tasks.named("${edition}c_build_graal_image").map { it.headerFiles })
+    pypiDir = layout.projectDirectory.dir("src/main/c/pypi")
+    saxonCApiDir = layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+    outputDir = pythonPackageDir
+    it.edition = edition
+    it.libpath = libpath
+    it.version3 = saxonVersion3
   }
 
   tasks.register("${edition}c_pypi_pip_install", PipInstall) {
