@@ -13,6 +13,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.CallTemplate;
+import net.sf.saxon.functions.TransformFn;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
@@ -56,10 +57,12 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     @Override
     public void open(Controller controller) {
-        out.info("<trace " +
-                "saxon-version=\"" + Version.getProductVersion() + "\" " +
-                getOpeningAttributes() + '>');
-        indent++;
+        if (indent == 0) {
+            out.info("<trace " +
+                             "saxon-version=\"" + Version.getProductVersion() + "\" " +
+                             getOpeningAttributes() + '>');
+            indent++;
+        }
     }
 
     protected abstract String getOpeningAttributes();
@@ -176,11 +179,12 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected int level(Traceable info) {
         if (info instanceof TraceableComponent || info instanceof ApplyTemplates || info instanceof CallTemplate) {
             return 1;
-        } if (info instanceof Expression && ((Expression)info).isInstruction()) {
-            return 2;
-        } else {
-            return 3;
         }
+        if (info instanceof Expression &&
+                (((Expression) info).isInstruction() || ((Expression) info).isCallOn(TransformFn.class))) {
+            return 2;
+        }
+        return 3;
     }
 
     /**
