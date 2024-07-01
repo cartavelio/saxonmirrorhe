@@ -95,6 +95,26 @@ PHP_METHOD(XsltExecutable, getXslMessages) {
   }
 }
 
+
+PHP_METHOD(XsltExecutable, clearXslMessages) {
+  XsltExecutable *xsltExecutable;
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xsltExecutable_object *obj =
+      (xsltExecutable_object *)((char *)pobj -
+                                XtOffsetOf(xsltExecutable_object, std));
+  xsltExecutable = obj->xsltExecutable;
+
+  if (xsltExecutable != NULL) {
+    xsltExecutable->exceptionClear();
+    xsltExecutable->clearXslMessages();
+  }
+}
+
 PHP_METHOD(XsltExecutable, getResultDocuments) {
   XsltExecutable *xsltExecutable;
   zval *php_resultDocArr;
@@ -1852,17 +1872,13 @@ zend_function_entry XsltExecutable_methods[] = {
                                                                                                clearProperties,
                                                                                                arginfo_saxonc_xe_clearProperties,
                                                                                                ZEND_ACC_PUBLIC)
-                                                                    PHP_ME(XsltExecutable,
-                                                                           setSaveXslMessage,
-                                                                           arginfo_saxonc_xe_setSaveXslMessage,
-                                                                           ZEND_ACC_PUBLIC) PHP_ME(XsltExecutable,
-                                                                                                   exceptionOccurred, arginfo_saxonc_xe_exceptionOccurred,
-                                                                                                   ZEND_ACC_PUBLIC)
-                                                                        PHP_ME(
-                                                                            XsltExecutable,
-                                                                            exceptionClear,
-                                                                            arginfo_saxonc_xe_exceptionClear,
-                                                                            ZEND_ACC_PUBLIC)
+                            PHP_ME(XsltExecutable,setSaveXslMessage,arginfo_saxonc_xe_setSaveXslMessage,ZEND_ACC_PUBLIC)
+                            PHP_ME(XsltExecutable,exceptionOccurred, arginfo_saxonc_xe_exceptionOccurred,ZEND_ACC_PUBLIC)
+
+                            PHP_ME(XsltExecutable,getXslMessages,arginfo_saxonc_xe_getXslMessages,ZEND_ACC_PUBLIC)
+                            PHP_ME(XsltExecutable,clearXslMessages,arginfo_saxonc_xe_clearXslMessages,ZEND_ACC_PUBLIC)
+
+                            PHP_ME(XsltExecutable,exceptionClear,arginfo_saxonc_xe_exceptionClear,ZEND_ACC_PUBLIC)
                                                                             PHP_ME(
                                                                                 XsltExecutable,
                                                                                 exportStylesheet,

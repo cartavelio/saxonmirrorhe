@@ -334,6 +334,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         # Get the messages written using the xsl:message instruction
         XdmValue * getXslMessages()  except +raise_py_error
 
+        # Clear xsl:messages held in the PyXsltExecutable
+        XdmValue * clearXslMessages()  except +raise_py_error
+
         # Perform a one shot transformation. The result is stored in the supplied outputfile.
         void transformFileToFile(const char* sourcefile, const char* outputfile)  except +raise_py_error
 

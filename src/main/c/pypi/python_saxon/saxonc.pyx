@@ -1908,7 +1908,7 @@ cdef class PyXsltExecutable:
 
      def get_xsl_messages(self):
         """
-        xsl_messages
+        get_xsl_messages(self)
         Get the messages written using the xsl:message instruction. Return NULL if the user has not
         enabled capturing of xsl:messages via the method set_save_xsl_message.
 
@@ -1925,6 +1925,15 @@ cdef class PyXsltExecutable:
             val.thisvptr = xdmValue
             xdmValue.incrementRefCount()
             return val
+
+
+     def clear_xsl_messages(self):
+        """
+        clear_xsl_messages(self)
+        Clear the messages written using the xsl:message instruction to the in-memory list.
+        If xsl:messages are enabled to write to file then this method has no affect
+        """
+        self.thisxptr.clearXslMessages()
 
 
      def set_parameter(self, name, value):

@@ -17,6 +17,7 @@ import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.List;
 public class SaxonCMessageListener implements MessageListener2 {
     int mode = 0;
     String messageFilename = null;
-    Source sourceFile = null;
+    File sourceFile = null;
     List<XdmNode> xslMessages = new ArrayList<>();
     Processor processor = null;
 
@@ -56,9 +57,9 @@ public class SaxonCMessageListener implements MessageListener2 {
         }  else {
             this.mode = 2;
             messageFilename = mode;
-            sourceFile = SaxonCAPI.resolveFileToSource(processor, cwd, messageFilename, ResourceRequest.XML_NATURE);
+            sourceFile = SaxonCAPI.resolveFile(processor, cwd, messageFilename, ResourceRequest.XML_NATURE);
             if(SaxonCAPI.debug) {
-                System.err.println("SaxonCMessageListener mode = 2, filename = " + messageFilename + " resolved filename = " + sourceFile.getSystemId());
+                System.err.println("SaxonCMessageListener mode = 2, filename = " + messageFilename + " resolved filename = " + sourceFile.getAbsolutePath());
             }
         }
     }
@@ -73,7 +74,7 @@ public class SaxonCMessageListener implements MessageListener2 {
      * @return  - long value to the created SaxonCMessageListener object in the ObjectHandles pool
      * @throws SaxonApiException failure in the Message listener
      */
-    @CEntryPoint(name = "createSaxonCMessageListener", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
+    @CEntryPoint(name = "createSaxonCMessageListener", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createSaxonCMessageListener(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer c_mode) throws SaxonApiException {
         Processor processor = SaxonCAPI.objectHandles.get(procRef);
 
@@ -113,12 +114,12 @@ public class SaxonCMessageListener implements MessageListener2 {
             System.err.println(content.getStringValue());
         } else if (mode == 2) {
             xslMessages.add(content);
-            try (FileWriter fw = new FileWriter(new File(sourceFile.getSystemId()), true); //TODO change this to use Source
+            try (FileWriter fw = new FileWriter(sourceFile, true); //TODO change this to use Source
                  BufferedWriter bw = new BufferedWriter(fw);
                  PrintWriter out = new PrintWriter(bw)) {
                 out.println(content.getStringValue());
             } catch (IOException e) {
-                System.err.println("Error could not write message to file:" + messageFilename + " xsl:mesage=" + content.getStringValue());
+                System.err.println("Error could not to file:" + sourceFile.getAbsolutePath() + " the xsl:message=" + content.getStringValue());
             }
         }
     }
@@ -127,12 +128,12 @@ public class SaxonCMessageListener implements MessageListener2 {
      * Get the xsl:messages  as an array of XdmNode objects in the C memory space
      * @param thread - Graalvm runtime data structure for the thread
      * @param alloc  - Allocator function to create C memory space passed from the C++ application
-     * @param messageListnerRef - reference to the SaxonCMessageListener object in the ObjectHandles pool
+     * @param messageListenerRef - reference to the SaxonCMessageListener object in the ObjectHandles pool
      * @return pointer to the array of XdmNode objects in the C memory space
      */
     @CEntryPoint(name = "j_getXslMessages")
-    public static CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle messageListnerRef) {
-        SaxonCMessageListener messageListener = SaxonCAPI.objectHandles.get(messageListnerRef);
+    public static CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle messageListenerRef) {
+        SaxonCMessageListener messageListener = SaxonCAPI.objectHandles.get(messageListenerRef);
         List<XdmNode> xslMessages = messageListener.xslMessages;
         if(SaxonCAPI.debug) {
             System.err.println("SaxonCMessageListener getXslMessage size = " + messageListener.xslMessages.size());
@@ -147,5 +148,24 @@ public class SaxonCMessageListener implements MessageListener2 {
             CLongPointer addr = SaxonCAPI.longArrayToNativeWithLength(alloc,refs);
             return addr;
         
+    }
+
+
+    /**
+     * Clear the xsl:messages  held in the listener
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param messageListenerRef - reference to the SaxonCMessageListener object in the ObjectHandles pool
+     */
+    @CEntryPoint(name = "j_clearXslMessages")
+    public static void  clearXslMessages(IsolateThread thread, ObjectHandle messageListenerRef) {
+        SaxonCMessageListener messageListener = SaxonCAPI.objectHandles.get(messageListenerRef);
+        if(SaxonCAPI.debug) {
+                    System.err.println("Before clear - SaxonCMessageListener getXslMessage size = " + messageListener.xslMessages.size());
+                }
+        messageListener.xslMessages.clear();
+        if(SaxonCAPI.debug) {
+            System.err.println("After clear - SaxonCMessageListener getXslMessage size = " + messageListener.xslMessages.size());
+        }
+
     }
 }

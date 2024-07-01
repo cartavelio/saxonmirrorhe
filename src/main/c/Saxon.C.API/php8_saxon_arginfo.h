@@ -267,6 +267,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setSaveXslMessage, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_getXslMessages, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_clearXslMessages, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_exceptionOccurred, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
