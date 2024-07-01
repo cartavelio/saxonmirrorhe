@@ -910,9 +910,10 @@ void SaxonProcessor::createHeapDump(bool live) {
 void SaxonProcessor::release() {
   if (SaxonProcessor::jvmCreatedCPP != 0) {
     SaxonProcessor::jvmCreatedCPP = 0;
-#ifdef DEBUG
-    std::cerr << "SaxonProc: JVM finalized calling !" << std::endl;
-#endif
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "SaxonProc: JVM finalized calling !" << std::endl;
+    }
+
     // finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
 
     // delete SaxonProcessor::sxn_environ;
@@ -923,9 +924,9 @@ void SaxonProcessor::release() {
     }
 
   } else {
-#ifdef DEBUG
-    std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
-#endif
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
+    }
   }
 }
 
