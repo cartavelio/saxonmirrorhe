@@ -758,6 +758,16 @@ task all_saxonc_releases() {
       inputs.files(tasks.named("${edition}c_${releaseKind}_c_files").map { it.outputs.files })
 
       outputs.dir(layout.buildDirectory.dir(releasePath))
+
+      if (systemOs.isMacOsX()) {
+        doLast {
+          exec {
+            workingDir layout.buildDirectory.dir("${saxoncReleasePath}/libs/darwin")
+            executable "/usr/bin/install_name_tool"
+            args "-id", "@rpath/libsaxon-${edition}c-${saxonVersion3}.dylib", "libsaxon-${edition}c-${saxonVersion3}.dylib"
+          }
+        }
+      }
     }
   }
 
