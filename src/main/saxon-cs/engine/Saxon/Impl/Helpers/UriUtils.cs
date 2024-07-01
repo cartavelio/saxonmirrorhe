@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Saxon.Ejava.net;
 using Sys = System;
 namespace Saxon.Impl.Helpers {
     public class UriUtils {
@@ -46,7 +47,7 @@ namespace Saxon.Impl.Helpers {
         }
         
         public static Saxon.Ejava.net.URL ToURL(System.Uri uri) {
-            throw new(uri.ToString());
+            return new URL(uri);
         }
 
         private static readonly Regex twoHexDigits = new Regex("[0-9a-fA-F][0-9a-fA-F]");
