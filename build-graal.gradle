@@ -569,8 +569,29 @@ def textReplacementFilter(String edition, String location='../', String libpath=
   }
 }
 
-tasks.register("branchVenv", PythonVenv)
+def pyenvExeTask = tasks.register('pyenvExe', PyenvExe)
 
+def pyenvTask = tasks.register("pyenv", PythonPyenv) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = "3.12.2"
+  pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
+}
+
+def pyenvValgrindTask = tasks.register("pyenvValgrind", PythonPyenv) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = "3.12.2"
+  pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
+  debugVariant = "valgrind"
+}
+
+tasks.register("branchVenv", PythonVenv) {
+  pyenvPythonExe = pyenvTask.map { it.pythonExe.get() }
+}
+
+tasks.register("branchDebugVenv", PythonVenv) {
+  pyenvPythonExe = pyenvValgrindTask.map { it.pythonExe.get() }
+  suffix = "debug"
+}
 
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "ce" : "ee"
@@ -612,7 +633,7 @@ tasks.register("branchVenv", PythonVenv)
   tasks.register("${edition}c_build_graal_debug_image", GraalNativeImageTask) {
     sourceJar = tasks.named("${edition}c_graalJar").flatMap { it.archiveFile }
     libVersionedName = "libsaxon-${edition}c-${saxonVersion3}"
-    outputDir = layout.buildDirectory.dir("${edition}c/libsaxon")
+    outputDir = layout.buildDirectory.dir("${edition}c/libsaxon-debug")
     debug = true
   }
 
@@ -629,6 +650,7 @@ tasks.register("branchVenv", PythonVenv)
                 "net.sf.saxon.Transform", "-o", "${buildDir}/${edition}c/saxon-${edition}c-${saxonVersion3}",
                 "--no-fallback", "-H:Path=${buildDir}/${edition}c",
                 "-H:+AllowVMInspection",
+                "-R:-WriteableCodeCache",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
                 "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
@@ -756,16 +778,20 @@ task all_saxonc_releases() {
   }
 }
 
-def pythonPackageDirPath(String edition) {
-  layout.buildDirectory.dir("${edition}c/python/saxonc${edition}")
+def pythonPackageDirPath(String edition, Boolean debug = false) {
+  layout.buildDirectory.dir("${edition}c/python/saxonc${edition}${debug ? "-debug" : ""}")
 }
+
+//def pythonPackageDirPath(String edition) {
+//  layout.buildDirectory.dir("${edition}c/python/saxonc${edition}")
+//}
 
 
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def graalEdition = "graal_ce_home"
   def pythonPackageDir = pythonPackageDirPath(edition)
-
+  def pythonPackageDebugDir = pythonPackageDirPath(edition, true)
   def libpath = systemOs.isWindows() ? 'libs\\\\win\\\\' : ''
 
   /**
@@ -782,6 +808,20 @@ def pythonPackageDirPath(String edition) {
    * eec/jars/saxon-ee-12.4.2.jar vs
    * libs/libsaxon-eec-12.4.2.jar
    */
+
+//  def graalDebugImage = tasks.named("${edition}c_build_graal_debug_image")
+
+  def editionString = edition
+  tasks.register("setup_${edition}c_pypi_debug", PythonSetup) {
+    saxoncHomeFiles.from(tasks.named("${edition}c_build_graal_debug_image"))
+    graalImageHeaderFiles.from(tasks.named("${edition}c_build_graal_debug_image").map { it.headerFiles })
+    pypiDir = layout.projectDirectory.dir("src/main/c/pypi")
+    saxonCApiDir = layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+    outputDir = pythonPackageDebugDir
+    it.edition = edition
+    it.libpath = libpath
+    it.version3 = saxonVersion3
+  }
 
   tasks.register("setup_${edition}c_pypi") {
     inputs.files(tasks.named("${edition}c_build_graal_image").map { it.outputs.files })
@@ -863,6 +903,7 @@ def pythonPackageDirPath(String edition) {
 
   tasks.register("${edition}c_python_build_wheel", BuildWheel) {
     pythonExe = tasks.named("branchVenv").map { it.pythonExe.get() }
+    repairwheelExe = tasks.named("branchVenv").map { it.venvBinHostedExe("repairwheel").get() }
     productEdition = edition
     productVersion = saxonVersion3
     // This weirdness is because we can't get just the dir from the outputs of the setup task,
@@ -871,6 +912,18 @@ def pythonPackageDirPath(String edition) {
     libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
     outputDir = layout.buildDirectory.dir("${edition}c/python")
   }
+
+  tasks.register("${edition}c_python_build_debug_wheel", BuildWheel) {
+    pythonExe = tasks.named("branchDebugVenv").map { it.pythonExe.get() }
+    repairwheelExe = tasks.named("branchDebugVenv").map { it.venvBinHostedExe("repairwheel").get() }
+    productEdition = edition
+    productVersion = saxonVersion3
+    sourceDir = tasks.named("setup_${edition}c_pypi_debug").map { it.packageDir.get() }
+    libraryDir = tasks.named("${edition}c_build_graal_debug_image").map { it.libraryDir.get() }
+    outputDir = layout.buildDirectory.dir("${edition}c/python-debug")
+    debug = true
+  }
+
 
   task "saxon_${edition}c_stage_wheel"(
     dependsOn: ["setup_${edition}c_pypi"]
@@ -1099,6 +1152,11 @@ tasks.register("all_python_test_suites") {
   tasks.register("${edition}c_python_install_wheel", InstallLocalWheel) {
     pipExe = tasks.named("branchVenv").map { it.pipExe.get() }
     wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
+  }
+
+  tasks.register("${edition}c_python_install_debug_wheel", InstallLocalWheel) {
+    pipExe = tasks.named("branchDebugVenv").map { it.pipExe.get() }
+    wheel = tasks.named("${edition}c_python_build_debug_wheel").map { it.wheel.get() }
   }
 
   tasks.register("${edition}c_pytest_data", Copy) {

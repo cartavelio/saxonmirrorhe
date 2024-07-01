@@ -90,6 +90,7 @@ abstract class GraalNativeImageTask extends DefaultTask {
     abstract ListProperty<String> getSpecifiedArgs()
 
     @Input
+    @Optional
     abstract Property<Boolean> getDebug()
 
     @Internal

@@ -1,6 +1,7 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
@@ -12,7 +13,9 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -21,7 +24,8 @@ import org.gradle.internal.os.OperatingSystem
 import javax.inject.Inject
 
 abstract class ManagePythonEnvExtension {
-    abstract Property<String> getSystemPythonBinary()
+    abstract Property<String> getVenvBasePath()
+    abstract Property<String> getPythonBinDirName()
     abstract Property<String> getVenvPath()
     abstract Property<String> getVenvPipPath()
     abstract Property<String> getVenvPythonPath()
@@ -40,26 +44,126 @@ class ManagePythonEnvPlugin implements Plugin<Project> {
         OperatingSystem systemOs = OperatingSystem.current()
 
         def sysVenvBinarySuffix = ".exe"
-        def sysPythonBinary = "python"
         def pythonBinFolder = "Scripts"
         if(systemOs.isMacOsX() || systemOs.isLinux()) {
             sysVenvBinarySuffix = ""
-            sysPythonBinary = "python3"
             pythonBinFolder = "bin"
         }
 
-        def venvDir = project.layout.buildDirectory.dir(project.branches.current.map { "py_venvs/${it}" })
+        def venvBaseDir = project.layout.buildDirectory.dir(project.branches.current.map { it })
+        Provider<Directory> venvDir = venvBaseDir
         def venvBinDir = venvDir.map { it.dir(pythonBinFolder) }
 
-        extension.systemPythonBinary.convention(sysPythonBinary)
+        extension.pythonBinDirName.convention(pythonBinFolder)
+        extension.venvBinarySuffix.convention(sysVenvBinarySuffix)
+        extension.venvBasePath.convention(venvBaseDir.map { it.asFile.toString() })
         extension.venvPath.convention(venvDir.map { it.asFile.toString() })
         extension.venvBinPath.convention(venvBinDir.map { it.asFile.toString() })
         extension.venvBinDir.convention(venvBinDir)
-        extension.venvBinarySuffix.convention(sysVenvBinarySuffix)
         extension.venvPipPath.convention(venvBinDir.map { it.file("pip3${sysVenvBinarySuffix}").asFile.toString() })
         extension.venvPythonPath.convention(venvBinDir.map { it.file("python${sysVenvBinarySuffix}").asFile.toString() })
     }
 }
+
+abstract class PyenvExe extends DefaultTask {
+    @Optional
+    @Input
+    abstract Property<String> getPyenvExePath()
+
+    @OutputFile
+    final Provider<RegularFile> pyenv = pyenvExePath.orElse(findPyenvExePath()).flatMap {
+        def fileProp = project.objects.fileProperty()
+        fileProp.set(project.file(it))
+        fileProp
+    }
+
+    // Needs something done to it for Windows
+    private Provider<String> findPyenvExePath() {
+        project.providers.provider {
+            (new ByteArrayOutputStream()).withStream { out ->
+                project.exec {
+                    executable "which"
+                    args "pyenv"
+                    standardOutput out
+                }
+                out.toString().trim()
+            }
+        }
+    }
+}
+
+abstract class PythonPyenv extends DefaultTask {
+    @Input
+    abstract Property<String> getPythonVersion()
+
+    @InputFile
+    abstract RegularFileProperty getPyenvExe()
+
+    @InputDirectory
+    abstract DirectoryProperty getPythonBuildDefinitionsDir()
+
+    @Optional
+    @Input
+    abstract Property<String> getDebugVariant()
+
+    @Internal
+    final Provider<String> pyenvVersionName = pythonVersion.map {
+        "${it}${debugVariant.isPresent() ? "-${debugVariant.get()}" : "" }"
+    }
+
+    @Internal
+    final Provider<String> pythonExePath = pyenvExe.map { pyenvPath ->
+        (new ByteArrayOutputStream()).withStream { out ->
+            project.exec {
+                environment "PYENV_VERSION", pyenvVersionName.get()
+                executable pyenvPath.asFile
+                args "which", "python"
+                standardOutput out
+            }
+            out.toString().trim()
+        }
+    }
+
+    @OutputFile
+    Provider<RegularFile> pythonExe = pythonExePath.flatMap {
+        def fileProp = project.objects.fileProperty()
+        fileProp.set(project.file(it))
+        fileProp
+    }
+
+    @TaskAction
+    void execute() {
+        // version
+        // if not in pyenv versions
+        //   if version in python/
+        //      pyenv install /path/to/python/version
+        //   else
+        //      pyenv install version
+        def pyenv = pyenvExe.get()
+        def pyenvVersions = (new ByteArrayOutputStream()).withStream { out ->
+            project.exec {
+                executable pyenv
+                args "versions", "--bare"
+                standardOutput out
+            }
+            out.toString().trim()
+        }.split("\\R")
+
+        def pythonBuildVersionName = pyenvVersionName.get()
+
+        if (!pyenvVersions.contains(pythonBuildVersionName)) {
+            def definitionFile = pythonBuildDefinitionsDir.get().file(pythonBuildVersionName)
+            if (definitionFile.asFile.exists()) {
+                pythonBuildVersionName = definitionFile.asFile.toString()
+            }
+            project.exec {
+                executable pyenv
+                args "install", pythonBuildVersionName
+            }
+        }
+    }
+}
+
 
 abstract class PythonVenv extends DefaultTask {
     @Input
@@ -68,17 +172,38 @@ abstract class PythonVenv extends DefaultTask {
     @Input
     abstract ListProperty<String> getBuildRequirements()
 
+    @InputFile
+    abstract RegularFileProperty getPyenvPythonExe()
+
+    @Optional
+    @Input
+    abstract Property<String> getSuffix()
+
     @Internal
     final Provider<String> branch = branchesExtension.map { project.extensions.getByName(it).properties.get("current").get() }
 
-    @OutputFile
-    final Provider<RegularFile> pythonExe = project.layout.file(project.pythonEnv.venvPythonPath.map { project.file(it) })
+    @Internal
+    final Provider<String> venvName = branch.map {
+        def finalSuffix = suffix.isPresent() ? "-${suffix.get()}" : ""
+        "${it}${finalSuffix}"
+    }
+
+    @Internal
+    final Provider<Directory> venvPath = project.layout.dir(project.pythonEnv.venvBasePath.map { project.file(it) }).map { it.dir(venvName.get()) }
+
+    @Internal
+    final Provider<Directory> venvBinPath = venvPath.map { it.dir(project.pythonEnv.pythonBinDirName.get()) }
 
     @OutputFile
-    final Provider<RegularFile> pipExe = project.layout.file(project.pythonEnv.venvPipPath.map { project.file(it) })
+    final Provider<RegularFile> pythonExe = venvPath.flatMap { venvBinHostedExe("python") }
+
+    @OutputFile
+    final Provider<RegularFile> pipExe = venvPath.flatMap { venvBinHostedExe("pip3") }// envBinPath.map { it.file("pip3${sysVenvBinarySuffix}") }
 
     Provider<RegularFile> venvBinHostedExe(String exe) {
-        project.layout.dir(project.pythonEnv.venvBinPath.map { project.file(it) }).map { it.file(exe) }
+        venvBinPath.map {
+            it.file("${exe}${project.pythonEnv.venvBinarySuffix.get()}")
+        }
     }
 
     PythonVenv() {
@@ -88,16 +213,161 @@ abstract class PythonVenv extends DefaultTask {
 
     @TaskAction
     void execute() {
-        logger.info("Creating Python Venv for ${branch.get()}")
+        logger.info("Creating Python Venv for ${branch.get()}: ${venvName.get()}")
 
         project.exec {
-            executable project.pythonEnv.systemPythonBinary.get()
-            args "-m", "venv", project.pythonEnv.venvPath.get()
+            executable pyenvPythonExe.get()
+            args "-m", "venv", venvPath.get()
         }
 
         project.exec {
-            executable project.pythonEnv.venvPipPath.get()
+            executable pipExe.get().asFile.toString()
             args("install", "--require-virtualenv", "build", "wheel", "repairwheel", "setuptools", *buildRequirements.get())
+        }
+    }
+}
+
+
+abstract class PythonSetup extends DefaultTask {
+    @Input
+    abstract Property<String> getEdition()
+
+    @Input
+    abstract Property<String> getLibpath()
+
+    @Input
+    abstract Property<String> getVersion3()
+
+    @InputFiles
+    abstract ConfigurableFileCollection getSaxoncHomeFiles()
+
+    @InputFiles
+    abstract ConfigurableFileCollection getGraalImageHeaderFiles()
+
+    @InputFiles
+    abstract DirectoryProperty getPypiDir()
+
+    @InputFiles
+    abstract DirectoryProperty getSaxonCApiDir()
+
+    @Internal
+    abstract DirectoryProperty getOutputDir()
+
+    @OutputDirectory
+    final Provider<Directory> packageDir = outputDir.map { it }
+
+    @Internal
+    def systemOs = OperatingSystem.current()
+
+    @Internal
+    def systemOsArch = System.getProperty("os.arch") == "amd64" ? "x86_64" : System.getProperty("os.arch")
+
+    @TaskAction
+    void execute() {
+        def editionString = edition.get()
+
+        project.copy {
+            into packageDir
+            from pypiDir
+            filter textReplacementFilter(editionString, '', libpath.get())
+        }
+        def platformDir = (systemOs.isMacOsX() ? "darwin" : (systemOs.isLinux() ? "nix" : "win"))
+        def SAXONC_HOME = packageDir.map { it.file("libs/${platformDir}") }
+
+        if (SAXONC_HOME == null) {
+            throw GradleException("Don't know how to create Python packages on this OS.");
+        }
+        project.copy {
+            println("\"${editionString}c_build_graal_image\" files:")
+            println(saxoncHomeFiles.files)
+            into SAXONC_HOME
+            from(saxoncHomeFiles)
+        }
+
+        // What does this do?
+        project.copy {
+            from(graalImageHeaderFiles)
+            into packageDir.map { it.dir("Saxon.C.API/graalvm") }
+        }
+        project.copy {
+            from project.layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
+            into packageDir.map { it.dir("python_saxon") }
+            include "saxonc.pyx"
+            include "saxoncClasses.pxd"
+            include "readme.txt"
+            filter textReplacementFilter(editionString)
+        }
+        project.copy {
+            from project.layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
+            into packageDir
+            include "test_saxonc.py"
+            include "test_saxon_schema.py"
+            filter textReplacementFilter(editionString)
+        }
+        project.copy {
+            from project.layout.projectDirectory.dir("src/main/c/pypi/python_saxon")
+            into packageDir.map { it.dir("samples") }
+            include "saxon_example.py"
+            include "saxon_example2.py"
+            include "saxon_example3.py"
+            filter textReplacementFilter(editionString)
+        }
+        project.copy {
+            from project.layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+            into packageDir.map { it.dir("Saxon.C.API") }
+
+            include "*.h"
+            include "*.c"
+            include "*.cpp"
+            exclude "php*"
+
+            filter textReplacementFilter(editionString)
+        }
+    }
+
+    def textReplacementFilter(String edition, String location='../', String libpath=null) {
+        def gccopts = System.getProperty('os.arch') == 'amd64' ? '-m64' : ''
+        def saxonVersion3 = version3.get()
+
+        def libdir = (systemOs.isMacOsX()
+                ? 'libs/darwin'
+                : (systemOs.isLinux()
+                ? 'libs/nix'
+                : 'libs/win'))
+
+        if (libpath == null) {
+            libpath = (systemOs.isLinux()
+                    ? '../libs/nix/'
+                    : (systemOs.isMacOsX()
+                    ? '../libs/darwin/'
+                    : '..\\\\libs\\\\win\\\\'))
+        }
+
+        def lastLinePatch = (systemOs.isLinux()
+                ? ('[tool.cibuildwheel]\n'
+                + 'build = "*"\n'
+                + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n'
+                + "archs = [\"${systemOsArch}\"]\n"
+                + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
+                : (systemOs.isWindows()
+                ? ('[tool.cibuildwheel]\n'
+                + 'build = "*"\n'
+                + 'archs = ["AMD64"]\n'
+                + 'skip = ["*-win32", "cp36*", "cp37*", "pp*", "cp*musl*"]\n')
+                : ('[tool.cibuildwheel]\n'
+                + 'build = "*"\n'
+                + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n')))
+
+        return { line ->
+            line.replace('@@VERSION@@', saxonVersion3)
+                    .replace('@@VERSION.3@@', saxonVersion3)
+                    .replace('@@edition@@', edition)
+                    .replace('@@EDITION@@', edition.toUpperCase())
+                    .replace('@@gccopts@@', gccopts)
+                    .replace('@@libdir@@', libdir)
+                    .replace('@@libpath@@', libpath)
+                    .replace('@@location@@', location)
+                    .replace('[LAST-LINE-BUILD-PATCH]', lastLinePatch)
         }
     }
 }
@@ -152,11 +422,18 @@ abstract class BuildWheel extends DefaultTask {
     @InputFile
     abstract RegularFileProperty getPythonExe()
 
+    @InputFile
+    abstract RegularFileProperty getRepairwheelExe()
+
     @Input
     abstract Property<String> getProductEdition()
 
     @Input
     abstract Property<String> getProductVersion()
+
+    @Input
+    @Optional
+    abstract Property<Boolean> getDebug()
 
     @InputDirectory
     abstract DirectoryProperty getLibraryDir()
@@ -209,15 +486,16 @@ abstract class BuildWheel extends DefaultTask {
         project.exec {
             workingDir buildDir.get()
             executable pythonExe.get()
+            environment "BUILD_DEBUG", debug.getOrElse(false).toString()
             args "-m", "build", "--wheel"
         }
 
-        def pythonEnv = project.extensions.getByType(ManagePythonEnvExtension)
         project.exec {
-            executable pythonEnv.venvBinHostedExe("repairwheel").get()
+            executable repairwheelExe.get()
             args "--output-dir", outputDir.get(),
                     "--lib-dir", libraryDir.get(),
                     buildDir.map {it.file("dist/${wheelFilename.get()}") }.get()
+            println(it.commandLine)
         }
     }
 }

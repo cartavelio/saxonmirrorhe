@@ -1,0 +1,13 @@
+services:
+  saxondev:
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    build:
+      context: .
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    volumes:
+      - ../:/opt/saxonica/saxondev
+
+
