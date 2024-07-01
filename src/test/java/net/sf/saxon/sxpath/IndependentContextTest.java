@@ -74,12 +74,6 @@ class IndependentContextTest {
         }
 
         @Test
-        @DisplayName("Is using the default function library")
-        void defaultFunctionLib() {
-            assertThat(subject.usingDefaultFunctionLibrary, is(equalTo(true)));
-        }
-
-        @Test
         @DisplayName("The default function library is XPath 3.1's")
         void xpathFunctionLibVersion() {
             // function lib 31
@@ -186,12 +180,6 @@ class IndependentContextTest {
         @DisplayName("Has no defined Variables")
         void noVars() {
             assertThat(subject.getExternalVariables(), is(emptyIterable()));
-        }
-
-        @Test
-        @DisplayName("Is using the default function library")
-        void defaultFunctionLib() {
-            assertThat(subject.usingDefaultFunctionLibrary, is(equalTo(true)));
         }
 
         @Test

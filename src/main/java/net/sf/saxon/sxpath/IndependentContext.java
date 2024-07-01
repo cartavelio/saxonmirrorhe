@@ -71,7 +71,6 @@ public class IndependentContext extends AbstractStaticContext
         setConfiguration(config);
         clearNamespaces();
         setDefaultFunctionLibrary(31);
-        usingDefaultFunctionLibrary = true;
         setDefaultCollationName(config.getDefaultCollationName());
         setOptimizerOptions(config.getOptimizerOptions());
         PackageData pd = new PackageData(config);
@@ -100,6 +99,7 @@ public class IndependentContext extends AbstractStaticContext
         if (libList != null) {
             setFunctionLibrary((FunctionLibraryList) libList.copy());
         }
+        setDefaultCollationName(ic.getDefaultCollationName());
         setImportedSchemaNamespaces(ic.importedSchemaNamespaces);
         externalResolver = ic.externalResolver;
         autoDeclare = ic.autoDeclare;

@@ -55,7 +55,6 @@ public abstract class AbstractStaticContext implements StaticContext {
     private NamespaceUri defaultElementNamespace = NamespaceUri.NULL;
     private boolean backwardsCompatible = false;
     private int xpathLanguageLevel = 31;
-    protected boolean usingDefaultFunctionLibrary;
     private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
     private UnprefixedElementMatchingPolicy unprefixedElementPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private WarningHandler warningHandler;
@@ -229,7 +228,6 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     public void setFunctionLibrary(FunctionLibraryList lib) {
         libraryList = lib;
-        usingDefaultFunctionLibrary = false;
     }
 
     /**
