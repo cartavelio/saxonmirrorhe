@@ -66,13 +66,16 @@ abstract class PyenvExe extends DefaultTask {
     // Needs something done to it for Windows
     private Provider<String> findPyenvExePath() {
         project.providers.provider {
+            OperatingSystem systemOs = OperatingSystem.current()
+            def whichIsh = systemOs.isWindows() ? "where.exe" : "which"
             (new ByteArrayOutputStream()).withStream { out ->
                 project.exec {
-                    executable "which"
+                    executable whichIsh
                     args "pyenv"
                     standardOutput out
                 }
-                out.toString().trim()
+                def res = out.toString()
+                res.split(System.getProperty("line.separator"))[-1].trim()
             }
         }
     }
@@ -97,26 +100,6 @@ abstract class PythonPyenv extends DefaultTask {
         "${it}${debugVariant.isPresent() ? "-${debugVariant.get()}" : "" }"
     }
 
-    @Internal
-    final Provider<String> pythonExePath = pyenvExe.map { pyenvPath ->
-        (new ByteArrayOutputStream()).withStream { out ->
-            project.exec {
-                environment "PYENV_VERSION", pyenvVersionName.get()
-                executable pyenvPath.asFile
-                args "which", "python"
-                standardOutput out
-            }
-            out.toString().trim()
-        }
-    }
-
-    @OutputFile
-    Provider<RegularFile> pythonExe = pythonExePath.flatMap {
-        def fileProp = project.objects.fileProperty()
-        fileProp.set(project.file(it))
-        fileProp
-    }
-
     @TaskAction
     void execute() {
         // version
@@ -136,7 +119,6 @@ abstract class PythonPyenv extends DefaultTask {
         }.split("\\R")
 
         def pythonBuildVersionName = pyenvVersionName.get()
-
         if (!pyenvVersions.contains(pythonBuildVersionName)) {
             def definitionFile = pythonBuildDefinitionsDir.get().file(pythonBuildVersionName)
             if (definitionFile.asFile.exists()) {
@@ -147,6 +129,34 @@ abstract class PythonPyenv extends DefaultTask {
                 args "install", pythonBuildVersionName
             }
         }
+    }
+}
+
+abstract class PythonPyenvPythonExe extends DefaultTask {
+    @Input
+    abstract Property<String> getPyenvVersionName()
+
+    @InputFile
+    abstract RegularFileProperty getPyenvExe()
+
+    @Internal
+    final Provider<String> pythonExePath = pyenvExe.map { pyenvPath ->
+        (new ByteArrayOutputStream()).withStream { out ->
+            project.exec {
+                environment "PYENV_VERSION", pyenvVersionName.get()
+                executable pyenvPath.asFile
+                args "which", "python"
+                standardOutput out
+            }
+            out.toString().trim()
+        }
+    }
+
+    @OutputFile
+    Provider<RegularFile> pythonExe = pythonExePath.flatMap {
+        def fileProp = project.objects.fileProperty()
+        fileProp.set(project.file(it))
+        fileProp
     }
 }
 

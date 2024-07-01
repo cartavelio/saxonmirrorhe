@@ -584,8 +584,18 @@ def pyenvValgrindTask = tasks.register("pyenvValgrind", PythonPyenv) {
   debugVariant = "valgrind"
 }
 
+def pyenvPythonExeTask = tasks.register('pyenvPythonExe', PythonPyenvPythonExe) {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pyenvVersionName = pyenvTask.map { it.pyenvVersionName.get() }
+}
+
+def pyenvPythonValgrindExeTask = tasks.register('pyenvValgrindPythonExe', PythonPyenvPythonExe) {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pyenvVersionName = pyenvValgrindTask.map { it.pyenvVersionName.get() }
+}
+
 def branchVenvTask = tasks.register("branchVenv", PythonVenv) {
-  pyenvPythonExe = pyenvTask.map { it.pythonExe.get() }
+  pyenvPythonExe = pyenvPythonExeTask.map { it.pythonExe.get() }
 }
 
 def branchDebugVenvTask = tasks.register("branchDebugVenv", PythonVenv) {
