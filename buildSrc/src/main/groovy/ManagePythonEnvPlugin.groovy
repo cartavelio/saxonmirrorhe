@@ -234,7 +234,7 @@ abstract class PythonVenv extends DefaultTask {
 
         project.exec {
             executable pipExe.get().asFile.toString()
-            args("install", "--require-virtualenv", "build", "wheel", "setuptools", "repairwheel", *platformWheelFixupRequirements(), *buildRequirements.get())
+            args("install", "--require-virtualenv", "build", "wheel", "setuptools", *platformWheelFixupRequirements(), *buildRequirements.get())
         }
     }
 }
@@ -422,6 +422,73 @@ abstract class PipInstall extends DefaultTask {
 }
 
 /**
+ * Task for providing the Wheel platform tag, which we need in a couple of places
+ */
+abstract class WheelCompatibilityTags extends DefaultTask {
+    @InputFile
+    abstract RegularFileProperty getPyenvExe()
+
+    @InputFile
+    abstract RegularFileProperty getPythonExe()
+
+    @Input
+    abstract Property<String> getPythonVersion()
+
+    @Input
+    abstract Property<String> getManylinuxTarget()
+
+    @Internal
+    OperatingSystem systemOs = OperatingSystem.current()
+
+    @Internal
+    Provider<RegularFile> pythonVersionPath = pyenvExe.flatMap { RegularFile pyenv ->
+        def versionPath = project.objects.fileProperty()
+        versionPath.set(project.file(execString(pyenv, ["prefix", pythonVersion.get()], [:])))
+        versionPath
+    }
+
+    @Internal
+    Provider<String> macosxDeploymentTarget = pythonExe.map { python ->
+        execString(python, ["-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version]))"])
+    }
+
+    @Internal
+    Provider<String> platform = pythonVersionPath.map { path ->
+        execString(pythonExe.get(),
+                ["-c", "import os; from wheel.bdist_wheel import get_platform; print(get_platform(os.environ['PYTHON_VERSION_PREFIX']))"],
+                [PYTHON_VERSION_PREFIX: path.asFile.toString()])
+    }
+
+    @Internal
+    Provider<String> wheelSuffix = platform.map { generateWheelSuffix(it) }
+
+    @Internal
+    Provider<String> repairedWheelSuffix = manylinuxTarget.map { manylinux ->
+        def unrepairedPlatform = platform.get()
+        def repairedPlatform = systemOs.isLinux() ? "${manylinux}_${unrepairedPlatform.replace("linux_", "")}" : unrepairedPlatform
+        generateWheelSuffix(repairedPlatform)
+    }
+
+    String generateWheelSuffix(String platform) {
+        execString(pythonExe.get(),
+                ["-c", "import os; from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"],
+                [PLATFORM_TAG: platform])
+    }
+
+    String execString(RegularFile exe, List<String> arguments, Map<String, String> env = [:]) {
+        (new ByteArrayOutputStream()).withStream { out ->
+            project.exec {
+                environment env
+                executable exe
+                args(*arguments)
+                standardOutput out
+            }
+            out.toString().trim()
+        }
+    }
+}
+
+/**
  * Task for building a wheel and fixing it up with repairwheel
  */
 abstract class BuildWheel extends DefaultTask {
@@ -432,17 +499,8 @@ abstract class BuildWheel extends DefaultTask {
         this.fileSystemOperations = fileSystemOperations
     }
 
-    @Input
-    abstract Property<String> getManylinuxTarget()
-
-    @Internal
-    abstract Property<PythonVenv> getPythonVenvTask()
-
     @InputFile
     abstract RegularFileProperty getPythonExe()
-
-    @InputFile
-    abstract RegularFileProperty getRepairwheelExe()
 
     @Input
     abstract Property<String> getProductEdition()
@@ -455,9 +513,6 @@ abstract class BuildWheel extends DefaultTask {
     abstract Property<Boolean> getDebug()
 
     @InputDirectory
-    abstract DirectoryProperty getLibraryDir()
-
-    @InputDirectory
     abstract DirectoryProperty getSourceDir()
 
     @Internal
@@ -466,80 +521,53 @@ abstract class BuildWheel extends DefaultTask {
     @Internal
     def systemOs = OperatingSystem.current()
 
-    @Internal
-    def systemOsArch = System.getProperty("os.arch") == "amd64" ? "x86_64" : System.getProperty("os.arch")
-
     @OutputDirectory
-    final Provider<Directory> buildDir = outputDir.map {it.dir("build") }
+    final Provider<Directory> buildDir = outputDir.map { it.dir("build") }
+
+    @Input
+    abstract Property<String> getWheelSuffix()
+
+    @Input
+    abstract Property<String> getMacosxDeploymentTarget()
+
+//    @Internal
+//    Provider<String> wheelFilePlatformSuffix = pythonExe.map {python ->
+//        (new ByteArrayOutputStream()).withStream { out ->
+//            project.exec {
+//                workingDir sourceDir.get()
+//                executable python
+//                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, get_platform('.')))"
+//                standardOutput out
+//            }
+//            out.toString().trim()
+//        }
+//    }
+//
+//    @Internal
+//    Provider<String> macosxDeploymentTarget = Provider<String> wheelFilePlatformSuffix = pythonExe.map {python ->
+//        (new ByteArrayOutputStream()).withStream { out ->
+//            project.exec {
+//                workingDir sourceDir.get()
+//                executable python
+//                args "-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version])"
+//                standardOutput out
+//            }
+//            out.toString().trim()
+//        }
+//    }
+//
+//    import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version])
 
     @Internal
-    Provider<String> repairedWheelFilePlatformSuffix = pythonExe.map {python ->
-        def platform = systemOs.isLinux() ? repairedLinuxPlatform() : unrepairedPlatform()
-        (new ByteArrayOutputStream()).withStream { out ->
-            project.exec {
-                environment REPAIRED_PLATFORM: platform
-                workingDir sourceDir.get()
-                executable python
-                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; import os; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['REPAIRED_PLATFORM']))"
-                standardOutput out
-            }
-            out.toString().trim()
-        }
-    }
-
-    String repairedLinuxPlatform() {
-        def arch = unrepairedPlatform().replace("linux_", "")
-        "${manylinuxTarget.get()}_${arch}"
-    }
-
-    String unrepairedPlatform() {
-        (new ByteArrayOutputStream()).withStream { out ->
-            project.exec {
-                workingDir sourceDir.get()
-                executable pythonExe.get()
-                args "-c", "from wheel.bdist_wheel import get_platform; print(get_platform('.'))"
-                standardOutput out
-            }
-            out.toString().trim()
-        }
-    }
-
-    @Internal
-    Provider<String> inputWheelFilePlatformSuffix = pythonExe.map {python ->
-        (new ByteArrayOutputStream()).withStream { out ->
-            project.exec {
-                workingDir sourceDir.get()
-                executable python
-                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, get_platform('.')))"
-                standardOutput out
-            }
-            out.toString().trim()
-        }
-    }
-
-    @Internal
-    Provider<String> inputWheelFilename = productEdition.map { prod ->
-        "saxonc${prod}-${productVersion.get()}-${inputWheelFilePlatformSuffix.get()}.whl"
-    }
-
-    @Internal
-    Provider<String> repairedWheelFilename = productEdition.map { prod ->
-        "saxonc${prod}-${productVersion.get()}-${repairedWheelFilePlatformSuffix.get()}.whl"
+    Provider<String> wheelFilename = productEdition.map { prod ->
+        "saxonc${prod}-${productVersion.get()}-${wheelSuffix.get()}.whl"
     }
 
     @OutputFile
-    Provider<RegularFile> wheel = productEdition.flatMap { prod ->
-        outputDir.map { it.file(repairedWheelFilename.get()) }
-    }
-
-    @Internal
-    Provider<RegularFile> inputWheel = buildDir.map {it.file("dist/${inputWheelFilename.get()}") }
+    Provider<RegularFile> wheel = productEdition.flatMap { buildDir.map { it.file("dist/${wheelFilename.get()}") } }
 
     @TaskAction
     void build() {
-        def tmpWheelDir = temporaryDir
-        def edition = productEdition.get()
-
         fileSystemOperations.copy {
             from(sourceDir) {
                 exclude "__pycache__/**"
@@ -552,13 +580,127 @@ abstract class BuildWheel extends DefaultTask {
             workingDir buildDir.get()
             executable pythonExe.get()
             environment "BUILD_DEBUG", debug.getOrElse(false).toString()
+            if (systemOs.isMacOsX()) {
+                environment "MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get()
+            }
             args "-m", "build", "--wheel"
         }
+    }
+}
 
-        repairWheel()
+abstract class RepairLocalWheel extends DefaultTask {
+    @InputFile
+    abstract RegularFileProperty getWheel()
+
+    @InputDirectory
+    abstract DirectoryProperty getLibraryDir()
+
+    @Input
+    abstract Property<String> getProductEdition()
+
+    @InputFile
+    abstract RegularFileProperty getPythonExe()
+
+    @Internal
+    abstract Property<PythonVenv> getPythonVenvTask()
+
+    @Optional
+    @Input
+    abstract Property<String> getManylinuxTarget()
+
+    @Internal
+    abstract DirectoryProperty getOutputDir()
+
+    @Internal
+    def systemOs = OperatingSystem.current()
+
+    @Internal
+    def systemOsArch = System.getProperty("os.arch") == "amd64" ? "x86_64" : System.getProperty("os.arch")
+
+    @Input
+    abstract Property<String> getRepairedWheelFilePlatformSuffix()
+//    = pythonExe.map {python ->
+//        def platform = systemOs.isLinux() ? repairedLinuxPlatform() : unrepairedPlatform()
+//        (new ByteArrayOutputStream()).withStream { out ->
+//            project.exec {
+//                environment REPAIRED_PLATFORM: platform
+//                workingDir outputDir.get()
+//                executable python
+//                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; import os; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['REPAIRED_PLATFORM']))"
+//                standardOutput out
+//            }
+//            out.toString().trim()
+//        }
+//    }
+
+//    String repairedLinuxPlatform() {
+//        def arch = unrepairedPlatform().replace("linux_", "")
+//        "${manylinuxTarget.get()}_${arch}"
+//    }
+
+//    String unrepairedPlatform() {
+//        (new ByteArrayOutputStream()).withStream { out ->
+//            project.exec {
+//                workingDir outputDir.get()
+//                executable pythonExe.get()
+//                args "-c", "from wheel.bdist_wheel import get_platform; print(get_platform('.'))"
+//                standardOutput out
+//            }
+//            out.toString().trim()
+//        }
+//    }
+
+    // Linux - auditwheel
+    ExecResult repairLinux() {
+        project.exec {
+            workingDir outputDir.get()
+            executable pythonVenvTask.flatMap { it.venvBinHostedExe("auditwheel") }.get()
+            environment "LD_LIBRARY_PATH", libraryDir.get()
+            args "repair"
+            if (manylinuxTarget.getOrElse("") != "") {
+                args "--only-plat", "--plat", "${manylinuxTarget.get()}_${systemOsArch}"
+            }
+            args "--wheel-dir", outputDir.get()
+            args wheel.get()
+        }
     }
 
-    ExecResult repairWheel() {
+    // MacOS - delocate
+    ExecResult repairMacos() {
+        project.exec {
+            workingDir outputDir.get()
+            executable pythonVenvTask.flatMap { it.venvBinHostedExe("delocate-wheel") }.get()
+            args "-w", outputDir.get()
+            args wheel.get()
+        }
+    }
+
+    // Windows - delvewheel
+    ExecResult repairWindows() {
+        project.exec {
+            workingDir outputDir.get()
+            executable pythonExe.get()
+            args "-m", "delvewheel"
+            args "repair", wheel.get()
+            args "--wheel-dir", outputDir.get()
+            args "--add-path", libraryDir.get()
+        }
+    }
+
+    // regex the wheel filename to the output /(saxonc[ehp]e-[0-9]+\.[0-9]+\.[0-9]+)-.+$/
+    @Internal
+    Provider<String> repairedWheelFilename = wheel.map { wheel ->
+        def nonPlatformPart = wheel.asFile.name.replaceFirst(/^(saxonc[ehp]e-[0-9]+\.[0-9]+\.[0-9]+)-.+$/, '$1')
+        "${nonPlatformPart}-${repairedWheelFilePlatformSuffix.get()}.whl"
+    }
+
+    @OutputFile
+    Provider<RegularFile> repairedWheel = productEdition.flatMap { prod ->
+        outputDir.map { it.file(repairedWheelFilename.get()) }
+    }
+
+    @TaskAction
+    void repairWheel() {
         if (systemOs.isLinux()) {
             repairLinux()
         } else if (systemOs.isMacOsX()) {
@@ -567,41 +709,6 @@ abstract class BuildWheel extends DefaultTask {
             repairWindows()
         } else {
             throw "Unknown Operating System"
-        }
-    }
-
-    // Linux - auditwheel
-    ExecResult repairLinux() {
-        project.exec {
-            workingDir buildDir.get()
-            executable pythonVenvTask.flatMap { it.venvBinHostedExe("auditwheel") }.get()
-            environment "LD_LIBRARY_PATH", libraryDir.get()
-            args "repair", "--only-plat"
-            args "--plat", "${manylinuxTarget.get()}_${systemOsArch}"
-            args "--wheel-dir", outputDir.get()
-            args inputWheel.get()
-        }
-    }
-
-    // MacOS - delocate
-    ExecResult repairMacos() {
-        project.exec {
-            workingDir buildDir.get()
-            executable pythonVenvTask.flatMap { it.venvBinHostedExe("delocate-wheel") }.get()
-            args "-w", outputDir.get()
-            args inputWheel.get()
-        }
-    }
-
-    // Windows - delvewheel
-    ExecResult repairWindows() {
-        project.exec {
-            workingDir buildDir.get()
-            executable pythonExe.get()
-            args "-m", "delvewheel"
-            args "repair", inputWheel.get()
-            args "--wheel-dir", outputDir.get()
-            args "--add-path", libraryDir.get()
         }
     }
 }

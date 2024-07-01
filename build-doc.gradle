@@ -1006,25 +1006,42 @@ def branchDocVenvTask = tasks.register("branch_doc_python_venv", PythonVenv) {
   suffix = "doc"
 }
 
+def docWheelPlatformTagTask = tasks.register("doc_python_wheel_platform_tag", WheelCompatibilityTags) {
+  pyenvExe = tasks.named("pyenvExe").map { it.pyenv.get() }
+  pythonVersion = pyenvDocPythonTask.map { it.pythonVersion.get() }
+  pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
+  manylinuxTarget = "manylinux_2_24"
+}
+
 tasks.register("saxonc_doc_python_pipInstall", PipInstall) {
   pipExe = branchDocVenvTask.map { it.pipExe.get() }
   requirements = tasks.named("saxonc_doc_pypi").map { it.packageDir.map { it.file("requirements.txt") }.get() }
 }
 
 def docBuildWheelTask = tasks.register("saxonc_doc_python_build_wheel", BuildWheel) {
-  manylinuxTarget = "manylinux_2_24"
   pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
-  repairwheelExe = branchDocVenvTask.map { it.venvBinHostedExe("repairwheel").get() }
   productEdition = "ee"
   productVersion = saxonVersion3
+  wheelSuffix = docWheelPlatformTagTask.flatMap { it.wheelSuffix }
+  macosxDeploymentTarget = docWheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
   sourceDir = tasks.named("saxonc_doc_pypi").map { it.packageDir.get() }
-  libraryDir = tasks.named("eec_build_graal_image").map { it.libraryDir.get() }
   outputDir = layout.buildDirectory.dir("doc_python_wheel")
+}
+
+def docRepairWheelTask = tasks.register("saxonc_doc_python_repair_wheel", RepairLocalWheel) {
+  outputDir = layout.buildDirectory.dir("doc_python_wheel")
+  manylinuxTarget = "manylinux_2_24"
+  pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
+  pythonVenvTask = branchDocVenvTask
+  productEdition = "ee"
+  repairedWheelFilePlatformSuffix = docWheelPlatformTagTask.flatMap { it.repairedWheelSuffix }
+  libraryDir = tasks.named("eec_build_graal_image").map { it.libraryDir.get() }
+  wheel = docBuildWheelTask.map { it.wheel.get() }
 }
 
 def docInstallWheelTask = tasks.register("saxonc_doc_python_install_wheel", InstallLocalWheel) {
   pipExe = branchDocVenvTask.map { it.pipExe.get() }
-  wheel = docBuildWheelTask.map { it.wheel.get() }
+  wheel = docRepairWheelTask.map { it.wheel.get() }
 }
 
 def docPydocTask = tasks.register("saxonc_doc_python_pydoc") {

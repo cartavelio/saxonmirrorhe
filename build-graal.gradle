@@ -603,6 +603,13 @@ def branchDebugVenvTask = tasks.register("branchDebugVenv", PythonVenv) {
   suffix = "debug"
 }
 
+def wheelPlatformTagTask = tasks.register("wheelPlatformTag", WheelCompatibilityTags) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = pyenvTask.map { it.pythonVersion.get() }
+  pythonExe = branchVenvTask.map { it.pythonExe.get() }
+  manylinuxTarget = "manylinux_2_24"
+}
+
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "ce" : "ee"
   def graalEdition = "ce"
@@ -854,30 +861,53 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
   }
 
   tasks.register("${edition}c_python_build_wheel", BuildWheel) {
+    outputDir = pythonBuildRootPath(edition)
+//    manylinuxTarget = "manylinux_2_24"
+    pythonExe = branchVenvTask.map { it.pythonExe.get() }
+//    pythonVenvTask = branchVenvTask
+    productEdition = edition
+    productVersion = saxonVersion3
+    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    sourceDir = tasks.named("setup_${edition}c_pypi").map { it.packageDir.get() }
+//    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
+  }
+
+  tasks.register("${edition}c_python_repair_wheel", RepairLocalWheel) {
+    outputDir = pythonBuildRootPath(edition)
     manylinuxTarget = "manylinux_2_24"
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
-    repairwheelExe = branchVenvTask.map { it.venvBinHostedExe("repairwheel").get() }
     productEdition = edition
-    productVersion = saxonVersion3
-    sourceDir = tasks.named("setup_${edition}c_pypi").map { it.packageDir.get() }
+    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.repairedWheelSuffix }
     libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
-    outputDir = pythonBuildRootPath(edition)
+    wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
   }
 
   tasks.register("${edition}c_python_build_debug_wheel", BuildWheel) {
-    manylinuxTarget = "manylinux_2_24"
+//    manylinuxTarget = "manylinux_2_24"
     pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
-    pythonVenvTask = branchVenvTask
-    repairwheelExe = branchDebugVenvTask.map { it.venvBinHostedExe("repairwheel").get() }
+//    pythonVenvTask = branchVenvTask
     productEdition = edition
     productVersion = saxonVersion3
+    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
     sourceDir = tasks.named("setup_${edition}c_pypi_debug").map { it.packageDir.get() }
-    libraryDir = tasks.named("${edition}c_build_graal_debug_image").map { it.libraryDir.get() }
+//    libraryDir = tasks.named("${edition}c_build_graal_debug_image").map { it.libraryDir.get() }
     outputDir = pythonBuildRootPath(edition, true)
     debug = true
   }
 
+  tasks.register("${edition}c_python_repair_debug_wheel", RepairLocalWheel) {
+    outputDir = pythonBuildRootPath(edition)
+    manylinuxTarget = "manylinux_2_24"
+    pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    pythonVenvTask = branchVenvTask
+    productEdition = edition
+    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.repairedWheelSuffix }
+    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
+    wheel = tasks.named("${edition}c_python_build_debug_wheel").map { it.wheel.get() }
+  }
 
   task "saxon_${edition}c_stage_wheel"(
     dependsOn: ["setup_${edition}c_pypi"]
@@ -1105,12 +1135,12 @@ tasks.register("all_python_test_suites") {
 
   tasks.register("${edition}c_python_install_wheel", InstallLocalWheel) {
     pipExe = branchVenvTask.map { it.pipExe.get() }
-    wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
+    wheel = tasks.named("${edition}c_python_repair_wheel").map { it.repairedWheel.get() }
   }
 
   tasks.register("${edition}c_python_install_debug_wheel", InstallLocalWheel) {
     pipExe = branchDebugVenvTask.map { it.pipExe.get() }
-    wheel = tasks.named("${edition}c_python_build_debug_wheel").map { it.wheel.get() }
+    wheel = tasks.named("${edition}c_python_repair_debug_wheel").map { it.repairedWheel.get() }
   }
 
   tasks.register("${edition}c_pytest_data", Copy) {
@@ -1118,9 +1148,24 @@ tasks.register("all_python_test_suites") {
     into pythonBuildRootPath(edition).map { it.dir("samples/data") }
   }
 
+  tasks.register("${edition}c_python_repair_test_wheel", RepairLocalWheel) {
+    outputDir = pythonBuildRootPath(edition)
+    pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    pythonVenvTask = branchVenvTask
+    productEdition = edition
+    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
+    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
+    wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
+  }
+
+  tasks.register("${edition}c_python_install_test_wheel", InstallLocalWheel) {
+    pipExe = branchVenvTask.map { it.pipExe.get() }
+    wheel = tasks.named("${edition}c_python_repair_test_wheel").map { it.repairedWheel.get() }
+  }
+
   tasks.register("${edition}c_pytest") {
     dependsOn "${edition}c_pypi_pip_install"
-    dependsOn "${edition}c_python_install_wheel"
+    dependsOn "${edition}c_python_install_test_wheel"
 
     Provider<Directory> pytestDataDir = tasks.named("${edition}c_pytest_data").map { it.destinationDir }
     Provider<RegularFile> pytest = branchVenvTask.map { it.venvBinHostedExe("pytest").get() }
@@ -1167,7 +1212,7 @@ tasks.register("all_python_test_suites") {
       }
 
       tasks.register("${edition}c_python_${testsuite}_test_suite${langslug}") {
-        dependsOn "${edition}c_python_install_wheel"
+        dependsOn "${edition}c_python_install_test_wheel"
         dependsOn "${edition}c_python_test_suite_pip_install"
 
         def output_path = layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion3}/${testsuite}/${DSTAMP}")
