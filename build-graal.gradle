@@ -1,3 +1,18 @@
+import java.security.MessageDigest
+
+static String wheelShaDigest(File file) {
+  def digest = MessageDigest.getInstance("sha1")
+  def inputstream = file.newInputStream()
+  def buffer = new byte[16384]
+  def len
+  while((len=inputstream.read(buffer)) > 0) {
+    digest.update(buffer, 0, len)
+  }
+  def sha1sum = digest.digest()
+  BigInteger bigInt = new BigInteger(1, sha1sum)
+  return bigInt.toString(16).padLeft(32, '0')
+}
+
 private String findGraalBin(String edition) {
   String home = System.getenv("GRAALVM_${edition.toUpperCase()}_HOME")
   if (home == null) {
@@ -764,7 +779,13 @@ tasks.register("pyBuildVenv") {
     inputs.dir layout.projectDirectory.dir("src/main/c/Saxon.C.API")
     outputs.files layout.buildDirectory.dir("${edition}c_pypi").map {
       it.asFileTree.matching {
+        exclude "built-wheel.txt"
+        exclude "installed-wheel.txt"
+        exclude "build/**"
+        exclude "__pycache__/**"
         exclude "dist/**"
+        exclude "samples/data/**"
+        exclude "package02.xsltpack" // What is this doing being put here?
       }
     }
 
@@ -843,34 +864,12 @@ tasks.register("pyBuildVenv") {
     })
   }
 
-//  tasks.register("saxon_${edition}c_pipInstall") {
-//    dependsOn 'pyBuildVenv'
-//    description "Install pip requirements into the current Python Venv"
-//
-////    inputs.file(tasks.named("setup_${edition}c_pypi").map { it.requirementsDotTxt })
-//    inputs.files tasks.named("setup_${edition}c_pypi").map { it.outputs.files }
-//    outputs.files fileTree(project.pythonEnv.venvDirPath).matching {
-//      include "lib/python*/site-packages/*.dist-info"
-//      exclude "lib/python*/site-packages/saxonc${edition}*.dist-info"
-//    }
-//
-//    doFirst {
-//      exec {
-//        workingDir layout.buildDirectory.dir("${edition}c_pypi")
-//
-//        executable file(project.pythonEnv.venvPip)
-//        args "install", "-r", "requirements.txt"
-//      }
-//    }
-//  }
-//
-
   tasks.register("saxon_${edition}c_local_wheel") {
     dependsOn "${edition}c_pypi_pip_install"
 
     def pythonExe = tasks.named("branchVenv").map { it.pythonExe.get() }
     inputs.file pythonExe // probably unnecessary
-//    inputs.files tasks.named("setup_${edition}c_pypi").map { it.outputs.files }
+    inputs.files tasks.named("setup_${edition}c_pypi").map { it.outputs.files }
     outputs.file layout.buildDirectory.file("${edition}c_pypi/built-wheel.txt")
 
     doLast {
@@ -884,11 +883,15 @@ tasks.register("pyBuildVenv") {
     }
 
     doLast {
-      def output = fileTree(layout.buildDirectory.dir("${edition}c_pypi/dist")).matching {
+      def wheelFile = fileTree(layout.buildDirectory.dir("${edition}c_pypi/dist")).matching {
         include "*.whl"
-      }.singleFile.toString()
-
-      file(layout.buildDirectory.file("${edition}c_pypi/built-wheel.txt")) << output
+      }.singleFile
+      file(layout.buildDirectory.file("${edition}c_pypi/built-wheel.txt")).newWriter().withWriter { w ->
+        w << wheelFile.toString()
+        w << "\n"
+        w << wheelShaDigest(wheelFile)
+        w << "\n"
+      }
     }
   }
 
@@ -1119,7 +1122,7 @@ tasks.register("all_python_test_suites") {
     def localWheelTask = tasks.named("saxon_${edition}c_local_wheel")
     inputs.file pipExe
     inputs.files localWheelTask.map { it.outputs.files }
-    outputs.file layout.buildDirectory.file("wheels/${edition}c_wheel.txt")
+    outputs.file layout.buildDirectory.file("${edition}c_pypi/installed-wheel.txt")
 
     def wheels = layout.buildDirectory.dir("${edition}c_pypi/dist")
 
@@ -1134,14 +1137,12 @@ tasks.register("all_python_test_suites") {
         executable pipExe.get()
         args "install", "--force-reinstall", wheel
       }
-    }
 
-    doLast {
-      def output = new FileWriter(file(layout.buildDirectory.file("wheels/${edition}c_wheel.txt")))
-      output.write(fileTree(wheels).matching {
-        include "*.whl"
-      }.singleFile.toString())
-      output.close()
+      def input = localWheelTask.map { it.outputs.files }.get().singleFile.readBytes()
+
+      file(layout.buildDirectory.file("${edition}c_pypi/installed-wheel.txt")).withOutputStream {f ->
+        f.write(input)
+      }
     }
   }
 
