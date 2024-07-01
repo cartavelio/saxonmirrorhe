@@ -466,6 +466,9 @@ abstract class BuildWheel extends DefaultTask {
     @Internal
     def systemOs = OperatingSystem.current()
 
+    @Internal
+    def systemOsArch = System.getProperty("os.arch") == "amd64" ? "x86_64" : System.getProperty("os.arch")
+
     @OutputDirectory
     final Provider<Directory> buildDir = outputDir.map {it.dir("build") }
 
@@ -573,8 +576,8 @@ abstract class BuildWheel extends DefaultTask {
             workingDir buildDir.get()
             executable pythonVenvTask.flatMap { it.venvBinHostedExe("auditwheel") }.get()
             environment "LD_LIBRARY_PATH", libraryDir.get()
-            args "--only-plat", manylinuxTarget.get()
-            args "--plat", manylinuxTarget.get()
+            args "repair", "--only-plat"
+            args "--plat", "${manylinuxTarget.get()}_${systemOsArch.get()}"
             args "--wheel-dir", outputDir.get()
             args inputWheel.get()
         }
