@@ -105,9 +105,9 @@
    </xsl:template>
    
    <xsl:template match="typeParameter">
-      <xsl:message>found code <xsl:copy-of select="."/></xsl:message>
+      <!--<xsl:message>found code <xsl:copy-of select="."/></xsl:message>-->
       <xsl:for-each select=".//name">
-         <xsl:message>cp1 found code <typeParameter name="{@identifier}" /></xsl:message>
+         <!--<xsl:message>cp1 found code <typeParameter name="{@identifier}" /></xsl:message>-->
          <typeParameter name="{@identifier}" />                    
       </xsl:for-each>
    </xsl:template>
