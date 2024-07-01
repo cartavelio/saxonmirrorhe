@@ -122,7 +122,6 @@ void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
 }
 
 void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
-
   if (_selection == nullptr) {
     selectionRef = SXN_UNSET;
   } else {
@@ -426,7 +425,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
       (void *)(selectionRef == SXN_UNSET ? (void *)nullptr
                                          : (void *)selectionRef),
       (char *)output_filename,
-      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
+      (void *)(processorDataRef == SXN_UNSET ? (void *)nullptr
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
@@ -913,6 +912,12 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
+    if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
+        optionStr = "s";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                             (char *)processorDataRef, (char *)optionStr.c_str(),
+                             (void *)selectionRef);
+    }
   char *cstylesheet = nullptr;
   int64_t result = j_transformToValue(
       SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(),
@@ -947,6 +952,7 @@ void XsltExecutable::transformFileToFile(const char *source,
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
+
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
@@ -965,6 +971,12 @@ void XsltExecutable::transformFileToFile(const char *source,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
+    if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
+        optionStr = "s";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                             (char *)processorDataRef, (char *)optionStr.c_str(),
+                             (void *)selectionRef);
+    }
   char *cstylesheet = nullptr;
   long status = j_transformToFile(
       SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(),
@@ -1075,6 +1087,13 @@ const char *XsltExecutable::transformFileToString(const char *source) {
                          (char *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
+  if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
+      optionStr = "s";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (char *)processorDataRef, (char *)optionStr.c_str(),
+                           (void *)selectionRef);
+  }
+
   char *cstylesheet = nullptr;
   allocFn fn = operator new;
 
@@ -1085,6 +1104,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
                                              : (void *)processorDataRef));
   if (result == nullptr) {
     exceptionFound = true;
+    throw SaxonApiException();
   }
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,

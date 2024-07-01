@@ -762,8 +762,6 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile) {
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &len1) ==
         FAILURE) {
       RETURN_NULL();
-    } else {
-      WRONG_PARAM_COUNT;
     }
   }
 
@@ -947,9 +945,9 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelection) {
         if (ooth != nullptr) {
           XdmValue *value = ooth->xdmValue;
           if (value != nullptr) {
+            value->incrementRefCount();
             xsltExecutable->setInitialMatchSelection(value);
-            // value->incrementRefCount(); - no longer required because we get
-            // the underlying reference
+
           }
         }
       } else if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -964,9 +962,8 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelection) {
           XdmNode *value = ooth->xdmNode;
           if (value != nullptr) {
             XdmValue *valueX = (XdmValue *)value;
+            valueX->incrementRefCount();
             xsltExecutable->setInitialMatchSelection(valueX);
-            // valueX->incrementRefCount(); - no longer required because we get
-            // the underlying reference
           } else {
 
             php_error(E_WARNING, "XdmNode - seInitialMatchSelection - ERROR");
@@ -981,13 +978,12 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelection) {
         if (ooth != nullptr) {
           XdmAtomicValue *value = ooth->xdmAtomicValue;
           if (value != nullptr) {
+            value->incrementRefCount();
             xsltExecutable->setInitialMatchSelection((XdmValue *)value);
-            // value->incrementRefCount(); - no longer required because we get
-            // the underlying reference
           }
         }
       } else {
-        // TODO raise warning
+          php_error(E_WARNING, "Error setting setInitialMatchSelection");
       }
     }
   }

@@ -54,9 +54,6 @@ class Encoding {
  */
 public class Xslt30Processor extends SaxonCAPI {
 
-     
-
-
 
     /**
      * Constructor to initialise XsltProcessor with processor and license flag
@@ -126,30 +123,30 @@ public class Xslt30Processor extends SaxonCAPI {
      */
     @CEntryPoint(name = "createXslt30Processor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXslt30Processor(IsolateThread thread) {
-            ObjectHandle handle = SaxonCAPI.createHandle(new net.sf.saxon.option.cpp.Xslt30Processor(false));
-            return handle.rawValue();
+        ObjectHandle handle = SaxonCAPI.createHandle(new net.sf.saxon.option.cpp.Xslt30Processor(false));
+        return handle.rawValue();
     }
 
     /**
-     *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param processorRef  - long value referencing the Processor object in the ObjectHandles pool
-     * @return  long value referencing the created Xslt30Processor i nthe ObjectHandles pool
+     * @param thread       - Graalvm runtime data structure for a thread
+     * @param processorRef - long value referencing the Processor object in the ObjectHandles pool
+     * @return long value referencing the created Xslt30Processor i nthe ObjectHandles pool
      */
     @CEntryPoint(name = "createXslt30WithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXslt30Processor1(IsolateThread thread, ObjectHandle processorRef) {
-            Processor processor = objectHandles.get(processorRef);
-            if(processor == null) {
-                return 0;
-            }
-            ObjectHandle handle = SaxonCAPI.createHandle(Xslt30Processor.newInstance(processor));
-            return handle.rawValue();
+        Processor processor = objectHandles.get(processorRef);
+        if (processor == null) {
+            return 0;
+        }
+        ObjectHandle handle = SaxonCAPI.createHandle(Xslt30Processor.newInstance(processor));
+        return handle.rawValue();
     }
 
     /**
      * Create new SaxonC Xslt30Processor object from a Java Processor
-     * @param proc  - underlying Processor object
-     * @return  Xslt30Processor
+     *
+     * @param proc - underlying Processor object
+     * @return Xslt30Processor
      */
     public static Xslt30Processor newInstance(Processor proc) {
         return new Xslt30Processor(proc);
@@ -159,30 +156,30 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Compile package from source file and save resulting sef to file store.
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param ccwd   - - Pointer to a C char array for the current working directory
-     * @param xsl  - File name of the stylesheet
-     * @param outFilename  - the file to which the compiled package should be saved
-     * @param processorDataAccumulatorRef  - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
-     * @return  long value for the status of compiling and the saving of the stylesheet
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param ccwd                        - - Pointer to a C char array for the current working directory
+     * @param xsl                         - File name of the stylesheet
+     * @param outFilename                 - the file to which the compiled package should be saved
+     * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
+     * @return long value for the status of compiling and the saving of the stylesheet
      * @throws SaxonApiException if failure to compile or create the SEF stylesheet. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_compileFromFileAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long compileFromFileAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
         String cwd = null;
 
-        if(xsl == WordFactory.nullPointer()) {
+        if (xsl == WordFactory.nullPointer()) {
             throw new SaxonApiException("Stylesheet file is NULL");
         }
 
-        if(outFilename == WordFactory.nullPointer()) {
+        if (outFilename == WordFactory.nullPointer()) {
             throw new SaxonApiException("Output file name is NULL");
         }
 
@@ -202,19 +199,20 @@ public class Xslt30Processor extends SaxonCAPI {
 
     /**
      * Compile package from source file and save resulting sef to file store.
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param ccwd  - Pointer to a C char array for the current working directory
+     *
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param ccwd                        - Pointer to a C char array for the current working directory
      * @param xsl
-     * @param outFilename - pointer to a C char array. The file to which the compiled package should be saved
-     * @param processorDataAccumulatorRef   - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
+     * @param outFilename                 - pointer to a C char array. The file to which the compiled package should be saved
+     * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
      * @return
      * @throws SaxonApiException if error in the compilation. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_compileFromFileAndImport", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long compileFromFileAndImport(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
 
@@ -222,7 +220,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Processor processor = xslt30Processor.getProcessor();
         String cwd = null;
 
-        if(xsl == WordFactory.nullPointer()) {
+        if (xsl == WordFactory.nullPointer()) {
             throw new SaxonApiException("Stylesheet file is NULL");
         }
 
@@ -258,20 +256,20 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
 
-
     /**
      * Produce a representation of the compiled stylesheet and save to file, in XML form, suitable for
      * distribution and reloading.
+     *
      * @param executableRef
      * @param filename
      */
     @CEntryPoint(name = "j_save", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long save(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer filename) throws SaxonApiException {
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
-        if(filename == WordFactory.nullPointer()) {
+        if (filename == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
         XsltExecutable executable = objectHandles.get(executableRef);
@@ -291,35 +289,35 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Compile package from string and save resulting sef to file store.
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param ccwd - Pointer to a C char array for the current working directory
-     * @param cstr - Pointer to a C char array for the file name of the stylesheet
-     * @param cfilename  - Pointer to C char array for the file to which the compiled package should be saved
-     * @param processorDataAccumulatorRef  - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
-     * @return  Status of running this method. Success=1, Failure=0 or exception thrown = -2
-     * @throws SaxonApiException  If there is a failure in the transformation, saving of file. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param ccwd                        - Pointer to a C char array for the current working directory
+     * @param cstr                        - Pointer to a C char array for the file name of the stylesheet
+     * @param cfilename                   - Pointer to C char array for the file to which the compiled package should be saved
+     * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
+     * @return Status of running this method. Success=1, Failure=0 or exception thrown = -2
+     * @throws SaxonApiException If there is a failure in the transformation, saving of file. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_compileFromStringAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long compileFromStringAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cstr, CCharPointer cfilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
-        if(cstr == WordFactory.nullPointer()) {
+        if (cstr == WordFactory.nullPointer()) {
             throw new SaxonApiException("Stylesheet string is null");
         }
 
-        if(cfilename == WordFactory.nullPointer()) {
+        if (cfilename == WordFactory.nullPointer()) {
             throw new SaxonApiException("Output filename is null");
         }
 
 
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         XsltCompiler compiler = processor.newXsltCompiler();
@@ -337,7 +335,7 @@ public class Xslt30Processor extends SaxonCAPI {
         try {
             //StreamSource stream = new StreamSource(sr);
             pack = compiler.compilePackage(new StreamSource(new StringReader(str)));
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             throw new SaxonApiException(ex.getMessage());
         }
         if (pack != null) {
@@ -353,11 +351,11 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Compile package from Xdm node and save resulting sef to file store.
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef  - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param xdmNodeRef  - long value referencing the XdmNode object in the ObjectHandler pool. Stylesheet given as an XdmNodeobject
-     * @param ccwd      - Pointer to C char array representing the current working directory
-     * @param cfilename - Pointer to the C char array representing the file to which the compiled package should be saved
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param xdmNodeRef                  - long value referencing the XdmNode object in the ObjectHandler pool. Stylesheet given as an XdmNodeobject
+     * @param ccwd                        - Pointer to C char array representing the current working directory
+     * @param cfilename                   - Pointer to the C char array representing the file to which the compiled package should be saved
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
      * @return Status of running this method. Success=1, Failure=0 or exception thrown = -2
      * @throws SaxonApiException if the Xslt30Processor is null or if there is a compile error
@@ -365,18 +363,18 @@ public class Xslt30Processor extends SaxonCAPI {
     @CEntryPoint(name = "j_compileFromXdmNodeAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long compileFromXdmNodeAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xdmNodeRef, CCharPointer ccwd, CCharPointer cfilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
-        if(processor == null) {
+        if (processor == null) {
             //TODO throw exception
             return SaxonCAPI.STATUS_FAIL;
         }
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltCompiler compiler = processor.newXsltCompiler();
         setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
@@ -390,7 +388,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         String filename = SaxonCAPI.toJavaString(cfilename, WordFactory.nullPointer());
 
-        if(pack != null) {
+        if (pack != null) {
             File file = resolveFile(processor, cwd, filename, ResourceRequest.XSLT_NATURE);
             pack.save(file);
         }
@@ -400,13 +398,12 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     /**
-     *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef  - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param ccwd  - Pointer to a C char array for the current working directory
-     * @param filename   - pointer to a C char array. The stylesheet file name
-     * @param cjit   - int value which is converted to boolean. Flag for Just in Time compilation
-     * @param processorDataAccumulatorRef  - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param ccwd                        - Pointer to a C char array for the current working directory
+     * @param filename                    - pointer to a C char array. The stylesheet file name
+     * @param cjit                        - int value which is converted to boolean. Flag for Just in Time compilation
+     * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
      * @return
      * @throws SaxonApiException if error in the compilation. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
      */
@@ -414,7 +411,7 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long compileFromAssociatedFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer filename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
 
@@ -424,8 +421,8 @@ public class Xslt30Processor extends SaxonCAPI {
             Processor processor = xslt30Processor.getProcessor();
             XsltCompiler compiler = processor.newXsltCompiler();
             String cwd = null;
-            if(ccwd != WordFactory.nullPointer()) {
-                cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
             }
             setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
             boolean jit = CTypeConversion.toBoolean(cjit);
@@ -433,7 +430,7 @@ public class Xslt30Processor extends SaxonCAPI {
                 compiler.setJustInTimeCompilation(jit);
             }
 
-            if(filename == WordFactory.nullPointer()) {
+            if (filename == WordFactory.nullPointer()) {
                 throw new SaxonApiException("XSL filename is NULL");
             }
             XsltExecutable executable = null;
@@ -466,27 +463,27 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Compile the stylesheet from file  for use later
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param ccwd  - Pointer to a C char array for the current working directory
-     * @param cfilename   - Pointer to C char array for the stylesheet file name
-     * @param cjit    - int value which is converted to boolean. Flag for Just in Time compilation
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param ccwd                        - Pointer to a C char array for the current working directory
+     * @param cfilename                   - Pointer to C char array for the stylesheet file name
+     * @param cjit                        - int value which is converted to boolean. Flag for Just in Time compilation
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of static parameter names to values
      * @return long value referencing the XsltExecutable created in this method.
-     * @throws SaxonApiException  if error in the compilation. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
+     * @throws SaxonApiException if error in the compilation. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_compileFromFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-   public static long compileFromFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cfilename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long compileFromFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cfilename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
         XsltCompiler compiler = processor.newXsltCompiler();
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
@@ -496,7 +493,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         XsltExecutable executable = null;
 
-        if(cfilename == WordFactory.nullPointer()) {
+        if (cfilename == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
         Source source = resolveFileToSource(processor, cwd, SaxonCAPI.toJavaString(cfilename, WordFactory.nullPointer()), ResourceRequest.XSLT_NATURE);
@@ -514,26 +511,26 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Compile the stylesheet from string  for use later
      *
-     * @param thread - Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param ccwd  - Pointer to the C char array. Current working directory
-     * @param stylesheet - Pointer to the C char array. Stylesheet as a string
-     * @param cjit  - int value which is converted to boolean. Flag for Just in Time compilation
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param ccwd                        - Pointer to the C char array. Current working directory
+     * @param stylesheet                  - Pointer to the C char array. Stylesheet as a string
+     * @param cjit                        - int value which is converted to boolean. Flag for Just in Time compilation
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied static parameter names to values
-     * @return  long value
+     * @return long value
      * @throws SaxonApiException if error in the compilation. Also if Xslt30Processor or stylesheet is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_compileFromString", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         Encoding encoding = new Encoding();
@@ -546,14 +543,14 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         Source source;
 
-        if(stylesheet == WordFactory.nullPointer()) {
+        if (stylesheet == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
         StringReader reader = new StringReader(SaxonCAPI.toJavaString2(stylesheet, encoding.getEncoding()));
         compiler.setSchemaAware(xslt30Processor.schemaAware);
         source = new StreamSource(reader);
         if (cwd != null && cwd.length() > 0) {
-            source.setSystemId(cwd+ (!cwd.endsWith("/") ? "/" : ""));
+            source.setSystemId(cwd + (!cwd.endsWith("/") ? "/" : ""));
         }
         compiler.setErrorList(SaxonCException.errorList);
         XsltExecutable executable = compiler.compile(source);
@@ -566,27 +563,27 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Compile the stylesheet from string  for use later
      *
-     * @param thread- Graalvm runtime data structure for a thread
-     * @param xslt30ProcessorRef - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
-     * @param ccwd    - pointer to the C char array for the current working directory. User supplies this as base URI. Accept null
-     * @param xdmNodeRef - long value referencing the XdmNode object in the ObjectHandler pool. Stylesheet given as an XdmNodeobject
-     * @param cjit  - int value representing boolean for the passing of the JIT flag
+     * @param thread-                     Graalvm runtime data structure for a thread
+     * @param xslt30ProcessorRef          - long value referencing the Xslt30Processor in the ObjectHandler pool. Cannot be null
+     * @param ccwd                        - pointer to the C char array for the current working directory. User supplies this as base URI. Accept null
+     * @param xdmNodeRef                  - long value referencing the XdmNode object in the ObjectHandler pool. Stylesheet given as an XdmNodeobject
+     * @param cjit                        - int value representing boolean for the passing of the JIT flag
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied static parameters
-     * @return   long value referencing the created XsltExecutable object held in the ObjectHandles pool
+     * @return long value referencing the created XsltExecutable object held in the ObjectHandles pool
      * @throws SaxonApiException if the XdmNodeRef or the xslt30ProcessorRef is null or if there is a failure in the compile phase. The SaxonCExceptionLongHandler handles the exception and returns -1.
      */
     @CEntryPoint(name = "j_compileFromXdmNode", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long compileFromXdmNode(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd,  ObjectHandle xdmNodeRef, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long compileFromXdmNode(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, ObjectHandle xdmNodeRef, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
-        if(xslt30ProcessorRef == WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("The Xslt30Processor is null");
         }
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
 
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef, null);
@@ -594,8 +591,8 @@ public class Xslt30Processor extends SaxonCAPI {
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
         }
-        if(xdmNodeRef == WordFactory.nullPointer()) {
-             throw new SaxonApiException("Failed to create Stylesheet from XdmNode");
+        if (xdmNodeRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Failed to create Stylesheet from XdmNode");
         }
         XdmNode node = objectHandles.get(xdmNodeRef);
 
@@ -615,19 +612,19 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Utility method to apply the static parameters to the XsltCompiler
      *
-     * @param compiler - the XsltCompiler where we set the static parameter data
-     * @param cwd  - current working directory. User supplies this as base URI. Accept null
+     * @param compiler                     - the XsltCompiler where we set the static parameter data
+     * @param cwd                          - current working directory. User supplies this as base URI. Accept null
      * @param processorDataAccumulatorRef- long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
-     * @param encoding  -  Set encoding data coming from the C++ API if available
-     * @throws SaxonApiException  if the ProcessorDataAccumulator is null or error in applying static parameter
+     * @param encoding                     -  Set encoding data coming from the C++ API if available
+     * @throws SaxonApiException if the ProcessorDataAccumulator is null or error in applying static parameter
      */
     private static void setStaticParametersFromArray(XsltCompiler compiler, String cwd, ObjectHandle processorDataAccumulatorRef, Encoding encoding) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;
         Processor processor = compiler.getProcessor();
-        if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
+        if (processorDataAccumulatorRef != WordFactory.nullPointer()) {
             processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
-        }  else {
-            if(debug) {
+        } else {
+            if (debug) {
                 System.err.println("DEBUG: setStaticParametersFromArray -  processorDataAccumulator is null");
             }
             return;
@@ -635,7 +632,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         String[] sparams = null;
         Object[] values = null;
-        if(processorDataAccumulator != null) {
+        if (processorDataAccumulator != null) {
             sparams = processorDataAccumulator.getParameterNames();
             values = processorDataAccumulator.getValues();
         }
@@ -649,44 +646,43 @@ public class Xslt30Processor extends SaxonCAPI {
                     QName qname = null;
                     try {
                         qname = QName.fromClarkName(paramName);
-                    } catch(IllegalArgumentException ex) {
+                    } catch (IllegalArgumentException ex) {
                         throw new SaxonApiException(ex);
                     }
                     valueForCpp = convertObjectToXdmValue(values[i]);
                     compiler.setParameter(qname, valueForCpp);
                 } else if (sparams[i].equals("-target")) {
-                    String value = (String)values[i];
+                    String value = (String) values[i];
                     compiler.setTargetEdition(value);
-                } else if(sparams[i].equals("-relocate")) {
-                    String value = (String)values[i];
-                    if(value.equals("1")) {
+                } else if (sparams[i].equals("-relocate")) {
+                    String value = (String) values[i];
+                    if (value.equals("1")) {
                         compiler.setRelocatable(true);
                     } else {
                         compiler.setRelocatable(false);
                     }
-                } else if(sparams[i].equals("-lang")) {
-                    String value = (String)values[i];
+                } else if (sparams[i].equals("-lang")) {
+                    String value = (String) values[i];
                     compiler.setXsltLanguageVersion(value);
-                } else if(sparams[i].equals("-fastCompile")) {
-                    String value = (String)values[i];
-                    if(value.equals("1")) {
+                } else if (sparams[i].equals("-fastCompile")) {
+                    String value = (String) values[i];
+                    if (value.equals("1")) {
                         compiler.setFastCompilation(true);
                     }
-                } else if(sparams[i].equals("importPack:")) {
+                } else if (sparams[i].equals("importPack:")) {
                     ProcessorDataAccumulator packageValue = (ProcessorDataAccumulator) values[i];
 
-                    String [] packageFileNames = packageValue.getParameterNames();
+                    String[] packageFileNames = packageValue.getParameterNames();
 
-                    for(int z = 0 ; z < packageFileNames.length; z++) {
+                    for (int z = 0; z < packageFileNames.length; z++) {
                         Source source = resolveFileToSource(processor, cwd, packageFileNames[z], ResourceRequest.XSLT_NATURE);
                         XsltPackage pack = compiler.loadLibraryPackage(source);
                         compiler.importPackage(pack);
                     }
 
 
-
-                } else if(sparams[i].equals("!input-encoding")) {
-                    String value = (String)values[i];
+                } else if (sparams[i].equals("!input-encoding")) {
+                    String value = (String) values[i];
                     encoding.setEncoding(value);
                 }
             }
@@ -696,19 +692,19 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
     /**
-     *  Utility method to create an Xslt30Transformer from a XsltExecutable after applyign static parameters and creating a stylesheet if the XsltExecutable is null
+     * Utility method to create an Xslt30Transformer from a XsltExecutable after applyign static parameters and creating a stylesheet if the XsltExecutable is null
      *
-     * @param cwd - current working directory. User supplies this as base URI. Accept null
-     * @param executable  - The XsltExecutable. Accept null
-     * @param stylesheet  - The lexical string representation of the stylesheet, which is used by the compiler if the XsltExecutable is null.
-     * @param staticParameters  map of the static parameters to apply against the XsltCompiler
-     * @return  The Xslt30Transformer object
-     * @throws SaxonApiException  if the XsltExecutable and stylesheet string are both null. Also if failure to compile stylesheet
+     * @param cwd              - current working directory. User supplies this as base URI. Accept null
+     * @param executable       - The XsltExecutable. Accept null
+     * @param stylesheet       - The lexical string representation of the stylesheet, which is used by the compiler if the XsltExecutable is null.
+     * @param staticParameters map of the static parameters to apply against the XsltCompiler
+     * @return The Xslt30Transformer object
+     * @throws SaxonApiException if the XsltExecutable and stylesheet string are both null. Also if failure to compile stylesheet
      */
     public Xslt30Transformer getXslt30Transformer(String cwd, XsltExecutable executable, String stylesheet, Map<QName, XdmValue> staticParameters) throws SaxonApiException {
         Xslt30Transformer transformer = null;
         if (stylesheet == null && executable != null) {
-            if(debug){
+            if (debug) {
                 System.err.println("Reusing executable");
             }
             transformer = executable.load30();
@@ -749,37 +745,37 @@ public class Xslt30Processor extends SaxonCAPI {
      * a global context item is required, this must be set separately using setGlobalContextItem(XdmItem) via the C++ API.
      * Alternatively, use one of the transform methods.</p>
      *
-     * @param thread - Graalvm runtime data structure for a thread
-     * @param ccwd - current working directory. User supplies this as base URI. Accept null
-     * @param xsltExecutableRef - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
-     * @param sourceObjRef - long value referencing a Source object in th ObjectHandles pool. Multiple types of source are accepted and checked with this argument.
-     *                     Source object can be an Xdm object, string or an array of Xdm values given as a ProcessorDataAccumulator.
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - current working directory. User supplies this as base URI. Accept null
+     * @param xsltExecutableRef           - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param sourceObjRef                - long value referencing a Source object in th ObjectHandles pool. Multiple types of source are accepted and checked with this argument.
+     *                                    Source object can be an Xdm object, string or an array of Xdm values given as a ProcessorDataAccumulator.
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return long value referencing the results as an XdmValue object which is held in the ObjectHandles pool to previous GC.
      * Caller must remove object from ObjectHandles pool when no longer required
      * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_applyTemplatesReturningValue", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long applyTemplatesReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xsltExecutableRef, ObjectHandle sourceObjRef , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long applyTemplatesReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xsltExecutableRef, ObjectHandle sourceObjRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(xsltExecutableRef);
-        
-        Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
-        if(executable == null) {
-            if(SaxonCAPI.debug) {
+        if (executable == null) {
+            if (SaxonCAPI.debug) {
                 System.err.println("Error: executable is null");
             }
             throw new SaxonApiException("executable is null");
         }
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
-        String cwd= SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             throw new SaxonApiException(ex);
 
         }
@@ -802,14 +798,14 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             xdmResult = new XdmDestination();
         }
-        if(sourceObjRef == WordFactory.nullPointer()) {
+        if (sourceObjRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("Source Object is NULL");
         }
         Object sourceObji = objectHandles.get(sourceObjRef);
         Object sourceObj = null;
-        if(sourceObji instanceof ProcessorDataAccumulator) {
-             sourceObj = ((ProcessorDataAccumulator)sourceObji).getValues();
-        }  else {
+        if (sourceObji instanceof ProcessorDataAccumulator) {
+            sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
+        } else {
             sourceObj = sourceObji;
         }
         if (sourceObj instanceof String) {
@@ -829,21 +825,21 @@ public class Xslt30Processor extends SaxonCAPI {
 
             transformer.applyTemplates(selection, xdmResult);
         } else if (sourceObj instanceof Object[]) {
-            Object [] valueObj = (Object[]) sourceObj;
+            Object[] valueObj = (Object[]) sourceObj;
             if (valueObj.length == 0) {
                 throw new SaxonApiException("Source object found is an empty array");
             }
             List<XdmItem> itemList = new ArrayList<>(valueObj.length);
-            for(int i=0; i < valueObj.length; i++) {
-                 itemList.add((XdmItem) valueObj[i]);
+            for (int i = 0; i < valueObj.length; i++) {
+                itemList.add((XdmItem) valueObj[i]);
             }
             XdmValue valueSeq;
             valueSeq = new XdmValue(itemList);
             transformer.applyTemplates(valueSeq, xdmResult);
         } else {
-            if(SaxonCAPI.debug) {
-                
-                if(sourceObj == null) {
+            if (SaxonCAPI.debug) {
+
+                if (sourceObj == null) {
                     System.err.println("sourceObj is null ");
                 } else {
                     System.err.println("sourceObj Type = " + sourceObj.getClass().getName());
@@ -883,24 +879,24 @@ public class Xslt30Processor extends SaxonCAPI {
      * a file. The invocation uses any initial mode set using setInitialMode(QName), via a C++ API method,
      * and any template parameters passed as the argument ProcessorDataAccumulator.
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param ccwd    - Pointer to a C char array for the supplied current working directory or given base URI by the caller.
-     * @param executableRef - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
-     * @param sourceObjRef - long value referencing a Source object in th ObjectHandles pool. Multiple types of source are accepted and checked with this argument.
-     *                     Source object can be an Xdm object, string or an array of Xdm values given as a ProcessorDataAccumulator.
-     *                     Used as source document to the Xslt30Executable
-     * @param coutFilename - Pointer to a C char array. The file name to save the result of the apply template transformation
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - Pointer to a C char array for the supplied current working directory or given base URI by the caller.
+     * @param executableRef               - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param sourceObjRef                - long value referencing a Source object in th ObjectHandles pool. Multiple types of source are accepted and checked with this argument.
+     *                                    Source object can be an Xdm object, string or an array of Xdm values given as a ProcessorDataAccumulator.
+     *                                    Used as source document to the Xslt30Executable
+     * @param coutFilename                - Pointer to a C char array. The file name to save the result of the apply template transformation
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return long value representing the status of the transformation. Success=1, failure = -1 and exception=-2
      * @throws SaxonApiException if error in the transformation. If XsltExecutable is null. If error with the source object. Also if there is a failure to write to file
      */
     @CEntryPoint(name = "j_applyTemplatesReturningFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long applyTemplatesReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef, CCharPointer coutFilename , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long applyTemplatesReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         XsltExecutable executable = objectHandles.get(executableRef);
 
 
-        Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
@@ -928,18 +924,18 @@ public class Xslt30Processor extends SaxonCAPI {
 
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             throw new SaxonApiException(ex);
 
         }
-        if(sourceObjRef == WordFactory.nullPointer()) {
+        if (sourceObjRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("Source object is null");
         }
         Object sourceObji = objectHandles.get(sourceObjRef);
         Object sourceObj = null;
-        if(sourceObji instanceof ProcessorDataAccumulator) {
-             sourceObj = ((ProcessorDataAccumulator)sourceObji).getValues();
-        }  else {
+        if (sourceObji instanceof ProcessorDataAccumulator) {
+            sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
+        } else {
             sourceObj = sourceObji;
         }
         if (sourceObj instanceof String) {
@@ -958,22 +954,25 @@ public class Xslt30Processor extends SaxonCAPI {
             XdmValue selection = (XdmValue) sourceObj;
             transformer.applyTemplates(selection, serializer);
         } else if (sourceObj instanceof Object[]) {
-            Object [] valueObj = (Object[]) sourceObj;
+            Object[] valueObj = (Object[]) sourceObj;
             if (valueObj.length == 0) {
                 throw new SaxonApiException("Source object found is an empty array");
             }
             List<XdmItem> itemList = new ArrayList<>(valueObj.length);
-            for(int i=0; i < valueObj.length; i++) {
-                 itemList.add((XdmItem) valueObj[i]);
+            for (int i = 0; i < valueObj.length; i++) {
+                itemList.add((XdmItem) valueObj[i]);
             }
             XdmValue valueSeq;
             valueSeq = new XdmValue(itemList);
             transformer.applyTemplates(valueSeq, serializer);
         } else {
+            if (SaxonCAPI.debug) {
+                System.err.println("DEBUG applyTemplatesReturningFile sourceObj: " + sourceObj.getClass().getName());
+            }
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
 
-         return SaxonCAPI.STATUS_OK;
+        return SaxonCAPI.STATUS_OK;
     }
 
     /**
@@ -986,38 +985,38 @@ public class Xslt30Processor extends SaxonCAPI {
      * a global context item is required, this must be set separately using setGlobalContextItem(XdmItem) via the C++ API.
      * Alternatively, use one of the transform methods.</p>
      *
-     * @param thread - Graalvm runtime data structure for a thread
-     * @param alloc - reference to the C++ allocator object
-     * @param ccwd - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
-     * @param executableRef - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
-     * @param sourceObjRef - long value referencing a Source object in th ObjectHandles pool. Multiple types of source are accepted and checked with this argument.
-     *                     Source object can be an Xdm object, string or an array of Xdm values given as a ProcessorDataAccumulator.
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param alloc                       - reference to the C++ allocator object
+     * @param ccwd                        - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
+     * @param executableRef               - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param sourceObjRef                - long value referencing a Source object in th ObjectHandles pool. Multiple types of source are accepted and checked with this argument.
+     *                                    Source object can be an Xdm object, string or an array of Xdm values given as a ProcessorDataAccumulator.
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return the result as a pointer to a C char array held in the C/C++ heap memory space. Caller must destroy char array when no longer required.
      * Caller must remove object from ObjectHandles pool when no longer required
      * @throws SaxonApiException if error in the transformation. If XsltExecutable is null. Also if error with the source object
      */
     @CEntryPoint(name = "j_applyTemplatesReturningString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer applyTemplatesReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static CCharPointer applyTemplatesReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable = objectHandles.get(executableRef);
         Object sourceObji = objectHandles.get(sourceObjRef);
         Object sourceObj = null;
-        if(sourceObji instanceof ProcessorDataAccumulator) {
-             sourceObj = ((ProcessorDataAccumulator)sourceObji).getValues();
-        }  else {
+        if (sourceObji instanceof ProcessorDataAccumulator) {
+            sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
+        } else {
             sourceObj = sourceObji;
         }
 
-        Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
-        if(executable == null) {
+        if (executable == null) {
             throw new SaxonApiException("XsltExecutable is null");
 
         }
@@ -1028,7 +1027,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             throw new SaxonApiException(ex);
 
         }
@@ -1048,18 +1047,21 @@ public class Xslt30Processor extends SaxonCAPI {
             XdmValue selection = (XdmValue) sourceObj;
             transformer.applyTemplates(selection, serializer);
         } else if (sourceObj instanceof Object[]) {
-            Object [] valueObj = (Object[]) sourceObj;
+            Object[] valueObj = (Object[]) sourceObj;
             if (valueObj.length == 0) {
                 throw new SaxonApiException("Source object found is an empty array");
             }
             List<XdmItem> itemList = new ArrayList<>(valueObj.length);
-            for(int i=0; i < valueObj.length; i++) {
-                 itemList.add((XdmItem) valueObj[i]);
+            for (int i = 0; i < valueObj.length; i++) {
+                itemList.add((XdmItem) valueObj[i]);
             }
             XdmValue valueSeq;
             valueSeq = new XdmValue(itemList);
             transformer.applyTemplates(valueSeq, serializer);
         } else {
+            if (SaxonCAPI.debug) {
+                System.err.println("DEBUG applyTemplatesReturningFile sourceObj: " + (sourceObj == null ? "null found" : sourceObji.getClass().getName()));
+            }
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
         //String charsetFlag  = System.getenv("SAXONC_DEBUG_CHARSET_FLAG");
@@ -1077,9 +1079,10 @@ public class Xslt30Processor extends SaxonCAPI {
 
     /**
      * Utility method to convert array of objects to array of XdmValues
+     *
      * @param arguments - Java Objects to convert
      * @return array of XdmValues. If length is empty then return empty array of XdmValus
-     * @throws SaxonApiException  if the arguments ar not of type XdmValue
+     * @throws SaxonApiException if the arguments ar not of type XdmValue
      */
     public static XdmValue[] getArguments(Object[] arguments) throws SaxonApiException {
         if (arguments != null && arguments.length > 0) {
@@ -1104,40 +1107,40 @@ public class Xslt30Processor extends SaxonCAPI {
      * Call a public user-defined function in the stylesheet, wrapping the result in an XML document, and sending
      * this document to a specified file name
      *
-     * @param thread - Graalvm runtime data structure for a thread
-     * @param ccwd  - Pointer to the C char array representing the file to which the compiled package should be saved
-     * @param executableRef  - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
-     * @param ccFuncName  - Pointer to  C char array. The name of the function to be called
-     * @param coutFilename - Pointer to a C char array. The file name to save the result of the apply template transformation
-     * @param argumentsRef  - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
-     *                            will be converted if necessary to the type as defined in the function signature, using
-     *                             the function conversion rules.
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - Pointer to the C char array representing the file to which the compiled package should be saved
+     * @param executableRef               - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param ccFuncName                  - Pointer to  C char array. The name of the function to be called
+     * @param coutFilename                - Pointer to a C char array. The file name to save the result of the apply template transformation
+     * @param argumentsRef                - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
+     *                                    will be converted if necessary to the type as defined in the function signature, using
+     *                                    the function conversion rules.
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
-     * @return   long value representing the status of the transformation. Success=1, failure = -1 and exception=-2
+     * @return long value representing the status of the transformation. Success=1, failure = -1 and exception=-2
      * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_callFunctionReturningFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long callFunctionReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, CCharPointer coutFilename , ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long callFunctionReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, CCharPointer coutFilename, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         String cFuncName = SaxonCAPI.toJavaString(ccFuncName, WordFactory.nullPointer());
         String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
         XsltExecutable executable = objectHandles.get(executableRef);
-        Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = null;
-        if(cFuncName.startsWith("Q{")) {
+        if (cFuncName.startsWith("Q{")) {
             qname = QName.fromEQName(cFuncName);
         } else {
             qname = QName.fromClarkName(cFuncName);
         }
 
-        Map<String, Object> paramsMap =  setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
-        if(executable == null) {
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        if (executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
         Xslt30Transformer transformer = executable.load30();
@@ -1155,48 +1158,47 @@ public class Xslt30Processor extends SaxonCAPI {
         applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
 
         ProcessorDataAccumulator argumentsAccumulator = null;
-        if(argumentsRef != WordFactory.nullPointer()) {
+        if (argumentsRef != WordFactory.nullPointer()) {
             argumentsAccumulator = objectHandles.get(argumentsRef);
         }
-        Object [] arguments = argumentsAccumulator.getValues();
+        Object[] arguments = argumentsAccumulator.getValues();
         transformer.callFunction(qname, getArguments(arguments), serializer);
         return SaxonCAPI.STATUS_OK;
     }
 
 
     /**
-     *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param ccwd  - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
-     * @param executableRef - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
-     *                        will be converted if necessary to the type as defined in the function signature, using
-     *                         the function conversion rules.
-     * @param ccFuncName    - Pointer to  C char array. The name of the function to be called
-     * @param argumentsRef  - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
-     *                       will be converted if necessary to the type as defined in the function signature, using
-     *                       the function conversion rules.
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
+     * @param executableRef               - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
+     *                                    will be converted if necessary to the type as defined in the function signature, using
+     *                                    the function conversion rules.
+     * @param ccFuncName                  - Pointer to  C char array. The name of the function to be called
+     * @param argumentsRef                - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
+     *                                    will be converted if necessary to the type as defined in the function signature, using
+     *                                    the function conversion rules.
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return long value referencing the results as an XdmValue object which is held in the ObjectHandles pool to previous GC.
-     *      Caller must remove object from ObjectHandles pool when no longer required
+     * Caller must remove object from ObjectHandles pool when no longer required
      * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_callFunctionReturningValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long callFunctionReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         String cFuncName = SaxonCAPI.toJavaString(ccFuncName, WordFactory.nullPointer());
         XsltExecutable executable = objectHandles.get(executableRef);
-        
-        Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
+
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = QName.fromClarkName(cFuncName);
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, null, initialTemplateParameters, true);
 
-        if(executable == null) {
+        if (executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
         Xslt30Transformer transformer = executable.load30();
@@ -1204,25 +1206,24 @@ public class Xslt30Processor extends SaxonCAPI {
 
         applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
         Object[] arguments = null;
-        if(argumentsRef != WordFactory.nullPointer()) {
+        if (argumentsRef != WordFactory.nullPointer()) {
             ProcessorDataAccumulator argumentsAccumulator = objectHandles.get(argumentsRef);
             arguments = argumentsAccumulator.getValues();
         }
-        XdmValue result =  transformer.callFunction(qname, getArguments(arguments));
+        XdmValue result = transformer.callFunction(qname, getArguments(arguments));
         ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
     }
 
     /**
-     *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param alloc - reference to the C++ allocator object
-     * @param ccwd   - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
-     * @param executableRef  - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
-     * @param ccFuncName - Pointer to  C char array. The name of the function to be called
-     * @param argumentsRef - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
-     *                       will be converted if necessary to the type as defined in the function signature, using
-     *                        the function conversion rules.
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param alloc                       - reference to the C++ allocator object
+     * @param ccwd                        - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
+     * @param executableRef               - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param ccFuncName                  - Pointer to  C char array. The name of the function to be called
+     * @param argumentsRef                - wrapped function arguments in a ProcessorDataAccumulator in the ObjectHandles pool. The values of the arguments to be supplied to the function. These
+     *                                    will be converted if necessary to the type as defined in the function signature, using
+     *                                    the function conversion rules.
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return
      * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
@@ -1230,18 +1231,18 @@ public class Xslt30Processor extends SaxonCAPI {
     @CEntryPoint(name = "j_callFunctionReturningString", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer callFunctionReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable;
-        if(executableRef != WordFactory.nullPointer()) {
+        if (executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
         } else {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
         String cFuncName = SaxonCAPI.toJavaString(ccFuncName, WordFactory.nullPointer());
 
-        Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
@@ -1255,7 +1256,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Serializer serializer = processor.newSerializer(bStream);
         applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
         Object[] arguments = null;
-        if(argumentsRef != WordFactory.nullPointer()) {
+        if (argumentsRef != WordFactory.nullPointer()) {
             ProcessorDataAccumulator argumentsAccumulator = objectHandles.get(argumentsRef);
             arguments = argumentsAccumulator.getValues();
         }
@@ -1272,38 +1273,38 @@ public class Xslt30Processor extends SaxonCAPI {
      * called, then the parameters supplied are made available to the called template (no error
      * occurs if parameters are supplied that are not used).
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param ccwd   - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
-     * @param executableRef  - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
-     * @param ctemplateName - The name of the initial template given as a pointer to the C char array. This must match the name of a
-     *                        public named template in the stylesheet. If the value is null,
-     *                        the QName <code>xsl:initial-template</code> is used.
-     * @param coutFilename   - Pointer to a C char array. The file name to save the result of the apply template transformation
-     * @param processorDataAccumulatorRef  - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
+     * @param executableRef               - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param ctemplateName               - The name of the initial template given as a pointer to the C char array. This must match the name of a
+     *                                    public named template in the stylesheet. If the value is null,
+     *                                    the QName <code>xsl:initial-template</code> is used.
+     * @param coutFilename                - Pointer to a C char array. The file name to save the result of the apply template transformation
+     * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return long value representing the status of the transformation. Success=1, failure = -1 and exception=-2
      * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_callTemplateReturningFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long callTemplateReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef,  CCharPointer ctemplateName, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long callTemplateReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ctemplateName, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable;
-        if(executableRef != WordFactory.nullPointer()) {
+        if (executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
         } else {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
         String templateName = null;
         QName qname = null;
-        if(ctemplateName != WordFactory.nullPointer()) {
+        if (ctemplateName != WordFactory.nullPointer()) {
             templateName = SaxonCAPI.toJavaString(ctemplateName, WordFactory.nullPointer());
             qname = QName.fromClarkName(templateName);
         }
         String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
 
-        Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
@@ -1334,32 +1335,32 @@ public class Xslt30Processor extends SaxonCAPI {
      * called, then the parameters supplied are made available to the called template (no error
      * occurs if parameters are supplied that are not used).
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param ccwd  - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
-     * @param executableRef  - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
-     * @param cclarkName - Pointer to a C char array for the the name of the initial template. This must match the name of a
-     *                     public named template in the stylesheet. If the value is null,
-     *                     the QName <code>xsl:initial-template</code> is used.
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
+     * @param executableRef               - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param cclarkName                  - Pointer to a C char array for the the name of the initial template. This must match the name of a
+     *                                    public named template in the stylesheet. If the value is null,
+     *                                    the QName <code>xsl:initial-template</code> is used.
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return long value referencing the results as an XdmValue object which is held in the ObjectHandles pool to previous GC.
-     *   Caller must remove object from ObjectHandles pool when no longer required
+     * Caller must remove object from ObjectHandles pool when no longer required
      * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_callTemplateReturningValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long callTemplateReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         XsltExecutable executable;
-        if(executableRef != WordFactory.nullPointer()) {
+        if (executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
         } else {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
 
-        Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
@@ -1395,7 +1396,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         transformer.callTemplate(qname, xdmResult);
 
-        XdmValue value =  getXdmValue(xdmResult, paramsMap);
+        XdmValue value = getXdmValue(xdmResult, paramsMap);
         ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
     }
@@ -1433,46 +1434,46 @@ public class Xslt30Processor extends SaxonCAPI {
      * called, then the parameters supplied are made available to the called template (no error
      * occurs if parameters are supplied that are not used).
      *
-     * @param thread  - Graalvm runtime data structure for a thread
+     * @param thread                      - Graalvm runtime data structure for a thread
      * @param alloc
-     * @param ccwd  - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
-     * @param executableRef  - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
+     * @param ccwd                        - Pointer to a C char array. current working directory. User supplies this as base URI. Accept null
+     * @param executableRef               - long value referencing the Xslt30Executable object held in the ObjectHandles pool.
      * @param cclarkName
-     * @param processorDataAccumulatorRef  - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
+     * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return
      * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_callTemplateReturningString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer callTemplateReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc,  CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static CCharPointer callTemplateReturningString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable;
-        if(executableRef != WordFactory.nullPointer()) {
+        if (executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
         } else {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
         QName qname = null;
-        if(cclarkName != WordFactory.nullPointer()) {
+        if (cclarkName != WordFactory.nullPointer()) {
             qname = QName.fromClarkName(SaxonCAPI.toJavaString(cclarkName, WordFactory.nullPointer()));
         }
 
-        if(SaxonCAPI.debug) {
-            if(qname!= null) {
-                System.err.println("DEBUG: j_callTemplateReturningString qname="+qname);
+        if (SaxonCAPI.debug) {
+            if (qname != null) {
+                System.err.println("DEBUG: j_callTemplateReturningString qname=" + qname);
             } else {
                 System.err.println("DEBUG: j_callTemplateReturningString qname is null");
             }
         }
 
-        Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
-        
+
         Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
@@ -1489,8 +1490,8 @@ public class Xslt30Processor extends SaxonCAPI {
         transformer.callTemplate(qname, serializer);
         CCharPointer result = SaxonCAPI.stringToNative(alloc, bStream);
 
-        if(SaxonCAPI.debug) {
-            if(result == WordFactory.nullPointer()) {
+        if (SaxonCAPI.debug) {
+            if (result == WordFactory.nullPointer()) {
                 System.err.println("DEBUG: j_callTemplateReturningString result is null");
             }
         }
@@ -1507,50 +1508,48 @@ public class Xslt30Processor extends SaxonCAPI {
      * Here we supply parameters and properties required to do the transformation.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param ccwd - current working directory supplied as a pointer to the C char array
-     * @param xslt30ProcessorRef - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the executable ,cannot be null
-     * @param executableRef - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the Xslt30Processor cannot be null
-     * @param csourceFilename  - source file name  supplied as a pointer to a C char array. Converted to a Java string
-     * @param cstylesheet  - stylesheet string  supplied as a pointer to a C char array. Converted to a Java string
-     * @param coutFilename   - Save result of transformation to the given file name. Passed as a pointer to a C char array
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - current working directory supplied as a pointer to the C char array
+     * @param xslt30ProcessorRef          - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the executable ,cannot be null
+     * @param executableRef               - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the Xslt30Processor cannot be null
+     * @param csourceFilename             - source file name  supplied as a pointer to a C char array. Converted to a Java string
+     * @param cstylesheet                 - stylesheet string  supplied as a pointer to a C char array. Converted to a Java string
+     * @param coutFilename                - Save result of transformation to the given file name. Passed as a pointer to a C char array
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of parameters and properties to values.
-     * @return   long value representing the success status of the transformation. success=0, fail=-1 and exception thrown=-2
-     * @throws SaxonApiException  if the transformation fails. SaxonCExceptionLongHandler class handlers any exception thrown
+     * @return long value representing the success status of the transformation. success=0, fail=-1 and exception thrown=-2
+     * @throws SaxonApiException if the transformation fails. SaxonCExceptionLongHandler class handlers any exception thrown
      */
     @CEntryPoint(name = "j_transformToFile", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long transformToFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = null;
-        if(executableRef != WordFactory.nullPointer()) {
+        if (executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
         }
 
-
         Xslt30Processor xslt30Processor = null;
-        if(xslt30ProcessorRef != WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef != WordFactory.nullPointer()) {
             xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         }
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
         String stylesheet = null;
-        if(cstylesheet != WordFactory.nullPointer()) {
+        if (cstylesheet != WordFactory.nullPointer()) {
             stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
         }
         String sourceFilename = null;
-        if(csourceFilename != WordFactory.nullPointer()) {
+        if (csourceFilename != WordFactory.nullPointer()) {
             sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
         }
         String outFilename = null;
-        if(coutFilename != WordFactory.nullPointer()) {
+        if (coutFilename != WordFactory.nullPointer()) {
             outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
         }
 
-
         try {
             Serializer serializer = null;
-            Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+            Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
             Map<QName, XdmValue> globalParameters = new HashMap<>();
             Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
             Properties props = new Properties();
@@ -1559,27 +1558,43 @@ public class Xslt30Processor extends SaxonCAPI {
             Xslt30Transformer transformer;
             Processor processor;
 
-            if (executable != null){
+            if (executable != null) {
                 transformer = executable.load30();
                 processor = executable.getProcessor();
-            }else if(xslt30Processor != null) {
+            } else if (xslt30Processor != null) {
                 processor = xslt30Processor.getProcessor();
                 transformer = xslt30Processor.getXslt30Transformer(cwd, executable, stylesheet, staticParameters);
             } else {
-                  throw new SaxonApiException("Error XsltExecutable is null");
+                throw new SaxonApiException("Error XsltExecutable is null");
             }
 
             if (outFilename != null) {
+                if (debug) {
+                    System.err.println("DEBUG: j_transformToFile outFilename: " + outFilename);
+                }
                 serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             } else if (paramsMap.containsKey("o")) {
                 String outfile = (String) paramsMap.get("o");
+                if (debug) {
+                    if (outfile != null) {
+                        System.err.println("DEBUG: j_transformToFile outfile with 'o' property: " + outfile);
+                    } else {
+                        System.err.println("DEBUG: j_transformToFile outfile is null");
+                    }
+                }
                 serializer = resolveOutputFile(processor, cwd, outfile, ResourceRequest.XML_NATURE);
             } else if (serializer == null) {
                 throw new SaxonApiException("Output file not set for this transformation");
             }
-
+            if (debug) {
+                System.err.println("DEBUG: Serializer = " + System.identityHashCode(serializer));
+            }
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
             XdmNode doc = null;
+
+            if (debug) {
+                System.err.println("DEBUG: Serializer after= " + System.identityHashCode(serializer));
+            }
 
             Object valuei = paramsMap.get("node");
             if (valuei == null) {
@@ -1589,6 +1604,17 @@ public class Xslt30Processor extends SaxonCAPI {
                 doc = (XdmNode) valuei;
             }
 
+            if (doc == null && sourceFilename == null && paramsMap.containsKey("s")) {
+                XdmItem itemi = transformer.getGlobalContextItem();
+
+                if (itemi instanceof XdmNode) {
+                    doc = (XdmNode) itemi;
+                } else if (debug) {
+                    System.err.println("DEBUG: value error for property 's'");
+                }
+
+            }
+
             if (sourceFilename == null && doc != null) {
                 transformer.setGlobalContextItem(doc);
                 transformer.transform(doc.asSource(), serializer);
@@ -1596,12 +1622,11 @@ public class Xslt30Processor extends SaxonCAPI {
                 source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
 
                 transformer.transform(source, serializer);
+            } else {
+                throw new SaxonApiException("Stylesheet source document not found");
             }
 
-
-            serializer = null;
-
-        }  catch (NullPointerException ex) {
+        } catch (NullPointerException ex) {
             SaxonApiException ex2 = new SaxonApiException(ex);
             throw ex2;
         } catch (Exception ex) {
@@ -1617,14 +1642,15 @@ public class Xslt30Processor extends SaxonCAPI {
      * In addition we can supply the source, stylesheet and output file names.
      * We can also supply values to xsl:param and xsl:variables required in the stylesheet.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
-     *  @param cwd                       - current working directory
+     *
+     * @param cwd                       - current working directory
      * @param processor                 - required to use the same processor as for the compiled stylesheet
      * @param transformer               - pass the current object to set local variables supplied in the parameters
      * @param serializer                - pass the serializer to set properties
      * @param props                     - properties to apply to the Serializer
      * @param map                       - parameters and property names given as string keys. Their Values given as a array of Java objects
      * @param globals                   - Supply the values of global stylesheet parameters.
-     * @param initialTemplateParameters  - Supply the initial template parameters
+     * @param initialTemplateParameters - Supply the initial template parameters
      */
     public static void applyXsltTransformerProperties(String cwd, Processor processor, Xslt30Transformer transformer, Serializer serializer, Properties props, Map<String, Object> map, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters) throws SaxonApiException {
         boolean tunnel = false;
@@ -1663,13 +1689,13 @@ public class Xslt30Processor extends SaxonCAPI {
                 if (valuei instanceof String) {
                     initialMode = (String) valuei;
                     QName qname = null;
-                    if(initialMode.equals("xsl:unnamed")) {
-                         qname = new QName("xsl", NamespaceConstant.XSLT, "unnamed");
-                    } else if(initialMode.equals("xsl:default")) {
+                    if (initialMode.equals("xsl:unnamed")) {
+                        qname = new QName("xsl", NamespaceConstant.XSLT, "unnamed");
+                    } else if (initialMode.equals("xsl:default")) {
                         qname = new QName("xsl", NamespaceConstant.XSLT, "default");
-                    } else if(initialMode.startsWith("Q{")){
+                    } else if (initialMode.startsWith("Q{")) {
                         qname = QName.fromEQName(initialMode);
-                    }  else if(initialMode.startsWith("{")) {
+                    } else if (initialMode.startsWith("{")) {
                         qname = QName.fromClarkName(initialMode);
                     } else {
                         qname = new QName(initialMode);
@@ -1730,27 +1756,26 @@ public class Xslt30Processor extends SaxonCAPI {
 
             if (map.containsKey("m")) {
                 Object value = map.get("m");
-                if(value instanceof SaxonCMessageListener) {
-                   transformer.setMessageListener((SaxonCMessageListener)value);
+                if (value instanceof SaxonCMessageListener) {
+                    transformer.setMessageListener((SaxonCMessageListener) value);
                 } else {
-                    transformer.setMessageListener(new SaxonCMessageListener(processor, cwd, (String)value));
+                    transformer.setMessageListener(new SaxonCMessageListener(processor, cwd, (String) value));
                 }
 
             }
 
             if (map.containsKey("rd")) {
                 Object value = map.get("rd");
-                if(value instanceof SaxonCResultDocumentHandler) {
-                    if(SaxonCAPI.debug) {
+                if (value instanceof SaxonCResultDocumentHandler) {
+                    if (SaxonCAPI.debug) {
                         System.err.println("DEBUG: result-document handler set");
                     }
-                   transformer.setResultDocumentHandler((SaxonCResultDocumentHandler)value);
-                } else if(SaxonCAPI.debug) {
+                    transformer.setResultDocumentHandler((SaxonCResultDocumentHandler) value);
+                } else if (SaxonCAPI.debug) {
                     System.err.println("DEBUG: Not able to set the result-document handler. Please check type of object");
                 }
 
             }
-
 
 
             if (map.containsKey("tunnel")) {
@@ -1770,21 +1795,21 @@ public class Xslt30Processor extends SaxonCAPI {
 
         if (!initialTemplateParameters.isEmpty()) {
             if (SaxonCAPI.debug) {
-               for(Map.Entry<QName, XdmValue> entry : initialTemplateParameters.entrySet()) {
+                for (Map.Entry<QName, XdmValue> entry : initialTemplateParameters.entrySet()) {
 
-                 if(entry.getKey() != null) {
-                     System.err.println("DEBUG: key = "+ entry.getKey());
-                 } else {
-                     System.err.println("DEBUG: initialTemplateParameter Found null key");
+                    if (entry.getKey() != null) {
+                        System.err.println("DEBUG: key = " + entry.getKey());
+                    } else {
+                        System.err.println("DEBUG: initialTemplateParameter Found null key");
 
-                 }
-                   if(entry.getValue() != null) {
-                       System.err.println("DEBUG: key = "+ entry.getValue().toString());
-                   } else {
-                       System.err.println("DEBUG: initialTemplateParameter Found null value");
+                    }
+                    if (entry.getValue() != null) {
+                        System.err.println("DEBUG: key = " + entry.getValue().toString());
+                    } else {
+                        System.err.println("DEBUG: initialTemplateParameter Found null value");
 
-                   }
-               }
+                    }
+                }
             }
             transformer.setInitialTemplateParameters(initialTemplateParameters, tunnel);
         }
@@ -1803,47 +1828,47 @@ public class Xslt30Processor extends SaxonCAPI {
      * Here we supply parameters and properties required to do the transformation.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param ccwd - current working directory supplied as a pointer to the C char array
-     * @param xslt30ProcessorRef - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the executable ,cannot be null
-     * @param executableRef - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the Xslt30Processor cannot be null
-     * @param csourceFile  - source file name  supplied as a pointer to a C char array. Converted to a Java string
-     * @param cstylesheet  - stylesheet string  supplied as a pointer to a C char array. Converted to a Java string
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param ccwd                        - current working directory supplied as a pointer to the C char array
+     * @param xslt30ProcessorRef          - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the executable ,cannot be null
+     * @param executableRef               - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the Xslt30Processor cannot be null
+     * @param csourceFile                 - source file name  supplied as a pointer to a C char array. Converted to a Java string
+     * @param cstylesheet                 - stylesheet string  supplied as a pointer to a C char array. Converted to a Java string
      * @param processorDataAccumulatorRef - long value referencing processorData object in the ObjectHandle pool.  Used to pass processor data and options
-     * @return  long value referencing the XdmNode held in the ObjectHandles pool. Caller must remove object from ObjectHandles pool when no longer required
-     * @throws SaxonApiException   if failure in transformation or if both the Xslt30Processor and XsltExecutable are null
+     * @return long value referencing the XdmNode held in the ObjectHandles pool. Caller must remove object from ObjectHandles pool when no longer required
+     * @throws SaxonApiException if failure in transformation or if both the Xslt30Processor and XsltExecutable are null
      */
     @CEntryPoint(name = "j_transformToValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long transformToValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = null;
         Xslt30Processor xslt30Processor = null;
-        if(executableRef != WordFactory.nullPointer()) {
+        if (executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
-        } else if(xslt30ProcessorRef != WordFactory.nullPointer()) {
+        } else if (xslt30ProcessorRef != WordFactory.nullPointer()) {
             xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         } else {
             throw new SaxonApiException("XSLT30 Processor not created");
         }
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
 
         String stylesheet = null;
-        if(cstylesheet != WordFactory.nullPointer()) {
+        if (cstylesheet != WordFactory.nullPointer()) {
             stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
         }
 
-        String sourceFile =  null;
-        if(csourceFile != WordFactory.nullPointer()) {
+        String sourceFile = null;
+        if (csourceFile != WordFactory.nullPointer()) {
             sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
         }
 
 
         Source source;
 
-        Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
@@ -1852,14 +1877,14 @@ public class Xslt30Processor extends SaxonCAPI {
             Xslt30Transformer transformer;
             Processor processor;
 
-            if (executable != null){
+            if (executable != null) {
                 transformer = executable.load30();
                 processor = executable.getProcessor();
-            }else if(xslt30Processor != null) {
+            } else if (xslt30Processor != null) {
                 processor = xslt30Processor.getProcessor();
                 transformer = xslt30Processor.getXslt30Transformer(cwd, executable, stylesheet, staticParameters);
             } else {
-                  throw new SaxonApiException("Error XsltExecutable is null");
+                throw new SaxonApiException("Error XsltExecutable is null");
             }
 
             applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
@@ -1882,7 +1907,7 @@ public class Xslt30Processor extends SaxonCAPI {
             }
             XdmNode doc = null;
 
-            if(sourceFile == null && paramsMap.containsKey("node")) {
+            if (sourceFile == null && paramsMap.containsKey("node")) {
                 Object valuei = paramsMap.get("node");
                 if (valuei == null) {
                     valuei = paramsMap.get("param:node");
@@ -1891,15 +1916,15 @@ public class Xslt30Processor extends SaxonCAPI {
                     doc = (XdmNode) valuei;
                 }
             } else if (sourceFile == null && paramsMap.containsKey("s")) {
-                 Object valuei = paramsMap.get("s");
-                 if (valuei instanceof String) {
-                     DocumentBuilder builder = processor.newDocumentBuilder();
-                     source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
-                     doc = builder.build(source);
-                 } else if (debug) {
-                     System.err.println("DEBUG: value error for property 's'");
-                 }
-             }
+                Object valuei = paramsMap.get("s");
+                if (valuei instanceof String) {
+                    DocumentBuilder builder = processor.newDocumentBuilder();
+                    source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
+                    doc = builder.build(source);
+                } else if (debug) {
+                    System.err.println("DEBUG: value error for property 's'");
+                }
+            }
 
             if (sourceFile == null && doc != null) {
                 transformer.transform(doc.asSource(), destination);
@@ -1931,45 +1956,45 @@ public class Xslt30Processor extends SaxonCAPI {
      * Here we supply parameters and properties required to do the transformation.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
      *
-     * @param thread  - Graalvm runtime data structure for a thread
-     * @param alloc - reference to the C++ allocator object
-     * @param ccwd - current working directory supplied as a pointer to the C char array
-     * @param xslt30ProcessorRef - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the executable ,cannot be null
-     * @param executableRef - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the Xslt30Processor cannot be null
-     * @param csourceFile  - source file name  supplied as a pointer to a C char array. Converted to a Java string
-     * @param cstylesheet  - stylesheet string  supplied as a pointer to a C char array. Converted to a Java string
+     * @param thread                      - Graalvm runtime data structure for a thread
+     * @param alloc                       - reference to the C++ allocator object
+     * @param ccwd                        - current working directory supplied as a pointer to the C char array
+     * @param xslt30ProcessorRef          - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the executable ,cannot be null
+     * @param executableRef               - long value reference to the Executable object held in the ObjectHandle pool. Null accepted, but the Xslt30Processor cannot be null
+     * @param csourceFile                 - source file name  supplied as a pointer to a C char array. Converted to a Java string
+     * @param cstylesheet                 - stylesheet string  supplied as a pointer to a C char array. Converted to a Java string
      * @param processorDataAccumulatorRef - long value referencing processorData object in the ObjectHandles pool.  Used to pass processor data and options
-     * @return  result as a string representation in a byte array and converted as a pointer to a C char array. Data is held in the C/C++ heap memory space. Caller must clear associated memory
-     * @throws SaxonApiException   if failure in transformation
+     * @return result as a string representation in a byte array and converted as a pointer to a C char array. Data is held in the C/C++ heap memory space. Caller must clear associated memory
+     * @throws SaxonApiException if failure in transformation
      */
     @CEntryPoint(name = "j_transformToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer transformToString(IsolateThread thread, AllocatorCCharFn alloc, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = null;
-        if(executableRef != WordFactory.nullPointer()) {
+        if (executableRef != WordFactory.nullPointer()) {
             executable = objectHandles.get(executableRef);
         }
 
 
         Xslt30Processor xslt30Processor = null;
-        if(xslt30ProcessorRef != WordFactory.nullPointer()) {
+        if (xslt30ProcessorRef != WordFactory.nullPointer()) {
             xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         }
         String cwd = null;
-        if(ccwd !=WordFactory.nullPointer()) {
+        if (ccwd != WordFactory.nullPointer()) {
             cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         }
 
 
         String stylesheet = null;
-        if(cstylesheet != WordFactory.nullPointer()) {
+        if (cstylesheet != WordFactory.nullPointer()) {
             stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
         }
 
-        String sourceFile =  null;
-        if(csourceFile != WordFactory.nullPointer()) {
+        String sourceFile = null;
+        if (csourceFile != WordFactory.nullPointer()) {
             sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
         }
-        Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
+        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
         Properties props = new Properties();
@@ -1979,14 +2004,14 @@ public class Xslt30Processor extends SaxonCAPI {
             Xslt30Transformer transformer;
             Processor processor;
 
-            if (executable != null){
+            if (executable != null) {
                 transformer = executable.load30();
                 processor = executable.getProcessor();
-            }else if(xslt30Processor != null) {
+            } else if (xslt30Processor != null) {
                 processor = xslt30Processor.getProcessor();
                 transformer = xslt30Processor.getXslt30Transformer(cwd, null, stylesheet, staticParameters);
             } else {
-                  throw new SaxonApiException("Error XsltExecutable is null");
+                throw new SaxonApiException("Error XsltExecutable is null");
             }
 
             if (debug) {
@@ -2000,7 +2025,7 @@ public class Xslt30Processor extends SaxonCAPI {
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
             XdmNode doc = null;
 
-            if(paramsMap.containsKey("node")) {
+            if (paramsMap.containsKey("node")) {
                 Object valuei = paramsMap.get("node");
                 if (valuei == null) {
                     valuei = paramsMap.get("param:node");
@@ -2011,22 +2036,29 @@ public class Xslt30Processor extends SaxonCAPI {
             }
 
             if (doc == null && paramsMap.containsKey("s")) {
-                 Object valuei = paramsMap.get("s");
-                 if (valuei instanceof String) {
-                     DocumentBuilder builder = processor.newDocumentBuilder();
-                     source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
-                     doc = builder.build(source);
-                 } else if (debug) {
-                     System.err.println("DEBUG: value error for property 's'");
-                 }
-             }
+                Object valuei = paramsMap.get("s");
+                if (valuei instanceof String) {
+                    DocumentBuilder builder = processor.newDocumentBuilder();
+                    source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) valuei, ResourceRequest.XML_NATURE);
+                    doc = builder.build(source);
+                } else if (debug) {
+                    System.err.println("DEBUG: value error for property 's'");
+                }
+            }
 
             if (sourceFile == null && doc != null) {
                 source = doc.asSource();
             } else if (sourceFile != null) {
+                if (debug) {
+                    System.err.println("DEBUG: resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE); called");
+                }
                 source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
             }
             //transformer.setErrorListener(errorListener);
+            if (debug) {
+                if (source == null)
+                    System.err.println("DEBUG: before transformer.transform(source, serializer), source is null");
+            }
             transformer.transform(source, serializer);
             serializer = null;
             CCharPointer a = SaxonCAPI.stringToNative(alloc, bStream);
@@ -2052,13 +2084,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException(e);
         }
     }    */
-
-
-
-
-
-
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
         String cwd2 = "/Users/ond1/work/development/svn/archive/opensource/latest9.9/hec/samples/php/trax";
         String cwd = "/Users/ond1/work/development/tests/jeroen";
         // String cwd = "C:///www///html///trax";
@@ -2082,5 +2108,5 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    
+
 }
