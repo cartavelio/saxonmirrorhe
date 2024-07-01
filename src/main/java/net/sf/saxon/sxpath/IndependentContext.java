@@ -107,6 +107,7 @@ public class IndependentContext extends AbstractStaticContext
         setXPathLanguageLevel(ic.getXPathVersion());
         requiredContextItemType = ic.requiredContextItemType;
         setExecutable(ic.getExecutable());
+        setOptimizerOptions(ic.getOptimizerOptions());
     }
 
     /**

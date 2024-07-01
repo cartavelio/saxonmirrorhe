@@ -2,6 +2,7 @@ package net.sf.saxon.sxpath;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.Executable;
+import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.PackageData;
@@ -100,6 +101,12 @@ class IndependentContextTest {
             assertThat(subject.getUnprefixedElementMatchingPolicy(), equalTo(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE));
         }
 
+        @Test
+        @DisplayName("the optimizer options are taken from the Configuration")
+        void optimizerOptions() {
+            assertThat(subject.getOptimizerOptions().toString(), is(equalTo(config.getOptimizerOptions().toString())));
+        }
+
         @Nested
         class ContextPackageData {
             PackageData subjectPackageData;
@@ -154,6 +161,7 @@ class IndependentContextTest {
             src.setXPathLanguageLevel(30);
             src.setRequiredContextItemType(AnyFunctionType.ANY_FUNCTION);
             src.setExecutable(executable);
+            src.setOptimizerOptions(new OptimizerOptions("f"));
 
             subject = new IndependentContext(src);
         }
@@ -218,6 +226,11 @@ class IndependentContextTest {
             assertThat(subject.getExecutable(), is(sameInstance(executable)));
         }
 
+        @Test
+        @DisplayName("the optimizer options are inherited")
+        void optimizerOptions() {
+            assertThat(subject.getOptimizerOptions().toString(), is(equalTo(src.getOptimizerOptions().toString())));
+        }
         @Nested
         class ContextPackageData {
             PackageData subjectPackageData;
