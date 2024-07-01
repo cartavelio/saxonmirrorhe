@@ -16,6 +16,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Static registry for accumulators (XSLT 3.0) defined within a single package. Generally accessed
@@ -23,7 +24,7 @@ import java.util.*;
  */
 public class AccumulatorRegistry {
 
-    protected Map<StructuredQName, Accumulator> accumulatorsByName = new HashMap<StructuredQName, Accumulator>();
+    protected Map<StructuredQName, Accumulator> accumulatorsByName = new ConcurrentHashMap<>();
 
 
     public AccumulatorRegistry() {
