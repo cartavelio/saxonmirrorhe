@@ -458,6 +458,15 @@ cdef class PySaxonProcessor:
         saxoncClasses.SaxonProcessor.deleteString(c_string, 0)
         return py_string_i
 
+    def empty_sequence(self):
+        """
+        Returns a PyXdmValue representing the empty sequence
+
+        Returns:
+            PyXdmValue: the empty sequence
+        """
+        return PyXdmValue(self)
+
     cdef wrap_value(self, saxoncClasses.XdmValue *value_ptr):
         """
         Creates a new PyXdm* instance, wrapping the C++ XdmValue referenced by

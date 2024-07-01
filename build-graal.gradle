@@ -1142,8 +1142,8 @@ tasks.register("all_python_test_suites") {
     environment SAXONC_HOME: saxonLicenseDir
     environment SAXONC_DEBUG_FLAG: "true"//, SAXONC_TESTSUITE_DEBUG: "true"
 
-    baseArgs "--data-dir", file(tasks.named("${edition}c_pytest_data").map { it.destinationDir })
-    tests "./test_saxonc.py"
+    baseArgs "--import-mode=importlib", "--data-dir", file(tasks.named("${edition}c_pytest_data").map { it.destinationDir })
+    tests "test_saxonc.py", "tests"
   }
 
   tasks.register("${edition}c_python_test_suite_pip_install", PipInstall) {
