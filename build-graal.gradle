@@ -862,15 +862,12 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
 
   tasks.register("${edition}c_python_build_wheel", BuildWheel) {
     outputDir = pythonBuildRootPath(edition)
-//    manylinuxTarget = "manylinux_2_24"
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
-//    pythonVenvTask = branchVenvTask
     productEdition = edition
     productVersion = saxonVersion3
     wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
     macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
     sourceDir = tasks.named("setup_${edition}c_pypi").map { it.packageDir.get() }
-//    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
   }
 
   tasks.register("${edition}c_python_repair_wheel", RepairLocalWheel) {
@@ -885,15 +882,12 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
   }
 
   tasks.register("${edition}c_python_build_debug_wheel", BuildWheel) {
-//    manylinuxTarget = "manylinux_2_24"
     pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
-//    pythonVenvTask = branchVenvTask
     productEdition = edition
     productVersion = saxonVersion3
     wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
     macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
     sourceDir = tasks.named("setup_${edition}c_pypi_debug").map { it.packageDir.get() }
-//    libraryDir = tasks.named("${edition}c_build_graal_debug_image").map { it.libraryDir.get() }
     outputDir = pythonBuildRootPath(edition, true)
     debug = true
   }
@@ -909,38 +903,14 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
     wheel = tasks.named("${edition}c_python_build_debug_wheel").map { it.wheel.get() }
   }
 
-  task "saxon_${edition}c_stage_wheel"(
-    dependsOn: ["setup_${edition}c_pypi"]
-  ) {
+  tasks.register("saxon_${edition}c_stage_wheel", Copy) {
     def wheelDir = "wheels/${systemOsName}/${edition}c_pypi"
 
-    inputs.files tasks.named("${edition}c_python_build_wheel").map { it.outputs.files }
+    inputs.files tasks.named("setup_${edition}c_pypi")
     outputs.dir  layout.buildDirectory.dir(wheelDir)
 
-    doLast {
-      def libdir = (systemOs.isMacOsX()
-                    ? "libs/darwin"
-                    : (systemOs.isLinux()
-                       ? "libs/nix"
-                       : "libs/win"))
-      if (libdir == null) {
-        throw GradleException("Don't know how to create Python wheels on this OS.");
-      }
-     
-      copy {
-        into layout.buildDirectory.dir("${wheelDir}/${libdir}")
-        from layout.buildDirectory.dir("c")
-        include "graal*.h"
-        include "libsaxon-${edition}c-${saxonVersion3}.*"
-      }
-    }
-
-    doLast {
-      copy {
-        into layout.buildDirectory.dir(wheelDir)
-        from layout.buildDirectory.dir("${edition}c_pypi")
-      }
-    }
+    from layout.buildDirectory.dir("${edition}c/python/saxonc${edition}")
+    into layout.buildDirectory.dir(wheelDir)
   }
 }
 
@@ -948,29 +918,26 @@ def pythonPackageDirPath(String edition, Boolean debug = false) {
 // saxonc_build_wheels different names, but two of the names have been in use
 // for a while, so I'm not changing them
 
-task saxonc_stage_wheels(
-  type: Tar,
-  dependsOn: ['saxon_eec_stage_wheel', 'saxon_pec_stage_wheel', 'saxon_hec_stage_wheel']
-
-) {
-  inputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}")
-  outputs.file "${buildDir}/distributions/${systemOsName}-${systemOsArch}.wheels.tar.gz"
+def saxoncStageWheels = tasks.register("saxonc_stage_wheels", Tar) {
+  inputs.files tasks.named("saxon_hec_stage_wheel")
+  inputs.files tasks.named("saxon_pec_stage_wheel")
+  inputs.files tasks.named("saxon_eec_stage_wheel")
 
   archiveFileName = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
-  from "${buildDir}/wheels"
+  from layout.buildDirectory.dir("wheels")
   include "${systemOsName}/**"
   exclude "${systemOsName}/*/build/**"
   exclude "${systemOsName}/*/*.egg-info/**"
   compression = Compression.GZIP
 
   doLast {
-    delete "${buildDir}/wheels/${systemOsName}"
+    delete layout.buildDirectory.dir("wheels/${systemOsName}")
   }
 }
 
-task saxonc_prepare_wheels(
-  dependsOn: ['saxonc_stage_wheels']
-) {
+tasks.register("saxonc_prepare_wheels") {
+  inputs.files saxoncStageWheels
+
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
   if (user == 'ndw') {
     user = 'norm' // HACK
@@ -988,9 +955,9 @@ task saxonc_prepare_wheels(
     doLast {
       println("Copying ${systemOsName} staging files to s3://saxonica-wheel-staging/${user}/${wheels}")
       exec {
-        workingDir "${buildDir}/distributions"
+        workingDir layout.buildDirectory.dir("distributions")
         commandLine awscli, "--profile", "saxonica",
-          "s3", "cp", "${wheels}",
+          "s3", "cp", saxoncStageWheels.map { it.archiveFile.get().asFile.toString() }.get(),
           "s3://saxonica-wheel-staging/${user}/${wheels}"
       }
     }
