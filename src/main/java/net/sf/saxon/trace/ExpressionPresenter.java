@@ -348,7 +348,7 @@ public class ExpressionPresenter {
                 emitAttribute("defaultFunctionNS", defaultFnNs);
             }
             if (!options.suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
-                boolean includeXmlNamespace = "JS".equals(getOptions().target) && getOptions().targetVersion == 2;
+                boolean includeXmlNamespace = "JS".equals(getOptions().target) && getOptions().targetVersion >= 2;
                 emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap(), includeXmlNamespace));
             }
         } catch (XPathException e) {
@@ -359,7 +359,7 @@ public class ExpressionPresenter {
     /**
      * From a NamespaceMap, produce the SEF concise representation, for example "xs=~ xsl=~ example=file://example.com/"
      * @param sc the namespace map
-     * @param includeXmlNamespace for compatibility with SaxonJS 2.x, indicate that any explicit binding for the
+     * @param includeXmlNamespace for compatibility with SaxonJS 2+, indicate that any explicit binding for the
      *                            XML namespace should be included in the list
      * @return the concise string representation of the namespace map
      * @throws XPathException if the namespace map contains unsuitable namespaces, for example namespace URIs containing
