@@ -577,7 +577,7 @@ abstract class BuildWheel extends DefaultTask {
             executable pythonVenvTask.flatMap { it.venvBinHostedExe("auditwheel") }.get()
             environment "LD_LIBRARY_PATH", libraryDir.get()
             args "repair", "--only-plat"
-            args "--plat", "${manylinuxTarget.get()}_${systemOsArch.get()}"
+            args "--plat", "${manylinuxTarget.get()}_${systemOsArch}"
             args "--wheel-dir", outputDir.get()
             args inputWheel.get()
         }
