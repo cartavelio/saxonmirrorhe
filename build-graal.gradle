@@ -599,7 +599,7 @@ def branchVenvTask = tasks.register("branchVenv", PythonVenv) {
 }
 
 def branchDebugVenvTask = tasks.register("branchDebugVenv", PythonVenv) {
-  pyenvPythonExe = pyenvValgrindTask.map { it.pythonExe.get() }
+  pyenvPythonExe = pyenvPythonValgrindExeTask.map { it.pythonExe.get() }
   suffix = "debug"
 }
 
