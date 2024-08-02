@@ -155,7 +155,7 @@ public:
    * @param value of the query parameter, or nullptr to clear a previously set
    * value
    */
-  void setParameter(const char *name, XdmValue *value);
+  void setParameter(const char *name, XdmValue *value, bool withParam=true);
 
   //! Remove a parameter (name, value) pair
   /**
@@ -193,7 +193,7 @@ public:
    * @param withParam Internal use only
    * @return XdmValue
    */
-  XdmValue *getParameter(const char *name, bool withParam);
+  XdmValue *getParameter(const char *name, bool withParam=true);
 
 
   //! Get all parameters as a std::map
