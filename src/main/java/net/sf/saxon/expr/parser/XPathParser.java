@@ -5245,7 +5245,8 @@ public class XPathParser {
      * Make a NamespaceTest (name:*)
      *
      * @param nodeKind integer code identifying the type of node required
-     * @param prefix   the namespace prefix
+     * @param prefix   either the namespace prefix, or a string in the form
+     *                 Q{uri}* (including the final '*').
      * @return the NamespaceTest, a pattern that matches all nodes in this
      * namespace
      * @throws XPathException if the namespace prefix is not declared
