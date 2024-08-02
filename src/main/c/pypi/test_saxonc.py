@@ -345,14 +345,9 @@ def testXslMessageToListWithClear(saxonproc):
     assert messages.size == 1
 
 def testEmbeddedStylesheet(saxonproc, data_dir):
-        print("WAT", file=sys.stderr)
         trans = saxonproc.new_xslt30_processor()
-        print("HELLO MUM 1", file=sys.stderr)
         input_ = saxonproc.parse_xml(xml_file_name=os.path.join(data_dir, "books.xml"))
-        print("HELLO DAD", file=sys.stderr)
         path = "/processing-instruction(xml-stylesheet)[matches(.,'type\\s*=\\s*[''\"\"]text/xsl[''\" \"]')]/replace(., '.*?href\\s*=\\s*[''\" \"](.*?)[''\" \"].*', '$1')"
-
-        print(os.path.join(data_dir, "books.xml"))
 
         assert input_ is not None
 
