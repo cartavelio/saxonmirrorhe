@@ -492,13 +492,17 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     }
 
     protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
-        synchronized(this) {
-            if (pushEvaluator == null) {
-                pushEvaluator = expression.makeElaborator().elaborateForPush();
+        try {
+            synchronized(this) {
+                if (pushEvaluator == null) {
+                    pushEvaluator = expression.makeElaborator().elaborateForPush();
+                }
             }
+            Expression.dispatchTailCall(
+                    pushEvaluator.processLeavingTail(dest, context));
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
-        Expression.dispatchTailCall(
-                pushEvaluator.processLeavingTail(dest, context));
     }
 
     protected void closeStreamIfNecessary(StreamResult result, boolean mustClose) throws XPathException {
