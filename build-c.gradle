@@ -77,6 +77,12 @@ tasks.register("rejar_Xerces", Jar) {
   from(layout.buildDirectory.dir("xerces")) {
     include "**/*.class"
     include "**/*.properties"
+    // include XmlResolver cached common resources (like XHTML DTD)
+    include "org/xmlresolver/cat*.xml"
+    include "org/xmlresolver/www.rddl.org/**/*"
+    include "org/xmlresolver/www.w3.org/**/*"
+    include "org/xmlresolver/xmlcatalogs.org/**/*"
+    include "org/xmlresolver/xmlresolver.org/**/*"
     exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
     exclude "META-INF/MANIFEST.MF"
   }

@@ -141,6 +141,7 @@ abstract class GraalNativeImageTask extends DefaultTask {
                           "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
                           "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
                           "-H:+ReportExceptionStackTraces",
+                          "-H:Log=registerResource:3",
                           "-H:+AddAllCharsets",
                           "-Dfile.encoding=UTF-8",
                           "--trace-class-initialization=javax.xml.parsers.FactoryFinder",

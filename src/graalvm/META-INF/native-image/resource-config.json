@@ -63,8 +63,16 @@
     },
     {
       "pattern":"\\Qnet/sf/saxon/data/analyze-string.xsd\\E"
+    },
+    {
+      "pattern":"\\Aorg/xmlresolver/cat.+xml\\Z"
+    },
+    {
+      "pattern": "\\Aorg/xmlresolver/(www\\.w3|www\\.rddl|xmlcatalogs)\\.org/.+\\.(dtd|ent|mod|rng|rnc|xsd|xsl)\\Z"
+    },
+    {
+      "pattern": "\\Aorg/xmlresolver/xmlresolver\\.org/.+\\.xml\\Z"
     }
-
   ]},
   "bundles":[]
 }
