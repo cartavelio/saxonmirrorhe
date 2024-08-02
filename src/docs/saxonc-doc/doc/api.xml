@@ -489,7 +489,7 @@
                      $value)</span>
                   <div class="fcomment">Set a configuration property specific to the processor in
                      use. Properties specified here are common across all the processors. See <a target="_blank"
-                        href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
+                        href="https://www.saxonica.com/documentation12/index.html#!configuration/config-features"
                         >Configuration features</a> for more details.</div>
                </td>
             </tr>
@@ -832,8 +832,8 @@
                <td>
                   <span class="signature">compileFromAssociatedFile(string $xmlFileName)</span>
                   <div class="fcomment">Get the stylesheet associated via the xml-stylesheet
-                     processing instruction (see <a href="http://www.w3.org/TR/xml-stylesheet/"
-                        target="_blank">http://www.w3.org/TR/xml-stylesheet/</a>) in the document
+                     processing instruction (see <a href="https://www.w3.org/TR/xml-stylesheet/"
+                        target="_blank">https://www.w3.org/TR/xml-stylesheet/</a>) in the document
                      specified in the $xmlFileName argument, and that match the given criteria. If
                      there are several suitable xml-stylesheet processing instructions, then the
                      returned source will identify a synthesized stylesheet module that imports all
