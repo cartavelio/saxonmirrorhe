@@ -116,8 +116,8 @@
   <div class="javaonly">
   <h2 class="subtitle">SaxonJ-EE and SaxonJ-PE</h2>
       <p>The Enterprise and Professional editions of Saxon are commercial products released under the
-        terms and conditions published at <a href="http://www.saxonica.com/license/paid-license.pdf"
-          class="bodylink">http://www.saxonica.com/license/paid-license.pdf</a>.</p>
+        terms and conditions published at <a href="https://www.saxonica.com/license/paid-license.pdf"
+          class="bodylink">https://www.saxonica.com/license/paid-license.pdf</a>.</p>
     
       <p>From Saxon 11, licenses are issued as term licenses rather than perpetual licenses: that is,
       they have an expiry date. Please take care to order a replacement license so that it can be
@@ -214,8 +214,8 @@
   
     <p>If you produce a product that includes or requires SaxonJ-HE, please refer to it prominently as
       "The Saxon XSLT and XQuery Processor from Saxonica Limited", and include the URL of the home
-      page, which is at <a href="http://www.saxonica.com/" class="bodylink"
-        >http://www.saxonica.com/</a>. As a courtesy, please take reasonable steps to ensure that your
+      page, which is at <a href="https://www.saxonica.com/" class="bodylink"
+        >https://www.saxonica.com/</a>. As a courtesy, please take reasonable steps to ensure that your
       users know that they are running Saxon.</p>
   </div>
 

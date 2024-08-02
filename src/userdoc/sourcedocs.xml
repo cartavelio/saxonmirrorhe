@@ -85,8 +85,8 @@
     
     <aside><p>Technically, <em>resolving</em> a URI is the process of expanding a relative
       to an absolute URI, for example resolving the relative reference <code>feature-matrix-11.xml</code>
-      against a base URI such as <code>http://www.saxonica.com/products/</code> to give the 
-      absolute URI <code>http://www.saxonica.com/products/feature-matrix-11.xml</code>.
+      against a base URI such as <code>https://www.saxonica.com/products/</code> to give the 
+      absolute URI <code>https://www.saxonica.com/products/feature-matrix-11.xml</code>.
       The process of fetching an XML document using this absolute URI is properly
       refered to as <em>dereferencing</em>; however, it is often called <em>resolving</em>,
       and since this term is used in many APIs, it is impossible to avoid it.</p>
