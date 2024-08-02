@@ -370,9 +370,6 @@ private:
                          called; */
   int childCount;     /*!< The number of of child nodes on the current node*/
   int axisCount;
-  XdmNode *parent;      /*!< Cached. The parent node of the current node.*/
-  XdmValue *typedValue; /*!< Cached.  The typed value of this node, as defined
-                           in XDM */
   XdmNode **attrValues; /*!< Cached attribute nodes when getAttributeNodes
                            method is first called; */
   int attrCount; /*!< The number of attribute nodes from the current node */

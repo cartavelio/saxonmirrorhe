@@ -8,14 +8,14 @@
 
 XdmNode::XdmNode(int64_t obj)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
-      childCount(-1), children(nullptr), parent(nullptr), typedValue(nullptr),
+      childCount(-1), children(nullptr),
       attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), axisCount(0),
       nodeToString(nullptr) {
 }
 
 XdmNode::XdmNode(XdmNode *p, int64_t obj, XDM_NODE_KIND kind)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
-      childCount(-1), children(nullptr), parent(p), typedValue(nullptr),
+      childCount(-1), children(nullptr),
       attrValues(nullptr), attrCount(-1), nodeKind(kind), axisCount(0),
       nodeToString(nullptr) {}
 
@@ -25,8 +25,6 @@ XdmNode::XdmNode(const XdmNode &other) {
   nodeName = other.nodeName;
   localName = other.localName;
   childCount = other.childCount;
-  parent = other.parent;
-  typedValue = other.typedValue;
   attrCount = other.attrCount;
   nodeKind = other.nodeKind;
   nodeToString = other.nodeToString;
@@ -177,19 +175,7 @@ const char *XdmNode::getNodeName() {
 // TODO we still don't know if the result is an XdmAtomicValue, EmptySequence or
 // XdmValue
 XdmValue *XdmNode::getTypedValue() {
-  if (typedValue == nullptr) {
-    int64_t result =
-        j_getTypedValue(SaxonProcessor::sxn_environ->thread, (void *)value);
-    if (result > 0) {
-      typedValue = new XdmValue();
-      typedValue->addUnderlyingValue(result);
-      return typedValue;
-    }
-    return nullptr;
-
-  } else {
-    return typedValue;
-  }
+  return SaxonProcessor::makeXdmValueFromRef(j_getTypedValue(SaxonProcessor::sxn_environ->thread, (void *)value));
 }
 
 int XdmNode::getLineNumber(){
@@ -228,23 +214,15 @@ const char *XdmNode::getBaseUri() {
 }
 
 XdmNode *XdmNode::getParent() {
-    //TODO test this still works if the parent node has been deleted
-  if (parent == nullptr) {
     int64_t nodeRef =
         getParentForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)value);
     if (nodeRef > SXN_UNSET) {
-      parent = new XdmNode(nullptr, nodeRef, UNKNOWN);
-      return parent;
+      return new XdmNode(nullptr, nodeRef, UNKNOWN);
     }
     return nullptr;
-
-  } else {
-    return parent;
-  }
 }
 
 const char *XdmNode::getAttributeValue(const char *str) {
-
   if (str == nullptr) {
     return nullptr;
   }
@@ -274,7 +252,6 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
     XdmNode *tempNode = nullptr;
     for (int p = 0; p < attrCount; ++p) {
       tempNode = new XdmNode(this, results[p], ATTRIBUTE);
-      // this->incrementRefCount();
       attrValuesi[p] = tempNode;
     }
 
@@ -309,7 +286,6 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
   for (int p = 1; p < axisCount + 1; ++p) {
 
     tempNode = new XdmNode(this, results[p], UNKNOWN);
-    // this->incrementRefCount();
     valuesi[p - 1] = tempNode;
   }
 
