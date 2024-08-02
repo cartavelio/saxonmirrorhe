@@ -633,6 +633,10 @@ public class SortKeyDefinition extends PseudoExpression {
         }
         newSKD.setSortKey(new ContextItemExpression(), true);
 
+        if (getStable() != null) {
+            newSKD.setStable(new StringLiteral(this.getStable().evaluateAsString(context)));
+        }
+
         return newSKD;
     }
 
