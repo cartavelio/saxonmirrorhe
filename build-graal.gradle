@@ -573,13 +573,13 @@ def pyenvExeTask = tasks.register('pyenvExe', PyenvExe)
 
 def pyenvTask = tasks.register("pyenv", PythonPyenv) {
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
-  pythonVersion = "3.12.2"
+  pythonVersion = project.pythonVersion
   pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
 }
 
 def pyenvValgrindTask = tasks.register("pyenvValgrind", PythonPyenv) {
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
-  pythonVersion = "3.12.2"
+  pythonVersion = project.pythonVersion
   pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
   debugVariant = "valgrind"
 }
@@ -607,14 +607,14 @@ def wheelPlatformTagTask = tasks.register("wheelPlatformTag", WheelCompatibility
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
   pythonVersion = pyenvTask.map { it.pythonVersion.get() }
   pythonExe = branchVenvTask.map { it.pythonExe.get() }
-  manylinuxTarget = "manylinux_2_24"
+  manylinuxTarget = project.manylinuxTarget
 }
 
 def wheelDebugPlatformTagTask = tasks.register("wheelDebugPlatformTag", WheelCompatibilityTags) {
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
   pythonVersion = pyenvTask.map { it.pythonVersion.get() }
   pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
-  manylinuxTarget = "manylinux_2_24"
+  manylinuxTarget = project.manylinuxTarget
 }
 
 
