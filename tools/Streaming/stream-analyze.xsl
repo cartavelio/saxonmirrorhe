@@ -257,7 +257,7 @@
               style="position:fixed; width:66px;         height:2000px; z-index:1; left: 0px; top: 0px; border: 1px none #000000;         background-color: #C1CEDE; layer-background-color: #C1CEDE; visibility:         visible;"/>
             <div id="LogoArea"
               style="position:absolute; width:340px; height:72px; z-index:3; right: 0px; top: 0px; border: 1px none #000000; visibility: visible;">
-              <a href="http://www.saxonica.com/">
+              <a href="https://www.saxonica.com/">
                 <img src="style/img/saxonica_logo.gif" width="340" height="72" border="0"
                   alt="saxonica.com"/>
               </a>
