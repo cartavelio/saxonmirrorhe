@@ -274,6 +274,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
             sourceBinding.handleSequenceConstructor(exec, decl);
 
             LocalParam binding = new LocalParam();
+            binding.setLocation(allocateLocation());
             binding.setSelectExpression(sourceBinding.getSelectExpression());
             binding.setConversion(conversion);
             binding.setVariableQName(name);
