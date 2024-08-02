@@ -9,6 +9,8 @@ PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunc
 # distutils: sources = SaxonProcessor.cpp
 # cython: language_level = 3
 
+__version__ = '@@VERSION@@'
+
 cimport saxoncClasses
 from libcpp cimport bool
 from libcpp.string cimport string
