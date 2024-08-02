@@ -314,14 +314,26 @@ public final class BigIntegerValue extends IntegerValue {
         if (scale >= 0) {
             return this;
         } else {
-            BigInteger factor = BigInteger.valueOf(10).pow(-scale);
-            BigInteger[] pair = value.divideAndRemainder(factor);
-            int up = pair[1].compareTo(factor.divide(BigInteger.valueOf(2)));
-            if (up >= 0) {
-                // remainder is > .5
-                pair[0] = pair[0].add(BigInteger.valueOf(1));
+            boolean negative = value.signum() < 0;
+
+            // factor is 1 for scale=0, 10 for scale=-1, 100 for scale=-2, etc
+            long factor = 1;
+            for (long i = 1; i <= -scale; i++) {
+                factor *= 10;
             }
-            return makeIntegerValue(pair[0].multiply(factor));
+            BigInteger factorB = BigInteger.valueOf(factor);
+
+            BigInteger towardsZero = value.divide(factorB).multiply(factorB);
+            if (towardsZero.equals(value)) {
+                return this;
+            }
+            BigInteger awayFromZero = negative ? towardsZero.subtract(factorB) : towardsZero.add(factorB);
+            BigInteger floor = negative ? awayFromZero : towardsZero;
+            BigInteger ceiling = negative ? towardsZero : awayFromZero;
+            BigInteger midpoint = floor.add(ceiling.subtract(floor).divide(BigInteger.valueOf(2)));
+            boolean midway = value.equals(midpoint);
+            BigInteger nearest = value.compareTo(midpoint) > 0 ? ceiling : floor;
+            return IntegerValue.makeIntegerValue(midway ? ceiling : nearest);
         }
     }
 
@@ -336,23 +348,34 @@ public final class BigIntegerValue extends IntegerValue {
 
     @Override
     public NumericValue roundHalfToEven(int scale) {
-        if (scale >= 0) {
+        if (scale >= 0 || value.signum() == 0) {
             return this;
         } else {
-            BigInteger factor = BigInteger.valueOf(10).pow(-scale);
-            BigInteger[] pair = value.divideAndRemainder(factor);
-            int up = pair[1].compareTo(factor.divide(BigInteger.valueOf(2)));
-            if (up > 0) {
-                // remainder is > .5
-                pair[0] = pair[0].add(BigInteger.valueOf(1));
-            } else if (up == 0) {
-                // remainder == .5
-                if (pair[0].mod(BigInteger.valueOf(2)).signum() != 0) {
-                    // last digit of quotient is odd: make it even
-                    pair[0] = pair[0].add(BigInteger.valueOf(1));
-                }
+            boolean negative = value.signum() < 0;
+
+            // factor is 1 for scale=0, 10 for scale=-1, 100 for scale=-2, etc
+            long factor = 1;
+            for (long i = 1; i <= -scale; i++) {
+                factor *= 10;
             }
-            return makeIntegerValue(pair[0].multiply(factor));
+            BigInteger factorB = BigInteger.valueOf(factor);
+
+            BigInteger towardsZero = value.divide(factorB).multiply(factorB);
+            if (towardsZero.equals(value)) {
+                return this;
+            }
+            BigInteger awayFromZero = negative ? towardsZero.subtract(factorB) : towardsZero.add(factorB);
+            BigInteger floor = negative ? awayFromZero : towardsZero;
+            BigInteger ceiling = negative ? towardsZero : awayFromZero;
+            BigInteger midpoint = floor.add(ceiling.subtract(floor).divide(BigInteger.valueOf(2)));
+            boolean midway = value.equals(midpoint);
+            BigInteger nearest = value.compareTo(midpoint) > 0 ? ceiling : floor;
+
+            return IntegerValue.makeIntegerValue(
+                    midway
+                    ? (floor.divide(factorB).mod(BigInteger.valueOf(2)).signum() == 0 ? floor : ceiling)
+                    : nearest);
+
         }
     }
 
