@@ -184,7 +184,7 @@
                                     <xsl:variable name="PDlink" select="concat($version, '/', $variant, '.pdf')"/>
                                     <td><xsl:if test="tokenize($package/@platforms, '\s') =
                                         $platform"><a class="bodylink" 
-                                            href="http://www.saxonica.com/products/PD{$PDlink}"><div
+                                            href="https://www.saxonica.com/products/PD{$PDlink}"><div
                                                 class="DownloadButton"><xsl:value-of
                                                 select="concat($variant, ' ', $versionNo)"/></div></a></xsl:if></td>
                                 </xsl:for-each>
@@ -208,31 +208,31 @@
                     <h2>View the full product descriptions</h2>
                     <ul>
                         <li><a class="title" target="_blank"
-                            href="http://www.saxonica.com/products/PD{$version}/HE.pdf">
+                            href="https://www.saxonica.com/products/PD{$version}/HE.pdf">
                             <b>HE: </b>Saxon Home Edition (open source)</a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/PE.pdf">
+                        <li><a class="title" target="_blank" href="https://www.saxonica.com/products/PD{$version}/PE.pdf">
                             <b>PE: </b>Saxon Professional Edition</a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EE.pdf">
+                        <li><a class="title" target="_blank" href="https://www.saxonica.com/products/PD{$version}/EE.pdf">
                             <b>EE: </b>Saxon Enterprise Edition</a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EET.pdf">
+                        <li><a class="title" target="_blank" href="https://www.saxonica.com/products/PD{$version}/EET.pdf">
                             <b>EET: </b>Enterprise Edition Transformation package - 
                             includes enterprise features for XSLT and Schema processing only.
                             No XQuery enterprise features.
                             <i>(In the online shop, select the "No XQuery" language option.)</i>
                         </a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EEQ.pdf">
+                        <li><a class="title" target="_blank" href="https://www.saxonica.com/products/PD{$version}/EEQ.pdf">
                             <b>EEQ: </b>Enterprise Edition Query package - 
                             includes enterprise features for XQuery and Schema processing only.
                             No XSLT enterprise features.
                             <i>(In the online shop, select the "No XSLT" language option.)</i>
                         </a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/EEV.pdf">
+                        <li><a class="title" target="_blank" href="https://www.saxonica.com/products/PD{$version}/EEV.pdf">
                             <b>EEV: </b>Enterprise Edition Validation package - 
                             includes enterprise features for Schema processing only.
                             No XSLT and XQuery enterprise features.
                             <i>(In the online shop, select the "No XSLT" and "No XQuery" language options.)</i>
                         </a></li>
-                        <li><a class="title" target="_blank" href="http://www.saxonica.com/products/PD{$version}/CS.pdf">
+                        <li><a class="title" target="_blank" href="https://www.saxonica.com/products/PD{$version}/CS.pdf">
                             <b>CS: </b>Saxon Enterprise Edition for .NET 6</a></li>
                         <li><a class="title" href="../saxon-js/index.xml"><b>JS2: </b>SaxonJS 2, JavaScript processor</a></li>
                     </ul>
