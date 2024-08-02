@@ -1496,7 +1496,7 @@ public class Transform {
         if (!showTime) {
             logger.info(getConfiguration().getProductTitle());
         }
-        logger.info("Usage: see http://www.saxonica.com/documentation/index.html#!using-xsl/commandline");
+        logger.info("Usage: see https://www.saxonica.com/documentation/index.html#!using-xsl/commandline");
         logger.info("Format: " + CommandLineOptions.getCommandName(this) + " options params");
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);

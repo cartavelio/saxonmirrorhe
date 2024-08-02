@@ -35,7 +35,7 @@ public class Xslt30TestReport extends TestReport {
         results.writeAttribute("version", Version.getProductVersion());
         results.writeAttribute("anonymous-result-column", "false");
         results.writeEmptyElement(NS, "organization");
-        results.writeAttribute("name", "http://www.saxonica.com/");
+        results.writeAttribute("name", "https://www.saxonica.com/");
         results.writeAttribute("anonymous", "false");
         results.writeEmptyElement(NS, "submitter");
         results.writeAttribute("name", "Michael Kay");
