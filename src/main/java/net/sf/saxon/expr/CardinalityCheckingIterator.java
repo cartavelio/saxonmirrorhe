@@ -68,8 +68,9 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
                 second = base.next();
                 if (second != null && !Cardinality.allowsMany(requiredCardinality)) {
                     RoleDiagnostic role = roleSupplier.get();
-                    typeError("A sequence of more than one item is not allowed as the " +
-                            role.getMessage() + CardinalityChecker.depictSequenceStart(new TwoItemIterator(first, second), 2),
+                    typeError("A sequence of more than one item {" +
+                                      CardinalityChecker.depictSequenceStart(new TwoItemIterator(first, second), 2) +
+                                      "} is not allowed as the " + role.getMessage(),
                             role.getErrorCode());
                 }
             }
