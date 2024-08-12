@@ -188,6 +188,24 @@ namespace Saxon.Api {
                 throw new ArgumentException("Attribute \"" + s + "\" should be a single character");
             }
         }
+        
+        /// <summary>
+        /// Sets a property of the default (unnamed) decimal format, for use by the <c>format-number()</c> function.
+        /// </summary>
+        /// <remarks>
+        /// This method checks that the value is valid for the particular property, but it does not
+        /// check that all the values for the decimal format are consistent (for example, that the
+        /// decimal separator and grouping separator have different values). This consistency
+        /// check is performed only when the decimal format is used.
+        /// </remarks>
+        /// <param name="property">The name of the property to set: one of
+        ///   "decimal-separator", "grouping-separator", "infinity", "NaN",
+        ///   "minus-sign", "percent", "per-mille", "zero-digit", "digit",
+        ///   or "pattern-separator".</param>
+        /// <param name="value">The new value for the property.</param>
+        public void SetDecimalFormatProperty(string property, string value) {
+            Implementation.setDecimalFormatProperty(property, value);
+        }
 
         /// <summary>
         /// Sets a property of a selected decimal format, for use by the <c>format-number()</c> function.
