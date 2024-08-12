@@ -608,6 +608,24 @@ namespace SaxonCS_NUnit {
  
         }
 
+        [Test]
+        public void TestDefaultDecimalFormat() {
+            try {
+                Processor p = new ();
+                XPathCompiler c = p.NewXPathCompiler();
+                c.XPathLanguageVersion = ("3.1");
+                c.SetDecimalFormatProperty("decimal-separator", "~");
+                c.SetDecimalFormatProperty( "grouping-separator", "|");
+                c.SetDecimalFormatProperty( "exponent-separator", "E");
+                XPathExecutable e = c.Compile("format-number(123.4, '0|000~0E0'");
+                XPathSelector s = e.Load();
+                String result = s.EvaluateSingle().StringValue;
+                Assert.That(result.Equals("1|234~0E-1"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
 
         [Test]
         public void TestDecimalFormat() {
