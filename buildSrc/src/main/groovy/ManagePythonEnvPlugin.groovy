@@ -461,7 +461,7 @@ abstract class WheelCompatibilityTags extends DefaultTask {
     @Internal
     Provider<String> platform = pythonVersionPath.map { path ->
         execString(pythonExe.get(),
-                ["-c", "import os; from wheel.bdist_wheel import get_platform; print(get_platform(os.environ['PYTHON_VERSION_PREFIX']))"],
+                ["-c", "import os; from setuptools.command.bdist_wheel import get_platform; print(get_platform(os.environ['PYTHON_VERSION_PREFIX']))"],
                 [PYTHON_VERSION_PREFIX: path.asFile.toString()])
     }
 
@@ -477,7 +477,7 @@ abstract class WheelCompatibilityTags extends DefaultTask {
 
     String generateWheelSuffix(String platform) {
         execString(pythonExe.get(),
-                ["-c", "import os; from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"],
+                ["-c", "import os; from setuptools.command.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"],
                 [PLATFORM_TAG: platform])
     }
 
