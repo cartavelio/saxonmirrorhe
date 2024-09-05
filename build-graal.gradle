@@ -388,27 +388,22 @@ tasks.register("graal_hec_jar", Jar) {
   from(layout.buildDirectory.dir("xerces")) {
     include "**/*.class"
     include "**/*.properties"
-    include "org/xmlresolver/cat*.xml"
-    include "org/xmlresolver/schemas/**/*"
-    include "org/xmlresolver/www.rddl.org/**/*"
-    include "org/xmlresolver/www.w3.org/**/*"
-    include "org/xmlresolver/xmlcatalogs.org/**/*"
-    include "org/xmlresolver/xmlresolver.org/**/*"
     exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
     exclude "META-INF/MANIFEST.MF"
   }
 }
 
-tasks.register("graal_pec_jar", Jar) {
-  dependsOn "graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-          "processResources", "unjar_ICU4jJar"
-  description "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
-
-  inputs.files fileTree(layout.buildDirectory.dir("services/saxon-pe/META-INF"))
-  inputs.files fileTree(layout.buildDirectory.dir("classes/pec"))
-  inputs.files fileTree(layout.projectDirectory.dir("src/main/resources/net"))
-  inputs.files fileTree(layout.buildDirectory.dir("xerces"))
-  inputs.files fileTree(layout.buildDirectory.dir("icu"))
+task graal_pec_jar(
+  type: Jar,
+  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
+              "processResources", "unjar_ICU4jJar"],
+  description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
+) {
+  inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
+  inputs.files fileTree(dir: "${buildDir}/classes/pec")
+  inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
+  inputs.files fileTree(dir: "${buildDir}/xerces")
+  inputs.files fileTree(dir: "${buildDir}/icu")
 
   archiveBaseName = "saxon-pe-${saxonVersion3}"
   destinationDirectory = layout.buildDirectory.dir("pec/build/graalvm")
@@ -416,10 +411,10 @@ tasks.register("graal_pec_jar", Jar) {
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from (layout.buildDirectory.dir("services/saxon-pe")) {
+  from ("build/services/saxon-pe") {
     include "META-INF/**"
   }
-  from (layout.buildDirectory.dir("classes/pec")) {
+  from ("build/classes/pec") {
     include "net/**/*.class"
     exclude "net/sf/saxon/ant/*.class"
     exclude "**/sql/**/*.class"
@@ -439,33 +434,27 @@ tasks.register("graal_pec_jar", Jar) {
     exclude "com/saxonica/config/EnterpriseXPathFactory.class"
     include "javax/xml/xquery/*.class"
   }
-  from (layout.buildDirectory.dir("xerces")) {
-    include "**/*.class"
-    include "**/*.properties"
-    include "org/xmlresolver/cat*.xml"
-    include "org/xmlresolver/schemas/**/*"
-    include "org/xmlresolver/www.rddl.org/**/*"
-    include "org/xmlresolver/www.w3.org/**/*"
-    include "org/xmlresolver/xmlcatalogs.org/**/*"
-    include "org/xmlresolver/xmlresolver.org/**/*"
-    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
-    exclude "META-INF/MANIFEST.MF"
-  }
-  from (layout.buildDirectory.dir("htmlparser")) {
-    include "**/*.class"
-    include "**/*.properties"
-    exclude "META-INF/MANIFEST.MF"
-  }
-  from (layout.projectDirectory.dir("src/main/resources")) {
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/htmlparser") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }   
+  from ("src/main/resources") {
     include "net/**"
   }
-  from (layout.buildDirectory.dir("icu")) {
-    include "**/*.class"
-    include "**/*.*"
-    include "**/*.properties"
-    exclude "META-INF/MANIFEST.MF"
-  }
-  from (layout.buildDirectory.dir("jLine")) {
+  from ("${buildDir}/icu") {
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/jLine") {
     include "**/*.class"
     include "**/*.*"
     include "**/*.properties"
@@ -473,16 +462,17 @@ tasks.register("graal_pec_jar", Jar) {
   }
 }
 
-tasks.register("graal_eec_jar", Jar) {
-  dependsOn "graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-          "processResources", "unjar_ICU4jJar"
-  description "Build the EE jar file for SaxonC, removed \"unjar_ICU4jJar\", \"unjar_JLineJar\""
-
-  inputs.files fileTree(layout.buildDirectory.dir("services/saxon-ee/META-INF"))
-  inputs.files fileTree(layout.buildDirectory.dir("classes/eec"))
-  inputs.files fileTree(layout.projectDirectory.dir("src/main/resources/net"))
-  inputs.files fileTree(layout.buildDirectory.dir("xerces"))
-  inputs.files fileTree(layout.buildDirectory.dir("icu"))
+task graal_eec_jar(
+  type: Jar,
+  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
+              "processResources","unjar_ICU4jJar"],
+  description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\", \"unjar_JLineJar\""
+) {
+  inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
+  inputs.files fileTree(dir: "${buildDir}/classes/eec")
+  inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
+  inputs.files fileTree(dir: "${buildDir}/xerces")
+  inputs.files fileTree(dir: "${buildDir}/icu")
 
   archiveBaseName = "saxon-ee-${saxonVersion3}"
   destinationDirectory = layout.buildDirectory.dir("eec/build/graalvm")
@@ -490,43 +480,38 @@ tasks.register("graal_eec_jar", Jar) {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from (layout.buildDirectory.dir("services/saxon-ee")) {
+  from ("${buildDir}/services/saxon-ee") {
     include "META-INF/**"
   }
-  from (layout.buildDirectory.dir("classes/eec")) {
+  from ("${buildDir}/classes/eec") {
     include "net/**/*.class"
     exclude "net/sf/saxon/ant/*.class"
     exclude "**/sql/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
   }
-  from (layout.projectDirectory.dir("src/main/resources")) {
+  from ("${projectDir}/src/main/resources") {
     include "net/**"
   }
-  from (layout.buildDirectory.dir("xerces")) {
-    include "**/*.class"
-    include "**/*.properties"
-    include "org/xmlresolver/cat*.xml"
-    include "org/xmlresolver/schemas/**/*"
-    include "org/xmlresolver/www.rddl.org/**/*"
-    include "org/xmlresolver/www.w3.org/**/*"
-    include "org/xmlresolver/xmlcatalogs.org/**/*"
-    include "org/xmlresolver/xmlresolver.org/**/*"
-    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
-    exclude "META-INF/MANIFEST.MF"
-  }
-  from (layout.buildDirectory.dir("htmlparser")) {
-    include "**/*.class"
-    include "**/*.properties"
-    exclude "META-INF/MANIFEST.MF"
-  }
-  from (layout.buildDirectory.dir("icu")) {
-    include "**/*.class"
-    include "**/*.*"
-    include "**/*.properties"
-    exclude "META-INF/MANIFEST.MF"
-  }
-  from (layout.buildDirectory.dir("jLine")) {
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/htmlparser") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/icu") {
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.res"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/jLine") {
     include "**/*.class"
     include "**/*.*"
     include "**/*.res"
@@ -905,7 +890,7 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
 
   tasks.register("${edition}c_python_repair_wheel", RepairLocalWheel) {
     outputDir = pythonBuildRootPath(edition)
-    manylinuxTarget = project.manylinuxTarget
+    manylinuxTarget = "manylinux_2_24"
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
     productEdition = edition
@@ -927,7 +912,7 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
 
   tasks.register("${edition}c_python_repair_debug_wheel", RepairLocalWheel) {
     outputDir = pythonBuildRootPath(edition)
-    manylinuxTarget = project.manylinuxTarget
+    manylinuxTarget = "manylinux_2_24"
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
     productEdition = edition
