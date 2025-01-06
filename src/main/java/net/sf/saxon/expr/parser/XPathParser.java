@@ -4086,7 +4086,7 @@ public class XPathParser {
                         placeMarkers.add(args.size());
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
-                        arg = parseExprSingle();
+                        arg = parseFunctionArgument();
                     }
                     args.add(arg);
                 }
