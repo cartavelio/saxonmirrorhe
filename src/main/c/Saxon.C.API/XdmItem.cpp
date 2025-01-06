@@ -17,7 +17,7 @@ XdmItem::XdmItem(const XdmItem &other) : XdmValue(other) {
   itemToString = other.itemToString;
 }
 
-XdmItem::XdmItem(int64_t objRef) {
+XdmItem::XdmItem(int64_t objRef): XdmValue() {
   value = objRef;
   xdmSize = 1;
   refCount = 0;
