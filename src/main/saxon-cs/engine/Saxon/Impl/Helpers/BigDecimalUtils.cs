@@ -49,6 +49,32 @@ namespace Saxon.Impl.Helpers {
                 _ => BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointToPositiveInfinity)
             };
         }
+        
+        public static Singulink.Numerics.BigDecimal Round(Singulink.Numerics.BigDecimal a, int scale,
+            Saxon.Hej.functions.Round.RoundingRule roundingRule) {
+#pragma warning disable 8524
+            return roundingRule switch {
+                Hej.functions.Round.RoundingRule.FLOOR =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.ToNegativeInfinity),
+                Hej.functions.Round.RoundingRule.CEILING =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.ToPositiveInfinity),
+                Hej.functions.Round.RoundingRule.TOWARD_ZERO =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.ToZero),
+                Hej.functions.Round.RoundingRule.AWAY_FROM_ZERO =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.AwayFromZero),
+                Hej.functions.Round.RoundingRule.HALF_TO_FLOOR =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointToNegativeInfinity),
+                Hej.functions.Round.RoundingRule.HALF_TO_CEILING =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointToPositiveInfinity),
+                Hej.functions.Round.RoundingRule.HALF_TOWARD_ZERO =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointToZero),
+                Hej.functions.Round.RoundingRule.HALF_AWAY_FROM_ZERO =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointAwayFromZero),
+                Hej.functions.Round.RoundingRule.HALF_TO_EVEN =>
+                    BigDecimal.Round(a, scale, Singulink.Numerics.RoundingMode.MidpointToEven)
+            };
+#pragma warning restore 8524
+        }
     }
 }
 
