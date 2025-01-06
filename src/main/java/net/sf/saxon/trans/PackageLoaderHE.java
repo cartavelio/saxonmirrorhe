@@ -7,7 +7,6 @@
 
 package net.sf.saxon.trans;
 
-import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CheckSumFilter;
 import net.sf.saxon.event.FilterFactory;
@@ -2350,7 +2349,6 @@ public class PackageLoaderHE implements IPackageLoader {
                     f = loader.makeEXPathBinaryFunction(qName, arity);
                 } else if (uri == NamespaceUri.EXPATH_FILE) {
                     f = loader.makeEXPathFileFunction(qName, arity);
-                    f = EXPathFileFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
                 }
             } else {
                 f = SystemFunction.makeFunction(name, rsc, arity);
