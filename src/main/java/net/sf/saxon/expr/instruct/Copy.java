@@ -295,7 +295,7 @@ public class Copy extends ElementCreator {
                             }
                             Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                SchemaDeclaration attr = config.getElementDeclaration(fp);
+                                SchemaDeclaration attr = config.getAttributeDeclaration(fp);
                                 if (attr != null) {
                                     try {
                                         return new ContentTypeTest(Type.ATTRIBUTE, attr.getType(), config, false);
