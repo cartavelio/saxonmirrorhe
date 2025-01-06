@@ -1319,7 +1319,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         return this == DURATION || this == DAY_TIME_DURATION || this == YEAR_MONTH_DURATION;
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
     @Override
     public FunctionItem getComponentAsFunction() {
         return UserSimpleType.getComponentAsFunction(this);

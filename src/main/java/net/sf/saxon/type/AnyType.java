@@ -640,7 +640,7 @@ public enum AnyType implements ComplexType {
         return "mixed";
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
 
     @Override
     public FunctionItem getComponentAsFunction() {

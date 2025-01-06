@@ -539,7 +539,7 @@ public class BuiltInListType implements ListType {
         return input;
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
 
     /**
      * Get the schema component in the form of a function item. This allows schema information

@@ -130,7 +130,7 @@ public class NodeSetPattern extends Pattern {
         return getSelectionExpression().getDependencies();
     }
 
-    //#ifdefined STREAM
+    //#if STREAM==true
 
     /**
      * Test whether a pattern is motionless, that is, whether it can be evaluated against a node

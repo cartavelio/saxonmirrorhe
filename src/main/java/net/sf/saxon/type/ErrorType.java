@@ -696,7 +696,7 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
         return Optional.of("Evaluation of the supplied expression will always fail");
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
     /**
      * Get the schema component in the form of a function item. This allows schema information
      * to be made visible to XSLT or XQuery code. The function makes available the contents of the

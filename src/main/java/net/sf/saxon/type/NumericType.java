@@ -694,7 +694,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      */
     @Override
     public void checkTypeDerivationIsOK(SchemaType base, int block) throws SchemaException {
-        //#ifdefined  SCHEMA
+        //#if SCHEMA==true
         String s = UserSimpleType.isTypeDerivationOK(this, base, block);
         if (s != null) {
             throw new SchemaException(s);
@@ -702,7 +702,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
         //#endif
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
     /**
      * Get the schema component in the form of a function item. This allows schema information
      * to be made visible to XSLT or XQuery code. The function makes available the contents of the

@@ -109,7 +109,7 @@ public abstract class VariableReference extends Expression implements BindingRef
         flattened = ref.flattened;
         inLoop = ref.inLoop;
         filtered = ref.filtered;
-        //#ifdefined STREAM
+        //#if STREAM==true
         Streamability.setPostureAndSweep(this, Streamability.getPostureAndSweepIfKnown(ref));
         //#endif
         ExpressionTool.copyLocationInfo(ref, this);

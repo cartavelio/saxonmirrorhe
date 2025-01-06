@@ -328,7 +328,7 @@ public class GeneralPositionalPattern extends Pattern {
         return nodeTest.hashCode() ^ positionExpr.hashCode();
     }
 
-//#ifdefined STREAM
+//#if STREAM==true
 
     /**
      * Test whether a pattern is motionless, that is, whether it can be evaluated against a node

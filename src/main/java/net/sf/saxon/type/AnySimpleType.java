@@ -464,7 +464,7 @@ public enum AnySimpleType implements SimpleType {
         return input;
     }
 
-    //#ifdefined SCHEMA
+    //#if SCHEMA==true
     /**
      * Get the schema component in the form of a function item. This allows schema information
      * to be made visible to XSLT or XQuery code. The function makes available the contents of the
