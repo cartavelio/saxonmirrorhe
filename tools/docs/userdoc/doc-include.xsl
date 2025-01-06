@@ -53,8 +53,11 @@
         <xsl:apply-templates select="document($src)"/>
       </xsl:result-document>
       </xsl:when>
+      <xsl:when test="$name = ('javadoc.xml', 'dotnetdoc.xml')">
+        <!-- We know that these are not available -->
+      </xsl:when>
       <xsl:otherwise>
-        <xsl:message select="'Failed to load: …/build/' || substring-after($src, '/build/')"/>
+        <xsl:message select="'Failed to load: /build/' || substring-after($src, '/build/')"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
