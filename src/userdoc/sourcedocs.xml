@@ -2467,14 +2467,23 @@ documentBuilder.build(as);]]></code></pre>
         (or with its underlying <code java="net.sf.saxon.Configuration">Configuration</code>) by setting the
         configuration feature <a class="feature" href="DEFAULT_COLLECTION"/>. The value takes the form of a
         collection URI. When the <a class="bodylink code" href="/functions/fn/collection">collection()</a>
-        function is called with no arguments, this is exactly the same as supplying this default collection
-        URI. If no default collection URI has been registered, an empty collection is returned.</p>
+        or <a class="bodylink code" href="/functions/fn/uri-collection">uri-collection()</a>
+        function is called with no arguments, or when the supplied argument is an empty sequence,
+        this is exactly the same as supplying this default collection
+        URI. If no default collection URI has been registered, the function raises error <code>FODC0002</code>.</p>
+      
+      <p>Before the collection URI is passed to the collection finder, it is processed as follows. First it is
+      validated as a URI using the relevant built-in Java or C# mechanisms. If validation fails, another attempt
+      is made after applying the <a class="bodylink code" href="/functions/fn/iri-to-uri">iri-to-uri()</a>
+      function (this is particularly useful if the collection URI includes a query part containing a regular expression,
+      as this will often need to be percent-encoded). If the resulting URI is relative, it is then resolved
+      against the static base URI.</p>
 
     <p>The standard collection finder supports four different kinds of collection: registered collections,
       catalog-based collections, directory-based collections, and (on Java only) zip-based collections:</p>
     
     <ul>
-      <li><p>A registered collection is one that has been explicitly registered with the Configuration, by calling
+      <li><p>A registered collection is one that has been explicitly registered with the <code>Configuration</code>, by calling
         <code java="net.sf.saxon.Configuration#registerCollection">Configuration.registerCollection()</code>
         in Java, or <code cs="Saxon.Api.Processor#RegisterCollection">Processor.RegisterCollection()</code> in
         C#. (See <a class="bodylink" href="../registered-collections">Registered collections</a>.)</p></li>
@@ -2498,7 +2507,7 @@ documentBuilder.build(as);]]></code></pre>
     <p>In the case of directory-based and ZIP-based collections, query parameters may be added to
       the collection URI to further control how it is to be processed.</p>
     
-    <aside><p>Saxon cannot assume that the nodes returned by the <code>collection()</code> function
+    <aside><p>Saxon cannot assume that any nodes returned by the <code>collection()</code> function
     are in document order. It is therefore best to avoid expressions like <code>collection()/doc/section</code>
     which force the collection to be sorted (and therefore force all the nodes in the collection to
     be in memory at the same time). To iterate over a collection, it's better to use constructs that
