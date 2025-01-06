@@ -16,6 +16,7 @@ import net.sf.saxon.value.IntegerValue;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.*;
 import java.time.temporal.ChronoField;
 import java.util.*;
@@ -94,6 +95,30 @@ public class TestReflexionHelper {
 
     public static List<String> getEmptyList() {
         return new ArrayList<String>();
+    }
+
+    public static String maxi(String label, DoubleValue... doubles) {
+        double max = Double.MIN_VALUE;
+        for (DoubleValue val : doubles) {
+            max = val.getDoubleValue() > max ? val.getDoubleValue() : max;
+        }
+        return label + ": " + max;
+    }
+
+    public static String maxi2(String label, DoubleValue... doubles) {
+        double max = Double.MIN_VALUE;
+        for (DoubleValue val : doubles) {
+            max = val.getDoubleValue() > max ? val.getDoubleValue() : max;
+        }
+        return label + " (s) : " + max;
+    }
+
+    public static String maxi2(URI label, DoubleValue... doubles) {
+        double max = Double.MIN_VALUE;
+        for (DoubleValue val : doubles) {
+            max = val.getDoubleValue() > max ? val.getDoubleValue() : max;
+        }
+        return label + " (u) : " + max;
     }
 
 
