@@ -232,6 +232,8 @@ public class LicenseTests {
 
     @Test
     public void testOEMActivation() {
+        // Activate Saxon at the level of a s9api Processor.
+        // Calls deprecated processor.setConfigurationProperty() method
         try {
             Processor processor = new Processor(true);
             ActivateSaxon.activate(processor);
@@ -247,10 +249,66 @@ public class LicenseTests {
     }
 
     @Test
+    public void testOEMActivation2() {
+        // Activate Saxon at the level of a s9api Processor.
+        // Calls processor.getUnderlyingConfiguration().setConfigurationProperty()
+        try {
+            Processor processor = new Processor(true);
+            ActivateSaxon.activate2(processor);
+            XPathCompiler xpc = processor.newXPathCompiler();
+            xpc.declareNamespace("saxon", "http://saxon.sf.net/");
+            XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
+            XdmValue result = xpe.load().evaluate();
+            assertEquals(3.33333, ((XdmAtomicValue) result).getDoubleValue());
+            assertEquals("V012311", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testOEMActivation3() {
+        // Activate a ProfessionalConfiguration
+        try {
+            Processor processor = new Processor(true);
+            ActivateSaxon.activate((ProfessionalConfiguration) processor.getUnderlyingConfiguration());
+            XPathCompiler xpc = processor.newXPathCompiler();
+            xpc.declareNamespace("saxon", "http://saxon.sf.net/");
+            XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
+            XdmValue result = xpe.load().evaluate();
+            assertEquals(3.33333, ((XdmAtomicValue) result).getDoubleValue());
+            assertEquals("V012311", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
     public void testOEMActivationExpired() {
+        // Activate Saxon at the level of a s9api Processor.
+        // Calls deprecated processor.setConfigurationProperty() method
         try {
             Processor processor = new Processor(true);
             ActivateSaxon.activateExpired(processor);
+            XPathCompiler xpc = processor.newXPathCompiler();
+            xpc.declareNamespace("saxon", "http://saxon.sf.net/");
+            XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
+            XdmValue result = xpe.load().evaluate();
+            fail("Unexpected success " + result);
+        } catch (LicenseException e) {
+            assertTrue(e.getMessage().contains("(serial number V010024)"), "serial");
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testOEMActivationExpired2() {
+        // Activate Saxon at the level of a s9api Processor.
+        // Calls processor.getUnderlyingConfiguration().setConfigurationProperty()
+        try {
+            Processor processor = new Processor(true);
+            ActivateSaxon.activateExpired2(processor);
             XPathCompiler xpc = processor.newXPathCompiler();
             xpc.declareNamespace("saxon", "http://saxon.sf.net/");
             XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
