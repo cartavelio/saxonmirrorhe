@@ -1899,7 +1899,12 @@ PHP_METHOD(XdmItem, getStringValue) {
   xdmItem = obj->xdmItem;
 
   if (xdmItem != nullptr) {
-    const char *value = xdmItem->getStringValue();
+	const char *value = nullptr;
+    try {
+    	value = xdmItem->getStringValue();
+    } catch (SaxonApiException &e) {
+   		zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+    }
     if (value != nullptr) {
       RETVAL_STRING(value);
       SaxonProcessor::deleteString(value);
