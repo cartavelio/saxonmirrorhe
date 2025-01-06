@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <Nullable>disable</Nullable>
     <OutputType>Exe</OutputType>
     <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
@@ -37,10 +37,10 @@
       <PackageReference Include="Singulink.Numerics.BigDecimal" Version="2.0.2" />
       <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.1.0" />
       <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-      <PackageReference Include="XmlResolver" Version="2.1.0" />
-      <PackageReference Include="XmlResolverData" Version="1.2.3" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="6.0.0" />
+      <PackageReference Include="XmlResolver" Version="2.1.1" />
+      <PackageReference Include="XmlResolverData" Version="1.2.4" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.0" />
     </ItemGroup>
 </Project>
