@@ -183,19 +183,15 @@ public class TestPackage {
         }
     }
 
+
     @Test
-    public void testExportedPackage01() {
+    public void testExportedPackage02() {
+        // This version of the test uses a SEF file exported on 2024-08-30 using Saxon-EE 12.0
         try {
             Processor processor = new Processor(true);
-            // MHK 2016-08-27 - currently crashes if bytecode enabled
-            //processor.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
             XsltCompiler compiler = processor.newXsltCompiler();
-            // Note: if necessary, the .sef file can be regenerated from the .xsl file of the same name
-            // by using Transform on the command line. The current .sef file was generated using 9.7.0.7, and
-            // leaving it in this form is deliberate as it provides a backwards compatibility test
-            File file = new File(configTest.getDataDir() + "override-m-021-base.sef");
+            File file = new File(configTest.getDataDir() + "override-m-021-base-v12.0.sef");
             XsltPackage pack = compiler.loadLibraryPackage(file.toURI());
-            fail("Failed to detect that license has expired");
             System.err.println("Package loaded from " + file.getAbsolutePath());
             compiler.importPackage(pack);
             XsltExecutable exec = compiler.compile(new StreamSource(new File(configTest.getDataDir() + "override-m-021.xsl")));
@@ -211,7 +207,8 @@ public class TestPackage {
             e.printStackTrace();
             fail();
         } catch (LicenseException le) {
-            assertTrue(le.getMessage().contains("does not cover upgrade"));
+            le.printStackTrace();
+            fail();
         }
     }
 

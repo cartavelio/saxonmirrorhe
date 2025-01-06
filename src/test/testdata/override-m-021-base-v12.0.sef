@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2024-08-30T17:13:49.833943+01:00' id='0' name='http://example.com/override-m-021-base' version='30' defaultMode='Q{}m1' declaredModes='1' packageVersion='1' saxonProduct='SAXON-EE' saxonVersion='12.0' buildDateTime='2024-08-30T17:13:49.835057+01:00' target='EE' targetVersion='1' relocatable='false' implicit='false'>
+ <co id='0' binds=''>
+  <mode onNo='TC' flags='dWe' patternSlots='0'/>
+ </co>
+ <co id='1' vis='PUBLIC' binds='1 1'>
+  <mode name='Q{}m1' onNo='SC' flags='W' patternSlots='0'>
+   <templateRule prec='0' prio='0.0' seq='0' rank='0' minImp='0' slots='0' matches='NE nQ{}foo' flags='s' line='14' module='file:/Users/mike/GitHub/qt4cg/xslt40-test/tests/decl/override/override-m-021-base.xsl'>
+    <p.nodeTest role='match' test='NE nQ{}foo'/>
+    <elem role='action' baseUri='file:/Users/mike/GitHub/qt4cg/xslt40-test/tests/decl/override/override-m-021-base.xsl' ns='math=~ xs=~ xsl=~ xml=~' line='15' name='bar' nsuri=''>
+     <sequence line='16'>
+      <applyT mode='Q{}m1' bSlot='0'>
+       <axis role='select' name='attribute' nodeTest='NA'/>
+      </applyT>
+      <applyT line='17' mode='Q{}m1' flags='i' bSlot='1'>
+       <axis role='select' name='child' nodeTest='N'/>
+      </applyT>
+     </sequence>
+    </elem>
+   </templateRule>
+  </mode>
+ </co>
+ <overridden/>
+ <output>
+  <property name='Q{http://saxon.sf.net/}stylesheet-version' value='30'/>
+ </output>
+ <decimalFormat/>
+</package>
+<?Σ c5ebb2d6?>
