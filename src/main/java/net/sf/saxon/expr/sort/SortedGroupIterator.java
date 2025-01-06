@@ -89,8 +89,8 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        GroupToBeSorted[] groupArray = (GroupToBeSorted[]) values;
-        GroupToBeSorted thisGroup = groupArray[position - 1];
+        ObjectToBeSorted[] groupArray = values;
+        GroupToBeSorted thisGroup = (GroupToBeSorted) groupArray[position - 1];
         ManualGroupIterator iter = new ManualGroupIterator(thisGroup.value, position);
         iter.setCurrentGroup(thisGroup.currentGroup);
         iter.setCurrentGroupingKey(thisGroup.currentGroupingKey);

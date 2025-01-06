@@ -13,8 +13,8 @@ import net.sf.saxon.om.GroundedValue;
 /**
  * This class is a specialization of ObjectToBeSorted for use when the sequence
  * being sorted is a sequence of groups. The group is represented by its initial
- * item, but the object holds in addition the value of the grouping key, and an
- * iterator over the items in the group.
+ * item, but the object holds in addition the value of the grouping key, and a
+ * GroundedValue holding the items in the group.
  */
 public class GroupToBeSorted extends ObjectToBeSorted {
 

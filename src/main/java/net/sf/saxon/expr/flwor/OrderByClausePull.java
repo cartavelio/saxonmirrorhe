@@ -9,7 +9,7 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.ItemToBeSorted;
+import net.sf.saxon.expr.sort.ObjectToBeSorted;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -28,7 +28,7 @@ public class OrderByClausePull extends TuplePull {
     private final TupleExpression tupleExpr;
     private int currentPosition = -1;
     private final AtomicComparer[] comparers;
-    private final ArrayList<ItemToBeSorted> tupleArray = new ArrayList<ItemToBeSorted>(100);
+    private final ArrayList<ObjectToBeSorted> tupleArray = new ArrayList<>(100);
 
     public OrderByClausePull(TuplePull base, TupleExpression tupleExpr, OrderByClause orderBy, XPathContext context) {
         this.base = base;
@@ -61,7 +61,7 @@ public class OrderByClausePull extends TuplePull {
             while (base.nextTuple(context)) {
                 Tuple tuple = tupleExpr.evaluateItem(context);
                 SortKeyDefinitionList sortKeyDefinitions = orderByClause.getSortKeyDefinitions();
-                ItemToBeSorted itbs = new ItemToBeSorted(sortKeyDefinitions.size());
+                ObjectToBeSorted itbs = new ObjectToBeSorted(sortKeyDefinitions.size());
                 itbs.value = tuple;
                 for (int i = 0; i < sortKeyDefinitions.size(); i++) {
                     itbs.sortKeyValues[i] = orderByClause.evaluateSortKey(i, context);

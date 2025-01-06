@@ -196,7 +196,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
     protected void buildArray() throws XPathException {
         int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
-        values = new ItemToBeSorted[allocated];
+        values = new ObjectToBeSorted[allocated];
         count = 0;
 
         // initialise the array with data
@@ -209,7 +209,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
                 System.arraycopy(values, 0, nk2, 0, count);
                 values = nk2;
             }
-            ItemToBeSorted itbs = new ItemToBeSorted(comparators.length);
+            ObjectToBeSorted itbs = new ObjectToBeSorted(comparators.length);
             values[count] = itbs;
             itbs.value = item;
             // TODO: delay evaluating the sort keys until we know they are needed. Often the 2nd and subsequent

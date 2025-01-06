@@ -27,7 +27,7 @@ public class OrderByClausePush extends TuplePush {
     private final AtomicComparer[] comparers;
     private final XPathContext context;
     private int position = 0;
-    private final ArrayList<ItemToBeSorted> tupleArray = new ArrayList<>(100);
+    private final ArrayList<ObjectToBeSorted> tupleArray = new ArrayList<>(100);
 
     public OrderByClausePush(Outputter outputter, TuplePush destination, TupleExpression tupleExpr, OrderByClause orderBy, XPathContext context) {
         super(outputter);
@@ -50,7 +50,7 @@ public class OrderByClausePush extends TuplePush {
     public void processTuple(XPathContext context) throws XPathException {
         Tuple tuple = tupleExpr.evaluateItem(context);
         SortKeyDefinitionList sortKeyDefinitions = orderByClause.getSortKeyDefinitions();
-        ItemToBeSorted itbs = new ItemToBeSorted(sortKeyDefinitions.size());
+        ObjectToBeSorted itbs = new ObjectToBeSorted(sortKeyDefinitions.size());
         itbs.value = tuple;
         for (int i = 0; i < sortKeyDefinitions.size(); i++) {
             itbs.sortKeyValues[i] = orderByClause.evaluateSortKey(i, context);
@@ -88,7 +88,7 @@ public class OrderByClausePush extends TuplePush {
             throw new XPathException("Non-comparable types found while sorting: " + e.getMessage(), "XPTY0004");
         }
 
-        for (ItemToBeSorted itbs : tupleArray) {
+        for (ObjectToBeSorted itbs : tupleArray) {
             tupleExpr.setCurrentTuple(context, (Tuple) itbs.value);
             destination.processTuple(context);
         }
