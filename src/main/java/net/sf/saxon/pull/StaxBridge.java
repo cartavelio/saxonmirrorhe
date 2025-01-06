@@ -9,6 +9,7 @@ package net.sf.saxon.pull;
 
 
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.om.*;
@@ -182,7 +183,14 @@ public class StaxBridge implements PullProvider {
                             FingerprintedQName fName = new FingerprintedQName(
                                     name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart(), pool);
                             String value = reader.getAttributeValue(i);
-                            AttributeInfo att = new AttributeInfo(fName, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, 0);
+                            String attType = reader.getAttributeType(i);
+                            int props = 0;
+                            if (attType.equals("ID")) {
+                                props = ReceiverOption.IS_ID;
+                            } else if (attType.equals("IDREF") || attType.equals("IDREFS")) {
+                                props = ReceiverOption.IS_IDREF;
+                            }
+                            AttributeInfo att = new AttributeInfo(fName, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, props);
                             attList.add(att);
                         }
                         attributes = SequenceTool.attributeMapFromList(attList);
