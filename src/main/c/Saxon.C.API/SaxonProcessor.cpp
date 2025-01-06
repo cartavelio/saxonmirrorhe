@@ -794,10 +794,11 @@ XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
   int64_t xdmValueRef = parseJsonString(sxn_environ->thread, (void *)procRef,
                                         (char *)source, (char *)encoding);
   if (xdmValueRef >= 0) {
-    XdmValue *value = new XdmValue(xdmValueRef);
+    XdmValue *value = makeXdmValueFromRef(xdmValueRef);
 
     return value;
-  } else if (xdmValueRef == SXN_EXCEPTION) {
+  }
+  if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -813,10 +814,12 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
   int64_t xdmValueRef = parseJsonFile(sxn_environ->thread, (void *)procRef,
                                       (char *)cwd.c_str(), (char *)source);
   if (xdmValueRef >= 0) {
-    XdmValue *value = new XdmValue(xdmValueRef);
+    XdmValue *value = makeXdmValueFromRef(xdmValueRef);
 
     return value;
-  } else if (xdmValueRef == SXN_EXCEPTION) {
+  }
+
+  if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;

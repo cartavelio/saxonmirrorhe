@@ -6,15 +6,12 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-XdmMap::XdmMap() : XdmFunctionItem() { map_size = 1; }
+XdmMap::XdmMap() : XdmFunctionItem() { }
 
 XdmMap::XdmMap(const XdmMap &d) {
-  arity = d.arity;
-  data = d.data; // TODO check if copy works
-  map_size = d.map_size;
 }
 
-XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) { map_size = -1; }
+XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) { }
 
 const char *XdmMap::toString() {
   allocFn fn = operator new;
@@ -25,10 +22,7 @@ const char *XdmMap::toString() {
 }
 
 int XdmMap::mapSize() {
-  if (map_size == -1) {
-    return j_xdmMap_size(SaxonProcessor::sxn_environ->thread, (void *)value);
-  }
-  return map_size;
+  return j_xdmMap_size(SaxonProcessor::sxn_environ->thread, (void *)value);
 }
 
 XdmValue *XdmMap::get(XdmAtomicValue *key) {
