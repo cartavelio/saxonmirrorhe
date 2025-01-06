@@ -6,7 +6,12 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-XdmMap::XdmMap() : XdmFunctionItem() { }
+XdmMap::XdmMap() : XdmFunctionItem() {
+  int64_t mapDataRef = j_create_mapData(sxn_environ->thread);
+  value  = j_makeXdmMap(sxn_environ->thread, (void *)mapDataRef);
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
+
+}
 
 XdmMap::XdmMap(const XdmMap &d): XdmFunctionItem(d) {
 }

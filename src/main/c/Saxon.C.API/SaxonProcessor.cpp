@@ -58,6 +58,9 @@ void operator delete(void *ptr, std::size_t) noexcept {
 
 #define new new (__FILE__, __LINE__)
 
+
+
+
 void SaxonProcessor::getInfo() {
 
   std::cout << std::endl;
@@ -72,6 +75,54 @@ void SaxonProcessor::getInfo() {
 }
 
 #endif
+
+extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+        fprintf(stdout, "We are in a c function. calling function name %s=\n", functionName);
+    }
+
+  void * userFuncResult = nullptr;
+  XdmValue * result = nullptr;
+  XdmValue ** arguments1 = new XdmValue*[numOfArguments];
+  for(int i =0; i< numOfArguments; i++) {
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        fprintf(stdout, "Making XdmValue YYYIII ref=%ld.\n", (long)arguments[i]);
+      }
+        arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
+  }
+
+  userFuncResult  = userFunctionNativeCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr<<"after user function call - c_nativeCall ref="<<((long)userFuncResult)<<std::endl;
+  }
+
+  //destroy arguments
+  /*if(useNativeTypes) {
+    for(int i =0; i< numOfArguments; i++) {
+      //delete arguments1[i];
+      arguments1[i]->resetValue(SXN_UNSET);
+      delete arguments1[i];
+    }
+  }*/
+  delete [] arguments;
+  arguments = nullptr;
+  delete [] arguments1;
+  arguments1 = nullptr;
+
+  /*if(result != nullptr) {
+    result->decrementRefCount();
+    if(result->getRefCount() < 1) {
+      result->resetValue(SXN_UNSET);
+      delete result;
+      result = nullptr;
+    }
+  } */
+
+  return userFuncResult;
+}
+
+
 
 // jobject cpp;
 const char *failure;
@@ -348,6 +399,43 @@ SaxonProcessor::~SaxonProcessor() {
     versionStr.clear();
   }
   // exceptionClear();
+}
+
+void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes)
+{
+
+    XdmValue * signatureValue = parseJsonFromString(signature);
+
+    if(signatureValue == nullptr) {
+        throw new SaxonApiException("Failed to create function signature from JSON");
+    }
+
+
+    allocFn alloc = operator new;
+
+    if(getenv("SAXONC_DEBUG_FLAG") && useNativeTypes) {
+      std::cerr<<"useNativeTypes is True in C++"<<std::endl;
+    }
+
+
+    long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1,
+                                               (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
+
+
+    if(signatureValue != nullptr) {
+      delete signatureValue;
+    }
+    if (status == SXN_EXCEPTION) {
+      throw SaxonApiException();
+    }
+
+}
+
+void SaxonProcessor::registerUserFunction(const char * ns1, XdmValue * (*func)(int, XdmValue **), const char * signature, bool isNativeTypes)
+{
+
+    registerUserFunctionWithProcessor(nullptr, ns1, (void *)func,signature, isNativeTypes);
+
 }
 
 bool SaxonProcessor::isSchemaAwareProcessor() {
@@ -918,6 +1006,7 @@ void SaxonProcessor::release() {
     SaxonProcessor::jvmCreatedCPP = 0;
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "SaxonProc: JVM finalized calling !" << std::endl;
+      j_printObjectHandlesPoolInfo(sxn_environ->thread);
     }
 
     // finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
@@ -997,8 +1086,6 @@ XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
 
 XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
   SaxonProcessor::attachCurrentThread();
-  // jobject obj = longValue(*SaxonProcessor::sxn_environ, l);
-
   int64_t longValueRef = j_makeLongValue(sxn_environ->thread, l);
   XdmAtomicValue *value = new XdmAtomicValue(
       longValueRef, "Q{http://www.w3.org/2001/XMLSchema}long");
@@ -1090,8 +1177,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
   for (int i = 0; i < length; i++) {
     if (input[i] == nullptr || input[i]->getUnderlyingValue() <= SXN_UNSET) {
-      std::cerr << "Error found when converting array of XdmValue to XdmArray"
-                << std::endl;
+
       return nullptr;
     }
     addProcessorValue(sxn_environ->thread, (void *)processorDataRef,
@@ -1102,9 +1188,9 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
       j_makeXdmArray(sxn_environ->thread, (void *)processorDataRef);
 
   if (xdmArrayRef <= 0) {
-    std::cerr
+   /* std::cerr
         << "Error found when converting array of XdmValue to XdmArray - Ref="
-        << ((long)xdmArrayRef) << std::endl;
+        << ((long)xdmArrayRef) << std::endl;*/
     return nullptr;
   }
 
