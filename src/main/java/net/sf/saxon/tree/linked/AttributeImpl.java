@@ -314,7 +314,7 @@ public class AttributeImpl extends NodeImpl {
     /**
      * Rename this node
      *
-     * @param newNameCode the NamePool code of the new name
+     * @param newNameCode the new name
      * @param inherit true if any new namespace binding is to be inherited
      */
 
@@ -324,8 +324,10 @@ public class AttributeImpl extends NodeImpl {
         ElementImpl owner = (ElementImpl)getRawParent();
         if (owner != null && !isDeleted()) {
             AttributeInfo att = getAttributeInfo();
+            int properties = att.getProperties() & ~(ReceiverOption.IS_ID | ReceiverOption.IS_IDREF);
             owner.setAttributeInfo(getSiblingPosition(),
-                                   new AttributeInfo(newNameCode, BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), att.getProperties()));
+                                   new AttributeInfo(newNameCode, BuiltInAtomicType.UNTYPED_ATOMIC,
+                                                     att.getValue(), att.getLocation(), properties));
             NamespaceUri newURI = newNameCode.getNamespaceUri();
             if (!newURI.isEmpty()) {
                 // new attribute name is in a namespace
