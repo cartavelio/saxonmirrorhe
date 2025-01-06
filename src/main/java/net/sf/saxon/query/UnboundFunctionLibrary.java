@@ -35,7 +35,7 @@ import java.util.Map;
 public class UnboundFunctionLibrary implements FunctionLibrary {
 
     private List<UserFunctionResolvable> unboundFunctionReferences = new ArrayList<>(20);
-    private List<StaticContext> correspondingStaticContext = new ArrayList<>(20);
+    private List<QueryModule> correspondingQueryModule = new ArrayList<>(20);
     private final List<List<String>> correspondingReasons = new ArrayList<>();
     private boolean resolving = false;
 
@@ -76,7 +76,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
         UnboundFunctionCallDetails details = new UnboundFunctionCallDetails(functionName, arguments, keywords, env);
         UserFunctionCall ufc = new UserFunctionCall(details);
         unboundFunctionReferences.add(ufc);
-        correspondingStaticContext.add(env);
+        correspondingQueryModule.add((QueryModule)env);
         correspondingReasons.add(reasons);
         return ufc;
     }
@@ -99,7 +99,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
         }
         XQueryFunctionLibrary.UnresolvedCallable uc = new XQueryFunctionLibrary.UnresolvedCallable(functionName);
         unboundFunctionReferences.add(uc);
-        correspondingStaticContext.add(null);
+        correspondingQueryModule.add((QueryModule)staticContext);
         correspondingReasons.add(new ArrayList<>());
         CallableFunction fi = new CallableFunction(functionName, uc, AnyFunctionType.getInstance());
         //uc.setFunctionItem(fi);
@@ -137,16 +137,24 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
             UserFunctionResolvable ref = unboundFunctionReferences.get(i);
             if (ref instanceof UserFunctionCall) {
                 UserFunctionCall ufc = (UserFunctionCall) ref;
-                QueryModule importingModule = (QueryModule) correspondingStaticContext.get(i);
-                if (importingModule == null) {
+                QueryModule containingModule = correspondingQueryModule.get(i);
+                if (containingModule == null) {
                     // means we must have already been here
                     continue;
                 }
-                correspondingStaticContext.set(i, null);    // for garbage collection purposes
+                correspondingQueryModule.set(i, null);    // for garbage collection purposes
                 // The original UserFunctionCall is effectively a dummy: we weren't able to find a function
                 // definition at the time. So we try again.
                 UnboundFunctionCallDetails details = ufc.getUnboundCallDetails();
-                boolean success = lib.bindUnboundFunctionCall(ufc, new ArrayList<>());
+                boolean success = containingModule.getLocalFunctionLibrary().bindUnboundFunctionCall(ufc, new ArrayList<>());
+                if (!success) {
+                    for (QueryModule imp : containingModule.getImportedModules()) {
+                        success = imp.getLocalFunctionLibrary().bindUnboundFunctionCall(ufc, new ArrayList<>());
+                        if (success) {
+                            break;
+                        }
+                    }
+                }
                 if (success) {
                     // all done
                 } else {
@@ -171,14 +179,29 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
                 final StructuredQName q = uc.getFunctionName();
                 final int arity = uc.getArity();
 
-                XQueryFunction fd = lib.getDeclaration(q, arity);
+                QueryModule containingModule = correspondingQueryModule.get(i);
+                if (containingModule == null) {
+                    // means we must have already been here
+                    continue;
+                }
+                correspondingQueryModule.set(i, null);
+
+                boolean found = false;
+                XQueryFunction fd = containingModule.getLocalFunctionLibrary().getDeclaration(q, arity);
                 if (fd != null) {
                     fd.registerReference(uc);
-                    //uc.setStaticType(fd.getResultType());
-                    // Check that the result type and all the argument types are in the static context of the
-                    // calling module
-                    //importingModule.checkImportedFunctionSignature(fd);
+                    found = true;
                 } else {
+                    for (QueryModule imp : containingModule.getImportedModules()) {
+                        fd = imp.getLocalFunctionLibrary().getDeclaration(q, arity);
+                        if (fd != null) {
+                            fd.registerReference(uc);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
                     String msg = "Cannot find a " + arity +
                             "-argument function named " + q.getEQName() + "()";
                     if (!config.getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
@@ -203,7 +226,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
     public FunctionLibrary copy() {
         UnboundFunctionLibrary qfl = new UnboundFunctionLibrary();
         qfl.unboundFunctionReferences = new ArrayList<>(unboundFunctionReferences);
-        qfl.correspondingStaticContext = new ArrayList<>(correspondingStaticContext);
+        qfl.correspondingQueryModule = new ArrayList<>(correspondingQueryModule);
         qfl.resolving = resolving;
         return qfl;
     }
