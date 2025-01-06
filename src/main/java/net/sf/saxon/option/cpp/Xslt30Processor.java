@@ -553,6 +553,7 @@ public class Xslt30Processor extends SaxonCAPI {
             source.setSystemId(cwd + (!cwd.endsWith("/") ? "/" : ""));
         }
         compiler.setErrorList(SaxonCException.errorList);
+        
         XsltExecutable executable = compiler.compile(source);
         ObjectHandle handle = SaxonCAPI.createHandle(executable);
 

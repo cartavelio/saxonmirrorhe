@@ -312,7 +312,6 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
         SaxonProcessor::sxn_environ->thread, (void *)processorDataRef,
         (char *)packageOptionStr.c_str(), (void *)importPackageValue);
   }
-
   int64_t objRef = j_compileFromString(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheetStr, (int)jitCompilation,
