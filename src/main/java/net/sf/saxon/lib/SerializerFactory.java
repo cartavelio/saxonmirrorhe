@@ -1180,7 +1180,11 @@ public class SerializerFactory {
                     break;
                 case OutputKeys.STANDALONE:
                     if (value != null && !value.equals("omit")) {
-                        value = checkYesOrNo(key, value);
+                        try {
+                            value = checkYesOrNo(key, value);
+                        } catch (XPathException e) {
+                            throw new XPathException("Serialization parameter {standalone} must have the value yes|no, true|false, 1|0, or 'omit'", "SEPM0016");
+                        }
                     }
                     break;
                 case OutputKeys.VERSION:
