@@ -92,7 +92,7 @@ public:
    * compile-time exception is reported. In streaming mode, the source document
    * is supplied as a stream, and no tree is built in memory. The default is
    * false. When setStreaming(true) is specified, this has the additional
-   * side-effect of setting the required context item type to "document-node()"
+   * side effect of setting the required context item type to "document-node()"
    */
   void setStreaming(bool option);
 
@@ -154,7 +154,7 @@ public:
 
   //! Perform the Query to file.
   /**
-   * The result is is saved to file
+   * The result is saved to file
    *
    * @param infilename - The file name of the source document
    * @param ofilename - The file name of where result will be stored
@@ -172,7 +172,7 @@ public:
    * @param query - The query as string representation
    * @param encoding -  the encoding of the query string. If not specified then
    * the platform default encoding is used.
-   * @return XdmValue - result of the the query as a XdmValue
+   * @return XdmValue - result of the query as a XdmValue. The caller is responsible for memory deallocation
    * @throws SaxonApiException
    */
   XdmValue *executeQueryToValue(const char *infilename, const char *query,
@@ -184,7 +184,7 @@ public:
    * @param query - The query as string representation
    * @param encoding -  the encoding of the query string. If not specified then
    * the platform default encoding is used.
-   * @return char array - result of as a string
+   * @return char array - result of as a string. The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
   const char *executeQueryToString(const char *infilename, const char *query,
@@ -193,7 +193,7 @@ public:
   //! Execute the Query cached.
   /**
    * The use of the context item would have had to be set in advance
-   * @return XdmValue of the result
+   * @return XdmValue of the result. The caller is responsible for memory deallocation
    * @throws SaxonApiException
    *
    */
@@ -202,7 +202,8 @@ public:
   /**
    * Execute the Query cached.
    * The use of the context item would have had to be set in advance
-   * @return Result as a string (i.e. pointer array of char)
+   * @return Result as a string (i.e. pointer array of char).
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    *
    */
@@ -253,7 +254,7 @@ public:
 
   //! Get all properties as a std::map
   /**
-   * @return std::map map of the properties string->string
+   * @return std::map of the properties string->string
    */
   std::map<std::string, std::string> &getProperties();
 
