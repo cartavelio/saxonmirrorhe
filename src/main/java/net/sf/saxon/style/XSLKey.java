@@ -14,7 +14,10 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
 import net.sf.saxon.expr.instruct.CallTemplate;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
@@ -22,6 +25,7 @@ import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
@@ -300,7 +304,8 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         if (xPath10ModeIsEnabled()) {
             if (!useType.equals(BuiltInAtomicType.STRING) && !useType.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
                 use = new AtomicSequenceConverter(use, BuiltInAtomicType.STRING);
-                ((AtomicSequenceConverter) use).allocateConverter(config, false);
+                Converter c = ((AtomicSequenceConverter) use).allocateConverter(config, false);
+                ((AtomicSequenceConverter) use).setConverter(c);
                 useType = BuiltInAtomicType.STRING;
             }
         }
