@@ -367,7 +367,21 @@ namespace Saxon.Api {
         /// (by default, fixed and default attribute values are expanded, that is, they are inserted) into
         /// the document during validation as if they were present in the instance being validated)
         /// </summary>
+        /// <remarks>
+        /// <p>The property name was misspelled; the correct spelling has been added as a synonym in a maintenance
+        /// release, but the correct spelling will be used from Saxon 13.
+        /// </remarks>
         public bool ExpendAttributeDefaults {
+            get => UnderlyingSchemaValidator.isExpandAttributeDefaults();
+            set => UnderlyingSchemaValidator.setExpandAttributeDefaults(value);
+        }
+        
+        /// <summary>
+        /// Ask and set whether attribute defaults defined in a schema are to be expanded or not
+        /// (by default, fixed and default attribute values are expanded, that is, they are inserted) into
+        /// the document during validation as if they were present in the instance being validated)
+        /// </summary>
+        public bool ExpandAttributeDefaults {
             get => UnderlyingSchemaValidator.isExpandAttributeDefaults();
             set => UnderlyingSchemaValidator.setExpandAttributeDefaults(value);
         }
