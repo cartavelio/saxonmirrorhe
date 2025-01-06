@@ -10,7 +10,6 @@ PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunc
 # cython: language_level = 3
 
 __version__ = '@@VERSION@@'
-__author__ = 'Saxonica'
 
 cimport saxoncClasses
 from libcpp cimport bool
@@ -4424,11 +4423,14 @@ cdef class PyXdmNode(PyXdmItem):
             PyXdmValue: the typed value. If the typed value is a single atomic value, this will be returned
             as an instance of PyXdmAtomicValue
         """
+        cdef PyXdmValue val = None
         cdef saxoncClasses.XdmValue * xdmValue = self.derivednptr.getTypedValue()
         if xdmValue == NULL:
             return None
         else:
-            return self.processor.wrap_value(xdmValue)
+            val = PyXdmValue(self.processor)
+            val.thisvptr = xdmValue
+            return val
 
     @property
     def base_uri(self):
