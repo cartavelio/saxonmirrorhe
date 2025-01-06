@@ -290,12 +290,12 @@ public final class DoubleValue extends NumericValue {
             return new DoubleValue(dec.doubleValue());
         }
 
-        // Now apply any rounding needed, using the "round half to even" rule***CHANGE
+        // Now apply any rounding needed
 
         double rem = d % 10;
-        if (rem >= 5) {
+        if (rem > 5 || (rem == 5 && value > 0)) {
             d += 10 - rem;
-        } else if (rem < 5) {
+        } else {
             d -= rem;
         }
 
