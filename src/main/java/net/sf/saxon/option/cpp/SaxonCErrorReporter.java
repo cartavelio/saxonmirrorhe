@@ -37,6 +37,7 @@ public class SaxonCErrorReporter  extends StandardErrorReporter {
 
     public void reset(){
         errors = new StringWriter();
+        setLogger(new StandardLogger(errors));
     }
 
 }
