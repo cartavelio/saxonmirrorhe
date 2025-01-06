@@ -890,7 +890,7 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
 
   tasks.register("${edition}c_python_repair_wheel", RepairLocalWheel) {
     outputDir = pythonBuildRootPath(edition)
-    manylinuxTarget = "manylinux_2_24"
+    manylinuxTarget = project.manylinuxTarget
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
     productEdition = edition
@@ -912,7 +912,7 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
 
   tasks.register("${edition}c_python_repair_debug_wheel", RepairLocalWheel) {
     outputDir = pythonBuildRootPath(edition)
-    manylinuxTarget = "manylinux_2_24"
+    manylinuxTarget = project.manylinuxTarget
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
     productEdition = edition
