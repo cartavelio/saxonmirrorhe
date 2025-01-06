@@ -583,7 +583,7 @@ public class FLWORExpression extends Expression {
         // it easier to rearrange where clauses as predicates
         boolean depends = false;
         for (Clause w : clauses) {
-            if (w instanceof WhereClause && ExpressionTool.dependsOnFocus(((WhereClause) w).getPredicate())) {
+            if (w instanceof WhereClause && w.isRepeated() && ExpressionTool.dependsOnFocus(((WhereClause) w).getPredicate())) {
                 depends = true;
                 break;
             }

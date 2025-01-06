@@ -20,6 +20,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Cardinality;
 
 
 /**
@@ -33,7 +34,7 @@ public class Empty extends Aggregate {
 
         // See if we can deduce the answer from the cardinality
         int c = arguments[0].getCardinality();
-        if (c == StaticProperty.ALLOWS_ONE_OR_MORE) {
+        if (!Cardinality.allowsZero(c)) {
             return Literal.makeLiteral(BooleanValue.FALSE, arguments[0]);
         } else if (c == StaticProperty.ALLOWS_ZERO) {
             return Literal.makeLiteral(BooleanValue.TRUE, arguments[0]);
