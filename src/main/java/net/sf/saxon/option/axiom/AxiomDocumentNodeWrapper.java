@@ -139,7 +139,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
      */
     @Override
     public String getBaseURI() {
-        return getTreeInfo().getRootNode().getBaseURI();
+        return ((AxiomDocument) getTreeInfo()).getSystemId();
     }
 
     /**
