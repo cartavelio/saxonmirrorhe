@@ -176,6 +176,7 @@ XdmValue **XdmArray::values() {
       std::cerr << "Exception message = " << exception->getMessage()
                 << std::endl;
       delete exception;
+      delete [] arr;
       return nullptr;
     }
     if (typeRef == 1) {
