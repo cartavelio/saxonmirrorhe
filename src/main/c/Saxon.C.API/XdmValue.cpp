@@ -25,6 +25,10 @@ XdmValue::XdmValue(const XdmValue &other) {
   	for (int i = 0; i < xdmSize; i++) {
     	addXdmItem(other.values[i]);
   	}
+  } else {
+    //values = new XdmItem *[values_cap];
+    values = nullptr;
+
   }
 }
 
