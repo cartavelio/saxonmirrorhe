@@ -81,7 +81,8 @@ public:
   /**
    * Get the string value of the function
    *
-   * @return nothing; this method always throws an exception
+   * @return nothing is returned; this method always throws an exceptionn because the XdmFunctionItem
+   * has no associated string value
    */
   const char *getStringValue();
 
@@ -97,13 +98,13 @@ public:
    * @param arity - the number of arguments in the function
    * @return the requested function, or null if there is no such function. Note
    * that some functions (those with particular context dependencies) may be
-   * unsuitable for dynamic calling.
+   * unsuitable for dynamic calling. The caller is responsible for memory deallocation
    */
   static XdmFunctionItem *getSystemFunction(SaxonProcessor *processor,
                                      const char *name, int arity);
 
   /**
-   * Utility method for working with SaxonC on Python
+   * Internal Utility method for working with SaxonC on Python
    */
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
@@ -117,7 +118,7 @@ public:
    * The "function conversion rules" will be applied to convert the arguments to
    * the required type when necessary.
    * @param argument_length - the length of the array
-   * @return the result of calling the function
+   * @return the result of calling the function. The caller is responsible for memory deallocation
    */
   XdmValue *call(SaxonProcessor *processor, XdmValue **arguments,
                  int argument_length);

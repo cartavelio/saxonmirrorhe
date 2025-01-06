@@ -68,7 +68,7 @@ public:
    * result is xs:anyAtomicType.
    *
    * @return a string of the QName naming the primitive type of this atomic
-   * value. This will always be an atomic type.
+   * value. This will always be an atomic type. Memory deallocation is internally managed.
    */
   const char *getPrimitiveTypeName();
 
@@ -107,6 +107,7 @@ public:
    * node.</p>
    *
    * @return the result of converting the item to a string.
+   * The caller is responsible for memory deallocation
    */
   const char *getStringValue();
 
@@ -127,7 +128,7 @@ public:
    */
   void setType(const char *ty);
 
-  //! Get the first item in the sequence
+  //! Get the first item in the sequence which is the XdmAtomicValue itself.
   /**
    *
    * @return XdmItem or nullptr if sequence is empty
