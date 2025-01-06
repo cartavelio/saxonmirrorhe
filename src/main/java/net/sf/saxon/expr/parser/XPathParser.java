@@ -844,13 +844,6 @@ public class XPathParser {
                 return parseSwitchExpression();
             case Token.TYPESWITCH:
                 return parseTypeswitchExpression();
-            case Token.VALIDATE:
-            case Token.VALIDATE_STRICT:
-            case Token.VALIDATE_LAX:
-            case Token.VALIDATE_TYPE:
-                return parseValidateExpression();
-            case Token.PRAGMA:
-                return parseExtensionExpression();  // XQuery only
             case Token.KEYWORD_CURLY:
                 if (t.currentTokenValue.equals("try")) {
                     return parseTryCatchExpression();
