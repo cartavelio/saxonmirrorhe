@@ -22,6 +22,18 @@ public class AxiomTreeTests extends ObjectModelTests {
         return AxiomObjectModel.getInstance();
     }
 
+    /**
+     * Ask whether Saxon's wrapper for this tree model merges adjacent sibling text nodes
+     * when found on the external tree
+     *
+     * @return if Saxon merges such text nodes, or if they are merged automatically during parsing
+     * and tree construction.
+     */
+    @Override
+    boolean mergesAdjacentTextNodes() {
+        return false;
+    }
+
     @Override
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {

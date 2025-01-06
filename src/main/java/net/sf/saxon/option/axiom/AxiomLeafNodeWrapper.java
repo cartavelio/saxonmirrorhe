@@ -58,6 +58,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
         int kind = node.getType();
         switch (kind) {
             case OMNode.TEXT_NODE:
+            case OMNode.CDATA_SECTION_NODE:
             case OMNode.SPACE_NODE:
                 nodeKind = Type.TEXT;
                 break;
