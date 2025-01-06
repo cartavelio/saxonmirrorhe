@@ -1,4 +1,6 @@
-package net.sf.saxon.type;public class EnumerationUnionType {
+package net.sf.saxon.type;
+
+public class EnumerationUnionType {
 }
 
 //

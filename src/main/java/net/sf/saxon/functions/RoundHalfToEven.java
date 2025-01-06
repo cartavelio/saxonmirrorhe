@@ -41,8 +41,7 @@ public final class RoundHalfToEven extends SystemFunction {
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as Sequences
      * @return the result of the evaluation, in the form of a Sequence
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a dynamic error occurs during the evaluation of the expression
+     * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
@@ -54,15 +53,17 @@ public final class RoundHalfToEven extends SystemFunction {
         int scale = 0;
         if (arguments.length == 2) {
             NumericValue scaleVal = (NumericValue) arguments[1].head();
-            if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
-                return val0;
-            } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
-                scale = Integer.MIN_VALUE;
-            } else {
-                scale = (int) scaleVal.longValue();
+            if (scaleVal != null) {
+                if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
+                    return val0;
+                } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
+                    scale = Integer.MIN_VALUE;
+                } else {
+                    scale = (int) scaleVal.longValue();
+                }
             }
         }
-        return val0.roundHalfToEven(scale);
+        return val0.round(scale, Round.RoundingRule.HALF_TO_EVEN);
     }
 
     /**
@@ -91,24 +92,24 @@ public final class RoundHalfToEven extends SystemFunction {
                         if (result == null) {
                             return null;
                         }
-                        return result.roundHalfToEven(0);
+                        return result.round(0, Round.RoundingRule.HALF_TO_EVEN);
                     };
                 } else {
-                    return context -> ((NumericValue) arg0eval.eval(context)).roundHalfToEven(0);
+                    return context -> ((NumericValue) arg0eval.eval(context)).round(0, Round.RoundingRule.HALF_TO_EVEN);
                 }
-            } else if (fnc.getArg(1) instanceof Literal && ((Literal)fnc.getArg(1)).getGroundedValue() instanceof NumericValue) {
+            } else if (fnc.getArg(1) instanceof Literal && ((Literal) fnc.getArg(1)).getGroundedValue() instanceof NumericValue) {
                 final NumericValue scaleVal = (NumericValue) ((Literal) fnc.getArg(1)).getGroundedValue();
                 if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
                     return arg0eval;
                 } else {
                     try {
-                        int scale = scaleVal.compareTo(Integer.MIN_VALUE) < 0 ? Integer.MIN_VALUE: (int) scaleVal.longValue();
+                        int scale = scaleVal.compareTo(Integer.MIN_VALUE) < 0 ? Integer.MIN_VALUE : (int) scaleVal.longValue();
                         return context -> {
                             NumericValue result = (NumericValue) arg0eval.eval(context);
                             if (result == null) {
                                 return null;
                             }
-                            return result.roundHalfToEven(scale);
+                            return result.round(scale, Round.RoundingRule.HALF_TO_EVEN);
                         };
                     } catch (XPathException e) {
                         return context -> {
@@ -117,7 +118,7 @@ public final class RoundHalfToEven extends SystemFunction {
                     }
 
                 }
-        } else {
+            } else {
                 final ItemEvaluator scaleArg = fnc.getArg(1).makeElaborator().elaborateForItem();
                 return context -> {
                     NumericValue result = (NumericValue) arg0eval.eval(context);
@@ -125,15 +126,17 @@ public final class RoundHalfToEven extends SystemFunction {
                         return null;
                     }
                     NumericValue scaleVal = (NumericValue) scaleArg.eval(context);
-                    int scale;
-                    if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
-                        return result;
-                    } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
-                        scale = Integer.MIN_VALUE;
-                    } else {
-                        scale = (int) scaleVal.longValue();
+                    int scale = 0;
+                    if (scaleVal != null) {
+                        if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
+                            return result;
+                        } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
+                            scale = Integer.MIN_VALUE;
+                        } else {
+                            scale = (int) scaleVal.longValue();
+                        }
                     }
-                    return result.roundHalfToEven(scale);
+                    return result.round(scale, Round.RoundingRule.HALF_TO_EVEN);
                 };
             }
 

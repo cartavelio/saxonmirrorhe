@@ -156,7 +156,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public StringConverter getStringConverter(ConversionRules rules) {
-        return null;  // TODO
+        return new StringToEnumConverter(this);
     }
 
     /**
@@ -689,6 +689,24 @@ public class EnumerationType implements AtomicType {
     @Override
     public int getRedefinitionLevel() {
         return 0;
+    }
+
+    private static class StringToEnumConverter extends StringConverter {
+
+        private final EnumerationType enumType;
+
+        public StringToEnumConverter(EnumerationType enumType) {
+            this.enumType = enumType;
+        }
+
+        @Override
+        public ConversionResult convertString(UnicodeString input) {
+            if (enumType.values.contains(input.toString())) {
+                return new StringValue(input, enumType);
+            } else {
+                return new ValidationFailure("'" + input + "' is not a valid value for the required enumeration type");
+            }
+        }
     }
 
     //#ifdefined SCHEMA
