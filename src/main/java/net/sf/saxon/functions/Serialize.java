@@ -533,7 +533,7 @@ public class Serialize extends SystemFunction implements Callable {
             props.setProperty(OutputKeys.METHOD, "xml");
         }
         if (props.getProperty(OutputKeys.OMIT_XML_DECLARATION) == null) {
-            props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "true");
+            props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         }
                                                                                   
         // TODO add more spec-defined defaults here (for both cases)
