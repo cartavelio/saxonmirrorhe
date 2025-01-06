@@ -906,6 +906,20 @@ public function testSingle()
     );
     $this->assertEquals($item, "<person>text1</person>");
     }
+
+public function testArray()
+{
+    $xp = self::$saxonProc->newXPathProcessor();
+
+    $item = $xp->evaluateSingle("[1,2,3]");
+    $this->assertInstanceOf(
+        Saxon\XdmItem::class,
+        $item
+    );
+    $this->assertTrue($item->isArray());
+    $arrVal = $item->getArray();
+    $this->assertEquals($arrVal->getStringValue(), "[1,2,3]");
+    }
     /*  public function testItemSeparatorToSerializer(): void {
           try {
 
