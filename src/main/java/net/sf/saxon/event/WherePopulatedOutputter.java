@@ -171,9 +171,10 @@ public class WherePopulatedOutputter extends ProxyOutputter {
                 getNextOutputter().startDocument(pendingProperties);
             } else {
                 // Bug #6577
-                super.startElement(pendingElemName, pendingSchemaType,
+                spreadStartElement(pendingElemName, pendingSchemaType,
                                    pendingAttributes, pendingNamespaces,
-                                   pendingLocationId, pendingProperties);
+                                   pendingLocationId, pendingProperties,
+                                   getNextOutputter());
             }
             pendingStartTag = false;
         }
