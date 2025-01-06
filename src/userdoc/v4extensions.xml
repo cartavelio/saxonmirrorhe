@@ -1130,10 +1130,13 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
             <p>returns the chapter(s) entited "Introduction" if such a chapter exists; otherwise it returns the first chapter.</p>
 
-            <p>The precedence of the operator is greater than arithmetic operators (so <code>$n div $m otherwise 1</code>
-        means <code>$n div ($m otherwise 1)</code>), but less than the "union" operator (so <code>a/b/c otherwise 0</code>
-        means <code>(a/b/c) otherwise 0</code>).</p>
-
+            <p>As defined in the current XPath 4.0 draft (September 2024), arithmetic operators such as <code>+</code>
+               bind more tightly than <code>otherwise</code>, so <code>$a + $b otherwise $c</code>
+               means <code>($a + $b) otherwise $c</code>. However, Saxon 12 implements an earlier draft of the 
+               specification in which it means <code>$a + ($b otherwise $c)</code>. Use parentheses to make your 
+               intended meaning clear and to avoid compatibility problems in the future.</p>
+               
+ 
 
          </section>
 
