@@ -121,6 +121,13 @@ public class PathHelper {
         return source;
     }
 
+    public static URI pathToURI(Configuration config, String path) throws SaxonApiException {
+        Path currentRelativePath = Paths.get("");
+        String crp = currentRelativePath.toAbsolutePath().toString();
+        PathHelper helper = new PathHelper();
+        return helper.resolveToURI(config, crp , path);
+    }
+
     /**
      * Resolve a supplied relative or absolute file path, or URI string, to a Java URI.
      * Relative paths will be resolved against the supplied current working
@@ -146,3 +153,6 @@ public class PathHelper {
                 name.startsWith("file:");
     }
 }
+
+
+
