@@ -212,6 +212,7 @@ public class XQueryEngine extends SaxonCAPI {
 
         XQueryExecutable executable = null;
 
+        compiler.setErrorReporter(SaxonCException.errorReporter);
         if(query != null) {
             executable = compiler.compile(query);
         }
@@ -283,6 +284,7 @@ public class XQueryEngine extends SaxonCAPI {
         } catch (SaxonApiException ex) {
             throw ex;
         }
+        eval.setErrorReporter(SaxonCException.errorReporter);
         return eval;
     }
 
