@@ -39,6 +39,7 @@ XsltExecutable::XsltExecutable(SaxonProcessor *proci, int64_t exRef,
 }
 
 XsltExecutable::~XsltExecutable() {
+  SaxonProcessor::attachCurrentThread();
   clearProperties();
   clearParameters();
 
