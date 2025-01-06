@@ -84,10 +84,15 @@ public class TypeChecker {
             return supplied.staticTypeCheck(req, false, roleSupplier, visitor);
         }
 
-        Expression exp = supplied;
         final StaticContext env = visitor.getStaticContext();
         final Configuration config = env.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
+
+        if (supplied instanceof Literal && ((Literal)supplied).isInstance(req, th)) {
+            return supplied;
+        }
+
+        Expression exp = supplied;
         final ContextItemStaticInfo defaultContextInfo = config.getDefaultContextItemStaticInfo();
         final boolean allow40 = env.getXPathVersion() >= 40;
 

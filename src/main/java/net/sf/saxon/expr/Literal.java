@@ -123,6 +123,20 @@ public class Literal extends Expression {
         }
     }
 
+    public boolean isInstance(SequenceType req, TypeHierarchy th) {
+        int requiredCardinality = req.getCardinality();
+        int count = value.getLength();
+        if (!Cardinality.allows(requiredCardinality, count)) {
+            return false;
+        }
+        ItemType requiredType = req.getPrimaryType();
+        for (Item item : value.asIterable()) {
+            if (!requiredType.matches(item, th)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Get the static type of the expression as a UType, following precisely the type
