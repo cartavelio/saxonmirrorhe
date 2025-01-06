@@ -24,7 +24,7 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.TRACE;
 public class TraceClause extends Clause {
 
     private final Clause target;
-    private NamespaceResolver nsResolver;
+    private final FLWORExpression flworExpression;
 
     /**
      * Create a traceClause
@@ -35,7 +35,7 @@ public class TraceClause extends Clause {
 
     public TraceClause(FLWORExpression expression, Clause target) {
         this.target = target;
-        this.nsResolver = expression.getRetainedStaticContext();
+        this.flworExpression = expression;
     }
 
     /**
@@ -45,19 +45,8 @@ public class TraceClause extends Clause {
      */
 
     public NamespaceResolver getNamespaceResolver() {
-        return nsResolver;
+        return flworExpression.getRetainedStaticContext();
     }
-
-    /**
-     * Set the namespace bindings from the static context of the clause
-     *
-     * @param nsResolver a namespace resolver that reflects the in scope namespaces of the clause
-     */
-
-    public void setNamespaceResolver(NamespaceResolver nsResolver) {
-        this.nsResolver = nsResolver;
-    }
-
 
     @Override
     public ClauseName getClauseKey() {
