@@ -10,7 +10,8 @@ package net.sf.saxon.om;
 import net.sf.saxon.style.PackageVersion;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
@@ -101,11 +102,11 @@ public class DocumentKey {
                 uri = "file:/" + uri.substring(8);
             }
             if (uri.startsWith("file:/")) {
-                // Use getCanonicalPath() to remove any "." and ".." path segments
+                // Bug 6565: No longer use getCanonicalPath() to remove any "." and ".." path segments, for performance reasons
                 try {
-                    String cpath = new File(uri.substring(5)).getCanonicalPath();
+                    String cpath = Paths.get(uri.substring(6)).normalize().toString();
                     uri = "file:" + cpath;
-                } catch (IOException ioe) {
+                } catch (InvalidPathException ioe) {
                     // nop
                 }
             }
