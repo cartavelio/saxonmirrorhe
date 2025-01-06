@@ -1720,7 +1720,7 @@ publishing {
         name = 'Saxon-HE'
         packaging = 'jar'
         description = 'The XSLT and XQuery Processor'
-        url = 'http://www.saxonica.com/'
+        url = 'https://www.saxonica.com/'
         inceptionYear = '1999'
 
         organization pomOrganization("he")
@@ -1750,7 +1750,7 @@ publishing {
           name = 'Saxon-PE'
           packaging = 'jar'
           description = 'The XSLT and XQuery Processor'
-          url = 'http://www.saxonica.com/'
+          url = 'https://www.saxonica.com/'
           inceptionYear = '1999'
 
           organization pomOrganization("pe")
@@ -1778,7 +1778,7 @@ publishing {
           name = 'Saxon-EE'
           packaging = 'jar'
           description = 'The XSLT and XQuery Processor'
-          url = 'http://www.saxonica.com/'
+          url = 'https://www.saxonica.com/'
           inceptionYear = '1999'
 
           organization pomOrganization("ee")
