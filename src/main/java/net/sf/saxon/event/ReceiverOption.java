@@ -165,6 +165,11 @@ public class ReceiverOption {
      */
     public static final int SEPARATOR = 0x100000;
 
+    /**
+     * Flag set on startElement() to indicate that it's in a validation=skip wildcard
+     */
+    public static final int SKIP_VALIDATION = 0x200000;
+
 
     public static boolean contains(int options, int option) {
         return (options & option) != 0;
