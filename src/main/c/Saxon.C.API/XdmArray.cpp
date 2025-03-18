@@ -4,9 +4,9 @@
 
 XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(0) {
   int64_t processorDataRef = processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread);
+  value = j_makeXdmArray(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
 
-  value =
-    j_makeXdmArray(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
 
 }
 
@@ -32,7 +32,7 @@ int XdmArray::arrayLength() {
 }
 
 XdmValue *XdmArray::get(int n) {
-  if (n < 0 || value == SXN_UNSET) {
+  if (n < 0 || value == SXN_UNSET || arrayLength() == 0) {
     return nullptr;
   }
   int64_t result =
