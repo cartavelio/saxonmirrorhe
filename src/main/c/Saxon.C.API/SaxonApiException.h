@@ -45,7 +45,13 @@ public:
    *          is in possession of the Exception object. Callers must
    *          not attempt to free the memory.
    */
-  virtual const char *what();
+#ifdef _LIBCPP___EXCEPTION_EXCEPTION_H
+ virtual char const* what() const _NOEXCEPT;
+#else
+ virtual const char *what();
+#endif
+
+
 
   /**
    * A constructor. Create a SaxonApiException
