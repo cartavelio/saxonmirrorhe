@@ -123,8 +123,11 @@ def process_catalog(path: str, catalogi):
     cat_builder = driver_proc.new_document_builder()
     xpc = driver_proc.new_xpath_processor()
     if os.getenv("SAXON_LICENSE_DIR")  is not None:
-        driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
-                                       os.getenv("SAXON_LICENSE_DIR" + "/saxon-license.lic"))
+        try:
+            driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                           os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
+        except PySaxonApiError as ex:
+            print(str(ex))
     try:
         schemaValidator = driver_proc.new_schema_validator()
     except PySaxonApiError as ex:
@@ -384,7 +387,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
         for i in range(base.size):
             basei = base.item_at(i)
             uri = basei.get_node_value().get_attribute_value("uri")
-            if uri is None or uri == "UNDEFINED":
+            if uri is None or uri == "#UNDEFINED":
                 environment.xquery_proc.set_query_base_uri(None)
                 environment.xpath_proc.set_base_uri(None)
             else:

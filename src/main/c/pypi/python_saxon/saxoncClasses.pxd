@@ -477,7 +477,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         XPathProcessor() except +handle_saxonc_api_exceptions
 
-        void setBaseURI(const char * uriStr)
+        void setBaseURI(const char * uriStr) except +handle_saxonc_api_exceptions
 
         const char * getBaseURI()
 

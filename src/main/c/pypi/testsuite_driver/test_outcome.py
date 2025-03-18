@@ -27,22 +27,29 @@ class PyTestOutcome:
                        catalog_xpc: PyXPathProcessor, assert_set: set):
         self.processor = proc
         tag = assertion.name
-        success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
+        try:
+            success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
 
-        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None and "any-of" != tag and "all-of" != tag and "not" != tag:
-            if not success:
-                if result is not None:
-                    print("Assertion =" + str(assertion))
-                    print("=============================")
-                    print("Result =" + str(result))
+            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None and "any-of" != tag and "all-of" != tag and "not" != tag:
+                if not success:
+                    if result is not None:
+                        print("Assertion =" + str(assertion))
+                        print("=============================")
+                        print("Result =" + str(result))
 
-                if result_as_error:
-                    print("Assertion Error=" + str(assertion))
-                    print(self.wrong_error)
-                    print("=============================")
-                    print("Result =" + str(result_as_error))
+                    if result_as_error:
+                        print("Assertion Error=" + str(assertion))
+                        print(self.wrong_error)
+                        print("=============================")
+                        print("Result =" + str(result_as_error))
 
-        return success
+            return success
+        except Exception as ex:
+            print("Assertion =" + str(assertion))
+            print("Unexpected Exception occured")
+            print("=============================")
+            print("Result =" + str(ex))
+            return False
 
     def test_assertion_error(self, assertion: PyXdmNode, result: PySaxonApiError, assert_xpc: PyXPathProcessor,
                              catalog_xpc: PyXPathProcessor):
@@ -217,7 +224,7 @@ class PyTestOutcome:
 
     def assert_serialization_error(self, assertion: PyXdmNode, result: PySaxonApiError, assert_xpc: PyXPathProcessor):
         if result is None:
-            print("Error in PytestOutCome PySaxonApiError should not be None")
+            print("Error in PytestOutcome PySaxonApiError should not be None")
             return False
         code = assertion.get_attribute_value("code")
         resulti = code in str(result)
@@ -400,7 +407,7 @@ class PyTestOutcome:
 
     def compare_expected_error(self, assertion: PyXdmNode, result: PySaxonApiError, assert_xpc: PyXPathProcessor, catalog_xpc: PyXPathProcessor):
         if result is None:
-            print("Error in PytestOutCome PySaxonApiError should not be None")
+            print("Error in PytestOutcome PySaxonApiError should not be None")
             return False
         code = assertion.get_attribute_value("code")
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:

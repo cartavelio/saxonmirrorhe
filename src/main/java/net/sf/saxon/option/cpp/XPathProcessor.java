@@ -247,12 +247,15 @@ public class XPathProcessor extends SaxonCAPI {
      */
     @CEntryPoint(name = "j_xp_setBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long setBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_uriStr) throws SaxonApiException {
-        if(c_uriStr == WordFactory.nullPointer()) {
-            throw new SaxonApiException("URI string is null");
-        }
-        String uriStr = SaxonCAPI.toJavaString(c_uriStr, WordFactory.nullPointer());
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
+
+        if(c_uriStr == WordFactory.nullPointer()) {
+            compiler.setBaseURI(null);
+            return SaxonCAPI.STATUS_OK;
+        }
+
+        String uriStr = SaxonCAPI.toJavaString(c_uriStr, WordFactory.nullPointer());
         URI uri = null;
         try {
             uri = new URI(uriStr);

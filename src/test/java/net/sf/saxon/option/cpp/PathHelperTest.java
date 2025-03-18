@@ -15,6 +15,7 @@ import javax.xml.transform.Source;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,6 +31,12 @@ class PathHelperTest {
     Function<Path, Boolean> pathVerifier = (path) -> true;
     String nature = ResourceRequest.XML_NATURE;
     PathHelper subject = new PathHelper(pathVerifier);
+
+    @Test
+    void uRWhat() throws URISyntaxException {
+        URI uri = new URI("");
+        System.out.println(uri);
+    }
 
     @Nested
     @DisplayName("verifying paths can be resolved on a local filesystem")

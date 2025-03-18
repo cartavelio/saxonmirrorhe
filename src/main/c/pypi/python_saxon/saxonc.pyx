@@ -3567,8 +3567,12 @@ cdef class PyXPathProcessor:
         Args:
             base_uri (str): the base output URI
         """
-        py_uri_string = base_uri.encode('UTF-8') if base_uri is not None else None
-        cdef char * c_uri = py_uri_string if base_uri is not None else ""
+        cdef char * c_uri
+        if base_uri is None:
+            c_uri = NULL
+        else:
+            py_uri_string = base_uri.encode('UTF-8')
+            c_uri = py_uri_string
         self.thisxpptr.setBaseURI(c_uri)
 
     @property
