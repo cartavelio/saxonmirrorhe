@@ -48,6 +48,17 @@ public:
    */
   XdmItem(const XdmItem &item);
 
+ bool operator==(const XdmItem& other) const
+ {
+  std::cerr<<"C++ XdmItem equals operator called !!!!"<<std::endl;
+  return false;
+  /*char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
+  if((int)result == SXN_EXCEPTION) {
+   throw SaxonApiException();
+  }
+  return result != 0;*/
+ }
+
   /**
    * Destructor method for XdmItem
    */

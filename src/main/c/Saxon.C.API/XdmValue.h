@@ -61,6 +61,17 @@ public:
    */
   void addXdmItem(XdmItem *val);
 
+ virtual bool operator==(const XdmValue& other) const
+ {
+  std::cerr<<"C++ XdmValue equals operator called !!!!"<<std::endl;
+  return false;
+  /*char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
+  if((int)result == SXN_EXCEPTION) {
+   throw SaxonApiException();
+  }
+  return result != 0;*/
+ }
+
   /**
    * Add an XdmItem to the sequence, when the sequence was returned from SaxonC - internal use only.
    * @param val - XdmItem object
