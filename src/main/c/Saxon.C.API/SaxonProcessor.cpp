@@ -288,8 +288,9 @@ void SaxonProcessor::attachCurrentThread() {
 void SaxonProcessor::detachCurrentThread() {
 #ifdef DEBUG
   std::cerr << "detachCurrentThread called" << std::endl;
+  int result =
 #endif
-  int result = detach_graalvm_thread(SaxonProcessor::sxn_environ);
+  detach_graalvm_thread(SaxonProcessor::sxn_environ);
 #ifdef DEBUG
   if (result != 0) {
     std::cerr << "detachCurrentThread failed" << std::endl;
@@ -537,7 +538,7 @@ int64_t SaxonProcessor::createParameterJArray(
     std::map<std::string, XdmValue *> parameters,
     std::map<std::string, std::string> properties, int additions) {
 
-  int size = parameters.size() + properties.size() + additions;
+  int size = (int) parameters.size() + properties.size() + additions;
 #ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "Properties size: " << properties.size() << std::endl;
@@ -605,7 +606,7 @@ int64_t SaxonProcessor::createParameterJArray(
 int64_t SaxonProcessor::createParameterJArray2(
     std::map<std::string, XdmValue *> parameters) {
 
-  int size = parameters.size();
+  int size = (int) parameters.size();
   int64_t processorDataRef = createProcessorDataWithCapacity(
       SaxonProcessor::sxn_environ->thread, size);
 
@@ -929,7 +930,7 @@ void SaxonProcessor::setConfigurationProperty(const char *name,
   if (name != nullptr && value != nullptr) {
     /*configProperties.insert(std::pair<std::string, std::string>(
         std::string(name), std::string((value == nullptr ? "" : value))));*/
-    int resultsi = j_applyPropertyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
+    int resultsi = (int) j_applyPropertyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
                            (char *)name, (char *)value);
 
     if (resultsi == SXN_EXCEPTION) {
@@ -1211,7 +1212,7 @@ SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
   int64_t mapDataRef = SXN_UNSET;
 
   mapDataRef =
-      j_create_mapDataWithCapacity(sxn_environ->thread, dataMap.size());
+      j_create_mapDataWithCapacity(sxn_environ->thread, (int) dataMap.size());
 
   for (std::map<XdmAtomicValue *, XdmValue *>::iterator iter = dataMap.begin();
        iter != dataMap.end(); ++iter) {
@@ -1241,7 +1242,7 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
   int64_t mapDataRef = SXN_UNSET;
 
   mapDataRef =
-      j_create_mapDataWithCapacity(sxn_environ->thread, dataMap.size());
+      j_create_mapDataWithCapacity(sxn_environ->thread, (int) dataMap.size());
 
   for (std::map<std::string, XdmValue *>::iterator iter = dataMap.begin();
        iter != dataMap.end(); ++iter) {

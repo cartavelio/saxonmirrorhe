@@ -8,14 +8,14 @@
 
 XdmNode::XdmNode(int64_t obj)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
-      childCount(-1), children(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), axisCount(0) {
+      children(nullptr), childCount(-1), axisCount(0),
+      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN) {
 }
 
 XdmNode::XdmNode(XdmNode *p, int64_t obj, XDM_NODE_KIND kind)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
-      childCount(-1), children(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(kind), axisCount(0) {}
+      children(nullptr), childCount(-1), axisCount(0),
+      attrValues(nullptr), attrCount(-1), nodeKind(kind) {}
 
 XdmNode::XdmNode(const XdmNode &other): XdmItem(other) {
   baseURI = nullptr;
@@ -288,7 +288,7 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
   if (results == nullptr) {
     return nullptr;
   }
-  axisCount = results[0];
+  axisCount = (int) results[0];
   if (axisCount == 0) {
     return nullptr;
   }

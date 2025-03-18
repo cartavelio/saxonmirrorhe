@@ -131,7 +131,7 @@ extern const char *failure;
  * Get resources directory.
  */
 
-char *_getResourceDirectory();
+char *_getResourceDirectory(void);
 
 /**
  * Load dll using the default setting in SaxonC.

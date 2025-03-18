@@ -268,6 +268,11 @@ public:
    */
   int64_t getUnderlyingValidator() { return cppV; }
 
+  /**
+   * Get the SaxonProcessor which created this SchemaValidator.
+   */
+  SaxonProcessor* getSaxonProcessor() { return proc; }
+
 private:
   bool lax; /*!< Flag to indicate lax mode for the Schema validation */
   SaxonProcessor

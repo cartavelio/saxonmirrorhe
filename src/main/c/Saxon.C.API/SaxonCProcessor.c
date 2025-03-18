@@ -128,9 +128,8 @@ void executeQueryToFile(sxnc_environment *environi, sxnc_processor *proc,
     }
   }
 
-  long result =
-      j_executeQueryToFile(environi->thread, (void *)proc->value, cwd, NULL,
-                           outputfile, NULL, (void *)processorDataRef);
+  j_executeQueryToFile(environi->thread, (void *)proc->value, cwd, NULL,
+                       outputfile, NULL, (void *)processorDataRef);
 }
 
 const char *executeQueryToString(sxnc_environment *environi,

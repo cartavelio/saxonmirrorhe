@@ -568,6 +568,11 @@ public:
    */
   void exceptionClear();
 
+  /**
+   * Get the SaxonProcessor which created this XsltExecutable.
+   */
+  SaxonProcessor* getSaxonProcessor() { return proc; }
+
 private:
   /**
    * Default constructor.

@@ -184,7 +184,7 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
     proc = (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
     int check = c_createXPathProcessor(environi, NULL, proc);
     if (check == -2) {
-      return NULL;
+      return false;
     }
   }
 
