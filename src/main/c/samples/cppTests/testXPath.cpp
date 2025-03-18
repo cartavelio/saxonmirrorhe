@@ -464,7 +464,7 @@ void testIsLicensed(sResultCount *sresult) {
     } else {
       std::cerr<<"Product is not licensed"<<endl;
       sresult->failure++;
-      sresult->failureList.push_back("testIsLicensed");
+      sresult->failureList.push_back("testIsLicensed - this should fail - license file required");
     }
 
   } else {

@@ -9,6 +9,7 @@ package net.sf.saxon.option.cpp;
 
 
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.trans.LicenseException;
 import org.graalvm.nativeimage.IsolateThread;
 
 import org.graalvm.nativeimage.c.function.CEntryPoint;
@@ -87,6 +88,9 @@ public class SaxonCException  {
         if(SaxonCAPI.debug) {
             System.err.println("Java DEBUG: j_getErrorMessageWithErrorCode called");
             System.err.println("Java DEBUG: j_getErrorMessageWithErroCode erroReporter message="+errorReporter.getErrors().toString());
+            if(throwable instanceof LicenseException) {
+                System.err.println("Java DEBUG: j_getErrorMessageWithErroCode LicenseException found="+((LicenseException)throwable).getMessage());
+            }
         }
 
         if(throwable == null) {
@@ -127,11 +131,13 @@ public class SaxonCException  {
             throwable.printStackTrace(pw);
             System.err.println(sw.toString());
 
+            if(errorReporter.getErrors() != null) {}
+
         }
         CCharPointer a = null;
         String errorMessage = null;
 
-        if(errorReporter.getErrors().toString() != null) {
+        if(errorReporter.getErrors().toString() != null && !errorReporter.getErrors().toString().isEmpty()) {
             errorMessage = errorReporter.getErrors().toString();
 
         } else {
@@ -141,6 +147,10 @@ public class SaxonCException  {
             } else {
                errorMessage = exception.getErrorCode().getLocalName() + ": " + exception.getMessage() + ". Line number: "+lineNumber;
             }
+        }
+
+        if(SaxonCAPI.debug) {
+            System.err.println("Java Debug: Exception found cp0: " + errorMessage);
         }
 
         a = SaxonCAPI.stringToNative2(alloc, errorMessage);

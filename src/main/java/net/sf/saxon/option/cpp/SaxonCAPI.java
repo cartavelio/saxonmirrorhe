@@ -6,7 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.option.cpp;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
+import com.saxonica.config.Verifier;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
@@ -181,11 +183,13 @@ public class SaxonCAPI {
     public static byte j_isLicensed(IsolateThread thread, ObjectHandle procRef) {
         Processor proc = objectHandles.get(procRef);
         Configuration config = proc.getUnderlyingConfiguration();
-        if(config instanceof ProfessionalConfiguration) {
-            System.err.println("Professional configuration found");
-            return CTypeConversion.toCBoolean(((ProfessionalConfiguration)config).isLicenseFound());
+        if(config instanceof EnterpriseConfiguration) {
+            EnterpriseConfiguration ec = (EnterpriseConfiguration) config;
+            return CTypeConversion.toCBoolean(ec.isLicenseFound());
+        } else if(config instanceof ProfessionalConfiguration) {
+            ProfessionalConfiguration pc = (ProfessionalConfiguration) config;
+            return CTypeConversion.toCBoolean(pc.isLicenseFound());
         } else{
-            System.err.println("HE Configuration found");
             return CTypeConversion.toCBoolean(false);
         }
 
@@ -807,6 +811,138 @@ public class SaxonCAPI {
         return this.processor;
     }
 
+    /**
+     * Static method to set configuration property on the Processor
+     * @param thread - Graalvm runtime data structure for a thread
+     * @param processorRef - processor reference in the objectHandle pool
+     * @param c_propertyName reference to the property name
+     * @param c_propertyValue reference to the property
+     * @return success status. 1 is success, -1 is a fail and -2 is a exception thrown
+     * @throws SaxonApiException if processor object is null. Also if we cannot apply a configuration
+     */
+    @CEntryPoint(name = "j_applyPropertyToConfiguration", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static synchronized long applyPropertyToConfiguration(IsolateThread thread, ObjectHandle processorRef, CCharPointer c_propertyName, CCharPointer c_propertyValue) throws SaxonApiException {
+
+        if(processorRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor is null");
+        }
+        Processor processor = objectHandles.get(processorRef);
+        if (debug) {
+            System.err.println("New processor created, Processor: " + System.identityHashCode(processor));
+        }
+
+        String name = null;
+        String value = null;
+        if (c_propertyName != WordFactory.nullPointer()) {
+            name = SaxonCAPI.toJavaString(c_propertyName, WordFactory.nullPointer());
+        }
+
+        if (c_propertyValue != WordFactory.nullPointer()) {
+            value = SaxonCAPI.toJavaString(c_propertyValue, WordFactory.nullPointer());
+        }
+
+        Configuration config = processor.getUnderlyingConfiguration();
+
+
+            if (debug) {
+                System.err.println("SaxonC DEBUG - applyConfiguration, name=" + name);
+                System.err.println("SaxonC DEBUG - applyConfiguration, value=" + value);
+            }
+            if (value == null || name == null) {
+                if (debug) {
+                    System.err.println("SaxonC DEBUG - applyConfiguration value or name is null");
+                }
+                return SaxonCAPI.STATUS_FAIL;
+            }
+            if (name.equals("l")) {
+                processor.setConfigurationProperty(Feature.LINE_NUMBERING,
+                        "on".equals(value));
+            } else if (name.equals("dtd")) {
+                int validationMode = Validation.DEFAULT;
+                switch (value) {
+                    case "on":
+                        validationMode = Validation.STRICT;
+                        break;
+                    case "off":
+                        validationMode = Validation.SKIP;
+                        break;
+                    case "recover":
+                        validationMode = Validation.LAX;
+                        break;
+                }
+                config.setParseOptions(config.getParseOptions().withDTDValidationMode(validationMode));
+            } else {
+                boolean b = "on".equals(value) || "true".equals(value) || "1".equals(value);
+                switch (name) {
+                    case "expand":
+                        config.setParseOptions(config.getParseOptions().withExpandAttributeDefaults(b));
+                        break;
+                    case "opt":
+                        config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, value);
+
+                        break;
+                    case "outval":
+
+                        Boolean isRecover = "recover".equals(value);
+                        config.setConfigurationProperty(Feature.VALIDATION_WARNINGS, isRecover);
+                        config.setConfigurationProperty(Feature.VALIDATION_COMMENTS, isRecover);
+
+
+                        break;
+                    case "strip":
+
+                        config.setConfigurationProperty(Feature.STRIP_WHITESPACE, value);
+                        break;
+                    case "val":
+                        if ("strict".equals(value)) {
+                            processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.STRICT);
+                        } else if ("lax".equals(value)) {
+                            processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION, Validation.LAX);
+                        }
+
+                        break;
+                    case "xsdversion":
+                        processor.setConfigurationProperty(Feature.XSD_VERSION, value);
+
+                        break;
+                    case "xmlversion":
+
+                        processor.setConfigurationProperty(Feature.XML_VERSION, value);
+
+                        break;
+                    default:
+                        if (name.equals("xi")) {
+                            processor.setConfigurationProperty(Feature.XINCLUDE, b);
+
+                        } else if (name.equals("xsiloc")) {
+                            processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, b);
+                        } else if (name.equals("errorOutputFile") || name.equals("http://saxon.sf.net/feature/standardErrorOutputFile")) {
+                            if (SaxonCAPI.debug) {
+                                System.err.println("JAVA DEBUG: standErrorOutputFile set name=" + value);
+                            }
+                            //processor.setConfigurationProperty(Feature.STANDARD_ERROR_OUTPUT_FILE,value);
+                            SaxonCException.errorOutputFile = value;
+
+
+                            try {
+                                boolean append = true;
+                                boolean autoFlush = true;
+                                SaxonCException.errorReporter.setStandardErrorOutput(new PrintStream(new FileOutputStream((String) value, append), autoFlush));
+                            } catch (FileNotFoundException fnf) {
+                                throw new IllegalArgumentException(fnf);
+                            }
+
+                        } else if (name.startsWith("http://saxon.sf.net/feature/")) {
+                            processor.setConfigurationProperty(name, value);
+                        }
+                        break;
+                }
+            }
+
+
+        return SaxonCAPI.STATUS_OK;
+    }
+
 
     /**
      * Static method to set configuration properties on the Processor
@@ -816,8 +952,8 @@ public class SaxonCAPI {
      * @return success status. 1 is success, -1 is a fail and -2 is a exception thrown
      * @throws SaxonApiException if processor object is null. Also if we cannot apply a configuration
      */
-    @CEntryPoint(name = "j_applyToConfiguration", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static synchronized long applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_applyPropertiesToConfiguration", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static synchronized long applyPropertiesToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) throws SaxonApiException {
 
         Processor processor = objectHandles.get(processorRef);
         if (debug) {
@@ -1775,6 +1911,29 @@ public class SaxonCAPI {
         SaxonCAPI.debug  = true;
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(Feature.LICENSE_FILE_LOCATION, "/Users/ond1/work/development/git/private/saxon-license.lic");
+
+        ProfessionalConfiguration pconfiog = (ProfessionalConfiguration) processor.getUnderlyingConfiguration();
+        boolean licensed = pconfiog.isLicenseFound();
+
+        System.out.println("Licensed = " + licensed);
+        XPathCompiler xpathCompiler = processor.newXPathCompiler();
+
+        DocumentBuilder builder = processor.newDocumentBuilder();
+
+        XdmNode node = builder.build(new File("/Users/ond1/work/development/git/saxon-dev/misc/cat.xml"));
+        XPathSelector selector = xpathCompiler.compile("saxon:line-number((//item1)[1])").load();
+
+        selector.setContextItem(node);
+
+        XdmItem item = selector.evaluateSingle();
+
+        if(item != null) {
+
+            System.err.println(" Item = " + item);
+        }
+
+
+
         //Source result = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.3/samples/cppTests", "../php/xsl/foo.xsl", ResourceRequest.XSLT_NATURE);
         String input = "home/ond1/file.txt";
         Path path = Paths.get("/", input).normalize();

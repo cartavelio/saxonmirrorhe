@@ -359,15 +359,11 @@ bool SaxonProcessor::isLicensed() {
   SaxonProcessor::attachCurrentThread();
   if (!licensei) {
     return false;
-  } else {
-
-    if (procRef < 0) {
-      return false;
-    }
-    licensei =
-        j_isLicensed(SaxonProcessor::sxn_environ->thread, (void *)procRef);
-    return licensei;
   }
+  if (procRef < 0) {
+      return false;
+  }
+  return j_isLicensed(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 }
 
 
@@ -393,7 +389,7 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
 }
 
 void SaxonProcessor::applyConfigurationProperties() {
-  SaxonProcessor::attachCurrentThread();
+ /*SaxonProcessor::attachCurrentThread();
   if (configProperties.size() > 0) {
     int size = configProperties.size();
     int64_t processorDataRef = createProcessorDataWithCapacity(
@@ -404,16 +400,19 @@ void SaxonProcessor::applyConfigurationProperties() {
         configProperties.begin();
     for (iter = configProperties.begin(); iter != configProperties.end();
          ++iter, i++) {
-      // cnames[i] = (iter->first).c_str();
-      // cvalues[i] = (iter->second).c_str();
       addProcessorPropertyPair(
           SaxonProcessor::sxn_environ->thread, (void *)processorDataRef,
           (char *)(iter->first).c_str(), (char *)(iter->second).c_str());
     }
 
-    j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
+    int resultsi = j_applyPropertiesToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
                            (void *)processorDataRef);
-  }
+
+    if (resultsi == SXN_EXCEPTION) {
+      throw SaxonApiException();
+    }
+
+  }*/
 }
 
 XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
@@ -665,7 +664,7 @@ SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
   cwd = other.cwd;
 
   parameters = other.parameters;
-  configProperties = other.configProperties;
+  //configProperties = other.configProperties;
   licensei = other.licensei;
   exception = other.exception;
   return *this;
@@ -677,7 +676,7 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
   cwd = other.cwd;
 
   parameters = other.parameters;
-  configProperties = other.configProperties;
+  //configProperties = other.configProperties;
   licensei = other.licensei;
   exception = other.exception;
 }
@@ -927,13 +926,20 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri,
 void SaxonProcessor::setConfigurationProperty(const char *name,
                                               const char *value) {
   if (name != nullptr && value != nullptr) {
-    configProperties.insert(std::pair<std::string, std::string>(
-        std::string(name), std::string((value == nullptr ? "" : value))));
+    /*configProperties.insert(std::pair<std::string, std::string>(
+        std::string(name), std::string((value == nullptr ? "" : value))));*/
+    int resultsi = j_applyPropertyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
+                           (char *)name, (char *)value);
+
+    if (resultsi == SXN_EXCEPTION) {
+      throw SaxonApiException();
+    }
   }
+
 }
 
 void SaxonProcessor::clearConfigurationProperties() {
-  configProperties.clear();
+
 }
 
 void SaxonProcessor::createHeapDump(bool live) {

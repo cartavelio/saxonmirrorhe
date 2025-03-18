@@ -1239,6 +1239,42 @@ PHP_METHOD(SaxonProcessor, newSchemaValidator) {
   }
 }
 
+PHP_METHOD(SaxonProcessor, getSaxonEdition) {
+  SaxonProcessor *saxonProcessor;
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  saxonProcessor_object *obj =
+      (saxonProcessor_object *)((char *)pobj -
+                                XtOffsetOf(saxonProcessor_object, std));
+  saxonProcessor = obj->saxonProcessor;
+  if (saxonProcessor != nullptr) {
+    const char *editionStr = saxonProcessor->getSaxonEdition();
+    RETURN_STRING(editionStr);
+  }
+  RETURN_NULL();
+}
+
+PHP_METHOD(SaxonProcessor, isLicensed) {
+  SaxonProcessor *saxonProcessor;
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  saxonProcessor_object *obj =
+      (saxonProcessor_object *)((char *)pobj -
+                                XtOffsetOf(saxonProcessor_object, std));
+  saxonProcessor = obj->saxonProcessor;
+  if (saxonProcessor != nullptr) {
+    bool flag = saxonProcessor->isLicensed();
+    RETURN_BOOL(flag);
+  }
+  RETURN_BOOL(false);
+}
+
 PHP_METHOD(SaxonProcessor, version) {
   SaxonProcessor *saxonProcessor;
 
@@ -3833,6 +3869,8 @@ zend_function_entry SaxonProcessor_methods[] = {
             PHP_ME(SaxonProcessor, parseJsonFromString,arginfo_saxonc_parseJsonFromString,ZEND_ACC_PUBLIC)
             PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd, ZEND_ACC_PUBLIC)
             PHP_ME(SaxonProcessor, getcwd, arginfo_saxonc_getcwd, ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, isLicensed, arginfo_saxonc_isLicensed, ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, getSaxonEdition, arginfo_saxonc_getSaxonEdition, ZEND_ACC_PUBLIC)
             PHP_ME(SaxonProcessor, newXPathProcessor, arginfo_saxonc_newXPathProcessor, ZEND_ACC_PUBLIC)
             PHP_ME(SaxonProcessor, newDocumentBuilder,arginfo_saxonc_newDocumentBuilder,ZEND_ACC_PUBLIC)
             PHP_ME(SaxonProcessor, newXslt30Processor,arginfo_saxonc_newXslt30Processor,ZEND_ACC_PUBLIC)
