@@ -772,6 +772,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
   long result =
       j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
                         (char *)cwd.c_str(), (void *)processorDataRef);
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
   }
@@ -805,6 +806,7 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
   long result =
       j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
                         (char *)cwd.c_str(), (void *)processorDataRef);
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
   } else if (result == SXN_EXCEPTION) {
@@ -1131,6 +1133,8 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
   int64_t xdmArrayRef =
       j_makeXdmArray(sxn_environ->thread, (void *)processorDataRef);
 
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+
   if (xdmArrayRef <= 0) {
    /* std::cerr
         << "Error found when converting array of XdmValue to XdmArray - Ref="
@@ -1234,12 +1238,10 @@ SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
 
   int64_t xdmmapRef = j_makeXdmMap(sxn_environ->thread, (void *)mapDataRef);
 
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
+
   if (xdmmapRef <= 0) {
-    std::cerr << "Error found when converting std:map of pair (XdmAtomicValue, "
-                 "XdmValue) to XdmMap - Ref="
-              << ((long)xdmmapRef) << std::endl;
-    // TODO create exception
-    return nullptr;
+    throw new SaxonApiException("Error found when converting std:map of pair (XdmAtomicValue, XdmValue) to XdmMap");
   }
 
   XdmMap *newArray = new XdmMap(xdmmapRef);
@@ -1273,12 +1275,11 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
 
   int64_t xdmmapRef = j_makeXdmMap(sxn_environ->thread, (void *)mapDataRef);
 
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
+
   if (xdmmapRef <= 0) {
-    std::cerr << "Error found when converting std:map of pair (XdmAtomicValue, "
-                 "XdmValue) to XdmMap - Ref="
-              << ((long)xdmmapRef) << std::endl;
-    // TODO create exception
-    return nullptr;
+    throw new SaxonApiException("Error found when converting std:map of pair (XdmAtomicValue, XdmValue) to XdmMap");
+
   }
 
   XdmMap *newArray = new XdmMap(xdmmapRef);
@@ -1304,13 +1305,11 @@ XdmMap *SaxonProcessor::makeMap3(XdmAtomicValue **keys, XdmValue **values,
   }
 
   int64_t xdmmapRef = j_makeXdmMap(sxn_environ->thread, (void *)mapDataRef);
+  
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
 
   if (xdmmapRef <= 0) {
-    std::cerr << "Error found when converting std:map of pair (XdmAtomicValue, "
-                 "XdmValue) to XdmMap - Ref="
-              << ((long)xdmmapRef) << std::endl;
-    // TODO create exception
-    return nullptr;
+    throw new SaxonApiException("Error found when converting std:map of pair (XdmAtomicValue, XdmValue)");
   }
 
   XdmMap *newArray = new XdmMap(xdmmapRef);
