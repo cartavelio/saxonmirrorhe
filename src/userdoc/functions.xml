@@ -5903,8 +5903,8 @@
       </description>
       <signatures>
         <proto return-type="xs:integer"/>
-        <proto return-type="xs:integer">
-          <arg name="node" type="node()" desc="The node whose column number is required"/>
+        <proto return-type="xs:integer?">
+          <arg name="node" type="node()?" desc="The node whose column number is required"/>
         </proto>
       </signatures>
       <status>
@@ -5928,6 +5928,9 @@
             position of the "&lt;" character at the start of the start tag. SAX parsers report line
             and column numbers only for element nodes, so for any other kind of node, the returned
             value will be -1.</p>
+          
+          <p>From 12.6, the function returns an empty sequence if the supplied argument is an empty
+            sequence.</p>
         </div>
       </details>
       <see-also name="system-id" namespace="http://saxon.sf.net/"/>
@@ -7457,8 +7460,8 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       </description>
       <signatures>
         <proto return-type="xs:integer"/>
-        <proto return-type="xs:integer">
-          <arg name="node" type="node()" desc="The node whose line number is required"/>
+        <proto return-type="xs:integer?">
+          <arg name="node" type="node()?" desc="The node whose line number is required"/>
         </proto>
       </signatures>
       <status>
@@ -7489,6 +7492,9 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             element node. For elements created using other instructions, the line number will
             reflect the position of the instruction in the stylesheet or query that caused the
             element to be created.</p>
+          
+          <p>From 12.6, the function returns an empty sequence if the supplied argument is an empty
+            sequence.</p>
         </div>
       </details>
       <see-also name="system-id" namespace="http://saxon.sf.net/"/>
