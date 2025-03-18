@@ -315,17 +315,32 @@ public class DocumentInstr extends ParentNodeConstructor {
 
         public PushEvaluator elaborateForPush() {
             DocumentInstr expr = (DocumentInstr) getExpression();
-//            PushEvaluator content = expr.getContentExpression().makeElaborator().elaborateForPush();
-//            if (expr.preservingTypes && !expr.textOnly) {
-//                return (output, context) -> {
-//                    output.setSystemId(expr.getStaticBaseURIString());
-//                    output.startDocument(ReceiverOption.NONE);
-//                    TailCall tc = content.processLeavingTail(output, context);
-//                    dispatchTailCall(tc);
-//                    output.endDocument();
-//                    return null;
-//                };
-//            } else {
+            PushEvaluator content = expr.getContentExpression().makeElaborator().elaborateForPush();
+            if (!expr.textOnly) {
+                if (expr.preservingTypes) {
+                    return (output, context) -> {
+                        output.setSystemId(expr.getStaticBaseURIString());
+                        output.startDocument(ReceiverOption.NONE);
+                        TailCall tc = content.processLeavingTail(output, context);
+                        dispatchTailCall(tc);
+                        output.endDocument();
+                        return null;
+                    };
+                } else {
+                    return (output, context) -> {
+                        ParseOptions options = expr.getValidationOptions();
+                        context.getConfiguration().prepareValidationReporting(context, options);
+                        Receiver validator = context.getConfiguration().getDocumentValidator(
+                                output, expr.getStaticBaseURIString(), options, expr.getLocation());
+                        ComplexContentOutputter outputter = new ComplexContentOutputter(validator);
+                        outputter.startDocument(ReceiverOption.NONE);
+                        TailCall tc = content.processLeavingTail(outputter, context);
+                        dispatchTailCall(tc);
+                        outputter.endDocument();
+                        return null;
+                    };
+                }
+            } else {
                 ItemEvaluator evalAsItem = elaborateForItem();
                 Location loc = expr.getLocation();
                 return (output, context) -> {
@@ -335,7 +350,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     }
                     return null;
                 };
-//            }
+            }
         }
 
         @Override
