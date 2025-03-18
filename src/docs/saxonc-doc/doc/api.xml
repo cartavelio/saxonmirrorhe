@@ -1101,7 +1101,8 @@
                </td>
                <td>
                   <span class="signature">exceptionClear()</span>
-                  <div class="fcomment">Clear any exceptions thrown.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Clear any exceptions thrown.</div>
                </td>
             </tr>
             <tr>
@@ -1110,7 +1111,8 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1119,7 +1121,8 @@
                </td>
                <td>
                   <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the error message if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1128,7 +1131,8 @@
                </td>
                <td>
                   <span class="signature">getExceptionCount()</span>
-                  <div class="fcomment">Get the number of errors during execution or evaluation of a
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the number of errors during execution or evaluation of a
                      stylesheet.</div>
                </td>
             </tr>
@@ -1622,7 +1626,8 @@
                </td>
                <td>
                   <span class="signature">exceptionClear()</span>
-                  <div class="fcomment">Clear any exceptions thrown.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Clear any exceptions thrown.</div>
                </td>
             </tr>
             <tr>
@@ -1631,7 +1636,8 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1640,7 +1646,8 @@
                </td>
                <td>
                   <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the error message if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1649,7 +1656,8 @@
                </td>
                <td>
                   <span class="signature">getExceptionCount()</span>
-                  <div class="fcomment">Get the number of errors during execution or evaluation of a
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the number of errors during execution or evaluation of a
                      stylesheet.</div>
                </td>
             </tr>
@@ -1849,7 +1857,8 @@
                </td>
                <td>
                   <span class="signature">exceptionClear()</span>
-                  <div class="fcomment">Clear any exceptions thrown.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Clear any exceptions thrown.</div>
                </td>
             </tr>
             <tr>
@@ -1858,7 +1867,8 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1867,7 +1877,8 @@
                </td>
                <td>
                   <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the error message if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1876,7 +1887,8 @@
                </td>
                <td>
                   <span class="signature">getExceptionCount()</span>
-                  <div class="fcomment">Get the number of errors during execution or evaluation of a
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the number of errors during execution or evaluation of a
                      query.</div>
                </td>
             </tr>
@@ -2104,7 +2116,8 @@
                </td>
                <td>
                   <span class="signature">exceptionClear()</span>
-                  <div class="fcomment">Clear any exceptions thrown.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Clear any exceptions thrown.</div>
                </td>
             </tr>
             <tr>
@@ -2113,7 +2126,8 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2122,7 +2136,8 @@
                </td>
                <td>
                   <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the error message if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2131,7 +2146,8 @@
                </td>
                <td>
                   <span class="signature">getExceptionCount()</span>
-                  <div class="fcomment">Get the number of errors during execution or evaluation of
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the number of errors during execution or evaluation of
                      an XPath expression.</div>
                </td>
             </tr>
@@ -2333,7 +2349,8 @@
                </td>
                <td>
                   <span class="signature">exceptionClear()</span>
-                  <div class="fcomment">Clear any exceptions thrown.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Clear any exceptions thrown.</div>
                </td>
             </tr>
             <tr>
@@ -2342,7 +2359,8 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2351,7 +2369,8 @@
                </td>
                <td>
                   <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the error message if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2360,7 +2379,8 @@
                </td>
                <td>
                   <span class="signature">getExceptionCount()</span>
-                  <div class="fcomment">Get the number of errors during execution of the
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the number of errors during execution of the
                      validation.</div>
                </td>
             </tr>
@@ -2527,7 +2547,8 @@
                </td>
                <td>
                   <span class="signature">exceptionOccurred()</span>
-                  <div class="fcomment">Checks for pending exceptions. Returns true when there is a
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Checks for pending exceptions. Returns true when there is a
                      pending exception; otherwise returns false.</div>
                </td>
             </tr>
@@ -2538,7 +2559,8 @@
                </td>
                <td>
                   <span class="signature">exceptionClear()</span>
-                  <div class="fcomment">Clear any exception thrown.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Clear any exception thrown.</div>
                </td>
             </tr>
             
@@ -2548,7 +2570,8 @@
                </td>
                <td>
                   <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the error message if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error message if there is an error.</div>
                </td>
             </tr>
             
@@ -2558,7 +2581,8 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there is an error.</div>
+                  <div class="fcomment">Deprecated: from 12.1 this method is no longer used, since
+                     exceptions are now thrown. Get the error code if there is an error.</div>
                </td>
             </tr>
             

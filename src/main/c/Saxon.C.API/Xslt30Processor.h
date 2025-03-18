@@ -364,39 +364,40 @@ public:
   /**
    * Deprecated. Checks for pending exceptions without creating a local reference to the
    * exception object.
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
 
   /**
-   * Get the SaxonApiException object created when we have an error.
+   * Deprecated. Get the SaxonApiException object created when we have an error.
    * After use of the processor if there is an error then a
    * SaxonApiException is created.
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
   SaxonApiException *getException();
 
   /**
-   * Clear any thrown exceptions
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * Deprecated. Clear any thrown exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    */
   void exceptionClear();
 
   /**
-   * Get the first error message if there are any errors.
+   * Deprecated. Get the first error message if there are any errors.
    * A transformation may have a number of errors reported against it.
    * @return The message of the exception
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    */
   const char *getErrorMessage();
 
   /**
-   * Get the first error code if there are any errors
+   * Deprecated. Get the first error code if there are any errors
    * A transformation may have a number of errors reported against it.
    * @return The error code of the exception. The error codes are
    * related to the specific specification
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    */
   const char *getErrorCode();
 

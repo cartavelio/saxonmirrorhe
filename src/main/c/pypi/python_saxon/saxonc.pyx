@@ -1011,6 +1011,7 @@ cdef class PySaxonProcessor:
     def exception_occurred(self):
         """
         exception_occurred(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Property to check if an exception has occurred internally within SaxonC
         Returns:
             boolean: True if an exception has been reported; otherwise False
@@ -1020,6 +1021,7 @@ cdef class PySaxonProcessor:
     def exception_clear(self):
         """
         exception_clear(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Clear any exception thrown internally in SaxonC.
         """
         self.thisptr.exceptionClear()
@@ -1028,6 +1030,7 @@ cdef class PySaxonProcessor:
     def error_message(self):
        """
        error_message(self)
+       Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
        The PySaxonProcessor may have a number of errors reported against it. Get the error message
        if there are any errors.
        Returns:
@@ -1694,6 +1697,7 @@ cdef class PyXslt30Processor:
      def exception_occurred(self):
         """
         exception_occurred(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Property to check for pending exceptions without creating a local reference to the exception object
         Returns:
             boolean: True when there is an exception thrown; otherwise False
@@ -1703,6 +1707,7 @@ cdef class PyXslt30Processor:
      def exception_clear(self):
         """
         exception_clear(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Clear any exception thrown
         """
         self.thisxptr.exceptionClear()
@@ -1711,6 +1716,7 @@ cdef class PyXslt30Processor:
      def error_message(self):
         """
         error_message(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         A transformation may have a number of errors reported against it. This property returns an error message
         if there are any errors.
         Returns:
@@ -1724,6 +1730,7 @@ cdef class PyXslt30Processor:
      def error_code(self):
         """
         error_code(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         A transformation may have a number of errors reported against it. This property returns the error code if
         there are any errors.
         Returns:
@@ -2762,6 +2769,7 @@ cdef class PyXsltExecutable:
     def exception_occurred(self):
         """
         exception_occurred(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Property to check for pending exceptions without creating a local reference to the exception object
         Returns:
             boolean: True when there is a pending exception; otherwise False
@@ -2771,6 +2779,7 @@ cdef class PyXsltExecutable:
     def exception_clear(self):
         """
         exception_clear(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Clear any exception thrown
         """
         self.thisxptr.exceptionClear()
@@ -2779,6 +2788,7 @@ cdef class PyXsltExecutable:
     def error_message(self):
         """
         error_message(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         A transformation may have a number of errors reported against it. Get the error message if there are any errors
         Returns:
             str: The message of the exception. Returns None if the exception does not exist.
@@ -3222,6 +3232,7 @@ cdef class PyXQueryProcessor:
      def check_exception(self):
         """
         check_exception(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Check for exception thrown and get message of the exception.
         Returns:
             str: Returns the exception message if thrown otherwise returns None
@@ -3232,6 +3243,7 @@ cdef class PyXQueryProcessor:
      def exception_occurred(self):
         """
         exception_occurred(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Property to check for pending exceptions without creating a local reference to the exception object
         Returns:
             boolean: True when there is a pending exception; otherwise False
@@ -3241,6 +3253,7 @@ cdef class PyXQueryProcessor:
      def exception_clear(self):
         """
         exception_clear(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Clear any exception thrown
         """
         self.thisxqptr.exceptionClear()
@@ -3249,6 +3262,7 @@ cdef class PyXQueryProcessor:
      def error_message(self):
         """
         error_message(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         A query may have a number of errors reported against it. This property returns an error message
         if there are any errors.
         Returns:
@@ -3260,6 +3274,7 @@ cdef class PyXQueryProcessor:
      def error_code(self):
         """
         error_code(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         A query may have a number of errors reported against it. This property returns the error code
         if there are any errors.
         Returns:
@@ -3640,6 +3655,7 @@ cdef class PyXPathProcessor:
     def exception_occurred(self):
         """
         exception_occurred(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Check if an exception has occurred internally within SaxonC
         Returns:
             boolean: True if an exception has been reported; otherwise False
@@ -3649,6 +3665,7 @@ cdef class PyXPathProcessor:
     def exception_clear(self):
         """
         exception_clear(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Clear any exception thrown
         """
         self.thisxpptr.exceptionClear()
@@ -3657,6 +3674,7 @@ cdef class PyXPathProcessor:
     def error_message(self):
         """
         error_message(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         An expression may have a number of errors reported against it. This property returns the error message
         if there are any errors.
         Returns:
@@ -3670,6 +3688,7 @@ cdef class PyXPathProcessor:
     def error_code(self):
         """
         error_code(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         An expression may have a number of errors reported against it. This property returns the error code
         if there are any errors.
         Returns:
@@ -3994,6 +4013,7 @@ cdef class PySchemaValidator:
     def exception_occurred(self):
         """
         exception_occurred(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Property to check if an exception has occurred internally within SaxonC
         Returns:
             boolean: True if an exception has been reported; otherwise False
@@ -4003,6 +4023,7 @@ cdef class PySchemaValidator:
     def exception_clear(self):
         """
         exception_clear(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         Clear any exception thrown
         """
         self.thissvptr.exceptionClear()
@@ -4010,6 +4031,7 @@ cdef class PySchemaValidator:
     def get_error_message(self):
         """
         get_error_message(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         A validation may have a number of errors reported against it. Get the error message if there
         are any errors.
         Args:
@@ -4021,6 +4043,7 @@ cdef class PySchemaValidator:
     def get_error_code(self):
         """
         get_error_code(self)
+        Deprecated: from 12.1 this method is no longer used, since exceptions are now thrown.
         A validation may have a number of errors reported against it. Get the error code if there was an error.
         Args:
         Returns:
