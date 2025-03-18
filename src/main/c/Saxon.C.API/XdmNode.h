@@ -101,6 +101,14 @@ public:
    */
   XdmItem *getHead();
 
+ /**
+  * The <code>equals()</code> relation between two XdmNode objects is true if they both represent the same
+  * node. That is, it corresponds to the "is" operator in XPath.
+  * @param  other the object to be compared
+  * @return true if and only if the other object is an XdmNode instance representing the same node
+  */
+ bool equals(XdmNode * other);
+
 
   /**
    * Get the kind of the node.

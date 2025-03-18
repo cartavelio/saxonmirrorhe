@@ -200,6 +200,11 @@
                been added in the C++, Python and PHP APIs to give the shortened name of the Saxon product edition.</li>
             <li>The <code>isLicensed()</code> method on the <code>SaxonProcessor</code> class has
                been added in the C++, Python and PHP APIs to determine if this configuration is licensed.</li>
+            <li>The <code>equals()</code> method on
+               the <code>XdmNode</code> class has been added in the C++, Python and PHP APIs to
+            check the relationship between two XdmNode objects if they are equal. We have also added the
+               overloaded <code>==</code> operator on the <code>XdmNode</code> class in the C++ class which does the same as the
+               <code>equals</code> method.</li>
          </ul>
       </category>
       
