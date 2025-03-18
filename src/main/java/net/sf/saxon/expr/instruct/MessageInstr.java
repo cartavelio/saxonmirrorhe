@@ -9,7 +9,10 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.StringEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
@@ -22,12 +25,12 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -351,7 +354,11 @@ public class MessageInstr extends Instruction {
                 builder.close();
                 NodeInfo content = builder.getCurrentRoot();
                 Message message = expr.makeMessage(abort, errorCode, content);
-                controller.getMessageHandler().accept(message);
+                try {
+                    controller.getMessageHandler().accept(message);
+                } catch (Exception e) {
+                    // Bug 6464: ignore the exception
+                }
                 if (abort) {
                     TerminationException te = new TerminationException(
                             "Processing terminated by " + StandardDiagnostics.getInstructionNameDefault(expr) +
