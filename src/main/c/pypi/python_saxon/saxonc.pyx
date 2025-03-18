@@ -1,5 +1,4 @@
-"""@package saxonc@@edition@@
-This documentation details the Python API for SaxonC, which has been written in cython for Python3.
+"""This documentation details the Python API for SaxonC, which has been written in cython for Python3.
 SaxonC is produced by compiling the Java source code of Saxon to a native executable using GraalVM,
 and adding APIs for C/C++, Python, and PHP.
 SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and Schema validation 1.0/1.1.
@@ -8,9 +7,6 @@ PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunc
 # distutils: language = c++
 # distutils: sources = SaxonProcessor.cpp
 # cython: language_level = 3
-
-__version__ = '@@VERSION@@'
-__author__ = 'Saxonica'
 
 cimport saxoncClasses
 from libcpp cimport bool
