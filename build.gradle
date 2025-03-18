@@ -206,9 +206,9 @@ dependencies {
 
   basicConfiguration (
     // N.B. Some of these are also listed in pomDependencies below!
-    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.4.0'],
-    [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.4.0'],
-    [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.4.0'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15'],
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
     [group: 'jline', name: 'jline', version: jlineVersion ],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
@@ -755,7 +755,7 @@ task "hej_preprocess"(
       mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/hej", "/o:${buildDir}/src/hej",
-        "/p:EE=false", "/p:PE=false", "/p:SCHEMA=false", "/p:STREAM=false",
+        "/p:EE=false", "/p:PE=false",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
@@ -841,15 +841,13 @@ task "pej_preprocess"(
       mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/pej", "/o:${buildDir}/src/pej",
-        "/p:EE=false", "/p:PE=true", "/p:SCHEMA=false", "/p:STREAM=false",
+        "/p:EE=false", "/p:PE=true",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
 
   doLast {
     patchReleaseInfo("${buildDir}/src/pej/net/sf/saxon/Version.java")
-    patchKey("${buildDir}/src/pej/com/saxonica/config/JavaVerifier.java", "dsa", dsaPublicKey)
-    patchKey("${buildDir}/src/pej/com/saxonica/config/JavaVerifier.java", "ed25519", ed25519PublicKey)
   }
 }
 
@@ -1722,7 +1720,7 @@ publishing {
         name = 'Saxon-HE'
         packaging = 'jar'
         description = 'The XSLT and XQuery Processor'
-        url = 'https://www.saxonica.com/'
+        url = 'http://www.saxonica.com/'
         inceptionYear = '1999'
 
         organization pomOrganization("he")
@@ -1752,7 +1750,7 @@ publishing {
           name = 'Saxon-PE'
           packaging = 'jar'
           description = 'The XSLT and XQuery Processor'
-          url = 'https://www.saxonica.com/'
+          url = 'http://www.saxonica.com/'
           inceptionYear = '1999'
 
           organization pomOrganization("pe")
@@ -1780,7 +1778,7 @@ publishing {
           name = 'Saxon-EE'
           packaging = 'jar'
           description = 'The XSLT and XQuery Processor'
-          url = 'https://www.saxonica.com/'
+          url = 'http://www.saxonica.com/'
           inceptionYear = '1999'
 
           organization pomOrganization("ee")
