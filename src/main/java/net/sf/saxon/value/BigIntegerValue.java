@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.expr.sort.XPathComparable;
+import net.sf.saxon.functions.Round;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
@@ -311,43 +312,21 @@ public final class BigIntegerValue extends IntegerValue {
 
     @Override
     public NumericValue round(int scale) {
-        if (scale >= 0) {
-            return this;
-        } else {
-            boolean negative = value.signum() < 0;
-
-            // factor is 1 for scale=0, 10 for scale=-1, 100 for scale=-2, etc
-            long factor = 1;
-            for (long i = 1; i <= -scale; i++) {
-                factor *= 10;
-            }
-            BigInteger factorB = BigInteger.valueOf(factor);
-
-            BigInteger towardsZero = value.divide(factorB).multiply(factorB);
-            if (towardsZero.equals(value)) {
-                return this;
-            }
-            BigInteger awayFromZero = negative ? towardsZero.subtract(factorB) : towardsZero.add(factorB);
-            BigInteger floor = negative ? awayFromZero : towardsZero;
-            BigInteger ceiling = negative ? towardsZero : awayFromZero;
-            BigInteger midpoint = floor.add(ceiling.subtract(floor).divide(BigInteger.valueOf(2)));
-            boolean midway = value.equals(midpoint);
-            BigInteger nearest = value.compareTo(midpoint) > 0 ? ceiling : floor;
-            return IntegerValue.makeIntegerValue(midway ? ceiling : nearest);
-        }
+        return round(scale, Round.RoundingRule.HALF_TO_CEILING);
     }
 
     /**
-     * Implement the XPath round-to-half-even() function
+     * Implement the XPath round-to-half-even() or round#3 function
      *
-     * @param scale number of digits required after the decimal point; the
-     *              value -2 (for example) means round to a multiple of 100
+     * @param scale        number of digits required after the decimal point; the
+     *                     value -2 (for example) means round to a multiple of 100
+     * @param roundingRule how rounding is performed
      * @return if the scale is &gt;=0, return this value unchanged. Otherwise
-     *         round it to a multiple of 10**-scale
+     * round it to a multiple of 10**-scale
      */
 
     @Override
-    public NumericValue roundHalfToEven(int scale) {
+    public NumericValue round(int scale, Round.RoundingRule roundingRule) {
         if (scale >= 0 || value.signum() == 0) {
             return this;
         } else {
@@ -370,12 +349,30 @@ public final class BigIntegerValue extends IntegerValue {
             BigInteger midpoint = floor.add(ceiling.subtract(floor).divide(BigInteger.valueOf(2)));
             boolean midway = value.equals(midpoint);
             BigInteger nearest = value.compareTo(midpoint) > 0 ? ceiling : floor;
-
-            return IntegerValue.makeIntegerValue(
-                    midway
-                    ? (floor.divide(factorB).mod(BigInteger.valueOf(2)).signum() == 0 ? floor : ceiling)
-                    : nearest);
-
+            switch (roundingRule) {
+                case FLOOR:
+                    return IntegerValue.makeIntegerValue(floor);
+                case TOWARD_ZERO:
+                    return IntegerValue.makeIntegerValue(towardsZero);
+                case CEILING:
+                    return IntegerValue.makeIntegerValue(ceiling);
+                case AWAY_FROM_ZERO:
+                    return IntegerValue.makeIntegerValue(awayFromZero);
+                case HALF_TO_FLOOR:
+                    return IntegerValue.makeIntegerValue(midway ? floor : nearest);
+                case HALF_TO_CEILING:
+                default:
+                    return IntegerValue.makeIntegerValue(midway ? ceiling : nearest);
+                case HALF_TOWARD_ZERO:
+                    return IntegerValue.makeIntegerValue(midway ? towardsZero : nearest);
+                case HALF_AWAY_FROM_ZERO:
+                    return IntegerValue.makeIntegerValue(midway ? awayFromZero : nearest);
+                case HALF_TO_EVEN:
+                    return IntegerValue.makeIntegerValue(
+                            midway
+                                    ? (floor.divide(factorB).mod(BigInteger.valueOf(2)).signum() == 0 ? floor : ceiling)
+                                    : nearest);
+            }
         }
     }
 
