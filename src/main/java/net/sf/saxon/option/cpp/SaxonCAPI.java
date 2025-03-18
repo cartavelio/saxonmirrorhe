@@ -183,16 +183,13 @@ public class SaxonCAPI {
     public static byte j_isLicensed(IsolateThread thread, ObjectHandle procRef) {
         Processor proc = objectHandles.get(procRef);
         Configuration config = proc.getUnderlyingConfiguration();
-        if(config instanceof EnterpriseConfiguration) {
-            EnterpriseConfiguration ec = (EnterpriseConfiguration) config;
-            return CTypeConversion.toCBoolean(ec.isLicenseFound());
-        } else if(config instanceof ProfessionalConfiguration) {
+//#if EE==true || PE==true
+        if(config instanceof ProfessionalConfiguration) {
             ProfessionalConfiguration pc = (ProfessionalConfiguration) config;
             return CTypeConversion.toCBoolean(pc.isLicenseFound());
-        } else{
-            return CTypeConversion.toCBoolean(false);
         }
-
+//#endif
+        return CTypeConversion.toCBoolean(false);
 
     }
 
@@ -1909,29 +1906,6 @@ public class SaxonCAPI {
 
     public static void testj() throws SaxonApiException {
         SaxonCAPI.debug  = true;
-        Processor processor = new Processor(true);
-        processor.setConfigurationProperty(Feature.LICENSE_FILE_LOCATION, "/Users/ond1/work/development/git/private/saxon-license.lic");
-
-        ProfessionalConfiguration pconfiog = (ProfessionalConfiguration) processor.getUnderlyingConfiguration();
-        boolean licensed = pconfiog.isLicenseFound();
-
-        System.out.println("Licensed = " + licensed);
-        XPathCompiler xpathCompiler = processor.newXPathCompiler();
-
-        DocumentBuilder builder = processor.newDocumentBuilder();
-
-        XdmNode node = builder.build(new File("/Users/ond1/work/development/git/saxon-dev/misc/cat.xml"));
-        XPathSelector selector = xpathCompiler.compile("saxon:line-number((//item1)[1])").load();
-
-        selector.setContextItem(node);
-
-        XdmItem item = selector.evaluateSingle();
-
-        if(item != null) {
-
-            System.err.println(" Item = " + item);
-        }
-
 
 
         //Source result = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.3/samples/cppTests", "../php/xsl/foo.xsl", ResourceRequest.XSLT_NATURE);
