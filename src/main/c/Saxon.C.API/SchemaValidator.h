@@ -26,7 +26,7 @@ class SchemaValidator {
 public:
   //! Default constructor.
   /*!
-   * Creates Schema Validator
+   * Creates a Schema Validator
    * @throws SaxonApiException
    */
   SchemaValidator();
@@ -35,16 +35,16 @@ public:
   /*!
    * The supplied processor should have license flag set to true for the Schema
    * Validator to operate.
-   * @param proc - the SaxonProcessor
-   * @param cwd - set the current working directory
+   * @param proc - pointer to the SaxonProcessor object
+   * @param cwd - the current working directory
    * @throws SaxonApiException
    */
   SchemaValidator(SaxonProcessor *proc, std::string cwd = "");
 
-  //! Copy constructor.
-  /*!
-    Create a copy of the SchemaValidator.
-  */
+  /**
+   * SchemaValidator copy constructor.
+   * @param other - SchemaValidator
+   */
   SchemaValidator(const SchemaValidator &other);
 
   //! Destructor method. At the end of the program call the release() method to clear the JVM.
@@ -65,10 +65,10 @@ public:
    */
   void setcwd(const char *cwd);
 
- //! Get the current working directory. Memory dellocation is handled internally.
  /**
-  *
-  * @returns const char * - Supplied working directory which replaces any set cwd.
+  * Get the current working directory set on this validator.
+  * Memory deallocation is handled internally.
+  * @return Current working directory
   */
  const char * getcwd();
 
@@ -157,34 +157,31 @@ public:
    */
   XdmNode *getValidationReport();
 
-  //! Set a parameter value used in the validator
+  //! Set the value of a parameter used in the validator
   /**
-   *
-   *
-   * @param name  of the parameter, as a string. For namespaced parameter use
-   * the JAXP solution i.e. "{uri}name"
-   * @param value of the query parameter, or nullptr to clear a previously set
+   * @param name - the name of the parameter, as a string. For a namespaced name use
+   * clark notation i.e. "{uri}local"
+   * @param value - the value of the parameter, or nullptr to clear a previously set
    * value
    */
   void setParameter(const char *name, XdmValue *value, bool withParam=true);
 
   //! Remove a parameter (name, value) pair
   /**
-   *
-   *
-   * @param name  of the parameter
-   * @return bool - outcome of the removal
+   * @param name - the name of the parameter
+   * @return Outcome of the removal
    */
   bool removeParameter(const char *name);
 
-  //! Set a property.
+  //! Set a configuration property specific to the validator in use.
   /**
    *
    *
-   * @param name of the property
-   * @param value of the property
+   * @param name - the name of the property
+   * @param value - the value of the property
    */
   void setProperty(const char *name, const char *value);
+
   //! Clear parameter values set.
   /**
    * Default behaviour (false) is to leave XdmValues in memory.
@@ -195,14 +192,14 @@ public:
    */
   void clearParameters(bool deleteValues = false);
 
-  //! Clear property values set
+  //! Clear configuration property values set
   void clearProperties();
 
   /**
-   * Get a parameter value by name
-   * @param name - Specified parameter name to get
-   * @param withParam Internal use only
-   * @return XdmValue. Memory deallocation is handled internally.
+   * Get the value of a parameter
+   * @param name - the name of the parameter
+   * @param withParam - internal use only
+   * @return The value of the parameter as an XdmValue. Memory deallocation is handled internally.
    */
   XdmValue *getParameter(const char *name, bool withParam=true);
 
@@ -210,25 +207,24 @@ public:
   //! Get all parameters as a std::map
   std::map<std::string, XdmValue *> &getParameters();
 
-  //! Get all properties as a std::map
+  //! Get all configuration properties specified on the processor as a std::map
   std::map<std::string, std::string> &getProperties();
 
   //! Checks for pending exceptions without creating a local reference to the exception object
   /**
    *
-   * @return bool - true when there is a pending exception; otherwise return
-   * false
+   * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
 
-  //! Check for exception thrown.
+  //! Check for thrown exceptions.
   /**
-   * @return char*. Returns the main exception message if thrown otherwise
+   * @return The main exception message if any has been thrown otherwise
    * return nullptr
    */
   const char *checkException();
 
-  //! Clear any exception thrown
+  //! Clear any thrown exceptions
   void exceptionClear();
 
   //! Get number of errors during validation of the source against the schema
@@ -239,8 +235,8 @@ public:
 
   //! Get the error message if there are any validation errors
   /**
-   *  May have a number of validation errors reported against it the source.
-   * @return char* - The message of the exception thrown
+   * A validation may have a number of errors reported against it.
+   * @return The message of the exception
    */
   const char *getErrorMessage();
 
@@ -262,24 +258,24 @@ public:
    */
   void setLax(bool l);
 
-  //! Get the underlying java object of the C++ schema validator
+  //! Get the underlying Java object of the C++ schema validator
   int64_t getUnderlyingValidator() { return cppV; }
 
 private:
-  bool lax; /*!< flag to indicate lax mode for the Schema validation */
+  bool lax; /*!< Flag to indicate lax mode for the Schema validation */
   SaxonProcessor
-      *proc; /*!< Saxon Processor Pointer, which created this SchemaValidator */
+      *proc; /*!< Pointer to the SaxonProcessor object which created this SchemaValidator */
   // jclass  cppClass; /*!< JNI object where the SchemaValidator method will be
   // invoked */
   int64_t cppV;     /*!< The underlying SchemaValidator Java object */
-  std::string cwdV; /*!< current working directory */
+  std::string cwdV; /*!< Current working directory */
   std::string
       outputFile; /*!< The output file name for the exported schema validator */
   std::map<std::string, XdmValue *>
-      parameters; /*!< map of parameters used for the transformation as (string,
+      parameters; /*!< Map of parameters used for the transformation as (string,
                      value) pairs */
   std::map<std::string, std::string>
-      properties; /*!< map of properties used for the transformation as (string,
+      properties; /*!< Map of properties used for the transformation as (string,
                      string) pairs */
   SaxonApiException *exception; /*!< Exceptions reported against the
                                    SchemaValidator are stored here */

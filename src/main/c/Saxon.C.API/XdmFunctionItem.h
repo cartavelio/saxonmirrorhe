@@ -25,30 +25,26 @@
 class XdmFunctionItem : public XdmItem {
 
 public:
-  //! Default constructor for XdmFunctionItem.
   /**
-   * Create an empty XdmFunctionItem
+   * Default constructor.
+   * Creates an empty XdmFunctionItem
    */
   XdmFunctionItem();
 
-  //! XdmFunctionItem constructor created from a Java object - internal use
   /**
-   * XdmFunctionItem constructor created from a JNI Java object. This is for
-   * internal use only
-   * @param obj - The internal Java object for the XdmFunctionItem is wrapped
-   * here in the C++ XdmArray
+   * XdmFunctionItem constructor to create an object which is a wrapper for a Java XdmFunctionItem object - internal use only
+   * @param obj - internal Java XdmFunctionItem object to be wrapped
    */
   XdmFunctionItem(int64_t obj);
 
-  //! Copy constructor.
   /**
-   * Copy constructor for XdmFunctionItem
+   * XdmFunctionItem copy constructor.
+   * @param d - XdmFunctionItem
    */
   XdmFunctionItem(const XdmFunctionItem &d);
 
-  //! Destructor.
   /**
-   * Destructor for XdmFunctionItem
+   * Destructor method for XdmFunctionItem
    */
   virtual ~XdmFunctionItem() {
     if (fname != nullptr) {
@@ -56,49 +52,48 @@ public:
     }
   }
 
-  //! Get the name of the function as EQName.
   /**
+   * Get the name of the function as an EQName.
    * The expanded name, as a string using the notation devised by EQName.
    * If the name is in a namespace, the resulting string takes the form
    * <code>Q{uri}local</code>. Otherwise, the value is the local part of the
    * name.
    *
-   * @return the function name as a string in the EQName notation, or null for
+   * @return The function name as a string in the EQName notation, or null for
    * an anonymous inline function item.
    * The caller is responsible for memory deallocation using `operator delete`.
    */
   const char *getName();
 
-  //! Get the arity of the function
   /**
+   * Get the arity of the function
    *
-   *
-   * @return the arity of the function, that is, the number of arguments in the
+   * @return The arity of the function, that is, the number of arguments in the
    * function's signature
    */
   virtual int getArity();
 
-  //! Get the string value of the XdmArray item.
   /**
-   * Get the string value of the function
+   * Get the string value of the XdmFunctionItem. There is no string value for
+   * function items, so an exception is always thrown.
    *
-   * @return nothing is returned; this method always throws an exceptionn because the XdmFunctionItem
+   * @return Nothing is returned; this method always throws an exception because the XdmFunctionItem
    * has no associated string value.
-   * The caller is responsible for memory deallocation using `operator delete`.
+   * @throws SaxonApiException
    */
   const char *getStringValue();
 
-  //! Get a system function
   /**
+   * Get a system function.
    * This can be any function defined in XPath 3.1 functions and operators,
    * including functions in the math, map, and array namespaces. It can also be
    * a Saxon extension function, provided a licensed Processor is used.
    *
-   * @param processor - The Saxon Processor object required to get the system
+   * @param processor - the Saxon Processor object required to get the system
    * function
    * @param name - the name of the function
    * @param arity - the number of arguments in the function
-   * @return the requested function, or null if there is no such function. Note
+   * @return The requested function, or null if there is no such function. Note
    * that some functions (those with particular context dependencies) may be
    * unsuitable for dynamic calling. The caller is responsible for memory deallocation.
    */
@@ -106,41 +101,39 @@ public:
                                      const char *name, int arity);
 
   /**
-   * Internal Utility method for working with SaxonC on Python
+   * Utility method for working with SaxonC on Python - internal use only
    */
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
-  //! Call the function
   /**
-   *
+   * Call the function
    *
    * @param processor - the SaxonProcessor object required in the call of the
    * function
    * @param arguments  - the values to be supplied as arguments to the function.
    * The "function conversion rules" will be applied to convert the arguments to
    * the required type when necessary.
-   * @param argument_length - the length of the array
-   * @return the result of calling the function. The caller is responsible for memory deallocation.
+   * @param argument_length - the length of the array of arguments
+   * @return The result of calling the function. The caller is responsible for memory deallocation.
    */
   XdmValue *call(SaxonProcessor *processor, XdmValue **arguments,
                  int argument_length);
 
   /**
-   * Check if this XdmItem is atomic
-   * @return false
+   * Determine whether the item is an atomic value or some other type of item
+   * @return False
    */
   bool isAtomic() { return false; }
 
   /**
-   * Get the type of the object
+   * Get the type of this XDM value
+   * @return The type of the XdmValue as an XDM_TYPE
    */
   XDM_TYPE getType() { return XDM_FUNCTION_ITEM; }
 
-  //! Determine whether the item is a function or some other type of item
   /**
-   *
-   * @return true if the item is a Xdm function item, false if it is an atomic
-   * value or a function (including maps and arrays)
+   * Determine whether the item is a function or some other type of item
+   * @return True
    */
   bool isFunction() { return true; }
 

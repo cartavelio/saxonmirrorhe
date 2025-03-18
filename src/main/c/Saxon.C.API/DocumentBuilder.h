@@ -24,7 +24,7 @@ class SchemaValidator;
  * <p>This class has no public constructor.  To construct a DocumentBuilder,
  * use the factory method SaxonProcessor.newDocumentBuilder().</p>
  * <p>All documents used in a single Saxon query, transformation, or validation
- * episode must be built with the same Configuration. However, there is no
+ * episode must be built with the same SaxonProcessor. However, there is no
  * requirement that they should use the same <code>DocumentBuilder</code>.</p>
  * <p>Sharing of a <code>DocumentBuilder</code> across multiple threads is not
  * recommended. However, in the current implementation sharing a
@@ -37,7 +37,7 @@ class DocumentBuilder {
 
 public:
   /**
-   * DocumentBuilder Destructor
+   * Destructor method
    */
   ~DocumentBuilder();
 
@@ -55,7 +55,7 @@ public:
    * source: for example, it is not available when loading from an existing DOM
    * Document.</p>
    *
-   * @param option true if line numbers are to be maintained, false otherwise.
+   * @param option - true if line numbers are to be maintained, false otherwise.
    */
 
   void setLineNumbering(bool option);
@@ -66,7 +66,7 @@ public:
    * is disabled.</p> <p>Line numbering is not available for all kinds of
    * source: in particular, it is not available when loading from an existing
    * DOM Document.</p>
-   * @return true if line numbering is enabled
+   * @return True if line numbering is enabled
    */
 
   bool isLineNumbering();
@@ -74,14 +74,14 @@ public:
   /**
    * Set the SchemaValidator to be used. This determines whether schema
    * validation is applied to an input document and whether type annotations in
-   * a supplied document are retained. If no schemaValidator is supplied, then
+   * a supplied document are retained. If no SchemaValidator is supplied, then
    * schema validation does not take place. <p>This option requires the
    * schema-aware version of the Saxon product (Saxon-EE).</p> <p>Since a
    * <code>SchemaValidator</code> is serially reusable but not thread-safe,
    * using this method is not appropriate when the <code>DocumentBuilder</code>
    * is shared between threads.</p>
    *
-   * @param validator the SchemaValidator to be used
+   * @param validator - the SchemaValidator to be used
    */
 
   void setSchemaValidator(SchemaValidator *validator);
@@ -90,7 +90,7 @@ public:
    * Get the SchemaValidator used to validate documents loaded using this
    * <code>DocumentBuilder</code>.
    *
-   * @return the SchemaValidator if one has been set; otherwise null. The caller is responsible for memory deallocation.
+   * @return The SchemaValidator if one has been set; otherwise null. The caller is responsible for memory deallocation.
    */
   SchemaValidator *getSchemaValidator();
 
@@ -99,7 +99,7 @@ public:
    * <code>DocumentBuilder</code>.
    * <p>By default, no DTD validation takes place.</p>
    *
-   * @param option true if DTD validation is to be applied to the document
+   * @param option - true if DTD validation is to be applied to the document
    */
 
   void setDTDValidation(bool option);
@@ -108,7 +108,7 @@ public:
    * Ask whether DTD validation is to be applied to documents loaded using this
    * <code>DocumentBuilder</code>.
    *
-   * @return true if DTD validation is to be applied
+   * @return True if DTD validation is to be applied
    */
 
   bool isDTDValidation();
@@ -122,7 +122,7 @@ public:
    * loading from a Stream or a DOMSource. The value is ignored when loading
    * from a source that does have an intrinsic base URI.</p>
    *
-   * @param uri the base URI of documents loaded using this
+   * @param uri - the base URI of documents loaded using this
    * <code>DocumentBuilder</code>. This must be an absolute URI.
    */
 
@@ -132,7 +132,7 @@ public:
    * Get the base URI of documents loaded using this DocumentBuilder when no
    * other URI is available.
    *
-   * @return the base URI to be used, or null if no value has been set. Memory deallocation is handled internally.
+   * @return The base URI to be used, or null if no value has been set. Memory deallocation is handled internally.
    */
 
   const char *getBaseUri();
@@ -142,13 +142,12 @@ public:
    * memory.
    *
    * @param content - the XML document as a serialized string
-   * @param encoding of the source string argument. If not specified then
-   * platform default encoding is used
-   * @return An <code>XdmNode</code>. This will be
-   *         the document node at the root of the tree of the resulting
-   * in-memory document. The caller is responsible for memory deallocation.
- * @throws SaxonApiException if there is a failure in the parsing of the XML
-  * document
+   * @param encoding - the encoding of the source document string. If not specified then
+   * the platform default encoding is used.
+   * @return The document node at the root of the tree of the resulting
+   * in-memory document, as an XdmNode. The caller is responsible for memory deallocation.
+   * @throws SaxonApiException if there is a failure in the parsing of the XML
+   * document
    */
 
   XdmNode *parseXmlFromString(const char *content,
@@ -157,8 +156,8 @@ public:
   /**
    * Build a document from a supplied XML file.
    *
-   * @param filename - the supplied file
-   * @return the XdmNode representing the root of the document tree
+   * @param filename - the file name for the source document
+   * @return The XdmNode representing the root of the document tree
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
    */
@@ -168,11 +167,10 @@ public:
   /**
    * Build a document from a supplied URI source.
    *
-   * @param source - URI to the XML source
+   * @param source - URI for the XML source document
    *
-   * @return An <code>XdmNode</code>. This will be
-   *         the document node at the root of the tree of the resulting
-   * in-memory document.
+   * @return The document node at the root of the tree of the resulting
+   * in-memory document, as an XdmNode.
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
    */
@@ -182,64 +180,57 @@ public:
    * Deprecated. Checks for pending exceptions without creating a local reference to the
    * exception object
    * @deprecated
-   * @return bool - true when there is a pending exception; otherwise return
-   * false
+   * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
 
-  //! Deprecated. Clear any exception thrown
+  //! Deprecated. Clear any thrown exceptions
  /**
   * @deprecated
   */
   void exceptionClear();
 
-  //! Deprecated. Get the error message if an error has been reported by JNI
+  //! Deprecated. Get the first error message if there are any errors
   /**
-   * A transformation may have a number of errors reported against it.
    * @deprecated
-   * @return char* - The message of the exception
+   * @return The message of the exception
    */
   const char *getErrorMessage();
 
-  //! Deprecated. Get the error code if an error has been reported by JNI
+  //! Deprecated. Get the first error code if there are any errors
   /**
-   * After the execution of the XPath expression there may be  a number of
-   * errors reported against it.
    * @deprecated
-   * @return char* - The error code of the exception.
+   * @return The error code of the exception
    */
   const char *getErrorCode();
 
   //! Deprecated. Get the SaxonApiException object created when we have an error
   /**
-   * @deprecated - exception are now thrown directly
-   * After the execution of the processor if there is an error, then a
-   * SaxonApiException is created. NULL returned if there is no error.
-   * @return SaxonApiException object of the exception thrown.
+   * @deprecated - exceptions are now thrown directly
+   * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
   SaxonApiException *getException();
 
 private:
   /**
    * Create a DocumentBuilder. This is a protected constructor. Users should
-   * construct a DocumentBuilder by calling the factory method {@link
-   * net.sf.saxon.s9api.Processor#newDocumentBuilder()}.
-   *
-   * @param config the Saxon configuration
+   * construct a DocumentBuilder by calling the factory method
+   * SaxonProcessor.newDocumentBuilder().
    */
 
   DocumentBuilder();
 
-  //! Constructor with the SaxonProcessor supplied.
-  /*!
-    @param proc - Supplied pointer to the SaxonProcessor object
-    cwd - The current working directory
-  */
+  /**
+   * Constructor with the SaxonProcessor supplied.
+   * @param p - supplied pointer to the SaxonProcessor object
+   * @param docBuilderObject - reference to the underlying Java DocumentBuilder object
+   * @param cwd - the current working directory
+   */
   DocumentBuilder(SaxonProcessor *p, int64_t docBuilderObject, std::string cwd);
 
   /**
-   * Xslt30Processor copy constructor.
-   * @param other - Xslt30Processor
+   * DocumentBuilder copy constructor.
+   * @param other - DocumentBuilder
    */
   DocumentBuilder(const DocumentBuilder &other);
 

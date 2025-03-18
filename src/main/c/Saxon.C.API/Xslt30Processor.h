@@ -39,8 +39,8 @@ public:
 
   //! Constructor with the SaxonProcessor supplied.
   /*!
-   * @param proc - Supplied pointer to the SaxonProcessor object
-   * @param cwd - The current working directory
+   * @param proc - pointer to the SaxonProcessor object
+   * @param cwd - the current working directory
    * @throws SaxonApiException
    */
   Xslt30Processor(SaxonProcessor *proc, std::string cwd = "");
@@ -55,7 +55,7 @@ public:
 
   //! Get the SaxonProcessor object
   /**
-   * @return SaxonProcessor - Pointer to the object
+   * @return Pointer to the SaxonProcessor object
    */
   SaxonProcessor *getSaxonProcessor() { return proc; }
 
@@ -65,7 +65,7 @@ public:
    * supplied as lexical string. The cwd is used to set the base URI is part of
    * the static context, and is used to resolve any relative URIs appearing
    * within XSLT.
-   * @param cwd - Current working directory
+   * @param cwd - current working directory
    */
   void setcwd(const char *cwd);
 
@@ -74,16 +74,16 @@ public:
  /**
   * The cwd is used to set the base URI is part of the static context, and is
   * used to resolve any relative URIs appearing within XSLT.
-  * @returns cwd - Current working directory
+  * @return Current working directory
   */
  const char * getcwd();
 
   //! Set the base output URI.
   /**
-   * <p> The base output URI is used for resolving relative URIs in the
+   * The base output URI is used for resolving relative URIs in the
    * <code>href</code> attribute of the <code>xsl:result-document</code>
    * instruction; it is accessible to XSLT stylesheet code using the XPath
-   * current-output-uri() function</p>
+   * current-output-uri() function
    *
    * @param baseURI - the base output URI
    */
@@ -108,18 +108,17 @@ public:
    */
   void setJustInTimeCompilation(bool jit);
 
- //! Get the status of just-in-time compilation of template flag.
+ //! Get the status of the just-in-time compilation flag.
  /**
   * <p><b>Recommendation:</b> disable this option unless you are confident that
   * the stylesheet you are compiling is error-free.</p>
   *
-  * @return bool - status of just-in-time compilation of template flag
+  * @return Status of the just-in-time compilation flag
   */
  bool getJustInTimeCompilation();
 
-  //! Set the target edition
+  //! Set the target edition under which the stylesheet will be executed.
   /**
-   * Set the target edition under which the stylesheet will be executed.
    * @param edition - the Saxon edition for the run-time environment. One of
    * "EE", "PE", "HE", or "JS", "JS2", or "JS3".
    */
@@ -152,10 +151,10 @@ public:
    */
   void setFastCompilation(bool fast);
 
-  //! Indicate package deployable to a different location
+  //! Indicate that packages compiled by this processor are deployable to a different location
   /**
    * Say whether any package produced by this compiler can be deployed to a
-   * different location, with a different base URI
+   * different location, with a different base URI.
    * @param relocatable - if true then static-base-uri() represents the deployed
    * location of the package, rather than its compile time location
    */
@@ -164,21 +163,21 @@ public:
   //! Set the value of a stylesheet parameter.
   /**
    * Static (compile-time) parameters must be provided using
-   * this method on the XsltCompiler object, prior to stylesheet compilation.
+   * this method, prior to stylesheet compilation.
    * Non-static parameters may also be provided using this method if their
    * values will not vary from one transformation to another.
    *
    * @param name - the name of the stylesheet parameter, as a string. For
-   * namespaced parameter use the JAXP solution i.e. "{uri}name"
+   * a namespaced name use clark notation i.e. "{uri}local"
    * @param value - the value of the stylesheet parameter, or nullptr to clear a
    * previously set value
    */
   void setParameter(const char *name, XdmValue *value);
 
   /**
-   * Get a parameter value by name
-   * @param name - Specified parameter name to get
-   * @return XdmValue
+   * Get the value of a stylesheet parameter
+   * @param name - the name of the stylesheet parameter
+   * @return The value of the parameter as an XdmValue
    */
   XdmValue *getParameter(const char *name);
 
@@ -186,7 +185,7 @@ public:
    * Remove a parameter (name, value) pair from a stylesheet
    *
    * @param name - the name of the stylesheet parameter
-   * @return bool - outcome of the removal
+   * @return Outcome of the removal
    */
   bool removeParameter(const char *name);
 
@@ -195,12 +194,12 @@ public:
    *
    * Please note that the key name has been prefixed with 'param:', for example
    * 'param:name'
-   * @return std:map with key as string name mapped to XdmValue.
+   * @return An std:map with key as string name mapped to XdmValue.
    *
    */
   std::map<std::string, XdmValue *> &getParameters();
 
-  //! Clear parameter values set.
+  //! Clear stylesheet parameter values set.
   /**
    * Default behaviour (false) is to leave XdmValues in memory.
    * Individual pointers to XdmValue objects have to be deleted in the calling
@@ -211,13 +210,12 @@ public:
 
 
   /**
-   * Utility method for working with SaxonC on Python
-   * Internal use
+   * Utility method for working with SaxonC on Python - internal use only
    */
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
   /**
-   * Utility method for working with SaxonC on Python
+   * Utility method for working with SaxonC on Python - internal use only
    */
   char **createCharArray(int len) { return (new char *[len]); }
 
@@ -233,11 +231,11 @@ public:
 
   //! Perform a one shot transformation.
   /**
-   * The result is stored in the supplied outputfile.
+   * The result is stored in the specified output file.
    *
-   * @param sourcefile - The file name of the source document
-   * @param stylesheetfile - The file name of the stylesheet document.
-   * @param outputfile - The file name where results will be stored
+   * @param sourcefile - the file name of the source document
+   * @param stylesheetfile - the file name of the stylesheet document
+   * @param outputfile - the file name where results will be stored
    * @throws SaxonApiException if the transformation fails
    */
   void transformFileToFile(const char *sourcefile, const char *stylesheetfile,
@@ -245,12 +243,12 @@ public:
 
   //! Perform a one shot transformation.
   /**
-   * The result is returned as a string
+   * The result is returned as a string.
    *
-   * @param sourcefile - The file name of the source document
-   * @param stylesheetfile - The file name of the stylesheet document.
-   * @return char array - result string of the transformation as a char pointer array.
-   *  A zero length string is returned if the executed query is an Empty Sequence.
+   * @param sourcefile - the file name of the source document
+   * @param stylesheetfile - the file name of the stylesheet document
+   * @return The result of the transformation as a string.
+   * A zero length string is returned if the transformation result is an empty sequence.
    * The caller is responsible for memory deallocation using `operator delete`.
    * @throws SaxonApiException if the transformation fails
    */
@@ -260,9 +258,9 @@ public:
   /**
    * Perform a one shot transformation. The result is returned as an XdmValue
    *
-   * @param sourcefile - The file name of the source document
-   * @param stylesheetfile - The file name of the stylesheet document.
-   * @return XdmValue - result of the transformation
+   * @param sourcefile - the file name of the source document
+   * @param stylesheetfile - the file name of the stylesheet document
+   * @return The result of the transformation as an XdmValue.
    * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the transformation fails
    */
@@ -285,8 +283,8 @@ public:
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
-   * @param stylesheet - The file name of the stylesheet document.
-   * @return an XsltExecutable, which represents the compiled stylesheet. The
+   * @param stylesheet - the file name of the stylesheet document
+   * @return An XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
    * The caller is responsible for memory deallocation using `delete`.
@@ -294,7 +292,7 @@ public:
    */
   XsltExecutable *compileFromFile(const char *stylesheet);
 
-  //! Compile a stylesheet received as a string.
+  //! Compile a stylesheet supplied as a string.
   /**
    *
    * Note: the term "compile" here indicates that the stylesheet is converted
@@ -303,7 +301,7 @@ public:
    * @param stylesheet - the stylesheet as a lexical string representation
    * @param encoding - the encoding of the stylesheet string. If not specified
    * then the platform default encoding is used.
-   * @return an XsltExecutable, which represents the compiled stylesheet. The
+   * @return An XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
    * The caller is responsible for memory deallocation using `delete`.
@@ -317,8 +315,8 @@ public:
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
-   * @param sourceFile - The file name of the XML document.
-   * @return an XsltExecutable, which represents the compiled stylesheet. The
+   * @param sourceFile - the file name of the XML document
+   * @return An XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
    * The caller is responsible for memory deallocation using `delete`.
@@ -363,7 +361,7 @@ public:
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
    * @param node - the XdmNode object for the stylesheet
-   * @return an XsltExecutable, which represents the compiled stylesheet. The
+   * @return An XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
    * The caller is responsible for memory deallocation using `delete`.
@@ -374,33 +372,32 @@ public:
   /**
    * Checks for pending exceptions without creating a local reference to the
    * exception object
-   * @return bool - true when there is a pending exception; otherwise return
-   * false
+   * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
 
   //! Get the SaxonApiException object created when we have an error
   /**
-   * After the execution of the processor if there is an error, then a
-   * SaxonApiException is created. NULL returned if there is no error.
-   * @return SaxonApiException object of the exception thrown.
+   * After use of the processor if there is an error then a
+   * SaxonApiException is created.
+   * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
   SaxonApiException *getException();
 
-  //! Clear any exception thrown
+  //! Clear any thrown exceptions
   void exceptionClear();
 
   //! Get the first error message if there are any errors
   /**
    * A transformation may have a number of errors reported against it.
-   * @return char* - The message of the exception
+   * @return The message of the exception
    */
   const char *getErrorMessage();
 
   //! Get the first error code if there are any errors
   /**
    * A transformation may have a number of errors reported against it.
-   * @return char* - The error code of the exception. The error codes are
+   * @return The error code of the exception. The error codes are
    * related to the specific specification
    */
   const char *getErrorCode();
@@ -408,37 +405,37 @@ public:
 private:
   void createException(const char *message = nullptr);
 
-  //! Set a property specific to the XSLT processor in use.
+  //! Set a configuration property specific to the XSLT processor in use.
   /**
    *
-   * XsltProcessor: set serialization properties (names start with '!' i.e. name
+   * Xslt30Processor: set serialization properties (names start with '!' i.e. name
    * "!method" -> "xml"), 'o':outfile name, 'it': initial template, 'im': initial
    * mode, 's': source as file name, 'm': switch on message listener for
    * xsl:message instructions
-   * @param name of the property
-   * @param value of the property
+   * @param name - the name of the property
+   * @param value - the value of the property
    */
   void setProperty(const char *name, const char *value);
 
- //! Get properties specified on the XSLT processor.
+ //! Get all configuration properties specified on the processor as a std::map.
  /**
-  * @returns map (string, string) pair
+  * @return Map of (string, string) pairs
   */
  std::map<std::string, std::string> &getProperties();
 
-  //! Clear property values set
+  //! Clear configuration property values set
   void clearProperties();
 
-  SaxonProcessor *proc; /*!< Pointer to SaxonProcessor object*/
+  SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this Xslt30Processor */
   int64_t cppXT;
   int64_t importPackageValue;
-  std::string cwdXT;   /*!< current working directory */
-  bool jitCompilation; /*!< Just-In=Time compilation flag*/
+  std::string cwdXT;   /*!< Current working directory */
+  bool jitCompilation; /*!< Just-in-time compilation flag*/
   std::map<std::string, XdmValue *>
-      parameters; /*!< map of parameters used for the transformation as (string,
+      parameters; /*!< Map of parameters used for the transformation as (string,
                      value) pairs */
   std::map<std::string, std::string>
-      properties; /*!< map of properties used for the transformation as (string,
+      properties; /*!< Map of properties used for the transformation as (string,
                      string) pairs */
   SaxonApiException *exception;
 };

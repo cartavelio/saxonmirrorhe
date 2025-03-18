@@ -24,7 +24,7 @@ class SaxonApiException : public std::exception {
 
 public:
   /**
-   * A default Constructor. Create a SaxonApiException
+   * Default constructor. Creates a SaxonApiException
    */
   SaxonApiException(bool staticError = false);
 
@@ -35,8 +35,8 @@ public:
   SaxonApiException(const char *err);
 
   /**
-   * A Copy constructor. Create a SaxonApiException
-   * @param ex - The exception object to copy
+   * SaxonApiException copy constructor.
+   * @param ex - the exception object to copy
    */
   SaxonApiException(const SaxonApiException &ex);
 
@@ -66,7 +66,7 @@ public:
   virtual ~SaxonApiException() throw();
 
   /**
-   * Get the error code associated with the exception, if it exists.
+   * Get the error code associated with the current exception, if it exists.
    * The caller does not need to deallocate memory.
    * @return the associated error code, or null if no error code is available.
    * Memory deallocation is handled internally.

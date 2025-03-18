@@ -356,7 +356,5 @@ XdmItem *XdmValue::itemAt(int n) {
   return nullptr;
 }
 
-/**
- * Get the type of the object
- */
+
 XDM_TYPE XdmValue::getType() { return XDM_VALUE; }

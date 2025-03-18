@@ -26,55 +26,49 @@
 class XdmAtomicValue : public XdmItem {
 
 public:
-  //! A default Constructor.
   /**
-   * Create an empty atomic value
+   * Default constructor.
+   * Creates an empty atomic value
    */
   XdmAtomicValue();
 
-  //! A copy constructor.
   /**
-   *
+   * XdmAtomicValue copy constructor.
    * @param other - XdmAtomicValue
    */
   XdmAtomicValue(const XdmAtomicValue &other);
 
-  //! Destructor.
   /**
-   * Destructor for this XdmAtomicValue
+   * Destructor method for XdmAtomicValue
    */
   virtual ~XdmAtomicValue();
 
-  //! A Java Wrapper Constructor
   /**
-   * Wrap a Java XdmAtomicValue object.
-   * @param val - Java XdmAtomicValue object
+   * XdmAtomicValue constructor to create an object which is a wrapper for a Java XdmAtomicValue object - internal use only
+   * @param val - internal Java XdmAtomicValue object to be wrapped
    */
   XdmAtomicValue(int64_t val);
 
-  //! A Java Wrapper Constructor
   /**
-   * Wrap a Java XdmAtomicValue object.
-   * @param val - Java XdmAtomicValue object
+   * XdmAtomicValue constructor to create an object which is a wrapper for a Java XdmAtomicValue object - internal use only
+   * @param val - internal Java XdmAtomicValue object to be wrapped
    * @param ty - type of the XdmAtomicValue
    */
   XdmAtomicValue(int64_t val, const char *ty);
 
-  //! Get the primitive type of this atomic value, as a QName.
   /**
-   *  The primitive types for this purpose are
+   * Get the primitive type of this atomic value, as a QName. The primitive types for this purpose are
    * the 19 primitive types of XML Schema, plus xs:integer, xs:dayTimeDuration
    * and xs:yearMonthDuration, and xs:untypedAtomic. For external objects, the
    * result is xs:anyAtomicType.
    *
-   * @return a string of the QName naming the primitive type of this atomic
+   * @return A string of the QName naming the primitive type of this atomic
    * value. This will always be an atomic type. Memory deallocation is handled internally.
    */
   const char *getPrimitiveTypeName();
 
-  //! Get the value converted to a boolean using the XPath casting rules
   /**
-   *
+   * Get the value converted to a boolean using the XPath casting rules
    *
    * @return the result of converting to a boolean (Note: this is not the same
    * as the effective boolean value).
@@ -83,9 +77,8 @@ public:
    */
   bool getBooleanValue();
 
-  //! Get the value converted to a double using the XPath casting rules.
   /**
-   *
+   * Get the value converted to a double using the XPath casting rules.
    * <p>If the value is a string, the XSD 1.1 rules are used, which means that
    * the string
    * "+INF" is recognised.</p>
@@ -96,9 +89,8 @@ public:
    */
   double getDoubleValue();
 
-  //! Get the string value of the item.
   /**
-   *  For a node, this gets the string value
+   * Get the string value of the item. For a node, this gets the string value
    * of the node. For an atomic value, it has the same effect as casting the
    * value to a string. In all cases the result is the same as applying the
    * XPath string() function. <p>For atomic values, the result is the same as
@@ -111,9 +103,8 @@ public:
    */
   const char *getStringValue();
 
-  //! Get the value converted to an integer using the XPath casting rules
   /**
-   *
+   * Get the value converted to an integer using the XPath casting rules
    *
    * @return the result of converting to an integer
    * @remark zero if the value cannot be cast to an integer.  Exception will be
@@ -121,38 +112,34 @@ public:
    */
   long getLongValue();
 
-  //! Set the type annotation of the atomic value
   /**
-   *
-   * @param ty - The annotated type given as a string
+   * Set the type annotation of the atomic value
+   * @param ty - the annotated type given as a string
    */
   void setType(const char *ty);
 
-  //! Get the first item in the sequence which is the XdmAtomicValue itself.
   /**
-   *
-   * @return XdmItem or nullptr if sequence is empty
+   * Get the first item in the sequence consisting of just this item
+   * @return This XdmAtomicValue
    */
   XdmItem *getHead();
 
-  //! Determine whether the item is an atomic value or some other type of item
   /**
+   * Determine whether the item is an atomic value or some other type of item
    *
-   *
-   * @return true if the item is an atomic value, false if it is a node or a
-   * function (including maps and arrays)
+   * @return True
    */
   bool isAtomic() { return true; }
 
-  //! Get a hashcode that reflects the rules for equality matching
   /**
-   *
-   * @return a suitable hashcode
+   * Get a hashcode that reflects the rules for equality matching
+   * @return A suitable hashcode
    */
   int getHashCode();
 
   /**
-   * Get the type of the object
+   * Get the type of this XDM value
+   * @return The type of the XdmValue as an XDM_TYPE
    */
   XDM_TYPE getType() { return XDM_ATOMIC_VALUE; }
 
