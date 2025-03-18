@@ -369,7 +369,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <remarks>
         /// <p>The property name was misspelled; the correct spelling has been added as a synonym in a maintenance
-        /// release, but the correct spelling will be used from Saxon 13.
+        /// release, but the correct spelling will be used from Saxon 13.</p>
         /// </remarks>
         public bool ExpendAttributeDefaults {
             get => UnderlyingSchemaValidator.isExpandAttributeDefaults();
