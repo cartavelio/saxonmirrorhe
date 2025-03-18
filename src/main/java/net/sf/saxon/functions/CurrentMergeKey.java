@@ -13,10 +13,13 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.expr.sort.MergeInstr;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.value.AtomicValue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -77,7 +80,15 @@ public class CurrentMergeKey extends SystemFunction implements Callable {
         if (gi == null) {
             throw new XPathException("There is no current merge key", "XTDE3510");
         }
-        return gi.getCurrentGroupingKey().iterate();
+        AtomicSequence keySequence = gi.getCurrentGroupingKey();
+        // Bug 6639 - remove any null entries
+        List<AtomicValue> items = new ArrayList<>(keySequence.getLength());
+        for (AtomicValue item : keySequence) {
+            if (item != null) {
+                items.add(item);
+            }
+        }
+        return new ListIterator.Of<>(items);
 
     }
 
