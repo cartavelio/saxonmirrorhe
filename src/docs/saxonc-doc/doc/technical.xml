@@ -119,10 +119,10 @@ operator delete((char *)itemiStr);
 delete itemi;
 ]]></code></pre>
         
-        <p>The exception to this is the <a
+        <p>Note that there are exceptions to this, where the API method creates a string on the
+            stack, and the memory management is internally handled. For instance the <a
             href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html"
-            class="bodylink code">SaxonProcessor</a> method <code>version()</code>. This method
-            creates a string on the stack therefore memory management is internally handled.</p>
+            class="bodylink code">SaxonProcessor</a> method <code>version()</code>.</p>
         
     </section>
 
