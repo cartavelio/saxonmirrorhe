@@ -31,13 +31,7 @@ class PathHelperTest {
     Function<Path, Boolean> pathVerifier = (path) -> true;
     String nature = ResourceRequest.XML_NATURE;
     PathHelper subject = new PathHelper(pathVerifier);
-
-    @Test
-    void uRWhat() throws URISyntaxException {
-        URI uri = new URI("");
-        System.out.println(uri);
-    }
-
+    
     @Nested
     @DisplayName("verifying paths can be resolved on a local filesystem")
     class FsPathVerification {
