@@ -10,6 +10,7 @@ package net.sf.saxon.trace;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LetExpression;
 import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.expr.accum.AccumulatorRule;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.functions.Trace;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -70,9 +71,11 @@ public class XSLTTraceListener extends AbstractTraceListener {
                 return "fn-trace";
             } else if (expr instanceof SystemFunctionCall) {
                 return "call";
-            } else  {
+            } else {
                 return expr.getExpressionName();
             }
+        } else if (info instanceof AccumulatorRule) {
+            return "xsl:accumulator";
         } else if (info instanceof UserFunction){
             return "xsl:function";
         } else if (info instanceof TemplateRule) {

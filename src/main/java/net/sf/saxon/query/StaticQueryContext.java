@@ -563,7 +563,7 @@ public class StaticQueryContext {
         if (codeInjector != null) {
             qp.setCodeInjector(codeInjector);
         } else if (config.isCompileWithTracing()) {
-            qp.setCodeInjector(new TraceCodeInjector());
+            qp.setCodeInjector(new XQueryTraceCodeInjector());
         }
         qp.setStreaming(isStreaming());
         return qp.makeXQueryExpression(query, mainModule, config);

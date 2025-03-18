@@ -24,12 +24,14 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Mode;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * This is the standard trace listener used when the -T option is specified on the command line.
@@ -41,6 +43,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected int indent = 0;
     protected int detail = TraceLevel.NORMAL;
     protected Logger out = new StandardLogger();
+    private Stack<Object> stack = new Stack<>();
     /*@NotNull*/ private static final StringBuilder spaceBuffer = new StringBuilder("                ");
 
     /**
@@ -86,6 +89,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     @Override
     public void enter(Traceable info, Map<String, Object> properties, XPathContext context) {
         if (isApplicable(info)) {
+            stack.push(info);
             Location loc = getLocation(info);
             String file = abbreviateLocationURI(loc.getSystemId());
             String elementTag = tag(info);
@@ -186,6 +190,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     @Override
     public void leave(Traceable info) {
         if (isApplicable(info)) {
+            stack.pop();
             indent--;
             out.info(AbstractTraceListener.spaces(indent) + "</" + tag(info) + '>');
         }
@@ -224,6 +229,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     @Override
     public void startCurrentItem(Item item) {
         if (item instanceof NodeInfo && detail > 0) {
+            stack.push(item);
             NodeInfo curr = (NodeInfo) item;
             out.info(AbstractTraceListener.spaces(indent) + "<source node=\"" + Navigator.getPath(curr)
                     + "\" line=\"" + curr.getLineNumber()
@@ -244,6 +250,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
             NodeInfo curr = (NodeInfo) item;
             out.info(AbstractTraceListener.spaces(indent) + "</source><!-- " +
                     Navigator.getPath(curr) + " -->");
+            stack.pop();
         }
     }
 
@@ -279,6 +286,42 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     public Logger getOutputDestination() {
         return out;
+    }
+
+    /**
+     * Method called immediately after the {@link #enter} method corresponding to an
+     * {@code xsl:try} instruction (or XQuery try/catch). The method may return an object
+     * containing checkpoint information, which will be passed to the {@link #recover}
+     * method if an error occurs and is caught.
+     *
+     * @return arbitrary checkpoint information, or null. This implementation returns
+     * the size of the stack.
+     */
+    @Override
+    public Object checkpoint() {
+        return stack.size();
+    }
+
+    /**
+     * Method called when an error is caught by an {@code xsl:catch} (or XQuery try/catch).
+     *
+     * @param checkpoint A checkpoint object returned by a previous call to the {@link #checkpoint} method.
+     * @param error      The error that was caught
+     */
+    @Override
+    public void recover(Object checkpoint, XPathException error) {
+        out.info(AbstractTraceListener.spaces(indent) + "<error code='"
+                         + error.getErrorCodeQName().getLocalPart()
+                         + "'>" + error.getMessage() + "</error>");
+        while (stack.size() > (int) checkpoint) {
+            Object o = stack.peek();
+            if (o instanceof Item) {
+                endCurrentItem((Item) o);
+            } else if (o instanceof Traceable) {
+                leave((Traceable) o);
+            }
+        }
+        out.info(AbstractTraceListener.spaces(indent) + "<catch/>");
     }
 
     /**

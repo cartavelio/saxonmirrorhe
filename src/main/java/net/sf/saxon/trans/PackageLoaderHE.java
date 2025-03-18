@@ -894,6 +894,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Pattern pattern = getFirstChildPattern(accRuleElement);
             Expression select = getSecondChildExpression(accRuleElement);
             AccumulatorRule rule = new AccumulatorRule(select, sm, !preDescent);
+            rule.setLocation(makeLocation(accRuleElement));
             if (flags != null && flags.contains("c")) {
                 rule.setCapturing(true);
             }
