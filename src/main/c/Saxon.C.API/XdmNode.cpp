@@ -9,28 +9,23 @@
 XdmNode::XdmNode(int64_t obj)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
       childCount(-1), children(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), axisCount(0),
-      nodeToString(nullptr) {
+      attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), axisCount(0) {
 }
 
 XdmNode::XdmNode(XdmNode *p, int64_t obj, XDM_NODE_KIND kind)
     : XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),
       childCount(-1), children(nullptr),
-      attrValues(nullptr), attrCount(-1), nodeKind(kind), axisCount(0),
-      nodeToString(nullptr) {}
+      attrValues(nullptr), attrCount(-1), nodeKind(kind), axisCount(0) {}
 
 XdmNode::XdmNode(const XdmNode &other): XdmItem(other) {
-  baseURI = other.baseURI;
-  //value = other.value;
-  nodeName = other.nodeName;
-  localName = other.localName;
+  baseURI = nullptr;
+  nodeName = nullptr;
+  localName = nullptr;
   childCount = other.childCount;
   attrCount = other.attrCount;
   nodeKind = other.nodeKind;
-  nodeToString = other.nodeToString;
   axisCount = other.axisCount;
   //children = other.children;
-
 }
 
 bool XdmNode::operator==(const XdmNode& other) const
@@ -92,12 +87,7 @@ XdmNode::~XdmNode() {
         delete[] children;
     }*/
 
-  /* if (nodeToString != nullptr) {
-    delete[] nodeToString;
-    nodeToString = nullptr;
-  }
-
-
+  /*
    if (attrCount > 0 && attrValues != nullptr) {
        for (int p = 0; p < attrCount; ++p) {
            delete attrValues[p];

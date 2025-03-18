@@ -328,6 +328,10 @@ int64_t XdmValue::getUnderlyingValue() {
     if (count == 1) {
       return values[0]->getUnderlyingValue();
     }
+
+    if(values == nullptr) {
+      return SXN_UNSET;
+    }
     jValues = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, count);
 

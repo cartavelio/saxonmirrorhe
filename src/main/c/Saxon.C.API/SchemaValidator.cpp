@@ -355,7 +355,7 @@ void SchemaValidator::clearParameters(bool delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
-            if (value != nullptr) {
+            if (delValues && value != nullptr) {
               if (getenv("SAXONC_DEBUG_FLAG")) {
                 std::cerr << "SchemaValidator.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;
