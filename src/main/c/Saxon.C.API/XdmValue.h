@@ -119,7 +119,7 @@ public:
    *
    * @return XdmItem or nullptr if sequence is empty
    * Pointer to XdmItem objects have to be deleted in the calling program.
-   * The caller is responsible for memory deallocation
+   * The caller is responsible for memory deallocation.
    */
   virtual XdmItem *getHead();
 
@@ -133,7 +133,7 @@ public:
    * zero return nullptr  if n is less than zero or greater than or equal to the
    * number of items in the value.
    * Pointer to XdmItem objects have to be deleted in the calling program.
-   * The caller is responsible for memory deallocation
+   * The caller is responsible for memory deallocation.
    */
   virtual XdmItem *itemAt(int n);
 
@@ -148,7 +148,7 @@ public:
    * The result of serializing
    * the value using the adaptive serialization method.
    * @return a string representation of the value.
-   * The caller is responsible for memory deallocation. Must use `operator delete`
+   * The caller is responsible for memory deallocation using `operator delete`.
    */
   virtual const char *toString();
 

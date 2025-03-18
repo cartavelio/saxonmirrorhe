@@ -74,7 +74,7 @@ public class XdmAtomicValue extends XdmItem {
     /**
      * Create an <code>xs:short</code> atomic value
      *
-     * @param value the <code>xs:integer</code> value, as a long
+     * @param value the <code>xs:integer</code> value, as a short
      */
 
     public XdmAtomicValue(short value) {
@@ -82,9 +82,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <code>xs:short</code> atomic value
+     * Create an <code>xs:byte</code> atomic value
      *
-     * @param value the <code>xs:integer</code> value, as a long
+     * @param value the <code>xs:integer</code> value, as a byte
      */
 
     public XdmAtomicValue(byte value) {
