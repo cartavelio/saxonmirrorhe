@@ -10,11 +10,10 @@ package net.sf.saxon.trans.rules;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ParameterSet;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.Navigator;
 
 /**
  * The built-in rule set introduced in XSLT 3.0, which raises an error when there is no user-supplied
@@ -51,9 +50,7 @@ public class FailRuleSet implements BuiltInRuleSet {
     public void process(Item item, ParameterSet parameters,
                         ParameterSet tunnelParams, Outputter output, XPathContext context,
                         Location locationId) throws XPathException {
-        String id = (item instanceof NodeInfo ?
-                "the node " + Navigator.getPath((NodeInfo) item) :
-                "the atomic value " + item.getUnicodeStringValue());
+        String id = Err.depict(item);
         XPathException err = new XPathException("No user-defined template rule in " +
                                                     context.getCurrentMode().getActor().getModeTitle(false) +
                                                         " matches " + id, "XTDE0555");
