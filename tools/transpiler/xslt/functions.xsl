@@ -128,6 +128,7 @@
       'java.util.ArrayList': 'System.Collections.Generic.List',
       'java.util.Collection': 'System.Collections.Generic.ICollection',
       'java.util.Comparator': 'System.Collections.Generic.Comparer',
+      'java.util.concurrent.atomic.AtomicInteger': 'Saxon.Impl.Helpers.AtomicInteger',
       'java.util.concurrent.ConcurrentHashMap': 'System.Collections.Concurrent.ConcurrentDictionary',
       'java.util.concurrent.ArrayBlockingQueue': 'System.Collections.Concurrent.BlockingCollection',
       'java.util.concurrent.BlockingQueue': 'System.Collections.Concurrent.BlockingCollection',

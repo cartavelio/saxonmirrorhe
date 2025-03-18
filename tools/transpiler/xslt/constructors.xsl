@@ -45,9 +45,9 @@
    </xsl:template>
    
    <!-- new AtomicInteger(x) creates a plain int -->
-   <xsl:template match="*[type/@RESOLVED_TYPE='java.util.concurrent.atomic.AtomicInteger']" priority="30">
+   <!--<xsl:template match="*[type/@RESOLVED_TYPE='java.util.concurrent.atomic.AtomicInteger']" priority="30">
       <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-   </xsl:template>
+   </xsl:template>-->
    
    <!-- new String(byte[], Charset) => Encoding.XXX.GetString(bytes) -->
    <xsl:template match="*[type/@RESOLVED_TYPE='java.lang.String'][count(arguments/argument)=2]" priority="30">
