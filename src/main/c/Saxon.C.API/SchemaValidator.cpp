@@ -130,14 +130,17 @@ void SchemaValidator::registerSchemaFromNode(XdmNode *node) {
       (void *)node->getUnderlyingValue(),
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
+
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
+
+  if (status == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+
 }
 
 void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
@@ -155,14 +158,17 @@ void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
       (char *)cwdV.c_str(), (char *)sourceFile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
+
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
+
+  if (status == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+
 }
 
 void SchemaValidator::exportSchema(const char *fileName) {
@@ -198,6 +204,13 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
       (char *)sourceStr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef > 0) {
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
+  
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -220,13 +233,14 @@ void SchemaValidator::validate(const char *sourceFile) {
       (char *)cwdV.c_str(), (char *)sourceFile, (char *)nullptr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
   if (processorDataRef > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
+  }
+
+  if (status == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
 }
 
