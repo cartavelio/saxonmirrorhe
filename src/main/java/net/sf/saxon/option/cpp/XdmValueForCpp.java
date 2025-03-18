@@ -199,19 +199,10 @@ public class XdmValueForCpp {
      */
     @CEntryPoint(name = "j_getBooleanValue")
     public static byte getBooleanValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
-        try {
-            XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
 
-            byte result = CTypeConversion.toCBoolean(value.getBooleanValue());
-            return result;
-        } catch(SaxonApiException ex) {
-            SaxonCException.throwable = ex;
-            return -2;
-        } catch (Exception ex) {
-            System.err.println("getLongValue exception found!!");
-            SaxonCException.throwable = ex;
-            return -2;
-        }
+        byte result =CTypeConversion.toCBoolean(value.getBooleanValue());
+        return result;
     }
 
     /**
@@ -222,18 +213,12 @@ public class XdmValueForCpp {
      * @param thread - Graalvm runtime data structure for the thread
      * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
      * @return  the result of converting to a double - reference to XdmAtomicValue given as long
-     * @throws SaxonApiException - we catch the exception and return a
-     * spurious value. We must check in C++ that the exception was thrown
+     * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_getDoubleValue")
     public static double getDoubleValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
-            XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
-            try {
-                return value.getDoubleValue();
-            } catch (Exception ex) {
-                SaxonCException.throwable = ex;
-                return -0.9999999;
-            }
+        XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
+        return value.getDoubleValue();
     }
 
     /**
@@ -241,19 +226,12 @@ public class XdmValueForCpp {
      * @param thread - Graalvm runtime data structure for the thread
      * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
      * @return  long value as reference for the XdmAtomicValue - the result of converting to an integer
-     * @throws SaxonApiException - we catch the exception and return a
-     * spurious value. We must check in C++ that the exception was thrown
+     * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_getLongValue")
     public static long getLongValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
-        try {
-            return value.getLongValue();
-        } catch (Exception ex) {
-            System.err.println("getLongValue exception found!!");
-            SaxonCException.throwable = ex;
-            return -9999999;
-        }
+        return value.getLongValue();
     }
 
     /**
