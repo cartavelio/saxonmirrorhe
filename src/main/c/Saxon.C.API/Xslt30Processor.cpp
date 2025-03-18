@@ -155,7 +155,7 @@ void Xslt30Processor::setJustInTimeCompilation(bool jit) {
   jitCompilation = jit;
 }
 
-bool getJustInTimeCompilation() {
+bool Xslt30Processor::getJustInTimeCompilation() {
 
   return jitCompilation;
 }
@@ -219,6 +219,10 @@ void Xslt30Processor::setcwd(const char *dir) {
   if (dir != nullptr) {
     cwdXT = std::string(dir);
   }
+}
+
+const char * Xslt30Processor::getcwd() {
+  return cwdXT.c_str();
 }
 
 SaxonApiException *Xslt30Processor::getException() { return exception; }

@@ -66,6 +66,13 @@ public:
    */
   void setcwd(const char *cwd);
 
+ //! Get the Current working Directory. Memory dellocation of string internally handled
+ /**
+  * Set the current working directory for the Schema Validator
+  * @returns const char * - Supplied working directory which replaces any set cwd.
+  */
+ const char * getcwd();
+
   //! Register the schema from file name.
   /**
    * The schema components derived from this schema document are added to
@@ -109,6 +116,12 @@ public:
    * @param outputFile the output file name for later use
    */
   void setOutputFile(const char *outputFile);
+
+ //! Get the output file that will be used by the validator.
+ /**
+  * @return const char * - string of the output file. Memory management handled internally. String not to be deallocated
+  */
+ const char *getOutputFile();
 
   //! Validate an instance document by a registered schema.
   /**

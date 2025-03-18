@@ -180,8 +180,8 @@ PHP_METHOD(SchemaValidator, validateToNode) {
   RETURN_NULL();
 }
 
-PHP_METHOD(XPathProcessor, setcwd) {
-  XPathProcessor *schemaValidator;
+PHP_METHOD(SchemaValidator, setcwd) {
+  SchemaValidator *schemaValidator;
   char *cwdStr;
   size_t len;
 
@@ -327,6 +327,7 @@ PHP_METHOD(SchemaValidator, setOutputFile) {
   if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &len1) == FAILURE) {
     RETURN_NULL();
   }
+
   zend_object *pobj = Z_OBJ_P(getThis());
   schemaValidator_object *obj =
       (schemaValidator_object *)((char *)pobj -
@@ -334,6 +335,27 @@ PHP_METHOD(SchemaValidator, setOutputFile) {
   schemaValidator = obj->schemaValidator;
   if (schemaValidator != nullptr) {
     schemaValidator->setOutputFile(name);
+  }
+}
+
+PHP_METHOD(SchemaValidator, getOutputFile) {
+  SchemaValidator *schemaValidator;
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  schemaValidator_object *obj =
+      (schemaValidator_object *)((char *)pobj -
+                                 XtOffsetOf(schemaValidator_object, std));
+  schemaValidator = obj->schemaValidator;
+  if (schemaValidator != nullptr) {
+    const char * outputStr = schemaValidator->getOutputFile();
+    if(outputStr != nullptr) {
+      RETURN_STRING(outputStr);
+    } else {
+      RETURN_NULL();
+    }
   }
 }
 

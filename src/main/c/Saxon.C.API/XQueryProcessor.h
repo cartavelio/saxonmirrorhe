@@ -283,10 +283,11 @@ public:
   void setcwd(const char *cwd);
 
  /**
-  * Get the current working directory set on the XQueryProcessor
+  * Get the current working directory set on the XQueryProcessor.
+  * Memory dellocation of string internally handled
   * @return const char * - cwd set on this XQueryProcessor
   */
- const char * cwd getcwd()
+ const char * getcwd();
 
   //! Check for exception thrown.
   /**

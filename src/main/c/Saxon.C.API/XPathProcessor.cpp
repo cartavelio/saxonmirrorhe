@@ -390,7 +390,17 @@ void XPathProcessor::clearParameters(bool delValues) {
 
 void XPathProcessor::clearProperties() { properties.clear(); }
 
-void XPathProcessor::setcwd(const char *dir) { cwdXP = std::string(dir); }
+void XPathProcessor::setcwd(const char *dir) {
+    if(dir != nullptr) {
+        cwdXP = std::string(dir);
+    }
+}
+
+
+const char * XPathProcessor::getcwd() {
+    return cwdXP.c_str();
+}
+
 
 std::map<std::string, XdmValue *> &XPathProcessor::getParameters() {
     std::map < std::string, XdmValue * > &ptr = parameters;

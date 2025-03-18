@@ -69,6 +69,15 @@ public:
    */
   void setcwd(const char *cwd);
 
+
+ //! Get the current working directory (cwd). Memory management of string internally handled
+ /**
+  * The cwd is used to set the base URI is part of the static context, and is
+  * used to resolve any relative URIs appearing within XSLT.
+  * @returns cwd - Current working directory
+  */
+ const char * getcwd();
+
   //! Set the base output URI.
   /**
    * <p> The base output URI is used for resolving relative URIs in the
