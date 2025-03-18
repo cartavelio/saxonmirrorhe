@@ -212,11 +212,6 @@ public:
   /**
    * Utility method for working with SaxonC on Python - internal use only
    */
-  XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
-
-  /**
-   * Utility method for working with SaxonC on Python - internal use only
-   */
   char **createCharArray(int len) { return (new char *[len]); }
 
   //! Utility method for Python API - internal use only

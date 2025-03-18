@@ -101,11 +101,6 @@ public:
                                      const char *name, int arity);
 
   /**
-   * Utility method for working with SaxonC on Python - internal use only
-   */
-  XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
-
-  /**
    * Call the function
    *
    * @param processor - the SaxonProcessor object required in the call of the

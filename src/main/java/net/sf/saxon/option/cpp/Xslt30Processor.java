@@ -762,8 +762,9 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
         if (executable == null) {
             if (SaxonCAPI.debug) {
                 System.err.println("Error: executable is null");
@@ -776,7 +777,7 @@ public class Xslt30Processor extends SaxonCAPI {
         String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
         try {
-            applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
+            applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
         } catch (Exception ex) {
             throw new SaxonApiException(ex);
 
@@ -919,8 +920,9 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
 
         Xslt30Transformer transformer = executable.load30();
         transformer.setErrorReporter(SaxonCException.errorReporter);
@@ -946,7 +948,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
         try {
-            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
         } catch (Exception ex) {
             throw new SaxonApiException(ex);
 
@@ -1022,8 +1024,9 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
         if (executable == null) {
             throw new SaxonApiException("XsltExecutable is null");
 
@@ -1036,7 +1039,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
 
         try {
-            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
         } catch (Exception ex) {
             throw new SaxonApiException(ex);
 
@@ -1141,6 +1144,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = null;
         if (cFuncName.startsWith("Q{")) {
@@ -1149,7 +1153,7 @@ public class Xslt30Processor extends SaxonCAPI {
             qname = QName.fromClarkName(cFuncName);
         }
 
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
         if (executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
         }
@@ -1166,7 +1170,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("File name for CallFunction has not been set");
         }
 
-        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
 
         ProcessorDataAccumulator argumentsAccumulator = null;
         if (argumentsRef != WordFactory.nullPointer()) {
@@ -1205,9 +1209,10 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = QName.fromClarkName(cFuncName);
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, null, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, null, initialTemplateParameters, initialTemplateTunnelParameters, true);
 
         if (executable == null) {
             throw new SaxonApiException("Error XsltExecutable is null");
@@ -1215,7 +1220,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
-        applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
+        applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
         Object[] arguments = null;
         if (argumentsRef != WordFactory.nullPointer()) {
             ProcessorDataAccumulator argumentsAccumulator = objectHandles.get(argumentsRef);
@@ -1257,16 +1262,17 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = QName.fromClarkName(cFuncName);
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
 
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
         Serializer serializer = processor.newSerializer(bStream);
-        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
         Object[] arguments = null;
         if (argumentsRef != WordFactory.nullPointer()) {
             ProcessorDataAccumulator argumentsAccumulator = objectHandles.get(argumentsRef);
@@ -1320,9 +1326,10 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
 
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
@@ -1335,7 +1342,7 @@ public class Xslt30Processor extends SaxonCAPI {
             throw new SaxonApiException("File name for CallFunction has not been set");
         }
 
-        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
         transformer.setErrorReporter(SaxonCException.errorReporter);
         transformer.callTemplate(qname, serializer);
         return SaxonCAPI.STATUS_OK;
@@ -1376,6 +1383,7 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
         QName qname = null;
 
@@ -1383,12 +1391,12 @@ public class Xslt30Processor extends SaxonCAPI {
             String clarkName = SaxonCAPI.toJavaString(cclarkName, WordFactory.nullPointer());
             qname = QName.fromClarkName(clarkName);
         }
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
         Xslt30Transformer transformer = executable.load30();
         Processor processor = executable.getProcessor();
 
         //setsource(cwd, transformer, sourceObj, paramsMap);
-        applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
+        applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
         Destination xdmResult;
         boolean returnXdmValue = false;
         if (paramsMap.containsKey("outvalue")) {
@@ -1485,9 +1493,10 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
 
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
         Xslt30Transformer transformer = executable.load30();
         transformer.setErrorReporter(SaxonCException.errorReporter);
         Processor processor = executable.getProcessor();
@@ -1498,7 +1507,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         //setsource(cwd, transformer, sourceObj, paramsMap);
 
-        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+        applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
 
 
         transformer.callTemplate(qname, serializer);
@@ -1566,9 +1575,10 @@ public class Xslt30Processor extends SaxonCAPI {
             Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
             Map<QName, XdmValue> globalParameters = new HashMap<>();
             Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+            Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
             Properties props = new Properties();
             Source source;
-            Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+            Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
             Xslt30Transformer transformer;
             Processor processor;
 
@@ -1604,7 +1614,7 @@ public class Xslt30Processor extends SaxonCAPI {
             if (debug) {
                 System.err.println("DEBUG: Serializer = " + System.identityHashCode(serializer));
             }
-            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
             XdmNode doc = null;
 
             if (debug) {
@@ -1656,17 +1666,17 @@ public class Xslt30Processor extends SaxonCAPI {
      * We can also supply values to xsl:param and xsl:variables required in the stylesheet.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
      *
-     * @param cwd                       - current working directory
-     * @param processor                 - required to use the same processor as for the compiled stylesheet
-     * @param transformer               - pass the current object to set local variables supplied in the parameters
-     * @param serializer                - pass the serializer to set properties
-     * @param props                     - properties to apply to the Serializer
-     * @param map                       - parameters and property names given as string keys. Their Values given as a array of Java objects
-     * @param globals                   - Supply the values of global stylesheet parameters.
-     * @param initialTemplateParameters - Supply the initial template parameters
+     * @param cwd                             - current working directory
+     * @param processor                       - required to use the same processor as for the compiled stylesheet
+     * @param transformer                     - pass the current object to set local variables supplied in the parameters
+     * @param serializer                      - pass the serializer to set properties
+     * @param props                           - properties to apply to the Serializer
+     * @param map                             - parameters and property names given as string keys. Their Values given as a array of Java objects
+     * @param globals                         - Supply the values of global stylesheet parameters.
+     * @param initialTemplateParameters       - Supply the initial template parameters
+     * @param initialTemplateTunnelParameters - - Supply the initial template tunnel parameters
      */
-    public static void applyXsltTransformerProperties(String cwd, Processor processor, Xslt30Transformer transformer, Serializer serializer, Properties props, Map<String, Object> map, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters) throws SaxonApiException {
-        boolean tunnel = false;
+    public static void applyXsltTransformerProperties(String cwd, Processor processor, Xslt30Transformer transformer, Serializer serializer, Properties props, Map<String, Object> map, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters, Map<QName, XdmValue> initialTemplateTunnelParameters) throws SaxonApiException {
         if (!map.isEmpty()) {
             String initialMode;
             XdmItem item;
@@ -1791,16 +1801,6 @@ public class Xslt30Processor extends SaxonCAPI {
             }
 
 
-            if (map.containsKey("tunnel")) {
-                valuei = map.get("tunnel");
-                if (valuei instanceof Boolean) {
-                    tunnel = (Boolean) valuei;
-                } else if (valuei instanceof String) {
-                    tunnel = ((String) valuei).equals("yes") || valuei.equals("true");
-                }
-            }
-
-
         }
         if (!props.isEmpty() && serializer != null) {
             serializer.setOutputProperties(props);
@@ -1824,7 +1824,28 @@ public class Xslt30Processor extends SaxonCAPI {
                     }
                 }
             }
-            transformer.setInitialTemplateParameters(initialTemplateParameters, tunnel);
+            transformer.setInitialTemplateParameters(initialTemplateParameters, false);
+        }
+
+        if (!initialTemplateTunnelParameters.isEmpty()) {
+            if (SaxonCAPI.debug) {
+                for (Map.Entry<QName, XdmValue> entry : initialTemplateTunnelParameters.entrySet()) {
+
+                    if (entry.getKey() != null) {
+                        System.err.println("DEBUG: key = " + entry.getKey());
+                    } else {
+                        System.err.println("DEBUG: initialTemplateTunnelParameter Found null key");
+
+                    }
+                    if (entry.getValue() != null) {
+                        System.err.println("DEBUG: key = " + entry.getValue().toString());
+                    } else {
+                        System.err.println("DEBUG: initialTemplateTunnelParameter Found null value");
+
+                    }
+                }
+            }
+            transformer.setInitialTemplateParameters(initialTemplateTunnelParameters, true);
         }
 
         transformer.setStylesheetParameters(globals);
@@ -1884,9 +1905,10 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
         try {
-            Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+            Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
             Xslt30Transformer transformer;
             Processor processor;
 
@@ -1901,7 +1923,7 @@ public class Xslt30Processor extends SaxonCAPI {
                 throw new SaxonApiException("Error XsltExecutable is null");
             }
 
-            applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters);
+            applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
             Destination destination;
             boolean returnXdmValue = false;
             if (paramsMap.containsKey("outvalue")) {
@@ -2011,8 +2033,9 @@ public class Xslt30Processor extends SaxonCAPI {
         Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, true);
+        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
         try {
             Source source = null;
             Xslt30Transformer transformer;
@@ -2037,7 +2060,7 @@ public class Xslt30Processor extends SaxonCAPI {
             Serializer serializer = processor.newSerializer(bStream);
 
 
-            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters);
+            applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
             XdmNode doc = null;
 
             if (paramsMap.containsKey("node")) {
