@@ -710,7 +710,7 @@ public class XPathCompiler {
      * incrementally; they are only checked for consistency when an XPath expression is compiled.
      *
      * @param format   The name of the decimal format. (Note: it is not possible to set
-     *                 properties for the default unnamed decimal format.)
+     *                 properties for the default unnamed decimal format using this method.)
      * @param property The decimal symbols name to update, for example {@code "grouping-separator"}
      * @param value    The value to update the decimal symbol property
      * @throws SaxonApiException if an invalid value is supplied for a decimal format property
