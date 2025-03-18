@@ -101,7 +101,7 @@ public:
    */
   virtual bool isAtomic();
 
-  //! Get the first item in the sequence
+  //! Get the first item in the sequence. For the XdmNode it is this object
   /**
    *
    * @return XdmItem or nullptr if sequence is empty
@@ -117,8 +117,8 @@ public:
    */
   XDM_NODE_KIND getNodeKind();
 
-  //! Get the name of the node, as a string in the form of a EQName. The caller
-  //! does not need to deallocate memory.
+  //! Get the name of the node, as a string in the form of a EQName.
+ //! Deallocation of memory is done internally.
   /**
    *
    *
@@ -127,8 +127,8 @@ public:
    */
   const char *getNodeName();
 
-  //! Get the local name of the node. The caller does not need to deallocate
-  //! memory.
+  //! Get the local name of the node.
+  //! Deallocation of memory is done internally.
   /**
    *
    *
@@ -164,6 +164,7 @@ public:
   int getColumnNumber();
 
   //! Get the base URI of this node
+  //! Deallocation of memory is done internally.
   /**
    *
    * @return the base URI, as defined in the XDM model. The value may be null if
@@ -173,7 +174,7 @@ public:
   const char *getBaseUri();
 
   //! Get the string value of the item. For a node, this gets the string value
-  //! of the node.  The caller should deallocate memory using `delete`
+  //! of the node.  The caller should deallocate memory using `operator delete`
   /**
    * For an atomic value, it has the same effect as casting the value
    * to a string. In all cases the result is the same as applying the XPath
@@ -188,8 +189,8 @@ public:
   const char *getStringValue();
 
   //! The toString() method returns a simple XML serialization of the node with
-  //! defaulted serialization parameters. The caller should deallocate memory
-  //! using `delete`
+  //! defaulted serialization parameters. The caller must deallocate memory
+  //! using `operator delete`
 
   /**
    *
@@ -368,7 +369,7 @@ private:
   const char *nodeToString;
   XdmNode **children; /*!< Cached. Child nodes when getChildren method is first
                          called; */
-  int childCount;     /*!< The number of of child nodes on the current node*/
+  int childCount;     /*!< The number of child nodes on the current node*/
   int axisCount;
   XdmNode **attrValues; /*!< Cached attribute nodes when getAttributeNodes
                            method is first called; */

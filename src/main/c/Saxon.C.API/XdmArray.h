@@ -200,7 +200,7 @@ public:
    *
    * @return a simple XML serialization of the node. Under error conditions the
    * method may return an error message which will always begin with the label "Error: ".
-   * The caller is responsible for memory deallocation
+   * The caller is responsible for memory deallocation using `operator delete`
    */
   const char *toString();
 
