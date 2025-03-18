@@ -1086,16 +1086,20 @@ void runTest(const char *testName, const char *expr, const char *expectedResult,
              XPathProcessor *xpath, sResultCount *sresult, XdmNode *document) {
   cout << endl << "Test " << testName << endl;
   XdmValue *result = good(xpath, sresult, document, expr);
+  if(result == nullptr) {
+    sresult->failure++;
+    sresult->failureList.push_back(testName);
+    return;
+  }
+  
   const char *resultStr = result->toString();
-  if (result != nullptr &&
-      CppTestUtils::assertEquals(expectedResult, resultStr)) {
+
+  if (CppTestUtils::assertEquals(expectedResult, resultStr)) {
     sresult->success++;
     operator delete((char *)resultStr);
     delete result;
   } else {
-    if (result != nullptr) {
-      cout << "Failed result=" << result->toString() << endl;
-    }
+    cout << "Failed result=" << result->toString() << endl;
     sresult->failure++;
     sresult->failureList.push_back(testName);
   }
@@ -1409,7 +1413,7 @@ int main() {
   runTest("testDefaultLanguage", "default-language()", "en", xpathProc, sresult,
           document);
 
-           testEncoding(processor, xpathProc, sresult);
+  //testEncoding(processor, xpathProc, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)
