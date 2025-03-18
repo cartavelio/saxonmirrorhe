@@ -168,7 +168,7 @@ public:
   virtual XDM_TYPE getType();
 
 protected:
-  int64_t value;            /*!< The Java XdmItem reference in Graalvm  */
+
   const char *stringValue;  /*!< Cached. String representation of the XdmValue,
                                if available */
   const char *itemToString; /*!< Cached. String representation of the XdmValue,
