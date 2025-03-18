@@ -25,8 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -215,10 +213,6 @@ public class XQueryEngine extends SaxonCAPI {
         XQueryExecutable executable = null;
 
         compiler.setErrorReporter(SaxonCException.errorReporter);
-        if(cwd != null) {
-            URI baseURI = PathHelper.pathToURI(processor.getUnderlyingConfiguration(), cwd);
-            compiler.setBaseURI(baseURI);
-        }
         if(query != null) {
             executable = compiler.compile(query);
         }

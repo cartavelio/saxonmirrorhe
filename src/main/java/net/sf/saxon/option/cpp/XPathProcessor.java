@@ -22,8 +22,6 @@ import org.graalvm.word.WordFactory;
 import javax.xml.transform.Source;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -343,9 +341,6 @@ public class XPathProcessor extends SaxonCAPI {
         Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
         setupXPathCompiler(compiler, optionsMap);
 
-        URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
-        compiler.setBaseURI(baseURI);
-
         XPathSelector selector = compiler.compile(xpathStr).load();
         selector.setErrorReporter(SaxonCException.errorReporter);
         applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
@@ -474,8 +469,6 @@ public class XPathProcessor extends SaxonCAPI {
         Map<QName, XdmValue> parameters = new HashMap<>();
         Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
         setupXPathCompiler(compiler, optionsMap);
-        URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
-        compiler.setBaseURI(baseURI);
         XPathSelector selector = compiler.compile(xpathStr).load();
         selector.setErrorReporter(SaxonCException.errorReporter);
         applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
@@ -520,8 +513,6 @@ public class XPathProcessor extends SaxonCAPI {
             throw new SaxonApiException("XPath string is null");
         }
         setupXPathCompiler(compiler, optionsMap);
-        URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
-        compiler.setBaseURI(baseURI);
         XPathSelector selector = compiler.compile(xpathStr).load();
         selector.setErrorReporter(SaxonCException.errorReporter);
 
