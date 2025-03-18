@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2025 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -332,8 +332,7 @@ public:
    */
   XsltExecutable *compileFromAssociatedFile(const char *sourceFile);
 
-  //! compile a stylesheet received as a string and save to an exported file
-  //! (SEF).
+  //! compile a stylesheet received as a string and save to an exported file (SEF).
   /**
    *
    * The compiled stylesheet is saved as SEF to file store
@@ -345,8 +344,7 @@ public:
   void compileFromStringAndSave(const char *stylesheet, const char *filename,
                                 const char *encoding = nullptr);
 
-  //! compile a stylesheet received as a file and save to an exported file
-  //! (SEF).
+  //! compile a stylesheet received as a file and save to an exported file (SEF).
   /**
    *
    * The compiled stylesheet is saved as SEF to file store

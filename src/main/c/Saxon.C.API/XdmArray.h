@@ -44,16 +44,14 @@ public:
    */
   virtual ~XdmArray() {}
 
-  //! XdmArray constructor which is used a wrapper class for the Java XdmArray
-  //! object - internal use
+  //! XdmArray constructor which is used a wrapper class for the Java XdmArray object - internal use
   /**
    * @param obj - The internal Java object for the XdmArray is wrapped here in
    * the C++ XdmArray
    */
   XdmArray(int64_t obj);
 
-  //! XdmArray constructor which is used a wrapper class for the Java XdmArray
-  //! object - internal use
+  //! XdmArray constructor which is used a wrapper class for the Java XdmArray object - internal use
   /**
    * @param obj - The internal Java object for the XdmArray is wrapped here in
    * the C++ XdmArray
@@ -176,8 +174,7 @@ public:
    */
   bool isArray() { return true; }
 
-  //! The toString() method returns a simple XML serialization of the node with
-  //! defaulted serialization parameters.
+  //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
   /**
    *
    * <p>In the case of an element node, the result will be a well-formed

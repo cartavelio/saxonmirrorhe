@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2025 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -84,8 +84,7 @@ public:
    */
   XPathProcessor(const XPathProcessor &other);
 
-  //! Set the static base URI for XPath expressions compiled using this
-  //! XPathCompiler.
+  //! Set the static base URI for XPath expressions compiled using this XPathCompiler.
   /**
    * The base URI is part of the static context, and is used to resolve any
    * relative URIs appearing within an XPath expression, for example a relative
@@ -95,9 +94,9 @@ public:
    */
   void setBaseURI(const char *uriStr);
 
-  //! Get the static base URI for XPath expressions compiled using this
-  //! XPathCompiler. The memory deallocation is internally managed.
+  //! Get the static base URI for XPath expressions compiled using this XPathCompiler.
   /**
+   * The memory deallocation is internally managed.
    * @return base URI as string of the xPathProcessor
    */
   const char *getBaseURI();
@@ -113,8 +112,7 @@ public:
    */
   XdmValue *evaluate(const char *xpathStr, const char *encoding = nullptr);
 
-  //! Compile and evaluate an XPath expression. The result is expected to be a
-  //! single XdmItem or nullptr
+  //! Compile and evaluate an XPath expression. The result is expected to be a single XdmItem or nullptr
   /**
     * @param xpathStr - supplied as a character string
     * @param encoding -  the encoding of the string. If not specified then the
@@ -148,8 +146,7 @@ public:
    */
   void setContextFile(const char *filename);
 
-  //! Evaluate the XPath expression, returning the effective boolean value of
-  //! the result.
+  //! Evaluate the XPath expression, returning the effective boolean value of the result.
   /** @param xpathStr - supplied as a character string
    * @param encoding -  the encoding of the string. If not specified then the
    * platform default encoding is used.
@@ -222,8 +219,7 @@ public:
    */
   void declareVariable(const char *name);
 
-  //! Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is
-  //! required.
+  //! Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
   /**
    * Set the language version for the XPath compiler.
    *

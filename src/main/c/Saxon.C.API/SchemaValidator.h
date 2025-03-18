@@ -47,8 +47,7 @@ public:
   */
   SchemaValidator(const SchemaValidator &other);
 
-  //! Destructor method. At the end of the program call the release() method to
-  //! clear the JVM.
+  //! Destructor method. At the end of the program call the release() method to clear the JVM.
   ~SchemaValidator();
 
   //! The copy assignment= operator
@@ -101,11 +100,10 @@ public:
    */
   void registerSchemaFromNode(XdmNode *node);
 
-  //! Export a precompiled Schema Component Model containing all the components
-  //! (except built-in components) that have been loaded by using the register
-  //! methods.
+  //! Export a precompiled Schema Component Model.
   /**
-   *
+   * The Component model containing all the components (except built-in components) that have
+   * been loaded by using the register methods.
    * @param fileName - The file name where the exported schema will be stored
    * @throws SaxonApiException
    */
@@ -136,7 +134,7 @@ public:
   /**
    * @param sourceFile The name of the file to be validated. Default is nullptr
    * @return XdmNode - the validated document returned to the calling program.
-   * The caller is responsible for deallocation of memory
+   * The caller is responsible for deallocation of memory. Use `delete`
    * @throws SaxonApiException
    */
   XdmNode *validateToNode(const char *sourceFile = nullptr);
@@ -216,8 +214,7 @@ public:
   //! Get all properties as a std::map
   std::map<std::string, std::string> &getProperties();
 
-  //! Checks for pending exceptions without creating a local reference to the
-  //! exception object
+  //! Checks for pending exceptions without creating a local reference to the exception object
   /**
    *
    * @return bool - true when there is a pending exception; otherwise return

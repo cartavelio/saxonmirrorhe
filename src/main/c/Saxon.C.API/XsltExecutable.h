@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2025 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -33,9 +33,10 @@ class XsltExecutable {
 public:
   ~XsltExecutable();
 
-  //! set the current working directory (cwd). This method also applies to the
-  // static base URI for XSLT stylesheets when supplied as lexical string.
+  //! set the current working directory (cwd).
   /**
+   * This method also applies to the static base URI for XSLT
+   * stylesheets when supplied as lexical string.
    * The cwd is used to set the base URI is part of the static context, and is
    * used to resolve any relative URIs appearing within XSLT.
    * @param cwd - Current working directory
@@ -61,8 +62,7 @@ public:
    */
   void setBaseOutputURI(const char *baseURI);
 
-  //! Supply the context item to be used when evaluating global variables and
-  //! parameters.
+  //! Supply the context item to be used when evaluating global variables and parameters.
   /**
    * Set the source document from an XdmNode for the transformation.
    * @param value - the item to be used as the context item within the
@@ -99,16 +99,16 @@ public:
    */
   void setInitialMode(const char *modeName);
 
-  //! The initial value to which templates are to be applied (equivalent to the
-  //! <code>select</code> attribute of <code>xsl:apply-templates</code>)
+  //! The initial value to which templates are to be applied
   /**
+   * This is equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>
    *  @param selection - The value to which the templates are to be applied
    */
   void setInitialMatchSelection(XdmValue *selection);
 
-  //! The initial filename to which templates are to be applied (equivalent to
-  //! the <code>select</code> attribute of <code>xsl:apply-templates</code>).
+  //! The initial filename to which templates are to be applied
   /**
+   * This is equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>.
    * The file is parsed internally
    *  @param filename - The file name to which the templates are to be applied
    */
@@ -274,8 +274,7 @@ public:
    */
   void deleteXdmValueArray(XdmValue **arr, int len);
 
-  //! This method gives users the option to switch on or off the
-  //! <code>xsl:message</code> feature.
+  //! This method gives users the option to switch on or off the <code>xsl:message</code> feature.
   /**
    * It is also possible
    * to send the <code>xsl:message</code> outputs to file given by file name.
@@ -286,11 +285,10 @@ public:
    */
   void setSaveXslMessage(bool show, const char *filename = nullptr);
 
-  //! Enable the capture of the result-document output into an std:map. This
-  //! overrides the default mechanism.
+  //! Enable the capture of the result-document output into a std:map. This overrides the default mechanism.
   /**
    * If this option is enabled, then any document created using
-   * xsl:result-document is saved (as an XdmNode) in an std::map object where it
+   * xsl:result-document is saved (as an XdmNode) in a std::map object where it
    * is accessible using the URI as a key. After the execution of the
    * transformation a call on the <code>getResultDocuments()</code> method is
    * required to get access to the result-documents in the map.
@@ -350,8 +348,7 @@ public:
    */
   XdmValue *transformFileToValue(const char *sourcefile);
 
-  //! Invoke the stylesheet by applying templates to a supplied input sequence,
-  //! Saving the results to file.
+  //! Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results to file.
   /**
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile. The result is
@@ -364,8 +361,7 @@ public:
    */
   void applyTemplatesReturningFile(const char *outfile);
 
-  //! Invoke the compiled stylesheet by applying templates to a supplied input
-  //! sequence, Saving the results as serialized string.
+  //! Invoke the compiled stylesheet by applying templates to a supplied input sequence, Saving the results as serialized string.
   /**
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile.
@@ -376,8 +372,7 @@ public:
    */
   const char *applyTemplatesReturningString();
 
-  //! Invoke the compiled stylesheet by applying templates to a supplied input
-  //! sequence, Saving the results as an XdmValue.
+  //! Invoke the compiled stylesheet by applying templates to a supplied input sequence, Saving the results as an XdmValue.
   /**
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile.
@@ -388,8 +383,7 @@ public:
    */
   XdmValue *applyTemplatesReturningValue();
 
-  //! Invoke a transformation by calling a named template and save result to
-  //! file.
+  //! Invoke a transformation by calling a named template and save result to file.
   /** The results of calling the template are wrapped in a document node, which
    * is then sent to the specified file destination. If
    * setInitialTemplateParameters(std::Map, boolean) has been called, then the
@@ -403,8 +397,7 @@ public:
    */
   void callTemplateReturningFile(const char *templateName, const char *outfile);
 
-  //! Invoke a transformation by calling a named template and return result as a
-  //! string.
+  //! Invoke a transformation by calling a named template and return result as a string.
   /** The results of calling the template are wrapped in a document node, which
    * is then serialized as a string. If setInitialTemplateParameters(std::Map,
    * boolean) has been called, then the parameters supplied are made available
@@ -419,8 +412,7 @@ public:
    */
   const char *callTemplateReturningString(const char *templateName = nullptr);
 
-  //! Invoke a transformation by calling a named template and return result as
-  //! an XdmValue.
+  //! Invoke a transformation by calling a named template and return result as an XdmValue.
   /** The results of calling the template are wrapped in a document node, which
    * is then returned as an XdmValue. If setInitialTemplateParameters(std::Map,
    * boolean) has been called, then the parameters supplied are made available

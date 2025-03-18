@@ -530,6 +530,74 @@ void testGetDoubleFromString(SaxonProcessor* processor, sResultCount *sresult) {
   }
 }
 
+void testEmptyStringFromNull(SaxonProcessor* processor, sResultCount *sresult) {
+  cout << endl << " testEmptyStringFromNull" << endl;
+  try {
+    XdmAtomicValue *v = processor->makeStringValue(nullptr);
+
+    if(v == nullptr) {
+      sresult->failureList.push_back("testEmptyStringFromNull0");
+      sresult->failure++;
+      return;
+    }
+    const char * d = v->getStringValue();
+
+    if ((d != nullptr) && (d[0] == '\0')) {
+      printf("c string is correctly empty\n");
+      sresult->success++;
+    } else {
+      sresult->failure++;
+      if(d == nullptr) {
+        sresult->failureList.push_back("testEmptyStringFromNull1");
+      } else {
+        sresult->failureList.push_back("testEmptyStringFromNull2");
+      }
+    }
+    delete v;
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testEmptyStringFromNull3");
+  }
+}
+
+void testEmptyString(SaxonProcessor* processor, sResultCount *sresult) {
+  cout << endl << " testEmptyString" << endl;
+  try {
+    XdmAtomicValue *v = processor->makeStringValue(nullptr);
+
+    if(v == nullptr) {
+      sresult->failureList.push_back("testEmptyString0");
+      sresult->failure++;
+      return;
+    }
+    const char * d = v->getStringValue();
+
+    if ((d != nullptr) && (d[0] == '\0')) {
+      printf("c string is correctly empty\n");
+      sresult->success++;
+    } else {
+      sresult->failure++;
+      if(d == nullptr) {
+        sresult->failureList.push_back("testEmptyString1");
+      } else {
+        sresult->failureList.push_back("testEmptyString2");
+      }
+    }
+    delete v;
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testEmptyString3");
+  }
+}
+
 
 void testGetLongErrFromString(SaxonProcessor* processor, sResultCount *sresult) {
   cout << endl << " testGetLongErrFromString" << endl;
@@ -665,7 +733,7 @@ void testXdmArray(SaxonProcessor *processor, sResultCount *sresult) {
     XdmArray *a = processor->makeArray(values, 3);
 
     XdmArray *b = new XdmArray(*a);
-    XdmAtomicValue * item1 = (XdmAtomicValue *)(b->get(1)->getHead());
+    XdmAtomicValue * item1 = (XdmAtomicValue *)(a->get(1)->getHead());
     long value1 = item1->getLongValue();
 
     if(value1 == 2) {
@@ -677,17 +745,14 @@ void testXdmArray(SaxonProcessor *processor, sResultCount *sresult) {
 
     XdmValue * xdmvalue = (XdmValue *)b;
     XdmItem * firstItem = xdmvalue->getHead();
-    if(firstItem->isArray()) {
-      std::cerr<<"Array Found!"<<std::endl;
-    }
-    if(firstItem == nullptr) {
+
+    if(firstItem == nullptr || !(firstItem->isArray())) {
       sresult->failure++;
       sresult->failureList.push_back("testXdmArray1");
     } else {
       cerr<<"XdmArray size = "<<(((XdmArray *)firstItem)->arrayLength())<<endl;
-      XdmAtomicValue * item2 = (XdmAtomicValue *)a->get(0);//(XdmAtomicValue *)(((XdmArray *)firstItem)->get(0));
+      XdmAtomicValue * item2 = (XdmAtomicValue *)(((XdmArray *)firstItem)->get(0)->getHead());
       if(item2 != nullptr) {
-        cerr<<"XdmArray item2= "<<(item2->getStringValue())<<endl;
         long value2 = item2->getLongValue();
         if(value1 == 2) {
           sresult->success++;
@@ -871,6 +936,11 @@ int main() {
        << endl;
 
   testGetDoubleFromString(processor, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testEmptyStringFromNull(processor, sresult);
 
   cout << endl
      << "============================================================="
