@@ -39,7 +39,7 @@ XdmValue::XdmValue(const XdmValue &other) {
   }
 }
 
-const char *XdmValue::toString() {
+const char *XdmValue::toString(const char *encoding) {
   int count = size();
   allocFn fn = operator new;
   char *toStringValuei = nullptr;
@@ -47,19 +47,25 @@ const char *XdmValue::toString() {
   if (count == 0) {
     toStringValuei =
         xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
-                        nullptr);
+                        nullptr, nullptr);
   } else if (count == 1) {
     toStringValuei =
         xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
-                        (void *)(values[0]->getUnderlyingValue()));
+                        (void *)(values[0]->getUnderlyingValue()), (char *) encoding);
   } else {
     if (jValues == -1) {
       jValues = getUnderlyingValue();
     }
 
     toStringValuei = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread,
-                                           (void *)fn, (void *)jValues);
+                                           (void *)fn, (void *)jValues, (char *) encoding);
   }
+
+  if(toStringValuei == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+    throw SaxonApiException();
+  }
+
+
 
   return toStringValuei;
 }

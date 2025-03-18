@@ -143,10 +143,12 @@ public:
   /**
    * Create a string representation of the sequence. This is the result of serializing
    * the sequence using the adaptive serialization method.
+   * @param encoding - the encoding of the string returned. If NULL or omitted defaults to the JVM encoding, which in most cases is UTF-8.
    * @return A string representation of the XdmValue.
    * The caller is responsible for memory deallocation using `operator delete`.
+   * @throws SaxonApiException if encoding cannot be recognized
    */
-  virtual const char *toString();
+  virtual const char *toString(const char *encoding = nullptr);
 
   /**
    * Get the number of references on this XdmValue - internal use only

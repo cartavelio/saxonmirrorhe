@@ -390,8 +390,8 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
 }
 
 void SaxonProcessor::applyConfigurationProperties() {
-    SaxonProcessor::attachCurrentThread();
-  /*if (configProperties.size() > 0) {
+ SaxonProcessor::attachCurrentThread();
+ /* if (configProperties.size() > 0) {
     int size = configProperties.size();
     int64_t processorDataRef = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, size);
@@ -659,7 +659,7 @@ int64_t SaxonProcessor::createParameterJArray2(
 }
 
 SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
-  // SaxonProcessor::attachCurrentThread();
+  SaxonProcessor::attachCurrentThread();
 
   procRef = other.procRef;
   cwd = other.cwd;
@@ -683,7 +683,7 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
 }
 
 DocumentBuilder *SaxonProcessor::newDocumentBuilder() {
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   int64_t docBuilderRef = createDocumentBuilder(
       SaxonProcessor::sxn_environ->thread, (void *)procRef);
 
@@ -693,24 +693,24 @@ DocumentBuilder *SaxonProcessor::newDocumentBuilder() {
 }
 
 Xslt30Processor *SaxonProcessor::newXslt30Processor() {
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
 
   return (new Xslt30Processor(this, cwd));
 }
 
 XQueryProcessor *SaxonProcessor::newXQueryProcessor() {
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   return (new XQueryProcessor(this, cwd));
 }
 
 XPathProcessor *SaxonProcessor::newXPathProcessor() {
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   return (new XPathProcessor(this, cwd));
 }
 
 SchemaValidator *SaxonProcessor::newSchemaValidator() {
   if (licensei) {
-    applyConfigurationProperties();
+    SaxonProcessor::attachCurrentThread();
     return (new SchemaValidator(this, cwd));
   } else {
     std::cerr << "\nError: Processor is not licensed for schema processing!!"
@@ -722,6 +722,7 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
 const char *SaxonProcessor::version() {
 
   if (versionStr.empty()) {
+    SaxonProcessor::attachCurrentThread();
     versionStr = std::string(j_c_getProductVersion(
         SaxonProcessor::sxn_environ->thread, (void *)procRef));
   }
@@ -822,7 +823,7 @@ XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
     throw SaxonApiException("JSON source string is null");
   }
 
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   int64_t xdmValueRef = parseJsonString(sxn_environ->thread, (void *)procRef,
                                         (char *)source, (char *)encoding);
   if (xdmValueRef >= 0) {
@@ -842,7 +843,7 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
     throw SaxonApiException("JSON source file name is null");
   }
 
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   int64_t xdmValueRef = parseJsonFile(sxn_environ->thread, (void *)procRef,
                                       (char *)cwd.c_str(), (char *)source);
   if (xdmValueRef > 0) {
@@ -860,9 +861,7 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source,
                                             const char *encoding,
                                             SchemaValidator *validator) {
-   SaxonProcessor::attachCurrentThread();
-
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   int64_t xdmNodeRef = parseXmlStringWithValidator(
       sxn_environ->thread, (void *)procRef, (char *)encoding,
       (validator != nullptr ? (void *)validator->getUnderlyingValidator()
@@ -887,7 +886,7 @@ int SaxonProcessor::getNodeKind(int64_t nodeRef) {
 
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename,
                                           SchemaValidator *validator) {
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   int64_t xdmNodeRef = parseXmlFileWithValidator(
       sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef,
       (validator != nullptr ? (void *)validator->getUnderlyingValidator()
@@ -906,7 +905,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename,
 
 XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri,
                                          SchemaValidator *validator) {
-  applyConfigurationProperties();
+  SaxonProcessor::attachCurrentThread();
   int64_t xdmNodeRef = parseXmlFileWithValidator(
       sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef,
       (validator != nullptr ? (void *)validator->getUnderlyingValidator()
@@ -982,6 +981,16 @@ void SaxonProcessor::deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len) {
   if (arr != nullptr) {
     delete[] arr;
   }
+}
+
+const char * SaxonProcessor::encodeString(const char * stringValue, const char * toCharSetName) {
+
+  allocFn fn = operator new;
+  const char * result = j_cpp_encodeString(SaxonProcessor::sxn_environ->thread, (char *)stringValue, (char *)toCharSetName, (void *)fn);
+  if(result == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+      throw SaxonApiException();
+  }
+  return result;
 }
 
 /* ========= Factory method for Xdm ======== */

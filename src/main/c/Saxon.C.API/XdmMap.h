@@ -230,10 +230,11 @@ public:
   /**
    * Create a string representation of the XDM map. This is the result of serializing
    * the map using the adaptive serialization method.
+   * @param encoding - the encoding of the string returned. If NULL or omitted defaults to the JVM encoding, which in most cases is UTF-8.
    * @return A string representation of the XdmMap.
    * The caller is responsible for memory deallocation using `operator delete`.
    */
-  const char *toString();
+  const char *toString(const char *encoding = nullptr);
 
 };
 

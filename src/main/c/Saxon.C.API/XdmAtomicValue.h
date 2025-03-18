@@ -97,11 +97,11 @@ public:
    * the result of calling <code>toString</code>. This is not the case for
    * nodes, where <code>toString</code> returns an XML serialization of the
    * node.</p>
-   *
+   * @param encoding - the encoding of the string returned. If NULL or omitted defaults to the JVM encoding, which in most cases is UTF-8.
    * @return the result of converting the item to a string.
    * The caller is responsible for memory deallocation.
    */
-  const char *getStringValue();
+  const char *getStringValue(const char *encoding = nullptr);
 
   /**
    * Get the value converted to an integer using the XPath casting rules

@@ -18,13 +18,17 @@ XdmMap::XdmMap(const XdmMap &d): XdmFunctionItem(d) {
 
 XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) { }
 
-const char *XdmMap::toString() {
+const char *XdmMap::toString(const char *encoding) {
   if (value == SXN_UNSET) {
     return nullptr;
   }
   allocFn fn = operator new;
   const char *str = xdmMapToString(SaxonProcessor::sxn_environ->thread,
-                                   (void *)fn, (void *)value);
+                                   (void *)fn, (void *)value, (char *)encoding);
+
+  if(str == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+    throw SaxonApiException();
+  }
 
   return str;
 }

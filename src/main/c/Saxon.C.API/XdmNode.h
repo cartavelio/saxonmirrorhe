@@ -171,10 +171,10 @@ public:
    * result of calling <code>toString</code>. This is not the case for nodes,
    * where <code>toString</code> returns an XML serialization of the node.</p>
    * <p>The caller is responsible for memory deallocation using `operator delete`.</p>
-   *
+   * @param encoding - the encoding of the string returned. If NULL or omitted defaults to the JVM encoding, which in most cases is UTF-8.
    * @return The string value of the node.
    */
-  const char *getStringValue();
+  const char *getStringValue(const char *encoding = nullptr);
 
 
   /**
@@ -198,12 +198,12 @@ public:
    * <code>getStringValue()</code> instead.</p>
    *
    * <p>The caller is responsible for memory deallocation using `operator delete`.</p>
-   *
+   * @param encoding - the encoding of the string returned. If NULL or omitted defaults to the JVM encoding, which in most cases is UTF-8.
    * @return A simple XML serialization of the node. Under error conditions the
    * method may return an error message which will always begin with the label
    * "Error: ".
    */
-  const char *toString();
+  const char *toString(const char *encoding = nullptr);
 
   /**
    * Get the parent of this node

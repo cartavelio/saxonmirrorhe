@@ -133,22 +133,24 @@ void testEncoding(SaxonProcessor *processor,
                                          sResultCount *sresult) {
 
   cout << endl << "Test testEncoding:" << endl;
-
-
-
+try{
 
   // parser the XML
 
   XdmItem * item = xpath->evaluateSingle("unparsed-text('../data/help.txt')");
   const char * value = item->getStringValue();
-    allocFn fn = operator new;
-    std::string encoding = "windows-1252";
- const char * result = j_cpp_encodeStringValue(SaxonProcessor::sxn_environ->thread, (char *)value, (char *)encoding.c_str(), (void *)fn);
-cout << endl << "Test encoding cp1:" << endl;
+  std::string encoding = "Cp437";//"windows-1252";
+  const char * result = SaxonProcessor::encodeString(value, encoding.c_str());
   if(item != nullptr) {
-  cout << endl << "Item="<<item->getStringValue() << endl;
     cout << endl << "Item-String="<<result << endl;
     delete item;
+    operator delete(result);
+  }
+  sresult->success++;
+  } catch(SaxonApiException e){
+      cout << "Error Message = " << e.getMessage() << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testEncoding");
   }
 
 
@@ -1413,7 +1415,7 @@ int main() {
   runTest("testDefaultLanguage", "default-language()", "en", xpathProc, sresult,
           document);
 
-  //testEncoding(processor, xpathProc, sresult);
+  testEncoding(processor, xpathProc, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)

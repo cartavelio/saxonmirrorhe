@@ -562,7 +562,7 @@ public class SaxonCAPI {
     /**
      * Allocate Char array in the C/C++ memory space
      */
-    interface AllocatorCCharFn extends CFunctionPointer {
+    public interface AllocatorCCharFn extends CFunctionPointer {
         @InvokeCFunctionPointer
         CCharPointer call(long size);
     }
@@ -1752,24 +1752,21 @@ public class SaxonCAPI {
         return a;
     }
 
-    @CEntryPoint(name = "j_cpp_encodeStringValue")
-    public static CCharPointer encodeStringValue(IsolateThread thread, CCharPointer c_string, CCharPointer c_encoding, SaxonCAPI.AllocatorCCharFn alloc) throws net.sf.saxon.s9api.SaxonApiException, UnsupportedEncodingException {
-        try {
-            String encoding = "utf-8";
-            if (!c_encoding.isNull()) {
-                encoding = CTypeConversion.toJavaString(c_encoding);
+    @CEntryPoint(name = "j_cpp_encodeString",  exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer encodeStringValue(IsolateThread thread, CCharPointer c_string, CCharPointer c_outEncoding, SaxonCAPI.AllocatorCCharFn alloc) throws net.sf.saxon.s9api.SaxonApiException, UnsupportedEncodingException {
+            String outEncoding = "utf-8";
+            if (!c_outEncoding.isNull()) {
+                outEncoding = CTypeConversion.toJavaString(c_outEncoding);
             }
-            System.err.println("In Java encoding = "+ encoding);
-            String str = toJavaString(c_string, c_encoding);
-            System.err.println("In Java = "+ str);
+
+            String str = toJavaString(c_string, c_outEncoding);
+            if(SaxonCAPI.debug) {
+                System.err.println("Java DEBUG string before encoding (from: "+outEncoding+ ") = " + str);
+            }
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            System.err.println("In Java = "+ stream.toString(encoding));
-            stream.writeBytes(str.toString().getBytes(encoding));
+            stream.writeBytes(str.toString().getBytes(outEncoding));
             CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
             return a;
-        } catch (Exception e) {
-            return WordFactory.nullPointer();
-        }
     }
 
 

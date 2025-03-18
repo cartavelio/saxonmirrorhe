@@ -200,14 +200,14 @@ int XdmNode::getColumnNumber() {
 
 XdmItem *XdmNode::getHead() { return this; }
 
-const char *XdmNode::getStringValue() { return XdmItem::getStringValue(); }
+const char *XdmNode::getStringValue(const char *encoding) { return XdmItem::getStringValue(encoding); }
 
-const char *XdmNode::toString() {
+const char *XdmNode::toString(const char *encoding) {
   const char *nodeToStringi = nullptr;
   // if (nodeToString == nullptr) {
   allocFn fn = operator new;
   nodeToStringi = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
-                                  (void *)fn, (void *)value);
+                                  (void *)fn, (void *)value, (char *)encoding);
   if (nodeToStringi == nullptr) {
     throw SaxonApiException();
   }

@@ -133,12 +133,12 @@ public:
   /**
    * Get the string value of the XdmArray item. There is no string value for
    * function items, so an exception is always thrown.
-   *
+   * @param encoding - the encoding of the string returned. If NULL or omitted defaults to the JVM encoding, which in most cases is UTF-8.
    * @return Nothing is returned; this method always throws an exception because the XdmArray
    * has no associated string value.
    * @throws SaxonApiException
    */
-  const char *getStringValue();
+  const char *getStringValue(const char *encoding = nullptr);
 
   /**
    * Determine whether the item is an XDM function or some other type of item
@@ -166,7 +166,7 @@ public:
    * @return A string representation of the XdmArray.
    * The caller is responsible for memory deallocation using `operator delete`.
    */
-  const char *toString();
+  const char *toString(const char *encoding = nullptr);
 
 private:
   int arrayLen;
