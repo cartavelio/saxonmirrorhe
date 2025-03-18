@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.IntFunction;
 
-public class Bug6554 {
+public class Bug6225 {
         public static final int THREADS = 24;
         public static final int ITERATIONS = 1_000;
 
