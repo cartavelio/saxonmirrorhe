@@ -7,8 +7,8 @@
 #endif
 
 XdmMap::XdmMap() : XdmFunctionItem() {
-  int64_t mapDataRef = j_create_mapData(sxn_environ->thread);
-  value  = j_makeXdmMap(sxn_environ->thread, (void *)mapDataRef);
+  int64_t mapDataRef = j_create_mapData(SaxonProcessor::sxn_environ->thread);
+  value  = j_makeXdmMap(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
   j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
 
 }
