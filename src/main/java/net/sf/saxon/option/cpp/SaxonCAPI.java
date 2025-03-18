@@ -6,7 +6,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.option.cpp;
 
-import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
@@ -180,8 +179,8 @@ public class SaxonCAPI {
         Processor proc = objectHandles.get(procRef);
         Configuration config = proc.getUnderlyingConfiguration();
 //#if EE==true || PE==true
-        if(config instanceof ProfessionalConfiguration) {
-            ProfessionalConfiguration pc = (ProfessionalConfiguration) config;
+        if(config instanceof com.saxonica.config.ProfessionalConfiguration) {
+            com.saxonica.config.ProfessionalConfiguration pc = (com.saxonica.config.ProfessionalConfiguration) config;
             return CTypeConversion.toCBoolean(pc.isLicenseFound());
         }
 //#endif
