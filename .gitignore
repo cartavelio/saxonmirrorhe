@@ -5,7 +5,6 @@
 /out/
 /extra/lib/
 java_*.hprof
-/Saxon-bytecode/
 /.idea/
 /src/test/testdata/temp/
 /src/test/testdata/sandpit/
