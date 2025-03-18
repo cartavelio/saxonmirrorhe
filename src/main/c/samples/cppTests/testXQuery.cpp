@@ -234,9 +234,6 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
 
   if (input == nullptr) {
     cout << "testReusability failure - Source document is null." << endl;
-    if (processor->exceptionOccurred()) {
-      cerr << processor->getErrorMessage() << endl;
-    }
     sresult->failure++;
     sresult->failureList.push_back("testReusability");
     return;
@@ -269,18 +266,9 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
     }
     delete val;
   } else {
-    if (queryProc2->exceptionOccurred()) {
       cerr << "failure in testReusability-1" << endl;
       sresult->failure++;
       sresult->failureList.push_back("testReusability-1");
-      SaxonApiException *exception = queryProc2->getException();
-      if (exception != nullptr) {
-        cout << "Exception found. " << endl;
-        const char *message = queryProc2->getErrorMessage();
-        cout << "Error Message = " << message << endl;
-        queryProc2->exceptionClear();
-      }
-    }
 
     return;
   }
@@ -315,18 +303,9 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
     operator delete((char *)valStr);
     delete val2;
   } else {
-    if (queryProc3->exceptionOccurred()) {
       cerr << "failure in testReusability-2" << endl;
       sresult->failure++;
       sresult->failureList.push_back("testReusability-2");
-      SaxonApiException *exception = queryProc3->getException();
-      if (exception != nullptr) {
-        cout << "Exception found. " << endl;
-        const char *message = queryProc3->getErrorMessage();
-        cout << "Error Message = " << message << endl;
-        queryProc3->exceptionClear();
-      }
-    }
     delete value1;
     delete value2;
     delete queryProc2;
