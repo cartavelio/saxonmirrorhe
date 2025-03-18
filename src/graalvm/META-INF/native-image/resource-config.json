@@ -68,9 +68,6 @@
       "pattern":"\\Aorg/xmlresolver/cat.+xml\\Z"
     },
     {
-      "pattern": "\\Aorg/xmlresolver/schemas/.+\\.(dtd|rng|rnc|xml)\\Z"
-    },
-    {
       "pattern": "\\Aorg/xmlresolver/(www\\.w3|www\\.rddl|xmlcatalogs)\\.org/.+\\.(dtd|ent|mod|rng|rnc|xsd|xsl)\\Z"
     },
     {
