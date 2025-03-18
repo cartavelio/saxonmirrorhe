@@ -63,6 +63,13 @@
                been updated to provide more details relevant for the C/C++, PHP and Python platforms where
                this differs to Saxon on the Java and C# platforms.</p></li>
          </ul>
+         <p>From SaxonC 12.6:</p>
+         <ul>
+            <li><p>Added documentation on <a href="/technical/memory">Memory management in
+               C++</a>, and improved the C++ API documentation for relevant methods when the caller
+               must deallocate the memory used.</p></li>
+         </ul>
+         
       </category>
 
       <category name="api">

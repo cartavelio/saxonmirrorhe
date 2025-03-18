@@ -12,7 +12,7 @@
       >Configuration features</a> section in the main Saxon documentation.</p>
    
    <p>Note that a small number of the features are not available with SaxonC. Please see the <a
-      href="/technical">Technical information: Limitations</a> section for details.</p>
+      href="/technical/limitations">Limitations</a> section for details.</p>
 
    <h2 class="subtitle">Setting properties on the SaxonProcessor</h2>
 

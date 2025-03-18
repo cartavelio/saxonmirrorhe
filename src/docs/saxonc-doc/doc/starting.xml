@@ -308,6 +308,11 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          behaves. For more information about setting configuration features on
             <code>SaxonProcessor</code> and the other processors in SaxonC, see <a
             href="/configuration">Configuration</a>.</p>
+     
+     <p>When using the SaxonC C++ API, memory management is important. Some API methods return
+       pointers which require manual deallocation of memory, and in many cases this is the caller's
+       responsibility. For more information, see <a href="/technical/memory">Memory management in
+         C++</a>.</p>
 
       <h2 class="subtitle">Command line interface</h2>
 
