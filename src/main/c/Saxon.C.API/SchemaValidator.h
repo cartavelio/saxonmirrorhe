@@ -122,7 +122,8 @@ public:
   //! Validate an instance document supplied as a Source object
   /**
    * @param sourceFile The name of the file to be validated. Default is nullptr
-   * @return XdmNode - the validated document returned to the calling program
+   * @return XdmNode - the validated document returned to the calling program.
+   * The caller is responsible for deallocation of memory
    * @throws SaxonApiException
    */
   XdmNode *validateToNode(const char *sourceFile = nullptr);
@@ -132,7 +133,7 @@ public:
    * @param source - The source document supplied as an XdmNode, which will be
    * used to validate against the schema using the validate methods.
    * The deletion of allocated memory associated with the source node is the
-   * document is the responsbility of the caller.
+   * responsibility of the caller.
    */
   void setSourceNode(XdmNode *source);
 
@@ -141,7 +142,7 @@ public:
    * The validation-report option must have been set to true in the properties
    * to use this feature.
    * @return XdmNode - Pointer to XdmNode. Return nullptr if validation
-   * reporting feature has not been enabled
+   * reporting feature has not been enabled. The caller is responsible for deallocation of memory
    * @throws SaxonApiException
    */
   XdmNode *getValidationReport();
@@ -191,7 +192,7 @@ public:
    * Get a parameter value by name
    * @param name - Specified parameter name to get
    * @param withParam Internal use only
-   * @return XdmValue
+   * @return XdmValue. Deallocation of memory internally handled
    */
   XdmValue *getParameter(const char *name, bool withParam=true);
 

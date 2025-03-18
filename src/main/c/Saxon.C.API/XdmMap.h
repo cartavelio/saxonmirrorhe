@@ -81,7 +81,7 @@ public:
    * @return the value to which the specified key is mapped, or
    * NULL if this map contains no mapping for the key
    * @remark if null is returned check getException method on the SaxonProcessor
-   * object for errors
+   * object for errors. The caller should deallocate memory using `delete`.
    */
   XdmValue *get(XdmAtomicValue *key);
 
@@ -95,7 +95,8 @@ public:
    *            entries whose key is <code>xs:untypedAtomic</code> or
    * <code>xs:anyURI</code>)
    * @return the value to which the specified key is mapped, or
-   * NULL if this map contains no mapping for the key
+   * NULL if this map contains no mapping for the key.
+   * The caller should deallocate memory using `delete`.
    */
   XdmValue *get(const char *key);
 
@@ -109,7 +110,8 @@ public:
    * treated as an instance of <code>xs:integer</code> (which will also match
    *            entries whose key belongs to another numeric type)
    * @return the value to which the specified key is mapped, or NULL if this map
-   * contains no mapping for the key
+   * contains no mapping for the key.
+   * The caller should deallocate memory using `delete`.
    */
   XdmValue *get(int key);
 
@@ -123,7 +125,8 @@ public:
    * treated as an instance of <code>xs:double</code> (which will also match
    *            entries whose key belongs to another numeric type)
    * @return the value to which the specified key is mapped, or
-   * NULL if this map contains no mapping for the key
+   * NULL if this map contains no mapping for the key.
+   * The caller should deallocate memory using `delete`.
    */
   XdmValue *get(double key);
 
@@ -137,7 +140,8 @@ public:
    * treated as an instance of <code>xs:integer</code> (which will also match
    *            entries whose key belongs to another numeric type)
    * @return the value to which the specified key is mapped, or
-   * NULL if this map contains no mapping for the key
+   * NULL if this map contains no mapping for the key.
+   * The caller should deallocate memory using `delete`.
    */
   XdmValue *get(long key);
 
@@ -147,6 +151,7 @@ public:
    * If there is an existing entry with the same key, it is removed
    * @return a new map containing the additional entry. The original map is
    * unchanged.
+   * The caller should deallocate memory using `delete`.
    */
   XdmMap *put(XdmAtomicValue *key, XdmValue *value);
 
@@ -156,7 +161,9 @@ public:
    * If there is no entry with the same key, the new map has the same content as
    * the old (it may or may not be the same Java object)
    * @param key - The key to be removed given as an XdmAtomicValue
-   * @return a map without the specified entry. The original map is unchanged.
+   * @return a map without the specified entry. The caller should deallocate memory using `delete`.
+   * The original map is unchanged.
+   *
    */
   XdmMap *remove(XdmAtomicValue *key);
 
@@ -164,7 +171,7 @@ public:
   /**
    *
    * @return an unordered std::set of the keys present in this map, in arbitrary
-   * order.
+   * order. The caller should deallocate memory.
    */
   std::set<XdmAtomicValue *> keySet();
 
@@ -173,7 +180,7 @@ public:
   /**
    *
    * @return an unordered pointer array of the keys present in this map, in
-   * arbitrary order.
+   * arbitrary order. The caller should deallocate memory.
    */
   XdmAtomicValue **keys();
 
@@ -205,7 +212,7 @@ public:
    *
    * @return a std::list containing the values found in this map. The result
    * may contain duplicates, and the ordering of the collection is
-   * unpredictable.
+   * unpredictable. The caller should deallocate memory.
    */
   std::list<XdmValue *> valuesAsList();
 
@@ -216,7 +223,7 @@ public:
    *
    * @return a pointer array containing the values found in this map. The result
    * may contain duplicates, and the ordering of the collection is
-   * unpredictable.
+   * unpredictable. The caller should deallocate memory using `delete`.
    */
   XdmValue **values();
 
@@ -262,7 +269,7 @@ public:
    *
    * @return a simple XML serialization of the node. Under error conditions the
    * method may return an error message which will always begin with the label
-   * "Error: ".
+   * "Error: ". The caller should deallocate memory using `delete`.
    */
   const char *toString();
 

@@ -151,7 +151,7 @@ public:
    * zero return nullptr  if n is less than zero or greater than or equal to the
    * number of items in the value return nullptr if the value is lazily
    * evaluated and the delayed evaluation fails with a dynamic error.
-   * The caller is responsible for memory deallocation
+   * TThe caller is responsible for memory deallocation
    */
   XdmItem *itemAt(int n);
 
@@ -168,7 +168,7 @@ public:
   virtual XDM_TYPE getType();
 
 protected:
-
+  int64_t value;            /*!< The Java XdmItem reference in Graalvm  */
   const char *stringValue;  /*!< Cached. String representation of the XdmValue,
                                if available */
   const char *itemToString; /*!< Cached. String representation of the XdmValue,
