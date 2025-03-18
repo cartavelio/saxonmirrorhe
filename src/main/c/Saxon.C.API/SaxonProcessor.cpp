@@ -389,8 +389,8 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
 }
 
 void SaxonProcessor::applyConfigurationProperties() {
- /*SaxonProcessor::attachCurrentThread();
-  if (configProperties.size() > 0) {
+    SaxonProcessor::attachCurrentThread();
+  /*if (configProperties.size() > 0) {
     int size = configProperties.size();
     int64_t processorDataRef = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, size);
