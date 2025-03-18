@@ -93,6 +93,7 @@ public class TransformFn extends SystemFunction implements Callable {
         op.addAllowedOption("vendor-options", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
         op.addAllowedOption("cache", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("enable-assertions", SequenceType.SINGLE_BOOLEAN);
+        op.addAllowedOption("enable-messages", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("package-name", SequenceType.SINGLE_STRING);
         op.addAllowedOption("package-version", SequenceType.SINGLE_STRING);
         op.addAllowedOption("package-node", SequenceType.SINGLE_NODE);
@@ -638,8 +639,21 @@ public class TransformFn extends SystemFunction implements Callable {
         Xslt30Transformer transformer = sheet.load30();
         transformer.setErrorReporter(context.getErrorReporter());
 
+
         if (options.get("enable-assertions") != null) {
             transformer.setAssertionsEnabled(asBoolean((AtomicValue) options.get("enable-assertions").head()));
+        }
+
+        boolean enableMessages = true;
+        if (options.get("enable-messages") != null) {
+            enableMessages = asBoolean((AtomicValue) options.get("enable-messages").head());
+        }
+        if (enableMessages) {
+            if (context.getController() instanceof XsltController) {
+                transformer.setMessageHandler(((XsltController) context.getController()).getMessageHandler());
+            }
+        } else {
+            transformer.setMessageHandler(msg -> {});
         }
 
         //Destination primaryDestination = new XdmDestination();
