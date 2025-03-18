@@ -20,6 +20,7 @@ import net.sf.saxon.functions.Current;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.type.ItemType;
@@ -268,6 +269,9 @@ public abstract class Pattern extends PseudoExpression {
             return matches(item, context);
         } catch (XPathException.Circularity | XPathException.StackOverflow e) {
             throw e;
+        } catch (UncheckedXPathException ex) {
+            handleDynamicError(ex.getXPathException(), context);
+            return false;
         } catch (XPathException ex) {
             handleDynamicError(ex, context);
             return false;
