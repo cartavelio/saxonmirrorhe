@@ -2345,10 +2345,6 @@ public class PackageLoaderHE implements IPackageLoader {
                     f = ArrayFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
                 } else if (uri == NamespaceUri.SAXON) {
                     f = loader.getConfiguration().bindSaxonExtensionFunction(qName.getLocalPart(), arity);
-                } else if (uri == NamespaceUri.EXPATH_BINARY) {
-                    f = loader.makeEXPathBinaryFunction(qName, arity);
-                } else if (uri == NamespaceUri.EXPATH_FILE) {
-                    f = loader.makeEXPathFileFunction(qName, arity);
                 }
             } else {
                 f = SystemFunction.makeFunction(name, rsc, arity);
@@ -3356,14 +3352,6 @@ public class PackageLoaderHE implements IPackageLoader {
             return vc;
         });
 
-    }
-
-    protected SystemFunction makeEXPathBinaryFunction(StructuredQName qName, int arity) throws XPathException {
-        throw new XPathException("Cannot reload SEF file: EXPath Binary functions require Saxon-PE/EE");
-    }
-
-    protected SystemFunction makeEXPathFileFunction(StructuredQName qName, int arity) throws XPathException {
-        throw new XPathException("Cannot reload SEF file: EXPath File functions require Saxon-PE/EE");
     }
 
     private static int getLevelCode(String levelAtt) {
