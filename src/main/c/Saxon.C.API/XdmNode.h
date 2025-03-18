@@ -72,9 +72,11 @@ public:
   XdmNode(XdmNode *parent, int64_t, XDM_NODE_KIND kind);
 
  /**
- * XdmNode == operator. The <code>equals()</code> relation between two XdmNode objects is true if they both represent the same
+ * XdmNode == operator. Corresponds to the <code>equals()</code> relation -
+ * which is true between two XdmNode objects if they both represent the same
  * node. That is, it corresponds to the "is" operator in XPath.
- * @param other - the node being copied
+ * @param other - the object to be compared
+ * @return True if and only if the other object is an XdmNode instance representing the same node
  */
  bool operator==(const XdmNode& other) const;
 
@@ -104,8 +106,8 @@ public:
  /**
   * The <code>equals()</code> relation between two XdmNode objects is true if they both represent the same
   * node. That is, it corresponds to the "is" operator in XPath.
-  * @param  other the object to be compared
-  * @return true if and only if the other object is an XdmNode instance representing the same node
+  * @param other - the object to be compared
+  * @return True if and only if the other object is an XdmNode instance representing the same node
   */
  bool equals(XdmNode * other);
 
