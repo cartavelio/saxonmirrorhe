@@ -149,7 +149,6 @@ cout << endl << "Test encoding cp1:" << endl;
   cout << endl << "Item="<<item->getStringValue() << endl;
     cout << endl << "Item-String="<<result << endl;
     delete item;
-    delete xpath;
   }
 
 
