@@ -844,6 +844,13 @@ public class XPathParser {
                 return parseSwitchExpression();
             case Token.TYPESWITCH:
                 return parseTypeswitchExpression();
+            case Token.VALIDATE:
+            case Token.VALIDATE_STRICT:
+            case Token.VALIDATE_LAX:
+            case Token.VALIDATE_TYPE:
+                return parseValidateExpression();
+            case Token.PRAGMA:
+                return parseExtensionExpression();  // XQuery only
             case Token.KEYWORD_CURLY:
                 if (t.currentTokenValue.equals("try")) {
                     return parseTryCatchExpression();
@@ -2423,13 +2430,9 @@ public class XPathParser {
             case Token.PI_QNAME:
             case Token.NAMESPACE_QNAME:
             case Token.NAMED_FUNCTION_REF:
-            case Token.LSQB:
                 return true;
             case Token.KEYWORD_CURLY:
-                return t.currentTokenValue.equals("ordered")
-                        || t.currentTokenValue.equals("unordered")
-                        || t.currentTokenValue.equals("map")
-                        || t.currentTokenValue.equals("array");
+                return t.currentTokenValue.equals("ordered") || t.currentTokenValue.equals("unordered");
             default:
                 return false;
         }
@@ -2795,7 +2798,20 @@ public class XPathParser {
             case Token.DOLLAR:
                 int offset = t.currentTokenStartOffset;
                 StructuredQName variableName = parseVariableName();
-                return resolveVariableReference(offset, variableName);
+//                if (allowXPath40Syntax && t.currentToken == Token.THIN_ARROW) {
+//                    // This is a single-argument lambda expression, $x -> {EXPR}
+//                    List<UserFunctionParameter> params = new ArrayList<>(1);
+//                    UserFunctionParameter arg = new UserFunctionParameter();
+//                    arg.setRequiredType(SequenceType.ANY_SEQUENCE);
+//                    arg.setVariableQName(variableName);
+//                    arg.setSlotNumber(0);
+//                    params.add(arg);
+//                    nextToken();
+//                    return parseInlineFunctionBody(AnnotationList.EMPTY, params, SequenceType.ANY_SEQUENCE);
+//                } else {
+                    // This is a variable reference
+                    return resolveVariableReference(offset, variableName);
+//                }
 
             case Token.LPAR:
                 if (allowXPath40Syntax
@@ -3699,9 +3715,6 @@ public class XPathParser {
                 List<NodeTest> tests = parseNameTestUnion(nodeKind);
                 if (tests.size() == 1) {
                     nodeTest = tests.get(0);
-                    if (!allowXPath40Syntax && (nodeTest instanceof NamespaceTest || nodeTest instanceof LocalNameTest)) {
-                        grumble("Wildcard syntax in item types requires 4.0 to be enabled");
-                    }
                 } else {
                     if (!allowXPath40Syntax) {
                         grumble("NameTestUnion syntax requires 4.0 to be enabled");
@@ -4089,7 +4102,7 @@ public class XPathParser {
                         placeMarkers.add(args.size());
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
-                        arg = parseFunctionArgument();
+                        arg = parseExprSingle();
                     }
                     args.add(arg);
                 }
