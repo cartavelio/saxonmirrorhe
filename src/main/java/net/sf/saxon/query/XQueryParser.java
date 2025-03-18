@@ -1421,9 +1421,6 @@ public class XQueryParser extends XPathParser {
         if (mImport.locationURIs.isEmpty()) {
             List<QueryModule> list = executable.getQueryLibraryModules(mImport.namespaceURI);
             if (list != null && !list.isEmpty()) {
-                for (QueryModule target : list) {
-                    ((QueryModule) env).addImportedModule(target);
-                }
                 return;
             }
         }
@@ -1807,12 +1804,7 @@ public class XQueryParser extends XPathParser {
         if (t.currentToken == Token.ASSIGN) {
             t.setState(Tokenizer.DEFAULT_STATE);
             nextToken();
-            int refs = ((QueryModule)env).getForwardReferenceCount(varQName);
             Expression exp = parseExprSingle();
-            if (((QueryModule) env).getForwardReferenceCount(varQName) > refs) {
-                grumble("Variable $" + var.getVariableQName().getDisplayName()
-                                + " is referenced within its own declaration", "XPST0008");
-            }
             exp = makeTracer(exp, varQName);
             if (allowXPath40Syntax && requiredType != SequenceType.ANY_SEQUENCE) {
                 TypeChecker checker = env.getConfiguration().getTypeChecker(false);
