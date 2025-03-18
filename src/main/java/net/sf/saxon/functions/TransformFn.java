@@ -57,7 +57,8 @@ public class TransformFn extends SystemFunction implements Callable {
 
     private static final String[] transformOptionNames30 = new String[]{
             "package-name", "package-version", "package-node", "package-location", "static-params", "global-context-item",
-            "template-params", "tunnel-params", "initial-function", "function-params"
+            "template-params", "tunnel-params", "initial-function", "function-params",
+            "enable-assertions"
     };
 
     private final static String dummyBaseOutputUriScheme = "dummy";
@@ -91,6 +92,7 @@ public class TransformFn extends SystemFunction implements Callable {
         op.addAllowedOption("serialization-params", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
         op.addAllowedOption("vendor-options", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
         op.addAllowedOption("cache", SequenceType.SINGLE_BOOLEAN);
+        op.addAllowedOption("enable-assertions", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("package-name", SequenceType.SINGLE_STRING);
         op.addAllowedOption("package-version", SequenceType.SINGLE_STRING);
         op.addAllowedOption("package-node", SequenceType.SINGLE_NODE);
@@ -623,6 +625,9 @@ public class TransformFn extends SystemFunction implements Callable {
         if (request40) {
             xsltCompiler.setXsltLanguageVersion("4.0");
         }
+        if (options.get("enable-assertions") != null) {
+            xsltCompiler.setAssertionsEnabled(asBoolean((AtomicValue) options.get("enable-assertions").head()));
+        }
 
         // Set static params on XsltCompiler before compiling stylesheet (XSLT 3.0 processing only)
         if (options.get("static-params") != null) {
@@ -632,6 +637,10 @@ public class TransformFn extends SystemFunction implements Callable {
         XsltExecutable sheet = getStylesheet(options, xsltCompiler, styleOption, context);
         Xslt30Transformer transformer = sheet.load30();
         transformer.setErrorReporter(context.getErrorReporter());
+
+        if (options.get("enable-assertions") != null) {
+            transformer.setAssertionsEnabled(asBoolean((AtomicValue) options.get("enable-assertions").head()));
+        }
 
         //Destination primaryDestination = new XdmDestination();
         String deliveryFormat = "document";
