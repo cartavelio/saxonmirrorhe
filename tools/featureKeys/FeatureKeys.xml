@@ -446,7 +446,7 @@
         <name>DISABLE_XSL_EVALUATE</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/disableXslEvaluate</uri>
-        <editions>EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
         <configfile>xslt/@disableXslEvaluate</configfile>
         <configfiledesc>
@@ -1745,7 +1745,7 @@
         <name>TRACE_EXTERNAL_FUNCTIONS</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/trace-external-functions</uri>
-        <editions>PE EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J</platforms>
         <configfile>global/@traceExternalFunctions</configfile>
         <configfiledesc>
@@ -1831,7 +1831,7 @@
         <name>TRACE_OPTIMIZER_DECISIONS</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/trace-optimizer-decisions</uri>
-        <editions>PE EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
         <configfile>global/@traceOptimizerDecisions</configfile>
         <configfiledesc>
@@ -2525,7 +2525,7 @@
         <name>XSLT_ENABLE_ASSERTIONS</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/enableAssertions</uri>
-        <editions>PE EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J CS</platforms>
         <commandline for="T">-ea</commandline>
         <configfile>xslt/@enableAssertions</configfile>
