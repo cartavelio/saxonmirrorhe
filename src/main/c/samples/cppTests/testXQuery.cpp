@@ -65,6 +65,40 @@ void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
   queryProc->clearProperties();
 }
 
+
+void testxQueryToString_OnEmptySequence(XQueryProcessor *queryProc,
+                    sResultCount *sresult) {
+  cout << endl << "Test testxQueryToString_OnEmptySequence:" << endl;
+  queryProc->clearParameters();
+  queryProc->clearProperties();
+
+  queryProc->setProperty("qs", "declare option saxon:output 'omit-xml-declaration=yes'; (1,2,3)[10]");
+
+  const char *result = nullptr;
+  try {
+    result = queryProc->runQueryToString();
+    if (result == nullptr) {
+      sresult->success++;
+    } else {
+    cout << "Result :" << result << endl;
+      cout << "Result :" << strlen(result) << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testxQueryToString_OnEmptySequence1");
+    delete result;
+    }
+
+  } catch (SaxonApiException &e) {
+    sresult->failure++;
+    sresult->failureList.push_back("testxQueryToString_OnEmptySequence2");
+
+    cerr << "Error: " << e.getMessage() << endl;
+    cerr << "Error code: " << e.getErrorCode() << endl;
+  }
+
+  queryProc->clearParameters();
+  queryProc->clearProperties();
+}
+
 void testxQuery_ICU(SaxonProcessor *processor, XQueryProcessor *queryProc,
                     sResultCount *sresult) {
   cout << endl << "Test testXQuery_ICU:" << endl;
@@ -457,6 +491,14 @@ int main(int argc, char *argv[]) {
        << "============================================================="
        << endl
        << endl;
+
+  testxQueryToString_OnEmptySequence(query, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
   testxQuery_ICU(processor, query, sresult);
 
   delete query;

@@ -634,6 +634,22 @@ public:
   //! Clear configuration properties specific to the processor in use.
   void clearConfigurationProperties();
 
+ //!
+ /**
+ *
+*/
+ bool isLicensed();
+
+ //!Get the short name of the Saxon product edition.
+ /**
+ *
+ * For example "EE". This represents the kind of configuration
+ * that has been created, rather than the software that has been installed; for example it is possible to
+ * instantiate an "HE" configuration even when using the "PE" or "EE" software.
+ * @return the Saxon edition code: "EE", "PE", or "HE". Memory management is handled internally
+*/
+ const char * getSaxonEdition();
+
   //! Get the Saxon version
   /**
    *
@@ -641,79 +657,6 @@ public:
    */
   const char *version();
 
-  //! Add a native method.
-  /**
-   *
-   * @param name of the native method
-   * @param signature of the native method
-   * @param fnPtr Pointer to the native method
-   */
-  /*void addNativeMethod(char *name, char *signature, void *fnPtr) {
-
-      JNINativeMethod method;
-      method.name = name;
-      method.signature = signature;
-      method.fnPtr = fnPtr;
-
-      nativeMethodVect.push_back(method);
-
-
-  }*/
-
-  //! Register several native methods for one class.
-  /**
-   *
-   * @param libName name of the library which contains the function(s). Loads
-  the library
-   * @param gMethods Register native methods. Default is nullptr, also nullptr
-  allowed in which cause assumption is made the user has added native methods
-  using the method addNativeMethod .
-  * @return bool success of registered native method
-  */
-  /*bool registerCPPFunction(char *libName, JNINativeMethod *gMethods = nullptr)
-  { if (libName != nullptr) { setConfigurationProperty("extc", libName);
-
-      }
-
-      if (gMethods == nullptr && nativeMethodVect.size() == 0) {
-          return false;
-      } else {
-          if (gMethods == nullptr) {
-              //copy vector to gMethods
-              gMethods = new JNINativeMethod[nativeMethodVect.size()];
-          }
-          return registerNativeMethods(sxn_environ->env,
-  "com/saxonica/functions/extfn/CppCall$PhpFunctionCall", gMethods,
-  nativeMethodVect.size());
-
-
-      }
-      return false;
-  } */
-
-  //! Register several native methods for one class.
-  /**
-   * @param env
-   * @param className
-   * @param gMethods
-   * @param numMethods
-   * @return bool success of registered native method
-   */
-  /*static bool registerNativeMethods(JNIEnv *env, const char *className,
-                                    JNINativeMethod *gMethods, int numMethods) {
-      jclass clazz;
-      clazz = env->FindClass(className);
-      if (clazz == nullptr) {
-          std::cerr << "Native registration unable to find class " << className
-  << std::endl; return false;
-      }
-
-      if (env->RegisterNatives(clazz, gMethods, numMethods) < 0) {
-          // std::cerr<<"RegisterNatives failed for "<< className<<std::endl;
-          return false;
-      }
-      return true;
-  } **/
 
   static int jvmCreatedCPP; /*!< Flag to indicate jvm created - used in memory
                                management */

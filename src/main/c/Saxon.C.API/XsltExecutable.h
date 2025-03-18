@@ -333,6 +333,7 @@ public:
    *
    * @param sourcefile - The file name of the source document
    * @return char pointer array - result of the transformation
+   *  A zero length string is returned if the executed transformation is an Empty Sequence.
    * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
@@ -366,6 +367,7 @@ public:
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile.
    * @return char pointer array - result of the transformation
+   * A zero length string is returned if the executed transformation is an Empty Sequence.
    * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    *
@@ -407,6 +409,7 @@ public:
    * name of a public named template in the stylesheet. If the value is nullptr,
    * the clark name for xsl:initial-template is used.
    * @return char pointer array - result of the transformation
+   * A zero length string is returned if the executed transformation is an Empty Sequence.
    * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
@@ -453,7 +456,8 @@ public:
    * function conversion rules.
    * The caller is responsible for memory deallocation using `operator delete`
    * @param argument_length - the Count of arguments objects in the array
-   * @return the result of calling the function.
+   * @return char pointer array - the result of calling the function.
+   * A zero length string is returned if the executed function is an Empty Sequence.
    * @throws SaxonApiException
    */
   const char *callFunctionReturningString(const char *functionName,
@@ -484,6 +488,7 @@ public:
    * @param source - source document supplied as an XdmNode object. nullptr
    * accepted if source document has been set already.
    * @return Pointer to Array of chars. Result returned as a string.
+   * A zero length string is returned if the executed transformation is an Empty Sequence.
    * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    *
