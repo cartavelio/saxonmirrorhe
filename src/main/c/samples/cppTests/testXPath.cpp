@@ -108,7 +108,7 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
   if(document == nullptr) {
     delete document;
     sresult->failure++;
-    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+    sresult->failureList.push_back("testCopyConstructorForXdmNode");
     return;
 
   }
@@ -123,9 +123,12 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
   } else {
 
     sresult->failure++;
-    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+    sresult->failureList.push_back("testCopyConstructorForXdmNode");
   }
   delete document;
+
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
