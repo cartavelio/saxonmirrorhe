@@ -755,7 +755,7 @@ task "hej_preprocess"(
       mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/hej", "/o:${buildDir}/src/hej",
-        "/p:EE=false", "/p:PE=false",
+        "/p:EE=false", "/p:PE=false", "/p:SCHEMA=false", "/p:STREAM=false",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
@@ -841,7 +841,7 @@ task "pej_preprocess"(
       mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/pej", "/o:${buildDir}/src/pej",
-        "/p:EE=false", "/p:PE=true",
+        "/p:EE=false", "/p:PE=true", "/p:SCHEMA=false", "/p:STREAM=false",
         "/p:OPT=false", "/p:SAXONC=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
