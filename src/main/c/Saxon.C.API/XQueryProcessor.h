@@ -305,11 +305,13 @@ public:
    * Checks for pending exceptions without creating a local reference to the
    * exception object
    * @return True when there is a pending exception; otherwise false
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   bool exceptionOccurred();
 
   /**
    * Clear any thrown exceptions
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   void exceptionClear();
 
@@ -317,6 +319,7 @@ public:
    * Get the first error message if there are any errors.
    * A query may have a number of errors reported against it.
    * @return The message of the exception
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorMessage();
 
@@ -325,6 +328,7 @@ public:
    * After the execution of the query there may be a number of errors reported
    * against it.
    * @return The error code of the exception
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorCode();
 
@@ -333,6 +337,7 @@ public:
    * After the execution of the query if there is an error then a
    * SaxonApiException is created.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   SaxonApiException *getException();
 

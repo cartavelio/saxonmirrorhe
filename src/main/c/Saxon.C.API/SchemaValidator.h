@@ -225,24 +225,22 @@ public:
    * Check for thrown exceptions.
    * @return The main exception message if any has been thrown otherwise
    * return nullptr
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *checkException();
 
   /**
    * Clear any thrown exceptions.
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   void exceptionClear();
 
-  /**
-   * Get number of errors during validation of the source against the schema
-   * @return int - Count of the exceptions reported during validation
-   */
-  // int exceptionCount();
 
   /**
    * Get the error message if there are any validation errors.
    * A validation may have a number of errors reported against it.
    * @return The message of the exception
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorMessage();
 
@@ -250,6 +248,7 @@ public:
    * Get error code if an error is reported.
    * Validation error are reported as exceptions. All errors can be retrieved.
    * @return char* - The error code of the exception.
+   * @deprecated - This method is no longer used. We now throw exceptions
    */
   const char *getErrorCode();
 
