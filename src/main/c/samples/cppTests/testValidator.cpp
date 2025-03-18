@@ -369,6 +369,66 @@ void testValidator6(SaxonProcessor *processor, SchemaValidator *val,
   }
 }
 
+void testValidatorToFile(const char *cwd, sResultCount *sresult) {
+
+  SaxonProcessor *processor = new SaxonProcessor(true);
+  SchemaValidator *val = processor->newSchemaValidator();
+
+  val->setProperty("!indent", "yes");
+  val->setProperty("!omit-xml-declaration", "yes");
+  cout <<"cwd=" << cwd<<endl;
+ // val->setcwd(cwd);
+  val->setOutputFile("validatedDoc.xml");
+  cout << endl
+       << "Test 7: testValidatorToFile - Validate source file with schema file. i.e. family.xml and "
+          "family.xsd and output result in file validatedDoc.xml" << endl;
+
+  try {
+    val->registerSchemaFromFile("../data/family-ext.xsd");
+
+    val->registerSchemaFromFile("../data/family.xsd");
+    val->validate("../data/family.xml");
+
+        if (CppTestUtils::exists("validatedDoc.xml")) {
+          cout << "The file validatedDoc.xml exists" << endl;
+          sresult->success++;
+          /*if(CppTestUtils::CheckWord("validatedDoc.xml", "...")) {
+            sresult->success++;
+          } else {
+            sresult->failure++;
+            sresult->failureList.push_back("testTransformFromstring2Err2");
+
+          }*/
+          //remove("validatedDoc.xml");
+
+        } else {
+          cout << "The file validatedDoc.xml does not exist" << endl;
+
+          sresult->failure++;
+          sresult->failureList.push_back("testValidatorToFile");
+        }
+
+
+    cout << endl << "Doc1 is OK" << endl;
+    sresult->success++;
+  } catch (SaxonApiException &e) {
+    cout << endl << "Error: Doc reported as invalid!" << endl;
+    const char *message = e.getMessage();
+    const char *errorCode = e.getErrorCode();
+    if (errorCode != nullptr) {
+      cerr << "ErrorCode = " << errorCode << endl;
+    }
+    if (message != nullptr) {
+
+      cerr << "Exception thrown = " << message << endl;
+    }
+    sresult->failure++;
+    sresult->failureList.push_back("testValidatorToFile");
+  }
+  delete val;
+  delete processor;
+}
+
 int main(int argc, char *argv[]) {
 
   SaxonProcessor *processor = new SaxonProcessor(true);
@@ -419,6 +479,7 @@ int main(int argc, char *argv[]) {
   SchemaValidator *validator3 = processor->newSchemaValidator();
   testValidator5(processor, validator3, sresult);
   testValidator6(processor, validator3, sresult);
+  testValidatorToFile(cwd, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)
