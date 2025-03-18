@@ -87,7 +87,11 @@ public class ParseXml extends SystemFunction implements Callable {
             }
             Configuration config = controller.getConfiguration();
 
-            StringReader sr = new StringReader(inputArg.getStringValue());
+            String inputXml = inputArg.getStringValue();
+            if (inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
+                inputXml = inputXml.substring(1);
+            }
+            StringReader sr = new StringReader(inputXml);
             InputSource is = new InputSource(sr);
             is.setSystemId(baseURI);
             Source source = new SAXSource(is);
@@ -175,7 +179,11 @@ public class ParseXml extends SystemFunction implements Callable {
             }
             Configuration config = context.getConfiguration();
 
-            StringReader sr = new StringReader(inputArg.getStringValue());
+            String inputXml = inputArg.getStringValue();
+            if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
+                inputXml = inputXml.substring(1);
+            }
+            StringReader sr = new StringReader(inputXml);
             StreamSource ss = new StreamSource(sr, baseURI);
             Source pullSource = Version.platform.resolveSource(ss, config);
 
