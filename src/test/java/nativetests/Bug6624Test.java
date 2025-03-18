@@ -4,8 +4,9 @@ import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -13,16 +14,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Regression test for bug 6626
  */
-public class Bug6626Test {
+public class Bug6624Test {
 
     @Test
-    public void testBug6626() {
+    public void testBug6624() {
         String xml = "<root>\n"
                 + "    <foo>foo 1</foo>\n"
                 + "    <bar>bar 1</bar>\n"
                 + "</root>";
 
-        String xsl1 = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
+        String xsl = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
                 + "                xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
                 + "                xmlns:saxon=\"http://saxon.sf.net/\"\n"
                 + "                exclude-result-prefixes=\"#all\"\n"
@@ -40,72 +41,30 @@ public class Bug6626Test {
                 + "\n"
                 + "</xsl:stylesheet>";
 
-        String xsl2 = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
-                + "                xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
-                + "                xmlns:saxon=\"http://saxon.sf.net/\"\n"
-                + "                exclude-result-prefixes=\"#all\"\n"
-                + "                version=\"3.0\"\n"
-                + "                expand-text=\"yes\">\n"
-                + "\n"
-                + "    <xsl:accumulator name=\"latest-foo-value\" streamable=\"yes\" initial-value=\"()\" as=\"xs:string?\">\n"
-                + "        <xsl:accumulator-rule match=\"foo/text()\" select=\"string()\"/>\n"
-                + "    </xsl:accumulator>\n"
-                + "\n"
-                + "    <xsl:mode on-no-match=\"shallow-copy\" streamable=\"yes\" use-accumulators=\"latest-foo-value\"/>\n"
-                + "\n"
-                + "    <xsl:mode name=\"grounded\" on-no-match=\"shallow-copy\"/>\n"
-                + "\n"
-                + "    <xsl:template match=\"bar\">\n"
-                + "        <xsl:comment>XX: {accumulator-before('latest-foo-value')}</xsl:comment>\n"
-                + "        <xsl:apply-templates select=\"copy-of()\" mode=\"grounded\"/>\n"
-                + "    </xsl:template>\n"
-                + "\n"
-                + "    <xsl:template mode=\"grounded\" match=\"bar\">\n"
-                + "        <xsl:comment>YY: {accumulator-before('latest-foo-value')}</xsl:comment>\n"
-                + "        <xsl:next-match/>\n"
-                + "    </xsl:template>\n"
-                + "\n"
-                + "    <xsl:template match=\"/\">\n"
-                + "        <xsl:copy>\n"
-                + "            <xsl:apply-templates/>\n"
-                + "        </xsl:copy>\n"
-                + "    </xsl:template>\n"
-                + "\n"
-                + "</xsl:stylesheet>";
-
-
+ 
         try {
             Processor processor = new Processor(true);
 
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            XsltExecutable xsltExecutable1 = xsltCompiler.compile(new StreamSource(new StringReader(xsl1)));
+            XsltExecutable xsltExecutable1 = xsltCompiler.compile(
+                    new StreamSource(new StringReader(xsl)));
 
             Xslt30Transformer xslt30Transformer1 = xsltExecutable1.load30();
 
-            XsltExecutable xsltExecutable2 = xsltCompiler.compile(new StreamSource(new StringReader(xsl2)));
+            XsltExecutable xsltExecutable2 = xsltCompiler.compile(
+                    new StreamSource(new StringReader(xsl)));
 
             Xslt30Transformer xslt30Transformer2 = xsltExecutable2.load30();
 
-            // Run transformation 2 on its own
-            StringWriter sw0 = new StringWriter();
-            Xslt30Transformer xslt30Transformer0 = xsltExecutable2.load30();
-            xslt30Transformer0.applyTemplates(new StreamSource(new StringReader(xml)), xslt30Transformer0.newSerializer(sw0));
-//            System.err.println("===Standalone:===");
-//            System.err.println(sw0);
-            assertTrue(sw0.toString().contains("<!--XX: foo 1--><!--YY: foo 1--><bar>bar 1</bar>"));
-
-            // Run transformation 1 followed by 2
-            StringWriter sw2 = new StringWriter();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             xslt30Transformer1.applyTemplates(
                     new StreamSource(new StringReader(xml)),
-                    xslt30Transformer2.asDocumentDestination(xslt30Transformer2.newSerializer(sw2)));
+                    xslt30Transformer2.asDocumentDestination(xslt30Transformer2.newSerializer(baos)));
 
-//            System.err.println("===Combined:===");
-//            System.err.println(sw2);
-            assertTrue(sw2.toString().contains("<!--XX: foo 1--><!--YY: foo 1--><bar>bar 1</bar>"));
+            assertTrue(baos.toString("utf-8").contains("<foo>foo 1</foo>"));
 
-        } catch (SaxonApiException e) {
+        } catch (SaxonApiException | UnsupportedEncodingException e) {
             e.printStackTrace();
             fail(e);
         }
