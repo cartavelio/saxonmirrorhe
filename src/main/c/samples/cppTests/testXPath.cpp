@@ -139,11 +139,11 @@ void testEncoding(SaxonProcessor *processor,
 
   // parser the XML
 
-  XdmItem * item = xpath->evaluateSingle("unparsed-text('help.txt')");
+  XdmItem * item = xpath->evaluateSingle("unparsed-text('../data/help.txt')");
   const char * value = item->getStringValue();
     allocFn fn = operator new;
     std:string encoding = "windows-1252";
- const char * result = j_cpp_encodeStringValue(SaxonProcessor::sxn_environ->thread, (char *)value, (char *)encoding.c_str(), fn);
+ const char * result = j_cpp_encodeStringValue(SaxonProcessor::sxn_environ->thread, (char *)value, (char *)encoding.c_str(), (void *)fn);
 cout << endl << "Test encoding cp1:" << endl;
   if(item != nullptr) {
   cout << endl << "Item="<<item->getStringValue() << endl;
