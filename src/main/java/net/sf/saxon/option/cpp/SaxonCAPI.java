@@ -6,9 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.option.cpp;
 
-import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
-import com.saxonica.config.Verifier;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
@@ -59,7 +57,6 @@ import java.util.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 
 /**
@@ -73,7 +70,6 @@ public class SaxonCAPI {
     public static boolean debug = false;
     protected boolean schemaAware = false;
     public static String RESOURCES_DIR = null;
-    protected long exceptionCheck = -1;
 
     public static PathHelper pathHelper = new PathHelper();
 
