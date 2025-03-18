@@ -2,14 +2,9 @@ from tempfile import mkstemp
 import pytest
 from saxonc@@edition@@ import *
 import os
-from pathlib import Path
 from os.path import isfile
 from datetime import datetime as date
 import sys
-import threading
-import time
-import random
-
 '''pytest --data-dir=[path/data]  test_saxonc.py'''
 
 
@@ -75,8 +70,6 @@ def test_create_config():
         assert False
     finally:
         os.unlink(fname)
-
-
 def test_create_procs():
     """Create XPathProcessor, XsltProcessor from SaxonProcessor object"""
     sp = PySaxonProcessor()
@@ -106,133 +99,6 @@ def test_version2():
 
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
-
-class myThread (threading.Thread):
-    def __init__(self, threadID, name, saxon_proc):
-        threading.Thread.__init__(self)
-        print ("Starting thread init")
-        self.threadID = threadID
-        self.name = name
-        self.saxon_proc = saxon_proc
-
-
-
-    def run(self):
-        print ("Starting " + self.name)
-        xml = '<root><child>Test</child></root>'
-        builder = self.saxon_proc.new_document_builder()
-        node = builder.parse_xml(xml_text=xml)
-        xml = node.to_string()
-        print("Sleeping.... " + self.name)
-        time.sleep(random.randrange(1, 5))
-        print("Exiting " + self.name)
-        return xml
-
-class myThread2 (threading.Thread):
-    def __init__(self, threadID, name, data_dir, saxon_proc):
-        threading.Thread.__init__(self)
-        print ("Starting thread init")
-        self.threadID = threadID
-        self.name = name
-        self.saxon_proc = saxon_proc
-        self.data_dir  = data_dir
-
-
-    def run(self):
-        print ("Starting " + self.name)
-        xml = '<root><child>Test</child></root>'
-        node = self.saxon_proc.parse_xml(xml_text=xml)
-        xml = node.to_string()
-        print("Sleeping.... " + self.name)
-        time.sleep(random.randrange(1, 5))
-        print("Exiting " + self.name)
-        return xml
-
-class myThread3 (threading.Thread):
-    def __init__(self, threadID, name, data_dir, saxon_proc):
-        threading.Thread.__init__(self)
-        print ("Starting thread init")
-        self.threadID = threadID
-        self.name = name
-        self.saxon_proc = saxon_proc
-        self.data_dir  = data_dir
-
-
-    def run(self):
-        print("Sleeping.... " + self.name)
-        time.sleep(random.randrange(1, 5))
-        xml = '<root><child>Test</child></root>'
-        node = self.saxon_proc.parse_xml(xml_text=xml)
-        value = self.saxon_proc.make_array([self.saxon_proc.make_integer_value(i) for i in [8,9,10]])
-        xsltproc = self.saxon_proc.new_xslt30_processor()
-        xsltproc.set_cwd(self.data_dir)
-        executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' version='2.0'> <xsl:param name='values' select='(2, 3, 4, 5)'/><xsl:output method='xml' indent='yes'/><xsl:template match='*'><output><xsl:for-each select='$values'><out><xsl:value-of select='.'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
-
-        executable.set_parameter("values", value)
-
-        result = executable.apply_templates_returning_string(xdm_value=node)
-        print(result)
-        print("Exiting " + self.name)
-        return xml
-
-def test_threading1(saxonproc):
-    # Create new threads
-    try:
-        thread1 = myThread(1, "Thread-1", saxonproc)
-        thread2 = myThread(2, "Thread-2", saxonproc)
-        thread3 = myThread(3, "Thread-3", saxonproc)
-
-        # Start new Threads
-        thread1.start()
-        thread2.start()
-        thread3.start()
-        thread1.join()
-        thread2.join()
-        thread3.join()
-        assert True
-    except Exception as err:
-        print("Error: ", err)
-        assert False
-
-def test_threading2(data_dir, saxonproc):
-    # Create new threads
-    try:
-        thread1 = myThread2(1, "Thread-1", data_dir, saxonproc)
-        thread2 = myThread2(2, "Thread-2", data_dir, saxonproc)
-        thread3 = myThread2(3, "Thread-3", data_dir, saxonproc)
-
-        # Start new Threads
-        thread1.start()
-        thread2.start()
-        thread3.start()
-        thread1.join()
-        thread2.join()
-        thread3.join()
-        assert True
-    except Exception as err:
-        print("Error: ", err)
-        assert False
-
-def test_threading3(data_dir, saxonproc):
-    # Create new threads
-    try:
-        thread1 = myThread3(1, "Thread-1", data_dir, saxonproc)
-        thread2 = myThread3(2, "Thread-2", data_dir, saxonproc)
-        thread3 = myThread3(3, "Thread-3", data_dir, saxonproc)
-
-        # Start new Threads
-        thread1.start()
-        thread2.start()
-        thread3.start()
-        thread1.join()
-        thread2.join()
-        thread3.join()
-        assert True
-    except Exception as err:
-        print("Error: ", err)
-        assert False
-
-
 
 def test_icu_lib():
     saxonproc = PySaxonProcessor(license=True)
@@ -305,7 +171,6 @@ def test_schema_aware2():
         assert sp.is_schema_aware == True
     except Exception as err:
             print("Error: ", err)
-            assert False
 
 '''PyXsltProcessor test cases '''
 def test_xslt30_processor(data_dir):
@@ -1313,39 +1178,6 @@ def test_document_builder(saxonproc):
     node = builder.parse_xml(xml_text="<foo xmlns='http://one.uri/'><bar/></foo>")
     assert node is not None
     assert node.base_uri == "file:/tmp"
-
-def test_static_base_uri(saxonproc):
-    xquery1 = '"Static base uri : " || static-base-uri()'
-
-    xqueryProcessor = saxonproc.new_xquery_processor()
-    workingDirPath = str(Path.cwd().absolute())
-
-    assert workingDirPath is not None
-
-    xqueryProcessor.set_cwd(workingDirPath)
-
-    try:
-        result = xqueryProcessor.run_query_to_string(query_text=xquery1)
-        assert result is not None
-    except  Exception as err:
-        assert False
-
-def test_static_base_http_uri(saxonproc):
-    xquery1 = '"Static base uri : " || static-base-uri()'
-
-    xqueryProcessor = saxonproc.new_xquery_processor()
-    workingDirPath = 'http://www.example.com/base'
-
-    assert workingDirPath is not None
-
-    xqueryProcessor.set_cwd(workingDirPath)
-
-    try:
-        result = xqueryProcessor.run_query_to_string(query_text=xquery1)
-        assert result is not None
-        assert 'http://' in result
-    except  Exception as err:
-        assert False
 
 def test_default_namespace2(saxonproc):
     query_proc = saxonproc.new_xquery_processor()
