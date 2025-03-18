@@ -8,9 +8,9 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.style.PackageVersion;
-import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.io.File;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.Objects;
 
@@ -104,9 +104,9 @@ public class DocumentKey {
             if (uri.startsWith("file:/")) {
                 // Bug 6565: No longer use getCanonicalPath() to remove any "." and ".." path segments, for performance reasons
                 try {
-                    String cpath = getCanonicalPath(uri);
+                    String cpath = Paths.get(uri.substring(6)).normalize().toString();
                     uri = "file:" + cpath;
-                } catch (Exception ioe) {
+                } catch (InvalidPathException ioe) {
                     // nop
                 }
             }
@@ -115,12 +115,6 @@ public class DocumentKey {
             }
         }
         return uri;
-    }
-
-
-    @CSharpReplaceBody(code = "return new Saxon.Ejava.io.File(uri.Substring(5)).getCanonicalPath();")
-    private static String getCanonicalPath(String uri) {
-        return Paths.get(uri.substring(6)).normalize().toString();
     }
 }
 
