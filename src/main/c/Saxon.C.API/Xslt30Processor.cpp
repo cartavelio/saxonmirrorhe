@@ -113,6 +113,9 @@ void Xslt30Processor::setProperty(const char *name, const char *value) {
   }
 }
 
+std::map<std::string, std::string> &Xslt30Processor::getProperties() { return properties; }
+
+
 void Xslt30Processor::clearProperties() { properties.clear(); }
 
 bool Xslt30Processor::exceptionOccurred() { return false; }

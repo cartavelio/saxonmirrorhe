@@ -351,6 +351,14 @@ bool XPathProcessor::removeParameter(const char *name) {
     return (bool) (parameters.erase("param:" + std::string(name)));
 }
 
+const char * XPathProcessor::getProperty(const char *name) {
+    std::map<std::string, std::string>::iterator it;
+    it = properties.find(std::string(name));
+    if (it != properties.end())
+        return it->second.c_str();
+    return nullptr;
+}
+
 void XPathProcessor::setProperty(const char *name, const char *value) {
     if (name != nullptr) {
         int s = properties.size();
