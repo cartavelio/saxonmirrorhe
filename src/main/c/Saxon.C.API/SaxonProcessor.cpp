@@ -952,6 +952,7 @@ void SaxonProcessor::release() {
     SaxonProcessor::jvmCreatedCPP = 0;
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "SaxonProc: JVM finalized calling !" << std::endl;
+      j_printObjectHandlesPoolInfo(sxn_environ->thread);
     }
 
     // finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);

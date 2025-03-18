@@ -73,6 +73,7 @@ public class SaxonCAPI {
     public static PathHelper pathHelper = new PathHelper();
 
     public static ObjectHandles objectHandles = ObjectHandles.create();
+    public static Map<Long , String> objectHandlesPool = new HashMap<>(); //for debugging
 
     public static int objHandlesCreated = 0;
 
@@ -288,9 +289,17 @@ public class SaxonCAPI {
     public static ObjectHandle createHandle(Object obj) {
         if (debug) {
             objHandlesCreated++;
-            System.err.println("Object Handles created: " + objHandlesCreated);
+            System.err.println("Total Object Handles created: " + objHandlesCreated);
         }
-        return objectHandles.create(obj);
+        ObjectHandle handle = objectHandles.create(obj);
+        if (debug) {
+            if(objectHandlesPool.containsKey(handle.rawValue())){
+                System.err.println("Object handle key already exists!");
+            }
+            System.err.println("Created Object Handle ref=" + handle.rawValue() + " Class name = "+ obj.getClass().getName());
+            objectHandlesPool.put(handle.rawValue(), obj.getClass().getName());
+        }
+        return handle;
     }
 
     /**
@@ -402,9 +411,20 @@ public class SaxonCAPI {
      */
     @CEntryPoint(name = "j_handles_destroy")
     public static void destroy(IsolateThread thread, ObjectHandle handle) {
+        j_internal_destroy(handle);
+    }
+
+
+    public static void j_internal_destroy(ObjectHandle handle) {
         if (handle != WordFactory.nullPointer()) {
             if (debug) {
-                System.err.println("destroy method Class to be deleted= " + (objectHandles.get(handle)).getClass().getName());
+                System.err.println("destroy method, Class to be deleted= " + (objectHandles.get(handle)).getClass().getName() + " ref=" + handle.rawValue());
+                String value = objectHandlesPool.remove(handle.rawValue());
+                if(value == null){
+                    System.err.println("SaxonCAPI objectHandlesPool returned null value for ref="+handle.rawValue());
+                } else {
+                    System.err.println("SaxonCAPI objectHandlesPool value removed for ref="+handle.rawValue());
+                }
             }
             objectHandles.destroy(handle);
             if (debug) {
@@ -414,6 +434,17 @@ public class SaxonCAPI {
         } else if (SaxonCAPI.debug) {
             System.err.println("ObjectHandle not destroyed: Null found");
         }
+    }
+
+    @CEntryPoint(name = "j_printObjectHandlesPoolInfo")
+    public static void printObjectHandlesPoolInfo(IsolateThread thread){
+        if (SaxonCAPI.debug) {
+            System.err.println("Java Debug ObjectHandlesPoolInfo size="+objectHandlesPool.size());
+            for(Map.Entry<Long, String> entry : objectHandlesPool.entrySet()) {
+                System.err.println("Java Debug ObjectHandlesPoolInfo ref=" + entry.getKey() + " value=" + entry.getValue());
+            }
+        }
+
     }
 
     /**
