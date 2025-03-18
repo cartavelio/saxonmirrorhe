@@ -13,6 +13,7 @@ import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionBinder;
@@ -121,7 +122,8 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs,
                            Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons)
     throws XPathException {
-        boolean debug = env.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
+        boolean debug = env.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)
+                && !NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri());
         Logger err = env.getConfiguration().getLogger();
         if (debug) {
             err.info("Looking for function " + functionName.getComponentName().getEQName() + "#" + functionName.getArity());

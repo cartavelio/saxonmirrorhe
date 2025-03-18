@@ -3,6 +3,7 @@ package jaxptest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.om.AllElementsSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
@@ -37,7 +38,7 @@ public class MemoryTest {
             long finalFree = getUsedMemory();
             System.err.println("final: " + finalFree);
             System.err.println("Tinytree memory used: " + (finalFree - initFree));
-            ((TinyDocumentImpl) doc).getTree().showSize();
+            ((TinyDocumentImpl) doc).getTree().showSize(new StandardLogger());
         } catch (XPathException e) {
             fail(e.getMessage());
         }
