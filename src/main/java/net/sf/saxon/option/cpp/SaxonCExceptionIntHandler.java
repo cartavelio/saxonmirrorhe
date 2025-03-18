@@ -25,7 +25,7 @@ public class SaxonCExceptionIntHandler implements CEntryPoint.ExceptionHandler {
      */
     @Uninterruptible(reason = "exception handler")
     public static int handle(Throwable e) {
-        SaxonCException.throwable = e;
+        SaxonCCurrentException.getInstance().setThrowable(e);
         return -2;
    	}
 }

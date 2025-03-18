@@ -205,11 +205,10 @@ public class XdmValueForCpp {
             byte result = CTypeConversion.toCBoolean(value.getBooleanValue());
             return result;
         } catch(SaxonApiException ex) {
-            SaxonCException.throwable = ex;
+            SaxonCCurrentException.getInstance().setThrowable(ex);
             return -2;
         } catch (Exception ex) {
-            System.err.println("getLongValue exception found!!");
-            SaxonCException.throwable = ex;
+            SaxonCCurrentException.getInstance().setThrowable(ex);
             return -2;
         }
     }
@@ -231,7 +230,7 @@ public class XdmValueForCpp {
             try {
                 return value.getDoubleValue();
             } catch (Exception ex) {
-                SaxonCException.throwable = ex;
+                SaxonCCurrentException.getInstance().setThrowable(ex);
                 return -0.9999999;
             }
     }
@@ -250,8 +249,7 @@ public class XdmValueForCpp {
         try {
             return value.getLongValue();
         } catch (Exception ex) {
-            System.err.println("getLongValue exception found!!");
-            SaxonCException.throwable = ex;
+            SaxonCCurrentException.getInstance().setThrowable(ex);
             return -9999999;
         }
     }

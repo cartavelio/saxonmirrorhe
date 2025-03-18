@@ -18,7 +18,7 @@ public class SaxonCExceptionDoubleHandler implements CEntryPoint.ExceptionHandle
      */
     @Uninterruptible(reason = "exception handler")
     public static double handle(Throwable e) {
-        SaxonCException.throwable = e;
+        SaxonCCurrentException.getInstance().setThrowable(e);
         return SaxonCAPI.STATUS_EXCEPTION;
     }
 }
