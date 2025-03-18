@@ -206,9 +206,9 @@ dependencies {
 
   basicConfiguration (
     // N.B. Some of these are also listed in pomDependencies below!
-    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.2.15'],
-    [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.2.15'],
-    [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.2.15'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom', version: '1.4.0'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.4.0'],
+    [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.4.0'],
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
     [group: 'jline', name: 'jline', version: jlineVersion ],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
