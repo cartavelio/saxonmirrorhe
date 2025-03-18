@@ -2,13 +2,7 @@
 
 #include "XdmMap.h"
 
-XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(0) {
-  int64_t processorDataRef = processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread);
-  value = j_makeXdmArray(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
-
-  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
-
-}
+XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(-1) {}
 
 XdmArray::XdmArray(const XdmArray &d) : XdmFunctionItem(d) {
   arrayLen = d.arrayLen;
@@ -21,9 +15,6 @@ XdmArray::XdmArray(int64_t obj, int aLen)
     : XdmFunctionItem(obj), arrayLen(aLen) {}
 
 int XdmArray::arrayLength() {
-  if (value == SXN_UNSET) {
-    return 0;
-  }
   if (arrayLen == -1) {
     arrayLen = j_xdmArray_arrayLength(SaxonProcessor::sxn_environ->thread,
                                       (void *)value);
@@ -32,7 +23,7 @@ int XdmArray::arrayLength() {
 }
 
 XdmValue *XdmArray::get(int n) {
-  if (n < 0 || value == SXN_UNSET || arrayLength() == 0) {
+  if (n < 0) {
     return nullptr;
   }
   int64_t result =
@@ -41,9 +32,6 @@ XdmValue *XdmArray::get(int n) {
 }
 
 const char *XdmArray::toString() {
-  if (value == SXN_UNSET) {
-    return nullptr;
-  }
   allocFn fn = operator new;
   const char *str = j_xdmArray_toString(SaxonProcessor::sxn_environ->thread,
                                         (void *)fn, (void *)value);
@@ -161,7 +149,7 @@ XdmValue **XdmArray::values() {
   XdmValue **arr = nullptr;
 
   int sizex = arrayLength();
-  if (sizex == 0 || value == SXN_UNSET) {
+  if (sizex == 0) {
     return arr;
   }
   allocFn fn = operator new;
