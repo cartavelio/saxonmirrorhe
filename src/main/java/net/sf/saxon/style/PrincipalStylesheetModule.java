@@ -1375,10 +1375,12 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             for (Component decl : stylesheetPackage.getComponentIndex().values()) {
                 if (decl.getActor() instanceof UserFunction) {
                     UserFunction f = (UserFunction) decl.getActor();
-                    if (f.isOverrideExtensionFunction()) {
-                        overriding.addFunction(f);
-                    } else {
-                        underriding.addFunction(f);
+                    if (f.getDeclaredVisibility() != Visibility.PRIVATE) {
+                        if (f.isOverrideExtensionFunction()) {
+                            overriding.addFunction(f);
+                        } else {
+                            underriding.addFunction(f);
+                        }
                     }
                 }
             }
