@@ -416,10 +416,10 @@ tasks.register("graal_pec_jar", Jar) {
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from (layout.buildDirectory.dir("build/services/saxon-pe")) {
+  from (layout.buildDirectory.dir("services/saxon-pe")) {
     include "META-INF/**"
   }
-  from (layout.buildDirectory.dir("build/classes/pec")) {
+  from (layout.buildDirectory.dir("classes/pec")) {
     include "net/**/*.class"
     exclude "net/sf/saxon/ant/*.class"
     exclude "**/sql/**/*.class"
@@ -490,10 +490,10 @@ tasks.register("graal_eec_jar", Jar) {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from (layout.buildDirectory.dir("build/services/saxon-ee")) {
+  from (layout.buildDirectory.dir("services/saxon-ee")) {
     include "META-INF/**"
   }
-  from (layout.buildDirectory.dir("build/classes/eec")) {
+  from (layout.buildDirectory.dir("classes/eec")) {
     include "net/**/*.class"
     exclude "net/sf/saxon/ant/*.class"
     exclude "**/sql/**/*.class"
