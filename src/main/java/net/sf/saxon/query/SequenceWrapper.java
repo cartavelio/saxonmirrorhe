@@ -335,8 +335,7 @@ public class SequenceWrapper extends SequenceReceiver {
      *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
      *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
      *                   </dl>
-     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-     *                                start tag
+     * @throws IllegalStateException if an attempt is made to output an attribute when there is no open element start tag
      */
 
     private void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
@@ -358,8 +357,7 @@ public class SequenceWrapper extends SequenceReceiver {
      * A namespace must not conflict with any namespaces already used for element or attribute names.
      *
      * @param namespaceBindings the namespace binding or bindings being notified
-     * @throws IllegalStateException: attempt to output a namespace when there is no open element
-     *                                start tag
+     * @throws IllegalStateException if an attempt is made to output an attribute when there is no open element start tag
      */
 
     private void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
