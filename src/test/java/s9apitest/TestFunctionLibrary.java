@@ -1,7 +1,6 @@
 package s9apitest;
 
 import com.saxonica.config.ProfessionalConfiguration;
-import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.StaticQueryContext;
@@ -32,16 +31,13 @@ public class TestFunctionLibrary {
             File library = new File("src/test/testdata/functionLibrary.xsl");
             SAXSource stylesheet = new SAXSource(new InputSource(library.toURI().toString()));
             XsltCompiler compiler = processor.newXsltCompiler();
-            XsltExecutable exec = compiler.compile(stylesheet);
-            PreparedStylesheet ps = exec.getUnderlyingCompiledStylesheet();
-            FunctionLibrary flib = ps.getFunctionLibrary();
+            XsltPackage exec = compiler.compilePackage(stylesheet);
 
-            ProfessionalConfiguration pc = (ProfessionalConfiguration) processor.getUnderlyingConfiguration();
-            pc.setExtensionBinder("https://saxonica.com/unit-test", flib);
 
             XPathCompiler xcompiler = processor.newXPathCompiler();
             xcompiler.declareNamespace("test", "http://example.com/ns/test");
             xcompiler.declareNamespace("test1", "http://example.com/ns/test1");
+            xcompiler.addXsltFunctionLibrary(exec);
             XPathExecutable xexec = xcompiler.compile("test:function1()");
             XPathSelector selector = xexec.load();
             XdmValue value = selector.evaluate();
@@ -52,16 +48,20 @@ public class TestFunctionLibrary {
             value = selector.evaluate();
             Assertions.assertEquals("test:function1-called", value.getUnderlyingValue().getStringValue());
 
-            xexec = xcompiler.compile("test1:function1()");
-            selector = xexec.load();
-            value = selector.evaluate();
-            Assertions.assertEquals("test:private-function-called", value.getUnderlyingValue().getStringValue());
+            try {
+                xexec = xcompiler.compile("test1:function1()");
+                selector = xexec.load();
+                value = selector.evaluate();
+                fail("unexpected success");
+            } catch (SaxonApiException e) {
+                Assertions.assertTrue(e.getMessage().contains("Cannot find a 0-argument function"));
+            }
 
             try {
                 xexec = xcompiler.compile("test:private-function()");
                 selector = xexec.load();
                 value = selector.evaluate();
-                fail();
+                fail("unexpected success");
             } catch (SaxonApiException ex) {
                 Assertions.assertTrue(ex.getMessage().contains("Cannot find a 0-argument function"));
             }
@@ -70,6 +70,7 @@ public class TestFunctionLibrary {
             fail();
         }
     }
+
 
     @Test
     public void testXQueryFunctionLibrary() {
