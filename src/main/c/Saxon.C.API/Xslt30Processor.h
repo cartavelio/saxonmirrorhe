@@ -99,6 +99,15 @@ public:
    */
   void setJustInTimeCompilation(bool jit);
 
+ //! get the status of just-in-time compilation of template flag.
+ /**
+  * <p><b>Recommendation:</b> disable this option unless you are confident that
+  * the stylesheet you are compiling is error-free.</p>
+  *
+  * @return bool - status of just-in-time compilation of template flag
+  */
+ bool getJustInTimeCompilation();
+
   //! Set the target edition
   /**
    * Set the target edition under which the stylesheet will be executed.

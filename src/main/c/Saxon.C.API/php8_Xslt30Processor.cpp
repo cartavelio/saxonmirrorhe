@@ -472,6 +472,25 @@ PHP_METHOD(Xslt30Processor, setJustInTimeCompilation) {
   }
 }
 
+PHP_METHOD(Xslt30Processor, getJustInTimeCompilation) {
+  Xslt30Processor *xslt30Processor;
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xslt30Processor_object *obj =
+      (xslt30Processor_object *)((char *)pobj -
+                                 XtOffsetOf(xslt30Processor_object, std));
+  xslt30Processor = obj->xslt30Processor;
+  if (xslt30Processor != nullptr) {
+    bool jit = xslt30Processor->getJustInTimeCompilation();
+    RETURN_BOOL(jit);
+  }
+  RETURN_BOOL(false);
+}
+
 PHP_METHOD(Xslt30Processor, importPackage) {
   Xslt30Processor *xslt30Processor;
   char *str;
@@ -698,13 +717,9 @@ zend_function_entry Xslt30Processor_methods[] = {
                                                 compileFromAssociatedFile,
                                                 arginfo_saxonc_xp_compileFromAssociatedFile,
                                                 ZEND_ACC_PUBLIC)
-                        PHP_ME(
-                            Xslt30Processor, setJustInTimeCompilation,
-                            arginfo_saxonc_xp_setJustInTimeCompilation,
-                            ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor,
-                                                    setRelocatable,
-                                                    arginfo_saxonc_xp_setRelocatable,
-                                                    ZEND_ACC_PUBLIC)
+  PHP_ME(Xslt30Processor, setJustInTimeCompilation,arginfo_saxonc_xp_setJustInTimeCompilation,ZEND_ACC_PUBLIC)
+  PHP_ME(Xslt30Processor, getJustInTimeCompilation,arginfo_saxonc_xp_getJustInTimeCompilation,ZEND_ACC_PUBLIC)
+                            PHP_ME(Xslt30Processor,setRelocatable,arginfo_saxonc_xp_setRelocatable,ZEND_ACC_PUBLIC)
                             PHP_ME(Xslt30Processor, setFastCompilation,
                                    arginfo_saxonc_xp_setFastCompilation,
                                    ZEND_ACC_PUBLIC)
