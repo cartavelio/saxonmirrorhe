@@ -560,6 +560,29 @@
             </tr>
             <tr>
                <td>
+                  <code>boolean</code>
+               </td>
+               <td>
+                  <span class="signature">isLicensed()</span>
+                  <div class="fcomment">Determine whether a license key has been found and accepted.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getSaxonEdition()</span>
+                  <div class="fcomment">Get the short name of the licensed Saxon product edition:
+                     "EE", "PE", or "HE". This represents the kind of configuration that has been
+                     created, rather than the software that has been installed; which depends on the
+                     license key supplied, as well as the software edition installed. For example it is
+                     possible to instantiate an "HE" configuration even when using the "PE" or "EE"
+                     software.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
                   <code>string</code>
                </td>
                <td>
