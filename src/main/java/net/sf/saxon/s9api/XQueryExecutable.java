@@ -37,10 +37,10 @@ public class XQueryExecutable {
     }
 
     /**
-     * Load the stylesheet to prepare it for execution.
+     * Load the query to prepare it for execution.
      *
-     * @return An XsltTransformer. The returned XsltTransformer can be used to set up the
-     *         dynamic context for stylesheet evaluation, and to run the stylesheet.
+     * @return An XQueryEvaluator. The returned XQueryEvaluator can be used to set up the
+     *         dynamic context for query evaluation, and to run the query.
      */
 
     public XQueryEvaluator load() {
@@ -94,7 +94,7 @@ public class XQueryExecutable {
      * <p><i>The detailed form of this representation is not stable (or even documented).</i></p>
      *
      * @param destination the destination for the XML document containing the diagnostic representation
-     *                    of the compiled stylesheet
+     *                    of the compiled query
      * @throws SaxonApiException if an error is detected
      * @since 9.6
      */
@@ -110,11 +110,11 @@ public class XQueryExecutable {
     }
 
     /**
-     * Get the underlying implementation object representing the compiled stylesheet. This provides
+     * Get the underlying implementation object representing the compiled query. This provides
      * an escape hatch into lower-level APIs. The object returned by this method may change from release
      * to release.
      *
-     * @return the underlying implementation of the compiled stylesheet
+     * @return the underlying implementation of the compiled query
      */
 
     public XQueryExpression getUnderlyingCompiledQuery() {

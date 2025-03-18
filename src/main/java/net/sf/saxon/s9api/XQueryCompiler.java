@@ -291,9 +291,9 @@ public class XQueryCompiler {
      * (though validation of the final result tree is permitted). Setting the argument to true
      * means that schema-aware code will be compiled regardless.
      *
-     * @param schemaAware If true, the stylesheet will be compiled with schema-awareness
-     *                    enabled even if it contains no xsl:import-schema declarations. If false, the stylesheet
-     *                    is treated as schema-aware only if it contains one or more xsl:import-schema declarations.
+     * @param schemaAware If true, the query will be compiled with schema-awareness
+     *                    enabled even if it contains no "import schema" declarations. If false, the query
+     *                    is treated as schema-aware only if it contains one or more "import schema" declarations.
      *                    Note that setting the value to false does not disable use of an import-schema declaration.
      * @since 9.2
      */
@@ -433,10 +433,10 @@ public class XQueryCompiler {
      * <p>The chosen policy affects:</p>
      * <ul>
      *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStep</code>
-     *     or <code>ReverseStep</code>) in an XPath expression within the stylesheet, other than an
+     *     or <code>ReverseStep</code>) in an XPath expression within the query, other than an
      *     axis step using the attribute or namespace axis</li>
      *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStepP</code>
-     *     in a pattern within the stylesheet, other than an axis step using the attribute or namespace
+     *     in a pattern within the query, other than an axis step using the attribute or namespace
      *     axis</li>
      * </ul>
      *
