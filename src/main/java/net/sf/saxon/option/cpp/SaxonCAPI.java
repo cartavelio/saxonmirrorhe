@@ -860,17 +860,8 @@ public class SaxonCAPI {
                         if(SaxonCAPI.debug) {
                             System.err.println("JAVA DEBUG: standErrorOutputFile set name=" + value);
                         }
-                        //processor.setConfigurationProperty(Feature.STANDARD_ERROR_OUTPUT_FILE,value);
+                        processor.setConfigurationProperty(Feature.STANDARD_ERROR_OUTPUT_FILE,value);
                         SaxonCException.errorOutputFile = value;
-
-
-                        try {
-                            boolean append = true;
-                            boolean autoFlush = true;
-                            SaxonCException.errorReporter.setStandardErrorOutput(new PrintStream(new FileOutputStream((String) value, append), autoFlush));
-                        } catch (FileNotFoundException fnf) {
-                            throw new IllegalArgumentException(fnf);
-                        }
 
                     }else if (name.startsWith("http://saxon.sf.net/feature/")) {
                         processor.setConfigurationProperty(name, value);
@@ -1735,16 +1726,7 @@ public class SaxonCAPI {
         SaxonCAPI.debug  = true;
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(Feature.LICENSE_FILE_LOCATION, "/Users/ond1/work/development/git/private/saxon-license.lic");
-        //Source result = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.3/samples/cppTests", "../php/xsl/foo.xsl", ResourceRequest.XSLT_NATURE);
-        String input = "home/ond1/file.txt";
-        Path path = Paths.get("/", input).normalize();
-        URI uri = Paths.get(input).toUri();
-
-
-        //(new File(input)).toURI();
-
-        System.err.println("Path = " + path);
-        System.err.println("URI = " + uri.toString());
+        Source result = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.3/samples/cppTests", "../php/xsl/foo.xsl", ResourceRequest.XSLT_NATURE);
         //Source source = SaxonCAPI.resolveFileToSource(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.1/samples/cppTests/", "../data/test.xsl", ResourceRequest.XSLT_NATURE);
 
         //XsltCompiler compiler = processor.newXsltCompiler();

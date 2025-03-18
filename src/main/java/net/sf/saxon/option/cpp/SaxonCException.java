@@ -7,10 +7,13 @@
 
 package net.sf.saxon.option.cpp;
 
-
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XmlProcessingError;
 import org.graalvm.nativeimage.IsolateThread;
-
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.ObjectHandles;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
@@ -18,6 +21,8 @@ import org.graalvm.word.WordFactory;
 import com.oracle.svm.core.Uninterruptible;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * * This class is to use with Saxon on C++
@@ -25,9 +30,8 @@ import java.io.*;
 public class SaxonCException  {
 
     public static Throwable throwable = null;
+    public static List<? super XmlProcessingError> errorList = new ArrayList<>();
     public static String errorOutputFile = null;
-    public static SaxonCErrorReporter errorReporter = new SaxonCErrorReporter();
-
     //public static String ecwd = null;
 
     @Uninterruptible(reason = "exception handler")
@@ -36,10 +40,34 @@ public class SaxonCException  {
 
     }
 
-    public void setErrorOutput(PrintStream out){
-        errorReporter.setStandardErrorOutput(out);
-    }
+    @CEntryPoint(name = "j_errorOutputFileCheckAndSave")
+    public static void j_errorOutputFileCheckAndSave(IsolateThread thread){
+        if(errorOutputFile != null) {
+            String message = new String();
 
+            for (Object item : errorList) {
+                XmlProcessingError error = (XmlProcessingError) item;
+                if (error.getErrorCode() == null) {
+                    message += (((XmlProcessingError) item).getMessage() + "\n");
+                } else {
+                    message += (error.getErrorCode().getLocalName() + ": " + ((XmlProcessingError) item).getMessage() + "\n");
+                }
+
+            }
+
+            if (!message.isEmpty()) {
+                try {
+                    PrintStream stream = new PrintStream(new FileOutputStream(errorOutputFile, true), true);
+                    stream.print(message);
+                    stream.close();
+                } catch (FileNotFoundException e) {
+
+                }
+            }
+
+        }
+
+    }
     
     @CEntryPoint(name = "j_getErrorMessage")
     public static CCharPointer j_getErrorMessage(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
@@ -86,7 +114,6 @@ public class SaxonCException  {
         SaxonApiException exception = null;
         if(SaxonCAPI.debug) {
             System.err.println("Java DEBUG: j_getErrorMessageWithErrorCode called");
-            System.err.println("Java DEBUG: j_getErrorMessageWithErroCode erroReporter message="+errorReporter.getErrors().toString());
         }
 
         if(throwable == null) {
@@ -129,21 +156,14 @@ public class SaxonCException  {
 
         }
         CCharPointer a = null;
-        String errorMessage = null;
-
-        if(errorReporter.getErrors().toString() != null) {
-            errorMessage = errorReporter.getErrors().toString();
-
+        int lineNumber = exception.getLineNumber();
+        if(exception.getErrorCode() == null) {
+            a = SaxonCAPI.stringToNative2(alloc, exception.getMessage()+". Line number: "+lineNumber);
         } else {
-            int lineNumber = exception.getLineNumber();
-            if(exception.getErrorCode() == null) {
-                errorMessage = exception.getMessage()+". Line number: "+lineNumber;
-            } else {
-               errorMessage = exception.getErrorCode().getLocalName() + ": " + exception.getMessage() + ". Line number: "+lineNumber;
-            }
+            a = SaxonCAPI.stringToNative2(alloc,exception.getErrorCode().getLocalName() + ": " + exception.getMessage() +
+                    ". Line number: "+lineNumber);
         }
 
-        a = SaxonCAPI.stringToNative2(alloc, errorMessage);
         return a;
     }
 
@@ -182,10 +202,10 @@ public class SaxonCException  {
             return a;
         }
 
-        String message = errorReporter.getErrors().toString();
+        String message = new String();
 
 
-        /*for (Object item : staticErrorList) {
+        for (Object item : errorList) {
             XmlProcessingError error = (XmlProcessingError) item;
             if (error.getErrorCode() == null) {
                 message += (((XmlProcessingError) item).getMessage() + "\n");
@@ -193,10 +213,10 @@ public class SaxonCException  {
                 message += (error.getErrorCode().getLocalName() + ": " + ((XmlProcessingError) item).getMessage() + "\n");
             }
 
-        }*/
+        }
 
         if (SaxonCAPI.debug) {
-            //System.err.println("Debug - j_getCombinedStaticErrorMessages errorList.length: " + staticErrorList.size());
+            System.err.println("Debug - j_getCombinedStaticErrorMessages errorList.length: " + errorList.size());
             System.err.println("Debug - j_getCombinedStaticErrorMessages: message length:" + message.length());
         }
 
@@ -269,8 +289,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_clearException")
     public static void clearException(IsolateThread thread) {
-        //staticErrorList.clear();
-        errorReporter.reset();
+        errorList.clear();
         throwable = null;
         errorOutputFile = null;
     }
@@ -286,7 +305,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_staticErrorCount")
     public static int staticErrorCount(IsolateThread thread) {
-        return errorReporter.getNumberOfErrors();
+        return errorList.size();
     }
 
 
