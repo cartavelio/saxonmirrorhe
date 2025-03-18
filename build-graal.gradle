@@ -233,7 +233,7 @@ task hec_graal_preprocess(
   mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
   args "/c",
     "/i:${buildDir}/filtered/hec", "/o:${buildDir}/preprocess/hec",
-    "/p:EE=false", "/p:PE=false", "/p:CSHARP=false",
+    "/p:EE=false", "/p:PE=false", "/p:CSHARP=false", "/p:STREAM=false", "/p:SCHEMA=false",
     "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false"
 }
 

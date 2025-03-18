@@ -47,6 +47,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_setcwd, 0, 0, 1)
 ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_getcwd, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_newXPathProcessor, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -266,6 +269,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_setcwd, 0, 0, 1)
 ZEND_ARG_INFO(0, cwd)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_getcwd, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xe_clearParameters, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -356,6 +362,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromAssociatedFile, 0, 0, 1)
 ZEND_ARG_INFO(0, xml_file_name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setcwd, 0, 0, 1)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_getcwd, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setJustInTimeCompilation, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -418,6 +431,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_registerSchemaFromNode, 0, 0, 1)
 ZEND_ARG_INFO(0, file_name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_setcwd, 0, 0, 1)
+ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_getcwd, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_validate, 0, 0, 1)
@@ -497,6 +517,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setContextItemFromFile, 0,
                        0, 1)
 ZEND_ARG_INFO(0, file_name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setcwd, 0, 0, 1)
+ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_getcwd, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setParameter, 0, 0, 2)
@@ -583,6 +610,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_evaluateSingle, 0, 0, 1)
 ZEND_ARG_INFO(0, xpath)
 ZEND_ARG_INFO(0, encoding_Str)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setcwd, 0, 0, 1)
+ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_getcwd, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setParameter, 0, 0, 2)
