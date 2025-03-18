@@ -183,7 +183,7 @@ XdmValue::~XdmValue() {
   }
   if (jValues > 0) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr << "XdmValue j_handles_destroy" << std::endl;
+          std::cerr << "XdmValue on jValues j_handles_destroy" << std::endl;
         }
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
     jValues = SXN_UNSET;

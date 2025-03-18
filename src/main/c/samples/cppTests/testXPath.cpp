@@ -108,7 +108,7 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
   if(document == nullptr) {
     delete document;
     sresult->failure++;
-    sresult->failureList.push_back("testCopyConstructorForXdmNode");
+    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
     return;
 
   }
@@ -123,12 +123,36 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
   } else {
 
     sresult->failure++;
-    sresult->failureList.push_back("testCopyConstructorForXdmNode");
+    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
   }
   delete document;
+}
 
-  fflush(stdout);
-  fflush(stderr);
+void testEncoding(SaxonProcessor *processor,
+                                         XPathProcessor *xpath,
+                                         sResultCount *sresult) {
+
+  cout << endl << "Test testEncoding:" << endl;
+
+
+
+
+  // parser the XML
+
+  XdmItem * item = xpath->evaluateSingle("unparsed-text('help.txt')");
+  const char * value = item->getStringValue();
+    allocFn fn = operator new;
+    std:string encoding = "windows-1252";
+ const char * result = j_cpp_encodeStringValue(SaxonProcessor::sxn_environ->thread, (char *)value, (char *)encoding.c_str(), fn);
+cout << endl << "Test encoding cp1:" << endl;
+  if(item != nullptr) {
+  cout << endl << "Item="<<item->getStringValue() << endl;
+    cout << endl << "Item-String="<<result << endl;
+    delete item;
+    delete xpath;
+  }
+
+
 }
 
 void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
@@ -1385,6 +1409,8 @@ int main() {
        << endl;
   runTest("testDefaultLanguage", "default-language()", "en", xpathProc, sresult,
           document);
+
+           testEncoding(processor, xpathProc, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)

@@ -84,13 +84,13 @@ XDM_TYPE XdmItem::getType() { return XDM_ITEM; }
 
 XdmItem::~XdmItem() {
   SaxonProcessor::attachCurrentThread();
-#ifdef DEBUG
+
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmItem destructor called:" << refCount
               << " ob ref=" << (this) << " value =" << ((long)value)
               << std::endl;
   }
-#endif
+
   if (value > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
   }

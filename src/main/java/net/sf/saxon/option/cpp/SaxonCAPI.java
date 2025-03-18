@@ -1715,6 +1715,26 @@ public class SaxonCAPI {
         return a;
     }
 
+    @CEntryPoint(name = "j_cpp_encodeStringValue")
+    public static CCharPointer encodeStringValue(IsolateThread thread, CCharPointer c_string, CCharPointer c_encoding, SaxonCAPI.AllocatorCCharFn alloc) throws net.sf.saxon.s9api.SaxonApiException, UnsupportedEncodingException {
+        try {
+            String encoding = "utf-8";
+            if (!c_encoding.isNull()) {
+                encoding = CTypeConversion.toJavaString(c_encoding);
+            }
+            System.err.println("In Java encoding = "+ encoding);
+            String str = toJavaString(c_string, c_encoding);
+            System.err.println("In Java = "+ str);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            System.err.println("In Java = "+ stream.toString(encoding));
+            stream.writeBytes(str.toString().getBytes(encoding));
+            CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
+            return a;
+        } catch (Exception e) {
+            return WordFactory.nullPointer();
+        }
+    }
+
 
     /**
      * Parse XML document given as a file name and return reference to XdmNode in the ObjectHandle pool. Also accept the SchemaValidator to validate document
