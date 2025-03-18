@@ -13,6 +13,8 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Closure;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * A <code>LearningEvaluator</code> initially performs
  * lazy incremental evaluation of an expression; but if this proves unproductive,
@@ -25,12 +27,13 @@ import net.sf.saxon.value.Closure;
 public class LearningEvaluator implements SequenceEvaluator {
 
     private final static int EVAL_LIMIT = 20;
+    private final static int LEARNING_LIMIT = 40;
 
     private final Expression expression;
     private SequenceEvaluator evaluator;
-    private int completed = 0;
-    private int count = 0;
-    private boolean flipped;
+    private final AtomicInteger completed = new AtomicInteger(0);
+    private final AtomicInteger count = new AtomicInteger(0);
+
 
     /**
      * Construct a <code>LearningEvaluator</code>
@@ -42,6 +45,10 @@ public class LearningEvaluator implements SequenceEvaluator {
      *             themselves eagerly all the time.
      */
     public LearningEvaluator(Expression expr, SequenceEvaluator lazy) {
+//        monitoring = expr.toShortString().contains("$return-val");
+//        if (monitoring) {
+//            System.err.println("New learning evaluator for " + expr.toShortString());
+//        }
         this.expression = expr;
         this.evaluator = lazy;
     }
@@ -55,16 +62,14 @@ public class LearningEvaluator implements SequenceEvaluator {
      */
     @Override
     public Sequence evaluate(XPathContext context) throws XPathException {
-        if (count > EVAL_LIMIT) {
+        int numberStarted = count.incrementAndGet();
+        if (numberStarted > LEARNING_LIMIT) {
             return evaluator.evaluate(context);
         } else {
             Sequence result = evaluator.evaluate(context);
             if (result instanceof Closure) {
-                ((Closure)result).setLearningEvaluator(this, count);
-            } else {
-                flipped = true;
+                ((Closure)result).setLearningEvaluator(this, numberStarted);
             }
-            count++;
             return result;
         }
     }
@@ -80,24 +85,12 @@ public class LearningEvaluator implements SequenceEvaluator {
         // be partially read, and it might never be accessed at all. In the final case we will get no
         // feedback. The condition we want to test for is that of the first N MemoClosures created,
         // each one was read to completion
-        //System.err.println("Completion " + expression.toShortString() + " " + serialNumber);
-        if (completed++ >= EVAL_LIMIT && completed == count) {
-            //System.err.println("Switch " + expression.toShortString() + " to eager evaluation");
+        int numberCompleted = completed.incrementAndGet();
+        int numberStarted = count.get();
+        if (numberCompleted >= EVAL_LIMIT && numberCompleted == numberStarted) {
             evaluator = (expression.makeElaborator().eagerly());
-            count = Integer.MAX_VALUE;
-            flipped = true;
         }
 
-    }
-
-    /**
-     * Ask whether the LearningEvaluator has decided to use eager evaluation always
-     * @return true if sufficient evaluations have been performed to determine
-     * that lazy evaluation offers no benefits
-     */
-
-    public boolean hasDecidedToEvaluateEagerly() {
-        return flipped;
     }
 
 }
