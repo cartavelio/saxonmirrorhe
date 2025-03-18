@@ -249,7 +249,7 @@ task pec_graal_preprocess(
   args "/c",
     "/i:${buildDir}/filtered/pec", "/o:${buildDir}/preprocess/pec",
     "/p:EE=false", "/p:PE=true", "/p:CSHARP=false",
-    "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false",
+    "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false", "/p:SCHEMA=false", "/p:STREAM=false",
     "/p:HOF=true"
   doFirst {
     mkdir "${buildDir}/preprocess/pec"
