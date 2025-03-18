@@ -93,7 +93,6 @@ public class QueryModule implements StaticContext {
     private int languageLevel;
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
-    private Set<QueryModule> importedModules = new HashSet<>();
 
     /**
      * Create a QueryModule for a main module, copying the data that has been set up in a
@@ -236,7 +235,6 @@ public class QueryModule implements StaticContext {
         Objects.requireNonNull(baseURI, "Base URI of XQuery module must not be null");
         Configuration config = executable.getConfiguration();
         QueryModule module = new QueryModule(config, importer);
-        importer.addImportedModule(module);
         try {
             module.setLocationURI(new URI(baseURI));
         } catch (URISyntaxException e) {
@@ -592,15 +590,6 @@ public class QueryModule implements StaticContext {
         importedModuleNamespaces.add(uri);
         getImportedFunctionLibrary().addImportedNamespace(uri);
     }
-
-    public void addImportedModule(QueryModule module) {
-        importedModules.add(module);
-    }
-
-    public Set<QueryModule> getImportedModules() {
-        return importedModules;
-    }
-
 
     /**
      * Ask whether this module directly imports a particular namespace
