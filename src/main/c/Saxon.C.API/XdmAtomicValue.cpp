@@ -52,10 +52,6 @@ const char *XdmAtomicValue::getPrimitiveTypeName() {
 bool XdmAtomicValue::getBooleanValue() {
   char result =
       j_getBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)value);
-
-  if((int)result == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
   return result != 0;
 }
 
@@ -68,12 +64,6 @@ int XdmAtomicValue::getHashCode() {
 double XdmAtomicValue::getDoubleValue() {
   double result =
       j_getDoubleValue(SaxonProcessor::sxn_environ->thread, (void *)value);
-  if(result == -0.9999999) {
-    char cresult = j_checkForException(SaxonProcessor::sxn_environ->thread);
-    if(cresult != 0) {
-      throw SaxonApiException();
-    }
-  }
   return result;
 }
 
@@ -83,12 +73,6 @@ const char *XdmAtomicValue::getStringValue() {
 
 long XdmAtomicValue::getLongValue() {
   long result =
-        j_getLongValue(SaxonProcessor::sxn_environ->thread, (void *)value);
-  if(result == -9999999) {
-    char cresult = j_checkForException(SaxonProcessor::sxn_environ->thread);
-    if(cresult != 0) {
-      throw SaxonApiException();
-    }
-  }
+      j_getLongValue(SaxonProcessor::sxn_environ->thread, (void *)value);
   return result;
 }
