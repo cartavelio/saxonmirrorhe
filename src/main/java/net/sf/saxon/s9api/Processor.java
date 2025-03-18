@@ -403,7 +403,6 @@ public class Processor implements Configuration.ApiProvider {
      *                                  is not a valid value for the named property.
      */
 
-    @Deprecated
     public void setConfigurationProperty(/*@NotNull*/ String name, /*@NotNull*/ Object value) {
         if (name.equals(FeatureKeys.CONFIGURATION)) {
             config = (Configuration) value;
