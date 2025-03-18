@@ -101,7 +101,7 @@ public:
    */
   virtual bool isAtomic();
 
-  //! Get the first item in the sequence. For the XdmNode it is this object
+  //! Get the first item in the sequence
   /**
    *
    * @return XdmItem or nullptr if sequence is empty
@@ -117,8 +117,8 @@ public:
    */
   XDM_NODE_KIND getNodeKind();
 
-  //! Get the name of the node, as a string in the form of a EQName.
- //! Deallocation of memory is done internally.
+  //! Get the name of the node, as a string in the form of a EQName. The caller
+  //! does not need to deallocate memory.
   /**
    *
    *
@@ -127,8 +127,8 @@ public:
    */
   const char *getNodeName();
 
-  //! Get the local name of the node.
-  //! Deallocation of memory is done internally.
+  //! Get the local name of the node. The caller does not need to deallocate
+  //! memory.
   /**
    *
    *
@@ -164,7 +164,6 @@ public:
   int getColumnNumber();
 
   //! Get the base URI of this node
-  //! Deallocation of memory is done internally.
   /**
    *
    * @return the base URI, as defined in the XDM model. The value may be null if
@@ -174,7 +173,7 @@ public:
   const char *getBaseUri();
 
   //! Get the string value of the item. For a node, this gets the string value
-  //! of the node.  The caller should deallocate memory using `operator delete`
+  //! of the node.  The caller should deallocate memory using `delete`
   /**
    * For an atomic value, it has the same effect as casting the value
    * to a string. In all cases the result is the same as applying the XPath
@@ -189,8 +188,8 @@ public:
   const char *getStringValue();
 
   //! The toString() method returns a simple XML serialization of the node with
-  //! defaulted serialization parameters. The caller must deallocate memory
-  //! using `operator delete`
+  //! defaulted serialization parameters. The caller should deallocate memory
+  //! using `delete`
 
   /**
    *
@@ -231,7 +230,7 @@ public:
   //! element
   /**
    *
-   * User is responsible for memory management for the attribute nodes. Deallocate using `operator delete`
+   *
    * @param name the name of the required attribute, interpreted as a
    * no-namespace name
    * @return NULL if this node is not an element, or if this element has no
@@ -252,8 +251,8 @@ public:
   /**
    *
    *
-   * @param cache - deprecated.
-   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
+   * @param cache - deprecated. User is
+   * responsible for memory management for the attribute nodes.
    * @return NULL if this node is not an element, or if this element has no
    * attribute with the specified name. Otherwise return the attribute nodes as
    * a pointer array.
@@ -262,7 +261,6 @@ public:
 
   //! Get the array of nodes reachable from this node via a given axis.
   /**
-  * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
   * @param axis - identifies which axis is to be navigated. Axis options are as
   follows:
          * ANCESTOR = 0, ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
@@ -306,17 +304,14 @@ public:
 
   //! Get all the child nodes from the current parent node.
   /**
-   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
-   * Caching is no longer used, the value of cache is ignored.
-   * This param is deprecated and will be removed in a later version.
+   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
    * @return pointer array of XdmNode objects
    */
   XdmNode **getChildren(bool cache = false);
 
   //! Get the ith child nodes from the current parent node
   /**
-   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
-   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.
+   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
    * @return a pointer to the ith child node
    */
 
@@ -343,7 +338,7 @@ public:
     void resetRelinquishedChildren();
 
     /**
-      * Internal method used to increment the ref count for a relinquished child only once
+      * Internal method used to increment the ref count for an relinquished child only once
       */
     void incrementRefCountForRelinquishedChildren();
 
@@ -373,7 +368,7 @@ private:
   const char *nodeToString;
   XdmNode **children; /*!< Cached. Child nodes when getChildren method is first
                          called; */
-  int childCount;     /*!< The number of child nodes on the current node*/
+  int childCount;     /*!< The number of of child nodes on the current node*/
   int axisCount;
   XdmNode **attrValues; /*!< Cached attribute nodes when getAttributeNodes
                            method is first called; */

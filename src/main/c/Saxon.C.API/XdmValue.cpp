@@ -21,14 +21,8 @@ XdmValue::XdmValue(const XdmValue &other) {
   values_cap = other.values_cap;
   relinquished_values = new char[values_cap];
   memset(relinquished_values, 0, sizeof(*relinquished_values) * values_cap);
-  if (other.values) {
-  	for (int i = 0; i < xdmSize; i++) {
-    	addXdmItem(other.values[i]);
-  	}
-  } else {
-    //values = new XdmItem *[values_cap];
-    values = nullptr;
-
+  for (int i = 0; i < xdmSize; i++) {
+    addXdmItem(other.values[i]);
   }
 }
 
@@ -91,11 +85,9 @@ XdmValue::XdmValue(int64_t val, bool arr) {
   for (int p = 1; p <= xdmSizei; ++p) {
     typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                  (void *)results[p]);
-#ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++ XdmValue - typeRef= " << typeRef << std::endl;
     }
-#endif
     if (typeRef == -2) {
       std::cerr << "Exception thrown while creating XdmValue from array"
                 << std::endl;
@@ -124,11 +116,9 @@ XdmValue::XdmValue(int64_t val, bool arr) {
 }
 
 void XdmValue::resetRelinquishedItems(){
-#ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
         std::cerr << "resetRelinquishedItems called:" << " ob ref=" << (this)  << std::endl;
     }
-#endif
     for (int i = 0; i < xdmSize; i++) {
         if(values[i] != nullptr) {
             if (relinquished_values[i] == (char) 1) {
@@ -144,12 +134,10 @@ void XdmValue::resetRelinquishedItems(){
 }
 
 XdmValue::~XdmValue() {
-#ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmValue destructor called:" << refCount
               << " ob ref=" << (this)  << std::endl;
   }
-#endif
 
   if (xdmSize > 0 && values != nullptr) {
       if (getenv("SAXONC_DEBUG_FLAG")) {
