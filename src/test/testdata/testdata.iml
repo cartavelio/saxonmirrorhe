@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/ganta" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/hedenus" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/kessel" isTestSource="false" packagePrefix="test" />
+      <sourceFolder url="file://$MODULE_DIR$/leak" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/radu" isTestSource="false" packagePrefix="com.bofa.crme.xmlappliance.test" />
+      <sourceFolder url="file://$MODULE_DIR$/xq_modules_problem" isTestSource="false" packagePrefix="net.sf.saxon.query" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="xqj" level="project" />
+    <orderEntry type="library" name="resolver" level="project" />
+    <orderEntry type="library" name="lib1" level="project" />
+    <orderEntry type="module" module-name="xqj" />
+  </component>
+</module>
