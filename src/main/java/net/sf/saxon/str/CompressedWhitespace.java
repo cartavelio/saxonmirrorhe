@@ -36,11 +36,10 @@ public class CompressedWhitespace extends WhitespaceString {
     public static UnicodeString compressWS(char[] in, int start, int len) {
         int runlength = 1;
         int outlength = 0;
-        int end = start + len;
-        for (int i = start; i < end; i++) {
-            final char c = in[i];
+        for (int i = 0; i < len; i++) {
+            final char c = in[start+i];
             if (c <= 32 && CODES[c] >= 0) {
-                if (i == end - 1 || c != in[i + 1] || runlength == 63) {
+                if (i == len - 1 || c != in[i + 1] || runlength == 63) {
                     runlength = 1;
                     outlength++;
                     if (outlength > 8) {
@@ -56,9 +55,9 @@ public class CompressedWhitespace extends WhitespaceString {
         int ix = 0;
         runlength = 1;
         int[] out = new int[outlength];
-        for (int i = start; i < end; i++) {
-            final char c = in[i];
-            if (i == end - 1 || c != in[i + 1] || runlength == 63) {
+        for (int i = 0; i < len; i++) {
+            final char c = in[start+i];
+            if (i == len - 1 || c != in[i + 1] || runlength == 63) {
                 out[ix++] = (CODES[c] << 6) | runlength;
                 runlength = 1;
             } else {
@@ -67,12 +66,11 @@ public class CompressedWhitespace extends WhitespaceString {
         }
         long value = 0;
         for (int i = 0; i < outlength; i++) {
-            value = (value << 8) | (long) out[i];
+            value = (value << 8) | (long)out[i];
         }
         value = value << (8 * (8 - outlength));
         return new CompressedWhitespace(value);
     }
-
 
 //    /**
 //     * Make a compressed whitespace text node suitable for inserting indentation into
