@@ -24,15 +24,15 @@ class XdmItem;
  */
 class SchemaValidator {
 public:
-  //! Default constructor.
-  /*!
+  /**
+   * Default constructor.
    * Creates a Schema Validator
    * @throws SaxonApiException
    */
   SchemaValidator();
 
-  //! Constructor with the SaxonProcessor supplied.
-  /*!
+  /**
+   * Constructor with the SaxonProcessor supplied.
    * The supplied processor should have license flag set to true for the Schema
    * Validator to operate.
    * @param proc - pointer to the SaxonProcessor object
@@ -47,19 +47,20 @@ public:
    */
   SchemaValidator(const SchemaValidator &other);
 
-  //! Destructor method. At the end of the program call the release() method to clear the JVM.
+  /**
+   * Destructor method: at the end of the program call the release() method to clear the JVM.
+   */
   ~SchemaValidator();
 
-  //! The copy assignment= operator
-  /*!
+  /**
+   * The copy assignment= operator.
    * Create a copy of the SchemaValidator.
    * @param other - SchemaValidator object
    */
   SchemaValidator &operator=(const SchemaValidator &other);
 
-  //! Set the current working directory for the validator
   /**
-   *
+   * Set the current working directory for the validator.
    * @param cwd  - Supplied working directory which replaces any set cwd. Ignore
    * if cwd is NULL.
    */
@@ -72,10 +73,11 @@ public:
   */
  const char * getcwd();
 
-  //! Register the schema from file name.
   /**
+   * Register the schema from file name.
+   *
    * The schema components derived from this schema document are added to
-   * the cache of schema components maintained by this SchemaValidator
+   * the cache of schema components maintained by this SchemaValidator.
    * @param xsd - File name of the schema relative to the cwd or full path if
    * cwd is null. The document may be either a schema document in source XSD
    * format, or a compiled schema in Saxon-defined SCM format (as produced using
@@ -84,8 +86,8 @@ public:
    */
   void registerSchemaFromFile(const char *xsd);
 
-  //! Register the schema supplied as a string
   /**
+   * Register the schema supplied as a string.
    * @param schemaStr - The schema document supplied as a string
    * @param systemID - The system ID of the document supplied as a string
    * @throws SaxonApiException
@@ -93,15 +95,15 @@ public:
   void registerSchemaFromString(const char *schemaStr,
                                 const char *systemID = nullptr);
 
-  //! Register the schema supplied as an XDM Node Object
   /**
+   * Register the schema supplied as an XDM Node Object
    * @param node - The schema document supplied as an XdmNode object
    * @throws SaxonApiException
    */
   void registerSchemaFromNode(XdmNode *node);
 
-  //! Export a precompiled Schema Component Model.
   /**
+   * Export a precompiled Schema Component Model.
    * The Component model containing all the components (except built-in components) that have
    * been loaded by using the register methods.
    * @param fileName - The file name where the exported schema will be stored
@@ -109,29 +111,28 @@ public:
    */
   void exportSchema(const char *fileName);
 
-  //! Set the name of the output file that will be used by the validator.
   /**
+   * Set the name of the output file that will be used by the validator.
    * @param outputFile the output file name for later use
    */
   void setOutputFile(const char *outputFile);
 
- //! Get the output file that will be used by the validator.
  /**
+  * Get the output file that will be used by the validator.
   * @return const char * - string of the output file. Memory deallocation is handled internally.
   */
  const char *getOutputFile();
 
-  //! Validate an instance document by a registered schema.
   /**
-   *
+   * Validate an instance document by a registered schema.
    * @param sourceFile Name of the file to be validated. Allow nullptr when
    * source document is supplied with other method
    * @throws SaxonApiException
    */
   void validate(const char *sourceFile = nullptr);
 
-  //! Validate an instance document supplied as a Source object
   /**
+   * Validate an instance document supplied as a Source object.
    * @param sourceFile The name of the file to be validated. Default is nullptr
    * @return XdmNode - the validated document returned to the calling program.
    * The caller is responsible for deallocation using `delete`.
@@ -139,16 +140,16 @@ public:
    */
   XdmNode *validateToNode(const char *sourceFile = nullptr);
 
-  //! Set the source node for validation
   /**
+   * Set the source node for validation.
    * @param source - The source document supplied as an XdmNode, which will be
    * used to validate against the schema using the validate methods.
    * The caller is responsible for deallocation of memory associated with the source node.
    */
   void setSourceNode(XdmNode *source);
 
-  //! Get the validation report
   /**
+   * Get the validation report.
    * The validation-report option must have been set to true in the properties
    * to use this feature.
    * @return XdmNode - Pointer to XdmNode. Return nullptr if validation
@@ -157,8 +158,8 @@ public:
    */
   XdmNode *getValidationReport();
 
-  //! Set the value of a parameter used in the validator
   /**
+   * Set the value of a parameter used in the validator.
    * @param name - the name of the parameter, as a string. For a namespaced name use
    * clark notation i.e. "{uri}local"
    * @param value - the value of the parameter, or nullptr to clear a previously set
@@ -166,24 +167,23 @@ public:
    */
   void setParameter(const char *name, XdmValue *value, bool withParam=true);
 
-  //! Remove a parameter (name, value) pair
   /**
+   * Remove a parameter (name, value) pair.
    * @param name - the name of the parameter
    * @return Outcome of the removal
    */
   bool removeParameter(const char *name);
 
-  //! Set a configuration property specific to the validator in use.
   /**
-   *
+   * Set a configuration property specific to the validator in use.
    *
    * @param name - the name of the property
    * @param value - the value of the property
    */
   void setProperty(const char *name, const char *value);
 
-  //! Clear parameter values set.
   /**
+   * Clear parameter values set.
    * Default behaviour (false) is to leave XdmValues in memory.
    * Individual pointers to XdmValue objects have to be deleted in the calling
    * program.
@@ -192,7 +192,9 @@ public:
    */
   void clearParameters(bool deleteValues = false);
 
-  //! Clear configuration property values set
+  /**
+   * Clear configuration property values set.
+   */
   void clearProperties();
 
   /**
@@ -203,52 +205,56 @@ public:
    */
   XdmValue *getParameter(const char *name, bool withParam=true);
 
-
-  //! Get all parameters as a std::map
+  /**
+   * Get all parameters as a std::map.
+   */
   std::map<std::string, XdmValue *> &getParameters();
 
-  //! Get all configuration properties specified on the processor as a std::map
+  /**
+   * Get all configuration properties specified on the processor as a std::map.
+   */
   std::map<std::string, std::string> &getProperties();
 
-  //! Checks for pending exceptions without creating a local reference to the exception object
   /**
-   *
+   * Checks for pending exceptions without creating a local reference to the exception object.
    * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
 
-  //! Check for thrown exceptions.
   /**
+   * Check for thrown exceptions.
    * @return The main exception message if any has been thrown otherwise
    * return nullptr
    */
   const char *checkException();
 
-  //! Clear any thrown exceptions
+  /**
+   * Clear any thrown exceptions.
+   */
   void exceptionClear();
 
-  //! Get number of errors during validation of the source against the schema
   /**
+   * Get number of errors during validation of the source against the schema
    * @return int - Count of the exceptions reported during validation
    */
   // int exceptionCount();
 
-  //! Get the error message if there are any validation errors
   /**
+   * Get the error message if there are any validation errors.
    * A validation may have a number of errors reported against it.
    * @return The message of the exception
    */
   const char *getErrorMessage();
 
-  //! Get error code if an error is reported
   /**
+   * Get error code if an error is reported.
    * Validation error are reported as exceptions. All errors can be retrieved.
    * @return char* - The error code of the exception.
    */
   const char *getErrorCode();
 
-  //! The validation mode may be either strict or lax.
   /**
+   * Set the validation mode - which may be either strict or lax.
    * The default is strict; this method may be called
    * to indicate that lax validation is required. With strict validation,
    * validation fails if no element declaration can be located for the outermost
@@ -258,7 +264,9 @@ public:
    */
   void setLax(bool l);
 
-  //! Get the underlying Java object of the C++ schema validator
+  /**
+   * Get the underlying Java object of the C++ schema validator.
+   */
   int64_t getUnderlyingValidator() { return cppV; }
 
 private:

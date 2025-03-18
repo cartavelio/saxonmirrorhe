@@ -18,19 +18,19 @@ class SaxonApiException;
 class XdmValue;
 class XdmItem;
 
-/*! An <code>XQueryProcessor</code> represents a factory to compile, load and
- * execute queries. <p/>
+/** An <code>XQueryProcessor</code> represents a factory to compile, load and
+ * execute queries.
  */
 class XQueryProcessor {
 public:
-  //! Default constructor.
-  /*!
+  /**
+  * Default constructor.
   * Creates a Saxon-HE XQuery processor
   */
   XQueryProcessor();
 
-  //! Constructor with the SaxonProcessor supplied.
-  /*!
+  /**
+   * Constructor with the SaxonProcessor supplied.
    * @param p - pointer to the SaxonProcessor object
    * @param cwd - the current working directory. Default is the empty string
    */
@@ -81,14 +81,14 @@ public:
    */
   void setParameter(const char *name, XdmValue *value, bool withParam=true);
 
-  //! Set the XQuery language version for the XQuery compiler
   /**
+   * Set the XQuery language version for the XQuery compiler
    * @param version - "3.1" or "4.0" in the current Saxon release.
    */
   void setLanguageVersion(const char *version);
 
-  //! Say whether the query should be compiled and evaluated to use streaming.
   /**
+   * Say whether the query should be compiled and evaluated to use streaming.
    * This affects subsequent calls on the compile() methods. This option
    * requires Saxon-EE.
    * @param option if true, the compiler will attempt to compile a query to be
@@ -100,9 +100,8 @@ public:
    */
   void setStreaming(bool option);
 
-  //! Ask whether the streaming option has been set
   /**
-   * Ask whether the streaming option has been set, that is, whether
+   * Ask whether the streaming option has been set. That is, whether
    * subsequent calls on compile() will compile queries to be capable
    * of executing in streaming mode.
    *
@@ -110,17 +109,15 @@ public:
    */
   bool isStreaming();
 
-  //! Remove a parameter (name, value) pair
   /**
-   *
+   * Remove a parameter (name, value) pair
    * @param name - the name of the parameter
    * @return Outcome of the removal
    */
   bool removeParameter(const char *name);
 
-  //! Set a configuration property specific to the XQuery processor in use.
   /**
-   *
+   * Set a configuration property specific to the XQuery processor in use.
    * XQueryProcessor: set serialization properties (names start with '!' i.e.
    * name "!method" -> "xml"), 'o':outfile name, 's': source as file name 'q':
    * query file name, 'q': current by name, 'qs': string form of the query,
@@ -131,8 +128,8 @@ public:
    */
   void setProperty(const char *name, const char *value);
 
-  //! Clear parameter values set.
   /**
+   * Clear parameter values set.
    * Default behaviour (false) is to leave XdmValues in memory.
    * Individual pointers to XdmValue objects have to be deleted in the calling
    * program.
@@ -140,12 +137,13 @@ public:
    */
   void clearParameters(bool deleteValues = false);
 
-  //! Clear configuration property values set
+  /**
+   * Clear configuration property values set
+   */
   void clearProperties();
 
-
-  //! Say whether the query is allowed to be updating.
   /**
+   * Say whether the query is allowed to be updating.
    * XQuery update syntax will be rejected
    * during query compilation unless this flag is set. XQuery Update is
    * supported only under Saxon-EE.
@@ -156,8 +154,8 @@ public:
    */
   void setUpdating(bool updating);
 
-  //! Execute a query, and save the result to file.
   /**
+   * Execute a query, and save the result to file.
    * @param infilename - the file name of the source document
    * @param ofilename - the file name where results will be stored
    * @param query - the query supplied as a string
@@ -168,8 +166,8 @@ public:
   void executeQueryToFile(const char *infilename, const char *ofilename,
                           const char *query, const char *encoding = nullptr);
 
-  //! Execute a query, returning the result as an XdmValue.
   /**
+   * Execute a query, returning the result as an XdmValue.
    * @param infilename - the file name of the source document
    * @param query - the query supplied as a string
    * @param encoding - the encoding of the query string. If not specified then
@@ -180,8 +178,8 @@ public:
   XdmValue *executeQueryToValue(const char *infilename, const char *query,
                                 const char *encoding = nullptr);
 
-  //! Execute a query, returning the result as a string.
   /**
+   * Execute a query, returning the result as a string.
    * @param infilename - the file name of the source document
    * @param query - the query supplied as a string
    * @param encoding - the encoding of the query string. If not specified then
@@ -194,8 +192,8 @@ public:
   const char *executeQueryToString(const char *infilename, const char *query,
                                    const char *encoding = nullptr);
 
-  //! Execute a query as already configured for this XQueryProcessor, returning the result as an XdmValue.
   /**
+   * Execute a query as already configured for this XQueryProcessor, returning the result as an XdmValue.
    * All configuration properties must set in advance - for instance supplying the query and the context item.
    * @return The result of the query as an XdmValue. The caller is responsible for memory deallocation.
    * @throws SaxonApiException
@@ -214,8 +212,8 @@ public:
    */
   const char *runQueryToString();
 
-  //! Execute a query as already configured for this XQueryProcessor, and save the result to file.
   /**
+   * Execute a query as already configured for this XQueryProcessor, and save the result to file.
    * All configuration properties must set in advance - for instance supplying the query and the context item,
    * and the file name for the result output.
    * @throws SaxonApiException
@@ -250,34 +248,34 @@ public:
    */
   XdmValue *getParameter(const char *name, bool withParam=true);
 
-  //! Get all parameters as a std::map
   /**
+   * Get all parameters as a std::map
    * @return An std:map with key as string name mapped to XdmValue.
    */
   std::map<std::string, XdmValue *> &getParameters();
 
-  //! Get all configuration properties specified on the processor as a std::map
   /**
+   * Get all configuration properties specified on the processor as a std::map
    * @return Map of (string, string) pairs
    */
   std::map<std::string, std::string> &getProperties();
 
-  //! Compile a query file.
   /**
+   * Compile a query file.
    * The supplied query is cached for later execution.
    * @param filename - the file name of the query document
    */
   void setQueryFile(const char *filename);
 
-  //! Compile a query supplied as a string.
   /**
+   * Compile a query supplied as a string.
    * The supplied query is cached for later execution.
    * @param content - the query supplied as a character string
    */
   void setQueryContent(const char *content);
 
-  //! Set the static base URI for the query
   /**
+   * Set the static base URI for the query
    * @param baseURI - the static base URI; or nullptr to indicate that no base URI
    * is available
    */
@@ -296,8 +294,8 @@ public:
   */
  const char * getcwd();
 
-  //! Check for thrown exceptions.
   /**
+   * Check for thrown exceptions.
    * @return The main exception message if any has been thrown otherwise
    * return nullptr
    */
@@ -310,26 +308,28 @@ public:
    */
   bool exceptionOccurred();
 
-  //! Clear any thrown exceptions
+  /**
+   * Clear any thrown exceptions
+   */
   void exceptionClear();
 
-  //! Get the first error message if there are any errors
   /**
+   * Get the first error message if there are any errors.
    * A query may have a number of errors reported against it.
    * @return The message of the exception
    */
   const char *getErrorMessage();
 
-  //! Get the first error code if there are any errors
   /**
+   * Get the first error code if there are any errors.
    * After the execution of the query there may be a number of errors reported
    * against it.
    * @return The error code of the exception
    */
   const char *getErrorCode();
 
-  //! Get the SaxonApiException object created when we have an error
   /**
+   * Get the SaxonApiException object created when we have an error.
    * After the execution of the query if there is an error then a
    * SaxonApiException is created.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise

@@ -57,25 +57,26 @@ enum class UnprefixedElementMatchingPolicy {
   DEFAULT_NAMESPACE_OR_NONE = 2
 };
 
-/*! An <code>XPathProcessor</code> represents a factory to compile, load and
- * execute XPath expressions. <p/>
+/** An <code>XPathProcessor</code> represents a factory to compile, load and
+ * execute XPath expressions.
  */
 class XPathProcessor {
 public:
-  //! Default constructor.
-  /*!
-  * Creates a Saxon-HE XPath processor
+ /**
+  * Default constructor.
+  *
+  * Creates a Saxon-HE XPath processor.
   */
   XPathProcessor();
 
   ~XPathProcessor();
 
-  //! Constructor with the SaxonProcessor supplied.
-  /*!
-    @param proc - pointer to the SaxonProcessor object
-    @param cwd - the current working directory
-    @throws SaxonApiException
-  */
+  /**
+   * Constructor with the SaxonProcessor supplied.
+   * @param proc - pointer to the SaxonProcessor object
+   * @param cwd - the current working directory
+   * @throws SaxonApiException
+   */
   XPathProcessor(SaxonProcessor *proc, std::string cwd = "");
 
   /**
@@ -84,8 +85,9 @@ public:
    */
   XPathProcessor(const XPathProcessor &other);
 
-  //! Set the static base URI for XPath expressions compiled using this XPathProcessor.
   /**
+   * Set the static base URI for XPath expressions compiled using this XPathProcessor.
+   *
    * The base URI is part of the static context, and is used to resolve any
    * relative URIs appearing within an XPath expression, for example a relative
    * URI passed as an argument to the doc() function. If no static base URI is
@@ -94,15 +96,15 @@ public:
    */
   void setBaseURI(const char *uriStr);
 
-  //! Get the static base URI for XPath expressions compiled using this XPathProcessor.
   /**
+   * Get the static base URI for XPath expressions compiled using this XPathProcessor.
    * Note that memory deallocation is handled internally.
    * @return The static base URI as a string
    */
   const char *getBaseURI();
 
-  //! Compile and evaluate an XPath expression.
   /**
+   * Compile and evaluate an XPath expression.
    * @param xpathStr - the XPath expression supplied as a character string
    * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
@@ -113,8 +115,8 @@ public:
    */
   XdmValue *evaluate(const char *xpathStr, const char *encoding = nullptr);
 
-  //! Compile and evaluate an XPath expression. The result is expected to be a single XdmItem or nullptr.
   /**
+   * Compile and evaluate an XPath expression; the result is expected to be a single XdmItem or nullptr.
    * @param xpathStr - the XPath expression supplied as a character string
    * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
@@ -149,8 +151,8 @@ public:
    */
   void setContextFile(const char *filename);
 
-  //! Evaluate the XPath expression, returning the effective boolean value of the result.
   /**
+   * Evaluate the XPath expression, returning the effective boolean value of the result.
    * @param xpathStr - the XPath expression supplied as a character string
    * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
@@ -180,8 +182,8 @@ public:
    */
   bool removeParameter(const char *name);
 
-  //! Set a configuration property specific to the XPath processor in use.
   /**
+   * Set a configuration property specific to the XPath processor in use.
    * XPathProcessor: set serialization properties (names start with '!' i.e.
    * name "!method" -> "xml"), 'o':outfile name, 's': context item supplied as
    * file name
@@ -190,16 +192,15 @@ public:
    */
   void setProperty(const char *name, const char *value);
 
- //! Get the value of a configuration property specified on the XPath processor in use. Memory deallocation is handled internally.
  /**
+  * Get the value of a configuration property specified on the XPath processor in use. Memory deallocation is handled internally.
   * @param name - the name of the property
   * @return Value of the property or nullptr if the property is not found. Memory deallocation is handled internally.
   */
  const char * getProperty(const char *name);
 
-  //! Declare a namespace binding as part of the static context for XPath expressions compiled using this XPathProcessor
   /**
-   *
+   * Declare a namespace binding as part of the static context for XPath expressions compiled using this XPathProcessor
    * @param prefix - the namespace prefix. If the value is a zero-length string,
    * this method sets the default namespace for elements and types.
    * @param uri - the namespace URI. It is possible to specify a zero-length
@@ -211,9 +212,10 @@ public:
    */
   void declareNamespace(const char *prefix, const char *uri);
 
-  //! Declare a variable as part of the static context for XPath expressions compiled using this XPathProcessor.
   /**
-   *  It is an error for the XPath expression to refer to a variable unless it
+   * Declare a variable as part of the static context for XPath expressions compiled using this XPathProcessor.
+   *
+   * It is an error for the XPath expression to refer to a variable unless it
    * has been declared. This method declares the existence of the variable, but
    * it does not bind any value to the variable; that is done later, when the
    * XPath expression is evaluated. The variable is allowed to have any type
@@ -224,8 +226,8 @@ public:
    */
   void declareVariable(const char *name);
 
-  //! Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
   /**
+   * Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
    * Set the language version for the XPath compiler.
    *
    * @param version One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
@@ -237,8 +239,8 @@ public:
    */
   void setLanguageVersion(const char *version);
 
-  //! Say whether XPath 1.0 backwards compatibility mode is to be used
   /**
+   * Say whether XPath 1.0 backwards compatibility mode is to be used.
    * In backwards compatibility
    * mode, more implicit type conversions are allowed in XPath expressions, for
    * example it is possible to compare a number with a string. The default is
@@ -249,8 +251,8 @@ public:
    */
   void setBackwardsCompatible(bool option);
 
-  //! Say whether the compiler should maintain a cache of compiled expressions.
   /**
+   * Say whether the compiler should maintain a cache of compiled expressions.
    * @param caching - if set to true, caching of compiled expressions is enabled.
    *                If set to false, any existing cache is cleared, and future
    * compiled expressions will not be cached until caching is re-enabled. The
@@ -261,8 +263,8 @@ public:
 
   void setCaching(bool caching);
 
-  //! Set the policy for matching unprefixed element names in XPath expressions
   /**
+   * Set the policy for matching unprefixed element names in XPath expressions.
    * Use the convertEnumPolicy method to create an UnprefixedElementMatchingPolicy value.
    * @param policy - the policy to be used, possible values: DEFAULT_NAMESPACE =
    * 0, ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 2
@@ -281,14 +283,14 @@ public:
     return static_cast<UnprefixedElementMatchingPolicy>(n);
   }
 
-  //! Get the policy for matching unprefixed element names in XPath expressions
   /**
+   * Get the policy for matching unprefixed element names in XPath expressions
    * @return The policy being used
    */
   UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
 
-  //! Import a schema namespace
   /**
+   * Import a schema namespace.
    * That is, add the element and attribute declarations and type definitions
    * contained in a given namespace to the static context for the XPath
    * expression. <p>This method will not cause the schema to be loaded. This
@@ -353,26 +355,28 @@ public:
    */
   bool exceptionOccurred();
 
-  //! Clear any thrown exceptions
+  /**
+   * Clear any thrown exceptions
+   */
   void exceptionClear();
 
-  //! Get the first error message if there are any errors
   /**
+   * Get the first error message if there are any errors.
    * An XPath expression may have a number of errors reported against it.
    * @return The message of the exception
    */
   const char *getErrorMessage();
 
-  //! Get the first error code if there are any errors
   /**
+   * Get the first error code if there are any errors.
    * After the execution of the XPath expression there may be a number of
    * errors reported against it.
    * @return The error code of the exception
    */
   const char *getErrorCode();
 
-  //! Get the SaxonApiException object created when we have an error
   /**
+   * Get the SaxonApiException object created when we have an error.
    * After the execution of the processor if there is an error then a
    * SaxonApiException is created.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise

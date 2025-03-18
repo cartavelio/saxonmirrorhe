@@ -22,7 +22,7 @@ class XdmItem;
 class XdmNode;
 class XdmFunctionItem;
 
-/*! An <code>XsltExecutable</code> represents the compiled form of a stylesheet.
+/** An <code>XsltExecutable</code> represents the compiled form of a stylesheet.
  * <p>An XsltExecutable is created by using one of the <code>compile</code>
  * methods on the Xslt30Processor class.</p>
  */
@@ -33,8 +33,8 @@ class XsltExecutable {
 public:
   ~XsltExecutable();
 
-  //! Set the current working directory (cwd).
   /**
+   * Set the current working directory (cwd).
    * This method also applies to the static base URI for XSLT
    * stylesheets when supplied as lexical string.
    * The cwd is used to set the base URI is part of the static context, and is
@@ -43,27 +43,27 @@ public:
    */
   void setcwd(const char *cwd);
 
- //! Get the current working directory (cwd). Memory deallocation is handled internally.
  /**
+  * Get the current working directory (cwd). Memory deallocation is handled internally.
   * The cwd is used to set the base URI is part of the static context, and is
   * used to resolve any relative URIs appearing within XSLT.
   * @return Current working directory
   */
  const char * getcwd();
 
-  //! Set the base output URI.
   /**
+   * Set the base output URI.
    * The base output URI is used for resolving relative URIs in the
    * <code>href</code> attribute of the <code>xsl:result-document</code>
    * instruction; it is accessible to XSLT stylesheet code using the XPath
-   * current-output-uri() function
+   * current-output-uri() function.
    *
    * @param baseURI - the base output URI
    */
   void setBaseOutputURI(const char *baseURI);
 
-  //! Supply the context item to be used when evaluating global variables and parameters.
   /**
+   * Supply the context item to be used when evaluating global variables and parameters.
    * Set the context item for the transformation as an XdmItem.
    * @param value - the item to be used as the context item within the
    * initializers of global variables and parameters. Given as a pointer to a
@@ -80,16 +80,14 @@ public:
    */
   void setGlobalContextFromFile(const char *filename);
 
-  //! Create a clone of this XsltExecutable object
   /**
-   *
+   * Create a clone of this XsltExecutable object.
    * @return A new copy of this XsltExecutable object
    */
   XsltExecutable *clone();
 
-  //! Set the initial mode for the transformation
   /**
-   *
+   * Set the initial mode for the transformation.
    * @param modeName - the EQName of the initial mode. Two special values are
    * recognized, in the reserved XSLT namespace: xsl:unnamed to indicate the
    * mode with no name, and xsl:default to indicate the mode defined in the
@@ -99,15 +97,15 @@ public:
    */
   void setInitialMode(const char *modeName);
 
-  //! Set the initial match selection for the transformation to be a specified XDM value
   /**
+   * Set the initial match selection for the transformation to be a specified XDM value.
    * This is equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>
    * @param selection - the XDM value to which template rules are to be applied
    */
   void setInitialMatchSelection(XdmValue *selection);
 
-  //! Set the initial match selection for the transformation to be a specified file
   /**
+   * Set the initial match selection for the transformation to be a specified file.
    * This is equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>.
    * The file is parsed internally.
    * @param filename - the file name for the source document to which template rules are to be applied
@@ -227,9 +225,8 @@ public:
    */
   const char *getProperty(const char *name);
 
-  //! Get all parameters as a std::map
   /**
-   *
+   * Get all parameters as a std::map.
    * Please note that the key name has been prefixed with 'param:', for example
    * 'param:name'
    * @return std:map with key as string name mapped to XdmValue.
@@ -237,15 +234,14 @@ public:
    */
   std::map<std::string, XdmValue *> &getParameters();
 
-  //! Get all configuration properties specified on the processor as a std::map
   /**
-   *
+   * Get all configuration properties specified on the processor as a std::map.
    * @return Map of (string, string) pairs
    */
   std::map<std::string, std::string> &getProperties();
 
-  //! Clear stylesheet parameter values set.
   /**
+   * Clear stylesheet parameter values set.
    * Default behaviour (false) is to leave XdmValues in memory.
    * Individual pointers to XdmValue objects have to be deleted in the calling
    * program.
@@ -253,8 +249,9 @@ public:
    */
   void clearParameters(bool deleteValues = false);
 
-
-  //! Clear configuration property values set
+  /**
+   * Clear configuration property values set
+   */
   void clearProperties();
 
 
@@ -263,16 +260,16 @@ public:
    */
   char **createCharArray(int len) { return (new char *[len]); }
 
-  //! Utility method for Python API - internal use only
   /**
+   * Utility method for Python API - internal use only.
    * This method deletes a XdmValue pointer array
    * @param arr - XdmValue pointer array
    * @param len - length of the array
    */
   void deleteXdmValueArray(XdmValue **arr, int len);
 
-  //! This method gives users the option to switch on or off the <code>xsl:message</code> feature.
   /**
+   * This method gives users the option to switch on or off the <code>xsl:message</code> feature.
    * It is also possible
    * to send the <code>xsl:message</code> outputs to file given by file name.
    * @param show - boolean to indicate if xsl:message should be outputted.
@@ -282,8 +279,8 @@ public:
    */
   void setSaveXslMessage(bool show, const char *filename = nullptr);
 
-  //! Enable the capture of secondary result documents into a std:map. This overrides the default mechanism.
   /**
+   * Enable the capture of secondary result documents into a std:map, this overrides the default mechanism.
    * If this option is enabled, then any document created using
    * xsl:result-document is saved (as an XdmNode) in a std::map object where it
    * is accessible using the URI as a key. After the execution of the
@@ -298,8 +295,8 @@ public:
    */
   void setCaptureResultDocuments(bool flag, bool rawResults = false);
 
-  //! Produce a representation of the compiled stylesheet
   /**
+   * Produce a representation of the compiled stylesheet.
    * The representation of the compiled stylesheet is in an XML form, suitable
    * for distribution and reloading. If the configuration under which the export
    * takes place is suitably licensed, then license information will be included
@@ -314,8 +311,8 @@ public:
    */
   void exportStylesheet(const char *filename);
 
-  //! Perform a one shot transformation, and save the result to file.
   /**
+   * Perform a one shot transformation, and save the result to file.
    * The result is stored in the specified output file.
    *
    * @param sourcefile - the file name of the source document
@@ -324,9 +321,8 @@ public:
    */
   void transformFileToFile(const char *sourcefile, const char *outputfile);
 
-  //! Perform a one shot transformation, returning the result as a string.
   /**
-   *
+   * Perform a one shot transformation, returning the result as a string.
    * @param sourcefile - the file name of the source document
    * @return The result of the transformation serialized to a string.
    * A zero length string is returned if the transformation result is an empty sequence.
@@ -345,8 +341,9 @@ public:
    */
   XdmValue *transformFileToValue(const char *sourcefile);
 
-  //! Invoke a transformation by applying templates to a supplied input sequence, and save the result to file.
   /**
+   * Invoke a transformation by applying templates to a supplied input sequence, and save the result to file.
+   *
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile. The result is
    * stored in the specified output file.
@@ -357,8 +354,9 @@ public:
    */
   void applyTemplatesReturningFile(const char *outfile);
 
-  //! Invoke a transformation by applying templates to a supplied input sequence, returning the result as a string.
   /**
+   * Invoke a transformation by applying templates to a supplied input sequence, returning the result as a string.
+   *
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile.
    * @return The result of the transformation serialized to a string.
@@ -369,8 +367,9 @@ public:
    */
   const char *applyTemplatesReturningString();
 
-  //! Invoke a transformation by applying templates to a supplied input sequence, returning the result as an XdmValue.
   /**
+   * Invoke a transformation by applying templates to a supplied input sequence, returning the result as an XdmValue.
+   *
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile.
    * @return The result of the transformation as an XdmValue.
@@ -380,8 +379,10 @@ public:
    */
   XdmValue *applyTemplatesReturningValue();
 
-  //! Invoke a transformation by calling a named template, and save the result to file.
-  /** The results of calling the template are wrapped in a document node, which
+  /**
+   * Invoke a transformation by calling a named template, and save the result to file.
+   *
+   * The results of calling the template are wrapped in a document node, which
    * is then sent to the specified file destination. If
    * setInitialTemplateParameters(std::map, boolean) has been called, then the
    * parameters supplied are made available to the called template (no error
@@ -394,8 +395,10 @@ public:
    */
   void callTemplateReturningFile(const char *templateName, const char *outfile);
 
-  //! Invoke a transformation by calling a named template and return the result as a string.
-  /** The results of calling the template are wrapped in a document node, which
+  /**
+   * Invoke a transformation by calling a named template and return the result as a string.
+   *
+   * The results of calling the template are wrapped in a document node, which
    * is then serialized as a string. If setInitialTemplateParameters(std::map,
    * boolean) has been called, then the parameters supplied are made available
    * to the called template (no error occurs if parameters are supplied that are
@@ -410,8 +413,10 @@ public:
    */
   const char *callTemplateReturningString(const char *templateName = nullptr);
 
-  //! Invoke a transformation by calling a named template and return the result as an XdmValue.
-  /** The results of calling the template are wrapped in a document node, which
+  /**
+   * Invoke a transformation by calling a named template and return the result as an XdmValue.
+   *
+   * The results of calling the template are wrapped in a document node, which
    * is then returned as an XdmValue. If setInitialTemplateParameters(std::map,
    * boolean) has been called, then the parameters supplied are made available
    * to the called template (no error occurs if parameters are supplied that are
@@ -426,8 +431,10 @@ public:
    */
   XdmValue *callTemplateReturningValue(const char *templateName = nullptr);
 
-  //! Call a public user-defined function in the stylesheet, and save the result to file.
-  /** The results of calling the function are wrapped in a document node, which
+  /**
+   * Call a public user-defined function in the stylesheet, and save the result to file.
+   *
+   * The results of calling the function are wrapped in a document node, which
    * is then sent to the specified file destination.
    * @param functionName - the name of the function to be called
    * @param arguments - pointer array of XdmValue objects - the values of the
@@ -441,8 +448,10 @@ public:
   void callFunctionReturningFile(const char *functionName, XdmValue **arguments,
                                  int argument_length, const char *outfile);
 
-  //! Call a public user-defined function in the stylesheet and return the result as a string.
-  /** The results of calling the function are wrapped in a document node, which
+  /**
+   * Call a public user-defined function in the stylesheet and return the result as a string.
+   *
+   * The results of calling the function are wrapped in a document node, which
    * is then serialized as a string.
    * @param functionName - the name of the function to be called
    * @param arguments - pointer array of XdmValue objects - the values of the
@@ -459,8 +468,10 @@ public:
                                           XdmValue **arguments,
                                           int argument_length);
 
-  //! Call a public user-defined function in the already compiled stylesheet
-  /** The results of calling the function are wrapped in a document node, which
+  /**
+   * Call a public user-defined function in the already compiled stylesheet.
+   *
+   * The results of calling the function are wrapped in a document node, which
    * is then returned as an XdmValue.
    * @param functionName - the name of the function to be called
    * @param arguments - pointer array of XdmValue objects - the values of the
@@ -477,8 +488,8 @@ public:
                                        XdmValue **arguments,
                                        int argument_length);
 
-  //! Execute a transformation, returning the result as a string. Properties supplied in advance.
   /**
+   * Execute a transformation, returning the result as a string, with properties supplied in advance.
    * Perform the transformation as configured for this XsltExecutable.
    * @param source - source document supplied as an XdmNode object. nullptr
    * accepted if source document has been set already.
@@ -490,8 +501,8 @@ public:
    */
   const char *transformToString(XdmNode *source = nullptr);
 
-  //! Execute a transformation, returning the result as an XdmValue. Properties supplied in advance.
   /**
+   * Execute a transformation, returning the result as an XdmValue, with properties supplied in advance.
    * Perform the transformation as configured for this XsltExecutable.
    * @param source - source document supplied as an XdmNode object. nullptr
    * accepted if source document has been set already.
@@ -502,8 +513,8 @@ public:
    */
   XdmValue *transformToValue(XdmNode *source = nullptr);
 
-  //! Execute a transformation, and save the result to file. Properties supplied in advance.
   /**
+   * Execute a transformation, and save the result to file, with properties supplied in advance.
    * Perform the transformation as configured for this XsltExecutable.
    * The result is stored in the output file as set in advance.
    * @param source - source document supplied as an XdmNode object. nullptr
@@ -535,31 +546,33 @@ public:
    */
   bool exceptionOccurred();
 
-  //! Get the SaxonApiException object created when we have an error
   /**
+   * Get the SaxonApiException object created when we have an error.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
   SaxonApiException *getException();
 
-  //! Get the first error message if there are any errors
   /**
+   * Get the first error message if there are any errors.
    * A transformation may have a number of errors reported against it.
    * @return The message of the exception
    */
   const char *getErrorMessage();
 
-  //! Clear any thrown exceptions
+  /**
+   * Clear any thrown exceptions.
+   */
   void exceptionClear();
 
 private:
-  //! Default constructor.
-  /*!
-    Creates an XsltExecutable
-  */
+  /**
+   * Default constructor.
+   * Creates an XsltExecutable
+   */
   XsltExecutable();
 
-  //! Constructor with the SaxonProcessor supplied.
-  /*!
+  /**
+   * Constructor with the SaxonProcessor supplied.
    * @param proc - pointer to the SaxonProcessor object
    * @param cwd - the current working directory
    */
