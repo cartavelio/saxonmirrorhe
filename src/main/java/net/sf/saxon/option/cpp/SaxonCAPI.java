@@ -154,6 +154,12 @@ public class SaxonCAPI {
         return handle.rawValue();
     }
 
+
+    @CEntryPoint(name = "j_gc")
+    public static void gc(IsolateThread thread) {
+        System.gc();
+    }
+
     /**
      *  Static method to check if the Processor object is schema aware
      * @param thread - Graalvm runtime data structure for a thread
