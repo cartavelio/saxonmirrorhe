@@ -44,6 +44,10 @@ XdmValue *XdmMap::get(XdmAtomicValue *key) {
       j_xdmMap_get(SaxonProcessor::sxn_environ->thread, (void *)value,
                    (void *)key->getUnderlyingValue());
 
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+
   return getXdmValueSubClass(result);
 }
 
@@ -53,6 +57,11 @@ XdmValue *XdmMap::get(const char *key) {
   }
   int64_t result = j_xdmMap_get_with_key_as_string(
       SaxonProcessor::sxn_environ->thread, (void *)value, (char *)key);
+
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+
   return getXdmValueSubClass(result);
 }
 
@@ -62,6 +71,10 @@ XdmValue *XdmMap::get(int key) {
   }
   int64_t result = j_xdmMap_get_with_key_as_int(
       SaxonProcessor::sxn_environ->thread, (void *)value, key);
+
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   return getXdmValueSubClass(result);
 }
 
@@ -71,6 +84,10 @@ XdmValue *XdmMap::get(double key) {
   }
   int64_t result = j_xdmMap_get_with_key_as_double(
       SaxonProcessor::sxn_environ->thread, (void *)value, key);
+
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   return getXdmValueSubClass(result);
 }
 
@@ -80,6 +97,10 @@ XdmValue *XdmMap::get(long key) {
   }
   int64_t result = j_xdmMap_get_with_key_as_long(
       SaxonProcessor::sxn_environ->thread, (void *)value, key);
+
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   return getXdmValueSubClass(result);
 }
 
@@ -92,8 +113,10 @@ XdmMap *XdmMap::put(XdmAtomicValue *key, XdmValue *valuei) {
   int64_t result = j_xdmMap_put(
       SaxonProcessor::sxn_environ->thread, (void *)value,
       (void *)key->getUnderlyingValue(), (void *)valuei->getUnderlyingValue());
-  if (result <= 0) {
-    return nullptr;
+
+
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
   return new XdmMap(result);
 }
@@ -105,8 +128,9 @@ XdmMap *XdmMap::remove(XdmAtomicValue *key) {
   int64_t result =
       j_xdmMap_remove(SaxonProcessor::sxn_environ->thread, (void *)value,
                       (void *)key->getUnderlyingValue());
-  if (result <= 0) {
-    return nullptr;
+
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
   return new XdmMap(result);
 }
@@ -126,7 +150,7 @@ std::set<XdmAtomicValue *> XdmMap::keySet() {
     tempValue = new XdmAtomicValue(results[p]);
     myset.insert(tempValue);
   }
-  delete results;
+  operator delete(results);
 
   return myset;
 }
@@ -149,7 +173,7 @@ XdmAtomicValue **XdmMap::keys() {
     tempValue = new XdmAtomicValue(results[p]);
     valuesi[p] = tempValue;
   }
-  delete results;
+  operator delete(results);
   return valuesi;
 }
 

@@ -19,9 +19,9 @@ XdmNode::XdmNode(XdmNode *p, int64_t obj, XDM_NODE_KIND kind)
       attrValues(nullptr), attrCount(-1), nodeKind(kind), axisCount(0),
       nodeToString(nullptr) {}
 
-XdmNode::XdmNode(const XdmNode &other) {
+XdmNode::XdmNode(const XdmNode &other): XdmItem(other) {
   baseURI = other.baseURI;
-  value = other.value;
+  //value = other.value;
   nodeName = other.nodeName;
   localName = other.localName;
   childCount = other.childCount;
@@ -29,7 +29,7 @@ XdmNode::XdmNode(const XdmNode &other) {
   nodeKind = other.nodeKind;
   nodeToString = other.nodeToString;
   axisCount = other.axisCount;
-  children = other.children;
+  //children = other.children;
 
 }
 
@@ -234,6 +234,10 @@ const char *XdmNode::getAttributeValue(const char *str) {
   const char *stri =
       j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value,
                           (char *)str, (void *)fn);
+
+  if((bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+    throw SaxonApiException();
+  }
 
   return stri;
 }

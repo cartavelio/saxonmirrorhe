@@ -61,8 +61,11 @@ XsltExecutable::~XsltExecutable() {
 }
 
 XsltExecutable::XsltExecutable(const XsltExecutable &other) {
-
-  executableRef = other.executableRef;
+  executableRef = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.executableRef);
+  if(executableRef == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+  //executableRef = other.executableRef;
   procRef = other.procRef;
   cwdXE = other.cwdXE;
   resources_dir = other.resources_dir;

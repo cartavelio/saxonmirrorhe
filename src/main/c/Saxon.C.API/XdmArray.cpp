@@ -32,11 +32,14 @@ int XdmArray::arrayLength() {
 }
 
 XdmValue *XdmArray::get(int n) {
-  if (n < 0 || value == SXN_UNSET || arrayLength() == 0) {
+  if (n < 0 || value == SXN_UNSET) {
     return nullptr;
   }
   int64_t result =
       j_xdmArray_get(SaxonProcessor::sxn_environ->thread, (void *)value, n);
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   return getXdmValueSubClass(result);
 }
 
@@ -47,6 +50,9 @@ const char *XdmArray::toString() {
   allocFn fn = operator new;
   const char *str = j_xdmArray_toString(SaxonProcessor::sxn_environ->thread,
                                         (void *)fn, (void *)value);
+  if(str == nullptr) {
+    throw SaxonApiException();
+  }
 
   return str;
 }
@@ -58,13 +64,13 @@ const char *XdmArray::getStringValue() {
 
 XdmArray *XdmArray::put(int n, XdmValue *valuei) {
   if (n < 0) {
-    return nullptr;
+    throw SaxonApiException("XdmArray::put: Negative number supplied for the arguments");
   }
   int64_t result =
       j_xdmArray_put(SaxonProcessor::sxn_environ->thread, (void *)value, n,
                      (void *)valuei->getUnderlyingValue());
-  if (result <= 0) {
-    return nullptr;
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
   auto *newValue = new XdmArray(result);
   return newValue;
@@ -74,8 +80,8 @@ XdmArray *XdmArray::addMember(XdmValue *valuei) {
   int64_t result =
       j_xdmArray_addMember(SaxonProcessor::sxn_environ->thread, (void *)value,
                            (void *)valuei->getUnderlyingValue());
-  if (result <= 0) {
-    return nullptr;
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
   auto *newValue = new XdmArray(result);
   return newValue;
@@ -85,8 +91,8 @@ XdmArray *XdmArray::concat(XdmArray *valuei) {
   int64_t result =
       j_xdmArray_concat(SaxonProcessor::sxn_environ->thread, (void *)value,
                         (void *)valuei->getUnderlyingValue());
-  if (result <= 0) {
-    return nullptr;
+  if(result == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
   auto *newValue = new XdmArray(result);
   return newValue;
@@ -151,7 +157,7 @@ std::list<XdmValue *> XdmArray::asList() {
 
       arr.push_back(tempValue);
     }
-    delete results;
+    operator delete(results);
   }
 
   return arr;
@@ -229,6 +235,6 @@ XdmValue **XdmArray::values() {
 
     arr[p] = tempValue;
   }
-  delete results;
+  operator delete(results);
   return arr;
 }

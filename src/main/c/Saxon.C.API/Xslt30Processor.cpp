@@ -76,8 +76,10 @@ Xslt30Processor::~Xslt30Processor() {
 
 Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
   proc = other.proc;
-
-  cppXT = other.cppXT;
+  cppXT = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppXT);
+  if(cppXT == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   cwdXT = other.cwdXT;
   importPackageValue = other.importPackageValue;
   std::map<std::string, XdmValue *>::const_iterator paramIter =

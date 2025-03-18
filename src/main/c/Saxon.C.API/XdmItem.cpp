@@ -9,7 +9,10 @@ XdmItem::XdmItem() : XdmValue() {
 }
 
 XdmItem::XdmItem(const XdmItem &other) : XdmValue(other) {
-  value = other.value;
+  value = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.value);
+  if(value == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   xdmSize = 1;
   refCount = other.refCount;
   stringValue = other.stringValue;

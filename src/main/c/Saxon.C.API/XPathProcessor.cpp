@@ -25,16 +25,6 @@ XPathProcessor::XPathProcessor(SaxonProcessor *p, std::string curr) {
     unprefixedElementPolicy = UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE;
     // SaxonProcessor::attachCurrentThread();
 
-    /*cppClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                    "net/sf/saxon/option/cpp/XPathProcessor");
-    if ((proc->proc) == nullptr) {
-            std::cerr << "Processor is nullptr" << std::endl;
-    }
-
-  jobject tempcppXP = createSaxonProcessor2(SaxonProcessor::sxn_environ->env,
-  cppClass,
-                    "(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);*/
-
     cppXP = createXPathProcessorWithProcessor(SaxonProcessor::sxn_environ->thread,
                                               (void *) p->procRef);
 
@@ -63,9 +53,11 @@ XPathProcessor::XPathProcessor(SaxonProcessor *p, std::string curr) {
 
 XPathProcessor::XPathProcessor(const XPathProcessor &other) {
     cwdXP = other.cwdXP;
-    proc = other.proc; // TODO check thread safety
-
-    cppXP = other.cppXP;
+    proc = other.proc;
+    cppXP = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppXP);
+    if(cppXP == SXN_EXCEPTION) {
+        throw SaxonApiException();
+    }
     xp_baseURI = other.xp_baseURI;
     unprefixedElementPolicy = other.unprefixedElementPolicy;
     std::map<std::string, XdmValue *>::const_iterator paramIter =
