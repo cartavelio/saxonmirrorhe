@@ -13,6 +13,7 @@ import net.sf.saxon.event.Sender;
 import net.sf.saxon.lib.ErrorReporterToListener;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SerializerFactory;
+import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -104,10 +105,15 @@ public class IdentityTransformer extends Transformer {
      * Get the error event handler in effect for the transformation.
      * Implementations must provide a default error listener.
      *
-     * @return The current error handler, which should never be null.
+     * @return The current error listener, which should never be null. If no error listener
+     * has been supplied then a default one (whose behavior is completely undefined)
+     * is returned.
      */
     @Override
     public ErrorListener getErrorListener() {
+        if (errorListener == null) {
+            errorListener = new StandardErrorListener();
+        }
         return errorListener;
     }
 
