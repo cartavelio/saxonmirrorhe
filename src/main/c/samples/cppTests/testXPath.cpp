@@ -437,6 +437,44 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
   }
 }
 
+void testEdition(SaxonProcessor *processor, sResultCount *sresult) {
+  cout << endl << "Test testEdition:" << endl;
+  const char * edition  = processor->getSaxonEdition();
+
+  if (strcmp(edition, "@@EDITION@@") == 0) {
+    std::cerr<<"Edition = "<<processor->getSaxonEdition()<<endl;
+    sresult->success++;
+  } else {
+    sresult->failure++;
+    sresult->failureList.push_back("testEdition");
+
+  }
+
+}
+
+void testIsLicensed(sResultCount *sresult) {
+  SaxonProcessor *processor = new SaxonProcessor(true);
+  cout << endl << "Test testIsLicensed:" << endl;
+  const char * edition  = processor->getSaxonEdition();
+
+  if (strcmp(edition, "EE") == 0 || strcmp(edition, "PE") == 0) {
+    if(processor->isLicensed()) {
+      std::cerr<<"Product is licensed"<<endl;
+      sresult->success++;
+    } else {
+      std::cerr<<"Product is not licensed"<<endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testIsLicensed");
+    }
+
+  } else {
+
+
+  }
+
+
+}
+
 // Test case on XdmValue without any item (i.e. EmptySequence)
 void testEmptyXdmValueToString(SaxonProcessor *processor, XPathProcessor *xpath,
                      sResultCount *sresult) {
@@ -876,6 +914,17 @@ int main() {
        << "Test: XPathProcessor with Saxon version=" << processor->version()
        << endl;
   testXPathSingle(processor, xpathProc, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testEdition(processor, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testIsLicensed(sresult);
   cout << endl
        << "============================================================="
        << endl

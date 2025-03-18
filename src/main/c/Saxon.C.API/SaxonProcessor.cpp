@@ -355,6 +355,27 @@ SaxonProcessor::~SaxonProcessor() {
   // exceptionClear();
 }
 
+bool SaxonProcessor::isLicensed() {
+  SaxonProcessor::attachCurrentThread();
+  if (!licensei) {
+    return false;
+  } else {
+
+    if (procRef < 0) {
+      return false;
+    }
+    licensei =
+        j_isLicensed(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+    return licensei;
+  }
+}
+
+
+const char * SaxonProcessor::getSaxonEdition() {
+    SaxonProcessor::attachCurrentThread();
+  return SAXONC_EDITION;
+}
+
 
 bool SaxonProcessor::isSchemaAwareProcessor() {
   SaxonProcessor::attachCurrentThread();

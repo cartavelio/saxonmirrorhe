@@ -26,6 +26,7 @@
 //#define DEBUG //remove
 //#define MEM_DEBUG //remove
 #define CVERSION "@@VERSION@@"
+#define SAXONC_EDITION "@@EDITION@@"
 #define CVERSION_API_NO 1210
 
 #include <iostream>
@@ -634,9 +635,9 @@ public:
   //! Clear configuration properties specific to the processor in use.
   void clearConfigurationProperties();
 
- //!
+ //! Flag to determine if this configuration is licensed.
  /**
- *
+ * @returns bool - flag if this configuraton is licensed
 */
  bool isLicensed();
 

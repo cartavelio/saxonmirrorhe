@@ -6,6 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.option.cpp;
 
+import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
@@ -160,7 +161,7 @@ public class SaxonCAPI {
      *  Static method to check if the Processor object is schema aware
      * @param thread - Graalvm runtime data structure for a thread
      * @param procRef - long value pointing to a SaxonProcessor object in the ObjectHandle pool
-     * @return  byte representing boolean. true if this this processor is licensed for schema processing, false otherwise
+     * @return  byte representing boolean. true if this processor is licensed for schema processing, false otherwise
      */
     @CEntryPoint(name = "j_isSchemaAware")
     public static byte j_isSchemaAware(IsolateThread thread, ObjectHandle procRef) {
@@ -168,6 +169,27 @@ public class SaxonCAPI {
         boolean result = proc.isSchemaAware();
 
         return CTypeConversion.toCBoolean(result);
+    }
+
+    /**
+     *  Static method to check if the Processor object is licensed
+     * @param thread - Graalvm runtime data structure for a thread
+     * @param procRef - long value pointing to a SaxonProcessor object in the ObjectHandle pool
+     * @return  byte representing boolean. true if this processor is licensed, false otherwise
+     */
+    @CEntryPoint(name = "j_isLicensed")
+    public static byte j_isLicensed(IsolateThread thread, ObjectHandle procRef) {
+        Processor proc = objectHandles.get(procRef);
+        Configuration config = proc.getUnderlyingConfiguration();
+        if(config instanceof ProfessionalConfiguration) {
+            System.err.println("Professional configuration found");
+            return CTypeConversion.toCBoolean(((ProfessionalConfiguration)config).isLicenseFound());
+        } else{
+            System.err.println("HE Configuration found");
+            return CTypeConversion.toCBoolean(false);
+        }
+
+
     }
 
     /**
