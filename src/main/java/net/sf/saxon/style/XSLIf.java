@@ -114,6 +114,8 @@ public class XSLIf extends StyleElement {
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         test = typeCheck("test", test);
+        thenExp = typeCheck("then", thenExp);
+        elseExp = typeCheck("else", elseExp);
         if (thenExp != null && hasChildNodes()) {
             compileError("xsl:if element must be empty if @then is present", "XTSE0010");
         }
