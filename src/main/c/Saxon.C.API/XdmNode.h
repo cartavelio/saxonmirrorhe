@@ -71,8 +71,22 @@ public:
    */
   XdmNode(XdmNode *parent, int64_t, XDM_NODE_KIND kind);
 
+ /**
+ * XdmNode == operator. The <code>equals()</code> relation between two XdmNode objects is true if they both represent the same
+ * node. That is, it corresponds to the "is" operator in XPath.
+ * @param other - the node being copied
+ */
+ bool operator==(const XdmNode& other) const
+ {
+  char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
+  if((int)result == SXN_EXCEPTION) {
+   throw SaxonApiException();
+  }
+  return result != 0;
+ }
+
   /**
-   * XdmValue copy constructor.
+   * XdmNode copy constructor.
    * @param other - the node being copied
    */
   XdmNode(const XdmNode &other);
@@ -93,6 +107,7 @@ public:
    * @return This XdmNode
    */
   XdmItem *getHead();
+
 
   /**
    * Get the kind of the node.

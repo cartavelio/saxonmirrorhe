@@ -128,6 +128,7 @@ void XdmNode::resetRelinquishedChildren(){
 
 }
 
+
 const char *XdmNode::getLocalName() {
   if (localName != nullptr) {
     return localName;
