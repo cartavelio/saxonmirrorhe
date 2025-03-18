@@ -729,7 +729,7 @@ public class XPathCompiler {
         }
 
         DecimalSymbols symbols = dfm.obtainNamedDecimalFormat(format.getStructuredQName());
-        setDecimalFormatProperty(symbols, property, value);
+        setDecimalFormatProperty(symbols, property, value;
 
     }
 
