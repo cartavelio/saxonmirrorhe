@@ -355,6 +355,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
                 out.setSystemId(getBaseOutputURI());
             }
             controller.initializeController(parameters);
+            controller.openTraceEpisode();
 
             if (initialTemplateName != null) {
                 controller.callTemplate(initialTemplateName.getStructuredQName(), out);
@@ -376,6 +377,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
             if (reset) {
                 controller.clearGlobalContextItem();
             }
+            controller.closeTraceEpisode();
         }
     }
 

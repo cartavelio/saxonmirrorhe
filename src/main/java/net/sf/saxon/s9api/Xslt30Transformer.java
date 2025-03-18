@@ -300,6 +300,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             XPathException err = new XPathException("No initial match selection supplied", "XTDE0044");
             throw new SaxonApiException(err);
         }
+        controller.openTraceEpisode();
         prime();
         try {
             Receiver sOut = getDestinationReceiver(controller, destination);
@@ -310,6 +311,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
                 getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
+        } finally {
+            controller.closeTraceEpisode();
         }
     }
 
@@ -431,6 +434,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     public synchronized void applyTemplates(XdmValue selection, Destination destination) throws SaxonApiException {
         Objects.requireNonNull(selection);
         Objects.requireNonNull(destination);
+        controller.openTraceEpisode();
         prime();
         try {
             Receiver sOut = getDestinationReceiver(controller, destination);
@@ -444,6 +448,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
                 getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
+        } finally {
+            controller.closeTraceEpisode();
         }
     }
 
@@ -492,6 +498,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
 
     public synchronized void callTemplate(QName templateName, Destination destination) throws SaxonApiException {
         Objects.requireNonNull(destination);
+        controller.openTraceEpisode();
         prime();
         if (templateName == null) {
             templateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
@@ -511,6 +518,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
                 getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
+        } finally {
+            controller.closeTraceEpisode();
         }
     }
 
@@ -552,6 +561,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
     public synchronized XdmValue callFunction(QName function, XdmValue[] arguments) throws SaxonApiException {
         Objects.requireNonNull(function);
         Objects.requireNonNull(arguments);
+        controller.openTraceEpisode();
         prime();
         try {
             Component f = getFunctionComponent(function, arguments);
@@ -570,6 +580,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
                 getErrorReporter().report(new XmlProcessingException(e));
             }
             throw new SaxonApiException(e);
+        } finally {
+            controller.closeTraceEpisode();
         }
     }
 
@@ -622,6 +634,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      */
 
     public synchronized void callFunction(QName function, XdmValue[] arguments, Destination destination) throws SaxonApiException {
+        controller.openTraceEpisode();
         prime();
         try {
             Component f = getFunctionComponent(function, arguments);
@@ -642,6 +655,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
         } catch (XPathException e) {
             getErrorReporter().report(new XmlProcessingException(e));
             throw new SaxonApiException(e);
+        } finally {
+            controller.closeTraceEpisode();
         }
 
         destination.closeAndNotify();

@@ -440,6 +440,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             throw new XPathException("A typed input document can only be used with a schema-aware query");
         }
         Controller controller = newController(env);
+        controller.openTraceEpisode();
         if (result instanceof Receiver) {
             ((Receiver)result).getPipelineConfiguration().setController(controller);
         }
@@ -478,9 +479,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             throw err;
         } finally {
             try {
-                if (tracer != null) {
-                    tracer.close();
-                }
+                controller.closeTraceEpisode();
                 dest.close();
             } catch (XPathException e) {
                 e.printStackTrace();

@@ -1052,6 +1052,18 @@ public class Controller implements ContextOriginator {
         }
     }
 
+    public void openTraceEpisode() {
+        if (traceListener != null) {
+            traceListener.open(this);
+        }
+    }
+
+    public void closeTraceEpisode() {
+        if (traceListener != null) {
+            traceListener.close();
+        }
+    }
+
     /**
      * Removes the specified trace listener so that the listener will no longer
      * receive trace events.
@@ -1125,7 +1137,7 @@ public class Controller implements ContextOriginator {
         globalContextItem = executable.checkInitialContextItem(globalContextItem, newXPathContext());
 
         if (traceListener != null) {
-            traceListener.open(this);
+            //traceListener.open(this);
             preEvaluateGlobals(newXPathContext());
         }
     }
