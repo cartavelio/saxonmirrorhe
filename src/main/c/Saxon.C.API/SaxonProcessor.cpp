@@ -58,9 +58,6 @@ void operator delete(void *ptr, std::size_t) noexcept {
 
 #define new new (__FILE__, __LINE__)
 
-
-
-
 void SaxonProcessor::getInfo() {
 
   std::cout << std::endl;
@@ -75,8 +72,6 @@ void SaxonProcessor::getInfo() {
 }
 
 #endif
-
-
 
 // jobject cpp;
 const char *failure;
@@ -333,7 +328,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 }
 
 SaxonProcessor::~SaxonProcessor() {
-  SaxonProcessor::attachCurrentThread();
+  // SaxonProcessor::attachCurrentThread();
   clearConfigurationProperties();
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~SaxonProcessor destructor:"
@@ -354,7 +349,6 @@ SaxonProcessor::~SaxonProcessor() {
   }
   // exceptionClear();
 }
-
 
 bool SaxonProcessor::isSchemaAwareProcessor() {
   SaxonProcessor::attachCurrentThread();
@@ -400,12 +394,11 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     XdmValue *value = nullptr;
     int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                      (void *)results);
-#ifdef DEBUG
+
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++ makeXdmValueFromRef - typeRef= " << typeRef
                 << std::endl;
     }
-#endif
     if (typeRef == SXN_EXCEPTION) {
 
       throw SaxonApiException();
@@ -518,13 +511,11 @@ int64_t SaxonProcessor::createParameterJArray(
     std::map<std::string, std::string> properties, int additions) {
 
   int size = parameters.size() + properties.size() + additions;
-#ifdef DEBUG
+
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "Properties size: " << properties.size() << std::endl;
     std::cerr << "Parameter size: " << parameters.size() << std::endl;
   }
-#endif
-
   if (size > 0) {
     int64_t processorDataRef = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, size);
@@ -837,7 +828,7 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source,
                                             const char *encoding,
                                             SchemaValidator *validator) {
-   SaxonProcessor::attachCurrentThread();
+  // SaxonProcessor::attachCurrentThread();
 
   applyConfigurationProperties();
   int64_t xdmNodeRef = parseXmlStringWithValidator(
@@ -1003,6 +994,8 @@ XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
 
 XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
   SaxonProcessor::attachCurrentThread();
+  // jobject obj = longValue(*SaxonProcessor::sxn_environ, l);
+
   int64_t longValueRef = j_makeLongValue(sxn_environ->thread, l);
   XdmAtomicValue *value = new XdmAtomicValue(
       longValueRef, "Q{http://www.w3.org/2001/XMLSchema}long");
@@ -1070,8 +1063,8 @@ const char *SaxonProcessor::getStringValue(XdmItem *item) {
 XdmArray *SaxonProcessor::makeArray(short *input, int length) {
   SaxonProcessor::attachCurrentThread();
   if (input == nullptr) {
-    /*std::cerr << "Error found when converting pointer array of short values to "
-                 "XdmArray"; */
+    std::cerr << "Error found when converting pointer array of short values to "
+                 "XdmArray";
     return nullptr;
   }
   int64_t xdmArrayRef =
@@ -1087,6 +1080,8 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
   if (length == 0) {
     processorDataRef = createProcessorData(sxn_environ->thread);
+    std::cerr << "Converting array of XdmValue to XdmArray length=0"
+              << std::endl;
   } else {
     processorDataRef =
         createProcessorDataWithCapacity(sxn_environ->thread, length);
@@ -1094,7 +1089,8 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
   for (int i = 0; i < length; i++) {
     if (input[i] == nullptr || input[i]->getUnderlyingValue() <= SXN_UNSET) {
-
+      std::cerr << "Error found when converting array of XdmValue to XdmArray"
+                << std::endl;
       return nullptr;
     }
     addProcessorValue(sxn_environ->thread, (void *)processorDataRef,
@@ -1105,9 +1101,9 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
       j_makeXdmArray(sxn_environ->thread, (void *)processorDataRef);
 
   if (xdmArrayRef <= 0) {
-   /* std::cerr
+    std::cerr
         << "Error found when converting array of XdmValue to XdmArray - Ref="
-        << ((long)xdmArrayRef) << std::endl;*/
+        << ((long)xdmArrayRef) << std::endl;
     return nullptr;
   }
 
