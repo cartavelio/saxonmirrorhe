@@ -1,3 +1,4 @@
+\mainpage
 This documentation details the C++ API and C API for SaxonC.
 
 SaxonC is a compiled variant of Saxon from the Java
