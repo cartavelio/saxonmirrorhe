@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(SaxonC VERSION 12.6.0)
+project(SaxonC VERSION ${SAXON_VERSION})
 enable_testing()
 
 set(SaxonC_EDITION "he" CACHE STRING "Saxon edition")
