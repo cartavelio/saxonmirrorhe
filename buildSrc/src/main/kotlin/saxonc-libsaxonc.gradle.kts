@@ -282,6 +282,19 @@ val releaseZipUnicesTask = tasks.register<Exec>("release_zip") {
     workingDir = packagedDir.map { it.dir("tmp") }.get().asFile
 }
 
+val sourceZipTask = tasks.register<Zip>("source_release_zip") {
+    archiveBaseName = extension.package_name
+    archiveAppendix = "source"
+    archiveVersion = saxonBuild.version
+
+    destinationDirectory = packagedDir
+
+    val topLevelDir = extension.package_name.map { name -> "${name}-${saxonBuild.version.get()}" }
+    into(topLevelDir)
+    from(layout.projectDirectory.dir("../src"))
+
+}
+
 tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(if (saxonBuild.targetHost.get().isWindows) releaseZipWindowsTask else releaseZipUnicesTask)
 }
