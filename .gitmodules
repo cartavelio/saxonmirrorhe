@@ -1,0 +1,21 @@
+[submodule "submodules/qt3"]
+	path = submodules/qt3
+	url = https://github.com/w3c/qt3tests.git
+[submodule "submodules/qt4"]
+	path = submodules/qt4
+	url = https://github.com/qt4cg/qt4tests.git
+[submodule "submodules/xslt30"]
+	path = submodules/xslt30
+	url = https://github.com/w3c/xslt30-test.git
+[submodule "submodules/xslt40"]
+	path = submodules/xslt40
+	url = https://github.com/qt4cg/xslt40-test.git
+[submodule "submodules/expath"]
+	path = submodules/expath
+	url = https://github.com/Saxonica/expath-cg.git
+[submodule "submodules/extra"]
+	path = submodules/extra
+	url = git@saxonica.plan.io:saxonica/extra-test-suites.git
+[submodule "submodules/xsd"]
+	path = submodules/xsd
+	url = https://github.com/w3c/xsdtests.git
