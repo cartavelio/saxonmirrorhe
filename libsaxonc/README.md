@@ -1,9 +1,9 @@
-README document for SaxonC-@@EDITION@@ @@VERSION@@:
+README document for SaxonC-@EDITION@ @VERSION@:
 
-SaxonC-@@EDITION@@ is a compiled variant of Saxon from the Java
+SaxonC-@EDITION@ is a compiled variant of Saxon from the Java
 platform to the C/C++ platform using GraalVM native-image.
 
-SaxonC-@@EDITION@@ provides processing in XSLT 3.0, XQuery 3.1 and
+SaxonC-@EDITION@ provides processing in XSLT 3.0, XQuery 3.1 and
 XPath 3.1, and Schema validation 1.0/1.1.
 
 This is a library with APIs for C, C++, PHP, and Python. The main
