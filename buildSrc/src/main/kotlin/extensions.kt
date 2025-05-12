@@ -1,16 +1,28 @@
 import com.saxonica.build.TargetHost
+import com.saxonica.build.java.BranchInfo
+import com.saxonica.build.java.JarTaskBuilder
+import com.saxonica.build.java.JarTaskBuilder.SaxonJarTasks
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
-import java.io.File
-import java.nio.file.Path
-import com.saxonica.build.java.JarTaskBuilder
-import com.saxonica.build.java.JarTaskBuilder.SaxonJarTasks
-import org.gradle.api.GradleException
-import org.gradle.api.provider.*
 import org.gradle.internal.os.OperatingSystem
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStreamReader
+import java.io.PrintStream
+import java.nio.file.Path
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.iterator
 
 interface ManageBranchesExtension {
     abstract val currentBranch: Property<String>
@@ -53,7 +65,7 @@ interface SaxonBuildExtension {
     // "Platform neutral URI"
     fun puri(path: String): String {
       if (systemOsName.get() == "windows") {
-        var fixed = path.replace("\\", "/")
+        val fixed = path.replace("\\", "/")
         if (!fixed.startsWith("/") && fixed.length > 1 && fixed[1] == ':') {
           return "file:/${fixed}"
         }
@@ -135,6 +147,86 @@ interface SaxonJExtension {
 
     fun editionJarTasks(project: Project, configuration: JarTaskBuilder.() -> Unit): SaxonJarTasks {
         return JarTaskBuilder.createEditionBuilder(project, this).invoke(configuration)
+    }
+
+    fun patchReleaseInfo(src: File, saxonVersion: String, majorDate: String) {
+        val (saxonMajor, saxonMinor, saxonPatch) = saxonVersion.split(".")
+        val minorDate = SimpleDateFormat("yyyy-MM-dd").format(Date())
+
+        // Trim to 7 digits so that it will always fit in an int.
+        val hash = BranchInfo.currentCommitHash(src.parentFile).substring(0, 7)
+
+        val replacements = mapOf<Regex, String>(
+            "\\d+; // @@MAJOR_VERSION@@.*$".toRegex() to "${saxonMajor};",
+            "\\d+; // @@MINOR_VERSION@@.*$".toRegex() to "${saxonMinor};",
+            "\\d+; // @@PATCH_VERSION@@.*$".toRegex() to "${saxonPatch};",
+            "\\d+; // @@BUILD@@.*$".toRegex() to "0x${hash};",
+            "\".*\"; // @@MAJOR_DATE@@.*$".toRegex() to "\"${majorDate}\";",
+            "\".*\"; // @@MINOR_DATE@@.*$".toRegex() to "\"${minorDate}\";"
+        )
+        val matched = mutableSetOf<Regex>()
+
+        val lines = mutableListOf<String>()
+        src.forEachLine { line ->
+            var patched = line.trimEnd()
+            for ((rex, repl) in replacements) {
+                if (rex.containsMatchIn(line)) {
+                    matched.add(rex)
+                    patched = line.replace(rex, repl)
+                }
+            }
+            lines.add(patched)
+        }
+        if (matched.size != replacements.size) {
+            throw GradleException("Failed to replace some values in Version.java!")
+        }
+        PrintStream(src).use { stream ->
+            for (line in lines) {
+                stream.println(line)
+            }
+        }
+    }
+
+    fun patchKey(src: File, keyType: String, keyFilename: String?) {
+        if (keyFilename == null) {
+            return
+        }
+
+        if (keyType !in listOf("dsa", "ed25519")) {
+            throw GradleException("Invalid key type: ${keyType}!")
+        }
+
+        val publicKey = File(keyFilename).readText()
+
+        val lines = mutableListOf<String>()
+        FileInputStream(src).use { fis ->
+            InputStreamReader(fis).use { inreader ->
+                BufferedReader(inreader).use { reader ->
+                    var line = reader.readLine()
+                    while (line != null) {
+                        if (keyType == "dsa" && line.indexOf("final String PUBLIC_KEY = ") > 0) {
+                            while (line.indexOf(";") < 0) {
+                                line = reader.readLine()
+                            }
+                            line = "    private static final String PUBLIC_KEY = \"${publicKey}\";"
+                        }
+
+                        if (keyType == "ed25519" && line.indexOf("final String PUBLIC_KEY2 = ") > 0) {
+                            line = "    private static final String PUBLIC_KEY2 = \"${publicKey}\";"
+                        }
+
+                        lines.add(line)
+                        line = reader.readLine()
+                    }
+                }
+            }
+        }
+
+        PrintStream(src).use { stream ->
+            for (line in lines) {
+                stream.println(line)
+            }
+        }
     }
 }
 
