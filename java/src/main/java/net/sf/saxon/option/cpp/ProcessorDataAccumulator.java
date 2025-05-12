@@ -17,10 +17,12 @@ import org.graalvm.word.WordFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ProcessorDataAccumulator {
-    private ArrayList<String> paramNames;
-    private ArrayList values;
+    private List<String> paramNames;
+    private List values;
 
     public ProcessorDataAccumulator(){
         paramNames = new ArrayList<String>();
@@ -28,22 +30,22 @@ public class ProcessorDataAccumulator {
     }
 
     public ProcessorDataAccumulator(int cap){
-        paramNames = new ArrayList<String>(cap);
-        values = new ArrayList(cap);
+        paramNames = Collections.synchronizedList(new ArrayList<String>(cap));
+        values = Collections.synchronizedList(new ArrayList(cap));
     }
 
     public ProcessorDataAccumulator(String [] props){
-        paramNames = new ArrayList<String>(Arrays.asList(props));
+        paramNames = Collections.synchronizedList(new ArrayList<String>(Arrays.asList(props)));
     }
 
     public ProcessorDataAccumulator(int cap, boolean propsOnly){
 
-        paramNames = new ArrayList<String>(cap);
+        paramNames = Collections.synchronizedList(new ArrayList<String>(cap));
     }
 
 
     public ProcessorDataAccumulator(XdmValue[] ivalues){
-        values =  new ArrayList<XdmValue>(Arrays.asList(ivalues));
+        values =  Collections.synchronizedList(new ArrayList<XdmValue>(Arrays.asList(ivalues)));
 
     }
 
@@ -153,7 +155,7 @@ public class ProcessorDataAccumulator {
     public static CCharPointer j_getProcessorDataProperty(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataRef, int index){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
-        String data = processorData.paramNames.get(index);
+        String data = (String) processorData.paramNames.get(index);
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, data);
         return a;
 
@@ -193,11 +195,11 @@ public class ProcessorDataAccumulator {
 
 
     public String [] getParameterNames() {
-        return paramNames.toArray(new String[paramNames.size()]);
+        return (String[]) paramNames.toArray(new String[paramNames.size()]);
     }
 
     public ArrayList<String> getParameterNamesAsArrayList() {
-        return paramNames;
+        return (ArrayList<String>) paramNames;
 
     }
 
