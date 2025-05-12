@@ -57,7 +57,7 @@ dependencies {
   doxygenCBucket(project(mapOf("path" to ":libsaxonc:ee",
                               "configuration" to "doxygenOutput")))
 
-  // N.B. the gen_doc_icu_uca class depeneds on using the current build!
+  // N.B. the gen_doc_icu_uca task depends on using the current build!
   documentation(project(":java", "runtimeElements"))
 
   // We need a license to build SEFs
@@ -206,7 +206,7 @@ tasks.register<JavaExec>("product_xsljavadoc") {
   inputs.files(layout.projectDirectory.dir("tools/javadoc"))
   outputs.dir(layout.buildDirectory.dir("javadoc-xml"))
 
-  classpath = configurations.named("documentationx").get()
+  classpath = configurations.named("documentation").get()
   mainClass = "com.saxonica.Transform"
   args("-s:${files(xmldocletSources).first()}/doclet.xml",
        "-xsl:${layout.projectDirectory.file("tools/javadoc/chunk-xmljavadoc.xsl")}",
@@ -262,12 +262,11 @@ tasks.register<JavaExec>("doc_FeatureKeysDoc") {
   dependsOn("copy_userdoc_sources")
 
   inputs.files(copy_feature_keys)
-  inputs.files(layout.projectDirectory.dir("../java/keys/tools"))
   outputs.file(layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml"))
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
-  args("${layout.projectDirectory.file("../src/main/xml/FeatureKeys.xml")}",
-       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToDoc.xsl")}",
+  args("${layout.buildDirectory.file("featurekeys/xml/FeatureKeys.xml").get().asFile}",
+       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToDoc.xsl").get().asFile}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml").get().asFile}")
 }
 
@@ -357,12 +356,12 @@ tasks.register<JavaExec>("doc_ConfigFileDoc") {
   dependsOn("copy_userdoc_sources")
   dependsOn("doc_FeatureKeysDoc")
 
-  inputs.files(layout.projectDirectory.dir("../src/main/xml"))
+  inputs.files(copy_feature_keys)
   outputs.dir(layout.buildDirectory.dir("src/userdoc/featureKeys"))
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
-  args("-s:${layout.projectDirectory.file("../src/main/xml/AdditionalFeatures.xml")}",
-       "-xsl:${layout.projectDirectory.file("tools/featureKeys/ToConfigFileDoc.xsl")}",
+  args("-s:${layout.buildDirectory.file("featurekeys/xml/AdditionalFeatures.xml").get().asFile}",
+       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToDoc.xsl").get().asFile}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/ConfigFileDoc.xml").get().asFile}")
 }
 
