@@ -22,6 +22,11 @@ val javaSources by configurations.resolvable("javaSources") {
     extendsFrom(javaSourcesBucket)
 }
 
+val javaSampleClassesBucket by configurations.dependencyScope("javaSampleClassesBucket")
+val javaSampleClasses by configurations.resolvable("javaSampleClasses") {
+  extendsFrom(javaSampleClassesBucket)
+}
+
 val javadocBucket by configurations.dependencyScope("javadocBucket")
 val javadocSources = configurations.resolvable("javadocSources") {
   extendsFrom(javadocBucket)
@@ -64,6 +69,9 @@ val userdocViewerAppJS by configurations.resolvable("userdocViewerAppJS") {
 
 dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../java/src/main/java")))
+
+  javaSampleClassesBucket(project(mapOf("path" to ":java",
+                                        "configuration" to "sampleClasses")))
 
   javadocBucket(project(mapOf("path" to ":java",
                               "configuration" to "javadocArtifacts")))
@@ -178,6 +186,15 @@ val stageSamples = tasks.register<Copy>("stageSamples") {
   include("styles/summarize.xsl")
 }
 resources { dependsOn(stageSamples) }
+
+val stageSampleClasses = tasks.register<Copy>("stageSampleClasses") {
+  group = "Internal"
+  from(zipTree(javaSampleClasses.singleFile)) {
+    exclude("classes/META-INF/**")
+  }
+  into(layout.buildDirectory.dir("stage/samples/java"))
+}
+resources { dependsOn(stageSampleClasses) }
 
 val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
   group = "Internal"
