@@ -1,5 +1,9 @@
 package com.saxonica.build.java.testsuite
 
+import java.io.File
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.io.PrintStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.*
@@ -12,6 +16,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 abstract class JavaRunner: DefaultTask() {
+  companion object {
+    val reports = mutableListOf<String>()
+  }
+
   override fun getGroup(): String {
     return "Testsuite"
   }
@@ -81,10 +89,32 @@ abstract class JavaRunner: DefaultTask() {
   @TaskAction
   fun execute() {
     val testclasspath = classpath
+    val stdOutput = ByteArrayOutputStream()
+    val errOutput = ByteArrayOutputStream()
+    var showOutput = true
+
     project.javaexec {
       mainClass = driverClass
       workingDir = project.file(suiteDir)
       classpath = testclasspath
+
+      for (task in project.gradle.taskGraph.getAllTasks()) {
+        // If the testsuites task(s) are in the graph, assume we're doing
+        // a longer run and we don't want to see all the detailed output
+        if (task.name == "testsuites") {
+          showOutput = false
+          break;
+        }
+      }
+
+      if (!showOutput) {
+        println("(buffering output)")
+        standardOutput = stdOutput
+        errorOutput = errOutput
+      }
+
+      reports.add("${reportDir.get()}")
+
       args(
         "${suiteDir.get()}",
         catalog,
@@ -95,6 +125,46 @@ abstract class JavaRunner: DefaultTask() {
       )
       testOpts.forEach { (opt, arg) ->
         args("-${opt}:${arg}")
+      }
+    }
+
+    if (!showOutput) {
+      println("==> ${reportDir.get()}/stderr.txt")
+      var outputStream = PrintStream(File("${reportDir.get()}/stderr.txt"))
+      var lines = errOutput.toString("utf-8")
+      outputStream.print(lines)
+      outputStream.close()
+
+      var failures = false
+      val failureList = mutableListOf<String>()
+      for (line in lines.split("\\n+".toRegex())) {
+        if (line.startsWith("Failures by Test Set:")) {
+          failures = true
+        }
+        if (line.startsWith("Finished in")) {
+          failures = false
+        }
+        if (failures) {
+          failureList.add(line)
+        }
+        if (line.startsWith("Result:")) {
+          if (failureList.size > 1) {
+            println("⋮")
+            for (fline in failureList) {
+              println(fline)
+            }
+          }
+          println(line)
+          break;
+        }
+      }
+
+      if (stdOutput.size() > 0) {
+        println("==> ${reportDir.get()}/stdout.txt")
+        outputStream = PrintStream(File("${reportDir.get()}/stdout.txt"))
+        lines = stdOutput.toString("utf-8")
+        outputStream.print(lines)
+        outputStream.close()
       }
     }
   }

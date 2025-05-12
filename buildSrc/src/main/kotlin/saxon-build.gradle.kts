@@ -1,5 +1,6 @@
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.ExecutableFinder
+import com.saxonica.build.java.testsuite.JavaRunner
 import java.text.SimpleDateFormat
 import java.util.Date
 import org.gradle.internal.os.OperatingSystem
@@ -54,6 +55,39 @@ tasks.register(LifecycleTasks.DEBUG_TASK_NAME) {
 tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
   group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
   description = "Run acceptance tests, like the W3C/QTCG test suites"
+  doLast {
+    val archive = project.findProperty("saxonicaTestDriverReportArchive")?.toString()
+    if (archive != null) {
+      val root = File(archive)
+      if (!root.exists() && root.isDirectory()) {
+        root.mkdirs()
+      }
+      for (report in JavaRunner.reports) {
+        // Translate from the output path to the archive path..bleh.
+        var pos = report.indexOf("/java/")
+        var path = report.substring(pos+6)
+        val edition = if (path.startsWith("pe/")) {
+          "pej"
+        } else if (path.startsWith("he/")) {
+          "hej"
+        } else {
+          "eej"
+        }
+        pos = report.indexOf("/build/test-results/")
+        path = report.substring(pos+20)
+        
+        val outputDir = File(root, "${edition}/${version}/$path")
+        outputDir.mkdirs()
+
+        project.copy {
+          into(outputDir)
+          from(report)
+        }
+
+        println("OUT ${outputDir.absolutePath}")
+      }
+    }
+  }
 }
 
 tasks.register(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
