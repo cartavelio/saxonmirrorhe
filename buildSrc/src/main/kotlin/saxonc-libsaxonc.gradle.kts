@@ -176,10 +176,6 @@ val build_package = tasks.register<Exec>("cpack_package") {
     args("-C", "Release")
 }
 
-tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
-    dependsOn(build_package)
-}
-
 tasks.build.configure {
     dependsOn(build)
     dependsOn(stage)
@@ -209,7 +205,7 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
 
 val noticeFilenames = listOf("JAMESCLARK.txt", "JLINE2.txt", "LICENSE.txt")
 val notices = project.rootProject.layout.projectDirectory.dir("src/main/notices").files(noticeFilenames)
-tasks.register<Zip>("package") {
+val releaseZipTask = tasks.register<Zip>("package") {
     group = LifecycleTasks.RELEASE_GROUP
     description = "generate the libsaxon download .zip package"
 
@@ -238,6 +234,10 @@ tasks.register<Zip>("package") {
     into("samples") {
         from(layout.projectDirectory.dir("../samples"))
     }
+}
+
+tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
+    dependsOn(releaseZipTask)
 }
 
 libDir.outgoing.artifact(releaseStagingPath.map { it.dir("lib") }) { builtBy(stage) }
