@@ -228,12 +228,13 @@ val generator = tasks.register("cmake_generate") {
     }
 }
 
-fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTask>, taskBlock: Action<CMakePackageBuilder>): TaskProvider<CMakePackageBuilder> {
-    val config_task_name = config.lowercase()
+val packageOutputDir = layout.buildDirectory.dir("cmake-package")
 
-    val configDir = layout.buildDirectory.dir(config)
+fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTask>, debug: Boolean, taskBlock: Action<Task>): TaskProvider<Task> {
+    val configTaskName = config.lowercase()
+    val configPackageOutputDir = layout.buildDirectory.dir(config)
 
-    val build = tasks.register<Exec>("build_ersatz_${config_task_name}") {
+    val build = tasks.register<Exec>("build_ersatz_${configTaskName}") {
         inputs.files(generator)
         inputs.files(layout.projectDirectory.dir("../cmake/ersatz"))
         outputs.dir(layout.buildDirectory.dir(config))
@@ -243,35 +244,51 @@ fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTas
         args("--build", ersatzPath.get().asFile.toString(), "--config", config)
     }
 
-    val ersatzConfigPath = ersatzPath.map { it.dir("staging/${config}") }
-    val generateCMakeConfigPackageFiles = tasks.register<Exec>("install_ersatz_${config_task_name}") {
+    val ersatzConfigPath = ersatzPath.map { it.dir("staging") }
+    val EDITION = extension.edition.map { it.uppercase() }
+    val cmakeFilenames = EDITION.map { ED -> listOf("", "-${config.lowercase()}", "Config", "ConfigVersion").map { suffix -> "SaxonCCore${ED}${suffix}.cmake" } }
+    val generateCMakeConfigPackageFiles = tasks.register<Exec>("install_ersatz_${configTaskName}") {
         inputs.files(build)
-        outputs.dir(ersatzConfigPath.map { it.dir("lib/cmake") })
+        outputs.files(ersatzConfigPath.map { conf -> conf.dir("lib/cmake/SaxonCCore${EDITION.get()}").files(*cmakeFilenames.get().toTypedArray()) })
 
         workingDir = layout.projectDirectory.asFile
         executable = "cmake"
-        args("--install", ersatzPath.get().asFile.toString(), "--config", "Release", "--prefix", ersatzConfigPath.get().asFile.toString())
+        args("--install", ersatzPath.get().asFile.toString(), "--config", config, "--prefix", ersatzConfigPath.get().asFile.toString())
     }
 
-    val mainTask = tasks.register<CMakePackageBuilder>("${config_task_name}_cmake_package") {
+    val mainTask = tasks.register<CMakePackageBuilder>("${configTaskName}_cmake_package_assemble") {
         group = LifecycleBasePlugin.BUILD_GROUP
         libName = extension.edition.map { edition -> "saxonc-core-${edition}" }
+        cmakePackageName = EDITION.map { "SaxonCCore${it}" }
         version =  saxonBuild.version
         majorVersion = saxonBuild.majorVersion
         sharedLibFiles.from(imageTask.map { it.sharedLibFiles })
         importLibFiles.from(imageTask.map { it.importLibFiles })
         headerFiles.from(imageTask.map { it.headerFiles })
+        debugConfig = debug
         packageCMakeFiles.from(generateCMakeConfigPackageFiles)
-        packageDir = configDir
+        packageDir = configPackageOutputDir
     }
-    mainTask.configure(taskBlock)
-    return mainTask
+
+    val finalizeTask = tasks.register("${configTaskName}_cmake_package") {
+        inputs.files(mainTask)
+        outputs.dir(packageOutputDir)
+        doLast {
+            project.delete(packageOutputDir)
+            project.copy {
+                from(mainTask)
+                into(packageOutputDir)
+            }
+        }
+    }
+    finalizeTask.configure(taskBlock)
+    return finalizeTask
 }
 
-val releaseCMakePackage = setupConfigTasks("Release", graalImage) {
+val releaseCMakePackage = setupConfigTasks("Release", graalImage, false) {
     description = "Build and package up the native-image and CMake package config files"
 }
-val debugCMakePackage = setupConfigTasks("Debug", debugGraalImage) {
+val debugCMakePackage = setupConfigTasks("Debug", debugGraalImage, true) {
     description = "Build and package up the debug-enabled version of the native-image and CMake package config files"
 }
 
@@ -279,5 +296,5 @@ tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(releaseCMakePackage)
 }
 
-cMakePackageDir.outgoing.artifact(releaseCMakePackage.map { it.outputDir }) { builtBy(releaseCMakePackage) }
-debugCMakePackageDir.outgoing.artifact(debugCMakePackage.map { it.outputDir }) { builtBy(debugCMakePackage) }
+cMakePackageDir.outgoing.artifact(packageOutputDir) { builtBy(releaseCMakePackage) }
+debugCMakePackageDir.outgoing.artifact(packageOutputDir) { builtBy(debugCMakePackage) }

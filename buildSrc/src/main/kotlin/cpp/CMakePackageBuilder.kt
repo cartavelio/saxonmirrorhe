@@ -22,6 +22,9 @@ abstract class CMakePackageBuilder : DefaultTask() {
   abstract val version: Property<String>
 
   @get:Input
+  abstract val cmakePackageName: Property<String>
+
+  @get:Input
   abstract val majorVersion: Property<String>
 
   @get:InputFiles
@@ -36,6 +39,9 @@ abstract class CMakePackageBuilder : DefaultTask() {
   @get:InputFiles
   abstract val packageCMakeFiles: ConfigurableFileCollection
 
+  @get:Input
+  abstract val debugConfig: Property<Boolean>
+
   @get:Internal
   val sharedLibDir: Provider<Directory> = packageDir.map { it.dir(if (systemOs.isWindows) "bin" else "lib") }
 
@@ -49,7 +55,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
   val includeDir = packageDir.map { it.dir("include") }
 
   @get:Internal
-  val cmakeDir = packageDir.map { it.dir("lib/cmake") }
+  val cmakeDir = packageDir.map { packageDir -> cmakePackageName.map { name -> packageDir.dir("lib/cmake/${name}") }.get() }
 
   @get:OutputDirectory
   val outputDir: Provider<Directory> = packageDir
@@ -63,12 +69,33 @@ abstract class CMakePackageBuilder : DefaultTask() {
     buildCMakeDir()
   }
 
+  private fun debugPostfix(): String {
+    if (!debugConfig.get()) {
+      return ""
+    }
+    if (systemOs.isMacOsX) {
+      return "_debug"
+    } else {
+      return "d"
+    }
+  }
+
   private fun platformSharedLibFilename(base: String, libversion: String): (String) -> String  {
-    return { filename ->
+    return { _ ->
       if (systemOs.isMacOsX) {
-        "${base}.${libversion}.dylib"
+        "${base}${debugPostfix()}.${libversion}.dylib"
       } else if (systemOs.isLinux) {
-        "${base}.so.${libversion}"
+        "${base}${debugPostfix()}.so.${libversion}"
+      } else {
+        "${base}${debugPostfix()}.dll"
+      }
+    }
+  }
+
+  private fun importLibFilename(base: String, libversion: String): (String) -> String  {
+    return { filename ->
+      if (systemOs.isWindows) {
+        "${base}${debugPostfix()}.lib"
       } else {
         filename
       }
@@ -78,7 +105,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
   private fun platformLinkerNameFilename(base: String): (String) -> String {
     return { _ ->
       val ext = if (systemOs.isMacOsX) "dylib" else "so"
-      "${base}.${ext}"
+      "${base}${debugPostfix()}.${ext}"
     }
   }
 
@@ -116,12 +143,14 @@ abstract class CMakePackageBuilder : DefaultTask() {
   }
 
   private fun buildImportLibDir() {
+    val importLibRenamer = importLibFilename(libFilenameWithoutExtension.get(), version.get())
     // Cannot use project.sync here because it just nukes the lib dir on Unices
     // and then causes broken symlinks which causes the sync task to explode in
     // a little fireball
     project.copy {
       from(importLibFiles)
       into(importLibDir)
+      rename(importLibRenamer)
     }
   }
 
@@ -132,6 +161,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
     }
   }
   private fun buildCMakeDir() {
+    // We need the task to remove release files when debug is present and vice versa
     project.copy {
       from(packageCMakeFiles)
       into(cmakeDir)
