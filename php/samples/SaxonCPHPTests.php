@@ -918,7 +918,11 @@ public function testArray()
     );
     $this->assertTrue($item->isArray());
     $arrVal = $item->getArray();
-    $this->assertEquals($arrVal->getStringValue(), "[1,2,3]");
+    $alen = $arrVal->arrayLength();
+    for($i = 0; $i < $alen; $i++) {
+        $arrVal->get($i);
+    }
+    $this->assertEquals($arrVal, "[1,2,3]");
     }
     /*  public function testItemSeparatorToSerializer(): void {
           try {
