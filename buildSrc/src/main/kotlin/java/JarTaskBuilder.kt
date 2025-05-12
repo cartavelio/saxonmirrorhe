@@ -45,9 +45,9 @@ class JarTaskBuilder(val extension: SaxonJExtension, val project: Project, val t
     edition.convention(extension.edition)
     if (classifierOrSuffix != null) jarClassifier.convention(classifierOrSuffix)
     downloadJarBaseName.convention(edition.map { edition ->
-      val args = mutableListOf(edition)
-      if (jarClassifier.isPresent) args.add(jarClassifier.get())
-      buildArchiveBaseName(*args.toTypedArray()).lowercase()
+      val args = mutableListOf(edition.uppercase())
+      if (jarClassifier.isPresent) args.add(jarClassifier.get().lowercase())
+      buildArchiveBaseName(*args.toTypedArray())
     })
   }
 
