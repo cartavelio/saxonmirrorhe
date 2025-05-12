@@ -1,0 +1,124 @@
+<exceptions>
+
+  <!-- Microsoft tests -->
+  
+  <exception test-set="MS-Particles2006-07-15" test-case="particlesZ033_g">
+    <reason>Until recently, Saxon ran out of memory. It now runs the test but
+    approximates the minOccurs and maxOccurs values. I suspect this is why it decides
+    the schema is valid although the expected result is invalid.</reason>
+  </exception>
+
+  <exception test-set="MS-Element2006-07-15" test-case="elemT062">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="MS-Element2006-07-15" test-case="elemT063">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="MS-Element2006-07-15" test-case="elemT064">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="MS-Element2006-07-15" test-case="elemT065">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="MS-Element2006-07-15" test-case="elemT066">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="MS-Element2006-07-15" test-case="elemT067">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+
+  <exception test-set="MS-Additional2006-07-15" test-case="addB114">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+
+  <exception test-set="MS-Schema2006-07-15" test-case="schB8">
+    <reason>Test assumes that http://foo/foo will not dereference. But some ISP's return a page.</reason>
+  </exception>
+  <exception test-set="MS-Schema2006-07-15" test-case="schE9">
+    <reason>Test assumes that http://foo/foo will not dereference. But some ISP's return a page.</reason>
+  </exception>
+
+  <exception test-set="ElemDecl" test-case="disallowedsubst00105m">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00105m">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00106m2">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00501m2">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00502m3">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00502m4">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00503m3">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00503m4">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  <exception test-set="ElemDecl" test-case="disallowedsubst00503m5">
+    <reason>Bug 16161: blocked membership of substitution group</reason>
+  </exception>
+  
+  <!-- IBM tests -->
+  <exception test-set="ID_IDREF" test-case="s3_3_4v04">
+    <reason>Microsoft XML parser does not report unparsed entities</reason>
+  </exception>
+  
+  <exception test-set="ID_IDREF" test-case="s3_3_4v05">
+    <reason>Microsoft XML parser does not report unparsed entities</reason>
+  </exception>
+
+  <!-- Saxonica tests -->
+  <exception test-set="Complex" test-case="complex018">
+    <reason>Bug 16786: no content model after openContent element</reason>
+  </exception>
+  <exception test-set="Id" test-case="id017">
+    <reason>Unparsed entities in DTD</reason>
+  </exception>
+  <exception test-set="Id" test-case="id018">
+    <reason>Unparsed entities in DTD</reason>
+  </exception>
+  <exception test-set="Id" test-case="id019">
+    <reason>Unparsed entities in DTD</reason>
+  </exception>
+  <exception test-set="Id" test-case="id020">
+    <reason>Unparsed entities in DTD</reason>
+  </exception>
+  <exception test-set="Id" test-case="id021">
+    <reason>Unparsed entities in DTD</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv001">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv002">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv003">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv004">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv005">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv006">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv007">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv008">
+    <reason>XML version 1.1</reason>
+  </exception>
+  <exception test-set="XmlVersions" test-case="xv009">
+    <reason>XML version 1.1</reason>
+  </exception>
+</exceptions>

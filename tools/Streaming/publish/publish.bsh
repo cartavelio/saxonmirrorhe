@@ -1,5 +1,0 @@
-#! bash
-zip -r stream.xaw content *.xml
-
-echo FINISHED
-#read PAUSE

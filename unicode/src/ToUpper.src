@@ -1,0 +1,83 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-@@YEAR@@ Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+package net.sf.saxon.str;
+
+import net.sf.saxon.z.IntHashMap;
+import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.IntRangeToIntMap;
+
+/**
+ * Class to perform uppercase conversion.
+ * <p>Note we could use the built-in Java function (the rules are compatible with the XPath rules), but
+ * we would then need to convert the UnicodeString to a Java String; and using our own implementation
+ * is the best approach on .NET.</p>
+ */
+public class ToUpper {
+
+    private final static IntRangeToIntMap ranges = new IntRangeToIntMap(@@RANGECOUNT@@);
+    private final static IntHashMap<String> specials = new IntHashMap<>(@@SPECIALCOUNT@@);
+    private final static char[] latin = new char[256];
+
+    private static void range(int start, int end, int delta) {
+        ranges.addEntry(start, end, delta);
+        if (end < 256) {
+            for (int i=start; i<=end; i++) {
+                latin[i] = (char)(i+delta);
+            }
+        }
+    }
+
+    private static void single(int cp, int delta) {
+        range(cp, cp, delta);
+    }
+
+    private static void special(int cp, String result) {
+        specials.put(cp, result);
+    }
+
+    private static void init() {
+        // Generated from Unicode version @@VERSION@@
+        for (int i=0; i<256; i++) {
+            latin[i] = (char)i;
+        }
+        // START GENERATED CONTENT
+        // END GENERATED CONTENT
+
+    }
+
+    static {
+        init();
+    }
+
+    public static UnicodeString toUpper(UnicodeString input) {
+        UnicodeBuilder ub = new UnicodeBuilder((int)input.estimatedLength());
+        IntIterator iter = input.codePoints();
+        while (iter.hasNext()) {
+            int cp = iter.next();
+            if (cp < 256 && cp != 223) {
+                // Fast path for latin-1 characters other than eszet
+                ub.append(latin[cp]);
+            } else {
+                String special = specials.get(cp);
+                if (special != null) {
+                    ub.append(special);
+                } else {
+                    int delta = ranges.get(cp);
+                    if (delta == Integer.MIN_VALUE) {
+                        ub.append(cp);
+                    } else {
+                        ub.append(cp + delta);
+                    }
+                }
+            }
+        }
+        return ub.toUnicodeString();
+    }
+}
+
+

@@ -1,0 +1,137 @@
+<exception>
+
+  <testcase set="MS-Group2006-07-15" group="groupH021v">
+    <comment>A valid subsumption disallowed by the 1.0 spec.</comment>
+  </testcase>  
+
+  <testcase set="MS-Particles2006-07-15" group="particlesV002">
+    <comment>Saxon runs out of memory. Still true in Saxon 9.1.</comment>
+  </testcase>
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ033_c">
+    <comment>Saxon runs out of memory</comment>
+  </testcase> 
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ033_d">
+    <comment>Saxon runs out of memory</comment>
+  </testcase>   
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ033_e">
+    <comment>Saxon runs out of memory</comment>
+  </testcase>   
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ033_f">
+    <comment>Saxon runs out of memory</comment>
+  </testcase>   
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ033_g">
+    <comment>Saxon runs out of memory</comment>
+  </testcase> 
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesHa161">
+    <comment>A valid subsumption disallowed by the 1.0 spec</comment>
+  </testcase>    
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesHb008">
+    <comment>A valid subsumption disallowed by the 1.0 spec</comment>
+  </testcase>   
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesHb011">
+    <comment>A valid subsumption disallowed by the 1.0 spec</comment>
+  </testcase> 
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesS002">
+    <comment>A valid subsumption disallowed by the 1.0 spec. The spec
+    disallows all(a,b) to be derived from all(b,a) "for implementer convenience"!</comment>
+  </testcase>   
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesT002">
+    <comment>A valid subsumption disallowed by the 1.0 spec. (Order of a choice)</comment>
+  </testcase> 
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesT009">
+    <comment>A valid subsumption disallowed by the 1.0 spec. (Order of a choice)</comment>
+  </testcase>  
+
+  <testcase set="MS-Particles2006-07-15" group="particlesZ001">
+    <comment>A valid subsumption disallowed by the 1.0 spec.</comment>
+  </testcase>
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ023">
+    <comment>A valid subsumption disallowed by the 1.0 spec.</comment>
+  </testcase>  
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ024">
+    <comment>A valid subsumption disallowed by the 1.0 spec.</comment>
+  </testcase>  
+  
+  <testcase set="MS-Particles2006-07-15" group="particlesZ028">
+    <comment>A valid subsumption disallowed by the 1.0 spec.</comment>
+  </testcase>  
+  
+  <testcase set="MS-Additional2006-07-15" group="addB118">
+    <comment>A valid subsumption disallowed by the 1.0 spec.</comment>
+  </testcase> 
+<!--  
+  <testcase set="MS-SimpleType2006-07-15" group="ste110">
+    <comment>This is a circular union which is clearly invalid</comment>
+  </testcase>                       
+-->  
+  <testcase set="MS-SimpleType2006-07-15" group="stZ007">
+    <comment>Not clear what to do: type derived directly from xs:anySimpleType</comment>
+  </testcase>  
+  
+  <testcase set="MS-SimpleType2006-07-15" group="stZ047">
+    <comment>Not clear what to do: type derived directly from xs:anySimpleType</comment>
+  </testcase>  
+  
+  <testcase set="MS-SimpleType2006-07-15" group="stZ055">
+    <comment>Not clear what to do: type derived directly from xs:anySimpleType</comment>
+  </testcase>
+  
+  <testcase set="MS-Schema2006-07-15" group="schL5">
+    <comment>A valid subsumption disallowed by the 1.0 spec. The spec
+    disallows all(a,b) to be derived from all(b,a) "for implementer convenience"!</comment>
+  </testcase> 
+
+  <testcase set="MS-Particles2006-07-15" group="particlesHa122">
+  	<comment>Not sure why we are excluding this. Claims to be a valid subsumption in 1.0; certainly looks valid in 1.1; disallowed by
+  	    Saxon in both 1.0 and 1.1</comment>
+  </testcase>
+  
+  <testcase set="MS-Wildcards2006-07-15" group="wildZ013">
+  	<comment>A wildcard union that is inexpressible in 1.0 but is well-defined in 1.1.</comment>
+  </testcase>
+<!--  
+  <testcase set="MS-Additional2006-07-15" group="addB145" date="2010-07-07" bug="10100">
+  	<comment>ID values not allowed in outermost element</comment>
+  </testcase>
+-->  
+  <testcase set="MS-SimpleType2006-07-15" group="stE072" date="2010-07-07" bug="10111">
+  	<comment>ID values not allowed in outermost element</comment>
+  </testcase>  
+  
+  <testcase set="MS-Element2006-07-15" group="elemU015" date="2010-10-10" bug="11007">
+  	<comment>Regex [ae-] is now invalid in XSD 1.1</comment>
+  </testcase>
+  
+  <testcase set="MS-Regex2006-07-15" group="reH18" date="2010-10-10" bug="11007">
+  	<comment>Regex [ae-] is now invalid in XSD 1.1</comment>
+  </testcase>
+  <testcase set="MS-Regex2006-07-15" group="RegexTest_582" date="2010-10-10" bug="11007">
+  	<comment>Regex [ae-] is now invalid in XSD 1.1</comment>
+  </testcase>
+  <testcase set="MS-Regex2006-07-15" group="RegexTest_751" date="2010-10-10" bug="11007">
+  	<comment>Regex [ae-] is now invalid in XSD 1.1</comment>
+  </testcase>
+  <testcase set="MS-Regex2006-07-15" group="RegexTest_1066" date="2010-10-10" bug="11007">
+  	<comment>Regex [ae-] is now invalid in XSD 1.1</comment>
+  </testcase>
+  <testcase set="MS-Regex2006-07-15" group="RegexTest_1235" date="2010-10-10" bug="11007">
+  	<comment>Regex [ae-] is now invalid in XSD 1.1</comment>
+  </testcase>
+
+               
+  
+</exception>
+

@@ -1,0 +1,141 @@
+<exceptions>
+  
+  <!-- Exceptions file for Saxon-CS -->
+  
+  <exception test-case="avt-0901" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Collations</reason>
+  </exception>
+  
+  <exception test-case="base-uri-006" run="false" report=".NET limitation">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>URIs with single-character scheme names are handled incorrectly by the System.Uri class</reason>
+  </exception>
+  
+  <exception test-case="base-uri-052" run="false" report=".NET limitation">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Requires XInclude support</reason>
+  </exception>
+  
+  <exception test-case="choose-0107" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Collations</reason>
+  </exception>
+  
+  <exception test-case="current-output-uri-013 current-output-uri-015" run="false" report="Test driver limitation">
+    <created by="Michael Kay" on="2021-06-12"/>
+    <reason>'output file="#absent"' not recognised by test driver</reason>
+  </exception>
+  
+  <exception test-case="format-date-en-032" run="false" report="Dependency not satisfied">
+    <created by="Michael Kay" on="2021-12-08"/>
+    <reason>Test assumes that Iberian (lang="xib") is not recognised, but on .NET it is.</reason>
+  </exception>
+  
+  <exception test-case="format-number-044" run="false" report="BigDecimal precision issue">
+    <created by="Michael Kay" on="2021-06-12"/>
+    <reason>https://github.com/Singulink/Singulink.Numerics.BigDecimal/issues/4. See also qt3test numberformat60
+      and https://www.w3.org/Bugs/Public/show_bug.cgi?id=14934</reason>
+  </exception>
+  
+  <exception test-case="function-available-1008" run="false" report="Bug">
+    <created by="Michael Kay" on="2021-10-01"/>
+    <reason>Saxon-CS recognizes function concat#0 even when 4.0 is not enabled.</reason>
+  </exception>
+  
+
+  
+  <exception test-case="id-001
+    id-015
+    id-016
+    id-018
+    id-019
+    id-034
+    id-037" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Relies on DTD-defined ID attributes</reason>
+  </exception>
+  
+  <exception test-case="id-043" run="false" report="test-driver">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Test driver limitation: source/select</reason>
+  </exception>
+  
+  
+  <exception test-case="include-0102" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Relies on DTD-defined ID attributes</reason>
+  </exception>
+  
+  <exception test-case="include-0103" run="false" report="not-implemented">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Relies on imported embedded stylesheets</reason>
+  </exception>
+  
+  <exception test-case="package-017" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>W3C Bug 29233</reason>
+  </exception>
+  
+  <exception test-case="package-018" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>W3C Bug 29233</reason>
+  </exception>
+  
+  <exception test-case="package-908" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>W3C Bug 29234</reason>
+  </exception>
+
+  <exception test-case="regex-syntax-0986" run="false" report="tooBig">
+    <created by="Michael Kay" on="2012-11-05"/>
+    <reason>Slow running</reason>
+  </exception>
+  
+  <exception test-case="regex-syntax-0987" run="false" report="tooBig">
+    <created by="Michael Kay" on="2012-11-05"/>
+    <reason>Slow running</reason>
+  </exception>
+ 
+  <exception test-case="override-f-029" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2016-02-14"/>
+    <reason>Saxon bug 2781</reason>
+  </exception>
+  
+  <exception test-case="type-functions-0304" run="false" report=".NET limitation">
+    <created by="Michael Kay" on="2021-06-11"/>
+    <reason>"a:_underscore_" is not recognised as a URI by the System.Uri class (it thinks it might be a filename...)</reason>
+  </exception>
+  
+  <exception test-case="si-group-064" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2020-09-09"/>
+    <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
+  </exception>
+  
+  <exception test-case="function-40-012" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-02"/>
+    <reason>Imposing a temporary restriction on default function parameters until spec clarified.</reason>
+  </exception>
+  
+  <exception test-case="next-match-420" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-30"/>
+    <reason>Default priorities on record type patterns are not implemented.</reason>
+  </exception>
+  
+  <exception test-case="current-401" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-30"/>
+    <reason>Dynamic evaluation of fn:current#0 is not implemented.</reason>
+  </exception>
+  
+  <exception test-case="number-4801" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-03-30"/>
+    <reason>ICU spellout numbering names not recognized.</reason>
+  </exception>
+  
+  <exception test-case="record-024 record-025" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-11-02"/>
+    <reason>Coercion of record arguments is not implemented.</reason>
+  </exception>
+
+
+</exceptions>

@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exceptions>
+   
+   <exception test-set="UCA-collation" test-case="UCA-reorder-codes-009" run="false" report="Bug in ICU-J">
+      <created by="Michael Kay" on="2018-09-09"/>
+      <reason>Believed to be a bugin ICU-J. (We reported a bug and it was acknowledged, but there's a new bug tracker and I can't find it now)</reason>
+   </exception>
+   
+   <exception test-set="UCA-collation" test-case="UCA-reorder-codes-010" run="false" report="Bug in ICU-J">
+      <created by="Michael Kay" on="2018-09-09"/>
+      <reason>Believed to be a bugin ICU-J. (We reported a bug and it was acknowledged, but there's a new bug tracker and I can't find it now)</reason>
+   </exception>
+   
+   <exception test-set="saxon-parse-dateTime" run="false" report="Not supported">
+      <created by="Michael Kay" on="2021-08-20"/>
+      <reason>Function not supported in Saxon-CS</reason>
+   </exception>
+   
+   <exception test-set="saxon-analyze-uri" test-case="analyze-uri-008" run="false" report="Not supported">
+      <created by="Michael Kay" on="2023-11-21"/>
+      <reason>Can't see how to get the escaped path component from .NET</reason>
+   </exception>
+   
+   <exception test-set="fn-transform" test-case="fn-transform-2 fn-transform-3" run="false" report="Not supported">
+      <created by="Michael Kay" on="2021-08-31"/>
+      <reason>Requires localization options not supported in Saxon-CS</reason>
+   </exception>
+   
+   <exception test-set="saxon-is-defaulted-attribute" run="false" report="Not supported">
+      <created by="Michael Kay" on="2021-08-20"/>
+      <reason>Function saxon:is-defaulted not supported in Saxon-CS</reason>
+   </exception>
+ 
+ 
+    <exception test-set="or" test-case="or-006">
+       <!-- The expression should be optimized to include a lookup in a map, and a general comparison -->
+       <optimization assert="//ifCall[@name='Q{http://www.w3.org/2005/xpath-functions/map}contains'] and //gcEE"/>
+    </exception>
+    
+  
+   <exception test-case="filter-001" test-set="">
+      <optimization assert="query/keys/key[2] and query/body//functionCall[@name='fn:key']"/>
+   </exception>
+   <exception test-case="filter-002" test-set="">
+      <optimization assert="query/keys/key[2] and query/body//functionCall[@name='fn:key']"/>
+   </exception>
+   <exception test-case="filter-003" test-set="">
+      <optimization assert="query/keys/key[2] and query/body//functionCall[@name='fn:key']"/>
+   </exception>
+   <exception test-case="filter-004" test-set="">
+      <optimization assert="exists(query/body//functionCall[@name='subsequence'])"/>
+   </exception>
+   <exception test-case="join-001" test-set="">
+      <optimization assert="query/keys/key[2] and query/body//functionCall[@name='fn:key']"/>
+   </exception>
+   <exception test-case="join-002" test-set="">
+      <optimization assert="exists(query/declareFunction//indexedFilter)"/>
+   </exception>
+   <exception test-case="join-003" test-set="">
+      <optimization assert="exists(query/declareFunction//indexedFilter)"/>
+   </exception>
+   <exception test-case="one-to-many-001" test-set="">
+      <optimization assert="exists(query/body/directElement/functionCall[@name='subsequence'])"/>
+   </exception>
+   <exception test-case="one-to-many-002" test-set="">
+      <optimization assert="query/keys/key[2] and query/body//functionCall[@name='fn:key']"/>
+   </exception>
+   <exception test-case="one-to-many-003" test-set="">
+      <optimization assert="exists(query/body//integerRangeTest)"/>
+   </exception>
+   <exception test-case="one-to-many-004" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="one-to-many-005" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="many-to-many-038" test-set="">
+      <optimization assert="every $a in /query/body//directAttribute satisfies .//operator[@op eq '=' (:and @cardinality = 'many-to-many (SA)':)]"/>
+   </exception>
+   <exception test-case="switch-001" test-set="">
+      <optimization assert="exists(//switch)"/>
+   </exception>
+   <exception test-case="switch-002" test-set="">
+      <optimization assert="exists(//switch)"/>
+   </exception>
+   <exception test-case="geq-untyped-1" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-2" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-3" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-4" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-5" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-6" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-7" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-8" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-9" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-11" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-12" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-13" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-14" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-15" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-16" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-17" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-18" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-19" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-21" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-22" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-23" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-24" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-1" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-2" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-3" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-4" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-5" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-6" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-7" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-8" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-9" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-11" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-12" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-13" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-14" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-15" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-16" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-17" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-18" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-19" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-22" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-23" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-24" test-set="">
+      <optimization assert="exists(//functionCall[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-1" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-2" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-3" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-4" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-5" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-6" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-7" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-8" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-9" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-11" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-12" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-13" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-14" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-15" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-16" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-17" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-18" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-19" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-21" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-22" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-23" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="geq-untyped-vi-24" test-set="">
+      <optimization assert="empty(//indexedFilter) and empty(//function[@name='fn:key'])"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-1" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-2" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-3" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-4" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-5" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-6" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-7" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-8" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-9" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-11" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-12" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-13" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-14" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-15" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-16" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-17" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-18" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-19" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-22" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-23" test-set="">
+      <optimization assert="exists(//indexedFilter)"/>
+   </exception>
+   <exception test-case="veq-untyped-vi-24" test-set="">
+      <optimization assert="empty(//indexedFilter) and empty(//function[@name='fn:key'])"/>
+   </exception>
+    
+</exceptions>
