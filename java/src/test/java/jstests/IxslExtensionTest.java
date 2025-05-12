@@ -13,6 +13,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class IxslExtensionTest {
 
-    @Test
+    @Ignore("needs Nashorn")
     public void testIxslEval() {
         try {
             Processor p = new Processor(true);
@@ -55,6 +56,7 @@ public class IxslExtensionTest {
 
     @Test
     public void testBug6140() {
+        // Test that IXSL extensions are available in SaxonJ at compile time, if configured
         try {
             Processor p = new Processor(true);
             Configuration configuration = p.getUnderlyingConfiguration();
