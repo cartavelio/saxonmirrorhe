@@ -166,6 +166,7 @@ public class ResourceRequest {
                         if (iae.getCause() instanceof URISyntaxException) {
                             throw new XPathException("Invalid URI " + uri, iae.getCause());
                         }
+                        throw e;
                     } else {
                         throw e;
                     }
