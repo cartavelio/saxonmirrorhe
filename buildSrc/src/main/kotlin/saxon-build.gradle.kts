@@ -32,6 +32,7 @@ val os = (if (systemOs.isMacOsX())
   "linux" else if (systemOs.isWindows())
   "windows" else "unknown")
 
+extension.targetHost.convention(TargetHost.current())
 extension.systemOs.convention(systemOs)
 extension.systemOsName.convention(os)
 extension.platform.convention(if (os == "mac") { "osx" } else { os })
