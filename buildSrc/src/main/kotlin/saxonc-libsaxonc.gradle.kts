@@ -17,7 +17,7 @@ val saxonBuild = the<SaxonBuildExtension>()
 extension.package_name.convention(extension.edition.map { "SaxonC${it.uppercase()}" })
 extension.package_file_name.convention(extension.package_name.map { name ->
     val (os, arch) = saxonBuild.targetHost.get()
-    "${name}-${os}-${arch}-${saxonBuild.version.get()}"
+    "${name}-${os}-${arch}-${saxonBuild.version.get().replace('.', '-')}"
 })
 val saxonCCoreCMakePackageBucket by configurations.dependencyScope("saxonCCoreCMakePackageBucket")
 val saxonCCoreCMakePackageDir by configurations.resolvable("saxonCCoreCMakePackageDir") {
@@ -251,7 +251,18 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
         from(phpReleaseFolder.elements.map { it.first() })
     }
     into("samples") {
-        from(layout.projectDirectory.dir("../samples"))
+        from(layout.projectDirectory.dir("../samples")) {
+            exclude("CMakeLists.txt.in")
+        }
+        from(layout.projectDirectory.dir("../samples")) {
+            include("CMakeLists.txt.in")
+            rename { _ -> "CMakeLists.txt" }
+            filter<ReplaceTokens>("tokens" to mapOf(
+                "version" to saxonBuild.version.get(),
+                "EDITION" to extension.edition.get().uppercase(),
+                "edition" to extension.edition.get(),
+            ))
+        }
     }
     into("python") {
         from(pythonSamples.elements.map { it.first() })
