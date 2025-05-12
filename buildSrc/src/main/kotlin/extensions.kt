@@ -161,6 +161,8 @@ interface SaxonCCoreExtension {
 
 interface SaxonCExtension {
     abstract val edition: Property<String>
+    abstract val package_name: Property<String>
+    abstract val package_file_name: Property<String>
 }
 
 interface SaxonCPythonExtension {

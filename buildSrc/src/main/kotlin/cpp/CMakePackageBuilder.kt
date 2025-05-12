@@ -7,8 +7,10 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
 
-abstract class CMakePackageBuilder : DefaultTask() {
+abstract class CMakePackageBuilder @Inject constructor(val ex: ExecOperations) : DefaultTask() {
   private val targetHost = TargetHost.current()
 
   @get:Internal
@@ -109,7 +111,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
   }
 
   private fun symlinkLibrary(source: (String) -> String, target: (String) -> String) {
-    project.exec {
+    ex.exec {
       workingDir = sharedLibDir.get().asFile
       executable = "ln"
       args("-nsf", source.invoke(""), target.invoke(""))
@@ -123,7 +125,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
       // project.sync gets itself in a mess because of symlinks pointed at symlinks in the lib dir.
       // This is a bug in Gradle, hence this nasty workaround. It's mac/linux only because there
       // are no symlinks involved on Windows.
-      project.exec {
+      ex.exec {
         executable = "rm"
         args("-rf", sharedLibDir.get().asFile)
       }
