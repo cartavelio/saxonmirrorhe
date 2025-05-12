@@ -26,6 +26,9 @@ include(Catch)
 
 set(saxonc "saxonc-${SaxonC_EDITION}")
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 configure_file(../src/lib/saxonc_version.c.in saxonc_version.c @ONLY)
 add_library(${saxonc} SHARED
     ${CMAKE_CURRENT_BINARY_DIR}/saxonc_version.c
@@ -52,6 +55,7 @@ set_target_properties(${saxonc} PROPERTIES
     SOVERSION ${SaxonC_VERSION_MAJOR}
     VERSION ${SaxonC_VERSION}
 )
+target_link_libraries(${saxonc} PRIVATE Threads::Threads)
 
 include(GenerateExportHeader)
 generate_export_header(${saxonc} BASE_NAME saxonc)
@@ -137,6 +141,7 @@ target_link_libraries(CppTestXQuery PRIVATE ${saxonc})
 
 add_executable(CppTestXslt ../samples/cppTests/testXSLT30.cpp)
 target_link_libraries(CppTestXslt PRIVATE ${saxonc})
+target_link_libraries(CppTestXslt PRIVATE Threads::Threads)
 
 add_test(NAME cppXPath COMMAND CppTestXPath "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
 add_test(NAME cppXQuery COMMAND CppTestXQuery "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
