@@ -27,8 +27,6 @@ final class TinyProcInstImpl extends TinyNodeImpl {
 
     public TinyProcInstImpl(TinyTree tree, int nodeNr) {
         super(tree, nodeNr);
-        this.tree = tree;
-        this.nodeNr = nodeNr;
     }
 
     @Override
