@@ -174,8 +174,6 @@ abstract class DotNetBuild: DotNetImplementation() {
 
     val configuration = this.configuration.get()
 
-    println("TARGET: ${target.get()}")
-
     val cwd = project.layout.buildDirectory.dir("${arch.get()}/${target.get()}").get().asFile
 
     project.exec {
