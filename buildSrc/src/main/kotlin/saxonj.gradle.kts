@@ -482,8 +482,13 @@ val (editionDownloadJarTask, editionMavenJarTask) = extension.editionJarTasks(pr
     common {
         inputs.property("inclusions", extension.editionJarInclusions)
         inputs.property("exclusions", extension.editionJarExclusions)
-        from(compile)
         from(jarMetaInf)
+        from(compile) {
+          exclude("previous-compilation-data.bin")
+        }
+        from(project.rootProject.layout.projectDirectory.dir("java/src/main/resources")) {
+          include("net/sf/saxon/data/**")
+        }
 
         exclude(extension.editionJarExclusions.get())
         include(extension.editionJarInclusions.get())
@@ -503,19 +508,6 @@ val (editionDownloadJarTask, editionMavenJarTask) = extension.editionJarTasks(pr
 tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(editionDownloadJarTask, editionMavenJarTask)
 }
-
-//val testJarManifest = tasks.register<ManifestComparer>("testJarManifest") {
-//    jar = editionJar.map { it.outputs.files.singleFile }
-//    goldJarManifest = extension.edition.map { edition -> layout.projectDirectory.file("gold-jar-manifests/saxon-${edition}.list") }
-//    releaseBuild = saxonBuild.releaseBuild
-//    expectSignedJar = jarSigner.canSignJars
-//    newFilesLog = layout.buildDirectory.file("new-files.log")
-//    missingFilesLog = layout.buildDirectory.file("missing-files.log")
-//}
-//
-//editionJar {
-//    finalizedBy(testJarManifest)
-//}
 
 val compileTestDrivers = tasks.register<JavaCompile>("compileTestDrivers") {
     destinationDirectory = layout.buildDirectory.dir("testdriver/classes")
@@ -598,7 +590,7 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
     into(archiveBaseName) {
         from(editionDownloadJarTask)
         from(testdriverJarTask)
-        into("libs") {
+        into("lib") {
             from(downloadReleaseBundled.getIncoming().files)
         }
         from(releaseDocsRoot) {
