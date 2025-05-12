@@ -224,12 +224,12 @@ val stageJavadocHtml = tasks.register<Copy>("stageJavadocHtml") {
 }
 resources { dependsOn(stageJavadocHtml) }
 
-val stageDocumentationResources = tasks.register<Copy>("stageDocumentationResources") {
+val stageResourcesDoc = tasks.register<Copy>("stageResourcesDoc") {
   group = "Internal"
-  from(layout.projectDirectory.dir("../documentation/src/main/resources"))
+  from(layout.projectDirectory.dir("src/main/resources/doc"))
   into(layout.buildDirectory.dir("stage/doc"))
 }
-resources { dependsOn(stageDocumentationResources) }
+resources { dependsOn(stageResourcesDoc) }
 
 // FIXME: sample classes
 
