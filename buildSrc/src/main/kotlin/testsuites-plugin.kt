@@ -282,7 +282,7 @@ abstract class TestSuitesExtension
 
     val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
 
-    val testargs = mutableListOf<String>("echo", "${dotnet.get()}",
+    val testargs = mutableListOf<String>("${dotnet.get()}",
                                          "${testDrivers.get().asFile}",
                                          "${directory.get()}",
                                          "-o:${reportDir}",
