@@ -46,7 +46,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
   val sharedLibDir: Provider<Directory> = packageDir.map { it.dir(if (systemOs.isWindows) "bin" else "lib") }
 
   @get:Internal
-  val libFilenameWithoutExtension: Provider<String> = libName.map { "lib${it}" }
+  val libFilenameWithoutExtension: Provider<String> = libName.map { "${if (systemOs.isWindows) "" else "lib"}${it}" }
 
   @get:Internal
   val importLibDir = packageDir.map { it.dir("lib") }
