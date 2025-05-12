@@ -91,9 +91,9 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
 
     <ItemGroup>
       <PackageReference Include="AngleSharp" Version="0.17.1" />
-      <PackageReference Include="ICU4N" Version="60.1.0-alpha.402" />
+      <PackageReference Include="ICU4N" Version="60.1.0-alpha.436" />
+      <PackageReference Include="ICU4N.Resources" Version="60.1.0-alpha.436" />
       <!-- Is this implied by ICU4N? I'm getting duplicate package reference errors for it
-      <PackageReference Include="ICU4N.Resources" Version="60.1.0-alpha.402" />
       -->
       <PackageReference Include="NSec.Cryptography" Version="22.4.0" />
       <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
