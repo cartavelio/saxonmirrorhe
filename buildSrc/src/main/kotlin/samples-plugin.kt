@@ -128,18 +128,7 @@ abstract class SamplesExtension
         layout.projectDirectory.file("../../tools/sample-check.py")
       }
 
-      // Presumably this can be improved by leveraging what the python
-      // build tasks do, but brute force for the moment...
-      var python = "python"
-      for (dir in System.getenv("PATH").split(":")) {
-        val file = File("${dir}/python")
-        if (file.exists() && file.canExecute()) {
-          python = file.absolutePath
-          break
-        }
-      }
-
-      commandLine = listOf(python, "${script}", "--edition", "${edition.get()}",
+      commandLine = listOf("python", "${script}", "--edition", "${edition.get()}",
                            "--sample", sample,
                            "${layout.buildDirectory.file("sample_results/${sample}.txt").get()}")
     }
