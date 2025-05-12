@@ -18,7 +18,13 @@ int exists(const char *fname) {
   return 0;
 }
 
-int main() {
+void path_join(char* result, const char* segment1, const char* segment2) {
+  int path_len = strlen(segment1) + strlen(segment2) + 1;
+  snprintf(result, path_len, "%s%s", segment1, segment2);
+}
+
+int main(int argc, char *argv[]) {
+  const char * const data_dir = argc > 1 ? argv[1] : "";
 
   char cwd[FILENAME_MAX]; // create string buffer to hold path
   GetCurrentDir(cwd, FILENAME_MAX);
@@ -50,12 +56,17 @@ int main() {
   const char *verCh = getProductVariantAndVersion(environi, processor);
   printf("XSLT Tests\n\nSaxon version: %s \n", verCh);
 
-  const char *result =
-      xsltApplyStylesheet(environi, processor, cwd, "../data/cat.xml",
-                          "../data/test.xsl", 0, 0, 0, 0);
+  char cat_xml_file[FILENAME_MAX];
+  path_join(cat_xml_file, data_dir, "/cat.xml");
+  char test_xsl_file[FILENAME_MAX];
+  path_join(test_xsl_file, data_dir, "/test.xsl");
 
-  xsltSaveResultToFile(environi, processor, cwd, "../data/cat.xml",
-                       "../data/test.xsl", "../outputFile.xml", 0, 0, 0, 0);
+  const char *result =
+      xsltApplyStylesheet(environi, processor, cwd, cat_xml_file,
+                          test_xsl_file, 0, 0, 0, 0);
+
+  xsltSaveResultToFile(environi, processor, cwd, cat_xml_file,
+                       test_xsl_file, "outputFile.xml", 0, 0, 0, 0);
 
   if (!result) {
     printf("result is null \n");
@@ -67,7 +78,7 @@ int main() {
     printf("Test 1 Pass: %s", result);
   }
 
-  if (exists("../outputFile.xml")) {
+  if (exists("outputFile.xml")) {
     printf("Test 2 - Pass: outputFile.xml exists \n");
   } else {
     printf("Test 2 - Fail: outputFile.xml not found \n");
