@@ -47,11 +47,6 @@ val copySaxoncDoc by configurations.resolvable("copySaxoncDoc") {
   extendsFrom(copySaxoncDocBucket)
 }
 
-val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
-val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
-  extendsFrom(javaFeatureKeysBucket)
-}
-
 val featureKeysSourcesBucket by configurations.dependencyScope("featureKeysSourcesBucket")
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
   extendsFrom(featureKeysSourcesBucket)
@@ -82,8 +77,6 @@ dependencies {
   copySaxoncDocBucket(project(mapOf("path" to ":documentation",
                                    "configuration" to "copySaxoncDoc")))
 
-  javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
-                                      "configuration" to "javaFeatureKeys")))
   featureKeysSourcesBucket(project(mapOf("path" to ":featurekeys",
                                          "configuration" to "featureKeysSources")))
 
@@ -155,7 +148,7 @@ resources { dependsOn(stageNotices) }
 val stageSamples = tasks.register<Copy>("stageSamples") {
   group = "Internal"
   into(layout.buildDirectory.dir("stage/samples"))
-  from(layout.projectDirectory.dir("../src/samples"))
+  from(layout.projectDirectory.dir("../samples/src"))
   include("config/config.xml")
   include("config/config-HE.xml")
   include("config/saxon-attributes.xsd")
@@ -194,19 +187,18 @@ val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
 
 val stageConfigSchema = tasks.register<JavaExec>("stageConfigSchema") {
   group = "Internal"
-  inputs.files(javaFeatureKeysSources)
   inputs.files(copy_feature_keys)
-  inputs.files(layout.projectDirectory.file("../src/samples/config/config-raw.xsd"))
+  inputs.files(layout.projectDirectory.file("../samples/src/config/config-raw.xsd"))
   outputs.files(layout.buildDirectory.file("stage/samples/config/config.xsd"))
 
   classpath = configurations.named("documentation").get()
   mainClass = "com.saxonica.Transform"
-  args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToSchema.xsl")}",
+  args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToSchema.xsl").get()}",
        "-o:${layout.buildDirectory.file("stage/samples/config/config.xsd").get()}",
        "-it:main",
-       "FeatureKeys=${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml")}",
-       "AdditionalFeatures=${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml")}",
-       "ConfigSchema=file://${layout.projectDirectory.file("../src/samples/config/config-raw.xsd")}")
+       "FeatureKeys=${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml").get()}",
+       "AdditionalFeatures=${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml").get()}",
+       "ConfigSchema=file://${layout.projectDirectory.file("../samples/src/config/config-raw.xsd")}")
 }
 resources { dependsOn(stageConfigSchema) }
 
@@ -214,11 +206,11 @@ val stageSampleSources = tasks.register("stageSampleSources") {
   group = "Internal"
   doLast {
     copy {
-      from(layout.projectDirectory.dir("../src/samples/java"))
+      from(layout.projectDirectory.dir("../samples/src/java"))
       into(layout.buildDirectory.dir("stage/samples/java"))
     }
     copy {
-      from(layout.projectDirectory.dir("../src/samples/cs"))
+      from(layout.projectDirectory.dir("../samples/src/cs"))
       into(layout.buildDirectory.dir("stage/samples/cs"))
     }
   }
