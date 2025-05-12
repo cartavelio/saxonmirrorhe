@@ -94,15 +94,15 @@ abstract class CSharpRunner: DefaultTask() {
     // This makes the report name match what the regression report builder
     // expects. Since I don't think any one else cares...
     val reportName = if (name.startsWith("test_suite_")) {
-      "${edition.get()}dotnet_${name.substring(11)}"
+      "${edition.get()}dotnet_${name.substring(11)}.xml"
     } else {
-      name
+      "${name}.xml"
     }
 
     val testargs = mutableListOf<String>("${dotnet.get()}",
                                          "${testDrivers.get().asFile}",
                                          "${suiteDir.get()}",
-                                         "${catalog}",
+                                         "-catalog:${catalog}",
                                          "-exceptions:${exceptionsFile.get()}",
                                          "-reportfilename:${reportName}",
                                          "-o:${reportDir.get()}",
