@@ -741,7 +741,7 @@ tasks.register<Copy>("saxonc_documentation") {
   }
 }
 
-tasks.register<Copy>("copy_saxonc_doc") {
+val copy_saxonc_doc = tasks.register<Copy>("copy_saxonc_doc") {
   group = "Internal"
   description = "Copy the SaxonC documentation source"
 
@@ -750,6 +750,8 @@ tasks.register<Copy>("copy_saxonc_doc") {
     exclude("xsl/*.xsl")
   }
 }
+val copySaxoncDoc by configurations.consumable("copySaxoncDoc")
+copySaxoncDoc.outgoing.artifact(copy_saxonc_doc) { builtBy(copy_saxonc_doc) }
 
 tasks.register<Copy>("copy_saxonc_css") {
   group = "Internal"
@@ -769,7 +771,7 @@ tasks.register<Copy>("copy_saxonc_css") {
   }
 }
 
-tasks.register<JavaExec>("saxonc_doc_sef") {
+val saxonc_doc_sef = tasks.register<JavaExec>("saxonc_doc_sef") {
   group = "Internal"
   description = "Compile the viewer_app stylesheet for the SaxonC documentation"
 
@@ -784,6 +786,8 @@ tasks.register<JavaExec>("saxonc_doc_sef") {
        "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
        "--generateByteCode:off")
 }
+val saxoncDocSef by configurations.consumable("saxoncDocSefArtifacts")
+saxoncDocSef.outgoing.artifact(saxonc_doc_sef) { builtBy(saxonc_doc_sef) }
 
 val saxonc_api_doc = tasks.register("saxonc_api_doc") {
   inputs.files(doxygenDocumentation)
