@@ -590,7 +590,7 @@ val uploadUnsignedMavenJars = tasks.register<UnsignedArtifactUploadTask>("upload
     queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
     region = signingResources.map { it.region.get() }
     baseKeyPrefix = "inputs"
-    jobFileDir = layout.buildDirectory.dir("uploadUnsignedDownloadJars")
+    jobFileDir = layout.buildDirectory.dir("uploadMavenDownloadJars")
 }
 
 val downloadSignedDownloadJars = tasks.register<SignedArtifactDownloadTask>("downloadSignedDownloadJars") {
