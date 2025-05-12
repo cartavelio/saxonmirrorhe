@@ -3,6 +3,7 @@ import com.saxonica.build.cpp.DoxygenTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.*
+import java.nio.file.Files
 
 plugins {
     base
@@ -165,16 +166,16 @@ tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
     dependsOn(test)
 }
 
-val build_package = tasks.register<Exec>("cpack_package") {
-    dependsOn(build)
-
-    outputs.file(layout.buildDirectory.file(extension.package_file_name.map { "${it}.zip" }))
-
-    group = LifecycleTasks.RELEASE_GROUP
-    workingDir = layout.buildDirectory.get().asFile
-    executable = "cpack"
-    args("-C", "Release")
-}
+//val build_package = tasks.register<Exec>("cpack_package") {
+//    dependsOn(build)
+//
+//    outputs.file(layout.buildDirectory.file(extension.package_file_name.map { "${it}.zip" }))
+//
+//    group = LifecycleTasks.RELEASE_GROUP
+//    workingDir = layout.buildDirectory.get().asFile
+//    executable = "cpack"
+//    args("-C", "Release")
+//}
 
 tasks.build.configure {
     dependsOn(build)
@@ -205,25 +206,32 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
 
 val noticeFilenames = listOf("JAMESCLARK.txt", "JLINE2.txt", "LICENSE.txt")
 val notices = project.rootProject.layout.projectDirectory.dir("src/main/notices").files(noticeFilenames)
-val releaseZipTask = tasks.register<Zip>("package") {
-    group = LifecycleTasks.RELEASE_GROUP
-    description = "generate the libsaxon download .zip package"
 
-    inputs.files(build_package.map { it.outputs.files })
-    inputs.files(notices)
-    archiveBaseName =  extension.package_file_name
-    destinationDirectory =  layout.buildDirectory.dir("out")
+val packagedDir = layout.buildDirectory.dir("packaged")
+val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder") {
+    into(packagedDir.map { it.dir("tmp/${extension.package_file_name.get()}") })
 
-    from(zipTree(build_package.map { it.outputs.files.singleFile })) {
+    // this is the path releaseStagingPath, but we're triggering the build dependency
+    from(stage.map { it.outputs.files.singleFile }) {
+        val sourceRootPath = releaseStagingPath.get().asFile.toPath()
+        val destinationRootPath = destinationDir.toPath()
         into(extension.package_name)
-        eachFile {
-            // We want to extract the files from the cpack-created .zip and drop the top-level folder.
-            // For infuriating reasons, the destination folder gets put on the front of the relative path
-            // and we have to drop the second segment to achieve what we want.
-            val rejiggeredPath = relativePath.segments.take(1) + relativePath.segments.drop(2)
-            relativePath = RelativePath(true, *rejiggeredPath.toTypedArray())
+
+        if (!saxonBuild.targetHost.get().isWindows) {
+            eachFile {
+                val sourcePathObj = sourceRootPath.resolve(sourcePath)
+                val destinationPath = destinationRootPath.resolve(path)
+                if(Files.isSymbolicLink(sourcePathObj)) {
+                    exclude()
+                    destinationPath.parent.toFile().mkdirs()
+                    val linkTarget = Files.readSymbolicLink(sourcePathObj)
+                    project.exec {
+                        executable = "ln"
+                        args("-nsf", linkTarget, destinationPath)
+                    }
+                }
+            }
         }
-        includeEmptyDirs = false
     }
     into("notices") {
         from(notices)
@@ -236,8 +244,26 @@ val releaseZipTask = tasks.register<Zip>("package") {
     }
 }
 
+val packagedZip = packagedDir.map { it.file("${extension.package_file_name.get()}.zip") }
+val releaseZipWindowsTask = tasks.register<Zip>("release_zip_windows_zip") {
+    from(releaseFolderTask.map { it.destinationDir })
+    into(packagedZip)
+}
+
+val releaseZipUnicesTask = tasks.register<Exec>("package") {
+    group = LifecycleTasks.RELEASE_GROUP
+    description = "generate the libsaxon download .zip package"
+
+    inputs.dir(releaseFolderTask.map { it.destinationDir })
+    outputs.file(packagedZip)
+
+    executable("zip")
+    args("--recurse-paths", "--symlinks", packagedZip.get(), extension.package_file_name.get())
+    workingDir = packagedDir.map { it.dir("tmp") }.get().asFile
+}
+
 tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
-    dependsOn(releaseZipTask)
+    dependsOn(if (saxonBuild.targetHost.get().isWindows) releaseZipWindowsTask else releaseZipUnicesTask)
 }
 
 libDir.outgoing.artifact(releaseStagingPath.map { it.dir("lib") }) { builtBy(stage) }
