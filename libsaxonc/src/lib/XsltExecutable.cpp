@@ -127,7 +127,7 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
 }
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
-
+  SaxonProcessor::attachCurrentThread();
     if (!selectionStringFlag) {
         XdmValue * valuei = getParameter("_i_matches", false);
             if(valuei != nullptr) {
@@ -209,7 +209,7 @@ void XsltExecutable::setInitialTemplateParameters(
 }
 
 void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
-
+  SaxonProcessor::attachCurrentThread();
   if (flag) {
     resultDocumentMap.clear();
     if (saxonResultDocRef != SXN_UNSET) {
@@ -241,7 +241,7 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
 }
 
 std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
-
+  SaxonProcessor::attachCurrentThread();
   if (saxonResultDocRef > 0) {
     allocFn fn = operator new;
     long long *results =
@@ -356,7 +356,7 @@ void XsltExecutable::clearParameters(bool delValues) {
 }
 
 void XsltExecutable::clearProperties() {
-
+  SaxonProcessor::attachCurrentThread();
   properties.clear();
   if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
@@ -391,6 +391,7 @@ const char * XsltExecutable::getcwd() {
 }
 
 void XsltExecutable::exportStylesheet(const char *filename) {
+  SaxonProcessor::attachCurrentThread();
   long status =
       j_save(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(),
              (void *)executableRef, (char *)filename);
