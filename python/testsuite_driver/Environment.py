@@ -73,11 +73,13 @@ class Environment:
     def __init__(self):
         ...
         self.proc = saxonc.PySaxonProcessor(license=True)
-        '''self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
-                                               "/Users/ond1/work/development/git/private/saxon-license.lic")'''
-        if os.getenv("SAXON_LICENSE_DIR") is not None:
-            self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+
+        try:
+            if os.getenv("SAXON_LICENSE_DIR") is not None:
+                self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
                                                    os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
+        except saxonc.PySaxonApiError as ex:
+            print("*** unlicensed environment :" + str(ex))
 
         self.lang = None
         self.proc.set_configuration_property('http://saxon.sf.net/feature/optimizationLevel', optimizer_flags)
