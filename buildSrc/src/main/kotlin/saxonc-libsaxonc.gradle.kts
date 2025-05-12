@@ -235,6 +235,9 @@ tasks.register<Zip>("package") {
     into("php") {
         from(phpReleaseFolder.elements.map { it.first() })
     }
+    into("samples") {
+        from(layout.projectDirectory.dir("../samples"))
+    }
 }
 
 libDir.outgoing.artifact(releaseStagingPath.map { it.dir("lib") }) { builtBy(stage) }
