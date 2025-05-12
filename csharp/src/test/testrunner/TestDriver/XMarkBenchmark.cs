@@ -281,7 +281,7 @@ namespace TestRunner {
 
                         try {
                             SysCollGen.List<long> measures = new SysCollGen.List<long>();
-                            File query = new File(dir + 'q' + q + ".xq");
+                            Saxon.Ejava.io.File query = new (dir + 'q' + q + ".xq");
                             comp.BaseUri = query.toURI();
                             comp.SchemaAware = val;
                             XQueryExecutable exp =
