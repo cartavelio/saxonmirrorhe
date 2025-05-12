@@ -94,7 +94,7 @@ abstract class CSharpRunner: DefaultTask() {
     // This makes the report name match what the regression report builder
     // expects. Since I don't think any one else cares...
     val reportName = if (name.startsWith("test_suite_")) {
-      "${edition.get()}j_${name.substring(11)}"
+      "${edition.get()}dotnet_${name.substring(11)}"
     } else {
       name
     }

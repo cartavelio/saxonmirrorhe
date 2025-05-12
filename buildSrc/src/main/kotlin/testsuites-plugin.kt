@@ -1,5 +1,6 @@
 package com.saxonica.build
 
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
@@ -259,91 +260,11 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
-
-/*
-    // If this fails, make a task named all_test_suites in your build before calling configureSuite()
-    val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME)
-    val build = tasks.named("dotnetBuildTestDrivers")
-
-
-
-    val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
-
-    val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite)
-
-    val catalog = when (suite) {
-      "qt3extra" -> "j-catalog.xml"
-      else -> "catalog.xml"
-    }
-
-    val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
-
-    val relprefix = "${arch.get()}/TestDrivers/bin/Release"
-    val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
-
-    val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
-
-    val testargs = mutableListOf<String>("${dotnet.get()}",
-                                         "${testDrivers.get().asFile}",
-                                         "${directory.get()}",
-                                         "${catalog}",
-                                         "-exceptions:${exceptionsFile.get()}",
-                                         "-reportfilename:${taskName}",
-                                         "-o:${reportDir}",
-                                         "-lang:${language}")
-    for ((optname, optvalue) in options) {
-      testargs.add("-${optname}:${optvalue}")
-    }
-    for((optname, optvalue) in propertyOptions.get()) {
-      if (optvalue == "") {
-        testargs.add("-${optname}")
-      } else {
-        testargs.add("-${optname}:${optvalue}")
-      }
-    }
-*/
-/*
-    val thisSuite = tasks.register<Exec>(taskName) {
-      group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-
-      dependsOn(build)
-      workingDir = directory.get().asFile
-      commandLine = testargs
-      //ignoreExitValue = true
-
-      doFirst {
-        println(testargs)
-        println("${product.get()}, ${platform.get()}, ${arch.get()}, ${edition.get()}")
-        Files.createDirectories(Paths.get(reportDir.toString()))
-      }
-    }
-    if (suite == "expath") {
-      // This is annoying. We have to copy the suite because the sandpit is writable
-      val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
-        group = "Internal"
-        description = "Copy the expath test suite"
-        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        from(submodulesDir.dir("expath/tests/qt3"))
-      }
-      val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
-        group = "Internal"
-        description = "Copy the expath test suite sandpit"
-        dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
-        from(submodulesDir.dir("extra/data/sandpit"))
-      }
-      thisSuite.configure {
-        dependsOn(copySandpit)
-      }
-    }
-*/
   }
 
   fun configureCsharpXsd(suite: String, 
                          @Suppress("UNUSED_PARAMETER") language: String,
                          options: Map<String,String>, taskName: String) {
-    // If this fails, make a task named all_test_suites in your build before calling configureSuite()
     val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME).get()
     val build = tasks.named("dotnetBuildTestDrivers").get()
 
@@ -361,7 +282,7 @@ abstract class TestSuitesExtension
 
     val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
 
-    val testargs = mutableListOf<String>("${dotnet.get()}",
+    val testargs = mutableListOf<String>("echo", "${dotnet.get()}",
                                          "${testDrivers.get().asFile}",
                                          "${directory.get()}",
                                          "-o:${reportDir}",
@@ -387,9 +308,25 @@ abstract class TestSuitesExtension
       //ignoreExitValue = true
 
       doFirst {
-        println(testargs)
-        println("${product.get()}, ${platform.get()}, ${arch.get()}, ${edition.get()}")
         Files.createDirectories(Paths.get(reportDir.toString()))
+      }
+
+      // In the Java test driver, we made the report filename an option.
+      // For the C# test driver, I'm just banging in rewrite for the name.
+      doLast {
+        val vparts = "${project.findProperty("saxonVersion")}".split("\\.".toRegex())
+        val shortVer = "${vparts[0]}.${vparts[1]}"
+        val rpath = "test-results/${suite}/${dateStamp}"
+        val rfile = layout.buildDirectory.file(
+            "${rpath}/SaxonResults${shortVer}n.xml").get().asFile
+        val dfile = layout.buildDirectory.file(
+            "${rpath}/${edition.get()}dotnet_xsd_XSD${xsdVersion}.xml").get().asFile
+        if (rfile.exists()) {
+          if (dfile.exists()) {
+            dfile.delete()
+          }
+          rfile.renameTo(dfile)
+        }
       }
     }
 
