@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Xml;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using Org.XmlResolver;
 using Org.XmlResolver.Features;
 using Saxon.Api;
 using Saxon.Callbacks;
@@ -20,7 +22,7 @@ namespace SaxonCS_NUnit {
             ClassicAssert.NotNull(config.getResourceResolver());
             Assert.That(config.getResourceResolver() is ConfigurableResourceResolver);
         }
-        
+
         [Test]
         public void explicitCatalogResourceResolverClass() {
             Processor proc = new();
@@ -29,27 +31,27 @@ namespace SaxonCS_NUnit {
             ClassicAssert.NotNull(config.getResourceResolver());
             Assert.That(config.getResourceResolver() is CatalogResourceResolver);
         }
-        
+
         [Test]
         public void explicitCatalogResourceResolver() {
             Processor proc = new();
             Configuration config = proc.Implementation;
-        
+
             CatalogResourceResolver underlyingResolver = new CatalogResourceResolver();
-        
+
             MyResolver resolver = new MyResolver(underlyingResolver);
-        
+
             config.setResourceResolver(resolver);
             ClassicAssert.NotNull(config.getResourceResolver());
             Assert.That(config.getResourceResolver() is CatalogResourceResolver);
             Assert.That(config.getResourceResolver() is MyResolver);
         }
-        
+
         [Test]
         public void explicitErroneousCatalogResourceResolver() {
             Processor proc = new();
             Configuration config = proc.Implementation;
-        
+
             try {
                 proc.SetProperty(Feature.RESOURCE_RESOLVER, "Hello");
                 Assert.Fail();
@@ -61,8 +63,70 @@ namespace SaxonCS_NUnit {
                 Assert.Fail();
             }
         }
-        
-        private class MyResolver : CatalogResourceResolver {
+
+        [Test]
+        public void parseXmlTest() {
+             
+            String query = "parse-xml('<!DOCTYPE root [\n" +
+                               "  <!ENTITY xxe SYSTEM \"TEST_02.xml\">\n" +
+                               "]>\n" +
+                               "<root>&amp;xxe;</root>')";
+            // Test 1 - no resrtictions
+            try{
+                Processor processor = new Processor();
+
+                XQueryCompiler xqueryCompiler = processor.NewXQueryCompiler();
+                xqueryCompiler.BaseUri = ConfigTest.DataDirUri;
+                XQueryEvaluator xqueryEvaluator = xqueryCompiler.Compile(query).Load();
+                MemoryStream os1 = new MemoryStream();
+                xqueryEvaluator.Run(processor.NewSerializer(os1));
+                Console.WriteLine("First run successful");
+            }
+            catch (SaxonApiException err) {
+                Assert.Fail(err.Message);
+            }
+            // Test 2 - restricted using a custom resource resolver
+            try {
+                Processor processor = new Processor();
+                processor.SetResourceResolver(request => {
+                    if (request.Uri.IsFile) {
+                        throw new SaxonApiException("File URI not allowed");
+                    }
+                    else {
+                        return null;
+                    }
+                }, true);
+                XQueryCompiler xqueryCompiler = processor.NewXQueryCompiler();
+                xqueryCompiler.BaseUri = ConfigTest.DataDirUri;
+                XQueryEvaluator xqueryEvaluator = xqueryCompiler.Compile(query).Load();
+                MemoryStream os = new MemoryStream();
+                xqueryEvaluator.Run(processor.NewSerializer(os));
+                Console.WriteLine("Second run successful");
+                Assert.Fail("Error not detected");
+            }
+            catch (SaxonApiException err) {
+                // error is expected
+            }
+            // Test 3 - restricted set of allowed protocols (bug 6711)
+            try {
+                Processor processor = new Processor();
+                processor.SetProperty(Feature.ALLOWED_PROTOCOLS, "https,http");
+                XQueryCompiler xqueryCompiler = processor.NewXQueryCompiler();
+                xqueryCompiler.BaseUri = ConfigTest.DataDirUri;
+                XQueryEvaluator xqueryEvaluator = xqueryCompiler.Compile(query).Load();
+                MemoryStream os = new MemoryStream();
+                xqueryEvaluator.Run(processor.NewSerializer(os));
+                Console.WriteLine("Second run successful");
+                Assert.Fail("Error not detected");
+            }
+            catch (SaxonApiException err) {
+                // error is expected
+            }
+        }
+    
+
+
+    private class MyResolver : CatalogResourceResolver {
             private readonly CatalogResourceResolver resolver;
         
             public MyResolver(CatalogResourceResolver resolver) {
