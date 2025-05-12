@@ -165,8 +165,9 @@ abstract class TestSuitesExtension
 
     val catalog = "catalog.xml"
 
-    val reportFn = "SaxonResults-${language}.xml"
-    val errorFn = "SaxonFailures-${language}-errors.xml"
+    // The format expected by the regression report generator
+    val reportFn = "${edition.get()}j_${suite}_${language}.xml"
+    val errorFn = "${edition.get()}j_${suite}_${language}-errors.xml"
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
