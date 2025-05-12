@@ -1,4 +1,7 @@
+package com.saxonica.build
+
 import org.gradle.internal.os.OperatingSystem
+
 /**
  * Represents a target OS / arch for building / publishing release artifacts
  *
