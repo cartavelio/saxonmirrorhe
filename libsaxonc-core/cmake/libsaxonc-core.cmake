@@ -11,6 +11,9 @@ if(NOT CMAKE_DEBUG_POSTFIX)
     endif()
 endif()
 
+# Always use `lib` instead of sometimes `lib64`
+set(SAXON_CMAKE_INSTALL_LIBDIR "lib")
+
 set(saxonc_core "saxonc-core-${SaxonCCore_EDITION}")
 string(TOUPPER ${SaxonCCore_EDITION} SAXON_EDITION)
 
@@ -36,7 +39,7 @@ include(CMakePackageConfigHelpers)
 
 configure_package_config_file(../cmake/SaxonCCoreConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}Config.cmake
-        INSTALL_DESTINATION lib/cmake/SaxonCCore${SAXON_EDITION}
+        INSTALL_DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
 )
 
 write_basic_package_version_file(
@@ -47,7 +50,7 @@ write_basic_package_version_file(
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}ConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
+        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
 )
 
 install(TARGETS ${saxonc_core}
@@ -55,6 +58,6 @@ install(TARGETS ${saxonc_core}
         FILE_SET HEADERS
 )
 install(EXPORT "SaxonCCore${SAXON_EDITION}"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
+        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
         NAMESPACE "SaxonC${SAXON_EDITION}::"
 )

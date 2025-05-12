@@ -10,6 +10,9 @@ string(TOUPPER ${SaxonC_EDITION} SAXON_EDITION)
 # set(SaxonCCore_IncludePath CACHE PATH) Path to Graal native-image output; must be set on command line with -D
 # set(SAXON_VERSION CACHE STRING) Main Saxon J version; must be set on command line with -D
 
+# Always use `lib` instead of sometimes `lib64`
+set(SAXON_CMAKE_INSTALL_LIBDIR "lib")
+
 Include(FetchContent)
 FetchContent_Declare(
         Catch2
@@ -144,7 +147,7 @@ include(CMakePackageConfigHelpers)
 
 configure_package_config_file(../cmake/SaxonCConfig.cmake.in
        ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}Config.cmake
-       INSTALL_DESTINATION lib/cmake/SaxonC${SAXON_EDITION}
+       INSTALL_DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
 )
 write_basic_package_version_file(
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}ConfigVersion.cmake
@@ -162,13 +165,13 @@ install(TARGETS ${saxonc}
 install(TARGETS Gizmo Transform Query)
 
 install(EXPORT "SaxonC${SAXON_EDITION}"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
+        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
         NAMESPACE "SaxonC${SAXON_EDITION}::"
 )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}ConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
+        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
 )
 
 # Files from saxonc-core
@@ -199,7 +202,7 @@ install(DIRECTORY
 )
 
 install(DIRECTORY ${SaxonCCore_PackageDir}/lib/cmake/SaxonCCore${SAXON_EDITION}/
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
+    DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
     PATTERN *Config.cmake EXCLUDE
     PATTERN *ConfigVersion.cmake EXCLUDE
 )
