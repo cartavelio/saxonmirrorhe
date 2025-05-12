@@ -34,6 +34,10 @@ saxonj {
   )
 }
 
+val saxonBuild = the<SaxonBuildExtension>()
+
+val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
+
 val downloadReleaseBundled by configurations.getting
 
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
@@ -152,6 +156,17 @@ val (_, mavenSqlSourceJar) = jarTaskBuilder("sqlSource") {
   }
 }
 
+tasks.named<Sync>("signingDownloadJars") {
+  into(layout.buildDirectory.dir("signing/download"))
+  from(downloadSqlJar)
+}
+
+tasks.named<Sync>("signingMavenJars") {
+  into(layout.buildDirectory.dir("signing/mavendownload"))
+  from(mavenSqlJar)
+  from(mavenSqlSourceJar)
+}
+
 val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
 
 val testSuitesClasspath = files(sourceSets["edition"].output)
@@ -166,7 +181,13 @@ testSuites {
 }
 
 val downloadRelease = tasks.named<Zip>("downloadRelease") {
-  from(downloadSqlJar)
+  if (signedReleaseArtifacts) {
+    val name = "signed-download/saxon"
+    val vers = saxonBuild.publishVersion.get()
+    from(tasks.named("downloadSignedDownloadJars").map {layout.buildDirectory.file("${name}-sql-${vers}.jar") })
+  } else {
+    from(downloadSqlJar)
+  }
   into("notices") {
     from(layout.projectDirectory.dir("../../src/main/notices"))
     include("ICU-J.txt")
@@ -256,8 +277,11 @@ testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
 
 testSuites.configure("xslt30extra", "XT30")
 
-val saxonBuild = the<SaxonBuildExtension>()
+val signTask = tasks.named("downloadSignedMavenJars")
 val mavenArtifactId = "Saxon-PE"
+val mavenVersion = saxonBuild.publishVersion.get()
+val signRootName = "signed-maven/${mavenArtifactId}-${mavenVersion}"
+
 val mavenPom = PomGenerator() {
   name = mavenArtifactId
   license(PomGenerator.COMMERCIAL_LICENSE)
@@ -269,16 +293,29 @@ publishing {
     create<MavenPublication>("maven") {
       groupId = "com.saxonica"
       artifactId = mavenArtifactId
-      version = saxonBuild.version.get()
+      version = mavenVersion
 
       pom(mavenPom.generate())
 
-      artifact(tasks.named<Jar>("editionMavenJar"))
-      artifact(tasks.named<Jar>("javadocMavenJar"))
-      artifact(mavenSqlJar)
-      artifact(mavenSqlSourceJar)
-      artifact(tasks.named<Jar>("testDriversMavenJar"))
-      artifact(tasks.named<Jar>("testDriversSourceMavenJar"))
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}.jar") })
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-javadoc.jar") }) {
+        classifier = "javadoc"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sources.jar") }) {
+        classifier = "sources"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql.jar") }) {
+        classifier = "sql"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql-sources.jar") }) {
+        classifier = "sql-sources"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
+        classifier = "test"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
+        classifier = "test-sources"
+      }
     }
   }
   repositories {

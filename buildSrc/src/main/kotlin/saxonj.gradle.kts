@@ -121,7 +121,6 @@ dependencies {
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
     downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
-    //downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
 
     implementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
     implementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
@@ -561,6 +560,16 @@ val signingDownloadJars = tasks.register<Sync>("signingDownloadJars") {
     from(testdriverJarTask)
 }
 
+val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    into(layout.buildDirectory.dir("signing/mavendownload"))
+    from(tasks.named<Jar>("editionMavenJar"))
+    from(tasks.named<Jar>("javadocMavenJar"))
+    from(tasks.named<Jar>("editionSourceMavenJar"))
+    from(tasks.named<Jar>("testDriversMavenJar"))
+    from(tasks.named<Jar>("testDriversSourceMavenJar"))
+}
+
 val signingResources = tasks.register<AwsSigningResources>("signingResources") {
     region = "eu-west-2"
     stackName = "SaxonicaCiCdStack"
@@ -568,6 +577,15 @@ val signingResources = tasks.register<AwsSigningResources>("signingResources") {
 
 val uploadUnsignedDownloadJars = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedDownloadJars") {
     inputDir = signingDownloadJars.map { it.destinationDir }
+    bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+    queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
+    region = signingResources.map { it.region.get() }
+    baseKeyPrefix = "inputs"
+    jobFileDir = layout.buildDirectory.dir("uploadUnsignedDownloadJars")
+}
+
+val uploadUnsignedMavenJars = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedMavenJars") {
+    inputDir = signingMavenJars.map { it.destinationDir }
     bucket = signingResources.map { it.codeSigningInputsBucket.get() }
     queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
     region = signingResources.map { it.region.get() }
@@ -583,20 +601,35 @@ val downloadSignedDownloadJars = tasks.register<SignedArtifactDownloadTask>("dow
     jobFile = uploadUnsignedDownloadJars.map { it.jobFile.get() }
 }
 
+val downloadSignedMavenJars = tasks.register<SignedArtifactDownloadTask>("downloadSignedMavenJars") {
+    outputDir = layout.buildDirectory.dir("signed-maven")
+    bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
+    queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
+    region = signingResources.map { it.region.get() }
+    jobFile = uploadUnsignedMavenJars.map { it.jobFile.get() }
+}
+
+val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
+
 val downloadRelease = tasks.register<Zip>("downloadRelease") {
     group = LifecycleTasks.RELEASE_GROUP
     val releaseDocsRoot = extension.sourceRoot.dir("../../src/main")
-
     archiveBaseName = extension.edition.map { edition ->
-        val parts = extension.version.get().split('.')
-        val usefulParts = if (parts.last() == "0") parts.dropLast(1) else parts
-        "Saxon${edition.uppercase()}${usefulParts.joinToString(".")}J"
+        "Saxon${edition.uppercase()}${saxonBuild.publishVersion.get()}J"
     }
 
     destinationDirectory = layout.buildDirectory.dir("releases")
-    
-    from(editionDownloadJarTask)
-    from(testdriverJarTask)
+
+    if (signedReleaseArtifacts) {
+      val name = "signed-download/saxon-${extension.edition.get()}"
+      val vers = saxonBuild.publishVersion.get()
+      from(downloadSignedDownloadJars.map { layout.buildDirectory.file("${name}-${vers}.jar") })
+      from(downloadSignedDownloadJars.map { layout.buildDirectory.file("${name}-test-${vers}.jar") })
+    } else {
+      from(editionDownloadJarTask)
+      from(testdriverJarTask)
+    }
+
     into("lib") {
       from(downloadReleaseBundled.getIncoming().files)
     }
