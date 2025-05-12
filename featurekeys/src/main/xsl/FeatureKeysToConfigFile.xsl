@@ -56,15 +56,15 @@
     <xsl:template match="*" mode="process-base">
         <xsl:variable name="this-element-in-config" select="." as="element()"/>
         <xsl:variable name="element-name" select="local-name()" as="xs:string"/>
-        <xsl:variable name="additional-doc" select="doc('AdditionalFeatures.xml')"/>
+        <xsl:variable name="additional-doc"
+                      select="doc(resolve-uri('AdditionalFeatures.xml', base-uri(/)))"/>
         <xsl:variable name="reference-doc"
-            select="$additional-doc//config-element[@name eq $element-name]/@src-doc"/>
+            select="resolve-uri($additional-doc//config-element[@name eq $element-name]/@src-doc, base-uri(.))"/>
         <xsl:if test="$debug">
             <xsl:message expand-text="yes">processing element: {$element-name}</xsl:message>
             <xsl:message expand-text="yes">additional-doc: {exists($additional-doc)}</xsl:message>
             <xsl:message expand-text="yes">reference-doc: {$reference-doc}</xsl:message>
         </xsl:if>
-        
         
         <xsl:variable name="src-doc" select="doc($reference-doc)" as="document-node()?"/>
         

@@ -41,7 +41,9 @@ val editionTestSourceSet = sourceSets.create("editionTest")
 // TODO: Exclude xml-apis as a transitive dependency
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
+val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
+val configXsdBucket by configurations.dependencyScope("configXsdBucket")
 val releaseArtifacts by configurations.consumable("releaseArtifacts")
 val sourceArtifacts by configurations.consumable("sourceArtifacts")
 val resources by configurations.consumable("resources")
@@ -101,8 +103,12 @@ val javaTestSourceRoot = extension.sourceRoot.map { it.dir("test/java") }
 val libTidyPath = extension.sourceRoot.map { it.file("../lib/Tidy.jar") }
 dependencies {
     javaSourcesBucket(files(javaMainSourceRoot))
-    featureKeysBucket(project(mapOf("path" to ":java:keys",
-        "configuration" to "featureKeys")))
+    javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                        "configuration" to "javaFeatureKeys")))
+    featureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                    "configuration" to "featureKeysSources")))
+    configXsdBucket(project(mapOf("path" to ":samples",
+                                  "configuration" to "configXsd")))
 
     xmldoclet("com.saxonica:xmldoclet:${findProperty("xmldocletVersion")}")
     xmldoclet(editionSourceSet.output)
@@ -151,8 +157,14 @@ val javaSources = configurations.resolvable("javaSources") {
 val unprocessedJavaSources = configurations.consumable("unprocessedJavaSources") {
     extendsFrom(javaSourcesBucket)
 }
+val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
+    extendsFrom(javaFeatureKeysBucket)
+}
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
     extendsFrom(featureKeysBucket)
+}
+val configXsd = configurations.resolvable("configXsd") {
+  extendsFrom(configXsdBucket)
 }
 
 // from() is set in the edition build.gradle.kts
@@ -164,7 +176,7 @@ val filteredSources = tasks.register<Sync>("filteredSources") {
 val bundledFilteredSources = tasks.register<Sync>("bundleFilteredSources") {
     into(layout.buildDirectory.dir("tmp/bundled-filtered-sources"))
     from(filteredSources)
-    from(featureKeysSources)
+    from(javaFeatureKeysSources)
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
@@ -350,7 +362,7 @@ sourceSets.named("editionTest") {
 sourceSets {
     main {
         java {
-            srcDir(featureKeysSources)
+            srcDir(javaFeatureKeysSources)
         }
     }
 }
@@ -602,10 +614,46 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
 tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(downloadRelease)
 }
-//val artifacts = tasks.register<Copy>("release") {
-//    into(layout.buildDirectory.dir("releases"))
-//    from(tasks.named("jar"))
-//    from(tasks.named("jarTestDrivers"))
-//}
-//
-//releaseArtifacts.outgoing.artifact(artifacts)
+
+val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
+  group = "Internal"
+  into(layout.buildDirectory.dir("featureKeys"))
+  from(featureKeysSources)
+}
+
+/* FIXME: this requires access to EE for validation even when HE/PE are being built
+for (features in listOf("all", "current")) {
+  val includeObsolete = if (features == "current") "false()" else "true()"
+  val gen_config = tasks.register<JavaExec>("gen_config_file_${features}") {
+    group = "Internal"
+    description = "Generate test configuration file for ${extension.edition.get().uppercase()}"
+
+    inputs.files(copy_feature_keys)
+    outputs.files(layout.buildDirectory.file("config/generated-config-${features}.xml"))
+
+    classpath = editionSourceSet.output + configurations.named("downloadReleaseBundled").get()
+
+    mainClass = "net.sf.saxon.Transform"
+    args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToConfigFile.xsl").get()}",
+         "-s:${layout.buildDirectory.file("featureKeys/xml/config-base.xml").get()}",
+         "-o:${layout.buildDirectory.file("config/generated-config-${features}.xml").get()}",
+         "edition=${extension.edition.get().uppercase()}",
+         "platform=J",
+         "?include-obsolete=${includeObsolete}")
+  }
+
+  val val_config = tasks.register<JavaExec>("validate_gen_config_file_${features}") {
+    group = "Internal"
+    dependsOn(gen_config)
+    inputs.files(configXsd)
+    outputs.files(layout.buildDirectory.file("config/reportfile-${features}.xml"))
+
+    classpath = editionSourceSet.output + configurations.named("downloadReleaseBundled").get()
+    mainClass = "com.saxonica.Validate"
+
+    args("-s:${layout.buildDirectory.file("config/generated-config-${features}.xml").get()}",
+         "-xsd:${configXsd.get()}",
+         "-report:${layout.buildDirectory.file("config/reportfile-${features}.xml").get()}")
+  }
+}
+*/
