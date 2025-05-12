@@ -23,6 +23,8 @@ from libc.string cimport memcpy
 
 from cython import Py_ssize_t
 
+__version__ = "@VERSION@"
+
 ctypedef fused xdm_hierarchy:
     saxoncClasses.XdmValue
     saxoncClasses.XdmItem
