@@ -168,9 +168,7 @@ samples {
   edition = "ee"
 }
 
-samples.transform("Books_Transform_1", "books.xml", "books.xsl",
-                  listOf("-t"))
-
+samples.transform("Books_Transform_1", "books.xml", "books.xsl", listOf())
 samples.transform("Books_Transform_2", "books.xml", "books.xsl", 
                   listOf("top-author=Thomas Hardy"))
 
@@ -223,22 +221,34 @@ samples.bookSample("validate", "xml", "Validate_2",
 
 // ============================================================
 
+samples.sampleClass("JAXPExamples", listOf("all"), "he.JAXPExamples")
+samples.sampleClass("ApplyXPathJAXP_saxon",
+                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"),
+                    "he.ApplyXPathJAXP")
+samples.sampleClass("ApplyXPathJAXP_dom",
+                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"),
+                    "he.ApplyXPathJAXP")
+samples.sampleClass("ExampleContentHandler", listOf("data/books.xml"), "he.ExampleContentHandler")
+samples.sampleClass("S9APIExamplesOM_ee", listOf("all"), "he.S9APIExamplesOM")
+samples.sampleClass("S9APIExamples_ee", listOf("all"), "he.S9APIExamples")
 samples.sampleClass("JDOM2Example", listOf("data/books.xml", "styles/books.xsl"))
 samples.sampleClass("PullExamples", listOf())
 samples.sampleClass("QuickValidator", listOf("data/books.xml", "data/books.xsd"))
+
 samples.sampleClass("SchemaValidatorExample_1", listOf("data/books.xsd", "data/books.xml"),
-                    "SchemaValidatorExample")
+                    "ee.SchemaValidatorExample")
 samples.sampleClass("SchemaValidatorExample_2", listOf("--", "data/books.xml"),
-                    "SchemaValidatorExample")
+                    "ee.SchemaValidatorExample")
 samples.sampleClass("SchemaValidatorHandlerExample_1", listOf("data/books.xsd", "data/books.xml"),
-                    "SchemaValidatorHandlerExample")
+                    "ee.SchemaValidatorHandlerExample")
 samples.sampleClass("SchemaValidatorHandlerExample_2", listOf("--", "data/books.xml"),
-                    "SchemaValidatorHandlerExample")
+                    "ee.SchemaValidatorHandlerExample")
 samples.sampleClass("XPathExampleSA", listOf("data/books.xml", "data/books.xsd"))
 samples.sampleClass("XQJExamples", listOf("all"))
 
 /*
 // The XMarkBenchmark runs slowly, so only add it on request
+samples.sampleClass("XMarkBenchmark_1":
 if (project.findProperty("xmark") == "true") {
   eeSampleConfigurations += ["XMarkBenchmark_1"]
 }
@@ -248,10 +258,6 @@ if (project.findProperty("xmark") == "true") {
                     "XMarkBenchmark_1": ["-dir:${buildDir}/tests/extra/data/xmark/"],
 */
 
-// ============================================================
-
-samples.javaTest("ApplyXPathJAXP_saxon", "he.ApplyXPathJAXP", "ApplyXPathJAXP",
-                 "books.xml", listOf("/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"))
 
 // ============================================================
 
