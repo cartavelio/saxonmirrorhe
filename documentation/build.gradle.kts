@@ -75,8 +75,8 @@ dependencies {
   implementation("org.apache.ws.commons.axiom:axiom-impl:1.2.15")
   implementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   implementation("jline:jline:${findProperty("jlineVersion")}")
+  implementation("org.apache.xmlgraphics:fop:2.10")
 
-  //implementation("com.saxonica:Saxon-EE:12.4")
   implementation("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
   implementation("com.github.javaparser:javaparser-symbol-solver-core:3.17.0")
   implementation("com.github.javaparser:javaparser-core:3.17.0")
@@ -257,13 +257,16 @@ tasks.register<JavaExec>("doc_FeatureKeysDoc") {
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml").get().asFile}")
 }
 
-tasks.register<Copy>("dotnet_doc_html") {
+val dotnet_doc_html = tasks.register<Copy>("dotnet_doc_html") {
   group = "Documentation"
   description = "Copy the HTML .NET documentation"
 
   from(csharpHtmlDocumentation)
   into(layout.buildDirectory.dir("dotnetdoc-html"))
 }
+
+val dotnetDocHtmlArtifacts by configurations.consumable("dotnetDocHtmlArtifacts")
+dotnetDocHtmlArtifacts.outgoing.artifact(dotnet_doc_html) { builtBy(dotnet_doc_html) }
 
 tasks.register<Copy>("dotnet_doc_xml") {
   group = "Documentation"
@@ -415,7 +418,6 @@ tasks.register("website") {
   dependsOn("documentation")
   dependsOn("copy_prod_desc_pdf")
   dependsOn("saxonc_documentation")
-  // Just a place to hang dependencies
 }
 
 // ============================================================
@@ -567,14 +569,16 @@ tasks.register("userdoc_publish_html") {
 
 // ============================================================
 
-tasks.register("update_documentation") {
+val update_documentation = tasks.register("update_documentation") {
   group = "Documentation"
   description = "Update documentation from viewer app"
+  outputs.dir(layout.buildDirectory.dir("userdoc/viewer_appJS"))
   dependsOn("copy_xml_documentation")
   dependsOn("copy_html_documentation")
   dependsOn("copy_base_css")
-  // Just a place to hang dependencies
 }
+val userdocViewerAppJS by configurations.consumable("userdocViewerAppJS")
+userdocViewerAppJS.outgoing.artifact(update_documentation) { builtBy(update_documentation) }
 
 tasks.register<Copy>("copy_html_documentation") {
   group = "Internal"
@@ -666,13 +670,13 @@ tasks.register<JavaExec>("gen_prod_desc_fo") {
   mainClass = "com.saxonica.Transform"
   args("-s:${layout.buildDirectory.file("proddesc/prod-desc.xml").get().asFile}",
        "-xsl:${layout.projectDirectory.file("tools/feature-matrix/PD/prod-desc-to-fo.xsl")}",
-       "-o:${layout.buildDirectory.file("proddesc/PD/dummy.xml")}")
+       "-o:${layout.buildDirectory.file("proddesc/PD/dummy.xml").get().asFile}")
 }
 
 tasks.register<Copy>("setup_fop") {
   group = "Internal"
   into(layout.buildDirectory.file("proddesc"))
-  from(layout.projectDirectory.file("src/docs/doc/img")) {
+  from(layout.projectDirectory.file("src/main/resources/img")) {
     include("saxonica_logo.gif")
   }
 }
@@ -809,7 +813,5 @@ val saxonc_api_doc = tasks.register("saxonc_api_doc") {
     }
   }
 }
-
-val saxoncApiDocArtifacts by configurations.consumable("saxoncApiDocArtifacts")
-saxoncApiDocArtifacts.outgoing.artifact(saxonc_api_doc) { builtBy(saxonc_api_doc) }
-
+val saxoncApiDoc by configurations.consumable("saxoncApiDocArtifacts")
+saxoncApiDoc.outgoing.artifact(saxonc_api_doc) { builtBy(saxonc_api_doc) }
