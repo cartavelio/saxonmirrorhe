@@ -55,6 +55,7 @@ val pyenvTask = tasks.register<PythonPyenv>("pyenv") {
     pyenvExe = pyenvExeTask.map { it.pyenv.get() }
     pythonVersion = extension.version
     pythonBuildDefinitionsDir = layout.projectDirectory.dir("../pyenv")
+    macosxDeploymentTarget = saxonBuild.macosx_min_version
 }
 
 val pyenvValgrindTask = tasks.register<PythonPyenv>("pyenv_valgrind") {
@@ -62,6 +63,7 @@ val pyenvValgrindTask = tasks.register<PythonPyenv>("pyenv_valgrind") {
     pythonVersion = extension.version
     pythonBuildDefinitionsDir = layout.projectDirectory.dir("../pyenv")
     debugVariant = "valgrind"
+    macosxDeploymentTarget = saxonBuild.macosx_min_version
 }
 
 val pyenvPythonExeTask = tasks.register<PythonPyenvPythonExe>("pyenv_python_exe") {
@@ -95,6 +97,7 @@ val wheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_platfor
     pythonVersion = pyenvTask.map { it.pythonVersion.get() }
     pythonExe = venv.map { it.pythonExe.get() }
     manylinuxTarget = extension.manylinuxTarget
+    macosxDeploymentTarget = saxonBuild.macosx_min_version
 }
 
 val wheelDebugPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_debug_platform_tag") {
@@ -102,6 +105,7 @@ val wheelDebugPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_de
     pythonVersion = pyenvTask.map { it.pythonVersion.get() }
     pythonExe = debugVenv.map { it.pythonExe.get() }
     manylinuxTarget = extension.manylinuxTarget
+    macosxDeploymentTarget = saxonBuild.macosx_min_version
 }
 
 val pipInstall = project.tasks.register<PipInstall>("pip_install") {
@@ -177,8 +181,8 @@ val buildDebugWheel = project.tasks.register<BuildWheel>("build_debug_wheel") {
     pythonExe = venv.map { it.pythonExe.get() }
     productEdition = extension.edition
     productVersion = saxonBuild.version
-    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
-    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    wheelSuffix = wheelDebugPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelDebugPlatformTagTask.flatMap { it.macosxDeploymentTarget }
     sourceDir = pythonSrcDir
     saxoncCoreDir = layout.dir(conf.libsaxoncDebugArtifactsDir.elements.map { it.first().asFile })
     outputDir = layout.buildDirectory.dir("wheel")
