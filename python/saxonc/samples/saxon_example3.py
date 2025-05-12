@@ -1,6 +1,6 @@
-from saxonc@@edition@@ import *
+import saxonche as saxonc
 
-with PySaxonProcessor(license=False) as saxonproc2:
+with saxonc.PySaxonProcessor(license=False) as saxonproc2:
     trans = saxonproc2.new_xslt30_processor()
 
     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0'>  <xsl:template match='*'>     <xsl:param name='a' as='xs:double'/>     <xsl:param name='b' as='xs:float'/><xsl:sequence select='., $a + $b'/> </xsl:template> </xsl:stylesheet>"

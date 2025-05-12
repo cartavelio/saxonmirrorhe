@@ -1,9 +1,7 @@
+import saxoncee as saxonc
 import time
 
-from saxonc@@edition@@ import *
-
-
-saxonproc = PySaxonProcessor(license=True)
+saxonproc = saxonc.PySaxonProcessor(license=True)
 
 trans = saxonproc.new_xslt30_processor()
 
