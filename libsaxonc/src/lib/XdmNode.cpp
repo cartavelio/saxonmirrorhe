@@ -279,28 +279,28 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
   }
 }
 
-int XdmNode::axisNodeCount() { return axisCount; }
+int XdmNode::axisNodeCount() {return axisCount; }
 
 XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
   allocFn fn = operator new;
   long long *results = j_axisIterator(SaxonProcessor::sxn_environ->thread,
                                       (void *)fn, (void *)value, int(axis));
   if (results == nullptr) {
+    axisCount = 0;
     return nullptr;
   }
   axisCount = (int) results[0];
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "axisNodes count=" << axisCount << std::endl;
+  }
   if (axisCount == 0) {
     return nullptr;
   }
-  /*if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "axisNodes count=" << axisCount << std::endl;
-  } */
   XdmNode **valuesi = nullptr;
 
   valuesi = new XdmNode *[axisCount];
   XdmNode *tempNode = nullptr;
   for (int p = 1; p < axisCount + 1; ++p) {
-
     tempNode = new XdmNode(this, results[p], UNKNOWN);
     valuesi[p - 1] = tempNode;
   }
