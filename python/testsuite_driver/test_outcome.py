@@ -163,11 +163,20 @@ class PyTestOutcome:
                 print("uri=" + uri)
             if self.result_documents:
                 if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-                    print(list(self.result_documents.keys()))
+                    print('result-doc base_urii=', base_urii)
+                    print('result-doc keys=', list(self.result_documents.keys()))
+                    print('result-doc uri=', list(self.result_documents.keys()))
+                    print('result-doc result = ', self.result_documents['file:/Users/ond1/work/development/git/XSLT30/xslt30-test/results/multresult1.out'])
                 try:
                     print("Check assert-result-document")
                     print("uri=" + uri)
+                    print("========")
                     print(*self.result_documents, sep=", ")
+                    if uri in self.result_documents:
+                        doc = self.result_documents[uri]
+                    else:
+                        uri = uri.replace("file:///", "file:/")
+                        doc = self.result_documents[uri]
                     doc = self.result_documents[uri]
                     ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, None, assert_xpc, catalog_xpc, assert_set)
                     if not ok:
