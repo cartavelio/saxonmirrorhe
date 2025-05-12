@@ -150,6 +150,12 @@ val (_, mavenXqjSourceJar) = jarTaskBuilder("xqjSource") {
 
 xqjDownloadJarArtifact.outgoing.artifact(downloadXqjJar)
 
+// In principle, this should be in the samples-plugin...
+tasks.register<Copy>("copy_java_sample_sources") {
+    into(layout.buildDirectory.dir("samples/src/java/main"))
+    from(javaSampleSources)
+}
+
 samples {
   runclasspath = (files(sourceSets["edition"].output)
                   + configurations.named("samplesConfiguration").get())
@@ -217,72 +223,35 @@ samples.bookSample("validate", "xml", "Validate_2",
 
 // ============================================================
 
-val copy_java_sample_sources = tasks.register<Copy>("copy_java_sample_sources") {
-  into(layout.buildDirectory.dir("samples/src/java/main"))
-  from(javaSampleSources)
+samples.sampleClass("JDOM2Example", listOf("data/books.xml", "styles/books.xsl"))
+samples.sampleClass("PullExamples", listOf())
+samples.sampleClass("QuickValidator", listOf("data/books.xml", "data/books.xsd"))
+samples.sampleClass("SchemaValidatorExample_1", listOf("data/books.xsd", "data/books.xml"),
+                    "SchemaValidatorExample")
+samples.sampleClass("SchemaValidatorExample_2", listOf("--", "data/books.xml"),
+                    "SchemaValidatorExample")
+samples.sampleClass("SchemaValidatorHandlerExample_1", listOf("data/books.xsd", "data/books.xml"),
+                    "SchemaValidatorHandlerExample")
+samples.sampleClass("SchemaValidatorHandlerExample_2", listOf("--", "data/books.xml"),
+                    "SchemaValidatorHandlerExample")
+samples.sampleClass("XPathExampleSA", listOf("data/books.xml", "data/books.xsd"))
+samples.sampleClass("XQJExamples", listOf("all"))
+
+/*
+// The XMarkBenchmark runs slowly, so only add it on request
+if (project.findProperty("xmark") == "true") {
+  eeSampleConfigurations += ["XMarkBenchmark_1"]
 }
+// FIXME: Automate testing of SaxonSAServlet
+// Only necessary if the configuration key is not the class name
+                         "XMarkBenchmark_1": "XMarkBenchmark"]
+                    "XMarkBenchmark_1": ["-dir:${buildDir}/tests/extra/data/xmark/"],
+*/
+
+// ============================================================
 
 samples.javaTest("ApplyXPathJAXP_saxon", "he.ApplyXPathJAXP", "ApplyXPathJAXP",
                  "books.xml", listOf("/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"))
-
-
-/*
-
-
-  val sampleClass = "he.ApplyXPathJAXP"
-  
-
-
-      if (!ignoreThisCombination) {
-        def sampleClass = "he.${sample}"
-        if (heSampleMainClass.containsKey(sample)) {
-          sampleClass = "he.${heSampleMainClass[sample]}"
-        }
-        def sampleArgs = heSampleArgs[sample]
-
-        task "${tver}_he_samples_${sample}_${edition}"(
-          type: JavaExec,
-          dependsOn: ["${edition}_samples_common"]
-        ) {
-          def resdir = "${buildDir}/samples/results/he"
-
-          if (tver == "run") {
-            dependsOn "${tver}_${edition}j_samples_he", "${edition}jJar"
-            description "Run test of HE ${sample} with ${edition}"
-            outputs.file "${resdir}/${sample}_${edition}.txt"
-
-            classpath = configurations.samples \
-            + files("${buildDir}/samples/classes/${tver}/${edition}") \
-            + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
-
-          } else {
-            dependsOn "${tver}_${edition}j_samples_he", "compileJava"
-            description "Debug test of HE ${sample} with ${edition}"
-
-            classpath = configurations.samples \
-            + files("${buildDir}/samples/classes/${tver}/${edition}") \
-            + project.files("${buildDir}/classes/java/main") \
-            + files("${projectDir}/src/main/resources")
-          }
-
-          inputs.files fileTree(dir: "${buildDir}/samples/classes/${tver}/${edition}")
-          inputs.files "${projectDir}/src/samples/java/he"
-          workingDir = "${buildDir}/output/he/resources/samples"
-
-          doFirst {
-            if (tver == "run") {
-              mkdir resdir
-              standardOutput = new FileOutputStream(new File("${resdir}/${sample}_${edition}.txt"))
-            }
-          }
-
-          systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
-
-          mainClass = sampleClass
-          args sampleArgs
-        }
-
-*/
 
 // ============================================================
 

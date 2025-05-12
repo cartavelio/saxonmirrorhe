@@ -130,6 +130,62 @@ abstract class SamplesExtension
     }
   }
 
+  fun sampleClass(sample: String, args: List<String>, className: String? = null) {
+    val t = tasks.register<JavaExec>("sample_class_${sample}") {
+      dependsOn("compile_sample_run_classes")
+      inputs.files(copy_sample_sources.get().outputs)
+      outputs.file(layout.buildDirectory.file("sample_results/${sample}.txt"))
+
+      var showOutput = true
+      val stdOutput = ByteArrayOutputStream()
+      val errOutput = ByteArrayOutputStream()
+      
+      doFirst {
+        for (task in project.gradle.taskGraph.getAllTasks()) {
+          // If the testsuites task(s) are in the graph, assume we're doing
+          // a longer run and we don't want to see all the detailed output
+          if (task.name == "all_samples") {
+            showOutput = false
+            break;
+          }
+        }
+
+        if (!showOutput) {
+          println("(buffering output)")
+          standardOutput = stdOutput
+          errorOutput = errOutput
+        }
+      }
+
+      mainClass = if (className == null) "${edition.get()}.${sample}" else "${edition.get()}.${className}"
+      classpath = runclasspath.get() + run_classes.get().outputs.files
+      workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
+      args(args)
+
+      doLast {
+        if (!showOutput) {
+          if (stdOutput.size() > 0) {
+            val outfile = layout.buildDirectory.file("sample_results/${sample}.txt").get().asFile
+            println("==> ${outfile}")
+            var outputStream = PrintStream(outfile)
+            var lines = stdOutput.toString("utf-8")
+            outputStream.print(lines)
+            outputStream.close()
+          }
+          if (errOutput.size() > 0) {
+            val outfile = layout.buildDirectory.file("sample_results/${sample}.err").get().asFile
+            println("==> ${outfile}")
+            var outputStream = PrintStream(outfile)
+            var lines = errOutput.toString("utf-8")
+            outputStream.print(lines)
+            outputStream.close()
+          }
+        }
+      }
+    }
+    all_samples.get().dependsOn(t)
+  }
+
   // ============================================================
   
   fun javaTransform(sample: String, input: String?, stylesheet: String,
@@ -139,15 +195,10 @@ abstract class SamplesExtension
 
     val t = tasks.register<JavaExec>(taskName) {
       inputs.files(copy_sample_sources.get().outputs)
-
-      println("INPUTS: ${layout.buildDirectory.file("samples/resources/styles/${stylesheet}").get()}")
-
       if (output == null) {
         outputs.files(layout.buildDirectory.file("sample_results/${sample}.html"))
-        println("OUTPUTS: ${layout.buildDirectory.file("sample_results/${sample}.html").get()}")
       } else {
         outputs.file(output)
-        println("OUTPUTS: ${output}")
       }
 
       classpath = runclasspath.get()
