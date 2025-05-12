@@ -21,7 +21,7 @@ provide any other feedback.</p>
 
   <p>SaxonC can be installed on Linux, Mac OS and Windows. As a
   prerequisite SaxonC requires as a minimum C++14. In this section we
-  provide a step by step installation guide for the three
+  provide a step-by-step installation guide for the three
   platforms.</p>
 
   <nav>
@@ -378,12 +378,20 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <p>The PHP extension is in the form of a C/C++ PHP8 extension to
       SaxonC created using the Zend module API.</p>
 
-      <p>To install, open a shell window and navigate to the <code>php</code>
+       <p>User should install the SaxonC libraries (i.e. directory 'SaxonC[EDITION]') in a suitable location.
+           The search paths are '/opt/saxonica' '/usr/local' '/usr'.</p>
+
+      <p>To install, open a shell window and navigate to the <code>php/src</code>
       directory inside the location where you unpacked the zip file. Run
       these commands:</p>
 
       <kbd>phpize</kbd>
+
       <kbd>./configure --with-saxon</kbd>
+
+       <p>Alternatively:</p>
+       <kbd>./configure --with-saxon=path/SaxonC[EDITION]</kbd>
+
       <kbd>make</kbd>
       <kbd>sudo make install</kbd>
 
