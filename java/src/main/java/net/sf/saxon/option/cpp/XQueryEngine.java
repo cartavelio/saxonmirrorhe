@@ -64,12 +64,6 @@ public class XQueryEngine extends SaxonCAPI {
         super(proc);
         Configuration config = processor.getUnderlyingConfiguration();
         schemaAware = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT);
-//#if EE==true || PE==true
-        if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
-        }
-//#endif
     }
 
 
