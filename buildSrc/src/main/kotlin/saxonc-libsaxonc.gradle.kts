@@ -1,4 +1,5 @@
 import com.saxonica.build.LifecycleTasks
+import com.saxonica.build.GatherReleaseArtifacts
 import com.saxonica.build.cpp.DoxygenTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
@@ -37,6 +38,7 @@ project.layout.projectDirectory.dir("src/include")
 val includeDir by configurations.consumable("includeDir")
 val libDir by configurations.consumable("libDir")
 val releaseArtifactsDir by configurations.consumable("releaseArtifactsDir")
+val releaseZips by configurations.consumable("releaseZips")
 val debugIncludeDir by configurations.consumable("debugIncludeDir")
 val debugLibDir by configurations.consumable("debugLibDir")
 val debugArtifactsDir by configurations.consumable("debugArtifactsDir")
@@ -295,13 +297,14 @@ val sourceZipTask = tasks.register<Zip>("source_release_zip") {
 
 }
 
-tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
+val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(if (saxonBuild.targetHost.get().isWindows) releaseZipWindowsTask else releaseZipUnicesTask)
 }
 
 libDir.outgoing.artifact(releaseStagingPath.map { it.dir("lib") }) { builtBy(stage) }
 includeDir.outgoing.artifact(releaseStagingPath.map { it.dir("include") }) { builtBy(stage) }
 releaseArtifactsDir.outgoing.artifact(releaseStagingPath) { builtBy(stage) }
+releaseZips.outgoing.artifact(packagedZip) { builtBy(release) }
 debugLibDir.outgoing.artifact(debugStagingPath.map { it.dir("lib") }) { builtBy(debugStage) }
 debugIncludeDir.outgoing.artifact(debugStagingPath.map { it.dir("include") }) { builtBy(debugStage) }
 debugArtifactsDir.outgoing.artifact(debugStagingPath) { builtBy(debugStage) }
