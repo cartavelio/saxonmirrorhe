@@ -81,6 +81,7 @@ class Environment:
 
         self.lang = None
         self.proc.set_configuration_property('http://saxon.sf.net/feature/optimizationLevel', optimizer_flags)
+        self.proc.set_configuration_property('http://saxon.sf.net/feature/xsd-version', "1.1")
 
         self.base_uri = ""
         self.spec = None
