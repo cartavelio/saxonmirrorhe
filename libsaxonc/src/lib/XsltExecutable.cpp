@@ -107,12 +107,20 @@ bool XsltExecutable::exceptionOccurred() { return exceptionFound; }
 
 void XsltExecutable::setGlobalContextItem(XdmItem *value) {
   if (value != nullptr) {
-      setParameter("node", (XdmValue*)value, false);
+    const char * ifile = getProperty("node");
+    if(ifile != nullptr) {
+      properties.erase("s");
+    }
+    setParameter("node", (XdmValue*)value, false);
   }
 }
 
 void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
   if (ifile != nullptr) {
+    XdmValue * valuei = getParameter("node", false);
+    if(valuei != nullptr) {
+      parameters.erase("node");
+    }
     setProperty("s", ifile);
   }
 }
@@ -121,7 +129,7 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
     if (_selection == nullptr) {
         selectionRef = SXN_UNSET;
     } else {
-        setParameter("_i_matchs", _selection, false);
+        setParameter("_i_matches", _selection, false);
         selectionStringFlag = false;
     }
 }
@@ -131,9 +139,19 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
     if (!selectionStringFlag) {
         XdmValue * valuei = getParameter("_i_matches", false);
             if(valuei != nullptr) {
-            parameters.erase("_i_matches");
-        }
-    } else if (selectionRef != SXN_UNSET && selectionStringFlag) {
+              parameters.erase("_i_matches");
+            }
+    }
+
+    selectionStringFlag = true;
+
+    setProperty("_i_file_matches", filename);
+
+
+
+    /*
+
+    else if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)selectionRef);
   }
@@ -149,7 +167,7 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
     }
   } else {
     selectionRef = SXN_UNSET;
-  }
+  } */
 }
 
 void XsltExecutable::setOutputFile(const char *ofile) {
@@ -358,11 +376,11 @@ void XsltExecutable::clearParameters(bool delValues) {
 void XsltExecutable::clearProperties() {
   SaxonProcessor::attachCurrentThread();
   properties.clear();
-  if (selectionRef != SXN_UNSET && selectionStringFlag) {
+  /*if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)selectionRef);
     selectionRef = SXN_UNSET;
-  }
+  } */
 }
 
 std::map<std::string, XdmValue *> &XsltExecutable::getParameters() {
@@ -403,11 +421,6 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
   proc->attachCurrentThread();
-  /*if (selectionRef == SXN_UNSET) {
-    throw SaxonApiException(
-        "Error: The initial match selection has not been set. Please set it "
-        "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
-  }*/
 
   setProperty("resources", resources_dir.c_str());
 
@@ -461,11 +474,6 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
 const char *XsltExecutable::applyTemplatesReturningString() {
   proc->attachCurrentThread();
-  /*if (selectionRef == SXN_UNSET) {
-    throw SaxonApiException(
-        "Error: The initial match selection has not been set. Please set it "
-        "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
-  }*/
 
   setProperty("resources", resources_dir.c_str());
 
