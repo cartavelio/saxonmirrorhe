@@ -695,9 +695,8 @@ tasks.register<DotNetBuild>("dotnetBuildTestDrivers") {
   group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
   dependsOn("dotnetBuild")
   target = "TestDrivers"
-  arch = "arm64"
+  arch = architectures.first()
   inputs.files(copyTestDrivers)
-  //inputs.files(layout.buildDirectory.file("${arch}/bin/Release/${netver}/${archdir}/SaxonCS.dll"))
 }
 
 testSuites {
