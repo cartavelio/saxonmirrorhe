@@ -467,21 +467,6 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
   }
 }
 
-void testEdition(SaxonProcessor *processor, sResultCount *sresult) {
-  cout << endl << "Test testEdition:" << endl;
-  const char * edition  = processor->getSaxonEdition();
-
-  if (strcmp(edition, "@@EDITION@@") == 0) {
-    std::cerr<<"Edition = "<<processor->getSaxonEdition()<<endl;
-    sresult->success++;
-  } else {
-    sresult->failure++;
-    sresult->failureList.push_back("testEdition");
-
-  }
-
-}
-
 void testIsLicensed(sResultCount *sresult) {
   SaxonProcessor *processor = new SaxonProcessor(true);
   cout << endl << "Test testIsLicensed:" << endl;

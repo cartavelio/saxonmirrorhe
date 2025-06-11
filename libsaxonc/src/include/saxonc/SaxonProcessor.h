@@ -638,7 +638,7 @@ public:
  * configuration that has been created, rather than the software that has been installed; which depends on
  * the license key supplied, as well as the software edition installed. For example it is possible to
  * instantiate an "HE" configuration even when using the "PE" or "EE" software.
- * @return The Saxon edition code: "EE", "PE", or "HE". Memory deallocation is handled internally.
+ * @return The Saxon edition code: "ee", "pe", or "he". Memory deallocation is handled internally.
  */
  const char * getSaxonEdition();
 
