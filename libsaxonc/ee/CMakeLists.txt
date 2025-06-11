@@ -33,6 +33,9 @@ set_tests_properties(
     ENVIRONMENT_MODIFICATION
         "PATH=path_list_append:$<TARGET_RUNTIME_DLL_DIRS:${saxonc}>"
 )
+
+install(TARGETS Validate)
+
 if(PROJECT_IS_TOP_LEVEL)
     # include(CPack) will happen inside the following call
     add_subdirectory(packaging)

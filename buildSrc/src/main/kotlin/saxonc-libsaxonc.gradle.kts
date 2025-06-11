@@ -9,8 +9,13 @@ plugins {
 }
 
 val extension = project.extensions.create<SaxonCExtension>("libsaxonc")
-
 val saxonBuild = the<SaxonBuildExtension>()
+
+extension.package_name.convention(extension.edition.map { "SaxonC${it.uppercase()}" })
+extension.package_file_name.convention(extension.package_name.map { name ->
+    val (os, arch) = saxonBuild.targetHost.get()
+    "${name}-${os}-${arch}-${saxonBuild.version.get()}"
+})
 val saxonCCoreCMakePackageBucket by configurations.dependencyScope("saxonCCoreCMakePackageBucket")
 
 val saxonCCoreCMakePackageDir by configurations.resolvable("saxonCCoreCMakePackageDir") {
@@ -54,6 +59,8 @@ val generator = tasks.register("cmake_generate") {
             executable = "cmake"
             args("-G", generatorName, "-B", layout.buildDirectory.get().asFile.toString(),
                 "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
+                "-D", extension.edition.map { "SAXON_PACKAGE_NAME:STRING=SaxonC${it.uppercase()}" }.get(),
+                "-D", extension.edition.map { "SAXON_PACKAGE_FILE_NAME:STRING=SaxonC${it.uppercase()}" }.get(),
                 "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.name}" }.get(),
                 "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
                 "-D", saxonCCoreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
@@ -159,10 +166,19 @@ tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
 
 val build_package = tasks.register<Exec>("package") {
     dependsOn(build)
+
+    for (format in listOf("zip")) {
+        outputs.files(layout.buildDirectory.files(extension.package_file_name.map { arrayOf("${it}.${format}", "${it}.${format}.sha256") }))
+    }
+
     group = LifecycleTasks.RELEASE_GROUP
     workingDir = layout.buildDirectory.get().asFile
     executable = "cpack"
     args("-C", "Release")
+
+    doLast {
+        println(outputs.files.files)
+    }
 }
 
 tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
