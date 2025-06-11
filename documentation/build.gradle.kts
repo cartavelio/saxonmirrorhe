@@ -265,7 +265,7 @@ tasks.register<JavaExec>("doc_FeatureKeysDoc") {
   outputs.file(layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml"))
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
-  args("${layout.buildDirectory.file("featurekeys/xml/FeatureKeys.xml").get().asFile}",
+  args("${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml").get().asFile}",
        "-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToDoc.xsl").get().asFile}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml").get().asFile}")
 }
@@ -360,7 +360,7 @@ tasks.register<JavaExec>("doc_ConfigFileDoc") {
   outputs.dir(layout.buildDirectory.dir("src/userdoc/featureKeys"))
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
-  args("-s:${layout.buildDirectory.file("featurekeys/xml/AdditionalFeatures.xml").get().asFile}",
+  args("-s:${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml").get().asFile}",
        "-xsl:${layout.buildDirectory.file("featureKeys/xsl/ToConfigFileDoc.xsl").get().asFile}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/ConfigFileDoc.xml").get().asFile}")
 }
