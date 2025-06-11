@@ -126,12 +126,31 @@ abstract class TestSuitesExtension
     }
 
     if (suite == "expath") {
-      val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
+      val copySuite = tasks.register("${taskName}_copy_suite") {
         group = "Internal"
         description = "Copy the expath test suite"
-        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        from(submodulesDir.dir("expath/tests/qt3")) {
-          exclude("archive/sandpit2/**")
+        inputs.files(submodulesDir.dir("expath/tests/qt3"))
+        outputs.dir(layout.buildDirectory.dir("suite/expath/${taskName}"))
+
+        doLast {
+          project.copy {
+            into(layout.buildDirectory.dir("suite/expath/${taskName}"))
+            from(submodulesDir.dir("expath/tests/qt3")) {
+              exclude("archive/sandpit2/**")
+            }
+          }
+        }
+
+        doLast {
+          // Also, make sure that the file "test.bin" exists
+          // or some tests will fail.
+          project.copy {
+            into(layout.buildDirectory.dir("suite/expath/${taskName}/sandpit"))
+            from(submodulesDir.dir("expath/tests/qt3")) {
+              include("catalog.xml")
+            }
+            rename { "test.bin" }
+          }
         }
       }
 
