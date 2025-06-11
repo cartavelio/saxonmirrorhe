@@ -8,10 +8,6 @@ val srcFolder = project.layout.projectDirectory.dir("../src")
 val releaseFolderTask = tasks.register<Copy>("release_folder") {
   into(project.layout.buildDirectory.dir("release"))
 
-  from(project.layout.projectDirectory.dir("../")) {
-    include("README.md")
-  }
-
   into("src") {
     from(srcFolder) {
       exclude("20-saxon.ini", "config.m4", "config.w32")

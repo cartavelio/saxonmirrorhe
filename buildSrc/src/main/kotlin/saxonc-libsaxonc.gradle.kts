@@ -17,9 +17,13 @@ extension.package_file_name.convention(extension.package_name.map { name ->
     "${name}-${os}-${arch}-${saxonBuild.version.get()}"
 })
 val saxonCCoreCMakePackageBucket by configurations.dependencyScope("saxonCCoreCMakePackageBucket")
-
 val saxonCCoreCMakePackageDir by configurations.resolvable("saxonCCoreCMakePackageDir") {
     extendsFrom(saxonCCoreCMakePackageBucket)
+}
+
+val phpReleaseFolderBucket by configurations.dependencyScope("phpReleaseFolderBucket")
+val phpReleaseFolder by configurations.resolvable("phpReleaseFolder") {
+    extendsFrom(phpReleaseFolderBucket)
 }
 
 project.layout.projectDirectory.dir("src/include")
@@ -36,6 +40,9 @@ sampleData.outgoing.artifact(layout.projectDirectory.dir("../samples/data"))
 dependencies {
     saxonCCoreCMakePackageBucket(extension.edition.map { edition ->
         project(path = ":libsaxonc-core:${edition}", configuration = "cMakePackageDir")
+    })
+    phpReleaseFolderBucket(extension.edition.map  { edition ->
+        project(path = ":php:${edition}", configuration = "releaseFolder")
     })
 }
 
@@ -70,12 +77,6 @@ val generator = tasks.register("cmake_generate") {
             }
         }
     }
-}
-
-val copyIncludes = tasks.register<Copy>("cpp_includes") {
-    into(layout.buildDirectory.dir("include"))
-    from(layout.projectDirectory.dir("../src/include"))
-    from(layout.projectDirectory.dir("src/include"))
 }
 
 val build = tasks.register<Exec>("build_release") {
@@ -164,21 +165,15 @@ tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
     dependsOn(test)
 }
 
-val build_package = tasks.register<Exec>("package") {
+val build_package = tasks.register<Exec>("cpack_package") {
     dependsOn(build)
 
-    for (format in listOf("zip")) {
-        outputs.files(layout.buildDirectory.files(extension.package_file_name.map { arrayOf("${it}.${format}", "${it}.${format}.sha256") }))
-    }
+    outputs.file(layout.buildDirectory.file(extension.package_file_name.map { "${it}.zip" }))
 
     group = LifecycleTasks.RELEASE_GROUP
     workingDir = layout.buildDirectory.get().asFile
     executable = "cpack"
     args("-C", "Release")
-
-    doLast {
-        println(outputs.files.files)
-    }
 }
 
 tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
@@ -210,6 +205,36 @@ val doxygenTask = tasks.register<DoxygenTask>("doxygen") {
 
 tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
     dependsOn(doxygenTask)
+}
+
+val noticeFilenames = listOf("JAMESCLARK.txt", "JLINE2.txt", "LICENSE.txt")
+val notices = project.rootProject.layout.projectDirectory.dir("src/main/notices").files(noticeFilenames)
+tasks.register<Zip>("package") {
+    group = LifecycleTasks.RELEASE_GROUP
+    description = "generate the libsaxon download .zip package"
+
+    inputs.files(build_package.map { it.outputs.files })
+    inputs.files(notices)
+    archiveBaseName =  "${project.name}-${version}"
+    destinationDirectory =  layout.buildDirectory.dir("out")
+
+    from(zipTree(build_package.map { it.outputs.files.singleFile })) {
+        into(extension.package_name)
+        eachFile {
+            // We want to extract the files from the cpack-created .zip and drop the top-level folder.
+            // For infuriating reasons, the destination folder gets put on the front of the relative path
+            // and we have to drop the second segment to achieve what we want.
+            val rejiggeredPath = relativePath.segments.take(1) + relativePath.segments.drop(2)
+            relativePath = RelativePath(true, *rejiggeredPath.toTypedArray())
+        }
+        includeEmptyDirs = false
+    }
+    into("notices") {
+        from(notices)
+    }
+    into("php") {
+        from(phpReleaseFolder.elements.map { it.first() })
+    }
 }
 
 libDir.outgoing.artifact(releaseStagingPath.map { it.dir("lib") }) { builtBy(stage) }
