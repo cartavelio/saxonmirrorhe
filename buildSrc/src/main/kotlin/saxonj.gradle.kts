@@ -203,6 +203,20 @@ val preprocessJava = tasks.register<PreprocessSourcesTask>("preprocessJava") {
     }
 
     output = layout.buildDirectory.dir("src/main/java")
+
+    doLast {
+        extension.patchReleaseInfo(
+            layout.buildDirectory.file("src/main/java/net/sf/saxon/Version.java").get().asFile,
+            "${findProperty("saxonVersion")!!}",
+            "${findProperty("saxonMajorReleaseDate")!!}")
+        val verifier = layout.buildDirectory.file("src/main/java/com/saxonica/config/JavaVerifier.java").get().asFile
+        val dsaPublicKey = findProperty("dsaPublicKey")?.toString()
+        val ed25519PublicKey = findProperty("ed25519PublicKey")?.toString()
+        if (verifier.exists()) {
+            extension.patchKey(verifier, "dsa", dsaPublicKey)
+            extension.patchKey(verifier, "ed25519", ed25519PublicKey)
+        }
+    }
 }
 
 sourceArtifacts.outgoing.artifact(preprocessJava)
