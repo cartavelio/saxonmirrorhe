@@ -16,10 +16,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 abstract class JavaRunner: DefaultTask() {
-  companion object {
-    val reports = mutableListOf<String>()
-  }
-
   override fun getGroup(): String {
     return "Testsuite"
   }
@@ -113,13 +109,19 @@ abstract class JavaRunner: DefaultTask() {
         errorOutput = errOutput
       }
 
-      reports.add("${reportDir.get()}")
+      // This makes the report name match what the regression report builder
+      // expects. Since I don't think any one else cares...
+      val reportName = if (name.startsWith("test_suite_")) {
+        "${edition.get()}j_${name.substring(11)}"
+      } else {
+        name
+      }
 
       args(
         "${suiteDir.get()}",
         catalog,
         "-exceptions:${exceptionsFile.get()}",
-        "-reportfilename:${name}",
+        "-reportfilename:${reportName}",
         "-o:${reportDir.get()}",
         "-lang:${language.get()}"
       )
