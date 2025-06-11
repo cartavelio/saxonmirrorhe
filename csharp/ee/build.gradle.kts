@@ -495,6 +495,13 @@ if ((saxonBuild.systemOsName.get() == "mac"
     val x64 = layout.buildDirectory.dir("x64/SaxonCS/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
 
     doFirst {
+      // If a previous build put the docs in there, delete them; they aren't
+      // allowed in a signed build
+      delete(layout.buildDirectory.dir("SaxonCS.app/doc"))
+      delete(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
+    }
+
+    doFirst {
       copy {
         from("${arm64}/osx-arm64/publish/SaxonCS.app")
         into(layout.buildDirectory.dir("SaxonCS.app"))
