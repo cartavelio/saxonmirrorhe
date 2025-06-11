@@ -109,7 +109,12 @@ dependencies {
 
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
-    downloadReleaseBundled("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+    downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
+    //downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
+
+    implementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+    implementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
+    implementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
 
     editionCompileAndTestOnly("xom:xom:1.3.5")
     editionCompileAndTestOnly("org.jdom:jdom:1.1.3")
@@ -118,10 +123,7 @@ dependencies {
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-dom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-impl:1.2.15")
-//    downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
-    downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
-    compileOnly("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
-    compileOnly("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
+
     compileOnly("org.graalvm.sdk:graal-sdk:${findProperty("graalSdkVersion")}")
     compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
     compileOnly(libTidyPath.map { files(it.asFile) })

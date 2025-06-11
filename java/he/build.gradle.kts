@@ -63,7 +63,9 @@ tasks.named<Jar>("editionMavenJar") {
 }
 
 val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
-val testSuitesClasspath = files(sourceSets["edition"].java.classesDirectory).from(configurations.testDrivers).from(compile_testdrivers)
+val testSuitesClasspath = files(sourceSets["edition"].output)
+    .from(configurations.testDrivers)
+    .from(compile_testdrivers)
 testSuites {
   product = "java"
   edition = "he"

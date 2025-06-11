@@ -129,7 +129,10 @@ val (_, mavenSqlSourceJar) = jarTaskBuilder("sqlSource") {
 }
 
 val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
-val testSuitesClasspath = files(sourceSets["edition"].java.classesDirectory).from(configurations.testDrivers).from(compile_testdrivers)
+
+val testSuitesClasspath = files(sourceSets["edition"].output)
+    .from(configurations.testDrivers)
+    .from(compile_testdrivers)
 testSuites {
   product = "java"
   edition = "pe"
@@ -138,9 +141,8 @@ testSuites {
   exceptionsDir = layout.projectDirectory.dir("../src/test/exceptions")
 }
 
-tasks.register("all_test_suites") {
-  // Just somewhere to hang dependencies
-}
+testSuites.configure("expath", "XP31")
+testSuites.configure("expath", "XQ31")
 
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
@@ -148,10 +150,8 @@ testSuites.configure("qt3", "XQ31")
 testSuites.configure("qt3extra", "XP31")
 testSuites.configure("qt3extra", "XQ31")
 
-testSuites.configure("expath", "XP31")
-testSuites.configure("expath", "XQ31")
-
 testSuites.configure("xslt30", "XT30")
+testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
 
 testSuites.configure("xslt30extra", "XT30")
 
