@@ -3086,9 +3086,8 @@ void RunThread(XsltExecutable *executable, int tid,
   att_arg.name = NULL;
   att_arg.group = NULL;*/
 
-  // SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void**)&SaxonProcessor::sxn_environ->env,
-  // NULL);
-  cerr << endl << "RunThread cp0,  THEAD ID=" << tid << endl;
+  SaxonProcessor::attachCurrentThread();
+  cerr << endl << "RunThread cp0-0,  THEAD ID=" << tid << endl;
   fflush(stderr);
   fflush(stdout);
 
@@ -3105,7 +3104,7 @@ void RunThread(XsltExecutable *executable, int tid,
     } else {
       cerr << " ===== Failed in THREAD ID: " << tid << endl;
     }
-    delete executable;
+    //delete executable;
   } else {
     cerr << "XsltExecutable is nullptr" << endl;
   }
@@ -3116,6 +3115,8 @@ void RunThread(XsltExecutable *executable, int tid,
 void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
                  const std::string *const dataDir,
                  sResultCount *sresult) {
+
+  cerr << endl << "testThreads test" << endl;
 
   std::vector<std::string> s = {CppTestUtils::concat(2, dataDir->c_str(), "/xmark100k.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/xmark1.xml").c_str(),
                                 CppTestUtils::concat(2, dataDir->c_str(), "/xmark4.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/xmark10.xml").c_str()};
@@ -3132,8 +3133,9 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
   }
 
   for (auto &th : threads) {
+        cerr << "testThreads cp1 - loop" << endl;
     th.join();
-    cerr << "testThreads cp1 - loop" << endl;
+    cerr << "testThreads cp0 - loop" << endl;
   }
 }
 
