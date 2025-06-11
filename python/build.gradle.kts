@@ -1,6 +1,7 @@
 import com.saxonica.build.python.PyenvExe
 import com.saxonica.build.python.PyenvPythonVersion
 import org.gradle.internal.os.OperatingSystem
+import com.saxonica.build.GatherReleaseArtifacts
 
 plugins {
   base
@@ -58,4 +59,29 @@ extension.releaseVersions.get().forEach { releaseVersion ->
   }
 
   versionConfig.outgoing.artifact(versionTask) { builtBy(versionTask) }
+}
+
+val heReleaseWheelsBucket by configurations.dependencyScope("heReleaseWheelsBucket")
+val heReleaseWheels by configurations.resolvable("heReleaseWheels") {
+  extendsFrom(heReleaseWheelsBucket)
+}
+val peReleaseWheelsBucket by configurations.dependencyScope("peReleaseWheelsBucket")
+val peReleaseWheels by configurations.resolvable("peReleaseWheels") {
+  extendsFrom(peReleaseWheelsBucket)
+}
+val eeReleaseWheelsBucket by configurations.dependencyScope("eeReleaseWheelsBucket")
+val eeReleaseWheels by configurations.resolvable("eeReleaseWheels") {
+  extendsFrom(eeReleaseWheelsBucket)
+}
+
+dependencies {
+  heReleaseWheelsBucket(project(path = ":python:he", configuration = "releaseWhl"))
+  peReleaseWheelsBucket(project(path = ":python:pe", configuration = "releaseWhl"))
+  eeReleaseWheelsBucket(project(path = ":python:ee", configuration = "releaseWhl"))
+}
+
+val gather = tasks.register<GatherReleaseArtifacts>("gather_release_artifacts") {
+  artifacts.from(heReleaseWheels)
+  artifacts.from(peReleaseWheels)
+  artifacts.from(eeReleaseWheels)
 }
