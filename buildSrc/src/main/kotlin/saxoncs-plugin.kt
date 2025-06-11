@@ -38,8 +38,9 @@ class SaxonCSPlugin : Plugin<Project> {
     extension.release.convention("${if (release == "prod") "production" else release}")
     */
 
-    extension.release.convention("${project.findProperty("csharpBuilds") ?: "Debug"}")
-    extension.arch.convention(if (System.getProperty("os.arch") == "aarch64") "arm64" else "x64")
+    extension.release.convention("${project.findProperty("csharpBuild") ?: "Debug"}")
+    extension.arch.convention("${project.findProperty("csharpArch") ?:
+                                     (if (System.getProperty("os.arch") == "aarch64") "arm64" else "x64")}")
     extension.platform.convention(if (OperatingSystem.current().isMacOsX())
                                     "osx" else if (OperatingSystem.current().isWindows())
                                       "windows" else "linux")
@@ -57,7 +58,7 @@ abstract class DotNetImplementation: DefaultTask() {
   abstract val configuration: Property<String>
 
   init {
-    configuration.convention("${project.findProperty("csharpBuilds") ?: "Debug"}")
+    configuration.convention("${project.findProperty("csharpBuild") ?: "Debug"}")
     platform.convention(if (OperatingSystem.current().isMacOsX())
                         "osx" else if (OperatingSystem.current().isWindows())
                           "windows" else "linux")
@@ -222,32 +223,44 @@ abstract class DotNetPublish: DotNetImplementation() {
     val csrid = "${platform}-${arch}"
     val csver = saxonBuild.version.get()
 
-    if (platform == "osx") {
-      project.exec {
-        workingDir = project.layout.buildDirectory.file("${arch}/SaxonCS").get().asFile
-        commandLine("${saxonBuild.dotnet.get()}",
-                    "restore", "SaxonCS.sln",
-                    "-p:Configuration=${configuration}", "-p:Platform=Any CPU")
-      }
+    project.exec {
+      workingDir = project.layout.buildDirectory.file("${arch}/SaxonCS").get().asFile
+      commandLine("${saxonBuild.dotnet.get()}",
+                  "publish", "SaxonCS.sln", "-r", csrid,
+                  "--self-contained", "true",
+                  "-p:PublishSingleFile=true",
+                  "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+                  "-p:Configuration=${configuration}", "-p:Platform=Any CPU")
+    }
+  }
+}
 
-      project.exec {
-        workingDir = project.layout.buildDirectory.file("${arch}/SaxonCS").get().asFile
-        commandLine("${saxonBuild.dotnet.get()}",
-                    "msbuild", "-t:BundleApp",
-                    "-p:Version=${csver}", "-p:PackageVersion=${csver}",
-                    "-p:Configuration=${configuration}",
-                    "SaxonCS.csproj")
-      }
-    } else {
-      project.exec {
-        workingDir = project.layout.buildDirectory.file("${arch}/SaxonCS").get().asFile
-        commandLine("${saxonBuild.dotnet.get()}",
-                    "publish", "SaxonCS.sln", "-r", csrid,
-                    "--self-contained", "true",
-                    "-p:PublishSingleFile=true",
-                    "-p:Version=${csver}", "-p:PackageVersion=${csver}",
-                    "-p:Configuration=${configuration}", "-p:Platform=Any CPU")
-      }
+abstract class DotNetMakeApp: DotNetImplementation() {
+  @TaskAction
+  fun build() {
+    val saxonBuild = project.extensions.findByType(SaxonBuildExtension::class.java)
+    if (saxonBuild !is SaxonBuildExtension) {
+      throw GradleException("Could not find 'saxonbuild' extension")
+    }
+
+    val saxonCS = project.extensions.findByType(SaxonCSExtension::class.java)
+    if (saxonCS !is SaxonCSExtension) {
+      throw GradleException("Could not find 'saxoncs' extension")
+    }
+
+    val arch = this.arch.get()
+
+    val platform = this.platform.get()
+    val configuration = this.configuration.get()
+    val csrid = "${platform}-${arch}"
+    val csver = saxonBuild.version.get()
+
+    project.exec {
+      workingDir = project.layout.buildDirectory.file("${arch}/SaxonCS").get().asFile
+      commandLine("${saxonBuild.dotnet.get()}",
+                  "msbuild", "-t:BundleApp",
+                  "-p:Configuration=${configuration}",
+                  "SaxonCS.csproj")
     }
   }
 }
