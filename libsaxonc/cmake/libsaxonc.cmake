@@ -142,6 +142,14 @@ add_test(NAME cppXPath COMMAND CppTestXPath "${CMAKE_CURRENT_SOURCE_DIR}/../samp
 add_test(NAME cppXQuery COMMAND CppTestXQuery "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
 add_test(NAME cppXslt COMMAND CppTestXslt "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
 
+set_tests_properties(
+    cXPath cXQuery cXslt cppXPath cppXQuery cppXslt
+    PROPERTIES
+    ENVIRONMENT_MODIFICATION
+        "PATH=path_list_append:$<TARGET_RUNTIME_DLL_DIRS:${saxonc}>"
+)
+
+
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
