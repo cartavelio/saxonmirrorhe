@@ -56,6 +56,7 @@ import java.util.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -73,7 +74,7 @@ public class SaxonCAPI {
     public static PathHelper pathHelper = new PathHelper();
 
     public static final ObjectHandles objectHandles = ObjectHandles.create();
-    public static final Map<Long , String> objectHandlesPool = new HashMap<>(); //for debugging
+    public static final Map<Long , String> objectHandlesPool = new ConcurrentHashMap<>(); //for debugging
 
     public static int objHandlesCreated = 0;
 
