@@ -42,7 +42,6 @@ val generator = tasks.register("cmake_generate") {
     outputs.file(layout.buildDirectory.file("CMakeCache.txt"))
 
     doLast {
-        println("saxonCCoreCMakePackageDir: ${saxonCCoreCMakePackageDir.elements.get()}")
         val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
         project.exec {
             workingDir = layout.projectDirectory.asFile
