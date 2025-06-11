@@ -100,6 +100,15 @@ public class ProtocolRestrictor {
             this.protocolRestrictor = pr;
             this.nextResolver = rr;
         }
+
+        // Pass the allowed protocols through to the underlying resolver.
+        public void setAllowedProtocols(String protocols) {
+            if (nextResolver instanceof CatalogResourceResolver) {
+                CatalogResourceResolver catres = (CatalogResourceResolver) nextResolver;
+                catres.setAllowedProtocols(protocols);
+            }
+        }
+
         @Override
         public Source resolve(ResourceRequest request) throws XPathException {
             if (protocolRestrictor.test(URI.create(request.uri))) {

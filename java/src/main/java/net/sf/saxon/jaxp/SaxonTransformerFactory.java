@@ -330,11 +330,22 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
             case XMLConstants.ACCESS_EXTERNAL_STYLESHEET:
                 getConfiguration().setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, value.toString());
                 ResourceResolver resolver = getConfiguration().getResourceResolver();
+
+                // This is a bit of a hack. If the next resolver is a protocol resolver, we forward
+                // the access protocols to it. It will, in turn, pass them on to the underlying catalog
+                // resolver if that's what it's forwarding to.
+                if (resolver instanceof ProtocolRestrictor.RestrictedResourceResolver) {
+                    ProtocolRestrictor.RestrictedResourceResolver pres = (ProtocolRestrictor.RestrictedResourceResolver) resolver;
+                    pres.setAllowedProtocols(value.toString());
+                }
+
+                // But if our resolver is already a CatalogResourceResolver, pass the configuration
+                // directly on to it as well.
                 if (resolver instanceof CatalogResourceResolver) {
                     CatalogResourceResolver catres = (CatalogResourceResolver) resolver;
-                    catres.setFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, value.toString());
-                    catres.setFeature(ResolverFeature.ACCESS_EXTERNAL_ENTITY, value.toString());
+                    catres.setAllowedProtocols(value.toString());
                 }
+
                 break;
             default:
                 getConfiguration().setConfigurationProperty(name, value);
