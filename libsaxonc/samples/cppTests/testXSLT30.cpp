@@ -1875,10 +1875,16 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
       "<xsl:param name='b' as='xs:float'/>     <xsl:sequence select='., $a + "
       "$b'/>  </xsl:template>  </xsl:stylesheet>";
   cout << endl << "Test:testInitialTemplate" << endl;
-  XsltExecutable *executable = trans->compileFromString(source);
-  if (executable == nullptr) {
+  XsltExecutable *executable = nullptr;
+  try {
+  	executable = trans->compileFromString(source);
+  } catch (SaxonApiException &e) {
     sresult->failure++;
-    sresult->failureList.push_back("testInitialTemplate0");
+    sresult->failureList.push_back("testInitialTemplate");
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cout << "Error: " << message << endl;
+    }
     return;
   }
   XdmNode *node = proc->parseXmlFromString("<e/>");
