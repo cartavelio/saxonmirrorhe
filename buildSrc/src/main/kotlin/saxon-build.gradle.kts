@@ -40,7 +40,7 @@ val systemOsArch = if (arch == "amd64") "x86_64" else arch
 extension.systemOsArch.convention(systemOsArch)
 extension.dotnet.convention(exeFinder.find("dotnet",
   listOf("/usr/local/share/dotnet", "/usr/local/share/dotnet/x64")))
-extension.dotnetversion.convention("6.0")
+extension.dotnetversion.convention("8.0")
 extension.macosx_min_version.convention(project.findProperty("macosx_min_version_${systemOsArch}")?.toString())
 
 tasks.register(LifecycleTasks.RELEASE_TASK_NAME) {
