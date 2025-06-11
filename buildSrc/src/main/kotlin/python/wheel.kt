@@ -3,6 +3,7 @@ package com.saxonica.build.python
 import SaxonBuildExtension
 import SaxonCPythonExtension
 import com.saxonica.build.PyprojectToml
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -12,6 +13,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.filter
 import org.gradle.kotlin.dsl.register
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.process.ExecOperations
@@ -138,7 +140,20 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
             from(sourceDir)
             into(srcCopyDir)
 
-            exclude("pyproject.toml")
+            exclude("pyproject.toml", "README.md")
+        }
+
+        project.copy {
+            into(srcCopyDir)
+
+            from(sourceDir) {
+                include("README.md")
+                filter<ReplaceTokens>("tokens" to mapOf(
+                    "EDITION" to productEdition.get().uppercase(),
+                    "edition" to productEdition.get(),
+                    "VERSION" to  productVersion.get()
+                ))
+            }
         }
 
         val pyproject = PyprojectToml(sourceDir, productVersion, productEdition)
@@ -159,7 +174,7 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
             args("-m", "build", "--wheel", "--outdir", outputDir.get().asFile.toString())
         }
 
-        if (buildResult.exitValue == 0) project.delete(srcCopyDir)
+//        if (buildResult.exitValue == 0) project.delete(srcCopyDir)
         buildResult.assertNormalExitValue()
     }
 }
