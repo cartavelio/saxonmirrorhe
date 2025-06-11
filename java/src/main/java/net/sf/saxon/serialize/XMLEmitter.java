@@ -306,6 +306,7 @@ public class XMLEmitter extends Emitter {
                 writer.writeCodePoint(delimiter);
                 if (standalone != null) {
                     writer.writeAscii(XML_DECL_STANDALONE);
+                    writer.writeCodePoint(delimiter);
                     writer.write(standalone);
                     writer.writeCodePoint(delimiter);
                 }
