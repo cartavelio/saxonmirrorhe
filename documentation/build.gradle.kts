@@ -676,7 +676,7 @@ tasks.register<JavaExec>("gen_prod_desc_fo") {
 tasks.register<Copy>("setup_fop") {
   group = "Internal"
   into(layout.buildDirectory.file("proddesc"))
-  from(layout.projectDirectory.file("src/main/resources/img")) {
+  from(layout.projectDirectory.file("tools/feature-matrix/PD")) {
     include("saxonica_logo.gif")
   }
 }
