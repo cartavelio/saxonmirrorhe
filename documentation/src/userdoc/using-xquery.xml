@@ -398,7 +398,7 @@
                   invoked from another Java application such as Ant. </p>
             </td>
          </tr>
-         <tr class="javaonly">
+         <tr>
             <td>
                <p>-qversion:(3.1|4.0)</p>
             </td>
@@ -553,7 +553,7 @@
                <p>Directs the output of tracing to a specified file (assuming that <code>-T</code> is enabled).</p>
             </td>
          </tr>
-         <tr>
+         <tr class="javaonly">
             <td>
                <p>-TP:filename</p>
             </td>
