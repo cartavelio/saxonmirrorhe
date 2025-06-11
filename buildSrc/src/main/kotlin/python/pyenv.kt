@@ -159,38 +159,3 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
         pythonExe.get().asFile.writeText(pythonExePath(pyenv))
     }
 }
-
-abstract class PythonPyenvPythonExe @Inject constructor(private val ex: ExecOperations): DefaultTask() {
-    @get:Input
-    abstract val pyenvVersionName: Property<String>
-
-    @get:Input
-    abstract val pyenvRoot: Property<String>
-
-    @get:InputFile
-    abstract val pyenvExe: RegularFileProperty
-
-    @Internal
-    val pythonExePath: Provider<String> = pyenvExe.map { pyenvPath ->
-        ByteArrayOutputStream().use { out ->
-            ex.exec {
-                environment("PYENV_VERSION", pyenvVersionName.get())
-                environment("PYENV_ROOT", pyenvRoot.get())
-                executable(pyenvPath.asFile)
-                args("which", "python")
-                standardOutput = out
-            }
-            out.toString().trim()
-        }
-    }
-
-    @TaskAction
-    fun execute() {}
-
-    @OutputFile
-    val pythonExe: Provider<RegularFile> = pythonExePath.flatMap {
-        val fileProp = project.objects.fileProperty()
-        fileProp.set(project.file(it))
-        fileProp
-    }
-}
