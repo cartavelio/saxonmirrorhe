@@ -71,7 +71,7 @@ dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../java/src/main/java")))
 
   javaSampleClassesBucket(project(mapOf("path" to ":java",
-                                        "configuration" to "sampleClasses")))
+                                        "configuration" to "javaSampleClasses")))
 
   javadocBucket(project(mapOf("path" to ":java",
                               "configuration" to "javadocArtifacts")))
@@ -189,6 +189,7 @@ resources { dependsOn(stageSamples) }
 
 val stageSampleClasses = tasks.register<Copy>("stageSampleClasses") {
   group = "Internal"
+  dependsOn(javaSampleClasses)
   from(zipTree(javaSampleClasses.singleFile)) {
     exclude("classes/META-INF/**")
   }
