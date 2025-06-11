@@ -1,10 +1,11 @@
-import com.saxonica.build.TestSuitesExtension
+import com.saxonica.build.java.PomGenerator
 
 plugins {
   id("saxon-build")
   id("com.saxonica.build.testsuites")
   id("com.saxonica.build.samples")
   id("saxonj")
+  id("maven-publish")
 }
 
 saxonj {
@@ -19,6 +20,14 @@ saxonj {
 val xqjDownloadJarBucket by configurations.dependencyScope("xqjDownloadJarBucket")
 val xqjDownloadJar by configurations.resolvable("xqjDownloadJar") {
   extendsFrom(xqjDownloadJarBucket)
+}
+val xqjMavenJarBucket by configurations.dependencyScope("xqjMavenJarBucket")
+val xqjMavenJar by configurations.resolvable("xqjMavenJar") {
+  extendsFrom(xqjMavenJarBucket)
+}
+val xqjSourceMavenJarBucket by configurations.dependencyScope("xqjSourceMavenJarBucket")
+val xqjSourceMavenJar by configurations.resolvable("xqjSourceMavenJar") {
+  extendsFrom(xqjSourceMavenJarBucket)
 }
 
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
@@ -41,6 +50,8 @@ dependencies {
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
+  xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
+  xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
 }
 
 tasks.named("compileJava") {
@@ -178,5 +189,61 @@ testSuites.configure("xslt30extra", "XT30")
 val downloadRelease = tasks.named<Zip>("downloadRelease") {
   into(archiveBaseName) {
     from(xqjDownloadJar)
+  }
+}
+
+val saxonBuild = the<SaxonBuildExtension>()
+
+val pseudoXqjMavenJar = tasks.register("pseudoXqjMavenJar") {
+  inputs.file(xqjMavenJar)
+  outputs.file(xqjMavenJar)
+}
+
+val pseudoXqjSourceMavenJar = tasks.register("pseudoXqjSourceMavenJar") {
+  inputs.file(xqjSourceMavenJar)
+  outputs.file(xqjSourceMavenJar)
+}
+val mavenArtifactId = "Saxon-HE"
+val mavenPom = PomGenerator() {
+  name = mavenArtifactId
+  license {
+    name = "Mozilla Public License Version 2.0"
+    url = "http://www.mozilla.org/MPL/2.0/"
+    distribution = "repo"
+  }
+  scm  {
+    url = "https://saxonica.plan.io/projects/saxonmirrorhe/repository"
+    connection = "scm:git:https://saxonica.plan.io/projects/saxonmirrorhe/repository"
+    developerConnection = "scm:git:https://saxonica.plan.io/projects/saxonmirrorhe/repository"
+  }
+  dependencies = configurations.editionImplementation.get().allDependencies
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("maven") {
+      groupId = "net.sf.saxon"
+      artifactId = mavenArtifactId
+      version = saxonBuild.version.get()
+
+      pom(mavenPom.generate())
+
+      artifact(tasks.named<Jar>("editionMavenJar"))
+      artifact(tasks.named<Jar>("javadocMavenJar"))
+      artifact(tasks.named<Jar>("editionSourceMavenJar"))
+      artifact(pseudoXqjMavenJar) {
+        classifier = "xqj"
+      }
+      artifact(pseudoXqjSourceMavenJar) {
+        classifier = "xqj-sources"
+      }
+      artifact(tasks.named<Jar>("testDriversMavenJar"))
+      artifact(tasks.named<Jar>("testDriversSourceMavenJar"))
+    }
+  }
+  repositories {
+    maven {
+      url = layout.buildDirectory.dir("maven-o-matic").map { it.asFile.toURI() }.get()
+    }
   }
 }
