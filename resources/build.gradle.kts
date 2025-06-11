@@ -89,7 +89,7 @@ dependencies {
 val resources = tasks.register<Zip>("resources") {
   group = "Internal"
   destinationDirectory = layout.buildDirectory
-  archiveFileName = "saxon-resources.zip"
+  archiveFileName = "saxon-resources-${saxonMajorVersion}.zip"
   from(layout.buildDirectory.dir("stage"))
   into("/")
 }
