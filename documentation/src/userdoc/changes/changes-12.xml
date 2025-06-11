@@ -9,9 +9,10 @@
             <p>Note: Saxon 12.0 did not work under Java 8; this is fixed in Saxon 12.1.</p>
         </div>
         
-        <p class="csonly">SaxonCS 12 is targeted at .NET 6.</p>
-        
-        
+        <div class="csonly">
+            <p>SaxonCS 12 is targeted at .NET 6.</p>
+            <p>From 12.6, SaxonCS 12 is targeted at .NET 8.</p>
+        </div>
         
         
     </category>
