@@ -21,7 +21,7 @@ target_link_libraries(CppTestValidator PRIVATE ${saxonc})
 target_include_directories(CppTestValidator PRIVATE
     PATHS "${SAXON_LIBRARY_INCLUDE_DIR}" "../samples/cppTests"
 )
-add_test(NAME cppValidator COMMAND CppTestValidator)
+add_test(NAME cppValidator COMMAND CppTestValidator "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ctest-working-dir")
 
 if(PROJECT_IS_TOP_LEVEL)
     # include(CPack) will happen inside the following call
