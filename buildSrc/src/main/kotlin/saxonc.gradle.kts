@@ -210,32 +210,22 @@ val debugGraalImage = tasks.register<GraalNativeImageTask>("debug_graal_image") 
 }
 val ersatzPath = layout.buildDirectory.dir("ersatz")
 val EDITION = extension.edition.map { it.uppercase() }
-fun cmakeFilenameMapper(vararg suffixes: String): (String) -> Array<String> {
+fun cmakeFilenameMapper(suffixes: List<String>): (String) -> List<String> {
     return { ED ->
-        suffixes.map { suffix -> "SaxonCCore${ED}${suffix}.cmake" }.toTypedArray()
+        suffixes.map { suffix -> "SaxonCCore${ED}${suffix}.cmake" }
     }
 }
-val universalCMakeFileSuffixes = arrayOf("Config", "ConfigVersion")
-val universalCMakeFilenames = EDITION.map(cmakeFilenameMapper(*universalCMakeFileSuffixes))
-val generator = tasks.register("cmake_generate") {
+val universalCMakeFileSuffixes = listOf("Config", "ConfigVersion")
+val universalCMakeFilenames = EDITION.map(cmakeFilenameMapper(universalCMakeFileSuffixes))
+
+val generator = tasks.register<ErsatzCMakeGenerator>("cmake_generate") {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Generate build system for the ersatz CMake-driven library"
-    inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
-    inputs.files(layout.projectDirectory.dir("../cmake"))
-    outputs.file(ersatzPath.map { it.file("CMakeCache.txt") })
-    outputs.file(ersatzPath.map { it.file("cmake_install.cmake") })
-    outputs.files(ersatzPath.map { it.files(universalCMakeFilenames) }) // We only want the Config and ConfigVersion files here
 
-    doLast {
-        val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
-        providers.exec {
-            workingDir = layout.projectDirectory.asFile
-            executable = "cmake"
-            args("-G", generatorName, "-B", ersatzPath.get().asFile.toString(),
-                "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get()
-            )
-        }
-    }
+    version = saxonBuild.version
+    platformIsWindows = saxonBuild.targetHost.map { it.isWindows }
+    buildPath = ersatzPath
+    cmakeFilenames = universalCMakeFilenames
 }
 
 val packageOutputDir = layout.buildDirectory.dir("cmake-package")
@@ -255,10 +245,10 @@ fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTas
     }
 
     val ersatzConfigPath = ersatzPath.map { it.dir("staging") }
-    val cmakeFilenames = EDITION.map(cmakeFilenameMapper(*universalCMakeFileSuffixes, "", "-${config.lowercase()}"))
+    val cmakeFilenames = EDITION.map(cmakeFilenameMapper(universalCMakeFileSuffixes.plus(listOf("", "-${config.lowercase()}"))))
     val generateCMakeConfigPackageFiles = tasks.register<Exec>("install_ersatz_${configTaskName}") {
         inputs.files(build)
-        outputs.files(ersatzConfigPath.map { conf -> conf.dir("lib/cmake/SaxonCCore${EDITION.get()}").files(*cmakeFilenames.get()) })
+        outputs.files(ersatzConfigPath.map { conf -> conf.dir("lib/cmake/SaxonCCore${EDITION.get()}").files(cmakeFilenames.get()) })
 
         workingDir = layout.projectDirectory.asFile
         executable = "cmake"

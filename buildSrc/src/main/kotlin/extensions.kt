@@ -1,3 +1,4 @@
+import com.saxonica.build.TargetHost
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
