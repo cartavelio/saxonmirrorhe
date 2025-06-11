@@ -1,7 +1,4 @@
-package com.saxonica.build
-
 import org.gradle.internal.os.OperatingSystem
-
 /**
  * Represents a target OS / arch for building / publishing release artifacts
  *
@@ -60,9 +57,6 @@ sealed interface TargetHost {
 
   val isX86_64: Boolean get() = false
   val isArm64: Boolean get() = false
-
-  operator fun component1() = name
-  operator fun component2() = architecture
 
   sealed class Windows(override val architecture: String) : TargetHost {
     override val name = "windows"

@@ -48,6 +48,8 @@ val generator = tasks.register("cmake_generate") {
             executable = "cmake"
             args("-G", generatorName, "-B", layout.buildDirectory.get().asFile.toString(),
                 "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
+                "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.name}" }.get(),
+                "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
                 "-D", saxonCCoreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
             )
             if (saxonBuild.macosx_min_version.isPresent) {
