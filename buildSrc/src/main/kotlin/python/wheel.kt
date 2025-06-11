@@ -338,7 +338,7 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
             outputDir = builder.buildDir.dir("wheel")
         }
 
-        val libLocations: Provider<List<String>> = saxonBuild.systemOsArch.map { arch -> if (arch == "windows") listOf("lib", "bin") else listOf("lib") }
+        val libLocations: Provider<List<String>> = saxonBuild.systemOsName.map { os -> if (os == "windows") listOf("lib", "bin") else listOf("lib") }
         val libDirs = saxoncCoreDir.map { dirs ->
             val dirPath = dirs.first().asFile.toString()
             libLocations.map { dirnames ->
