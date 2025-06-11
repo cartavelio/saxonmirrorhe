@@ -28,6 +28,11 @@ val phpReleaseFolder by configurations.resolvable("phpReleaseFolder") {
     extendsFrom(phpReleaseFolderBucket)
 }
 
+val pythonSamplesBucket by configurations.dependencyScope("pythonSamplesBucket")
+val pythonSamples by configurations.resolvable("pythonSamples") {
+    extendsFrom(pythonSamplesBucket)
+}
+
 project.layout.projectDirectory.dir("src/include")
 val includeDir by configurations.consumable("includeDir")
 val libDir by configurations.consumable("libDir")
@@ -45,6 +50,9 @@ dependencies {
     })
     phpReleaseFolderBucket(extension.edition.map  { edition ->
         project(path = ":php:${edition}", configuration = "releaseFolder")
+    })
+    pythonSamplesBucket(extension.edition.map  { edition ->
+        project(path = ":python:${edition}", configuration = "packagedSamples")
     })
 }
 
@@ -242,6 +250,9 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
     }
     into("samples") {
         from(layout.projectDirectory.dir("../samples"))
+    }
+    into("python") {
+        from(pythonSamples.elements.map { it.first() })
     }
     from(layout.projectDirectory.dir("../")) {
         include("README.md")

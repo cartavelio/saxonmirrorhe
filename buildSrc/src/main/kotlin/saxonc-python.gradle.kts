@@ -8,7 +8,6 @@ plugins {
     id("saxon-build")
 }
 
-
 val extension = project.extensions.create<SaxonCPythonExtension>("saxoncPython")
 val manageBranches = the<ManageBranchesExtension>()
 val saxonBuild = the<SaxonBuildExtension>()
@@ -217,3 +216,38 @@ val pyTest = tasks.register<PytestRunner>("pytest") {
 tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
     dependsOn(pyTest)
 }
+
+val packagedSamplesDir = layout.buildDirectory.dir("packaged-samples")
+val packageSamplesTask = tasks.register<Copy>("package_samples") {
+    into(packagedSamplesDir.map { it.dir("samples") })
+    from(layout.projectDirectory.dir("../saxonc/samples")) {
+        include("*.py")
+        filter { line ->
+            if (line == "import saxonche as saxonc") "import saxonc${extension.edition.get()} as saxonc" else line
+        }
+    }
+    from(layout.projectDirectory.dir("../saxonc/samples")) {
+        exclude("*.py")
+    }
+}
+val packagePytestsTask = tasks.register<Copy>("package_pytests") {
+    into(packagedSamplesDir.map { it.dir("test") })
+    from(layout.projectDirectory.dir("../saxonc/test"))
+    from(layout.projectDirectory.dir("test"))
+}
+val packageTestdriverTask = tasks.register<Copy>("package_testdriver") {
+    into(packagedSamplesDir.map { it.dir("testsuite_driver") })
+    from(layout.projectDirectory.dir("../testsuite_driver")) {
+        exclude(".venv/**", ".idea/**")
+    }
+}
+val packageSamples = tasks.register<Copy>("package_samples_for_release") {
+    dependsOn(packageSamplesTask, packagePytestsTask , packageTestdriverTask)
+    from(layout.projectDirectory.dir("../"))
+    into(packagedSamplesDir)
+    include("README-samples.md")
+    rename { name -> "README.md" }
+}
+
+val packagedSamples by configurations.consumable("packagedSamples")
+packagedSamples.outgoing.artifact(packagedSamplesDir) { builtBy(packageSamples) }
