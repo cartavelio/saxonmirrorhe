@@ -454,7 +454,7 @@ class PyTestOutcome:
                         assert_xpc.declare_namespace(ns_name, str(itemn.get_node_value().string_value))
             assert_xpc.declare_variable("result")
             '''print("Testing " + assertion.string_value)
-            print(result)'''
+            print(result.head)'''
             assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
             assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
             assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
@@ -463,8 +463,9 @@ class PyTestOutcome:
             assert_xpc.declare_namespace("j", "http://www.w3.org/2005/xpath-functions")
             assert_xpc.declare_namespace("file", "http://expath.org/ns/file")
             assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
-            assert_xpc.set_parameter("result", result)
-            assert_xpc.set_context(xdm_item=result.item_at(0))
+            assert_xpc.set_parameter("result", result.head)
+            if(result.head is not None):
+                assert_xpc.set_context(xdm_item=result.head)
             try:
                 b = assert_xpc.effective_boolean_value(assertion.string_value)
                 '''if not b:
