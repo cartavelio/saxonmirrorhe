@@ -77,7 +77,7 @@ void testxQueryToString_OnEmptySequence(XQueryProcessor *queryProc,
   const char *result = nullptr;
   try {
     result = queryProc->runQueryToString();
-    if (result == nullptr) {
+    if (result[0] == '\0') {
       sresult->success++;
     } else {
     cout << "Result :" << result << endl;
@@ -338,7 +338,8 @@ void testXQueryLineNumberError(const char *cwd, const string * const dataDir, sR
   if (cwd != nullptr) {
     queryProc->setcwd(cwd);
   }
-  queryProc->setProperty("s", CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
+  string xmlFile = CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml");
+  queryProc->setProperty("s", xmlFile.c_str());
 
   queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
   const char *result = nullptr;
@@ -363,7 +364,7 @@ void testXQueryLineNumberError(const char *cwd, const string * const dataDir, sR
 }
 
 // Test requirement of license file - Test should succeed
-void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
+void testXQueryLineNumber(const char *cwd, const std::string * const dataDir, sResultCount *sresult) {
   SaxonProcessor *processor = new SaxonProcessor(true);
   processor->setcwd(cwd);
   processor->setConfigurationProperty("l", "on");
@@ -377,8 +378,8 @@ void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
   // queryProc->setProperty("s", "data/cat.xml");
   queryProc->declareNamespace("saxon", "http://saxon.sf.net/");
 
-  queryProc->setProperty("qs", "saxon:line-number(doc('data/cat.xml')/out/"
-                               "person[1])"); /// out/person[1]
+  string qs = string { "saxon:line-number(doc('" } + *dataDir + string { "/cat.xml')/out/person[1])" };
+  queryProc->setProperty("qs", qs.c_str()); /// out/person[1]
   try {
     const char *result = queryProc->runQueryToString();
     cout << "Result :" << result << endl;
@@ -456,7 +457,7 @@ int main(int argc, char *argv[]) {
        << "============================================================="
        << endl
        << endl;
-  testXQueryLineNumber(cwd, sresult);
+  testXQueryLineNumber(cwd, &dataDir, sresult);
 
   cout << endl
        << "============================================================="

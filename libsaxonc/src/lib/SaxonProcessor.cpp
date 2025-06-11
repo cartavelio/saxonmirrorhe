@@ -800,8 +800,9 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
   for (int i = 0; i < length; i++) {
 
     if (catalogFiles[i] != nullptr) {
+      char* catFile = (char *)catalogFiles[i];
       addProcessorProperty(sxn_environ->thread, (void *)processorDataRef,
-                           (char *)catalogFiles[i]);
+                           catFile);
     }
   }
 
