@@ -25,16 +25,6 @@ class XdmItem;
 class XdmAtomicValue;
 class XdmNode;
 
-typedef enum saxonTypeEnum {
-  enumNode,
-  enumString,
-  enumInteger,
-  enumDouble,
-  enumFloat,
-  enumBool,
-  enumArrXdmValue
-} PRIMITIVE_TYPE;
-
 /** An <code>XdmValue</code> represents a value in the XDM data model. A value
  * is a sequence of zero or more items, each item being an atomic value, a node,
  * or a function item. This class is a wrapper of the XdmValue object created in
