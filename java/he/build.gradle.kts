@@ -285,6 +285,7 @@ publishing {
     maven {
       url = uri(layout.buildDirectory.dir("maven-o-matic").get())
     }
+/*
     maven {
       name = "sonatype"
       url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
@@ -293,6 +294,7 @@ publishing {
         password = project.findProperty("sonatypePassword")?.toString() ?: "NOPASS"
       }
     }
+*/
   }
 }
 
