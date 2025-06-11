@@ -10,8 +10,8 @@ namespace SaxonCS_NUnit
         public static string extraTests = Environment.GetEnvironmentVariable("SAXON_EXTRA_TEST_SUITE_DIR");
         
         
-        public static string NUNIT_DATA_DIR = Path.Combine(repo, "src/test/nunit/testdata/");
-		public static string DATA_DIR = Path.Combine(repo, "src/test/testdata/");
+        public static string NUNIT_DATA_DIR = Path.Combine(repo, "csharp/src/test/nunit/testdata/");
+	public static string DATA_DIR = Path.Combine(repo, "src/test/testdata/");
         public static string SANDPIT_DIR = Path.Combine(DATA_DIR, "sandpit/");
         public static string XMARK_DIR = Path.Combine(extraTests, "data/xmark/");
         public static string RESOURCES_DIR = NUNIT_DATA_DIR;
