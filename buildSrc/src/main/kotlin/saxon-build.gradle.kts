@@ -83,9 +83,8 @@ tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
           into(outputDir)
           from(report)
         }
-
-        println("OUT ${outputDir.absolutePath}")
       }
+      println("Wrote ${JavaRunner.reports.size} reports to ${archive}")
     }
   }
 }
