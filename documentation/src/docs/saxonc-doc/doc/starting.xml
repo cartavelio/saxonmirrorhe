@@ -31,8 +31,8 @@
     <section id="installingLinux" title="Linux">
       <h1>Installing on Linux</h1>
 
-      <aside>In the following, [EDITION] means one of: HE, PE, EE; and [VERSION] is the maintenance
-        release version number (for instance 12.0), and [ARCH] is the processor architecture (64-bit
+      <aside>In the following, [EDITION] means one of: HE, PE, EE; [VERSION] is the maintenance
+        release version number (for instance 12.0); and [ARCH] is the processor architecture (64-bit
         Intel/AMD <code>x86_64</code>, or 64-bit ARM <code>aarch64</code>). </aside>
 
       <!--<p>As a prerequisite SaxonC requires <code>GLIBC_2.2.5</code> as minimum. Note that on some Debian stable
@@ -260,7 +260,8 @@
 
       <aside>In the following, [EDITION] means one of: HE, PE, EE; and [VERSION] is the maintenance
         release version number (for instance 12.6.0). </aside>
-
+      
+      <p><b>From SaxonC 12.6:</b></p>
       <ol>
         <li>
           <p>
@@ -275,7 +276,7 @@
             <b>Unpack</b>
           </p>
           <p>To install the SaxonC-[EDITION] release on Windows, first unpack the download by
-            unzipping the file <code>SaxonC[EDITION]-windows-[ARCH]-[VERSION].zip.zip</code>.</p>
+            unzipping the file <code>SaxonC[EDITION]-windows-x86_64-[VERSION].zip</code>.</p>
 
           <p>The zip file can be unpacked anywhere suitable, but it is recommended to unzip to:
               <code>C:\Program Files\Saxonica\SaxonC[EDITION][VERSION]</code>.</p>
@@ -287,12 +288,49 @@
           <p>The core SaxonC libraries are located under the <code>SaxonC[EDITION]/bin</code>
             directory, named <code>saxonc-[EDITION].dll</code> and
               <code>saxonc-[EDITION]-core.dll</code>.</p>
-          <p>The <code>lib</code> path must be added to the environment variable
+          <p>The <code>bin</code> path must be added to the environment variable
             <code>PATH</code>.</p>
           <p>On Windows, this can be done in various ways. The environment variable can be set from
             Window Settings &gt; System Properties &gt; Environment Variables; or from the command
             line using a set command like:</p>
-          <kbd>set PATH="%PATH%;C:\Program Files\Saxonica\Saxon[EDITION][VERSION]\bin"</kbd>
+          <kbd>set PATH="%PATH%;C:\Program Files\Saxonica\SaxonC[EDITION][VERSION]\bin"</kbd>
+        </li>
+      </ol>
+      
+      <p>
+        <b>For older releases, Saxon 12.0 – 12.5:</b>
+      </p>
+      <ol>
+        <li>
+          <p>
+            <b>Download</b>
+          </p>
+          <p>Download the SaxonC software from www.saxonica.com. There are different downloads
+            available for the Saxon-HE, Saxon-PE and Saxon-EE products, for different operating
+            systems.</p>
+        </li>
+        <li>
+          <p>
+            <b>Unpack</b>
+          </p>
+          <p>To install the SaxonC-[EDITION] release on Windows, first unpack the download by
+            unzipping the file <code>libsaxon-[EDITION]C-windows-v[VERSION].zip</code>.</p>
+          
+          <p>The zip file can be unpacked anywhere suitable, but it is recommended to unzip to:
+            <code>C:\Program Files\Saxonica\Saxon[EDITION][VERSION]</code>.</p>
+        </li>
+        <li>
+          <p>
+            <b>Add the core SaxonC library location to the PATH environment variable</b>
+          </p>
+          <p>The core SaxonC library is located under the <code>libs/win</code> directory, named
+            <code>libsaxon-[EDITION]c-[VERSION].dll</code>.</p>
+          <p>The <code>libs/win</code> path must be added to the environment variable
+            <code>PATH</code>.</p>
+          <p>On Windows, this can be done in various ways. The environment variable can be set from
+            Window Settings &gt; System Properties &gt; Environment Variables; or from the command
+            line using a set command like:</p>
+          <kbd>set PATH="%PATH%;C:\Program Files\Saxonica\Saxon[EDITION][VERSION]\libs\win"</kbd>
         </li>
       </ol>
 
@@ -380,7 +418,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
         target="_blank" href="https://cmake.org/">https://cmake.org/</a>).</p>
 
     <p>For example, to run the C++ <code>testXPath</code> sample file on Linux or macOS use the
-      following commands (where [PLATFORM] is linux or mac):</p>
+      following commands:</p>
 
     <kbd>cd samples</kbd>
     <kbd>cmake .</kbd>
@@ -400,7 +438,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
     <p>By default MSVC will build Debug executables, and put them in the <code>Debug</code>
       directory, but we asked CMake to build Release executables with <code>--config Release</code>,
-      so you they will be in the <code>Release</code> directory:</p>
+      so here they will be in the <code>Release</code> directory:</p>
 
     <kbd>.\Release\CppTestXPath.exe .\data</kbd>
 
@@ -409,6 +447,23 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       the sample exe file does not run due to dll not found, either add the dll to your environment
       variable, or copy the dll files to the <code>/samples/Debug</code> (or
         <code>/samples/Release</code>) directory.</p>
+    
+    <aside>
+      <p>For older releases Saxon 12.0 – 12.5, to run the C++ <code>testXPath</code> sample file on
+        Linux or Mac OS use the following commands (where [PLATFORM] is linux or mac):</p>
+      
+      <kbd>cd samples/cppTests/</kbd>
+      <kbd>./build64-[PLATFORM].sh</kbd>
+      <kbd>./testXPath</kbd>
+      
+      <p>Similarly for Windows, use the commands:</p>
+      
+      <kbd>cd samples/cppTests/</kbd>
+      <kbd>build-windows.bat</kbd>
+      <kbd>testXPath.exe</kbd>
+    </aside>
+    
+
 
     <h2 class="subtitle">Using SaxonC in applications</h2>
 
@@ -416,8 +471,8 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       useful when you want to write your own applications in C/C++, Python or PHP to invoke XSLT
       transforms, XQuery, XPath evaluation, or XML Schema validation with Saxon.</p>
 
-    <p>The simplest way to include SaxonC in your application, if it uses CMake as well, is to
-      import it into your CMake project with <code>find_package()</code>. The
+    <p>From SaxonC 12.6, the simplest way to include SaxonC in your application, if it uses CMake as
+      well, is to import it into your CMake project with <code>find_package()</code>. The
         <code>samples/CMakeLists.txt</code> shows this in action.</p>
 
     <p>For more information on how to get started using the SaxonC APIs, see the relevant sections
@@ -470,12 +525,27 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       also having a <code>Validate</code> binary. On Windows the binaries have the <code>.exe</code>
       suffix (<code>Transform.exe</code>, and so on).</p>
 
-    <p>To run SaxonC from the command line, the commands look like the following (assuming the
-      installed binary location (e.g. <code>/opt/saxonica/bin</code>) is on the <code>PATH</code>:</p>
+    <p>To run SaxonC from the command line, the commands look like the following, assuming the
+      installed binary location (e.g. <code>/opt/saxonica/bin</code>) is on the
+      <code>PATH</code>:</p>
 
     <kbd>Transform [options] [params]</kbd>
     <kbd>Query [options] [params]</kbd>
     <kbd>Validate [options] source.xml</kbd>
+
+    <aside>
+      <p>For older releases Saxon 12.0 – 12.5, see the <code>Transform.c</code> and
+          <code>Query.c</code> files (and <code>Validate.c</code> for SaxonC-EE) in the
+          <code>command</code> directory. To build the command line programs, execute the
+          <code>build64-linux.sh</code> script for Linux, <code>build64-mac.sh</code> for MacOS, or
+        the <code>build-windows.bat</code> script for Windows.</p>
+
+      <p>To run SaxonC from the command line, the commands look like the following:</p>
+
+      <kbd>./transform [options] [params]</kbd>
+      <kbd>./query [options] [params]</kbd>
+      <kbd>./validate [options] source.xml</kbd>
+    </aside>
 
     <p>The same command line options as in the Java products are available in the SaxonC command
       line tool. Please see the relevant sections of the main Saxon documentation for details:</p>
