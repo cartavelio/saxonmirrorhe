@@ -34,6 +34,10 @@ dependencies {
     })
 }
 
+interface InjectedExecOps {
+    @get:Inject val execOps: ExecOperations
+}
+
 val generator = tasks.register("cmake_generate") {
     group = LifecycleBasePlugin.BUILD_GROUP
     inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
@@ -41,9 +45,11 @@ val generator = tasks.register("cmake_generate") {
     inputs.dir(saxonCCoreCMakePackageDir.elements.map { it.first().asFile })
     outputs.file(layout.buildDirectory.file("CMakeCache.txt"))
 
+    val injected = project.objects.newInstance<InjectedExecOps>()
+
     doLast {
         val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
-        project.exec {
+        injected.execOps.exec {
             workingDir = layout.projectDirectory.asFile
             executable = "cmake"
             args("-G", generatorName, "-B", layout.buildDirectory.get().asFile.toString(),
