@@ -451,9 +451,15 @@ def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spe
                 select = param_node.get_attribute_value("select")
                 parami_value = xpc.evaluate(select)
 
-            is_static = True if param_node.get_attribute_value('static') is not None else False
+            statici = param_node.get_attribute_value('static')
+            is_static = False
+            if statici is not None:
+                is_static = True if statici == "true" or statici == "yes" else False
             environment.xpath_proc.declare_variable(var_name)
-            declared = True if param_node.get_attribute_value("declared") is not None else False
+            declared = False
+            declaredi = param_node.get_attribute_value("declared")
+            if declaredi is not None:
+                declared = True if declaredi == "true" or declaredi == "yes" else False
 
             if not declared:
                 environment.param_declarations = environment.param_declarations + "declare variable $" + var_name + " external; "
@@ -739,6 +745,9 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
             try:
                 environment = localEnvironments[env_ref]
 
+                if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                    print('environment = ' + str(environment.params))
+
             except KeyError as ex:
                 try:
                     environment = globalEnvironments[env_ref]
@@ -846,6 +855,14 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                     testxqc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
                     testxqc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
                     testxqc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
+
+                    if len(environment.params) > 0:
+                        for var_name in environment.params.keys():
+                            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                                print("Environment params uri=", var_name)
+                                print("Environment params value=", str(environment.params[var_name]))
+                                print("declarations = ", environment.param_declarations)
+                            testxqc.set_parameter(var_name, environment.params[var_name])
 
                     try:
                         testxqc.set_cwd(cwd_from_base_uri(testxqc.base_uri))
