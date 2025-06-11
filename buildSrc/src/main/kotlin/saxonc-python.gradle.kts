@@ -62,6 +62,19 @@ val pythonSrcDir = layout.projectDirectory.dir(provider { "../saxonc" })
 val releaseWheels = tasks.register("release_wheels") {
     group = LifecycleTasks.RELEASE_GROUP
     description = "Build release wheels for all supported Python versions"
+
+    doLast {
+      mkdir(layout.buildDirectory.file("repaired-wheels"))
+    }
+
+    doLast {
+      tasks.withType<RepairLocalWheel>().filter { it.name.contains("release_wheel") }.forEach { rtask ->
+        copy {
+          into(layout.buildDirectory.file("repaired-wheels"))
+          from(rtask.outputs)
+        }
+      }
+    }
 }
 
 val pythonVersions = mutableMapOf<String, String>()
