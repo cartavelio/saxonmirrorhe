@@ -144,7 +144,7 @@ resources { dependsOn(stageSourceUserdoc) }
 
 val stageNotices = tasks.register<Copy>("stageNotices") {
   group = "Internal"
-  from(layout.projectDirectory.dir("../READMEs/src/notices"))
+  from(layout.projectDirectory.dir("../src/main/notices"))
   into(layout.buildDirectory.dir("stage/notices"))
   include("JAMESCLARK.txt")
   include("ICU-J.txt")
