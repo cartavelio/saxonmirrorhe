@@ -13,7 +13,10 @@
   <!-- Can use <c> or <code> tags within documentation comments to get code font in documentation. -->
 
   <xsl:param name="inputdir" required="yes"/>
-  <xsl:variable name="files" select="uri-collection($inputdir || '?select=*.cs')"/>
+  <xsl:param name="featurekeysdir" required="yes"/>
+  <xsl:variable name="files"
+                select="(uri-collection($inputdir || '?select=*.cs'),
+                         uri-collection($featurekeysdir || '?select=*.cs'))"/>
   <!--  'Configuration.cs',
     'Destination.cs',
     'Errors.cs',
