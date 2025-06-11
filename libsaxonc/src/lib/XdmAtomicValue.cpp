@@ -77,10 +77,6 @@ double XdmAtomicValue::getDoubleValue() {
   return result;
 }
 
-const char *XdmAtomicValue::getStringValue(const char *encoding) {
-  return XdmItem::getStringValue(encoding);
-}
-
 long XdmAtomicValue::getLongValue() {
   long result =
         j_getLongValue(SaxonProcessor::sxn_environ->thread, (void *)value);
