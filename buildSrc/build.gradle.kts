@@ -41,5 +41,9 @@ gradlePlugin {
       id = "com.saxonica.build.testsuites"
       implementationClass = "com.saxonica.build.TestSuitesPlugin"
     }
+    create("samples") {
+      id = "com.saxonica.build.samples"
+      implementationClass = "com.saxonica.build.SamplesPlugin"
+    }
   }
 }

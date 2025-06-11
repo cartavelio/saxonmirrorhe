@@ -3,6 +3,7 @@ import com.saxonica.build.TestSuitesExtension
 plugins {
   id("saxon-build")
   id("com.saxonica.build.testsuites")
+  id("com.saxonica.build.samples")
   id("saxonj")
 }
 
@@ -20,7 +21,18 @@ val xqjDownloadJar by configurations.resolvable("xqjDownloadJar") {
   extendsFrom(xqjDownloadJarBucket)
 }
 
+val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
+  extendsFrom(configurations["testImplementation"])
+}
+
+val sampleSourcesBucket by configurations.dependencyScope("sampleSourcesBucket")
+val sampleSources = configurations.resolvable("sampleSources") {
+  extendsFrom(sampleSourcesBucket)
+}
+
 dependencies {
+  sampleSourcesBucket(project(mapOf("path" to ":samples",
+                                    "configuration" to "sampleSources")))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
 }
 
@@ -61,6 +73,58 @@ tasks.named<Jar>("editionDownloadJar") {
 tasks.named<Jar>("editionMavenJar") {
   exclude("net/sf/saxon/option")
 }
+
+samples {
+  runclasspath = (files(sourceSets["edition"].output)
+                  + configurations.named("samplesConfiguration").get())
+  debugclasspath = (files(layout.buildDirectory.dir("classes/java/main"))
+                    + files(layout.buildDirectory.dir("build/resources/main"))
+                    + configurations.named("samplesConfiguration").get())
+
+  sources = sampleSources
+  product = "java"
+  edition = "he"
+}
+
+samples.transform("Books_Transform_1", "books.xml", "books.xsl",
+                  listOf("-t"))
+
+samples.transform("Books_Transform_2", "books.xml", "books.xsl", 
+                  listOf("top-author=Thomas Hardy"))
+
+samples.transform("Books_Transform_3", "books.xml", "books-csv.xsl")
+
+samples.query("Books_Query_1", "books.xml", "books.xq")
+
+samples.transform("Tour_Transform_1", null, "tour.xsl", listOf("-it:main"))
+samples.transform("Tour_Transform_2", null, "tour.xsl", listOf("-it:main", "start=a6"))
+samples.transform("Tour_Transform_3", null, "tour.xsl", listOf("-it:main", "start=g2"))
+
+samples.query("Tour_Query_1", null, "tour.xq", listOf("start=e5"))
+samples.query("Tour_Query_2", null, "tour.xq", listOf("start=d2", "end=42"))
+samples.query("Tour_Query_3", null, "tour.xq", listOf("end=61"))
+
+samples.transform("Shakespeare_1", "othello.xml", "play.xsl",
+                  listOf("dir=file:///${layout.buildDirectory.file("sample_results/playhtml").get()}"),
+                  layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
+
+samples.transform("Bible_1", "../bible/nt/nt.xml", "bible.xsl",
+                  listOf("dir=${layout.buildDirectory.file("sample_results/biblehtml").get()}"),
+                  layout.buildDirectory.file("sample_results/biblehtml/index.html").get().asFile)
+
+samples.bookSample("transform", "html", "Transform_1",
+                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl"))
+
+samples.bookSample("transform", "html", "Transform_2",
+                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl", "top-author=Thomas Hardy"))
+
+samples.bookSample("transform", "txt", "Transform_3",
+                   listOf("-s:data/books.xml", "-xsl:styles/books-csv.xsl"))
+
+samples.bookSample("query", "html", "Query_1",
+                   listOf("-s:data/books.xml", "-q:query/books.xq"))
+
+// ============================================================
 
 val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
 val testSuitesClasspath = files(sourceSets["edition"].output)
