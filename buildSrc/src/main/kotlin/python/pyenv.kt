@@ -14,7 +14,7 @@ import org.gradle.process.ExecSpec
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
-abstract class PyenvExe : DefaultTask() {
+abstract class PyenvExe @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
     @get:Optional
     @get:Input
     abstract val pyenvExePath: Property<String>
@@ -28,7 +28,7 @@ abstract class PyenvExe : DefaultTask() {
 
     fun execString(exe: String , arguments: List<String>, env: Map<String, String> = mapOf()): String {
         return (ByteArrayOutputStream()).use { out ->
-            project.exec {
+            ex.exec {
                 environment(env)
                 executable(exe)
                 args(arguments)
