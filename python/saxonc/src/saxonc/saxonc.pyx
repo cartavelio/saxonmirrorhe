@@ -3912,7 +3912,8 @@ cdef class PySchemaValidator:
     def validation_report(self):
         """
         validation_report(self)
-        Get the validation report
+        Get the validation report. This is switched on using the 'report-node' property name
+         in the set_property() method: set_property('report-node', true).
         Returns:
             PyXdmNode: The Validation report result from the Schema validator
         Raises:
