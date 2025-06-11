@@ -125,18 +125,6 @@ samples.transform("Bible_1", "../bible/nt/nt.xml", "bible.xsl",
                   listOf("dir=${layout.buildDirectory.file("sample_results/biblehtml").get()}"),
                   layout.buildDirectory.file("sample_results/biblehtml/index.html").get().asFile)
 
-samples.bookSample("transform", "html", "Transform_1",
-                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl"))
-
-samples.bookSample("transform", "html", "Transform_2",
-                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl", "top-author=Thomas Hardy"))
-
-samples.bookSample("transform", "txt", "Transform_3",
-                   listOf("-s:data/books.xml", "-xsl:styles/books-csv.xsl"))
-
-samples.bookSample("query", "html", "Query_1",
-                   listOf("-s:data/books.xml", "-q:query/books.xq"))
-
 // ============================================================
 
 samples.sampleClass("JAXPExamples", listOf("all"))
@@ -150,11 +138,23 @@ samples.sampleClass("ExampleContentHandler", listOf("data/books.xml"), "he.Examp
 //samples.sampleClass("S9APIExamplesOM_he", listOf("all"), "he.S9APIExamplesOM") // requires setup
 samples.sampleClass("S9APIExamples_he", listOf("nonschema"), "he.S9APIExamples")
 
-/*
-samples.sampleClass("S9APIExamplesOM_pe":
-samples.sampleClass("S9APIExamples_pe":
-*/
+// ============================================================
 
+val run_with_config = tasks.register<JavaExec>("run_with_config-HE") {
+  doFirst {
+    mkdir(layout.buildDirectory.file("sample_results"))
+  }
+
+  classpath = (files(sourceSets["edition"].output)
+               + configurations.named("samplesConfiguration").get())
+  mainClass = "net.sf.saxon.Transform"
+  args("-config:${layout.projectDirectory.file("../../samples/src/config/config-HE.xml")}",
+       "-s:${layout.projectDirectory.file("../../samples/src/data/books.xml")}",
+       "-xsl:${layout.projectDirectory.file("../../samples/src/styles/books.xsl")}",
+       "-o:${layout.buildDirectory.file("sample_results/books_with_config-HE.html").get()}",
+       "--traceListenerOutputFile:${layout.buildDirectory.file("sample_results/traceOutput_config.log").get()}")
+}
+tasks.named("all_samples").get().dependsOn(run_with_config)
 
 // ============================================================
 
