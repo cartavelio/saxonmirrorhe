@@ -296,15 +296,18 @@ public class XMLEmitter extends Emitter {
 
             if (omitXMLDeclaration.equals("no")) {
                 writer.writeAscii(XML_DECL_VERSION);
+                writer.writeCodePoint(delimiter);
                 writer.write(version);
-                writer.writeAscii(QUOTE_SPACE);
+                writer.writeCodePoint(delimiter);
+                writer.writeCodePoint(' ');
                 writer.writeAscii(XML_DECL_ENCODING);
+                writer.writeCodePoint(delimiter);
                 writer.write(encoding);
-                writer.writeCodePoint('"');
+                writer.writeCodePoint(delimiter);
                 if (standalone != null) {
                     writer.writeAscii(XML_DECL_STANDALONE);
                     writer.write(standalone);
-                    writer.writeCodePoint('"');
+                    writer.writeCodePoint(delimiter);
                 }
                 writer.writeAscii(StringConstants.PI_END);
 //                writer.write("<?xml version=\"" + version + "\" " + "encoding=\"" + encoding + '\"' +
@@ -317,13 +320,12 @@ public class XMLEmitter extends Emitter {
         }
     }
 
-    private static final byte[] XML_DECL_VERSION = StringConstants.bytes("<?xml version=\"");
-    private static final byte[] XML_DECL_ENCODING = StringConstants.bytes("encoding=\"");
-    private static final byte[] XML_DECL_STANDALONE = StringConstants.bytes(" standalone=\"");
-    private static final byte[] QUOTE_SPACE = StringConstants.bytes("\" ");
+    private static final byte[] XML_DECL_VERSION = StringConstants.bytes("<?xml version=");
+    private static final byte[] XML_DECL_ENCODING = StringConstants.bytes("encoding=");
+    private static final byte[] XML_DECL_STANDALONE = StringConstants.bytes(" standalone=");
     protected static final byte[] DOCTYPE = StringConstants.bytes("<!DOCTYPE ");
     private static final byte[] SYSTEM = StringConstants.bytes("  SYSTEM ");
-    private static final byte[] PUBLIC = StringConstants.bytes("  PUBLIC \"");
+    private static final byte[] PUBLIC = StringConstants.bytes("  PUBLIC ");
     protected static final byte[] RIGHT_ANGLE_NEWLINE = StringConstants.bytes(">\n");
 
     /**
@@ -350,8 +352,10 @@ public class XMLEmitter extends Emitter {
                 if (systemId != null) {
                     if (systemId.contains("\"")) {
                         quotedSystemId = "'" + systemId + "'";
-                    } else {
+                    } else if (systemId.contains("'")) {
                         quotedSystemId = '"' + systemId + '"';
+                    } else {
+                        quotedSystemId = delimiter + systemId + delimiter;
                     }
                 }
                 if (systemId != null && publicId == null) {
@@ -359,12 +363,15 @@ public class XMLEmitter extends Emitter {
                     writer.write(quotedSystemId);
                 } else if (systemId == null && publicId != null) {     // handles the HTML case
                     writer.writeAscii(PUBLIC);
+                    writer.writeCodePoint(delimiter);
                     writer.write(publicId);
-                    writer.writeCodePoint('"');
+                    writer.writeCodePoint(delimiter);
                 } else if (publicId != null) {
                     writer.writeAscii(PUBLIC);
+                    writer.writeCodePoint(delimiter);
                     writer.write(publicId);
-                    writer.writeAscii(QUOTE_SPACE);
+                    writer.writeCodePoint(delimiter);
+                    writer.writeCodePoint(' ');
                     writer.write(quotedSystemId);
                 }
                 if (internalSubset != null) {
