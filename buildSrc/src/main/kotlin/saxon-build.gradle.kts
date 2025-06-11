@@ -58,6 +58,8 @@ tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
   doLast {
     val archive = project.findProperty("saxonicaTestDriverReportArchive")?.toString()
     if (archive != null) {
+      println("Archiving results: ${archive}")
+
       val root = File(archive)
       if (!root.exists() && root.isDirectory()) {
         root.mkdirs()
@@ -65,23 +67,50 @@ tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
 
       val dateStamp = extension.dateStamp.get()
 
-      var javaRoot = "${layout.buildDirectory.get()}"
-      var pos = javaRoot.indexOf("/java/")
-      javaRoot = javaRoot.substring(0, pos+6)
+      // The build directory depends on what subproject runs this task...
+      var saxonRoot: String? = null
+      val buildDir = "${layout.buildDirectory.get()}"
+      
+      var pos = buildDir.indexOf("/java/")
+      if (pos > 0) {
+        saxonRoot = buildDir.substring(0, pos+1)
+      } else {
+        pos = buildDir.indexOf("/csharp/")
+        if (pos > 0) {
+          saxonRoot = buildDir.substring(0, pos+1)
+        }
+      }
 
-      val relativePath = mapOf(
-          "eej" to "build/test-results/",
-          "hej" to "he/build/test-results/",
-          "pej" to "pe/build/test-results/"
-      )
+      if (saxonRoot == null) {
+        println("FAILED TO PARSE: ${buildDir}")
+      } else {
+        val relativePath = mapOf(
+            "eej" to "java/build/test-results/",
+            "hej" to "java/he/build/test-results/",
+            "pej" to "java/pe/build/test-results/"
+        )
 
-      for (edition in listOf("hej", "pej", "eej")) {
-        val testroot = "${javaRoot}${relativePath[edition]}"
-        val copyroot = "${archive}${edition}/${version}/"
-        project.copy {
-          into(copyroot)
-          from(testroot) {
-            include("**/${dateStamp}/**")
+        for (edition in listOf("hej", "pej", "eej")) {
+          val testroot = "${saxonRoot}${relativePath[edition]}"
+          val copyroot = "${archive}${edition}/${version}/"
+          println("${testroot}->${copyroot}")
+          project.copy {
+            into(copyroot)
+            from(testroot) {
+              include("**/${dateStamp}/**")
+            }
+          }
+        }
+
+        for (edition in listOf("he", "pe", "ee")) {
+          val testroot = "${saxonRoot}csharp/${edition}/build/test-results/"
+          val copyroot = "${archive}${edition}dotnet/${version}/"
+          println("${testroot}->${copyroot}")
+          project.copy {
+            into(copyroot)
+            from(testroot) {
+              include("**/${dateStamp}/**")
+            }
           }
         }
       }

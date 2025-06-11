@@ -13,12 +13,10 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.assign
-import org.gradle.process.ExecOperations
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
 
-abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+abstract class CSharpRunner: DefaultTask() {
   override fun getGroup(): String {
     return "Testsuite"
   }
@@ -96,15 +94,15 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
     // This makes the report name match what the regression report builder
     // expects. Since I don't think any one else cares...
     val reportName = if (name.startsWith("test_suite_")) {
-      "${edition.get()}dotnet_${name.substring(11)}.xml"
+      "${edition.get()}j_${name.substring(11)}"
     } else {
-      "${name}.xml"
+      name
     }
 
     val testargs = mutableListOf<String>("${dotnet.get()}",
                                          "${testDrivers.get().asFile}",
                                          "${suiteDir.get()}",
-                                         "-catalog:${catalog}",
+                                         "${catalog}",
                                          "-exceptions:${exceptionsFile.get()}",
                                          "-reportfilename:${reportName}",
                                          "-o:${reportDir.get()}",
@@ -119,7 +117,7 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       }
     }
 
-    ex.exec {
+    project.exec {
       if (!showOutput) {
         println("(buffering output)")
         standardOutput = stdOutput
