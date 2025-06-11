@@ -58,6 +58,10 @@ abstract class PythonPyenv: DefaultTask() {
     @get:Input
     abstract val debugVariant: Property<String>
 
+    @get:Optional
+    @get:Input
+    abstract val macosxDeploymentTarget: Property<String>
+
     @Internal
     val pyenvVersionName: Provider<String> = pythonVersion.map {
         "${it}${if (debugVariant.isPresent()) "-${debugVariant.get()}" else "" }"
@@ -89,6 +93,9 @@ abstract class PythonPyenv: DefaultTask() {
             }
             project.exec {
                 executable(pyenv)
+                if (macosxDeploymentTarget.isPresent) {
+                    environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
+                }
                 args("install", pythonBuildVersionName)
             }
         }
