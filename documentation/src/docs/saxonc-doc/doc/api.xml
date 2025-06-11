@@ -2300,8 +2300,8 @@
                <td>
                   <span class="signature">getValidationReport()</span>
                   <div class="fcomment">Get the validation report produced after validating the
-                     source document. The reporting feature is switched on by setting the 'report-node'
-                     property on the SchemaValidator: e.g. <code>validator.setProperty('report-node',
+                     source document. The reporting feature is switched on by setting the 'report'
+                     property on the SchemaValidator: e.g. <code>validator.setProperty('report',
                         'true')</code>. Returns the report as an <a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a>.</div>
                </td>
@@ -2322,8 +2322,7 @@
                </td>
                <td>
                   <span class="signature">setProperty(string $name, string $value)</span>
-                  <div class="fcomment">Set properties for this SchemaValidator. For the full list of
-                     properties see: <a href="/configuration/schema">Schema validator configuration</a>.</div>
+                  <div class="fcomment">Set properties for this SchemaValidator.</div>
                </td>
             </tr>
             <tr>
@@ -2712,17 +2711,6 @@
                      null.</div>
                </td>
             </tr>
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">__toString()</span>
-                  <div class="fcomment">Magic Method to create a string representation of the value.
-                     This is the result of serializing the value using the adaptive serialization method.
-                  </div>
-               </td>
-            </tr>
          </table>
 
       </section>
@@ -2793,16 +2781,6 @@
                   <span class="signature">isAtomic()</span>
                   <div class="fcomment">Determine whether or not the item is an atomic value. This
                      method will return TRUE as the item is atomic.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">__toString()</span>
-                  <div class="fcomment">Magic Method to create a string representation of the value.
-                     This is the result of serializing the value using the adaptive serialization method.</div>
                </td>
             </tr>
          </table>
@@ -2992,16 +2970,6 @@
                      corresponds to the "is" operator in XPath.</div>
                </td>
             </tr>
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">__toString()</span>
-                  <div class="fcomment">Magic Method to create a string representation of the value.
-                     This is the result of serializing the value using the adaptive serialization method.</div>
-               </td>
-            </tr>
          </table>
       </section>
       
@@ -3069,16 +3037,6 @@
                      The "function conversion rules" will be applied to convert the arguments to the required
                      type when necessary. Returns the result of calling the function as an <a class="bodylink
                         code" href="../saxon_c_php_xdmvalue">XdmValue</a>.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">__toString()</span>
-                  <div class="fcomment">Magic Method to create a string representation of the value.
-                     This is the result of serializing the value using the adaptive serialization method..</div>
                </td>
             </tr>
 
@@ -3149,16 +3107,6 @@
                   <span class="signature">concat(<a class="bodylink code" href="../saxon_c_php_xdmarray">Saxon/XdmArray</a> $value)</span>
                   <div class="fcomment">Concatenate another array. Returns a new array, containing the members
                      of this array followed by the members of the array supplied in the $value argument.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">__toString()</span>
-                  <div class="fcomment">Magic Method to create a string representation of the value.
-                     This is the result of serializing the value using the adaptive serialization method.</div>
                </td>
             </tr>
          </table>
@@ -3271,16 +3219,6 @@
                <td>
                   <span class="signature">containsKey(<a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">XdmAtomicValue</a> $key)</span>
                   <div class="fcomment">Returns true if this map contains an entry for the specified key.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">__toString()</span>
-                  <div class="fcomment">Magic Method to create a string representation of the value.
-                     This is the result of serializing the value using the adaptive serialization method.</div>
                </td>
             </tr>
             <!-- <tr>

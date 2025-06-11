@@ -124,8 +124,7 @@
             installation dependencies.</p>
          <ol>
             <li>
-               <p>Ensure that Java is installed. SaxonJ 12.0 to 12.5 are built and tested using Java
-                  11, and 12.6 onwards using Java 21, but should still
+               <p>Ensure that Java is installed. SaxonJ 12 is built and tested using Java 11, but should still
                   be usable with Java 8 or later. If for some reason you need to run with an earlier Java
                   release, SaxonJ 9.8 ran with Java SE 6 or later, while SaxonJ 11 ran with Java 8 or later.
                   To check that Java is installed, try typing <code>java -version</code>
@@ -254,17 +253,13 @@
 
          <ol>
             <li>
-               <p>SaxonCS 12.0 to 12.5 are targeted at .NET 6, while SaxonCS 12.6 is targeted at
-                  .NET 8, which you will need to install separately. 
-                  For details, see <a class="bodylink"
-                     href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">https://dotnet.microsoft.com/en-us/download/dotnet/6.0</a>
-                  and <a  class="bodylink"
-                     href="https://dotnet.microsoft.com/en-us/download/dotnet/8.0">https://dotnet.microsoft.com/en-us/download/dotnet/8.0</a>.
-               There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 8.0.408)
+               <p>SaxonCS is targeted at .NET 6, which you will need to install separately.
+                  For details, see <a class="bodylink" href="https://dotnet.microsoft.com/en-us/download/dotnet/6.0">https://dotnet.microsoft.com/en-us/download/dotnet/6.0</a>.
+               There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 6.0.403)
                corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU 
                architecture (for example AArch64, x64, or x86).</p>
                
-               <aside>At the time of writing, SaxonCS has not been tested on .NET 9. You're welcome to try it;
+               <aside>At the time of writing, SaxonCS has not been tested on .NET 7. You're welcome to try it;
                please share your experiences. We'll try to fix any problems you report.</aside>
 
             </li>
@@ -400,8 +395,8 @@
                your application code.</p>
             <p>The SaxonCS product, available from Saxon 11, is a complete redesign. The previous
             .NET product was built using the IKVM technology, which confined it to .NET Framework 4.x.
-            SaxonCS is built by converting Java source code to C#, and runs on .NET 5 (SaxonCS 11),
-            .NET 6 (SaxonCS 12.0 to 12.5) or .NET 8 (from SaxonCS 12.6), fitting
+            SaxonCS is built by converting Java source code to C#, and runs on .NET 5 (SaxonCS 11)
+            or .NET 6 (SaxonCS 12), fitting
             in with Microsoft's strategic direction. The API for the new product retains many of the
             classes and methods from the older product, but we have taken the opportunity to modernize
             the design (for example by using delegates rather than interfaces for callbacks), and it's therefore
@@ -512,8 +507,7 @@
             <li>
                <p>To run SaxonJ you need at least a Java VM, and preferably a Java development
                   environment. SaxonJ 12 requires at least Java SE 8 (also known as JDK 1.8). 
-                  SaxonJ 12.0 to 12.5 are built and tested using Java SE 11, and 12.6 onwards using
-                  Java SE 21, but should also still be usable 
+                  SaxonJ 12 is built and tested using Java SE 11, but should also still be usable
                   with Java 8 or later. It should also run under all subsequent Java versions, but this may
                   not be fully tested. </p>
             </li>
@@ -1042,8 +1036,7 @@ any version number.</p>
          download.</p>
       <ul>
          <li>
-            <p>To run SaxonCS 12.0 to 12.5 you need to install .NET 6, and from SaxonCS 12.6 you
-               need to install .NET 8. This is the only release on which the product
+            <p>To run SaxonCS 12 you need to install .NET 6. This is the only release on which the product
             has been validated; if you want to try it on other versions, please let us know your experience.</p>
          </li>
          <li>

@@ -98,10 +98,6 @@ namespace Saxon.Impl.Helpers {
             return "CS";
         }
 
-        public bool isWindows() {
-            return System.OperatingSystem.IsWindows();
-        }
-
         public bool hasICUCollator() {
             return true;
         }

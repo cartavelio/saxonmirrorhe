@@ -28,14 +28,7 @@ class PyTestOutcome:
                        catalog_xpc: saxonc.PyXPathProcessor, assert_set: set):
         self.processor = proc
         tag = assertion.name
-
-        success = False
-        try:
-            success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
-        except saxonc.PySaxonApiError as ex:
-            print('Message =', ex)
-            raise ex
-            '''success = False'''
+        success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
 
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None and "any-of" != tag and "all-of" != tag and "not" != tag:
             if not success:
@@ -163,22 +156,11 @@ class PyTestOutcome:
                 print("uri=" + uri)
             if self.result_documents:
                 if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-                    print('result-doc base_urii=', base_urii)
-                    print('result-doc keys=', list(self.result_documents.keys()))
-                    print('result-doc uri=', list(self.result_documents.keys()))
+                    print(list(self.result_documents.keys()))
                 try:
                     print("Check assert-result-document")
                     print("uri=" + uri)
-                    print("========")
                     print(*self.result_documents, sep=", ")
-                    if uri in self.result_documents:
-                        doc = self.result_documents[uri]
-                    else:
-                        uri = uri.replace("file:///", "file:/")
-                        if uri not in self.result_documents:
-                            print("Check assert-result-document cp0")
-                            return False
-                        doc = self.result_documents[uri]
                     doc = self.result_documents[uri]
                     ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, None, assert_xpc, catalog_xpc, assert_set)
                     if not ok:
@@ -454,7 +436,7 @@ class PyTestOutcome:
                         assert_xpc.declare_namespace(ns_name, str(itemn.get_node_value().string_value))
             assert_xpc.declare_variable("result")
             '''print("Testing " + assertion.string_value)
-            print(result.head)'''
+            print(result)'''
             assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
             assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
             assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
@@ -464,8 +446,7 @@ class PyTestOutcome:
             assert_xpc.declare_namespace("file", "http://expath.org/ns/file")
             assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
             assert_xpc.set_parameter("result", result)
-            if(result.head is not None):
-                assert_xpc.set_context(xdm_item=result.head)
+            assert_xpc.set_context(xdm_item=result.item_at(0))
             try:
                 b = assert_xpc.effective_boolean_value(assertion.string_value)
                 '''if not b:
@@ -502,11 +483,6 @@ class PyTestOutcome:
 
         result_str = "<z>" + str(result).strip().replace("\r\n", "\n").replace("\n", "") + "</z>"
 
-        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-            print("assert-xml:")
-            print("Comparand xml = " + comparand)
-            print("result xml = " + result_str)
-
         try:
             comparand_node = self.processor.parse_xml(xml_text=comparand)
 
@@ -538,7 +514,7 @@ class PyTestOutcome:
                 print("Failed using Saxon deep-equal function")
                 print("Comparand xml = " + str(no_wsp_comparand_node))
                 print("resultx = " + str(no_wsp_result_node))
-        except saxonc.PySaxonApiError as ex:
+        except PySaxonApiError as ex:
             if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                 print("Faild to parse Comparand xml or run effective_boolean_value = " + comparand)
                 print(ex)
@@ -572,6 +548,6 @@ class PyTestOutcome:
             print(item)'''
             return item is not None and item.get_atomic_value().boolean_value
 
-        except saxonc.PySaxonApiError as ex:
+        except PySaxonApiError as ex:
             '''print("assert-eq failed - " + str(ex))'''
             return False

@@ -15,7 +15,7 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Collections;
@@ -86,7 +86,7 @@ public class SignatureTest {
        return result;
     }
 
-    @Ignore("12.x isn't up-to-date with the latest QT4 specs")
+    @Test
     public void testFunctionSignatures() {
         File catalog = new File(new ConfigTest().getQt4SpecsDir()
                                         + "specifications/xpath-functions-40/src/function-catalog.xml");

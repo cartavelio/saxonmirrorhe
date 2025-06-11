@@ -684,7 +684,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         Expression body = compileSequenceConstructor(compilation, decl, true);
         body.restoreParentPointers();
         RetainedStaticContext rsc = makeRetainedStaticContext();
-        if (body.getLocalRetainedStaticContext() == null) {
+        if (body.getRetainedStaticContext() == null) {
             body.setRetainedStaticContext(rsc); // bug 2608
         }
         if (match != null && compilation.getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY) &&

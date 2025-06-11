@@ -132,10 +132,6 @@ name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri(
 
     public function testEmbeddedStylesheet(): void
     {
-        global $argv, $argc;
-
-        $this->assertGreaterThan(2, $argc, 'No data directory passed');
-        $data_dir = $argv[2];
         if(getenv("SAXONC_DEBUG_FLAG")) {
             print("Test: testEmbeddedStylesheet");
         }
@@ -922,11 +918,7 @@ public function testArray()
     );
     $this->assertTrue($item->isArray());
     $arrVal = $item->getArray();
-    $alen = $arrVal->arrayLength();
-    for($i = 0; $i < $alen; $i++) {
-        $arrVal->get($i);
-    }
-    $this->assertEquals($arrVal, "[1,2,3]");
+    $this->assertEquals($arrVal->getStringValue(), "[1,2,3]");
     }
     /*  public function testItemSeparatorToSerializer(): void {
           try {

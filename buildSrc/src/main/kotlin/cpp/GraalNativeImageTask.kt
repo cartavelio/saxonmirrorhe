@@ -7,8 +7,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.process.ExecOperations
-import javax.inject.Inject
 
 
 /*
@@ -96,7 +94,7 @@ using SONAME.
 
 This task will produce correctly named headers and incorrectly named binaries that have the right SONAME or Dylib ID.
  */
-abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+abstract class GraalNativeImageTask(): DefaultTask() {
     private val systemOs: OperatingSystem = OperatingSystem.current()
 
     @get:InputFile
@@ -117,10 +115,6 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
     @get:Input
     @get:Optional
     abstract val debug: Property<Boolean>
-
-    @get:Input
-    @get:Optional
-    abstract val macosx_min_version: Property<String>
 
     @get:Internal
     abstract val outputDir: DirectoryProperty
@@ -202,9 +196,6 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
             "--enable-url-protocols=https",
             "--enable-url-protocols=http",
             "--shared")
-        if(macosx_min_version.isPresent) {
-            nativeArgs.add("-EMACOSX_DEPLOYMENT_TARGET=${macosx_min_version.get()}")
-        }
         if (debug.getOrElse(false)) {
             nativeArgs.add("-g")
             nativeArgs.add("-O0")
@@ -238,7 +229,7 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
         val firstArgs = generatedArgs()
         val remainingArgs = specifiedArgs.get()
 
-        ex.exec {
+        project.exec {
             executable(graalNativeImage.get())
             args(firstArgs)
             args(remainingArgs)

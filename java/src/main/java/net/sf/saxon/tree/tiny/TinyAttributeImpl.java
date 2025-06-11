@@ -29,7 +29,8 @@ import net.sf.saxon.type.Type;
 final public class TinyAttributeImpl extends TinyNodeImpl {
 
     public TinyAttributeImpl(TinyTree tree, int nodeNr) {
-        super(tree, nodeNr);
+        this.tree = tree;
+        this.nodeNr = nodeNr;
     }
 
 

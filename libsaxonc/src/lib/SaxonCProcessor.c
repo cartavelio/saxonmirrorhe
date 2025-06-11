@@ -35,57 +35,6 @@ void freeSaxonc(sxnc_environment **environi, sxnc_processor **proc,
   free(*prop);
 }
 
-void setConfigurationProperty(sxnc_environment *environi, sxnc_processor *proc,
-                                            char *name, char *value){
-  if (name != NULL && value != NULL) {
-
-    j_applyPropertyToConfiguration(environi->thread, (void *)proc->value,
-                           (char *)name, (char *)value);
-  }
-
-
-}
-
-void setCatalog(sxnc_environment *environi, sxnc_processor *proc,
-                                           char *cwd, char *catalogFileName){
-
-   if (catalogFileName != NULL ) {
-  int64_t processorDataRef =
-      createProcessorDataWithCapacity(environi->thread, 1);
-
-  addProcessorProperty(environi->thread, (void *)processorDataRef,
-                       (char *)catalogFileName);
-
-  long result =
-      j_setCatalogFiles(environi->thread, (void *)proc->value,
-                        (char *)cwd, (void *)processorDataRef);
-  j_handles_destroy(environi->thread, (void *)processorDataRef);
-  }
-
-}
-
-void setCatalogFiles(sxnc_environment *environi, sxnc_processor *proc,
-                                            char *cwd, char **catalogFileNames, int length){
-
-    if (catalogFileNames != NULL ) {
-  int64_t processorDataRef =
-      createProcessorDataWithCapacity(environi->thread, length);
-
-  for(int i = 0; i < length; i++){
-     char* catFile = (char *)catalogFileNames[i];
-     if(catFile != NULL){
-         addProcessorProperty(environi->thread, (void *)processorDataRef,
-                       (char *)catalogFileNames);
-     }
-  }
-
-  long result =
-      j_setCatalogFiles(environi->thread, (void *)proc->value,
-                        (char *)cwd, (void *)processorDataRef);
-  j_handles_destroy(environi->thread, (void *)processorDataRef);
-  }
-}
-
 void xsltSaveResultToFile(sxnc_environment *environi, sxnc_processor *proc,
                           char *cwd, char *source, char *stylesheet,
                           char *outputfile, sxnc_parameter *parameters,

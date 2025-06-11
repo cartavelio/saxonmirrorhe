@@ -1,0 +1,180 @@
+<?xml version="1.0"?><!-- This is an example configuration file, including as many options and
+  example values as possible. The values are not necessarily usable, rather they are included to 
+  supply some values for testing validation and the completeness of ConfigurationReader.
+-->
+<configuration xmlns="http://saxon.sf.net/ns/configuration">
+  <global
+    allowedProtocols="all"
+    allowExternalFunctions="true"
+    allowMultiThreading="true"
+    allowOldJavaUriFormat="false"
+    allowSyntaxExtensions="false"
+    collationUriResolver="net.sf.saxon.lib.StandardCollationURIResolver"
+    collectionFinder="net.sf.saxon.resource.StandardCollectionFinder"
+    compileWithTracing="false"
+    debugByteCode="false"
+    debugByteCodeDirectory="file:///e:/debug"
+    defaultCollation="http://www.w3.org/2005/xpath-functions/collation/codepoint"
+    defaultCollection="file:///e:/temp"
+    defaultRegexEngine="S"
+    displayByteCode="false"
+    dtdValidation="false"
+    dtdValidationRecoverable="true"
+    eagerEvaluation="true"
+    entityResolver="org.xmlresolver.Resolver"
+    environmentVariableResolver="net.sf.saxon.lib.StandardEnvironmentVariableResolver"
+    errorListener="net.sf.saxon.lib.StandardErrorListener"
+    expandAttributeDefaults="true"
+    generateByteCode="false"
+    ignoreSAXSourceParser="false"
+    lazyConstructionMode="false"
+    lineNumbering="true"
+    markDefaultedAttributes="true"
+    maxCompiledClasses="10000"
+    monitorHotSpotByteCode="false"
+    optimizationLevel="0"
+    parser="#DEFAULT"
+    preEvaluateDoc="false"
+    recognizeUriQueryParameters="true"
+    regexBacktrackingLimit="10000000"
+    resourceResolver="net.sf.saxon.lib.CatalogResourceResolver"
+    retainNodeForDiagnostics="false"
+    schemaValidation="strip"
+    serializerFactory=""
+    sourceResolver=""
+    stableCollectionUri="false"
+    stableUnparsedText="false"
+    standardErrorOutputFile=""
+    streamability="standard"
+    streamingFallback="true"
+    stripSpace="all"
+    styleParser=""
+    suppressEvaluationExpiryWarning="false"
+    suppressXPathWarnings="false"
+    suppressXsltNamespaceCheck="false"
+    thresholdForFunctionInlining="100"
+    thresholdForHotspotByteCode="100"
+    timing="false"
+    traceExternalFunctions="false"
+    traceListener="net.sf.saxon.trace.XSLTTraceListener"
+    traceListenerOutputFile=""
+    traceOptimizerDecisions="false"
+    treeModel="tinyTreeCondensed"
+    unparsedTextURIResolver="net.sf.saxon.lib.StandardUnparsedTextResolver"
+    uriResolver="net.sf.saxon.lib.StandardURIResolver"
+    usePiDisableOutputEscaping="false"
+    useTypedValueCache="true"
+    validationComments="false"
+    validationWarnings="true"
+    versionOfXml="1.0"
+    xInclude="false"
+    xpathVersionForXsd="20"
+    xpathVersionForXslt="31"
+    zipUriPattern="^jar:|\.jar$|\.zip$\.docx$\.xlsx$"
+  />
+  
+  <xslt
+    disableXslEvaluate="false"
+    enableAssertions="false"
+    initialMode="defaultMode"
+    initialTemplate="main"
+    messageEmitter="net.sf.saxon.event.Receiver"
+    outputUriResolver=""
+    recoveryPolicy="recoverSilently"
+    resultDocumentThreads="10"
+    schemaAware="false"
+    staticErrorListener=""
+    staticUriResolver=""
+    strictStreamability="false"
+    styleParser=""
+    version="3.0"
+    versionWarning="false">
+    <extensionElement namespace="http://saxon.sf.net/sql" 
+      factory="net.sf.saxon.option.sql.SQLElementFactory"/>
+  </xslt>
+  
+  <xsltPackages>
+    <package name="http://package.one/" version="1.0" sourceLocation="packageOne.xsl" 
+      exportLocation="packageOne.sef" priority="1"/>
+    <package name="http://package.one/" version="2.0-beta" sourceLocation="2.0beta/packageOne.xsl" 
+      exportLocation="2.0beta/packageOne.sef" priority="1"/>
+    <package name="http://package.two/" version="8.6.3" sourceLocation="packageTwo.xsl" priority="1">
+      <withParam name="debug" select="true()"/>
+      <withParam name="maxTransactions" select="300"/>
+    </package>
+  </xsltPackages>  
+  
+  <xquery
+    allowUpdate="true"
+    constructionMode="preserve"
+    defaultElementNamespace=""
+    defaultFunctionNamespace="http://www.w3.org/2005/xpath-functions"
+    emptyLeast="true"
+    inheritNamespaces="true"
+    moduleUriResolver="net.sf.saxon.lib.StandardModuleURIResolver"
+    multipleModuleImports="true"
+    preserveBoundarySpace="false"
+    preserveNamespaces="true"
+    requiredContextItemType="document-node()"
+    schemaAware="false"
+    staticErrorListener=""
+    version="3.1"
+  />
+  
+  <xsd
+    allowUnresolvedSchemaComponents="false"
+    assertionsCanSeeComments="false"
+    implicitSchemaImports="false"
+    multipleSchemaImports="false"
+    occurrenceLimits="100,250"
+    schemaUriResolver=""
+    thresholdForCompilingTypes="100"
+    useXsiSchemaLocation="false"
+    version="1.1"
+  />
+  
+  <serialization
+    allow-duplicate-names="no"
+    byte-order-mark="no"
+    escape-solidus="yes"
+    escape-uri-attributes="no"
+    html-version="5"
+    indent="yes"
+    include-content-type="no"
+    json-node-output-method="xml"
+    method="xml"
+    omit-xml-declaration="no"
+    standalone="no"
+    undeclare-prefixes="no"
+    saxon:indent-spaces="8"
+    xmlns:saxon="http://saxon.sf.net/"/>
+  
+  <resources>
+    <externalObjectModel>net.sf.saxon.option.xom.XOMObjectModel</externalObjectModel>
+    <extensionFunction/>
+    <fileExtension extension="xq" mediaType="text/plain"/>
+    <schemaDocument/>
+    <schemaComponentModel/>
+  </resources>
+  
+  <collations>
+    <collation uri="http://www.w3.org/2005/xpath-functions/collation/codepoint" 
+      class="net.sf.saxon.expr.sort.CodepointCollator"/>
+    <collation uri="http://www.microsoft.com/collation/caseblind" 
+      class="net.sf.saxon.expr.sort.CodepointCollator"/>
+    <collation uri="http://example.com/french" lang="fr"
+      alphanumeric="yes"
+      case-order="#default"
+      decomposition="none"
+      ignore-case="yes"
+      ignore-modifiers="no"
+      ignore-symbols="no"
+      ignore-width="no"
+      strength="primary"/>
+  </collations>
+  
+  <localizations defaultLanguage="en" defaultCountry="US">
+    <localization lang="da" class="net.sf.saxon.option.local.Numberer_da"/>
+    <localization lang="de" class="net.sf.saxon.option.local.Numberer_de"/>
+  </localizations>
+</configuration>

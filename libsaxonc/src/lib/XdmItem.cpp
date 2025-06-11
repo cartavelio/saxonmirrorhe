@@ -102,10 +102,12 @@ XdmItem::~XdmItem() {
 
 void XdmItem::incrementRefCount() {
   refCount++;
+#ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "after refCount-inc-xdmItem=" << refCount
               << " ob ref=" << (this) << std::endl;
   }
+#endif
 }
 
 void XdmItem::decrementRefCount() {

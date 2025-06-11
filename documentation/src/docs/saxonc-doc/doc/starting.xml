@@ -21,7 +21,7 @@ provide any other feedback.</p>
 
   <p>SaxonC can be installed on Linux, Mac OS and Windows. As a
   prerequisite SaxonC requires as a minimum C++14. In this section we
-  provide a step-by-step installation guide for the three
+  provide a step by step installation guide for the three
   platforms.</p>
 
   <nav>
@@ -55,9 +55,9 @@ provide any other feedback.</p>
           unzipping the file <code>libsaxon-[EDITION]C-linux-v[VERSION].zip</code>.</p>
       </li>
       <li>
-        <p><b>Copy the SaxonC libraries to the install location</b></p>
-        <p>The SaxonC libraries are located under the <code>SaxonC[EDITION]/libs</code> directory, named
-          <code>libsaxonc-[EDITION]-[VERSION].so</code>.</p>
+        <p><b>Copy the core SaxonC library to the install location</b></p>
+        <p>The core SaxonC library is located under the <code>libs/nix</code> directory, named
+          <code>libsaxon-[EDITION]c-[VERSION].so</code>.</p>
                
         <p>On Linux, the expected install location is <code>/usr/lib</code>, and the following
           commands use this default. If you choose to install to a different location, then the
@@ -109,30 +109,33 @@ provide any other feedback.</p>
         unzipping the file <code>libsaxon-[EDITION]C-mac-[x86_64|aarch64]-v[VERSION].zip</code>.</p>
       </li>
       <li>
-        <p><b>Copy the SaxonC libraries to the users chosen install location</b></p>
-        <p>he SaxonC libraries are located under the <code>SaxonC[EDITION]/SaxonC[EDITION]</code> directory. The two libraries are named
-            <code>libsaxonc-core-[EDITION]-[VERSION].dylib</code> and <code>libsaxonc-[EDITION]-[VERSION].dylib</code> in the <code>lib</code> directory.</p>
+        <p><b>Copy the core SaxonC library to the install location</b></p>
+        <p>The core SaxonC library is located under the <code>libs/darwin</code> directory, named
+          <code>libsaxon-[EDITION]c-[VERSION].dylib</code>.</p>
         
-        <p>On Mac OS, copy the SaxonC libraries to the install location of choice, which could be <code>/opt/saxonica</code>.
-            Then the
-          DYLD_LIBRARY_PATH environment variable must be set accordingly (see the next step).</p>
+        <p>On Mac OS, the expected install location is <code>/usr/local/lib</code>, and the following
+          commands use this default. If you choose to install to a different location, then the
+          LD_LIBRARY_PATH environment variable must be set accordingly (see the next step).</p>
                
         <p>For instance, to copy the SaxonC-HE 12.0 MacOS AArch64 library from the unpacked
-          location <code>SaxonCEE-macos-aarch64-12-6-0</code>, to
-        <code>/opt/saxonica</code>:</p>
+          location <code>libsaxon-HEC-mac-aarch64-v12.0</code>, to
+        <code>/usr/local/lib</code>:</p>
                
-        <kbd>cd libsaxonCHE-mac-aarch64-v12.0/</kbd>
-        <kbd>sudo cp -r -f SaxonCHE/. /opt/saxonica</kbd>
+        <kbd>cd libsaxon-HEC-mac-aarch64-v12.0/</kbd>
+        <kbd>sudo cp libs/darwin/libsaxon-hec-12.0.dylib /usr/local/lib/.</kbd>
                
          <aside>If you encounter permission issues after copying, then
          the privileges of the folders and files may need
          adjusting.</aside>
       </li>
       <li>
-        <p><b>Set the DYLD_LIBRARY_PATH environment variable</b></p>
-        <p>The DYLD_LIBRARY_PATH variable must be set to the location where the SaxonC files have
+        <p><b>Set the LD_LIBRARY_PATH environment variable</b></p>
+        <p>The LD_LIBRARY_PATH variable must be set to the location where the SaxonC files have
         been installed. For instance:</p>
-        <kbd>export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/opt/saxonica/lib</kbd>
+        <kbd>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib</kbd>
+        <p>If the SaxonC files were installed to a location other than the default
+        <code>/usr/local/lib</code>, then the LD_LIBRARY_PATH variable must be set to the correct
+        location.</p>
       </li>
     </ol>
 
@@ -162,11 +165,11 @@ provide any other feedback.</p>
           unzipping the file <code>libsaxon-[EDITION]C-windows-v[VERSION].zip</code>.</p>
         
         <p>The zip file can be unpacked anywhere suitable, but it is recommended to unzip to:
-          <code>C:\Program-Files\Saxonica\SaxonC[EDITION][VERSION]</code>.</p>
+          <code>C:\Program-Files\Saxonica\Saxon[EDITION][VERSION]</code>.</p>
       </li>
       <li>
         <p><b>Add the core SaxonC library location to the PATH environment variable</b></p>
-        <p>The core SaxonC library is located under the <code>SaxonC[EDITION]/lib</code> directory, named
+        <p>The core SaxonC library is located under the <code>libs/win</code> directory, named
           <code>libsaxon-[EDITION]c-[VERSION].dll</code>.</p>
         <p>The <code>libs/win</code> path must be added to the environment variable <code>PATH</code>.</p>
           <p>On Windows, this can be done in various ways. The environment variable can be set
@@ -373,22 +376,15 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <h3>Building with PHP8</h3>
 
       <p>The PHP extension is in the form of a C/C++ PHP8 extension to
-      SaxonC created using the Zend module API.</p>
+      SaxonC created using the Zend module API. (To use the extension
+      with PHP5, see the "Building with PHP5" note below.)</p>
 
-       <p>User should install the SaxonC libraries (i.e. directory 'SaxonC[EDITION]') in a suitable location.
-           The search paths are '/opt/saxonica' '/usr/local' '/usr'.</p>
-
-      <p>To install, open a shell window and navigate to the <code>php/src</code>
+      <p>To install, open a shell window and navigate to the <code>Saxon.C.API</code>
       directory inside the location where you unpacked the zip file. Run
       these commands:</p>
 
       <kbd>phpize</kbd>
-
-      <kbd>./configure --with-saxon</kbd>
-
-       <p>Alternatively:</p>
-       <kbd>./configure --with-saxon=path/SaxonC[EDITION]</kbd>
-
+      <kbd>./configure --enable-saxon</kbd>
       <kbd>make</kbd>
       <kbd>sudo make install</kbd>
 
@@ -419,7 +415,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <p>(Running these should display 'SaxonC'.)</p>
 
       <p>If you cannot load the extension from the <code>php.ini</code> file, you need to load it at
-         script execution time using the code: <code>dl(“saxon.so”);</code>. However, this is not
+         script execution time using the code: <code>dl(“saxon.so”);</code>. However this is not
          recommended as the loading and unloading can be slow.</p>
 
        <p>When working with PHP the SaxonC library file must be available for linking to the SaxonC PHP extension. Usually
@@ -473,7 +469,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
      <h1>Python extension</h1>
      
      <p>The Python extension is an interface module that allows SaxonC to be invoked from Python
-       applications. The SaxonC 12 Python extension requires Python >=3.9 (64-bit) and  &lt;=3.13.</p>
+       applications. The SaxonC 12 Python extension requires Python >=3.8 (64-bit).</p>
      
      <p>SaxonC is now officially available as a wheel package available on <a target="_blank"
        href="https://pypi.org/user/saxonica/">PyPI</a>. This means that it

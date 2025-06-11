@@ -107,20 +107,12 @@ bool XsltExecutable::exceptionOccurred() { return exceptionFound; }
 
 void XsltExecutable::setGlobalContextItem(XdmItem *value) {
   if (value != nullptr) {
-    const char * ifile = getProperty("node");
-    if(ifile != nullptr) {
-      properties.erase("s");
-    }
-    setParameter("node", (XdmValue*)value, false);
+      setParameter("node", (XdmValue*)value, false);
   }
 }
 
 void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
   if (ifile != nullptr) {
-    XdmValue * valuei = getParameter("node", false);
-    if(valuei != nullptr) {
-      parameters.erase("node");
-    }
     setProperty("s", ifile);
   }
 }
@@ -129,29 +121,19 @@ void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
     if (_selection == nullptr) {
         selectionRef = SXN_UNSET;
     } else {
-        setParameter("_i_matches", _selection, false);
+        setParameter("_i_matchs", _selection, false);
         selectionStringFlag = false;
     }
 }
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
-  SaxonProcessor::attachCurrentThread();
+
     if (!selectionStringFlag) {
         XdmValue * valuei = getParameter("_i_matches", false);
             if(valuei != nullptr) {
-              parameters.erase("_i_matches");
-            }
-    }
-
-    selectionStringFlag = true;
-
-    setProperty("_i_file_matches", filename);
-
-
-
-    /*
-
-    else if (selectionRef != SXN_UNSET && selectionStringFlag) {
+            parameters.erase("_i_matches");
+        }
+    } else if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)selectionRef);
   }
@@ -167,7 +149,7 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
     }
   } else {
     selectionRef = SXN_UNSET;
-  } */
+  }
 }
 
 void XsltExecutable::setOutputFile(const char *ofile) {
@@ -227,7 +209,7 @@ void XsltExecutable::setInitialTemplateParameters(
 }
 
 void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
-  SaxonProcessor::attachCurrentThread();
+
   if (flag) {
     resultDocumentMap.clear();
     if (saxonResultDocRef != SXN_UNSET) {
@@ -259,7 +241,7 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
 }
 
 std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
-  SaxonProcessor::attachCurrentThread();
+
   if (saxonResultDocRef > 0) {
     allocFn fn = operator new;
     long long *results =
@@ -356,7 +338,6 @@ const char *XsltExecutable::getProperty(const char *name) {
 
 
 void XsltExecutable::clearParameters(bool delValues) {
-  SaxonProcessor::attachCurrentThread();
     if (delValues) {
         for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
              itr != parameters.end(); itr++) {
@@ -375,13 +356,13 @@ void XsltExecutable::clearParameters(bool delValues) {
 }
 
 void XsltExecutable::clearProperties() {
-  SaxonProcessor::attachCurrentThread();
+
   properties.clear();
-  /*if (selectionRef != SXN_UNSET && selectionStringFlag) {
+  if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)selectionRef);
     selectionRef = SXN_UNSET;
-  } */
+  }
 }
 
 std::map<std::string, XdmValue *> &XsltExecutable::getParameters() {
@@ -410,7 +391,6 @@ const char * XsltExecutable::getcwd() {
 }
 
 void XsltExecutable::exportStylesheet(const char *filename) {
-  SaxonProcessor::attachCurrentThread();
   long status =
       j_save(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(),
              (void *)executableRef, (char *)filename);
@@ -421,7 +401,12 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 }
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
+  /*if (selectionRef == SXN_UNSET) {
+    throw SaxonApiException(
+        "Error: The initial match selection has not been set. Please set it "
+        "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
+  }*/
 
   setProperty("resources", resources_dir.c_str());
 
@@ -461,7 +446,8 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (status == SXN_EXCEPTION) {
@@ -473,14 +459,28 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 }
 
 const char *XsltExecutable::applyTemplatesReturningString() {
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
+  /*if (selectionRef == SXN_UNSET) {
+    throw SaxonApiException(
+        "Error: The initial match selection has not been set. Please set it "
+        "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
+  }*/
+
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
-  
+  /*if(saxonMessageListenerRef != SXN_UNSET ) {
+      additions++;
+  }
+  if(saxonResultDocRef != SXN_UNSET) {
+      additions++;
+  }*/
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
+
   std::string optionStr;
+  // TODO change map to set values as int64_t then we can add
+  // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET ) {
     optionStr = "m";
     addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
@@ -494,20 +494,18 @@ const char *XsltExecutable::applyTemplatesReturningString() {
                          (void *)saxonResultDocRef);
   }
   allocFn fn = operator new;
-
   char *result = j_applyTemplatesReturningString(
       SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(),
       (void *)executableRef,
       (selectionRef == SXN_UNSET ? (void *)NULL : (void *)selectionRef),
       (processorDataRef == SXN_UNSET ? (void *)NULL
                                      : (void *)processorDataRef));
-
- 
   if (processorDataRef > 0) {
-    SaxonProcessor::attachCurrentThread();
-    SaxonProcessor::destroyHandle(processorDataRef);    
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
+
   if (result == nullptr) {
     exceptionFound = true;
     throw SaxonApiException();
@@ -517,7 +515,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 }
 
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -554,7 +552,8 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -571,7 +570,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
                                                int argument_length,
                                                const char *outfile) {
 
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -617,7 +616,8 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
       (processorDataRef == SXN_UNSET ? (void *)NULL
                                      : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (status == SXN_EXCEPTION) {
@@ -629,7 +629,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
 const char *XsltExecutable::callFunctionReturningString(
     const char *functionName, XdmValue **arguments, int argument_length) {
 
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -676,7 +676,8 @@ const char *XsltExecutable::callFunctionReturningString(
       (void *)(processorDataRef == SXN_UNSET ? (void *)nullptr
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
@@ -691,7 +692,7 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
                                                      XdmValue **arguments,
                                                      int argument_length) {
 
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -736,7 +737,8 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -752,7 +754,7 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
 void XsltExecutable::callTemplateReturningFile(const char *templateName,
                                                const char *outfile) {
 
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -788,7 +790,8 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (status == SXN_EXCEPTION) {
@@ -798,7 +801,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
 
 const char *
 XsltExecutable::callTemplateReturningString(const char *templateName) {
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -834,7 +837,8 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result == nullptr) {
@@ -844,7 +848,7 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
 }
 
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
-  SaxonProcessor::attachCurrentThread();
+  proc->attachCurrentThread();
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -881,7 +885,8 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -938,7 +943,8 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -999,7 +1005,8 @@ void XsltExecutable::transformFileToFile(const char *source,
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 }
@@ -1124,7 +1131,8 @@ const char *XsltExecutable::transformFileToString(const char *source) {
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    SaxonProcessor::destroyHandle(processorDataRef);
+    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+                      (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result == nullptr) {

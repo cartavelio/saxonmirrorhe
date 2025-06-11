@@ -34,14 +34,9 @@ import net.sf.saxon.type.UType;
 
 public abstract class TinyNodeImpl implements NodeInfo {
 
-    protected final TinyTree tree;
-    protected final int nodeNr;
-    protected TinyNodeImpl parent = null;
-
-    protected TinyNodeImpl(TinyTree tree, int nodeNr) {
-        this.tree = tree;
-        this.nodeNr = nodeNr;
-    }
+    protected TinyTree tree;
+    protected int nodeNr;
+    /*@Nullable*/ protected TinyNodeImpl parent = null;
 
     /**
      * Get the genre of this item
@@ -594,17 +589,11 @@ public abstract class TinyNodeImpl implements NodeInfo {
         if (parent != null) {
             return parent;
         }
-        synchronized (this) {
-            if (parent == null) {
-                int p = getParentNodeNr(tree, nodeNr);
-                if (p == -1) {
-                    return null;
-                } else {
-                    return parent = tree.getNode(p);
-                }
-            } else {
-                return parent;
-            }
+        int p = getParentNodeNr(tree, nodeNr);
+        if (p == -1) {
+            return null;
+        } else {
+            return parent = tree.getNode(p);
         }
     }
 

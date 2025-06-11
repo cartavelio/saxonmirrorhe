@@ -1,6 +1,6 @@
-import saxonche as saxonc
+from saxonc@@edition@@ import *
 
-with saxonc.PySaxonProcessor(license=False) as proc:
+with PySaxonProcessor(license=False) as proc:
 
     print("SaxonC Sample in Python")
     print(proc.version)

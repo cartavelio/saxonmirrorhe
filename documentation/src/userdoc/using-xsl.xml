@@ -312,13 +312,13 @@
                   containing an embedded license key is being executed.</p>
             </td>
          </tr>
-         <!--<tr class="javaonly">
+         <tr class="javaonly">
             <td>
                <p>-m:classname</p>
             </td>
             <td>
                <p>From Saxon 11.1 this option has no effect.</p>
-               <!-\-<p>Use the specified <code>Receiver</code> to process the output from
+               <!--<p>Use the specified <code>Receiver</code> to process the output from
                      <code>xsl:message</code>. The class must implement the <a class="javalink"
                      href="net.sf.saxon.event.Receiver">Receiver</a> interface, and
                  it must have a public zero-argument constructor. This
@@ -341,9 +341,9 @@
                   or to <code>getLineNumber()</code> on the same object).</p> 
               <p>Select the class <code java="net.sf.saxon.serialize.MessageWarner">MessageWarner</code> to have <code>xsl:message</code>
                   output notified to the JAXP <code>ErrorListener</code>, as described in the JAXP
-                  documentation.</p>-\->
+                  documentation.</p>-->
             </td>
-         </tr>-->
+         </tr>
          <tr>
             <td>
                <p>-nogo</p>
@@ -425,7 +425,7 @@
                   <li>j: just-in-time compilation of template rules</li>
                   <li>k: create keys</li>
                   <li>l: loop lifting</li>
-                  <li>m: miscellaneous (see below)</li>
+                  <li>m: miscellaneous</li>
                   <li>n: constant folding</li>
                   <li>p: predicate reordering</li>
                   <li>r: template rule-sets</li>
@@ -442,7 +442,6 @@
                   debugging, or causes extension functions with side-effects to behave
                   unpredictably. (Note however, that even with no optimization, lazy evaluation may
                   still cause the evaluation order to be not as expected.) </p>
-               <p>The <code>-m</code> (miscellaneous) flag is a prerequisite for some of the more specific optimizations.</p>
                <aside>Disabling optimizations may in some cases prevent streamed evaluation. For example, some expressions
                only become streamable because the optimizer is able to work out that sorting nodes into document order is unnecessary.</aside>
                <aside>Most of these flags enable optimizations that cause extra work at compile time to improve run-time performance.
@@ -802,14 +801,6 @@
                   with Saxon-EE, and this flag automatically switches on the <code>-sa</code>
                   option. Specify <code>-val</code> or <code>-val:strict</code> to request strict
                   validation, or <code>-val:lax</code> for lax validation.</p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>-versionmsg:(on|off)</p>
-            </td>
-            <td>
-               <p>No longer used.</p>
             </td>
          </tr>
          <tr>
@@ -2678,8 +2669,8 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
          user interface.</p>
          
          <aside>Older interfaces for processing messages remain available for backwards compatibility;
-         but from 11.1, the <code>-m</code> option on the command line is no longer permitted, while the
-            configuration property <a class="feature" href="MESSAGE_EMITTER_CLASS"/> is ignored.</aside>
+         but from 11.1, the <code>-m</code> option on the command line is ignored, as is the
+            configuration property <a class="feature" href="MESSAGE_EMITTER_CLASS"/>.</aside>
       </section>
       
    </section>

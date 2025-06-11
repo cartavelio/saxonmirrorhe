@@ -37,7 +37,7 @@ class CloudFormationStackDetails(val region: Property<String>, val stackName: Pr
     get() = stackOutputValue("CodeSigningInputsBucketName")
 
   val signingOutputsBucket: String
-    get() = stackOutputValue("CodeSigningOutputsBucketName")
+    get() = stackOutputValue("CodeSigningInputsBucketName")
 
   val stackDetails: Stack
     get() = fetchStackDetails()

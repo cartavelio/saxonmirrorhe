@@ -2126,12 +2126,10 @@ public abstract class StyleElement extends ElementImpl {
                 }
             }
         }
-        Expression block;
         if (containsSpecials) {
-            block = new ConditionalBlock(contents);
-        } else {
-            block = Block.makeBlock(contents);
+            return new ConditionalBlock(contents);
         }
+        Expression block = Block.makeBlock(contents);
         if (block.getLocation() == null) {
             block.setLocation(locationId);
         }

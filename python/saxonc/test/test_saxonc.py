@@ -990,7 +990,7 @@ def testParseJson(saxonproc):
         parsed_json1 = saxonproc.parse_json(json_text=json1)
         print(parsed_json1)
         assert True
-    except saxonc.PySaxonApiError as e:
+    except PySaxonApiError as e:
         print(e.message)
         assert False
     except Exception as e:
@@ -1004,7 +1004,7 @@ def testParseJsonWithEncoding(saxonproc):
         parsed_json1 = saxonproc.parse_json(json_text=json1, encoding="UTF-8")
         print(parsed_json1)
         assert True
-    except saxonc.PySaxonApiError as e:
+    except PySaxonApiError as e:
         print(e.message)
         assert False
     except Exception as e:
@@ -1017,13 +1017,13 @@ def testParseJsonFunction(saxonproc):
     json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
 
 
-    parse_json_fn = saxonc.PyXdmFunctionItem.get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
+    parse_json_fn = PyXdmFunctionItem.get_system_function(saxonproc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
 
     try:
         parsed_json1 = parse_json_fn.call([saxonproc.make_string_value(json1, encoding="UTF-8")])
         print(parsed_json1)
         assert True
-    except saxonc.PySaxonApiError as e:
+    except PySaxonApiError as e:
         print(e.message)
         assert False
 
