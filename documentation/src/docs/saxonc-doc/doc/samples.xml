@@ -6,7 +6,7 @@
       you want to write your own applications in C/C++, Python or PHP to invoke XSLT transforms, XQuery, XPath
       evaluation, or XML Schema validation with Saxon. For more information on how to get started using these
       APIs, see the relevant sections in the main Saxon documentation:</p>
-  
+
   <ul>
     <li><a target="_blank"
       href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation" >XSLT
@@ -28,10 +28,10 @@
 
     <p>The <a href="https://github.com/Saxonica/saxonc-resources" target="_blank">SaxonC resources GitHub repository</a> contains all
         the samples, unit tests and test drivers released in the products for C/C++, Python and PHP.</p>
-  
+
   <p>This section of the documentation also provides some example code in C/C++, PHP and Python to help
     get started using SaxonC:</p>
-  
+
   <nav>
     <ul/>
   </nav>
@@ -42,10 +42,10 @@
         <p>The <code>samples/cTests</code> directory in the SaxonC download contains C code samples
             for running XSLT, XQuery and XPath, along with the build and run scripts. These
            tests provide various examples of the use of the SaxonC C API.</p>
-      
+
       <p>For a step by step guide to building your own C application for XML processing with SaxonC see the
         following sections in the main Saxon documentation:</p>
-      
+
       <ul>
         <li><a target="_blank"
           href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/c-api-transformation"
@@ -57,28 +57,63 @@
           href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/c-api-xpath"
           >XPath from a C application</a></li>
       </ul>
-      
+
       <h3 class="subtitle">Running the samples</h3>
+      <p>On all platforms, the following instructions assume that you have installed a compiler (XCode
+        on macOS, GCC/Clang on Linux, or MSVC on Windows), and CMake 3.27 or newer (see <a
+          target="_blank" href="https://cmake.org/">https://cmake.org/</a>).</p>
 
-        <p>To build SaxonC on C, the following files are required: <code>SaxonCGlue.c</code>,
-              <code>SaxonCProcessor.c</code> and <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code> then
-            compile the sample test code by running the build script <code>build64-linux.sh</code> file for linux, <code>build64-mac.sh</code> for
-            MacOS and <code>build64-windows.bat</code> on Windows. This script builds the test harness executables, using a command similar to the
-           following:</p>
+      <p>The samples are provided with a CMakeLists.txt file to allow the samples
+        to be built using CMake, which also serves as an example of how to
+        integrate SaxonC into your existing CMake-using project.</p>
 
-        <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c ../SaxonCProcessor.c
-           ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl -lc</kbd>
+      <p>For example, to build and run the C <code>testXPath.c</code> sample file on Linux or macOS use the
+        following commands:</p>
 
-         <p>The C samples are available here: <a href="https://gist.github.com/ond1/b7c6e43638620e981639fefe6b7d5015">testXSLT.c</a>,
-             <a href="https://gist.github.com/ond1/6b0bc58e2846223fce5b84dd82e1c14d">testXQuery.c</a> and
-             <a href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34">testXPath.c</a></p>
+      <kbd>cd samples</kbd>
+      <kbd>cmake .</kbd>
+      <kbd>cmake --build .</kbd>
+      <kbd>./CTestXPath</kbd>
 
-        <p>To run the executables from the command line, use a command such as:</p>
+      <p>On Windows, you would use:</p>
+
+      <kbd>cmake .</kbd>
+      <kbd>cmake --build . --config Release</kbd>
+      <kbd>.\Release\CTestXPath.exe</kbd>
+
+      <p>The C samples are also available here: <a href="https://gist.github.com/ond1/b7c6e43638620e981639fefe6b7d5015">testXSLT.c</a>,
+        <a href="https://gist.github.com/ond1/6b0bc58e2846223fce5b84dd82e1c14d">testXQuery.c</a> and
+        <a href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34">testXPath.c</a></p>
+
+      <aside>
+        <p>To build SaxonC on C, the following files are required:
+            <code>SaxonCGlue.c</code>, <code>SaxonCProcessor.c</code> and
+            <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code>
+          then compile the sample test code by running the build script
+            <code>build64-linux.sh</code> file for linux,
+            <code>build64-mac.sh</code> for MacOS and
+            <code>build64-windows.bat</code> on Windows. This script builds the
+          test harness executables, using a command similar to the following:</p>
+
+        <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c
+          ../SaxonCProcessor.c ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl
+          -lc</kbd>
+
+        <p>The C samples are available here: <a
+            href="https://gist.github.com/ond1/b7c6e43638620e981639fefe6b7d5015"
+            >testXSLT.c</a>, <a
+            href="https://gist.github.com/ond1/6b0bc58e2846223fce5b84dd82e1c14d"
+            >testXQuery.c</a> and <a
+            href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34"
+            >testXPath.c</a></p>
+
+        <p>To run the executables from the command line, use a command such
+          as:</p>
 
         <kbd>./testXSLT</kbd>
-         <kbd>./testXPath</kbd>
-         <kbd>./testXQuery</kbd>
-
+        <kbd>./testXPath</kbd>
+        <kbd>./testXQuery</kbd>
+      </aside>
     </section>
 
    <section id="samples_cpp" title="C++ samples">
@@ -89,10 +124,10 @@
         directory in the SaxonC download contains C++ code samples
           for running XSLT, XQuery, XPath and Schema Validation, along with the build
          and run scripts. These tests provide various examples of the use of the SaxonC C++ API.</p>
-     
+
      <p>For a step by step guide to building your own C++ application for XML processing with SaxonC see the
        following sections in the main Saxon documentation:</p>
-     
+
      <ul>
        <li><a target="_blank"
          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/cpp-api-transformation"
@@ -107,47 +142,77 @@
          href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/cpp-api-validation"
          >Validation from C++</a></li>
      </ul>
-     
+
      <h3 class="subtitle">Running the samples</h3>
+     <p>On all platforms, the following instructions assume that you have installed a compiler (XCode
+       on macOS, GCC/Clang on Linux, or MSVC on Windows), and CMake 3.27 or newer (see <a
+         target="_blank" href="https://cmake.org/">https://cmake.org/</a>).</p>
 
-      <p>To build SaxonC on C++, the following files are required: <code>SaxonCGlue.c</code>,
-            <code>SaxonCXPath.c</code>, <code>XdmValue.cpp</code>, <code>XdmItem.cpp</code>,
-        <code>XdmNode.cpp</code>, <code>XdmAtomicValue.cpp</code>, <code>XdmFunctionItem.cpp</code>,
-        <code>XdmArray.cpp</code>, <code>XdmMap.cpp</code>,
-            <code>SaxonProcessor.cpp</code>, <code>Xslt30Processor.cpp</code>,
-            <code>XsltExecutable.cpp</code>, <code>XQueryProcessor.cpp</code>,
-            <code>XPathProcessor.cpp</code> and <code>SchemaValidator.cpp</code>. To compile the
-         samples in C++ execute the
-          <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests" target="_blank"><code>build64-[PLATFORM].sh</code></a>
-          file in the <code>samples/cppTests</code> directory for Linux and Mac OS, or the
-            <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"><code>buildCPPSaxon[EDITION].bat</code></a> file for Windows. These build files build the
-         test harness executables, using a command similar to the following:</p>
+     <p>The samples are provided with a CMakeLists.txt file to allow the samples
+       to be built using CMake, which also serves as an example of how to
+       integrate SaxonC into your existing CMake-using project.</p>
 
-  
-       
+     <p>For example, to build and run the C++ <code>testXPath.cpp</code> sample file on Linux or macOS use the
+       following commands:</p>
 
-      <p>The executables created for Linux and Mac OS can be run from the command line using the
-         following commands:</p>
+     <kbd>cd samples</kbd>
+     <kbd>cmake .</kbd>
+     <kbd>cmake --build .</kbd>
+     <kbd>./CppTestXPath</kbd>
+
+     <p>On Windows, you would use:</p>
+
+     <kbd>cmake .</kbd>
+     <kbd>cmake --build . --config Release</kbd>
+     <kbd>.\Release\CppTestXPath.exe</kbd>
+
+
+    <aside>
+      <p>To build SaxonC on C++, the following files are required:
+          <code>SaxonCGlue.c</code>, <code>SaxonCXPath.c</code>,
+          <code>XdmValue.cpp</code>, <code>XdmItem.cpp</code>,
+          <code>XdmNode.cpp</code>, <code>XdmAtomicValue.cpp</code>,
+          <code>XdmFunctionItem.cpp</code>, <code>XdmArray.cpp</code>,
+          <code>XdmMap.cpp</code>, <code>SaxonProcessor.cpp</code>,
+          <code>Xslt30Processor.cpp</code>, <code>XsltExecutable.cpp</code>,
+          <code>XQueryProcessor.cpp</code>, <code>XPathProcessor.cpp</code> and
+          <code>SchemaValidator.cpp</code>. To compile the samples in C++
+        execute the <a
+          href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"
+          target="_blank"><code>build64-[PLATFORM].sh</code></a> file in the
+          <code>samples/cppTests</code> directory for Linux and Mac OS, or the
+          <a
+          href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"
+            ><code>buildCPPSaxon[EDITION].bat</code></a> file for Windows. These
+        build files build the test harness executables, using a command similar
+        to the following:</p>
+
+
+
+
+      <p>The executables created for Linux and Mac OS can be run from the
+        command line using the following commands:</p>
 
       <kbd>./testXSLT30</kbd>
       <kbd>./testXQuery</kbd>
       <kbd>./testXPath</kbd>
       <kbd>./testValidator</kbd>
 
-      <p>Similarly on Windows the <code>.exe</code> files created can be run from the command line
-         using the following commands:</p>
+      <p>Similarly on Windows the <code>.exe</code> files created can be run
+        from the command line using the following commands:</p>
 
       <kbd>testXSLT30.exe</kbd>
       <kbd>testXQuery.exe</kbd>
       <kbd>testXPath.exe</kbd>
       <kbd>testValidator.exe</kbd>
+    </aside>
+    <h3 class="subtitle">Example code</h3>
 
-      <h3 class="subtitle">Example code</h3>
+    <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a
+      stylesheet parameter, and using the new feature rich
+        <code>XsltExecutable</code> API</p>
 
-     <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a stylesheet parameter, and using the
-       new feature rich <code>XsltExecutable</code> API</p>
-
-      <pre><code class="language-cpp"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
+    <pre><code class="language-cpp"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 
 XdmAtomicValue * value =processor->makeStringValue("Hello to you");
@@ -238,27 +303,27 @@ queryProc->setProperty("s", "cat.xml");
 queryProc->setProperty("q", "family.xq");
 queryProc->runQueryToString();
   ]]></code></pre>
-     
+
      <p>C++ Example 5: parsing XML represented as a lexical string</p>
-     
+
      <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromString("<doc/>");
   ]]></code></pre>
-     
+
      <p>C++ Example 6: parsing XML from a file</p>
-     
+
      <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromFile(dir+"books.xml"");
   ]]></code></pre>
-     
+
      <p>C++ Example 7: parsing XML directly using SaxonProcessor</p>
-     
+
      <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 XdmNode *input = proc->parseXmlFromString("<z/>");
   ]]></code></pre>
-     
+
      <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
 
    </section>
