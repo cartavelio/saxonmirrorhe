@@ -685,7 +685,7 @@ public class XPathCompiler {
      * @param property The decimal symbols name to update, for example {@code "grouping-separator"}
      * @param value    The value to update the decimal symbol property
      * @throws SaxonApiException if an invalid value is supplied for a decimal format property
-     * @throws IllegalArgumentException if the value of {code property} is not one of the recognized
+     * @throws IllegalArgumentException if the value of {@code property} is not one of the recognized
      * decimal format properties
      * @since 9.4
      */

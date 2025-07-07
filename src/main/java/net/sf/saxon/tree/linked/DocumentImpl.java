@@ -100,8 +100,8 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     }
 
     /**
-     * Ask whether the tree is mutable. This is true only if {@link #setMutable(boolean) has been called
-     * supplying the value {@code true}}
+     * Ask whether the tree is mutable. This is true only if {@link #setMutable(boolean)} has been called
+     * supplying the value {@code true}
      * @return true if and only if the tree has been marked as mutable
      */
 
