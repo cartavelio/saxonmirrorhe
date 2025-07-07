@@ -116,6 +116,16 @@ namespace Saxon.Callbacks {
             catalogBasedResolver.GetConfiguration().SetFeature(feature, value);
         }
 
+        public virtual void setAllowedProtocols(string value) {
+            if (catalogBasedResolver == null) {
+                throw new NullReferenceException();
+            }
+            // The legacy V2 implementation of XmlResolver in C# doesn't support this feature.
+            // It will be available in 6.x in time, one imagines, for Saxon 13.
+            //catalogBasedResolver.GetConfiguration().SetFeature(ResolverFeature.ACCESS_EXTERNAL_ENTITY, value);
+            //catalogBasedResolver.GetConfiguration().SetFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, value);
+        }
+
         public virtual object getFeature(ResolverFeature resolverFeature) {
             return catalogBasedResolver?.GetConfiguration().GetFeature(resolverFeature);
         }
