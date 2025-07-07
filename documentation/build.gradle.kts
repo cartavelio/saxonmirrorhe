@@ -361,7 +361,7 @@ tasks.register<JavaExec>("doc_ConfigFileDoc") {
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
   args("-s:${layout.buildDirectory.file("featurekeys/xml/AdditionalFeatures.xml").get().asFile}",
-       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToDoc.xsl").get().asFile}",
+       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/ToConfigFileDoc.xsl").get().asFile}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/ConfigFileDoc.xml").get().asFile}")
 }
 
@@ -461,25 +461,10 @@ listOf<String>("binary", "archive", "file").forEach { target ->
   expath_doc { dependsOn(t) }
 }
 
-tasks.register<JavaExec>("generate_ConfigFileDoc") {
-  group = "Internal"
-  description = "Generate the featureKeys files for userdoc sections"
-  dependsOn("gen_doc")
-
-  inputs.files(layout.buildDirectory.file("featureKeys/xsl/ToConfigFileDoc.xsl"))
-  outputs.files(layout.buildDirectory.file("src/userdoc/ConfigFileDoc-global.xml"))
-  classpath = configurations.named("documentation").get()
-  mainClass = "com.saxonica.Transform"
-  args("${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml").get()}",
-       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/ToConfigFileDoc.xsl").get()}",
-       "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/ConfigFileDoc.xml").get()}")
-}
-
 tasks.register<JavaExec>("expand_userdoc_sections") {
   group = "Internal"
   description = "Expand documentation sections from inclusions for app"
   dependsOn("gen_doc")
-  dependsOn("generate_ConfigFileDoc")
 
   inputs.file(layout.buildDirectory.file("src/userdoc/catalog.xml"))
   inputs.files(layout.buildDirectory.dir("src/userdoc"))
@@ -628,18 +613,10 @@ tasks.register<Copy>("copy_base_css") {
 
 // ============================================================
 
-val setup_gen_contents_ref = tasks.register<Copy>("setup_gen_contents_ref") {
-  dependsOn(copy_saxonc_doc)
-  dependsOn("saxonc_api_doc")
-  into(layout.buildDirectory.dir("website/documentation${saxonMajorVersion}/doc"))
-  from(layout.buildDirectory.dir("saxonc-doc/documentation${saxonMajorVersion}/doc"))
-}
-
 tasks.register<JavaExec>("gen_contents_ref") {
   group = "Internal"
   description = "Creates the contents reference file for the user documentation (used for website pages)"
   dependsOn("copy_xml_documentation")
-  dependsOn("setup_gen_contents_ref")
   
   val catalog = "website/documentation${saxonMajorVersion}/doc/catalog.xml"
   val contents = "website/documentation${saxonMajorVersion}/contents.xml"
