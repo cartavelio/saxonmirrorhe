@@ -244,6 +244,7 @@ public class Query {
      * that support the same command line interface
      *
      * @param args    the command-line arguments
+     * @param command name of the class, to be used in error messages
      */
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -560,10 +561,10 @@ public class Query {
         allowExit = !"off".equals(options.getOptionValue("quit"));
 
         backup = "on".equals(options.getOptionValue("backup"));
-        explainOutputFileName = CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("explain"));
+        explainOutputFileName = options.getOptionValue("explain");
         explaining = explainOutputFileName != null;
         moduleURIResolverClass = options.getOptionValue("mr");
-        outputFileName = CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("o"));
+        outputFileName = options.getOptionValue("o");
         streaming = "on".equals(options.getOptionValue("stream"));
 
         String value = options.getOptionValue("p");
@@ -796,7 +797,7 @@ public class Query {
             request.uri = cwd.resolve(sourceFileName).toString();
             request.nature = ResourceRequest.XML_NATURE;
             request.purpose = ResourceRequest.ANY_PURPOSE;
-            sourceInput = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            sourceInput = request.resolve(config.getResourceResolver());
         } else if (sourceFileName.equals("-")) {
             // take input from stdin
             String sysId = CommandLineOptions.getCurrentWorkingDirectory().toASCIIString();
@@ -882,9 +883,8 @@ public class Query {
                     }
                     try {
                         String queryText = QueryReader.readSourceQuery((StreamSource) sources[0], config.getValidCharacterChecker());
-                        compiler.setBaseURI(new URI(sources[0].getSystemId()));
                         exp = compiler.compile(queryText);
-                    } catch (XPathException|URISyntaxException e) {
+                    } catch (XPathException e) {
                         throw new SaxonApiException(e);
                     }
                     break;
