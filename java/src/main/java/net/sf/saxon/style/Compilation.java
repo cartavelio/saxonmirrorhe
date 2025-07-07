@@ -206,6 +206,7 @@ public class Compilation {
                 disallowed.add(details.nameAndVersion);
                 library.obtainLoadedPackage(details, disallowed);
             } catch (XPathException err) {
+                err.maybeSetErrorCode("XTSE3000");
                 if (!err.hasBeenReported()) {
                     reportError(err);
                 }
