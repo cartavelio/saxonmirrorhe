@@ -186,19 +186,7 @@ public class XQueryParser extends XPathParser {
 
             XQueryExpression queryExp = config.makeXQueryExpression(exp, mainModule, streaming);
 
-            // Make the function library that's available at run-time (e.g. for saxon:evaluate() and function-lookup()).
-            // This includes all user-defined functions regardless of which module they are in
-
-            FunctionLibrary userlib = exec.getFunctionLibrary();
-            FunctionLibraryList lib = new FunctionLibraryList();
-            lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
-            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
-            lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
-            lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
-            lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());
-            config.addExtensionBinders(lib);
-            lib.addFunctionLibrary(userlib);
-            exec.setFunctionLibrary(lib);
+            makeRunTimeFunctionLibrary(mainModule, config, exec);
 
             return queryExp;
         } catch (XPathException e) {
@@ -207,6 +195,22 @@ public class XQueryParser extends XPathParser {
             }
             throw e;
         }
+    }
+
+    public static void makeRunTimeFunctionLibrary(QueryModule mainModule, Configuration config, Executable exec) {
+        // Make the function library that's available at run-time (e.g. for saxon:evaluate() and function-lookup()).
+        // This includes all user-defined functions regardless of which module they are in
+
+        FunctionLibrary userlib = exec.getFunctionLibrary();
+        FunctionLibraryList lib = new FunctionLibraryList();
+        lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
+        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
+        lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
+        lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
+        lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());
+        config.addExtensionBinders(lib);
+        lib.addFunctionLibrary(userlib);
+        exec.setFunctionLibrary(lib);
     }
 
     /**

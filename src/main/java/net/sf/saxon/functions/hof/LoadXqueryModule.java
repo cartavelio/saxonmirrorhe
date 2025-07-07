@@ -195,6 +195,8 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         }
 
         Controller newController = xqe.newController(dqc);
+
+        XQueryParser.makeRunTimeFunctionLibrary(main, config, main.getExecutable());
         
         XPathContext newContext = newController.newXPathContext();
 
