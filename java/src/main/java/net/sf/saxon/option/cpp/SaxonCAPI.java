@@ -56,7 +56,6 @@ import java.util.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -74,7 +73,7 @@ public class SaxonCAPI {
     public static PathHelper pathHelper = new PathHelper();
 
     public static final ObjectHandles objectHandles = ObjectHandles.create();
-    public static final Map<Long , String> objectHandlesPool = new ConcurrentHashMap<>(); //for debugging
+    public static final Map<Long , String> objectHandlesPool = new HashMap<>(); //for debugging
 
     public static int objHandlesCreated = 0;
 
@@ -194,19 +193,6 @@ public class SaxonCAPI {
 //#endif
         return CTypeConversion.toCBoolean(false);
 
-    }
-
-    /**
-     * Static method to get the edition the Processor object is licensed as
-     * @param thread - Graalvm runtime data structure for a thread
-     * @param processorRef - long value pointing to a SaxonProcessor object in the ObjectHandle pool
-     * @return product version given as a C string - C Char pointer array
-     */
-    @CEntryPoint(name = "j_c_getSaxonEdition")
-    public static CCharPointer getSaxonEdition(IsolateThread thread, ObjectHandle processorRef) {
-        Processor processor = objectHandles.get(processorRef);
-        final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(processor.getSaxonEdition());
-        return holder.get();
     }
 
     /**
@@ -813,7 +799,7 @@ public class SaxonCAPI {
         Processor processor = objectHandles.get(processorRef);
         ProcessorDataAccumulator accumulator = objectHandles.get(catalogFilesRef);
 
-        List<String>  catalogFiles = accumulator.getParameterNamesAsArrayList();
+        ArrayList<String>  catalogFiles = accumulator.getParameterNamesAsArrayList();
         ArrayList<String>  catalogFilesConverted = new ArrayList<String>();
 
         int sizea = catalogFiles.size();

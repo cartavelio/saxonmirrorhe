@@ -8,7 +8,6 @@ import org.gradle.kotlin.dsl.*
 
 plugins {
     id("java-library")
-    id("saxon-build")
 }
 
 val extension = project.extensions.create<SaxonCCoreExtension>("saxonc")
@@ -20,6 +19,7 @@ repositories {
 }
 
 val saxonBuild = the<SaxonBuildExtension>()
+
 val graalRelease: String by project
 extension.project.set(project)
 extension.graal {
@@ -153,6 +153,7 @@ val testJarManifest = tasks.register<ManifestComparer>("testJarManifest") {
 
 tasks.jar {
     description = "Create the JAR used as input to native-image"
+    finalizedBy(testJarManifest)
     archiveBaseName = extension.edition.map { edition ->
         val ver = findProperty("saxonVersion")
         "saxon-${edition}c-${ver}"
@@ -193,10 +194,6 @@ val graalImage = tasks.register<GraalNativeImageTask>("release_graal_image") {
     libName = extension.edition.map { edition -> "saxonc-core-${edition}" }
     version = saxonBuild.version
     majorVersion = saxonBuild.majorVersion
-    macosx_min_version = saxonBuild.macosx_min_version
-    specifiedArgs = saxonBuild.targetHost.map {
-        if (it.isWindows && it.isX86_64) listOf("-march=x86-64-v1") else listOf()
-    }
 }
 
 val debugGraalImage = tasks.register<GraalNativeImageTask>("debug_graal_image") {
@@ -208,39 +205,34 @@ val debugGraalImage = tasks.register<GraalNativeImageTask>("debug_graal_image") 
     libName = extension.edition.map { edition -> "saxonc-core-${edition}" }
     version = saxonBuild.version
     majorVersion = saxonBuild.majorVersion
-    macosx_min_version = saxonBuild.macosx_min_version
-    specifiedArgs = saxonBuild.targetHost.map {
-        if (it.isWindows && it.isX86_64) listOf("-march=x86-64-v1") else listOf()
-    }
     debug = true
 }
 val ersatzPath = layout.buildDirectory.dir("ersatz")
-val EDITION = extension.edition.map { it.uppercase() }
-fun cmakeFilenameMapper(suffixes: List<String>): (String) -> List<String> {
-    return { ED ->
-        suffixes.map { suffix -> "SaxonCCore${ED}${suffix}.cmake" }
-    }
-}
-val universalCMakeFileSuffixes = listOf("Config", "ConfigVersion")
-val universalCMakeFilenames = EDITION.map(cmakeFilenameMapper(universalCMakeFileSuffixes))
-
-val generator = tasks.register<ErsatzCMakeGenerator>("cmake_generate") {
+val generator = tasks.register("cmake_generate") {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Generate build system for the ersatz CMake-driven library"
+    inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
+    inputs.files(layout.projectDirectory.dir("../cmake"))
+    outputs.file(ersatzPath.map { it.file("CMakeCache.txt") })
 
-    version = saxonBuild.version
-    platformIsWindows = saxonBuild.targetHost.map { it.isWindows }
-    buildPath = ersatzPath
-    cmakeFilenames = universalCMakeFilenames
+    doLast {
+        val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
+        project.exec {
+            workingDir = layout.projectDirectory.asFile
+            executable = "cmake"
+            args("-G", generatorName, "-B", ersatzPath.get().asFile.toString(),
+                "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get()
+            )
+        }
+    }
 }
 
-val packageOutputDir = layout.buildDirectory.dir("cmake-package")
+fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTask>, taskBlock: Action<CMakePackageBuilder>): TaskProvider<CMakePackageBuilder> {
+    val config_task_name = config.lowercase()
 
-fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTask>, debug: Boolean, taskBlock: Action<Task>): TaskProvider<CMakePackageBuilder> {
-    val configTaskName = config.lowercase()
-    val configPackageOutputDir = layout.buildDirectory.dir(config)
+    val configDir = layout.buildDirectory.dir(config)
 
-    val build = tasks.register<Exec>("build_ersatz_${configTaskName}") {
+    val build = tasks.register<Exec>("build_ersatz_${config_task_name}") {
         inputs.files(generator)
         inputs.files(layout.projectDirectory.dir("../cmake/ersatz"))
         outputs.dir(layout.buildDirectory.dir(config))
@@ -250,39 +242,35 @@ fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTas
         args("--build", ersatzPath.get().asFile.toString(), "--config", config)
     }
 
-    val ersatzConfigPath = ersatzPath.map { it.dir("staging") }
-    val cmakeFilenames = EDITION.map(cmakeFilenameMapper(universalCMakeFileSuffixes.plus(listOf("", "-${config.lowercase()}"))))
-    val generateCMakeConfigPackageFiles = tasks.register<Exec>("install_ersatz_${configTaskName}") {
+    val ersatzConfigPath = ersatzPath.map { it.dir("staging/${config}") }
+    val generateCMakeConfigPackageFiles = tasks.register<Exec>("install_ersatz_${config_task_name}") {
         inputs.files(build)
-        outputs.files(ersatzConfigPath.map { conf -> conf.dir("lib/cmake/SaxonCCore${EDITION.get()}").files(cmakeFilenames.get()) })
+        outputs.dir(ersatzConfigPath.map { it.dir("lib/cmake") })
 
         workingDir = layout.projectDirectory.asFile
         executable = "cmake"
-        args("--install", ersatzPath.get().asFile.toString(), "--config", config, "--prefix", ersatzConfigPath.get().asFile.toString())
+        args("--install", ersatzPath.get().asFile.toString(), "--config", "Release", "--prefix", ersatzConfigPath.get().asFile.toString())
     }
 
-    val mainTask = tasks.register<CMakePackageBuilder>("${configTaskName}_cmake_package") {
+    val mainTask = tasks.register<CMakePackageBuilder>("${config_task_name}_cmake_package") {
         group = LifecycleBasePlugin.BUILD_GROUP
         libName = extension.edition.map { edition -> "saxonc-core-${edition}" }
-        cmakePackageName = EDITION.map { "SaxonCCore${it}" }
         version =  saxonBuild.version
         majorVersion = saxonBuild.majorVersion
         sharedLibFiles.from(imageTask.map { it.sharedLibFiles })
         importLibFiles.from(imageTask.map { it.importLibFiles })
         headerFiles.from(imageTask.map { it.headerFiles })
-        debugConfig = debug
         packageCMakeFiles.from(generateCMakeConfigPackageFiles)
-        packageDir = configPackageOutputDir
+        packageDir = configDir
     }
-
     mainTask.configure(taskBlock)
     return mainTask
 }
 
-val releaseCMakePackage = setupConfigTasks("Release", graalImage, false) {
+val releaseCMakePackage = setupConfigTasks("Release", graalImage) {
     description = "Build and package up the native-image and CMake package config files"
 }
-val debugCMakePackage = setupConfigTasks("Debug", debugGraalImage, true) {
+val debugCMakePackage = setupConfigTasks("Debug", debugGraalImage) {
     description = "Build and package up the debug-enabled version of the native-image and CMake package config files"
 }
 
@@ -290,5 +278,5 @@ tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(releaseCMakePackage)
 }
 
-cMakePackageDir.outgoing.artifact(releaseCMakePackage.map { it.packageDir.asFile }) { builtBy(releaseCMakePackage) }
-debugCMakePackageDir.outgoing.artifact(debugCMakePackage.map { it.packageDir.asFile }) { builtBy(debugCMakePackage) }
+cMakePackageDir.outgoing.artifact(releaseCMakePackage.map { it.outputDir }) { builtBy(releaseCMakePackage) }
+debugCMakePackageDir.outgoing.artifact(debugCMakePackage.map { it.outputDir }) { builtBy(debugCMakePackage) }

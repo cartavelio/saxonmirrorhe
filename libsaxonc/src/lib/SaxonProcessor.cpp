@@ -246,12 +246,8 @@ void SaxonProcessor::initialize(bool l) {
   if (SaxonProcessor::jvmCreatedCPP == 0) {
     SaxonProcessor::jvmCreatedCPP = 1;
     SaxonProcessor::sxn_environ =
-        new sxnc_environment;
-
-    SaxonProcessor::sxn_environ->isolate = NULL;
-	SaxonProcessor::sxn_environ->mainthread = NULL;
-	SaxonProcessor::sxn_environ->thread = NULL;
-
+        new sxnc_environment; //(sxnc_environment
+                              //*)malloc(sizeof(sxnc_environment));
 
     /*
      * InitializeGraalvm run-time.
@@ -373,8 +369,8 @@ bool SaxonProcessor::isLicensed() {
 
 
 const char * SaxonProcessor::getSaxonEdition() {
-  SaxonProcessor::attachCurrentThread();
-  return j_c_getSaxonEdition(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+    SaxonProcessor::attachCurrentThread();
+  return SAXONC_EDITION;
 }
 
 
@@ -474,13 +470,6 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
   return nullptr;
 }
 
- void SaxonProcessor::destroyHandle(int64_t handleRef){
-
-   //SaxonProcessor::attachCurrentThread();
-   j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                    (void *)handleRef);
- }
-
 XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
   if (results > 0) {
     int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
@@ -548,7 +537,7 @@ int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
 int64_t SaxonProcessor::createParameterJArray(
     std::map<std::string, XdmValue *> parameters,
     std::map<std::string, std::string> properties, int additions) {
-  SaxonProcessor::attachCurrentThread();
+
   int size = (int) parameters.size() + properties.size() + additions;
 #ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -616,7 +605,7 @@ int64_t SaxonProcessor::createParameterJArray(
 
 int64_t SaxonProcessor::createParameterJArray2(
     std::map<std::string, XdmValue *> parameters) {
-  //SaxonProcessor::attachCurrentThread();
+
   int size = (int) parameters.size();
   int64_t processorDataRef = createProcessorDataWithCapacity(
       SaxonProcessor::sxn_environ->thread, size);
@@ -811,9 +800,8 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
   for (int i = 0; i < length; i++) {
 
     if (catalogFiles[i] != nullptr) {
-      char* catFile = (char *)catalogFiles[i];
       addProcessorProperty(sxn_environ->thread, (void *)processorDataRef,
-                           catFile);
+                           (char *)catalogFiles[i]);
     }
   }
 
@@ -1077,18 +1065,13 @@ XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
 
 XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei,
                                                 const char *strValue) {
-  SaxonProcessor::attachCurrentThread();
-  if(typei == nullptr || strValue == nullptr) {
-    return nullptr;
-  }
-  int64_t obj = j_makeAtomicValue(sxn_environ->thread, (char *)typei, (char *)strValue);
-  if(obj == -1) {
-    return nullptr;
-  } else if(obj == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
+  return nullptr;
+  // TODO fix this method
+  /*SaxonProcessor::attachCurrentThread();
+  jobject obj = xdmValueAsObj(SaxonProcessor::sxn_environ, typei, strValue);
   XdmAtomicValue *value = new XdmAtomicValue(obj, typei);
-  return value;
+  SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+  return value;*/
 }
 
 const char *SaxonProcessor::clarkNameToEQName(const char *name) {
@@ -1301,7 +1284,6 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
 
 XdmMap *SaxonProcessor::makeMap3(XdmAtomicValue **keys, XdmValue **values,
                                  int size) {
-  SaxonProcessor::attachCurrentThread();
   int64_t mapDataRef = SXN_UNSET;
 
   mapDataRef = j_create_mapDataWithCapacity(sxn_environ->thread, size);

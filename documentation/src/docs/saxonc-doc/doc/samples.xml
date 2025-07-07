@@ -6,7 +6,7 @@
       you want to write your own applications in C/C++, Python or PHP to invoke XSLT transforms, XQuery, XPath
       evaluation, or XML Schema validation with Saxon. For more information on how to get started using these
       APIs, see the relevant sections in the main Saxon documentation:</p>
-
+  
   <ul>
     <li><a target="_blank"
       href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation" >XSLT
@@ -28,10 +28,10 @@
 
     <p>The <a href="https://github.com/Saxonica/saxonc-resources" target="_blank">SaxonC resources GitHub repository</a> contains all
         the samples, unit tests and test drivers released in the products for C/C++, Python and PHP.</p>
-
+  
   <p>This section of the documentation also provides some example code in C/C++, PHP and Python to help
     get started using SaxonC:</p>
-
+  
   <nav>
     <ul/>
   </nav>
@@ -42,10 +42,10 @@
         <p>The <code>samples/cTests</code> directory in the SaxonC download contains C code samples
             for running XSLT, XQuery and XPath, along with the build and run scripts. These
            tests provide various examples of the use of the SaxonC C API.</p>
-
+      
       <p>For a step by step guide to building your own C application for XML processing with SaxonC see the
         following sections in the main Saxon documentation:</p>
-
+      
       <ul>
         <li><a target="_blank"
           href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/c-api-transformation"
@@ -57,55 +57,28 @@
           href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/c-api-xpath"
           >XPath from a C application</a></li>
       </ul>
-
+      
       <h3 class="subtitle">Running the samples</h3>
-      <p>On all platforms, the following instructions assume that you have installed a compiler (XCode
-        on macOS, GCC/Clang on Linux, or MSVC on Windows), and CMake 3.27 or newer (see <a
-          target="_blank" href="https://cmake.org/">https://cmake.org/</a>).</p>
 
-      <p>The samples are provided with a CMakeLists.txt file to allow the samples
-        to be built using CMake, which also serves as an example of how to
-        integrate SaxonC into your existing CMake-using project.</p>
+        <p>To build SaxonC on C, the following files are required: <code>SaxonCGlue.c</code>,
+              <code>SaxonCProcessor.c</code> and <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code> then
+            compile the sample test code by running the build script <code>build64-linux.sh</code> file for linux, <code>build64-mac.sh</code> for
+            MacOS and <code>build64-windows.bat</code> on Windows. This script builds the test harness executables, using a command similar to the
+           following:</p>
 
-      <p>For example, to build and run the C <code>testXPath.c</code> sample file on Linux or macOS use the
-        following commands:</p>
+        <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c ../SaxonCProcessor.c
+           ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl -lc</kbd>
 
-      <kbd>cd samples</kbd>
-      <kbd>cmake .</kbd>
-      <kbd>cmake --build .</kbd>
-      <kbd>./CTestXPath</kbd>
+         <p>The C samples are available here: <a href="https://gist.github.com/ond1/b7c6e43638620e981639fefe6b7d5015">testXSLT.c</a>,
+             <a href="https://gist.github.com/ond1/6b0bc58e2846223fce5b84dd82e1c14d">testXQuery.c</a> and
+             <a href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34">testXPath.c</a></p>
 
-      <p>On Windows, you would use:</p>
-
-      <kbd>cmake .</kbd>
-      <kbd>cmake --build . --config Release</kbd>
-      <kbd>.\Release\CTestXPath.exe</kbd>
-
-      <p>The C samples are also available here: <a href="https://gist.github.com/ond1/b7c6e43638620e981639fefe6b7d5015">testXSLT.c</a>,
-        <a href="https://gist.github.com/ond1/6b0bc58e2846223fce5b84dd82e1c14d">testXQuery.c</a> and
-        <a href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34">testXPath.c</a></p>
-
-      <aside>
-        <p>For older releases Saxon 12.0 – 12.5, to build SaxonC on C, the following files are required:
-            <code>SaxonCGlue.c</code>, <code>SaxonCProcessor.c</code> and
-            <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code>
-          then compile the sample test code by running the build script
-            <code>build64-linux.sh</code> file for linux,
-            <code>build64-mac.sh</code> for MacOS and
-            <code>build64-windows.bat</code> on Windows. This script builds the
-          test harness executables, using a command similar to the following:</p>
-
-        <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c
-          ../SaxonCProcessor.c ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl
-          -lc</kbd>
-
-        <p>To run the executables from the command line, use a command such
-          as:</p>
+        <p>To run the executables from the command line, use a command such as:</p>
 
         <kbd>./testXSLT</kbd>
-        <kbd>./testXPath</kbd>
-        <kbd>./testXQuery</kbd>
-      </aside>
+         <kbd>./testXPath</kbd>
+         <kbd>./testXQuery</kbd>
+
     </section>
 
    <section id="samples_cpp" title="C++ samples">
@@ -116,10 +89,10 @@
         directory in the SaxonC download contains C++ code samples
           for running XSLT, XQuery, XPath and Schema Validation, along with the build
          and run scripts. These tests provide various examples of the use of the SaxonC C++ API.</p>
-
+     
      <p>For a step by step guide to building your own C++ application for XML processing with SaxonC see the
        following sections in the main Saxon documentation:</p>
-
+     
      <ul>
        <li><a target="_blank"
          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/cpp-api-transformation"
@@ -134,70 +107,47 @@
          href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/cpp-api-validation"
          >Validation from C++</a></li>
      </ul>
-
+     
      <h3 class="subtitle">Running the samples</h3>
-     <p>On all platforms, the following instructions assume that you have installed a compiler (XCode
-       on macOS, GCC/Clang on Linux, or MSVC on Windows), and CMake 3.27 or newer (see <a
-         target="_blank" href="https://cmake.org/">https://cmake.org/</a>).</p>
 
-     <p>The samples are provided with a CMakeLists.txt file to allow the samples
-       to be built using CMake, which also serves as an example of how to
-       integrate SaxonC into your existing CMake-using project.</p>
+      <p>To build SaxonC on C++, the following files are required: <code>SaxonCGlue.c</code>,
+            <code>SaxonCXPath.c</code>, <code>XdmValue.cpp</code>, <code>XdmItem.cpp</code>,
+        <code>XdmNode.cpp</code>, <code>XdmAtomicValue.cpp</code>, <code>XdmFunctionItem.cpp</code>,
+        <code>XdmArray.cpp</code>, <code>XdmMap.cpp</code>,
+            <code>SaxonProcessor.cpp</code>, <code>Xslt30Processor.cpp</code>,
+            <code>XsltExecutable.cpp</code>, <code>XQueryProcessor.cpp</code>,
+            <code>XPathProcessor.cpp</code> and <code>SchemaValidator.cpp</code>. To compile the
+         samples in C++ execute the
+          <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests" target="_blank"><code>build64-[PLATFORM].sh</code></a>
+          file in the <code>samples/cppTests</code> directory for Linux and Mac OS, or the
+            <a href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"><code>buildCPPSaxon[EDITION].bat</code></a> file for Windows. These build files build the
+         test harness executables, using a command similar to the following:</p>
 
-     <p>For example, to build and run the C++ <code>testXPath.cpp</code> sample file on Linux or macOS use the
-       following commands:</p>
+  
+       
 
-     <kbd>cd samples</kbd>
-     <kbd>cmake .</kbd>
-     <kbd>cmake --build .</kbd>
-     <kbd>./CppTestXPath</kbd>
-
-     <p>On Windows, you would use:</p>
-
-     <kbd>cmake .</kbd>
-     <kbd>cmake --build . --config Release</kbd>
-     <kbd>.\Release\CppTestXPath.exe</kbd>
-
-
-    <aside>
-      <p>For older releases Saxon 12.0 – 12.5, to build SaxonC on C++, the following files are required:
-          <code>SaxonCGlue.c</code>, <code>SaxonCXPath.c</code>,
-          <code>XdmValue.cpp</code>, <code>XdmItem.cpp</code>,
-          <code>XdmNode.cpp</code>, <code>XdmAtomicValue.cpp</code>,
-          <code>XdmFunctionItem.cpp</code>, <code>XdmArray.cpp</code>,
-          <code>XdmMap.cpp</code>, <code>SaxonProcessor.cpp</code>,
-          <code>Xslt30Processor.cpp</code>, <code>XsltExecutable.cpp</code>,
-          <code>XQueryProcessor.cpp</code>, <code>XPathProcessor.cpp</code> and
-          <code>SchemaValidator.cpp</code>. To compile the samples in C++
-        execute the <code>build64-[PLATFORM].sh</code> file in the
-          <code>samples/cppTests</code> directory for Linux and Mac OS, or the
-          <code>buildCPPSaxon[EDITION].bat</code> file for Windows. These
-        build files build the test harness executables.</p>
-
-      <p>The executables created for Linux and Mac OS can be run from the
-        command line using the following commands:</p>
+      <p>The executables created for Linux and Mac OS can be run from the command line using the
+         following commands:</p>
 
       <kbd>./testXSLT30</kbd>
       <kbd>./testXQuery</kbd>
       <kbd>./testXPath</kbd>
       <kbd>./testValidator</kbd>
 
-      <p>Similarly on Windows the <code>.exe</code> files created can be run
-        from the command line using the following commands:</p>
+      <p>Similarly on Windows the <code>.exe</code> files created can be run from the command line
+         using the following commands:</p>
 
       <kbd>testXSLT30.exe</kbd>
       <kbd>testXQuery.exe</kbd>
       <kbd>testXPath.exe</kbd>
       <kbd>testValidator.exe</kbd>
-    </aside>
 
-    <h3 class="subtitle">Example code</h3>
+      <h3 class="subtitle">Example code</h3>
 
-    <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a
-      stylesheet parameter, and using the new feature rich
-        <code>XsltExecutable</code> API</p>
+     <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a stylesheet parameter, and using the
+       new feature rich <code>XsltExecutable</code> API</p>
 
-    <pre><code class="language-cpp"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
+      <pre><code class="language-cpp"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
 Xslt30Processor * xslt = processor->newXslt30Transformer();
 
 XdmAtomicValue * value =processor->makeStringValue("Hello to you");
@@ -288,27 +238,27 @@ queryProc->setProperty("s", "cat.xml");
 queryProc->setProperty("q", "family.xq");
 queryProc->runQueryToString();
   ]]></code></pre>
-
+     
      <p>C++ Example 5: parsing XML represented as a lexical string</p>
-
+     
      <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromString("<doc/>");
   ]]></code></pre>
-
+     
      <p>C++ Example 6: parsing XML from a file</p>
-
+     
      <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 DocumentBuilder * builder = proc->newDocumentBuilder();
 XdmNode *d = builder->parseXmlFromFile(dir+"books.xml"");
   ]]></code></pre>
-
+     
      <p>C++ Example 7: parsing XML directly using SaxonProcessor</p>
-
+     
      <pre><code class="language-cpp"><![CDATA[SaxonProcessor proc = new SaxonProcessor();
 XdmNode *input = proc->parseXmlFromString("<z/>");
   ]]></code></pre>
-
+     
      <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
 
    </section>
@@ -316,7 +266,7 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
    <section id="samples_php" title="PHP samples">
       <h1>PHP samples</h1>
      
-     <p>The <code>php/samples</code> directory in the SaxonC download contains PHP code samples
+     <p>The <code>samples/php</code> directory in the SaxonC download contains PHP code samples
        for running XSLT, XQuery, XPath and Schema Validation, providing various examples of the use of the
        SaxonC PHP API.</p>
      
@@ -340,26 +290,22 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
      
      <h3 class="subtitle">Running the samples</h3>
 
-      <p>The <code>php/samples</code> directory in the SaxonC download contains various samples for
+      <p>The <code>samples/php</code> directory in the SaxonC download contains various samples for
          XSLT, XQuery, XPath and Schema Validation (namely: <code>xsltExamples.php</code>,
             <code>xslt30Examples.php</code>, <code>xqueryExamples.php</code>,
             <code>xpathExamples.php</code>, and <code>validatorExamples.php</code>) and associated
-        files, as well as PHP unit tests for XSLT, XQuery, XPath and Schema Validation (<code>SaxonCPHPTests.php</code>). These files
+         files, as well as PHP unit tests for XSLT (<code>xslt30_PHPUnit.php</code>). These files
          contain many useful examples which will help get you started. The unit tests run under
-         PHPUnit for PHP 8.X which can be downloaded and installed separately in the same directory
+         PHPUnit for PHP 7.2 which can be downloaded and installed separately in the same directory
          as the unit tests.</p>
 
       <p>To run the PHP unit tests for XSLT, use a command such as:</p>
-      <kbd>cd php/samples</kbd>
-      <kbd>./phpunit SaxonCPHPTests.php</kbd>
+      <kbd>cd samples/php</kbd>
+      <kbd>./phpunit xslt30_PHPUnit.php</kbd>
 
       <p>And to run a single unit test:</p>
-      <kbd>./phpunit --filter testPipeline SaxonCPHPTests.php</kbd>
+      <kbd>./phpunit --filter testPipeline xslt30_PHPUnit.php</kbd>
      
-     <aside>
-       <p>Note that for older releases Saxon 12.0 – 12.5, the samples directory is
-         <code>samples/php</code>, and the PHP unit tests file is <code>xslt30_PHPUnit.php</code>.</p>
-     </aside>
      
 
       <h3 class="subtitle">Example code</h3>
@@ -378,7 +324,7 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
 
   
 
-      <p>Exceptions that are thrown from the SaxonC PHP  API can be handled using the PHP try-catch block. It is also
+      <p>The following example shows how to debug if something unexpected is happening. It is also
          very useful to examine the apache <code>error.log</code> file:</p>
 
       <pre><code class="language-php"><![CDATA[<?php
@@ -387,14 +333,17 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
   $proc = new Saxon\SaxonProcessor();
   $xsltProc = $proc->newXslt30Processor();
   $executable = $xsltProc->compileFromFile($xslFile);
-  try{
-    $result = $executable->transformFileToString($xmlFile);
-    echo $result;
-  } catch(Exception $e) {
-        echo "Exception".$e->getMessage();
+  
+  $result = $executable->transformFileToString($xmlFile);
+  if($result == NULL) {
+    if($executable->exceptionOccurred()){
+        $errCode = $executable->getErrorCode();
+        $errMessage = $executable->getErrorMessage();
+        echo 'Expected error: Code='.$errCode.' Message='.$errMessage;
+      $xsltProc->exceptionClear();
+    }
   }
-  }
-
+  echo $result;
   $xsltProc->clearParameters();
   $xsltProc->clearProperties();
 ?>]]></code></pre>
@@ -405,159 +354,127 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
 ]]></code></pre>
    </section>
 
-  <section id="samples_python" title="Python samples">
-    <h1>Python samples</h1>
+   <section id="samples_python" title="Python samples">
+      <h1>Python samples</h1>
+     
+     <p>The <a
+       href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"><code>pypi</code></a>
+       directory in the SaxonC download contains Python code samples
+       for running XSLT, XQuery, XPath and Schema Validation, providing various examples of the use of the
+       SaxonC Python API.</p>
+     
+     <p>For a step by step guide to building your own Python application for XML processing with SaxonC see the
+       following sections in the main Saxon documentation:</p>
+     
+     <ul>
+       <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/python-api-transformation"
+         >XSLT transformations from a Python application</a></li>
+       <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/python-api-query"
+         >XQuery from a Python application</a></li>
+       <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/python-api-xpath"
+         >XPath from a Python application</a></li>
+       <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/python-api-validation"
+         >Validation from Python</a></li>
+     </ul>
+     
+     <h3 class="subtitle">Running the samples</h3>
 
-    <p>The <a
-        href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"
-          ><code>python</code></a> directory in the SaxonC download contains
-      Python code samples for running XSLT, XQuery, XPath and Schema Validation,
-      providing various examples of the use of the SaxonC Python API.</p>
+       <p>The <a
+         href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"><code>pypi</code></a>
+         directory in the SaxonC download includes the 
+         unit test files <code>test_saxonc.py</code> and <code>test_saxon_schema.py</code>, which
+         contain a collection of Python unit test cases to be run with the pytest framework. The
+         pyunit tests can be run with the following command:</p>
 
-    <p>For a step by step guide to building your own Python application for XML
-      processing with SaxonC see the following sections in the main Saxon
-      documentation:</p>
+           <kbd>cd pypi</kbd>
+           <kbd>pytest test_saxonc.py</kbd>
 
-    <ul>
-      <li>
-        <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/python-api-transformation"
-          >XSLT transformations from a Python application</a>
-      </li>
-      <li>
-        <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/python-api-query"
-          >XQuery from a Python application</a>
-      </li>
-      <li>
-        <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/python-api-xpath"
-          >XPath from a Python application</a>
-      </li>
-      <li>
-        <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/python-api-validation"
-          >Validation from Python</a>
-      </li>
-    </ul>
 
-    <h3 class="subtitle">Running the samples</h3>
+     <p>In the <code>pypi/testsuite_driver</code> directory, you will also find the test driver for running
+       the W3C test suite for XSLT 3.0 against SaxonC. The test suite itself is on GitHub: repository
+       <code>w3c/xslt30-test</code>. The test suite driver can be run as follows:</p>
 
-    <p>The <a
-        href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"
-          ><code>python</code></a> directory in the SaxonC download includes the
-      unit test files, including <code>test_saxonc.py</code> and
-        <code>test_saxon_schema.py</code>, which contain a collection of Python
-      unit test cases to be run with the pytest framework. The pyunit tests can
-      be run with the following command:</p>
+      <kbd>cd testsuite_driver</kbd>
+      <kbd>python3 xslt30_test_suite_driver.py [TEST SUITE DIR] -o [RESULTS OUTPUT DIR]</kbd>
 
-    <kbd>cd python</kbd>
-    <kbd>pytest --data-dir=../samples/data</kbd>
+      <p>The test driver also provides options for running individual test cases or test sets:</p>
+     <kbd>python3 xslt30_test_suite_driver.py -t &lt;test-case> -s &lt;testset> -o &lt;resultdir></kbd>
+     
+     
+     <h3 class="subtitle">Example code</h3>
 
-    <p>You will require a <code>pytest.ini</code> file to configure pytest. If
-      one isn't present in the <code>python</code> directory, you can create a
-      file named <code>pytest.ini</code> and add the following content:</p>
+      <p>To help get started with SaxonC and Python, the <code>pypi/samples</code>
+         directory also includes some python example scripts: <code>saxon_example.py</code>,
+            <code>saxon_example2.py</code> and <code>saxon_example3.py</code>.</p>
 
-    <pre><code><![CDATA[[pytest]
-testpaths = test
-pythonpath = test/saxon_import
-norecursedirs = test/saxon_import
-addopts = --import-mode=importlib]]></code></pre>
-    
-    <p>In the <code>python/testsuite_driver</code> directory, you will also find
-      the test driver for running the W3C test suite for XSLT 3.0 against
-      SaxonC. The test suite itself is on GitHub: repository
-        <code>w3c/xslt30-test</code>. The test suite driver must be told what
-      edition of SaxonC to import, using the <code>SAXONC_EDITION</code>
-      environment variable. It can be run as follows (for SaxonC-HE):</p>
+      <p>Example 1: Python script using the SaxonC-HE API with a simple stylesheet test.xsl:</p>
 
-    <kbd>cd testsuite_driver</kbd>
-    <kbd>SAXONC_EDITION=he python3 xslt30_test_suite_driver.py [TEST SUITE DIR]
-      -o [RESULTS OUTPUT DIR]</kbd>
+     <pre><code class="language-python"><![CDATA[from saxonche import *
 
-    <p>The test driver also provides options for running individual test cases
-      or test sets:</p>
-    <kbd>SAXONC_EDITION=he python3 xslt30_test_suite_driver.py -t &lt;test-case>
-      -s &lt;testset> -o &lt;resultdir></kbd>
+with PySaxonProcessor(license=False) as proc:
 
-    <aside>
-      <p>For older releases Saxon 12.0 – 12.5, the edition of SaxonC being used is hardcoded
-        into the testsuite driver, so it's not necessary to set the
-          <code>SAXONC_EDITION</code> environment variable.</p>
-    </aside>
+  print(proc.version)
+  try:
+      xsltproc = proc.new_xslt30_processor()
+      document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
+      executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
 
-    <h3 class="subtitle">Example code</h3>
+      print(document)
 
-    <p>To help get started with SaxonC and Python, the <code>python/samples</code>
-      directory also includes some python example scripts:
-        <code>saxon_example.py</code>, <code>saxon_example2.py</code> and
-        <code>saxon_example3.py</code>.</p>
+      output = executable.transform_to_string(xdm_node=document)
+      print(output)
+  except PySaxonApiError as err:
+              print('Error during function call', err)
+      
 
-    <p>Example 1: Python script using the SaxonC-HE API with a simple stylesheet
-      test.xsl:</p>
 
-    <pre><code class="language-python"><![CDATA[from saxonche import *
+  print('Example 2 \n')
+  xml = """\
+    <out>
+      <person>text1</person>
+      <person>text2</person>
+      <person>text3</person>
+    </out>"""
+  xp = proc.new_xpath_processor()
+  node = proc.parse_xml(xml_text=xml)
+  print('test 1\n node='+node.string_value)
+  xp.set_context(xdm_item=node)
+  item = xp.evaluate_single('//person[1]')
+  if isinstance(item,saxonc.PyXdmNode):
+    print(item.string_value)
+    ]]></code></pre>
+     
+     <p>Example 2: Python script using PyXsltExecutable (with SaxonC-HE):</p>
+     
+     <pre><code class="language-python"><![CDATA[from saxonche import *
 
-proc = PySaxonProcessor(license=False)
+with PySaxonProcessor(license=False) as proc:
 
-print(proc.version)
-try:
+  print(proc.version)
   xsltproc = proc.new_xslt30_processor()
-  document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
   executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
+  executable.set_result_as_raw_value(True)
+  executable.set_initial_match_selection(file_name="cat.xml")
+  xdm_atomic_value = proc.make_integer_value(5)
+  value1= proc.make_string_value("text")
 
-  print(document)
-
-  output = executable.transform_to_string(xdm_node=document)
-  print(output)
-except PySaxonApiError as err:
-  print('Error during function call', err)
-
-
-print('Example 2 \n')
-xml = """\
-<out>
-  <person>text1</person>
-  <person>text2</person>
-  <person>text3</person>
-</out>"""
-xp = proc.new_xpath_processor()
-node = proc.parse_xml(xml_text=xml)
-print('test 1\n node='+node.string_value)
-xp.set_context(xdm_item=node)
-item = xp.evaluate_single('//person[1]')
-if isinstance(item,saxonc.PyXdmNode):
-  print(item.string_value)
-]]></code></pre>
-
-    <p>Example 2: Python script using PyXsltExecutable (with SaxonC-HE):</p>
-
-    <pre><code class="language-python"><![CDATA[from saxonche import *
-
-proc = PySaxonProcessor(license=False)
-
-print(proc.version)
-xsltproc = proc.new_xslt30_processor()
-executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
-executable.set_result_as_raw_value(True)
-executable.set_initial_match_selection(file_name="cat.xml")
-xdm_atomic_value = proc.make_integer_value(5)
-value1= proc.make_string_value("text")
-
-executable.set_parameter("param",value1)
-executable.set_parameter("param2",xdm_atomic_value)
-result = executable.apply_templates_returning_string()
-print(result)
-]]></code></pre>
-
-    <p>Example 3: Parsing XML from a file:</p>
-
-    <pre><code class="language-python"><![CDATA[builder = saxonproc.new_document_builder()
-node = builder.parse_xml(xml_file_name='books.xml')
-]]></code></pre>
-
-    <p>For an example of exception handling, see <a href="/technical/debugging"
-        >Debugging</a>.</p>
-
-  </section>
+  executable.set_parameter("param",value1)
+  executable.set_parameter("param2",xdm_atomic_value)
+  result = executable.apply_templates_returning_string()
+  print(result)
+    ]]></code></pre>
+     
+     <p>Example 3: Parsing XML from a file:</p>
+     
+     <pre><code class="language-python"><![CDATA[  builder = saxonproc.new_document_builder()
+  node = builder.parse_xml(xml_file_name='books.xml')
+  ]]></code></pre>
+     
+     <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
+     
+   </section>
 </article>

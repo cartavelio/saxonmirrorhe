@@ -7,6 +7,8 @@
 
 package net.sf.saxon.option.cpp;
 
+import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
+import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
@@ -53,7 +55,7 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Constructor to initialise XsltProcessor with processor and license flag
      *
-     * @param proc - The processor
+     * @param proc - s9api processor
      */
     public Xslt30Processor(Processor proc) {
         super(proc);
@@ -62,6 +64,15 @@ public class Xslt30Processor extends SaxonCAPI {
         if (debug) {
             System.err.println("Xslt30Processor constructor1(proc, l), Processor: " + System.identityHashCode(proc));
         }
+//#if EE==true || PE==true
+        if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            if (debug) {
+                System.err.println("Xslt30Processor1-1(l), Processor: function libraries added");
+            }
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
+        }
+//#endif
     }
 
 
@@ -88,6 +99,16 @@ public class Xslt30Processor extends SaxonCAPI {
         if (debug) {
             System.err.println("XsltProcessor3(l), Processor: " + System.identityHashCode(processor));
         }
+//#if EE==true || PE==true
+        if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            if (debug) {
+                System.err.println("XsltProcessor3-1(l), Processor: function libraries added");
+            }
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
+        }
+//#endif
+
     }
 
 
@@ -832,8 +853,8 @@ public class Xslt30Processor extends SaxonCAPI {
         Object sourceObji;
         Object sourceObj = null;
 
-        if (paramsMap.containsKey("_i_matches")) {
-            sourceObji = paramsMap.get("_i_matches");
+        if (paramsMap.containsKey("_i_matchs")) {
+            sourceObji = paramsMap.get("_i_matchs");
             if (debug) {
                 if(sourceObji == null) {
                     System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
@@ -841,17 +862,10 @@ public class Xslt30Processor extends SaxonCAPI {
                     System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name: " + sourceObji.getClass().getName());
                 }
             }
-        } else if (paramsMap.containsKey("_i_file_matches")) {
-            sourceObji = paramsMap.get("_i_file_matches");
-            if (debug) {
-                if(sourceObji == null) {
-                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
-                } else {
-                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match file name: " + sourceObji.getClass().getName());
-                }
-            }
-        } else  {
+        } else if (sourceObjRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("Source Object is NULL");
+        } else {
+            sourceObji = objectHandles.get(sourceObjRef);
         }
 
         if (sourceObji instanceof ProcessorDataAccumulator) {

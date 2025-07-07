@@ -1591,9 +1591,6 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
                   those parcels to form the new array.</p>
             </li>
          </ul>
-         
-         <p><i>Note: the implementation of <code>xsl:array</code> and <code>xsl:array-member</code> in Saxon 12.x reflects 
-         an earlier draft of the XSLT 4.0 specification. The current (April 2025) draft has moved on from this.</i></p>
       </section>
       
       <section id="enclosing-modes" title="Enclosing modes">

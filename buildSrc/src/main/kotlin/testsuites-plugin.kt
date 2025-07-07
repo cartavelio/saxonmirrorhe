@@ -1,6 +1,5 @@
 package com.saxonica.build
 
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
@@ -20,7 +19,6 @@ import SaxonBuildExtension
 import javax.inject.Inject
 
 import com.saxonica.build.java.testsuite.JavaRunner
-import com.saxonica.build.java.testsuite.CSharpRunner
 import org.gradle.api.file.*
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.assign
@@ -99,69 +97,37 @@ abstract class TestSuitesExtension
       else -> throw GradleException("Unknown exceptions for test suite: ${suite}")
     }
   }
+
   
   fun configureJava(suite: String, language: String,
                     @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
                     taskName: String) {
     val plugin = this
-
-    // This is annoying. We have to copy the suite because
-    // the sandpit is writable...
-    val actualSuiteDir = if (suite == "expath") {
-      layout.buildDirectory.dir("suite/expath/${taskName}")
-    } else {
-      suiteDir(suite)
-    }
-
     val thisSuite = tasks.register<JavaRunner>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       this.edition = plugin.edition
       this.suite = suite
       this.language = language
-      this.suiteDir = actualSuiteDir
-      this.options = options
+      this.suiteDir = suiteDir(suite)
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
     }
 
     if (suite == "expath") {
-      val copySuite = tasks.register("${taskName}_copy_suite") {
+      // This is annoying. We have to copy the suite because the sandpit is writable
+      val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
         group = "Internal"
         description = "Copy the expath test suite"
-        inputs.files(submodulesDir.dir("expath/tests/qt3"))
-        outputs.dir(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        doLast {
-          project.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              exclude("archive/sandpit2/**")
-            }
-          }
-        }
-
-        doLast {
-          // Also, make sure that the file "test.bin" exists
-          // or some tests will fail.
-          project.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              include("catalog.xml")
-            }
-            rename { "test.bin" }
-          }
-        }
+        into(layout.buildDirectory.dir("suite/expath"))
+        from(submodulesDir.dir("expath/tests/qt3"))
       }
-
       val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
         group = "Internal"
         description = "Copy the expath test suite sandpit" 
         dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
-        // sandpit2!?
-        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
-          include("**")
-        }
+        into(layout.buildDirectory.dir("suite/expath/archive/sandpit"))
+        from(submodulesDir.dir("extra/data/sandpit"))
       }
       thisSuite.configure {
         dependsOn(copySandpit)
@@ -185,9 +151,8 @@ abstract class TestSuitesExtension
 
     val catalog = "catalog.xml"
 
-    // The format expected by the regression report generator
-    val reportFn = "${edition.get()}j_${suite}_${language}.xml"
-    val errorFn = "${edition.get()}j_${suite}_${language}-errors.xml"
+    val reportFn = "SaxonResults-${language}.xml"
+    val errorFn = "SaxonFailures-${language}-errors.xml"
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
@@ -222,62 +187,82 @@ abstract class TestSuitesExtension
     }
   }
 
-  fun configureCsharp(suite: String, language: String,
-                      @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
-                      taskName: String) {
-    val plugin = this
+  fun configureCsharp(suite: String, language: String, options: Map<String,String>, taskName: String) {
+    // If this fails, make a task named all_test_suites in your build before calling configureSuite()
+    val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME)
+    val build = tasks.named("dotnetBuildTestDrivers")
 
-    // This is annoying. We have to copy the suite because
-    // the sandpit is writable...
-    val actualSuiteDir = if (suite == "expath") {
-      layout.buildDirectory.dir("suite/expath/${taskName}")
-    } else {
-      suiteDir(suite)
+    val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
+
+    val directory = suiteDir(suite)
+    val exceptionsFile = exceptions(suite)
+
+    val catalog = when (suite) {
+      "qt3extra" -> "j-catalog.xml"
+      else -> "catalog.xml"
     }
 
-    val thisSuite = tasks.register<CSharpRunner>(taskName) {
+    val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
+
+    val relprefix = "${arch.get()}/TestDrivers/bin/Release"
+    val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
+
+    val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
+
+    val testargs = mutableListOf<String>("${dotnet.get()}",
+                                         "${testDrivers.get().asFile}",
+                                         "${directory.get()}",
+                                         "${catalog}",
+                                         "-exceptions:${exceptionsFile.get()}",
+                                         "-reportfilename:${taskName}",
+                                         "-o:${reportDir}",
+                                         "-lang:${language}")
+    for ((optname, optvalue) in options) {
+      testargs.add("-${optname}:${optvalue}")
+    }
+    for((optname, optvalue) in propertyOptions.get()) {
+      if (optvalue == "") {
+        testargs.add("-${optname}")
+      } else {
+        testargs.add("-${optname}:${optvalue}")
+      }
+    }
+
+    val thisSuite = tasks.register<Exec>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-      dependsOn("dotnetBuild")
-      dependsOn("dotnetBuildTestDrivers")
-      this.edition = plugin.edition
-      this.suite = suite
-      this.language = language
-      this.suiteDir = actualSuiteDir
-      this.arch = plugin.arch
-      this.netver = plugin.netver
-      this.dotnet = plugin.dotnet
-      this.platform = plugin.platform
-      this.options = options
-      exceptionsFile = exceptions(suite)
-      reportingRootDir = layout.buildDirectory.dir("test-results")
-    }
 
+      dependsOn(build)
+      workingDir = directory.get().asFile
+      commandLine = testargs
+      //ignoreExitValue = true
+
+      doFirst {
+        println(testargs)
+        println("${product.get()}, ${platform.get()}, ${arch.get()}, ${edition.get()}")
+        Files.createDirectories(Paths.get(reportDir.toString()))
+      }
+    }
     if (suite == "expath") {
+      // This is annoying. We have to copy the suite because the sandpit is writable
       val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
         group = "Internal"
         description = "Copy the expath test suite"
-        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        from(submodulesDir.dir("expath/tests/qt3")) {
-          exclude("archive/sandpit2/**")
-        }
+        into(layout.buildDirectory.dir("suite/expath"))
+        from(submodulesDir.dir("expath/tests/qt3"))
       }
-
       val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
         group = "Internal"
-        description = "Copy the expath test suite sandpit" 
+        description = "Copy the expath test suite sandpit"
         dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
-        // sandpit2!?
-        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
-          include("**")
-        }
+        into(layout.buildDirectory.dir("suite/expath/archive/sandpit"))
+        from(submodulesDir.dir("extra/data/sandpit"))
       }
       thisSuite.configure {
         dependsOn(copySandpit)
       }
     }
 
-    tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
+    allSuites.configure {
       dependsOn(thisSuite)
     }
   }
@@ -285,6 +270,7 @@ abstract class TestSuitesExtension
   fun configureCsharpXsd(suite: String, 
                          @Suppress("UNUSED_PARAMETER") language: String,
                          options: Map<String,String>, taskName: String) {
+    // If this fails, make a task named all_test_suites in your build before calling configureSuite()
     val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME).get()
     val build = tasks.named("dotnetBuildTestDrivers").get()
 
@@ -328,25 +314,9 @@ abstract class TestSuitesExtension
       //ignoreExitValue = true
 
       doFirst {
+        println(testargs)
+        println("${product.get()}, ${platform.get()}, ${arch.get()}, ${edition.get()}")
         Files.createDirectories(Paths.get(reportDir.toString()))
-      }
-
-      // In the Java test driver, we made the report filename an option.
-      // For the C# test driver, I'm just banging in rewrite for the name.
-      doLast {
-        val vparts = "${project.findProperty("saxonVersion")}".split("\\.".toRegex())
-        val shortVer = "${vparts[0]}.${vparts[1]}"
-        val rpath = "test-results/${suite}/${dateStamp}"
-        val rfile = layout.buildDirectory.file(
-            "${rpath}/SaxonResults${shortVer}n.xml").get().asFile
-        val dfile = layout.buildDirectory.file(
-            "${rpath}/${edition.get()}dotnet_xsd_XSD${xsdVersion}.xml").get().asFile
-        if (rfile.exists()) {
-          if (dfile.exists()) {
-            dfile.delete()
-          }
-          rfile.renameTo(dfile)
-        }
       }
     }
 

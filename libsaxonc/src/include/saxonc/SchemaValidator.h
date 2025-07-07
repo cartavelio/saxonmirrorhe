@@ -151,8 +151,8 @@ public:
 
   /**
    * Get the validation report.
-   * The 'report-node' option must have been set to true in the properties
-   * to use this feature: e.g. using setProperty("report-node", true) on the class object.
+   * The validation-report option must have been set to true in the properties
+   * to use this feature.
    * @return XdmNode - Pointer to XdmNode. Return nullptr if validation
    * reporting feature has not been enabled. The caller is responsible for memory deallocation.
    * @throws SaxonApiException

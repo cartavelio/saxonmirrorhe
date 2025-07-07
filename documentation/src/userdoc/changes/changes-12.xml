@@ -5,16 +5,13 @@
     <category name="installation">
         
         <div class="javaonly">
-            <p>SaxonJ 12.0 to 12.5 are built and tested using Java 11, and from 12.6 is built and
-                tested using Java 21, but is supported with Java 8 or later.</p>
+            <p>SaxonJ 12 is built and tested using Java 11, but is supported with Java 8 or later.</p>
             <p>Note: Saxon 12.0 did not work under Java 8; this is fixed in Saxon 12.1.</p>
-            <p>Note: Saxon 12.6 did not work under Java 8; this is fixed in Saxon 12.7.</p>
         </div>
         
-        <div class="csonly">
-            <p>SaxonCS 12 is targeted at .NET 6.</p>
-            <p>From 12.6, SaxonCS 12 is targeted at .NET 8.</p>
-        </div>
+        <p class="csonly">SaxonCS 12 is targeted at .NET 6.</p>
+        
+        
         
         
     </category>

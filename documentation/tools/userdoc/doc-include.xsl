@@ -42,7 +42,6 @@
     <xsl:variable name="src" select="resolve-uri(string-join(($dir,@ref,'.xml')),$base-uri)"/>-->
     <xsl:variable name="name" select="string-join((@ref,'.xml'))"/>
     <xsl:variable name="src" select="resolve-uri($name,$base-uri)"/>
-
     <xsl:choose>
       <xsl:when test="doc-available(xs:string($src))">
       <!--<xsl:variable name="href"
@@ -58,7 +57,7 @@
         <!-- We know that these are not available -->
       </xsl:when>
       <xsl:otherwise>
-        <xsl:message select="'Failed to load: ' || $src"/>
+        <xsl:message select="'Failed to load: /build/' || substring-after($src, '/build/')"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>

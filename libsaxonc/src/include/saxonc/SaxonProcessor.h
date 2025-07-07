@@ -600,7 +600,7 @@ public:
    * Deprecated. Set a catalog file to be used in Saxon.
    * @param catalogFile - file name to the catalog
    * @throws SaxonApiException if there is a failure to set the catalog file
-   * @deprecated - Use the setCatalogFiles() method
+   * @deprecated
    */
   void setCatalog(const char *catalogFile);
 
@@ -638,7 +638,7 @@ public:
  * configuration that has been created, rather than the software that has been installed; which depends on
  * the license key supplied, as well as the software edition installed. For example it is possible to
  * instantiate an "HE" configuration even when using the "PE" or "EE" software.
- * @return The Saxon edition code: "ee", "pe", or "he". Memory deallocation is handled internally.
+ * @return The Saxon edition code: "EE", "PE", or "HE". Memory deallocation is handled internally.
  */
  const char * getSaxonEdition();
 
@@ -672,6 +672,10 @@ public:
    */
   void createHeapDump(bool live);
 
+  /**
+   * Get info on objects allocated and still in memory
+   */
+  static void getInfo();
 
   /*static JavaVM *jvm;*/
 
@@ -724,16 +728,6 @@ private:
   static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 
   static const char *checkException();
-
- /**
- * Remove ObjectHandle from the pool. Free for the GC.
- */
-  static void destroyHandle(int64_t handleRef);
-
-   /**
-   * Get info on objects allocated and still in memory
-   */
-  static void getInfo();
 };
 
 //===============================================================================================

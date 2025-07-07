@@ -93,7 +93,7 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         XdmAtomicValue * makeQNameValue(const char* str)
 
-        XdmAtomicValue * makeAtomicValue(const char* type, const char* value)  except +handle_saxonc_api_exceptions
+        XdmAtomicValue * makeAtomicValue(const char* type, const char* value)
 
 
         XdmArray *makeArray(const char **input, int length)
@@ -552,8 +552,6 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         void setProperty(const char * name, const char * value)
 
-        const char * getProperty(const char * name)
-
         void clearParameters()
 
         void clearProperties()
@@ -582,8 +580,6 @@ cdef extern from "saxonc/SaxonProcessor.h":
         void setQueryContent(const char* content)
 
         void setQueryBaseURI(const char * baseURI)
-
-        const char * getQueryBaseURI()
 
         void setcwd(const char* cwd)
 

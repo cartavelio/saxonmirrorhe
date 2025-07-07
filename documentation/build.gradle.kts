@@ -19,8 +19,7 @@ val saxonMajorVersion = saxonBuild.version.get().split('.').first()
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val javadocBucket by configurations.dependencyScope("javadocBucket")
-val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
-val featureKeysSourcesBucket by configurations.dependencyScope("featureKeysSourcesBucket")
+val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
 val xmldocletBucket by configurations.dependencyScope("xmldocletBucket")
 val csharpApiSourcesBucket by configurations.dependencyScope("csharpApiSourcesBucket")
 val csharpXmlDocBucket by configurations.dependencyScope("csharpXmlDocBucket")
@@ -40,10 +39,8 @@ dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../java/src/main/java")))
   javadocBucket(project(mapOf("path" to ":java",
                               "configuration" to "javadocArtifacts")))
-  javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
-                                      "configuration" to "javaFeatureKeys")))
-  featureKeysSourcesBucket(project(mapOf("path" to ":featurekeys",
-                                         "configuration" to "featureKeysSources")))
+  featureKeysBucket(project(mapOf("path" to ":java:keys",
+                                  "configuration" to "featureKeys")))
   xmldocletBucket(project(mapOf("path" to ":java",
                                 "configuration" to "xmldocletArtifacts")))
   csharpApiSourcesBucket(project(mapOf("path" to ":csharp:ee",
@@ -53,11 +50,11 @@ dependencies {
   csharpHtmlDocBucket(project(mapOf("path" to ":csharp:ee",
                                     "configuration" to "htmlDocArtifacts")))
   doxygenBucket(project(mapOf("path" to ":python:documentation",
-                              "configuration" to "pydocArtifact")))
+                              "configuration" to "doxygenArtifact")))
   doxygenCBucket(project(mapOf("path" to ":libsaxonc:ee",
                               "configuration" to "doxygenOutput")))
 
-  // N.B. the gen_doc_icu_uca task depends on using the current build!
+  // N.B. the gen_doc_icu_uca class depeneds on using the current build!
   documentation(project(":java", "runtimeElements"))
 
   // We need a license to build SEFs
@@ -78,8 +75,8 @@ dependencies {
   implementation("org.apache.ws.commons.axiom:axiom-impl:1.2.15")
   implementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   implementation("jline:jline:${findProperty("jlineVersion")}")
-  implementation("org.apache.xmlgraphics:fop:2.10")
 
+  //implementation("com.saxonica:Saxon-EE:12.4")
   implementation("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
   implementation("com.github.javaparser:javaparser-symbol-solver-core:3.17.0")
   implementation("com.github.javaparser:javaparser-core:3.17.0")
@@ -93,12 +90,8 @@ val javadocSources = configurations.resolvable("javadocSources") {
   extendsFrom(javadocBucket)
 }
 
-val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
-  extendsFrom(javaFeatureKeysBucket)
-}
-
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
-  extendsFrom(featureKeysSourcesBucket)
+  extendsFrom(featureKeysBucket)
 }
 
 val xmldocletSources = configurations.resolvable("xmldocletSources") {
@@ -206,7 +199,7 @@ tasks.register<JavaExec>("product_xsljavadoc") {
   inputs.files(layout.projectDirectory.dir("tools/javadoc"))
   outputs.dir(layout.buildDirectory.dir("javadoc-xml"))
 
-  classpath = configurations.named("documentation").get()
+  classpath = configurations.named("documentationx").get()
   mainClass = "com.saxonica.Transform"
   args("-s:${files(xmldocletSources).first()}/doclet.xml",
        "-xsl:${layout.projectDirectory.file("tools/javadoc/chunk-xmljavadoc.xsl")}",
@@ -250,43 +243,34 @@ tasks.register<Copy>("copy_userdoc_sources") {
   }
 }
 
-val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
-  group = "Internal"
-  into(layout.buildDirectory.dir("featureKeys"))
-  from(featureKeysSources)
-}
-
 tasks.register<JavaExec>("doc_FeatureKeysDoc") {
   group = "Internal"
   description = "Construct the documentation for feature keys"
   dependsOn("copy_userdoc_sources")
 
-  inputs.files(copy_feature_keys)
+  inputs.files(layout.projectDirectory.dir("../java/keys/tools"))
   outputs.file(layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml"))
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
-  args("${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml").get().asFile}",
-       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToDoc.xsl").get().asFile}",
+  args("${layout.projectDirectory.file("../src/main/xml/FeatureKeys.xml")}",
+       "-xsl:${layout.projectDirectory.file("tools/featureKeys/FeatureKeysToDoc.xsl")}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml").get().asFile}")
 }
 
-val dotnet_doc_html = tasks.register<Copy>("dotnet_doc_html") {
+tasks.register<Copy>("dotnet_doc_html") {
   group = "Documentation"
   description = "Copy the HTML .NET documentation"
 
   from(csharpHtmlDocumentation)
-  into(layout.buildDirectory.dir("dotnetdoc-html"))
+  into(layout.buildDirectory.dir("dotnetdoc_html"))
 }
-
-val dotnetDocHtmlArtifacts by configurations.consumable("dotnetDocHtmlArtifacts")
-dotnetDocHtmlArtifacts.outgoing.artifact(dotnet_doc_html) { builtBy(dotnet_doc_html) }
 
 tasks.register<Copy>("dotnet_doc_xml") {
   group = "Documentation"
   description = "Copy the XML .NET documentation"
 
   from(csharpXmlDocumentation)
-  into(layout.buildDirectory.dir("dotnetdoc-xml"))
+  into(layout.buildDirectory.dir("dotnetdoc_xml"))
 }
 
 tasks.register<Copy>("dotnet_doc") {
@@ -356,12 +340,12 @@ tasks.register<JavaExec>("doc_ConfigFileDoc") {
   dependsOn("copy_userdoc_sources")
   dependsOn("doc_FeatureKeysDoc")
 
-  inputs.files(copy_feature_keys)
+  inputs.files(layout.projectDirectory.dir("../src/main/xml"))
   outputs.dir(layout.buildDirectory.dir("src/userdoc/featureKeys"))
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
-  args("-s:${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml").get().asFile}",
-       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/ToConfigFileDoc.xsl").get().asFile}",
+  args("-s:${layout.projectDirectory.file("../src/main/xml/AdditionalFeatures.xml")}",
+       "-xsl:${layout.projectDirectory.file("tools/featureKeys/ToConfigFileDoc.xsl")}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/ConfigFileDoc.xml").get().asFile}")
 }
 
@@ -431,6 +415,7 @@ tasks.register("website") {
   dependsOn("documentation")
   dependsOn("copy_prod_desc_pdf")
   dependsOn("saxonc_documentation")
+  // Just a place to hang dependencies
 }
 
 // ============================================================
@@ -582,16 +567,14 @@ tasks.register("userdoc_publish_html") {
 
 // ============================================================
 
-val update_documentation = tasks.register("update_documentation") {
+tasks.register("update_documentation") {
   group = "Documentation"
   description = "Update documentation from viewer app"
-  outputs.dir(layout.buildDirectory.dir("userdoc/viewer_appJS"))
   dependsOn("copy_xml_documentation")
   dependsOn("copy_html_documentation")
   dependsOn("copy_base_css")
+  // Just a place to hang dependencies
 }
-val userdocViewerAppJS by configurations.consumable("userdocViewerAppJS")
-userdocViewerAppJS.outgoing.artifact(update_documentation) { builtBy(update_documentation) }
 
 tasks.register<Copy>("copy_html_documentation") {
   group = "Internal"
@@ -683,13 +666,13 @@ tasks.register<JavaExec>("gen_prod_desc_fo") {
   mainClass = "com.saxonica.Transform"
   args("-s:${layout.buildDirectory.file("proddesc/prod-desc.xml").get().asFile}",
        "-xsl:${layout.projectDirectory.file("tools/feature-matrix/PD/prod-desc-to-fo.xsl")}",
-       "-o:${layout.buildDirectory.file("proddesc/PD/dummy.xml").get().asFile}")
+       "-o:${layout.buildDirectory.file("proddesc/PD/dummy.xml")}")
 }
 
 tasks.register<Copy>("setup_fop") {
   group = "Internal"
   into(layout.buildDirectory.file("proddesc"))
-  from(layout.projectDirectory.file("tools/feature-matrix/PD")) {
+  from(layout.projectDirectory.file("src/docs/doc/img")) {
     include("saxonica_logo.gif")
   }
 }
@@ -754,7 +737,7 @@ tasks.register<Copy>("saxonc_documentation") {
   }
 }
 
-val copy_saxonc_doc = tasks.register<Copy>("copy_saxonc_doc") {
+tasks.register<Copy>("copy_saxonc_doc") {
   group = "Internal"
   description = "Copy the SaxonC documentation source"
 
@@ -763,8 +746,6 @@ val copy_saxonc_doc = tasks.register<Copy>("copy_saxonc_doc") {
     exclude("xsl/*.xsl")
   }
 }
-val copySaxoncDoc by configurations.consumable("copySaxoncDoc")
-copySaxoncDoc.outgoing.artifact(copy_saxonc_doc) { builtBy(copy_saxonc_doc) }
 
 tasks.register<Copy>("copy_saxonc_css") {
   group = "Internal"
@@ -784,7 +765,7 @@ tasks.register<Copy>("copy_saxonc_css") {
   }
 }
 
-val saxonc_doc_sef = tasks.register<JavaExec>("saxonc_doc_sef") {
+tasks.register<JavaExec>("saxonc_doc_sef") {
   group = "Internal"
   description = "Compile the viewer_app stylesheet for the SaxonC documentation"
 
@@ -799,8 +780,6 @@ val saxonc_doc_sef = tasks.register<JavaExec>("saxonc_doc_sef") {
        "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
        "--generateByteCode:off")
 }
-val saxoncDocSef by configurations.consumable("saxoncDocSefArtifacts")
-saxoncDocSef.outgoing.artifact(saxonc_doc_sef) { builtBy(saxonc_doc_sef) }
 
 val saxonc_api_doc = tasks.register("saxonc_api_doc") {
   inputs.files(doxygenDocumentation)
@@ -830,5 +809,7 @@ val saxonc_api_doc = tasks.register("saxonc_api_doc") {
     }
   }
 }
-val saxoncApiDoc by configurations.consumable("saxoncApiDocArtifacts")
-saxoncApiDoc.outgoing.artifact(saxonc_api_doc) { builtBy(saxonc_api_doc) }
+
+val saxoncApiDocArtifacts by configurations.consumable("saxoncApiDocArtifacts")
+saxoncApiDocArtifacts.outgoing.artifact(saxonc_api_doc) { builtBy(saxonc_api_doc) }
+

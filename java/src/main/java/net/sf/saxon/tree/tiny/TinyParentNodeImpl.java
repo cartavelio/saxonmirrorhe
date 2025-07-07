@@ -21,10 +21,6 @@ import net.sf.saxon.type.Type;
 
 public abstract class TinyParentNodeImpl extends TinyNodeImpl {
 
-    public TinyParentNodeImpl(TinyTree tree, int nodeNr) {
-        super(tree, nodeNr);
-    }
-
     /**
      * Determine if the node has children.
      */

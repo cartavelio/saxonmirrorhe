@@ -1,4 +1,4 @@
-# Welcome to SaxonC-@EDITION@
+# Welcome to SaxonC-@@EDITION@@
 
 This is the official [Saxonica](https://www.saxonica.com/) Python wheel package for
 Saxon, an XML document processor. [SaxonC](https://www.saxonica.com/saxon-c/index.xml) 
@@ -50,7 +50,7 @@ acquired a reputation for standards conformance, performance, and reliability.
 ## Installation
 
 ```bash
-pip install saxonc@edition@
+pip install saxonc@@edition@@
 ```
 
 ## Getting started
@@ -58,13 +58,13 @@ pip install saxonc@edition@
 Either import the whole API:
 
 ```python 
-from saxonc@edition@ import *
+from saxonc@@edition@@ import *
 ```
 
 Or specific modules:
 
 ```python 
-from saxonc@edition@ import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 ```
 
 The SaxonC API includes classes for constructing XDM data models
@@ -75,16 +75,16 @@ The following short example shows how to get the Saxon version from
 the `PySaxonProcessor`:
 
 ```python
-from saxonc@edition@ import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 
-proc = PySaxonProcessor(license=False)
-print(proc.version)
+with PySaxonProcessor(license=False) as proc:
+	print(proc.version)
 ```
 
 It will print something like this:
 
 ```bash
-SaxonC-@EDITION@ @VERSION@ from Saxonica
+SaxonC-@@EDITION@@ @@VERSION@@ from Saxonica
 ```
 
 **Note**: `license=False` requests the open-source version of Saxon, whereas 
@@ -97,10 +97,10 @@ on it before doing anything else:
 ```python
 from saxoncee import PySaxonProcessor
 
-proc = PySaxonProcessor(license=True)
-proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+with PySaxonProcessor(license=True) as proc:
+    proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
                                     "/path/to/saxon-license.lic")
-...
+    ...
 ```
 
 ### Example: Running a transformation
@@ -109,9 +109,9 @@ The following basic example shows how an XSLT stylesheet can be run against a so
 XML document in Python using SaxonC:
 
 ```python 
-from saxonc@edition@ import *
+from saxonc@@edition@@ import *
 
-proc = PySaxonProcessor(license=False)
+with PySaxonProcessor(license=False) as proc:
  
 xsltproc = proc.new_xslt30_processor()
 document = proc.parse_xml(xml_text="<doc><item>text1</item><item>text2</item><item>text3</item></doc>")
@@ -123,12 +123,12 @@ print(output)
 For more Python examples, and further details about installing and configuring the product, 
 see the [SaxonC 12 documentation](https://www.saxonica.com/saxon-c/documentation12/index.html).
 
-## Using `pylint` on a project which uses `saxonc@edition@`
+## Using `pylint` on a project which uses `saxonc@@edition@@`
 
-Because the `saxonc@edition@` is a C extension, you will need to either configure Pylint to load the module to avoid pylint errors like:
+Because the `saxonc@@edition@@` is a C extension, you will need to either configure Pylint to load the module to avoid pylint errors like:
 
 ```python
-E0611: No name 'PySaxonProcessor' in module 'saxonc@edition@' (no-name-in-module)
+E0611: No name 'PySaxonProcessor' in module 'saxonc@@edition@@' (no-name-in-module)
 ```
 
 ```shell

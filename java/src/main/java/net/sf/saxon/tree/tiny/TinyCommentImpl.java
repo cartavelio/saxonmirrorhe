@@ -27,7 +27,8 @@ import net.sf.saxon.value.StringValue;
 final class TinyCommentImpl extends TinyNodeImpl {
 
     public TinyCommentImpl(TinyTree tree, int nodeNr) {
-        super(tree, nodeNr);
+        this.tree = tree;
+        this.nodeNr = nodeNr;
     }
 
     /**

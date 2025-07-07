@@ -1,6 +1,4 @@
-import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.python.*
-import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 
@@ -8,6 +6,7 @@ plugins {
     base
     id("saxon-build")
 }
+
 
 val extension = project.extensions.create<SaxonCPythonExtension>("saxoncPython")
 val manageBranches = the<ManageBranchesExtension>()
@@ -17,7 +16,6 @@ val systemOs = OperatingSystem.current()
 val unixish = systemOs.isMacOsX() || systemOs.isLinux()
 val venvBaseDir = project.layout.buildDirectory.dir("pyvenv")
 val pythonVersion: String by project
-val pythonReleaseVersions: String by project
 
 extension.pythonBinDirName.convention(if (unixish) "bin" else "scripts")
 extension.venvBinarySuffix.convention(if (unixish) "" else ".exe")
@@ -25,11 +23,10 @@ extension.venvBaseDir.convention(venvBaseDir)
 extension.venvBasePath.convention(venvBaseDir.map { it.asFile.toString() })
 extension.version.convention(pythonVersion)
 extension.manylinuxTarget.convention("manylinux_2_24")
-extension.releaseVersions = pythonReleaseVersions.split(",")
 
-val libsaxoncReleaseArtifactsBucket by configurations.dependencyScope("libsaxoncReleaseArtifactsBucket")
-val libsaxoncReleaseArtifactsDir by configurations.resolvable("libsaxoncReleaseArtifactsDir") {
-    extendsFrom(libsaxoncReleaseArtifactsBucket)
+val saxoncCoreReleaseArtifactsBucket by configurations.dependencyScope("saxoncCoreReleaseArtifactsBucket")
+val saxoncCoreReleaseArtifactsDir by configurations.resolvable("saxoncCoreReleaseArtifactsDir") {
+    extendsFrom(saxoncCoreReleaseArtifactsBucket)
 }
 val libsaxoncDebugArtifactsBucket by configurations.dependencyScope("libsaxoncDebugArtifactsBucket")
 val libsaxoncDebugArtifactsDir by configurations.resolvable("libsaxoncDebugArtifactsDir") {
@@ -39,15 +36,9 @@ val saxonCSampleDataBucket by configurations.dependencyScope("saxonCSampleDataBu
 val saxonCSampleData by configurations.resolvable("saxonCSampleData") {
     extendsFrom(saxonCSampleDataBucket)
 }
-val devDebugPythonBucket by configurations.dependencyScope("devDebugPythonBucket")
-val devDebugPythonExe by configurations.resolvable("debugPython") {
-    extendsFrom(devDebugPythonBucket)
-}
-
-val releaseWhl by configurations.consumable("releaseWhl")
 
 dependencies {
-    libsaxoncReleaseArtifactsBucket(extension.edition.map { edition ->
+    saxoncCoreReleaseArtifactsBucket(extension.edition.map { edition ->
         project(path = ":libsaxonc:${edition}", configuration = "releaseArtifactsDir")
     })
     libsaxoncDebugArtifactsBucket(extension.edition.map { edition ->
@@ -56,102 +47,61 @@ dependencies {
     saxonCSampleDataBucket(extension.edition.map { edition ->
         project(path = ":libsaxonc:${edition}", configuration = "sampleData")
     })
-    devDebugPythonBucket(project(path=":python", configuration="debugPython"))
+}
+
+val pyenvExeTask = tasks.register<PyenvExe>("pyenv_exe")
+
+val pyenvTask = tasks.register<PythonPyenv>("pyenv") {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pythonVersion = extension.version
+    pythonBuildDefinitionsDir = layout.projectDirectory.dir("../pyenv")
+}
+
+val pyenvValgrindTask = tasks.register<PythonPyenv>("pyenv_valgrind") {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pythonVersion = extension.version
+    pythonBuildDefinitionsDir = layout.projectDirectory.dir("../pyenv")
+    debugVariant = "valgrind"
+}
+
+val pyenvPythonExeTask = tasks.register<PythonPyenvPythonExe>("pyenv_python_exe") {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pyenvVersionName = pyenvTask.map { it.pyenvVersionName.get() }
+}
+
+val pyenvPythonValgrindExeTask = tasks.register<PythonPyenvPythonExe>("pyenv_valgrind_python_exe") {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pyenvVersionName = pyenvValgrindTask.map { it.pyenvVersionName.get() }
 }
 
 val pythonSrcDir = layout.projectDirectory.dir(provider { "../saxonc" })
 
-val releaseWheels = tasks.register("release_wheels") {
-    group = LifecycleTasks.RELEASE_GROUP
-    description = "Build release wheels for all supported Python versions"
-    outputs.dir(layout.buildDirectory.file("repaired-wheels"))
-
-    doLast {
-      mkdir(layout.buildDirectory.file("repaired-wheels"))
-    }
-
-    doLast {
-      tasks.withType<RepairLocalWheel>().filter { it.name.contains("release_wheel") }.forEach { rtask ->
-        copy {
-          into(layout.buildDirectory.file("repaired-wheels"))
-          from(rtask.outputs)
-        }
-      }
-    }
-}
-
-releaseWhl.outgoing.artifact(releaseWheels) { builtBy(releaseWheels) }
-
-val pythonVersions = mutableMapOf<String, String>()
-
-val wheelTasksBuilder = WheelTasksBuilder.create(project, extension, saxonBuild)
-
-extension.releaseVersions.get().forEach { v ->
-    val pythonBucket by configurations.dependencyScope("python${v}Bucket")
-    val pythonExe by configurations.resolvable("python${v}") {
-        extendsFrom(pythonBucket)
-    }
-    dependencies {
-        pythonBucket(project(path=":python", configuration="python${v}"))
-    }
-
-    pythonVersions[v] = "python${v}"
-
-    val venv = tasks.register<PythonVenv>("release_venv_${v}") {
-        pythonEnv = extension
-        branch = manageBranches.currentBranch
-        suffix = "${v}-release"
-        pyenvPythonExe = pythonExe.elements.map { project.file(it.single().asFile.readText()) }
-        buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
-    }
-
-    val releaseWheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_platform_tag_${v}") {
-        this.pythonExe = venv.map { it.pythonExe.get() }
-        manylinuxTarget = extension.manylinuxTarget
-        macosxDeploymentTarget = saxonBuild.macosx_min_version
-    }
-
-    val repairDevWheel = wheelTasksBuilder {
-        prefix = "${v}_release"
-        sourceDir = pythonSrcDir
-        venvTask = venv
-        buildDir = layout.buildDirectory.dir("${v}_release")
-        platformTagTask = releaseWheelPlatformTagTask
-        libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
-    }
-
-    releaseWheels {
-        dependsOn(repairDevWheel)
-    }
-}
-
-val devPythonExe by configurations.named<ResolvableConfiguration>(pythonVersions[extension.version.get()]!!)
-
 val venv = tasks.register<PythonVenv>("venv") {
     pythonEnv = extension
     branch = manageBranches.currentBranch
-    pyenvPythonExe = devPythonExe.elements.map { project.file(it.single().asFile.readText()) }
+    pyenvPythonExe = pyenvPythonExeTask.map { it.pythonExe.get() }
     buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
 }
 
 val debugVenv = tasks.register<PythonVenv>("debug_venv") {
-    pyenvPythonExe = devDebugPythonExe.elements.map { project.file(it.single().asFile.readText()) }
+    pyenvPythonExe = pyenvPythonValgrindExeTask.map { it.pythonExe.get() }
     pythonEnv = extension
     branch = manageBranches.currentBranch
-    buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
     suffix = "debug"
 }
 
-val devWheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("dev_wheel_platform_tag") {
+val wheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_platform_tag") {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pythonVersion = pyenvTask.map { it.pythonVersion.get() }
     pythonExe = venv.map { it.pythonExe.get() }
-    manylinuxTarget = "linux"
-    macosxDeploymentTarget = saxonBuild.macosx_min_version
+    manylinuxTarget = extension.manylinuxTarget
 }
 
 val wheelDebugPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_debug_platform_tag") {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pythonVersion = pyenvTask.map { it.pythonVersion.get() }
     pythonExe = debugVenv.map { it.pythonExe.get() }
-    manylinuxTarget = "linux"
-    macosxDeploymentTarget = saxonBuild.macosx_min_version
+    manylinuxTarget = extension.manylinuxTarget
 }
 
 val pipInstall = project.tasks.register<PipInstall>("pip_install") {
@@ -159,35 +109,94 @@ val pipInstall = project.tasks.register<PipInstall>("pip_install") {
     requirements = layout.projectDirectory.dir("../saxonc").file("requirements.txt")
 }
 
-val repairDevWheel = wheelTasksBuilder {
+val conf = this
+
+val buildWheel = project.tasks.register<BuildWheel>("build_wheel") {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    description = "Build the release wheel"
+    pythonExe = venv.map { it.pythonExe.get() }
+    productEdition = extension.edition
+    productVersion = saxonBuild.version
+    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
     sourceDir = pythonSrcDir
-    venvTask = venv
-    buildDir = layout.buildDirectory
-    platformTagTask = devWheelPlatformTagTask
-    libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
+    saxoncCoreDir = layout.dir(conf.saxoncCoreReleaseArtifactsDir.elements.map { it.first().asFile })
+    outputDir = layout.buildDirectory.dir("wheel")
 }
 
-val repairDevDebugWheel = wheelTasksBuilder {
-    prefix = "debug"
-    sourceDir = pythonSrcDir
-    venvTask = debugVenv
-    buildDir = layout.buildDirectory
-    platformTagTask = wheelDebugPlatformTagTask
-    libsaxoncDir = libsaxoncDebugArtifactsDir.elements
+fun repairWheelTask(name: String, platformTagTask: TaskProvider<WheelCompatibilityTags>): TaskProvider<RepairLocalWheel> {
+    val libLocations: List<String> = if (systemOs.isWindows) listOf("lib", "bin") else listOf("lib")
+//    val libDirs = provider<List<File>> {
+//        val saxoncCoreDir = layout.dir(conf.saxoncCoreReleaseArtifactsDir.elements.map { it.first().asFile }).get()
+//        libLocations.map { dirname ->
+//            saxoncCoreDir.dir(dirname).asFile
+//        }
+//    }
+    val libDirs = conf.saxoncCoreReleaseArtifactsDir.elements.map { dirs ->
+        project.files(libLocations.map { dirname ->
+            layout.projectDirectory.dir(dirs.first().asFile.toString()).dir(dirname)
+        })
+    }
+
+//        val saxoncCoreDir = layout.dir(conf.saxoncCoreReleaseArtifactsDir.elements.map { it.first().asFile }).get()
+//        libLocations.map { dirname ->
+//            saxoncCoreDir.dir(dirname).asFile
+//        }
+//    }
+
+
+    return tasks.register<RepairLocalWheel>(name) {
+        group = LifecycleBasePlugin.BUILD_GROUP
+        manylinuxTarget = platformTagTask.flatMap { it.manylinuxTarget }
+        pythonExe = venv.map { it.pythonExe.get() }
+        pythonVenvTask = venv
+        productEdition = extension.edition
+        systemOsArch = saxonBuild.systemOsArch
+        repairedWheelFilePlatformSuffix = platformTagTask.flatMap { it.repairedWheelSuffix }
+        libraryDirs.from(libDirs)
+    }
 }
 
-val installDevWheel = tasks.register<InstallLocalWheel>("install_wheel") {
+val repairWheel = repairWheelTask("repair_wheel", wheelPlatformTagTask)
+repairWheel.configure {
+    description = "Fix up the shared libs within the release wheel"
+    outputDir = layout.buildDirectory.dir("repaired-wheel")
+    wheel = buildWheel.map { it.wheel.get() }
+}
+
+val installWheel = tasks.register<InstallLocalWheel>("install_wheel") {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Install the release wheel into the branch's VENV"
     pipExe = venv.map { it.pipExe.get() }
-    wheel = repairDevWheel.map { it.repairedWheel.get() }
+    wheel = repairWheel.map { it.repairedWheel.get() }
 }
 
-val installDevDebugWheel = tasks.register<InstallLocalWheel>("install_debug_wheel") {
+val buildDebugWheel = project.tasks.register<BuildWheel>("build_debug_wheel") {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    description = "Build the debug wheel"
+    pythonExe = venv.map { it.pythonExe.get() }
+    productEdition = extension.edition
+    productVersion = saxonBuild.version
+    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    sourceDir = pythonSrcDir
+    saxoncCoreDir = layout.dir(conf.libsaxoncDebugArtifactsDir.elements.map { it.first().asFile })
+    outputDir = layout.buildDirectory.dir("wheel")
+    debug = true
+}
+
+val repairDebugWheel = repairWheelTask("repair_debug_wheel", wheelPlatformTagTask)
+repairDebugWheel.configure {
+    description = "Fix up the shared libs within the debug wheel"
+    outputDir = layout.buildDirectory.dir("repaired-debug-wheel")
+    wheel = buildDebugWheel.map { it.wheel.get() }
+}
+
+val installDebugWheel = tasks.register<InstallLocalWheel>("install_debug_wheel") {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Install the debug wheel into the branch's VENV"
-    pipExe = debugVenv.map { it.pipExe.get() }
-    wheel = repairDevDebugWheel.map { it.repairedWheel.get() }
+    pipExe = venv.map { it.pipExe.get() }
+    wheel = repairDebugWheel.map { it.repairedWheel.get() }
 }
 
 val pyTestSamples = tasks.register<Copy>("pytest_data") {
@@ -195,6 +204,27 @@ val pyTestSamples = tasks.register<Copy>("pytest_data") {
     into(layout.buildDirectory.dir("samples/data"))
 }
 val pyTestData = pyTestSamples.map { it.destinationDir }
+
+val testWheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("test_wheel_platform_tag") {
+    pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+    pythonVersion = pyenvTask.map { it.pythonVersion.get() }
+    pythonExe = venv.map { it.pythonExe.get() }
+    manylinuxTarget = "linux"
+}
+
+val repairTestWheel = repairWheelTask("repair_test_wheel", testWheelPlatformTagTask)
+repairTestWheel.configure {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Repair the test wheel into the branch's VENV"
+    outputDir = layout.buildDirectory.dir("repaired-test-wheel")
+    wheel = buildWheel.map { it.wheel.get() }
+}
+
+val installTestWheel = tasks.register<InstallLocalWheel>("install_test_wheel") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    pipExe = venv.map { it.pipExe.get() }
+    wheel = repairTestWheel.map { it.repairedWheel.get() }
+}
 
 val pytestCopy = tasks.register<Copy>("pytest_copy") {
     from(layout.projectDirectory.dir("../saxonc/test"))
@@ -207,7 +237,7 @@ val pyTest = tasks.register<PytestRunner>("pytest") {
     description = "Run unit tests with pytest"
     inputs.files(pyTestSamples)
     inputs.dir(pytestCopyDir)
-    dependsOn(installDevWheel)
+    dependsOn(installTestWheel)
     dependsOn(pipInstall)
 
     pytest = venv.map { it.venvBinHostedExe("pytest").get() }
@@ -222,50 +252,3 @@ val pyTest = tasks.register<PytestRunner>("pytest") {
 tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
     dependsOn(pyTest)
 }
-
-val packagedSamplesDir = layout.buildDirectory.dir("packaged-samples")
-val packageSamplesTask = tasks.register<Copy>("package_samples") {
-    into(packagedSamplesDir.map { it.dir("samples") })
-    from(layout.projectDirectory.dir("../saxonc/samples")) {
-        include("*.py")
-        filter { line ->
-            if (line == "import saxonche as saxonc") "import saxonc${extension.edition.get()} as saxonc" else line
-        }
-    }
-    from(layout.projectDirectory.dir("../saxonc/samples")) {
-        exclude("*.py")
-    }
-}
-val packagePytestsTask = tasks.register<Copy>("package_pytests") {
-    into(packagedSamplesDir.map { it.dir("test") })
-    from(layout.projectDirectory.dir("../saxonc/test"))
-    from(layout.projectDirectory.dir("test"))
-}
-val packagePytestIniTask = tasks.register<PythonExec>("package_pytest_ini") {
-    val script = layout.projectDirectory.file("../saxonc/generate_samples_pytest_ini.py")
-    val pytest_ini = packagedSamplesDir.map { it.file("pytest.ini") }
-    inputs.file(script)
-    inputs.file(layout.projectDirectory.file("../saxonc/pyproject.toml"))
-    outputs.file(pytest_ini)
-    python = venv.map { it.pythonExe.get() }
-    workingDir = layout.projectDirectory.dir("../saxonc")
-    args(script, pytest_ini)
-}
-val packageTestdriverTask = tasks.register<Copy>("package_testdriver") {
-    into(packagedSamplesDir.map { it.dir("testsuite_driver") })
-    from(layout.projectDirectory.dir("../testsuite_driver")) {
-        exclude(".venv/**", ".idea/**")
-    }
-}
-val packageSamples = tasks.register<Copy>("package_samples_for_release") {
-    dependsOn(packageSamplesTask, packagePytestsTask , packageTestdriverTask,  packagePytestIniTask)
-    into(packagedSamplesDir)
-    from(layout.projectDirectory.dir("../")) {
-        include("README-samples.md")
-        rename { name -> "README.md" }
-        filter<ReplaceTokens>("tokens" to mapOf("edition" to extension.edition.get()))
-    }
-}
-
-val packagedSamples by configurations.consumable("packagedSamples")
-packagedSamples.outgoing.artifact(packagedSamplesDir) { builtBy(packageSamples) }

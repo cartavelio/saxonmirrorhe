@@ -8,7 +8,6 @@
 package net.sf.saxon.trans;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
@@ -839,7 +838,7 @@ public class CommandLineOptions {
             if (outputName.startsWith("/")) {
                 outputName = outputName.replaceFirst("^/+", "/");
             }
-            if (Version.platform.isWindows() && outputName.matches("^/[A-Za-z]:.*$")) {
+            if (System.getProperty("os.name").startsWith("Windows") && outputName.matches("^/[A-Za-z]:.*$")) {
                 outputName = outputName.substring(1);
             }
         }

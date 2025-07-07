@@ -9,7 +9,6 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
 import org.gradle.api.tasks.*
-import org.gradle.process.ExecOperations
 import java.io.File
 import javax.inject.Inject
 
@@ -90,7 +89,7 @@ class DoxygenConfigValues
     }
 }
 
-abstract class DoxygenTask @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+abstract class DoxygenTask : DefaultTask() {
     @get:InputFile
     abstract val doxyfile: RegularFileProperty
     @get:InputDirectory
@@ -132,7 +131,7 @@ abstract class DoxygenTask @Inject constructor(private val ex: ExecOperations): 
             }
         }
 
-        ex.exec {
+        project.exec {
             workingDir(project.layout.buildDirectory)
             commandLine("doxygen", project.layout.buildDirectory.file("Doxyfile").get().asFile)
         }

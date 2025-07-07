@@ -7,6 +7,8 @@
 
 package net.sf.saxon.option.cpp;
 
+import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
+import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
@@ -37,7 +39,7 @@ public class XQueryEngine extends SaxonCAPI {
     //private XQueryExecutable executable = null;
 
     /**
-     * Default Constructor to initialise XQueryEngine. Processor is created with license flag as false
+     * Default Constructor to initialise XQueryEngine. s9api Processor is created with license flag as false
      */
     public XQueryEngine() {
         super(false);
@@ -53,6 +55,12 @@ public class XQueryEngine extends SaxonCAPI {
         super(license);
         Configuration config = processor.getUnderlyingConfiguration();
         schemaAware = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT);
+//#if EE==true || PE==true
+        if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
+        }
+//#endif
     }
 
     /**
@@ -64,6 +72,12 @@ public class XQueryEngine extends SaxonCAPI {
         super(proc);
         Configuration config = processor.getUnderlyingConfiguration();
         schemaAware = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT);
+//#if EE==true || PE==true
+        if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
+            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
+        }
+//#endif
     }
 
 

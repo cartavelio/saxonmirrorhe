@@ -232,11 +232,6 @@ public class JavaPlatform implements Platform {
         return "Java version " + System.getProperty("java.version");
     }
 
-    @Override
-    public boolean isWindows() {
-        return System.getProperty("os.name").startsWith("Windows");
-    }
-
     /**
      * Get a suffix letter to add to the Saxon version number to identify the platform
      */

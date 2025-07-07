@@ -1,7 +1,6 @@
 package com.saxonica.build
 
 import ManageBranchesExtension
-import com.saxonica.build.java.BranchInfo
 import java.io.File
 import java.io.BufferedReader
 import java.io.FileReader
@@ -24,7 +23,40 @@ class ManageBranchesPlugin : Plugin<Project> {
     // Make sure we only do the work once.
     synchronized(Companion) {
       if (ManageBranchesPlugin.currentBranchName == null) {
-        ManageBranchesPlugin.currentBranchName = BranchInfo.currentBranchName(project.projectDir)
+        // Where is git?
+        var git: String? = null
+        System.getenv("PATH").split(System.getProperty("path.separator")).forEach { dir ->
+          if (git == null) {
+            val fn = File(dir + "/git")
+            if (fn.exists() && !fn.isDirectory() && fn.canExecute()) {
+              git = fn.toString()
+            } else {
+              val wfn = File(dir + "\\git.exe")
+              if (wfn.exists() && wfn.canExecute()) {
+                git = wfn.toString()
+              }
+            }
+          }
+        }
+
+        if (git == null) {
+          throw GradleException("Cannot find git on PATH!?")
+        }
+
+        val pb = ProcessBuilder().command(git, "rev-parse", "--abbrev-ref", "HEAD")
+        pb.directory(project.projectDir)
+        val proc = pb.start()
+        proc.waitFor()
+
+        if (proc.exitValue() != 0) {
+          throw GradleException("Git failed to return current branch!?")
+        }
+
+        ManageBranchesPlugin.currentBranchName = InputStreamReader(proc.inputStream).use { instream ->
+          BufferedReader(instream).use { reader ->
+            reader.readLine()
+          }
+        }
       }
     }
 
