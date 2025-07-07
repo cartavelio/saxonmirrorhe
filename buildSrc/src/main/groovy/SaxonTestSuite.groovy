@@ -132,8 +132,7 @@ class SaxonTestSuite {
     def optionMap = this.optionMap
 
     Task run = project.task("run__${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/main/java")
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/test")
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file "${options['report']}.xml"
       outputs.upToDateWhen { false }
 
@@ -282,8 +281,7 @@ class SaxonTestSuite {
     errorFn += options['language'] + "-errors.xml"
 
     Task run = project.task("run__${testTaskName}", type: JavaExec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/main/java")
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/test")
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file resultFn
       outputs.file errorFn
 
@@ -423,8 +421,7 @@ class SaxonTestSuite {
     def optionMap = this.optionMap
 
     Task run = project.task("run__${testTaskName}", type: Exec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/main/saxon-cs")
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/test")
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file "${options['report']}.xml"
 
       doFirst {
@@ -437,7 +434,7 @@ class SaxonTestSuite {
       msg += "for ${options['language']} with ${prod}"
       description msg
 
-      def depends = ["dotnetTestDrivers", "eecs_featureKeys"]
+      def depends = ["dotnetTestDrivers"]
       depends += options.getOrDefault("depends", [])
       depends.each { name ->
         dependsOn name
@@ -567,8 +564,7 @@ class SaxonTestSuite {
     errorFn += options['language'] + "-errors.xml"
 
     Task run = project.task("run__${testTaskName}", type: Exec) {
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/main/saxon-cs")
-      inputs.files project.fileTree(dir: "${project.projectDir}/src/test")
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file resultFn
       outputs.file errorFn
 
@@ -582,7 +578,7 @@ class SaxonTestSuite {
       msg += "for ${options['language']} with ${prod}"
       description msg
 
-      def depends = ["dotnetTestDrivers", "eecs_featureKeys"]
+      def depends = ["dotnetTestDrivers"]
       depends += options.getOrDefault("depends", [])
       depends.each { name ->
         dependsOn name
