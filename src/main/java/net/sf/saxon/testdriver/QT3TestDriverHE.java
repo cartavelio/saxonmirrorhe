@@ -57,6 +57,8 @@ public class QT3TestDriverHE extends TestDriver {
     }
     private static final URI EMPTY_STRING_URI = URI.create("");
 
+    private static final String CUTOFF=null; //"2023-02-08";
+
     //private FotsResultsDocument resultsDoc;
 
     @Override
@@ -355,6 +357,18 @@ public class QT3TestDriverHE extends TestDriver {
         String hostLang;
         String langVersion;
         Spec specOpt = null;
+        if (CUTOFF != null) {
+            for (XdmNode data : testCase.children()) {
+                if (data.getNodeKind() == XdmNodeKind.ELEMENT &&
+                        (data.getNodeName().getLocalName().equals("created") ||
+                                 data.getNodeName().getLocalName().equals("modified"))) {
+                    String date = data.getAttributeValue(new QName("on"));
+                    if (date.compareTo(CUTOFF) > 0) {
+                        return;
+                    }
+                }
+            }
+        }
         XPathCompiler xpath = driverProc.newXPathCompiler();
         String testCaseName = testCase.attribute("name");
         String testSetName = testCase.getParent().attribute("name");
