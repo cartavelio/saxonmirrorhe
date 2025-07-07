@@ -74,7 +74,7 @@ namespace Saxon.Impl.Helpers {
             //     return false;
             // }
             
-            string escaped = System.Uri.EscapeUriString(original);
+            string escaped = System.Uri.EscapeDataString(original);
             if (uri.IsAbsoluteUri) {
                 if (new System.Uri(escaped).IsWellFormedOriginalString()) {
                     return true;
