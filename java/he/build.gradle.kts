@@ -188,9 +188,7 @@ testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30extra", "XT30")
 
 val downloadRelease = tasks.named<Zip>("downloadRelease") {
-  into(archiveBaseName) {
-    from(xqjDownloadJar)
-  }
+  from(xqjDownloadJar)
 }
 
 val saxonBuild = the<SaxonBuildExtension>()
