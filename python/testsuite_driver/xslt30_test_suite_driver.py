@@ -50,7 +50,7 @@ xpathProcForCompareNodes = driver_proc.new_xpath_processor()
 xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
 
 schemaValidator = None
-test_report = PyTestReport("xslt30", "http://www.w3.org/2012/11/xslt30-test-results", "XT30",driver_proc.version[:8], saxon_version)
+test_report = PyTestReport("xslt30", "http://www.w3.org/2012/11/xslt30-test-results", "XT30",driver_proc.version[:8], driver_proc.version)
 
 globalEnvironments = {}
 localEnvironments = {}
