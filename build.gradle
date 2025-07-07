@@ -1686,9 +1686,9 @@ def pomDevelopers(String release) {
       email = 'debbie@saxonica.com'
     }
     developer {
-      id = 'john'
-      name = 'John Lumley'
-      email = 'john@saxonica.com'
+      id = 'matt'
+      name = 'Matt Patterson'
+      email = 'matt@saxonica.com'
     }
     developer {
       id = 'norm'
@@ -1736,16 +1736,6 @@ def pomIssueManagement(String release) {
   return {
     system = "Saxon Community"
     url = 'https://saxonica.plan.io/projects/saxon'
-  }
-}
-
-def pomMailingLists(String release) {
-  return {
-    mailingList {
-      name = 'User List'
-      post = 'saxon-help@lists.sourceforge.net'
-      archive = 'http://sourceforge.net/mailarchive/forum.php?forum_name=saxon-help'
-    }
   }
 }
 
@@ -1799,7 +1789,6 @@ publishing {
         licenses pomLicenses("he")
         developers pomDevelopers("he")
         pomIssueManagement("he")
-        pomMailingLists("he")
 
         withXml pomXml("he")
       }
@@ -1830,7 +1819,6 @@ publishing {
           licenses pomLicenses("pe")
           developers pomDevelopers("pe")
           pomIssueManagement("pe")
-          pomMailingLists("pe")
 
           withXml pomXml("pe")
         }
@@ -1859,7 +1847,6 @@ publishing {
           licenses pomLicenses("ee")
           developers pomDevelopers("ee")
           pomIssueManagement("ee")
-          pomMailingLists("ee")
 
           withXml pomXml("ee")
         }
