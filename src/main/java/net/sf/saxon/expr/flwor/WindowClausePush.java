@@ -108,9 +108,22 @@ public class WindowClausePush extends TuplePush {
                 }
             }
         }
-        // on completion, despatch unclosed windows if required
-        if (windowClause.isIncludeUnclosedWindows()) {
-            for (WindowClause.Window w : currentWindows) {
+        //on completion, first discard windows that aren't finished and don't auto -close
+        if (!windowClause.isIncludeUnclosedWindows()) {
+            for (int i = currentWindows.size() - 1; i >= 0; i--) {
+                if (!currentWindows.get(i).isFinished()) {
+                    currentWindows.remove(i);
+                }
+            }
+        }
+
+        // now despatch any remaining windows that are finished or that auto-close
+        for (WindowClause.Window w : currentWindows) {
+            if (w.isFinished()) {
+                if (!w.isDespatched()) {
+                    despatch(w, getOutputter(), context);
+                }
+            } else if (windowClause.isIncludeUnclosedWindows()) {
                 w.endItem = current;
                 w.endPreviousItem = previous;
                 w.endNextItem = null;
