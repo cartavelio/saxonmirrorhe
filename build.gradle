@@ -91,7 +91,7 @@ ext {
   csbuildarch = null
   csarcarch = null
   csconfiguration = findProperty("csConfiguration") ?: "Release"
-  csoptimize = findProperty("csOptimize") ?: "false"
+  csoptimize = findProperty("csOptimize") ?: "true"
   csplatform = null
   c_sendria = "sendriasmtp"
   codesign_dylib = false
