@@ -180,6 +180,10 @@ abstract class DotNetBuild @Inject constructor(private val ex: ExecOperations): 
 
     ex.exec {
       workingDir = cwd
+      println(cwd)
+      println(listOf("${saxonBuild.dotnet.get()}",
+                  "restore", "${target.get()}.sln", "--verbosity", "Normal",
+                  "-p:Configuration=${configuration}", "-p:Platform=Any CPU"))
       commandLine("${saxonBuild.dotnet.get()}",
                   "restore", "${target.get()}.sln", "--verbosity", "Normal",
                   "-p:Configuration=${configuration}", "-p:Platform=Any CPU")
@@ -187,6 +191,13 @@ abstract class DotNetBuild @Inject constructor(private val ex: ExecOperations): 
 
     ex.exec {
       workingDir = cwd
+      println(listOf("${saxonBuild.dotnet.get()}",
+                  "build", "${target.get()}.sln", "--verbosity", "Normal",
+                  "/nodereuse:false", "--no-restore",
+                  "-p:Version=${saxonBuild.version.get()}",
+                  "-p:PackageVersion=${saxonBuild.version.get()}",
+                  "-p:Configuration=${configuration}", "-p:Platform=Any CPU",
+                  "-p:DefineConstants=${saxonCS.edition.get().uppercase()}"))
       commandLine("${saxonBuild.dotnet.get()}",
                   "build", "${target.get()}.sln", "--verbosity", "Normal",
                   "/nodereuse:false", "--no-restore",

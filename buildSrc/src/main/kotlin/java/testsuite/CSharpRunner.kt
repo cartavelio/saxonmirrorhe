@@ -89,7 +89,7 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       }
     }
 
-    val relprefix = "${arch.get()}/TestDrivers/bin/Release"
+    val relprefix = "${arch.get()}/TestDrivers/bin/Debug"
     val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
     val testDrivers = project.layout.buildDirectory.file("${relprefix}/${relarch}")
 
@@ -118,6 +118,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
         testargs.add("-${optname}:${optvalue}")
       }
     }
+
+    println(listOf(testargs))
 
     ex.exec {
       if (!showOutput) {
