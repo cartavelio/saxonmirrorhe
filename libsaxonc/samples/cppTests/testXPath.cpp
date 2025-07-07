@@ -129,6 +129,7 @@ void testCopyConstructorForXdmNode(SaxonProcessor *processor,
 }
 
 void testEncoding(SaxonProcessor *processor,
+                                         const std::string *const dataDir,
                                          XPathProcessor *xpath,
                                          sResultCount *sresult) {
 
@@ -136,8 +137,9 @@ void testEncoding(SaxonProcessor *processor,
 try{
 
   // parser the XML
-
-  XdmItem * item = xpath->evaluateSingle("unparsed-text('../data/help.txt')");
+  std::string xpathContents;
+  xpathContents = CppTestUtils::concat(3, "unparsed-text('", dataDir->c_str(), "/help.txt')");
+  XdmItem * item = xpath->evaluateSingle(xpathContents.c_str());
   const char * value = item->getStringValue();
   std::string encoding = "Cp437";//"windows-1252";
   const char * result = SaxonProcessor::encodeString(value, encoding.c_str());
@@ -534,14 +536,17 @@ void testEmptyXdmValueToString(SaxonProcessor *processor, XPathProcessor *xpath,
 
 }
 
+
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
 void testXPathOnFile(SaxonProcessor *processor, XPathProcessor *xpath,
+                     const std::string * const dataDir,
                      sResultCount *sresult) {
+
   cout << endl << "testXPathOnFile: Test testXPath with file source:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
 
   try {
     XdmValue *resultValues = xpath->evaluate("//person");
@@ -922,11 +927,11 @@ void testXdmArray(SaxonProcessor *processor, sResultCount *sresult) {
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
-void testXPathOnFile2(XPathProcessor *xpath, sResultCount *sresult) {
+void testXPathOnFile2(XPathProcessor *xpath, const std::string * const dataDir, sResultCount *sresult) {
   cout << endl << "Test testXPath with file source-2:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
   try {
     XdmItem *result = xpath->evaluateSingle("//person[1]");
 
@@ -972,11 +977,11 @@ void testXPathOnFile2(XPathProcessor *xpath, sResultCount *sresult) {
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
-void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
+void testXdmNodeEquals(XPathProcessor *xpath, const std::string * const dataDir, sResultCount *sresult) {
   cout << endl << "Test testXdmNodeEquals:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
   try {
     XdmNode *result = (XdmNode *)xpath->evaluateSingle("//person[1]");
     XdmNode *result2 = new XdmNode(* result);
@@ -1017,11 +1022,11 @@ void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
-void testXdmNodeEquals2(XPathProcessor *xpath, sResultCount *sresult) {
+void testXdmNodeEquals2(XPathProcessor *xpath, const std::string * const dataDir, sResultCount *sresult) {
   cout << endl << "Test testXdmNodeEquals2:" << endl;
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setContextFile("../data/cat.xml");
+  xpath->setContextFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
   try {
     XdmNode *result = (XdmNode *)xpath->evaluateSingle("//person[1]");
     XdmNode *result2 = new XdmNode(* result);
@@ -1107,7 +1112,8 @@ void runTest(const char *testName, const char *expr, const char *expectedResult,
   }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+  const std::string dataDir = argc > 1 ? string(argv[1]) : string();
 
   SaxonProcessor *processor = new SaxonProcessor(false);
   XPathProcessor *xpathProc = processor->newXPathProcessor();
@@ -1213,23 +1219,23 @@ int main() {
      << endl
      << endl;
 
-  testXPathOnFile(processor, xpathProc, sresult);
+  testXPathOnFile(processor, xpathProc, &dataDir, sresult);
   cout << endl
        << "============================================================="
        << endl
        << endl;
-  testXPathOnFile2(xpathProc, sresult);
+  testXPathOnFile2(xpathProc, &dataDir, sresult);
   cout << endl
        << "============================================================="
        << endl
        << endl;
-  testXdmNodeEquals(xpathProc, sresult);
+  testXdmNodeEquals(xpathProc, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
        << endl
        << endl;
-  testXdmNodeEquals2(xpathProc, sresult);
+  testXdmNodeEquals2(xpathProc, &dataDir, sresult);
 
   cout << endl
      << "============================================================="
@@ -1415,7 +1421,7 @@ int main() {
   runTest("testDefaultLanguage", "default-language()", "en", xpathProc, sresult,
           document);
 
-  testEncoding(processor, xpathProc, sresult);
+  testEncoding(processor, &dataDir, xpathProc, sresult);
 
   std::cout << "\nTest Results - Number of tests= "
             << (sresult->success + sresult->failure)
