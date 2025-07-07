@@ -1,8 +1,11 @@
+import com.saxonica.build.java.PomGenerator
+
 plugins {
   id("saxon-build")
   id("com.saxonica.build.testsuites")
   id("com.saxonica.build.samples")
   id("saxonj")
+  id("maven-publish")
 }
 
 saxonj {
@@ -252,3 +255,35 @@ testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
 
 testSuites.configure("xslt30extra", "XT30")
+
+val saxonBuild = the<SaxonBuildExtension>()
+val mavenArtifactId = "Saxon-PE"
+val mavenPom = PomGenerator() {
+  name = mavenArtifactId
+  license(PomGenerator.COMMERCIAL_LICENSE)
+  dependencies = configurations.editionImplementation.get().allDependencies
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("maven") {
+      groupId = "com.saxonica"
+      artifactId = mavenArtifactId
+      version = saxonBuild.version.get()
+
+      pom(mavenPom.generate())
+
+      artifact(tasks.named<Jar>("editionMavenJar"))
+      artifact(tasks.named<Jar>("javadocMavenJar"))
+      artifact(mavenSqlJar)
+      artifact(mavenSqlSourceJar)
+      artifact(tasks.named<Jar>("testDriversMavenJar"))
+      artifact(tasks.named<Jar>("testDriversSourceMavenJar"))
+    }
+  }
+  repositories {
+    maven {
+      url = layout.buildDirectory.dir("maven-o-matic").map { it.asFile.toURI() }.get()
+    }
+  }
+}
