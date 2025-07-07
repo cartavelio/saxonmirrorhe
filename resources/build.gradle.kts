@@ -47,9 +47,14 @@ val copySaxoncDoc by configurations.resolvable("copySaxoncDoc") {
   extendsFrom(copySaxoncDocBucket)
 }
 
-val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
+val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
+val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
+  extendsFrom(javaFeatureKeysBucket)
+}
+
+val featureKeysSourcesBucket by configurations.dependencyScope("featureKeysSourcesBucket")
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
-  extendsFrom(featureKeysBucket)
+  extendsFrom(featureKeysSourcesBucket)
 }
 
 val dotnetDocHtmlBucket by configurations.dependencyScope("dotnetDocHtmlBucket")
@@ -77,8 +82,11 @@ dependencies {
   copySaxoncDocBucket(project(mapOf("path" to ":documentation",
                                    "configuration" to "copySaxoncDoc")))
 
-  featureKeysBucket(project(mapOf("path" to ":java:keys",
-                                  "configuration" to "featureKeys")))
+  javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                      "configuration" to "javaFeatureKeys")))
+  featureKeysSourcesBucket(project(mapOf("path" to ":featurekeys",
+                                         "configuration" to "featureKeysSources")))
+
   dotnetDocHtmlBucket(project(mapOf("path" to ":documentation",
                                   "configuration" to "dotnetDocHtmlArtifacts")))
   userdocViewerAppJSBucket(project(mapOf("path" to ":documentation",
@@ -178,19 +186,26 @@ val stageSamples = tasks.register<Copy>("stageSamples") {
 }
 resources { dependsOn(stageSamples) }
 
+val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
+  group = "Internal"
+  into(layout.buildDirectory.dir("featureKeys"))
+  from(featureKeysSources)
+}
+
 val stageConfigSchema = tasks.register<JavaExec>("stageConfigSchema") {
   group = "Internal"
-  inputs.files(featureKeysSources)
+  inputs.files(javaFeatureKeysSources)
+  inputs.files(copy_feature_keys)
   inputs.files(layout.projectDirectory.file("../src/samples/config/config-raw.xsd"))
   outputs.files(layout.buildDirectory.file("stage/samples/config/config.xsd"))
 
   classpath = configurations.named("documentation").get()
   mainClass = "com.saxonica.Transform"
-  args("-xsl:${layout.projectDirectory.file("tools/featureKeys/FeatureKeysToSchema.xsl")}",
+  args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToSchema.xsl")}",
        "-o:${layout.buildDirectory.file("stage/samples/config/config.xsd").get()}",
        "-it:main",
-       "FeatureKeys=${layout.projectDirectory.file("../src/main/xml/FeatureKeys.xml")}",
-       "AdditionalFeatures=${layout.projectDirectory.file("../src/main/xml/AdditionalFeatures.xml")}",
+       "FeatureKeys=${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml")}",
+       "AdditionalFeatures=${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml")}",
        "ConfigSchema=file://${layout.projectDirectory.file("../src/samples/config/config-raw.xsd")}")
 }
 resources { dependsOn(stageConfigSchema) }

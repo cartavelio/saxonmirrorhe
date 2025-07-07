@@ -19,7 +19,8 @@ val saxonMajorVersion = saxonBuild.version.get().split('.').first()
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val javadocBucket by configurations.dependencyScope("javadocBucket")
-val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
+val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
+val featureKeysSourcesBucket by configurations.dependencyScope("featureKeysSourcesBucket")
 val xmldocletBucket by configurations.dependencyScope("xmldocletBucket")
 val csharpApiSourcesBucket by configurations.dependencyScope("csharpApiSourcesBucket")
 val csharpXmlDocBucket by configurations.dependencyScope("csharpXmlDocBucket")
@@ -39,8 +40,10 @@ dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../java/src/main/java")))
   javadocBucket(project(mapOf("path" to ":java",
                               "configuration" to "javadocArtifacts")))
-  featureKeysBucket(project(mapOf("path" to ":java:keys",
-                                  "configuration" to "featureKeys")))
+  javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                      "configuration" to "javaFeatureKeys")))
+  featureKeysSourcesBucket(project(mapOf("path" to ":featurekeys",
+                                         "configuration" to "featureKeysSources")))
   xmldocletBucket(project(mapOf("path" to ":java",
                                 "configuration" to "xmldocletArtifacts")))
   csharpApiSourcesBucket(project(mapOf("path" to ":csharp:ee",
@@ -90,8 +93,12 @@ val javadocSources = configurations.resolvable("javadocSources") {
   extendsFrom(javadocBucket)
 }
 
+val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
+  extendsFrom(javaFeatureKeysBucket)
+}
+
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
-  extendsFrom(featureKeysBucket)
+  extendsFrom(featureKeysSourcesBucket)
 }
 
 val xmldocletSources = configurations.resolvable("xmldocletSources") {
@@ -243,17 +250,24 @@ tasks.register<Copy>("copy_userdoc_sources") {
   }
 }
 
+val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
+  group = "Internal"
+  into(layout.buildDirectory.dir("featureKeys"))
+  from(featureKeysSources)
+}
+
 tasks.register<JavaExec>("doc_FeatureKeysDoc") {
   group = "Internal"
   description = "Construct the documentation for feature keys"
   dependsOn("copy_userdoc_sources")
 
+  inputs.files(copy_feature_keys)
   inputs.files(layout.projectDirectory.dir("../java/keys/tools"))
   outputs.file(layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml"))
   classpath = configurations.named("documentation").get()
   mainClass = "net.sf.saxon.Transform"
   args("${layout.projectDirectory.file("../src/main/xml/FeatureKeys.xml")}",
-       "-xsl:${layout.projectDirectory.file("tools/featureKeys/FeatureKeysToDoc.xsl")}",
+       "-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToDoc.xsl")}",
        "-o:${layout.buildDirectory.file("src/userdoc/featureKeys/FeatureKeysDoc.xml").get().asFile}")
 }
 
