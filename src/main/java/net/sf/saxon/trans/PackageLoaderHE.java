@@ -3617,6 +3617,26 @@ public class PackageLoaderHE implements IPackageLoader {
         return loc;
     }
 
+    public static NamespaceMap fromExportedNamespaces(String nsAtt) {
+        NamespaceMap map = NamespaceMap.emptyMap();
+        if (nsAtt != null) {
+            String[] namespaces = nsAtt.split(" ");
+            for (String ns : namespaces) {
+                int eq = ns.indexOf('=');
+                if (eq < 0) {
+                    throw new IllegalStateException("ns=" + nsAtt);
+                }
+                String prefix = ns.substring(0, eq);
+                String uri = ns.substring(eq + 1);
+                if (uri.equals("~")) {
+                    uri = NamespaceConstant.getUriForConventionalPrefix(prefix);
+                }
+                map = map.put(prefix, uri);
+            }
+        }
+        return map;
+    }
+
 }
 
 // Copyright (c) 2018-2022 Saxonica Limited

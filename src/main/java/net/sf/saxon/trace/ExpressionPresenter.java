@@ -364,29 +364,38 @@ public class ExpressionPresenter {
                 emitAttribute("defaultFunctionNS", sc.getDefaultFunctionNamespace());
             }
             if (!((ExportOptions)options).suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
-                UnicodeBuilder ub = new UnicodeBuilder();
-                for (Iterator<String> iter = sc.iteratePrefixes(); iter.hasNext(); ) {
-                    String p = iter.next();
-
-                    String uri = sc.getURIForPrefix(p, true);
-                    ub.append(p);
-                    ub.append("=");
-
-                    if (Whitespace.containsWhitespace(StringTool.codePoints(uri))) {
-                        throw new XPathException("Cannot export a stylesheet if namespaces contain whitespace: '" + uri + "'");
-                    }
-                    if (uri.equals(NamespaceConstant.getUriForConventionalPrefix(p))) {
-                        uri = "~";
-                    }
-                    ub.append(uri);
-                    ub.append(" ");
-
-                }
-                emitAttribute("ns", Whitespace.trim(ub.toUnicodeString()).toString());
+                emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap()));
             }
         } catch (XPathException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public static String getNamespacesAsString(NamespaceMap sc) throws XPathException {
+        // Note that this will throw an UnsupportedOperationException if the context does
+        // not allow namespace prefixes to be enumerated: that is, if it is a JAXP static context.
+        // Fortunately we don't need to serialize XPath expressions in that scenario.
+        UnicodeBuilder ub = new UnicodeBuilder();
+        for (Iterator<String> iter = sc.iteratePrefixes(); iter.hasNext(); ) {
+            String p = iter.next();
+            if (!p.equals("xml")) {
+                String uri = sc.getURIForPrefix(p, true);
+                ub.append(p);
+                ub.append("=");
+
+                if (uri.equals(NamespaceConstant.getUriForConventionalPrefix(p))) {
+                    ub.append("~");
+                } else {
+                    UnicodeString uUri = BMPString.of(uri);
+                    if (Whitespace.containsWhitespace(uUri.codePoints())) {
+                        throw new XPathException("Cannot export a stylesheet if namespaces contain whitespace: '" + uri + "'");
+                    }
+                    ub.append(uUri);
+                }
+                ub.append(" ");
+            }
+        }
+        return ub.toString().trim();
     }
 
     /**

@@ -69,19 +69,7 @@ public class RetainedStaticContext implements NamespaceResolver {
         if (Version.platform.JAXPStaticContextCheck(this, sc)) {
             //updated in method
         } else {
-            NamespaceResolver resolver = sc.getNamespaceResolver();
-            if (resolver instanceof NamespaceMap) {
-                namespaces = resolver;
-            } else {
-                NamespaceMap map = NamespaceMap.emptyMap();
-                for (Iterator<String> it = resolver.iteratePrefixes(); it.hasNext(); ) {
-                    String prefix = it.next();
-                    if (!prefix.equals("xml")) {
-                        map = map.put(prefix, resolver.getURIForPrefix(prefix, true));
-                    }
-                }
-                namespaces = map;
-            }
+            namespaces = sc.getNamespaceResolver();
         }
 
     }
@@ -333,6 +321,11 @@ public class RetainedStaticContext implements NamespaceResolver {
 
     public void setNamespaces(NamespaceResolver namespaces) {
         this.namespaces = namespaces;
+    }
+
+    public NamespaceMap getNamespaceMap() {
+        // This fails for a JAXP static context, whose namespaces cannot be enumerated
+        return NamespaceMap.fromNamespaceResolver(namespaces);
     }
 
 
