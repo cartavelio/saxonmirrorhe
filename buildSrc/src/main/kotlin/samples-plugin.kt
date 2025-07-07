@@ -137,13 +137,53 @@ abstract class SamplesExtension
     all_samples.get().dependsOn(t)
   }
 
+  fun csSample(sample: String, input: String?, stylesheet: String,
+               args: List<String> = emptyList(), output: File? = null) {
+
+    tasks.register("cs_sample_${sample}") {
+      dependsOn(copy_sample_sources)
+      dependsOn("dotnetPublish")
+
+      val saxonCS = project.extensions.findByType(SaxonCSExtension::class.java)!!
+
+      val arch = saxonCS.arch.get()
+      val rel = saxonCS.release.get()
+      val netver = "net6.0"
+      val target = "${saxonCS.platform.get()}-${arch}"
+      val exec = "${arch}/SaxonCS/bin/${rel}/${netver}/${target}/SaxonCS"
+
+      val cmdArgs = mutableListOf<String>()
+
+      cmdArgs.add("${layout.buildDirectory.file(exec).get()}")
+      cmdArgs.add("transform")
+
+      input?.let {
+        cmdArgs.add("-s:${layout.buildDirectory.file("samples/resources/data/${it}").get()}")
+        inputs.files(layout.buildDirectory.file("samples/resources/data/${it}"))
+      }
+      cmdArgs.add("-xsl:${layout.buildDirectory.file("samples/resources/styles/${stylesheet}").get()}")
+      cmdArgs.add("-o:file:/${layout.buildDirectory.file("sample_results/${sample}.html").get()}")
+      cmdArgs.addAll(args)
+
+      doFirst {
+        project.mkdir(layout.buildDirectory.file("sample_results/playhtml"))
+        println(cmdArgs)
+
+      }
+
+      doLast {
+        project.exec {
+          workingDir = layout.buildDirectory.file("samples/resources").get().asFile
+          commandLine(cmdArgs)
+        }
+      }
+    }
+  }
+
   // ============================================================
   
   fun javaTransform(sample: String, input: String?, stylesheet: String,
                     args: List<String>, taskName: String, output: File?) {
-
-    //println("Task: ${taskName}")
-
     val t = tasks.register<JavaExec>(taskName) {
       inputs.files(copy_sample_sources.get().outputs)
       if (output == null) {
