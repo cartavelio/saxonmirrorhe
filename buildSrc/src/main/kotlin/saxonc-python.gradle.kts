@@ -89,6 +89,7 @@ val debugVenv = tasks.register<PythonVenv>("debug_venv") {
     pyenvPythonExe = pyenvPythonValgrindExeTask.map { it.pythonExe.get() }
     pythonEnv = extension
     branch = manageBranches.currentBranch
+    buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
     suffix = "debug"
 }
 
@@ -178,7 +179,7 @@ val installWheel = tasks.register<InstallLocalWheel>("install_wheel") {
 val buildDebugWheel = project.tasks.register<BuildWheel>("build_debug_wheel") {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Build the debug wheel"
-    pythonExe = venv.map { it.pythonExe.get() }
+    pythonExe = debugVenv.map { it.pythonExe.get() }
     productEdition = extension.edition
     productVersion = saxonBuild.version
     wheelSuffix = wheelDebugPlatformTagTask.flatMap { it.wheelSuffix }
@@ -199,7 +200,7 @@ repairDebugWheel.configure {
 val installDebugWheel = tasks.register<InstallLocalWheel>("install_debug_wheel") {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Install the debug wheel into the branch's VENV"
-    pipExe = venv.map { it.pipExe.get() }
+    pipExe = debugVenv.map { it.pipExe.get() }
     wheel = repairDebugWheel.map { it.repairedWheel.get() }
 }
 
