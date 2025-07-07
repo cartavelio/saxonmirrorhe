@@ -159,6 +159,7 @@ publishing {
             }
 
             groupId = "com.saxonica"
+            artifactId = mavenArtifactId
             version = saxonVersion
 
             artifact(signTask.map { layout.buildDirectory.file("${signRootName}.jar") })
