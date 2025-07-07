@@ -202,12 +202,12 @@
                     select="
                     fc:edition((fc:saxon-edition,
                     $default.saxon,
-                    'default')[1])"/>
+                    'ALL')[1])"/>
                 <xsl:value-of
                     select="
                     fc:platform((fc:saxon-edition/@platform,
                     $default.platform,
-                    'default')[1])"/>
+                    'ALL')[1])"/>
             </p>
 
             <xsl:apply-templates select="fc:status" mode="f"/>
