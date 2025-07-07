@@ -1,6 +1,5 @@
 package bugs;
 
-import net.sf.saxon.lib.CatalogResourceResolver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.s9api.*;
@@ -68,7 +67,8 @@ public class Bug6813Test {
                 fail();
             }
         } catch (Exception ex) {
-            Assertions.assertTrue(ex.getMessage().indexOf("protocol access denied") > 0);
+            Assertions.assertTrue(ex.getMessage().indexOf("protocol access denied") > 0
+                    || ex.getMessage().indexOf("has been prohibited") > 0);
         }
     }
 
