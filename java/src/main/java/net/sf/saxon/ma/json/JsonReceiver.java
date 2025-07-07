@@ -284,7 +284,7 @@ public class JsonReceiver implements Receiver {
             } else {
                 Sequence result = SystemFunction.dynamicCall(
                         numberFormatter, context, new StringValue(uContent));
-                output.accept(((StringValue)result).getUnicodeStringValue());
+                output.accept(result.head().getUnicodeStringValue());
             }
 
         } else if (local.equals("string")) {
