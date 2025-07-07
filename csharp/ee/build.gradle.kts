@@ -538,13 +538,13 @@ if ((saxonBuild.systemOsName.get() == "mac"
   // We can't copy the documentation into the distribution because we've
   // signed it
   tasks.register<Zip>("dotnetPublishZip") {
-    archiveFileName = "SaxonCS-${saxonBuild.version.get().replace("\\.", "-")}-MacOS.zip"
+    archiveFileName = "SaxonCS-${saxonBuild.version.get().replace(".", "-")}-MacOS.zip"
     from(osxApp)
     into("/SaxonCS.app/")
   }
 } else {
   val ziparch = if (architectures[0] == "arm64") "aarch64" else "x86_64"
-  val zipver = saxonBuild.version.get().replace("\\.", "-")
+  val zipver = saxonBuild.version.get().replace(".", "-")
   val zipname = if (saxonBuild.systemOs.get().isWindows()) {
     "Windows"
   } else if (saxonBuild.systemOs.get().isMacOsX()) {

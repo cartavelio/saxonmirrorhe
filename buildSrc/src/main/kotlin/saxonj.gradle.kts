@@ -647,7 +647,7 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
     group = LifecycleTasks.RELEASE_GROUP
     val releaseDocsRoot = extension.sourceRoot.dir("../../src/main")
     archiveBaseName = extension.edition.map { edition ->
-        "Saxon${edition.uppercase()}${saxonBuild.publishVersion.get()}J"
+        "Saxon${edition.uppercase()}${saxonBuild.publishVersion.get().replace(".", "-")}J"
     }
 
     destinationDirectory = layout.buildDirectory.dir("releases")
