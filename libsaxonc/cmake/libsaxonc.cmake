@@ -100,7 +100,7 @@ target_sources(${saxonc}
         FILES
             ${CMAKE_CURRENT_BINARY_DIR}/saxonc_export.h
 )
-set(SaxonCCore${SAXON_EDITION}_DIR "${SaxonCCore_PackageDir}/lib/cmake/SaxonCCore${SAXON_EDITION}")
+set(SaxonCCore${SAXON_EDITION}_DIR "${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}")
 
 find_package(SaxonCCore${SAXON_EDITION} ${SaxonC_VERSION} EXACT REQUIRED)
 
@@ -157,6 +157,7 @@ write_basic_package_version_file(
 
 install(TARGETS ${saxonc}
         EXPORT "SaxonC${SAXON_EDITION}"
+        LIBRARY DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
         FILE_SET common_headers
         FILE_SET edition_headers
         FILE_SET export_header
@@ -176,35 +177,33 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}Config.cmake
 
 # Files from saxonc-core
 install(FILES
-       ${SaxonCCore_PackageDir}/include/graal_isolate.h
-       ${SaxonCCore_PackageDir}/include/saxonc-core-${SaxonC_EDITION}.h
-   TYPE INCLUDE
+        ${SaxonCCore_PackageDir}/include/graal_isolate.h
+        ${SaxonCCore_PackageDir}/include/saxonc-core-${SaxonC_EDITION}.h
+        TYPE INCLUDE
 )
 
-install(DIRECTORY
-       ${SaxonCCore_PackageDir}/lib/
-   TYPE LIB
-   USE_SOURCE_PERMISSIONS
-   FILES_MATCHING
-   PATTERN cmake EXCLUDE
-   PATTERN *.dylib
-   PATTERN *.lib
-   PATTERN *.so
-   PATTERN *.so.*
+install(DIRECTORY ${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/
+        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
+        USE_SOURCE_PERMISSIONS
+        FILES_MATCHING
+        PATTERN cmake EXCLUDE
+        PATTERN *.dylib
+        PATTERN *.lib
+        PATTERN *.so
+        PATTERN *.so.*
 )
-install(DIRECTORY
-       ${SaxonCCore_PackageDir}/bin/
-   TYPE BIN
-   USE_SOURCE_PERMISSIONS
-   FILES_MATCHING
-   PATTERN cmake EXCLUDE
-   PATTERN *.dll
+install(DIRECTORY ${SaxonCCore_PackageDir}/bin/
+        TYPE BIN
+        USE_SOURCE_PERMISSIONS
+        FILES_MATCHING
+        PATTERN cmake EXCLUDE
+        PATTERN *.dll
 )
 
-install(DIRECTORY ${SaxonCCore_PackageDir}/lib/cmake/SaxonCCore${SAXON_EDITION}/
-    DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
-    PATTERN *Config.cmake EXCLUDE
-    PATTERN *ConfigVersion.cmake EXCLUDE
+install(DIRECTORY ${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}/
+        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
+        PATTERN *Config.cmake EXCLUDE
+        PATTERN *ConfigVersion.cmake EXCLUDE
 )
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")

@@ -55,6 +55,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}Config.cmake
 
 install(TARGETS ${saxonc_core}
         EXPORT "SaxonCCore${SAXON_EDITION}"
+        LIBRARY DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
         FILE_SET HEADERS
 )
 install(EXPORT "SaxonCCore${SAXON_EDITION}"
