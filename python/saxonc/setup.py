@@ -11,10 +11,10 @@ from platform import system
 
 extra_link_args = []
 
-saxonc_core_path = Path(os.environ.get('SAXONC_CORE_PATH'))
-saxonc_include_location = saxonc_core_path / 'include'
-saxonc_dll_location = saxonc_core_path / 'bin'
-saxonc_built_libs_location = saxonc_core_path / 'lib'
+libsaxonc_path = Path(os.environ.get('LIBSAXONC_PATH'))
+saxonc_include_location = libsaxonc_path / 'include'
+saxonc_dll_location = libsaxonc_path / 'bin'
+saxonc_built_libs_location = libsaxonc_path / 'lib'
 
 saxonc_edition = os.environ.get('SAXONC_BUILD_EDITION')
 saxonc_version = os.environ.get('SAXONC_BUILD_VERSION')
