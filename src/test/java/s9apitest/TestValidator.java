@@ -1,6 +1,7 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.config.StandardSchemaResolver;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
@@ -16,6 +17,7 @@ import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
@@ -1982,6 +1984,19 @@ public class TestValidator {
             assert (report.toString().contains("path=\"/Q{}PIM[1]/Q{}category[3]/@title\""));
             assert (report.toString().contains("path=\"/Q{}PIM[1]/Q{}extra[1]\""));
             assert (report.toString().contains("path=\"/Q{}PIM[1]/Q{}nonsense[1]\""));
+        }
+    }
+
+    @Test
+    public void testBug6459() {
+        try {
+            Processor processor = new Processor(true);
+            SchemaManager mgr = processor.getSchemaManager();
+            mgr.setSchemaURIResolver(new StandardSchemaResolver((EnterpriseConfiguration) processor.getUnderlyingConfiguration()));
+            mgr.load(new File("/Users/mike/bugs/2024/6459-Kerner/test.xsd"));
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
         }
     }
 
