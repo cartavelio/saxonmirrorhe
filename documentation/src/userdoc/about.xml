@@ -124,7 +124,8 @@
             installation dependencies.</p>
          <ol>
             <li>
-               <p>Ensure that Java is installed. SaxonJ 12 is built and tested using Java 11, but should still
+               <p>Ensure that Java is installed. SaxonJ 12.0 to 12.5 are built and tested using Java
+                  11, and 12.6 onwards using Java 21, but should still
                   be usable with Java 8 or later. If for some reason you need to run with an earlier Java
                   release, SaxonJ 9.8 ran with Java SE 6 or later, while SaxonJ 11 ran with Java 8 or later.
                   To check that Java is installed, try typing <code>java -version</code>
@@ -511,7 +512,8 @@
             <li>
                <p>To run SaxonJ you need at least a Java VM, and preferably a Java development
                   environment. SaxonJ 12 requires at least Java SE 8 (also known as JDK 1.8). 
-                  SaxonJ 12 is built and tested using Java SE 11, but should also still be usable
+                  SaxonJ 12.0 to 12.5 are built and tested using Java SE 11, and 12.6 onwards using
+                  Java SE 21, but should also still be usable 
                   with Java 8 or later. It should also run under all subsequent Java versions, but this may
                   not be fully tested. </p>
             </li>
