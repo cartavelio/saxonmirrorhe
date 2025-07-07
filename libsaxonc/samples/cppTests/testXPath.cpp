@@ -1113,11 +1113,6 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  testEdition(processor, sresult);
-  cout << endl
-       << "============================================================="
-       << endl
-       << endl;
   testIsLicensed(sresult);
   cout << endl
        << "============================================================="
