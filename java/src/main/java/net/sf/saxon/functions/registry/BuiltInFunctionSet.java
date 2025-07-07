@@ -59,6 +59,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
 
     public static final int AS_ARG0 = 1;          // Result has same type as first argument
     public static final int AS_PRIM_ARG0 = 2;     // Result has same primitive type as first argument
+             // See bug 6840: must be used only for functions like abs, round, etc, with a numeric first argument
     public static final int CITEM = 4;            // Depends on context item
     public static final int BASE = 8;             // Depends on base URI
     public static final int NS = 16;              // Depends on namespace context
