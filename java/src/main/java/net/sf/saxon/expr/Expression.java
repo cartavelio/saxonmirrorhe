@@ -473,8 +473,13 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     public final RetainedStaticContext getRetainedStaticContext() {
         if (retainedStaticContext == null) {
             Expression parent = getParentExpression();
-            assert parent != null;
-            retainedStaticContext = parent.getRetainedStaticContext();
+            try {
+                retainedStaticContext = parent.getRetainedStaticContext();
+            } catch (NullPointerException npe) {
+                Location location = getLocation();
+                String loc = location.getSystemId() + " - " + location.getLineNumber() + ":" + location.getColumnNumber();
+                throw new NullPointerException(npe.getMessage() + " At " + toShortString() + ": " + loc);
+            }
             assert retainedStaticContext != null;
         }
         return retainedStaticContext;
