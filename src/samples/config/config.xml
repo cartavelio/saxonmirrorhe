@@ -3,7 +3,7 @@
      convenience of editing, so it is easy to set up a configuration file with non-default options.
      
      For documentation on the contents of a Saxon configuration file, see
-     http://www.saxonica.com/html/documentation/configuration/configuration-file/index.html
+     https://www.saxonica.com/html/documentation/configuration/configuration-file/index.html
 -->
 <configuration edition="EE" xmlns="http://saxon.sf.net/ns/configuration"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://saxon.sf.net/ns/configuration config.xsd">
