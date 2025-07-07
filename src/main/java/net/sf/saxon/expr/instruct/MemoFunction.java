@@ -10,8 +10,14 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.GenericAtomicComparer;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
@@ -67,9 +73,10 @@ public class MemoFunction extends UserFunction {
         Controller controller = context.getController();
         HashMap<String, Sequence> map = (HashMap<String, Sequence>) controller.getUserData(this, "memo-function-cache");
         Sequence value = map == null ? null : map.get(key);
-        if (value != null) {
-            return value;
-        }
+        Sequence oldValue = value;
+//        if (value != null) {
+//            return value;
+//        }
 
         value = super.call(context, actualArgs);
 
@@ -77,6 +84,11 @@ public class MemoFunction extends UserFunction {
         if (map == null) {
             map = new HashMap<>(32);
             controller.setUserData(this, "memo-function-cache", map);
+        }
+        AtomicComparer comparer = GenericAtomicComparer.makeAtomicComparer(
+                BuiltInAtomicType.ANY_ATOMIC, BuiltInAtomicType.ANY_ATOMIC, CodepointCollator.getInstance(), context);
+        if (oldValue != null && !DeepEqual.deepEqual(oldValue.iterate(), value.iterate(), comparer, context, 0)) {
+            System.err.println("Values differ in : " + getFunctionName() + " for " + key + ": " + oldValue + " != " + value);
         }
         map.put(key, value);
 
