@@ -3626,21 +3626,17 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
-        try {
-            if (getBooleanProperty(Feature.EAGER_EVALUATION)) {
-                // Using eager evaluation can make for easier debugging
-                SequenceIterator iter = expression.iterate(context);
-                return SequenceTool.toGroundedValue(iter);
-            }
-
-            Closure closure = ref > 1 ? new MemoClosure() : new Closure();
-            closure.setExpression(expression);
-            closure.setSavedXPathContext(context.newContext());
-            closure.saveContext(expression, context);
-            return closure;
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
+        if (getBooleanProperty(Feature.EAGER_EVALUATION)) {
+            // Using eager evaluation can make for easier debugging
+            SequenceIterator iter = expression.iterate(context);
+            return SequenceTool.toGroundedValue(iter);
         }
+
+        Closure closure = ref > 1 ? new MemoClosure() : new Closure();
+        closure.setExpression(expression);
+        closure.setSavedXPathContext(context.newContext());
+        closure.saveContext(expression, context);
+        return closure;
 
     }
 
@@ -3655,11 +3651,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public GroundedValue makeSequenceExtent(Expression expression, int ref, XPathContext context) throws XPathException {
-        try {
-            return SequenceTool.toGroundedValue(expression.iterate(context));
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
+        return SequenceTool.toGroundedValue(expression.iterate(context));
     }
 
 
