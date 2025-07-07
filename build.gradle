@@ -1907,7 +1907,6 @@ task sqlServerStart() {
   doFirst {
     DockerContainer.assertDockerAvailable()
     DockerContainer.assertDockerComposeAvailable()
-    mkdir "${buildDir}/sql/${sqlServer}/data"
   }
 
   doLast {

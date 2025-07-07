@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
     sqlserver:
       image: mysql:latest
@@ -7,7 +5,7 @@ services:
       ports:
         - 3306:3306
       volumes:
-        - ../../build/sql/mysql/data:/var/lib/postgresql/data
+        - db_data:/var/lib/mysql/data
         - ../sql/mysql:/app/sql
       environment:
         MYSQL_ROOT_PASSWORD: admin
@@ -16,3 +14,6 @@ services:
 
 networks:
   external_net: {}
+
+volumes:
+  db_data:
