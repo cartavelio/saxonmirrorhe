@@ -806,7 +806,7 @@ public class QueryModule implements StaticContext {
 
         final HashMap<StructuredQName, GlobalVariable> libVars = getTopLevelModule().libraryVariables;
         GlobalVariable old = libVars.get(key);
-        if (old == null || old == var) {
+        if (old == null || old == var || old.getUltimateOriginalVariable() == var.getUltimateOriginalVariable()) {
             // do nothing
         } else {
             XPathException err = new XPathException("Duplicate definition of global variable "
