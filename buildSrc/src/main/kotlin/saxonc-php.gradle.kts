@@ -1,4 +1,6 @@
 import com.saxonica.build.LifecycleTasks
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.kotlin.dsl.filter
 
 plugins {
   base
@@ -7,6 +9,8 @@ plugins {
 
 val srcFolder = project.layout.projectDirectory.dir("../src")
 val releaseBuildFolder = project.layout.buildDirectory.dir("release")
+
+val saxonBuild = the<SaxonBuildExtension>()
 
 val releaseFolderTask = tasks.register<Copy>("release_folder") {
   into(releaseBuildFolder)
@@ -17,7 +21,13 @@ val releaseFolderTask = tasks.register<Copy>("release_folder") {
 
   into("src") {
     from(srcFolder) {
-      exclude("20-saxon.ini")
+      exclude("20-saxon.ini", "php8_saxon.cpp")
+    }
+    from(srcFolder) {
+      include("php8_saxon.cpp")
+      filter<ReplaceTokens>("tokens" to mapOf(
+        "version" to saxonBuild.version.get(),
+      ))
     }
   }
 
