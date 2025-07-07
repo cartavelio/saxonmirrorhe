@@ -166,8 +166,8 @@ val jar_sample_run_classes = tasks.register<Jar>("jar_sample_run_classes") {
   }
 }
 
-val javaSampleClasses by configurations.consumable("sampleClasses")
-javaSampleClasses.outgoing.artifact(jar_sample_run_classes) { builtBy(jar_sample_run_classes) }
+val javaSampleClasses by configurations.consumable("javaSampleClasses")
+javaSampleClasses.outgoing.artifact(jar_sample_run_classes)
 
 samples {
   runclasspath = (files(sourceSets["edition"].output)
