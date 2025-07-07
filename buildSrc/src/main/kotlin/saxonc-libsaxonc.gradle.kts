@@ -131,7 +131,7 @@ val cleanCtestWorkingDir = tasks.register("ctest_working_dir") {
 }
 
 val test = tasks.register<Exec>("test") {
-    inputs.dir(ctestWorkingDir)
+    inputs.dir(cleanCtestWorkingDir.map { ctestWorkingDir.get() })
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Run the tests defined in CMakeLists with CTest"
     dependsOn(build)
