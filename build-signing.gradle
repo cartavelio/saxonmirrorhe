@@ -235,3 +235,27 @@ tasks.register("he_sonatype_bundle", Zip) {
         exclude "com"
     }
 }
+
+def unsignedNugetPkgs = tasks.register("unsignedNugetPkgs", Sync) {
+    into(layout.buildDirectory.dir("unsignedNugetPkgs"))
+    from(tasks.named("dotnetRelease")) {
+        include "*.nupkg"
+    }
+}
+
+def uploadUnsignedNugetPkg = tasks.register("uploadUnsignedNugetPkg", UnsignedArtifactUploadTask) {
+    inputDir = layout.projectDirectory.dir(unsignedNugetPkgs.map { it.destinationDir.toString() })
+    bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+    queueUrl = signingResources.map { it.windowsCodeSigningInputsQueueUrl.get() }
+    region = signingResources.map { it.region.get() }
+    baseKeyPrefix = "inputs"
+    jobFileDir = layout.buildDirectory.dir("uploadNugetPkg")
+}
+
+def downloadSignedNugetPkg = tasks.register("downloadSignedNugetPkg", SignedArtifactDownloadTask) {
+    outputDir = layout.buildDirectory.dir("signed-nuget")
+    bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
+    queueUrl = signingResources.map { it.windowsCodeSigningOutputsQueueUrl.get() }
+    region = signingResources.map { it.region.get() }
+    jobFile = uploadUnsignedNugetPkg.map { it.jobFile.get() }
+}
