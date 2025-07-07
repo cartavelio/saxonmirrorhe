@@ -3,6 +3,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaxonCS-EE-arm64", "ee\Saxo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDrivers-EE-arm64", "ee\TestDrivers-EE-arm64.csproj", "{0C11663D-B609-404E-AD0F-2233821F4237}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nunit", "src/test/nunit/SaxonCS-NUnit/SaxonCS-NUnit.csproj", "{0C11663D-B609-404E-AD0F-2233821F4238}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +19,9 @@ Global
 		{0C11663D-B609-404E-AD0F-2233821F4237}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C11663D-B609-404E-AD0F-2233821F4237}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C11663D-B609-404E-AD0F-2233821F4237}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C11663D-B609-404E-AD0F-2233821F4238}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C11663D-B609-404E-AD0F-2233821F4238}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C11663D-B609-404E-AD0F-2233821F4238}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C11663D-B609-404E-AD0F-2233821F4238}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

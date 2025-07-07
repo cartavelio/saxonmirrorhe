@@ -689,6 +689,22 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
   dependsOn(dotnetDocHtml)
   dependsOn(dotnetDocXml)
 }
+
+// ============================================================
+
+tasks.register<Exec>("eecsTest") {
+  group = "Verification"
+  description = "Run SaxonCS nUnit tests"
+  dependsOn("dotnetBuild")
+
+  val reportDir = layout.buildDirectory.dir("reports/tests/eecsTest")
+  inputs.dir(layout.projectDirectory.dir("../src/test/nunit"))
+  outputs.dir(reportDir)
+
+  workingDir = layout.projectDirectory.dir("../src/test/nunit").asFile
+  commandLine("${saxonBuild.dotnet.get()}", "test", "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
+}
+
 // ============================================================
 
 tasks.register<DotNetBuild>("dotnetBuildTestDrivers") {
