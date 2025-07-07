@@ -2067,11 +2067,11 @@ public class XPathParser {
             SequenceType valueType = parseSequenceType();
             expect(Token.RPAR);
             nextToken();
-            if (!(keyType instanceof PlainType)) {
+            if (!(keyType instanceof AtomicType)) {
                 grumble("Key type of a map must be atomic");
                 return null;
             }
-            return new MapType((PlainType) keyType, valueType);
+            return new MapType((AtomicType) keyType, valueType);
         }
     }
 
@@ -3100,9 +3100,6 @@ public class XPathParser {
             }
             empty = true;
             nextToken();
-        }
-        if (schemaDeclaration) {
-            expect(Token.NAME);
         }
         switch (primaryType) {
             case Type.ITEM:
@@ -4261,8 +4258,7 @@ public class XPathParser {
 
     private static LocalBinding findOuterXSLTVariable(
             StructuredQName qName, IndexedStack<InlineFunctionDetails> inlineFunctionStack, StaticContext env) {
-        StructuredQName attName = ((ExpressionContext) env).getAttributeName();
-        SourceBinding decl = ((ExpressionContext) env).getStyleElement().bindLocalVariable(qName, attName);
+        SourceBinding decl = ((ExpressionContext) env).getStyleElement().bindLocalVariable(qName);
         if (decl != null) {
             InlineFunctionDetails details = inlineFunctionStack.get(0);
             LocalBinding innermostBinding;
