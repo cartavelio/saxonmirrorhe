@@ -253,13 +253,19 @@
 
          <ol>
             <li>
-               <p>SaxonCS 11.0 to 11.4 are targeted at .NET 5 which you will need to install separately. Note
-                  that for SaxonCS 11.4, a version for .NET 6 was also published, while SaxonCS 11.5 is built
-                  for .NET 6 only (see the <a class="bodylink"
+               <p>SaxonCS 11.0 to 11.4 are targeted at .NET 5, SaxonCS 11.4 to 11.6 are targeted at
+                  .NET 6, while SaxonCS 11.7 is targeted at .NET 8, which you will need to install
+                  separately. (Note that for SaxonCS 11.4, versions were published for both .NET 5
+                  and .NET 6, while SaxonCS 11.5 is built for .NET 6 only; see the <a class="bodylink"
                      href="https://dev.saxonica.com/blog/norm/2022/08/09-net6.html">"SaxonCS for .NET 6" blog
-                     post</a> for more information). For details, see <a class="bodylink"
-                        href="https://dotnet.microsoft.com/download/dotnet/5.0">https://dotnet.microsoft.com/download/dotnet/5.0</a>.
-               There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 5.0.400)
+                     post</a> for more information.) 
+                  For details, see <a class="bodylink"
+                     href="https://dotnet.microsoft.com/download/dotnet/5.0">https://dotnet.microsoft.com/download/dotnet/5.0</a>,
+                  <a class="bodylink"
+                     href="https://dotnet.microsoft.com/download/dotnet/6.0">https://dotnet.microsoft.com/download/dotnet/6.0</a>
+                  and <a  class="bodylink"
+                     href="https://dotnet.microsoft.com/download/dotnet/8.0">https://dotnet.microsoft.com/download/dotnet/8.0</a>.
+                  There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 8.0.408)
                corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU 
                architecture (for example Arm64, x64, or x86).</p>
 
@@ -382,8 +388,8 @@
                your application code.</p>
             <p>The SaxonCS product, available with Saxon 11, is a complete redesign. The previous
             .NET product was built using the IKVM technology, which confined it to .NET Framework 4.x.
-            SaxonCS is built by converting Java source code to C#, and runs on .NET 5 (or also on .NET 6 for
-            SaxonCS 11.4, and .NET 6 only for SaxonCS 11.5 and above), fitting
+            SaxonCS is built by converting Java source code to C#, and runs on .NET 5 (for SaxonCS
+            11.0 to 11.4), .NET 6 (for SaxonCS 11.4 to 11.6) or .NET 8 (SaxonCS 11.7), fitting
             in with Microsoft's strategic direction. The API for the new product retains many of the
             classes and methods from the older product, but we have taken the opportunity to modernize
             the design (for example by using delegates rather than interfaces for callbacks), and it's therefore
@@ -1034,8 +1040,11 @@ any version number.</p>
          download.</p>
       <ul>
          <li>
-            <p>To run SaxonCS you need to install .NET 5 or 6. This is the only release on which the product
-            has been validated; if you want to try it on other versions, please let us know your experience.</p>
+            <p>To run SaxonCS 11.0 to 11.3 you need to install .NET 5, for SaxonCS 11.4 you need to
+               install .NET 5 or .NET 6 (separate published versions are available), from SaxonCS
+               11.5 to 11.6 you need to install .NET 6, and from SaxonCS 11.7 you need to install
+               .NET 8. This is the only release on which the product has been validated; if you want
+               to try it on other versions, please let us know your experience.</p>
          </li>
          <li>
             <p>SaxonCS validation has taken place primarily on MacOS, with extensive regression testing on Windows and Linux.
