@@ -9,11 +9,11 @@ public class ManageBranchesPlugin implements Plugin<Project> {
     System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
       if (git == null) {
         def fn = new File(dir + "/git")
-        if (fn.exists() && fn.canExecute()) {
+        if (fn.isFile() && fn.canExecute()) {
           git = fn.toString()
         } else {
           fn = new File(dir + "\\git.exe")
-          if (fn.exists() && fn.canExecute()) {
+          if (fn.isFile() && fn.canExecute()) {
             git = fn.toString()
           }
         }
