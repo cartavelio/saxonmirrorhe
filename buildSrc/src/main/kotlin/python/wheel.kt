@@ -76,7 +76,7 @@ abstract class WheelCompatibilityTags @Inject constructor(private val ex: ExecOp
 /**
  * Task for building a wheel and fixing it up with repairwheel
  */
-abstract class BuildWheel : DefaultTask() {
+abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:InputFile
     abstract val pythonExe: RegularFileProperty
 
@@ -144,7 +144,7 @@ abstract class BuildWheel : DefaultTask() {
         val pyproject = PyprojectToml(sourceDir, productVersion, productEdition)
         pyproject.process(srcCopyDir)
 
-        val buildResult = project.exec {
+        val buildResult = ex.exec {
             workingDir = srcCopyDir.get().asFile
             setIgnoreExitValue(true)
             executable(pythonExe.get())
@@ -164,7 +164,7 @@ abstract class BuildWheel : DefaultTask() {
     }
 }
 
-abstract class RepairLocalWheel : DefaultTask() {
+abstract class RepairLocalWheel  @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:Input
     abstract val systemOsArch: Property<String>
 
@@ -201,7 +201,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 
     // Linux - auditwheel
     fun repairLinux(): ExecResult {
-        return project.exec {
+        return ex.exec {
             workingDir(outputDir.get())
             executable(pythonVenvTask.flatMap { it.venvBinHostedExe("auditwheel") }.get())
             environment("LD_LIBRARY_PATH", libraryDirs.toList().map { it.toString() }.joinToString(separator = ":"))
@@ -216,7 +216,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 
     // MacOS - delocate
     fun repairMacos(): ExecResult {
-        return project.exec {
+        return ex.exec {
             workingDir(outputDir.get())
             environment("LD_LIBRARY_PATH", libraryDirs.toList().map { it.toString() }.joinToString(separator = ":"))
             environment("DYLD_LIBRARY_PATH", libraryDirs.toList().map { it.toString() }.joinToString(separator = ":"))
@@ -228,7 +228,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 
     // Windows - delvewheel
     fun repairWindows(): ExecResult {
-        return project.exec {
+        return ex.exec {
             workingDir(outputDir.get())
             executable(pythonExe.get())
             args("-m", "delvewheel")
@@ -267,7 +267,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 /**
  * Task to install a wheel from a local file
  */
-abstract class InstallLocalWheel : DefaultTask() {
+abstract class InstallLocalWheel  @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:InputFile
     abstract val pipExe: RegularFileProperty
 
@@ -276,7 +276,7 @@ abstract class InstallLocalWheel : DefaultTask() {
 
     @TaskAction
     fun install() {
-        project.exec {
+        ex.exec {
             executable(pipExe.get())
             args("install", "--force-reinstall", wheel.map { it.asFile }.get())
         }
