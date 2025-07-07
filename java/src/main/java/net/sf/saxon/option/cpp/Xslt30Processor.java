@@ -832,8 +832,8 @@ public class Xslt30Processor extends SaxonCAPI {
         Object sourceObji;
         Object sourceObj = null;
 
-        if (paramsMap.containsKey("_i_matchs")) {
-            sourceObji = paramsMap.get("_i_matchs");
+        if (paramsMap.containsKey("_i_matches")) {
+            sourceObji = paramsMap.get("_i_matches");
             if (debug) {
                 if(sourceObji == null) {
                     System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
@@ -841,10 +841,17 @@ public class Xslt30Processor extends SaxonCAPI {
                     System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name: " + sourceObji.getClass().getName());
                 }
             }
-        } else if (sourceObjRef == WordFactory.nullPointer()) {
+        } else if (paramsMap.containsKey("_i_file_matches")) {
+            sourceObji = paramsMap.get("_i_file_matches");
+            if (debug) {
+                if(sourceObji == null) {
+                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
+                } else {
+                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match file name: " + sourceObji.getClass().getName());
+                }
+            }
+        } else  {
             throw new SaxonApiException("Source Object is NULL");
-        } else {
-            sourceObji = objectHandles.get(sourceObjRef);
         }
 
         if (sourceObji instanceof ProcessorDataAccumulator) {
