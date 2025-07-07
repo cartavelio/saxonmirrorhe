@@ -4,6 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.lib {
     public class JJ_ResourceRequest {
         public const string TEXT_NATURE = "https://www.iana.org/assignments/media-types/text/plain";
+        public const string BINARY_NATURE = "https://www.iana.org/assignments/media-types/application/binary";
         public const string XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";
         public static readonly string XSLT_NATURE = Saxon.Hej.lib.NamespaceConstant.XSLT;
         public static readonly string XSD_NATURE = Saxon.Hej.lib.NamespaceConstant.SCHEMA;
@@ -49,9 +50,8 @@ namespace Saxon.Hej.lib {
                             if ((iae.InnerException is System.UriFormatException)) {
                                 throw new Saxon.Hej.trans.XPathException(("Invalid URI "+uri), iae.InnerException);
                             }
-                        } else {
-                            throw;
                         }
+                        throw;
                     }
                     if ((s != null)) {
                         return s;

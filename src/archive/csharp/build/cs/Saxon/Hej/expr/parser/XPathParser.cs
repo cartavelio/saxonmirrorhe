@@ -1463,9 +1463,10 @@ namespace Saxon.Hej.expr.parser {
               case Saxon.Hej.expr.parser.Token.PI_QNAME:
               case Saxon.Hej.expr.parser.Token.NAMESPACE_QNAME:
               case Saxon.Hej.expr.parser.Token.NAMED_FUNCTION_REF:
+              case Saxon.Hej.expr.parser.Token.LSQB:
                 return true;
               case Saxon.Hej.expr.parser.Token.KEYWORD_CURLY:
-                return (t.currentTokenValue.Equals("ordered") || t.currentTokenValue.Equals("unordered"));
+                return (((t.currentTokenValue.Equals("ordered") || t.currentTokenValue.Equals("unordered")) || t.currentTokenValue.Equals("map")) || t.currentTokenValue.Equals("array"));
               default:
                 return false;
             }

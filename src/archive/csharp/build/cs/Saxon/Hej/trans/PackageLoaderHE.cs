@@ -3144,6 +3144,25 @@ namespace Saxon.Hej.trans {
             }
             return loc;
         }
+        public static Saxon.Hej.om.NamespaceMap fromExportedNamespaces(string nsAtt) {
+            Saxon.Hej.om.NamespaceMap map = Saxon.Hej.om.NamespaceMap.emptyMap();
+            if ((nsAtt != null)) {
+                string[] namespaces = System.Text.RegularExpressions.Regex.Split(nsAtt, " ");
+                foreach (string ns in namespaces) {
+                    int eq = ns.IndexOf('=');
+                    if ((eq<0)) {
+                        throw new Saxon.Ejava.lang.IllegalStateException(("ns="+nsAtt));
+                    }
+                    string prefix = ns.Substring(0, eq - 0);
+                    string uri = ns.Substring((eq+1));
+                    if (uri.Equals("~")) {
+                        uri = Saxon.Hej.lib.NamespaceConstant.getUriForConventionalPrefix(prefix);
+                    }
+                    map = map.put(prefix, uri);
+                }
+            }
+            return map;
+        }
     
     }
 }

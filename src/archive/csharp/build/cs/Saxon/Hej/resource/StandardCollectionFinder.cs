@@ -28,16 +28,7 @@ namespace Saxon.Hej.resource {
             } catch (System.UriFormatException e) {
                 throw new Saxon.Hej.trans.XPathException(e);
             }
-            string protocols = (string)(context.getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<System.Object>.ALLOWED_PROTOCOLS));
-            bool allow = "all".Equals(protocols);
-            if (!(allow)) {
-                foreach (string protocol in System.Text.RegularExpressions.Regex.Split(protocols, "\\s+")) {
-                    if (Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(resolvedURI.Scheme, protocol)) {
-                        allow = true;
-                        break ;
-                    }
-                }
-            }
+            bool allow = context.getConfiguration().getProtocolRestrictor().test(resolvedURI);
             if (!(allow)) {
                 throw new Saxon.Hej.trans.XPathException((("URI scheme '"+resolvedURI.Scheme)+"' has been disallowed"));
             }

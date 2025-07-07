@@ -111,11 +111,6 @@ namespace Saxon.Hej.tree.iter {
         
         }
     
-        /* Expanding default method materialize from interface GroundedIterator */
-        public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.value.SequenceExtent.from(this).reduce();
-        }
-
         /* Expanding default method close from interface SequenceIterator */
         public virtual void close() {
         }
@@ -124,18 +119,13 @@ namespace Saxon.Hej.tree.iter {
         public virtual void discharge() {
         }
 
-        /* Creating stub method getResidue to satisfy interface GroundedIterator */
-        public virtual Saxon.Hej.om.GroundedValue getResidue() {
-            throw new System.NotImplementedException();
+        /* Expanding default method materialize from interface GroundedIterator */
+        public virtual Saxon.Hej.om.GroundedValue materialize() {
+            return Saxon.Hej.value.SequenceExtent.from(this).reduce();
         }
 
-        /* Creating stub method hasNext to satisfy interface LookaheadIterator */
-        public virtual bool hasNext() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method getReverseIterator to satisfy interface ReversibleIterator */
-        public virtual Saxon.Hej.om.SequenceIterator getReverseIterator() {
+        /* Creating stub method next to satisfy interface SequenceIterator */
+        public virtual Saxon.Hej.om.Item next() {
             throw new System.NotImplementedException();
         }
 
@@ -149,8 +139,18 @@ namespace Saxon.Hej.tree.iter {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method next to satisfy interface SequenceIterator */
-        public virtual Saxon.Hej.om.Item next() {
+        /* Creating stub method hasNext to satisfy interface LookaheadIterator */
+        public virtual bool hasNext() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getResidue to satisfy interface GroundedIterator */
+        public virtual Saxon.Hej.om.GroundedValue getResidue() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getReverseIterator to satisfy interface ReversibleIterator */
+        public virtual Saxon.Hej.om.SequenceIterator getReverseIterator() {
             throw new System.NotImplementedException();
         }
 

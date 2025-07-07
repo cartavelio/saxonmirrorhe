@@ -157,6 +157,10 @@ namespace Saxon.Hej.trans {
                 errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, code);
             }
         }
+        public Saxon.Hej.trans.XPathException withErrorCode(string code) {
+            setErrorCode(code);
+            return this;
+        }
         public void maybeSetErrorCode(string code) {
             if (((errorCode == null) && (code != null))) {
                 errorCode = new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, code);

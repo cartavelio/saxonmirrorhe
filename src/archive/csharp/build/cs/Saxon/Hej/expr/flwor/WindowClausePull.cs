@@ -94,6 +94,13 @@ namespace Saxon.Hej.expr.flwor {
                     }
                 }
             }
+            foreach (Saxon.Hej.expr.flwor.WindowClause.Window w in currentWindows) {
+                if ((w.isFinished() && !(w.isDespatched()))) {
+                    processWindow(w, context);
+                    Saxon.Impl.Helpers.ListUtils.Remove(currentWindows, w);
+                    return true;
+                }
+            }
             return false;
         }
         private Saxon.Hej.expr.flwor.WindowClause.Window despatch(Saxon.Hej.expr.flwor.WindowClause.Window w, Saxon.Hej.expr.XPathContext context) {

@@ -73,13 +73,26 @@ namespace Saxon.Hej.expr.flwor {
                     }
                 }
             }
-            if (windowClause.isIncludeUnclosedWindows()) {
-                foreach (Saxon.Hej.expr.flwor.WindowClause.Window w in currentWindows) {
-                    w.endItem = current;
-                    w.endPreviousItem = previous;
-                    w.endNextItem = null;
-                    w.endPosition = position;
-                    despatch(w, getOutputter(), context);
+            if (!(windowClause.isIncludeUnclosedWindows())) {
+                for (int i = (currentWindows.Count-1); (i>=0); i--) {
+                    if (!(currentWindows[i].isFinished())) {
+                        Saxon.Impl.Helpers.ListUtils.Remove(currentWindows, i);
+                    }
+                }
+            }
+            foreach (Saxon.Hej.expr.flwor.WindowClause.Window w in currentWindows) {
+                if (w.isFinished()) {
+                    if (!(w.isDespatched())) {
+                        despatch(w, getOutputter(), context);
+                    }
+                } else {
+                    if (windowClause.isIncludeUnclosedWindows()) {
+                        w.endItem = current;
+                        w.endPreviousItem = previous;
+                        w.endNextItem = null;
+                        w.endPosition = position;
+                        despatch(w, getOutputter(), context);
+                    }
                 }
             }
         }

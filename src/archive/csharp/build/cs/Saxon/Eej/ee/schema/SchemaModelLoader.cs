@@ -256,7 +256,9 @@ namespace Saxon.Eej.ee.schema {
                 string type = attributes.getValue("", "type");
                 Saxon.Hej.sxpath.XPathEvaluator evaluator = new Saxon.Hej.sxpath.XPathEvaluator(config);
                 Saxon.Hej.sxpath.IndependentContext env = (Saxon.Hej.sxpath.IndependentContext)(evaluator.getStaticContext());
-                env.setNamespaceResolver(loader.namespaceResolver);
+                string nsContext = attributes.getValue("", "nsContext");
+                Saxon.Hej.om.NamespaceMap nsMap = Saxon.Hej.trans.PackageLoaderHE.fromExportedNamespaces(nsContext);
+                env.setNamespaceResolver(nsMap);
                 env.setDefaultElementNamespace(defaultNamespace);
                 env.setBaseURI(xmlBase);
                 Saxon.Hej.sxpath.XPathExpression condition;
@@ -359,7 +361,9 @@ namespace Saxon.Eej.ee.schema {
                 bool isField = localName.Equals("field");
                 string defaultNamespace = attributes.getValue("", "defaultNamespace");
                 Saxon.Hej.sxpath.IndependentContext env = new Saxon.Hej.sxpath.IndependentContext(loader.config);
-                env.setNamespaceResolver(Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
+                string nsContext = attributes.getValue("", "nsContext");
+                Saxon.Hej.om.NamespaceMap nsMap = Saxon.Hej.trans.PackageLoaderHE.fromExportedNamespaces(nsContext);
+                env.setNamespaceResolver(nsMap);
                 env.setDefaultElementNamespace(defaultNamespace);
                 Saxon.Hej.pattern.Pattern selector;
                 try {
@@ -933,7 +937,9 @@ namespace Saxon.Eej.ee.schema {
                     evaluator = new Saxon.Hej.sxpath.XPathEvaluator(loader.config);
                 }
                 Saxon.Hej.sxpath.IndependentContext env = (Saxon.Hej.sxpath.IndependentContext)(evaluator.getStaticContext());
-                env.setNamespaceResolver(Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
+                string nsContext = attributes.getValue("", "nsContext");
+                Saxon.Hej.om.NamespaceMap nsMap = Saxon.Hej.trans.PackageLoaderHE.fromExportedNamespaces(nsContext);
+                env.setNamespaceResolver(nsMap);
                 env.setBaseURI(xmlBase);
                 env.setDefaultElementNamespace(defaultNamespace);
                 env.getPackageData().setLocalLicenseId(loader.schema.getLocalLicenseId());

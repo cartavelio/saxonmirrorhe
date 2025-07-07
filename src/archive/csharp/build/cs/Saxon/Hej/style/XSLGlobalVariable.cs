@@ -135,7 +135,7 @@ namespace Saxon.Hej.style {
                 } else {
                     Saxon.Hej.expr.Expression select = sourceBinding.getSelectExpression();
                     inst.setBody(select);
-                    if ((compilation.getCompilerInfo().getCodeInjector() != null)) {
+                    if (((compilation.getCompilerInfo().getCodeInjector() != null) && (select != null))) {
                         compilation.getCompilerInfo().getCodeInjector().process(inst);
                     }
                 }

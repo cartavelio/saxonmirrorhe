@@ -350,7 +350,7 @@ namespace Saxon.Hej.query {
             getPackageData().addGlobalVariable(var);
             System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.instruct.GlobalVariable> libVars = getTopLevelModule().libraryVariables;
             Saxon.Hej.expr.instruct.GlobalVariable old = Saxon.Impl.Helpers.MapUtils.Get(libVars, key);
-            if (((old == null) || (old == var))) {
+            if ((((old == null) || (old == var)) || (old.getUltimateOriginalVariable() == var.getUltimateOriginalVariable()))) {
             } else {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((((("Duplicate definition of global variable "+var.getVariableQName().getDisplayName())+" (see line ")+old.getLineNumber())+" in module ")+old.getSystemId())+')'));
                 err.setErrorCode("XQST0049");

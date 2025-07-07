@@ -116,6 +116,7 @@ namespace Saxon.Hej.functions.hof {
                 dqc.setContextItem(contextItemOption.head());
             }
             Saxon.Hej.Controller newController = xqe.newController(dqc);
+            Saxon.Hej.query.XQueryParser.makeRunTimeFunctionLibrary(main, config, main.getExecutable());
             Saxon.Hej.expr.XPathContext newContext = newController.newXPathContext();
             Saxon.Hej.ma.map.MapItem variablesMap = new Saxon.Impl.DataModel.ImmMap();
             foreach (Saxon.Hej.expr.instruct.GlobalVariable var in lib.getImportedGlobalVariables()) {

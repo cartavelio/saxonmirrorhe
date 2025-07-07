@@ -10,7 +10,7 @@ namespace Saxon.Hej.trans {
         }
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.expr.sort.AtomicMatchKey,System.Object> index;
         private Saxon.Hej.type.UType keyTypesPresent = Saxon.Hej.type.UType.VOID;
-        private readonly Saxon.Hej.type.UType keyTypesConvertedFromUntyped = Saxon.Hej.type.UType.STRING_LIKE;
+        private Saxon.Hej.type.UType keyTypesConvertedFromUntyped = Saxon.Hej.type.UType.STRING_LIKE;
         private System.Collections.Generic.IList<Saxon.Hej.value.StringValue> untypedKeys;
         private Saxon.Hej.lib.ConversionRules rules;
         private int implicitTimezone;
@@ -158,6 +158,7 @@ namespace Saxon.Hej.trans {
         public Saxon.Hej.om.SequenceIterator getNodes(Saxon.Hej.value.AtomicValue soughtValue) {
             if (((untypedKeys != null) && !(keyTypesConvertedFromUntyped.subsumes(soughtValue.getUType())))) {
                 reindexUntypedValues(soughtValue.getPrimitiveType());
+                keyTypesConvertedFromUntyped = keyTypesConvertedFromUntyped.union(soughtValue.getPrimitiveType().getUType());
             }
             if (soughtValue.isUntypedAtomic()) {
                 System.Collections.Generic.IList<Saxon.Hej.om.NodeInfo> resultNodes = new System.Collections.Generic.List<Saxon.Hej.om.NodeInfo>();

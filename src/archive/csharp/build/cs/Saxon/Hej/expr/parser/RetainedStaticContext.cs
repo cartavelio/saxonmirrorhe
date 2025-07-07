@@ -37,19 +37,7 @@ namespace Saxon.Hej.expr.parser {
             backwardsCompatibility = sc.isInBackwardsCompatibleMode();
             if (Saxon.Hej.Version.platform.JAXPStaticContextCheck(this, sc)) {
             } else {
-                Saxon.Hej.om.NamespaceResolver resolver = sc.getNamespaceResolver();
-                if ((resolver is Saxon.Hej.om.NamespaceMap)) {
-                    namespaces = resolver;
-                } else {
-                    Saxon.Hej.om.NamespaceMap map = Saxon.Hej.om.NamespaceMap.emptyMap();
-                    for (System.Collections.Generic.IEnumerator<string> it = resolver.iteratePrefixes(); it.MoveNext() /*UNSAFE CONVERSION*/; ) {
-                        string prefix = it.Current;
-                        if (!(prefix.Equals("xml"))) {
-                            map = map.put(prefix, resolver.getURIForPrefix(prefix, true));
-                        }
-                    }
-                    namespaces = map;
-                }
+                namespaces = sc.getNamespaceResolver();
             }
         }
         public Saxon.Hej.Configuration getConfiguration() {
@@ -149,6 +137,9 @@ namespace Saxon.Hej.expr.parser {
         }
         public void setNamespaces(Saxon.Hej.om.NamespaceResolver namespaces) {
             this.namespaces = namespaces;
+        }
+        public Saxon.Hej.om.NamespaceMap getNamespaceMap() {
+            return Saxon.Hej.om.NamespaceMap.fromNamespaceResolver(namespaces);
         }
     
     }

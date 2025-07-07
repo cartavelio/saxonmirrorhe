@@ -868,6 +868,12 @@ namespace Saxon.Eej.ee.optim {
             if ((filter is Saxon.Hej.expr.compat.GeneralComparison10)) {
                 return 0;
             }
+            if ((filter is Saxon.Hej.expr.ValueComparison)) {
+                Saxon.Hej.value.BooleanValue resultWhenEmpty = ((Saxon.Hej.expr.ValueComparison)(filter)).getResultWhenEmpty();
+                if (((resultWhenEmpty != null) && resultWhenEmpty.getBooleanValue())) {
+                    return 0;
+                }
+            }
             Saxon.Hej.expr.Expression op0 = filter.getLhsExpression();
             Saxon.Hej.expr.Expression op1 = filter.getRhsExpression();
             bool d0f = Saxon.Hej.expr.parser.ExpressionTool.dependsOnFocus(op0);

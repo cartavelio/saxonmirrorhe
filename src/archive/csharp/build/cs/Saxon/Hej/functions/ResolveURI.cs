@@ -133,6 +133,9 @@ namespace Saxon.Hej.functions {
             if (relativeURI.StartsWith("classpath:")) {
                 return new System.Uri(relativeURI, System.UriKind.RelativeOrAbsolute);
             }
+            if (relativeURI.StartsWith("data:")) {
+                return new System.Uri(relativeURI, System.UriKind.RelativeOrAbsolute);
+            }
             try {
                 if (((@base == null) || @base.Length==0)) {
                     absoluteURI = new System.Uri(relativeURI, System.UriKind.RelativeOrAbsolute);

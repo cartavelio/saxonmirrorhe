@@ -83,16 +83,7 @@ namespace Saxon.Hej.query {
                 }
                 exec.fixupQueryModules(mainModule);
                 Saxon.Hej.query.XQueryExpression queryExp = config.makeXQueryExpression(exp, mainModule, streaming);
-                Saxon.Hej.functions.FunctionLibrary userlib = exec.getFunctionLibrary();
-                Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-                lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
-                lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
-                lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
-                lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
-                lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());
-                config.addExtensionBinders(lib);
-                lib.addFunctionLibrary(userlib);
-                exec.setFunctionLibrary(lib);
+                makeRunTimeFunctionLibrary(mainModule, config, exec);
                 return queryExp;
             } catch (Saxon.Hej.trans.XPathException e) {
                 if (!(e.hasBeenReported())) {
@@ -100,6 +91,18 @@ namespace Saxon.Hej.query {
                 }
                 throw;
             }
+        }
+        public static void makeRunTimeFunctionLibrary(Saxon.Hej.query.QueryModule mainModule, Saxon.Hej.Configuration config, Saxon.Hej.expr.instruct.Executable exec) {
+            Saxon.Hej.functions.FunctionLibrary userlib = exec.getFunctionLibrary();
+            Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
+            lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
+            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
+            lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
+            lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());
+            config.addExtensionBinders(lib);
+            lib.addFunctionLibrary(userlib);
+            exec.setFunctionLibrary(lib);
         }
         private static string normalizeLineEndings11(string @in) {
             if ((((@in.IndexOf((char)(unchecked((int)0xd)))<0) && (@in.IndexOf((char)(unchecked((int)0x85)))<0)) && (@in.IndexOf((char)(0x2028))<0))) {
@@ -2442,7 +2445,7 @@ namespace Saxon.Hej.query {
             if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
                 if ("validate-type".Equals(localName)) {
                     if (!(env.getConfiguration().isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY))) {
-                        warning(("Ignoring saxon:validate-type. To use this feature "+"you need the Saxon-EE processor from http://www.saxonica.com/"));
+                        warning(("Ignoring saxon:validate-type. To use this feature "+"you need the Saxon-EE processor from https://www.saxonica.com/"));
                     } else {
                         string typeName = Saxon.Hej.value.Whitespace.trim(pragmaContents);
                         if (!(Saxon.Hej.om.NameChecker.isQName(Saxon.Hej.str.StringTool.codePoints(typeName)))) {

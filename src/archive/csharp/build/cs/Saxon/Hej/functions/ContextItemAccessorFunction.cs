@@ -10,7 +10,7 @@ namespace Saxon.Hej.functions {
                     throw new Saxon.Hej.trans.XPathException((("Context item for "+getFunctionName().getDisplayName())+" is absent"), "XPDY0002");
                 } );
                 Saxon.Hej.type.FunctionItemType fit = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
-                return new Saxon.Hej.functions.CallableFunction(0, callable, fit);
+                return new Saxon.Hej.functions.CallableFunction(new Saxon.Hej.trans.SymbolicName.F(getFunctionName(), 0), callable, fit);
             }
             Saxon.Hej.functions.ConstantFunction fn = new Saxon.Hej.functions.ConstantFunction(evaluate(ci, context));
             fn.setDetails(getDetails());

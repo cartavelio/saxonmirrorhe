@@ -109,6 +109,9 @@ namespace Saxon.Hej.serialize {
         }
         public override void characters(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
             if (((suppressedAtLevel<0) && Saxon.Hej.value.Whitespace.isAllWhite(chars))) {
+                if ((pendingWhitespace != null)) {
+                    flushPendingWhitespace();
+                }
                 pendingWhitespace = new Saxon.Hej.@event.Event.Text(chars, locationId, properties);
             } else {
                 flushPendingWhitespace();

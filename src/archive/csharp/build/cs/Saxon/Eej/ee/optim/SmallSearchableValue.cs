@@ -28,6 +28,7 @@ namespace Saxon.Eej.ee.optim {
                 manual.setContextItem(value[i]);
                 Saxon.Hej.om.SequenceIterator keys = use.iterate(c2);
                 Saxon.Hej.om.Item key;
+                bool matched = false;
                 while (((key = keys.next()) != null)) {
                     Saxon.Hej.om.AtomicSequence atomized = key.atomize();
                     foreach (Saxon.Hej.value.AtomicValue sought in soughtValues) {
@@ -37,9 +38,18 @@ namespace Saxon.Eej.ee.optim {
                                     return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(value[i]);
                                 } else {
                                     selected.Add(value[i]);
+                                    matched = true;
+                                    break ;
                                 }
                             }
                         }
+                        if (matched) {
+                            break ;
+                        }
+                    }
+                    if (matched) {
+                        keys.close();
+                        break ;
                     }
                 }
             }

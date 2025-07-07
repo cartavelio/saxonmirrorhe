@@ -370,7 +370,7 @@ namespace Saxon.Eej {
             if (!(showTime)) {
                 config.getLogger().info(config.getProductTitle());
             }
-            config.getLogger().info("Usage: see http://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
+            config.getLogger().info("Usage: see https://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
             config.getLogger().info((("Format: "+Saxon.Hej.trans.CommandLineOptions.getCommandName(this))+" options"));
             Saxon.Hej.trans.CommandLineOptions options = new Saxon.Hej.trans.CommandLineOptions();
             setPermittedOptions(options);

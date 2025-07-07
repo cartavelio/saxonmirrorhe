@@ -46,7 +46,7 @@ namespace Saxon.Impl.Helpers {
         }
         
         public static Saxon.Ejava.net.URL ToURL(System.Uri uri) {
-            throw new(uri.ToString());
+            return new Saxon.Ejava.net.URL(uri.ToString());
         }
 
         private static readonly Regex twoHexDigits = new Regex("[0-9a-fA-F][0-9a-fA-F]");

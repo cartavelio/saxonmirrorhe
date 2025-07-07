@@ -301,6 +301,7 @@ namespace Saxon.Hej.trans {
             applyProperty(props, "traceOptimizerDecisions", Saxon.Hej.lib.FeatureCode.TRACE_OPTIMIZER_DECISIONS, "JN");
             applyProperty(props, "treeModel", Saxon.Hej.lib.FeatureCode.TREE_MODEL_NAME, "JN");
             applyProperty(props, "unparsedTextUriResolver", Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
+            applyProperty(props, "unparsedTextURIResolver", Saxon.Hej.lib.FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
             applyProperty(props, "uriResolver", Saxon.Hej.lib.FeatureCode.URI_RESOLVER_CLASS, "J");
             applyProperty(props, "usePiDisableOutputEscaping", Saxon.Hej.lib.FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING, "JN");
             applyProperty(props, "useTypedValueCache", Saxon.Hej.lib.FeatureCode.USE_TYPED_VALUE_CACHE, "JN");

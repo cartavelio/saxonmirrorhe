@@ -133,38 +133,14 @@ namespace Saxon.Hej.value {
             return Saxon.Hej.om.Genre.ATOMIC;
         }
     
-        /* Expanding default method getStringValue from interface Item */
-        public virtual string getStringValue() {
-            return getUnicodeStringValue().ToString();
-        }
-
-        /* Expanding default method subsequence from interface Item */
-        public virtual Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
-            if (((start<=0) && (((start+length))>0))) {
-                return this;
-            } else {
-                return Saxon.Hej.value.EmptySequence.getInstance();
-            }
-        }
-
-        /* Expanding default method reduce from interface GroundedValue */
+        /* Expanding default method reduce from interface Item */
         public virtual Saxon.Hej.om.GroundedValue reduce() {
             return this;
         }
 
-        /* Expanding default method isStreamed from interface Item */
-        public virtual bool isStreamed() {
-            return false;
-        }
-
-        /* Expanding default method materialize from interface GroundedValue */
+        /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return this;
-        }
-
-        /* Expanding default method makeRepeatable from interface Sequence */
-        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
-            return this;
+            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
         }
 
         /* Expanding default method asIterable from interface GroundedValue */
@@ -185,6 +161,30 @@ namespace Saxon.Hej.value {
                 chain = chain.addAll(val.asIterable());
             }
             return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
+        }
+
+        /* Expanding default method getStringValue from interface Item */
+        public virtual string getStringValue() {
+            return getUnicodeStringValue().ToString();
+        }
+
+        /* Expanding default method subsequence from interface Item */
+        public virtual Saxon.Hej.om.GroundedValue subsequence(int start, int length) {
+            if (((start<=0) && (((start+length))>0))) {
+                return this;
+            } else {
+                return Saxon.Hej.value.EmptySequence.getInstance();
+            }
+        }
+
+        /* Expanding default method isStreamed from interface Item */
+        public virtual bool isStreamed() {
+            return false;
+        }
+
+        /* Expanding default method makeRepeatable from interface Sequence */
+        public virtual Saxon.Hej.om.Sequence makeRepeatable() {
+            return this;
         }
 
     }

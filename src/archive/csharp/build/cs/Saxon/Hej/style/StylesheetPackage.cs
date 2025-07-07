@@ -289,7 +289,7 @@ namespace Saxon.Hej.style {
                         }
                     }
                 }
-                if (((newC.getActor() is Saxon.Hej.trans.Mode) && overrides.Contains(name))) {
+                if ((((newC.getActor() is Saxon.Hej.trans.Mode) && overrides.Contains(name)) && !(newC.getVisibility().Equals(/*explicit enum*/ Saxon.Hej.trans.Visibility.HIDDEN)))) {
                     addCompletionAction(() => {
                         trace(("Doing mode completion for "+newC.getActor().getSymbolicName()));
                         System.Collections.Generic.IList<Saxon.Hej.expr.ComponentBinding> oldBindings = newC.getBaseComponent().getComponentBindings();

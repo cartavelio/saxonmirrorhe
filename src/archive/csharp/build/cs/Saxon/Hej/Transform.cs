@@ -826,7 +826,7 @@ namespace Saxon.Hej {
             if (!(showTime)) {
                 logger.info(getConfiguration().getProductTitle());
             }
-            logger.info("Usage: see http://www.saxonica.com/documentation/index.html#!using-xsl/commandline");
+            logger.info("Usage: see https://www.saxonica.com/documentation/index.html#!using-xsl/commandline");
             logger.info((("Format: "+Saxon.Hej.trans.CommandLineOptions.getCommandName(this))+" options params"));
             Saxon.Hej.trans.CommandLineOptions options = new Saxon.Hej.trans.CommandLineOptions();
             setPermittedOptions(options);

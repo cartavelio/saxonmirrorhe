@@ -612,6 +612,7 @@ namespace Saxon.Hej.functions {
                 transformer.setBaseOutputURI(baseOutputUri);
                 transformer.setInitialTemplateParameters(templateParams, false);
                 transformer.setInitialTemplateParameters(tunnelParams, true);
+                transformer.setResourceResolver(context.getResourceResolver());
                 if (((schemaValidation == Saxon.Hej.lib.Validation.STRICT) || (schemaValidation == Saxon.Hej.lib.Validation.LAX))) {
                     if ((sourceNode != null)) {
                         sourceNode = validate(sourceNode, targetConfig, schemaValidation);

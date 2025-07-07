@@ -169,26 +169,33 @@ namespace Saxon.Hej.trace {
                     emitAttribute("defaultFunctionNS", sc.getDefaultFunctionNamespace());
                 }
                 if ((!(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(options)).suppressStaticContext) && (((parentSC == null) || !(sc.declaresSameNamespaces(parentSC)))))) {
-                    Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
-                    for (System.Collections.Generic.IEnumerator<string> iter = sc.iteratePrefixes(); iter.MoveNext() /*UNSAFE CONVERSION*/; ) {
-                        string p = iter.Current;
-                        string uri = sc.getURIForPrefix(p, true);
-                        ub.append(p);
-                        ub.append("=");
-                        if (Saxon.Hej.value.Whitespace.containsWhitespace(Saxon.Hej.str.StringTool.codePoints(uri))) {
-                            throw new Saxon.Hej.trans.XPathException((("Cannot export a stylesheet if namespaces contain whitespace: '"+uri)+"'"));
-                        }
-                        if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.getUriForConventionalPrefix(p))) {
-                            uri = "~";
-                        }
-                        ub.append(uri);
-                        ub.append(" ");
-                    }
-                    emitAttribute("ns", Saxon.Hej.value.Whitespace.trim(ub.toUnicodeString()).ToString());
+                    emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap()));
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Ejava.lang.AssertionError(e);
             }
+        }
+        public static string getNamespacesAsString(Saxon.Hej.om.NamespaceMap sc) {
+            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
+            for (System.Collections.Generic.IEnumerator<string> iter = sc.iteratePrefixes(); iter.MoveNext() /*UNSAFE CONVERSION*/; ) {
+                string p = iter.Current;
+                if (!(p.Equals("xml"))) {
+                    string uri = sc.getURIForPrefix(p, true);
+                    ub.append(p);
+                    ub.append("=");
+                    if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.getUriForConventionalPrefix(p))) {
+                        ub.append("~");
+                    } else {
+                        Saxon.Hej.str.UnicodeString uUri = Saxon.Hej.str.BMPString.of(uri);
+                        if (Saxon.Hej.value.Whitespace.containsWhitespace(uUri.codePoints())) {
+                            throw new Saxon.Hej.trans.XPathException((("Cannot export a stylesheet if namespaces contain whitespace: '"+uri)+"'"));
+                        }
+                        ub.append(uUri);
+                    }
+                    ub.append(" ");
+                }
+            }
+            return ub.ToString().Trim();
         }
         public int startElement(string name) {
             nameStack.Push(name);

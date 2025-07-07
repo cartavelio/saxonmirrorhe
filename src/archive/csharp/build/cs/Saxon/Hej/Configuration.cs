@@ -1256,6 +1256,8 @@ namespace Saxon.Hej {
                     switch (code) {
                       case Saxon.Hej.lib.FeatureCode.ALLOWED_PROTOCOLS:
                         protocolRestrictor = new Saxon.Hej.lib.ProtocolRestrictor((string)(value));
+                        Saxon.Hej.lib.JJ_ResourceResolver existing = getResourceResolver();
+                        setResourceResolver(protocolRestrictor.asResourceResolver(existing));
                         break ;
                       case Saxon.Hej.lib.FeatureCode.COLLATION_URI_RESOLVER:
                         if (!(((value is Saxon.Hej.lib.CollationURIResolver)))) {

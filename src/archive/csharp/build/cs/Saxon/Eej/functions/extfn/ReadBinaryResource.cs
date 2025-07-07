@@ -2,15 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.functions.extfn {
-    public class ReadBinaryResource : Saxon.Hej.functions.SystemFunction {
+    public class ReadBinaryResource : Saxon.Eej.functions.extfn.ResourceAccessFunction {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+            System.IO.Stream stream = null;
             try {
                 string arg = arguments[0].head().getStringValue();
-                System.IO.Stream stream;
-                try {
-                    Saxon.Ejava.net.URL url = new Saxon.Ejava.net.URL(arg);
-                    stream = Saxon.Impl.Overrides.ResourceLoader.urlStream(url);
-                } catch (System.Exception e) {
+                stream = resolveResourceAccess(context, arg);
+                if ((stream == null)) {
                     throw new Saxon.Hej.trans.XPathException(("saxon:read-binary-resource - invalid or inaccessible URL "+arg), Saxon.Hej.trans.SaxonErrorCode.SXJE0053);
                 }
                 System.Collections.Generic.IList<byte[]> buffers = new System.Collections.Generic.List<byte[]>();
@@ -34,8 +32,20 @@ namespace Saxon.Eej.functions.extfn {
                     offset += buffer.Length;
                 }
                 return new Saxon.Hej.value.Base64BinaryValue(result);
-            } catch (System.IO.IOException e) {
+            } catch (Exception e) when (e is System.IO.IOException || e is System.UriFormatException) {
                 throw new Saxon.Hej.trans.XPathException(("saxon:read-binary-resource: I/O error: "+e.Message), Saxon.Hej.trans.SaxonErrorCode.SXJE0053);
+            } catch (Saxon.Hej.trans.XPathException e) {
+                if ((e.getException() is System.UriFormatException)) {
+                    throw new Saxon.Hej.trans.XPathException(("saxon:read-binary-resource: I/O error: "+e.Message), Saxon.Hej.trans.SaxonErrorCode.SXJE0053);
+                }
+                throw;
+            } finally {
+                if ((stream != null)) {
+                    try {
+                        stream.Close();
+                    } catch (System.IO.IOException e) {
+                    }
+                }
             }
         }
         private bool isFinished(int indicator) {

@@ -19,7 +19,7 @@ namespace Saxon.Hej.lib {
                         string subScheme = token.Substring(4).ToLower();
                         permitted.Add(uri => (scheme(uri).Equals("jar") && schemeSpecificPart(uri).ToLower().StartsWith(subScheme)));
                     } else {
-                        permitted.Add(uri => scheme(uri).Equals(token));
+                        permitted.Add(uri => token.Equals(scheme(uri)));
                     }
                 }
                 predicate = uri => {
@@ -38,11 +38,36 @@ namespace Saxon.Hej.lib {
         public override string ToString() {
             return originalRule;
         }
+        public Saxon.Hej.lib.JJ_ResourceResolver asResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver existing) {
+            return new Saxon.Hej.lib.ProtocolRestrictor.RestrictedResourceResolver(this, existing);
+        }
         private static string scheme(System.Uri uri) {
             return uri.Scheme;
         }
         private static string schemeSpecificPart(System.Uri uri) {
             return uri.GetComponents(System.UriComponents.PathAndQuery, System.UriFormat.Unescaped);
+        }
+        public class RestrictedResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver {
+            private readonly Saxon.Hej.lib.ProtocolRestrictor protocolRestrictor;
+            private readonly Saxon.Hej.lib.JJ_ResourceResolver nextResolver;
+            public RestrictedResourceResolver(Saxon.Hej.lib.ProtocolRestrictor pr, Saxon.Hej.lib.JJ_ResourceResolver rr)  {
+                this.protocolRestrictor = pr;
+                this.nextResolver = rr;
+            }
+            public void setAllowedProtocols(string protocols) {
+                if ((nextResolver is Saxon.Callbacks.CatalogResourceResolver)) {
+                    Saxon.Callbacks.CatalogResourceResolver catres = (Saxon.Callbacks.CatalogResourceResolver)(nextResolver);
+                    catres.setAllowedProtocols(protocols);
+                }
+            }
+            public Saxon.Ejavax.xml.transform.Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
+                if (protocolRestrictor.test(new System.Uri(request.uri, System.UriKind.RelativeOrAbsolute))) {
+                    return nextResolver.resolve(request);
+                } else {
+                    throw new Saxon.Hej.trans.XPathException((("Access to URI "+request.uri)+" has been prohibited"));
+                }
+            }
+        
         }
     
     }

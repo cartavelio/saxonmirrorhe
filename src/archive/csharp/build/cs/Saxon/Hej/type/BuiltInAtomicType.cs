@@ -542,6 +542,30 @@ namespace Saxon.Hej.type {
             return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     
+        /* Expanding default method getNormalizedDefaultPriority from interface ItemType */
+        public virtual double getNormalizedDefaultPriority() {
+            return (((getDefaultPriority()+1))/2);
+        }
+
+        /* Expanding default method getFullAlphaCode from interface ItemType */
+        public virtual string getFullAlphaCode() {
+            return getBasicAlphaCode();
+        }
+
+        /* Expanding default method toExportString from interface ItemType */
+        public virtual string toExportString() {
+            return ToString();
+        }
+
+        /* Expanding default method explainMismatch from interface AtomicType */
+        public virtual Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
+            if ((item is Saxon.Hej.value.AtomicValue)) {
+                return Saxon.Ejava.util.Optional<string>.of(("The supplied value is of type "+((Saxon.Hej.value.AtomicValue)(item)).getItemType()));
+            } else {
+                return Saxon.Ejava.util.Optional<string>.of(("The supplied value is "+Saxon.Hej.trans.Err.describeGenre(item.getGenre())));
+            }
+        }
+
         /* Expanding default method getGenre from interface AtomicType */
         public virtual Saxon.Hej.om.Genre getGenre() {
             return Saxon.Hej.om.Genre.ATOMIC;
@@ -550,11 +574,6 @@ namespace Saxon.Hej.type {
         /* Expanding default method getPrimitiveAtomicType from interface AtomicType */
         public virtual Saxon.Hej.type.BuiltInAtomicType getPrimitiveAtomicType() {
             return (Saxon.Hej.type.BuiltInAtomicType)(((/*1430*/Saxon.Hej.type.AtomicType)getPrimitiveItemType()));
-        }
-
-        /* Expanding default method explainMismatch from interface ItemType */
-        public virtual Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
-            return Saxon.Ejava.util.Optional<string>.empty();
         }
 
         /* Expanding default method getDefaultPriority from interface AtomicType */
@@ -569,21 +588,6 @@ namespace Saxon.Hej.type {
                 at = at.getBaseType();
             } while ((at != Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC));
             return (1-factor);
-        }
-
-        /* Expanding default method getNormalizedDefaultPriority from interface ItemType */
-        public virtual double getNormalizedDefaultPriority() {
-            return (((getDefaultPriority()+1))/2);
-        }
-
-        /* Expanding default method getFullAlphaCode from interface ItemType */
-        public virtual string getFullAlphaCode() {
-            return getBasicAlphaCode();
-        }
-
-        /* Expanding default method toExportString from interface ItemType */
-        public virtual string toExportString() {
-            return ToString();
         }
 
     }

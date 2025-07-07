@@ -109,8 +109,24 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileAppend : Saxon.Hej.functions.SystemFunction {
+        public abstract class EXPathFileFunction : Saxon.Hej.functions.SystemFunction {
+            protected internal void checkAllowedProtocols(Saxon.Hej.expr.XPathContext context) {
+                string protocols = (string)(context.getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<System.Object>.ALLOWED_PROTOCOLS));
+                if (((protocols != null) && !("all".Equals(protocols)))) {
+                    string[] allowed = System.Text.RegularExpressions.Regex.Split(protocols, ",\\s*");
+                    foreach (string p in allowed) {
+                        if ("file".Equals(p)) {
+                            return ;
+                        }
+                    }
+                    throw new Saxon.Ejava.lang.IllegalArgumentException("file: protocol access denied");
+                }
+            }
+        
+        }
+        public class FileAppend : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Hej.serialize.SerializationProperties @params;
                 if ((arguments.Length>2)) {
@@ -127,8 +143,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileAppendBinary : Saxon.Hej.functions.SystemFunction {
+        public class FileAppendBinary : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 try {
                     Saxon.Ejava.io.File file = toFile(path);
@@ -151,8 +168,9 @@ namespace Saxon.Eej.functions.extfn {
         private static System.IO.FileStream makeFileAppendOutputStream(Saxon.Ejava.io.File file) {
             return file.makeAppendOutputStream();
         }
-        public class FileAppendText : Saxon.Hej.functions.SystemFunction {
+        public class FileAppendText : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 string contents = arguments[1].head().getStringValue();
                 string encoding = "UTF-8";
@@ -183,8 +201,9 @@ namespace Saxon.Eej.functions.extfn {
         private static System.IO.TextWriter newOutputStreamWriter(System.IO.Stream stream, string encoding) {
             return Saxon.Impl.Helpers.IOUtils.newOutputStreamWriter(stream, encoding);
         }
-        public class FileAppendTextLines : Saxon.Hej.functions.SystemFunction {
+        public class FileAppendTextLines : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 string encoding = "UTF-8";
                 if ((arguments.Length>2)) {
@@ -214,8 +233,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileChildren : Saxon.Hej.functions.SystemFunction {
+        public class FileChildren : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 System.Collections.Generic.IList<Saxon.Hej.value.StringValue> result = new System.Collections.Generic.List<Saxon.Hej.value.StringValue>();
                 string dir = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File fd = toExistingDirectory(dir);
@@ -229,8 +249,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileCopy : Saxon.Hej.functions.SystemFunction {
+        public class FileCopy : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File from = toFile(arguments[0].head().getStringValue());
                 Saxon.Ejava.io.File to = toFile(arguments[1].head().getStringValue());
                 if ((from.exists() && from.isDirectory())) {
@@ -262,8 +283,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileCreateDir : Saxon.Hej.functions.SystemFunction {
+        public class FileCreateDir : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = toFile(path);
                 if (file.exists()) {
@@ -280,8 +302,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileCreateTempDir : Saxon.Hej.functions.SystemFunction {
+        public class FileCreateTempDir : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 try {
                     string prefix = arguments[0].head().getStringValue();
                     string suffix = arguments[1].head().getStringValue();
@@ -305,8 +328,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileCreateTempFile : Saxon.Hej.functions.SystemFunction {
+        public class FileCreateTempFile : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 try {
                     string prefix = arguments[0].head().getStringValue();
                     string suffix = arguments[1].head().getStringValue();
@@ -326,15 +350,17 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileCurrentDir : Saxon.Hej.functions.SystemFunction {
+        public class FileCurrentDir : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File file = toFile(".");
                 return new Saxon.Hej.value.StringValue((file.getAbsolutePath()+((file.isDirectory() ? Saxon.Ejava.io.File.separator : ""))));
             }
         
         }
-        public class FileDelete : Saxon.Hej.functions.SystemFunction {
+        public class FileDelete : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = toExistingFile(path);
                 bool recurse = false;
@@ -360,49 +386,56 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileDirSeparator : Saxon.Hej.functions.SystemFunction {
+        public class FileDirSeparator : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 return new Saxon.Hej.value.StringValue(Saxon.Ejava.io.File.separator);
             }
         
         }
-        public class FileExists : Saxon.Hej.functions.SystemFunction {
+        public class FileExists : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File file = toFile(arguments[0].head().getStringValue());
                 return Saxon.Hej.value.BooleanValue.get(file.exists());
             }
         
         }
-        public class FileIsDir : Saxon.Hej.functions.SystemFunction {
+        public class FileIsDir : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File file = toFile(arguments[0].head().getStringValue());
                 return Saxon.Hej.value.BooleanValue.get((file.exists() && file.isDirectory()));
             }
         
         }
-        public class FileIsFile : Saxon.Hej.functions.SystemFunction {
+        public class FileIsFile : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File file = toFile(arguments[0].head().getStringValue());
                 return Saxon.Hej.value.BooleanValue.get((file.exists() && file.isFile()));
             }
         
         }
-        public class FileLastModified : Saxon.Hej.functions.SystemFunction {
+        public class FileLastModified : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File file = toExistingFile(arguments[0].head().getStringValue());
                 long dt = file.lastModified();
                 return Saxon.Hej.value.DateTimeValue.EPOCH.add(Saxon.Hej.value.DayTimeDurationValue.fromMilliseconds(dt));
             }
         
         }
-        public class FileLineSeparator : Saxon.Hej.functions.SystemFunction {
+        public class FileLineSeparator : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 return new Saxon.Hej.value.StringValue(NEWLINE);
             }
         
         }
-        public class FileList : Saxon.Hej.functions.SystemFunction {
+        public class FileList : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = toExistingDirectory(path);
                 if (!(file.isDirectory())) {
@@ -454,8 +487,9 @@ namespace Saxon.Eej.functions.extfn {
             }
 
         }
-        public class FileMove : Saxon.Hej.functions.SystemFunction {
+        public class FileMove : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File from = toExistingFile(arguments[0].head().getStringValue());
                 Saxon.Ejava.io.File to = toFile(arguments[1].head().getStringValue());
                 if (from.isDirectory()) {
@@ -487,8 +521,10 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileName : Saxon.Hej.functions.SystemFunction {
+        public class FileName : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 if ((path.Equals("/") || path.Equals(""))) {
                     return Saxon.Hej.value.StringValue.EMPTY_STRING;
@@ -498,8 +534,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileParent : Saxon.Hej.functions.SystemFunction {
+        public class FileParent : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 if (path.Equals("/")) {
                     return Saxon.Hej.value.EmptySequence.getInstance();
@@ -515,14 +552,16 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FilePathSeparator : Saxon.Hej.functions.SystemFunction {
+        public class FilePathSeparator : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 return new Saxon.Hej.value.StringValue(System.IO.Path.PathSeparator.ToString());
             }
         
         }
-        public class FilePathToNative : Saxon.Hej.functions.SystemFunction {
+        public class FilePathToNative : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = null;
                 if (path.StartsWith("file:/")) {
@@ -547,8 +586,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FilePathToUri : Saxon.Hej.functions.SystemFunction {
+        public class FilePathToUri : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string filePath = arguments[0].head().getStringValue();
                 System.Uri uri;
                 if ((Saxon.Ejava.io.File.separator.Equals("\\") && ((filePath.StartsWith("\\\\") || filePath.StartsWith("//"))))) {
@@ -563,8 +603,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileReadBinary : Saxon.Hej.functions.SystemFunction {
+        public class FileReadBinary : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = checkReadSource(path);
                 long offset = 0;
@@ -611,8 +652,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileReadText : Saxon.Hej.functions.SystemFunction {
+        public class FileReadText : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = checkReadSource(path);
                 string encoding = "UTF-8";
@@ -643,8 +685,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileReadTextLines : Saxon.Hej.functions.SystemFunction {
+        public class FileReadTextLines : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = checkReadSource(path);
                 string encoding = "UTF-8";
@@ -655,28 +698,32 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileResolvePath : Saxon.Hej.functions.SystemFunction {
+        public class FileResolvePath : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File file = toFile(arguments[0].head().getStringValue());
                 return new Saxon.Hej.value.StringValue((file.getAbsolutePath()+((file.isDirectory() ? Saxon.Ejava.io.File.separator : ""))));
             }
         
         }
-        public class FileSize : Saxon.Hej.functions.SystemFunction {
+        public class FileSize : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 Saxon.Ejava.io.File file = toExistingFile(arguments[0].head().getStringValue());
                 return new Saxon.Hej.value.Int64Value((file.isDirectory() ? 0 : file.length()));
             }
         
         }
-        public class FileTempDir : Saxon.Hej.functions.SystemFunction {
+        public class FileTempDir : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 return new Saxon.Hej.value.StringValue(Saxon.Ejava.lang.System.getProperty("java.io.tmpdir"));
             }
         
         }
-        public class FileWrite : Saxon.Hej.functions.SystemFunction {
+        public class FileWrite : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Hej.om.Sequence contents = arguments[1];
                 Saxon.Hej.serialize.SerializationProperties @params;
@@ -692,8 +739,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileWriteBinary : Saxon.Hej.functions.SystemFunction {
+        public class FileWriteBinary : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = checkWriteDestination(path);
                 byte[] content = ((Saxon.Hej.value.Base64BinaryValue)(arguments[1].head())).getBinaryValue();
@@ -741,8 +789,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileWriteText : Saxon.Hej.functions.SystemFunction {
+        public class FileWriteText : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = checkWriteDestination(path);
                 string content = arguments[1].head().getStringValue();
@@ -766,8 +815,9 @@ namespace Saxon.Eej.functions.extfn {
             }
         
         }
-        public class FileWriteTextLines : Saxon.Hej.functions.SystemFunction {
+        public class FileWriteTextLines : Saxon.Eej.functions.extfn.EXPathFileFunctionSet.EXPathFileFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                checkAllowedProtocols(context);
                 string path = arguments[0].head().getStringValue();
                 Saxon.Ejava.io.File file = checkWriteDestination(path);
                 Saxon.Hej.om.SequenceIterator contents = arguments[1].iterate();

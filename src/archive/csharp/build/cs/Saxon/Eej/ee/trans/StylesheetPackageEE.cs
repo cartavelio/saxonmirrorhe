@@ -68,7 +68,8 @@ namespace Saxon.Eej.ee.trans {
                     presenter.emitAttribute("dmk", dmk);
                 }
                 string expiry = getConfiguration().getLicenseFeature("Expiration");
-                if (((expiry != null) && !(expiry.Equals("never")))) {
+                string evaluation = getConfiguration().getLicenseFeature("Evaluation");
+                if ((((expiry != null) && !(expiry.Equals("never"))) && !(evaluation.Equals("no")))) {
                     presenter.emitAttribute("expiry", expiry);
                 }
             }

@@ -320,7 +320,8 @@ namespace Saxon.Eej.expr.sort {
                     if (!(keys.Contains(tokens[0]))) {
                         unknownKeys.Add(tokens[0]);
                     }
-                    props.setProperty(tokens[0], tokens[1]);
+                    string value = ((tokens.Length>=2) ? tokens[1] : "");
+                    props.setProperty(tokens[0], value);
                 }
             }
             string fallback = props.getProperty("fallback");

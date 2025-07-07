@@ -99,7 +99,7 @@ namespace Saxon.Hej.serialize {
                             }
                         } else {
                             if ((item is Saxon.Hej.value.IntegerValue)) {
-                                emit((num.longValue()+""));
+                                emit(num.getStringValue());
                             } else {
                                 if (((num.isWholeNumber() && !(num.isNegativeZero())) && (num.abs().compareTo(1_000_000_000_000_000_000L)<0))) {
                                     emit((num.longValue()+""));

@@ -32,7 +32,7 @@ namespace Saxon.Hej.expr {
             return getBaseExpression().getItemType();
         }
         protected internal override int computeCardinality() {
-            return (getBaseExpression().getCardinality()|Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO);
+            return ((getBaseExpression().getCardinality()|Saxon.Hej.expr.StaticProperty.ALLOWS_ONE)|Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO);
         }
         protected internal override Saxon.Hej.expr.OperandRole getOperandRole() {
             return Saxon.Hej.expr.OperandRole.SAME_FOCUS_ACTION;
