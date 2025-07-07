@@ -205,7 +205,7 @@ task product_jeljavadoc(
   outputs.files fileTree(dir: "${buildDir}/jeljavadoc")
 
   def cp = ""
-  configurations.documentation.resolve().each { path ->
+  configurations.jeldoclet.resolve().each { path ->
     cp = cp + System.getProperty("path.separator") + path
   }
 
