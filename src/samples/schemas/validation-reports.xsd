@@ -4,7 +4,7 @@
   <xs:element name="validation-reports">
     <xs:complexType>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" ref="v:validation-report"/>
+        <xs:element ref="v:validation-report" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -14,7 +14,7 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" ref="v:error"/>
+        <xs:element ref="v:error" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element ref="v:meta-data" maxOccurs="1" minOccurs="1"/>
       </xs:sequence>
       <xs:attribute name="system-id" use="required" type="xs:anyURI">
@@ -120,12 +120,12 @@
     <xs:complexType>
       <xs:attribute name="name" use="required" type="xs:string">
         <xs:annotation>
-          <xs:documentation>The name of the the schema validation product, for example SAXON-EE</xs:documentation>
+          <xs:documentation>The name of the schema validation product, for example SAXON-EE</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="vendor" use="optional" type="xs:string">
         <xs:annotation>
-          <xs:documentation>Defines the vendor of the Schema validation product</xs:documentation>
+          <xs:documentation>Defines the vendor of the schema validation product</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="version" use="required" type="xs:string">
@@ -139,12 +139,12 @@
     <xs:complexType>
       <xs:attribute name="errors" use="required" type="xs:integer">
         <xs:annotation>
-          <xs:documentation>Defines the number of the validation error found in the source document</xs:documentation>
+          <xs:documentation>Defines the number of validation errors found in the source document</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="warnings" use="required" type="xs:integer">
         <xs:annotation>
-          <xs:documentation>Defines the number of the validation warnings found in the source document</xs:documentation>
+          <xs:documentation>Defines the number of validation warnings found in the source document</xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
