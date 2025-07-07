@@ -444,7 +444,7 @@ class SaxonTestSuite {
       }
 
       def testargs = [options["dotnet"],
-                      "${project.buildDir}/testdrivers/bin/Release/net6.0/TestDrivers.dll",
+                      "${project.buildDir}/testdrivers/bin/Release/net8.0/TestDrivers.dll",
                       directory,
                       "-exceptions:${options['exceptions']}",
                       "-reportfilename:${options['reportFilename']}.xml",
@@ -589,7 +589,7 @@ class SaxonTestSuite {
       }
 
       def testargs = [options["dotnet"],
-                      "${project.buildDir}/testdrivers/bin/Release/net6.0/TestDrivers.dll",
+                      "${project.buildDir}/testdrivers/bin/Release/net8.0/TestDrivers.dll",
                       directory,
                       "-o:${options['reportDirectory']}",
                       "-lang:${options['language']}",
