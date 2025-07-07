@@ -160,11 +160,11 @@ docs-count: <xsl:value-of select="count($section-docs/*)"/>
                             <!-- bread-crumb trail -->
                             <ul class="trail" id="trail">
                                 <li id="trail1">
-                                    <a href="http://saxonica.com">Saxonica ▷</a>
+                                    <a href="https://saxonica.com">Saxonica ▷</a>
                                 </li>
                                 <li id="trail2">
                                     <a
-                                        href="http://www.saxonica.com/documentation/documentation.xml"
+                                        href="https://www.saxonica.com/documentation/documentation.xml"
                                         >Saxon ▷</a>
                                 </li>
                                 <!-- add other items here -->
