@@ -1,0 +1,198 @@
+import com.saxonica.build.*
+
+// New signing machinery
+
+def signingResources = tasks.register("awsSigningResources", AwsSigningResources) {
+    region = "eu-west-2"
+    stackName = "SaxonicaCiCdStack"
+}
+
+["He", "Pe", "Ee"].each { Release ->
+    def edition = Release.toLowerCase()
+
+    def signingMavenJars = tasks.register("${edition}_signingMavenJars", Sync) {
+        duplicatesStrategy = DuplicatesStrategy.WARN
+        into(layout.buildDirectory.dir("${edition}-signing/mavendownload"))
+        from(tasks.named("maven${Release}SaxonJar"))
+        from(tasks.named("maven${Release}JavadocJar"))
+        if (edition == "he") {
+            from(tasks.named("mavenHeSourceJar"))
+            from(tasks.named("mavenHeXqjJar"))
+            from(tasks.named("mavenHeXqjSourcesJar"))
+        } else {
+            from(tasks.named("maven${Release}SqlJar"))
+            from(tasks.named("maven${Release}SqlSourcesJar"))
+        }
+        from(tasks.named("maven${Release}TestJar"))
+        from(tasks.named("maven${Release}TestSourcesJar"))
+    }
+
+    def uploadUnsignedMavenJars = tasks.register("${edition}_uploadUnsignedMavenJars", UnsignedArtifactUploadTask) {
+        inputDir = layout.projectDirectory.dir(signingMavenJars.map { it.destinationDir.toString() })
+        bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+        queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
+        region = signingResources.map { it.region.get() }
+        baseKeyPrefix = "inputs"
+        jobFileDir = layout.buildDirectory.dir("${edition}-uploadMavenDownloadJars")
+    }
+
+    def downloadSignedMavenJars = tasks.register("${edition}_downloadSignedMavenJars", SignedArtifactDownloadTask) {
+        outputDir = layout.buildDirectory.dir("${edition}-signed-maven")
+        bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
+        queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
+        region = signingResources.map { it.region.get() }
+        jobFile = uploadUnsignedMavenJars.map { it.jobFile.get() }
+    }
+}
+
+publishing {
+    publications {
+        create("he_maven", MavenPublication) {
+            def signTask = tasks.named("he_downloadSignedMavenJars")
+            def mavenArtifactId = "Saxon-HE"
+            def signRootName = "he-signed-maven/${mavenArtifactId}-${saxonVersion}"
+
+
+            groupId = "net.sf.saxon"
+            artifactId = mavenArtifactId
+            version = saxonVersion
+
+            pom {
+                name = 'Saxon-HE'
+                packaging = 'jar'
+                description = 'The XSLT and XQuery Processor'
+                url = 'https://www.saxonica.com/'
+                inceptionYear = '1999'
+
+                organization pomOrganization("he")
+                scm pomScm("he")
+                licenses pomLicenses("he")
+                developers pomDevelopers("he")
+                pomIssueManagement("he")
+
+                withXml pomXml("he")
+            }
+
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}.jar") })
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-javadoc.jar") }) {
+                classifier = "javadoc"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sources.jar") }) {
+                classifier = "sources"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-xqj.jar") }) {
+                classifier = "xqj"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-xqj-sources.jar") }) {
+                classifier = "xqj-sources"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
+                classifier = "test"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
+                classifier = "test-sources"
+            }
+        }
+
+        create("pe_maven", MavenPublication) {
+            def signTask = tasks.named("pe_downloadSignedMavenJars")
+            def mavenArtifactId = "Saxon-PE"
+            def signRootName = "pe-signed-maven/${mavenArtifactId}-${saxonVersion}"
+
+            pom {
+                name = 'Saxon-PE'
+                packaging = 'jar'
+                description = 'The XSLT and XQuery Processor'
+                url = 'https://www.saxonica.com/'
+                inceptionYear = '1999'
+
+                organization pomOrganization("pe")
+                //scm pomScm("pe")
+                licenses pomLicenses("pe")
+                developers pomDevelopers("pe")
+                pomIssueManagement("pe")
+
+                withXml pomXml("pe")
+            }
+
+            groupId = "com.saxonica"
+            artifactId = mavenArtifactId
+            version = saxonVersion
+
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}.jar") })
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-javadoc.jar") }) {
+                classifier = "javadoc"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql.jar") }) {
+                classifier = "sql"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql-sources.jar") }) {
+                classifier = "sql-sources"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
+                classifier = "test"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
+                classifier = "test-sources"
+            }
+        }
+
+        create("ee_maven", MavenPublication) {
+            def signTask = tasks.named("ee_downloadSignedMavenJars")
+            def mavenArtifactId = "Saxon-EE"
+            def signRootName = "ee-signed-maven/${mavenArtifactId}-${saxonVersion}"
+
+            pom {
+                name = 'Saxon-EE'
+                packaging = 'jar'
+                description = 'The XSLT and XQuery Processor'
+                url = 'https://www.saxonica.com/'
+                inceptionYear = '1999'
+
+                organization pomOrganization("ee")
+                //scm pomScm("ee")
+                licenses pomLicenses("ee")
+                developers pomDevelopers("ee")
+                pomIssueManagement("ee")
+
+                withXml pomXml("ee")
+            }
+
+            groupId = "com.saxonica"
+            version = saxonVersion
+
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}.jar") })
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-javadoc.jar") }) {
+                classifier = "javadoc"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql.jar") }) {
+                classifier = "sql"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql-sources.jar") }) {
+                classifier = "sql-sources"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
+                classifier = "test"
+            }
+            artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
+                classifier = "test-sources"
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "maven-o-matic"
+            url = uri(layout.buildDirectory.dir("maven-o-matic").get())
+        }
+/*
+    maven {
+      name = "sonatype"
+      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+      credentials {
+        username = project.findProperty("sonatypeUsername")?.toString() ?: "NOUSER"
+        password = project.findProperty("sonatypePassword")?.toString() ?: "NOPASS"
+      }
+    }
+*/
+    }
+}
