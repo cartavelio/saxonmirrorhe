@@ -19,6 +19,7 @@ interface ManageBranchesExtension {
 interface SaxonBuildExtension {
     abstract val project: Property<Project>
     abstract val version: Property<String>
+    abstract val publishVersion: Property<String>
     abstract val majorVersion: Property<String>
     abstract val releaseBuild: Property<Boolean>
     abstract val saxonLicenseDir: Property<String>

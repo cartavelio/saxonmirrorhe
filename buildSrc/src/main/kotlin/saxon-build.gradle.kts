@@ -14,6 +14,13 @@ val version = project.findProperty("saxonVersion").toString()
 
 extension.project.set(project)
 extension.version.set(version)
+
+if (version.split('.').last() == "0") {
+  extension.publishVersion.set(version.substring(0, version.length - 2))
+} else {
+  extension.publishVersion.set(version)
+}
+
 extension.majorVersion.set(version.replace("\\..+$".toRegex(), ""))
 extension.releaseBuild.set(project.findProperty("releaseBuild")?.toString() == "true")
 extension.saxonLicenseDir.set(project.findProperty("saxonLicenseDir")?.toString()
