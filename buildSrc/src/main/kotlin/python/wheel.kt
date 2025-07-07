@@ -30,6 +30,10 @@ abstract class WheelCompatibilityTags : DefaultTask() {
     @get:Input
     abstract val manylinuxTarget: Property<String>
 
+    @get:Input
+    @get:Optional
+    abstract val macosxDeploymentTarget: Property<String>
+
     @Internal
     val systemOs = OperatingSystem.current()
 
@@ -38,15 +42,6 @@ abstract class WheelCompatibilityTags : DefaultTask() {
         val versionPath = project.objects.fileProperty()
         versionPath.set(project.file(execString(pyenv, listOf("which", "pip"), mapOf("PYENV_VERSION" to pythonVersion.get()))).parentFile.parentFile)
         versionPath
-    }
-
-    @Internal
-    val macosxDeploymentTarget: Provider<String> = pythonExe.map { python ->
-        if (systemOs.isMacOsX()) {
-            execString(python, listOf("-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version]))"))
-        } else {
-            ""
-        }
     }
 
     @Internal
@@ -161,7 +156,7 @@ abstract class BuildWheel : DefaultTask() {
             setIgnoreExitValue(true)
             executable(pythonExe.get())
             environment("BUILD_DEBUG", debug.getOrElse(false).toString())
-            if (systemOs.isMacOsX()) {
+            if (macosxDeploymentTarget.isPresent) {
                 environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
             }
 

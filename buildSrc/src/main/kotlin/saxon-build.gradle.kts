@@ -36,11 +36,12 @@ extension.systemOs.convention(systemOs)
 extension.systemOsName.convention(os)
 extension.platform.convention(if (os == "mac") { "osx" } else { os })
 extension.arch.convention(arch)
-extension.systemOsArch.convention(if (arch == "amd64") "x86_64" else arch)
+val systemOsArch = if (arch == "amd64") "x86_64" else arch
+extension.systemOsArch.convention(systemOsArch)
 extension.dotnet.convention(exeFinder.find("dotnet",
   listOf("/usr/local/share/dotnet", "/usr/local/share/dotnet/x64")))
-
 extension.dotnetversion.convention("6.0")
+extension.macosx_min_version.convention(project.findProperty("macosx_min_version_${systemOsArch}")?.toString())
 
 tasks.register(LifecycleTasks.RELEASE_TASK_NAME) {
   group = LifecycleTasks.RELEASE_GROUP
