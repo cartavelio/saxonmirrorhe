@@ -285,7 +285,10 @@ tasks.named<Test>("test") {
 }
 
 val test = tasks.register<Test>("editionTest") {
-    useJUnitPlatform()
+    useJUnitPlatform {
+      excludeTags("performance")
+    }
+
     description = "Runs JUnit tests."
     group = "verification"
     environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())

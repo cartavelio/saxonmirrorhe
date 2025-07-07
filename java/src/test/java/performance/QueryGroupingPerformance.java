@@ -1,7 +1,11 @@
 package performance;
 
 import net.sf.saxon.s9api.*;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+
 
 import java.io.File;
 
@@ -49,7 +53,8 @@ public class QueryGroupingPerformance extends PerformanceTestCase {
     }
 
     @Test
-    //@Tag("performance")
+    @Tag("performance")
+    @Disabled("depends on MHK filestore")
     public void testXQGrouping() {
         measure6446(1000);
     }

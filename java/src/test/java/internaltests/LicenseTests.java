@@ -346,6 +346,9 @@ public class LicenseTests {
                 if (content.get(i).startsWith("Signature=")) {
                     content.set(i, "Signature=FFFFFFFF");
                 }
+                else if (content.get(i).startsWith("Signature2024=")) {
+                    content.set(i, "Signature2024=FFFFFFFF");
+                }
             }
             Files.write(licenseFilePath, content);
         }
@@ -364,6 +367,7 @@ public class LicenseTests {
             corruptLicenseFile();
             Processor processor = new Processor(new StreamSource(configFilePath.toFile()));
             assertNotNull(processor);
+//            assertRaise
             assertFalse(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
         }
     }
