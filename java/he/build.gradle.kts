@@ -391,6 +391,8 @@ val mavenPom = PomGenerator() {
   dependencies = configurations.editionImplementation.get().allDependencies
 }
 
+val mavenOMaticDir = layout.buildDirectory.dir("maven-o-matic")
+
 publishing {
   publications {
     create<MavenPublication>("maven") {
@@ -423,7 +425,8 @@ publishing {
   }
   repositories {
     maven {
-      url = uri(layout.buildDirectory.dir("maven-o-matic").get())
+      name = "maven-o-matic"
+      url = uri(mavenOMaticDir.get())
     }
 /*
     maven {
@@ -440,4 +443,14 @@ publishing {
 
 signing {
   sign(publishing.publications)
+}
+
+val heMavenPubTask = tasks.named("publishMavenPublicationToMaven-o-maticRepository")
+
+tasks.register<Zip>("sonatype_bundle") {
+  dependsOn(heMavenPubTask)
+  archiveFileName = "he_sonatype_bundle.zip"
+  from(mavenOMaticDir) {
+    exclude("com")
+  }
 }
