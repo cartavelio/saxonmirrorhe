@@ -3998,7 +3998,7 @@ public class XPathParser {
             return new ErrorExpression();
         }
         SquareArrayConstructor block = new SquareArrayConstructor(members);
-        setLocation(block, offset);
+        block.setLocation(makeLocation(offset));
         return block;
     }
 
