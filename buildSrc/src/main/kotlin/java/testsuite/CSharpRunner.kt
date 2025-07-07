@@ -13,10 +13,12 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.assign
+import org.gradle.process.ExecOperations
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
-abstract class CSharpRunner: DefaultTask() {
+abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations): DefaultTask() {
   override fun getGroup(): String {
     return "Testsuite"
   }
@@ -117,7 +119,7 @@ abstract class CSharpRunner: DefaultTask() {
       }
     }
 
-    project.exec {
+    ex.exec {
       if (!showOutput) {
         println("(buffering output)")
         standardOutput = stdOutput

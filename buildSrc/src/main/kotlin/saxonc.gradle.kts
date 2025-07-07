@@ -228,7 +228,7 @@ val generator = tasks.register("cmake_generate") {
 
     doLast {
         val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
-        project.exec {
+        providers.exec {
             workingDir = layout.projectDirectory.asFile
             executable = "cmake"
             args("-G", generatorName, "-B", ersatzPath.get().asFile.toString(),

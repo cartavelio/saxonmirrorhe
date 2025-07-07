@@ -7,6 +7,8 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
 
 
 /*
@@ -94,7 +96,7 @@ using SONAME.
 
 This task will produce correctly named headers and incorrectly named binaries that have the right SONAME or Dylib ID.
  */
-abstract class GraalNativeImageTask(): DefaultTask() {
+abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     private val systemOs: OperatingSystem = OperatingSystem.current()
 
     @get:InputFile
@@ -236,7 +238,7 @@ abstract class GraalNativeImageTask(): DefaultTask() {
         val firstArgs = generatedArgs()
         val remainingArgs = specifiedArgs.get()
 
-        project.exec {
+        ex.exec {
             executable(graalNativeImage.get())
             args(firstArgs)
             args(remainingArgs)

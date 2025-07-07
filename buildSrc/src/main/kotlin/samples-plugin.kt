@@ -18,11 +18,13 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
+import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
 abstract class SamplesExtension
   @Inject constructor(private val layout: ProjectLayout,
-                      private val tasks: TaskContainer) {
+                      private val tasks: TaskContainer,
+                      private val ex: ExecOperations) {
 
   abstract val runclasspath: Property<FileCollection>
   abstract val debugclasspath: Property<FileCollection>
@@ -173,7 +175,7 @@ abstract class SamplesExtension
       }
 
       doLast {
-        project.exec {
+        ex.exec {
           workingDir = layout.buildDirectory.file("samples/resources").get().asFile
           commandLine(cmdArgs)
         }
