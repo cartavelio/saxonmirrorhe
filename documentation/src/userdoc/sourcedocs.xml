@@ -36,8 +36,6 @@
       <li>Source XSLT stylesheet modules, and compiled XSLT packages made available as SEF files.</li>
       <li>Source XSD schema documents, and compiled schemas made available as SCM files.</li>
       <li>Source XQuery queries (main modules and library modules).</li>
-      <li>Binary resources accessed using the <a class="bodylink code"
-        href="/functions/saxon/read-binary-resource">saxon:read-binary-resource()</a> function.</li>
     </ul>
     
     <p>This section describes how URIs referring to XML documents (and in some cases, non-XML resources)
