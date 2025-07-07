@@ -1581,8 +1581,6 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
                of <i>value records</i> (also known as <i>parcels</i>), which will be the case if they are constructed
             using the <code>xsl:array-member</code> instruction, then the result is an array
             containing the values in those value records.</p></li>
-            <li>
-            
          </ul>
       </section>
       
