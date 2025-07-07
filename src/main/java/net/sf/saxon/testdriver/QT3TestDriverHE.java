@@ -358,6 +358,7 @@ public class QT3TestDriverHE extends TestDriver {
         String langVersion;
         Spec specOpt = null;
         if (CUTOFF != null) {
+            // run tests that have not changed since the cutoff date
             for (XdmNode data : testCase.children()) {
                 if (data.getNodeKind() == XdmNodeKind.ELEMENT &&
                         (data.getNodeName().getLocalName().equals("created") ||
