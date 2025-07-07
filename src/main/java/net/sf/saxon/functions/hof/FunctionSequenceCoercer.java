@@ -15,6 +15,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -63,7 +64,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression simplify() throws XPathException {
-        //try {
+        try {
             setBaseExpression(getBaseExpression().simplify());
             if (getBaseExpression() instanceof Literal) {
                 GroundedValue val =
@@ -71,9 +72,9 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
                 return Literal.makeLiteral(val, this);
             }
             return this;
-//        } catch (UncheckedXPathException e) {
-//            throw e.getXPathException();
-//        }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
     /**
