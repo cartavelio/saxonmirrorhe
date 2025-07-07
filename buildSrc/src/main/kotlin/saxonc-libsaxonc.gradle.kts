@@ -6,6 +6,7 @@ import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.*
 import java.nio.file.Files
 import org.apache.tools.ant.filters.ReplaceTokens
+import java.io.IOException
 
 plugins {
     base
@@ -34,6 +35,16 @@ val pythonSamples by configurations.resolvable("pythonSamples") {
     extendsFrom(pythonSamplesBucket)
 }
 
+val pythonSourceBucket by configurations.dependencyScope("pythonSourceBucket")
+val pythonSourceDir by configurations.resolvable("pythonSourceDir") {
+    extendsFrom(pythonSourceBucket)
+}
+
+val saxonCCoreJavaSrcBucket by configurations.dependencyScope("saxonCCoreJavaSrc")
+val saxonCCoreJavaSrcDir by configurations.resolvable("saxonCCoreJavaSrcDir") {
+    extendsFrom(saxonCCoreJavaSrcBucket)
+}
+
 project.layout.projectDirectory.dir("src/include")
 val includeDir by configurations.consumable("includeDir")
 val libDir by configurations.consumable("libDir")
@@ -55,6 +66,12 @@ dependencies {
     })
     pythonSamplesBucket(extension.edition.map  { edition ->
         project(path = ":python:${edition}", configuration = "packagedSamples")
+    })
+    pythonSourceBucket(extension.edition.map  { edition ->
+        project(path = ":python:${edition}", configuration = "sourceFiles")
+    })
+    saxonCCoreJavaSrcBucket(extension.edition.map { edition ->
+        project(path = ":libsaxonc-core:${edition}", configuration = "javaSrcDir")
     })
 }
 
@@ -295,6 +312,57 @@ val releaseZipUnicesTask = tasks.register<Exec>("release_zip") {
     workingDir = packagedDir.map { it.dir("tmp") }.get().asFile
 }
 
+val exportHeaderTask = tasks.register("combined_export_header") {
+    val cmakeExportHeader = build.map { layout.buildDirectory.file("saxonc_export.h").get() }
+    val clangHeader = layout.projectDirectory.file("../saxonc_export_header/clang/saxonc_export.h")
+    val msvcHeader = layout.projectDirectory.file("../saxonc_export_header/msvc/saxonc_export.h")
+    inputs.file(cmakeExportHeader)
+    inputs.file(clangHeader)
+    inputs.file(msvcHeader)
+    outputs.file(layout.buildDirectory.file("unified_export_header/saxonc_export.h"))
+
+    doLast {
+        val compilerDirName = if (saxonBuild.targetHost.get().isWindows) "msvc" else "clang"
+        val comparisonHeaderFile = layout.projectDirectory.file("../saxonc_export_header/${compilerDirName}/saxonc_export.h").asFile.toPath()
+        val cmakeChanged = Files.mismatch(cmakeExportHeader.get().asFile.toPath(), comparisonHeaderFile) > -1L
+        if (cmakeChanged) IOException("CMake generated export header ${comparisonHeaderFile} has changed")
+
+        val transformer = Transformer<String?, String> { line ->
+            val skip = when (line) {
+                "#ifndef SAXONC_EXPORT_H" -> true
+                "#define SAXONC_EXPORT_H" -> true
+                "#endif /* SAXONC_EXPORT_H */" -> true
+                else -> false
+            }
+            if (skip) "" else line
+        }
+
+        copy {
+            into(layout.buildDirectory.dir("unified_export_header"))
+            from(clangHeader) {
+                rename({_ -> "clang_export.h"})
+                filter(transformer)
+            }
+            from(msvcHeader) {
+                rename({_ -> "msvc_export.h"})
+                filter(transformer)
+            }
+        }
+
+        copy {
+            into(layout.buildDirectory.dir("unified_export_header"))
+            from(layout.projectDirectory.file("../saxonc_export_header/saxonc_export.h.in")) {
+                rename({_ -> "saxonc_export.h"})
+                filter<ReplaceTokens>("tokens" to mapOf(
+                    "MSVC_HEADER" to layout.buildDirectory.file("unified_export_header/msvc_export.h").get().asFile.readText(),
+                    "CLANG_HEADER" to layout.buildDirectory.file("unified_export_header/clang_export.h").get().asFile.readText()
+                ))
+            }
+        }
+    }
+}
+
+
 val sourceZipTask = tasks.register<Zip>("source_release_zip") {
     archiveBaseName = extension.package_name
     archiveAppendix = "source"
@@ -304,8 +372,39 @@ val sourceZipTask = tasks.register<Zip>("source_release_zip") {
 
     val topLevelDir = extension.package_name.map { name -> "${name}-${saxonBuild.version.get()}" }
     into(topLevelDir)
-    from(layout.projectDirectory.dir("../src"))
 
+    // C/C++/Java Sources
+    from(layout.projectDirectory.dir("../src")) {
+        into("src/main/c")
+        exclude("**/*.c.in")
+    }
+    from(saxonCCoreJavaSrcDir.elements.map { it.first() }) {
+        into("src/main/java")
+    }
+    from(exportHeaderTask) {
+        into("src/main/c/include")
+    }
+    from(build.map { layout.buildDirectory.file("saxonc_version.c") }) {
+        into("src/main/c/lib")
+    }
+    // Python sources
+    from(pythonSourceDir.elements.map { it.first() }) {
+        into("python")
+    }
+    // License
+    from(layout.projectDirectory.dir("../../src/main/notices")) {
+        include("LICENSE.txt")
+        into("notices")
+    }
+    // Readme
+    from(layout.projectDirectory.dir("../")) {
+        include("README-source-zip.md")
+        rename { _ -> "README.md" }
+        filter<ReplaceTokens>("tokens" to mapOf(
+            "EDITION" to extension.edition.map { it.uppercase() }.get(),
+            "VERSION" to saxonBuild.version.get(),
+        ))
+    }
 }
 
 val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
