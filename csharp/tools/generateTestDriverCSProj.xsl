@@ -21,6 +21,11 @@
         <Compile Include="..\..\..\..\src\test\testrunner\**"/>
         <Compile Remove="..\..\..\..\**\.DS_Store"/>
       </ItemGroup>
+      <ItemGroup>
+        <Reference Include="SaxonCS">
+          <HintPath>../SaxonCS/bin/Debug/net8.0/osx-arm64/SaxonCS.dll</HintPath>
+        </Reference>
+      </ItemGroup>
     </Project>
   </xsl:result-document>
 
