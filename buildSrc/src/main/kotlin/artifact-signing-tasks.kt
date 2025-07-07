@@ -33,6 +33,12 @@ class CloudFormationStackDetails(val region: Property<String>, val stackName: Pr
   val signingOutputsQueueUrl: String
     get() = stackOutputValue("LinuxCodeSigningOutputsQueueUrl")
 
+  val windowsSigningInputsQueueUrl: String
+    get() = stackOutputValue("WindowsCodeSigningInputsQueueUrl")
+
+  val windowsSigningOutputsQueueUrl: String
+    get() = stackOutputValue("WindowsCodeSigningOutputsQueueUrl")
+
   val signingInputsBucket: String
     get() = stackOutputValue("CodeSigningInputsBucketName")
 
@@ -72,10 +78,16 @@ abstract class AwsSigningResources: DefaultTask() {
   abstract val codeSigningInputsQueueUrl: Property<String>
 
   @get:Internal
+  abstract val windowsCodeSigningInputsQueueUrl: Property<String>
+
+  @get:Internal
   abstract val codeSigningInputsBucket: Property<String>
 
   @get:Internal
   abstract val codeSigningOutputsQueueUrl: Property<String>
+
+  @get:Internal
+  abstract val windowsCodeSigningOutputsQueueUrl: Property<String>
 
   @get:Internal
   abstract val codeSigningOutputsBucket: Property<String>
@@ -84,8 +96,10 @@ abstract class AwsSigningResources: DefaultTask() {
   fun execute() {
     val details = CloudFormationStackDetails(region, stackName)
     codeSigningInputsQueueUrl.set(details.signingInputsQueueUrl)
+    windowsCodeSigningInputsQueueUrl.set(details.windowsSigningInputsQueueUrl)
     codeSigningInputsBucket.set(details.signingInputsBucket)
     codeSigningOutputsQueueUrl.set(details.signingOutputsQueueUrl)
+    windowsCodeSigningOutputsQueueUrl.set(details.windowsSigningOutputsQueueUrl)
     codeSigningOutputsBucket.set(details.signingOutputsBucket)
   }
 }
