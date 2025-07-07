@@ -610,7 +610,7 @@ val docParse = tasks.register<JavaExec>("docParse") {
        "-xsl:${layout.projectDirectory.file("../tools/parsecs.xsl")}",
        "-o:${layout.buildDirectory.file("dotnetdoc/names.xml").get().asFile}",
        "inputdir=file://${layout.projectDirectory.file("../src/main/cs/Saxon/Api")}",
-       "featurekeysdir=file://${layout.projectDirectory.file("../keys/build/cs/Saxon/Api")}")
+       "featurekeysdir=file://${layout.projectDirectory.file("../../featurekeys/build/cs/Saxon/Api")}")
 }
 
 tasks.register<JavaExec>("docMerge") {
@@ -637,7 +637,7 @@ tasks.register<JavaExec>("docMerge") {
        "-xsl:${layout.projectDirectory.file("../tools/merge.xsl")}",
        "-o:${layout.buildDirectory.file("dotnetdoc/merged.xml").get().asFile}",
        "names-file=${docParse.get().outputs.getFiles().getSingleFile()}",
-       "api-doc-file=${buildtask.get().outputs.getFiles().first()}/${xmlpath}")
+       "api-doc-file=${layout.buildDirectory.file("apidoc/SaxonCS.xml").get().asFile}")
 }
 
 tasks.register<Copy>("docCss") {
