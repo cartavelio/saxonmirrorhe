@@ -331,6 +331,13 @@ val transpile = tasks.register<JavaExec>("transpile") {
     mkdir("${layout.buildDirectory.dir("tmp/xml").get()}")
   }
 
+  // Fix Windows filenames so that Java doesn't get confused
+  val xdigest = saxonBuild.puri("${layout.projectDirectory.file("../transpiler/tools/xslt/xml-to-digest.xsl")}")
+  val rdigest = saxonBuild.puri("${layout.projectDirectory.file("../transpiler/tools/xslt/refine-digest.xsl")}")
+  val xmldir = saxonBuild.puri("${layout.buildDirectory.dir("tmp/xml").get()}")
+  val tmpdigest = saxonBuild.puri("${layout.buildDirectory.file("tmp/digest.xml").get()}")
+  val digest = saxonBuild.puri("${layout.buildDirectory.file("digest.xml").get()}")
+
   classpath = configurations.named("transpiler").get()
   mainClass = "ToXml"
   args("-j:${layout.buildDirectory.dir("src").get()}",
@@ -346,9 +353,9 @@ val transpile = tasks.register<JavaExec>("transpile") {
       classpath = preprocessorClasspath
       mainClass = "net.sf.saxon.Transform"
       args("-it",
-           "-xsl:${layout.projectDirectory.file("../transpiler/tools/xslt/xml-to-digest.xsl")}",
-           "-o:${layout.buildDirectory.file("tmp/digest.xml").get()}",
-           "xmlDir=${layout.buildDirectory.dir("tmp/xml").get()}")
+           "-xsl:${xdigest}",
+           "-o:${tmpdigest}",
+           "xmlDir=${xmldir}")
     }
   }
 
@@ -356,10 +363,10 @@ val transpile = tasks.register<JavaExec>("transpile") {
     javaexec {
       classpath = preprocessorClasspath
       mainClass = "net.sf.saxon.Transform"
-      args("-xsl:${layout.projectDirectory.file("../transpiler/tools/xslt/refine-digest.xsl")}",
-           "-s:${layout.buildDirectory.file("tmp/digest.xml").get()}",
-           "-o:${layout.buildDirectory.file("digest.xml").get()}",
-           "xmlDir=${layout.buildDirectory.dir("tmp/xml").get()}")
+      args("-xsl:${rdigest}",
+           "-s:${tmpdigest}",
+           "-o:${digest}",
+           "xmlDir=${xmldir}")
     }
   }
 }
@@ -455,11 +462,16 @@ for (buildArch in architectures) {
   }
   build_task { dependsOn(build) }
 
+
+  val platform = saxonCS.platform.get()
+  val csrid = "${platform}-${buildArch}"
+  val release = saxonCS.release.get()
+
   val publish = tasks.register<DotNetPublish>("dotnetPublish_${buildArch}") {
     LifecycleTasks.RELEASE_GROUP
     arch = buildArch
     inputs.files(build)
-    outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS/bin/${saxonCS.release.get()}/net8.0/linux-${buildArch}/publish"))
+    outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS/bin/${release}/net8.0/${csrid}/publish"))
   }
   publish_task { dependsOn(publish) }
 
@@ -642,9 +654,6 @@ tasks.register<JavaExec>("docMerge") {
 
   val arch = architectures.first()
   val buildtask = tasks.named("dotnetBuild_${arch}")
-
-  val platform = saxonBuild.platform.get()
-  val netver = "net${saxonBuild.dotnetversion.get()}"
 
   dependsOn(buildtask)
   inputs.files(apiDocumentation)
