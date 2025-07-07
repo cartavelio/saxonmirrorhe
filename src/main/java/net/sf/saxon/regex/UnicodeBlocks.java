@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -11,10 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AllElementsSpaceStrippingRule;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
@@ -30,23 +27,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class provides knowledge of the names and contents of Unicode character blocks,
- * as referenced using the \p{IsXXXXX} construct in a regular expression. The underlying
+ * This singleton class provides knowledge of the names and contents of Unicode character blocks,
+ * as referenced using the <code>\p{IsXXXXX}</code> construct in a regular expression. The underlying
  * data is in an XML resource file UnicodeBlocks.xml
  */
 public class UnicodeBlocks {
 
-    private static Map<String, IntSet> blocks = null;
+    private final Map<String, IntSet> blocks = new HashMap<>(250);
+
+    private UnicodeBlocks() {
+        build();
+    }
+
+    private static class Holder {
+        // See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+        // The idea here is that the initialization occurs the first time getInstance() is called,
+        // and it is automatically synchronized by virtue of the Java class loading rules.
+        public static final UnicodeBlocks INSTANCE = new UnicodeBlocks();
+    }
+
+    private static UnicodeBlocks getInstance() {
+        return Holder.INSTANCE;
+    }
 
     public static IntSet getBlock(String name) throws RESyntaxException {
-        if (blocks == null) {
-            readBlocks(new Configuration());
-        }
-        IntSet cc = blocks.get(name);
+        UnicodeBlocks instance = getInstance();
+        IntSet cc = instance.blocks.get(name);
         if (cc != null) {
             return cc;
         }
-        cc = blocks.get(normalizeBlockName(name));
+        cc = instance.blocks.get(normalizeBlockName(name));
         return cc;
     }
 
@@ -70,17 +80,18 @@ public class UnicodeBlocks {
         return fsb.toString();
     }
 
-    private synchronized static void readBlocks(Configuration config) throws RESyntaxException {
-        blocks = new HashMap<>(250);
+    private void build() throws RESyntaxException {
         InputStream in = Version.platform.locateResource("unicodeBlocks.xml", new ArrayList<>());
         if (in == null) {
             throw new RESyntaxException("Unable to read unicodeBlocks.xml file");
         }
 
+        Configuration config = new Configuration();
         ParseOptions options = new ParseOptions();
         options.setSchemaValidationMode(Validation.SKIP);
         options.setDTDValidationMode(Validation.SKIP);
         options.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+        options.setPleaseCloseAfterUse(true);
         TreeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "unicodeBlocks.xml"), options);
@@ -88,7 +99,8 @@ public class UnicodeBlocks {
             throw new RESyntaxException("Failed to process unicodeBlocks.xml: " + e.getMessage());
         }
 
-        AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, "", "block", config.getNamePool()));
+        AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT,
+                                                          new NameTest(Type.ELEMENT, "", "block", config.getNamePool()));
         while (true) {
             NodeInfo item = iter.next();
             if (item == null) {

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -30,10 +30,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Data for Regular expression character categories. The data is in an XML file derived from the Unicode
+ * Singleton class holding data for Regular expression character categories.
+ * <p>The data is read from an XML file derived from the Unicode
  * database (In Saxon 9.6, this is based on Unicode 6.2.0). Since Saxon 9.4,
  * we no longer make use of Java's support for character categories since there are too many differences
- * from Unicode.
+ * from Unicode.</p>
+ * <p>Some commonly used categories are hard-coded and made available as static constants.</p>
  */
 public class Categories {
 
@@ -62,7 +64,7 @@ public class Categories {
         public boolean isDisjoint(CharacterClass other) {
             if (other instanceof Category) {
                 char majorCat0 = label.charAt(0);
-                String otherLabel = ((Category)other).label;
+                String otherLabel = ((Category) other).label;
                 char majorCat1 = otherLabel.charAt(0);
                 return majorCat0 != majorCat1 ||
                         (label.length() > 1 && otherLabel.length() > 1 && !label.equals(otherLabel));
@@ -70,7 +72,7 @@ public class Categories {
             } else if (other instanceof InverseCharacterClass) {
                 return other.isDisjoint(this);
             } else if (other instanceof SingletonCharacterClass) {
-                return !test(((SingletonCharacterClass)other).getCodepoint());
+                return !test(((SingletonCharacterClass) other).getCodepoint());
             } else if (other instanceof IntSetCharacterClass) {
                 IntSet intSet = other.getIntSet();
                 if (intSet.size() > 100) {
@@ -103,11 +105,24 @@ public class Categories {
     }
 
 
-    private static HashMap<String, Category> CATEGORIES = null;
+    private final HashMap<String, Category> CATEGORIES = new HashMap<>(30);
 
-    static void build() {
+    private Categories() {
+        build();
+    }
 
-        CATEGORIES = new HashMap<>(30);
+    private static class Holder {
+        // See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+        // The idea here is that the initialization occurs the first time getInstance() is called,
+        // and it is automatically synchronized by virtue of the Java class loading rules.
+        public static final Categories INSTANCE = new Categories();
+    }
+
+    private static Categories getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private void build() {
 
         InputStream in = Version.platform.locateResource("categories.xml", new ArrayList<>());
         if (in == null) {
@@ -119,6 +134,7 @@ public class Categories {
         options.setSchemaValidationMode(Validation.SKIP);
         options.setDTDValidationMode(Validation.SKIP);
         options.setTreeModel(Builder.TINY_TREE);
+        options.setPleaseCloseAfterUse(true);
         NodeInfo doc;
         try {
             doc = config.buildDocumentTree(new StreamSource(in, "categories.xml"), options).getRootNode();
@@ -131,17 +147,16 @@ public class Categories {
         int fp_t = config.getNamePool().allocateFingerprint("", "t");
 
         AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, "", "cat", config.getNamePool()));
-        NodeInfo item;
-        while ((item = iter.next()) != null) {
-            String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
+        for (NodeInfo item; (item = iter.next()) != null; ) {
+            String cat = ((TinyElementImpl) item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
             for (NodeInfo r : item.children(NodeKindTest.ELEMENT)) {
-                String from = ((TinyElementImpl)r).getAttributeValue(fp_f);
+                String from = ((TinyElementImpl) r).getAttributeValue(fp_f);
                 String to = ((TinyElementImpl) r).getAttributeValue(fp_t);
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));
             }
             CATEGORIES.put(cat, new Category(cat, new IntSetPredicate(irs)));
-        };
+        }
 
         String c = "CLMNPSZ";
         for (int i = 0; i < c.length(); i++) {
@@ -194,10 +209,7 @@ public class Categories {
      */
 
     public synchronized static Category getCategory(String cat) {
-        if (CATEGORIES == null) {
-            build();
-        }
-        return CATEGORIES.get(cat);
+        return getInstance().CATEGORIES.get(cat);
     }
 
 

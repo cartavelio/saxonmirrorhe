@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -27,7 +27,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
- * This class holds data about the case-variants of Unicode characters. The data is automatically
+ * This singleton class holds data about the case-variants of Unicode characters. The data is held
+ * in the resource file {@code casevariants.xml}, which is read on first use; the file has been automatically
  * generated from the Unicode database.
  */
 public class CaseVariants {
@@ -35,14 +36,25 @@ public class CaseVariants {
     // Use one hashmap for characters with a single case variant, another for characters with multiple
     // case variants, to reduce the number of objects that need to be allocated
 
-    private static IntToIntMap monoVariants = null;
-    private static IntHashMap<int[]> polyVariants = null;
+    private final IntToIntMap monoVariants = new IntToIntHashMap(2500);
+    private final IntHashMap<int[]> polyVariants = new IntHashMap<>(100);
 
+    private CaseVariants() {
+        build();
+    }
 
-    static void build() {
+    private static class Holder {
+        // See https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+        // The idea here is that the initialization occurs the first time getInstance() is called,
+        // and it is automatically synchronized by virtue of the Java class loading rules.
+        public static final CaseVariants INSTANCE = new CaseVariants();
+    }
 
-        monoVariants = new IntToIntHashMap(2500);
-        polyVariants = new IntHashMap<>(100);
+    private static CaseVariants getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private void build() {
 
         InputStream in = Version.platform.locateResource("casevariants.xml", new ArrayList<>());
         if (in == null) {
@@ -71,7 +83,7 @@ public class CaseVariants {
             String variants = item.getAttributeValue("", "v");
             String[] vhex = variants.split(",");
             int[] vint = new int[vhex.length];
-            for (int i=0; i<vhex.length; i++) {
+            for (int i = 0; i < vhex.length; i++) {
                 vint[i] = Integer.parseInt(vhex[i], 16);
             }
             if (vhex.length == 1) {
@@ -89,15 +101,14 @@ public class CaseVariants {
      * @return the case variants of the character, excluding the character itself
      */
 
-    public synchronized static int[] getCaseVariants(int code) {
-        if (monoVariants == null) {
-            build();
-        }
+    public static int[] getCaseVariants(int code) {
+        CaseVariants variants = getInstance();
+        IntToIntMap monoVariants = variants.monoVariants;
         int mono = monoVariants.get(code);
         if (mono != monoVariants.getDefaultValue()) {
             return new int[]{mono};
         } else {
-            int[] result = polyVariants.get(code);
+            int[] result = variants.polyVariants.get(code);
             if (result == null) {
                 return IntArraySet.EMPTY_INT_ARRAY;
             } else {
