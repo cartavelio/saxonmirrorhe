@@ -23,7 +23,7 @@
       </ItemGroup>
       <ItemGroup>
         <Reference Include="SaxonCS">
-          <HintPath>../SaxonCS/bin/Debug/net8.0/osx-arm64/SaxonCS.dll</HintPath>
+          <HintPath>../SaxonCS/bin/Debug/net8.0/{$csrid}/SaxonCS.dll</HintPath>
         </Reference>
       </ItemGroup>
     </Project>
