@@ -385,10 +385,12 @@ def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spe
                 environment.xquery_proc.set_query_base_uri(None)
                 environment.xpath_proc.set_base_uri(None)
             else:
-                environment.xquery_proc.set_query_base_uri(uri)
-                environment.xpath_proc.set_base_uri(uri)
-                environment.base_uri = uri
-                '''print("base-uri = " + uri)'''
+                print("base-uri = " + uri)
+                if uri != "#UNDEFINED":
+                    environment.xquery_proc.set_query_base_uri(uri)
+                    environment.xpath_proc.set_base_uri(uri)
+                    environment.base_uri = uri
+                    '''print("base-uri = " + uri)'''
 
     '''set any requested collations - TODO'''
 
@@ -852,9 +854,6 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         print(ex)
         errorResult = ex
 
-    for func in environment.reset_actions:
-        func(environment.proc)
-
     assert_xpc = environment.proc.new_xpath_processor()
     assert_xpc.set_property("sa", "true")
     assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
@@ -898,6 +897,8 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         return
     test_report.write_test_case_element(str(test_name), "notRun", None)
     not_run += 1
+    '''for func in environment.reset_actions:
+        func(environment.proc)'''
 
 
 
