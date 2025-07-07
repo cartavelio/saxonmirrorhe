@@ -392,7 +392,9 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "traceListenerOutputFile", FeatureCode.TRACE_LISTENER_OUTPUT_FILE, "JN");
         applyProperty(props, "traceOptimizerDecisions", FeatureCode.TRACE_OPTIMIZER_DECISIONS, "JN");
         applyProperty(props, "treeModel", FeatureCode.TREE_MODEL_NAME, "JN");
+        // Two spellings accepted: see bug #6201. The correct one (according to the schema) is "unparsedTextURIResolver"
         applyProperty(props, "unparsedTextUriResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
+        applyProperty(props, "unparsedTextURIResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
         applyProperty(props, "uriResolver", FeatureCode.URI_RESOLVER_CLASS, "J");
         applyProperty(props, "usePiDisableOutputEscaping", FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING, "JN");
         applyProperty(props, "useTypedValueCache", FeatureCode.USE_TYPED_VALUE_CACHE, "JN");
