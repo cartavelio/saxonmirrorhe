@@ -129,9 +129,7 @@ public class CommandLineOptions {
 
     public void setActualOptions(/*@NotNull*/ String[] args) throws XPathException {
         for (String arg : args) {
-            if ("".equals(arg)) {
-                throw new XPathException("An empty string is not a valid command line option");
-            } else if ("-".equals(arg)) {
+            if ("-".equals(arg)) {
                 positionalOptions.add(arg);
             } else if (arg.equals("--?")) {
                 System.err.println("Configuration features:" + featureKeys());
@@ -807,30 +805,6 @@ public class CommandLineOptions {
             name.startsWith("file:") ||
             name.startsWith("classpath:") ||
             name.startsWith("jar:");
-    }
-
-    /*
-     * Coerce an output filename that's been specified with a file: URI into a filename.
-     *
-     * file:path => path
-     * file://///path => /path
-     * file:///c:/path => c:/path (on Windows)
-     *
-     */
-    public static String coerceImplicitOutputURI(String outputName) {
-        if (outputName == null) {
-            return null;
-        }
-        if (outputName.startsWith("file:")) {
-            outputName = outputName.substring(5);
-            if (outputName.startsWith("/")) {
-                outputName = outputName.replaceFirst("^/+", "/");
-            }
-            if (System.getProperty("os.name").startsWith("Windows") && outputName.matches("^/[A-Za-z]:.*$")) {
-                outputName = outputName.substring(1);
-            }
-        }
-        return outputName;
     }
 
     public static void loadAdditionalSchemas(/*@NotNull*/ Configuration config, String additionalSchemas)
