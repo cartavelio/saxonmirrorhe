@@ -819,8 +819,10 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                     testxpc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
                     testxpc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
                     testxpc.set_base_uri(test_case_node.base_uri)
-                    print(testxpc.base_uri)
-                    testxpc.set_cwd(cwd_from_base_uri(testxpc.base_uri))
+                    try:
+                        testxpc.set_cwd(cwd_from_base_uri(testxpc.base_uri))
+                    except IOError as ex:
+                        print(ex)
 
                     if len(environment.params) > 0:
                         for var_name in environment.params.keys():
@@ -843,6 +845,10 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                     testxqc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
                     testxqc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
 
+                    try:
+                        testxqc.set_cwd(cwd_from_base_uri(testxqc.base_uri))
+                    except IOError as ex:
+                        print(ex)
                     if environment.param_decimal_declarations is not None \
                             and len(environment.param_decimal_declarations) > 0:
                         exp = environment.param_decimal_declarations + exp
