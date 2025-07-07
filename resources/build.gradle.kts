@@ -120,11 +120,6 @@ val stageSaxoncApiDocZip = tasks.register<Zip>("stageSaxoncApiDoc") {
   archiveFileName = "saxonc-userdoc.zip"
   from(saxoncApiDoc.elements.map { it.first().asFile })
   into("/")
-
-  from(layout.projectDirectory.dir("../documentation/src/docs/saxonc-doc")) {
-    exclude("xsl/*.xsl")
-  }
-  into("/")
 }
 resources { dependsOn(stageSaxoncApiDocZip) }
 
