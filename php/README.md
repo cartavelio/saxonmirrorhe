@@ -29,11 +29,19 @@ page](https://www.saxonica.com/saxon-c/index.xml). For bug reporting,
 lists of known bugs, and help forums, please visit the SaxonC bug issue project:
 [https://saxonica.plan.io/projects/saxon-c](https://saxonica.plan.io/projects/saxon-c).
 
-To install, open a shell window and navigate to the `php` directory inside
+To install, open a shell window and navigate to the `php/src` directory inside
 the location where you unpacked the zip file. Run these commands:
 
 - phpize
+  
+User should install the SaxonC libraries (i.e. directory 'SaxonC[EDITION]') in a suitable location. 
+The search paths are '/opt/saxonica' '/usr/local' '/usr'. Then run the command
+
 - ./configure --with-saxon
+
+Alternatively:
+- ./configure --with-saxon=path/SaxonC[EDITION]
+
 - make
 - sudo make install
 
