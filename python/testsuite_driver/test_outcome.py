@@ -34,8 +34,8 @@ class PyTestOutcome:
             success = self.test_assertion2(assertion, result, result_as_error, assert_xpc, catalog_xpc, assert_set)
         except saxonc.PySaxonApiError as ex:
             print('Message =', ex)
-            raise ex
-            '''success = False'''
+            #raise ex
+            success = False
 
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None and "any-of" != tag and "all-of" != tag and "not" != tag:
             if not success:
