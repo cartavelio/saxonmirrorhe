@@ -403,7 +403,8 @@ task eecs_dll(
 
     exec {
         workingDir = "${buildDir}/cs"
-        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+
     }
   }
 }
@@ -644,6 +645,12 @@ task dotnetPublish(
 task dotnetMakeApp(
   dependsOn: ["dotnetPublish"]
 ) {
+  // This task has been tweaked to ship 11.7. It may not be as general as it should be.
+  doFirst {
+    delete("${buildDir}/SaxonCS.app")
+    mkdir("${buildDir}/SaxonCS.app")
+  }
+
   doLast {
     exec {
       workingDir "${buildDir}/cs"
@@ -659,6 +666,24 @@ task dotnetMakeApp(
         '--entitlements', "${projectDir}/tools/saxon-cs/entitlements.plist",
         '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
         '--timestamp', "bin/${csconfiguration}/net8.0/${csrid}/publish/SaxonCS.app"
+    }
+  }
+
+  doLast {
+    copy {
+      from("${buildDir}/cs/bin/Release/net8.0/${csrid}/publish/SaxonCS.app")
+      into("${buildDir}/SaxonCS.app")
+    }
+  }
+
+  doLast {
+    exec {
+      commandLine("codesign", "--force", "--options", "runtime",
+                  "--entitlements",
+                  "${projectDir}/tools/entitlements.plist",
+                  "--deep", "--sign", "Developer ID Application: Saxonica Limited",
+                  "--timestamp",
+                  "${buildDir}/SaxonCS.app")
     }
   }
 }
