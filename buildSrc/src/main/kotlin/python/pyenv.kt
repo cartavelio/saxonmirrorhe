@@ -8,7 +8,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
 abstract class PyenvExe : DefaultTask() {
     @get:Optional
@@ -44,12 +46,15 @@ abstract class PyenvExe : DefaultTask() {
     }
 }
 
-abstract class PythonPyenv: DefaultTask() {
+abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:Input
     abstract val pythonVersion: Property<String>
 
     @get:InputFile
     abstract val pyenvExe: RegularFileProperty
+
+    @get:Input
+    abstract val pyenvRoot: Property<String>
 
     @get:InputDirectory
     abstract val pythonBuildDefinitionsDir: DirectoryProperty
@@ -62,9 +67,25 @@ abstract class PythonPyenv: DefaultTask() {
     @get:Input
     abstract val macosxDeploymentTarget: Property<String>
 
+    @get:OutputFile
+    val pythonExe = pythonVersion.map { project.layout.buildDirectory.file("python-${it}").get() }
+
     @Internal
     val pyenvVersionName: Provider<String> = pythonVersion.map {
         "${it}${if (debugVariant.isPresent()) "-${debugVariant.get()}" else "" }"
+    }
+
+    private fun pythonExePath(pyenv: RegularFile): String {
+        ByteArrayOutputStream().use { out ->
+            ex.exec {
+                environment("PYENV_VERSION", pyenvVersionName.get())
+                environment("PYENV_ROOT", pyenvRoot.get())
+                executable(pyenv)
+                args("which", "python")
+                standardOutput = out
+            }
+            return out.toString().trim()
+        }
     }
 
     @TaskAction
@@ -76,22 +97,22 @@ abstract class PythonPyenv: DefaultTask() {
         //   else
         //      pyenv install version
         val pyenv = pyenvExe.get()
-        val pyenvVersions = ByteArrayOutputStream().use { out ->
-            project.exec {
-                executable(pyenv)
-                args("versions", "--bare")
-                standardOutput = out
-            }
-            out.toString().trim()
-        }.lines()
-
         var pythonBuildVersionName = pyenvVersionName.get()
-        if (!pyenvVersions.contains(pythonBuildVersionName)) {
+        val execResult = ex.exec {
+            environment("PYENV_ROOT", pyenvRoot.get())
+            executable(pyenv)
+            args("latest", pythonBuildVersionName)
+            setIgnoreExitValue(true)
+        }
+        val notInstalled = execResult.exitValue != 0
+
+        if (notInstalled) {
             val definitionFile = pythonBuildDefinitionsDir.get().file(pythonBuildVersionName)
             if (definitionFile.asFile.exists()) {
                 pythonBuildVersionName = definitionFile.asFile.toString()
             }
-            project.exec {
+            ex.exec {
+                environment("PYENV_ROOT", pyenvRoot.get())
                 executable(pyenv)
                 if (macosxDeploymentTarget.isPresent) {
                     environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
@@ -99,12 +120,17 @@ abstract class PythonPyenv: DefaultTask() {
                 args("install", pythonBuildVersionName)
             }
         }
+
+        pythonExe.get().asFile.writeText(pythonExePath(pyenv))
     }
 }
 
-abstract class PythonPyenvPythonExe: DefaultTask() {
+abstract class PythonPyenvPythonExe @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:Input
     abstract val pyenvVersionName: Property<String>
+
+    @get:Input
+    abstract val pyenvRoot: Property<String>
 
     @get:InputFile
     abstract val pyenvExe: RegularFileProperty
@@ -112,8 +138,9 @@ abstract class PythonPyenvPythonExe: DefaultTask() {
     @Internal
     val pythonExePath: Provider<String> = pyenvExe.map { pyenvPath ->
         ByteArrayOutputStream().use { out ->
-            project.exec {
+            ex.exec {
                 environment("PYENV_VERSION", pyenvVersionName.get())
+                environment("PYENV_ROOT", pyenvRoot.get())
                 executable(pyenvPath.asFile)
                 args("which", "python")
                 standardOutput = out
@@ -121,6 +148,9 @@ abstract class PythonPyenvPythonExe: DefaultTask() {
             out.toString().trim()
         }
     }
+
+    @TaskAction
+    fun execute() {}
 
     @OutputFile
     val pythonExe: Provider<RegularFile> = pythonExePath.flatMap {
