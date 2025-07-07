@@ -8,7 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.trans.XPathException;
-
+import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
 
@@ -39,32 +39,59 @@ public class PackageVersionRanges {
 
         public PackageVersionRange(String s) throws XPathException {
             display = s;
-            if ("*".equals(s)) {
-                all = true;
-            } else if (s.endsWith("+")) {
+            if (s.endsWith("+")) {
                 low = new PackageVersion(s.replace("+", ""));
                 high = PackageVersion.MAX_VALUE;
-            } else if (s.endsWith(".*")) {
-                prefix = true;
-                low = new PackageVersion(s.replace(".*", ""));
-            } else if (s.matches(".*\\s*to\\s+.*")) {
+            } else if (s.matches("^to\\s.*")) {
+                low = PackageVersion.ZERO;
+                String end = s.substring(3);
+                if (end.endsWith(".*")) {
+                    high = new PackageVersion(end.substring(0, end.length()-2));
+                    prefix = true;
+                } else {
+                    high = new PackageVersion(end);
+                }
+            } else if (s.matches(".*\\s?to\\s+.*")) {
                 String[] range = s.split("\\s*to\\s+");
                 if (range.length > 2) {
                     throw new XPathException("Invalid version range:" + s, "XTSE0020");
                 }
-                low = range[0].equals("") ? PackageVersion.ZERO : new PackageVersion(range[0]);
-                high = new PackageVersion(range[1]);
+                low = new PackageVersion(range[0]);
+                String end = range[1];
+                if (end.endsWith(".*")) {
+                    high = new PackageVersion(end.substring(0, end.length() - 2));
+                    prefix = true;
+                } else {
+                    high = new PackageVersion(end);
+                }
+            } else if (s.endsWith(".*")) {
+                prefix = true;
+                low = new PackageVersion(s.substring(0, s.length() - 2));
+
             } else {
                 low = new PackageVersion(s);
                 high = low;
             }
         }
 
+        /**
+         * Create a range representing "all" packages
+         */
+        public PackageVersionRange() {
+            display = "*";
+            all = true;
+        }
+
         boolean contains(PackageVersion v) {
             if (all) {
                 return true;
             } else if (prefix) {
-                return low.isPrefix(v);
+                if (high != null) {
+                    return low.compareTo(v) <= 0
+                            && (v.compareTo(high) <= 0 || high.isPrefix(v));
+                } else {
+                    return low.isPrefix(v);
+                }
             } else {
                 return low.compareTo(v) <= 0 && v.compareTo(high) <= 0;
             }
@@ -84,9 +111,14 @@ public class PackageVersionRanges {
      * @throws XPathException if any version range is invalid
      */
     public PackageVersionRanges(String s) throws XPathException {
-        ranges = new ArrayList<PackageVersionRange>();
-        for (String p : s.trim().split("\\s*,\\s*")) {
-            ranges.add(new PackageVersionRange(p));
+        ranges = new ArrayList<>();
+        String trimmed = Whitespace.normalize(s);
+        if (trimmed.equals("*")) {
+            ranges.add(new PackageVersionRange());
+        } else {
+            for (String p : trimmed.split("\\s?,\\s?")) {
+                ranges.add(new PackageVersionRange(p));
+            }
         }
     }
 
