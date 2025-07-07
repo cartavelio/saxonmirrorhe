@@ -40,7 +40,16 @@ class SaxonCSPlugin : Plugin<Project> {
     extension.release.convention("${if (release == "prod") "production" else release}")
     */
 
-    extension.release.convention("${project.findProperty("csharpBuild") ?: "Debug"}")
+    val saxonBuild = project.extensions.findByType(SaxonBuildExtension::class.java)
+    if (saxonBuild !is SaxonBuildExtension) {
+      throw GradleException("Could not find 'saxonbuild' extension")
+    }
+    if (saxonBuild.releaseBuild.get()) {
+      extension.release.convention("Release")
+    } else {
+      extension.release.convention("Debug")
+    }
+
     extension.arch.convention("${project.findProperty("csharpArch") ?:
                                      (if (System.getProperty("os.arch") == "aarch64") "arm64" else "x64")}")
     extension.platform.convention(if (OperatingSystem.current().isMacOsX())
@@ -60,7 +69,17 @@ abstract class DotNetImplementation: DefaultTask() {
   abstract val configuration: Property<String>
 
   init {
-    configuration.convention("${project.findProperty("csharpBuild") ?: "Debug"}")
+    val saxonBuild = project.extensions.findByType(SaxonBuildExtension::class.java)
+    if (saxonBuild !is SaxonBuildExtension) {
+      throw GradleException("Could not find 'saxonbuild' extension")
+    }
+
+    if (saxonBuild.releaseBuild.get()) {
+      configuration.convention("Release")
+    } else {
+      configuration.convention("Debug")
+    }
+
     platform.convention(if (OperatingSystem.current().isMacOsX())
                         "osx" else if (OperatingSystem.current().isWindows())
                           "win" else "linux")
@@ -96,7 +115,6 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
            "edition=${saxonCS.edition.get()}",
            "optimize=true",
            "csrid=${csrid}")
-
     }
 
     ex.javaexec {
@@ -107,6 +125,7 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
            "-o:${project.layout.buildDirectory.file("${arch}/TestDrivers/core.csproj").get()}",
            "saxonVersion=${saxonBuild.version.get()}",
            "edition=${saxonCS.edition.get()}",
+           "configuration=${configuration.get()}",
            "optimize=true",
            "csrid=${csrid}")
     }

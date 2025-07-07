@@ -42,6 +42,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   @get:Internal
   abstract val dotnet: Property<String>
   @get:Internal
+  abstract val dotnetBuildType: Property<String>
+  @get:Internal
   abstract val platform: Property<String>
   @get:Internal
   abstract val options: MapProperty<String,String>
@@ -89,7 +91,7 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       }
     }
 
-    val relprefix = "${arch.get()}/TestDrivers/bin/Debug"
+    val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
     val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
     val testDrivers = project.layout.buildDirectory.file("${relprefix}/${relarch}")
 

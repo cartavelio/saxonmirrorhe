@@ -10,5 +10,7 @@ class LifecycleTasks {
     val DOCUMENTATION_TASK_NAME = "documentation"
     val ACCEPTANCE_TEST_GROUP = "testsuites"
     val ACCEPTANCE_TEST_TASK_NAME = "testsuites"
+    val ACCEPTANCE_JAVA_TEST_TASK_NAME = "java-testsuites"
+    val ACCEPTANCE_CSHARP_TEST_TASK_NAME = "csharp-testsuites"
   }
 }

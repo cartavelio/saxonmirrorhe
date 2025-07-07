@@ -62,69 +62,89 @@ tasks.register(LifecycleTasks.DEBUG_TASK_NAME) {
   description = "Build debug-enabled release artifacts"
 }
 
-tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
-  group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-  description = "Run acceptance tests, like the W3C/QTCG test suites"
-  doLast {
-    val archive = project.findProperty("saxonicaTestDriverReportArchive")?.toString()
-    if (archive != null) {
-      println("Archiving results: ${archive}")
+private fun archiveTestSuiteResults() {
+  val archive = project.findProperty("saxonicaTestDriverReportArchive")?.toString()
+  if (archive != null) {
+    println("Archiving results: ${archive}")
 
-      val root = File(archive)
-      if (!root.exists() && root.isDirectory()) {
-        root.mkdirs()
-      }
+    val root = File(archive)
+    if (!root.exists() && root.isDirectory()) {
+      root.mkdirs()
+    }
 
-      val dateStamp = extension.dateStamp.get()
+    val dateStamp = extension.dateStamp.get()
 
-      // The build directory depends on what subproject runs this task...
-      var saxonRoot: String? = null
-      val buildDir = "${layout.buildDirectory.get()}"
-      
-      var pos = buildDir.indexOf("/java/")
+    // The build directory depends on what subproject runs this task...
+    var saxonRoot: String? = null
+    val buildDir = "${layout.buildDirectory.get()}"
+    
+    var pos = buildDir.indexOf("/java/")
+    if (pos > 0) {
+      saxonRoot = buildDir.substring(0, pos+1)
+    } else {
+      pos = buildDir.indexOf("/csharp/")
       if (pos > 0) {
         saxonRoot = buildDir.substring(0, pos+1)
-      } else {
-        pos = buildDir.indexOf("/csharp/")
-        if (pos > 0) {
-          saxonRoot = buildDir.substring(0, pos+1)
+      }
+    }
+
+    if (saxonRoot == null) {
+      println("FAILED TO PARSE: ${buildDir}")
+    } else {
+      val relativePath = mapOf(
+          "eej" to "java/build/test-results/",
+          "hej" to "java/he/build/test-results/",
+          "pej" to "java/pe/build/test-results/"
+      )
+
+      for (edition in listOf("hej", "pej", "eej")) {
+        val testroot = "${saxonRoot}${relativePath[edition]}"
+        val copyroot = "${archive}${edition}/${version}/"
+        println("${testroot}->${copyroot}")
+        project.copy {
+          into(copyroot)
+          from(testroot) {
+            include("**/${dateStamp}/**")
+          }
         }
       }
 
-      if (saxonRoot == null) {
-        println("FAILED TO PARSE: ${buildDir}")
-      } else {
-        val relativePath = mapOf(
-            "eej" to "java/build/test-results/",
-            "hej" to "java/he/build/test-results/",
-            "pej" to "java/pe/build/test-results/"
-        )
-
-        for (edition in listOf("hej", "pej", "eej")) {
-          val testroot = "${saxonRoot}${relativePath[edition]}"
-          val copyroot = "${archive}${edition}/${version}/"
-          println("${testroot}->${copyroot}")
-          project.copy {
-            into(copyroot)
-            from(testroot) {
-              include("**/${dateStamp}/**")
-            }
-          }
-        }
-
-        for (edition in listOf("he", "pe", "ee")) {
-          val testroot = "${saxonRoot}csharp/${edition}/build/test-results/"
-          val copyroot = "${archive}${edition}dotnet/${version}/"
-          println("${testroot}->${copyroot}")
-          project.copy {
-            into(copyroot)
-            from(testroot) {
-              include("**/${dateStamp}/**")
-            }
+      for (edition in listOf("he", "pe", "ee")) {
+        val testroot = "${saxonRoot}csharp/${edition}/build/test-results/"
+        val copyroot = "${archive}${edition}dotnet/${version}/"
+        println("${testroot}->${copyroot}")
+        project.copy {
+          into(copyroot)
+          from(testroot) {
+            include("**/${dateStamp}/**")
           }
         }
       }
     }
+  }
+}
+
+tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
+  group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
+  description = "Run acceptance tests, like the W3C/QTCG test suites"
+  doLast {
+    archiveTestSuiteResults()
+  }
+}
+
+tasks.register(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
+  group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
+  description = "Run Java acceptance tests, like the W3C/QTCG test suites"
+  doLast {
+    archiveTestSuiteResults()
+  }
+}
+
+tasks.register(LifecycleTasks.ACCEPTANCE_CSHARP_TEST_TASK_NAME) {
+  group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
+  description = "Run C# acceptance tests, like the W3C/QTCG test suites"
+  doLast {
+    archiveTestSuiteResults()
   }
 }
 
