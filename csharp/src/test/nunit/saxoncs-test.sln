@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaxonCS-NUnit", "SaxonCS-NUnit\SaxonCS-NUnit.csproj", "{D9666BAA-BAF5-4B96-937C-4EC10442A290}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaxonCS", "..\..\..\build\cs\SaxonCS.csproj", "{DB576905-C33F-4761-B559-A838ADFE6E1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaxonCS", "..\..\..\ee\build\arm64\SaxonCS\SaxonCS.csproj", "{DB576905-C33F-4761-B559-A838ADFE6E1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
