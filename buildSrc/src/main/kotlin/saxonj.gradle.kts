@@ -575,6 +575,8 @@ val (_, javadocMavenJarTask) = jarTaskBuilder("javadoc") {
     }
 }
 
+val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
+
 val signingDownloadJars = tasks.register<Sync>("signingDownloadJars") {
     duplicatesStrategy = DuplicatesStrategy.WARN
     into(layout.buildDirectory.dir("signing/download"))
@@ -587,7 +589,9 @@ val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
     into(layout.buildDirectory.dir("signing/mavendownload"))
     from(tasks.named<Jar>("editionMavenJar"))
     from(tasks.named<Jar>("javadocMavenJar"))
-    from(tasks.named<Jar>("editionSourceMavenJar"))
+    if (extension.edition.get().uppercase() == "HE") {
+      from(tasks.named<Jar>("editionSourceMavenJar"))
+    }
     from(tasks.named<Jar>("testDriversMavenJar"))
     from(tasks.named<Jar>("testDriversSourceMavenJar"))
 }
@@ -623,15 +627,21 @@ val downloadSignedDownloadJars = tasks.register<SignedArtifactDownloadTask>("dow
     jobFile = uploadUnsignedDownloadJars.map { it.jobFile.get() }
 }
 
-val downloadSignedMavenJars = tasks.register<SignedArtifactDownloadTask>("downloadSignedMavenJars") {
+val downloadSignedMavenJars = if (signedReleaseArtifacts) {
+  tasks.register<SignedArtifactDownloadTask>("downloadSignedMavenJars") {
     outputDir = layout.buildDirectory.dir("signed-maven")
     bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
     queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
     region = signingResources.map { it.region.get() }
     jobFile = uploadUnsignedMavenJars.map { it.jobFile.get() }
+  }
+} else {
+  tasks.register<Copy>("downloadSignedMavenJars") {
+    dependsOn(signingMavenJars)
+    into(layout.buildDirectory.dir("signed-maven"))
+    from(layout.buildDirectory.dir("signing/mavendownload"))
+  }
 }
-
-val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 val downloadRelease = tasks.register<Zip>("downloadRelease") {
     group = LifecycleTasks.RELEASE_GROUP
