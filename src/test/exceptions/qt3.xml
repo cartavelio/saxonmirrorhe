@@ -45,6 +45,21 @@
     <reason>(Generated) Tests use a validate expression but are not tagged as schema-aware.</reason>
   </exception>
   
+  <exception test-set="fn-round" test-case="fn-round2args-6 fn-round2args-6f" run="false" report="notRun">
+    <created by="Debbie Lockett" on="2025-06-18"/>
+    <reason>Known failure for Saxon 11. Bug 6537</reason>
+  </exception>
+  
+  <exception test-set="prod-InlineFunctionExpr" test-case="inline-fn-037" run="false" report="notRun">
+    <created by="Debbie Lockett" on="2025-06-18"/>
+    <reason>Known failure for Saxon 11. Bug 6231</reason>
+  </exception>
+  
+  <exception test-set="prod-TreatExpr" test-case="treat-as-26" run="false" report="notRun">
+    <created by="Debbie Lockett" on="2025-06-18"/>
+    <reason>Known failure for Saxon 11. Bug 6239</reason>
+  </exception>
+  
  
   
 

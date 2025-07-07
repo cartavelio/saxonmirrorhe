@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <exceptions>
+   
+   <exception test-set="saxon-decimal-divide" test-case="decimal-divide-010" run="false" report="notRun">
+      <created by="Debbie Lockett" on="2025-06-18"/>
+      <reason>Saxon bug #6622 - fixed in saxon12; crash in saxon11</reason>
+   </exception>
+   
+   <exception test-set="reflex" test-case="reflex-066" run="false" report="notRun">
+      <created by="Debbie Lockett" on="2025-06-18"/>
+      <reason>Crash in saxon11</reason>
+   </exception>
     
  
    <!--<exception test-set="expath-file" test-case="EXPath-file-exists-010" run="false" report="strange expected result">
