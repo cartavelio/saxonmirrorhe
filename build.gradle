@@ -1884,7 +1884,13 @@ publishing {
 // ============================================================
 // Docker tasks related to running an SQL server
 
-task "docker-sql-up"() {
+def composeArgs(...args) {
+  def fullArgs = args[0..(args.length - 1)]
+  if (DockerContainer.dockerCompose() == "docker") { fullArgs.push("compose") }
+  return fullArgs
+}
+
+def dockerCheckSqlUpTask = tasks.register("docker-sql-up") {
   doLast {
     DockerContainer.assertRunning(c_sqlserver)
   }
@@ -1896,7 +1902,8 @@ task "docker-sql-down"() {
   }
 }
 
-task sqlServerStart(dependsOn: ["docker-sql-up"]) {
+task sqlServerStart() {
+  finalizedBy(dockerCheckSqlUpTask)
   doFirst {
     DockerContainer.assertDockerAvailable()
     DockerContainer.assertDockerComposeAvailable()
@@ -1906,10 +1913,11 @@ task sqlServerStart(dependsOn: ["docker-sql-up"]) {
   doLast {
     exec {
       workingDir "tools/docker"
-      commandLine DockerContainer.dockerCompose(), "--file", "${sqlServer}-compose.yml", "up", "-d"
+      executable DockerContainer.dockerCompose()
+      args composeArgs("--file", "${sqlServer}-compose.yml", "up", "-d")
     }
     exec {
-      def id = DockerContainer.containerid(c_sqlserver)
+      def id = DockerContainer.id(c_sqlserver)
       commandLine "${projectDir}/tools/docker/wait-for-${sqlServer}", id
     }
   }
@@ -1917,7 +1925,7 @@ task sqlServerStart(dependsOn: ["docker-sql-up"]) {
   if (sqlServer == "mysql") {
     doLast {
       exec {
-        def id = DockerContainer.containerid(c_sqlserver)
+        def id = DockerContainer.id(c_sqlserver)
         commandLine DockerContainer.docker(), "exec", "-i",
           id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
       }
@@ -1925,7 +1933,7 @@ task sqlServerStart(dependsOn: ["docker-sql-up"]) {
   } else {
     doLast {
       exec {
-        def id = DockerContainer.containerid(c_sqlserver)
+        def id = DockerContainer.id(c_sqlserver)
         commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
           id, "psql", "-f", "/app/sql/setup.sql"
       }
@@ -1948,7 +1956,7 @@ task sqlServerSetup(dependsOn: ["docker-sql-up"]) {
   if (sqlServer == "mysql") {
     doLast {
       exec {
-        def id = DockerContainer.containerid(c_sqlserver)
+        def id = DockerContainer.id(c_sqlserver)
         commandLine DockerContainer.docker(), "exec", "-i",
           id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
       }
@@ -1956,7 +1964,7 @@ task sqlServerSetup(dependsOn: ["docker-sql-up"]) {
   } else {
     doLast {
       exec {
-        def id = DockerContainer.containerid(c_sqlserver)
+        def id = DockerContainer.id(c_sqlserver)
         commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
           id, "psql", "-f", "/app/sql/setup.sql"
       }
@@ -1972,7 +1980,7 @@ task sqlServerSetup(dependsOn: ["docker-sql-up"]) {
 task sqlServerLogs(dependsOn: ["docker-sql-up"]) {
   def id = "NA"
   doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
+    id = DockerContainer.id(c_sqlserver)
   }
   doLast {
     exec {
@@ -1984,7 +1992,7 @@ task sqlServerLogs(dependsOn: ["docker-sql-up"]) {
 task sqlServerWatch(dependsOn: ["docker-sql-up"]) {
   def id = "NA"
   doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
+    id = DockerContainer.id(c_sqlserver)
   }
   doLast {
     exec {
@@ -1997,7 +2005,8 @@ task sqlServerStop(dependsOn: ["docker-sql-up"]) {
   doLast {
     exec {
       workingDir "tools/docker"
-      commandLine DockerContainer.dockerCompose(), "--file", "${sqlServer}-compose.yml", "down"
+      executable DockerContainer.dockerCompose()
+      args composeArgs("--file", "${sqlServer}-compose.yml", "down")
     }
   }
 }
@@ -2034,15 +2043,9 @@ task sendriaServerStart() {
         try {
           exec {
             workingDir "tools/docker"
-            if (DockerContainer.dockerCompose() == "docker") {
-              commandLine DockerContainer.docker(),
-                "compose", "-f", "sendria-compose.yml",
-                "up", "-d", "sendriasmtp"
-            } else {
-              commandLine DockerContainer.dockerCompose(),
-                "-f", "sendria-compose.yml",
-                "up", "-d", "sendriasmtp"
-            }
+            executable DockerContainer.dockerCompose()
+            args composeArgs("-f", "sendria-compose.yml",
+                  "up", "-d", "sendriasmtp")
           }
         } catch (Exception e) {
           println("***************************************************************")
@@ -2093,14 +2096,8 @@ task sendriaServerStop(dependsOn: ["docker-sendria-up"]) {
   doLast {
     exec {
       workingDir "tools/docker"
-      if (DockerContainer.dockerCompose() == "docker") {
-        commandLine DockerContainer.docker(),
-          "compose", "-f", "sendria-compose.yml",
-          "stop", "sendriasmtp"
-      } else {
-        commandLine DockerContainer.dockerCompose(),
-          "-f", "sendria-compose.yml", "stop", "sendriasmtp"
-      }
+      executable DockerContainer.dockerCompose()
+      args composeArgs("-f", "sendria-compose.yml", "stop", "sendriasmtp")
     }
   }
 }
@@ -2109,11 +2106,8 @@ task dockerDown() {
   doLast {
     exec {
       workingDir "tools/docker"
-      if (DockerContainer.dockerCompose() == "docker") {
-        commandLine DockerContainer.docker(), "compose", "down"
-      } else {
-        commandLine DockerContainer.dockerCompose(), "down"
-      }
+      executable DockerContainer.dockerCompose()
+      args composeArgs("down")
     }
   }
 }
