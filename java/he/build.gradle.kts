@@ -157,6 +157,7 @@ sourceSets.named("editionTest") {
     exclude("xqjtests/TestSaxonDuration.java")
     exclude("xqjtests/TestTreeWalker.java")
     exclude("xqjtests/TestXQueryUsingXQJ.java")
+    exclude("bugs/Bug6547.java")
   }
 }
 
