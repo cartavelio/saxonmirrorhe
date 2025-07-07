@@ -27,6 +27,32 @@ def signingResources = tasks.register("awsSigningResources", AwsSigningResources
         from(tasks.named("maven${Release}TestSourcesJar"))
     }
 
+  def signingReleaseJars = tasks.register("${edition}_signingReleaseJars", Sync) {
+    dependsOn("${edition}jMakeJars")
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    into(layout.buildDirectory.dir("${edition}-signing/releasedownload"))
+    from(layout.buildDirectory.dir("libs")) {
+      include("saxon-${edition}-*.jar")
+    }
+  }
+
+  def uploadUnsignedReleaseJars = tasks.register("${edition}_uploadUnsignedReleaseJars", UnsignedArtifactUploadTask) {
+    inputDir = layout.projectDirectory.dir(signingReleaseJars.map { it.destinationDir.toString() })
+    bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+    queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
+    region = signingResources.map { it.region.get() }
+    baseKeyPrefix = "inputs"
+    jobFileDir = layout.buildDirectory.dir("${edition}-uploadReleaseJars")
+  }
+
+  def downloadSignedReleaseJars = tasks.register("${edition}_downloadSignedReleaseJars", SignedArtifactDownloadTask) {
+    outputDir = layout.buildDirectory.dir("${edition}-signed-release")
+    bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
+    queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
+    region = signingResources.map { it.region.get() }
+    jobFile = uploadUnsignedReleaseJars.map { it.jobFile.get() }
+  }
+
     def uploadUnsignedMavenJars = tasks.register("${edition}_uploadUnsignedMavenJars", UnsignedArtifactUploadTask) {
         inputDir = layout.projectDirectory.dir(signingMavenJars.map { it.destinationDir.toString() })
         bucket = signingResources.map { it.codeSigningInputsBucket.get() }

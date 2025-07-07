@@ -1553,16 +1553,19 @@ task eejTests(
 
 // ============================================================
 
+task hejMakeJars(
+  dependsOn: ["hejJar", "hejJarTests", "hejJarXqj"],
+  description: "Build the HE release jars Java"
+) {
+}
+
 task hejRelease(
   type: Copy,
-  dependsOn: ["hejJar", "hejJarTests", "hej_extras", "hejJarXqj"],
+  dependsOn: ["he_downloadSignedReleaseJars", "hej_extras"],
   description: "Build the HE release for Java"
 ) {
-  from "${buildDir}/libs"
+  from "${buildDir}/he-signed-release"
   into "${buildDir}/releases/hej"
-  include "saxon-he-${saxonVersion}.jar"
-  include "saxon-he-xqj-${saxonVersion}.jar"
-  include "saxon-he-test-${saxonVersion}.jar"
   rename { filename ->
     if (filename.startsWith("saxon-he-test")) {
       filename = "saxon-he-test-${saxonVersion}.jar"
@@ -1570,16 +1573,19 @@ task hejRelease(
   }
 }
 
+task pejMakeJars(
+  dependsOn: ["pejJar", "pejJarSql", "pejJarTests", "pejJarXqj"],
+  description: "Build the PE release jars Java"
+) {
+}
+
 task pejRelease(
   type: Copy,
-  dependsOn: ["pejJar", "pejJarSql", "pejJarTests", "pej_extras", "pejJarXqj"],
+  dependsOn: ["pe_downloadSignedReleaseJars", "pej_extras"],
   description: "Build the PE release for Java"
 ) {
-  from "${buildDir}/libs"
+  from "${buildDir}/pe-signed-release"
   into "${buildDir}/releases/pej"
-  include "saxon-pe-${saxonVersion}.jar"
-  include "saxon-pe-sql-${saxonVersion}.jar"
-  include "saxon-pe-test-${saxonVersion}.jar"
   rename { filename ->
     if (filename.startsWith("saxon-pe-sql")) {
       filename.replace("saxon-pe-sql", "saxon-sql")
@@ -1589,16 +1595,19 @@ task pejRelease(
   }
 }
 
+task eejMakeJars(
+  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eejJarXqj"],
+  description: "Build the EE release jars Java"
+) {
+}
+
 task eejRelease(
   type: Copy,
-  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras", "eejJarXqj"],
+  dependsOn: ["ee_downloadSignedReleaseJars", "eej_extras"],
   description: "Build the EE release for Java"
 ) {
-  from "${buildDir}/libs"
+  from "${buildDir}/ee-signed-release"
   into "${buildDir}/releases/eej"
-  include "saxon-ee-${saxonVersion}.jar"
-  include "saxon-ee-sql-${saxonVersion}.jar"
-  include "saxon-ee-test-${saxonVersion}.jar"
   rename { filename ->
     if (filename.startsWith("saxon-ee-sql")) {
       filename.replace("saxon-ee-sql", "saxon-sql")
