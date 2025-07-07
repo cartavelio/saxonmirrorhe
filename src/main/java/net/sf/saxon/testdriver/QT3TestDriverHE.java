@@ -580,7 +580,7 @@ public class QT3TestDriverHE extends TestDriver {
 
                             copySchemaNamespaces(env, testXpc);  // ensure environment has schema namespaces
 
-                            testXpc.setBaseURI(testCase.getBaseURI());
+                            //testXpc.setBaseURI(testCase.getBaseURI());
 
                             ModuleResolver mr = new ModuleResolver(xpc); //
 
