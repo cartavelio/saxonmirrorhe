@@ -538,7 +538,7 @@ if ((saxonBuild.systemOsName.get() == "mac"
 
   val stageZip = tasks.register("stageZip") {
     inputs.files(publish_task)
-    inputs.files(layout.projectDirectory.dir("../../src/docs/doc"))
+    inputs.files(layout.projectDirectory.dir("../../src/main/zipdoc"))
     outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
 
     doFirst {
@@ -551,7 +551,7 @@ if ((saxonBuild.systemOsName.get() == "mac"
         into(layout.buildDirectory.dir("SaxonCS.app"))
       }
       copy {
-        from(layout.projectDirectory.dir("../../src/docs/doc"))
+        from(layout.projectDirectory.dir("../../src/main/zipdoc"))
         into(layout.buildDirectory.dir("SaxonCS.app/doc"))
       }
     }
@@ -732,7 +732,7 @@ samples {
 }
 
 samples.csSample("Shakespeare_1", "othello.xml", "play.xsl",
-                 listOf("dir=file:/${layout.buildDirectory.file("sample_results/playhtml").get()}"),
+                 listOf("dir=file:${layout.buildDirectory.file("sample_results/playhtml").get()}"),
                  layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
 
 
