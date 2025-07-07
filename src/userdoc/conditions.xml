@@ -83,7 +83,7 @@
     variations between the code for different Saxon editions, and it therefore cannot be compiled until
     the preprocessor has been run. The repository includes gradle build files that invoke this preprocessing.
     The build files are complex and have many dependencies. Many users will therefore find it easier
-    to build from the preprocessed source published on SourceForge.</p></li>
+    to build from the preprocessed source published on GitHub.</p></li>
     <li><p>For every release, a ZIP file containing Saxon-HE source is published in the <a class="bodylink"
       href="https://github.com/Saxonica/Saxon-HE/">Saxonica Saxon-HE GitHub repository</a>. A typical file
       name is <code>saxon-source-11.0.zip</code>. This is the source
