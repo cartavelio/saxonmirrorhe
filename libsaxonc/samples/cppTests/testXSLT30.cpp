@@ -46,7 +46,8 @@ void testApplyTemplatesString1(Xslt30Processor *trans,
 
   XsltExecutable *executable = nullptr;
   try {
-    executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/test.xsl").c_str());
+    string xslFile = CppTestUtils::concat(2, dataDir->c_str(), "/test.xsl");
+    executable = trans->compileFromFile(xslFile.c_str());
   } catch (SaxonApiException &e) {
     cerr << " Exception thrown=" << e.what() << endl;
     sresult->failure++;
@@ -59,7 +60,8 @@ void testApplyTemplatesString1(Xslt30Processor *trans,
     return;
   }
   try {
-    executable->setInitialMatchSelectionAsFile(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
+    string xmlFile = CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml");
+    executable->setInitialMatchSelectionAsFile(xmlFile.c_str());
   } catch (SaxonApiException &e) {
     cerr << " Exception thrown=" << e.what() << endl;
     sresult->failure++;
@@ -681,7 +683,7 @@ void testTransformFromstring2Err2(sResultCount *sresult) {
 
     if (CppTestUtils::exists("SaxonCHE12ErrorOutputFile-Test1.txt")) {
       cout << "The file SaxonCHE12ErrorOutputFile-Test1.txt exists" << endl;
-      if(CppTestUtils::CheckWord("SaxonCHE12ErrorOutputFile-Test1.txt", "XTSE0090: Attribute @select1 is not allowed on element <xsl:for-each>")) {
+      if(CppTestUtils::CheckWord("SaxonCHE12ErrorOutputFile-Test1.txt", "XTSE0090  Attribute @select1 is not allowed on element <xsl:for-each>")) {
         sresult->success++;
       } else {
         sresult->failure++;
@@ -993,12 +995,14 @@ void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
   delete executable;
 }
 
-void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
+void exampleSimple1(Xslt30Processor *proc, const std::string *const dataDir, sResultCount *sresult) {
   cout << "ExampleSimple1 taken from PHP:" << endl;
 
   XsltExecutable *executable = nullptr;
+  string phpSampleDir = *dataDir + string { "/../../../php/samples" };
   try {
-    executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    string xslPath = phpSampleDir + string { "/xsl/foo.xsl" };
+    executable = proc->compileFromFile(xslPath.c_str());
   } catch (SaxonApiException &e) {
     cerr << "Failed - Exception thrown = " << e.what() << endl;
     sresult->failure++;
@@ -1012,7 +1016,8 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
     cerr << "exampleSimple1 NULL found" << endl;
     return;
   }
-  executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
+  string xmlPath = phpSampleDir + string { "/xml/foo.xml" };
+  executable->setInitialMatchSelectionAsFile(xmlPath.c_str());
   const char *result = executable->applyTemplatesReturningString();
   if (result != NULL) {
     cout << result << endl;
@@ -1053,11 +1058,13 @@ void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
   }
 }
 
-void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
+void exampleSimple2(Xslt30Processor *proc, const std::string *const dataDir, sResultCount *sresult) {
   cout << "<b>exampleSimple2:</b><br/>" << endl;
   XsltExecutable *executable = nullptr;
+  string phpSampleDir = *dataDir + string { "/../../../php/samples" };
   try {
-    executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    string xslPath = phpSampleDir + string { "/xsl/foo.xsl" };
+    executable = proc->compileFromFile(xslPath.c_str());
   } catch (SaxonApiException &e) {
     sresult->failure++;
     sresult->failureList.push_back("exampleSimple2");
@@ -1069,7 +1076,8 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
     return;
   }
 
-  executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
+  string xmlPath = phpSampleDir + string { "/xml/foo.xml" };
+  executable->setInitialMatchSelectionAsFile(xmlPath.c_str());
   const char *filename = "output1.xml";
   executable->setOutputFile(filename);
   try {
@@ -1096,13 +1104,15 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
   delete executable;
 }
 
-void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
+void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc, const std::string *const dataDir,
                             sResultCount *sresult) {
   cout << "<b>exampleTransformToFile:</b><br/>" << endl;
 
   XdmNode *xmlfile = nullptr;
+  string phpSampleDir = *dataDir + string { "/../../../php/samples" };
+  string xmlFile = phpSampleDir + string { "/xml/foo.xml" };
   try {
-    xmlfile = sproc->parseXmlFromFile("../php/xml/foo.xml");
+    xmlfile = sproc->parseXmlFromFile(xmlFile.c_str());
   } catch (SaxonApiException &e) {
     sresult->failure++;
     sresult->failureList.push_back("exampleTransformToFile");
@@ -1121,7 +1131,8 @@ void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
   }
   XsltExecutable *executable = nullptr;
   try {
-    executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    string xslFile = phpSampleDir + string { "/xsl/foo.xsl" };
+    executable = proc->compileFromFile(xslFile.c_str());
   } catch (SaxonApiException &e) {
     cerr << "exampleTransformToFile error: " << e.what() << endl;
   }
@@ -1134,7 +1145,7 @@ void exampleTransformToFile(SaxonProcessor *sproc, Xslt30Processor *proc,
   }
 
   const char *filename = "../output2.xml";
-  executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
+  executable->setInitialMatchSelectionAsFile(xmlFile.c_str());
   executable->setOutputFile(filename);
   executable->transformToFile(xmlfile);
 
@@ -1247,7 +1258,7 @@ void exampleTransformToString(SaxonProcessor *sproc, Xslt30Processor *proc,
 }
 
 void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc,
-                    sResultCount *sresult) {
+                    const std::string *const dataDir, sResultCount *sresult) {
   cout << "<b>exampleSimple3:</b><br/>" << endl;
   proc->clearParameters();
 
@@ -1256,9 +1267,10 @@ void exampleSimple3(SaxonProcessor *saxonProc, Xslt30Processor *proc,
 
 
   XsltExecutable *executable = nullptr;
-
+  string phpSampleDir = *dataDir + string { "/../../../php/samples" };
   try {
-    executable = proc->compileFromFile("../php/xsl/foo.xsl");
+    string xslPath = phpSampleDir + string { "/xsl/foo.xsl" };
+    executable = proc->compileFromFile(xslPath.c_str());
   } catch (SaxonApiException &e) {
     const char *message = e.getMessage();
     cout << "Error message=" << message << endl;
@@ -2559,7 +2571,8 @@ void testCatalog(const char *cwd, SaxonProcessor *proc,
   Xslt30Processor *trans = nullptr;
   vector<const char*> catalogFiles {};
   try {
-    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str());
+    string catFile = CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml");
+    catalogFiles.push_back(catFile.c_str());
 
     // catalogFiles = new const char *[1] {};
     // catalogFiles[0] = CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str();
@@ -2631,8 +2644,10 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
   Xslt30Processor *trans = nullptr;
   vector<const char*> catalogFiles {};
   try {
-    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str());
-    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog2.xml").c_str());
+    const string catOne = CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml");
+    const string catTwo = CppTestUtils::concat(2, dataDir->c_str(), "/catalog2.xml");
+    catalogFiles.push_back(catOne.c_str());
+    catalogFiles.push_back(catTwo.c_str());
 
     proc->setCatalogFiles(catalogFiles.data(), 2);
     proc->setcwd(cwd);
@@ -2704,7 +2719,8 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
   Xslt30Processor *trans = nullptr;
   vector<const char*> catalogFiles {};
   try {
-    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog-err.xml").c_str());
+    const string catFile = CppTestUtils::concat(2, dataDir->c_str(), "/catalog-err.xml");
+    catalogFiles.push_back(catFile.c_str());
 
     proc->setCatalogFiles(catalogFiles.data(), 1);
 
@@ -3116,7 +3132,7 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  exampleSimple1(trans, sresult);
+  exampleSimple1(trans, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
@@ -3130,14 +3146,14 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  exampleSimple2(trans, sresult);
+  exampleSimple2(trans, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
        << endl
        << endl;
 
-  exampleTransformToFile(processor, trans, sresult);
+  exampleTransformToFile(processor, trans, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
@@ -3165,7 +3181,7 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  exampleSimple3(processor, trans, sresult);
+  exampleSimple3(processor, trans, &dataDir, sresult);
 
   cout << endl
        << "============================================================="
