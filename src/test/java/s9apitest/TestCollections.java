@@ -16,8 +16,9 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -28,9 +29,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * JUnit tests for handling of Saxon collection URIs and collection URI resolver APIs
@@ -115,7 +114,7 @@ public class TestCollections {
     public void testDirectoryForbiddenProtocol() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http https");
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
@@ -124,6 +123,23 @@ public class TestCollections {
             fail("File scheme should have been disallowed");
         } catch (SaxonApiException e) {
             Assertions.assertTrue(e.getMessage().contains("has been disallowed"));
+        }
+    }
+
+    @Test
+    public void testDirectoryAllowedProtocol() {
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "file,webdav");
+            XPathCompiler c = p.newXPathCompiler();
+            XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
+            XPathSelector eval = exec.load();
+            eval.setContextItem(composeURI(configTest.getDataDir(), "trax/xml/?select=*.xml;recurse=yes"));
+            XdmValue val = eval.evaluate();
+            assertEquals(7, val.size());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail("File scheme should have been allowed");
         }
     }
 
@@ -162,7 +178,7 @@ public class TestCollections {
     public void testDirectoryUriForbiddenProtocol() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http https");
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("uri-collection(.)");
             XPathSelector eval = exec.load();
@@ -386,8 +402,9 @@ public class TestCollections {
     }
 
 
-    @Test
+    @Disabled
     public void testCollectionWithHttp() {
+        // To make this test work, port the testHttp framework from the saxon12 branch...
         try {
             Processor p = new Processor(true);
             XPathCompiler c = p.newXPathCompiler();
