@@ -131,11 +131,11 @@ public final class Version {
     /**
      * Return a web site address containing information about the product. Supports the XSLT system property xsl:vendor-url
      *
-     * @return the string "https://www.saxonica.com/"
+     * @return the string "http://www.saxonica.com/"
      */
 
     public static String getWebSiteAddress() {
-        return "https://www.saxonica.com/";
+        return "http://www.saxonica.com/";
     }
 
     /**
