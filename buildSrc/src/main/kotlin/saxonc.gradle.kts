@@ -230,7 +230,7 @@ val generator = tasks.register<ErsatzCMakeGenerator>("cmake_generate") {
 
 val packageOutputDir = layout.buildDirectory.dir("cmake-package")
 
-fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTask>, debug: Boolean, taskBlock: Action<Task>): TaskProvider<Task> {
+fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTask>, debug: Boolean, taskBlock: Action<Task>): TaskProvider<CMakePackageBuilder> {
     val configTaskName = config.lowercase()
     val configPackageOutputDir = layout.buildDirectory.dir(config)
 
@@ -255,7 +255,7 @@ fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTas
         args("--install", ersatzPath.get().asFile.toString(), "--config", config, "--prefix", ersatzConfigPath.get().asFile.toString())
     }
 
-    val mainTask = tasks.register<CMakePackageBuilder>("${configTaskName}_cmake_package_assemble") {
+    val mainTask = tasks.register<CMakePackageBuilder>("${configTaskName}_cmake_package") {
         group = LifecycleBasePlugin.BUILD_GROUP
         libName = extension.edition.map { edition -> "saxonc-core-${edition}" }
         cmakePackageName = EDITION.map { "SaxonCCore${it}" }
@@ -269,19 +269,8 @@ fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTas
         packageDir = configPackageOutputDir
     }
 
-    val finalizeTask = tasks.register("${configTaskName}_cmake_package") {
-        inputs.files(mainTask)
-        outputs.dir(packageOutputDir)
-        doLast {
-            project.delete(packageOutputDir)
-            project.copy {
-                from(mainTask)
-                into(packageOutputDir)
-            }
-        }
-    }
-    finalizeTask.configure(taskBlock)
-    return finalizeTask
+    mainTask.configure(taskBlock)
+    return mainTask
 }
 
 val releaseCMakePackage = setupConfigTasks("Release", graalImage, false) {
@@ -295,5 +284,5 @@ tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(releaseCMakePackage)
 }
 
-cMakePackageDir.outgoing.artifact(packageOutputDir) { builtBy(releaseCMakePackage) }
-debugCMakePackageDir.outgoing.artifact(packageOutputDir) { builtBy(debugCMakePackage) }
+cMakePackageDir.outgoing.artifact(releaseCMakePackage.map { it.packageDir.asFile }) { builtBy(releaseCMakePackage) }
+debugCMakePackageDir.outgoing.artifact(debugCMakePackage.map { it.packageDir.asFile }) { builtBy(debugCMakePackage) }

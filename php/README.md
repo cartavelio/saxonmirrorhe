@@ -33,7 +33,7 @@ To install, open a shell window and navigate to the `php` directory inside
 the location where you unpacked the zip file. Run these commands:
 
 - phpize
-- ./configure --enable-saxon
+- ./configure --with-saxon
 - make
 - sudo make install
 
