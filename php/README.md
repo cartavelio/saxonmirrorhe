@@ -29,38 +29,29 @@ page](https://www.saxonica.com/saxon-c/index.xml). For bug reporting,
 lists of known bugs, and help forums, please visit the SaxonC bug issue project:
 [https://saxonica.plan.io/projects/saxon-c](https://saxonica.plan.io/projects/saxon-c).
 
-To install, open a shell window and navigate to the `php/src` directory inside
+To install, open a shell window and navigate to the `php` directory inside
 the location where you unpacked the zip file. Run these commands:
 
-    phpize
-  
-User should install the SaxonC libraries (i.e. directory 'SaxonC[EDITION]') in a suitable location. 
-The search paths are '/opt/saxonica' '/usr/local' '/usr'. Then run the command
-
-    ./configure --with-saxon
-
-Alternatively:
-    
-    ./configure --with-saxon=path/SaxonC[EDITION]
-    make
-    sudo make install
+- phpize
+- ./configure --enable-saxon
+- make
+- sudo make install
 
 Next create a module conf file:
 
-    nano /etc/php/8.X/mods-available/20-saxon.ini
-
+---
+nano /etc/php/8.X/mods-available/20-saxon.ini
 with content:
 
-    ; configuration for php Saxon HE/PE/EE module
-    extension=saxon.so
-
+; configuration for php Saxon HE/PE/EE module
+extension=saxon.so
+---
 and save the file. Now enable the module for PHP using the command:
 
-    phpenmod saxon
+phpenmod saxon
+Alternatively, you can update the php.ini file or add the 20-saxon.ini file under the conf.d directory (if using Ubuntu it is usually in the location /etc/php/8.X/apache2/) to contain the PHP extension. Insert the code extension=saxon.so in the Dynamic Extensions section, then run the following commands:
 
-Alternatively, you can update the `php.ini` file or add the `20-saxon.ini` file under the `conf.d` directory (if using Ubuntu it is usually in the location `/etc/php/8.X/apache2/`) to contain the PHP extension. Insert the code `extension=saxon.so` in the Dynamic Extensions section, then run the following commands:
+For some Linux distributions using php-fpm the file 20-saxon.ini should be installed within the directory /etc/php.d
 
-For some Linux distributions using php-fpm the file `20-saxon.ini` should be installed within the directory `/etc/php.d`
-
-    sudo service apache2 restart
-    php -m | grep saxon -i
+sudo service apache2 restart
+php -m | grep saxon -i
