@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * JUnit tests for the s9api XsltTransformer
  */
-public class TestXsltTransformer {
+public class TestXsltTransformer2 {
     private final ConfigTest configTest = new ConfigTest();
     
     /**
