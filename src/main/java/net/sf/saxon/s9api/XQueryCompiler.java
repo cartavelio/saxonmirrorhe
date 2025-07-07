@@ -290,8 +290,8 @@ public class XQueryCompiler {
      * (though validation of the final result tree is permitted). Setting the argument to true
      * means that schema-aware code will be compiled regardless.
      *
-     * @param schemaAware If true, the stylesheet will be compiled with schema-awareness
-     *                    enabled even if it contains no xsl:import-schema declarations. If false, the stylesheet
+     * @param schemaAware If true, the query will be compiled with schema-awareness
+     *                    enabled even if it contains no xsl:import-schema declarations. If false, the query
      *                    is treated as schema-aware only if it contains one or more xsl:import-schema declarations.
      *                    Note that setting the value to false does not disable use of an import-schema declaration.
      * @since 9.2

@@ -298,7 +298,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Create a string representation of the value. The is the result of serializing
+     * Create a string representation of the value. This is the result of serializing
      * the value using the adaptive serialization method.
      * @return a string representation of the value
      */
