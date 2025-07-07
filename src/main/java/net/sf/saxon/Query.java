@@ -882,8 +882,9 @@ public class Query {
                     }
                     try {
                         String queryText = QueryReader.readSourceQuery((StreamSource) sources[0], config.getValidCharacterChecker());
+                        compiler.setBaseURI(new URI(sources[0].getSystemId()));
                         exp = compiler.compile(queryText);
-                    } catch (XPathException e) {
+                    } catch (XPathException|URISyntaxException e) {
                         throw new SaxonApiException(e);
                     }
                     break;
