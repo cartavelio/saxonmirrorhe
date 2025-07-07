@@ -459,6 +459,7 @@ for (buildArch in architectures) {
     LifecycleTasks.RELEASE_GROUP
     arch = buildArch
     inputs.files(build)
+    outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS/bin/${saxonCS.release.get()}/net8.0/linux-${buildArch}/publish"))
   }
   publish_task { dependsOn(publish) }
 
@@ -547,9 +548,10 @@ if ((saxonBuild.systemOsName.get() == "mac"
 
     doLast {
       copy {
-        from(publish_task)
-        into(layout.buildDirectory.dir("SaxonCS.app"))
+	from(tasks.named("dotnetPublish_${architectures[0]}").get().outputs)
+        into(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
       }
+      
       copy {
         from(layout.projectDirectory.dir("../../src/main/zipdoc"))
         into(layout.buildDirectory.dir("SaxonCS.app/doc"))
@@ -558,9 +560,14 @@ if ((saxonBuild.systemOsName.get() == "mac"
   }
 
   tasks.register<Zip>("dotnetPublishZip") {
+    var dirver = saxonBuild.version.get()
+    if (dirver.endsWith(".0")) {
+       dirver = dirver.substring(0, dirver.length - 2)
+     }
+
     archiveFileName = "SaxonCS-${zipver}-${zipname}-${ziparch}.zip"
     from(stageZip)
-    into("/SaxonCS.app/")
+    into("/SaxonCS-${dirver}/")
   }
 }
 
