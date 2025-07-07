@@ -1,5 +1,6 @@
 package com.saxonica.build.python
 
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -9,6 +10,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
+import org.gradle.process.ExecSpec
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
@@ -47,6 +49,9 @@ abstract class PyenvExe : DefaultTask() {
 }
 
 abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+    @get:Internal
+    abstract val os: Property<OperatingSystem>
+
     @get:Input
     abstract val pythonVersion: Property<String>
 
@@ -76,15 +81,42 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
     }
 
     private fun pythonExePath(pyenv: RegularFile): String {
+        return if (os.get().isWindows) {
+            windowsExePath(pyenv)
+        } else {
+            nonWindowsExePath(pyenv)
+        }
+    }
+
+    private fun execToString(action: ExecSpec.() -> Unit): String {
         ByteArrayOutputStream().use { out ->
             ex.exec {
-                environment("PYENV_VERSION", pyenvVersionName.get())
-                environment("PYENV_ROOT", pyenvRoot.get())
-                executable(pyenv)
-                args("which", "python")
+                action(this)
                 standardOutput = out
             }
             return out.toString().trim()
+        }
+    }
+
+    private fun nonWindowsExePath(pyenv: RegularFile): String {
+        return execToString {
+            environment("PYENV_VERSION", pyenvVersionName.get())
+            environment("PYENV_ROOT", pyenvRoot.get())
+            executable(pyenv)
+            args("which", "python")
+        }
+    }
+
+    private fun windowsExePath(pyenv: RegularFile): String {
+        val latestInstalledOfMajorVersion = execToString {
+            executable(pyenv)
+            args("latest", pyenvVersionName.get())
+        }
+        println("WINDOWS LATEST:  ${latestInstalledOfMajorVersion}: HOHOHOAHOAHOAHOAHOAHOAOAHOAHOAHOAHOAHOAHAOHOAHAOH")
+        return execToString {
+            executable("cmd.exe")
+            args("/c")
+            args("'${pyenv}' shell ${latestInstalledOfMajorVersion} && '${pyenv}' which python")
         }
     }
 
@@ -99,7 +131,9 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
         val pyenv = pyenvExe.get()
         var pythonBuildVersionName = pyenvVersionName.get()
         val execResult = ex.exec {
-            environment("PYENV_ROOT", pyenvRoot.get())
+            if (!os.get().isWindows) {
+                environment("PYENV_ROOT", pyenvRoot.get())
+            }
             executable(pyenv)
             args("latest", pythonBuildVersionName)
             setIgnoreExitValue(true)
@@ -112,7 +146,9 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
                 pythonBuildVersionName = definitionFile.asFile.toString()
             }
             ex.exec {
-                environment("PYENV_ROOT", pyenvRoot.get())
+                if (!os.get().isWindows) {
+                    environment("PYENV_ROOT", pyenvRoot.get())
+                }
                 executable(pyenv)
                 if (macosxDeploymentTarget.isPresent) {
                     environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())

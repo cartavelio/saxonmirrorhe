@@ -3097,7 +3097,7 @@ void testUTF8StringTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
 static int NUM_THREADS = 10;
 
 void RunThread(XsltExecutable *executable, int tid,
-               const std::string filename) {
+               const std::string filename, int *threadFailures) {
   /*JavaVMAttachArgs att_arg;
   att_arg.version = JNI_VERSION_1_2;
   att_arg.name = NULL;
@@ -3109,17 +3109,29 @@ void RunThread(XsltExecutable *executable, int tid,
   fflush(stdout);
 
   if (executable != nullptr) {
-    executable->setInitialMatchSelectionAsFile(filename.c_str());
+    try {
+      executable->setInitialMatchSelectionAsFile(filename.c_str());
 
-    const char *result = nullptr;
-    result = executable->applyTemplatesReturningString();
-    if (result != nullptr) {
-      cout << " Result from THREAD ID: " << tid << ", " << result << endl;
-      operator delete((char *)result);
-    } else {
-      cerr << " ===== Failed in THREAD ID: " << tid << endl;
+      const char *result = nullptr;
+      result = executable->applyTemplatesReturningString();
+      if (result != nullptr) {
+        cout << " Result from THREAD ID: " << tid << ", " << result << endl;
+        operator delete((char *)result);
+      } else {
+        cerr << " ===== Failed in THREAD ID: " << tid << endl;
+        threadFailures++;
+      }
+      delete executable;
+    } catch (SaxonApiException &e) {
+      const char *emessage = e.getMessage();
+      threadFailures++;
+      if (emessage != nullptr) {
+        cerr << "exception=" << emessage << endl;
+      } else {
+        cerr << "exception is nullptr" << endl;
+        return;
+      }
     }
-    delete executable;
   } else {
     cerr << "XsltExecutable is nullptr" << endl;
   }
@@ -3137,33 +3149,38 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
 
   std::vector<std::thread> threads;
 
+  int threadFailures = 0;
   try {
-
-  for (int i = 0; i < s.size(); i++) {
-    XsltExecutable *executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12.xsl").c_str());
-    if (executable == nullptr) {
-      continue;
+    for (int i = 0; i < s.size(); i++) {
+      XsltExecutable *executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12.xsl").c_str());
+      if (executable == nullptr) {
+        continue;
+      }
+      threads.push_back(std::thread(RunThread, executable, i, s[i], &threadFailures));
     }
-    threads.push_back(std::thread(RunThread, executable, i, s[i]));
-  }
 
-  } catch (SaxonApiException &e) {
-    const char *emessage = e.getMessage();
-    if (emessage != nullptr) {
-      cerr << "exception=" << emessage << endl;
-    } else {
-      cerr << "exception is nullptr" << endl;
-      sresult->failure++;
-      sresult->failureList.push_back("testThreads");
-      return;
+    } catch (SaxonApiException &e) {
+      const char *emessage = e.getMessage();
+      if (emessage != nullptr) {
+        cerr << "exception=" << emessage << endl;
+      } else {
+        cerr << "exception is nullptr" << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testThreads");
+        return;
 
-	}
+	  }
   }
 
   for (auto &th : threads) {
     th.join();
   }
-   sresult->success++;
+  if (threadFailures == 0) {
+    sresult->success++;
+  } else {
+    sresult->failure++;
+    sresult->failureList.push_back("testThreads");
+  }
 }
 
 int main(int argc, char *argv[]) {
