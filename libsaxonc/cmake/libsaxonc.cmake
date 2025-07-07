@@ -10,6 +10,17 @@ string(TOUPPER ${SaxonC_EDITION} SAXON_EDITION)
 # set(SaxonCCore_IncludePath CACHE PATH) Path to Graal native-image output; must be set on command line with -D
 # set(SAXON_VERSION CACHE STRING) Main Saxon J version; must be set on command line with -D
 
+Include(FetchContent)
+FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG        v3.4.0 # or a later release
+)
+FetchContent_MakeAvailable(Catch2)
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(CTest)
+include(Catch)
+
 set(saxonc "saxonc-${SaxonC_EDITION}")
 
 configure_file(../src/lib/saxonc_version.c.in saxonc_version.c @ONLY)
