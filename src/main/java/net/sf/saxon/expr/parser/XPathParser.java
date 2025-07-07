@@ -2233,9 +2233,13 @@ public class XPathParser {
             case Token.PI_QNAME:
             case Token.NAMESPACE_QNAME:
             case Token.NAMED_FUNCTION_REF:
+            case Token.LSQB:
                 return true;
             case Token.KEYWORD_CURLY:
-                return t.currentTokenValue.equals("ordered") || t.currentTokenValue.equals("unordered");
+                return t.currentTokenValue.equals("ordered")
+                        || t.currentTokenValue.equals("unordered")
+                        || t.currentTokenValue.equals("map")
+                        || t.currentTokenValue.equals("array");
             default:
                 return false;
         }
