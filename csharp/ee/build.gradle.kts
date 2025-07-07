@@ -707,16 +707,30 @@ testSuites {
   exceptionsDir = layout.projectDirectory.dir("../src/test/exceptions")
 }
 
-tasks.register("all_test_suites") {
-  // Just somewhere to hang dependencies
-}
-
-testSuites.configure(suite = "qt3", language = "XP31")
-
+testSuites.configure("expath", "XP31")
+testSuites.configure("expath", "XQ31")
+testSuites.configure("expath", "XQ40")
+testSuites.configure("qt3", "XP31")
+testSuites.configure("qt3", "XP31", mapOf("linq" to "on"))
+testSuites.configure("qt3", "XP31", mapOf("unfolded" to "on"))
+testSuites.configure("qt3", "XQ31")
+testSuites.configure("qt3", "XQ31", mapOf("unfolded" to "on"))
+testSuites.configure("qt3extra", "XP31")
+testSuites.configure("qt3extra", "XQ31")
+testSuites.configure("qt3extra", "XQ40")
+testSuites.configure("qt4", "XP40")
+testSuites.configure("qt4", "XQ31")
+testSuites.configure("qt4", "XQ31", mapOf("unfolded" to "on"))
+testSuites.configure("qt4", "XQ40")
 testSuites.configure("xsd", "XSD11")
-
-tasks.register("helloWorld") {
-  doLast {
-    println("Hello, world.")
-  }
-}
+testSuites.configure("xslt30", "XT30")
+testSuites.configure("xslt30", "XT30", mapOf("export" to "on"))
+testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
+testSuites.configure("xslt30extra", "XT30")
+testSuites.configure("xslt30extra", "XT30", mapOf("export" to "on"))
+testSuites.configure("xslt30extra", "XT30", mapOf("strict" to "on"))
+testSuites.configure("xslt30extra", "XT40")
+testSuites.configure("xslt30extra", "XT40", mapOf("export" to "on"))
+testSuites.configure("xslt30extra", "XT40", mapOf("strict" to "on"))
+testSuites.configure("xslt40", "XT40")
+testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))

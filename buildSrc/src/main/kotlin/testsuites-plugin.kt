@@ -19,6 +19,7 @@ import SaxonBuildExtension
 import javax.inject.Inject
 
 import com.saxonica.build.java.testsuite.JavaRunner
+import com.saxonica.build.java.testsuite.CSharpRunner
 import org.gradle.api.file.*
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.assign
@@ -97,7 +98,6 @@ abstract class TestSuitesExtension
       else -> throw GradleException("Unknown exceptions for test suite: ${suite}")
     }
   }
-
   
   fun configureJava(suite: String, language: String,
                     @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
@@ -118,6 +118,7 @@ abstract class TestSuitesExtension
       this.suite = suite
       this.language = language
       this.suiteDir = actualSuiteDir
+      this.options = options
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
@@ -202,10 +203,69 @@ abstract class TestSuitesExtension
     }
   }
 
-  fun configureCsharp(suite: String, language: String, options: Map<String,String>, taskName: String) {
+  fun configureCsharp(suite: String, language: String,
+                      @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
+                      taskName: String) {
+    val plugin = this
+
+    // This is annoying. We have to copy the suite because
+    // the sandpit is writable...
+    val actualSuiteDir = if (suite == "expath") {
+      layout.buildDirectory.dir("suite/expath/${taskName}")
+    } else {
+      suiteDir(suite)
+    }
+
+    val thisSuite = tasks.register<CSharpRunner>(taskName) {
+      group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
+      this.edition = plugin.edition
+      this.suite = suite
+      this.language = language
+      this.suiteDir = actualSuiteDir
+      this.arch = plugin.arch
+      this.netver = plugin.netver
+      this.dotnet = plugin.dotnet
+      this.platform = plugin.platform
+      this.options = options
+      exceptionsFile = exceptions(suite)
+      reportingRootDir = layout.buildDirectory.dir("test-results")
+    }
+
+    if (suite == "expath") {
+      val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
+        group = "Internal"
+        description = "Copy the expath test suite"
+        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
+        from(submodulesDir.dir("expath/tests/qt3")) {
+          exclude("archive/sandpit2/**")
+        }
+      }
+
+      val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
+        group = "Internal"
+        description = "Copy the expath test suite sandpit" 
+        dependsOn(copySuite)
+        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
+        // sandpit2!?
+        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
+          include("**")
+        }
+      }
+      thisSuite.configure {
+        dependsOn(copySandpit)
+      }
+    }
+
+    tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
+      dependsOn(thisSuite)
+    }
+
+/*
     // If this fails, make a task named all_test_suites in your build before calling configureSuite()
     val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME)
     val build = tasks.named("dotnetBuildTestDrivers")
+
+
 
     val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
 
@@ -242,11 +302,10 @@ abstract class TestSuitesExtension
         testargs.add("-${optname}:${optvalue}")
       }
     }
-
+*/
+/*
     val thisSuite = tasks.register<Exec>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-
-      println("REGISTERING ${taskName}")
 
       dependsOn(build)
       workingDir = directory.get().asFile
@@ -278,10 +337,7 @@ abstract class TestSuitesExtension
         dependsOn(copySandpit)
       }
     }
-
-    allSuites.configure {
-      dependsOn(thisSuite)
-    }
+*/
   }
 
   fun configureCsharpXsd(suite: String, 
