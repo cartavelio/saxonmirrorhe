@@ -140,14 +140,14 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
             from(sourceDir)
             into(srcCopyDir)
 
-            exclude("pyproject.toml", "README.md")
+            exclude("pyproject.toml", "README.md", "src/saxonc/saxonc.pyx")
         }
 
         project.copy {
             into(srcCopyDir)
 
             from(sourceDir) {
-                include("README.md")
+                include("README.md", "src/saxonc/saxonc.pyx")
                 filter<ReplaceTokens>("tokens" to mapOf(
                     "EDITION" to productEdition.get().uppercase(),
                     "edition" to productEdition.get(),
@@ -174,7 +174,7 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
             args("-m", "build", "--wheel", "--outdir", outputDir.get().asFile.toString())
         }
 
-//        if (buildResult.exitValue == 0) project.delete(srcCopyDir)
+        if (buildResult.exitValue == 0) project.delete(srcCopyDir)
         buildResult.assertNormalExitValue()
     }
 }

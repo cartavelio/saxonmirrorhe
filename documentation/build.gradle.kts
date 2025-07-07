@@ -53,7 +53,7 @@ dependencies {
   csharpHtmlDocBucket(project(mapOf("path" to ":csharp:ee",
                                     "configuration" to "htmlDocArtifacts")))
   doxygenBucket(project(mapOf("path" to ":python:documentation",
-                              "configuration" to "doxygenArtifact")))
+                              "configuration" to "pydocArtifact")))
   doxygenCBucket(project(mapOf("path" to ":libsaxonc:ee",
                               "configuration" to "doxygenOutput")))
 
