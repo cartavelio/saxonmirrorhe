@@ -226,7 +226,9 @@ public class CatalogResolverTest {
 
 //            String fn = "src/test/testdata/resolvers/" + xslFile;
             Path fn = Testdata.path("resolvers").resolve(xslFile);
-            Source xsl = new SAXSource(new InputSource(Files.newInputStream(fn)));
+            InputSource isource = new InputSource(Files.newInputStream(fn));
+            isource.setSystemId(fn.toAbsolutePath().toString());
+            Source xsl = new SAXSource(isource);
             XsltExecutable exec = compiler.compile(xsl);
 
             Xslt30Transformer transformer = exec.load30();
@@ -240,7 +242,7 @@ public class CatalogResolverTest {
             XdmDestination destination = new XdmDestination();
             transformer.applyTemplates(doc, destination);
 
-            System.out.println(destination.getXdmNode());
+            //System.out.println(destination.getXdmNode());
 
         } catch (Exception ex) {
             fail();
