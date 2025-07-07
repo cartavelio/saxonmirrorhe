@@ -190,7 +190,7 @@ public class JSONEmitter {
                 // " Implementations MAY serialize the numeric value using any
                 //   lexical representation of a JSON number defined in [RFC 7159]. "
                 // This avoids exponential notation for integers such as 1123456.
-                emit(num.longValue() + "");
+                emit(num.getStringValue());
             } else if (num.isWholeNumber() && !num.isNegativeZero() && num.abs().compareTo(1_000_000_000_000_000_000L) < 0) {
                 emit(num.longValue() + "");
             } else {
