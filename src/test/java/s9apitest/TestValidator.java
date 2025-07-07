@@ -1987,6 +1987,7 @@ public class TestValidator {
     }
 
     @Test
+    @Tag("mikeonly")
     public void testBug6459() {
         try {
             Processor processor = new Processor(true);
