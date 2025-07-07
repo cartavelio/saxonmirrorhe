@@ -399,6 +399,18 @@ public class XPathException extends TransformerException {
     }
 
     /**
+     * Set the error code. The error code is a QName; this method sets the local part of the name,
+     * setting the namespace of the error code to the standard system namespace {@link net.sf.saxon.lib.NamespaceConstant#ERR}
+     *
+     * @param code The local part of the name of the error code
+     * @return this XPathException object in a modified state
+     */
+    public XPathException withErrorCode(String code) {
+        setErrorCode(code);
+        return this;
+    }
+
+    /**
      * Set the error code, provided it has not already been set.
      * The error code is a QName; this method sets the local part of the name,
      * setting the namespace of the error code to the standard system namespace {@link NamespaceConstant#ERR}

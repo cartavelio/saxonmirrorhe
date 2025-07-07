@@ -19,7 +19,6 @@ import net.sf.saxon.type.ValidationException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -1993,9 +1992,8 @@ public class TestValidator {
             Processor processor = new Processor(true);
             SchemaManager mgr = processor.getSchemaManager();
             mgr.setSchemaURIResolver(new StandardSchemaResolver((EnterpriseConfiguration) processor.getUnderlyingConfiguration()));
-            mgr.load(new File("/Users/mike/bugs/2024/6459-Kerner/test.xsd"));
-
-        } catch (SaxonApiException e) {
+            mgr.load(new SAXSource(new InputSource(new FileInputStream("/Users/mike/bugs/2024/6459-Kerner/test.xsd"))));
+        } catch (Exception e) {
             fail(e.getMessage());
         }
     }
