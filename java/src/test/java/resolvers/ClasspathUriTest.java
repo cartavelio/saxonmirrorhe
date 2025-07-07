@@ -8,6 +8,8 @@ import org.xmlresolver.utils.URIUtils;
 import javax.xml.transform.sax.SAXSource;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,36 +38,43 @@ public class ClasspathUriTest {
     }
 
     @Test
-    public void testClasspathReferences() {
-        try {
-            Processor processor = new Processor(false);
-            InputStream stream = ClassLoader.getSystemResourceAsStream("classpath-testing/doc.xml");
-            assertNotNull(stream);
-            InputSource source = new InputSource(stream);
-            source.setSystemId("classpath:classpath-testing/doc.xml");
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode document = builder.build(new SAXSource(source));
-            assertNotNull(document);
+    public void testClasspathReferences() throws SaxonApiException {
+        Processor processor = new Processor(false);
 
-            stream = ClassLoader.getSystemResourceAsStream("classpath-testing/style.xsl");
-            assertNotNull(stream);
-            source = new InputSource(stream);
-            source.setSystemId("classpath:classpath-testing/doc.xml");
+        System.err.println(ClassLoader.class.getName());
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        System.err.println(cl.getClass().getName());
+//        cl.getParent().
+//        URL[] urls = ((URLClassLoader)cl).getURLs();
+//
+//        for(URL url: urls){
+//            System.err.println(url.getFile());
+//        }
 
-            XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.setSchemaAware(false);
-            XsltExecutable exec = compiler.compile(new SAXSource(source));
+        InputStream stream = ClassLoader.getSystemResourceAsStream("classpath-testing/doc.xml");
+        assertNotNull(stream, "ClassLoader.getSystemResourceAsStream returned null");
+        InputSource source = new InputSource(stream);
+        source.setSystemId("classpath:classpath-testing/doc.xml");
+        DocumentBuilder builder = processor.newDocumentBuilder();
+        XdmNode document = builder.build(new SAXSource(source));
+        assertNotNull(document);
 
-            XsltTransformer transformer = exec.load();
-            transformer.setInitialContextNode(document);
-            XdmDestination destination = new XdmDestination();
-            transformer.setDestination(destination);
-            transformer.transform();
+        stream = ClassLoader.getSystemResourceAsStream("classpath-testing/style.xsl");
+        assertNotNull(stream);
+        source = new InputSource(stream);
+        source.setSystemId("classpath:classpath-testing/doc.xml");
 
-            XdmNode result = destination.getXdmNode();
-            assertNotNull(result);
-        } catch (Exception ex) {
-            fail();
-        }
+        XsltCompiler compiler = processor.newXsltCompiler();
+        compiler.setSchemaAware(false);
+        XsltExecutable exec = compiler.compile(new SAXSource(source));
+
+        XsltTransformer transformer = exec.load();
+        transformer.setInitialContextNode(document);
+        XdmDestination destination = new XdmDestination();
+        transformer.setDestination(destination);
+        transformer.transform();
+
+        XdmNode result = destination.getXdmNode();
+        assertNotNull(result);
     }
 }
