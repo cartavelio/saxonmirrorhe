@@ -136,6 +136,7 @@ dependencies {
     testImplementation("org.apache.ant:ant:1.10.9")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("com.sparkjava:spark-core:2.9.4")
+    testImplementation("${findProperty("sqlDriverGroup")}:${findProperty("sqlDriverName")}:${findProperty("sqlDriverVersion")}")
     testImplementation(files(saxonBuild.saxonLicenseDir.get()))
 
     preprocessor("com.igormaznitsa:jcp:7.0.4")
