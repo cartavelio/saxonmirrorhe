@@ -87,6 +87,22 @@ public class CatalogResourceResolver implements
     }
 
     /**
+     * Calls {@link org.xmlresolver.XMLResolverConfiguration#setFeature} on the underlying resolver
+     * configuration to set the allowed protocols.
+     * <p>Having a special method for this purpose on the CatalogResourceResolver allows us
+     * to route around an API inconsistency between the Java implementation of the
+     * resolver and the C# implementation.</p>
+     * @param protocols The allowed protocols.
+     */
+    public void setAllowedProtocols(String protocols) {
+        if (catalogBasedResolver == null) {
+            throw new NullPointerException();
+        }
+        catalogBasedResolver.getConfiguration().setFeature(ResolverFeature.ACCESS_EXTERNAL_ENTITY, protocols);
+        catalogBasedResolver.getConfiguration().setFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, protocols);
+    }
+
+    /**
      * Resolve a resource request.
      *
      * If catalog resolution fails and a fallback URI resolver has been chained, the
