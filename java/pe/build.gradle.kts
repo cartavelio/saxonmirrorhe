@@ -214,21 +214,6 @@ samples.transform("Bible_1", "../bible/nt/nt.xml", "bible.xsl",
                   listOf("dir=${layout.buildDirectory.file("sample_results/biblehtml").get()}"),
                   layout.buildDirectory.file("sample_results/biblehtml/index.html").get().asFile)
 
-samples.bookSample("transform", "html", "Transform_1",
-                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl"))
-
-samples.bookSample("transform", "html", "Transform_2",
-                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl", "top-author=Thomas Hardy"))
-
-samples.bookSample("transform", "txt", "Transform_3",
-                   listOf("-s:data/books.xml", "-xsl:styles/books-csv.xsl"))
-
-samples.bookSample("query", "html", "Query_1",
-                   listOf("-s:data/books.xml", "-q:query/books.xq"))
-
-samples.bookSample("query", "html", "Query_2",
-                   listOf("-s:data/books.xml", "-qs:saxon:line-number((//*)[last()])", "-l:on"))
-
 // ============================================================
 
 samples.sampleClass("JAXPExamples", listOf("all"), "he.JAXPExamples")

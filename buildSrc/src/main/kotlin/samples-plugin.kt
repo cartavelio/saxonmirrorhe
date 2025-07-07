@@ -82,55 +82,6 @@ abstract class SamplesExtension
     javaValidate(sample, input, schema, args, name)
   }
 
-  fun bookSample(type: String, outputFormat: String, sample: String, args: List<String>) {
-    val outputfile = layout.buildDirectory.file("sample_results/${sample}.${outputFormat}")
-    val reportfile = layout.buildDirectory.file("sample_results/${sample}.xml")
-
-    val t = tasks.register<JavaExec>("run_books_${sample}") {
-      description = "Run the cmd books sample: ${sample}"
-      inputs.files(copy_sample_sources.get().outputs)
-      inputs.files(layout.buildDirectory.file("samples/resources"))
-
-      workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
-      classpath = runclasspath.get()
-      
-      mainClass = when (type) {
-        "transform" -> "net.sf.saxon.Transform"
-        "query" -> "net.sf.saxon.Query"
-        "validate" -> "com.saxonica.Validate"
-        else -> throw IllegalArgumentException("Bad type: ${type}")
-      }
-
-      val testArgs = mutableListOf<String>()
-      testArgs.addAll(args)
-      if (type == "validate") {
-        testArgs.add("-report:${reportfile.get()}")
-        outputs.file(reportfile)
-      } else {
-        testArgs.add("-o:${outputfile.get()}")
-        outputs.file(outputfile)
-      }
-      
-      args(testArgs)
-    }
-    run_cmd_books_sample_tests.get().dependsOn(t)
-    all_samples.get().dependsOn(t)
-
-    if (type == "validate") {
-      val t2 = tasks.register<JavaExec>("validate_books_${sample}_report") {
-        dependsOn(t)
-        description = "Validate the ${sample} validation report against validation-reports.xsd"
-        inputs.files(t.get().outputs.getFiles().getSingleFile())
-        workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
-        classpath = runclasspath.get()
-        mainClass = "com.saxonica.Validate"
-        args("-s:${t.get().outputs.getFiles().getSingleFile()}",
-             "-xsd:schemas/validation-reports.xsd")
-      }
-      t.get().finalizedBy(t2)
-    }
-  }
-
   fun sampleClass(sample: String, args: List<String>, className: String? = null) {
     val t = tasks.register<JavaExec>("sample_class_${sample}") {
       dependsOn("compile_sample_run_classes")
@@ -175,9 +126,20 @@ abstract class SamplesExtension
         layout.projectDirectory.file("../tools/sample-check.py")
       } else {
         layout.projectDirectory.file("../../tools/sample-check.py")
-      }        
+      }
 
-      commandLine = listOf("python", "${script}", "--edition", "${edition.get()}",
+      // Presumably this can be improved by leveraging what the python
+      // build tasks do, but brute force for the moment...
+      var python = "python"
+      for (dir in System.getenv("PATH").split(":")) {
+        val file = File("${dir}/python")
+        if (file.exists() && file.canExecute()) {
+          python = file.absolutePath
+          break
+        }
+      }
+
+      commandLine = listOf(python, "${script}", "--edition", "${edition.get()}",
                            "--sample", sample,
                            "${layout.buildDirectory.file("sample_results/${sample}.txt").get()}")
     }
@@ -270,7 +232,19 @@ abstract class SamplesExtension
       args(xformArgs)
     }
 
-      all_samples.get().dependsOn(t)
+    val t2 = tasks.register<JavaExec>("validate_${taskName}") {
+      dependsOn(t)
+      description = "Validate the ${sample} validation report against validation-reports.xsd"
+      inputs.files(t.get().outputs.getFiles().getSingleFile())
+      workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
+      classpath = runclasspath.get()
+      mainClass = "com.saxonica.Validate"
+      args("-s:${t.get().outputs.getFiles().getSingleFile()}",
+           "-xsd:schemas/validation-reports.xsd")
+    }
+
+    t.get().finalizedBy(t2)
+    all_samples.get().dependsOn(t)
   }
 
 /*
