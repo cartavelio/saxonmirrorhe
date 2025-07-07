@@ -56,7 +56,7 @@ public class KeyIndex {
     // The entry in an index is either a NodeInfo or a List<NodeInfo>
     private final Map <AtomicMatchKey, Object> index;
     private UType keyTypesPresent = UType.VOID;
-    private final UType keyTypesConvertedFromUntyped = UType.STRING_LIKE;
+    private UType keyTypesConvertedFromUntyped = UType.STRING_LIKE;
     private List<StringValue> untypedKeys;
     private ConversionRules rules;
     private int implicitTimezone;
@@ -345,6 +345,7 @@ public class KeyIndex {
     public SequenceIterator getNodes(AtomicValue soughtValue) throws XPathException {
         if (untypedKeys != null && !keyTypesConvertedFromUntyped.subsumes(soughtValue.getUType())) {
             reindexUntypedValues(soughtValue.getPrimitiveType());
+            keyTypesConvertedFromUntyped = keyTypesConvertedFromUntyped.union(soughtValue.getPrimitiveType().getUType());
         }
         if (soughtValue.isUntypedAtomic()) {
             List<NodeInfo> resultNodes = new ArrayList<>();
