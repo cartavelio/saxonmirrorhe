@@ -11,6 +11,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.*
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.compile.JavaCompile
@@ -136,53 +137,52 @@ abstract class SamplesExtension
       inputs.files(copy_sample_sources.get().outputs)
       outputs.file(layout.buildDirectory.file("sample_results/${sample}.txt"))
 
-      var showOutput = true
       val stdOutput = ByteArrayOutputStream()
       val errOutput = ByteArrayOutputStream()
       
-      doFirst {
-        for (task in project.gradle.taskGraph.getAllTasks()) {
-          // If the testsuites task(s) are in the graph, assume we're doing
-          // a longer run and we don't want to see all the detailed output
-          if (task.name == "all_samples") {
-            showOutput = false
-            break;
-          }
-        }
+      standardOutput = stdOutput
+      errorOutput = errOutput
 
-        if (!showOutput) {
-          println("(buffering output)")
-          standardOutput = stdOutput
-          errorOutput = errOutput
-        }
-      }
-
-      mainClass = if (className == null) "${edition.get()}.${sample}" else "${edition.get()}.${className}"
+      mainClass = className ?: "${edition.get()}.${sample}"
       classpath = runclasspath.get() + run_classes.get().outputs.files
       workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
       args(args)
 
       doLast {
-        if (!showOutput) {
-          if (stdOutput.size() > 0) {
-            val outfile = layout.buildDirectory.file("sample_results/${sample}.txt").get().asFile
-            println("==> ${outfile}")
-            var outputStream = PrintStream(outfile)
-            var lines = stdOutput.toString("utf-8")
-            outputStream.print(lines)
-            outputStream.close()
-          }
-          if (errOutput.size() > 0) {
-            val outfile = layout.buildDirectory.file("sample_results/${sample}.err").get().asFile
-            println("==> ${outfile}")
-            var outputStream = PrintStream(outfile)
-            var lines = errOutput.toString("utf-8")
-            outputStream.print(lines)
-            outputStream.close()
-          }
+        if (stdOutput.size() > 0) {
+          val outfile = layout.buildDirectory.file("sample_results/${sample}.txt").get().asFile
+          println("==> ${outfile}")
+          var outputStream = PrintStream(outfile)
+          var lines = stdOutput.toString("utf-8")
+          outputStream.print(lines)
+          outputStream.close()
+        }
+        if (errOutput.size() > 0) {
+          val outfile = layout.buildDirectory.file("sample_results/${sample}.err").get().asFile
+          println("==> ${outfile}")
+          var outputStream = PrintStream(outfile)
+          var lines = errOutput.toString("utf-8")
+          outputStream.print(lines)
+          outputStream.close()
         }
       }
     }
+
+    val t2 = tasks.register<Exec>("check_sample_class_${sample}") {
+      dependsOn(t)
+
+      val script = if (edition.get() == "ee") {
+        layout.projectDirectory.file("../tools/sample-check.py")
+      } else {
+        layout.projectDirectory.file("../../tools/sample-check.py")
+      }        
+
+      commandLine = listOf("python", "${script}", "--edition", "${edition.get()}",
+                           "--sample", sample,
+                           "${layout.buildDirectory.file("sample_results/${sample}.txt").get()}")
+    }
+
+    t.get().finalizedBy(t2)
     all_samples.get().dependsOn(t)
   }
 
@@ -273,6 +273,7 @@ abstract class SamplesExtension
       all_samples.get().dependsOn(t)
   }
 
+/*
   fun javaTest(sample: String, classFile: String, sampleClass: String,
                input: String, args: List<String>) {
     val tver = "run"
@@ -321,6 +322,7 @@ abstract class SamplesExtension
       }
     }
   }
+*/
 }
 
 class SamplesPlugin : Plugin<Project> {
