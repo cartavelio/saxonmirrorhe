@@ -1284,16 +1284,12 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
         switch (type) {
             case "spec":
+                boolean atLeast = value.endsWith("+");
+                value = value.replace("+", "");
                 String specName = spec.specAndVersion.replace("XT", "XSLT");
-                for (String token : value.split("\\s+")) {
-                    boolean atLeast = token.endsWith("+");
-                    token = token.replace("+", "");
-                    int order = token.compareTo(specName);
-                    if (atLeast ? order <= 0 : order == 0) {
-                        return true;
-                    }
-                }
-                return false;
+                int order = value.compareTo(specName);
+                return atLeast ? order <= 0 : order == 0;
+
             case "feature":
                 switch (value) {
                     case "XML_1.1": {
@@ -1356,7 +1352,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                         return true;
                     default:
                         System.err.println("*** Unknown feature in HE: " + value);
-                        return !env.processor.getSaxonEdition().equals("HE");
+                        return env.processor.getSaxonEdition().equals("HE") ? false : null;
                 }
 
             case "default_language_for_numbering": {
