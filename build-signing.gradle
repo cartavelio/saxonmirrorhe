@@ -45,6 +45,8 @@ def signingResources = tasks.register("awsSigningResources", AwsSigningResources
     }
 }
 
+def mavenOMaticDir = layout.buildDirectory.dir("maven-o-matic")
+
 publishing {
     publications {
         create("he_maven", MavenPublication) {
@@ -183,7 +185,7 @@ publishing {
     repositories {
         maven {
             name = "maven-o-matic"
-            url = uri(layout.buildDirectory.dir("maven-o-matic").get())
+            url = uri(mavenOMaticDir.get())
         }
 /*
     maven {
@@ -195,5 +197,15 @@ publishing {
       }
     }
 */
+    }
+}
+
+def heMavenPubTask = tasks.named("publishHe_mavenPublicationToMaven-o-maticRepository")
+
+tasks.register("he_sonatype_bundle", Zip) {
+    dependsOn(heMavenPubTask)
+    archiveFileName = "he_sonatype_bundle.zip"
+    from(mavenOMaticDir) {
+        exclude "com"
     }
 }
