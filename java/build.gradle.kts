@@ -156,6 +156,19 @@ tasks.register<Copy>("copy_java_sample_sources") {
     from(javaSampleSources)
 }
 
+val jar_sample_run_classes = tasks.register<Jar>("jar_sample_run_classes") {
+  dependsOn("compile_sample_run_classes")
+  archiveBaseName = "classes"
+  destinationDirectory = layout.buildDirectory.dir("tmp")
+  into(archiveBaseName)
+  from(tasks.named("compile_sample_run_classes")) {
+    exclude("previous-compilation-data.bin")
+  }
+}
+
+val javaSampleClasses by configurations.consumable("sampleClasses")
+javaSampleClasses.outgoing.artifact(jar_sample_run_classes) { builtBy(jar_sample_run_classes) }
+
 samples {
   runclasspath = (files(sourceSets["edition"].output)
                   + configurations.named("samplesConfiguration").get())
