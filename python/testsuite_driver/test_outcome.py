@@ -463,7 +463,7 @@ class PyTestOutcome:
             assert_xpc.declare_namespace("j", "http://www.w3.org/2005/xpath-functions")
             assert_xpc.declare_namespace("file", "http://expath.org/ns/file")
             assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
-            assert_xpc.set_parameter("result", result.head)
+            assert_xpc.set_parameter("result", result)
             if(result.head is not None):
                 assert_xpc.set_context(xdm_item=result.head)
             try:
