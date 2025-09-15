@@ -2549,14 +2549,7 @@ PHP_METHOD(XdmNode, getChildren) {
     int count = xdmNode->getChildCount();
     if (count > 0) {
 
-        XdmNode **childNodes = nullptr;
-        if(xdmNode->hasRelinquishedChildren()){
-            XdmNode **childNodes = xdmNode->getChildren(true);
-            xdmNode->incrementRefCountForRelinquishedChildren();
-        } else {
-            XdmNode **childNodes = xdmNode->getChildren(true);
-        }
-
+      XdmNode **childNodes = xdmNode->getChildren(true);
 
       if (childNodes != nullptr) {
         ///// creating PHP array
