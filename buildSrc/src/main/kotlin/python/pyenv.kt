@@ -112,11 +112,10 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
             executable(pyenv)
             args("latest", pyenvVersionName.get())
         }
-        println("WINDOWS LATEST:  ${latestInstalledOfMajorVersion}: HOHOHOAHOAHOAHOAHOAHOAOAHOAHOAHOAHOAHOAHAOHOAHAOH")
         return execToString {
             executable("cmd.exe")
             args("/c")
-            args("'${pyenv}' shell ${latestInstalledOfMajorVersion} && '${pyenv}' which python")
+            args(pyenv, "shell", latestInstalledOfMajorVersion, "&&", pyenv, "which", "python")
         }
     }
 
