@@ -1158,6 +1158,85 @@ void testXdmNodeEquals(XPathProcessor *xpath, const std::string * const dataDir,
 }
 
 
+// TODO remove test after testing - PRIVATE
+void testFileOkBug6813(const std::string * const dataDir, sResultCount *sresult) {
+  cout << endl << "Test testFileOkBug6813:" << endl;
+
+  try {
+    SaxonProcessor *processor = new SaxonProcessor(true);
+
+    XPathProcessor *xpath = processor->newXPathProcessor();
+
+    xpath->declareNamespace("saxon", "http://saxon.sf.net/");
+    //char * uri = CppTestUtils::concat(2,"file://" +"BUILD.md");
+    XdmValue *result = (XdmNode *)xpath->evaluate(CppTestUtils::concat(3, "saxon:read-binary-resource('file://", dataDir->c_str(), "/cat.xml')").c_str());
+
+    if (result == nullptr) {
+      printf("result is null \n");
+
+      sresult->failure++;
+      sresult->failureList.push_back("testFileOkBug6813");
+      return;
+    } else {
+      const char * resultOutput = result->toString();
+      cout << "Result output" << resultOutput << endl;
+      delete resultOutput;
+    }
+    delete result;
+    sresult->success++;
+
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testFileOkBug6813");
+  }
+}
+
+
+// TODO remove test after testing - PRIVATE
+void testFileBadBug6813(const std::string * const dataDir, sResultCount *sresult) {
+  cout << endl << "Test testFileBadBug6813:" << endl;
+
+  try {
+    SaxonProcessor *processor = new SaxonProcessor(true);
+
+    processor->setConfigurationProperty("http://saxon.sf.net/feature/allowedProtocols", "http,https");
+
+    XPathProcessor *xpath = processor->newXPathProcessor();
+
+    xpath->declareNamespace("saxon", "http://saxon.sf.net/");
+    //char * uri = CppTestUtils::concat(2,"file://" +"BUILD.md");
+    XdmValue *result = (XdmNode *)xpath->evaluate(CppTestUtils::concat(3, "saxon:read-binary-resource('file://", dataDir->c_str(), "/cat.xml')").c_str());
+
+    if (result == nullptr) {
+      printf("result is null \n");
+
+          sresult->success++;
+      //sresult->failureList.push_back("testFileOkBug6813");
+      return;
+    } else {
+      const char * resultOutput = result->toString();
+      cout << "Result output" << resultOutput << endl;
+      delete resultOutput;
+    }
+    delete result;
+    sresult->failure++;
+    sresult->failureList.push_back("testFileBadBug6813");
+
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+    sresult->success++;
+
+  }
+}
+
+
+
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
@@ -1410,6 +1489,17 @@ int main(int argc, char *argv[]) {
        << endl;
 
   testCreateXdmArrayOfChars(processor, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testFileOkBug6813(&dataDir, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testFileBadBug6813(&dataDir, sresult);
   cout << endl
        << "============================================================="
        << endl
