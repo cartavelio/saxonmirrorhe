@@ -234,55 +234,33 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
 
     @Override
     public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-        switch (getNodeKind()) {
-            case Type.ATTRIBUTE:
-            case Type.NAMESPACE:
-            case Type.TEXT:
-            case Type.COMMENT:
-            case Type.PROCESSING_INSTRUCTION:
-                switch (axisNumber) {
-                    case AxisInfo.CHILD:
-                    case AxisInfo.DESCENDANT:
-                    case AxisInfo.DESCENDANT_OR_SELF:
-                    case AxisInfo.PRECEDING_SIBLING:
-                    case AxisInfo.FOLLOWING_SIBLING:
-                    case AxisInfo.PRECEDING:
-                    case AxisInfo.FOLLOWING:
-                        return EmptyIterator.ofNodes();
-                    default:
-                        return super.iterateAxis(axisNumber, nodeTest);
-                }
-            default:
-                if (!original.isSameNodeInfo(pivot) && Navigator.isAncestorOrSelf(original, pivot)) {
-                    // We're on a node above the pivot node
-                    switch (axisNumber) {
-                        case AxisInfo.CHILD:
-                            // return only the child that is included in the snapshot, that is, the one
-                            // that is an ancestor-or-self of the pivot node
-                            return Navigator.filteredSingleton(getChildOfAncestorNode(), nodeTest);
-                        case AxisInfo.DESCENDANT:
-                        case AxisInfo.DESCENDANT_OR_SELF:
-                            // Use the child axis recursively, for efficiency
-                            AxisIterator iter = new Navigator.DescendantEnumeration(
-                                this, axisNumber == AxisInfo.DESCENDANT_OR_SELF, true);
-                            if (!(nodeTest instanceof AnyNodeTest)) {
-                                iter = new Navigator.AxisFilter(iter, nodeTest);
-                            }
-                            return iter;
-                        case AxisInfo.PRECEDING_SIBLING:
-                        case AxisInfo.FOLLOWING_SIBLING:
-                        case AxisInfo.PRECEDING:
-                        case AxisInfo.FOLLOWING:
-                            return EmptyIterator.ofNodes();
-                        default:
-                            return super.iterateAxis(axisNumber, nodeTest);
+        if (!original.isSameNodeInfo(pivot) && Navigator.isAncestorOrSelf(original, pivot)) {
+            // We're on a node above the pivot node
+            switch (axisNumber) {
+                case AxisInfo.CHILD:
+                    // return only the child that is included in the snapshot, that is, the one
+                    // that is an ancestor-or-self of the pivot node
+                    return Navigator.filteredSingleton(getChildOfAncestorNode(), nodeTest);
+                case AxisInfo.DESCENDANT:
+                case AxisInfo.DESCENDANT_OR_SELF:
+                    // Use the child axis recursively, for efficiency
+                    AxisIterator iter = new Navigator.DescendantEnumeration(
+                        this, axisNumber == AxisInfo.DESCENDANT_OR_SELF, true);
+                    if (!(nodeTest instanceof AnyNodeTest)) {
+                        iter = new Navigator.AxisFilter(iter, nodeTest);
                     }
-
-                } else {
+                    return iter;
+                case AxisInfo.PRECEDING_SIBLING:
+                case AxisInfo.FOLLOWING_SIBLING:
+                case AxisInfo.PRECEDING:
+                case AxisInfo.FOLLOWING:
+                    return EmptyIterator.ofNodes();
+                default:
                     return super.iterateAxis(axisNumber, nodeTest);
-                }
+            }
+        } else {
+            return super.iterateAxis(axisNumber, nodeTest);
         }
-
     }
 
     /**
