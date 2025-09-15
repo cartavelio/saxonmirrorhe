@@ -649,7 +649,7 @@ namespace TestDriver {
                                     exp = decVars + exp;
                                 }
                                 else {
-                                    exp = exp[..x] + decVars + exp[(x + 13)..];
+                                    exp = exp.Substring(0, x) + decVars + exp.Substring(x + 13);
                                 }
                             }
                             
@@ -665,7 +665,7 @@ namespace TestDriver {
                                     exp = vars + exp;
                                 }
                                 else {
-                                    exp = exp[..x] + vars + exp[(x + 13)..];
+                                    exp = exp.Substring(0, x) + vars + exp.Substring(x + 13);
                                 }
                             }
 

@@ -92,8 +92,8 @@ namespace Saxon.Api {
                 sqName = new StructuredQName("", uri, lexical);
             }
             else {
-                string prefix = lexical[..colon];
-                string local = lexical[(colon + 1)..];
+                string prefix = lexical.Substring(0, colon);
+                string local = lexical.Substring(colon + 1);
                 sqName = new StructuredQName(prefix, uri, local);
             }
         }

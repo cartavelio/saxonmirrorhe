@@ -65,7 +65,7 @@ namespace Saxon.Impl.Helpers {
             try {
                 string decoded = new string(encoding.GetChars(value, offset, len));
                 if (decoded.StartsWith(BOM)) {
-                    decoded = decoded[1..];
+                    decoded = decoded.Substring(1);
                 }
 
                 return decoded;

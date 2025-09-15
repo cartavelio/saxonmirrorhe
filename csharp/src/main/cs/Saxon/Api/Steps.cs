@@ -785,7 +785,7 @@ namespace Saxon.Api {
                         break;
                     default: {
                         if (step.StartsWith("@")) {
-                            string name = step[1..];
+                            string name = step.Substring(1);
                             if (!Saxon.Hej.om.NameChecker.isValidNCName(name)) {
                                 throw new System.ArgumentException("Invalid attribute name " + name);
                             }

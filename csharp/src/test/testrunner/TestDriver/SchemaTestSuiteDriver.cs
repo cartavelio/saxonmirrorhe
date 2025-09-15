@@ -129,22 +129,22 @@ namespace TestDriver {
                     debug = true;
                 }
                 else if (args[i].StartsWith("-c:")) {
-                    contributor = args[i][3..];
+                    contributor = args[i].Substring(3);
                 }
                 else if (args[i].StartsWith("-s:")) {
-                    testSetPattern = args[i][3..];
+                    testSetPattern = args[i].Substring(3);
                 }
                 else if (args[i].StartsWith("-g:")) {
-                    testGroupPattern = args[i][3..];
+                    testGroupPattern = args[i].Substring(3);
                 } 
                 else if (args[i].StartsWith("-v:")) {
                     // Note, although we allow setting -v:1.0 to run the tests appropriate to a 1.0 processor,
                     // we don't expect 100% success, because Saxon does not implement a conformant 1.0 processor,
                     // it only offers 1.1 conformance.
-                    versionUnderTest = args[i][3..];
+                    versionUnderTest = args[i].Substring(3);
                 }
                 else if (args[i].StartsWith("-o:")) {
-                    outputDir = args[i][3..];
+                    outputDir = args[i].Substring(3);
                 }
                 else if (args[i].StartsWith("-exceptions:")) {
                     exceptionsFile = args[i].Substring("-exceptions:".Length);

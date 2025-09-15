@@ -127,7 +127,7 @@ namespace TestDriver {
                 }
 
                 if (a.StartsWith("-locale:")) {
-                    Thread.CurrentThread.CurrentCulture = new CultureInfo(a[7..]);
+                    Thread.CurrentThread.CurrentCulture = new CultureInfo(a.Substring(7);
                 }
             }
 

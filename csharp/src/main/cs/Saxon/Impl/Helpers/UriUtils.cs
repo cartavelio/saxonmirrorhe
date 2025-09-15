@@ -15,7 +15,7 @@ namespace Saxon.Impl.Helpers {
         public static string GetQuery(System.Uri uri) {
             string q = uri.Query;
             if (q.StartsWith("?")) {
-                q = q[1..];
+                q = q.Substring(1);
             }
             if (q == "") {
                 return null;
@@ -27,7 +27,7 @@ namespace Saxon.Impl.Helpers {
         public static string GetFragment(System.Uri uri) {
             string q = uri.Fragment;
             if (q.StartsWith("#")) {
-                q = q[1..];
+                q = q.Substring(1);
             }
             if (q == "") {
                 return null;
