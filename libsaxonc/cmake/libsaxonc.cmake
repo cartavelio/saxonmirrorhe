@@ -6,6 +6,8 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
 if(NOT CMAKE_DEBUG_POSTFIX)
     if(APPLE)
         set(CMAKE_DEBUG_POSTFIX _debug)
+    elseif(WIN32)
+        # Do nothing for now
     else()
         set(CMAKE_DEBUG_POSTFIX d)
     endif()

@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 class DebugPostfix(private val targetHost: TargetHost) {
   override fun toString(): String {
-    return if (targetHost.isMacOS) "_debug" else "d"
+    return if (targetHost.isWindows) "" else if (targetHost.isMacOS) "_debug" else "d"
   }
 }
 

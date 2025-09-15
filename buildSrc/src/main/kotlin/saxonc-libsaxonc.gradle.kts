@@ -95,7 +95,7 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
         inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
         inputs.dir(layout.projectDirectory.dir("../cmake"))
         inputs.dir(coreCMakePackageDir.elements.map { it.first().asFile })
-        outputs.file(cmakeBuildDir.map { file("CMakeCache.txt") })
+        outputs.file(cmakeBuildDir.map { it.file("CMakeCache.txt") })
 
         val injected = project.objects.newInstance<InjectedExecOps>()
 
@@ -126,7 +126,7 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
         inputs.files(layout.projectDirectory.dir("src"))
         inputs.files(layout.projectDirectory.dir("../samples/cppTests"))
         inputs.files(layout.projectDirectory.dir("../samples/cTests"))
-        outputs.dir(cmakeBuildDir.map { it.dir("Release") })
+        outputs.dir(cmakeBuildDir.map { it.dir(config) })
 
         workingDir = layout.projectDirectory.asFile
         executable = "cmake"
