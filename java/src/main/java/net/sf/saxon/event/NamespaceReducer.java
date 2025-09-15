@@ -106,18 +106,6 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
 
     }
 
-//    /**
-//     * Output a namespace node (binding)
-//     *
-//     * @param namespaceBindings the prefix/uri pair to be output
-//     * @param properties       the properties of the namespace binding
-//     * @throws XPathException if any downstream error occurs
-//     */
-//
-//    public void namespaces(NamespaceMap namespaceBindings, int properties) throws XPathException {
-//        nextReceiver.namespaces(namespaceBindings, properties);
-//    }
-
     /**
      * Determine whether a namespace declaration is needed
      *

@@ -443,6 +443,19 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         if (delta.isEmpty()) {
             return this;
         } else {
+            // If every entry in delta is already in this map, return this map unchanged
+            boolean foundDifferences = false;
+            for (String prefix : delta.prefixes) {
+                NamespaceUri newUri = delta.getNamespaceUri(prefix);
+                NamespaceUri existingUri = getNamespaceUri(prefix);
+                if (newUri != existingUri) {
+                    foundDifferences = true;
+                    break;
+                }
+            }
+            if (!foundDifferences) {
+                return this;
+            }
             // Merge of two sorted arrays to produce a sorted array
             String[] p1 = prefixes;
             NamespaceUri[] u1 = uris;
@@ -465,7 +478,9 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                     }
                     i2++;
                 } else { // c == 0
-                    if (u2[i2] != NamespaceUri.NULL || p2[i2].isEmpty()) {
+                    // Same prefix. Retain the second URI, unless the new URI is empty,
+                    // in which case drop both the old and the new bindings. Bug 6866
+                    if (u2[i2] != NamespaceUri.NULL) {
                         prefixList.add(p2[i2]);
                         uriList.add(u2[i2]);
                     }
