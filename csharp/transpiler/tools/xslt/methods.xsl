@@ -1250,6 +1250,7 @@
       <xsl:sequence select="f:applyFormat(., map{
          'getUnderlyingValue#0':  '((Saxon.Hej.om.GroundedValue)%scope%.Unwrap())',
          'isEmpty#0':             '%scope%.Count==0',
+         'isEmptySequence#0':     '%scope%.Count==0',
          'size#0':                '%scope%.Count==0',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
