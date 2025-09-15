@@ -376,6 +376,9 @@ val sourceZipTask = tasks.register<Zip>("source_release_zip") {
         into("src/main/c")
         exclude("**/*.c.in", "**/Gizmo.c")
     }
+    from(layout.projectDirectory.dir("src")) {
+        into("src/main/c")
+    }
     from(saxonCCoreJavaSrcDir.elements.map { it.first() }) {
         into("src/main/java")
     }
