@@ -44,6 +44,8 @@ val devDebugPythonExe by configurations.resolvable("debugPython") {
     extendsFrom(devDebugPythonBucket)
 }
 
+val releaseWhl by configurations.consumable("releaseWhl")
+
 dependencies {
     libsaxoncReleaseArtifactsBucket(extension.edition.map { edition ->
         project(path = ":libsaxonc:${edition}", configuration = "releaseArtifactsDir")
@@ -62,6 +64,7 @@ val pythonSrcDir = layout.projectDirectory.dir(provider { "../saxonc" })
 val releaseWheels = tasks.register("release_wheels") {
     group = LifecycleTasks.RELEASE_GROUP
     description = "Build release wheels for all supported Python versions"
+    outputs.dir(layout.buildDirectory.file("repaired-wheels"))
 
     doLast {
       mkdir(layout.buildDirectory.file("repaired-wheels"))
@@ -76,6 +79,8 @@ val releaseWheels = tasks.register("release_wheels") {
       }
     }
 }
+
+releaseWhl.outgoing.artifact(releaseWheels) { builtBy(releaseWheels) }
 
 val pythonVersions = mutableMapOf<String, String>()
 
