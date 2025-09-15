@@ -1,12 +1,13 @@
 import com.saxonica.build.python.PyenvExe
 import com.saxonica.build.python.PyenvPythonVersion
-import com.saxonica.build.python.PythonPyenvPythonExe
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
   base
   id("saxon-build")
 }
 
+val systemOs = OperatingSystem.current()
 val pythonVersion: String by project
 val pythonReleaseVersions: String by project
 val saxonBuild = the<SaxonBuildExtension>()
@@ -21,6 +22,7 @@ extension.pyenvRoot = layout.projectDirectory.dir(".pyenv")
 val pyenvExeTask = tasks.register<PyenvExe>("pyenv_exe")
 
 val pyenvDevPythonTask = tasks.register<PyenvPythonVersion>("pyenv_dev_python") {
+  os = systemOs
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
   pyenvRoot = extension.pyenvRoot.map { it.asFile.toString() }
   pythonVersion = extension.devVersion
@@ -29,6 +31,7 @@ val pyenvDevPythonTask = tasks.register<PyenvPythonVersion>("pyenv_dev_python") 
 }
 
 val pyenvDevValgrindPythonTask = tasks.register<PyenvPythonVersion>("pyenv_dev_valgrind_python") {
+  os = systemOs
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
   pyenvRoot = extension.pyenvRoot.map { it.asFile.toString() }
   pythonVersion = extension.devVersion
@@ -46,6 +49,7 @@ extension.releaseVersions.get().forEach { releaseVersion ->
   val versionConfig = configurations.consumable("python${releaseVersion}").get()
 
   val versionTask = tasks.register<PyenvPythonVersion>("pyenv_python_${releaseVersion}") {
+    os = systemOs
     pyenvExe = pyenvExeTask.map { it.pyenv.get() }
     pyenvRoot = extension.pyenvRoot.map { it.asFile.toString() }
     pythonVersion = releaseVersion
