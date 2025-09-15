@@ -206,6 +206,7 @@ val repairDevWheel = wheelTasksBuilder {
 
 val repairDevDebugWheel = wheelTasksBuilder {
     prefix = "debug"
+    debug = true
     sourceDir = pythonSrcDir
     venvTask = debugVenv
     buildDir = layout.buildDirectory

@@ -1,5 +1,6 @@
 package com.saxonica.build.cpp
 
+import com.saxonica.build.TargetHost
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.*
 import org.gradle.api.provider.ListProperty
@@ -97,7 +98,8 @@ using SONAME.
 This task will produce correctly named headers and incorrectly named binaries that have the right SONAME or Dylib ID.
  */
 abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOperations): DefaultTask() {
-    private val systemOs: OperatingSystem = OperatingSystem.current()
+    @get:Internal
+    abstract val targetHost: Property<TargetHost>
 
     @get:InputFile
     abstract val sourceJar: RegularFileProperty
@@ -107,6 +109,9 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
 
     @get:Input
     abstract val libName: Property<String>
+
+    @get:Input
+    abstract val headerLibName: Property<String>
 
     @get:Input
     abstract val version: Property<String>
@@ -144,7 +149,7 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
     }
 
     @get:Internal
-    val headerFilenames: Provider<List<String>> = libName.map { filename ->
+    val headerFilenames: Provider<List<String>> = headerLibName.map { filename ->
         listOf("", "_dynamic").map { suffix ->
             listOf("graal_isolate", filename).map { name ->
                 "${name}${suffix}.h"
@@ -173,21 +178,25 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
     @get:Internal
     val libraryDir: Provider<Directory> = outputDir
 
+    private val th: TargetHost get() = targetHost.get()
+    private val isWindows get() = th.isWindows
+    private val isLinux get() = th.isLinux
+    private val isMacOS get() = th.isMacOS
+
     private fun addSonameOptions(args: ArrayList<String>) {
-        if (systemOs.isWindows) { return }
-        if (systemOs.isLinux) {
+        if (isWindows) { return }
+        if (isLinux) {
             args.add("--native-compiler-options=-Wl,-soname,lib${libName.get()}.so.${majorVersion.get()}")
         } else {
             args.add("--native-compiler-options=-Wl,-install_name,@rpath/lib${libName.get()}.${majorVersion.get()}.dylib")
         }
     }
-    private fun hasNativeCompilerOptions(): Boolean {
-        return if (systemOs.isWindows) false else true
-    }
 
     private fun generatedArgs(): List<Any> {
         var nativeArgs = arrayListOf<String>("-cp", sourceJar.get().toString(),
-            "-o", libName.get(),
+            // we need the header generated as saxonc-core-{edition}.h, or the headers for the debug build
+            // don't match the release headers.
+            "-o", headerLibName.get(),
             "--no-fallback", "-H:Path=${outputDir.get().asFile}",
             "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
             "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
@@ -214,10 +223,10 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
     }
 
     private fun platformSharedLibFilename(): String  {
-        val basename = libName.get()
-        return if (systemOs.isMacOsX) {
+        val basename = headerLibName.get()
+        return if (isMacOS) {
             "${basename}.dylib"
-        } else if (systemOs.isLinux) {
+        } else if (isLinux) {
             "${basename}.so"
         } else {
             "${basename}.dll"
@@ -225,8 +234,8 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
     }
 
     private fun platformImportLibFilename(): List<String> {
-        val basename = libName.get()
-        return if (systemOs.isWindows) {
+        val basename = headerLibName.get()
+        return if (isWindows) {
             listOf("${basename}.lib")
         } else {
             return listOf()

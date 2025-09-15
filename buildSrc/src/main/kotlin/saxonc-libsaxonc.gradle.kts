@@ -1,5 +1,4 @@
 import com.saxonica.build.LifecycleTasks
-import com.saxonica.build.GatherReleaseArtifacts
 import com.saxonica.build.cpp.DoxygenTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
@@ -20,9 +19,13 @@ extension.package_file_name.convention(extension.package_name.map { name ->
     val (os, arch) = saxonBuild.targetHost.get()
     "${name}-${os}-${arch}-${saxonBuild.hyphenatedVersion.get()}"
 })
-val saxonCCoreCMakePackageBucket by configurations.dependencyScope("saxonCCoreCMakePackageBucket")
-val saxonCCoreCMakePackageDir by configurations.resolvable("saxonCCoreCMakePackageDir") {
-    extendsFrom(saxonCCoreCMakePackageBucket)
+val saxonCCoreReleaseCMakePackageBucket by configurations.dependencyScope("saxonCCoreReleaseCMakePackageBucket")
+val saxonCCoreReleaseCMakePackageDir by configurations.resolvable("saxonCCoreReleaseCMakePackageDir") {
+    extendsFrom(saxonCCoreReleaseCMakePackageBucket)
+}
+val saxonCCoreDebugCMakePackageBucket by configurations.dependencyScope("saxonCCoreDebugCMakePackageBucket")
+val saxonCCoreDebugCMakePackageDir by configurations.resolvable("saxonCCoreDebugCMakePackageDir") {
+    extendsFrom(saxonCCoreDebugCMakePackageBucket)
 }
 
 val phpReleaseFolderBucket by configurations.dependencyScope("phpReleaseFolderBucket")
@@ -58,8 +61,11 @@ sampleData.outgoing.artifact(layout.projectDirectory.dir("../samples/data"))
 
 
 dependencies {
-    saxonCCoreCMakePackageBucket(extension.edition.map { edition ->
-        project(path = ":libsaxonc-core:${edition}", configuration = "cMakePackageDir")
+    saxonCCoreReleaseCMakePackageBucket(extension.edition.map { edition ->
+        project(path = ":libsaxonc-core:${edition}", configuration = "releaseCMakePackageDir")
+    })
+    saxonCCoreDebugCMakePackageBucket(extension.edition.map { edition ->
+        project(path = ":libsaxonc-core:${edition}", configuration = "debugCMakePackageDir")
     })
     phpReleaseFolderBucket(extension.edition.map  { edition ->
         project(path = ":php:${edition}", configuration = "releaseFolder")
@@ -79,87 +85,79 @@ interface InjectedExecOps {
     @get:Inject val execOps: ExecOperations
 }
 
-val generator = tasks.register("cmake_generate") {
-    group = LifecycleBasePlugin.BUILD_GROUP
-    inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
-    inputs.files(layout.projectDirectory.dir("../cmake"))
-    inputs.dir(saxonCCoreCMakePackageDir.elements.map { it.first().asFile })
-    outputs.file(layout.buildDirectory.file("CMakeCache.txt"))
+private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, coreCMakePackageDir: ResolvableConfiguration): Pair<TaskProvider<Exec>, TaskProvider<Exec>> {
+    val configTaskName = config.lowercase()
 
-    val injected = project.objects.newInstance<InjectedExecOps>()
+    val cmakeBuildDir = layout.buildDirectory.dir(config)
 
-    doLast {
-        val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
-        injected.execOps.exec {
-            workingDir = layout.projectDirectory.asFile
-            executable = "cmake"
-            args("-G", generatorName, "-B", layout.buildDirectory.get().asFile.toString(),
-                "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
-                "-D", extension.package_name.map { "SAXON_PACKAGE_NAME:STRING=${it}" }.get(),
-                "-D", extension.package_file_name.map { "SAXON_PACKAGE_FILE_NAME:STRING=${it}" }.get(),
-                "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.name}" }.get(),
-                "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
-                "-D", saxonCCoreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
-            )
-            if (saxonBuild.macosx_min_version.isPresent) {
-                args("-D", "CMAKE_OSX_DEPLOYMENT_TARGET=${saxonBuild.macosx_min_version.get()}")
+    val generator = tasks.register("cmake_generate_${configTaskName}") {
+        group = LifecycleBasePlugin.BUILD_GROUP
+        inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
+        inputs.files(layout.projectDirectory.dir("../cmake"))
+        inputs.dir(coreCMakePackageDir.elements.map { it.first().asFile })
+        outputs.file(cmakeBuildDir.map { file("CMakeCache.txt") })
+
+        val injected = project.objects.newInstance<InjectedExecOps>()
+
+        doLast {
+            val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
+            injected.execOps.exec {
+                workingDir = layout.projectDirectory.asFile
+                executable = "cmake"
+                args("-G", generatorName, "-B", cmakeBuildDir.get().asFile.toString(),
+                    "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
+                    "-D", extension.package_name.map { "SAXON_PACKAGE_NAME:STRING=${it}" }.get(),
+                    "-D", extension.package_file_name.map { "SAXON_PACKAGE_FILE_NAME:STRING=${it}" }.get(),
+                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.name}" }.get(),
+                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
+                    "-D", coreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
+                )
+                if (saxonBuild.macosx_min_version.isPresent) {
+                    args("-D", "CMAKE_OSX_DEPLOYMENT_TARGET=${saxonBuild.macosx_min_version.get()}")
+                }
             }
         }
     }
+
+    val build = tasks.register<Exec>("build_${configTaskName}") {
+        group = LifecycleBasePlugin.BUILD_GROUP
+        inputs.files(generator)
+        inputs.files(layout.projectDirectory.dir("../src"))
+        inputs.files(layout.projectDirectory.dir("src"))
+        inputs.files(layout.projectDirectory.dir("../samples/cppTests"))
+        inputs.files(layout.projectDirectory.dir("../samples/cTests"))
+        outputs.dir(cmakeBuildDir.map { it.dir("Release") })
+
+        workingDir = layout.projectDirectory.asFile
+        executable = "cmake"
+        args("--build", cmakeBuildDir.get().asFile.toString(), "--config", config)
+    }
+
+    val stage = tasks.register<Exec>("install_staging_${configTaskName}") {
+        group = LifecycleBasePlugin.BUILD_GROUP
+        inputs.files(build)
+        outputs.dir(stagingPath)
+
+        workingDir = layout.projectDirectory.asFile
+        executable = "cmake"
+        args("--install", cmakeBuildDir.get().asFile.toString(), "--config", config, "--prefix", stagingPath.get().asFile.toString())
+    }
+
+    return Pair(build, stage)
 }
 
-val build = tasks.register<Exec>("build_release") {
-    group = LifecycleBasePlugin.BUILD_GROUP
-    inputs.files(generator)
-    inputs.files(layout.projectDirectory.dir("../src"))
-    inputs.files(layout.projectDirectory.dir("src"))
-    inputs.files(layout.projectDirectory.dir("../samples/cppTests"))
-    inputs.files(layout.projectDirectory.dir("../samples/cTests"))
-    outputs.dir(layout.buildDirectory.dir("Release"))
-
-    workingDir = layout.projectDirectory.asFile
-    executable = "cmake"
-    args("--build", layout.buildDirectory.get().asFile.toString(), "--config", "Release")
-}
+val stagingPath = layout.buildDirectory.dir("staging/Release")
+val debugStagingPath = layout.buildDirectory.dir("staging/Debug")
+val (build, stage) = setupConfigTasks("Release", stagingPath, saxonCCoreReleaseCMakePackageDir)
+val (debugBuild, debugStage) = setupConfigTasks("Debug", debugStagingPath, saxonCCoreDebugCMakePackageDir)
 
 tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(build)
 }
-val buildDebug = tasks.register<Exec>("build_debug") {
-    group = LifecycleBasePlugin.BUILD_GROUP
-    inputs.files(generator)
-    inputs.files(layout.projectDirectory.dir("../src"))
-    inputs.files(layout.projectDirectory.dir("src"))
-    outputs.dir(layout.buildDirectory.dir("Debug"))
 
-    workingDir = layout.projectDirectory.asFile
-    executable = "cmake"
-    args("--build", layout.buildDirectory.get().asFile.toString(), "--config", "Debug")
-}
+val cmakeBuildDir = layout.buildDirectory.dir("Release")
+val ctestWorkingDir = cmakeBuildDir.map { it.dir("ctest-working-dir") }
 
-val releaseStagingPath = layout.buildDirectory.dir("staging/Release")
-val stage = tasks.register<Exec>("staging_install") {
-    group = LifecycleBasePlugin.BUILD_GROUP
-    inputs.files(build)
-    outputs.dir(releaseStagingPath)
-
-    workingDir = layout.projectDirectory.asFile
-    executable = "cmake"
-    args("--install", layout.buildDirectory.get().asFile.toString(), "--config", "Release", "--prefix", releaseStagingPath.get().asFile.toString())
-}
-
-val debugStagingPath = layout.buildDirectory.dir("staging/Debug")
-val debugStage = tasks.register<Exec>("debug_staging_install") {
-    group = LifecycleBasePlugin.BUILD_GROUP
-    inputs.files(buildDebug)
-    outputs.dir(debugStagingPath)
-
-    workingDir = layout.projectDirectory.asFile
-    executable = "cmake"
-    args("--install", layout.buildDirectory.get().asFile.toString(), "--config", "Debug", "--prefix", debugStagingPath.get().asFile.toString())
-}
-
-val ctestWorkingDir = layout.buildDirectory.dir("ctest-working-dir")
 val mkCtestWorkingDir = tasks.register("mk_ctest_working_dir") {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     outputs.dir(ctestWorkingDir)
@@ -185,7 +183,7 @@ val test = tasks.register<Exec>("test") {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Run the tests defined in CMakeLists with CTest"
     dependsOn(build)
-    workingDir = layout.buildDirectory.get().asFile
+    workingDir = cmakeBuildDir.get().asFile
     executable = "ctest"
     args("-C", "Release")
 }
@@ -206,7 +204,7 @@ tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
 //}
 
 tasks.build.configure {
-    dependsOn(build)
+//    dependsOn(build)
     dependsOn(stage)
 }
 
@@ -241,7 +239,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
 
     // this is the path releaseStagingPath, but we're triggering the build dependency
     from(stage.map { it.outputs.files.singleFile }) {
-        val sourceRootPath = releaseStagingPath.get().asFile.toPath()
+        val sourceRootPath = layout.buildDirectory.dir("staging/Release").get().asFile.toPath()
         val destinationRootPath = destinationDir.toPath()
         into(extension.package_name)
 
@@ -413,9 +411,9 @@ val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(sourceZipTask)
 }
 
-libDir.outgoing.artifact(releaseStagingPath.map { it.dir("lib") }) { builtBy(stage) }
-includeDir.outgoing.artifact(releaseStagingPath.map { it.dir("include") }) { builtBy(stage) }
-releaseArtifactsDir.outgoing.artifact(releaseStagingPath) { builtBy(stage) }
+libDir.outgoing.artifact(stagingPath.map { it.dir("lib") }) { builtBy(stage) }
+includeDir.outgoing.artifact(stagingPath.map { it.dir("include") }) { builtBy(stage) }
+releaseArtifactsDir.outgoing.artifact(stagingPath) { builtBy(stage) }
 releaseZips.outgoing.artifact(packagedZip) { builtBy(release) }
 debugLibDir.outgoing.artifact(debugStagingPath.map { it.dir("lib") }) { builtBy(debugStage) }
 debugIncludeDir.outgoing.artifact(debugStagingPath.map { it.dir("include") }) { builtBy(debugStage) }

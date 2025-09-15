@@ -11,6 +11,33 @@ import org.gradle.api.tasks.*
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
+class DebugPostfix(private val targetHost: TargetHost) {
+  override fun toString(): String {
+    return if (targetHost.isMacOS) "_debug" else "d"
+  }
+}
+
+class LibFilenames(val libName: String, val targetHost: TargetHost) {
+  val base: String get() = "${if (targetHost.isWindows) "" else "lib"}${libName}"
+
+  fun platformSharedLibFilename(version: String): String  {
+    return if (targetHost.isMacOS) {
+      "${base}.${version}.dylib"
+    } else if (targetHost.isLinux) {
+      "${base}.so.${version}"
+    } else {
+      "${base}.dll"
+    }
+  }
+
+  val importLibFilename: String get() = "${base}.lib"
+
+  val platformLinkerNameFilename: String get() {
+    val ext = if (targetHost.isMacOS) "dylib" else "so"
+    return "${base}.${ext}"
+  }
+}
+
 abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
   private val targetHost = TargetHost.current()
 
@@ -48,9 +75,6 @@ abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOpera
   val sharedLibDir: Provider<Directory> = packageDir.map { it.dir(if (targetHost.isWindows) "bin" else "lib") }
 
   @get:Internal
-  val libFilenameWithoutExtension: Provider<String> = libName.map { "${if (targetHost.isWindows) "" else "lib"}${it}" }
-
-  @get:Internal
   val importLibDir = packageDir.map { it.dir("lib") }
 
   @get:Internal
@@ -62,6 +86,9 @@ abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOpera
   @get:OutputDirectory
   val outputDir: Provider<Directory> = packageDir
 
+  @get:Internal
+  val libFilenames = libName.map { LibFilenames(it, targetHost) }
+
   @TaskAction
   fun build() {
     project.delete(packageDir)
@@ -71,57 +98,17 @@ abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOpera
     buildCMakeDir()
   }
 
-  private fun debugPostfix(): String {
-    if (!debugConfig.get()) {
-      return ""
-    }
-    if (targetHost.isMacOS) {
-      return "_debug"
-    } else {
-      return "d"
-    }
-  }
-
-  private fun platformSharedLibFilename(base: String, libversion: String): (String) -> String  {
-    return { _ ->
-      if (targetHost.isMacOS) {
-        "${base}${debugPostfix()}.${libversion}.dylib"
-      } else if (targetHost.isLinux) {
-        "${base}${debugPostfix()}.so.${libversion}"
-      } else {
-        "${base}${debugPostfix()}.dll"
-      }
-    }
-  }
-
-  private fun importLibFilename(base: String, libversion: String): (String) -> String  {
-    return { filename ->
-      if (targetHost.isWindows) {
-        "${base}${debugPostfix()}.lib"
-      } else {
-        filename
-      }
-    }
-  }
-
-  private fun platformLinkerNameFilename(base: String): (String) -> String {
-    return { _ ->
-      val ext = if (targetHost.isMacOS) "dylib" else "so"
-      "${base}${debugPostfix()}.${ext}"
-    }
-  }
-
-  private fun symlinkLibrary(source: (String) -> String, target: (String) -> String) {
+  private fun symlinkLibrary(source: String, target: String) {
     ex.exec {
       workingDir = sharedLibDir.get().asFile
       executable = "ln"
-      args("-nsf", source.invoke(""), target.invoke(""))
+      args("-nsf", source, target)
     }
   }
 
   private fun buildSharedLibDir() {
-    val baseLibFilename = libFilenameWithoutExtension.get()
-    val realName = platformSharedLibFilename(baseLibFilename, version.get())
+    val libFilenames = libFilenames.get()
+    val realName = libFilenames.platformSharedLibFilename(version.get())
     if (!targetHost.isWindows) {
       // project.sync gets itself in a mess because of symlinks pointed at symlinks in the lib dir.
       // This is a bug in Gradle, hence this nasty workaround. It's mac/linux only because there
@@ -134,25 +121,31 @@ abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOpera
     project.copy {
       from(sharedLibFiles)
       into(sharedLibDir)
-      rename(realName)
+      rename({ _ -> realName })
     }
     if (!targetHost.isWindows) {
-      val soName = platformSharedLibFilename(baseLibFilename, majorVersion.get())
-      val linkName = platformLinkerNameFilename(baseLibFilename)
+      val soName = libFilenames.platformSharedLibFilename(majorVersion.get())
+      val linkName = libFilenames.platformLinkerNameFilename
       symlinkLibrary(realName, soName)
       symlinkLibrary(soName, linkName)
     }
   }
 
   private fun buildImportLibDir() {
-    val importLibRenamer = importLibFilename(libFilenameWithoutExtension.get(), version.get())
     // Cannot use project.sync here because it just nukes the lib dir on Unices
     // and then causes broken symlinks which causes the sync task to explode in
     // a little fireball
     project.copy {
       from(importLibFiles)
       into(importLibDir)
-      rename(importLibRenamer)
+
+      rename({ filename ->
+        if (targetHost.isWindows) {
+          libFilenames.get().importLibFilename
+        } else {
+          filename
+        }
+      })
     }
   }
 
@@ -163,7 +156,6 @@ abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOpera
     }
   }
   private fun buildCMakeDir() {
-    // We need the task to remove release files when debug is present and vice versa
     project.copy {
       from(packageCMakeFiles)
       into(cmakeDir)
