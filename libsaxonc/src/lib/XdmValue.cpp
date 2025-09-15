@@ -24,6 +24,15 @@ XdmValue::XdmValue(const XdmValue &other) {
   } else {
     jValues = SXN_UNSET;
   }
+  if(other.emptyValue != SXN_UNSET) {
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    emptyValue = j_copy_handles(thread, (void *)other.emptyValue);
+    if(emptyValue == SXN_EXCEPTION) {
+      throw SaxonApiException();
+    }
+  } else {
+    emptyValue = SXN_UNSET;
+  }
   toStringValue = nullptr; // No longer used
   // values.resize(0);
   values_cap = other.values_cap;
@@ -186,13 +195,19 @@ XdmValue::~XdmValue() {
       }
     delete valueType;
   }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (jValues > 0) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr << "XdmValue on jValues j_handles_destroy" << std::endl;
         }
-    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
     j_handles_destroy(thread, (void *)jValues);
     jValues = SXN_UNSET;
+  }
+
+  if (emptyValue != SXN_UNSET) {
+    j_handles_destroy(thread, (void *)emptyValue);
+    emptyValue = SXN_UNSET;
   }
 
   xdmSize = 0;
@@ -238,13 +253,19 @@ int XdmValue::addXdmItemToValue(XdmItem *val) {
     values[xdmSize] = val;
     int addedItemIndex = xdmSize;
     xdmSize++;
-    if (jValues > 0) {
+    if (jValues != SXN_UNSET || emptyValue != SXN_UNSET) {
+      graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+      if (jValues != SXN_UNSET) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr << "XdmValue j_handles_destroy" << std::endl;
         }
-        graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
         j_handles_destroy(thread, (void *)jValues);
         jValues = SXN_UNSET;
+      }
+      if (emptyValue != SXN_UNSET) {
+        j_handles_destroy(thread, (void *)emptyValue);
+        emptyValue = SXN_UNSET;
+      }
     }
     if (toStringValue != nullptr) {
       operator delete(toStringValue);
@@ -285,29 +306,29 @@ void XdmValue::addUnderlyingValue(int64_t val) {
 
 void XdmValue::incrementRefCount() {
   refCount++;
-  if (getenv("SAXONC_DEBUG_FLAG")) {
+  /*if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "refCount-inc-xdmVal=" << refCount << " ob ref=" << (this)
               << std::endl;
-  }
+  }*/
 }
 
 void XdmValue::incrementRefCountForRelinquishedValue(int i){
   if (values!= nullptr && xdmSize > 0 && relinquished_values[i] == (char)0){
     values[i]->incrementRefCount();
-    if (getenv("SAXONC_DEBUG_FLAG")) {
+    /*if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "refCount-inc-relinquished-xdmVal=" << refCount << " ob ref=" << (this)
                 << std::endl;
-    }
+    }*/
   }
 }
 
 void XdmValue::decrementRefCount() {
   if (refCount > 0)
     refCount--;
-  if (getenv("SAXONC_DEBUG_FLAG")) {
+  /*if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "refCount-dec-xdmVal=" << refCount << " ob ref=" << (this)
               << std::endl;
-  }
+  }*/
 
 }
 
@@ -329,7 +350,10 @@ int64_t XdmValue::getUnderlyingValue() {
     int count = xdmSize;
     if (count == 0) {
         //Given that count =0 we return empty sequence
-        return j_getXdmEmptySequence(thread);
+        if (emptyValue == SXN_UNSET) {
+          emptyValue =  j_getXdmEmptySequence(thread);
+        }
+        return emptyValue;
     }
 
     if (count == 1) {

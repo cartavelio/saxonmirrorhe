@@ -2261,6 +2261,7 @@ cdef class PyXsltExecutable:
         if "encoding" in kwds:
             encoding = kwds["encoding"]
         if xdm_node is not None:
+            self.__parameters["node"] = self.processor.wrap_value(xdm_node._get_underlying_value())
             c_string = self.thisxptr.transformToString(xdm_node.derivednptr)
             py_string_i = make_py_str(c_string, encoding)
             saxoncClasses.SaxonProcessor.deleteString(c_string)
@@ -2322,6 +2323,7 @@ cdef class PyXsltExecutable:
             py_value = kwds["xdm_node"]
             if (isinstance(py_value, PyXdmNode)):
                 node_ = py_value
+                self.__parameters["node"] = self.processor.wrap_value(node_._get_underlying_value())
                 self.thisxptr.transformToFile(node_.derivednptr)
             else:
                 raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
@@ -2372,8 +2374,8 @@ cdef class PyXsltExecutable:
             py_value = kwds["xdm_node"]
             if (isinstance(py_value, PyXdmNode)):
                 node_ = py_value
+                self.__parameters["node"] = self.processor.wrap_value(node_._get_underlying_value())
                 xdmValue = self.thisxptr.transformToValue(node_.derivednptr)
-                node_.derivednptr.incrementRefCount()
             else:
                 raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
 

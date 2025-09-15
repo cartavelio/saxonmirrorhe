@@ -210,6 +210,8 @@ def test_threading1(saxonproc):
     except Exception as err:
         print("Error: ", err)
         assert False
+    
+
 
 
 def test_threading2(data_dir, saxonproc):
@@ -230,6 +232,7 @@ def test_threading2(data_dir, saxonproc):
     except Exception as err:
         print("Error: ", err)
         assert False
+    
 
 
 def test_threading3(data_dir, saxonproc):
@@ -250,6 +253,7 @@ def test_threading3(data_dir, saxonproc):
     except Exception as err:
         print("Error: ", err)
         assert False
+    
 
 
 def test_icu_lib():
@@ -280,6 +284,7 @@ def test_icu_lib():
     result7 = xqc.run_query_to_value()
     print("format-integer(33,'Ww','cs') => " + str(result7))
     assert 'Třicet Tři' in str(result7)
+    
 
 
 def test_icu_lib_HE():
@@ -312,6 +317,7 @@ def test_icu_lib_HE():
     print("format-integer(33,'Ww','cs') => " + str(result7))
 
     assert 'Thirty Three' in str(result7)
+    
 
 
 def test_schema_aware2():
@@ -340,6 +346,7 @@ def test_xslt30_processor(data_dir):
 
     assert output2 is not None
     assert 'text1' in output2
+    
 
 
 def testXdmArrayIn_xslt30(saxonproc, data_dir):
@@ -357,6 +364,7 @@ def testXdmArrayIn_xslt30(saxonproc, data_dir):
     result = executable.apply_templates_returning_string(source_file="cat.xml")
     print(result)
     assert "<out>8 9 10</out>" in result
+    
 
 
 def test_make_atomic_value1(saxonproc):
@@ -372,6 +380,7 @@ def test_make_atomic_value1(saxonproc):
 
     assert value3 is not None
     assert "2018" in str(value3)
+    
 
 
 def test_make_atomic_value_none(saxonproc):
@@ -394,6 +403,7 @@ def test_make_atomic_value_none(saxonproc):
     except Exception as err:
         print("Error: ", err)
         assert True
+    
 
 
 def test_Xslt_from_file1(saxonproc, data_dir):
@@ -437,6 +447,8 @@ def test_xslt_parameter(saxonproc, data_dir):
     output_ = executable.apply_templates_returning_string()
     assert output_ is not None
     assert 'text2' in output_
+    
+
 
 
 def test_catalog(saxonproc, data_dir):

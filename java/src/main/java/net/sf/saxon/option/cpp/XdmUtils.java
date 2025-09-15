@@ -478,7 +478,7 @@ public class XdmUtils {
             arguments = new XdmValue[0];
         }
         XdmValue value = functionItem.call(proc, arguments);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+        ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
     }
 
@@ -517,7 +517,7 @@ public class XdmUtils {
         if(function == null) {
             return -1;
         } else {
-            ObjectHandle handle = SaxonCAPI.objectHandles.create(function);
+            ObjectHandle handle = SaxonCAPI.createHandle(function);
             return handle.rawValue();
         }
 
@@ -583,7 +583,7 @@ public class XdmUtils {
         }catch (IndexOutOfBoundsException e) {
             throw new SaxonApiException(e);
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -616,7 +616,7 @@ public class XdmUtils {
         } catch(IndexOutOfBoundsException ex) {
             throw new SaxonApiException(ex);
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -642,7 +642,7 @@ public class XdmUtils {
         XdmMap map = SaxonCAPI.objectHandles.get(mapRef);
         XdmAtomicValue key = SaxonCAPI.objectHandles.get(keyRef);
         XdmMap result = map.remove(key);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -667,7 +667,7 @@ public class XdmUtils {
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
         XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
         XdmArray result = xdmArray.addMember(value);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -692,7 +692,7 @@ public class XdmUtils {
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
         XdmArray value = SaxonCAPI.objectHandles.get(valueRef);
         XdmArray result = xdmArray.concat(value);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -1104,7 +1104,7 @@ public class XdmUtils {
         if(result == null) {
             return SaxonCAPI.STATUS_FAIL;
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -1128,7 +1128,7 @@ public class XdmUtils {
         if(result == null) {
             return SaxonCAPI.STATUS_FAIL;
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -1155,7 +1155,7 @@ public class XdmUtils {
         if(result == null) {
             return SaxonCAPI.STATUS_FAIL;
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -1179,7 +1179,7 @@ public class XdmUtils {
         if(result == null) {
             return SaxonCAPI.STATUS_FAIL;
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -1204,7 +1204,7 @@ public class XdmUtils {
         if(result == null) {
             return SaxonCAPI.STATUS_FAIL;
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
@@ -1228,7 +1228,7 @@ public class XdmUtils {
         if(result == null) {
             return SaxonCAPI.STATUS_FAIL;
         }
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(result);
+        ObjectHandle handle = SaxonCAPI.createHandle(result);
         return handle.rawValue();
 
     }
