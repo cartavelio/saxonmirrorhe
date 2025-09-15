@@ -8,6 +8,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.*
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
@@ -34,6 +35,8 @@ abstract class JavaRunner: DefaultTask() {
   abstract val reportingRootDir: DirectoryProperty
   @get:InputFiles
   abstract val classpath: ConfigurableFileCollection
+  @get:Internal
+  abstract val options: MapProperty<String,String>
 
   @get:Internal
   val EDITION: String by lazy { edition.get().uppercase() }
@@ -125,6 +128,15 @@ abstract class JavaRunner: DefaultTask() {
         "-o:${reportDir.get()}",
         "-lang:${language.get()}"
       )
+
+      options.get().forEach { (opt, arg) -> 
+        if (arg == "") {
+          args("-${opt}")
+        } else {
+          args("-${opt}:${arg}")
+        }
+      }
+
       testOpts.forEach { (opt, arg) ->
         args("-${opt}:${arg}")
       }
