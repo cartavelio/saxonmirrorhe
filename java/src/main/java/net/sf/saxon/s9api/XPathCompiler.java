@@ -9,6 +9,7 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -560,6 +561,8 @@ public class XPathCompiler {
         } catch (net.sf.saxon.trans.XPathException e) {
             throw new SaxonApiException(e);
         }
+        String module = getBaseURI() == null ? null : getBaseURI().toString();
+        env.setContainingLocation(new Loc(module, 1, 1));
         XPathEvaluator eval = evaluator;
         IndependentContext ic = env;
         if (ic.isAllowUndeclaredVariables()) {
@@ -670,6 +673,8 @@ public class XPathCompiler {
         }
 
         try {
+            String base = getBaseURI() == null ? null : getBaseURI().toString();
+            env.setContainingLocation(new Loc(base, 1, 1));
             XPathExpression cexp = evaluator.createPattern(source);
             return new XPathExecutable(cexp, processor, env);
         } catch (XPathException e) {
