@@ -249,6 +249,11 @@ public class ResolveURI extends SystemFunction {
             return new URI(relativeURI);
         }
 
+        if (relativeURI.startsWith("data:")) {
+            // This is also an absolute URI...
+            return new URI(relativeURI);
+        }
+
         try {
             if (base == null || base.isEmpty()) {
                 absoluteURI = new URI(relativeURI);
