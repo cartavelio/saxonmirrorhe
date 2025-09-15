@@ -292,7 +292,7 @@
                   provided CMake files located in: <code>lib/cmake/SaxonCEE/</code>.</p>
                <p>To use SaxonC in a C++ project, users now only need the two shared library files
                   and the header files - greatly reducing setup complexity. Integrating with a project
-                  already using CMake is as simple as using <code>FindPackage(SaxonCHE 12.6.0)</code> (or
+                  already using CMake is as simple as using <code>find_package(SaxonCHE 12.6.0)</code> (or
                   SaxonCEE, or SaxonCPE, if using the EE or PE editions). A sample CMake project is
                   provided with the samples in the download ZIP.</p>
             </li>
