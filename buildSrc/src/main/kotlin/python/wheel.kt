@@ -1,31 +1,30 @@
 package com.saxonica.build.python
 
+import SaxonBuildExtension
+import SaxonCPythonExtension
 import com.saxonica.build.PyprojectToml
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.file.*
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.register
+import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
-
 /**
  * Task for providing the Wheel platform tag, which we need in a couple of places
  */
-abstract class WheelCompatibilityTags : DefaultTask() {
-    @get:InputFile
-    abstract val pyenvExe: RegularFileProperty
-
+abstract class WheelCompatibilityTags @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
     @get:InputFile
     abstract val pythonExe: RegularFileProperty
-
-    @get:Input
-    abstract val pythonVersion: Property<String>
 
     @get:Input
     abstract val manylinuxTarget: Property<String>
@@ -38,17 +37,9 @@ abstract class WheelCompatibilityTags : DefaultTask() {
     val systemOs = OperatingSystem.current()
 
     @Internal
-    val pythonVersionPath: Provider<RegularFile> = pyenvExe.flatMap { pyenv ->
-        val versionPath = project.objects.fileProperty()
-        versionPath.set(project.file(execString(pyenv, listOf("which", "pip"), mapOf("PYENV_VERSION" to pythonVersion.get()))).parentFile.parentFile)
-        versionPath
-    }
-
-    @Internal
-    val platform: Provider<String> = pythonVersionPath.map { path ->
-        execString(pythonExe.get(),
-            listOf("-c", "import os; from setuptools.command.bdist_wheel import get_platform; print(get_platform(os.environ['PYTHON_VERSION_PREFIX']))"),
-            mapOf("PYTHON_VERSION_PREFIX" to path.asFile.toString()))
+    val platform: Provider<String> = pythonExe.map { pyExe ->
+        execString(pyExe,
+            listOf("-c", "import sys; from setuptools.command.bdist_wheel import get_platform; print(get_platform(sys.base_prefix))"))
     }
 
     @Internal
@@ -71,7 +62,7 @@ abstract class WheelCompatibilityTags : DefaultTask() {
 
     fun execString(exe: RegularFile, arguments: List<String>, env: Map<String, String> = mapOf()): String {
         return (ByteArrayOutputStream()).use { out ->
-            project.exec {
+            ex.exec {
                 environment(env)
                 executable(exe)
                 args(arguments)
@@ -289,5 +280,87 @@ abstract class InstallLocalWheel : DefaultTask() {
             executable(pipExe.get())
             args("install", "--force-reinstall", wheel.map { it.asFile }.get())
         }
+    }
+}
+
+class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: SaxonBuildExtension, val project: Project, ) {
+    companion object {
+        fun create(
+            project: Project,
+            extension: SaxonCPythonExtension,
+            saxonBuild: SaxonBuildExtension
+        ): (WheelTasksBuilder.() -> Unit) -> TaskProvider<RepairLocalWheel> {
+            return { configuration ->
+                val builder = WheelTasksBuilder(extension, saxonBuild, project)
+                builder.configuration()
+                builder.invoke()
+            }
+        }
+    }
+
+    val sourceDir = project.objects.directoryProperty()
+    val buildDir = project.objects.directoryProperty()
+
+    private var venvVal: TaskProvider<PythonVenv>? = null
+    var venvTask: TaskProvider<PythonVenv>
+        get() = venvVal!!
+        set(value) {
+            venvVal = value
+        }
+
+    private var platformTagTaskVal: TaskProvider<WheelCompatibilityTags>?  = null
+    var platformTagTask: TaskProvider<WheelCompatibilityTags>
+        get() = platformTagTaskVal!!
+        set(value) {
+            platformTagTaskVal = value
+        }
+    private var saxoncCoreDirVal: Provider<Set<FileSystemLocation>>?  = null
+    var saxoncCoreDir: Provider<Set<FileSystemLocation>>
+        get() = saxoncCoreDirVal!!
+        set(value) {
+            saxoncCoreDirVal = value
+        }
+
+    var prefix: String? = null
+    protected fun invoke():  TaskProvider<RepairLocalWheel> {
+        val builder = this
+        val name_suffix = prefix?.let { "${it}_wheel" } ?: "wheel"
+        val buildWheel = project.tasks.register<BuildWheel>("build_${name_suffix}") {
+            group = LifecycleBasePlugin.BUILD_GROUP
+            description = "Build the release wheel"
+            pythonExe = venvTask.map { it.pythonExe.get() }
+            productEdition = extension.edition
+            productVersion = saxonBuild.version
+            wheelSuffix = platformTagTask.flatMap { it.wheelSuffix }
+            macosxDeploymentTarget = platformTagTask.flatMap { it.macosxDeploymentTarget }
+            sourceDir = builder.sourceDir
+            this.saxoncCoreDir = project.layout.dir(builder.saxoncCoreDir.map { it.first().asFile })
+            outputDir = builder.buildDir.dir("wheel")
+        }
+
+        val libLocations: Provider<List<String>> = saxonBuild.systemOsArch.map { arch -> if (arch == "windows") listOf("lib", "bin") else listOf("lib") }
+        val libDirs = saxoncCoreDir.map { dirs ->
+            val dirPath = dirs.first().asFile.toString()
+            libLocations.map { dirnames ->
+                dirnames.map { dirname ->
+                    project.layout.projectDirectory.dir(dirPath).dir(dirname)
+                }
+            }.get()
+        }
+
+        val repairWheel = project.tasks.register<RepairLocalWheel>("repair_${name_suffix}") {
+            description = "Fix up the shared libs within the release wheel"
+            outputDir = buildDir.dir("repaired-wheel")
+            wheel = buildWheel.map { it.wheel.get() }
+            manylinuxTarget = platformTagTask.flatMap { it.manylinuxTarget }
+            pythonExe = venvTask.map { it.pythonExe.get() }
+            pythonVenvTask = venvTask
+            productEdition = extension.edition
+            systemOsArch = saxonBuild.systemOsArch
+            repairedWheelFilePlatformSuffix = platformTagTask.flatMap { it.repairedWheelSuffix }
+            libraryDirs.from(libDirs)
+        }
+
+        return repairWheel
     }
 }

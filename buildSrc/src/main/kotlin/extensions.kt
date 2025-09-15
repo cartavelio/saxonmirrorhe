@@ -169,5 +169,14 @@ interface SaxonCPythonExtension {
     val pythonBinDirName: Property<String>
     val venvBinarySuffix: Property<String>
     val version: Property<String>
+    val releaseVersions: ListProperty<String>
     val manylinuxTarget: Property<String>
+}
+
+interface PyenvExtension {
+    val devVersion: Property<String>
+    val releaseVersions: ListProperty<String>
+    val debugVariant: Property<String>
+    val definitionsDir: DirectoryProperty
+    val pyenvRoot: DirectoryProperty
 }
