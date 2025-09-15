@@ -6,6 +6,7 @@ plugins {
   id("saxon-build")
   id("com.saxonica.build.saxoncs")
   id("com.saxonica.build.testsuites")
+  id("com.saxonica.build.samples")
 }
 
 repositories {
@@ -38,12 +39,19 @@ val preprocessorClasspath by configurations.resolvable("preprocessorClasspath") 
     extendsFrom(preprocessor)
 }
 
+val sampleSourcesBucket by configurations.dependencyScope("sampleSourcesBucket")
+val sampleSources = configurations.resolvable("sampleSources") {
+  extendsFrom(sampleSourcesBucket)
+}
+
 dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../../java/src/main/java")))
   csharpFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
                                     "configuration" to "csharpFeatureKeys")))
   javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
                                       "configuration" to "javaFeatureKeys")))
+  sampleSourcesBucket(project(mapOf("path" to ":samples",
+                                    "configuration" to "sampleSources")))
 
   transpilerRuntime(project(":csharp:transpiler", "runtimeElements"))
   transpilerRuntime("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
@@ -400,11 +408,11 @@ val copyResources = tasks.register("copyResources") {
 // I'm trying to make this build practical to manage and yet flexible enough
 // to handle the complexity of CS builds. For CS, we build for x64 or arm64,
 // depending on the platform and architecture. In addition, for MacOS in a
-// production build, we build *both* of those and make a universal binary.
+// Release build, we build *both* of those and make a universal binary.
 val architectures = if (findProperty("buildArch") != null) {
   listOf(findProperty("buildArch").toString())
 } else if (saxonBuild.systemOsName.get() == "mac"
-               && saxonCS.release.get() == "production") {
+               && saxonCS.release.get() == "Release") {
   listOf("arm64", "x64")
 } else {
   listOf(saxonCS.arch.get())
@@ -417,6 +425,7 @@ val configure_task = tasks.register("dotnetConfigure") {
 
 val build_task = tasks.register("dotnetBuild")
 val publish_task = tasks.register("dotnetPublish")
+val makeapp_task = tasks.register("dotnetMakeApp")
 for (buildArch in architectures) {
   // These tasks run every time because the .nupkg file changes every time.
   // The DotNet tasks use the outputDir as an output directory. This should
@@ -452,18 +461,25 @@ for (buildArch in architectures) {
     inputs.files(build)
   }
   publish_task { dependsOn(publish) }
+
+  val makeapp = tasks.register<DotNetMakeApp>("dotnetMakeApp_${buildArch}") {
+    LifecycleTasks.RELEASE_GROUP
+    arch = buildArch
+    inputs.files(build)
+  }
+  makeapp_task { dependsOn(makeapp) }
 }
 
 if ((saxonBuild.systemOsName.get() == "mac"
-         && saxonCS.release.get() == "production"
+         && saxonCS.release.get() == "Release"
          && architectures.size == 2)) {
   val osxApp = tasks.register("osxApp") {
     group = LifecycleTasks.RELEASE_GROUP
-    inputs.files(publish_task)
+    inputs.files(makeapp_task)
     outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
 
-    val arm64 = layout.buildDirectory.dir("arm64/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
-    val x64 = layout.buildDirectory.dir("x64/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
+    val arm64 = layout.buildDirectory.dir("arm64/SaxonCS/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
+    val x64 = layout.buildDirectory.dir("x64/SaxonCS/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
 
     doFirst {
       copy {
@@ -500,7 +516,7 @@ if ((saxonBuild.systemOsName.get() == "mac"
       }
     }
   }
-  publish_task { finalizedBy(osxApp) }
+  makeapp_task { finalizedBy(osxApp) }
 
   // We can't copy the documentation into the distribution because we've
   // signed it
@@ -629,8 +645,6 @@ tasks.register<JavaExec>("docMerge") {
   inputs.file(layout.projectDirectory.file("../tools/merge.xsl"))
   outputs.file(layout.buildDirectory.file("dotnetdoc/merged.xml"))
 
-  val xmlpath = "bin/Release/${netver}/${platform}-${arch}/SaxonCS.xml"
-
   classpath = preprocessorClasspath
   mainClass = "com.saxonica.Transform"
   args("-it:main",
@@ -704,6 +718,23 @@ tasks.register<Exec>("eecsTest") {
   workingDir = layout.projectDirectory.dir("../src/test/nunit").asFile
   commandLine("${saxonBuild.dotnet.get()}", "test", "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
 }
+
+// ============================================================
+
+samples {
+  // Irrelevant in C#, but must be initialized. :-(
+  runclasspath = sampleSources
+  debugclasspath = sampleSources
+
+  sources = sampleSources
+  product = "csharp"
+  edition = "ee"
+}
+
+samples.csSample("Shakespeare_1", "othello.xml", "play.xsl",
+                 listOf("dir=file:/${layout.buildDirectory.file("sample_results/playhtml").get()}"),
+                 layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
+
 
 // ============================================================
 
