@@ -24,6 +24,11 @@ configure<TestSuitesExtension> {
     edition = extension.edition
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 val defaultJarManifestClasspath = listOf(
     "lib/xmlresolver-${findProperty("xmlresolverVersion")}.jar", "lib/xmlresolver.jar",
     "lib/xmlresolver-${findProperty("xmlresolverVersion")}-data.jar", "lib/xmlresolverdata-data.jar",
