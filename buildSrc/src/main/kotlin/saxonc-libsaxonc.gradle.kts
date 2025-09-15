@@ -215,7 +215,7 @@ tasks.register<Zip>("package") {
 
     inputs.files(build_package.map { it.outputs.files })
     inputs.files(notices)
-    archiveBaseName =  "${project.name}-${version}"
+    archiveBaseName =  extension.package_file_name
     destinationDirectory =  layout.buildDirectory.dir("out")
 
     from(zipTree(build_package.map { it.outputs.files.singleFile })) {
