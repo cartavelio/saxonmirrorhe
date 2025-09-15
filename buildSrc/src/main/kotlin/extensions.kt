@@ -25,6 +25,7 @@ interface SaxonBuildExtension {
     abstract val pathSeparator: Property<String>
     abstract val fileSeparator: Property<String>
     abstract val systemOs: Property<OperatingSystem>
+    abstract val targetHost: Property<TargetHost>
     abstract val systemOsName: Property<String>
     abstract val platform: Property<String>
     abstract val arch: Property<String>
