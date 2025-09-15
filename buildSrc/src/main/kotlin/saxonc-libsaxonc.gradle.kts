@@ -170,7 +170,7 @@ val doxygenTask = tasks.register<DoxygenTask>("doxygen") {
     mainSrcDir = layout.projectDirectory.dir("../src")
     editionSrcDir = layout.projectDirectory.dir("src")
     docSrcDir = layout.projectDirectory.dir("../doc")
-    logo = layout.projectDirectory.file("../../documentation/src/main/resources/img/saxonica_logo.gif")
+    logo = layout.projectDirectory.file("../doc/saxonica_logo.gif")
     version = saxonBuild.version
     outputDir = layout.buildDirectory.dir("docs")
 
