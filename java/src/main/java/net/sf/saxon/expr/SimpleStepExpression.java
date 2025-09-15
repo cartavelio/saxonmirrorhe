@@ -132,21 +132,22 @@ public final class SimpleStepExpression extends SlashExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        NodeInfo origin;
-        try {
-            origin = (NodeInfo) getStart().evaluateItem(context);
-        } catch (XPathException e) {
-            if (e.hasErrorCode("XPDY0002") && !e.hasBeenReported()) {
-                throw new XPathException("The context item for axis step "
-                    + toShortString() + " is absent", "XPDY0002", getLocation());
-            } else {
-                throw e;
-            }
-        }
-        if (origin == null) {
-            return EmptyIterator.getInstance();
-        }
-        return ((AxisExpression) getStep()).iterate(origin);
+        return makeElaborator().elaborateForPull().iterate(context);
+//        NodeInfo origin;
+//        try {
+//            origin = (NodeInfo) getStart().evaluateItem(context);
+//        } catch (XPathException e) {
+//            if (e.hasErrorCode("XPDY0002") && !e.hasBeenReported()) {
+//                throw new XPathException("The context item for axis step "
+//                    + toShortString() + " is absent", "XPDY0002", getLocation());
+//            } else {
+//                throw e;
+//            }
+//        }
+//        if (origin == null) {
+//            return EmptyIterator.getInstance();
+//        }
+//        return ((AxisExpression) getStep()).iterate(origin);
     }
 
     @Override
