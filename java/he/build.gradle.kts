@@ -30,9 +30,16 @@ val sampleSources = configurations.resolvable("sampleSources") {
   extendsFrom(sampleSourcesBucket)
 }
 
+val javaSampleSourcesBucket by configurations.dependencyScope("javaSampleSourcesBucket")
+val javaSampleSources = configurations.resolvable("javaSampleSources") {
+  extendsFrom(javaSampleSourcesBucket)
+}
+
 dependencies {
   sampleSourcesBucket(project(mapOf("path" to ":samples",
                                     "configuration" to "sampleSources")))
+  javaSampleSourcesBucket(project(mapOf("path" to ":samples",
+                                        "configuration" to "javaSampleSources")))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
 }
 
@@ -74,6 +81,14 @@ tasks.named<Jar>("editionMavenJar") {
   exclude("net/sf/saxon/option")
 }
 
+// In principle, this should be in the samples-plugin...
+tasks.register<Copy>("copy_java_sample_sources") {
+    into(layout.buildDirectory.dir("samples/src/java/main"))
+    from(javaSampleSources) {
+      exclude("ee/**")
+    }
+}
+
 samples {
   runclasspath = (files(sourceSets["edition"].output)
                   + configurations.named("samplesConfiguration").get())
@@ -86,9 +101,7 @@ samples {
   edition = "he"
 }
 
-samples.transform("Books_Transform_1", "books.xml", "books.xsl",
-                  listOf("-t"))
-
+samples.transform("Books_Transform_1", "books.xml", "books.xsl", listOf())
 samples.transform("Books_Transform_2", "books.xml", "books.xsl", 
                   listOf("top-author=Thomas Hardy"))
 
@@ -123,6 +136,25 @@ samples.bookSample("transform", "txt", "Transform_3",
 
 samples.bookSample("query", "html", "Query_1",
                    listOf("-s:data/books.xml", "-q:query/books.xq"))
+
+// ============================================================
+
+samples.sampleClass("JAXPExamples", listOf("all"))
+samples.sampleClass("ApplyXPathJAXP_saxon",
+                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"),
+                    "he.ApplyXPathJAXP")
+samples.sampleClass("ApplyXPathJAXP_dom",
+                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"),
+                    "he.ApplyXPathJAXP")
+samples.sampleClass("ExampleContentHandler", listOf("data/books.xml"), "he.ExampleContentHandler")
+//samples.sampleClass("S9APIExamplesOM_he", listOf("all"), "he.S9APIExamplesOM") // requires setup
+samples.sampleClass("S9APIExamples_he", listOf("nonschema"), "he.S9APIExamples")
+
+/*
+samples.sampleClass("S9APIExamplesOM_pe":
+samples.sampleClass("S9APIExamples_pe":
+*/
+
 
 // ============================================================
 
