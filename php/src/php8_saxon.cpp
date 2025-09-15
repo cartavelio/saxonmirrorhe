@@ -2313,7 +2313,7 @@ PHP_METHOD(XdmNode, getColumnNumber){
 
     int colnumber = -1;
     if (xdmNode != nullptr) {
-        colnumber = xdmNode->getLineNumber();
+        colnumber = xdmNode->getColumnNumber();
     }
     RETURN_LONG(colnumber);
 }
