@@ -13,7 +13,7 @@ saxonj {
   edition = "ee"
   metaInfServices = mapOf(
     "javax.xml.transform.TransformerFactory" to "com.saxonica.config.EnterpriseTransformerFactory",
-    "javax.xml.validation.SchemaFactory" to "com.saxonica.config.EnterpriseTransformerFactory"
+    "javax.xml.validation.SchemaFactory" to "com.saxonica.ee.jaxp.SchemaFactoryImpl"
   )
   manifestMainClass = "net.sf.saxon.Transform"
   sourceRoot = layout.projectDirectory.dir("src")
